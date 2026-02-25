@@ -1,0 +1,12 @@
+{
+  "rca_summary": {
+    "dominant_stage": "compute",
+    "dominant_share": 0.9,
+    "action_hint": "optimize kernels / batching"
+  },
+  "timing_breakdown_seconds": {
+    "compute": 0.0203671278000229,
+    "host_copy": 0.0011315071000012724,
+    "serialization": 0.0011315071000012724
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://monet-wedding.local/schemas/lf_output.schema.json",
+  "title": "Low-Fidelity Export Contract",
+  "type": "object",
+  "required": ["nodes", "edges", "meta"],
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["node_id", "ux", "uy", "uz", "f_unbalanced", "bc_type"],
+        "properties": {
+          "node_id": {"type": "string"},
+          "ux": {"type": "number"},
+          "uy": {"type": "number"},
+          "uz": {"type": "number"},
+          "f_unbalanced": {
+            "type": "object",
+            "required": ["fx", "fy", "fz", "norm"],
+            "properties": {
+              "fx": {"type": "number"},
+              "fy": {"type": "number"},
+              "fz": {"type": "number"},
+              "norm": {"type": "number", "minimum": 0}
+            }
+          },
+          "bc_type": {
+            "type": "string",
+            "enum": ["fixed", "pinned", "roller", "free"]
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["edge_id", "from", "to", "axial_force", "shear_force", "moment", "local_stiffness", "yield_index"],
+        "properties": {
+          "edge_id": {"type": "string"},
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "axial_force": {"type": "number"},
+          "shear_force": {"type": "number"},
+          "moment": {"type": "number"},
+          "local_stiffness": {"type": "number", "minimum": 0},
+          "yield_index": {"type": "number", "minimum": 0}
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["unit_system", "residual_force_tolerance", "solver", "converged", "steps"],
+      "properties": {
+        "unit_system": {"type": "string", "enum": ["SI", "N-mm", "kN-m"]},
+        "residual_force_tolerance": {"type": "number", "minimum": 0},
+        "solver": {"type": "string"},
+        "converged": {"type": "boolean"},
+        "steps": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

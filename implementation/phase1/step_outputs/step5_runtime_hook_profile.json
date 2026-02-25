@@ -1,0 +1,79 @@
+{
+  "rows": [
+    {
+      "n": 2000,
+      "seconds": 0.000890062001417391,
+      "compute_seconds": 0.0008010558012756519,
+      "host_copy_seconds": 4.450310007086955e-05,
+      "serialization_seconds": 4.450310007086955e-05,
+      "peak_vram_bytes": 548,
+      "current_vram_bytes": 424,
+      "host_copy_bytes": 0
+    },
+    {
+      "n": 4000,
+      "seconds": 0.0016397309991589282,
+      "compute_seconds": 0.0014757578992430354,
+      "host_copy_seconds": 8.198654995794641e-05,
+      "serialization_seconds": 8.198654995794641e-05,
+      "peak_vram_bytes": 124,
+      "current_vram_bytes": 0,
+      "host_copy_bytes": 0
+    },
+    {
+      "n": 8000,
+      "seconds": 0.004313221999836969,
+      "compute_seconds": 0.0038818997998532724,
+      "host_copy_seconds": 0.00021566109999184848,
+      "serialization_seconds": 0.00021566109999184848,
+      "peak_vram_bytes": 152,
+      "current_vram_bytes": 48,
+      "host_copy_bytes": 0
+    },
+    {
+      "n": 16000,
+      "seconds": 0.008591204999902402,
+      "compute_seconds": 0.007732084499912162,
+      "host_copy_seconds": 0.00042956024999512015,
+      "serialization_seconds": 0.00042956024999512015,
+      "peak_vram_bytes": 176,
+      "current_vram_bytes": 72,
+      "host_copy_bytes": 0
+    },
+    {
+      "n": 32000,
+      "seconds": 0.01766960100030701,
+      "compute_seconds": 0.01590264090027631,
+      "host_copy_seconds": 0.0008834800500153507,
+      "serialization_seconds": 0.0008834800500153507,
+      "peak_vram_bytes": 176,
+      "current_vram_bytes": 72,
+      "host_copy_bytes": 0
+    }
+  ],
+  "slope_p": 1.1011840970240185,
+  "vram_slope_p": 0.17272100299449747,
+  "guardrail": {
+    "lower": 0.85,
+    "upper": 1.15
+  },
+  "within_guardrail": true,
+  "vram_trend_nonnegative": true,
+  "vram_trend_ok": true,
+  "vram_rows_used": 4,
+  "host_copy_budget_bytes": 0,
+  "total_host_copy_bytes": 0,
+  "host_copy_bytes_budget_ok": true,
+  "vram_trend_tolerance": -0.05,
+  "timing_breakdown_seconds": {
+    "compute": 0.029793438900560434,
+    "host_copy": 0.0016551910500311354,
+    "serialization": 0.0016551910500311354
+  },
+  "rca_summary": {
+    "dominant_stage": "compute",
+    "dominant_share": 0.9,
+    "action_hint": "optimize kernels / batching"
+  },
+  "runtime_hook_used": false
+}

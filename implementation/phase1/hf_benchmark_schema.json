@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Phase1 HF Benchmark KPI Contract",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "generated_at",
+    "contract_pass",
+    "reason_code",
+    "kpi_pass",
+    "metrics"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "run_id": {"type": "string"},
+    "generated_at": {"type": "string"},
+    "contract_pass": {"type": "boolean"},
+    "reason_code": {"type": "string", "enum": ["PASS", "ERR_BENCHMARK_KPI_FAIL"]},
+    "kpi_pass": {"type": "boolean"},
+    "metrics": {
+      "type": "object",
+      "required": ["drift_error_pct", "base_shear_error_pct", "mode_shape_mac", "buckling_factor_error_pct"],
+      "properties": {
+        "drift_error_pct": {"type": "number", "minimum": 0},
+        "base_shear_error_pct": {"type": "number", "minimum": 0},
+        "mode_shape_mac": {"type": "number", "minimum": 0, "maximum": 1},
+        "buckling_factor_error_pct": {"type": "number", "minimum": 0}
+      }
+    }
+  }
+}

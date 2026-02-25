@@ -1,0 +1,27 @@
+{
+  "producer_cmd": "python implementation/phase1/rust_hip_mock_producer.py",
+  "contract_pass": true,
+  "missing_fields": [],
+  "runtime_kind": "rust_hip",
+  "rust_hip_ready": true,
+  "strict_rust_hip_pass": true,
+  "next_action": "ready for strict rust-hip validation",
+  "pass": true,
+  "probe": {
+    "producer_kind": "rust_hip",
+    "roundtrip_success": true,
+    "shared_storage": true,
+    "host_copy_bytes": 0,
+    "device": "hip:0",
+    "shape": [
+      4096,
+      128
+    ],
+    "dtype": "float32",
+    "strides": [
+      128,
+      1
+    ],
+    "byte_offset": 0
+  }
+}

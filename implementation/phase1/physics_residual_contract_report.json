@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-physics-residual-contract",
+  "generated_at": "2026-02-25T07:53:23.910719+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "physics consistency metrics are within configured thresholds",
+  "thresholds": {
+    "eq_threshold": 0.05,
+    "boundary_threshold": 0.01,
+    "damping_min": 0.0,
+    "damping_max": 0.2
+  },
+  "metrics": {
+    "equilibrium_residual_norm": 0.021,
+    "boundary_violation_ratio": 0.0,
+    "damping_alpha": 0.02,
+    "damping_beta": 0.001,
+    "residual_norm_before": 1.0,
+    "residual_norm_after": 0.68
+  },
+  "checks": {
+    "eq_ok": true,
+    "boundary_ok": true,
+    "damping_ok": true,
+    "energy_monotonicity_pass": true
+  }
+}

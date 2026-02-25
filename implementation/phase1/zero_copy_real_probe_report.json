@@ -1,0 +1,27 @@
+{
+  "producer_cmd": "python implementation/phase1/engine_hook_stub.py",
+  "contract_pass": true,
+  "missing_fields": [],
+  "runtime_kind": "stub",
+  "rust_hip_ready": false,
+  "strict_rust_hip_pass": false,
+  "next_action": "connect Rust/HIP producer and rerun with --require-rust-hip",
+  "pass": true,
+  "probe": {
+    "producer_kind": "stub",
+    "roundtrip_success": true,
+    "shared_storage": true,
+    "host_copy_bytes": 0,
+    "device": "hip:0",
+    "shape": [
+      1024,
+      64
+    ],
+    "dtype": "float32",
+    "strides": [
+      64,
+      1
+    ],
+    "byte_offset": 0
+  }
+}

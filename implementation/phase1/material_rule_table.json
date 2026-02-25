@@ -1,0 +1,74 @@
+{
+  "kbc_2021": {
+    "steel": {
+      "rule_id": "KBC-STEEL-2021",
+      "hinge_softening": 0.15,
+      "yield_strain_range": [
+        0.0005,
+        0.02
+      ]
+    },
+    "concrete": {
+      "rule_id": "KBC-CONCRETE-2021",
+      "hinge_softening": 0.1,
+      "yield_strain_range": [
+        0.0002,
+        0.01
+      ]
+    }
+  },
+  "ibc_2021": {
+    "steel": {
+      "rule_id": "IBC-STEEL-2021",
+      "hinge_softening": 0.15,
+      "yield_strain_range": [
+        0.0005,
+        0.02
+      ]
+    },
+    "concrete": {
+      "rule_id": "IBC-CONCRETE-2021",
+      "hinge_softening": 0.1,
+      "yield_strain_range": [
+        0.0002,
+        0.01
+      ]
+    }
+  },
+  "kbc_2024": {
+    "steel": {
+      "rule_id": "KBC-2024-STEEL",
+      "hinge_softening": 0.15,
+      "yield_strain_range": [
+        0.0005,
+        0.02
+      ]
+    },
+    "concrete": {
+      "rule_id": "KBC-2024-CONCRETE",
+      "hinge_softening": 0.1,
+      "yield_strain_range": [
+        0.0002,
+        0.01
+      ]
+    }
+  },
+  "ibc_2024": {
+    "steel": {
+      "rule_id": "IBC-2024-STEEL",
+      "hinge_softening": 0.15,
+      "yield_strain_range": [
+        0.0005,
+        0.02
+      ]
+    },
+    "concrete": {
+      "rule_id": "IBC-2024-CONCRETE",
+      "hinge_softening": 0.1,
+      "yield_strain_range": [
+        0.0002,
+        0.01
+      ]
+    }
+  }
+}

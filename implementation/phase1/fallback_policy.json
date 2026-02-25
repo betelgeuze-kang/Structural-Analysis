@@ -1,0 +1,8 @@
+{
+  "policy_version": "v1",
+  "equilibrium_residual_threshold": 0.01,
+  "enable_hf_fallback": true,
+  "subgraph_selector": "topk_residual_nodes",
+  "max_subgraphs_per_iteration": 3,
+  "notes": "Phase1 policy scaffold; wire to real LF/HF dispatcher in Phase2."
+}

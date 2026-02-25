@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-priority3-summary",
+  "generated_at": "2026-02-25T03:16:48.481247+00:00",
+  "module1_zero_copy_bridge": true,
+  "module2_krylov_projection": true,
+  "module3_material_parser": true,
+  "module_metadata": {
+    "versions": {
+      "zero_copy": "1.0",
+      "krylov": "1.0",
+      "material": "1.0"
+    },
+    "major_versions": {
+      "zero_copy": "1",
+      "krylov": "1",
+      "material": "1"
+    },
+    "metadata_compatible": true
+  },
+  "all_pass": true,
+  "reason_code": "PASS",
+  "reason": "all three modules passed with metadata-compatible versions",
+  "artifacts": {
+    "zero_copy": "implementation/phase1/zero_copy_bridge_report.json",
+    "krylov": "implementation/phase1/krylov_projection_report.json",
+    "material": "implementation/phase1/material_map_report.json"
+  }
+}

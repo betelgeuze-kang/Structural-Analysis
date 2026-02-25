@@ -1,0 +1,7 @@
+{
+  "unit_system": "SI",
+  "residual_force_tolerance": 0.001,
+  "solver": "FIRE",
+  "converged": true,
+  "steps": 200
+}

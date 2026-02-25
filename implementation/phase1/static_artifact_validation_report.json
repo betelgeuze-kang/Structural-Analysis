@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-static-artifact-validation",
+  "generated_at": "static",
+  "pass": true,
+  "error_count": 0,
+  "errors": {
+    "smoke": [],
+    "ci": [],
+    "rca": [],
+    "priority": [],
+    "dyn": [],
+    "pgat": [],
+    "subproj": [],
+    "soa": [],
+    "physics_residual": [],
+    "meta_learning": [],
+    "buckling": [],
+    "benchmark": [],
+    "branching": [],
+    "bifurcation": [],
+    "rust_onnx": [],
+    "winning_ticket": []
+  },
+  "checked_files": {
+    "smoke": "implementation/phase1/lf_to_gnn_e2e_smoke_report.json",
+    "ci": "implementation/phase1/ci_gate_report.json",
+    "rca": "implementation/phase1/step_outputs/step5_rca_summary.json",
+    "priority": "implementation/phase1/priority3_summary.json",
+    "dyn": "implementation/phase1/dynamics_boundary_report.json",
+    "pgat": "implementation/phase1/pg_gat_contract_report.json",
+    "subproj": "implementation/phase1/subgraph_projection_report.json",
+    "soa": "implementation/phase1/soa_dlpack_contract_report.json",
+    "physics_residual": "implementation/phase1/physics_residual_contract_report.json",
+    "meta_learning": "implementation/phase1/meta_learning_task_report.json",
+    "buckling": "implementation/phase1/buckling_contract_report.json",
+    "benchmark": "implementation/phase1/hf_benchmark_report.json",
+    "branching": "implementation/phase1/physics_branching_report.json",
+    "bifurcation": "implementation/phase1/bifurcation_detector_report.json",
+    "rust_onnx": "implementation/phase1/rust_onnx_native_contract_report.json",
+    "winning_ticket": "implementation/phase1/winning_ticket_backprop_report.json"
+  }
+}

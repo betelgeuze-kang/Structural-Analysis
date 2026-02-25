@@ -1,0 +1,79 @@
+{
+  "runs": [
+    {
+      "rep": 1,
+      "case": "dead_only",
+      "converged": true,
+      "steps": 264,
+      "final_force_norm": 0.009871700456565454
+    },
+    {
+      "rep": 1,
+      "case": "dead_wind",
+      "converged": true,
+      "steps": 229,
+      "final_force_norm": 0.00972689178191721
+    },
+    {
+      "rep": 1,
+      "case": "dead_wind_seismic",
+      "converged": true,
+      "steps": 207,
+      "final_force_norm": 0.009836071194739993
+    },
+    {
+      "rep": 2,
+      "case": "dead_only",
+      "converged": true,
+      "steps": 264,
+      "final_force_norm": 0.009871700456565454
+    },
+    {
+      "rep": 2,
+      "case": "dead_wind",
+      "converged": true,
+      "steps": 229,
+      "final_force_norm": 0.00972689178191721
+    },
+    {
+      "rep": 2,
+      "case": "dead_wind_seismic",
+      "converged": true,
+      "steps": 207,
+      "final_force_norm": 0.009836071194739993
+    },
+    {
+      "rep": 3,
+      "case": "dead_only",
+      "converged": true,
+      "steps": 264,
+      "final_force_norm": 0.009871700456565454
+    },
+    {
+      "rep": 3,
+      "case": "dead_wind",
+      "converged": true,
+      "steps": 229,
+      "final_force_norm": 0.00972689178191721
+    },
+    {
+      "rep": 3,
+      "case": "dead_wind_seismic",
+      "converged": true,
+      "steps": 207,
+      "final_force_norm": 0.009836071194739993
+    }
+  ],
+  "summary": {
+    "all_converged": true,
+    "repeats": 3,
+    "mean_steps": 233.33333333333334,
+    "variability_pct_by_case": {
+      "dead_only": 0.0,
+      "dead_wind": 0.0,
+      "dead_wind_seismic": 0.0
+    },
+    "within_5pct_variability": true,
+    "engine_hook_used": false
+  }
+}

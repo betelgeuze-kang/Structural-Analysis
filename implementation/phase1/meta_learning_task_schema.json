@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Phase1 Meta-learning Task Schema",
+  "type": "object",
+  "required": ["schema_version", "task_id", "topology_type", "hazard_type", "support_profile", "split", "ood_tag", "target_zone"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "task_id": {"type": "string"},
+    "topology_type": {"type": "string", "enum": ["rahmen", "truss", "outrigger", "wall-frame"]},
+    "hazard_type": {"type": "string", "enum": ["wind", "seismic", "combined"]},
+    "support_profile": {"type": "string", "enum": ["fixed", "hinge", "mixed"]},
+    "split": {"type": "string", "enum": ["train", "val", "test"]},
+    "ood_tag": {"type": "string", "enum": ["in_distribution", "ood_topology", "ood_hazard", "ood_combined"]},
+    "target_zone": {
+      "type": "object",
+      "required": ["node_ids", "risk_label"],
+      "properties": {
+        "node_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "risk_label": {"type": "string", "enum": ["low", "mid", "high"]}
+      }
+    }
+  }
+}

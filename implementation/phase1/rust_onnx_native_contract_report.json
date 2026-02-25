@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "run_id": "rust-onnx-native-contract",
+  "generated_at": "2026-02-25T09:57:24.426917+00:00",
+  "architecture": "rust_hip_onnx_forward_only_branching",
+  "checks": {
+    "weights_as_dynamic_input": true,
+    "execution_provider_rocm": true,
+    "single_binary_deployment": true,
+    "rayon_async_branch_inference": true,
+    "dlpack_python_bridge_removed": true
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "native rust+hip+onnx contract ready"
+}

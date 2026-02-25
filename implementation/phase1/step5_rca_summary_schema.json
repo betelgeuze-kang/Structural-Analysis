@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Step5 RCA Summary",
+  "type": "object",
+  "required": ["rca_summary", "timing_breakdown_seconds"],
+  "properties": {
+    "rca_summary": {
+      "type": "object",
+      "required": ["dominant_stage", "dominant_share", "action_hint"],
+      "properties": {
+        "dominant_stage": {
+          "type": "string",
+          "enum": ["compute", "host_copy", "serialization"]
+        },
+        "dominant_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "action_hint": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "timing_breakdown_seconds": {
+      "type": "object",
+      "required": ["compute", "host_copy", "serialization"],
+      "properties": {
+        "compute": {"type": "number", "minimum": 0},
+        "host_copy": {"type": "number", "minimum": 0},
+        "serialization": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

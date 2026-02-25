@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.5",
+  "run_id": "phase1-ci-gate",
+  "generated_at": "2026-02-25T11:19:39.913135+00:00",
+  "artifacts": [
+    "implementation/phase1/zero_copy_real_probe_report_strict.json",
+    "implementation/phase1/step_outputs/step5_rca_summary.json",
+    "implementation/phase1/ci_gate_report.json",
+    "implementation/phase1/dynamics_boundary_report.json",
+    "implementation/phase1/pg_gat_contract_report.json",
+    "implementation/phase1/subgraph_projection_report.json",
+    "implementation/phase1/soa_dlpack_contract_report.json",
+    "implementation/phase1/physics_residual_contract_report.json",
+    "implementation/phase1/meta_learning_task_report.json",
+    "implementation/phase1/buckling_contract_report.json",
+    "implementation/phase1/hf_benchmark_report.json",
+    "implementation/phase1/physics_branching_report.json",
+    "implementation/phase1/bifurcation_detector_report.json",
+    "implementation/phase1/rust_onnx_native_contract_report.json",
+    "implementation/phase1/winning_ticket_backprop_report.json",
+    "implementation/phase1/priority3_summary.json"
+  ]
+}

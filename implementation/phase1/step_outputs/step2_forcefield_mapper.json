@@ -1,0 +1,18 @@
+{
+  "mapped": [
+    {
+      "id": "beam_si",
+      "Kb": 629999999.9999999,
+      "Ktheta_y": 2800000.0,
+      "Ktheta_z": 1050000.0
+    },
+    {
+      "id": "beam_nmm",
+      "Kb": 629999999.9999999,
+      "Ktheta_y": 2800000.0,
+      "Ktheta_z": 1050000.0
+    }
+  ],
+  "kb_unit_consistency_relative_error": 0.0,
+  "unit_consistency_pass": true
+}

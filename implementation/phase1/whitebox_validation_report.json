@@ -1,0 +1,139 @@
+{
+  "cases": [
+    "cantilever_2d",
+    "one_story_rahmen",
+    "truss_3d"
+  ],
+  "rows": [
+    {
+      "case": "cantilever_2d",
+      "metric": "disp_max_mm",
+      "hf": 12.4,
+      "lf": 12.9,
+      "gnn": 12.45,
+      "lf_rel_err": 0.04032258064516129,
+      "gnn_rel_err": 0.004032258064516043,
+      "improved": true
+    },
+    {
+      "case": "cantilever_2d",
+      "metric": "stress_max_mpa",
+      "hf": 238.0,
+      "lf": 251.0,
+      "gnn": 239.6,
+      "lf_rel_err": 0.0546218487394958,
+      "gnn_rel_err": 0.006722689075630228,
+      "improved": true
+    },
+    {
+      "case": "cantilever_2d",
+      "metric": "reaction_kN",
+      "hf": 116.2,
+      "lf": 114.8,
+      "gnn": 116.1,
+      "lf_rel_err": 0.012048192771084387,
+      "gnn_rel_err": 0.0008605851979346688,
+      "improved": true
+    },
+    {
+      "case": "cantilever_2d",
+      "metric": "equilibrium_residual",
+      "hf": 0.0,
+      "lf": 0.018,
+      "gnn": 0.004,
+      "lf_rel_err": 0.018,
+      "gnn_rel_err": 0.004,
+      "improved": true
+    },
+    {
+      "case": "one_story_rahmen",
+      "metric": "disp_max_mm",
+      "hf": 8.6,
+      "lf": 9.0,
+      "gnn": 8.65,
+      "lf_rel_err": 0.046511627906976785,
+      "gnn_rel_err": 0.005813953488372176,
+      "improved": true
+    },
+    {
+      "case": "one_story_rahmen",
+      "metric": "stress_max_mpa",
+      "hf": 191.0,
+      "lf": 203.0,
+      "gnn": 192.8,
+      "lf_rel_err": 0.06282722513089005,
+      "gnn_rel_err": 0.009424083769633567,
+      "improved": true
+    },
+    {
+      "case": "one_story_rahmen",
+      "metric": "reaction_kN",
+      "hf": 224.4,
+      "lf": 221.0,
+      "gnn": 224.1,
+      "lf_rel_err": 0.015151515151515176,
+      "gnn_rel_err": 0.0013368983957219758,
+      "improved": true
+    },
+    {
+      "case": "one_story_rahmen",
+      "metric": "equilibrium_residual",
+      "hf": 0.0,
+      "lf": 0.022,
+      "gnn": 0.005,
+      "lf_rel_err": 0.022,
+      "gnn_rel_err": 0.005,
+      "improved": true
+    },
+    {
+      "case": "truss_3d",
+      "metric": "disp_max_mm",
+      "hf": 5.2,
+      "lf": 5.5,
+      "gnn": 5.22,
+      "lf_rel_err": 0.057692307692307654,
+      "gnn_rel_err": 0.003846153846153764,
+      "improved": true
+    },
+    {
+      "case": "truss_3d",
+      "metric": "stress_max_mpa",
+      "hf": 142.0,
+      "lf": 149.0,
+      "gnn": 143.1,
+      "lf_rel_err": 0.04929577464788732,
+      "gnn_rel_err": 0.007746478873239397,
+      "improved": true
+    },
+    {
+      "case": "truss_3d",
+      "metric": "reaction_kN",
+      "hf": 303.0,
+      "lf": 298.7,
+      "gnn": 302.8,
+      "lf_rel_err": 0.014191419141914229,
+      "gnn_rel_err": 0.0006600660066006226,
+      "improved": true
+    },
+    {
+      "case": "truss_3d",
+      "metric": "equilibrium_residual",
+      "hf": 0.0,
+      "lf": 0.015,
+      "gnn": 0.003,
+      "lf_rel_err": 0.015,
+      "gnn_rel_err": 0.003,
+      "improved": true
+    }
+  ],
+  "summary": {
+    "max_lf_rel_err": 0.06282722513089005,
+    "max_gnn_rel_err": 0.009424083769633567,
+    "max_gnn_non_residual_err": 0.009424083769633567,
+    "max_gnn_residual_abs": 0.005,
+    "improved_ratio": 1.0,
+    "acceptance_rel_err": 0.03,
+    "acceptance_abs_residual": 0.01,
+    "pass": true
+  }
+}

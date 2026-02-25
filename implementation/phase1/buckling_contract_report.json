@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-buckling-eigen-contract",
+  "generated_at": "2026-02-25T07:53:25.329509+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "buckling eigen contract is valid",
+  "critical_load_factor": 2.78,
+  "mode_count": 2,
+  "selected_mode": 1,
+  "buckling_modes": [
+    {
+      "mode_id": 1,
+      "eigenvalue": 2.78,
+      "normalized_shape": [
+        0.0,
+        0.42,
+        1.0,
+        0.39
+      ]
+    },
+    {
+      "mode_id": 2,
+      "eigenvalue": 3.14,
+      "normalized_shape": [
+        0.0,
+        -0.36,
+        -1.0,
+        -0.31
+      ]
+    }
+  ]
+}

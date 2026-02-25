@@ -1,0 +1,5 @@
+member_id,units,E,A,Iy,Iz,L0,fy,material_type,regulation,section_class,temperature_factor,time_factor
+M1,SI,2.1e11,0.018,8.0e-5,3.0e-5,6.0,3.55e8,steel,kbc_2021,wide_flange,1.0,1.0
+M1_ALT,N-mm,210000,18000,8.0e7,3.0e7,6000,355,steel,kbc_2021,wide_flange,1.0,1.0
+M2,SI,3.0e10,0.12,2.2e-3,1.7e-3,4.2,3.0e7,concrete,ibc_2021,rectangular,0.98,0.95
+M3,SI,2.0e11,0.022,7.5e-5,2.8e-5,5.5,2.75e8,steel,kbc_2021,box,1.0,0.98

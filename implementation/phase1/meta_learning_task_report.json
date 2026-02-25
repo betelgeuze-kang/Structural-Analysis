@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-meta-learning-task-pack",
+  "generated_at": "2026-02-25T07:53:24.647604+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "meta-learning task pack ready",
+  "task_count": 3,
+  "meta_ood_generalization_pass": true,
+  "ood_task_count": 1,
+  "tasks": [
+    {
+      "schema_version": "1.0",
+      "task_id": "T-RHM-SEIS-001",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "support_profile": "mixed",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "target_zone": {
+        "node_ids": [
+          "N3",
+          "N4"
+        ],
+        "risk_label": "high"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "T-TRS-WIND-002",
+      "topology_type": "truss",
+      "hazard_type": "wind",
+      "support_profile": "fixed",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "target_zone": {
+        "node_ids": [
+          "N10"
+        ],
+        "risk_label": "mid"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "T-OUT-COMB-003",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "support_profile": "hinge",
+      "split": "test",
+      "ood_tag": "ood_combined",
+      "target_zone": {
+        "node_ids": [
+          "N21",
+          "N22"
+        ],
+        "risk_label": "high"
+      }
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,9 @@
+{
+  "strict_rust_hip_pass": true,
+  "host_copy_share": 0.05,
+  "host_copy_share_limit": 0.2,
+  "host_copy_share_pass": true,
+  "all_pass": true,
+  "reason_code": "PASS",
+  "reason": "all gates satisfied"
+}

@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-pg-gat-contract",
+  "generated_at": "2026-02-25T02:22:39.032983+00:00",
+  "interface_version": "1.0.0",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "attention_policy": {
+    "dense_top_ratio": 0.1,
+    "dense_edges": [
+      "E4"
+    ],
+    "sparse_edges": [
+      "E2",
+      "E1",
+      "E3"
+    ]
+  },
+  "edges": [
+    {
+      "edge_id": "E4",
+      "torsion": 0.9,
+      "stress": 1.2,
+      "damping": 0.8,
+      "physics_score": 5.22,
+      "alpha_ij": 0.9946217528261514
+    },
+    {
+      "edge_id": "E2",
+      "torsion": 1.1,
+      "stress": 0.9,
+      "damping": 0.6,
+      "physics_score": 4.680000000000001,
+      "alpha_ij": 0.990806294632712
+    },
+    {
+      "edge_id": "E1",
+      "torsion": 0.3,
+      "stress": 0.4,
+      "damping": 0.1,
+      "physics_score": 1.54,
+      "alpha_ij": 0.8234647252208833
+    },
+    {
+      "edge_id": "E3",
+      "torsion": 0.2,
+      "stress": 0.1,
+      "damping": 0.05,
+      "physics_score": 0.6400000000000001,
+      "alpha_ij": 0.6547534606063192
+    }
+  ],
+  "notes": "PG-GAT static scaffold using LF physics triggers only."
+}

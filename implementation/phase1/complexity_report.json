@@ -1,0 +1,44 @@
+{
+  "sizes": [
+    2000,
+    4000,
+    8000,
+    16000,
+    32000
+  ],
+  "repeats": 3,
+  "rows": [
+    {
+      "n": 2000,
+      "seconds": 0.0003593200017348863,
+      "checksum": 53.505930000000006
+    },
+    {
+      "n": 4000,
+      "seconds": 0.0007149070006562397,
+      "checksum": 107.85927100000131
+    },
+    {
+      "n": 8000,
+      "seconds": 0.001365508000162663,
+      "checksum": 216.00684699999974
+    },
+    {
+      "n": 16000,
+      "seconds": 0.002713623998715775,
+      "checksum": 433.26424999998864
+    },
+    {
+      "n": 32000,
+      "seconds": 0.005466868002258707,
+      "checksum": 866.54557500001
+    }
+  ],
+  "slope_p": 0.9779140131022982,
+  "guardrail": {
+    "lower": 0.85,
+    "upper": 1.15
+  },
+  "within_guardrail": true,
+  "note": "Scaffold measurement for LF preprocessing path; replace workload with Rust/HIP runtime hook when available."
+}

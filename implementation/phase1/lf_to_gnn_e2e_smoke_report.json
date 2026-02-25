@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-lf-gnn-smoke",
+  "generated_at": "2026-02-25T02:10:57.013023+00:00",
+  "interface_version": "1.0.0",
+  "ingest": {
+    "node_count": 2,
+    "edge_count": 1,
+    "meta_unit_system": "SI",
+    "meta_solver": "FIRE"
+  },
+  "inference": {
+    "backend": "python",
+    "model_module": "python_fallback",
+    "model_api_version": "1.0.0",
+    "torch_available": false,
+    "batch_size": 2,
+    "processed_batches": 1,
+    "processed_nodes": 2,
+    "residual_gain": 0.001,
+    "residual_correction_applied": true,
+    "sample_corrected_node": {
+      "node_id": "N1",
+      "ux": 0.0,
+      "uy": 0.0,
+      "uz": 0.0
+    }
+  },
+  "pass": true,
+  "reason_code": "PASS",
+  "reason": "one-batch ingestion + correction completed"
+}

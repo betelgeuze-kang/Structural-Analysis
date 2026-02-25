@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-subgraph-projection",
+  "generated_at": "2026-02-25T02:22:39.789539+00:00",
+  "interface_version": "1.0.0",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "projection_mode": "subgraph_divide_and_conquer",
+  "alpha": 0.35,
+  "subgraph_count": 3,
+  "projected_subgraphs": [
+    {
+      "subgraph_id": "S1",
+      "nodes": [
+        "N1",
+        "N2"
+      ],
+      "u_local_projected": [
+        0.0,
+        -3.8487999999999998
+      ]
+    },
+    {
+      "subgraph_id": "S2",
+      "nodes": [
+        "N3",
+        "N4"
+      ],
+      "u_local_projected": [
+        0.0,
+        1.0493
+      ]
+    },
+    {
+      "subgraph_id": "S3",
+      "nodes": [
+        "N5",
+        "N6"
+      ],
+      "u_local_projected": [
+        0.0,
+        -0.6997
+      ]
+    }
+  ],
+  "global_stitch": {
+    "method": "boundary_message_passing_stub",
+    "shared_boundary_nodes": [
+      "N2",
+      "N4"
+    ],
+    "iterations": 1
+  }
+}

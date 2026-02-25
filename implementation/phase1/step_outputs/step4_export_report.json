@@ -1,0 +1,11 @@
+{
+  "parquet_nodes_written": false,
+  "parquet_edges_written": false,
+  "fallback_csv_used": true,
+  "meta_written": true,
+  "written_files": [
+    "ulf_nodes.csv",
+    "ulf_edges.csv",
+    "ulf_meta.json"
+  ]
+}
