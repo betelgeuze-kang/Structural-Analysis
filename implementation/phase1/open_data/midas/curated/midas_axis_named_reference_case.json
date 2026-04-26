@@ -1,0 +1,466 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-midas-mgt-model",
+  "generated_at": "2026-04-08T13:56:38.219659+00:00",
+  "source": {
+    "path": "implementation/phase1/open_data/midas/curated/midas_axis_named_reference_case.mgt",
+    "sha256": "dfb890998c5a9de46fcc05c31205ae982ec7920e7a87be39dca280569f0258c0",
+    "size_bytes": 593,
+    "format": "midas_mgt",
+    "source_family": "midas_mgt"
+  },
+  "parser": {
+    "line_count": 37,
+    "section_counts": {
+      "GRID-X": 3,
+      "GRID-Y": 2,
+      "LEVEL": 2,
+      "NODE": 12,
+      "ELEMENT": 10
+    },
+    "strict_element_slot_parse": true,
+    "coarsening": {
+      "applied": true,
+      "elastic_link_count": 0,
+      "rigid_like_link_count": 0,
+      "merge_pair_count": 0,
+      "merged_link_ids_head": [],
+      "merged_node_count": 0,
+      "dropped_degenerate_elements": 0,
+      "node_count_pre": 12,
+      "node_count_post": 12,
+      "element_count_pre": 10,
+      "element_count_post": 10,
+      "dummy_node_removed_count": 0,
+      "support_node_count": 0,
+      "support_node_count_mapped": 0
+    },
+    "constraint_summary": {
+      "constraint_row_count": 0,
+      "support_node_count": 0,
+      "support_nodes": []
+    },
+    "diagnostics": {
+      "known_section_count": 2,
+      "unknown_section_count": 3,
+      "unknown_sections": [
+        "GRID-X",
+        "GRID-Y",
+        "LEVEL"
+      ],
+      "unknown_section_row_count": {
+        "GRID-X": 3,
+        "GRID-Y": 2,
+        "LEVEL": 2
+      },
+      "unknown_row_total": 7,
+      "typed_section_count": 0,
+      "typed_section_row_count": {},
+      "typed_row_total": 0,
+      "row_parse": {
+        "node_rows": 12,
+        "node_rows_parsed": 12,
+        "node_rows_skipped": 0,
+        "element_rows": 10,
+        "element_rows_parsed": 10,
+        "element_rows_skipped": 0,
+        "element_skip_ratio": 0.0,
+        "material_rows": 0,
+        "material_rows_parsed": 0,
+        "section_rows": 0,
+        "section_rows_parsed": 0,
+        "constraint_rows": 0,
+        "elastic_link_rows": 0
+      },
+      "element_skip_reason_count": {},
+      "unsupported_element_type_count": {},
+      "unresolved_elements_head": [],
+      "warnings_head": [
+        "unknown sections preserved as raw text: GRID-X,GRID-Y,LEVEL"
+      ]
+    }
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": 1,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 2,
+        "x": 8.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 3,
+        "x": 16.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 4,
+        "x": 0.0,
+        "y": 6.0,
+        "z": 0.0
+      },
+      {
+        "id": 5,
+        "x": 8.0,
+        "y": 6.0,
+        "z": 0.0
+      },
+      {
+        "id": 6,
+        "x": 16.0,
+        "y": 6.0,
+        "z": 0.0
+      },
+      {
+        "id": 7,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 3.6
+      },
+      {
+        "id": 8,
+        "x": 8.0,
+        "y": 0.0,
+        "z": 3.6
+      },
+      {
+        "id": 9,
+        "x": 16.0,
+        "y": 0.0,
+        "z": 3.6
+      },
+      {
+        "id": 10,
+        "x": 0.0,
+        "y": 6.0,
+        "z": 3.6
+      },
+      {
+        "id": 11,
+        "x": 8.0,
+        "y": 6.0,
+        "z": 3.6
+      },
+      {
+        "id": 12,
+        "x": 16.0,
+        "y": 6.0,
+        "z": 3.6
+      }
+    ],
+    "elements": [
+      {
+        "id": 1,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1,
+          7
+        ],
+        "section_id": 1,
+        "material_id": 1
+      },
+      {
+        "id": 2,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          2,
+          8
+        ],
+        "section_id": 1,
+        "material_id": 1
+      },
+      {
+        "id": 3,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          3,
+          9
+        ],
+        "section_id": 1,
+        "material_id": 1
+      },
+      {
+        "id": 4,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          4,
+          10
+        ],
+        "section_id": 1,
+        "material_id": 1
+      },
+      {
+        "id": 5,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          5,
+          11
+        ],
+        "section_id": 1,
+        "material_id": 1
+      },
+      {
+        "id": 6,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          6,
+          12
+        ],
+        "section_id": 1,
+        "material_id": 1
+      },
+      {
+        "id": 7,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          7,
+          8
+        ],
+        "section_id": 1,
+        "material_id": 1
+      },
+      {
+        "id": 8,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          8,
+          9
+        ],
+        "section_id": 1,
+        "material_id": 1
+      },
+      {
+        "id": 9,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          10,
+          11
+        ],
+        "section_id": 1,
+        "material_id": 1
+      },
+      {
+        "id": 10,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          11,
+          12
+        ],
+        "section_id": 1,
+        "material_id": 1
+      }
+    ],
+    "materials": [],
+    "sections": [],
+    "loads": {
+      "static_load_cases": [],
+      "active_static_case_sequence": [],
+      "load_cases": [],
+      "load_combinations": [],
+      "load_combination_graph": {
+        "node_count": 0,
+        "edge_count": 0,
+        "combo_node_count": 0,
+        "case_node_count": 0,
+        "nodes": [],
+        "edges": [],
+        "combo_summaries": []
+      },
+      "semantic_load_summary": {
+        "case_count": 0,
+        "combination_count": 0,
+        "bound_nodal_load_row_count": 0,
+        "bound_selfweight_row_count": 0,
+        "bound_pressure_row_count": 0,
+        "unbound_nodal_load_row_count": 0,
+        "unbound_selfweight_row_count": 0,
+        "unbound_pressure_row_count": 0,
+        "body_load_pending_case_count": 0,
+        "surface_load_pending_case_count": 0,
+        "case_force_summaries": [],
+        "combination_force_summaries": []
+      },
+      "selfweight": [],
+      "nodal_loads": [],
+      "nodal_masses": [],
+      "beam_offsets": [],
+      "pressure_loads": []
+    },
+    "metadata": {
+      "members": [],
+      "groups": [],
+      "thickness": [],
+      "design_sections": [],
+      "section_colors": [],
+      "section_scales": [],
+      "section_library": {
+        "contract_version": "0.1.0",
+        "provenance": "parser_additive_metadata",
+        "limitations": [
+          "Exact MIDAS section semantics are not fully decoded yet.",
+          "Derived catalog entries are placeholders for future UI/mesher/productization work.",
+          "Unusable or ambiguous rows remain in usage_summary even if no template was emitted."
+        ],
+        "usage_summary": [],
+        "derived_catalog": {
+          "version": "0.1.0",
+          "source_label": "midas_parser_derived",
+          "template_count": 0,
+          "family_counts": {},
+          "templates": []
+        },
+        "summary": {
+          "section_row_count": 0,
+          "used_section_count": 0,
+          "unused_section_count": 0,
+          "derived_template_count": 0,
+          "family_counts": {},
+          "shape_counts": {}
+        }
+      },
+      "load_pattern_library": {
+        "contract_version": "0.1.0",
+        "provenance": "parser_additive_metadata",
+        "limitations": [
+          "Load primitives are aggregated authoring seeds, not exact solver load cards.",
+          "Body/surface load assembly is still represented as productization metadata, not a native commercial editor.",
+          "Combination expansion is summary-grade and should not replace final code-check load assembly."
+        ],
+        "pattern_summary": {
+          "pattern_count": 0,
+          "primitive_count": 0,
+          "primitive_kind_counts": {},
+          "case_counts": {},
+          "patterns": []
+        },
+        "case_semantic_rows": [],
+        "combination_summary": {
+          "combination_count": 0,
+          "limit_state_counts": {},
+          "expansion_mode_counts": {},
+          "max_expansion_depth": 0,
+          "nested_combination_count": 0,
+          "referenced_case_union": [],
+          "referenced_leaf_case_union": [],
+          "combination_names": []
+        },
+        "summary": {
+          "pattern_count": 0,
+          "primitive_count": 0,
+          "design_situation_counts": {},
+          "semantic_status_counts": {},
+          "load_color_row_count": 0
+        }
+      },
+      "load_combination_editor_seed": {
+        "contract_version": "0.1.0",
+        "provenance": "parser_additive_metadata",
+        "seed_kind": "midas_load_combination_editor_seed",
+        "limitations": [
+          "Editor seed rows are deterministic authoring contracts, not final solver-ready code-check assemblies.",
+          "Graph layout/order is suitable for browser/editor preview and may differ from final commercial UI presentation.",
+          "Expanded factor maps should be treated as normalized references until round-trip export is fully wired."
+        ],
+        "summary": {
+          "combination_count": 0,
+          "case_count": 0,
+          "graph_edge_count": 0,
+          "stage_count": 0,
+          "max_expansion_depth": 0,
+          "nested_combination_count": 0,
+          "limit_state_counts": {},
+          "expansion_mode_counts": {}
+        },
+        "case_nodes": [],
+        "combination_nodes": [],
+        "graph_edges": []
+      },
+      "design_materials": [],
+      "design_material_rebar_payloads": [],
+      "group_local_rebar_payloads": [],
+      "material_colors": [],
+      "boundary_groups": [],
+      "domain_elements": [],
+      "eigen_controls": [],
+      "load_colors": [],
+      "length_units": [],
+      "main_domains": [],
+      "rebar_material_codes": [],
+      "story_eccentricity": [],
+      "structure_type": [],
+      "thickness_colors": [],
+      "version": [],
+      "named_axis_refs": {
+        "x": [
+          {
+            "label": "A",
+            "value": 0.0,
+            "count": 1
+          },
+          {
+            "label": "B",
+            "value": 8.0,
+            "count": 1
+          },
+          {
+            "label": "C",
+            "value": 16.0,
+            "count": 1
+          }
+        ],
+        "y": [
+          {
+            "label": "1",
+            "value": 0.0,
+            "count": 1
+          },
+          {
+            "label": "2",
+            "value": 6.0,
+            "count": 1
+          }
+        ],
+        "z": [
+          {
+            "label": "L1",
+            "value": 0.0,
+            "count": 1
+          },
+          {
+            "label": "L2",
+            "value": 3.6,
+            "count": 1
+          }
+        ]
+      }
+    },
+    "load_cases_raw": [],
+    "load_combinations_raw": []
+  },
+  "topology_metrics": {
+    "node_count": 12,
+    "element_count": 10,
+    "edge_count_undirected": 10,
+    "beam_element_count": 10,
+    "shell_element_count": 0,
+    "node_count_pre_coarsening": 12,
+    "element_count_pre_coarsening": 10
+  }
+}

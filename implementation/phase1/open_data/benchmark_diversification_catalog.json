@@ -1,0 +1,294 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-15T00:00:00Z",
+  "purpose": "Prioritized benchmark diversification candidates beyond the current recurring MIDAS design file, mapped to phase1 commercialization holdouts.",
+  "current_coverage_summary": {
+    "primary_recurring_design_file": "implementation/phase1/open_data/midas/midas_generator_33.mgt",
+    "authority_tracks_present": [
+      "opensees",
+      "sac",
+      "nheri"
+    ],
+    "megastructure_candidates_present": [
+      "zenodo_atwood_highrise_shm_2025",
+      "opstool_606m_megatall_model",
+      "canton_tower_megastructure_2026",
+      "zenodo_kw51_railway_bridge_monitoring_2025",
+      "sf_tall_building_inventory_2024",
+      "usgs_nsmp_structural_arrays"
+    ],
+    "rc_proxy_families_present": [
+      "cyclic_wall_cracking",
+      "bond_slip_pullout",
+      "creep_shrinkage_column",
+      "slab_wall_interaction"
+    ],
+    "observed_biases": [
+      "single recurring MIDAS building file dominates parser and optimization smoke coverage",
+      "panel-zone validation is still topology-projected rather than solver-verified",
+      "foundation optimization now has live green evidence, but raw-source diversity is still weak",
+      "wind raw mapping has live green evidence, but HFFB source diversity is narrow",
+      "hinge refresh is green from projected optimization changes, not from richer experimental hysteresis families",
+      "megastructure coverage is still synthetic-heavy until a Canton Tower-style real monitoring family is onboarded"
+    ]
+  },
+  "recommended_next_batch": [
+    "tpu_highrise_wind_pressure_and_force",
+    "peer_spd_rc_columns",
+    "designsafe_liquefaction_pile_foundations",
+    "peer_rc_beam_column_joint_2003_10",
+    "usgs_nsmp_structural_arrays"
+  ],
+  "next_frontier_batch": [
+    "canton_tower_megastructure",
+    "edefense_peer_blind_prediction",
+    "nuclear_containment_ssi"
+  ],
+  "candidates": [
+    {
+      "id": "tpu_highrise_wind_pressure_and_force",
+      "priority": 1,
+      "benchmark_domain": "wind",
+      "source_name": "TPU Aerodynamic Database",
+      "source_urls": [
+        "https://db.wind.arch.t-kougei.ac.jp/",
+        "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/experiment/highrise/",
+        "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/experiment/WindForce_UHB/",
+        "https://www.designsafe-ci.org/use-designsafe/tools-applications/hazard-apps/tpu-wind-databases/"
+      ],
+      "gap_targets": [
+        "P1 raw wind-tunnel HFFB mapping verification",
+        "high-rise wind pressure / force benchmark diversification"
+      ],
+      "data_shape": [
+        "pressure coefficient time histories",
+        "wind force balance results",
+        "multiple high-rise geometries including interference cases"
+      ],
+      "integration_fit": [
+        "raw HFFB row mapper",
+        "wind node / floor pressure binding validation",
+        "interference / neighboring building sensitivity holdout"
+      ],
+      "recommended_ingestion_mode": "add at least one isolated high-rise case and one interference case as external raw wind benchmark fixtures with source manifest",
+      "notes": "Best direct match for current wind holdout because it supplies official wind-tunnel pressure and force datasets instead of only semantic pressure binding."
+    },
+    {
+      "id": "peer_spd_rc_columns",
+      "priority": 2,
+      "benchmark_domain": "pbd_hinge",
+      "source_name": "PEER Structural Performance Database (SPD)",
+      "source_urls": [
+        "https://peer.berkeley.edu/node/123"
+      ],
+      "gap_targets": [
+        "P0 PBD hinge property refresh",
+        "member-local hysteresis / damage state benchmark diversification"
+      ],
+      "data_shape": [
+        "400+ cyclic lateral-load tests of reinforced concrete columns",
+        "digital force-displacement histories",
+        "geometry, reinforcement, axial load, damage observations"
+      ],
+      "integration_fit": [
+        "hinge back-calibration and refresh validation",
+        "rebar-sensitive hinge regression tests",
+        "column family holdout split for PBD review package"
+      ],
+      "recommended_ingestion_mode": "start with a small curated slice of spiral and rectangular columns and convert them into hinge-refresh calibration fixtures",
+      "notes": "Most useful external authority source for moving hinge refresh from projected optimization changes toward experimentally anchored response families."
+    },
+    {
+      "id": "designsafe_liquefaction_pile_foundations",
+      "priority": 3,
+      "benchmark_domain": "foundation_ssi",
+      "source_name": "DesignSafe liquefaction-induced downdrag on pile foundations dataset",
+      "source_urls": [
+        "https://www.designsafe-ci.org/community/news/2022/july/bridges-under-pressure/",
+        "https://www.designsafe-ci.org/community/dataset-awards/",
+        "https://simcenter.designsafe-ci.org/products/learning-tools/pile-group-tool/"
+      ],
+      "gap_targets": [
+        "P1 foundation / mat / pile optimization",
+        "soil-structure interaction and pile demand diversity"
+      ],
+      "data_shape": [
+        "centrifuge experiments on liquefaction-induced downdrag in pile foundations",
+        "bridge / soil-pile system measurements",
+        "complementary nonlinear pile-group synthetic studies"
+      ],
+      "integration_fit": [
+        "foundation scope promotion beyond below-grade geometric heuristics",
+        "pile demand validation cases",
+        "SSI regression family for foundation optimization artifact"
+      ],
+      "recommended_ingestion_mode": "pair one measured DesignSafe centrifuge case with one synthetic SimCenter Pile Group family so measured and parametric foundation tracks are both covered",
+      "notes": "Best candidate for diversifying foundation benchmarking because it adds real pile-soil interaction evidence rather than more superstructure-only cases."
+    },
+    {
+      "id": "peer_rc_beam_column_joint_2003_10",
+      "priority": 4,
+      "benchmark_domain": "panel_zone_joint",
+      "source_name": "PEER Report 2003-10 beam-column joint model",
+      "source_urls": [
+        "https://peer.berkeley.edu/publications/2003-10"
+      ],
+      "gap_targets": [
+        "P0 panel-zone 3D clash / anchorage",
+        "joint shear and anchorage benchmark coverage"
+      ],
+      "data_shape": [
+        "joint element calibration guidance",
+        "anchorage failure modes",
+        "joint core shear and interface shear-transfer mechanisms"
+      ],
+      "integration_fit": [
+        "panel-zone source contract schema hardening",
+        "anchorage field naming and minimum row requirements",
+        "future solver-verified panel source acceptance tests"
+      ],
+      "recommended_ingestion_mode": "use as the first benchmark-backed schema reference for panel-zone joint rows and anchorage failure annotations",
+      "notes": "This is not a drop-in raw dataset like TPU or SPD, but it is the strongest official reference for the exact mechanisms the current panel holdout is missing."
+    },
+    {
+      "id": "usgs_nsmp_structural_arrays",
+      "priority": 5,
+      "benchmark_domain": "measured_dynamic_holdout",
+      "source_name": "USGS National Strong Motion Project structural arrays",
+      "source_urls": [
+        "https://www.usgs.gov/programs/earthquake-hazards/nsmp-national-strong-motion-project",
+        "https://earthquake.usgs.gov/monitoring/nsmp/buildings/"
+      ],
+      "gap_targets": [
+        "measured building-response holdout diversity",
+        "building instrumentation validation beyond one recurring design file"
+      ],
+      "data_shape": [
+        "instrumented structures with ground and structural channels",
+        "processed strong-motion recordings",
+        "multiple building monitoring examples"
+      ],
+      "integration_fit": [
+        "dynamic response holdout expansion",
+        "phase-delay / transfer-function validation",
+        "external measured benchmark family beyond Atwood-only recurrence"
+      ],
+      "recommended_ingestion_mode": "curate one mid-rise building array and one taller instrumented building response example for measured-vs-modeled transfer validation",
+      "notes": "Best source for widening measured-response holdouts without tying the pipeline to another single proprietary design model."
+    },
+    {
+      "id": "peer_bridge_component_database",
+      "priority": 6,
+      "benchmark_domain": "bridge_component_performance",
+      "source_name": "PEER Report 1999-11 concrete bridge component performance database",
+      "source_urls": [
+        "https://peer.berkeley.edu/publications/1999-11",
+        "https://peer.berkeley.edu/bridgepbee"
+      ],
+      "gap_targets": [
+        "bridge / civil benchmark diversification",
+        "component-level performance limits"
+      ],
+      "data_shape": [
+        "bridge component and system performance library",
+        "simulated seismic load performance database",
+        "bridge-ground PBEE workflow references"
+      ],
+      "integration_fit": [
+        "bridge member family holdouts",
+        "civil/railway expansion beyond current tunnel and track examples"
+      ],
+      "recommended_ingestion_mode": "stage as a secondary civil benchmark track after wind, hinge, and foundation diversification land",
+      "notes": "Useful for civil expansion, but it should come after the four commercialization holdouts have wider direct evidence."
+    },
+    {
+      "id": "canton_tower_megastructure",
+      "priority": 7,
+      "stage": "immediate",
+      "benchmark_domain": "megastructure_shm",
+      "source_name": "Canton Tower megastructure SHM benchmark",
+      "source_manifest_stub": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm.source_manifest.json",
+      "source_urls": [
+        "https://polyucee.hk/ceyxia/benchmark/benchmark.htm",
+        "https://polyucee.hk/ceyxia/benchmark/tvtower.htm",
+        "https://polyucee.hk/ceyxia/benchmark/task_i.htm"
+      ],
+      "gap_targets": [
+        "measured megatall dynamic benchmark beyond Atwood recurrence",
+        "reduced-order SHM benchmark ingestion for irregular/megatall review chain",
+        "viewer/results explorer provenance on official measured high-rise response"
+      ],
+      "data_shape": [
+        "official reduced-order system matrices",
+        "accelerometer records",
+        "wind and temperature records",
+        "benchmark documentation PDFs"
+      ],
+      "integration_fit": [
+        "open_data/irregular harvested source registry",
+        "open_data/megastructure measured-response expansion",
+        "measured benchmark breadth gate"
+      ],
+      "recommended_ingestion_mode": "ingest as an official reduced-order SHM benchmark, not as a full-order native FE benchmark",
+      "notes": "Best next-frontier benchmark for the current repo because it exercises measured megatall response, provenance, and viewer/review chains without requiring full-order FE ingestion on day one."
+    },
+    {
+      "id": "edefense_peer_blind_prediction",
+      "priority": 8,
+      "stage": "next",
+      "benchmark_domain": "blind_prediction_dynamic_holdout",
+      "source_name": "E-Defense / PEER blind prediction benchmark",
+      "source_urls": [
+        "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+        "https://peer.berkeley.edu/sites/default/files/news_e-defense_blind_analysis_2009-article.pdf",
+        "https://peer.berkeley.edu/nees-tipse-defense-announce-blind-analysis-contest-seismic-isolation-test"
+      ],
+      "gap_targets": [
+        "authority-grade nonlinear / collapse benchmark diversity",
+        "member-local hysteresis and frame-response validation beyond projected hinge refresh",
+        "blind prediction style compare/report/viewer workflow"
+      ],
+      "data_shape": [
+        "specimen or frame geometry",
+        "member/material properties",
+        "excitation histories",
+        "measured structural response"
+      ],
+      "integration_fit": [
+        "pbd_hinge benchmark asset path",
+        "rc benchmark lock path",
+        "compare/report/viewer deep-link review surface"
+      ],
+      "recommended_ingestion_mode": "start with one PEER/E-Defense benchmark family that can be normalized into source_manifest -> benchmark_case -> compare_report -> viewer_entry, before attempting broader collapse suites",
+      "notes": "Very high value, but should follow Canton Tower because the repo is already strongest on measured/review chains and only partially closed on full collapse mechanics."
+    },
+    {
+      "id": "nuclear_containment_ssi",
+      "priority": 9,
+      "stage": "deferred",
+      "benchmark_domain": "nuclear_containment_ssi",
+      "source_name": "Nuclear containment / SSI benchmark references",
+      "source_urls": [
+        "https://ww2.nrc.gov/reading-rm/doc-collections/nuregs/contract/cr5679/index",
+        "https://www.osti.gov/biblio/1097517"
+      ],
+      "gap_targets": [
+        "SSI / containment benchmark hardening",
+        "impedance and transfer-function validation for heavy stiff structures",
+        "future thick-shell / stronger contact breadth validation"
+      ],
+      "data_shape": [
+        "benchmark reports and reference studies",
+        "SSI target curves and response summaries",
+        "possible model metadata, but raw FE meshes may be unavailable"
+      ],
+      "integration_fit": [
+        "reference benchmark staging",
+        "ssi boundary gate",
+        "foundation / soil-link gate"
+      ],
+      "recommended_ingestion_mode": "treat as a deferred reference benchmark until a trusted public model package or directly ingestible benchmark dataset is secured",
+      "notes": "Important long-term, but not the right immediate benchmark because current public evidence looks stronger at the report/reference level than at raw ingestible FE package level."
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "kind": "topk_residual_meta",
+  "source_benchmark_report": "implementation/phase1/hf_benchmark_report.json",
+  "summary": {
+    "train": {
+      "case_count": 7,
+      "drift_error_pct": 0.281921171843696,
+      "base_shear_error_pct": 0.20117063459102177,
+      "mode_shape_mac": 0.9793885690825326,
+      "buckling_factor_error_pct": 0.4344111932072409,
+      "equilibrium_residual_mean": 0.02500119831945215
+    },
+    "val": {
+      "case_count": 2,
+      "drift_error_pct": 0.5489010141887657,
+      "base_shear_error_pct": 0.48264610038938593,
+      "mode_shape_mac": 0.981858879327774,
+      "buckling_factor_error_pct": 0.3368674211636764,
+      "equilibrium_residual_mean": 0.022455686703324318
+    },
+    "test": {
+      "case_count": 3,
+      "drift_error_pct": 0.3757816738749323,
+      "base_shear_error_pct": 0.23269973309962022,
+      "mode_shape_mac": 0.9756213029225668,
+      "buckling_factor_error_pct": 0.43781504424297807,
+      "equilibrium_residual_mean": 0.03071795031428337
+    },
+    "all": {
+      "case_count": 12,
+      "drift_error_pct": 0.34988293774234996,
+      "base_shear_error_pct": 0.2559654868512321,
+      "mode_shape_mac": 0.978858470916748,
+      "buckling_factor_error_pct": 0.4190048606255812,
+      "equilibrium_residual_mean": 0.02600613438213865
+    }
+  },
+  "improvement_pct": {
+    "drift_error_reduction_pct": 96.97683435876864,
+    "base_shear_error_reduction_pct": 96.8953366398573,
+    "buckling_error_reduction_pct": 96.09771942936246,
+    "mode_shape_mac_gain_pct": 4.755329590826781
+  }
+}

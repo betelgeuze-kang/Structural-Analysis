@@ -1,0 +1,21 @@
+{
+  "summary": {
+    "support_mode": "fixture_identity_baseline",
+    "evidence_model": "fixture_identity_roundtrip_baseline",
+    "source_mgt_exists": true,
+    "output_mgt_exists": true,
+    "loadcomb_preview_exists": false,
+    "loadcomb_roundtrip_report_exists": true,
+    "loadcomb_roundtrip_pass": true,
+    "loadcomb_combo_count": 0,
+    "direct_patch_change_count": 0,
+    "supported_change_count": 0,
+    "unsupported_change_count": 0,
+    "instruction_sidecar_audit_only_change_count": 0,
+    "audit_review_queue_pending_count": 0,
+    "direct_patch_action_family_counts": {},
+    "supported_action_family_counts": {},
+    "unsupported_reason_counts": {},
+    "audit_review_queue_status_counts": {}
+  }
+}

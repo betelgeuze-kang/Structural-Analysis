@@ -1,0 +1,1 @@
+{"schema_version": "1.0", "node_count": 8, "edges": [[0, 1], [0, 3], [1, 2], [2, 3], [4, 5], [4, 7], [5, 6], [6, 7]], "source": "/tmp/pytest-of-betelgeuze/pytest-1/test_parse_opensees_synthetic_0/sample_dataset/real_frame.tcl"}

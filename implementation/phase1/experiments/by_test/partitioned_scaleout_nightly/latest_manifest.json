@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-28T15:33:49.492599+00:00",
+  "test_name": "partitioned_scaleout_nightly",
+  "latest_run_dir": "implementation/phase1/experiments/by_test/partitioned_scaleout_nightly/20260328T153349Z",
+  "latest_manifest": "implementation/phase1/experiments/by_test/partitioned_scaleout_nightly/20260328T153349Z/artifact_archive_manifest.json"
+}

@@ -1,0 +1,53 @@
+{
+  "producer_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
+  "contract_pass": true,
+  "missing_fields": [],
+  "runtime_kind": "rust_hip",
+  "runtime_backend": "rust_ffi_cpu",
+  "rust_hip_ready": true,
+  "challenge_ok": true,
+  "cpu_backend": true,
+  "cpu_required": true,
+  "cpu_fallback_used": false,
+  "cpu_allowed": false,
+  "allow_cpu_required": false,
+  "strict_rust_hip_pass": false,
+  "host_copy_share": 0.0,
+  "host_copy_share_limit": 0.05,
+  "host_copy_share_pass": true,
+  "timing_breakdown_seconds": {
+    "compute": 0.0012,
+    "host_copy": 0.0,
+    "serialization": 0.0004
+  },
+  "next_action": "ready for strict rust-hip validation",
+  "pass": false,
+  "probe": {
+    "producer_kind": "rust_hip",
+    "runtime_backend": "rust_ffi_cpu",
+    "roundtrip_success": true,
+    "shared_storage": true,
+    "host_copy_bytes": 0,
+    "device": "cpu",
+    "shape": [
+      8192,
+      1
+    ],
+    "dtype": "float32",
+    "strides": [
+      1,
+      1
+    ],
+    "byte_offset": 0,
+    "cpu_required": true,
+    "cpu_fallback_used": false,
+    "pointer_before": 108776913293104,
+    "pointer_after": 108776913293104,
+    "probe_checksum_before": -47.81160159364299,
+    "probe_checksum_after": -53.78805436463517,
+    "max_abs_error": 0.0,
+    "tensor_bytes": 32768,
+    "host_copy_share": 0.0,
+    "challenge_echo": "7ad107bb12f77435311b210f1aec48c7"
+  }
+}

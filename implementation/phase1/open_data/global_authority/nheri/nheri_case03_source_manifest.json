@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0",
+  "source_family": "nheri_sensor",
+  "case_id": "NHERI_UCSD_like_holdout_03",
+  "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+  "source_file_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_sensor.csv",
+  "source_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650"
+}

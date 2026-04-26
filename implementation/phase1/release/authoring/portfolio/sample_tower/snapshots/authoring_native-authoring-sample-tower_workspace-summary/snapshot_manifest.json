@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "job_id": "authoring::native-authoring-sample-tower::workspace-summary",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "snapshot_id": "authoring_native-authoring-sample-tower_workspace-summary__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_workspace_summary.json",
+      "label": "native_authoring_workspace_summary.json",
+      "sha256": "8673c9a63d0275d61e005f76acea6523c764d4fd5642cf694f2fef6f48bcf5d5",
+      "bytes": 12746
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_workspace_draft.json",
+      "label": "native_authoring_workspace_draft.json",
+      "sha256": "ffac3ce1371a15957b8a53795e35888128176f83ffa39d9ab72175d3748b1331",
+      "bytes": 1036
+    }
+  ],
+  "summary": {
+    "artifact_count": 2
+  }
+}

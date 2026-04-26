@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-normalize-peer-spd-column-seed",
+  "generated_at": "2026-03-20T03:51:34.418748+00:00",
+  "seed_id": "peer_spd_rc_column_spiral_seed_01",
+  "holdout_split": "val",
+  "source_name": "PEER Structural Performance Database",
+  "source_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=276",
+  "source_origin_class": "official_external_benchmark",
+  "source_file_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.raw.json",
+  "source_sha256": "33f74d1a6629596bd92a91dcc0638df371cb1d973406b7b8e1f51e6f4d710a66",
+  "specimen_summary": {
+    "specimen_id": "276",
+    "column_shape": "circular_or_spiral",
+    "confinement_type": "spiral",
+    "axial_load_ratio": 0.19996390285904797,
+    "longitudinal_rebar_ratio": 0.032,
+    "transverse_reinforcement_ratio": 1.02,
+    "height_mm": 800.0,
+    "section_width_mm": 400.0,
+    "section_depth_mm": 400.0
+  },
+  "hysteresis_summary": {
+    "point_count": 960,
+    "peak_abs_drift_ratio": 0.05208,
+    "peak_abs_lateral_force_kN": 451.01
+  },
+  "hinge_refresh_targets": {
+    "rebar_sensitive_expected": false,
+    "axial_load_sensitive_expected": false,
+    "confinement_sensitive_expected": true
+  },
+  "normalized_hysteresis": {
+    "rows_head": [
+      {
+        "drift_ratio": 0.0,
+        "lateral_force_kN": 0.0
+      },
+      {
+        "drift_ratio": -0.0012192375,
+        "lateral_force_kN": -0.97407
+      },
+      {
+        "drift_ratio": -0.000696725,
+        "lateral_force_kN": 4.8704
+      },
+      {
+        "drift_ratio": -0.000174175,
+        "lateral_force_kN": 18.507
+      },
+      {
+        "drift_ratio": 0.0002612625,
+        "lateral_force_kN": 30.196
+      },
+      {
+        "drift_ratio": 0.0010450875,
+        "lateral_force_kN": 44.807
+      },
+      {
+        "drift_ratio": 0.00217725,
+        "lateral_force_kN": 67.208
+      },
+      {
+        "drift_ratio": 0.003048125,
+        "lateral_force_kN": 87.666
+      },
+      {
+        "drift_ratio": 0.00418025,
+        "lateral_force_kN": 108.12
+      },
+      {
+        "drift_ratio": 0.00557375,
+        "lateral_force_kN": 137.34
+      },
+      {
+        "drift_ratio": 0.0073155,
+        "lateral_force_kN": 169.49
+      },
+      {
+        "drift_ratio": 0.008621750000000001,
+        "lateral_force_kN": 196.76
+      },
+      {
+        "drift_ratio": 0.01001525,
+        "lateral_force_kN": 226.96
+      },
+      {
+        "drift_ratio": 0.01149575,
+        "lateral_force_kN": 257.15
+      },
+      {
+        "drift_ratio": 0.012715,
+        "lateral_force_kN": 281.5
+      },
+      {
+        "drift_ratio": 0.013847499999999999,
+        "lateral_force_kN": 300.98
+      },
+      {
+        "drift_ratio": 0.015066250000000002,
+        "lateral_force_kN": 325.33
+      },
+      {
+        "drift_ratio": 0.01602375,
+        "lateral_force_kN": 338.97
+      },
+      {
+        "drift_ratio": 0.01663375,
+        "lateral_force_kN": 357.48
+      },
+      {
+        "drift_ratio": 0.017766249999999997,
+        "lateral_force_kN": 375.01
+      },
+      {
+        "drift_ratio": 0.01855,
+        "lateral_force_kN": 389.62
+      },
+      {
+        "drift_ratio": 0.01942125,
+        "lateral_force_kN": 402.28
+      },
+      {
+        "drift_ratio": 0.0207275,
+        "lateral_force_kN": 415.92
+      },
+      {
+        "drift_ratio": 0.02212,
+        "lateral_force_kN": 423.72
+      },
+      {
+        "drift_ratio": 0.02334,
+        "lateral_force_kN": 425.66
+      },
+      {
+        "drift_ratio": 0.024558749999999997,
+        "lateral_force_kN": 424.69
+      },
+      {
+        "drift_ratio": 0.025691250000000002,
+        "lateral_force_kN": 421.77
+      },
+      {
+        "drift_ratio": 0.02630125,
+        "lateral_force_kN": 418.84
+      },
+      {
+        "drift_ratio": 0.026475,
+        "lateral_force_kN": 412.03
+      },
+      {
+        "drift_ratio": 0.02612625,
+        "lateral_force_kN": 398.39
+      },
+      {
+        "drift_ratio": 0.025691250000000002,
+        "lateral_force_kN": 379.88
+      },
+      {
+        "drift_ratio": 0.024995,
+        "lateral_force_kN": 360.4
+      }
+    ],
+    "full_point_count": 960
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "PEER SPD column specimen normalized into a hinge benchmark fixture."
+}

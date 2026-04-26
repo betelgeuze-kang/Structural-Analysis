@@ -1,0 +1,450 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-30T15:42:50.813155+00:00",
+  "bundle_id": "20260330T154250Z",
+  "source_latest_external_validation_bundle_id": "20260330T150627Z",
+  "package_kind": "external_verification_bundle",
+  "program_summary": {
+    "task_count": 10,
+    "completed_case_count": 10,
+    "kpi_receipt_count": 10,
+    "signed_bundle_count": 10,
+    "review_pending_count": 2,
+    "full_submission_ready": false
+  },
+  "status_summary": {
+    "execution_mode": "limited",
+    "status_mode": "execution_complete_no_fail",
+    "executable_task_count": 10,
+    "planned_task_count": 0,
+    "in_progress_task_count": 0,
+    "completed_task_count": 10,
+    "failed_task_count": 0,
+    "blocked_task_count": 2,
+    "finished_task_count": 10,
+    "completion_ratio": 1.0,
+    "kpi_receipt_task_count": 10,
+    "case_bundle_dir_task_count": 10,
+    "case_bundle_zip_task_count": 10,
+    "review_boundary_pending_count": 2,
+    "review_boundary_resolution_label": "approve_all=PASS_START_NOW_FULL/ready_full=yes; reject_one=ERR_ARCHITECTURE_BLOCKERS/open_revision=1",
+    "review_boundary_owner_label": "licensed_engineer=2",
+    "review_boundary_assignee_label": "unassigned=2",
+    "review_boundary_assignment_status_label": "unassigned=2",
+    "review_boundary_priority_label": "high=1, medium=1",
+    "review_boundary_family_label": "connection_detailing=1, detailing=1",
+    "review_boundary_change_count_total": 11,
+    "review_boundary_followup_action_label": "wait_for_review=2",
+    "review_boundary_sla_state_label": "within_sla=2",
+    "review_boundary_age_bucket_label": "lt_24h=2",
+    "review_boundary_overdue_count": 0,
+    "review_boundary_oldest_open_age_hours": 0.001599,
+    "review_boundary_oldest_open_packet_id": "detailing|detailing_audit_after_material_patch|medium"
+  },
+  "completed_cases": [
+    {
+      "case_id": "peer_tbi_tall_building_ndtha",
+      "case_label": "PEER TBI Tall Building NDTHA",
+      "bundle_zip": "hardest_10/case_bundles/peer_tbi_tall_building_ndtha/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json"
+    },
+    {
+      "case_id": "nheri_designsafe_ssi",
+      "case_label": "NHERI DesignSafe SSI",
+      "bundle_zip": "hardest_10/case_bundles/nheri_designsafe_ssi/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/nheri_designsafe_ssi/benchmark_task_kpi_receipt.json"
+    },
+    {
+      "case_id": "uic_erri_rail_bridge",
+      "case_label": "UIC / ERRI Railway Bridge",
+      "bundle_zip": "hardest_10/case_bundles/uic_erri_rail_bridge/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/uic_erri_rail_bridge/benchmark_task_kpi_receipt.json"
+    },
+    {
+      "case_id": "nist_fema_progressive_collapse",
+      "case_label": "NIST / FEMA Progressive Collapse",
+      "bundle_zip": "hardest_10/case_bundles/nist_fema_progressive_collapse/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/nist_fema_progressive_collapse/benchmark_task_kpi_receipt.json"
+    },
+    {
+      "case_id": "caarc_wind_standard_tower",
+      "case_label": "CAARC Wind Standard Tower",
+      "bundle_zip": "hardest_10/case_bundles/caarc_wind_standard_tower/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/caarc_wind_standard_tower/benchmark_task_kpi_receipt.json"
+    },
+    {
+      "case_id": "nceer_mceer_isolation_damper",
+      "case_label": "NCEER / MCEER Isolation-Damper",
+      "bundle_zip": "hardest_10/case_bundles/nceer_mceer_isolation_damper/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/nceer_mceer_isolation_damper/benchmark_task_kpi_receipt.json"
+    },
+    {
+      "case_id": "iass_dome_snapthrough",
+      "case_label": "IASS Dome Snap-through",
+      "bundle_zip": "hardest_10/case_bundles/iass_dome_snapthrough/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/iass_dome_snapthrough/benchmark_task_kpi_receipt.json"
+    },
+    {
+      "case_id": "aci_fib_construction_stage_csa",
+      "case_label": "ACI / FIB Construction Stage CSA",
+      "bundle_zip": "hardest_10/case_bundles/aci_fib_construction_stage_csa/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/aci_fib_construction_stage_csa/benchmark_task_kpi_receipt.json"
+    },
+    {
+      "case_id": "oc3_oc4_offshore_monopile",
+      "case_label": "OC3 / OC4 Offshore Monopile",
+      "bundle_zip": "hardest_10/case_bundles/oc3_oc4_offshore_monopile/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/oc3_oc4_offshore_monopile/benchmark_task_kpi_receipt.json"
+    },
+    {
+      "case_id": "tc204_excavation_tunnel",
+      "case_label": "TC204 Excavation and Adjacent Tunnel",
+      "bundle_zip": "hardest_10/case_bundles/tc204_excavation_tunnel/signed_case_bundle.zip",
+      "kpi_receipt_json": "hardest_10/case_bundles/tc204_excavation_tunnel/benchmark_task_kpi_receipt.json"
+    }
+  ],
+  "files": [
+    {
+      "label": "Latest external validation bundle zip",
+      "source": "implementation/phase1/release/external_validation_submission_20260330T150627Z.zip",
+      "dest": "external_validation/latest_external_validation_submission.zip",
+      "size_bytes": 2779249
+    },
+    {
+      "label": "Latest external validation external_validation_onepage.json",
+      "source": "implementation/phase1/release/external_validation_submission_20260330T150627Z/external_validation_onepage.json",
+      "dest": "external_validation/external_validation_onepage.json",
+      "size_bytes": 273294
+    },
+    {
+      "label": "Latest external validation external_validation_onepage.md",
+      "source": "implementation/phase1/release/external_validation_submission_20260330T150627Z/external_validation_onepage.md",
+      "dest": "external_validation/external_validation_onepage.md",
+      "size_bytes": 37032
+    },
+    {
+      "label": "Latest external validation external_validation_onepage.html",
+      "source": "implementation/phase1/release/external_validation_submission_20260330T150627Z/external_validation_onepage.html",
+      "dest": "external_validation/external_validation_onepage.html",
+      "size_bytes": 48912
+    },
+    {
+      "label": "Latest external validation external_validation_onepage.pdf",
+      "source": "implementation/phase1/release/external_validation_submission_20260330T150627Z/external_validation_onepage.pdf",
+      "dest": "external_validation/external_validation_onepage.pdf",
+      "size_bytes": 237401
+    },
+    {
+      "label": "Commercial readiness report",
+      "source": "implementation/phase1/commercial_readiness_report.json",
+      "dest": "governance/commercial_readiness_report.json",
+      "size_bytes": 23506
+    },
+    {
+      "label": "CI gate report",
+      "source": "implementation/phase1/ci_gate_report.json",
+      "dest": "governance/ci_gate_report.json",
+      "size_bytes": 1509369
+    },
+    {
+      "label": "Nightly release gate report",
+      "source": "implementation/phase1/release/nightly_release_gate_report.json",
+      "dest": "governance/nightly_release_gate_report.json",
+      "size_bytes": 160629
+    },
+    {
+      "label": "Release gap report",
+      "source": "implementation/phase1/release/release_gap_report.md",
+      "dest": "governance/release_gap_report.md",
+      "size_bytes": 150049
+    },
+    {
+      "label": "Committee review report",
+      "source": "implementation/phase1/release/committee_review/committee_review_report.md",
+      "dest": "governance/committee_review_report.md",
+      "size_bytes": 377235
+    },
+    {
+      "label": "Committee review dashboard",
+      "source": "implementation/phase1/release/committee_review/committee_review_dashboard.html",
+      "dest": "governance/committee_review_dashboard.html",
+      "size_bytes": 109597
+    },
+    {
+      "label": "Solver truthfulness report",
+      "source": "implementation/phase1/solver_truthfulness_gate_report.json",
+      "dest": "governance/solver_truthfulness_gate_report.json",
+      "size_bytes": 5543
+    },
+    {
+      "label": "Solver HIP e2e report",
+      "source": "implementation/phase1/solver_hip_e2e_contract_report.json",
+      "dest": "governance/solver_hip_e2e_contract_report.json",
+      "size_bytes": 23083
+    },
+    {
+      "label": "Nonlinear generalization report",
+      "source": "implementation/phase1/nonlinear_generalization_gate_report.json",
+      "dest": "governance/nonlinear_generalization_gate_report.json",
+      "size_bytes": 19598
+    },
+    {
+      "label": "Workflow productization report",
+      "source": "implementation/phase1/workflow_productization_gate_report.json",
+      "dest": "governance/workflow_productization_gate_report.json",
+      "size_bytes": 7125
+    },
+    {
+      "label": "Material constitutive gate report",
+      "source": "implementation/phase1/material_constitutive_gate_report.json",
+      "dest": "governance/material_constitutive_gate_report.json",
+      "size_bytes": 797798
+    },
+    {
+      "label": "Surface interaction benchmark report",
+      "source": "implementation/phase1/surface_interaction_benchmark_gate_report.json",
+      "dest": "governance/surface_interaction_benchmark_gate_report.json",
+      "size_bytes": 178240
+    },
+    {
+      "label": "Solver breadth report",
+      "source": "implementation/phase1/solver_breadth_report.json",
+      "dest": "governance/solver_breadth_report.json",
+      "size_bytes": 8227
+    },
+    {
+      "label": "Hardest external 10-case kickoff report",
+      "source": "implementation/phase1/hardest_external_10case_kickoff_gate_report.json",
+      "dest": "governance/hardest_external_10case_kickoff_gate_report.json",
+      "size_bytes": 8055
+    },
+    {
+      "label": "Structural optimization viewer",
+      "source": "implementation/phase1/release/visualization/structural_optimization_viewer.html",
+      "dest": "viewer/structural_optimization_viewer.html",
+      "size_bytes": 30770780
+    },
+    {
+      "label": "Row provenance JSON",
+      "source": "implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.json",
+      "dest": "provenance/midas_kds_row_provenance_table.json",
+      "size_bytes": 5311960
+    },
+    {
+      "label": "Row provenance CSV",
+      "source": "implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.csv",
+      "dest": "provenance/midas_kds_row_provenance_table.csv",
+      "size_bytes": 715343
+    },
+    {
+      "label": "Row provenance report",
+      "source": "implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json",
+      "dest": "provenance/midas_kds_row_provenance_table_report.json",
+      "size_bytes": 353628
+    },
+    {
+      "label": "Hardest 10 program report",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/hardest_external_10case_program_report.json",
+      "dest": "hardest_10/program_report.json",
+      "size_bytes": 205543
+    },
+    {
+      "label": "Hardest 10 execution manifest",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+      "dest": "hardest_10/execution_manifest.json",
+      "size_bytes": 22653
+    },
+    {
+      "label": "Hardest 10 execution status manifest",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
+      "dest": "hardest_10/execution_status_manifest.json",
+      "size_bytes": 30150
+    },
+    {
+      "label": "Hardest 10 execution updates",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
+      "dest": "hardest_10/execution_updates.json",
+      "size_bytes": 8892
+    },
+    {
+      "label": "PEER TBI Tall Building NDTHA signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/peer_tbi_tall_building_ndtha/signed_case_bundle.zip",
+      "size_bytes": 10551
+    },
+    {
+      "label": "PEER TBI Tall Building NDTHA KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json",
+      "size_bytes": 2314
+    },
+    {
+      "label": "PEER TBI Tall Building NDTHA KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.md",
+      "size_bytes": 936
+    },
+    {
+      "label": "NHERI DesignSafe SSI signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nheri_designsafe_ssi/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/nheri_designsafe_ssi/signed_case_bundle.zip",
+      "size_bytes": 28296
+    },
+    {
+      "label": "NHERI DesignSafe SSI KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nheri_designsafe_ssi/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/nheri_designsafe_ssi/benchmark_task_kpi_receipt.json",
+      "size_bytes": 2306
+    },
+    {
+      "label": "NHERI DesignSafe SSI KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nheri_designsafe_ssi/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/nheri_designsafe_ssi/benchmark_task_kpi_receipt.md",
+      "size_bytes": 974
+    },
+    {
+      "label": "UIC / ERRI Railway Bridge signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/uic_erri_rail_bridge/signed_case_bundle.zip",
+      "size_bytes": 20365
+    },
+    {
+      "label": "UIC / ERRI Railway Bridge KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/uic_erri_rail_bridge/benchmark_task_kpi_receipt.json",
+      "size_bytes": 1868
+    },
+    {
+      "label": "UIC / ERRI Railway Bridge KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/uic_erri_rail_bridge/benchmark_task_kpi_receipt.md",
+      "size_bytes": 931
+    },
+    {
+      "label": "NIST / FEMA Progressive Collapse signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/nist_fema_progressive_collapse/signed_case_bundle.zip",
+      "size_bytes": 68901
+    },
+    {
+      "label": "NIST / FEMA Progressive Collapse KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/nist_fema_progressive_collapse/benchmark_task_kpi_receipt.json",
+      "size_bytes": 3901
+    },
+    {
+      "label": "NIST / FEMA Progressive Collapse KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/nist_fema_progressive_collapse/benchmark_task_kpi_receipt.md",
+      "size_bytes": 2220
+    },
+    {
+      "label": "CAARC Wind Standard Tower signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_caarc_wind_standard_tower/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/caarc_wind_standard_tower/signed_case_bundle.zip",
+      "size_bytes": 11787
+    },
+    {
+      "label": "CAARC Wind Standard Tower KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_caarc_wind_standard_tower/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/caarc_wind_standard_tower/benchmark_task_kpi_receipt.json",
+      "size_bytes": 1968
+    },
+    {
+      "label": "CAARC Wind Standard Tower KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_caarc_wind_standard_tower/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/caarc_wind_standard_tower/benchmark_task_kpi_receipt.md",
+      "size_bytes": 908
+    },
+    {
+      "label": "NCEER / MCEER Isolation-Damper signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/nceer_mceer_isolation_damper/signed_case_bundle.zip",
+      "size_bytes": 7767
+    },
+    {
+      "label": "NCEER / MCEER Isolation-Damper KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/nceer_mceer_isolation_damper/benchmark_task_kpi_receipt.json",
+      "size_bytes": 2140
+    },
+    {
+      "label": "NCEER / MCEER Isolation-Damper KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/nceer_mceer_isolation_damper/benchmark_task_kpi_receipt.md",
+      "size_bytes": 947
+    },
+    {
+      "label": "IASS Dome Snap-through signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_iass_dome_snapthrough/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/iass_dome_snapthrough/signed_case_bundle.zip",
+      "size_bytes": 6504
+    },
+    {
+      "label": "IASS Dome Snap-through KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_iass_dome_snapthrough/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/iass_dome_snapthrough/benchmark_task_kpi_receipt.json",
+      "size_bytes": 1365
+    },
+    {
+      "label": "IASS Dome Snap-through KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_iass_dome_snapthrough/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/iass_dome_snapthrough/benchmark_task_kpi_receipt.md",
+      "size_bytes": 685
+    },
+    {
+      "label": "ACI / FIB Construction Stage CSA signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_aci_fib_construction_stage_csa/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/aci_fib_construction_stage_csa/signed_case_bundle.zip",
+      "size_bytes": 75329
+    },
+    {
+      "label": "ACI / FIB Construction Stage CSA KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_aci_fib_construction_stage_csa/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/aci_fib_construction_stage_csa/benchmark_task_kpi_receipt.json",
+      "size_bytes": 2065
+    },
+    {
+      "label": "ACI / FIB Construction Stage CSA KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_aci_fib_construction_stage_csa/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/aci_fib_construction_stage_csa/benchmark_task_kpi_receipt.md",
+      "size_bytes": 926
+    },
+    {
+      "label": "OC3 / OC4 Offshore Monopile signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_oc3_oc4_offshore_monopile/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/oc3_oc4_offshore_monopile/signed_case_bundle.zip",
+      "size_bytes": 28476
+    },
+    {
+      "label": "OC3 / OC4 Offshore Monopile KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_oc3_oc4_offshore_monopile/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/oc3_oc4_offshore_monopile/benchmark_task_kpi_receipt.json",
+      "size_bytes": 3041
+    },
+    {
+      "label": "OC3 / OC4 Offshore Monopile KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_oc3_oc4_offshore_monopile/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/oc3_oc4_offshore_monopile/benchmark_task_kpi_receipt.md",
+      "size_bytes": 1178
+    },
+    {
+      "label": "TC204 Excavation and Adjacent Tunnel signed case bundle zip",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/signed_case_bundle.zip",
+      "dest": "hardest_10/case_bundles/tc204_excavation_tunnel/signed_case_bundle.zip",
+      "size_bytes": 29467
+    },
+    {
+      "label": "TC204 Excavation and Adjacent Tunnel KPI receipt JSON",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/benchmark_task_kpi_receipt.json",
+      "dest": "hardest_10/case_bundles/tc204_excavation_tunnel/benchmark_task_kpi_receipt.json",
+      "size_bytes": 2186
+    },
+    {
+      "label": "TC204 Excavation and Adjacent Tunnel KPI receipt Markdown",
+      "source": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/benchmark_task_kpi_receipt.md",
+      "dest": "hardest_10/case_bundles/tc204_excavation_tunnel/benchmark_task_kpi_receipt.md",
+      "size_bytes": 1038
+    }
+  ]
+}

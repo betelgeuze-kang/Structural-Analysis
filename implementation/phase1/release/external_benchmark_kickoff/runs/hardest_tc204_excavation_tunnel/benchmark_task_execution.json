@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:04.408691+00:00",
+  "task_id": "hardest::tc204_excavation_tunnel",
+  "phase": "hardest_case",
+  "benchmark_family": "excavation_tunnel_ground_interaction",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "note": "executed excavation_tunnel_ground_interaction",
+  "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/benchmark_task_result.json",
+  "execution_payload": {
+    "executor": "hardest_external_case_receipt_and_bundle",
+    "case_id": "tc204_excavation_tunnel",
+    "case_label": "TC204 Excavation and Adjacent Tunnel",
+    "artifact": {
+      "schema_version": "1.0",
+      "generated_at": "2026-04-01T13:48:04.397703+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "case_id": "tc204_excavation_tunnel",
+      "case_label": "TC204 Excavation and Adjacent Tunnel",
+      "benchmark_family": "excavation_tunnel_ground_interaction",
+      "hazard_family": "excavation_settlement",
+      "topology_family": "deep_excavation_adjacent_tunnel",
+      "load_path_family": "soil_tunnel_surface_sequence",
+      "primary_report": {
+        "path": "implementation/phase1/tunnel_dynamics_dataset_report.json",
+        "reason_code": "PASS",
+        "contract_pass": true,
+        "summary_head": {}
+      },
+      "supporting_reports": [
+        {
+          "role": "ssi_boundary",
+          "path": "implementation/phase1/ssi_boundary_gate_report.json",
+          "reason_code": "PASS",
+          "contract_pass": true
+        },
+        {
+          "role": "foundation_soil_link",
+          "path": "implementation/phase1/foundation_soil_link_gate_report.json",
+          "reason_code": "PASS",
+          "contract_pass": true
+        },
+        {
+          "role": "surface_interaction",
+          "path": "implementation/phase1/surface_interaction_benchmark_gate_report.json",
+          "reason_code": "PASS",
+          "contract_pass": true
+        }
+      ],
+      "kpi_rows": [
+        {
+          "label": "production_seed_success_count",
+          "source": "primary.production_seed_success_count",
+          "value": 96
+        },
+        {
+          "label": "dataset_case_count",
+          "source": "primary.outputs.case_count",
+          "value": 96
+        },
+        {
+          "label": "max_equilibrium_residual",
+          "source": "primary.metrics.max_equilibrium_residual",
+          "value": 0.3860107162910485
+        },
+        {
+          "label": "mean_displacement_m",
+          "source": "primary.metrics.mean_displacement_m",
+          "value": 0.00883114351722574
+        },
+        {
+          "label": "soil_tunnel_interaction_count",
+          "source": "supporting.surface_interaction.summary.interaction_family_group_ready_counts.soil_tunnel",
+          "value": 84
+        },
+        {
+          "label": "foundation_member_type_count",
+          "source": "supporting.foundation_soil_link.summary.foundation_member_type_count",
+          "value": 76
+        }
+      ],
+      "summary": {
+        "kpi_count": 6,
+        "supporting_report_count": 3
+      },
+      "native_midas_roundtrip_appendix": {
+        "summary_line": "MIDAS native write-back diff receipts: PASS | ready=14 | receipts=14/14 | topology=14/14 | load=14/14 | loadcomb=14/14 exact | types=4 | taxonomy=exact:13,canonical:1,lossy:0,unsupported:0,manual:1 | pending_review=2",
+        "public_native_ready_count": 0,
+        "public_preview_ready_count": 0,
+        "public_source_ready_count": 0,
+        "structure_type_count": 0,
+        "appendix_markdown": "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md",
+        "appendix_json": "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.json",
+        "batch_markdowns": [
+          "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md",
+          "implementation/phase1/release/midas_native_roundtrip/bridge.diff_batch.md",
+          "implementation/phase1/release/midas_native_roundtrip/building.diff_batch.md",
+          "implementation/phase1/release/midas_native_roundtrip/foundation.diff_batch.md",
+          "implementation/phase1/release/midas_native_roundtrip/vertical_circulation.diff_batch.md"
+        ]
+      }
+    },
+    "summary": {
+      "kpi_count": 6,
+      "bundle_id": "20260401T134804Z-tc204_excavation_tunnel",
+      "supporting_report_count": 3
+    },
+    "contract_pass": true,
+    "reason_code": "PASS",
+    "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/benchmark_task_kpi_receipt.json",
+    "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/signed_case_bundle",
+    "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/signed_case_bundle.zip",
+    "bundle_id": "20260401T134804Z-tc204_excavation_tunnel",
+    "bundle_signature_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/signed_case_bundle/case_bundle_manifest.signature.b64",
+    "bundle_manifest_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/signed_case_bundle/case_bundle_manifest.json",
+    "bundle_public_key_path": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem"
+  }
+}

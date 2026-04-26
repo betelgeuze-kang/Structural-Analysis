@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "report_type": "midas_binary_decoded_preview_bridge",
+  "generated_at": "2026-04-01T13:53:51.024993+00:00",
+  "source_id": "midas_support_stair_archive",
+  "inputs": {
+    "decoded_inventory_json": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive/meb_decoded_inventory.json",
+    "decoded_inventory_report": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive/meb_decoded_inventory_report.json",
+    "refresh_report": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive/meb_inventory_refresh_report.json",
+    "model_json_out": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_stair_archive_decoded_preview/model.json",
+    "npz_out": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_stair_archive_decoded_preview/dataset.npz",
+    "report_out": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_stair_archive_decoded_preview/bridge_report.json"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "summary": {
+    "preview_segment_count": 33,
+    "preview_point_count": 33,
+    "viewer_ready": true,
+    "family_assumption": "table_local_preview",
+    "preview_state_label": "unverified table-local preview",
+    "preview_mode": "table_local_ascii_preview",
+    "preview_basis": "table_local_payload",
+    "preview_projection_label": "XZ",
+    "preview_anchor_table_names": [
+      "PONT",
+      "CURV",
+      "MEMB",
+      "*POINT",
+      "*MEMBER_ADD"
+    ],
+    "bridge_mode": "table_local_segment_preview",
+    "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+    "topology_grounding_label": "explicit_member_add_paths",
+    "topology_node_count": 77,
+    "topology_edge_count": 92,
+    "topology_component_count": 4,
+    "dangling_point_count": 13,
+    "junction_point_count": 38,
+    "isolated_preview_point_count": 0,
+    "member_path_count": 32,
+    "resolved_member_path_count": 32,
+    "member_path_resolution_rate": 1.0,
+    "member_reference_count": 139,
+    "resolved_member_reference_count": 139,
+    "member_reference_resolution_rate": 1.0,
+    "missing_member_path_count": 0,
+    "missing_member_reference_count": 0,
+    "payload_exact_topology_ready": true,
+    "topology_preview_ready": true,
+    "topology_readiness_label": "payload-exact member-add topology preview",
+    "exact_topology_candidate": true,
+    "exact_topology_promoted": false,
+    "resolved_member_path_samples": [
+      [
+        41,
+        44,
+        2,
+        1
+      ],
+      [
+        1,
+        2,
+        9,
+        10,
+        11,
+        12
+      ],
+      [
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      [
+        45,
+        54,
+        4,
+        3
+      ],
+      [
+        57,
+        58,
+        6,
+        5
+      ]
+    ],
+    "topology_signal_field_sources": {
+      "topology_grounding_label": "geometry_preview",
+      "topology_node_count": "geometry_preview",
+      "topology_edge_count": "geometry_preview",
+      "topology_component_count": "geometry_preview",
+      "dangling_point_count": "geometry_preview",
+      "junction_point_count": "geometry_preview",
+      "isolated_preview_point_count": "geometry_preview",
+      "member_path_count": "geometry_preview",
+      "resolved_member_path_count": "geometry_preview",
+      "member_path_resolution_rate": "geometry_preview",
+      "member_reference_count": "geometry_preview",
+      "resolved_member_reference_count": "geometry_preview",
+      "member_reference_resolution_rate": "geometry_preview",
+      "missing_member_path_count": "geometry_preview",
+      "missing_member_reference_count": "geometry_preview",
+      "payload_exact_topology_ready": "geometry_preview",
+      "topology_preview_ready": "geometry_preview",
+      "topology_readiness_label": "geometry_preview",
+      "exact_topology_candidate": "geometry_preview",
+      "exact_topology_promoted": "geometry_preview"
+    },
+    "preview_exactness_tier": "exact-topology-candidate",
+    "preview_exactness_label": "exact topology candidate",
+    "preview_exactness_signal_source": "geometry_preview",
+    "preview_surface_bucket": "table-local-preview",
+    "preview_surface_status_label": "exact recovered topology-derived 3d candidate",
+    "preview_surface_status_tone": "warn",
+    "preview_readiness_stage_label": "exact recovered topology candidate",
+    "selected_member_name": "░µ╗τ╖╬_┐╣┴ª╞─└╧_FINAL.meb",
+    "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+    "accepted_type_label": "table_segment=33",
+    "bbox_min": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bbox_max": [
+      34.9666,
+      4.0,
+      0.0
+    ],
+    "node_count": 33,
+    "edge_count_directed": 66,
+    "element_count": 33,
+    "member_id_count": 33,
+    "decoded_geometry_preview_point_count": 77,
+    "decoded_geometry_preview_segment_count": 33
+  },
+  "artifacts": {
+    "decoded_inventory_json": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive/meb_decoded_inventory.json",
+    "decoded_inventory_report": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive/meb_decoded_inventory_report.json",
+    "refresh_report": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive/meb_inventory_refresh_report.json",
+    "model_json": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_stair_archive_decoded_preview/model.json",
+    "dataset_npz": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_stair_archive_decoded_preview/dataset.npz"
+  }
+}

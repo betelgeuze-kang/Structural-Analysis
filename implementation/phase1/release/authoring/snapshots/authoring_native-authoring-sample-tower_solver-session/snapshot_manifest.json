@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "job_id": "authoring::native-authoring-sample-tower::solver-session",
+  "generated_at": "2026-04-19T10:34:24.153789+00:00",
+  "snapshot_id": "authoring_native-authoring-sample-tower_solver-session__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/native_authoring_solver_session.json",
+      "label": "native_authoring_solver_session.json",
+      "sha256": "1a1a1956948061aee45b95626ebe812c65d2f235796e5659ff0cf28cd585da03",
+      "bytes": 45217
+    },
+    {
+      "path": "implementation/phase1/release/authoring/native_authoring_solver_session.loadcomb_preview.mgt",
+      "label": "native_authoring_solver_session.loadcomb_preview.mgt",
+      "sha256": "6cc69022772ec586737b85481f4bc3acdbe09201b345e79c30e825b7f6a499a6",
+      "bytes": 1697
+    }
+  ],
+  "summary": {
+    "artifact_count": 2
+  }
+}

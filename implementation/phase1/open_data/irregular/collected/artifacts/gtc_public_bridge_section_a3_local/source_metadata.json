@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 77481,
+  "collector_version": "0.2.0",
+  "family_id": "curved_plan_bridge_torsion",
+  "original_reference": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt",
+  "schema_version": "1.0",
+  "sha256": "dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6",
+  "source_format": "mgt",
+  "source_id": "gtc_public_bridge_section_a3_local",
+  "source_urls": [
+    "https://gtc.midasuser.com/"
+  ],
+  "title": "GTC public curved bridge section A3 raw MIDAS model"
+}

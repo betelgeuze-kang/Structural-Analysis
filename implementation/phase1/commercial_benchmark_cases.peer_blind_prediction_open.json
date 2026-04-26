@@ -1,0 +1,379 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-peer-blind-prediction-benchmark-cases",
+  "generated_at": "2026-04-16T14:46:52.835500+00:00",
+  "source": {
+    "source_family": "edefense_peer_blind_prediction",
+    "input_contract": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_input_contract.json",
+    "measured_normalized": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.measured_response_normalized.json",
+    "prebenchmark_scaffold": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_prebenchmark_scaffold.json"
+  },
+  "source_family_summary": {
+    "source_families": [
+      "edefense_peer_blind_prediction"
+    ],
+    "distinct_source_family_count": 1,
+    "element_mixes": [
+      "frame_wall_mix"
+    ],
+    "shell_beam_mix_case_count": 0,
+    "benchmark_case_status": "ready"
+  },
+  "split_counts": {
+    "holdout": 10
+  },
+  "public_benchmark_cases": [
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::random_noise",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "Random Noise",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm1",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "GM1",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm2",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "GM2",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm3",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "GM3",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm4",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "GM4",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm5",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "GM5",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm6",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "GM6",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm7",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "GM7",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm8",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "GM8",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm9",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "benchmark_case_status": "ready",
+      "excitation_label": "GM9",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::random_noise",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "Random Noise",
+        "excitation_kind": "random_noise",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm1",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "GM1",
+        "excitation_kind": "ground_motion",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm2",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "GM2",
+        "excitation_kind": "ground_motion",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm3",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "GM3",
+        "excitation_kind": "ground_motion",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm4",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "GM4",
+        "excitation_kind": "ground_motion",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm5",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "GM5",
+        "excitation_kind": "ground_motion",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm6",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "GM6",
+        "excitation_kind": "ground_motion",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm7",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "GM7",
+        "excitation_kind": "ground_motion",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm8",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "GM8",
+        "excitation_kind": "ground_motion",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm9",
+      "source_family": "edefense_peer_blind_prediction",
+      "element_mix": "frame_wall_mix",
+      "topology_type": "blind_prediction_frame",
+      "hazard_type": "seismic",
+      "split": "holdout",
+      "source_member": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+      "benchmark_case_status": "ready",
+      "compare_ready": true,
+      "viewer_entry_ready": true,
+      "blind_prediction_targets": {
+        "excitation_label": "GM9",
+        "excitation_kind": "ground_motion",
+        "measured_response_required": true,
+        "measured_response_present": true,
+        "input_contract_summary": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded"
+      },
+      "blind_prediction_metrics": {
+        "input_channel_count": 11,
+        "measured_channel_count": 11,
+        "drift_channel_count": 11,
+        "sensor_row_count": 5
+      }
+    }
+  ]
+}

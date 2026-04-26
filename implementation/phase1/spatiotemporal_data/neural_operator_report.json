@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-train-neural-operator",
+  "generated_at": "2026-02-25T15:22:05.704139+00:00",
+  "inputs": {
+    "dataset": "implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl",
+    "max_cases": 180,
+    "epochs": 3,
+    "batch_size": 12,
+    "width": 48,
+    "modes": 24,
+    "lr": 0.001,
+    "seed": 23
+  },
+  "split_counts": {
+    "train": 97,
+    "val": 17,
+    "test": 30
+  },
+  "validation_metrics": {
+    "case_count": 17,
+    "mae_pct": 63.789002842452255,
+    "peak_error_pct": 75.69279316096356
+  },
+  "test_metrics": {
+    "case_count": 30,
+    "mae_pct": 51.647988612369154,
+    "peak_error_pct": 58.69884983607841
+  },
+  "history_tail": [
+    {
+      "epoch": 1,
+      "train_loss": 0.00837663403298292,
+      "val_mae_pct": 90.22783665842249,
+      "val_peak_error_pct": 79.36442207172718
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.002826948339740435,
+      "val_mae_pct": 70.02066864156663,
+      "val_peak_error_pct": 75.25257764776076
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0019277981999847624,
+      "val_mae_pct": 63.789002842452255,
+      "val_peak_error_pct": 75.69279316096356
+    }
+  ],
+  "checkpoint": "implementation/phase1/spatiotemporal_data/neural_operator.pt",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "neural-operator surrogate trained"
+}

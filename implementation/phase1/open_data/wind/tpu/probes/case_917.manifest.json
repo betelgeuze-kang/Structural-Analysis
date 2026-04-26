@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-tpu-case-mat",
+  "generated_at": "2026-03-19T13:20:24.907629+00:00",
+  "source_name": "TPU Aerodynamic Database - Two Adjacent High-rise Buildings with Square Plan > P114_A114_case01",
+  "source_url": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=917",
+  "case_id": "917",
+  "mat_url": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/P114_A114_case01/time_series_of_point_wind_pressure_0.mat",
+  "mat_source_resolved": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/P114_A114_case01/time_series_of_point_wind_pressure_0.mat",
+  "real_source": true,
+  "source_origin_class": "official_external_benchmark",
+  "data_path": "implementation/phase1/open_data/wind/tpu/probes/case_917.mat",
+  "sha256": "e3588a020e8d664e48835158c592fb9e2097eabd6a3434605a6b183b837d55e8",
+  "size_bytes": 11195225,
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU case page resolved and MAT file fetched successfully."
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:44:44.577585+00:00",
+  "summary_line": "MIDAS native write-back diff receipts: PASS | ready=14 | receipts=14/14 | topology=14/14 | load=14/14 | loadcomb=14/14 exact | types=4 | taxonomy=exact:13,canonical:1,lossy:0,unsupported:0,manual:1 | pending_review=2",
+  "taxonomy_case_counts": {
+    "preserved_exact": 13,
+    "canonical_rewrite": 1,
+    "lossy_rewrite": 0,
+    "unsupported_card": 0,
+    "manual_review_required": 1,
+    "parser_drop_suspected": 1
+  },
+  "taxonomy_card_family_histogram": {
+    "supported_action_families": {
+      "beam_section": 1,
+      "connection_detailing": 12,
+      "detailing": 10,
+      "perimeter_frame": 1,
+      "rebar": 5,
+      "slab_thickness": 2,
+      "wall_thickness": 5
+    },
+    "direct_patch_action_families": {
+      "beam_section": 1,
+      "connection_detailing": 6,
+      "detailing": 5,
+      "perimeter_frame": 1,
+      "rebar": 5,
+      "slab_thickness": 2,
+      "wall_thickness": 5
+    },
+    "audit_only_action_families": {
+      "connection_detailing": 6,
+      "detailing": 5
+    },
+    "audit_manifest_action_families": {
+      "connection_detailing": 6,
+      "detailing": 5
+    },
+    "unsupported_reason_counts": {}
+  },
+  "structure_type_batch_markdowns": [
+    "implementation/phase1/release/midas_native_roundtrip/bridge.diff_batch.md",
+    "implementation/phase1/release/midas_native_roundtrip/building.diff_batch.md",
+    "implementation/phase1/release/midas_native_roundtrip/foundation.diff_batch.md",
+    "implementation/phase1/release/midas_native_roundtrip/vertical_circulation.diff_batch.md"
+  ],
+  "notes": [
+    "public archive-derived preview write-back baselines are counted separately from original public native .mgt baselines"
+  ]
+}

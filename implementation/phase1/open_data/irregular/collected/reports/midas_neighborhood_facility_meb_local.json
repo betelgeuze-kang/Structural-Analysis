@@ -1,0 +1,35 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_neighborhood_facility_meb_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_neighborhood_facility_meb_local/C07_T02_P000_RC_02_\u2592\u2518\u2555\u2591\u2557\u00b2\u255a\u2591\u255c\u251c.meb",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_neighborhood_facility_meb_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/midas_neighborhood_facility_meb_local.json"
+  },
+  "bytes_copied": 1896404,
+  "declared_format": "meb",
+  "family_id": "soft_story_podium_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "alternate_authority_candidate_source_id": "nheri_soft_story_podium_remote",
+    "benchmark_canonical_blocker": "Original MIDAS native binary is useful for roundtrip/native-source coverage, but this track still requires a benchmark-native IFC/TCL/MGT/INP source for canonical authority-grade promotion.",
+    "benchmark_canonical_eligible": false,
+    "native_binary_header": "MBDG",
+    "native_local_scope": "native_roundtrip_only"
+  },
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/C07_T02_P000_RC_02_\u2592\u2518\u2555\u2591\u2557\u00b2\u255a\u2591\u255c\u251c.meb",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/C07_T02_P000_RC_02_\u2592\u2518\u2555\u2591\u2557\u00b2\u255a\u2591\u255c\u251c.meb",
+  "sha256": "cfd331cda8727c23afd0b1efba9c4b48a4c63247fda38e6cd635594efda3d7d9",
+  "source_exists": true,
+  "source_format": "meb",
+  "source_id": "midas_neighborhood_facility_meb_local",
+  "source_index": 4,
+  "source_urls": [
+    "https://support.midasuser.com/"
+  ],
+  "status": "collected",
+  "title": "MIDAS neighborhood facility original native MEB"
+}

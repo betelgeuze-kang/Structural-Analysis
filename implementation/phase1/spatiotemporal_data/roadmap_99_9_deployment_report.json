@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-roadmap-99_9-deployment-freeze",
+  "generated_at": "2026-02-25T15:22:23.874375+00:00",
+  "all_pass": true,
+  "summary": {
+    "dataset_case_count": 144,
+    "step2_val_mae_pct": 8.564530296784628,
+    "step3_val_mae_pct": 16.93257211330991,
+    "step3_torsion_improvement_pct_point": -8.974475515279758,
+    "step4_val_mae_pct": 63.789002842452255,
+    "step5_code_pass_ratio": 0.9375,
+    "step5_fallback_trigger_ratio": 0.0
+  },
+  "artifacts": [
+    {
+      "path": "implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl",
+      "bytes": 13381269,
+      "sha256": "917fa029d51b5f1e415b38aeb603b2e0dfb08d708519476bfbd050707a337140"
+    },
+    {
+      "path": "implementation/phase1/spatiotemporal_data/bigdata_generation_report.json",
+      "bytes": 1177,
+      "sha256": "0d54418a73a06a77d7ef92de1475dc34e1ebcca2710dc2e31ffb8cdd4ff7930a"
+    },
+    {
+      "path": "implementation/phase1/spatiotemporal_data/tgnn_baseline_report.json",
+      "bytes": 2156,
+      "sha256": "259fb1710171e2aa9edec101923d8f279bb4c58452804310694f371a665a4b88"
+    },
+    {
+      "path": "implementation/phase1/spatiotemporal_data/simplicial_tgnn_report.json",
+      "bytes": 2222,
+      "sha256": "3e81aa2a79615e21dbd0b458280bf0b94152d74d193ad0b3aded278415e7de97"
+    },
+    {
+      "path": "implementation/phase1/spatiotemporal_data/neural_operator_report.json",
+      "bytes": 1356,
+      "sha256": "0a56f91e97bb26b9d2b8b17717b4a08e6014668198020f38ae7d2c04458573a7"
+    },
+    {
+      "path": "implementation/phase1/spatiotemporal_data/productization_gate_report.json",
+      "bytes": 12508,
+      "sha256": "3119a826e8a7084ecd9904989b3ee90215e0297eef2a777f1a9bb570b1e789a2"
+    },
+    {
+      "path": "implementation/phase1/spatiotemporal_data/roadmap_99_9_pipeline_report.quick.json",
+      "bytes": 3274,
+      "sha256": "511c8792ef9283dd4d35a11c5e2f2ae845488b839be074c72c24559ec79c92c3"
+    }
+  ]
+}

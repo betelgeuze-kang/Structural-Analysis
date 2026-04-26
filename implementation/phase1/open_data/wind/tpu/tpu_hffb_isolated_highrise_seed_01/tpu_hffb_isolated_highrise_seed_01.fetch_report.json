@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-tpu-case-mat",
+  "generated_at": "2026-04-11T12:04:00.128720+00:00",
+  "contract_pass": false,
+  "reason_code": "ERR_CASE_PAGE_FETCH",
+  "reason": "failed to fetch or parse the TPU case page.",
+  "inputs": {
+    "case_id": "",
+    "case_page_url": "",
+    "case_page_html": "/tmp/pytest-of-betelgeuze/pytest-1/test_materialize_tpu_hffb_seed1/missing.html",
+    "mat_url": "",
+    "mat_index": 0
+  },
+  "summary": {
+    "case_title": "",
+    "resolved_case_page": "",
+    "mat_link_count": 0,
+    "candidate_mat_urls_head": [],
+    "resolved_mat_url": "",
+    "size_bytes": 0
+  },
+  "artifacts": {
+    "out_mat": "",
+    "source_manifest_out": "implementation/phase1/open_data/wind/tpu/tpu_hffb_isolated_highrise_seed_01/tpu_hffb_isolated_highrise_seed_01.fetch_manifest.json"
+  }
+}

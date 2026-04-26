@@ -1,0 +1,435 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-megastructure-commercial-readiness",
+  "generated_at": "2026-03-30T13:32:47.448935+00:00",
+  "inputs": {
+    "model_cases": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json,implementation/phase1/commercial_benchmark_cases.from_csv.json,implementation/phase1/commercial_benchmark_cases.atwood_open.json",
+    "target_split": "all",
+    "ci_mode": "nightly",
+    "force_rerun": false,
+    "reuse_existing_if_present": true,
+    "require_gpu_strict": true,
+    "benchmark_epochs": 120,
+    "benchmark_branches": 10,
+    "benchmark_top_k": 3,
+    "noise_epochs": 24,
+    "noise_required_case_count": 4,
+    "noise_sensor_levels_pct": "0.5,1,2,5",
+    "noise_stiffness_levels_pct": "5,10",
+    "noise_seeds": "11,23,47",
+    "convergence_seeds": "11,23,47",
+    "convergence_stiffness_levels_pct": "10",
+    "scale_levels_pr": "1000000,3000000",
+    "scale_levels_nightly": "1000000,3000000,10000000",
+    "scale_levels_io": "1000000,3000000",
+    "opensees_edge_list_json": "implementation/phase1/open_data/megastructure/opensees_edges.json",
+    "max_drift_error_pct": 5.0,
+    "max_base_shear_error_pct": 5.0,
+    "min_mode_shape_mac": 0.95,
+    "max_buckling_factor_error_pct": 5.0,
+    "max_high_noise_drift_p95_pct": 15.0,
+    "max_high_noise_base_p95_pct": 10.0,
+    "min_wave_corr": 0.9,
+    "max_post_phase_error_deg": 8.0,
+    "max_post_lag_ms": 8.0,
+    "min_ood_recall": 0.92,
+    "max_ood_false_negative_ratio": 0.08,
+    "max_scaleout_memory_slope": 1.35,
+    "max_scaleout_latency_slope": 1.6,
+    "scaleout_max_projection_ratio": 25000.0,
+    "accepted_metric_sources": "engine_export_direct,commercial_solver_export,open_data_measurement",
+    "forbid_toy_cases": true,
+    "min_source_families": 3,
+    "min_measured_source_families": 2,
+    "min_measured_case_count": 6,
+    "require_measured_dynamic_targets": true,
+    "require_shell_beam_mix_cases": true,
+    "min_total_case_count": 12,
+    "min_unique_topology_types": 3,
+    "min_unique_hazard_types": 2,
+    "work_dir": "implementation/phase1/stress/commercial_readiness",
+    "out": "implementation/phase1/commercial_readiness_report.json"
+  },
+  "checks": {
+    "real_source_pass": true,
+    "benchmark_breadth_pass": true,
+    "source_family_pass": true,
+    "measured_dynamic_targets_pass": true,
+    "measured_source_family_pass": true,
+    "measured_case_count_pass": true,
+    "shell_beam_mix_pass": true,
+    "case_count_pass": true,
+    "topology_diversity_pass": true,
+    "hazard_diversity_pass": true,
+    "accuracy_pass": true,
+    "noise_robustness_pass": true,
+    "noise_convergence_pass": true,
+    "phase_dynamics_pass": true,
+    "ood_safety_pass": true,
+    "scaleout_pass": true,
+    "gpu_strict_pass": true,
+    "on_scaling_regression_pass": true
+  },
+  "grade": {
+    "label": "Commercial",
+    "research_pass": true,
+    "pre_commercial_pass": true,
+    "commercial_pass": true
+  },
+  "deployment_model": {
+    "mode": "engineer_in_the_loop_accelerated_coverage",
+    "accelerated_coverage_target_pct_range": [
+      95,
+      99
+    ],
+    "residual_holdout_target_pct_range": [
+      1,
+      5
+    ],
+    "engineer_in_loop_accelerated_coverage_ready": true,
+    "full_commercial_replacement_ready": false,
+    "recommended_use": "Use this engine to automate the dominant, time-consuming 95-99% of repeated analysis, screening, packaging, and optimization workflows. Keep the residual 1-5% under licensed engineer review, legacy-tool cross-check, and formal sign-off workflows."
+  },
+  "residual_holdout_categories": [
+    {
+      "id": "licensed_engineer_review_required",
+      "owner": "\uae30\uc220\uc0ac",
+      "label": "Licensed Engineer Review",
+      "scope": "non-standard interpretation, final judgment, exceptional irregularity, and member-level edge cases"
+    },
+    {
+      "id": "legacy_tool_cross_validation_required",
+      "owner": "\uae30\uc874\ud234+\uae30\uc220\uc0ac",
+      "label": "Legacy Tool Cross-Validation",
+      "scope": "novel load paths, authority-critical submodels, and residual niche workflows outside the accelerated envelope"
+    },
+    {
+      "id": "legal_authority_signoff_required",
+      "owner": "\uae30\uc220\uc0ac/\uae30\uc874 \uc2b9\uc778 workflow",
+      "label": "Legal Sign-Off",
+      "scope": "formal seal, legal submission, and authority-facing responsibility that remains outside automated scope"
+    }
+  ],
+  "model_rows": [
+    {
+      "model_id": "commercial_benchmark_cases.rwth_zenodo",
+      "cases_path": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+      "source_provenance": {
+        "cases_path": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+        "cases_sha256": "9b1cd4d90a72e9c696fee8dbdf1c89821519bd27b6df4504ebf2ebc1d65bfa48",
+        "case_count": 22,
+        "public_hf_case_count": 3,
+        "source_families": [
+          "rwth_zenodo"
+        ],
+        "source_family_count": 1,
+        "measured_case_count": 22,
+        "measured_source_families": [
+          "rwth_zenodo"
+        ],
+        "measured_source_family_count": 1,
+        "measured_shell_beam_mix_case_count": 7,
+        "topology_type_count": 4,
+        "hazard_type_count": 3,
+        "shell_beam_mix_case_count": 7,
+        "toy_marker_detected": false,
+        "toy_marker_hits": [],
+        "metric_source_gate_pass": true,
+        "metric_source_gate_errors": []
+      },
+      "checks": {
+        "real_source_pass": true,
+        "accuracy_pass": true,
+        "noise_robustness_pass": true,
+        "noise_convergence_pass": true
+      },
+      "metrics": {
+        "drift_error_pct": 0.6651807126407943,
+        "base_shear_error_pct": 0.40709033251401794,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 1.333978296908268,
+        "high_noise_drift_error_pct_p95": 4.182848903129834,
+        "high_noise_base_shear_error_pct_p95": 2.164387807031533,
+        "noise_convergence_fail_count": 0
+      },
+      "reports": {
+        "benchmark": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/hf_benchmark.json",
+        "comparison": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/topk_comparison.json",
+        "noise_sensitivity": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/noise_sensitivity.json",
+        "noise_convergence": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/noise_convergence.json"
+      }
+    },
+    {
+      "model_id": "commercial_benchmark_cases.from_csv",
+      "cases_path": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+      "source_provenance": {
+        "cases_path": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+        "cases_sha256": "d396f5f5ced64647a9e35e7a27abc8cbf5ec4e30498db967ae543c82116fe6cc",
+        "case_count": 12,
+        "public_hf_case_count": 4,
+        "source_families": [
+          "commercial_export"
+        ],
+        "source_family_count": 1,
+        "measured_case_count": 0,
+        "measured_source_families": [],
+        "measured_source_family_count": 0,
+        "measured_shell_beam_mix_case_count": 0,
+        "topology_type_count": 4,
+        "hazard_type_count": 3,
+        "shell_beam_mix_case_count": 6,
+        "toy_marker_detected": false,
+        "toy_marker_hits": [],
+        "metric_source_gate_pass": true,
+        "metric_source_gate_errors": []
+      },
+      "checks": {
+        "real_source_pass": true,
+        "accuracy_pass": true,
+        "noise_robustness_pass": true,
+        "noise_convergence_pass": true
+      },
+      "metrics": {
+        "drift_error_pct": 0.5676280919623902,
+        "base_shear_error_pct": 0.4015902899967652,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.6278138186838332,
+        "high_noise_drift_error_pct_p95": 7.998261462154602,
+        "high_noise_base_shear_error_pct_p95": 3.016650322502139,
+        "noise_convergence_fail_count": 0
+      },
+      "reports": {
+        "benchmark": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/hf_benchmark.json",
+        "comparison": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/topk_comparison.json",
+        "noise_sensitivity": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/noise_sensitivity.json",
+        "noise_convergence": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/noise_convergence.json"
+      }
+    },
+    {
+      "model_id": "commercial_benchmark_cases.atwood_open",
+      "cases_path": "implementation/phase1/commercial_benchmark_cases.atwood_open.json",
+      "source_provenance": {
+        "cases_path": "implementation/phase1/commercial_benchmark_cases.atwood_open.json",
+        "cases_sha256": "ca5a73091a552a9706ab8fc2f225e3ca72ea7ffe762c46537c39c6efd37815dd",
+        "case_count": 29,
+        "public_hf_case_count": 3,
+        "source_families": [
+          "opstool_606m_megatall_model"
+        ],
+        "source_family_count": 1,
+        "measured_case_count": 29,
+        "measured_source_families": [
+          "opstool_606m_megatall_model"
+        ],
+        "measured_source_family_count": 1,
+        "measured_shell_beam_mix_case_count": 18,
+        "topology_type_count": 4,
+        "hazard_type_count": 2,
+        "shell_beam_mix_case_count": 18,
+        "toy_marker_detected": false,
+        "toy_marker_hits": [],
+        "metric_source_gate_pass": true,
+        "metric_source_gate_errors": []
+      },
+      "checks": {
+        "real_source_pass": true,
+        "accuracy_pass": true,
+        "noise_robustness_pass": true,
+        "noise_convergence_pass": true
+      },
+      "metrics": {
+        "drift_error_pct": 0.9435979022699467,
+        "base_shear_error_pct": 0.49605082871673717,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.38059898841667683,
+        "high_noise_drift_error_pct_p95": 2.3511765505749755,
+        "high_noise_base_shear_error_pct_p95": 1.3023009175961082,
+        "noise_convergence_fail_count": 0
+      },
+      "reports": {
+        "benchmark": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/hf_benchmark.json",
+        "comparison": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/topk_comparison.json",
+        "noise_sensitivity": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/noise_sensitivity.json",
+        "noise_convergence": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/noise_convergence.json"
+      }
+    }
+  ],
+  "global_metrics": {
+    "source_family_count": 3,
+    "source_families": [
+      "commercial_export",
+      "opstool_606m_megatall_model",
+      "rwth_zenodo"
+    ],
+    "measured_source_family_count": 2,
+    "measured_source_families": [
+      "opstool_606m_megatall_model",
+      "rwth_zenodo"
+    ],
+    "measured_case_count": 51,
+    "total_case_count": 63,
+    "topology_type_count": 4,
+    "topology_types": [
+      "outrigger",
+      "rahmen",
+      "truss",
+      "wall-frame"
+    ],
+    "hazard_type_count": 3,
+    "hazard_types": [
+      "combined",
+      "seismic",
+      "wind"
+    ],
+    "shell_beam_mix_case_count": 31,
+    "measured_shell_beam_mix_case_count": 25,
+    "wave_corr_post": 0.9186067387740747,
+    "post_phase_error_deg": 5.148883820198643,
+    "post_time_lag_ms": 0.6501115934594247,
+    "ood_recall": 1.0,
+    "ood_false_negative_ratio": 0.0,
+    "scaleout_memory_loglog_slope": 0.33886842094544445,
+    "scaleout_latency_loglog_slope": 1.0260836270422529
+  },
+  "reports": {
+    "phase_dynamics": "implementation/phase1/stress/commercial_readiness/phase_correction_assimilation_report.json",
+    "soil_ood": "implementation/phase1/stress/commercial_readiness/heterogeneous_soil_ood_report.json",
+    "multiscale_l3": "implementation/phase1/stress/commercial_readiness/multiscale_l3_streaming_report.json",
+    "partitioned_scaleout": "implementation/phase1/stress/commercial_readiness/partitioned_scaleout_report.json",
+    "scaleout_io": "implementation/phase1/stress/commercial_readiness/scaleout_io_profile_report.json"
+  },
+  "steps": [
+    {
+      "step": "benchmark_commercial_benchmark_cases.rwth_zenodo",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/hf_benchmark.json --comparison-out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/topk_comparison.json --target-split all --epochs 120 --branches 10 --top-k 3 --seed 23 --max-drift-error-pct 5.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.95 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "report_path": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/hf_benchmark.json"
+    },
+    {
+      "step": "noise_commercial_benchmark_cases.rwth_zenodo",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_noise_sensitivity_stress.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --target-split all --required-case-count 4 --sensor-noise-levels-pct 0.5,1,2,5 --stiffness-noise-levels-pct 5,10 --seeds 11,23,47 --epochs 24 --branches 10 --top-k 3 --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement --out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/noise_sensitivity.json",
+      "report_path": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/noise_sensitivity.json"
+    },
+    {
+      "step": "convergence_commercial_benchmark_cases.rwth_zenodo",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_noise_convergence_gate.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --target-split all --limit-cases 4 --seeds 11,23,47 --stiffness-noise-levels 10 --out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/noise_convergence.json",
+      "report_path": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/noise_convergence.json"
+    },
+    {
+      "step": "benchmark_commercial_benchmark_cases.from_csv",
+      "ok": true,
+      "reused_existing": false,
+      "seconds": 6.372190952301025,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/hf_benchmark.json --comparison-out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/topk_comparison.json --target-split all --epochs 120 --branches 10 --top-k 3 --seed 23 --max-drift-error-pct 5.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.95 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "report_path": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/hf_benchmark.json",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/hf_benchmark.json\nWrote Top-k comparison report: implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/topk_comparison.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "noise_commercial_benchmark_cases.from_csv",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_noise_sensitivity_stress.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --target-split all --required-case-count 4 --sensor-noise-levels-pct 0.5,1,2,5 --stiffness-noise-levels-pct 5,10 --seeds 11,23,47 --epochs 24 --branches 10 --top-k 3 --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement --out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/noise_sensitivity.json",
+      "report_path": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/noise_sensitivity.json"
+    },
+    {
+      "step": "convergence_commercial_benchmark_cases.from_csv",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_noise_convergence_gate.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --target-split all --limit-cases 4 --seeds 11,23,47 --stiffness-noise-levels 10 --out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/noise_convergence.json",
+      "report_path": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/noise_convergence.json"
+    },
+    {
+      "step": "benchmark_commercial_benchmark_cases.atwood_open",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/commercial_benchmark_cases.atwood_open.json --out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/hf_benchmark.json --comparison-out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/topk_comparison.json --target-split all --epochs 120 --branches 10 --top-k 3 --seed 23 --max-drift-error-pct 5.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.95 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "report_path": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/hf_benchmark.json"
+    },
+    {
+      "step": "noise_commercial_benchmark_cases.atwood_open",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_noise_sensitivity_stress.py --cases implementation/phase1/commercial_benchmark_cases.atwood_open.json --target-split all --required-case-count 4 --sensor-noise-levels-pct 0.5,1,2,5 --stiffness-noise-levels-pct 5,10 --seeds 11,23,47 --epochs 24 --branches 10 --top-k 3 --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement --out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/noise_sensitivity.json",
+      "report_path": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/noise_sensitivity.json"
+    },
+    {
+      "step": "convergence_commercial_benchmark_cases.atwood_open",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_noise_convergence_gate.py --cases implementation/phase1/commercial_benchmark_cases.atwood_open.json --target-split all --limit-cases 4 --seeds 11,23,47 --stiffness-noise-levels 10 --out implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/noise_convergence.json",
+      "report_path": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/noise_convergence.json"
+    },
+    {
+      "step": "phase_correction",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/phase_correction_assimilation.py --max-post-phase-error-deg 8.0 --max-post-lag-ms 8.0 --out implementation/phase1/stress/commercial_readiness/phase_correction_assimilation_report.json",
+      "report_path": "implementation/phase1/stress/commercial_readiness/phase_correction_assimilation_report.json"
+    },
+    {
+      "step": "soil_ood",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/heterogeneous_soil_ood_gate.py --min-recall 0.92 --max-false-negative-ratio 0.08 --out implementation/phase1/stress/commercial_readiness/heterogeneous_soil_ood_report.json",
+      "report_path": "implementation/phase1/stress/commercial_readiness/heterogeneous_soil_ood_report.json"
+    },
+    {
+      "step": "multiscale_l3",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/multiscale_l3_streaming_profile.py --out implementation/phase1/stress/commercial_readiness/multiscale_l3_streaming_report.json",
+      "report_path": "implementation/phase1/stress/commercial_readiness/multiscale_l3_streaming_report.json"
+    },
+    {
+      "step": "partitioned_scaleout",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_partitioned_scaleout.py --dof-levels 1000000,3000000,10000000 --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --ci-mode nightly --edge-list-json implementation/phase1/open_data/megastructure/opensees_edges.json --require-real-graph --max-projection-ratio 25000.0 --out implementation/phase1/stress/commercial_readiness/partitioned_scaleout_report.json --gpu-strict",
+      "report_path": "implementation/phase1/stress/commercial_readiness/partitioned_scaleout_report.json"
+    },
+    {
+      "step": "scaleout_io",
+      "ok": true,
+      "reused_existing": true,
+      "seconds": 0.0,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_scaleout_io_profile.py --runtime-hook-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --producer-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --dof-levels 1000000,3000000 --out implementation/phase1/stress/commercial_readiness/scaleout_io_profile_report.json --gpu-strict",
+      "report_path": "implementation/phase1/stress/commercial_readiness/scaleout_io_profile_report.json"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "commercial-readiness qualification passed",
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/megastructure_commercial_readiness/20260330T133247Z/artifact_archive_manifest.json"
+}

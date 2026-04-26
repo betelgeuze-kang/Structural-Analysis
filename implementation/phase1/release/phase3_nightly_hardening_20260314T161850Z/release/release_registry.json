@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-generate-signed-release-registry",
+  "generated_at": "2026-03-14T16:13:31.215265+00:00",
+  "inputs": {
+    "repro_report": "implementation/phase1/reproducibility_version_lock_report.json",
+    "lock_manifest": "implementation/phase1/release/version_lock_manifest.json",
+    "kds_summary": "implementation/phase1/release/kds_compliance/kds_compliance_summary.json",
+    "midas_conversion": "implementation/phase1/midas_mgt_conversion_report.json",
+    "solver_hip_e2e": "implementation/phase1/solver_hip_e2e_contract_report.json",
+    "committee_package": "implementation/phase1/release/committee_review/committee_review_package_report.json",
+    "ci_report": "",
+    "parser_script": "implementation/phase1/parse_midas_mgt_to_json_npz.py",
+    "public_key_out": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
+    "signature_out": "implementation/phase1/release/signing/release_registry.signature.b64",
+    "out": "implementation/phase1/release/release_registry.json"
+  },
+  "checks": {
+    "green_reports_pass": true,
+    "lock_manifest_hash_match": true,
+    "artifact_hashes_present_pass": true,
+    "public_key_written_pass": true,
+    "signature_generated_pass": true,
+    "signature_verified_pass": true
+  },
+  "summary": {
+    "artifact_count": 6,
+    "model_hash_count": 2,
+    "input_hash_count": 2,
+    "key_generated_this_run": false,
+    "signing_algorithm": "ed25519",
+    "registry_body_sha256": "b35cf38fc7cc951af9d385c8210c589f375fc2e0bde4f1d8183b2d2a77d5aa62"
+  },
+  "registry_body": {
+    "schema_version": "1.0",
+    "registry_id": "phase1-signed-release-registry",
+    "generated_at": "2026-03-14T16:13:31.205414+00:00",
+    "provenance": {
+      "lock_manifest_path": "implementation/phase1/release/version_lock_manifest.json",
+      "lock_manifest_sha256": "ec9cce6f82e41c39bf083381357749606cb8b3b1c4f4187cd63ee9f20f1185d7",
+      "seed": 23,
+      "replay_runs": 3,
+      "replay_digest": "37980956e0a18f5ddb6d1cd142f9119dcc9ca7ff72d2da1b6fd6fc613f498614"
+    },
+    "input_hashes": {
+      "implementation/phase1/commercial_benchmark_cases.from_csv.json": "b9592c8bd47cb7ee985ee2d41879508cddad03b0496d72131ea135501fa0f69e",
+      "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/run_reproducibility_version_lock_gate.py": "6a171aef32948e7e79006ac550135e05c664cc42b087c58c4b8f0aef8abeba7a"
+    },
+    "model_hashes": {
+      "implementation/phase1/winning_ticket_backprop_report.json": "b2be65b6ef3d3f2ee01af9783f6e88e7ddaa3cd26c2b3857eee0a3d296f5c6ab",
+      "implementation/phase1/nonlinear_frame_engine_report.json": "e1958bd47c9e9eac5bbe15b451cee76584651e18ef0ada6423d545709febaeae"
+    },
+    "artifacts": [
+      {
+        "label": "repro_report",
+        "path": "implementation/phase1/reproducibility_version_lock_report.json",
+        "sha256": "0240fff6b71af0edadd1c247d5fddcf3a9d31cfa89143152ac3100c6b8c247c5",
+        "bytes": 2764,
+        "reason_code": "PASS",
+        "contract_pass": true
+      },
+      {
+        "label": "lock_manifest",
+        "path": "implementation/phase1/release/version_lock_manifest.json",
+        "sha256": "ec9cce6f82e41c39bf083381357749606cb8b3b1c4f4187cd63ee9f20f1185d7",
+        "bytes": 1225
+      },
+      {
+        "label": "kds_summary",
+        "path": "implementation/phase1/release/kds_compliance/kds_compliance_summary.json",
+        "sha256": "84572f17fd5db98f6a9438bc8acc98f06e61b6ddbb8d00a0b9373c72aec574b2",
+        "bytes": 1355810,
+        "reason_code": "PASS",
+        "contract_pass": true
+      },
+      {
+        "label": "midas_conversion",
+        "path": "implementation/phase1/midas_mgt_conversion_report.json",
+        "sha256": "cf5602ec7b0d7e49dd05b4705c1cd131f4a309dc89e5d9a6d438699095b88480",
+        "bytes": 5805,
+        "reason_code": "PASS",
+        "contract_pass": true
+      },
+      {
+        "label": "solver_hip_e2e",
+        "path": "implementation/phase1/solver_hip_e2e_contract_report.json",
+        "sha256": "0e5bce53a1bdc838f50e73272751563d5d349ee5cca0bbfc2cd88010fd64a8bb",
+        "bytes": 2400,
+        "reason_code": "PASS",
+        "contract_pass": true
+      },
+      {
+        "label": "parser_script",
+        "path": "implementation/phase1/parse_midas_mgt_to_json_npz.py",
+        "sha256": "ad783ab8ec84f6ea5ebf90e0bb0687f9c6821c83842fc92824a332a3a83bbe6f",
+        "bytes": 72230
+      }
+    ],
+    "parser_provenance": {
+      "parser_script": "implementation/phase1/parse_midas_mgt_to_json_npz.py",
+      "parser_script_sha256": "ad783ab8ec84f6ea5ebf90e0bb0687f9c6821c83842fc92824a332a3a83bbe6f",
+      "mgt_source_path": "implementation/phase1/open_data/midas/midas_generator_33.mgt",
+      "mgt_source_sha256": "269419de4b0ae9aacbfd2aeed05766d2c8bb065f7b64e81fee8c295129bbf2cc",
+      "element_rows_total": 12728,
+      "element_rows_skipped": 0,
+      "unknown_row_total": 0
+    },
+    "package_provenance": {
+      "kds_summary_path": "implementation/phase1/release/kds_compliance/kds_compliance_summary.json",
+      "kds_pdf_path": "implementation/phase1/release/kds_compliance/kds_compliance_report.pdf",
+      "committee_package_path": "implementation/phase1/release/committee_review/committee_review_package_report.json",
+      "committee_pdf_path": "implementation/phase1/release/committee_review/committee_review_report.pdf"
+    }
+  },
+  "signature": {
+    "algorithm": "ed25519",
+    "public_key_path": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
+    "signature_b64": "hyjZynexTzaL7VNeICfREJD6JrpF2W+TcoAS7HR7PX8cCo8SR2XFW0zpFiWxteJ3u8B6AhopFna4ETuzZWzoCA==",
+    "signature_out": "implementation/phase1/release/signing/release_registry.signature.b64",
+    "canonical_body_sha256": "b35cf38fc7cc951af9d385c8210c589f375fc2e0bde4f1d8183b2d2a77d5aa62"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "signed release registry generated"
+}

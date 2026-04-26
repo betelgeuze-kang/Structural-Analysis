@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-06T13:53:27.284618+00:00",
+  "test_name": "nonlinear_pushover_stress",
+  "latest_run_dir": "implementation/phase1/experiments/by_test/nonlinear_pushover_stress/20260406T135327Z",
+  "latest_manifest": "implementation/phase1/experiments/by_test/nonlinear_pushover_stress/20260406T135327Z/artifact_archive_manifest.json"
+}

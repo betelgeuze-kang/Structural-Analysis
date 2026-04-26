@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "kind": "topk_residual_meta",
+  "source_benchmark_report": "implementation/phase1/hf_benchmark_report.rwth_zenodo.json",
+  "summary": {
+    "train": {
+      "case_count": 14,
+      "drift_error_pct": 1.026440796596954,
+      "base_shear_error_pct": 0.6832546099227236,
+      "mode_shape_mac": 0.9820313368524823,
+      "buckling_factor_error_pct": 0.7808590036487717,
+      "equilibrium_residual_mean": 1.2329033953802926
+    },
+    "val": {
+      "case_count": 4,
+      "drift_error_pct": 2.5774114990019203,
+      "base_shear_error_pct": 1.3715266294342823,
+      "mode_shape_mac": 0.9841551333665848,
+      "buckling_factor_error_pct": 1.5001963949587678,
+      "equilibrium_residual_mean": 1.862867295742035
+    },
+    "test": {
+      "case_count": 4,
+      "drift_error_pct": 0.5638592829057187,
+      "base_shear_error_pct": 0.5450564932006583,
+      "mode_shape_mac": 0.9760836511850357,
+      "buckling_factor_error_pct": 0.7116799442754556,
+      "equilibrium_residual_mean": 0.7930273860692978
+    },
+    "all": {
+      "case_count": 22,
+      "drift_error_pct": 1.2243297399994508,
+      "base_shear_error_pct": 0.7832680467935407,
+      "mode_shape_mac": 0.9813360842791471,
+      "buckling_factor_error_pct": 0.8990696094554408,
+      "equilibrium_residual_mean": 1.2674648301167921
+    }
+  },
+  "improvement_pct": {
+    "drift_error_reduction_pct": 96.44473804904815,
+    "base_shear_error_reduction_pct": 94.27215657598872,
+    "buckling_error_reduction_pct": 93.58956416496783,
+    "mode_shape_mac_gain_pct": 4.355377395543809
+  }
+}

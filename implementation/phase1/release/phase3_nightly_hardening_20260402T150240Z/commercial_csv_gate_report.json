@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-commercial-csv-gate",
+  "generated_at": "2026-04-02T15:00:57.972626+00:00",
+  "inputs": {
+    "hf_csv": "implementation/phase1/commercial_hf_export_sample.csv",
+    "lf_csv": "implementation/phase1/commercial_lf_export_sample.csv",
+    "cases_out": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "benchmark_out": "implementation/phase1/hf_benchmark_report.from_csv.json",
+    "comparison_out": "implementation/phase1/topk_comparison_experiment_report.from_csv.json",
+    "target_split": "test",
+    "epochs": 120,
+    "branches": 10,
+    "top_k": 3,
+    "require_top_displacement": true
+  },
+  "artifacts": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "benchmark": "implementation/phase1/hf_benchmark_report.from_csv.json",
+    "comparison": "implementation/phase1/topk_comparison_experiment_report.from_csv.json",
+    "member_force_report": "implementation/phase1/member_force_soft_accept_report.json"
+  },
+  "checks": {
+    "build_cases_pass": true,
+    "benchmark_pass": true,
+    "metric_source_pass": true,
+    "drift_within_5pct": true,
+    "base_shear_within_5pct": true,
+    "buckling_within_5pct": true,
+    "mac_above_095": true,
+    "member_force_metric_present": true,
+    "member_force_soft_accept_pass": true,
+    "member_force_hard_pass": true,
+    "member_force_components_5d_pass": true
+  },
+  "metrics": {
+    "drift_error_pct": 1.2752002135807767,
+    "base_shear_error_pct": 0.9328419526579238,
+    "mode_shape_mac": 1.0,
+    "buckling_factor_error_pct": 0.9450985158206192,
+    "member_force_error_pct_p95": 3.907203907203907,
+    "member_force_error_pct_max": 3.907203907203907,
+    "member_force_soft_accept_case_ratio": 0.0,
+    "member_force_component_count": 5
+  },
+  "steps": [
+    {
+      "step": "build_cases_from_commercial_exports",
+      "seconds": 0.02899932861328125,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/build_cases_from_commercial_exports.py --hf-csv implementation/phase1/commercial_hf_export_sample.csv --lf-csv implementation/phase1/commercial_lf_export_sample.csv --metric-source commercial_solver_export --out implementation/phase1/commercial_benchmark_cases.from_csv.json --require-top-displacement",
+      "stdout_tail": "Wrote commercial benchmark cases: implementation/phase1/commercial_benchmark_cases.from_csv.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_kpi_contract",
+      "seconds": 6.35085391998291,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --out implementation/phase1/hf_benchmark_report.from_csv.json --comparison-out implementation/phase1/topk_comparison_experiment_report.from_csv.json --target-split test --epochs 120 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 23 --max-drift-error-pct 5.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.95 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources commercial_solver_export,engine_export_direct",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/hf_benchmark_report.from_csv.json\nWrote Top-k comparison report: implementation/phase1/topk_comparison_experiment_report.from_csv.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "member_force_soft_accept_gate",
+      "seconds": 0.02925872802734375,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_member_force_soft_accept_gate.py --hf-csv implementation/phase1/commercial_hf_export_sample.csv --lf-csv implementation/phase1/commercial_lf_export_sample.csv --components axial,shear_y,shear_z,moment_y,moment_z --axial-hf-col axial_force_kN --axial-lf-col axial_force_kN --shear-y-hf-col shear_force_y_kN --shear-y-lf-col shear_force_y_kN --shear-z-hf-col shear_force_z_kN --shear-z-lf-col shear_force_z_kN --moment-y-hf-col bending_moment_y_kNm --moment-y-lf-col bending_moment_y_kNm --moment-z-hf-col bending_moment_z_kNm --moment-z-lf-col bending_moment_z_kNm --max-hard-error-pct 5.0 --max-soft-accept-error-pct 10.0 --max-soft-accept-case-ratio 0.25 --out implementation/phase1/member_force_soft_accept_report.json --require-member-force",
+      "stdout_tail": "Wrote member force soft-accept gate report: implementation/phase1/member_force_soft_accept_report.json\n",
+      "stderr_tail": ""
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "commercial csv direct-compare gate passed"
+}

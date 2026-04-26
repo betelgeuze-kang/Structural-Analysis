@@ -1,0 +1,253 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-06T13:54:51Z",
+  "inputs": {
+    "parsed_model_json": "implementation/phase1/open_data/midas/midas_generator_33.json",
+    "dataset_npz": "implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "changes_json": "implementation/phase1/release/design_optimization/design_optimization_cost_reduction_changes.json"
+  },
+  "source_kind": "internal_group_local_rebar_payload_projection",
+  "summary": {
+    "design_material_rebar_payload_row_count": 5,
+    "design_material_rebar_payload_available_count": 3,
+    "group_local_rebar_payload_row_count": 6,
+    "group_local_rebar_payload_available_count": 6,
+    "blocked_group_local_payload_row_count": 0,
+    "blocked_reason_counts": {},
+    "projected_action_family_counts": {
+      "perimeter_frame": 1,
+      "rebar": 5
+    },
+    "projected_member_type_counts": {
+      "column": 1,
+      "wall": 5
+    }
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "projected internal group-local rebar payloads were generated",
+  "design_material_rebar_payloads": [
+    {
+      "material_id": 1,
+      "material_type": "CONC",
+      "material_name": "C40",
+      "payload_basis": "global_rebar_material_code_fallback",
+      "payload_present": true,
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "material_id": 2,
+      "material_type": "STEEL",
+      "material_name": "Q235",
+      "payload_basis": "unsupported_material_type",
+      "payload_present": false,
+      "rbcode": "",
+      "rbmain": "",
+      "rbsub": "",
+      "fy_r": null,
+      "fys": null
+    },
+    {
+      "material_id": 3,
+      "material_type": "SRC",
+      "material_name": "C40+Q235",
+      "payload_basis": "unsupported_material_type",
+      "payload_present": false,
+      "rbcode": "",
+      "rbmain": "",
+      "rbsub": "",
+      "fy_r": null,
+      "fys": null
+    },
+    {
+      "material_id": 4,
+      "material_type": "CONC",
+      "material_name": "C40WBR",
+      "payload_basis": "global_rebar_material_code_fallback",
+      "payload_present": true,
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "material_id": 7,
+      "material_type": "CONC",
+      "material_name": "C40F",
+      "payload_basis": "global_rebar_material_code_fallback",
+      "payload_present": true,
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    }
+  ],
+  "group_local_rebar_payloads": [
+    {
+      "group_id": "S03:intermediate:nogroup:slab:SB800X3002.00",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "payload_present": true,
+      "payload_basis": "target_rebar_ratio_projection",
+      "payload_source_class": "internal_ratio_projected_payload",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 6,
+      "material_ids": [
+        1
+      ],
+      "material_types": [
+        "CONC"
+      ],
+      "section_signature": "SB800X3002.00",
+      "section_width_m": 0.8,
+      "section_depth_m": 0.3,
+      "baseline_rebar_ratio": 0.01,
+      "target_rebar_ratio": 0.004,
+      "rbcode": "GB10(RC)",
+      "rbmain": "D10",
+      "rbsub": "D10",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "group_id": "S04:intermediate:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "payload_present": true,
+      "payload_basis": "target_rebar_ratio_projection",
+      "payload_source_class": "internal_ratio_projected_payload",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 34,
+      "material_ids": [
+        1,
+        4
+      ],
+      "material_types": [
+        "CONC"
+      ],
+      "section_signature": "SB1500X800",
+      "section_width_m": 1.5,
+      "section_depth_m": 0.8,
+      "baseline_rebar_ratio": 0.010000000000000004,
+      "target_rebar_ratio": 0.004,
+      "rbcode": "GB10(RC)",
+      "rbmain": "D16",
+      "rbsub": "D13",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "group_id": "S06:intermediate:nogroup:slab:SB800X3002.00",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "payload_present": true,
+      "payload_basis": "target_rebar_ratio_projection",
+      "payload_source_class": "internal_ratio_projected_payload",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 6,
+      "material_ids": [
+        1
+      ],
+      "material_types": [
+        "CONC"
+      ],
+      "section_signature": "SB800X3002.00",
+      "section_width_m": 0.8,
+      "section_depth_m": 0.3,
+      "baseline_rebar_ratio": 0.01,
+      "target_rebar_ratio": 0.004,
+      "rbcode": "GB10(RC)",
+      "rbmain": "D10",
+      "rbsub": "D10",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "group_id": "S03:intermediate:nogroup:slab:SB800X4002.00",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "payload_present": true,
+      "payload_basis": "target_rebar_ratio_projection",
+      "payload_source_class": "internal_ratio_projected_payload",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 20,
+      "material_ids": [
+        1,
+        4
+      ],
+      "material_types": [
+        "CONC"
+      ],
+      "section_signature": "SB800X4002.00",
+      "section_width_m": 0.8,
+      "section_depth_m": 0.4,
+      "baseline_rebar_ratio": 0.010000000000000002,
+      "target_rebar_ratio": 0.004,
+      "rbcode": "GB10(RC)",
+      "rbmain": "D13",
+      "rbsub": "D10",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "payload_present": true,
+      "payload_basis": "target_rebar_ratio_projection",
+      "payload_source_class": "internal_ratio_projected_payload",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 14,
+      "material_ids": [
+        1,
+        4
+      ],
+      "material_types": [
+        "CONC"
+      ],
+      "section_signature": "SB1500X800",
+      "section_width_m": 1.5,
+      "section_depth_m": 0.8,
+      "baseline_rebar_ratio": 0.009999999999999998,
+      "target_rebar_ratio": 0.004,
+      "rbcode": "GB10(RC)",
+      "rbmain": "D16",
+      "rbsub": "D13",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "member_type": "column",
+      "action_family": "perimeter_frame",
+      "payload_present": true,
+      "payload_basis": "target_rebar_ratio_projection",
+      "payload_source_class": "internal_ratio_projected_payload",
+      "mapping_source": "direct_group_id",
+      "element_id_count": 5,
+      "material_ids": [
+        3
+      ],
+      "material_types": [
+        "SRC"
+      ],
+      "section_signature": "P 50x4",
+      "section_width_m": 0.6,
+      "section_depth_m": 0.3,
+      "baseline_rebar_ratio": 0.074,
+      "target_rebar_ratio": 0.064,
+      "rbcode": "GB10(RC)",
+      "rbmain": "D25",
+      "rbsub": "D22",
+      "fy_r": 400.0,
+      "fys": 400.0
+    }
+  ],
+  "blocked_group_local_payload_rows": []
+}

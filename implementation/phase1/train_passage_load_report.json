@@ -1,0 +1,760 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-train-passage-load-generator",
+  "generated_at": "2026-02-27T12:41:38.517604+00:00",
+  "inputs": {
+    "tunnel_length_m": 1200.0,
+    "speed_m_s": 25.0,
+    "dt_s": 0.01,
+    "duration_s": 60.0,
+    "axle_load_n": 85000.0,
+    "axle_spacing_m": [
+      2.5,
+      2.5,
+      2.5
+    ],
+    "cars": 8,
+    "car_gap_m": 12.0,
+    "entry_offset_m": 80.0,
+    "pressure_peak_pa": 1200.0
+  },
+  "outputs": {
+    "csv": "implementation/phase1/open_data/tunnel/train_passage_load.csv",
+    "sample_count": 6001
+  },
+  "checks": {
+    "nonempty": true,
+    "peak_load_positive": true,
+    "peak_pressure_positive": true
+  },
+  "metrics": {
+    "peak_total_vertical_load_n": 2720000.0,
+    "peak_micro_pressure_wave_pa": 1200.0,
+    "max_active_axle_count": 32
+  },
+  "trace_head": [
+    {
+      "time_s": 0.0,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 50.88575432339113
+    },
+    {
+      "time_s": 0.01,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 51.899296275335246
+    },
+    {
+      "time_s": 0.02,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 52.92975857597442
+    },
+    {
+      "time_s": 0.03,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 53.97734870285286
+    },
+    {
+      "time_s": 0.04,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 55.04227504335434
+    },
+    {
+      "time_s": 0.05,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 56.124746860750776
+    },
+    {
+      "time_s": 0.06,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 57.22497425930663
+    },
+    {
+      "time_s": 0.07,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 58.34316814843422
+    },
+    {
+      "time_s": 0.08,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 59.47954020589409
+    },
+    {
+      "time_s": 0.09,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 60.634302840035815
+    },
+    {
+      "time_s": 0.1,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 61.80766915107457
+    },
+    {
+      "time_s": 0.11,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 62.99985289139899
+    },
+    {
+      "time_s": 0.12,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 64.21106842490637
+    },
+    {
+      "time_s": 0.13,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 65.44153068536221
+    },
+    {
+      "time_s": 0.14,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 66.6914551337797
+    },
+    {
+      "time_s": 0.15,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 67.96105771481724
+    },
+    {
+      "time_s": 0.16,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 69.25055481219114
+    },
+    {
+      "time_s": 0.17,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 70.56016320310107
+    },
+    {
+      "time_s": 0.18,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 71.89010001166714
+    },
+    {
+      "time_s": 0.19,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 73.24058266137656
+    },
+    {
+      "time_s": 0.2,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 74.61182882653955
+    },
+    {
+      "time_s": 0.21,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 76.00405638275345
+    },
+    {
+      "time_s": 0.22,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 77.41748335637546
+    },
+    {
+      "time_s": 0.23,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 78.85232787300345
+    },
+    {
+      "time_s": 0.24,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 80.30880810496711
+    },
+    {
+      "time_s": 0.25,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 81.78714221782882
+    },
+    {
+      "time_s": 0.26,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 83.28754831589718
+    },
+    {
+      "time_s": 0.27,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 84.81024438675522
+    },
+    {
+      "time_s": 0.28,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 86.35544824480483
+    },
+    {
+      "time_s": 0.29,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 87.9233774738322
+    },
+    {
+      "time_s": 0.3,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 89.51424936859591
+    },
+    {
+      "time_s": 0.31,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 91.1282808754435
+    },
+    {
+      "time_s": 0.32,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 92.76568853195965
+    },
+    {
+      "time_s": 0.33,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 94.4266884056519
+    },
+    {
+      "time_s": 0.34,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 96.11149603167884
+    },
+    {
+      "time_s": 0.35000000000000003,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 97.82032634962748
+    },
+    {
+      "time_s": 0.36,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 99.5533936393459
+    },
+    {
+      "time_s": 0.37,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 101.3109114558384
+    },
+    {
+      "time_s": 0.38,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 103.09309256323102
+    },
+    {
+      "time_s": 0.39,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 104.90014886781532
+    },
+    {
+      "time_s": 0.4,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 106.73229135017928
+    },
+    {
+      "time_s": 0.41000000000000003,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 108.58972999643505
+    },
+    {
+      "time_s": 0.42,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 110.4726737285526
+    },
+    {
+      "time_s": 0.43,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 112.38133033381004
+    },
+    {
+      "time_s": 0.44,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 114.31590639337219
+    },
+    {
+      "time_s": 0.45,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 116.276607210008
+    },
+    {
+      "time_s": 0.46,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 118.26363673495916
+    },
+    {
+      "time_s": 0.47000000000000003,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 120.27719749397362
+    },
+    {
+      "time_s": 0.48,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 122.3174905125156
+    },
+    {
+      "time_s": 0.49,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 124.38471524016744
+    },
+    {
+      "time_s": 0.5,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 126.47906947423719
+    },
+    {
+      "time_s": 0.51,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 128.6007492825865
+    },
+    {
+      "time_s": 0.52,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 130.7499489256957
+    },
+    {
+      "time_s": 0.53,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 132.92686077798075
+    },
+    {
+      "time_s": 0.54,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 135.13167524838076
+    },
+    {
+      "time_s": 0.55,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 137.3645807002315
+    },
+    {
+      "time_s": 0.56,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 139.62576337044467
+    },
+    {
+      "time_s": 0.5700000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 141.91540728801013
+    },
+    {
+      "time_s": 0.58,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 144.2336941918423
+    },
+    {
+      "time_s": 0.59,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 146.580803447988
+    },
+    {
+      "time_s": 0.6,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 148.95691196621877
+    },
+    {
+      "time_s": 0.61,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 151.36219411602647
+    },
+    {
+      "time_s": 0.62,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 153.7968216420456
+    },
+    {
+      "time_s": 0.63,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 156.26096357892396
+    },
+    {
+      "time_s": 0.64,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 158.754786165664
+    },
+    {
+      "time_s": 0.65,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 161.27845275945896
+    },
+    {
+      "time_s": 0.66,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 163.83212374904812
+    },
+    {
+      "time_s": 0.67,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 166.41595646761508
+    },
+    {
+      "time_s": 0.68,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 169.03010510525402
+    },
+    {
+      "time_s": 0.6900000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 171.67472062103218
+    },
+    {
+      "time_s": 0.7000000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 174.34995065467132
+    },
+    {
+      "time_s": 0.71,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 177.05593943787835
+    },
+    {
+      "time_s": 0.72,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 179.79282770535065
+    },
+    {
+      "time_s": 0.73,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 182.56075260548582
+    },
+    {
+      "time_s": 0.74,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 185.3598476108231
+    },
+    {
+      "time_s": 0.75,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 188.1902424282467
+    },
+    {
+      "time_s": 0.76,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 191.05206290898107
+    },
+    {
+      "time_s": 0.77,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 193.94543095840706
+    },
+    {
+      "time_s": 0.78,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 196.87046444573204
+    },
+    {
+      "time_s": 0.79,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 199.8272771135436
+    },
+    {
+      "time_s": 0.8,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 202.81597848727932
+    },
+    {
+      "time_s": 0.81,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 205.8366737846466
+    },
+    {
+      "time_s": 0.8200000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 208.88946382502274
+    },
+    {
+      "time_s": 0.8300000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 211.9744449388716
+    },
+    {
+      "time_s": 0.84,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 215.09170887720884
+    },
+    {
+      "time_s": 0.85,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 218.24134272115168
+    },
+    {
+      "time_s": 0.86,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 221.42342879158707
+    },
+    {
+      "time_s": 0.87,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 224.6380445589948
+    },
+    {
+      "time_s": 0.88,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 227.88526255345997
+    },
+    {
+      "time_s": 0.89,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 231.16515027491278
+    },
+    {
+      "time_s": 0.9,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 234.47777010363166
+    },
+    {
+      "time_s": 0.91,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 237.8231792110459
+    },
+    {
+      "time_s": 0.92,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 241.20142947087828
+    },
+    {
+      "time_s": 0.93,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 244.61256737066216
+    },
+    {
+      "time_s": 0.9400000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 248.05663392367364
+    },
+    {
+      "time_s": 0.9500000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 251.53366458131737
+    },
+    {
+      "time_s": 0.96,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 255.0436891460039
+    },
+    {
+      "time_s": 0.97,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 258.5867316845594
+    },
+    {
+      "time_s": 0.98,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 262.1628104422066
+    },
+    {
+      "time_s": 0.99,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 265.7719377571573
+    },
+    {
+      "time_s": 1.0,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 269.4141199758565
+    },
+    {
+      "time_s": 1.01,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 273.08935736892016
+    },
+    {
+      "time_s": 1.02,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 276.79764404780417
+    },
+    {
+      "time_s": 1.03,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 280.5389678822503
+    },
+    {
+      "time_s": 1.04,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 284.3133104185461
+    },
+    {
+      "time_s": 1.05,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 288.12064679864375
+    },
+    {
+      "time_s": 1.06,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 291.96094568017617
+    },
+    {
+      "time_s": 1.07,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 295.83416915741634
+    },
+    {
+      "time_s": 1.08,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 299.740272683218
+    },
+    {
+      "time_s": 1.09,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 303.67920499198283
+    },
+    {
+      "time_s": 1.1,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 307.6509080236947
+    },
+    {
+      "time_s": 1.11,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 311.65531684906415
+    },
+    {
+      "time_s": 1.12,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 315.6923595958255
+    },
+    {
+      "time_s": 1.1300000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 319.76195737622896
+    },
+    {
+      "time_s": 1.1400000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 323.8640242157708
+    },
+    {
+      "time_s": 1.1500000000000001,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 327.99846698320323
+    },
+    {
+      "time_s": 1.16,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 332.1651853218677
+    },
+    {
+      "time_s": 1.17,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 336.364071582393
+    },
+    {
+      "time_s": 1.18,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 340.5950107568026
+    },
+    {
+      "time_s": 1.19,
+      "active_axle_count": 0,
+      "total_vertical_load_n": 0.0,
+      "micro_pressure_wave_pa": 344.8578804140707
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "train passage load time-series generated"
+}

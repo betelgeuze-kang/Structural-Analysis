@@ -1,0 +1,283 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-mega-ndtha-partitioned-stress",
+  "generated_at": "2026-03-01T14:06:03.888143+00:00",
+  "inputs": {
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "topology_report": "implementation/phase1/opensees_topology_report.json",
+    "ground_motion_csv": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "target_dof": 10000000,
+    "require_shell_beam_mix": true,
+    "require_real_topology": true,
+    "require_full_duration": true,
+    "max_steps": 0,
+    "min_load_reversals": 100,
+    "partitions": 16,
+    "ag_scale": 2.0,
+    "pdelta_factor": 1.0,
+    "hardening_ratio": 0.2,
+    "yield_drift_scale": 0.45,
+    "max_step_iterations": 12,
+    "adaptive_load_decay": 0.85,
+    "halo_coupling_gain": 0.015,
+    "min_plastic_story_count": 1,
+    "sync_steps_cap": 6000,
+    "sync_bandwidth_gbps": 32.0,
+    "sync_latency_us": 40.0,
+    "sync_compute_us_per_node": 0.25,
+    "sync_overlap_cap": 0.7,
+    "sync_jitter_pct": 0.12,
+    "sync_max_stall_ratio": 0.36,
+    "sync_max_p99_step_ms": 550.0,
+    "sync_max_straggler_ratio": 2.4,
+    "sync_min_overlap_ratio": 0.35,
+    "sync_seed": 23,
+    "out": "implementation/phase1/mega_ndtha_partitioned_stress_report.json"
+  },
+  "checks": {
+    "topology_gate_pass": true,
+    "shell_beam_mix_pass": true,
+    "real_topology_pass": true,
+    "scale_target_10m_pass": true,
+    "pdelta_enabled_pass": true,
+    "dynamic_reversal_pass": true,
+    "full_duration_pass": false,
+    "all_steps_converged": false,
+    "rust_backend_used_pass": false,
+    "plasticity_triggered_all_partitions": true,
+    "sync_budget_pass": true,
+    "scaled_partition_projection_pass": true
+  },
+  "summary": {
+    "target_dof": 10000000,
+    "partition_count": 16,
+    "partition_nodes_projected_min": 625000,
+    "partition_nodes_projected_max": 625000,
+    "ground_motion_step_count_full": 6001,
+    "ground_motion_step_count_used": 6001,
+    "duration_s_full": 60.0,
+    "duration_s_used": 60.0,
+    "reversal_count": 432,
+    "completed_steps": 6,
+    "elapsed_wall_s": 0.006086186000175076,
+    "solver_calls_total": 108,
+    "solver_iteration_tries_total": 108,
+    "max_plastic_story_count_min": 6,
+    "max_plastic_story_count_mean": 24.8125,
+    "max_drift_ratio_pct_max": 109836.3169707248,
+    "mean_drift_ratio_pct": 22154.08233784507,
+    "wall_step_ms_mean": 0.9277696663048118,
+    "wall_step_ms_p99": 1.2345340002866578,
+    "sync_step_ms_p99": 0.4587316146173147,
+    "sync_stall_ratio": 0.0
+  },
+  "sync_result": {
+    "partition_count": 16,
+    "node_count": 20000,
+    "estimated_comm_bytes_per_step": 480.0,
+    "avg_step_ms": 0.38191073266182524,
+    "p95_step_ms": 0.4279542122161707,
+    "p99_step_ms": 0.4587316146173147,
+    "straggler_ratio": 1.2132604863795102,
+    "sync_stall_ratio": 0.0,
+    "comm_overlap_ratio": 1.0,
+    "p95_partition_lag_ms": 0.11553828212859626,
+    "p99_partition_lag_ms": 0.14361582968658168,
+    "simulated_comm_gbps": 0.01005470564609727,
+    "simulated_steps": 6000,
+    "dt_s": 0.01
+  },
+  "sync_checks": {
+    "sync_stall_budget_pass": true,
+    "p99_step_budget_pass": true,
+    "straggler_budget_pass": true,
+    "overlap_ratio_pass": true
+  },
+  "partition_projection": {
+    "source_partition_report": "implementation/phase1/stress/partitioned_scaleout/partition_quality_n10000000.json",
+    "sample_node_count": 20000,
+    "partition_sizes_sample": [
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250,
+      1250
+    ],
+    "partition_sizes_projected": [
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000,
+      625000
+    ]
+  },
+  "rows": {
+    "partitions": [
+      {
+        "pid": 0,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 28,
+        "max_drift_ratio_pct": 109836.3169707248,
+        "solver_try_calls": 18,
+        "adaptive_backtracks": 12
+      },
+      {
+        "pid": 1,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 28,
+        "max_drift_ratio_pct": 87246.11179261513,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 2,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 28,
+        "max_drift_ratio_pct": 37508.71914248243,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 3,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 28,
+        "max_drift_ratio_pct": 7162.882783319656,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 4,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 28,
+        "max_drift_ratio_pct": 206.60830509211272,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 5,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 26,
+        "max_drift_ratio_pct": 27.65062286757817,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 6,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 6,
+        "max_drift_ratio_pct": 2.71218583221867,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 7,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 26,
+        "max_drift_ratio_pct": 21.5595986006447,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 8,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 28,
+        "max_drift_ratio_pct": 99.55223616007632,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 9,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 26,
+        "max_drift_ratio_pct": 30.553416032416486,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 10,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 7,
+        "max_drift_ratio_pct": 2.9163748696270284,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 11,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 27,
+        "max_drift_ratio_pct": 52.35579597973391,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 12,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 27,
+        "max_drift_ratio_pct": 52.15381347213969,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 13,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 28,
+        "max_drift_ratio_pct": 4587.742507405214,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 14,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 28,
+        "max_drift_ratio_pct": 29529.05698618108,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      },
+      {
+        "pid": 15,
+        "nodes_projected": 625000,
+        "max_plastic_story_count": 28,
+        "max_drift_ratio_pct": 78098.42487388627,
+        "solver_try_calls": 6,
+        "adaptive_backtracks": 0
+      }
+    ],
+    "steps_head": [
+      {
+        "step": 0,
+        "time_s": 0.0,
+        "ag_g": 0.1881674,
+        "converged": true,
+        "max_plastic_story_count": 0,
+        "max_drift_ratio_pct": 0.09168499113534445,
+        "max_abs_top_displacement_m": 0.04721055565294419,
+        "wall_step_ms": 1.2500720004027244
+      }
+    ]
+  },
+  "contract_pass": false,
+  "reason_code": "ERR_FULL_DURATION_REQUIRED",
+  "reason": "ground-motion was cut before full duration"
+}

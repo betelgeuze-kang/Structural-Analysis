@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-branch64-microbatch-cache-profile",
+  "generated_at": "2026-03-02T12:54:35.791368+00:00",
+  "hardware": {
+    "gpu": "AMD Radeon RX 6900 XT",
+    "cache_mb": 128.0,
+    "cache_headroom_mb": 92.16
+  },
+  "inputs": {
+    "runtime_hook_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "branches": 64,
+    "chunk_candidates": [
+      64,
+      32,
+      16,
+      8,
+      4,
+      2,
+      1
+    ],
+    "node_count": 3000000,
+    "state_components": 5,
+    "cache_headroom": 0.72,
+    "graph_overhead_mb": 24.0,
+    "cache_penalty_gain": 0.85,
+    "repeats": 1
+  },
+  "full_batch_64": {
+    "chunk_branches": 64,
+    "num_chunks": 1,
+    "avg_total_seconds": 5692.37480410809,
+    "std_total_seconds": 0.0,
+    "avg_peak_vram_mb": 11010.328125,
+    "avg_cache_penalty": 73.26546020507813,
+    "avg_branch_ms": 88943.3563141889,
+    "cache_safe_by_estimate": false,
+    "estimated_working_set_mb": 11010.328125,
+    "cache_headroom_mb": 92.16,
+    "cache_fit_all_calls": false,
+    "cache_fit_ratio_max": 86.0181884765625
+  },
+  "scenarios": [
+    {
+      "chunk_branches": 64,
+      "num_chunks": 1,
+      "avg_total_seconds": 5692.37480410809,
+      "std_total_seconds": 0.0,
+      "avg_peak_vram_mb": 11010.328125,
+      "avg_cache_penalty": 73.26546020507813,
+      "avg_branch_ms": 88943.3563141889,
+      "cache_safe_by_estimate": false,
+      "estimated_working_set_mb": 11010.328125,
+      "cache_headroom_mb": 92.16,
+      "cache_fit_all_calls": false,
+      "cache_fit_ratio_max": 86.0181884765625
+    },
+    {
+      "chunk_branches": 32,
+      "num_chunks": 2,
+      "avg_total_seconds": 2849.743214111452,
+      "std_total_seconds": 0.0,
+      "avg_peak_vram_mb": 5517.1640625,
+      "avg_cache_penalty": 36.78741760253906,
+      "avg_branch_ms": 44527.23772049144,
+      "cache_safe_by_estimate": false,
+      "estimated_working_set_mb": 5517.1640625,
+      "cache_headroom_mb": 92.16,
+      "cache_fit_all_calls": false,
+      "cache_fit_ratio_max": 43.10284423828125
+    },
+    {
+      "chunk_branches": 16,
+      "num_chunks": 4,
+      "avg_total_seconds": 1457.6449537190024,
+      "std_total_seconds": 0.0,
+      "avg_peak_vram_mb": 2770.58203125,
+      "avg_cache_penalty": 18.54839630126953,
+      "avg_branch_ms": 22775.702401859413,
+      "cache_safe_by_estimate": false,
+      "estimated_working_set_mb": 2770.58203125,
+      "cache_headroom_mb": 92.16,
+      "cache_fit_all_calls": false,
+      "cache_fit_ratio_max": 21.645172119140625
+    },
+    {
+      "chunk_branches": 8,
+      "num_chunks": 8,
+      "avg_total_seconds": 741.2856374193577,
+      "std_total_seconds": 0.0,
+      "avg_peak_vram_mb": 1397.291015625,
+      "avg_cache_penalty": 9.428885650634765,
+      "avg_branch_ms": 11582.588084677465,
+      "cache_safe_by_estimate": false,
+      "estimated_working_set_mb": 1397.291015625,
+      "cache_headroom_mb": 92.16,
+      "cache_fit_all_calls": false,
+      "cache_fit_ratio_max": 10.916336059570312
+    },
+    {
+      "chunk_branches": 4,
+      "num_chunks": 16,
+      "avg_total_seconds": 380.4837668494736,
+      "std_total_seconds": 0.0,
+      "avg_peak_vram_mb": 710.6455078125,
+      "avg_cache_penalty": 4.869130325317382,
+      "avg_branch_ms": 5945.058857023026,
+      "cache_safe_by_estimate": false,
+      "estimated_working_set_mb": 710.6455078125,
+      "cache_headroom_mb": 92.16,
+      "cache_fit_all_calls": false,
+      "cache_fit_ratio_max": 5.551918029785156
+    },
+    {
+      "chunk_branches": 2,
+      "num_chunks": 32,
+      "avg_total_seconds": 202.73141155876965,
+      "std_total_seconds": 0.0,
+      "avg_peak_vram_mb": 367.32275390625,
+      "avg_cache_penalty": 2.5892526626586916,
+      "avg_branch_ms": 3167.6783056057757,
+      "cache_safe_by_estimate": false,
+      "estimated_working_set_mb": 367.32275390625,
+      "cache_headroom_mb": 92.16,
+      "cache_fit_all_calls": false,
+      "cache_fit_ratio_max": 2.869709014892578
+    },
+    {
+      "chunk_branches": 1,
+      "num_chunks": 64,
+      "avg_total_seconds": 113.44750578521352,
+      "std_total_seconds": 0.0,
+      "avg_peak_vram_mb": 195.661376953125,
+      "avg_cache_penalty": 1.4493138313293457,
+      "avg_branch_ms": 1772.6172778939613,
+      "cache_safe_by_estimate": false,
+      "estimated_working_set_mb": 195.661376953125,
+      "cache_headroom_mb": 92.16,
+      "cache_fit_all_calls": false,
+      "cache_fit_ratio_max": 1.528604507446289
+    }
+  ],
+  "recommended": null,
+  "checks": {
+    "full_batch_cache_safe": false,
+    "full_batch_cache_fit": false,
+    "microbatch_available": false,
+    "recommended_chunk_le_16": false
+  },
+  "contract_pass": false,
+  "reason_code": "ERR_NO_CACHE_SAFE_CHUNK",
+  "reason": "no tested chunk fits cache headroom"
+}

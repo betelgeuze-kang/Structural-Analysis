@@ -1,0 +1,34 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/luxinzheng_megatall_tcl_model1_local.json"
+  },
+  "bytes_copied": 2850355,
+  "declared_format": "tcl",
+  "family_id": "torsionally_eccentric_core_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "benchmark_variant": "Model1",
+    "model_mesh_note": "Model 1 coarse mesh; package also includes Model 2 refined mesh.",
+    "upstream_provider": "Tsinghua University benchmark page referenced by opstool docs"
+  },
+  "original_reference": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl",
+  "sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+  "source_exists": true,
+  "source_format": "tcl",
+  "source_id": "luxinzheng_megatall_tcl_model1_local",
+  "source_index": 7,
+  "source_urls": [
+    "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+    "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip"
+  ],
+  "status": "collected",
+  "title": "OpenSees 606 m mega-tall building Model 1 TCL"
+}

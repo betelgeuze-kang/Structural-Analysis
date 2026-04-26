@@ -1,0 +1,543 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-panel-zone-joint_geometry-source-artifact",
+  "generated_at": "2026-04-06T13:54:57.558291+00:00",
+  "source_kind": "panel_zone_joint_geometry_3d",
+  "source_provenance": {
+    "source_kind": "panel_zone_joint_geometry_3d",
+    "input_dataset_report": "implementation/phase1/release/design_optimization/design_optimization_dataset_report.json",
+    "input_design_optimization_npz": "implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "source_input_path": "implementation/phase1/panel_zone_solver_export_bundle.json",
+    "source_input_present": true,
+    "source_input_contract_pass": true,
+    "source_input_kind": "panel_zone_joint_geometry_3d",
+    "source_kind_match": true,
+    "source_bundle_detected": true,
+    "source_bundle_mode": "midas_topology_projection",
+    "producer_backend": "midas_topology_projection",
+    "topology_projected": true,
+    "solver_verified": false,
+    "upstream_verification_tier": "topology_projected_3d_source",
+    "instruction_sidecar_present": true,
+    "instruction_sidecar_change_count": 0,
+    "instruction_sidecar_candidate_overlap_mode": "none",
+    "instruction_sidecar_overlap_row_count": 0,
+    "instruction_sidecar_overlap_member_count": 0,
+    "instruction_sidecar_overlap_group_count": 0,
+    "instruction_sidecar_evidence_model": "direct_patch_plus_zero_touch_verification_manifest",
+    "instruction_sidecar_rebar_delivery_mode": "direct_patch_eligible",
+    "source_row_count": 45,
+    "valid_source_row_count": 45,
+    "invalid_source_row_count": 0,
+    "candidate_scan_mode": "npz_full",
+    "candidate_member_count": 45,
+    "candidate_member_ids_head": [
+      "26705",
+      "26708",
+      "26713",
+      "26715",
+      "26716",
+      "26721",
+      "26727",
+      "26868",
+      "26882",
+      "26900",
+      "26910",
+      "26911",
+      "26937",
+      "26938",
+      "26943",
+      "26944"
+    ],
+    "source_member_ids_head": [
+      "26705",
+      "26708",
+      "26713",
+      "26715",
+      "26716",
+      "26721",
+      "26727",
+      "26868",
+      "26882",
+      "26900",
+      "26910",
+      "26911",
+      "26937",
+      "26938",
+      "26943",
+      "26944"
+    ],
+    "overlap_member_count": 45,
+    "overlap_member_ids_head": [
+      "26705",
+      "26708",
+      "26713",
+      "26715",
+      "26716",
+      "26721",
+      "26727",
+      "26868",
+      "26882",
+      "26900",
+      "26910",
+      "26911",
+      "26937",
+      "26938",
+      "26943",
+      "26944"
+    ],
+    "required_source_fields": [
+      "joint_id"
+    ],
+    "required_source_member_id": true,
+    "verification_tier": "panel_zone_joint_geometry_3d_topology_projected_validated_source",
+    "topology_capable_input": true
+  },
+  "summary": {
+    "source_kind": "panel_zone_joint_geometry_3d",
+    "source_status": "validated",
+    "candidate_scan_mode": "npz_full",
+    "candidate_member_count": 45,
+    "source_row_count": 45,
+    "valid_source_row_count": 45,
+    "invalid_source_row_count": 0,
+    "overlap_member_count": 45,
+    "source_input_present": true,
+    "source_input_contract_pass": true,
+    "source_kind_match": true,
+    "source_bundle_mode": "midas_topology_projection",
+    "producer_backend": "midas_topology_projection",
+    "topology_projected": true,
+    "solver_verified": false,
+    "upstream_verification_tier": "topology_projected_3d_source",
+    "instruction_sidecar_present": true,
+    "instruction_sidecar_change_count": 0,
+    "instruction_sidecar_candidate_overlap_mode": "none",
+    "instruction_sidecar_overlap_row_count": 0,
+    "instruction_sidecar_overlap_member_count": 0,
+    "instruction_sidecar_overlap_group_count": 0,
+    "instruction_sidecar_evidence_model": "direct_patch_plus_zero_touch_verification_manifest",
+    "instruction_sidecar_rebar_delivery_mode": "direct_patch_eligible",
+    "verification_tier": "panel_zone_joint_geometry_3d_topology_projected_validated_source"
+  },
+  "artifacts": {
+    "candidate_rows_head": [
+      {
+        "member_id": "26705",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB800X4001.72",
+        "section_signature": "SB800X4001.72",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26708",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB800X4002.00",
+        "section_signature": "SB800X4002.00",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26713",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB800X4002.00",
+        "section_signature": "SB800X4002.00",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26715",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB800X4002.00",
+        "section_signature": "SB800X4002.00",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26716",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB800X4001.91",
+        "section_signature": "SB800X4001.91",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26721",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB600X2001.82",
+        "section_signature": "SB600X2001.82",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26727",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB1000X3002.00",
+        "section_signature": "SB1000X3002.00",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26868",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB400X2002.00",
+        "section_signature": "SB400X2002.00",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26882",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB800X3002.00",
+        "section_signature": "SB800X3002.00",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26900",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB800X3002.00",
+        "section_signature": "SB800X3002.00",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26910",
+        "member_type": "beam",
+        "group_id": "S09:intermediate:nogroup:beam:SB800X700",
+        "section_signature": "SB800X700",
+        "constructability_score": 0.24710774305301428
+      },
+      {
+        "member_id": "26911",
+        "member_type": "beam",
+        "group_id": "S09:intermediate:nogroup:beam:SB800X700",
+        "section_signature": "SB800X700",
+        "constructability_score": 0.24710774305301428
+      },
+      {
+        "member_id": "26937",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB800X4001.34",
+        "section_signature": "SB800X4001.34",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26938",
+        "member_type": "beam",
+        "group_id": "S09:perimeter:nogroup:beam:SB800X4001.34",
+        "section_signature": "SB800X4001.34",
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26943",
+        "member_type": "beam",
+        "group_id": "S09:intermediate:nogroup:beam:SB800X600",
+        "section_signature": "SB800X600",
+        "constructability_score": 0.24710774305301428
+      },
+      {
+        "member_id": "26944",
+        "member_type": "beam",
+        "group_id": "S09:intermediate:nogroup:beam:SB800X600",
+        "section_signature": "SB800X600",
+        "constructability_score": 0.24710774305301428
+      }
+    ],
+    "source_rows_head": [
+      {
+        "member_id": "26705",
+        "joint_id": "J-7605-7606",
+        "panel_zone_id": "PZ-26705",
+        "joint_node_ids": [
+          7605,
+          7606
+        ],
+        "joint_centroid_m": {
+          "x": 155.644,
+          "y": 152.2995,
+          "z": 3.7
+        },
+        "beam_length_mm": 4669.77,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 400.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26708",
+        "joint_id": "J-7610-7611",
+        "panel_zone_id": "PZ-26708",
+        "joint_node_ids": [
+          7610,
+          7611
+        ],
+        "joint_centroid_m": {
+          "x": 163.5325,
+          "y": 154.47050000000002,
+          "z": 3.7
+        },
+        "beam_length_mm": 8868.752,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 400.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26713",
+        "joint_id": "J-7617-7615",
+        "panel_zone_id": "PZ-26713",
+        "joint_node_ids": [
+          7617,
+          7615
+        ],
+        "joint_centroid_m": {
+          "x": 109.01599999999999,
+          "y": 156.27800000000002,
+          "z": 3.7
+        },
+        "beam_length_mm": 1999.585,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 400.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26715",
+        "joint_id": "J-7619-7620",
+        "panel_zone_id": "PZ-26715",
+        "joint_node_ids": [
+          7619,
+          7620
+        ],
+        "joint_centroid_m": {
+          "x": 166.983,
+          "y": 156.7435,
+          "z": 3.7
+        },
+        "beam_length_mm": 2393.144,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 400.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26716",
+        "joint_id": "J-7621-7619",
+        "panel_zone_id": "PZ-26716",
+        "joint_node_ids": [
+          7621,
+          7619
+        ],
+        "joint_centroid_m": {
+          "x": 164.34300000000002,
+          "y": 156.97500000000002,
+          "z": 3.7
+        },
+        "beam_length_mm": 2907.117,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 400.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26721",
+        "joint_id": "J-7627-7628",
+        "panel_zone_id": "PZ-26721",
+        "joint_node_ids": [
+          7627,
+          7628
+        ],
+        "joint_centroid_m": {
+          "x": 164.489,
+          "y": 158.643,
+          "z": 3.7
+        },
+        "beam_length_mm": 2906.943,
+        "section_depth_mm": 600.0,
+        "section_width_mm": 200.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26727",
+        "joint_id": "J-7635-7636",
+        "panel_zone_id": "PZ-26727",
+        "joint_node_ids": [
+          7635,
+          7636
+        ],
+        "joint_centroid_m": {
+          "x": 167.228,
+          "y": 159.55599999999998,
+          "z": 3.7
+        },
+        "beam_length_mm": 2397.216,
+        "section_depth_mm": 1000.0,
+        "section_width_mm": 300.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26868",
+        "joint_id": "J-7851-7852",
+        "panel_zone_id": "PZ-26868",
+        "joint_node_ids": [
+          7851,
+          7852
+        ],
+        "joint_centroid_m": {
+          "x": 98.443,
+          "y": 199.876,
+          "z": 3.7
+        },
+        "beam_length_mm": 894.0,
+        "section_depth_mm": 400.0,
+        "section_width_mm": 200.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26882",
+        "joint_id": "J-7874-7875",
+        "panel_zone_id": "PZ-26882",
+        "joint_node_ids": [
+          7874,
+          7875
+        ],
+        "joint_centroid_m": {
+          "x": 99.06049999999999,
+          "y": 213.979,
+          "z": 3.7
+        },
+        "beam_length_mm": 8627.0,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 300.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26900",
+        "joint_id": "J-7903-7904",
+        "panel_zone_id": "PZ-26900",
+        "joint_node_ids": [
+          7903,
+          7904
+        ],
+        "joint_centroid_m": {
+          "x": 98.78200000000001,
+          "y": 216.56,
+          "z": 3.7
+        },
+        "beam_length_mm": 9260.0,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 300.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26910",
+        "joint_id": "J-7784-7794",
+        "panel_zone_id": "PZ-26910",
+        "joint_node_ids": [
+          7784,
+          7794
+        ],
+        "joint_centroid_m": {
+          "x": 169.6815,
+          "y": 172.9935,
+          "z": 3.7
+        },
+        "beam_length_mm": 1768.799,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 700.0,
+        "constructability_score": 0.24710774305301428
+      },
+      {
+        "member_id": "26911",
+        "joint_id": "J-7756-7784",
+        "panel_zone_id": "PZ-26911",
+        "joint_node_ids": [
+          7756,
+          7784
+        ],
+        "joint_centroid_m": {
+          "x": 169.5105,
+          "y": 171.8925,
+          "z": 3.7
+        },
+        "beam_length_mm": 460.828,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 700.0,
+        "constructability_score": 0.24710774305301428
+      },
+      {
+        "member_id": "26937",
+        "joint_id": "J-7628-7635",
+        "panel_zone_id": "PZ-26937",
+        "joint_node_ids": [
+          7628,
+          7635
+        ],
+        "joint_centroid_m": {
+          "x": 165.9855,
+          "y": 159.089,
+          "z": 3.7
+        },
+        "beam_length_mm": 1148.105,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 400.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26938",
+        "joint_id": "J-7619-7628",
+        "panel_zone_id": "PZ-26938",
+        "joint_node_ids": [
+          7619,
+          7628
+        ],
+        "joint_centroid_m": {
+          "x": 165.864,
+          "y": 157.6825,
+          "z": 3.7
+        },
+        "beam_length_mm": 1675.374,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 400.0,
+        "constructability_score": 0.24959484239332508
+      },
+      {
+        "member_id": "26943",
+        "joint_id": "J-7742-7753",
+        "panel_zone_id": "PZ-26943",
+        "joint_node_ids": [
+          7742,
+          7753
+        ],
+        "joint_centroid_m": {
+          "x": 161.3065,
+          "y": 171.0755,
+          "z": 3.7
+        },
+        "beam_length_mm": 1634.751,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 600.0,
+        "constructability_score": 0.24710774305301428
+      },
+      {
+        "member_id": "26944",
+        "joint_id": "J-7737-7742",
+        "panel_zone_id": "PZ-26944",
+        "joint_node_ids": [
+          7737,
+          7742
+        ],
+        "joint_centroid_m": {
+          "x": 161.364,
+          "y": 170.0155,
+          "z": 3.7
+        },
+        "beam_length_mm": 494.96,
+        "section_depth_mm": 800.0,
+        "section_width_mm": 600.0,
+        "constructability_score": 0.24710774305301428
+      }
+    ],
+    "invalid_source_rows_head": []
+  },
+  "checks": {
+    "candidate_members_present": true,
+    "source_input_present": true,
+    "source_rows_present": true,
+    "source_input_contract_pass": true,
+    "source_kind_match": true,
+    "required_source_fields_present": true,
+    "source_member_overlap_present": true,
+    "topology_capable_input": true
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "MIDAS-topology-projected panel source rows are attached and candidate rows are bound; solver-verified 3D clash rows are not attached."
+}

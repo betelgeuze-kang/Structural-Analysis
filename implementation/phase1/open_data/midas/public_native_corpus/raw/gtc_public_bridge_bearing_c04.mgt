@@ -1,0 +1,3165 @@
+*UNIT    ; Unit System
+; FORCE, LENGTH, HEAT, TEMPER
+   KN   , MM, J, C
+
+*PROJINFO    ; Project Information
+   USER=거씨기
+   ADDRESS=(주)마이다스아이티
+
+*STRUCTYPE    ; Structure Type
+; iSTYP, iMASS, iSMAS, bMASSOFFSET, bSELFWEIGHT, GRAV, TEMPER, bALIGNBEAM, bALIGNSLAB, bROTRIGID
+     0, 1, 1, NO, NO, 9806, 0, NO, NO, NO
+
+*REBAR-MATL-CODE    ; Rebar Material Code
+; CONC_CODE, CONC_MDB, SRC_CODE, SRC_MDB
+ EN04(RC), Class A, ASTM(RC), Grade 60
+
+*NODE    ; Nodes
+; iNO, X, Y, Z
+     1, 820, 0, 0
+     2, 1820, 0, 0
+     3, 3100, 0, 0
+     4, 4630, 0, 0
+     5, 6160, 0, 0
+     6, 9260, 0, 0
+     7, 12360, 0, 0
+     8, 15460, 0, 0
+     9, 18560, 0, 0
+    10, 21660, 0, 0
+    11, 23210, 0, 0
+    12, 24760, 0, 0
+    13, 26310, 0, 0
+    14, 27860, 0, 0
+    15, 29100, 0, 0
+    16, 30100, 0, 0
+
+*ELEMENT    ; Elements
+; iEL, TYPE, iMAT, iPRO, iN1, iN2, ANGLE, iSUB, EXVAL, iOPT(EXVAL2) ; Frame  Element
+; iEL, TYPE, iMAT, iPRO, iN1, iN2, ANGLE, iSUB, EXVAL, EXVAL2, bLMT ; Comp/Tens Truss
+; iEL, TYPE, iMAT, iPRO, iN1, iN2, iN3, iN4, iSUB, iWID , LCAXIS    ; Planar Element
+; iEL, TYPE, iMAT, iPRO, iN1, iN2, iN3, iN4, iN5, iN6, iN7, iN8     ; Solid  Element
+     1, BEAM  ,    1,     3,     1,     2,     0,     0
+     2, BEAM  ,    1,     3,     2,     3,     0,     0
+     3, BEAM  ,    1,     3,     3,     4,     0,     0
+     4, BEAM  ,    1,     2,     4,     5,     0,     0
+     5, BEAM  ,    1,     2,     5,     6,     0,     0
+     6, BEAM  ,    1,     2,     6,     7,     0,     0
+     7, BEAM  ,    1,     2,     7,     8,     0,     0
+     8, BEAM  ,    1,     2,     8,     9,     0,     0
+     9, BEAM  ,    1,     2,     9,    10,     0,     0
+    10, BEAM  ,    1,     2,    10,    11,     0,     0
+    11, BEAM  ,    1,     3,    11,    12,     0,     0
+    12, BEAM  ,    1,     3,    12,    13,     0,     0
+    13, BEAM  ,    1,     3,    13,    14,     0,     0
+    14, BEAM  ,    1,     3,    14,    15,     0,     0
+    15, BEAM  ,    1,     3,    15,    16,     0,     0
+
+*GROUP    ; Group
+; NAME, NODE_LIST, ELEM_LIST, PLANE_TYPE
+   SG1       , 1to3 5to10 12 14to16, 1to15, 0
+   SG2       , 1to3 5to10 12 14to16, 1to15, 0
+   SG3       , 1to3 5to10 12 14to16, 1to15, 0
+
+*BNDR-GROUP    ; Boundary Group
+; NAME, AUTOTYPE
+ BG1, 0
+ BG2, 1052636
+ BG3, 1052636
+
+*LOAD-GROUP    ; Load Group
+; NAME
+ Self
+ 2nd Dead
+ PL
+ LL
+
+*MATERIAL    ; Material
+; iMAT, TYPE, MNAME, SPHEAT, HEATCO, PLAST, TUNIT, bMASS, DAMPRATIO, [DATA1]           ; STEEL, CONC, USER
+; iMAT, TYPE, MNAME, SPHEAT, HEATCO, PLAST, TUNIT, bMASS, DAMPRATIO, [DATA2], [DATA2]  ; SRC
+; [DATA1] : 1, DB, NAME, CODE, USEELAST, ELAST
+; [DATA1] : 2, ELAST, POISN, THERMAL, DEN, MASS
+; [DATA1] : 3, Ex, Ey, Ez, Tx, Ty, Tz, Sxy, Sxz, Syz, Pxy, Pxz, Pyz, DEN, MASS         ; Orthotropic
+; [DATA2] : 1, DB, NAME, CODE, USEELAST, ELAST or 2, ELAST, POISN, THERMAL, DEN, MASS
+    1, CONC , C40/50            , 0, 0, , C, NO, 0.05, 1, EN04(RC)   ,            , C40/50        , NO, 35.22
+    2, USER , Tendon            , 0, 0, , C, NO, 0, 2, 1.9600e+002,     0, 1.0000e-005, 7.85e-008,     0
+
+*MATL-COLOR
+; iMAT, W_R, W_G, W_B, HF_R, HF_G, HF_B, HE_R, HE_G, HE_B, bBLEND, FACT
+    1, 255,   0,   0,  255,  77,  77,  192, 220, 192,  NO, 0.5
+    2, 255,   0,   0,  255,  77,  77,  192, 220, 192,  NO, 0.5
+
+*TDM-TYPE    ; Time Dependent Material
+; NAME=NAME, CODE, STR, HU, VOL, AGE, CFACTA, CFACTB, TYPE, [ACI1 or ACI2]     ; CODE=ACI
+; NAME=NAME, CODE, STR, HU, MSIZE, CTYPE, AGE                                  ; CODE=CEB1990,KS,CEB1978,KSCE 2010,KCI-USD12
+; NAME=NAME, CODE, N1, PHI1, N2, PHI2                                          ; CODE=MEM
+; NAME=NAME, CODE, STR, HU, USS, UCS, VOL, RR, MOD                             ; CODE=PCA
+; NAME=NAME, CODE, STR, HU, VOL, UCS, VSR1, LAF, US, VSR, PST, bRCE, RR, MOD   ; CODE=COMBINED
+; NAME=NAME, CODE, STR, HTYPE, HU, MSIZE, CTYPE, AGE, CM                       ; CODE=JAPAN
+; NAME=NAME, CODE, ELAST, HU, VOL, CC, WC, AGE                                 ; CODE=JSCE
+; NAME=NAME, CODE, STR, HTYPE, HU, MSIZE, AGE                                  ; CODE=CHINA
+; NAME=NAME, CODE, STR, HU, MSIZE, BSC, AGE                                    ; CODE=JTG
+; NAME=NAME, CODE, STR, HU, VSR, AGE, bEXPOSE                                  ; CODE=AASHTO
+; NAME=NAME, CODE, STR, HU, MSIZE, AGE                                         ; CODE=INDIA(IRC:18-2000)
+; NAME=NAME, CODE, STR, HU, MSIZE, CTYPE, AGE                                  ; CODE=INDIA(IRC:112-2011)
+; NAME=NAME, CODE, STR, HU, MSIZE, CTYPE, AGE, TCode, bSILICA                  ; CODE=European
+; NAME=NAME, CODE, STR, EE(Not Use), FS, HT, DSE, DSC, AGE                     ; CODE=NZ Bridge(SP/M/022)
+; NAME=NAME, CODE, STR, HU, AGE, M, CMETH, CTYPE, CREEP, CONCT, W, MAXS, A, PZ ; CODE=Russian
+; NAME=NAME, CODE, STR, HU, MSIZE, BSC, AGE, FLYASH                            ; CODE=China(JTG D62-2016)
+; NAME=NAME, CODE, STR, EE, HT, DSC, AGE                                       ; CODE=Australia
+; NAME=NAME, CODE, bSSF, SSFNAME                                               ; CODE=USER(line1)
+;      CREEPFUNC1, AGE1, CREEPFUNC2, AGE2, ...                                 ; USER(from line 2)
+; [ACI1] : CURE, SLUMP, FAP, AIR, CC
+; [ACI2] : UCC, USS
+   NAME=ceep& SH, CEB, 0.04, 70, 500, NR, 3, 0
+
+*TDM-ELAST    ; Time Dependent Material(Comp. Strength)
+; NAME=NAME, TYPE, CODE, STRENGTH, A, B                          ; TYPE=CODE(Korean Standard, ACI)
+; NAME=NAME, TYPE, CODE, STRENGTH, iCTYPE                        ; TYPE=CODE(CEB-FIP, Ohzagi)
+; NAME=NAME, TYPE, CODE, STRENGTH                                ; TYPE=CODE(Chinese Standard)
+; NAME=NAME, TYPE, CODE, STRENGTH, bUSE, [DATA]                  ; TYPE=CODE(Japan(Hydration))
+; NAME=NAME, TYPE, CODE, STRENGTH, iTYPE                         ; TYPE=CODE(Japan(Elastic))
+; NAME=NAME, TYPE, CODE, STRENGTH                                ; TYPE=CODE(INDIA(IRC:18-2000))
+; NAME=NAME, TYPE, CODE, STRENGTH, iCTYPE                        ; TYPE=CODE(INDIA(IRC:112-2011))
+; NAME=NAME, TYPE, CODE, STRENGTH, iCTYPE                        ; TYPE=CODE(European)
+; NAME=NAME, TYPE, CODE, STRENGTH,                               ; TYPE=CODE(CEB-FIP(1978))
+; NAME=NAME, TYPE, CODE, STRENGTH, TYPE, CMETH, CTYPE, MAXS, PZ  ; TYPE=CODE(Russian))
+; NAME=NAME, TYPE, CODE, STRENGTH,                               ; CODE=Australia
+; NAME=NAME, TYPE, SCALE                                         ; TYPE=USER(line 1)
+;      DAY1, COMP1, TENS1, ELAST1, DAY2, COMP2, ...              ;      USER(from line 2)
+; [DATA] : A, B, D, TSF or iCTYPE, TSF
+   NAME=Creep & SH, CODE, CEB-FIP, 0.048, 2
+
+*TDM-LINK    ; Time Dependent Material Link
+; iMAT, TDM-TYPE1(CREEP/SHRINKAGE), TDM-TYPE2(ELASTICITY)
+    1, ceep& SH, Creep & SH
+
+*SECT-PSCVALUE    ; PSC Value, General Section, Composite PC, Composite General
+; SECT=iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE, bBU, bEQ                    ; 1st line
+;      [STIFF1]                                                                  ; 2nd line
+;      [STIFF2]                                                                  ; 3rd line
+;      [STIFF3]                                                                  ; 4th line
+;      T1, T2, BT, HT                                                            ; 5th line(PSC)
+;      bSHEARCHK, [SCHK], [WT]                                                   ; 6th line(PSC)
+;      SW, GN, CTC, Bc, Tc, Hh, EsEc, DsDc, Ps, Pc                               ; 7th line(COMPOSITE-PC)
+;      OPOLY=X1, Y1, X2, Y2, ..., Xn, Yn                                         ; Outer Polygon(PLANE)
+;      IPOLY=X1, Y1, X2, Y2, ..., Xn, Yn                                         ; Inner Polygon(PLANE)
+;      ...
+;      IPOLY=X1, Y1, X2, Y2, ..., Xn, Yn                                         ; Inner Polygon(PLANE)
+;      VERTEX=X1, Y1, X2, Y2, ..., Xn, Yn                                        ; Vertex(General-LINE)
+;      LINE=VI1, VJ1, dTHIK1, iALIGN1                                            ; Line(General-LINE)
+;      ...
+;      LINE=VIn, VJn, dTHIKn, iALIGNn                                            ; Line(General-LINE)
+;      LOOP=COUNT1, LIX11, LIX12, ..., LIXn                                      ; Line(General-LINE)
+;      ...
+;      LOOP=COUNTn, LIXn1, LIXn2, ..., LIXnn                                     ; Line(General-LINE)
+; SECT=iSEC, TYPE, SNAME, [OFFSET2], bSD, bWE, SHAPE, iyVAR, izVAR, bEQ          ; 1st line - TAPERED
+;      [STIFF1-I]                                                                ; 2nd line
+;      [STIFF2-I]                                                                ; 3rd line
+;      [STIFF3-I]                                                                ; 4th line
+;      [STIFF1-J]                                                                ; 5th line
+;      [STIFF2-J]                                                                ; 6th line
+;      [STIFF3-J]                                                                ; 7th line
+;      T1-I, T2-I, BT-I, HT-I, T1-J, T2-J, BT-J, HT-J                            ; 8th line(PSC)
+;      bSHEARCHK, [SCHK-I], [WT-I], [SCHK-J], [WT-J]                             ; 9rd line(PSC)
+;      OPOLY=bI, X1, Y1, X2, Y2, ..., Xn, Yn                                     ; Outer Polygon(PLANE)
+;      IPOLY=bI, X1, Y1, X2, Y2, ..., Xn, Yn                                     ; Inner Polygon(PLANE)
+;      ...
+;      IPOLY=bI, X1, Y1, X2, Y2, ..., Xn, Yn                                     ; Inner Polygon(PLANE)
+;      VERTEX=bI, X1, Y1, X2, Y2, ..., Xn, Yn                                    ; Vertex(General-LINE)
+;      LINE=bI, VI1, VJ1, dTHIK1, iALIGN1                                        ; Line(General-LINE)
+;      ...
+;      LINE=bI, VIn, VJn, dTHIKn, iALIGNn                                        ; Line(General-LINE)
+;      LOOP=bI, COUNT1, LIX11, LIX12, ..., LIXn                                  ; Line(General-LINE)
+;      ...
+;      LOOP=bI, COUNTn, LIXn1, LIXn2, ..., LIXnn                                 ; Line(General-LINE)
+; SECT=iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE, bBU, bEQ, BPRT              ; 1st line - COMPOSITE-GEN
+;      [PART1]                                                                   ; 2nd line
+;      [PART2]                                                                   ; 3rd line
+;      ...
+; SECT=iSEC, TYPE, SNAME, [OFFSET2], bSD, bWE, SHAPE, iyVAR, izVAR, bEQ, PARTNUM ; 1st line - COMPOSITE-GEN(TAPERED)
+;      [PART1]-I                                                                 ; 2nd line
+;      [PART2]-I                                                                 ; next lines
+;      ...
+;      [PART1]-J                                                                 ; next lines
+;      [PART2]-J                                                                 ; next lines
+;      ...
+; [OFFSET] : OFFSET, iCENT, iREF, iHORZ, HUSER, iVERT, VUSER
+; [OFFSET2]: OFFSET, iCENT, iREF, iHORZ, HUSERI, HUSERJ, iVERT, VUSERI, VUSERJ
+; [STIFF1] : AREA, ASy, ASz, Ixx, Iyy, Izz
+; [STIFF2] ; Cyp, Cym, Czp, Czm, Qyb, Qzb, PERI_OUT, PERI_IN, Cy, Cz
+; [STIFF3] ; Y1, Y2, Y3, Y4, Z1, Z2, Z3, Z4
+; [SCHK]   : Z1, Z3, bAUTO_QY1, QY1, bAUTO_QY2, QY2, bAUTO_QY3, QY3
+; [WT]     : TOR, bAUTO_SHR1, SHR1, bAUTO_SHR2, SHR2, bAUTO_SHR3, SHR3
+; [PART] : PART=part_num
+;        : [STIFF1]
+;        : [STIFF2]
+;        : [STIFF3]
+;        : [STIFF1]                                                            ; [STIFF1] of Part Sum.
+;        : [STIFF2]                                                            ; [STIFF2] of Part Sum.
+;        : [STIFF3]                                                            ; [STIFF3] of Part Sum.
+;        : OPOLY=(bI-Tapered), X1, Y1, X2, Y2, ..., Xn, Yn                     ; Outer Polygon(PLANE)
+;        : IPOLY=(bI-Tapered), X1, Y1, X2, Y2, ..., Xn, Yn                     ; Inner Polygon(PLANE)
+;        : ...
+;        : IPOLY=(bI-Tapered), X1, Y1, X2, Y2, ..., Xn, Yn                     ; Inner Polygon(PLANE)
+;        : VERTEX=(bI-Tapered), X1, Y1, X2, Y2, ..., Xn, Yn                    ; Vertex(General-LINE)
+;        : LINE=(bI-Tapered), VI1, VJ1, dTHIK1, iALIGN1                        ; Line(General-LINE)
+;        : ...
+;        : LINE=(bI-Tapered), VIn, VJn, dTHIKn, iALIGNn                        ; Line(General-LINE)
+;        : LOOP=(bI-Tapered), COUNT1, LIX11, LIX12, ..., LIXn                  ; Line(General-LINE)
+;        : ...
+;        : LOOP=(bI-Tapered), COUNTn, LIXn1, LIXn2, ..., LIXnn                 ; Line(General-LINE)
+ SECT=   2, PSC       , middle            , CT, 0, 0, 0, 0, 0, 0, YES, NO, VALU
+       2.595e+006, 1.25886e+006, 1.39784e+006, 1.89399e+012, 1.19212e+012, 1.25406e+012
+       1125, 1125, 1003.95, 996.05, 1.00016e+006, 1.18168e+006, 8500, 4531.37, 1125, 996.05
+       -1125, 1125, 1000, -1000, 1003.95, 1003.95, -996.05, -996.05
+       1800, 800, 300, 400
+       YES, 0.1, 1999.9, YES, , YES, , YES, , 300, YES, , YES, , YES, 
+       OPOLY=-1125, 1003.95, -1125, 703.95, -1000, 703.95, -1000, -996.05, 1000, -996.05
+             1000, 703.95, 1125, 703.95, 1125, 1003.95
+       IPOLY=-600, 503.95, -400, 703.95, 400, 703.95, 600, 503.95, 600, -396.05
+             400, -596.05, -400, -596.05, -600, -396.05
+ SECT=   3, PSC       , end               , CT, 0, 0, 0, 0, 0, 0, YES, NO, VALU
+       4.075e+006, 3.40241e+006, 3.34805e+006, 2.26313e+012, 1.38741e+012, 1.41814e+012
+       1125, 1125, 984.356, 1015.64, 515767, 519922, 8500, 0, 1125, 1015.64
+       -1125, 1125, 1000, -1000, 984.356, 984.356, -1015.64, -1015.64
+       1800, 900, 300, 300
+       YES, 0.1, 1999.9, YES, , YES, , YES, , 300, YES, , YES, , YES, 
+       OPOLY=-1125, 984.356, -1125, 684.356, -1000, 684.356, -1000, -1015.64, 1000, -1015.64
+             1000, 684.356, 1125, 684.356, 1125, 984.356
+ SECT=   5, PSC       , tendon section    , CT, 0, 0, 0, 0, 0, 0, YES, NO, VALU
+       2.39958e+006, 2.05606e+006, 1.68646e+006, 3.5174e+011, 1.04958e+011, 2.27345e+012
+       1980.33, 1908.09, 340.48, 384.52, 66523.8, 1.38564e+006, 8657.86, 0, 1908.09, 384.52
+       -1908.09, 1980.33, 1370.33, -1409.67, 340.48, 340.48, -384.52, -384.52
+       720, 2300, 400, 325
+       YES, 0.1, 724, YES, , YES, , YES, , 100, YES, , YES, , YES, 
+       OPOLY=-1908.09, 340.48, -1409.67, -384.52, 1370.33, -384.52, 1680.44, 140.48
+             1980.33, 140.48, 1980.33, 340.48
+
+
+*SECT-COLOR
+; iSEC, W_R, W_G, W_B, HF_R, HF_G, HF_B, HE_R, HE_G, HE_B, bBLEND, FACT
+    2, 255,   0,   0,    0, 255,   0,    0,   0, 255,  NO, 0.5
+    3, 255,   0,   0,    0, 255,   0,    0,   0, 255,  NO, 0.5
+    5, 255,   0,   0,    0, 255,   0,    0,   0, 255,  NO, 0.5
+
+
+*DGN-SECT-PSCVALUE    ; Design Section of PSC Value
+; SECT=iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE, bBU, bEQ                    ; 1st line
+;      [STIFF1]                                                                  ; 2nd line
+;      [STIFF2]                                                                  ; 3rd line
+;      [STIFF3]                                                                  ; 4th line
+;      T1, T2, BT, HT                                                            ; 5th line(PSC)
+;      bSHEARCHK, [SCHK], [WT]                                                   ; 6th line(PSC)
+;      SW, GN, CTC, Bc, Tc, Hh, EsEc, DsDc, Ps, Pc                               ; 7th line(COMPOSITE-PC)
+;      OPOLY=X1, Y1, X2, Y2, ..., Xn, Yn                                         ; Outer Polygon(PLANE)
+;      IPOLY=X1, Y1, X2, Y2, ..., Xn, Yn                                         ; Inner Polygon(PLANE)
+;      ...
+;      IPOLY=X1, Y1, X2, Y2, ..., Xn, Yn                                         ; Inner Polygon(PLANE)
+;      VERTEX=X1, Y1, X2, Y2, ..., Xn, Yn                                        ; Vertex(General-LINE)
+;      LINE=VI1, VJ1, dTHIK1, iALIGN1                                            ; Line(General-LINE)
+;      ...
+;      LINE=VIn, VJn, dTHIKn, iALIGNn                                            ; Line(General-LINE)
+;      LOOP=COUNT1, LIX11, LIX12, ..., LIXn                                      ; Line(General-LINE)
+;      ...
+;      LOOP=COUNTn, LIXn1, LIXn2, ..., LIXnn                                     ; Line(General-LINE)
+; SECT=iSEC, TYPE, SNAME, [OFFSET2], bSD, bWE, SHAPE, iyVAR, izVAR, bEQ          ; 1st line - TAPERED
+;      [STIFF1-I]                                                                ; 2nd line
+;      [STIFF2-I]                                                                ; 3rd line
+;      [STIFF3-I]                                                                ; 4th line
+;      [STIFF1-J]                                                                ; 5th line
+;      [STIFF2-J]                                                                ; 6th line
+;      [STIFF3-J]                                                                ; 7th line
+;      T1-I, T2-I, BT-I, HT-I, T1-J, T2-J, BT-J, HT-J                            ; 8th line(PSC)
+;      bSHEARCHK, [SCHK-I], [WT-I], [SCHK-J], [WT-J]                             ; 9rd line(PSC)
+;      OPOLY=bI, X1, Y1, X2, Y2, ..., Xn, Yn                                     ; Outer Polygon(PLANE)
+;      IPOLY=bI, X1, Y1, X2, Y2, ..., Xn, Yn                                     ; Inner Polygon(PLANE)
+;      ...
+;      IPOLY=bI, X1, Y1, X2, Y2, ..., Xn, Yn                                     ; Inner Polygon(PLANE)
+;      VERTEX=bI, X1, Y1, X2, Y2, ..., Xn, Yn                                    ; Vertex(General-LINE)
+;      LINE=bI, VI1, VJ1, dTHIK1, iALIGN1                                        ; Line(General-LINE)
+;      ...
+;      LINE=bI, VIn, VJn, dTHIKn, iALIGNn                                        ; Line(General-LINE)
+;      LOOP=bI, COUNT1, LIX11, LIX12, ..., LIXn                                  ; Line(General-LINE)
+;      ...
+;      LOOP=bI, COUNTn, LIXn1, LIXn2, ..., LIXnn                                 ; Line(General-LINE)
+; SECT=iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE, bBU, bEQ, BPRT              ; 1st line - COMPOSITE-GEN
+;      [PART1]                                                                   ; 2nd line
+;      [PART2]                                                                   ; 3rd line
+;      ...
+; SECT=iSEC, TYPE, SNAME, [OFFSET2], bSD, bWE, SHAPE, iyVAR, izVAR, bEQ, PARTNUM ; 1st line - COMPOSITE-GEN(TAPERED)
+;      [PART1]-I                                                                 ; 2nd line
+;      [PART2]-I                                                                 ; next lines
+;      ...
+;      [PART1]-J                                                                 ; next lines
+;      [PART2]-J                                                                 ; next lines
+;      ...
+; [OFFSET] : OFFSET, iCENT, iREF, iHORZ, HUSER, iVERT, VUSER
+; [OFFSET2]: OFFSET, iCENT, iREF, iHORZ, HUSERI, HUSERJ, iVERT, VUSERI, VUSERJ
+; [STIFF1] : AREA, ASy, ASz, Ixx, Iyy, Izz
+; [STIFF2] ; Cyp, Cym, Czp, Czm, Qyb, Qzb, PERI_OUT, PERI_IN, Cy, Cz
+; [STIFF3] ; Y1, Y2, Y3, Y4, Z1, Z2, Z3, Z4
+; [SCHK]   : Z1, Z3, bAUTO_QY1, QY1, bAUTO_QY2, QY2, bAUTO_QY3, QY3
+; [WT]     : TOR, bAUTO_SHR1, SHR1, bAUTO_SHR2, SHR2, bAUTO_SHR3, SHR3
+; [PART] : PART=part_num
+;        : [STIFF1]
+;        : [STIFF2]
+;        : [STIFF3]
+;        : [STIFF1]                                                            ; [STIFF1] of Part Sum.
+;        : [STIFF2]                                                            ; [STIFF2] of Part Sum.
+;        : [STIFF3]                                                            ; [STIFF3] of Part Sum.
+;        : OPOLY=(bI-Tapered), X1, Y1, X2, Y2, ..., Xn, Yn                     ; Outer Polygon(PLANE)
+;        : IPOLY=(bI-Tapered), X1, Y1, X2, Y2, ..., Xn, Yn                     ; Inner Polygon(PLANE)
+;        : ...
+;        : IPOLY=(bI-Tapered), X1, Y1, X2, Y2, ..., Xn, Yn                     ; Inner Polygon(PLANE)
+;        : VERTEX=(bI-Tapered), X1, Y1, X2, Y2, ..., Xn, Yn                    ; Vertex(General-LINE)
+;        : LINE=(bI-Tapered), VI1, VJ1, dTHIK1, iALIGN1                        ; Line(General-LINE)
+;        : ...
+;        : LINE=(bI-Tapered), VIn, VJn, dTHIKn, iALIGNn                        ; Line(General-LINE)
+;        : LOOP=(bI-Tapered), COUNT1, LIX11, LIX12, ..., LIXn                  ; Line(General-LINE)
+;        : ...
+;        : LOOP=(bI-Tapered), COUNTn, LIXn1, LIXn2, ..., LIXnn                 ; Line(General-LINE)
+ SECT=   2, PSC       , middle            , CT, 0, 0, 0, 0, 0, 0, YES, NO, VALU
+       2.595e+006, 1.25886e+006, 1.39784e+006, 1.89399e+012, 1.19212e+012, 1.25406e+012
+       1125, 1125, 1003.95, 996.05, 1.00016e+006, 1.18168e+006, 8500, 4531.37, 1125, 996.05
+       -1125, 1125, 1000, -1000, 1003.95, 1003.95, -996.05, -996.05
+       1800, 800, 300, 400
+       YES, 0.1, 1999.9, YES, , YES, , YES, , 300, YES, , YES, , YES, 
+       OPOLY=-1125, 1003.95, -1125, 703.95, -1000, 703.95, -1000, -996.05, 1000, -996.05
+             1000, 703.95, 1125, 703.95, 1125, 1003.95
+       IPOLY=-600, 503.95, -400, 703.95, 400, 703.95, 600, 503.95, 600, -396.05
+             400, -596.05, -400, -596.05, -600, -396.05
+ SECT=   3, PSC       , end               , CT, 0, 0, 0, 0, 0, 0, YES, NO, VALU
+       4.075e+006, 3.40241e+006, 3.34805e+006, 2.26313e+012, 1.38741e+012, 1.41814e+012
+       1125, 1125, 984.356, 1015.64, 515767, 519922, 8500, 0, 1125, 1015.64
+       -1125, 1125, 1000, -1000, 984.356, 984.356, -1015.64, -1015.64
+       1800, 900, 300, 300
+       YES, 0.1, 1999.9, YES, , YES, , YES, , 300, YES, , YES, , YES, 
+       OPOLY=-1125, 984.356, -1125, 684.356, -1000, 684.356, -1000, -1015.64, 1000, -1015.64
+             1000, 684.356, 1125, 684.356, 1125, 984.356
+ SECT=   5, PSC       , tendon section    , CT, 0, 0, 0, 0, 0, 0, YES, NO, VALU
+       2.39958e+006, 2.05606e+006, 1.68646e+006, 3.5174e+011, 1.04958e+011, 2.27345e+012
+       1980.33, 1908.09, 340.48, 384.52, 66523.8, 1.38564e+006, 8657.86, 0, 1908.09, 384.52
+       -1908.09, 1980.33, 1370.33, -1409.67, 340.48, 340.48, -384.52, -384.52
+       720, 2300, 400, 325
+       YES, 0.1, 724, YES, , YES, , YES, , 100, YES, , YES, , YES, 
+       OPOLY=-1908.09, 340.48, -1409.67, -384.52, 1370.33, -384.52, 1680.44, 140.48
+             1980.33, 140.48, 1980.33, 340.48
+
+*REBAR-PSC    ; Reinforcement of Section
+; SECT=NO, bMBARJ, bSHEARJ, bCRACKED                                                    ; line 1
+;      [DR-I], [SBW-I], [TR-I], [SR-I], [ES-I], [DR-J], [SBW-J], [TR-J], [SR-J], [ES-J] ; line 2
+;      I/J, NAME1, BARNUM1, YREF1, Y1, ZREF1, Z1, PITCH1, iPart1                        ; from line3
+;      I/J, NAME2, BARNUM2, YREF2, Y2, ZREF2, Z2, PITCH2, iPart2
+;      ...
+; [DR]  : bDR, SPITCH, STHETA, SAW
+; [SBW] : bSBW, TPITCH, TTHETA, TAP, TPS, SRF
+; [TR]  : bTR, LPITCH, LAWT, LALT
+; [SR]  : bSTIR, PITCH, AW
+; [ES]  : bES, CT, bIFC
+   SECT=2, YES, NO, NO
+        YES, 100, 90, 8042, NO, , , , , , YES, 100, 8042, 8042, NO, , , NO, , 
+        I, P20, 24, 0, 0, 0, 60, 150, 0
+        I, P20, 13, 0, 0, 1, 60, 150, 0
+        I, P20, 1, 1, 2466.87, 1, 1752.57, 0, 0
+        I, P20, 1, 1, 2388.5, 1, 1568.57, 0, 0
+        I, P20, 1, 1, 2310.12, 1, 1384.56, 0, 0
+        I, P20, 1, 1, 2231.75, 1, 1200.56, 0, 0
+        I, P20, 1, 1, 2153.37, 1, 1016.55, 0, 0
+        I, P20, 1, 1, 2075, 1, 832.55, 0, 0
+        I, P20, 1, 1, 1996.63, 1, 648.546, 0, 0
+        I, P20, 1, 1, 1918.25, 1, 464.542, 0, 0
+        I, P20, 1, 1, 1839.88, 1, 280.537, 0, 0
+        I, P20, 1, 1, 1761.5, 1, 96.5331, 0, 0
+        I, P20, 1, 1, 1683.13, 1, -87.4711, 0, 0
+        I, P20, 1, 1, -218.174, 1, 1754.14, 0, 0
+        I, P20, 1, 1, -140.539, 1, 1569.82, 0, 0
+        I, P20, 1, 1, -62.9044, 1, 1385.5, 0, 0
+        I, P20, 1, 1, 14.7304, 1, 1201.18, 0, 0
+        I, P20, 1, 1, 92.3652, 1, 1016.87, 0, 0
+        I, P20, 1, 1, 170, 1, 832.55, 0, 0
+        I, P20, 1, 1, 247.635, 1, 648.233, 0, 0
+        I, P20, 1, 1, 325.27, 1, 463.916, 0, 0
+        I, P20, 1, 1, 402.904, 1, 279.598, 0, 0
+        I, P20, 1, 1, 480.539, 1, 95.2811, 0, 0
+        I, P20, 1, 1, 558.174, 1, -89.0361, 0, 0
+        I, P20, 1, 1, 2671.98, 1, 1758.77, 0, 0
+        I, P20, 1, 1, 2596.58, 1, 1573.53, 0, 0
+        I, P20, 1, 1, 2521.19, 1, 1388.28, 0, 0
+        I, P20, 1, 1, 2445.79, 1, 1203.04, 0, 0
+        I, P20, 1, 1, 2370.4, 1, 1017.79, 0, 0
+        I, P20, 1, 1, 2295, 1, 832.55, 0, 0
+        I, P20, 1, 1, 2219.6, 1, 647.305, 0, 0
+        I, P20, 1, 1, 2144.21, 1, 462.061, 0, 0
+        I, P20, 1, 1, 2068.81, 1, 276.816, 0, 0
+        I, P20, 1, 1, 1993.42, 1, 91.5718, 0, 0
+        I, P20, 1, 1, 1918.02, 1, -93.6728, 0, 0
+        I, P20, 1, 1, -421.977, 1, 1758.77, 0, 0
+        I, P20, 1, 1, -346.581, 1, 1573.53, 0, 0
+        I, P20, 1, 1, -271.186, 1, 1388.28, 0, 0
+        I, P20, 1, 1, -195.791, 1, 1203.04, 0, 0
+        I, P20, 1, 1, -120.395, 1, 1017.79, 0, 0
+        I, P20, 1, 1, -45, 1, 832.55, 0, 0
+        I, P20, 1, 1, 30.3953, 1, 647.305, 0, 0
+        I, P20, 1, 1, 105.791, 1, 462.061, 0, 0
+        I, P20, 1, 1, 181.186, 1, 276.816, 0, 0
+        I, P20, 1, 1, 256.581, 1, 91.5718, 0, 0
+        I, P20, 1, 1, 331.977, 1, -93.6728, 0, 0
+        I, P20, 18, 0, 0, 0, 210, 150, 0
+        I, P20, 13, 0, 0, 1, 210, 150, 0
+        J, P20, 24, 0, 0, 0, 60, 150, 0
+        J, P20, 13, 0, 0, 1, 60, 150, 0
+        J, P20, 1, 1, 2466.87, 1, 1752.57, 0, 0
+        J, P20, 1, 1, 2388.5, 1, 1568.57, 0, 0
+        J, P20, 1, 1, 2310.12, 1, 1384.56, 0, 0
+        J, P20, 1, 1, 2231.75, 1, 1200.56, 0, 0
+        J, P20, 1, 1, 2153.37, 1, 1016.55, 0, 0
+        J, P20, 1, 1, 2075, 1, 832.55, 0, 0
+        J, P20, 1, 1, 1996.63, 1, 648.546, 0, 0
+        J, P20, 1, 1, 1918.25, 1, 464.542, 0, 0
+        J, P20, 1, 1, 1839.88, 1, 280.537, 0, 0
+        J, P20, 1, 1, 1761.5, 1, 96.5331, 0, 0
+        J, P20, 1, 1, 1683.13, 1, -87.4711, 0, 0
+        J, P20, 1, 1, -218.174, 1, 1754.14, 0, 0
+        J, P20, 1, 1, -140.539, 1, 1569.82, 0, 0
+        J, P20, 1, 1, -62.9044, 1, 1385.5, 0, 0
+        J, P20, 1, 1, 14.7304, 1, 1201.18, 0, 0
+        J, P20, 1, 1, 92.3652, 1, 1016.87, 0, 0
+        J, P20, 1, 1, 170, 1, 832.55, 0, 0
+        J, P20, 1, 1, 247.635, 1, 648.233, 0, 0
+        J, P20, 1, 1, 325.27, 1, 463.916, 0, 0
+        J, P20, 1, 1, 402.904, 1, 279.598, 0, 0
+        J, P20, 1, 1, 480.539, 1, 95.2811, 0, 0
+        J, P20, 1, 1, 558.174, 1, -89.0361, 0, 0
+        J, P20, 1, 1, 2671.98, 1, 1758.77, 0, 0
+        J, P20, 1, 1, 2596.58, 1, 1573.53, 0, 0
+        J, P20, 1, 1, 2521.19, 1, 1388.28, 0, 0
+        J, P20, 1, 1, 2445.79, 1, 1203.04, 0, 0
+        J, P20, 1, 1, 2370.4, 1, 1017.79, 0, 0
+        J, P20, 1, 1, 2295, 1, 832.55, 0, 0
+        J, P20, 1, 1, 2219.6, 1, 647.305, 0, 0
+        J, P20, 1, 1, 2144.21, 1, 462.061, 0, 0
+        J, P20, 1, 1, 2068.81, 1, 276.816, 0, 0
+        J, P20, 1, 1, 1993.42, 1, 91.5718, 0, 0
+        J, P20, 1, 1, 1918.02, 1, -93.6728, 0, 0
+        J, P20, 1, 1, -421.977, 1, 1758.77, 0, 0
+        J, P20, 1, 1, -346.581, 1, 1573.53, 0, 0
+        J, P20, 1, 1, -271.186, 1, 1388.28, 0, 0
+        J, P20, 1, 1, -195.791, 1, 1203.04, 0, 0
+        J, P20, 1, 1, -120.395, 1, 1017.79, 0, 0
+        J, P20, 1, 1, -45, 1, 832.55, 0, 0
+        J, P20, 1, 1, 30.3953, 1, 647.305, 0, 0
+        J, P20, 1, 1, 105.791, 1, 462.061, 0, 0
+        J, P20, 1, 1, 181.186, 1, 276.816, 0, 0
+        J, P20, 1, 1, 256.581, 1, 91.5718, 0, 0
+        J, P20, 1, 1, 331.977, 1, -93.6728, 0, 0
+        J, P20, 18, 0, 0, 0, 210, 150, 0
+        J, P20, 13, 0, 0, 1, 210, 150, 0
+   SECT=3, YES, NO, NO
+        YES, 100, 90, 3142, NO, , , , , , YES, 150, 3871, 2454, NO, , , NO, , 
+        I, P20, 1, 1, 2625, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2525, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2425, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2325, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2225, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 925, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 825, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 725, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 625, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 525, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 425, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 325, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 225, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 125, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 25, 1, 1908.64, 0, 0
+        I, P20, 1, 1, -75, 1, 1908.64, 0, 0
+        I, P20, 1, 1, -175, 1, 1908.64, 0, 0
+        I, P20, 1, 1, -275, 1, 1908.64, 0, 0
+        I, P20, 1, 1, -375, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2225, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 925, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 825, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 725, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 625, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 525, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 425, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 325, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 225, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 125, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 25, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 925, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 825, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 725, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 625, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 525, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 425, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 325, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 225, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 125, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 925, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 825, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 725, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 625, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 525, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 425, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 325, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 225, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 125, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 815.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 815.64, 0, 0
+        I, P20, 1, 1, 925, 1, 815.64, 0, 0
+        I, P20, 1, 1, 825, 1, 815.64, 0, 0
+        I, P20, 1, 1, 725, 1, 815.64, 0, 0
+        I, P20, 1, 1, 625, 1, 815.64, 0, 0
+        I, P20, 1, 1, 525, 1, 815.64, 0, 0
+        I, P20, 1, 1, 425, 1, 815.64, 0, 0
+        I, P20, 1, 1, 325, 1, 815.64, 0, 0
+        I, P20, 1, 1, 225, 1, 815.64, 0, 0
+        I, P20, 1, 1, 125, 1, 815.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 515.64, 0, 0
+        I, P20, 1, 1, 925, 1, 515.64, 0, 0
+        I, P20, 1, 1, 825, 1, 515.64, 0, 0
+        I, P20, 1, 1, 725, 1, 515.64, 0, 0
+        I, P20, 1, 1, 625, 1, 515.64, 0, 0
+        I, P20, 1, 1, 525, 1, 515.64, 0, 0
+        I, P20, 1, 1, 425, 1, 515.64, 0, 0
+        I, P20, 1, 1, 325, 1, 515.64, 0, 0
+        I, P20, 1, 1, 225, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 215.64, 0, 0
+        I, P20, 1, 1, 925, 1, 215.64, 0, 0
+        I, P20, 1, 1, 825, 1, 215.64, 0, 0
+        I, P20, 1, 1, 725, 1, 215.64, 0, 0
+        I, P20, 1, 1, 625, 1, 215.64, 0, 0
+        I, P20, 1, 1, 525, 1, 215.64, 0, 0
+        I, P20, 1, 1, 425, 1, 215.64, 0, 0
+        I, P20, 1, 1, 325, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1925, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1825, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1725, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1625, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1525, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1425, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1325, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1225, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1125, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1025, 1, -84.36, 0, 0
+        I, P20, 1, 1, 925, 1, -84.36, 0, 0
+        I, P20, 1, 1, 825, 1, -84.36, 0, 0
+        I, P20, 1, 1, 725, 1, -84.36, 0, 0
+        I, P20, 1, 1, 625, 1, -84.36, 0, 0
+        I, P20, 1, 1, 525, 1, -84.36, 0, 0
+        I, P20, 1, 1, 425, 1, -84.36, 0, 0
+        I, P20, 1, 1, 325, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1925, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1825, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1725, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1625, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1525, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1425, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1325, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1225, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1125, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1025, 1, -184.36, 0, 0
+        I, P20, 1, 1, 925, 1, -184.36, 0, 0
+        I, P20, 1, 1, 825, 1, -184.36, 0, 0
+        I, P20, 1, 1, 725, 1, -184.36, 0, 0
+        I, P20, 1, 1, 625, 1, -184.36, 0, 0
+        I, P20, 1, 1, 525, 1, -184.36, 0, 0
+        I, P20, 1, 1, 425, 1, -184.36, 0, 0
+        I, P20, 1, 1, 325, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1925, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 15.64, 0, 0
+        I, P20, 1, 1, 925, 1, 15.64, 0, 0
+        I, P20, 1, 1, 825, 1, 15.64, 0, 0
+        I, P20, 1, 1, 725, 1, 15.64, 0, 0
+        I, P20, 1, 1, 625, 1, 15.64, 0, 0
+        I, P20, 1, 1, 525, 1, 15.64, 0, 0
+        I, P20, 1, 1, 425, 1, 15.64, 0, 0
+        I, P20, 1, 1, 325, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 340.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 340.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 340.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 340.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 340.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 905, 1, 940.64, 0, 0
+        I, P20, 1, 1, 905, 1, 790.64, 0, 0
+        I, P20, 1, 1, 905, 1, 640.64, 0, 0
+        I, P20, 1, 1, 905, 1, 490.64, 0, 0
+        I, P20, 1, 1, 905, 1, 340.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 705, 1, 940.64, 0, 0
+        I, P20, 1, 1, 705, 1, 790.64, 0, 0
+        I, P20, 1, 1, 705, 1, 640.64, 0, 0
+        I, P20, 1, 1, 705, 1, 490.64, 0, 0
+        I, P20, 1, 1, 705, 1, 340.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 505, 1, 940.64, 0, 0
+        I, P20, 1, 1, 505, 1, 790.64, 0, 0
+        I, P20, 1, 1, 505, 1, 640.64, 0, 0
+        I, P20, 1, 1, 505, 1, 490.64, 0, 0
+        I, P20, 1, 1, 505, 1, 340.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 305, 1, 940.64, 0, 0
+        I, P20, 1, 1, 305, 1, 790.64, 0, 0
+        I, P20, 1, 1, 305, 1, 640.64, 0, 0
+        I, P20, 1, 1, 305, 1, 490.64, 0, 0
+        I, P20, 1, 1, 305, 1, 340.64, 0, 0
+        J, P20, 1, 1, 2625, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2525, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2425, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2325, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2225, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 925, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 825, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 725, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 625, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 525, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 425, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 325, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 225, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 125, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 25, 1, 1908.64, 0, 0
+        J, P20, 1, 1, -75, 1, 1908.64, 0, 0
+        J, P20, 1, 1, -175, 1, 1908.64, 0, 0
+        J, P20, 1, 1, -275, 1, 1908.64, 0, 0
+        J, P20, 1, 1, -375, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2225, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 925, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 825, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 725, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 625, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 525, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 425, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 325, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 225, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 125, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 25, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 925, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 825, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 725, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 625, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 525, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 425, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 325, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 225, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 125, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 925, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 825, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 725, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 625, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 525, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 425, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 325, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 225, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 125, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 815.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 815.64, 0, 0
+        J, P20, 1, 1, 925, 1, 815.64, 0, 0
+        J, P20, 1, 1, 825, 1, 815.64, 0, 0
+        J, P20, 1, 1, 725, 1, 815.64, 0, 0
+        J, P20, 1, 1, 625, 1, 815.64, 0, 0
+        J, P20, 1, 1, 525, 1, 815.64, 0, 0
+        J, P20, 1, 1, 425, 1, 815.64, 0, 0
+        J, P20, 1, 1, 325, 1, 815.64, 0, 0
+        J, P20, 1, 1, 225, 1, 815.64, 0, 0
+        J, P20, 1, 1, 125, 1, 815.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 515.64, 0, 0
+        J, P20, 1, 1, 925, 1, 515.64, 0, 0
+        J, P20, 1, 1, 825, 1, 515.64, 0, 0
+        J, P20, 1, 1, 725, 1, 515.64, 0, 0
+        J, P20, 1, 1, 625, 1, 515.64, 0, 0
+        J, P20, 1, 1, 525, 1, 515.64, 0, 0
+        J, P20, 1, 1, 425, 1, 515.64, 0, 0
+        J, P20, 1, 1, 325, 1, 515.64, 0, 0
+        J, P20, 1, 1, 225, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 215.64, 0, 0
+        J, P20, 1, 1, 925, 1, 215.64, 0, 0
+        J, P20, 1, 1, 825, 1, 215.64, 0, 0
+        J, P20, 1, 1, 725, 1, 215.64, 0, 0
+        J, P20, 1, 1, 625, 1, 215.64, 0, 0
+        J, P20, 1, 1, 525, 1, 215.64, 0, 0
+        J, P20, 1, 1, 425, 1, 215.64, 0, 0
+        J, P20, 1, 1, 325, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1925, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1825, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1725, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1625, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1525, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1425, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1325, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1225, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1125, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1025, 1, -84.36, 0, 0
+        J, P20, 1, 1, 925, 1, -84.36, 0, 0
+        J, P20, 1, 1, 825, 1, -84.36, 0, 0
+        J, P20, 1, 1, 725, 1, -84.36, 0, 0
+        J, P20, 1, 1, 625, 1, -84.36, 0, 0
+        J, P20, 1, 1, 525, 1, -84.36, 0, 0
+        J, P20, 1, 1, 425, 1, -84.36, 0, 0
+        J, P20, 1, 1, 325, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1925, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1825, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1725, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1625, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1525, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1425, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1325, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1225, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1125, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1025, 1, -184.36, 0, 0
+        J, P20, 1, 1, 925, 1, -184.36, 0, 0
+        J, P20, 1, 1, 825, 1, -184.36, 0, 0
+        J, P20, 1, 1, 725, 1, -184.36, 0, 0
+        J, P20, 1, 1, 625, 1, -184.36, 0, 0
+        J, P20, 1, 1, 525, 1, -184.36, 0, 0
+        J, P20, 1, 1, 425, 1, -184.36, 0, 0
+        J, P20, 1, 1, 325, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1925, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 15.64, 0, 0
+        J, P20, 1, 1, 925, 1, 15.64, 0, 0
+        J, P20, 1, 1, 825, 1, 15.64, 0, 0
+        J, P20, 1, 1, 725, 1, 15.64, 0, 0
+        J, P20, 1, 1, 625, 1, 15.64, 0, 0
+        J, P20, 1, 1, 525, 1, 15.64, 0, 0
+        J, P20, 1, 1, 425, 1, 15.64, 0, 0
+        J, P20, 1, 1, 325, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 340.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 340.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 340.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 340.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 340.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 905, 1, 940.64, 0, 0
+        J, P20, 1, 1, 905, 1, 790.64, 0, 0
+        J, P20, 1, 1, 905, 1, 640.64, 0, 0
+        J, P20, 1, 1, 905, 1, 490.64, 0, 0
+        J, P20, 1, 1, 905, 1, 340.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 705, 1, 940.64, 0, 0
+        J, P20, 1, 1, 705, 1, 790.64, 0, 0
+        J, P20, 1, 1, 705, 1, 640.64, 0, 0
+        J, P20, 1, 1, 705, 1, 490.64, 0, 0
+        J, P20, 1, 1, 705, 1, 340.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 505, 1, 940.64, 0, 0
+        J, P20, 1, 1, 505, 1, 790.64, 0, 0
+        J, P20, 1, 1, 505, 1, 640.64, 0, 0
+        J, P20, 1, 1, 505, 1, 490.64, 0, 0
+        J, P20, 1, 1, 505, 1, 340.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 305, 1, 940.64, 0, 0
+        J, P20, 1, 1, 305, 1, 790.64, 0, 0
+        J, P20, 1, 1, 305, 1, 640.64, 0, 0
+        J, P20, 1, 1, 305, 1, 490.64, 0, 0
+        J, P20, 1, 1, 305, 1, 340.64, 0, 0
+   SECT=5, YES, NO, NO
+        YES, 100, 90, 12568, NO, , , , , , YES, 100, 12568, 12568, NO, , , NO, , 
+        I, P20, 24, 0, 0, 0, 60, 150, 0
+        I, P20, 18, 0, 0, 1, 60, 150, 0
+        J, P20, 24, 0, 0, 0, 60, 150, 0
+        J, P20, 18, 0, 0, 1, 60, 150, 0
+
+*TENDON-GROUP    ; Tendon Group
+; NAME
+ T1-1
+ T2-1
+ T2-2
+ T1-2
+
+*TDN-PROPERTY    ; Tendon Property
+; NAME, TYPE, MATL, AREA, DIA, RM, RC, FF, WF, US, YS, LT, ASB, ASE, bBONDED, ALPHA, \ 
+;       bOSRF, FT, FPK, ACHANGE, bRELAX, TDMFK, WobbleType, AngleDisp
+   20 strands, INTERNAL, 2, 2774, 130, 5, 1, 0.3, 3e-006, 1.86, 1.67, POST, 6, 6, YES, 0, , , , 0, NO, 0, 0, 0
+   29 strands, INTERNAL, 2, 4022.3, 130, 1, 5, 0.2, 6e-006, 1.86, 1.67, POST, 6, 6, YES, 0, , , , 0, YES, 0, 0, 0
+
+*TDN-PROFILE   ; Tendon Profile
+; NAME=NAME, TDN-PROPERTY, ELEM_LIST, BEGIN, END, CURVE, INPUT  ; line 1
+;      GROUP, LENGOPT, BLEN, ELEN, bTP, rNUM                    ; line 2
+;      SHAPE, IP_X, IP_Y, IP_Z, AXIS, VX, VY                    ; line 3(Straight)
+;      SHAPE, IP_X, IP_Y, IP_Z, RC_X, RC_Y, OFFSET, DIR         ; line 3(Curve)
+;      SHAPE, INS_PT, REF_ELEM, AXIS                            ; line 3(Element)
+;      XAR_ANGLE, bPROJECTION, GR_AXIX, GR_ANGLE                ; line 4(Straight/Curve)
+;      XAR_ANGLE, bPROJECTION, OFFSET_Y, OFFSET_Z               ; line 4(Element)
+;      X1, Y1, Z1, bFIX1, RY1, RZ1, RADIUS1                     ; from line 5(3D)
+;      ...
+;      Xn, Yn, Zn, bFIX1, RY1, RZ1, RADIUSn
+;      Y=X1, Y1, bFIX1, RZ1, RADIUS1, OPT1, ANGLE1, HGT1, R1    ; from line 5(2D)
+;      Y=...
+;      Z=X1, Z1, bFIX1, RZ1, RADIUS1, OPT1, ANGLE1, HGT1, R1
+;      Z=...
+   NAME=teandon 1, 20 strands, 2to15, 0, 0, SPLINE, 3D
+        T1-1, AUTO1, , , NO, 
+        ELEMENT, END-I, 2, I-J
+        -5, YES, 900, 0
+        0, -300, 0, YES, 0, 0, 0
+        1280, -149, -217, NO, 0, 0, 0
+        2830, 0, -555, NO, 0, 0, 0
+        4380, 0, -690, NO, 0, 0, 0
+        7480, 0, -1084, NO, 0, 0, 0
+        10580, 0, -1320, NO, 0, 0, 0
+        13680, 0, -1400, NO, 0, 0, 0
+        16780, 0, -1400, NO, 0, 0, 0
+        18330, 0, -1400, NO, 0, 0, 0
+        21430, 0, -1349, NO, 0, 0, 0
+        22900, 0, -1239, NO, 0, 0, 0
+        24530, -20, -1197, NO, 0, 0, 0
+        28220, -300, -944, YES, 0, 0, 0
+   NAME=teandon 1-Copy, 20 strands, 2to15, 0, 0, SPLINE, 3D
+        T1-2, AUTO1, , , NO, 
+        ELEMENT, END-I, 2, I-J
+        5, YES, -900, 0
+        0, 300, 0, YES, 0, 0, 0
+        1280, 149, -217, NO, 0, 0, 0
+        2830, 0, -555, NO, 0, 0, 0
+        4380, 0, -690, NO, 0, 0, 0
+        7480, 0, -1084, NO, 0, 0, 0
+        10580, 0, -1320, NO, 0, 0, 0
+        13680, 0, -1400, NO, 0, 0, 0
+        16780, 0, -1400, NO, 0, 0, 0
+        18330, 0, -1400, NO, 0, 0, 0
+        21430, 0, -1349, NO, 0, 0, 0
+        22900, 0, -1239, NO, 0, 0, 0
+        24530, 20, -1197, NO, 0, 0, 0
+        28220, 300, -944, YES, 0, 0, 0
+   NAME=teandon 3, 20 strands, 1to15, 0, 0, SPLINE, 3D
+        T2-1, AUTO1, , , NO, 
+        ELEMENT, END-I, 1, I-J
+        -5, YES, 700, 0
+        0, -100, -1397, YES, 0, 0, 0
+        2220, -10, -1649, NO, 0, 0, 0
+        3310, 0, -1680, NO, 0, 0, 0
+        4060, 0, -1700, NO, 0, 0, 0
+        5340, 0, -1700, NO, 0, 0, 0
+        8440, 0, -1700, NO, 0, 0, 0
+        11540, 0, -1700, NO, 0, 0, 0
+        14640, 0, -1649, NO, 0, 0, 0
+        17740, 0, -1497, NO, 0, 0, 0
+        21040, 0, -1244, NO, 0, 0, 0
+        23390, 0, -891, NO, 0, 0, 0
+        26640, -10, -487, NO, 0, 0, 0
+        29000, -100, 0, YES, 0, 0, 0
+   NAME=teandon 3-Copy, 20 strands, 1to15, 0, 0, SPLINE, 3D
+        T2-2, AUTO1, , , NO, 
+        ELEMENT, END-I, 1, I-J
+        5, YES, -700, 0
+        0, 100, -1397, YES, 0, 0, 0
+        2220, 10, -1649, NO, 0, 0, 0
+        3310, 0, -1680, NO, 0, 0, 0
+        4060, 0, -1700, NO, 0, 0, 0
+        5340, 0, -1700, NO, 0, 0, 0
+        8440, 0, -1700, NO, 0, 0, 0
+        11540, 0, -1700, NO, 0, 0, 0
+        14640, 0, -1649, NO, 0, 0, 0
+        17740, 0, -1497, NO, 0, 0, 0
+        21040, 0, -1244, NO, 0, 0, 0
+        23390, 0, -891, NO, 0, 0, 0
+        26640, 10, -487, NO, 0, 0, 0
+        29000, 100, 0, YES, 0, 0, 0
+
+*STLDCASE    ; Static Load Cases
+; LCNAME, LCTYPE, DESC
+   Self , D , 
+   SiDL1, PL, Non-Structure Dead-footpath and barrier
+   Tendon, PS, 
+   SiDL3, BL, Ballast
+   Wind , W , 
+   Uniform Temp(+), T , 
+   Uniform temp (-), T , 
+   Temp Grad (+), TPG, 
+   Temp Grad (-), TPG, 
+   SiDL2, DC, Track +Co. Sleepers+fittings+UIC rail
+   2nd Dead- Noise barr, EV,  Noise barrier
+   PTL-Walk, L , LL of walkway
+   PTL-HL, L , LL of HandRailing
+   AL   , ILP, 
+   RTL-Traction1, IL, 
+   RTL-Braking1, IL, 
+
+
+*DGN-STEEL    ; Steel Design Code
+; CODE=CODE, bBRACED,  iWTL                                                   ; line 1
+; [AISC-LRFD93]   : PHI-T1, PHI-T2, PHI-C, PHI-B, PHI-V                       ; line 2
+; [AISC-LRFD2K]   : PHI-T1, PHI-T2, PHI-C, PHI-B, PHI-V                       ; line 2
+; [AIK-LSD97]     : PHI-T1, PHI-T2, PHI-C, PHI-B, PHI-V                       ; line 2
+; [TWN-LSD90]     : PHI-T1, PHI-T2, PHI-C, PHI-B, PHI-V                       ; line 2
+; [TWN-LSD96]     : PHI-T1, PHI-T2, PHI-C, PHI-B, PHI-V                       ; line 2
+; [KSSC-LSD09]    : PHI-T1, PHI-T2, PHI-C, PHI-B, PHI-V, bSPECIAL, FRAMETYPE  ; line 2
+; [KSSC-LSD16]    : PHI-T1, PHI-T2, PHI-C, PHI-B, PHI-V, bSPECIAL, FRAMETYPE  ; line 2
+; [AISC(13th)-LRFD05] : PHI-T1, PHI-T2, PHI-C, PHT-B, PHI-V, bSPECIAL, FRAMETYPE; line 2
+; [AISC(13th)-ASD05]  : OMEGA-T1, OMEGA-T2, OMEGA-C, OMEGA-B, OMEGA-V, bSPECIAL, FRAMETYPE ; line 2
+; [EUROCODE3]     : GAMMA-M0, GAMMA-M1, GAMMA-M2, iSCODE, iUseMaxForce ; line 2
+; [EUROCODE3:05]  : GAMMA-M0, GAMMA-M1, GAMMA-M2, iSCODE, iUseMaxForce ; line 2
+; [EUROCODE3-2:05]: GAMMA-M0, GAMMA-M1, GAMMA-M2, iSCODE, iUseMaxForce ; line 2
+; [BS5950-90]     : GAMMA-M1, GAMMA-M2                                 ; line 2
+; [BS5950-2K]     : GAMMA-M                                            ; line 2
+; [CSA-S16-01]    : PHI                                                ; line 2
+; [AISC-ASD89]    :                                           ; 
+; [KSSC-ASD03]    :                                           ; 
+; [AISI-CFSD86]   :                                           ; 
+; [AISI-CFSD08]   :                                           ; 
+; [AIK-ASD83]     :                                           ; 
+; [KSCE-ASD96]    :                                           ; 
+; [AIJ-ASD02]     :                                           ; 
+; [AISC-CFSD86]   :                                           ; 
+; [AIK-CFSD98]    :                                           ; 
+; [GBJ17-88]      : bSPECIAL, iCLASS, NetGrossAreaRatio       ; line 2
+; [GB50017-03]    : bSPECIAL, iCLASS, NetGrossAreaRatio       ; line 2
+; [GB50017-15]    : iCLASS, AreaRatio, iSeis, bSPECIAL, bWeldBeam, bStiffRib, StiffRibSpace; line 2
+; [IS:800-1984]   :                                           ; 
+; [IS:800-2007]   : GAMMA-M0, GAMMA-M1                        ; 
+; [AASHTO-LRFD02] : PHI-T1, PHI-T2, PHI-C, PHI-B, PHI-V       ; line 2
+; [AASHTO-LFD96]  :                                           ; 
+; [AASHTO-ASD96]  :                                           ; 
+; [JTJ025-86]     :                                           ; 
+; [TWN-BRG-LSD90] :                                           ; 
+; [TWN-ASD90]     :                                           ; 
+; [TWN-ASD96]     :                                           ; 
+; [TWN-BRG-ASD90] :                                           ; 
+; [KSCE-ASD05]    : iDGN_LCOM, bENVE_FORCE1, ... bENVE_FORCE12; line2 
+;                 : bPRINT_CHK1, ... bPRINT_CHK5              ; line3 
+   CODE=Eurocode3-2:05, NO, 0
+   0, 0, 0, 0, 0
+
+*DGN-CONC    ; Concrete Design Code
+; CODE=CODE, RHOC, RHOR, RHOW, MRF, SHR-RATIO { , METHOD, A1, A2 }                     ; line 1
+; [ACI318-89]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V                       ; line 2
+; [ACI318-95]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V                       ; line 2
+; [ACI318-99]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V                       ; line 2
+; [ACI318-02]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB      ; line 2
+; [ACI318-05]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB      ; line 2
+; [ACI318-08]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB, SPWALL, BNDR-MTHD, CD, IE, FRMTYPE, 2NDGRUP, RHOS, bTOR, TRFT; line 2
+; [ACI318-11]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB, SPWALL, BNDR-MTHD, CD, IE, FRMTYPE, 2NDGRUP, RHOS, bTOR, TRFT; line 2
+; [ACI318-14]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB, SPWALL, BNDR-MTHD, CD, IE, FRMTYPE, 2NDGRUP, RHOS, bTOR, TRFT; line 2
+; [ACI318M-14]    : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB, SPWALL, BNDR-MTHD, CD, IE, FRMTYPE, 2NDGRUP, RHOS, bTOR, TRFT; line 2
+; [NSR-10]        : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB, SPWALL, BNDR-MTHD, CD, IE, FRMTYPE, 2NDGRUP, RHOS; line 2
+; [AIK-USD94]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V                       ; line 2
+; [TWN-USD92]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, bTOR, TRFT, SCWB     ; line 2
+; [TWN-USD100]    : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, bTOR, TRFT, SCWB     ; line 2
+; [KCI-USD99]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB      ; line 2
+; [KCI-USD03]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB      ; line 2
+; [KCI-USD07]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB, SPWALL, BNDR-MTHD, CD, IE, FRMTYPE, 2NDGRUP, bTOR, TRFT; line 2
+; [KCI-USD12]     : bSPECIAL, PHI-B, PHI-T, PHIC1, PHI-C2, PHI-V, TLF, SLF, TSLCB, SPWALL, BNDR-MTHD, CD, IE, EXPOSURE, FRMTYPE, 2NDGRUP, bTOR, TRFT; line 2
+; [BS8110-97]     : GAMMA-MC, GAMMA-MS, GAMMA-MV                                       ; line 2
+; [EUROCODE2]     : GAMMA-CF, GAMMA-CA, GAMMA-SF, GAMMA-SA, iSCODE                     ; line 2
+; [EUROCODE2:04]  : GAMMA-CF, GAMMA-CA, GAMMA-SF, GAMMA-SA, ALPHACC, iSCODE,           ; line 2
+;                   bRULE, WEAK-FACT, iDUC, GAMMA-RD-B, GAMMA-RD-C, S-GRUP             ; line 2
+;                   FRAMETYPE, AUA1, SPLCK, SOILFACTOR, TB, TC, TD, AGR, I, DAMPINGRAT, BCJOINT, NTC2008, UF, GAMMA-RD-W, GAMMA-RD-J ; line 2
+;                   STRUT-ANG, bBEHAVIOR-FACT, BEHAVIOR-FACT-VALUE, iNTC, bVCWALL, bVCCOLM, dPHIEF, bAUTOA, bAUTOC, A, B, C, bTOR    ; line 2
+;                   bSHELL, dSHELLHORIZ, DSHELLVERT    ; line 2
+; [EUROCODE2-2:05]: GAMMA-CF, GAMMA-CA, GAMMA-SF, GAMMA-SA, GAMMA_CL, GAMMA_SL, ALPHACC, iSCODE, STRUT-ANG,; line 2
+;                   bSHELL, dSHELLHORIZ, DSHELLVERT    ; line 2
+; [IS456:2000]    : bSPECIAL, GAMMA-C, GAMMA-S, FOS, SubRex                            ; line 2
+; [GB50010-02]    : bSPECIAL, GAMMA-C, GAMMA-S, KIND, iSlabType                        ; line 2
+; [GB50010-10]    : bSPECIAL, GAMMA-C, GAMMA-S, KIND, iSlabType, bTOR, TRFT            ; line 2
+; [CSA-A23.3-94]  : bSPECIAL, PHI-C, PHI-S, PHI-M                                      ; line 2
+; [AIK-WSD2K]     : bSPECIAL                                                           ; line 2
+; [AIJ-WSD99]     : bSPECIAL, KIND                                                     ; line 2
+; [AASHTO-LRFD12] : bSPECIAL, PHI-B, PHI-T, PHI-C1, PHI-C2, PHI-V, KIND                ; line 2
+; [AASHTO-LRFD02] : bSPECIAL, PHI-B, PHI-T, PHI-C1, PHI-C2, PHI-V, KIND                ; line 2
+; [AASHTO-LFD96]  : bSPECIAL, PHI-B, PHI-T, PHI-C1, PHI-C2, PHI-V                      ; line 2
+; [KSCE-USD05]    : bSPECIAL, PHI-B, PHI-T, PHI-C1, PHI-C2, PHI-V                      ; line 2
+; [KSCE-USD96]    : bSPECIAL, PHI-B, PHI-T, PHI-C1, PHI-C2, PHI-V                      ; line 2
+; [KSCE-RAIL-USE04] : bSPECIAL, PHI-B, PHI-T, PHI-C1, PHI-C2, PHI-V                    ; line 2
+; [TWN-BRG-LSD90] : bSPECIAL, PHI-B, PHI-T, PHI-C1, PHI-C2, PHI-V                      ; line 2
+; [JTJ023-85]     : GAMMA-C, GAMMA-S, KIND                                             ; line 2
+; [CSA-S6-00]     : bSPECIAL, PHI-C, PHI-S, KIND                                       ; line 2
+; [IRC:21-2000]   : GAMMA-C, GAMMA-S                                                   ; line 2
+; [SNiP 2.05.03-84*]  : nBRIDGE, bmb7mb8, mb7mb8Type, mb7, mb8, bmb9, mb9Type, mb9     ; line 2
+; [SP 35.13330.2011]  : nBRIDGE, bmb7mb8, mb7mb8Type, mb7, mb8, bmb9, mb9Type, mb9     ; line 2
+; Member Check    : bBEAM, bCOLM, bBRCE, bWALL, bSLAB, bMAT, bRBEAM, bRCOLM, bRBRCE, bRWALL, bRSLAB, bRMAT, bSBEAM, bCANTIL, bUNDER-BM/COLM
+   CODE=Eurocode2-2:05, 0, 0, 0, 1, 0, , , 
+   0, 0, 0, 0, 0, 0, 0.85, 0, 45, NO, 0, 0
+   YES, YES, YES, YES, YES, YES, YES, YES, YES, YES, YES, YES, YES, YES, YES, 0
+
+*CONSTRAINT    ; Supports
+; NODE_LIST, CONST(Dx,Dy,Dz,Rx,Ry,Rz), GROUP
+   1, 011101, BG1
+   14, 111101, BG1
+
+*USE-STLD, Self
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1, Self
+
+; End of data for load case [Self] -------------------------
+
+*USE-STLD, SiDL1
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+     1, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0131, 1, -0.0131, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+
+; End of data for load case [SiDL1] -------------------------
+
+*USE-STLD, Tendon
+
+*TDN-PRESTRESS    ; Tendon Prestress Loads
+; TDN-NAME, FORCE/STRESS, JACKING, BEGIN, END, iGROUTING, GROUP
+ teandon 1, FORCE, BEGIN, 3906, 0, 0, PL
+ teandon 1-Copy, FORCE, BEGIN, 3906, 0, 0, PL
+ teandon 3, FORCE, END, 0, 3906, 0, PL
+ teandon 3-Copy, FORCE, END, 0, 3906, 0, PL
+
+; End of data for load case [Tendon] -------------------------
+
+*USE-STLD, SiDL3
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+     1, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0389, 1, -0.0389, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+
+; End of data for load case [SiDL3] -------------------------
+
+*USE-STLD, Wind
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+     1, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     1, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GY, NO , NO, aDir[1], , , , 0, 0.0005, 1, 0.0005, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, 0.0028, 1, 0.0028, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [Wind] -------------------------
+
+*USE-STLD, Uniform Temp(+)
+
+; *SYSTEMPER, SYSTEMP, GROUP
+*SYSTEMPER, 36, 
+
+; End of data for load case [Uniform Temp(+)] -------------------------
+
+*USE-STLD, Uniform temp (-)
+
+; *SYSTEMPER, SYSTEMP, GROUP
+*SYSTEMPER, 19.2, 
+
+; End of data for load case [Uniform temp (-)] -------------------------
+
+*USE-STLD, Temp Grad (+)
+
+*THERGRAD    ; Temperature Gradient
+; ELEM_LIST, iETYP, TZ, bUSEHZ, HZ, TY, bUSEHY, HY, GROUP
+; ELEM_LIST, iETYP, TZ, bUSEHZ, HZ, GROUP
+     1, 1, 27, YES, 0, 27, YES, 0, LL
+     2, 1, 27, YES, 0, 27, YES, 0, LL
+     3, 1, 27, YES, 0, 27, YES, 0, LL
+     4, 1, 27, YES, 0, 27, YES, 0, LL
+     5, 1, 27, YES, 0, 27, YES, 0, LL
+     6, 1, 27, YES, 0, 27, YES, 0, LL
+     7, 1, 27, YES, 0, 27, YES, 0, LL
+     8, 1, 27, YES, 0, 27, YES, 0, LL
+     9, 1, 27, YES, 0, 27, YES, 0, LL
+    10, 1, 27, YES, 0, 27, YES, 0, LL
+    11, 1, 27, YES, 0, 27, YES, 0, LL
+    12, 1, 27, YES, 0, 27, YES, 0, LL
+    13, 1, 27, YES, 0, 27, YES, 0, LL
+    14, 1, 27, YES, 0, 27, YES, 0, LL
+    15, 1, 27, YES, 0, 27, YES, 0, LL
+
+; End of data for load case [Temp Grad (+)] -------------------------
+
+*USE-STLD, Temp Grad (-)
+
+*THERGRAD    ; Temperature Gradient
+; ELEM_LIST, iETYP, TZ, bUSEHZ, HZ, TY, bUSEHY, HY, GROUP
+; ELEM_LIST, iETYP, TZ, bUSEHZ, HZ, GROUP
+     1, 1, 11, YES, 0, 11, YES, 0, LL
+     2, 1, 11, YES, 0, 11, YES, 0, LL
+     3, 1, 11, YES, 0, 11, YES, 0, LL
+     4, 1, 11, YES, 0, 11, YES, 0, LL
+     5, 1, 11, YES, 0, 11, YES, 0, LL
+     6, 1, 11, YES, 0, 11, YES, 0, LL
+     7, 1, 11, YES, 0, 11, YES, 0, LL
+     8, 1, 11, YES, 0, 11, YES, 0, LL
+     9, 1, 11, YES, 0, 11, YES, 0, LL
+    10, 1, 11, YES, 0, 11, YES, 0, LL
+    11, 1, 11, YES, 0, 11, YES, 0, LL
+    12, 1, 11, YES, 0, 11, YES, 0, LL
+    13, 1, 11, YES, 0, 11, YES, 0, LL
+    14, 1, 11, YES, 0, 11, YES, 0, LL
+    15, 1, 11, YES, 0, 11, YES, 0, LL
+
+; End of data for load case [Temp Grad (-)] -------------------------
+
+*USE-STLD, SiDL2
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+     1, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0295, 1, -0.0295, 0, 0, 0, 0, 2nd Dead, NO, 0, 0, NO, 
+
+; End of data for load case [SiDL2] -------------------------
+
+*USE-STLD, PTL-Walk
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+     1, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.004, 1, -0.004, 0, 0, 0, 0, LL, NO, 0, 0, NO, 
+
+; End of data for load case [PTL-Walk] -------------------------
+
+*USE-STLD, PTL-HL
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+     1, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.0015, 1, -0.0015, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [PTL-HL] -------------------------
+
+*USE-STLD, AL
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+     1, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -0.002, 1, -0.002, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [AL] -------------------------
+
+*USE-STLD, RTL-Traction1
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+     1, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, 0.00615, 1, 0.00615, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [RTL-Traction1] -------------------------
+
+*USE-STLD, RTL-Braking1
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+     1, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     2, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     3, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     4, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     5, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     6, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     7, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     8, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+     9, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    10, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    11, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    12, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    13, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    14, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+    15, BEAM   , UNILOAD, GX, NO , YES, 1, GZ, 750, 750, NO, 0, -0.0065, 1, -0.0065, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [RTL-Braking1] -------------------------
+
+*STAGE    ; Define Construction Stage
+; NAME=NAME, DURATION, bSAVESTAGE, bSAVESTEP, bINCRESTEP, INCRESTEP  ; line 1
+; STEP=DAY1, DAY2, ...                                               ; line 2
+; AELEM=GROUP1, AGE1, GROUP2, AGE2, ...                              ; line 3
+; DELEM=GROUP1, REDIST1, GROUP2, REDIST2, ...                        ; line 4
+; ABNDR=BGROUP1, POS1, BGROUP2, POS2, ...                            ; line 5
+; DBNDR=BGROUP1, BGROUP2, ...                                        ; line 6
+; ALOAD=LGROUP1, DAY1, LGROUP2, DAY2, ...                            ; line 7
+; DLOAD=LGROUP1, DAY1, LGROUP2, DAY2, ...                            ; line 8
+  NAME=CS1, 30, YES, NO, NO, 5
+  AELEM=SG1, 10
+  ABNDR=BG1, DEFORMED
+  ALOAD=Self, FIRST, PL, LAST
+  NAME=CS2, 30, YES, NO, NO, 5
+  AELEM=SG2, 30
+  ALOAD=2nd Dead, FIRST, LL, LAST
+  NAME=CS3, 10000, YES, NO, NO, 5
+  AELEM=SG3, 0
+  ABNDR=BG3, DEFORMED
+
+*MVLDCODE    ; Moving Load Code
+; CODE=CODE
+   CODE=NONE
+
+*STAGE-COLOR    ; Diagram Color for Construction Stage
+; STAGENAME, iR(COLOR), iG(COLOR), iB(COLOR)
+ CS1, 78, 0, 255
+ CS2, 0, 128, 128
+ CS3, 0, 128, 128
+
+*STAGE-CAMBER    ; Camber for Construction Stage
+; NODE_LIST, DEFORM, USER
+ 1, -8.45001, 0
+ 2, -27.5161, 0
+ 3, -50.4971, 0
+ 5, -94.8749, 0
+ 6, -123.213, 0
+ 7, -133.789, 0
+ 8, -126.133, 0
+ 9, -108.249, 0
+ 10, -87.015, 0
+ 12, -61.3489, 0
+ 14, -30.9105, 0
+ 15, -17.3041, 0
+ 16, -5.77473, 0
+
+*STAGE-CTRL    ; Construction Stage Analysis Control Data
+; bLAST-FINAL, FINAL-STAGE, CPFC, bEXT_REPL, bCALC-CFF, bCALC-CSP, bAPPLY-IMF,                    \ ; line 1
+; bCONV, bTRUSS, bBEAM, bITD, iITD, GROUP, LTYPECC, LTYPECC2, LTYPECC3, EREC1, EREC2, EREC3       \ ; line 1
+; bSAVE-OCS, bLFFC, LFFGR, bCAMBER, bSELFCONS, bCHANGE-CABLE                                         ; line 1
+; bINC-NLA, iNLA-TYPE, bIEMF, iLSTEP, iMAXITER, bENEG, EV, bDISP, DV, bFORC, FV, CF, BSSTEP, ADSTEP  ; line 2
+; bINC-PDL, iITER, TOL                                                                               ; line 3
+; bINC-TDE, bCNS, TYPE, iITER, TOL, bTTLE_CS, bRCE, bVAR, bTTLE_ES, bAPPLY-ELA                       ; line 4
+; bOUCC, bITS, iITS, bATS, iT10, iT100, iT1K, iT5K, iT10K                                            ; line 5
+; bSD, iSDOPT, SDCONST, iBSC, bSDLE, GLC1, GLC2, ...                                                 ; line 6
+; LCNAME1, LCNAME2, LCNAME3, ...                                                                     ; from line 7
+; LCNAME1, LCNAME2, LCNAME3, ...                                                                     ; from line 8
+; LCNAME1, LCNAME2, LCNAME3, ...                                                                     ; from line 9
+  YES, , INTERNAL, NO, YES, NO, NO, NO, NO, NO, NO, , , DW, DW, DW, Erection Load 1, Erection Load 2, Erection Load 3, NO, NO, , NO, NO, NO
+  0 
+  NO
+  YES, YES, BOTH, 5, 0.01, YES, NO, YES, YES, 0, NO
+  NO, NO, 2, YES, 2, 5, 7, 10, 20
+  NO, , , 1, NO
+
+*LOADCOMB    ; Combinations
+; NAME=NAME, KIND, ACTIVE, bES, iTYPE, DESC, iSERV-TYPE, nLCOMTYPE   ; line 1
+;      ANAL1, LCNAME1, FACT1, ...                                    ; from line 2
+   NAME=DL, GEN, ACTIVE, 0, 0, , 0, 0
+        ST, Self, 1
+   NAME=SiDL1, GEN, ACTIVE, 0, 0, , 0, 0
+        ST, SiDL1, 1
+   NAME=SiDL2, GEN, ACTIVE, 0, 0, , 0, 0
+        ST, 2nd Dead- Noise barr, 1, ST, SiDL2, 1
+   NAME=SIDL3, GEN, ACTIVE, 0, 0, Ballast, 0, 0
+        ST, SiDL3, 1
+   NAME=SH&CS, GEN, ACTIVE, 0, 0, Shrinkage Creep, 0, 0
+        CS, Shrinkage Primary, 1, CS, Shrinkage Secondary, 1
+        CS, Creep Primary, 1, CS, Creep Secondary, 1
+   NAME=Longitual L, GEN, ACTIVE, 0, 1, Tration & Braking, 0, 0
+        ST, RTL-Traction1, 0.75, ST, RTL-Braking1, 0.75
+   NAME=PL, GEN, ACTIVE, 0, 0, Prestressd, 0, 0
+        CS, Tendon Primary, 1, CS, Tendon Secondary, 1
+   NAME=RTL, GEN, ACTIVE, 0, 1, Train Traffic Load, 0, 0
+        CB, Longitual L, 0, ST, RTL-Traction1, 1, ST, RTL-Braking1, 1
+        ST, PTL-Walk, 1, ST, PTL-HL, 1
+   NAME=PTL, GEN, ACTIVE, 0, 0, Non -Public Pedestrian Load, 0, 0
+        ST, PTL-Walk, 1, ST, PTL-HL, 1
+   NAME=WL, GEN, ACTIVE, 0, 1, Wind, 0, 0
+        ST, Wind, 1
+   NAME=TL, GEN, ACTIVE, 0, 1, , 0, 0
+        ST, Uniform Temp(+), 1, ST, Uniform temp (-), 1, ST, Temp Grad (+), 1
+        ST, Temp Grad (-), 1
+   NAME=LC1, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, CB, SiDL1, 1, CB, SH&CS, 1, CB, PL, 1, CB, TL, 0.5
+   NAME=LC2, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, CB, SiDL1, 1, CB, SiDL2, 1, CB, SIDL3, 1.3, CB, SH&CS, 1
+        CB, Longitual L, 1, CB, PL, 1, CB, TL, 0.5
+   NAME=LC3, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, CB, SiDL1, 1, CB, SiDL2, 1, CB, SIDL3, 1.3, CB, SH&CS, 1
+        CB, TL, 0.5
+   NAME=LC4, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, CB, SiDL1, 1, CB, SiDL2, 1, CB, SIDL3, 1.3, CB, SH&CS, 1
+        CB, Longitual L, 1, CB, PL, 1, CB, RTL, 1.1, CB, PTL, 0.8, CB, WL, 0.75
+        CB, TL, 0.6
+   NAME=LC5, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, CB, SiDL1, 1, CB, SiDL2, 1, CB, SIDL3, 1.3, CB, SH&CS, 1
+        CB, Longitual L, 1, CB, PL, 1, CB, RTL, 0.88, CB, PTL, 0.8, CB, WL, 1
+        CB, TL, 0.6
+   NAME=LC6, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, CB, SiDL1, 1, CB, SiDL2, 1, CB, SIDL3, 1.3, CB, SH&CS, 1
+        CB, Longitual L, 1, CB, PL, 1, CB, RTL, 0.88, CB, PTL, 0.8
+        CB, WL, 0.75, CB, TL, 1
+   NAME=LC7, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, CB, SiDL1, 1, CB, SiDL2, 1, CB, SIDL3, 1.3, CB, SH&CS, 1
+        CB, Longitual L, 1, CB, PL, 1, CB, RTL, 0.88, CB, PTL, 0.8, CB, WL, 1
+        CB, TL, 0.5
+   NAME=LC8, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, CB, SiDL1, 1, CB, SiDL2, 1, CB, SIDL3, 1.3, CB, SH&CS, 1
+        CB, Longitual L, 1, CB, PL, 1, CB, RTL, 1, CB, PTL, 1, CB, WL, 1
+        CB, TL, 0.6
+   NAME=LC9, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, CB, SiDL1, 1, CB, SiDL2, 1, CB, SIDL3, 1.3, CB, SH&CS, 1
+        CB, Longitual L, 1, CB, PL, 1, CB, RTL, 1, CB, PTL, 1, CB, WL, 1
+        CB, TL, 0.6
+   NAME=NSLS, GEN, ACTIVE, 0, 1, , 0, 0
+        CB, LC1, 1, CB, LC2, 1, CB, LC3, 1, CB, LC4, 1, CB, LC5, 1, CB, LC6, 1
+        CB, LC7, 1, CB, LC8, 1, CB, LC9, 1
+   NAME=SDL, GEN, ACTIVE, 0, 0, , 0, 0
+        CB, DL, 1, ST, SiDL1, 1, ST, SiDL2, 1, CB, SIDL3, 1
+   NAME=LL, GEN, ACTIVE, 0, 1, , 0, 0
+        CB, Longitual L, 1
+   NAME=Superimpose DeaLoad, GEN, ACTIVE, 0, 0, , 0, 0
+        ST, SiDL1, 1, ST, SiDL3, 1, ST, SiDL2, 1, ST, 2nd Dead- Noise barr, 1
+   NAME=SH, GEN, ACTIVE, 0, 0, , 0, 0
+        CS, Shrinkage Primary, 1, CS, Shrinkage Secondary, 1
+   NAME=Creep, GEN, ACTIVE, 0, 0, , 0, 0
+        CS, Creep Primary, 1, CS, Creep Secondary, 1
+   NAME=Tendon, GEN, ACTIVE, 0, 0, , 0, 0
+        CS, Tendon Primary, 1, CS, Tendon Secondary, 1
+   NAME=DDL, GEN, ACTIVE, 0, 0, , 0, 0
+        ST, Self, 1, ST, SiDL1, 1, ST, SiDL3, 1, ST, SiDL2, 1
+   NAME=RTL, CONC, INACTIVE, 0, 0, 1.35Permanent+1.35M[1]+1.3PS+0.9W[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        ST, RTL-Traction1, 1, ST, RTL-Braking1, 1
+   NAME=TL, CONC, INACTIVE, 0, 0, 1.35Permanent+1.35M[1]+1.3PS-0.9W[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        ST, Uniform Temp(+), 1, ST, Uniform temp (-), 1, ST, Temp Grad (+), 1
+        ST, Temp Grad (-), 1
+   NAME=LC1, CONC, SERVICE, 0, 0, 1.35Permanent+1.35M[1]+1.0PS+0.9W[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.0(cPS), 0, 0
+        CBC, TL, 0.5, CS, Dead Load, 1, ST, SiDL1, 1, CS, Tendon Primary, 1
+   NAME=LC2, CONC, SERVICE, 0, 0, 1.35Permanent+1.35M[1]+1.0PS-0.9W[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.0(cPS), 0, 0
+        CS, Summation, 1, CBC, TL, 0.5, CS, Tendon Secondary, 1
+   NAME=LC3, CONC, SERVICE, 0, 0, 1.0Permanent+1.35M[1]+1.3PS+0.9W[1]+1.0(cD)+1.0(cCR)+1.0(cSH)+1.3(cPS), 0, 0
+        CS, Summation, 1, CBC, TL, 0.5, CS, Tendon Secondary, 1
+   NAME=LC4, CONC, SERVICE, 0, 0, 1.0Permanent+1.35M[1]+1.3PS-0.9W[1]+1.0(cD)+1.0(cCR)+1.0(cSH)+1.3(cPS), 0, 0
+        CS, Summation, 1, ST, Wind, 0.75, CBC, RTL, 1.1, ST, Tendon, 0.6
+        ST, PTL-Walk, 0.8, ST, PTL-HL, 0.8
+   NAME=LC5, CONC, SERVICE, 0, 0, 1.0Permanent+1.35M[1]+1.0PS+0.9W[1]+1.0(cD)+1.0(cCR)+1.0(cSH)+1.0(cPS), 0, 0
+        CS, Summation, 1, ST, Wind, 1, ST, PTL-Walk, 0.8, ST, Tendon, 1
+        CBC, RTL, 0.88, ST, PTL-HL, 0.8
+   NAME=LC6, CONC, SERVICE, 0, 0, 1.0Permanent+1.35M[1]+1.0PS-0.9W[1]+1.0(cD)+1.0(cCR)+1.0(cSH)+1.0(cPS), 0, 0
+        ST, Wind, 1, ST, PTL-Walk, 0.8, CS, Summation, 1, CBC, RTL, 1
+        CBC, TL, 0.6
+   NAME=LC7, CONC, SERVICE, 0, 0, 1.35Permanent+1.3PS+1.5W[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        CS, Summation, 1, CBC, RTL, 0.88, CBC, TL, 0.5, ST, PTL-Walk, 0.8
+        ST, PTL-HL, 0.8, ST, Wind, 0.75
+   NAME=LC8, CONC, SERVICE, 0, 0, 1.35Permanent+1.3PS-1.5W[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        CBC, TL, 0.5, CS, Summation, 1, CBC, RTL, 1
+   NAME=LC9, CONC, SERVICE, 0, 0, 1.35Permanent+1.0PS+1.5W[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.0(cPS), 0, 0
+        CS, Summation, 1, CBC, TL, 0.6, ST, PTL-Walk, 0.5, ST, PTL-HL, 0.5
+   NAME=LC21, CONC, STRENGTH, 0, 0, 1.35Permanent+1.0PS-1.5W[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.0(cPS), 0, 0
+        ST, Self, 0.95, ST, SiDL1, 0.95, ST, Tendon, 0.9, ST, SiDL3, 1.235
+        ST, Wind, 1.28, ST, SiDL2, 0.95, ST, PTL-Walk, 1.08, ST, PTL-HL, 1.08
+        CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1, CBC, RTL, 1.45
+        CBC, TL, 0.93
+   NAME=LC22, CONC, STRENGTH, 0, 0, 1.0Permanent+1.3PS+1.5W[1]+1.0(cD)+1.0(cCR)+1.0(cSH)+1.3(cPS), 0, 0
+        ST, Self, 1.05, ST, SiDL1, 1.05, ST, Tendon, 1, ST, SiDL3, 1.365
+        ST, Wind, 1.7, ST, SiDL2, 1.05, ST, PTL-Walk, 1.16, ST, PTL-HL, 1.08
+        CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1, CBC, RTL, 1.16
+        CBC, TL, 0.93
+   NAME=LC23, CONC, STRENGTH, 0, 0, 1.0Permanent+1.3PS-1.5W[1]+1.0(cD)+1.0(cCR)+1.0(cSH)+1.3(cPS), 0, 0
+        ST, Self, 0.95, ST, SiDL1, 0.95, ST, Tendon, 0.9, ST, SiDL3, 1.235
+        ST, Wind, 1.7, ST, SiDL2, 0.95, ST, PTL-Walk, 1.16, ST, PTL-HL, 1.08
+        CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1, CBC, RTL, 1.16
+        CBC, TL, 1.55
+   NAME=LC24, CONC, STRENGTH, 0, 0, 1.0Permanent+1.0PS+1.5W[1]+1.0(cD)+1.0(cCR)+1.0(cSH)+1.0(cPS), 0, 0
+        ST, Self, 1.35, ST, SiDL1, 1.35, ST, Tendon, 0.9, ST, SiDL3, 1.755
+        ST, Wind, 1.7, ST, SiDL2, 1.35, ST, PTL-Walk, 1.08, ST, PTL-HL, 1.08
+        CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1, CBC, RTL, 1.45
+        CBC, TL, 0.93
+   NAME=LC25, CONC, STRENGTH, 0, 0, 1.0Permanent+1.0PS-1.5W[1]+1.0(cD)+1.0(cCR)+1.0(cSH)+1.0(cPS), 0, 0
+        ST, Self, 0.95, ST, SiDL1, 0.95, ST, Tendon, 0.9, ST, SiDL3, 1.235
+        ST, Wind, 1.7, ST, SiDL2, 0.95, ST, PTL-Walk, 1.45, ST, PTL-HL, 1.08
+        CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1, CBC, RTL, 1.16
+        CBC, TL, 0.93
+   NAME=LC26, CONC, STRENGTH, 0, 0, 1.35Permanent+1.3PS+1.5T[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        ST, Self, 1.35, ST, SiDL1, 1.35, ST, Tendon, 0.9, ST, SiDL3, 1.755
+        ST, Wind, 1.28, ST, SiDL2, 1.35, ST, PTL-Walk, 1.45, ST, PTL-HL, 1.08
+        CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1, CBC, RTL, 1.16
+        CBC, TL, 1.55
+   NAME=LC27, CONC, STRENGTH, 0, 0, 1.35Permanent+1.3PS-1.5T[1]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        ST, Self, 1, ST, SiDL1, 1, ST, Tendon, 1, ST, SiDL3, 1.3
+        ST, Wind, 1.09, ST, SiDL2, 1, ST, PTL-Walk, 0.92, ST, PTL-HL, 0.92
+        CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1, CBC, RTL, 1.25
+        CBC, TL, 0.78
+   NAME=LC28, CONC, STRENGTH, 0, 0, 1.35Permanent+1.3PS+1.5T[2]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        ST, Self, 1, ST, SiDL1, 1, ST, Tendon, 0.9, ST, SiDL3, 1.3
+        ST, Wind, 1.45, ST, SiDL2, 1, ST, PTL-Walk, 0.92, ST, PTL-HL, 0.92
+        CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1, CBC, RTL, 1
+        CBC, TL, 0.78
+   NAME=LC29, CONC, STRENGTH, 0, 0, 1.35Permanent+1.3PS-1.5T[2]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        ST, Self, 1, ST, SiDL1, 1, ST, Tendon, 0.9, ST, SiDL3, 1.3
+        ST, Wind, 1.09, ST, SiDL2, 1, ST, PTL-Walk, 0.92, ST, PTL-HL, 0.92
+        CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1, CBC, RTL, 1
+        CBC, TL, 1.3
+   NAME=LC30, CONC, STRENGTH, 0, 0, 1.35Permanent+1.3PS+1.5T[3]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        ST, Self, 1, ST, SiDL1, 1, ST, Tendon, 1, ST, SiDL3, 1.3, ST, SiDL2, 1
+        ST, PTL-Walk, 1, ST, PTL-HL, 1, ST, AL, 1, CS, Creep Secondary, 1
+        CS, Shrinkage Secondary, 1, CBC, TL, 0.78
+   NAME=LC31, CONC, STRENGTH, 0, 0, 1.35Permanent+1.3PS-1.5T[3]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        ST, Self, 1, ST, SiDL1, 1, ST, Tendon, 1, ST, SiDL3, 1.3, ST, Wind, 0.5
+        ST, SiDL2, 1, ST, AL, 1, CS, Creep Secondary, 1
+        CS, Shrinkage Secondary, 1, CBC, TL, 0.78
+   NAME=LC32, CONC, STRENGTH, 0, 0, 1.35Permanent+1.3PS+1.5T[4]+1.35(cD)+1.35(cCR)+1.35(cSH)+1.3(cPS), 0, 0
+        ST, Self, 1, ST, SiDL1, 1, ST, Tendon, 1, ST, SiDL3, 1.3, ST, SiDL2, 1
+        ST, AL, 1, CS, Creep Secondary, 1, CS, Shrinkage Secondary, 1
+        CBC, TL, 0.93
+
+*GCAMBER-CTRL    ; General Camber Control
+; bSTARTPTZERO                               ; line 1
+; GroupName1, DIR1, GroupName2, DIR1, ...    ; from line 2
+   NO
+  SG1, +DX
+*LC-COLOR    ; Diagram Color for Load Case
+; ANAL, LCNAME, iR1(ALL), iG1(ALL), iB1(ALL), iR2(MIN), iG2(MIN), iB2(MIN), iR3(MAX), iG2(MAX), iB2(MAX)
+ ST, Self, 255, 192, 160, 0, 192, 128, 85, 192, 0
+ ST, SiDL1, 192, 0, 192, 160, 192, 255, 192, 128, 0
+ ST, Tendon, 255, 255, 87, 192, 192, 0, 85, 0, 192
+ ST, SiDL3, 255, 255, 87, 255, 87, 128, 0, 128, 128
+ ST, Wind, 0, 192, 192, 0, 192, 128, 192, 192, 192
+ ST, Uniform Temp(+), 192, 72, 0, 0, 192, 192, 255, 0, 128
+ ST, Uniform temp (-), 0, 192, 192, 78, 0, 255, 0, 192, 192
+ ST, Temp Grad (+), 255, 128, 0, 210, 210, 210, 255, 128, 0
+ ST, Temp Grad (-), 0, 128, 128, 78, 0, 255, 0, 192, 192
+ CB, DDL, 78, 0, 255, 85, 0, 192, 255, 160, 255
+ ST, AL, 255, 87, 87, 0, 128, 57, 148, 87, 255
+ CB, LC3, 255, 192, 160, 93, 255, 87, 212, 160, 255
+ CB, LC4, 0, 157, 192, 0, 157, 192, 85, 192, 0
+ CB, LC5, 148, 87, 255, 192, 72, 0, 255, 192, 87
+ CB, LC6, 128, 192, 0, 210, 210, 210, 160, 255, 255
+ CB, LC7, 192, 192, 192, 0, 128, 192, 192, 0, 192
+ CB, LC8, 255, 0, 192, 0, 128, 57, 255, 87, 87
+ CB, LC9, 160, 255, 255, 255, 128, 0, 0, 128, 255
+ CB, NSLS, 192, 72, 0, 128, 192, 0, 255, 255, 255
+ CS, Dead Load, 255, 192, 160, 192, 192, 0, 0, 128, 192
+ CS, Erection Load 1, 163, 255, 160, 255, 160, 255, 0, 128, 255
+ CS, Erection Load 2, 0, 128, 57, 0, 192, 192, 160, 255, 255
+ CS, Erection Load 3, 160, 192, 255, 0, 157, 192, 0, 192, 128
+ CS, Tendon Primary, 192, 128, 0, 192, 192, 0, 192, 0, 128
+ CS, Tendon Secondary, 163, 160, 255, 255, 0, 192, 192, 128, 0
+ CS, Creep Primary, 192, 128, 0, 255, 87, 128, 93, 255, 87
+ CS, Creep Secondary, 148, 87, 255, 192, 0, 192, 212, 160, 255
+ CS, Shrinkage Primary, 0, 192, 192, 0, 128, 128, 212, 160, 255
+ ST, RTL-Traction1, 192, 0, 192, 160, 255, 255, 78, 0, 255
+ ST, RTL-Braking1, 255, 128, 0, 255, 255, 255, 0, 192, 192
+ CB, SDL, 192, 128, 0, 255, 255, 255, 93, 255, 87
+ CB, LL, 255, 255, 87, 93, 255, 87, 212, 160, 255
+ CBC, RTL, 255, 0, 192, 128, 192, 0, 0, 128, 57
+ CBC, TL, 192, 0, 192, 0, 128, 57, 255, 128, 0
+ CBC, LC1, 0, 128, 255, 146, 0, 255, 85, 192, 0
+ CBC, LC2, 146, 0, 255, 192, 0, 192, 78, 0, 255
+ CBC, LC3, 192, 128, 0, 192, 0, 128, 146, 0, 255
+ CBC, LC4, 255, 255, 255, 192, 0, 192, 85, 0, 192
+ CBC, LC5, 255, 0, 128, 0, 157, 192, 255, 0, 192
+ CBC, LC6, 255, 255, 255, 210, 210, 210, 212, 160, 255
+ CBC, LC7, 0, 128, 57, 0, 128, 255, 192, 0, 128
+ CBC, LC8, 255, 128, 0, 0, 128, 128, 163, 255, 160
+ CBC, LC9, 160, 255, 255, 93, 255, 87, 212, 160, 255
+ CBC, LC21, 78, 0, 255, 255, 160, 255, 0, 192, 192
+ CBC, LC22, 192, 0, 128, 192, 192, 0, 0, 192, 192
+ ST, SiDL2, 255, 0, 192, 93, 255, 87, 192, 192, 192
+ CB, DL, 255, 0, 128, 146, 0, 255, 78, 0, 255
+ CB, RTL, 0, 192, 128, 160, 255, 255, 160, 255, 255
+ CB, SiDL1, 0, 128, 57, 255, 160, 255, 148, 87, 255
+ CB, SiDL2, 255, 0, 128, 255, 192, 160, 210, 210, 210
+ CB, SIDL3, 128, 192, 0, 78, 0, 255, 128, 192, 0
+ CB, SH&CS, 160, 192, 255, 148, 87, 255, 192, 0, 128
+ CB, Longitual L, 146, 0, 255, 160, 255, 255, 128, 192, 0
+ CB, PL, 192, 192, 0, 160, 192, 255, 85, 192, 0
+ CB, PTL, 255, 192, 160, 0, 192, 128, 255, 255, 87
+ CB, WL, 255, 255, 255, 192, 192, 0, 0, 128, 128
+ CB, TL, 192, 0, 128, 192, 192, 192, 255, 255, 255
+ CBC, LC23, 160, 192, 255, 255, 192, 87, 192, 192, 192
+ ST, PTL-Walk, 163, 160, 255, 192, 192, 0, 210, 210, 210
+ ST, PTL-HL, 0, 192, 128, 255, 0, 128, 163, 255, 160
+ CBC, LC24, 255, 192, 87, 163, 255, 160, 255, 0, 192
+ CBC, LC25, 0, 128, 128, 255, 192, 87, 163, 255, 160
+ CB, LC1, 148, 87, 255, 210, 210, 210, 255, 160, 255
+ CB, LC2, 160, 192, 255, 160, 255, 255, 93, 255, 87
+ CBC, LC26, 192, 0, 128, 0, 192, 128, 0, 192, 192
+ CBC, LC27, 148, 87, 255, 0, 128, 57, 255, 255, 255
+ CBC, LC28, 0, 128, 192, 0, 128, 57, 163, 255, 160
+ CBC, LC29, 93, 255, 87, 163, 255, 160, 212, 160, 255
+ CBC, LC30, 255, 128, 0, 192, 0, 128, 160, 255, 255
+ CBC, LC31, 148, 87, 255, 163, 255, 160, 163, 255, 160
+ CBC, LC32, 163, 255, 160, 78, 0, 255, 163, 160, 255
+ CS, Shrinkage Secondary, 85, 192, 0, 0, 128, 255, 160, 192, 255
+ CS, Summation, 85, 0, 192, 212, 160, 255, 255, 192, 160
+ ST, 2nd Dead- Noise barr, 255, 192, 160, 255, 192, 87, 192, 128, 0
+ CB, Superimpose DeaLoad, 192, 192, 0, 93, 255, 87, 192, 0, 192
+ CB, SH, 128, 192, 0, 192, 192, 192, 210, 210, 210
+ CB, Creep, 0, 128, 57, 212, 160, 255, 78, 0, 255
+ CB, Tendon, 192, 192, 192, 0, 128, 128, 163, 255, 160
+
+*ANAL-CTRL
+; bARDC, bANRC, iITER, TOL, bCSECF, bTRS, bCRBAR, bTPF, bCSO, bSCS, bCLATS
+   YES, YES, 20, 0.001, NO, YES, YES, NO, NO, NO, NO, NO
+
+*BOUNDARY-CHANGE    ; Boundary Change Assignment to Load Cases/Analyses
+; SEL=bSPT, bSPR, bGSPR, bCGLINK, bSSSF, bRLS, bCDOF
+; BGC=NAME1, BG1, BG2, ..., BGn
+; BGC=NAME2, BG1, BG2, ..., BGn
+; ...
+; LOAD=TYPE1, BGC1 { , LCNAME1 }
+; LOAD=TYPE2, BGC2 { , LCNAME2 }
+; ...
+  SEL=YES, YES, NO, NO, NO, NO, YES, NO
+  LOAD=ST, UNCHANGED, Self
+  LOAD=ST, UNCHANGED, SiDL1
+  LOAD=ST, UNCHANGED, Tendon
+  LOAD=ST, UNCHANGED, SiDL3
+  LOAD=ST, UNCHANGED, Wind
+  LOAD=ST, UNCHANGED, Uniform Temp(+)
+  LOAD=ST, UNCHANGED, Uniform temp (-)
+  LOAD=ST, UNCHANGED, Temp Grad (+)
+  LOAD=ST, UNCHANGED, Temp Grad (-)
+  LOAD=ST, UNCHANGED, SiDL2
+  LOAD=ST, UNCHANGED, 2nd Dead- Noise barr
+  LOAD=ST, UNCHANGED, PTL-Walk
+  LOAD=ST, UNCHANGED, PTL-HL
+  LOAD=ST, UNCHANGED, AL
+  LOAD=ST, UNCHANGED, RTL-Traction1
+  LOAD=ST, UNCHANGED, RTL-Braking1
+  LOAD=MV, UNCHANGED
+  LOAD=SM, UNCHANGED
+  LOAD=THRSEV, UNCHANGED
+  LOAD=PO, UNCHANGED
+  LOAD=THNS, UNCHANGED
+  LOAD=ULAT, UNCHANGED
+
+*DGN-MATL    ; Modify Steel(Concrete) Material
+; iMAT, TYPE, MNAME, [DATA1]                                    ; STEEL
+; iMAT, TYPE, MNAME, [DATA2], [R-DATA], FCI, bSERV, SHORT, LONG ; CONC
+; iMAT, TYPE, MNAME, [DATA3], [DATA2], [R-DATA]                 ; SRC
+; iMAT, TYPE, MNAME, [DATA5]                                    ; STEEL(None) & KSCE-ASD05
+; [DATA1] : 1, DB, CODE, NAME or 2, ELAST, POISN, FU, FY1, FY2, FY3, FY4
+;           FY5, FY6, AFT, AFT2, AFT3, FY, AFV, AFV2, AFV3
+; [DATA2] : 1, DB, CODE, NAME or 2, FC, CHK, LAMBDA
+; [DATA3] : 1, DB, CODE, NAME or 2, ELAST, FU, FY1, FY2, FY3, FY4
+;              FY5, FY6, AFT, AFT2, AFT3, FY, AFV, AFV2, AFV3
+; [DATA4] : 1, DB, CODE, NAME or 2, FC
+; [DATA5] : 3, ELAST, POISN, AL1, AL2, AL3, AL4, AL5, AL6, AL7, AL8, AL9, AL10
+;              MIN1, MIN2, MIN3
+; [R-DATA]: RBCODE, RBMAIN, RBSUB, FY(R), FYS
+    1, CONC , C40/50            , 1, EN04(RC)   ,            ,C40/50        , NO, 1, EN04(RC), Class B, Class B, , , 0.028, NO, 0, 0,            ,            ,              , 0, NO, 1, , , , 0, 0, 0
+
+*DGN-REBAR-PSC
+; SECT=NO, bMBARJ, bSHEARJ, bCRACKED                                                    ; line 1
+;      [DR-I], [SBW-I], [TR-I], [SR-I], [ES-I], [DR-J], [SBW-J], [TR-J], [SR-J], [ES-J] ; line 2
+;      I/J, NAME1, BARNUM1, YREF1, Y1, ZREF1, Z1, PITCH1, iPart1                        ; from line3
+;      I/J, NAME2, BARNUM2, YREF2, Y2, ZREF2, Z2, PITCH2, iPart2
+;      ...
+; [DR]  : bDR, SPITCH, STHETA, SAW
+; [SBW] : bSBW, TPITCH, TTHETA, TAP, TPS, SRF
+; [TR]  : bTR, LPITCH, LAWT, LALT
+; [SR]  : bSTIR, PITCH, AW
+; [ES]  : bES, CT, bIFC
+   SECT=2, YES, NO, NO
+        YES, 100, 90, 8042, NO, , , , , , YES, 100, 8042, 8042, NO, , , NO, , 
+        I, P20, 24, 0, 0, 0, 60, 150, 0
+        I, P20, 13, 0, 0, 1, 60, 150, 0
+        I, P20, 1, 1, 2466.87, 1, 1752.57, 0, 0
+        I, P20, 1, 1, 2388.5, 1, 1568.57, 0, 0
+        I, P20, 1, 1, 2310.12, 1, 1384.56, 0, 0
+        I, P20, 1, 1, 2231.75, 1, 1200.56, 0, 0
+        I, P20, 1, 1, 2153.37, 1, 1016.55, 0, 0
+        I, P20, 1, 1, 2075, 1, 832.55, 0, 0
+        I, P20, 1, 1, 1996.63, 1, 648.546, 0, 0
+        I, P20, 1, 1, 1918.25, 1, 464.542, 0, 0
+        I, P20, 1, 1, 1839.88, 1, 280.537, 0, 0
+        I, P20, 1, 1, 1761.5, 1, 96.5331, 0, 0
+        I, P20, 1, 1, 1683.13, 1, -87.4711, 0, 0
+        I, P20, 1, 1, -218.174, 1, 1754.14, 0, 0
+        I, P20, 1, 1, -140.539, 1, 1569.82, 0, 0
+        I, P20, 1, 1, -62.9044, 1, 1385.5, 0, 0
+        I, P20, 1, 1, 14.7304, 1, 1201.18, 0, 0
+        I, P20, 1, 1, 92.3652, 1, 1016.87, 0, 0
+        I, P20, 1, 1, 170, 1, 832.55, 0, 0
+        I, P20, 1, 1, 247.635, 1, 648.233, 0, 0
+        I, P20, 1, 1, 325.27, 1, 463.916, 0, 0
+        I, P20, 1, 1, 402.904, 1, 279.598, 0, 0
+        I, P20, 1, 1, 480.539, 1, 95.2811, 0, 0
+        I, P20, 1, 1, 558.174, 1, -89.0361, 0, 0
+        I, P20, 1, 1, 2671.98, 1, 1758.77, 0, 0
+        I, P20, 1, 1, 2596.58, 1, 1573.53, 0, 0
+        I, P20, 1, 1, 2521.19, 1, 1388.28, 0, 0
+        I, P20, 1, 1, 2445.79, 1, 1203.04, 0, 0
+        I, P20, 1, 1, 2370.4, 1, 1017.79, 0, 0
+        I, P20, 1, 1, 2295, 1, 832.55, 0, 0
+        I, P20, 1, 1, 2219.6, 1, 647.305, 0, 0
+        I, P20, 1, 1, 2144.21, 1, 462.061, 0, 0
+        I, P20, 1, 1, 2068.81, 1, 276.816, 0, 0
+        I, P20, 1, 1, 1993.42, 1, 91.5718, 0, 0
+        I, P20, 1, 1, 1918.02, 1, -93.6728, 0, 0
+        I, P20, 1, 1, -421.977, 1, 1758.77, 0, 0
+        I, P20, 1, 1, -346.581, 1, 1573.53, 0, 0
+        I, P20, 1, 1, -271.186, 1, 1388.28, 0, 0
+        I, P20, 1, 1, -195.791, 1, 1203.04, 0, 0
+        I, P20, 1, 1, -120.395, 1, 1017.79, 0, 0
+        I, P20, 1, 1, -45, 1, 832.55, 0, 0
+        I, P20, 1, 1, 30.3953, 1, 647.305, 0, 0
+        I, P20, 1, 1, 105.791, 1, 462.061, 0, 0
+        I, P20, 1, 1, 181.186, 1, 276.816, 0, 0
+        I, P20, 1, 1, 256.581, 1, 91.5718, 0, 0
+        I, P20, 1, 1, 331.977, 1, -93.6728, 0, 0
+        I, P20, 18, 0, 0, 0, 210, 150, 0
+        I, P20, 13, 0, 0, 1, 210, 150, 0
+        J, P20, 24, 0, 0, 0, 60, 150, 0
+        J, P20, 13, 0, 0, 1, 60, 150, 0
+        J, P20, 1, 1, 2466.87, 1, 1752.57, 0, 0
+        J, P20, 1, 1, 2388.5, 1, 1568.57, 0, 0
+        J, P20, 1, 1, 2310.12, 1, 1384.56, 0, 0
+        J, P20, 1, 1, 2231.75, 1, 1200.56, 0, 0
+        J, P20, 1, 1, 2153.37, 1, 1016.55, 0, 0
+        J, P20, 1, 1, 2075, 1, 832.55, 0, 0
+        J, P20, 1, 1, 1996.63, 1, 648.546, 0, 0
+        J, P20, 1, 1, 1918.25, 1, 464.542, 0, 0
+        J, P20, 1, 1, 1839.88, 1, 280.537, 0, 0
+        J, P20, 1, 1, 1761.5, 1, 96.5331, 0, 0
+        J, P20, 1, 1, 1683.13, 1, -87.4711, 0, 0
+        J, P20, 1, 1, -218.174, 1, 1754.14, 0, 0
+        J, P20, 1, 1, -140.539, 1, 1569.82, 0, 0
+        J, P20, 1, 1, -62.9044, 1, 1385.5, 0, 0
+        J, P20, 1, 1, 14.7304, 1, 1201.18, 0, 0
+        J, P20, 1, 1, 92.3652, 1, 1016.87, 0, 0
+        J, P20, 1, 1, 170, 1, 832.55, 0, 0
+        J, P20, 1, 1, 247.635, 1, 648.233, 0, 0
+        J, P20, 1, 1, 325.27, 1, 463.916, 0, 0
+        J, P20, 1, 1, 402.904, 1, 279.598, 0, 0
+        J, P20, 1, 1, 480.539, 1, 95.2811, 0, 0
+        J, P20, 1, 1, 558.174, 1, -89.0361, 0, 0
+        J, P20, 1, 1, 2671.98, 1, 1758.77, 0, 0
+        J, P20, 1, 1, 2596.58, 1, 1573.53, 0, 0
+        J, P20, 1, 1, 2521.19, 1, 1388.28, 0, 0
+        J, P20, 1, 1, 2445.79, 1, 1203.04, 0, 0
+        J, P20, 1, 1, 2370.4, 1, 1017.79, 0, 0
+        J, P20, 1, 1, 2295, 1, 832.55, 0, 0
+        J, P20, 1, 1, 2219.6, 1, 647.305, 0, 0
+        J, P20, 1, 1, 2144.21, 1, 462.061, 0, 0
+        J, P20, 1, 1, 2068.81, 1, 276.816, 0, 0
+        J, P20, 1, 1, 1993.42, 1, 91.5718, 0, 0
+        J, P20, 1, 1, 1918.02, 1, -93.6728, 0, 0
+        J, P20, 1, 1, -421.977, 1, 1758.77, 0, 0
+        J, P20, 1, 1, -346.581, 1, 1573.53, 0, 0
+        J, P20, 1, 1, -271.186, 1, 1388.28, 0, 0
+        J, P20, 1, 1, -195.791, 1, 1203.04, 0, 0
+        J, P20, 1, 1, -120.395, 1, 1017.79, 0, 0
+        J, P20, 1, 1, -45, 1, 832.55, 0, 0
+        J, P20, 1, 1, 30.3953, 1, 647.305, 0, 0
+        J, P20, 1, 1, 105.791, 1, 462.061, 0, 0
+        J, P20, 1, 1, 181.186, 1, 276.816, 0, 0
+        J, P20, 1, 1, 256.581, 1, 91.5718, 0, 0
+        J, P20, 1, 1, 331.977, 1, -93.6728, 0, 0
+        J, P20, 18, 0, 0, 0, 210, 150, 0
+        J, P20, 13, 0, 0, 1, 210, 150, 0
+   SECT=3, YES, NO, NO
+        YES, 100, 90, 3142, NO, , , , , , YES, 150, 3871, 2454, NO, , , NO, , 
+        I, P20, 1, 1, 2625, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2525, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2425, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2325, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2225, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 925, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 825, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 725, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 625, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 525, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 425, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 325, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 225, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 125, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 25, 1, 1908.64, 0, 0
+        I, P20, 1, 1, -75, 1, 1908.64, 0, 0
+        I, P20, 1, 1, -175, 1, 1908.64, 0, 0
+        I, P20, 1, 1, -275, 1, 1908.64, 0, 0
+        I, P20, 1, 1, -375, 1, 1908.64, 0, 0
+        I, P20, 1, 1, 2225, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 925, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 825, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 725, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 625, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 525, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 425, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 325, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 225, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 125, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 25, 1, 1608.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 925, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 825, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 725, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 625, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 525, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 425, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 325, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 225, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 125, 1, 1308.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 925, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 825, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 725, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 625, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 525, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 425, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 325, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 225, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 125, 1, 1108.64, 0, 0
+        I, P20, 1, 1, 2125, 1, 815.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 815.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 815.64, 0, 0
+        I, P20, 1, 1, 925, 1, 815.64, 0, 0
+        I, P20, 1, 1, 825, 1, 815.64, 0, 0
+        I, P20, 1, 1, 725, 1, 815.64, 0, 0
+        I, P20, 1, 1, 625, 1, 815.64, 0, 0
+        I, P20, 1, 1, 525, 1, 815.64, 0, 0
+        I, P20, 1, 1, 425, 1, 815.64, 0, 0
+        I, P20, 1, 1, 325, 1, 815.64, 0, 0
+        I, P20, 1, 1, 225, 1, 815.64, 0, 0
+        I, P20, 1, 1, 125, 1, 815.64, 0, 0
+        I, P20, 1, 1, 2025, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 515.64, 0, 0
+        I, P20, 1, 1, 925, 1, 515.64, 0, 0
+        I, P20, 1, 1, 825, 1, 515.64, 0, 0
+        I, P20, 1, 1, 725, 1, 515.64, 0, 0
+        I, P20, 1, 1, 625, 1, 515.64, 0, 0
+        I, P20, 1, 1, 525, 1, 515.64, 0, 0
+        I, P20, 1, 1, 425, 1, 515.64, 0, 0
+        I, P20, 1, 1, 325, 1, 515.64, 0, 0
+        I, P20, 1, 1, 225, 1, 515.64, 0, 0
+        I, P20, 1, 1, 1925, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 215.64, 0, 0
+        I, P20, 1, 1, 925, 1, 215.64, 0, 0
+        I, P20, 1, 1, 825, 1, 215.64, 0, 0
+        I, P20, 1, 1, 725, 1, 215.64, 0, 0
+        I, P20, 1, 1, 625, 1, 215.64, 0, 0
+        I, P20, 1, 1, 525, 1, 215.64, 0, 0
+        I, P20, 1, 1, 425, 1, 215.64, 0, 0
+        I, P20, 1, 1, 325, 1, 215.64, 0, 0
+        I, P20, 1, 1, 1925, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1825, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1725, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1625, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1525, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1425, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1325, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1225, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1125, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1025, 1, -84.36, 0, 0
+        I, P20, 1, 1, 925, 1, -84.36, 0, 0
+        I, P20, 1, 1, 825, 1, -84.36, 0, 0
+        I, P20, 1, 1, 725, 1, -84.36, 0, 0
+        I, P20, 1, 1, 625, 1, -84.36, 0, 0
+        I, P20, 1, 1, 525, 1, -84.36, 0, 0
+        I, P20, 1, 1, 425, 1, -84.36, 0, 0
+        I, P20, 1, 1, 325, 1, -84.36, 0, 0
+        I, P20, 1, 1, 1925, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1825, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1725, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1625, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1525, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1425, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1325, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1225, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1125, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1025, 1, -184.36, 0, 0
+        I, P20, 1, 1, 925, 1, -184.36, 0, 0
+        I, P20, 1, 1, 825, 1, -184.36, 0, 0
+        I, P20, 1, 1, 725, 1, -184.36, 0, 0
+        I, P20, 1, 1, 625, 1, -184.36, 0, 0
+        I, P20, 1, 1, 525, 1, -184.36, 0, 0
+        I, P20, 1, 1, 425, 1, -184.36, 0, 0
+        I, P20, 1, 1, 325, 1, -184.36, 0, 0
+        I, P20, 1, 1, 1925, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1825, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1725, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1625, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1525, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1425, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1325, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1225, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1125, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1025, 1, 15.64, 0, 0
+        I, P20, 1, 1, 925, 1, 15.64, 0, 0
+        I, P20, 1, 1, 825, 1, 15.64, 0, 0
+        I, P20, 1, 1, 725, 1, 15.64, 0, 0
+        I, P20, 1, 1, 625, 1, 15.64, 0, 0
+        I, P20, 1, 1, 525, 1, 15.64, 0, 0
+        I, P20, 1, 1, 425, 1, 15.64, 0, 0
+        I, P20, 1, 1, 325, 1, 15.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1945, 1, 340.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1745, 1, 340.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1545, 1, 340.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1345, 1, 340.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 940.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 790.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 640.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 490.64, 0, 0
+        I, P20, 1, 1, 1145, 1, 340.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 905, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 905, 1, 940.64, 0, 0
+        I, P20, 1, 1, 905, 1, 790.64, 0, 0
+        I, P20, 1, 1, 905, 1, 640.64, 0, 0
+        I, P20, 1, 1, 905, 1, 490.64, 0, 0
+        I, P20, 1, 1, 905, 1, 340.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 705, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 705, 1, 940.64, 0, 0
+        I, P20, 1, 1, 705, 1, 790.64, 0, 0
+        I, P20, 1, 1, 705, 1, 640.64, 0, 0
+        I, P20, 1, 1, 705, 1, 490.64, 0, 0
+        I, P20, 1, 1, 705, 1, 340.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 505, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 505, 1, 940.64, 0, 0
+        I, P20, 1, 1, 505, 1, 790.64, 0, 0
+        I, P20, 1, 1, 505, 1, 640.64, 0, 0
+        I, P20, 1, 1, 505, 1, 490.64, 0, 0
+        I, P20, 1, 1, 505, 1, 340.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1690.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1540.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1390.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1240.64, 0, 0
+        I, P20, 1, 1, 305, 1, 1090.64, 0, 0
+        I, P20, 1, 1, 305, 1, 940.64, 0, 0
+        I, P20, 1, 1, 305, 1, 790.64, 0, 0
+        I, P20, 1, 1, 305, 1, 640.64, 0, 0
+        I, P20, 1, 1, 305, 1, 490.64, 0, 0
+        I, P20, 1, 1, 305, 1, 340.64, 0, 0
+        J, P20, 1, 1, 2625, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2525, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2425, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2325, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2225, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 925, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 825, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 725, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 625, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 525, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 425, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 325, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 225, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 125, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 25, 1, 1908.64, 0, 0
+        J, P20, 1, 1, -75, 1, 1908.64, 0, 0
+        J, P20, 1, 1, -175, 1, 1908.64, 0, 0
+        J, P20, 1, 1, -275, 1, 1908.64, 0, 0
+        J, P20, 1, 1, -375, 1, 1908.64, 0, 0
+        J, P20, 1, 1, 2225, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 925, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 825, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 725, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 625, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 525, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 425, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 325, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 225, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 125, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 25, 1, 1608.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 925, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 825, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 725, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 625, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 525, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 425, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 325, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 225, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 125, 1, 1308.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 925, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 825, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 725, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 625, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 525, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 425, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 325, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 225, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 125, 1, 1108.64, 0, 0
+        J, P20, 1, 1, 2125, 1, 815.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 815.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 815.64, 0, 0
+        J, P20, 1, 1, 925, 1, 815.64, 0, 0
+        J, P20, 1, 1, 825, 1, 815.64, 0, 0
+        J, P20, 1, 1, 725, 1, 815.64, 0, 0
+        J, P20, 1, 1, 625, 1, 815.64, 0, 0
+        J, P20, 1, 1, 525, 1, 815.64, 0, 0
+        J, P20, 1, 1, 425, 1, 815.64, 0, 0
+        J, P20, 1, 1, 325, 1, 815.64, 0, 0
+        J, P20, 1, 1, 225, 1, 815.64, 0, 0
+        J, P20, 1, 1, 125, 1, 815.64, 0, 0
+        J, P20, 1, 1, 2025, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 515.64, 0, 0
+        J, P20, 1, 1, 925, 1, 515.64, 0, 0
+        J, P20, 1, 1, 825, 1, 515.64, 0, 0
+        J, P20, 1, 1, 725, 1, 515.64, 0, 0
+        J, P20, 1, 1, 625, 1, 515.64, 0, 0
+        J, P20, 1, 1, 525, 1, 515.64, 0, 0
+        J, P20, 1, 1, 425, 1, 515.64, 0, 0
+        J, P20, 1, 1, 325, 1, 515.64, 0, 0
+        J, P20, 1, 1, 225, 1, 515.64, 0, 0
+        J, P20, 1, 1, 1925, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 215.64, 0, 0
+        J, P20, 1, 1, 925, 1, 215.64, 0, 0
+        J, P20, 1, 1, 825, 1, 215.64, 0, 0
+        J, P20, 1, 1, 725, 1, 215.64, 0, 0
+        J, P20, 1, 1, 625, 1, 215.64, 0, 0
+        J, P20, 1, 1, 525, 1, 215.64, 0, 0
+        J, P20, 1, 1, 425, 1, 215.64, 0, 0
+        J, P20, 1, 1, 325, 1, 215.64, 0, 0
+        J, P20, 1, 1, 1925, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1825, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1725, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1625, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1525, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1425, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1325, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1225, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1125, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1025, 1, -84.36, 0, 0
+        J, P20, 1, 1, 925, 1, -84.36, 0, 0
+        J, P20, 1, 1, 825, 1, -84.36, 0, 0
+        J, P20, 1, 1, 725, 1, -84.36, 0, 0
+        J, P20, 1, 1, 625, 1, -84.36, 0, 0
+        J, P20, 1, 1, 525, 1, -84.36, 0, 0
+        J, P20, 1, 1, 425, 1, -84.36, 0, 0
+        J, P20, 1, 1, 325, 1, -84.36, 0, 0
+        J, P20, 1, 1, 1925, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1825, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1725, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1625, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1525, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1425, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1325, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1225, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1125, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1025, 1, -184.36, 0, 0
+        J, P20, 1, 1, 925, 1, -184.36, 0, 0
+        J, P20, 1, 1, 825, 1, -184.36, 0, 0
+        J, P20, 1, 1, 725, 1, -184.36, 0, 0
+        J, P20, 1, 1, 625, 1, -184.36, 0, 0
+        J, P20, 1, 1, 525, 1, -184.36, 0, 0
+        J, P20, 1, 1, 425, 1, -184.36, 0, 0
+        J, P20, 1, 1, 325, 1, -184.36, 0, 0
+        J, P20, 1, 1, 1925, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1825, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1725, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1625, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1525, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1425, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1325, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1225, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1125, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1025, 1, 15.64, 0, 0
+        J, P20, 1, 1, 925, 1, 15.64, 0, 0
+        J, P20, 1, 1, 825, 1, 15.64, 0, 0
+        J, P20, 1, 1, 725, 1, 15.64, 0, 0
+        J, P20, 1, 1, 625, 1, 15.64, 0, 0
+        J, P20, 1, 1, 525, 1, 15.64, 0, 0
+        J, P20, 1, 1, 425, 1, 15.64, 0, 0
+        J, P20, 1, 1, 325, 1, 15.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1945, 1, 340.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1745, 1, 340.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1545, 1, 340.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1345, 1, 340.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 940.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 790.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 640.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 490.64, 0, 0
+        J, P20, 1, 1, 1145, 1, 340.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 905, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 905, 1, 940.64, 0, 0
+        J, P20, 1, 1, 905, 1, 790.64, 0, 0
+        J, P20, 1, 1, 905, 1, 640.64, 0, 0
+        J, P20, 1, 1, 905, 1, 490.64, 0, 0
+        J, P20, 1, 1, 905, 1, 340.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 705, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 705, 1, 940.64, 0, 0
+        J, P20, 1, 1, 705, 1, 790.64, 0, 0
+        J, P20, 1, 1, 705, 1, 640.64, 0, 0
+        J, P20, 1, 1, 705, 1, 490.64, 0, 0
+        J, P20, 1, 1, 705, 1, 340.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 505, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 505, 1, 940.64, 0, 0
+        J, P20, 1, 1, 505, 1, 790.64, 0, 0
+        J, P20, 1, 1, 505, 1, 640.64, 0, 0
+        J, P20, 1, 1, 505, 1, 490.64, 0, 0
+        J, P20, 1, 1, 505, 1, 340.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1690.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1540.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1390.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1240.64, 0, 0
+        J, P20, 1, 1, 305, 1, 1090.64, 0, 0
+        J, P20, 1, 1, 305, 1, 940.64, 0, 0
+        J, P20, 1, 1, 305, 1, 790.64, 0, 0
+        J, P20, 1, 1, 305, 1, 640.64, 0, 0
+        J, P20, 1, 1, 305, 1, 490.64, 0, 0
+        J, P20, 1, 1, 305, 1, 340.64, 0, 0
+   SECT=5, YES, NO, NO
+        YES, 100, 90, 12568, NO, , , , , , YES, 100, 12568, 12568, NO, , , NO, , 
+        I, P20, 24, 0, 0, 0, 60, 150, 0
+        I, P20, 18, 0, 0, 1, 60, 150, 0
+        J, P20, 24, 0, 0, 0, 60, 150, 0
+        J, P20, 18, 0, 0, 1, 60, 150, 0
+
+*PSC-DGN-PARAM    ; PSC Design Parameter
+; (When iCODE=1(JSCE02))
+; iCODE, iDIMTYPE, iBRGTYPE, iCRKCODE, iCRKWIDTH, iCRKWIDTHB, iPSREDU, iST, iCT  ; line 1
+; bPR_DESIGN1, bPR_DESIGN2, ... , bPR_DESIGN5                                    ; line 2
+; bPR_STRUCT1, bPR_STRUCT2, ... , bPR_STRUCT5                                    ; line 3
+; bPR_MOMENT1, bPR_MOMENT2, ... , bPR_MOMENT8                                    ; line 4
+; bPR_SHEAR1,  bPR_SHEAR2,  ... , bPR_SHEAR5                                     ; line 5
+; bPR_TORSION1, bPR_TORSION2, ... , bPR_TORSION4                                 ; line 6
+; bPR_PAGENO, bPR_ETC, bPR_BACK1, bPR_BACK2, bPR_BACK3, bPR_BACK4                ; line 7
+; iPS_STRESS, iPS_KIND, bREFREBAR, bCMPWEB, iBRGDIR                              ; line 8
+; 
+; (When iCODE=2(KSCE_USD03), 4(KSCE_USD05), 5(KSCE_RAIL_USD04) 15(KSCE_USD10), 
+;             16(KSCE_RAIL_USD11))
+; iCODE, iDIMTYPE, iCRKWIDTH, iCRKWIDTHB, iFPS_METHOD, iTNDN_KIND, bRBAR         ; line 1;
+; bPR_SERVICE2, bPR_SERVICE3, ... , bPR_SERVICE5                                 ; line 2
+; bPR_STRENGTH1, bPR_STRENGTH2, ... , bPR_STRENGTH5                              ; line 3
+; 
+; (When iCODE=3(JTG_D62_04))
+; iCODE, iDIMTYPE, iBRGTYPE, iSAFETYPE, iCASTTYPE, iCRKWIDTH, iCRKWIDTHB         ; line 1
+; bPR_LEFT1, bPR_LEFT2, ... , bPR_LEFT6                                          ; line 2
+; bPR_RIGHT1, bPR_RIGHT2, ... , bPR_RIGHT4                                       ; line 3
+; 
+; (When iCODE=6(TB_10002_3_05))
+; iCODE, iDIMTYPE, iBRGTYPE                                                      ; line 1
+; bPR_BEAM1, bPR_BEAM2, ... , bPR_BEAM14                                         ; line 2
+; bPR_COLUMN1, bPR_COLUMN2, ... , bPR_COLUMN10                                   ; line 3
+; 
+; (When iCODE=9(AASHTO_LRFD07), 13(AASHTO_LRFD12), 14(CSA_S6_10), 23(AASHTO_LRFD14))
+; iCODE, iTNDN_KIND, iBRGTYPE, iCONSTRUCTION, iCORROSIVE, iFPS_METHOD,
+; iEXPOSURE-TYPE, EXPOSURE-FACTOR                                                ; line 1
+; bPR_SERVICE1, bPR_SERVICE2, ... , bPR_SERVICE7                                 ; line 2
+; bPR_STRENGTH1, bPR_STRENGTH2, ... , bPR_STRENGTH3                              ; line 3
+; 
+; (When iCODE=10(EUROCODE2_2_05_PSC)),iCODE=22(IRC_112_2011_PSC))
+; iCODE, iANNEX, iTNDN_METHOD, iSHEARMETHOD, dTHETA, iEXPOSURECLASS,
+; iCEMENTCLASS, bUSERINPUT, PRESTLTYPE                                           ; line 1
+; bULTIMATEEURO[0], bULTIMATEEURO[1], bULTIMATEEURO[2],, bULTIMATEEURO[3],
+; bSERVICEEURO[0],  bSERVICEEURO[1], ... , bSERVICEEURO[4], bSERVICEEURO[5]      ; line 2
+; dGAMMA_C_PT, dGAMMA_S_PT, dGAMMA_PS_PT, dGAMMA_C_A, dGAMMA_S_A, dGAMMA_PS_A,
+; dGAMMA_C_SERV, dGAMMA_S_SERV                                                   ; line 3
+; dALPHA_CC, dALPHA_CTC                                                          ; line 4
+; dK1_SL, dK3_SL, dK4_SL, dK6_SL, dK1_PS, dK2_PS, dK5_PS, dK7_PS, dK8_PS         ; line 5
+; dK_C_PS_STAGE, dK_T_PS_STAGE, dK_C_PS, dK_T_PS                                 ; line 6
+; dK3_CR, dK4_CR                                                                 ; line 7
+; dK3_FATIGUE                                                                    ; line 8
+; (When iCODE=17(KSCE_LSD15_PSC))
+; iCODE, iANNEX, iTNDN_METHOD, iSHEARMETHOD, dTHETA, iEXPOSURECLASS,
+; iCEMENTCLASS, bUSERINPUT, PRESTLTYPE, 
+; nTENDONTYPE, nBetaCalcType, nCalcCcType                                        ; line 1
+; bULTIMATEEURO[0], bULTIMATEEURO[1], bULTIMATEEURO[2],, bULTIMATEEURO[3],
+; bSERVICEEURO[0],  bSERVICEEURO[1], ... , bSERVICEEURO[4], bSERVICEEURO[5]      ; line 2
+; dGAMMA_C_PT, dGAMMA_S_PT, dGAMMA_PS_PT, dGAMMA_C_A, dGAMMA_S_A, dGAMMA_PS_A,
+; dGAMMA_C_SERV, dGAMMA_S_SERV                                                   ; line 3
+; dALPHA_CC, dALPHA_CTC                                                          ; line 4
+; dK1_SL, dK3_SL, dK4_SL, dK6_SL, dK1_PS, dK2_PS, dK5_PS, dK7_PS, dK8_PS         ; line 5
+; dK_C_PS_STAGE, dK_T_PS_STAGE, dK_C_PS, dK_T_PS                                 ; line 6
+; dK3_CR, dK4_CR                                                                 ; line 7
+; 
+; (When iCODE=12(CJJ11-2011))
+; iCODE, iDIMTYPE, iBRGTYPE, iSAFETYPE, iCASTTYPE, iCRKWIDTH, iCRKWIDTHB, iEXISTSPECIALLOAD         ; line 1
+; bPR_LEFT1, bPR_LEFT2, ... , bPR_LEFT6                                                             ; line 2
+; bPR_RIGHT1, bPR_RIGHT2, ... , bPR_RIGHT4                                                          ; line 3
+; 
+; (When iCODE=18(SNiP 2.05.03-84*), 19(SP 35.13330.2011))
+; iCODE, iBRGTYPE, bmb7mb8, mb7mb8Type, mb7, mb8, bmb9, mb9Type, mb9             ; line 1
+; b1st_Grp1, b1st_Grp2, ... , b1st_Grp4                                          ; line 2
+; b2nd_Grp1, b2nd_Grp1, ... , b2nd_Grp6                                          ; line 3
+ 10, 0, 0, 0, 45, 0, 0, NO, 1
+ YES, YES, YES, NO, YES, YES, YES, YES, YES, YES
+ 1.5, 1.15, 1.15, 1.2, 1, 1, 1, 1
+ 0.85, 1
+ 0.6, 0.8, 1, 0.7, 0.8, 0.9, 0.75, 0.75, 0.85
+ 1, 1, 1, 1
+ 3.4, 0.425
+ 0.85
+
+*PSC-DGN-OPTION   ; PSC Design Option
+; ELEM_LIST, iSHEAR, iMOMENT, iTORSION, iFATIGUE, iCRACK
+   1to15, 3, 3, 3, 3, 3
+
+*PSC-PRINT-OPT   ; PSC Print Options
+; ELEM_LIST, iPMC, iNMC, iSHR, iTOR, iPBC, iNBC, iFAtI, iCRACK
+   1to15, 3, 3, 3, 3, 3, 3, 3, 3
+
+*PSC-EXPOSURE_CLASS   ; Exposure Class
+; ELEM_LIST, bBOTHIJ, EC_I[0], EC_I[1], EC_J[0], EC_J[1]
+   1to15, YES, 4, 4, 4, 4
+
+*SECTION MANAGER-REBAR    ; Section Manager - Reinforcement
+; SECT = NO, bMBARSAMEJ, bSBARSAMEJ, bCRACK, dConcFact                           ; line 1
+;        MBARISIZE, MBARJSIZE                                                    ; line 2
+; .............................................................................  ;       
+;        LOOP UTIL (MBARISIZE, MBARJSIZE) - LONGITUDINAL                         ;       
+;        TYPE, REF.Y, REF.Z, NUMorCTC, NUM, CTC, EDGEBAR, BAR, STANDREF, PART    ; line n
+;        INPUTMETHOD, REFY_A, REFZ_A, dREFY_A, dREFZ_A, SPACING                  ; line n
+;        START(Y), START(Z), CENTER(Y), CENTER(Z), END(Y), END(Z), RADIUS        ; line n
+;        PASSAGESIZE, PASSAGESIZE(Y), PASSAGESIZE(Z).......                      ; line n
+; .............................................................................  ;       
+;        LOOP I, J - SHEAR                                                       ;       
+; [DR]   : bDR, SPITCH, STHETA, SAW                                              ; line n
+; [SBW]  : bSBW, TPITCH, TTHETA, TAP, TPS, SRF                                   ; line n
+; [TR]   : bTR, LPITCH, LAWT, LALT                                               ; line n
+; [SR]   : bSTIR, PITCH, AW                                                      ; line n
+; [ES]   : bES, CT, bIFC                                                         ; line n
+; .............................................................................  ;       
+   SECT=2, YES, YES, NO, 1
+ 8, 8
+ 1, 0, 0, 0, 24, 0, YES, P20, 0, 0, 0, 0, 0, 0, 60, 150
+ -1725, 868.82, 0, 0, 1725, 868.82, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 13, 0, YES, P20, 0, 0, 0, 0, 1, 0, 60, 150
+ -900, -1211.18, 0, 0, 900, -1211.18, 0
+ 1, 0, 0
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1400, 893, 0, 0, 500, -1220, 0
+ 1, 1400, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -1400, 893, 0, 0, -510, -1220, 0
+ 1, -1400, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1600, 893, 0, 0, 740, -1220, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -1600, 893, 0, 0, -740, -1220, 0
+ 1, 1600, 893
+ 1, 0, 0, 0, 18, 0, YES, P20, 0, 0, 0, 0, 0, 0, 210, 150
+ -1275, 718.82, 0, 0, 1275, 718.82, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 13, 0, YES, P20, 0, 0, 0, 0, 1, 0, 210, 150
+ -900, -1061.18, 0, 0, 900, -1061.18, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 24, 0, YES, P20, 0, 0, 0, 0, 0, 0, 60, 150
+ -1725, 868.82, 0, 0, 1725, 868.82, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 13, 0, YES, P20, 0, 0, 0, 0, 1, 0, 60, 150
+ -900, -1211.18, 0, 0, 900, -1211.18, 0
+ 1, 0, 0
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1400, 893, 0, 0, 500, -1220, 0
+ 1, 1400, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -1400, 893, 0, 0, -510, -1220, 0
+ 1, -1400, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1600, 893, 0, 0, 740, -1220, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -1600, 893, 0, 0, -740, -1220, 0
+ 1, 1600, 893
+ 1, 0, 0, 0, 18, 0, YES, P20, 0, 0, 0, 0, 0, 0, 210, 150
+ -1275, 718.82, 0, 0, 1275, 718.82, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 13, 0, YES, P20, 0, 0, 0, 0, 1, 0, 210, 150
+ -900, -1061.18, 0, 0, 900, -1061.18, 0
+ 1, 0, 0
+ YES, 100, 90, 8042, NO, 0, 90, 0, 0, 1, YES, 100, 8042, 8042, NO, 0, 0, NO, 0, NO
+ YES, 100, 90, 8042, NO, 0, 90, 0, 0, 1, YES, 100, 8042, 8042, NO, 0, 0, NO, 0, NO
+   SECT=3, YES, YES, NO, 1
+ 19, 19
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1600, 893, 0, 0, -1600, 893, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1200, 593, 0, 0, -1200, 593, 0
+ 1, 1200, 593
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, 293, 0, 0, -1100, 293, 0
+ 1, 1100, 293
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, 93, 0, 0, -1100, 93, 0
+ 1, 1100, 93
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, -200, 0, 0, -1100, -200, 0
+ 1, 1100, -200
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1000, -500, 0, 0, -1000, -500, 0
+ 1, 1000, -500
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -800, 0, 0, -900, -800, 0
+ 1, 900, -800
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1100, 0, 0, -900, -1100, 0
+ 1, 900, -1100
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1200, 0, 0, -900, -1200, 0
+ 1, 900, -1200
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1000, 0, 0, -900, -1000, 0
+ 1, 900, -1100
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 820, 800, 0, 0, 820, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 620, 800, 0, 0, 620, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 420, 800, 0, 0, 420, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 220, 800, 0, 0, 220, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 20, 800, 0, 0, 20, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -220, 800, 0, 0, -220, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -420, 800, 0, 0, -420, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -620, 800, 0, 0, -620, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -820, 800, 0, 0, -820, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1600, 893, 0, 0, -1600, 893, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1200, 593, 0, 0, -1200, 593, 0
+ 1, 1200, 593
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, 293, 0, 0, -1100, 293, 0
+ 1, 1100, 293
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, 93, 0, 0, -1100, 93, 0
+ 1, 1100, 93
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, -200, 0, 0, -1100, -200, 0
+ 1, 1100, -200
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1000, -500, 0, 0, -1000, -500, 0
+ 1, 1000, -500
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -800, 0, 0, -900, -800, 0
+ 1, 900, -800
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1100, 0, 0, -900, -1100, 0
+ 1, 900, -1100
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1200, 0, 0, -900, -1200, 0
+ 1, 900, -1200
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1000, 0, 0, -900, -1000, 0
+ 1, 900, -1100
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 820, 800, 0, 0, 820, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 620, 800, 0, 0, 620, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 420, 800, 0, 0, 420, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 220, 800, 0, 0, 220, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 20, 800, 0, 0, 20, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -220, 800, 0, 0, -220, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -420, 800, 0, 0, -420, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -620, 800, 0, 0, -620, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -820, 800, 0, 0, -820, -800, 0
+ 1, 1600, 893
+ YES, 100, 90, 3142, NO, 0, 90, 0, 0, 1, YES, 150, 3871, 2454, NO, 0, 0, NO, 0, NO
+ YES, 100, 90, 3142, NO, 0, 90, 0, 0, 1, YES, 150, 3871, 2454, NO, 0, 0, NO, 0, NO
+   SECT=5, YES, YES, NO, 1
+ 2, 2
+ 1, 0, 0, 0, 24, 0, YES, P20, 0, 0, 0, 0, 0, 0, 60, 150
+ -1725, 280.48, 0, 0, 1725, 280.48, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 18, 0, YES, P20, 0, 0, 0, 0, 1, 0, 60, 150
+ -1275, -324.52, 0, 0, 1275, -324.52, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 24, 0, YES, P20, 0, 0, 0, 0, 0, 0, 60, 150
+ -1725, 280.48, 0, 0, 1725, 280.48, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 18, 0, YES, P20, 0, 0, 0, 0, 1, 0, 60, 150
+ -1275, -324.52, 0, 0, 1275, -324.52, 0
+ 1, 0, 0
+ YES, 100, 90, 12568, NO, 0, 90, 0, 0, 1, YES, 100, 12568, 12568, NO, 0, 0, NO, 0, NO
+ YES, 100, 90, 12568, NO, 0, 90, 0, 0, 1, YES, 100, 12568, 12568, NO, 0, 0, NO, 0, NO
+
+*SECTION MANAGER-REBAR DESIGN    ; Section Manager - Reinforcement Design
+; SECT = NO, bMBARSAMEJ, bSBARSAMEJ, bCRACK, dConcFact                           ; line 1
+;        MBARISIZE, MBARJSIZE                                                    ; line 2
+; .............................................................................  ;       
+;        LOOP UTIL (MBARISIZE, MBARJSIZE) - LONGITUDINAL                         ;       
+;        TYPE, REF.Y, REF.Z, NUMorCTC, NUM, CTC, EDGEBAR, BAR, STANDREF, PART    ; line n
+;        INPUTMETHOD, REFY_A, REFZ_A, dREFY_A, dREFZ_A, SPACING                  ; line n
+;        START(Y), START(Z), CENTER(Y), CENTER(Z), END(Y), END(Z), RADIUS        ; line n
+;        PASSAGESIZE, PASSAGESIZE(Y), PASSAGESIZE(Z).......                      ; line n
+; .............................................................................  ;       
+;        LOOP I, J - SHEAR                                                       ;       
+; [DR]   : bDR, SPITCH, STHETA, SAW                                              ; line n
+; [SBW]  : bSBW, TPITCH, TTHETA, TAP, TPS, SRF                                   ; line n
+; [TR]   : bTR, LPITCH, LAWT, LALT                                               ; line n
+; [SR]   : bSTIR, PITCH, AW                                                      ; line n
+; [ES]   : bES, CT, bIFC                                                         ; line n
+; .............................................................................  ;       
+   SECT=2, YES, YES, NO, 1
+ 8, 8
+ 1, 0, 0, 0, 24, 0, YES, P20, 0, 0, 0, 0, 0, 0, 60, 150
+ -1725, 868.82, 0, 0, 1725, 868.82, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 13, 0, YES, P20, 0, 0, 0, 0, 1, 0, 60, 150
+ -900, -1211.18, 0, 0, 900, -1211.18, 0
+ 1, 0, 0
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1400, 893, 0, 0, 500, -1220, 0
+ 1, 1400, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -1400, 893, 0, 0, -510, -1220, 0
+ 1, -1400, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1600, 893, 0, 0, 740, -1220, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -1600, 893, 0, 0, -740, -1220, 0
+ 1, 1600, 893
+ 1, 0, 0, 0, 18, 0, YES, P20, 0, 0, 0, 0, 0, 0, 210, 150
+ -1275, 718.82, 0, 0, 1275, 718.82, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 13, 0, YES, P20, 0, 0, 0, 0, 1, 0, 210, 150
+ -900, -1061.18, 0, 0, 900, -1061.18, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 24, 0, YES, P20, 0, 0, 0, 0, 0, 0, 60, 150
+ -1725, 868.82, 0, 0, 1725, 868.82, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 13, 0, YES, P20, 0, 0, 0, 0, 1, 0, 60, 150
+ -900, -1211.18, 0, 0, 900, -1211.18, 0
+ 1, 0, 0
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1400, 893, 0, 0, 500, -1220, 0
+ 1, 1400, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -1400, 893, 0, 0, -510, -1220, 0
+ 1, -1400, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1600, 893, 0, 0, 740, -1220, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 0, 200, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -1600, 893, 0, 0, -740, -1220, 0
+ 1, 1600, 893
+ 1, 0, 0, 0, 18, 0, YES, P20, 0, 0, 0, 0, 0, 0, 210, 150
+ -1275, 718.82, 0, 0, 1275, 718.82, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 13, 0, YES, P20, 0, 0, 0, 0, 1, 0, 210, 150
+ -900, -1061.18, 0, 0, 900, -1061.18, 0
+ 1, 0, 0
+ YES, 100, 90, 8042, NO, 0, 90, 0, 0, 1, YES, 100, 8042, 8042, NO, 0, 0, NO, 0, NO
+ YES, 100, 90, 8042, NO, 0, 90, 0, 0, 1, YES, 100, 8042, 8042, NO, 0, 0, NO, 0, NO
+   SECT=3, YES, YES, NO, 1
+ 19, 19
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1600, 893, 0, 0, -1600, 893, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1200, 593, 0, 0, -1200, 593, 0
+ 1, 1200, 593
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, 293, 0, 0, -1100, 293, 0
+ 1, 1100, 293
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, 93, 0, 0, -1100, 93, 0
+ 1, 1100, 93
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, -200, 0, 0, -1100, -200, 0
+ 1, 1100, -200
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1000, -500, 0, 0, -1000, -500, 0
+ 1, 1000, -500
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -800, 0, 0, -900, -800, 0
+ 1, 900, -800
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1100, 0, 0, -900, -1100, 0
+ 1, 900, -1100
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1200, 0, 0, -900, -1200, 0
+ 1, 900, -1200
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1000, 0, 0, -900, -1000, 0
+ 1, 900, -1100
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 820, 800, 0, 0, 820, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 620, 800, 0, 0, 620, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 420, 800, 0, 0, 420, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 220, 800, 0, 0, 220, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 20, 800, 0, 0, 20, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -220, 800, 0, 0, -220, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -420, 800, 0, 0, -420, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -620, 800, 0, 0, -620, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -820, 800, 0, 0, -820, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1600, 893, 0, 0, -1600, 893, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1200, 593, 0, 0, -1200, 593, 0
+ 1, 1200, 593
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, 293, 0, 0, -1100, 293, 0
+ 1, 1100, 293
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, 93, 0, 0, -1100, 93, 0
+ 1, 1100, 93
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1100, -200, 0, 0, -1100, -200, 0
+ 1, 1100, -200
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 1000, -500, 0, 0, -1000, -500, 0
+ 1, 1000, -500
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -800, 0, 0, -900, -800, 0
+ 1, 900, -800
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1100, 0, 0, -900, -1100, 0
+ 1, 900, -1100
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1200, 0, 0, -900, -1200, 0
+ 1, 900, -1200
+ 1, 0, 0, 1, 1571, 100, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 900, -1000, 0, 0, -900, -1000, 0
+ 1, 900, -1100
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 820, 800, 0, 0, 820, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 620, 800, 0, 0, 620, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 420, 800, 0, 0, 420, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 220, 800, 0, 0, 220, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ 20, 800, 0, 0, 20, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -220, 800, 0, 0, -220, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -420, 800, 0, 0, -420, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -620, 800, 0, 0, -620, -800, 0
+ 1, 1600, 893
+ 1, 0, 0, 1, 1571, 150, NO, P20, 1, 0, 1, 0, 0, 0, 0, 0
+ -820, 800, 0, 0, -820, -800, 0
+ 1, 1600, 893
+ YES, 100, 90, 3142, NO, 0, 90, 0, 0, 1, YES, 150, 3871, 2454, NO, 0, 0, NO, 0, NO
+ YES, 100, 90, 3142, NO, 0, 90, 0, 0, 1, YES, 150, 3871, 2454, NO, 0, 0, NO, 0, NO
+   SECT=5, YES, YES, NO, 1
+ 2, 2
+ 1, 0, 0, 0, 24, 0, YES, P20, 0, 0, 0, 0, 0, 0, 60, 150
+ -1725, 280.48, 0, 0, 1725, 280.48, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 18, 0, YES, P20, 0, 0, 0, 0, 1, 0, 60, 150
+ -1275, -324.52, 0, 0, 1275, -324.52, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 24, 0, YES, P20, 0, 0, 0, 0, 0, 0, 60, 150
+ -1725, 280.48, 0, 0, 1725, 280.48, 0
+ 1, 0, 0
+ 1, 0, 0, 0, 18, 0, YES, P20, 0, 0, 0, 0, 1, 0, 60, 150
+ -1275, -324.52, 0, 0, 1275, -324.52, 0
+ 1, 0, 0
+ YES, 100, 90, 12568, NO, 0, 90, 0, 0, 1, YES, 100, 12568, 12568, NO, 0, 0, NO, 0, NO
+ YES, 100, 90, 12568, NO, 0, 90, 0, 0, 1, YES, 100, 12568, 12568, NO, 0, 0, NO, 0, NO
+
+*ENDDATA

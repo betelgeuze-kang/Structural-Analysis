@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-spatiotemporal-bigdata-generator",
+  "generated_at": "2026-02-25T15:21:13.895340+00:00",
+  "inputs": {
+    "base_cases": 120,
+    "active_rounds": 1,
+    "hard_topk": 24,
+    "seq_len": 90,
+    "dt": 0.01,
+    "coupling_k": 2800.0,
+    "seed": 23
+  },
+  "outputs": {
+    "dataset_path": "implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl",
+    "case_count": 144,
+    "split_counts": {
+      "test": 30,
+      "train": 97,
+      "val": 17
+    },
+    "topology_counts": {
+      "outrigger": 32,
+      "rahmen": 33,
+      "truss": 39,
+      "wall-frame": 40
+    },
+    "material_counts": {
+      "composite": 44,
+      "rc": 56,
+      "steel": 44
+    },
+    "ood_counts": {
+      "in_distribution": 29,
+      "ood_combined": 42,
+      "ood_hazard": 29,
+      "ood_topology": 44
+    },
+    "hard_case_count": 115,
+    "hard_case_ratio": 0.7986111111111112,
+    "torsion_sensitive_count": 86,
+    "avg_difficulty_score": 0.1302968429093858,
+    "active_learning_new_cases_per_round": [
+      24
+    ]
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "spatio-temporal active-learning dataset generated"
+}

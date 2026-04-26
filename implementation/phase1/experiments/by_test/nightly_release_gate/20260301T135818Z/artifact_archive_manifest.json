@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-01T13:58:18.941217+00:00",
+  "test_name": "nightly_release_gate",
+  "run_dir": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z",
+  "mode": "copy",
+  "archived_count": 18,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/release/nightly_release_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/nightly_release_gate_report.json",
+      "kind": "file",
+      "bytes": 11842,
+      "sha256": "21022ed7890c8727fe11961846b644c7b7c602e366cf85ab5bdca4c1bdd1a7ed",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_csv_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/commercial_csv_gate_report.json",
+      "kind": "file",
+      "bytes": 3063,
+      "sha256": "841d4fe70bc472985388ed690e1fa8ca9add03941493fd223a7819eee429b7f7",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_readiness_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/commercial_readiness_report.json",
+      "kind": "file",
+      "bytes": 14728,
+      "sha256": "7b3bc108ee3b8ac918b9bca230befa3c305d9613b514877f8c6755042e1b315e",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/real_source_multi_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/real_source_multi_gate_report.json",
+      "kind": "file",
+      "bytes": 1862,
+      "sha256": "82df68c5897c712ffb15d18c74c8b2dda736575448a15e30b14ea9c5ff04fd84",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/nonlinear_frame_engine_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/nonlinear_frame_engine_report.json",
+      "kind": "file",
+      "bytes": 4362,
+      "sha256": "45fe70207ca517a2793c4ace9227cd8e7bc54293466fe8d62df0d0af7aa17882",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/nonlinear_pushover_stress_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/nonlinear_pushover_stress_report.json",
+      "kind": "file",
+      "bytes": 9165,
+      "sha256": "18c7ec56a1bdf07e249a321146d5b70b98722746736044d1480c3fc2d60a7aea",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/nonlinear_ndtha_stress_report.json",
+      "kind": "file",
+      "bytes": 571680,
+      "sha256": "8d7ce61acb581c15ba642603a8e3958124ddd14cf4f2ffd4232906a63a23c9d6",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/phase3_megastructure_pipeline_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/phase3_megastructure_pipeline_report.json",
+      "kind": "file",
+      "bytes": 9335,
+      "sha256": "9fa79fa0889dac2d2938e0424206f590dbf4e8b17bee73317653513c6bc93e61",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/opensees_topology_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/opensees_topology_report.json",
+      "kind": "file",
+      "bytes": 2456,
+      "sha256": "5b0c8806265f01ba86e0ef674393dfa7c4d31556e8195dd5e3c00a379e51d900",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/partitioned_scaleout_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/partitioned_scaleout_report.json",
+      "kind": "file",
+      "bytes": 9052,
+      "sha256": "1354694c231574709aaec4f6784d56800fdab672d1f4e29accfef443a3e80dc2",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/sync_stress_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/sync_stress_gate_report.json",
+      "kind": "file",
+      "bytes": 4691,
+      "sha256": "941a9bfdf1e8186a17ad7290bee327d44a32cbca11afd0ba018942267de7d9be",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/noise_convergence_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/noise_convergence_gate_report.json",
+      "kind": "file",
+      "bytes": 12836,
+      "sha256": "8e1e341c8f0f29693b58207d8ec0bbc44249f254041ff8d15aaa5bdf54dcd966",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/scaleout_io_profile_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/scaleout_io_profile_report.json",
+      "kind": "file",
+      "bytes": 4744,
+      "sha256": "10a6c12fd4a66cd742fdac2598fb6ec6aecd988029b10321c8b91116368f0654",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/nightly_10m_repro_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/nightly_10m_repro_report.json",
+      "kind": "file",
+      "bytes": 4194,
+      "sha256": "48d90569e7c054bd75b4138e3045d65141f96b0e79aa2445d1b7207e29f0c9c2",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/ci_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/ci_gate_report.json",
+      "kind": "file",
+      "bytes": 1724,
+      "sha256": "e6a2844daaf80eff4898cd26927f0b23bb2a33cd78293ff57fcab255c4f08e01",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/static_artifact_validation_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/static_artifact_validation_report.json",
+      "kind": "file",
+      "bytes": 6022,
+      "sha256": "370b70b05af799f69afcfc66d72ac3f112300b47d7b98aee18e907f238ea5aa3",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/release/freeze_release_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/freeze_release_report.json",
+      "kind": "file",
+      "bytes": 2039,
+      "sha256": "8f321dbd29823c3620c38c12344a89112be6c6ecbe29016bc71dc6e822120f77",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/release/release_candidate_promotion_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T135818Z/artifacts/release_candidate_promotion_report.json",
+      "kind": "file",
+      "bytes": 1365,
+      "sha256": "cc6b529180620a648bf762d2ae3f3684788bf4fa3de76223512388a28442435c",
+      "mode": "copy"
+    }
+  ]
+}

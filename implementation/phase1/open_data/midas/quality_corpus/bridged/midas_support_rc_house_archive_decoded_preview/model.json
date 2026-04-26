@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "source_provenance": {
+    "source_family": "midas_binary_decoded_preview_bridge",
+    "source_id": "midas_support_rc_house_archive",
+    "path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_rc_house_archive/meb_decoded_inventory.json"
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": 1,
+        "x": -14.908413,
+        "y": -15.208413,
+        "z": 0.0
+      },
+      {
+        "id": 2,
+        "x": -5.0934,
+        "y": -5.3934,
+        "z": 0.0
+      },
+      {
+        "id": 3,
+        "x": -0.584698,
+        "y": -0.824698,
+        "z": 0.0
+      },
+      {
+        "id": 4,
+        "x": -1.185186,
+        "y": -1.425186,
+        "z": 0.0
+      },
+      {
+        "id": 5,
+        "x": -9.363627,
+        "y": -9.603627,
+        "z": 0.0
+      },
+      {
+        "id": 6,
+        "x": -2.237199,
+        "y": -2.477199,
+        "z": 0.0
+      }
+    ],
+    "elements": [
+      {
+        "id": 1,
+        "type": "BEAM",
+        "family": "beam_preview",
+        "node_ids": [
+          1,
+          2
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "xVPNT",
+        "preview_mode": "heuristic_xy_segment_preview",
+        "bridge_mode": "segment_preview"
+      },
+      {
+        "id": 2,
+        "type": "BEAM",
+        "family": "beam_preview",
+        "node_ids": [
+          3,
+          4
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "xVPNT",
+        "preview_mode": "heuristic_xy_segment_preview",
+        "bridge_mode": "segment_preview"
+      },
+      {
+        "id": 3,
+        "type": "BEAM",
+        "family": "beam_preview",
+        "node_ids": [
+          5,
+          6
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "xVPNT",
+        "preview_mode": "heuristic_xy_segment_preview",
+        "bridge_mode": "segment_preview"
+      }
+    ],
+    "materials": [],
+    "sections": [],
+    "loads": {},
+    "metadata": {
+      "bridge_family": "decoded_preview_baseline",
+      "family_assumption": "beam_preview",
+      "accepted_type_label": "heuristic_segment=3",
+      "selected_member_name": "C07_T03_P000_RC_03_┤▄╡╢┴╓┼├.meb",
+      "preview_state_label": "verified preview",
+      "preview_mode": "heuristic_xy_segment_preview",
+      "preview_basis": "table_directory_heuristic",
+      "preview_projection_label": "",
+      "preview_anchor_table_names": [],
+      "bridge_mode": "segment_preview",
+      "source_table": "xVPNT",
+      "topology_preview_ready": false,
+      "topology_signal_field_sources": {
+        "topology_preview_ready": "inventory_summary"
+      },
+      "preview_exactness_tier": "verified-geometry",
+      "preview_exactness_label": "verified geometry preview",
+      "preview_exactness_signal_source": "geometry_preview_ready",
+      "preview_surface_bucket": "verified-preview",
+      "preview_surface_status_label": "viewer-ready verified preview 3d bridge",
+      "preview_surface_status_tone": "ok",
+      "preview_readiness_stage_label": "viewer-ready verified preview"
+    }
+  },
+  "topology_metrics": {
+    "node_count": 6,
+    "element_count": 3,
+    "edge_count_undirected": 3,
+    "beam_element_count": 3,
+    "shell_element_count": 0
+  }
+}

@@ -1,0 +1,2679 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Structural Charts — Time History / Member Force / Story Drift</title>
+<link rel="stylesheet" href="./design-theme.css"/>
+</head>
+<body class="structural-surface charts-command-shell">
+<header class="companion-topbar">
+  <div class="header-copy">
+    <div class="app-brand-mark" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/></svg>
+    </div>
+    <div class="header-title">
+      <div class="header-eyebrow">Structural Insight Viewer</div>
+      <h1>Structural Analysis Charts</h1>
+      <div class="header-subtitle">Results cockpit with shared member/load-case handoff, provenance, and export-ready analysis surfaces.</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <span class="status-pill" id="artifact-source-pill">Loading artifacts...</span>
+    <span class="status-pill" id="artifact-coverage-pill">inline -> repo artifacts -> demo fallback</span>
+    <button type="button" class="status-pill" id="copy-deep-link-button" onclick="copyCurrentDeepLink()">Copy URL</button>
+    <button type="button" class="status-pill" id="export-png-button" onclick="exportActiveChartsPng()">PNG</button>
+    <button type="button" class="status-pill" id="toggle-light-mode-button" onclick="toggleLightMode()">Light</button>
+    <button type="button" class="status-pill" id="toggle-shortcuts-button" onclick="toggleShortcutHelp()">Shortcuts</button>
+  </div>
+  <nav class="suite-route-tabs" aria-label="Structural insight suite">
+    <a class="suite-route-tab" href="./index.html">Model Workspace</a>
+    <a class="suite-route-tab is-active" href="./charts.html">Analysis Charts</a>
+    <a class="suite-route-tab" href="./optimization_history.html">Optimization History</a>
+    <a class="suite-route-tab" href="./panel_zone.html">Panel Zone</a>
+  </nav>
+  <div class="header-provenance" id="charts-provenance" role="status" aria-live="polite">
+    <div class="provenance-card">
+      <div class="provenance-label">Source</div>
+      <div class="provenance-value" id="provenance-source-label">--</div>
+    </div>
+    <div class="provenance-card">
+      <div class="provenance-label">Report</div>
+      <div class="provenance-value" id="provenance-report-name">--</div>
+    </div>
+    <div class="provenance-card">
+      <div class="provenance-label">Timestamp</div>
+      <div class="provenance-value" id="provenance-timestamp">--</div>
+    </div>
+    <div class="provenance-card">
+      <div class="provenance-label">Selection</div>
+      <div class="provenance-value" id="provenance-selection">member=-- | load_case=-- | tab=timeseries</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="active" data-tab-key="timeseries" onclick="showTab('timeseries', this)">Time History</button>
+    <button data-tab-key="memberforce" onclick="showTab('memberforce', this)">Member Force</button>
+    <button data-tab-key="storydrift" onclick="showTab('storydrift', this)">Story Drift</button>
+    <button data-tab-key="envelope" onclick="showTab('envelope', this)">Envelope</button>
+  </div>
+</header>
+
+<div class="companion-workspace">
+  <aside class="companion-rail" aria-label="Results workspace navigation">
+    <section class="panel-section">
+      <div class="section-title">Workflow Rail</div>
+      <p class="rail-intro">Move through result lenses without leaving the shared structural command center.</p>
+      <nav class="shell-nav-list">
+        <button class="shell-nav-item is-active" type="button" data-rail-tab-key="timeseries" aria-pressed="true" onclick="showTab('timeseries', document.querySelector('[data-tab-key=timeseries]'))"><span class="shell-nav-item__icon">TH</span><span>Time History</span></button>
+        <button class="shell-nav-item" type="button" data-rail-tab-key="memberforce" aria-pressed="false" onclick="showTab('memberforce', document.querySelector('[data-tab-key=memberforce]'))"><span class="shell-nav-item__icon">MF</span><span>Member Force</span></button>
+        <button class="shell-nav-item" type="button" data-rail-tab-key="storydrift" aria-pressed="false" onclick="showTab('storydrift', document.querySelector('[data-tab-key=storydrift]'))"><span class="shell-nav-item__icon">SD</span><span>Story Drift</span></button>
+        <button class="shell-nav-item" type="button" data-rail-tab-key="envelope" aria-pressed="false" onclick="showTab('envelope', document.querySelector('[data-tab-key=envelope]'))"><span class="shell-nav-item__icon">EV</span><span>Envelope</span></button>
+      </nav>
+    </section>
+    <section class="panel-section">
+      <div class="section-title">Linked Context</div>
+      <div class="shell-meta-grid">
+        <span>Selection</span><span>Shared handoff</span>
+        <span>Source</span><span>Artifact first</span>
+        <span>Fallback</span><span>Demo guarded</span>
+      </div>
+      <div class="suite-chip-row" aria-label="handoff status">
+        <span class="context-chip is-accent">Selection sync</span>
+        <span class="context-chip">Deep link ready</span>
+      </div>
+    </section>
+  </aside>
+
+  <main class="companion-canvas" aria-label="Dominant analysis chart canvas">
+<section class="stage-strip" aria-label="Charts stage status">
+  <div>
+    <div class="section-title">Analysis Stage</div>
+    <div class="stage-title">Response Cockpit</div>
+  </div>
+  <div class="stage-context-row">
+    <span class="context-chip">Time history</span>
+    <span class="context-chip">Member force</span>
+    <span class="context-chip">Story drift</span>
+  </div>
+</section>
+<!-- Time History Tab -->
+<div id="tab-timeseries" class="chart-container chart-layout-2rows">
+  <div class="chart-panel">
+    <h3 id="time-history-title">Dynamic Response History</h3>
+    <div class="chart-info" id="time-history-info"></div>
+    <canvas id="accel-chart" height="250"></canvas>
+    <div class="legend" id="time-history-legend"></div>
+  </div>
+  <div class="chart-panel">
+    <h3 id="case-response-title">Case Response History</h3>
+    <div class="chart-info" id="case-response-info"></div>
+    <canvas id="disp-chart" height="250"></canvas>
+    <div class="legend" id="case-response-legend"></div>
+  </div>
+</div>
+
+<!-- Member Force Tab -->
+<div id="tab-memberforce" class="chart-container chart-layout-memberforce hidden">
+  <div class="stat-grid">
+    <div class="stat-card"><div class="value" id="max-moment">--</div><div class="label" id="max-moment-label">Max Moment</div></div>
+    <div class="stat-card"><div class="value" id="max-shear">--</div><div class="label" id="max-shear-label">Max Shear</div></div>
+    <div class="stat-card"><div class="value" id="max-axial">--</div><div class="label" id="max-axial-label">Max Axial</div></div>
+    <div class="stat-card"><div class="value tone-warn" id="max-dcr">--</div><div class="label" id="max-dcr-label">Max D/C Ratio</div></div>
+  </div>
+  <div class="chart-panel">
+    <h3 id="moment-panel-title">Moment Components</h3>
+    <div class="chart-info" id="moment-panel-info"></div>
+    <canvas id="moment-chart" height="220"></canvas>
+    <div class="legend" id="moment-chart-legend"></div>
+  </div>
+  <div class="chart-panel">
+    <h3 id="shear-panel-title">Axial / Shear Components</h3>
+    <div class="chart-info" id="shear-panel-info"></div>
+    <canvas id="shear-chart" height="220"></canvas>
+    <div class="legend" id="shear-chart-legend"></div>
+  </div>
+  <div class="chart-panel">
+    <h3 id="distribution-panel-title">Member Force Distribution</h3>
+    <div class="chart-info" id="distribution-panel-info"></div>
+    <canvas id="distribution-chart" height="240"></canvas>
+    <div class="legend" id="distribution-chart-legend"></div>
+  </div>
+</div>
+
+<!-- Story Drift Tab -->
+<div id="tab-storydrift" class="chart-container chart-layout-storydrift hidden">
+  <div class="chart-panel">
+    <h3 id="story-drift-left-title">Story Drift</h3>
+    <div class="chart-info" id="story-drift-left-info"></div>
+    <div id="drift-x"></div>
+  </div>
+  <div class="chart-panel">
+    <h3 id="story-drift-right-title">Residual Drift</h3>
+    <div class="chart-info" id="story-drift-right-info"></div>
+    <div id="drift-y"></div>
+  </div>
+</div>
+
+<!-- Envelope Tab -->
+<div id="tab-envelope" class="chart-container hidden">
+  <div class="chart-panel">
+    <h3 id="envelope-title">Envelope Explorer</h3>
+    <div class="chart-info" id="envelope-info"></div>
+    <canvas id="envelope-chart" height="350"></canvas>
+    <div class="legend" id="envelope-legend"></div>
+  </div>
+</div>
+  </main>
+
+  <aside class="companion-insight" aria-label="Chart insight rail">
+    <section class="panel-section">
+      <div class="section-title">Insight Rail</div>
+      <div class="kpi-summary-grid">
+        <div class="kpi-card kpi-card--accent"><div class="kpi-card__label">Canvas</div><div class="kpi-card__value">4</div><div class="kpi-card__meta">workflow views</div></div>
+        <div class="kpi-card"><div class="kpi-card__label">Handoff</div><div class="kpi-card__value">Live</div><div class="kpi-card__meta">member/load-case sync</div></div>
+        <div class="kpi-card kpi-card--wide"><div class="kpi-card__label">Instrumentation</div><div class="kpi-card__value">Traceable</div><div class="kpi-card__meta">Hover samples, row provenance, and export actions stay in the footer.</div></div>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<div class="controls companion-footer">
+  <label>Member: <select id="member-select" onchange="updateMemberCharts()"></select></label>
+  <label>Load Case: <select id="lc-select" onchange="updateAll()"></select></label>
+  <a id="review-row-link" class="status-pill is-disabled" href="#" target="_blank" rel="noopener">Review row provenance</a>
+  <a id="case-detail-link" class="status-pill is-disabled" href="#" target="_blank" rel="noopener">Open case detail</a>
+  <label class="controls-meta-label" id="point-focus-label">Point: hover/select a line sample</label>
+  <label class="controls-meta-label controls-meta-label--push" id="artifact-status-label">Source: loading...</label>
+  <label class="controls-meta-label" id="artifact-generated-label">Generated: --</label>
+</div>
+
+<div id="chart-tooltip" class="chart-tooltip" aria-hidden="true">
+  <div class="chart-tooltip-title" id="chart-tooltip-title">--</div>
+  <div class="chart-tooltip-meta" id="chart-tooltip-meta">--</div>
+</div>
+<div id="shortcut-help">
+  <strong>Shortcuts</strong>
+  <div><code>?</code> toggle shortcuts</div>
+  <div><code>L</code> light mode</div>
+  <div><code>P</code> PNG export</div>
+  <div><code>1-4</code> tab switch</div>
+</div>
+
+<script src="./charts.data.js"></script>
+<script>
+const ARTIFACT_PATHS={
+  viewer:'../../implementation/phase1/release/visualization/structural_optimization_viewer.json',
+  dynamic:'../../implementation/phase1/dynamic_time_history_report.json',
+  ndtha:'../../implementation/phase1/nonlinear_ndtha_stress_report.json',
+  memberForce:'../../implementation/phase1/member_force_soft_accept_report.json',
+};
+const INLINE_DATA_IDS=['charts-artifact-data','structure-viewer-data','viewer-payload-data'];
+const GLOBAL_INLINE_KEYS=['__STRUCTURAL_CHARTS_DATA__','__STRUCTURE_VIEWER_DATA__','__STRUCTURE_VIEWER_PAYLOAD__'];
+const IS_SINGLEFILE_VIEWER=window.__STRUCTURAL_SINGLEFILE__===true;
+
+const CANVAS_FONT_STACK='"IBM Plex Sans KR", "Pretendard", "Noto Sans KR", sans-serif';
+const CANVAS_TITLE_FONT=`700 26px "Space Grotesk", ${CANVAS_FONT_STACK}`;
+const CANVAS_SUBTITLE_FONT=`13px ${CANVAS_FONT_STACK}`;
+const CANVAS_SECTION_FONT=`600 16px ${CANVAS_FONT_STACK}`;
+const CANVAS_BODY_FONT=`12px ${CANVAS_FONT_STACK}`;
+const CANVAS_LABEL_FONT=`11px ${CANVAS_FONT_STACK}`;
+const CANVAS_TINY_FONT=`10px ${CANVAS_FONT_STACK}`;
+const COLORS=['#4FB7AD','#EF7D73','#63C7A1','#F4B56B','#C96D2C','#7BA7C6','#A1492E'];
+const DEFAULT_DRIFT_LIMIT=0.015;
+
+const SHARED_SELECTION_KEY='structural-viewer-selection-v1';
+const VIEWER_THEME_KEY='structural-charts-theme-v1';
+const selectionChannel=(()=>{
+  try{return typeof BroadcastChannel==='function'?new BroadcastChannel(SHARED_SELECTION_KEY):null}catch(_err){return null}
+})();
+let suppressSelectionPublish=false;
+const state={activeTab:'timeseries',dataset:null};
+const linePanelState=new Map();
+const groupedBarState=new Map();
+const groupedBarInteractionState={hover:null,selected:null};
+const lineInteractionState={hover:null,selected:null};
+const NODE_CONTOUR_FIELDS=new Set(['disp_mag','stress_vm']);
+
+function safeStorageGet(key){
+  try{return window.localStorage.getItem(key)}catch(_err){return null}
+}
+function safeStorageSet(key,value){
+  try{window.localStorage.setItem(key,value)}catch(_err){}
+}
+function applySavedThemeMode(){
+  const theme=normalizeSelectionValue(safeStorageGet(VIEWER_THEME_KEY));
+  document.body.classList.toggle('light-mode',theme==='light');
+  updateThemeButtons();
+}
+function updateThemeButtons(){
+  const button=document.getElementById('toggle-light-mode-button');
+  if(button instanceof HTMLButtonElement){
+    button.textContent=document.body.classList.contains('light-mode')?'Dark':'Light';
+  }
+}
+function toggleLightMode(){
+  const nextLight=!document.body.classList.contains('light-mode');
+  document.body.classList.toggle('light-mode',nextLight);
+  safeStorageSet(VIEWER_THEME_KEY,nextLight?'light':'dark');
+  updateThemeButtons();
+}
+function toggleShortcutHelp(force=null){
+  const node=document.getElementById('shortcut-help');
+  if(!(node instanceof HTMLElement))return;
+  const next=typeof force==='boolean'?force:!node.classList.contains('is-open');
+  node.classList.toggle('is-open',next);
+}
+function normalizeSelectionValue(value){
+  const text=String(value??'').trim();
+  return text||'';
+}
+function normalizeSelectionValues(values){
+  const source=Array.isArray(values)
+    ?values
+    :String(values??'').split('|');
+  const unique=[];
+  source.forEach(value=>{
+    const normalized=normalizeSelectionValue(value);
+    if(normalized&&!unique.includes(normalized))unique.push(normalized);
+  });
+  return unique;
+}
+function clamp(value,min,max){
+  return Math.min(max,Math.max(min,value));
+}
+function formatTimestampLabel(value){
+  const raw=String(value||'').trim();
+  if(!raw) return '--';
+  const date=new Date(raw);
+  return Number.isNaN(date.getTime())?raw:date.toLocaleString('ko-KR',{hour12:false});
+}
+function chartTooltipElements(){
+  return{
+    root:document.getElementById('chart-tooltip'),
+    title:document.getElementById('chart-tooltip-title'),
+    meta:document.getElementById('chart-tooltip-meta'),
+  };
+}
+function hideChartTooltip(){
+  const tooltip=chartTooltipElements();
+  if(!(tooltip.root instanceof HTMLElement))return;
+  tooltip.root.style.display='none';
+  tooltip.root.setAttribute('aria-hidden','true');
+}
+function showChartTooltip(event,{title,metaLines=[]}={}){
+  const tooltip=chartTooltipElements();
+  if(!(tooltip.root instanceof HTMLElement)||!(tooltip.title instanceof HTMLElement)||!(tooltip.meta instanceof HTMLElement))return;
+  tooltip.title.textContent=title||'';
+  tooltip.meta.innerHTML=(Array.isArray(metaLines)?metaLines:[String(metaLines||'')])
+    .filter(Boolean)
+    .map(line=>String(line)
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;'))
+    .join('<br/>');
+  tooltip.root.style.display='block';
+  tooltip.root.setAttribute('aria-hidden','false');
+  const x=Math.min(window.innerWidth-tooltip.root.offsetWidth-12,event.clientX+14);
+  const y=Math.min(window.innerHeight-tooltip.root.offsetHeight-12,event.clientY+14);
+  tooltip.root.style.left=`${Math.max(12,x)}px`;
+  tooltip.root.style.top=`${Math.max(12,y)}px`;
+}
+function getLinePanelState(canvasId){
+  if(!linePanelState.has(canvasId)){
+    linePanelState.set(canvasId,{
+      xDomain:null,
+      hover:null,
+      selectedPoint:null,
+      pointerDown:false,
+      dragMode:'',
+      dragMoved:false,
+      dragStartX:0,
+      dragCurrentX:0,
+      dragStartDomain:null,
+      suppressNextClick:false,
+    });
+  }
+  return linePanelState.get(canvasId);
+}
+function getGroupedBarState(canvasId){
+  if(!groupedBarState.has(canvasId)){
+    groupedBarState.set(canvasId,{hover:null,selectedBar:null,bound:false,chart:null,bars:[],panelKey:''});
+  }
+  return groupedBarState.get(canvasId);
+}
+function getLinePanelGroupKey(panel){
+  const explicit=normalizeTabKey(panel?.lineGroupKey||panel?.groupKey||panel?.tabKey||'');
+  return explicit||normalizeTabKey(state.activeTab)||'timeseries';
+}
+function getGroupedBarGroupKey(chart){
+  const explicit=normalizeTabKey(chart?.barGroupKey||chart?.groupKey||chart?.tabKey||'');
+  return explicit||normalizeTabKey(state.activeTab)||'memberforce';
+}
+function getLinePanelResultsCard(panel){
+  const normalized=String(panel?.resultsCard||'').trim().toLowerCase();
+  return normalized==='time-history'||normalized==='envelope'?normalized:'';
+}
+function createLinePanelConfig(panel,meta={}){
+  const base=panel&&typeof panel==='object'?Object.assign({},panel):{series:[]};
+  base.lineGroupKey=normalizeTabKey(meta.groupKey||base.lineGroupKey||state.activeTab||'')||'timeseries';
+  base.panelKey=normalizeSelectionValue(meta.panelKey||base.panelKey||'');
+  base.panelLabel=normalizeSelectionValue(meta.panelLabel||base.panelLabel||base.title||'');
+  base.resultsCard=getLinePanelResultsCard({resultsCard:meta.resultsCard||base.resultsCard});
+  base.memberId=normalizeSelectionValue(meta.memberId||base.memberId||'');
+  base.loadCase=normalizeSelectionValue(meta.loadCase||base.loadCase||'');
+  base.caseId=normalizeSelectionValue(meta.caseId||base.caseId||'');
+  return base;
+}
+function createGroupedBarChartConfig(chart,meta={}){
+  const base=chart&&typeof chart==='object'?Object.assign({},chart):{categories:[],series:[]};
+  base.barGroupKey=normalizeTabKey(meta.groupKey||base.barGroupKey||state.activeTab||'')||'memberforce';
+  base.panelKey=normalizeSelectionValue(meta.panelKey||base.panelKey||'');
+  base.panelLabel=normalizeSelectionValue(meta.panelLabel||base.panelLabel||base.title||'');
+  base.resultsCard=getLinePanelResultsCard({resultsCard:meta.resultsCard||base.resultsCard});
+  base.memberId=normalizeSelectionValue(meta.memberId||base.memberId||'');
+  base.loadCase=normalizeSelectionValue(meta.loadCase||base.loadCase||'');
+  base.caseId=normalizeSelectionValue(meta.caseId||base.caseId||'');
+  base.categoryLabel=normalizeSelectionValue(meta.categoryLabel||base.categoryLabel||'component');
+  return base;
+}
+function getPointMeta(point){
+  return point&&typeof point==='object'&&point.meta&&typeof point.meta==='object'
+    ?point.meta
+    :{};
+}
+function isChartPanelVisible(node){
+  return !(node?.closest('.chart-container')?.classList.contains('hidden'));
+}
+function redrawVisibleLinePanels(groupKey=''){
+  linePanelState.forEach((panelState,canvasId)=>{
+    const canvas=document.getElementById(canvasId);
+    if(!(canvas instanceof HTMLCanvasElement)||!panelState?.panel)return;
+    if(groupKey&&getLinePanelGroupKey(panelState.panel)!==groupKey)return;
+    if(!isChartPanelVisible(canvas))return;
+    drawLinePanel(canvasId,panelState.panel);
+  });
+}
+function buildLinePointFocusKey(pointIndex){
+  return `chart-marker:${Math.max(Number(pointIndex)||0,0)}`;
+}
+function buildGroupedBarFocusKey(panelKey,seriesIndex,categoryIndex){
+  return `chart-bar:${normalizeSelectionValue(panelKey||'chart')}:${Math.max(Number(seriesIndex)||0,0)}:${Math.max(Number(categoryIndex)||0,0)}`;
+}
+function buildLineInteractionContext(canvasId,panel,nearest,cursorXValue,kind='hover'){
+  const point=Array.isArray(nearest?.point)?nearest.point:null;
+  if(!point)return null;
+  const pointMeta=getPointMeta(point);
+  const member=currentMember();
+  const shared=readSharedSelection();
+  const fallbackLoadCase=currentLoadCase()||shared.loadCase||'';
+  return{
+    kind,
+    canvasId,
+    panel,
+    panelKey:normalizeSelectionValue(panel?.panelKey||canvasId),
+    panelLabel:normalizeSelectionValue(panel?.panelLabel||panel?.title||canvasId),
+    groupKey:getLinePanelGroupKey(panel),
+    resultsCard:getLinePanelResultsCard(panel),
+    seriesLabel:nearest.series?.label||`series ${Number(nearest.seriesIndex||0)+1}`,
+    seriesIndex:Number(nearest.seriesIndex)||0,
+    point,
+    pointIndex:Number(nearest.pointIndex)||0,
+    color:nearest.color||nearest.series?.color||COLORS[(Number(nearest.seriesIndex)||0)%COLORS.length],
+    xValue:Number(point[0])||0,
+    yValue:Number(point[1])||0,
+    cursorXValue:Number.isFinite(cursorXValue)?cursorXValue:(Number(point[0])||0),
+    xLabel:normalizeSelectionValue(panel?.xLabel)||'x',
+    yLabel:normalizeSelectionValue(nearest.series?.valueLabel||panel?.valueLabel||'value'),
+    memberId:normalizeSelectionValue(panel?.memberId||pointMeta.member_id||pointMeta.memberId||member?.id||shared.memberId),
+    loadCase:normalizeSelectionValue(panel?.loadCase||pointMeta.load_case||pointMeta.loadCase||pointMeta.case_id||pointMeta.caseId||fallbackLoadCase),
+    caseId:normalizeSelectionValue(panel?.caseId||pointMeta.case_id||pointMeta.caseId||fallbackLoadCase),
+    pointMeta,
+    focusKey:buildLinePointFocusKey(Number(nearest.pointIndex)||0),
+  };
+}
+function buildGroupedBarInteractionContext(canvasId,chart,bar,kind='hover'){
+  if(!bar)return null;
+  const member=currentMember();
+  const shared=readSharedSelection();
+  const categoryIndex=Math.max(Number(bar.categoryIndex)||0,0);
+  const seriesIndex=Math.max(Number(bar.seriesIndex)||0,0);
+  const fallbackLoadCase=currentLoadCase()||shared.loadCase||'';
+  const panelKey=normalizeSelectionValue(chart?.panelKey||canvasId);
+  return{
+    kind,
+    interactionKind:'bar',
+    canvasId,
+    chart,
+    panelKey,
+    panelLabel:normalizeSelectionValue(chart?.panelLabel||chart?.title||canvasId),
+    groupKey:getGroupedBarGroupKey(chart),
+    resultsCard:getLinePanelResultsCard({resultsCard:chart?.resultsCard}),
+    seriesLabel:normalizeSelectionValue(bar.seriesLabel||`series ${seriesIndex+1}`),
+    seriesIndex,
+    category:normalizeSelectionValue(bar.category||`item ${categoryIndex+1}`),
+    categoryIndex,
+    itemIndex:categoryIndex,
+    pointIndex:categoryIndex,
+    color:bar.color||COLORS[seriesIndex%COLORS.length],
+    value:Number(bar.value)||0,
+    xValue:categoryIndex,
+    yValue:Number(bar.value)||0,
+    xLabel:normalizeSelectionValue(chart?.categoryLabel)||'component',
+    yLabel:normalizeSelectionValue(chart?.valueLabel||bar.valueLabel)||'value',
+    memberId:normalizeSelectionValue(chart?.memberId||member?.id||shared.memberId),
+    loadCase:normalizeSelectionValue(chart?.loadCase||bar.loadCase||fallbackLoadCase),
+    caseId:normalizeSelectionValue(chart?.caseId||bar.caseId||chart?.loadCase||bar.loadCase||fallbackLoadCase),
+    focusKey:buildGroupedBarFocusKey(panelKey,seriesIndex,categoryIndex),
+  };
+}
+function setSharedLineInteraction(kind,context){
+  if(kind!=='hover'&&kind!=='selected')return;
+  lineInteractionState[kind]=context&&typeof context==='object'
+    ?Object.assign({},context,{kind,groupKey:getLinePanelGroupKey(context.panel),interactionKind:'line',updatedAt:Date.now()})
+    :null;
+  updatePointDrilldownLinks();
+  redrawVisibleLinePanels(lineInteractionState[kind]?.groupKey||state.activeTab||'');
+}
+function clearSharedLineInteraction(kind,canvasId=''){
+  if(kind!=='hover'&&kind!=='selected')return;
+  const current=lineInteractionState[kind];
+  if(!current)return;
+  if(canvasId&&current.canvasId!==canvasId)return;
+  const groupKey=current.groupKey||state.activeTab||'';
+  lineInteractionState[kind]=null;
+  updatePointDrilldownLinks();
+  redrawVisibleLinePanels(groupKey);
+}
+function setSharedGroupedBarInteraction(kind,context){
+  if(kind!=='hover'&&kind!=='selected')return;
+  groupedBarInteractionState[kind]=context&&typeof context==='object'
+    ?Object.assign({},context,{kind,groupKey:getGroupedBarGroupKey(context.chart),interactionKind:'bar',updatedAt:Date.now()})
+    :null;
+  updatePointDrilldownLinks();
+}
+function clearSharedGroupedBarInteraction(kind,canvasId=''){
+  if(kind!=='hover'&&kind!=='selected')return;
+  const current=groupedBarInteractionState[kind];
+  if(!current)return;
+  if(canvasId&&current.canvasId!==canvasId)return;
+  groupedBarInteractionState[kind]=null;
+  updatePointDrilldownLinks();
+}
+function chooseLatestInteractionContext(...contexts){
+  return contexts
+    .filter(context=>context&&context.groupKey===state.activeTab)
+    .sort((left,right)=>(Number(right.updatedAt)||0)-(Number(left.updatedAt)||0))[0]||null;
+}
+function getActiveLineInteractionContext(){
+  const hover=lineInteractionState.hover;
+  if(hover&&hover.groupKey===state.activeTab)return hover;
+  const selected=lineInteractionState.selected;
+  if(selected&&selected.groupKey===state.activeTab)return selected;
+  return null;
+}
+function getActiveChartInteractionContext(){
+  return chooseLatestInteractionContext(lineInteractionState.selected,groupedBarInteractionState.selected)
+    || chooseLatestInteractionContext(lineInteractionState.hover,groupedBarInteractionState.hover);
+}
+function resolveSharedLineInteractionForPanel(kind,panelState,canvasId,series,panel){
+  const shared=lineInteractionState[kind];
+  if(!shared||shared.groupKey!==getLinePanelGroupKey(panel))return null;
+  if(shared.canvasId===canvasId){
+    return kind==='hover'?panelState.hover:panelState.selectedPoint;
+  }
+  const nearest=findNearestSeriesPoint(series,shared.cursorXValue);
+  return nearest?buildLineInteractionContext(canvasId,panel,nearest,shared.cursorXValue,kind):null;
+}
+function basenameLabel(value,fallback='--'){
+  const raw=String(value||'').trim();
+  if(!raw) return fallback;
+  try{
+    const url=new URL(raw,window.location.href);
+    const pathname=String(url.pathname||'').split('/').filter(Boolean);
+    return pathname[pathname.length-1]||fallback;
+  }catch(_err){
+    const normalized=raw.replaceAll('\\','/');
+    const parts=normalized.split('/').filter(Boolean);
+    return parts[parts.length-1]||raw||fallback;
+  }
+}
+function normalizeTabKey(value){
+  const normalized=String(value||'').trim().toLowerCase();
+  return ['timeseries','memberforce','storydrift','envelope'].includes(normalized)?normalized:'';
+}
+function readRequestedTab(){
+  const params=new URLSearchParams(window.location.search);
+  return normalizeTabKey(params.get('tab')||'');
+}
+function readSharedSelection(){
+  const params=new URLSearchParams(window.location.search);
+  const queryMember=normalizeSelectionValue(
+    params.get('member')||params.get('member_id')||params.get('focus_member')||params.get('case_id')||params.get('focus')
+  );
+  const queryMemberIds=normalizeSelectionValues(params.get('member_set')||'');
+  const queryLoadCase=normalizeSelectionValue(params.get('load_case')||params.get('loadcase')||params.get('combination'));
+  let stored={};
+  const raw=safeStorageGet(SHARED_SELECTION_KEY);
+  if(raw){
+    try{stored=JSON.parse(raw)||{}}catch(_err){stored={}}
+  }
+  const storedMemberIds=normalizeSelectionValues(stored.memberIds||stored.memberSet||stored.member_ids||[]);
+  const memberIds=queryMemberIds.length
+    ?queryMemberIds
+    :(storedMemberIds.length
+      ?storedMemberIds
+      :(queryMember?[queryMember]:[]));
+  const memberId=queryMember
+    ||memberIds[0]
+    ||normalizeSelectionValue(stored.memberId)
+    ||normalizeSelectionValue(stored.focusMember);
+  return{
+    memberId,
+    memberIds,
+    selectionSetCount:memberIds.length,
+    loadCase:queryLoadCase||normalizeSelectionValue(stored.loadCase),
+    tab:readRequestedTab()||normalizeTabKey(stored.tab)||'timeseries',
+    updatedAt:normalizeSelectionValue(stored.updated_at)
+  };
+}
+function updateViewerQueryParams(selection){
+  const url=new URL(window.location.href);
+  if(selection.memberId)url.searchParams.set('member',selection.memberId);else url.searchParams.delete('member');
+  const memberIds=normalizeSelectionValues(selection.memberIds||[]);
+  if(memberIds.length)url.searchParams.set('member_set',memberIds.join('|'));else url.searchParams.delete('member_set');
+  if(selection.loadCase)url.searchParams.set('load_case',selection.loadCase);else url.searchParams.delete('load_case');
+  if(selection.tab)url.searchParams.set('tab',selection.tab);else url.searchParams.delete('tab');
+  window.history.replaceState({},'',url);
+}
+function publishSharedSelection(selection){
+  if(suppressSelectionPublish)return;
+  const memberIds=normalizeSelectionValues(selection.memberIds||selection.memberId||[]);
+  const primaryMember=normalizeSelectionValue(selection.memberId)||memberIds[0]||'';
+  const next={
+    memberId:primaryMember,
+    memberIds,
+    memberSet:memberIds,
+    selectionSetCount:memberIds.length,
+    focusMember:primaryMember,
+    loadCase:normalizeSelectionValue(selection.loadCase),
+    source:'charts',
+    viewerFamily:'charts_viewer',
+    tab:normalizeTabKey(selection.tab)||state.activeTab,
+    updated_at:new Date().toISOString()
+  };
+  safeStorageSet(SHARED_SELECTION_KEY,JSON.stringify(next));
+  updateViewerQueryParams(next);
+  try{selectionChannel?.postMessage(next)}catch(_err){}
+}
+function getCurrentSelectionState(){
+  const shared=readSharedSelection();
+  const currentMemberId=currentMember()?.id||shared.memberId||'';
+  const sharedMemberIds=normalizeSelectionValues(shared.memberIds||[]);
+  const memberIds=sharedMemberIds.includes(currentMemberId)
+    ?sharedMemberIds
+    :(currentMemberId?[currentMemberId]:sharedMemberIds);
+  return{
+    memberId:currentMemberId,
+    memberIds,
+    selectionSetCount:memberIds.length,
+    loadCase:currentLoadCase()||shared.loadCase||'',
+    tab:state.activeTab||'timeseries'
+  };
+}
+function buildCurrentDeepLinkUrl(){
+  const selection=getCurrentSelectionState();
+  const url=new URL(window.location.href);
+  if(selection.memberId)url.searchParams.set('member',selection.memberId);else url.searchParams.delete('member');
+  if(selection.memberIds?.length)url.searchParams.set('member_set',selection.memberIds.join('|'));else url.searchParams.delete('member_set');
+  if(selection.loadCase)url.searchParams.set('load_case',selection.loadCase);else url.searchParams.delete('load_case');
+  if(selection.tab)url.searchParams.set('tab',selection.tab);else url.searchParams.delete('tab');
+  return url.href;
+}
+async function copyCurrentDeepLink(){
+  const button=document.getElementById('copy-deep-link-button');
+  const href=buildCurrentDeepLinkUrl();
+  try{
+    if(navigator.clipboard&&typeof navigator.clipboard.writeText==='function'){
+      await navigator.clipboard.writeText(href);
+    }else{
+      const helper=document.createElement('textarea');
+      helper.value=href;
+      document.body.appendChild(helper);
+      helper.select();
+      document.execCommand('copy');
+      helper.remove();
+    }
+    if(button instanceof HTMLButtonElement){
+      button.textContent='Copied';
+      window.setTimeout(()=>{button.textContent='Copy URL'},1200);
+    }
+  }catch(_err){
+    if(button instanceof HTMLButtonElement){
+      button.textContent='Copy failed';
+      window.setTimeout(()=>{button.textContent='Copy URL'},1400);
+    }
+  }
+}
+function downloadBlob(blob,filename){
+  const href=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=href;
+  link.download=filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(()=>URL.revokeObjectURL(href),1000);
+}
+function drawExportText(ctx,text,x,y,maxWidth,lineHeight=14,color='#cbd5e1'){
+  const raw=String(text||'').trim();
+  if(!raw)return y;
+  const words=raw.split(/\s+/);
+  let line='';
+  words.forEach(word=>{
+    const probe=line?`${line} ${word}`:word;
+    if(ctx.measureText(probe).width>maxWidth&&line){
+      ctx.fillStyle=color;
+      ctx.fillText(line,x,y);
+      y+=lineHeight;
+      line=word;
+    }else{
+      line=probe;
+    }
+  });
+  if(line){
+    ctx.fillStyle=color;
+    ctx.fillText(line,x,y);
+    y+=lineHeight;
+  }
+  return y;
+}
+function drawStoryDriftExportPanel(ctx,panel,x,y,width,height){
+  const rows=Array.isArray(panel?.rows)?panel.rows.slice().reverse():[];
+  const limit=Number(panel?.limit||DEFAULT_DRIFT_LIMIT);
+  if(!rows.length){
+    ctx.fillStyle='#64748b';
+    ctx.font=CANVAS_BODY_FONT;
+    ctx.fillText('No story drift rows available',x+16,y+42);
+    return;
+  }
+  const top=y+44;
+  const rowHeight=Math.max(22,Math.floor((height-60)/Math.max(rows.length,1)));
+  rows.forEach((row,index)=>{
+    const rowY=top+index*rowHeight;
+    const ratio=Number(row.drift)||0;
+    const pct=Math.min(ratio/limit,1);
+    const color=ratio>limit?'#EF7D73':ratio>0.01?'#F4B56B':'#63C7A1';
+    ctx.fillStyle='#96A8BB';
+    ctx.font=CANVAS_LABEL_FONT;
+    ctx.textAlign='right';
+    ctx.fillText(`${row.story}F`,x+42,rowY+14);
+    ctx.fillStyle='rgba(10,14,26,.72)';
+    ctx.fillRect(x+56,rowY,width-92,14);
+    ctx.fillStyle=color;
+    ctx.fillRect(x+56,rowY,Math.max((width-92)*pct,2),14);
+    ctx.strokeStyle='rgba(248,113,113,.7)';
+    ctx.beginPath();
+    ctx.moveTo(x+56+(width-92),rowY-2);
+    ctx.lineTo(x+56+(width-92),rowY+16);
+    ctx.stroke();
+    ctx.textAlign='left';
+    ctx.fillText(`${(ratio*100).toFixed(3)}%`,x+width-28,rowY+11);
+  });
+}
+function buildChartExportPanels(){
+  const panels=[];
+  const byId=id=>document.getElementById(id);
+  if(state.activeTab==='timeseries'){
+    panels.push(
+      {title:byId('time-history-title')?.textContent||'Dynamic Response History',info:byId('time-history-info')?.textContent||'',canvas:byId('accel-chart')},
+      {title:byId('case-response-title')?.textContent||'Case Response History',info:byId('case-response-info')?.textContent||'',canvas:byId('disp-chart')}
+    );
+  }else if(state.activeTab==='memberforce'){
+    panels.push(
+      {title:byId('moment-panel-title')?.textContent||'Moment Components',info:byId('moment-panel-info')?.textContent||'',canvas:byId('moment-chart')},
+      {title:byId('shear-panel-title')?.textContent||'Axial / Shear Components',info:byId('shear-panel-info')?.textContent||'',canvas:byId('shear-chart')},
+      {title:byId('distribution-panel-title')?.textContent||'Member Force Distribution',info:byId('distribution-panel-info')?.textContent||'',canvas:byId('distribution-chart')}
+    );
+  }else if(state.activeTab==='storydrift'){
+    const driftPanels=resolveCasePanel(state.dataset?.storyDrift?.byCase,currentLoadCase())||{};
+    panels.push(
+      {title:byId('story-drift-left-title')?.textContent||'Story Drift',info:byId('story-drift-left-info')?.textContent||'',storyPanel:driftPanels.left||{rows:[]}},
+      {title:byId('story-drift-right-title')?.textContent||'Residual Drift',info:byId('story-drift-right-info')?.textContent||'',storyPanel:driftPanels.right||{rows:[]}}
+    );
+  }else{
+    panels.push({title:byId('envelope-title')?.textContent||'Envelope Explorer',info:byId('envelope-info')?.textContent||'',canvas:byId('envelope-chart')});
+  }
+  return panels.filter(panel=>panel.canvas instanceof HTMLCanvasElement||panel.storyPanel);
+}
+async function exportActiveChartsPng(){
+  const button=document.getElementById('export-png-button');
+  const restore=()=>{if(button instanceof HTMLButtonElement)button.textContent='PNG';};
+  if(button instanceof HTMLButtonElement)button.textContent='Saving...';
+  try{
+    const panels=buildChartExportPanels();
+    const width=1600;
+    const headerHeight=110;
+    const panelHeight=280;
+    const gap=16;
+    const height=headerHeight+panels.length*(panelHeight+gap)+24;
+  const canvas=document.createElement('canvas');
+  canvas.width=width;
+  canvas.height=height;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#0f172a';
+  ctx.fillRect(0,0,width,height);
+  ctx.fillStyle='#e2e8f0';
+  ctx.font=CANVAS_TITLE_FONT;
+  ctx.fillText(`Structural Charts · ${state.activeTab}`,24,36);
+  ctx.font=CANVAS_SUBTITLE_FONT;
+  ctx.fillStyle='#96A8BB';
+  drawExportText(ctx,`member ${currentMember()?.id||'--'} | load case ${currentLoadCase()||'--'} | source ${state.dataset?.sourceLabel||'--'}`,24,60,width-48,18,'#96A8BB');
+  drawExportText(ctx,`generated ${state.dataset?.generatedLabel||'--'} | coverage ${document.getElementById('artifact-coverage-pill')?.textContent||'--'}`,24,82,width-48,18,'#96A8BB');
+    panels.forEach((panel,index)=>{
+      const panelY=headerHeight+index*(panelHeight+gap);
+      ctx.fillStyle='rgba(30,41,59,.96)';
+      ctx.fillRect(24,panelY,width-48,panelHeight);
+      ctx.strokeStyle='rgba(51,65,85,.95)';
+      ctx.strokeRect(24,panelY,width-48,panelHeight);
+      ctx.fillStyle='#dbeafe';
+      ctx.font=CANVAS_SECTION_FONT;
+      ctx.fillText(panel.title,40,panelY+28);
+      ctx.font=CANVAS_BODY_FONT;
+      drawExportText(ctx,panel.info,40,panelY+48,width-96,16,'#96A8BB');
+      if(panel.canvas instanceof HTMLCanvasElement){
+        ctx.drawImage(panel.canvas,40,panelY+64,width-80,panelHeight-88);
+      }else if(panel.storyPanel){
+        drawStoryDriftExportPanel(ctx,panel.storyPanel,40,panelY+28,width-80,panelHeight-44);
+      }
+    });
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+    if(!blob)throw new Error('charts export blob failed');
+    downloadBlob(blob,`structural_charts_${state.activeTab}.png`);
+    if(button instanceof HTMLButtonElement){
+      button.textContent='Saved';
+      window.setTimeout(restore,1200);
+    }
+  }catch(err){
+    console.error('[Charts] PNG export failed:',err);
+    if(button instanceof HTMLButtonElement){
+      button.textContent='PNG failed';
+      window.setTimeout(restore,1400);
+    }
+  }
+}
+function getResultsExplorerBaseUrl(){
+  const path=String(window.location.pathname||'');
+  const relativePath=path.includes('/implementation/phase1/release/visualization/')
+    ? './structural_optimization_viewer.html'
+    : '../../implementation/phase1/release/visualization/structural_optimization_viewer.html';
+  return new URL(relativePath,window.location.href);
+}
+function buildReviewRowProvenanceUrl(memberId,loadCase=''){
+  const normalizedMember=normalizeSelectionValue(memberId);
+  if(!normalizedMember)return '';
+  const url=getResultsExplorerBaseUrl();
+  const selection=getCurrentSelectionState();
+  url.searchParams.set('source','row_provenance_shared_selection');
+  url.searchParams.set('focus','results');
+  url.searchParams.set('view','midas');
+  url.searchParams.set('codecheck_surface','drilldown');
+  url.searchParams.set('codecheck_detail_block','row-provenance');
+  url.searchParams.set('results_card','envelope');
+  url.searchParams.set('results_companion','checks');
+  url.searchParams.set('results_detail_block','chart');
+  url.searchParams.set('interactive_detail_more','open');
+  url.searchParams.set('overlay_detail_more','open');
+  url.searchParams.set('focus_member',normalizedMember);
+  url.searchParams.set('member_id',normalizedMember);
+  url.searchParams.set('baseline_focus_member_id',normalizedMember);
+  if(selection.memberIds?.length)url.searchParams.set('member_set',selection.memberIds.join('|'));
+  const normalizedLoadCase=normalizeSelectionValue(loadCase);
+  if(normalizedLoadCase)url.searchParams.set('combination',normalizedLoadCase);
+  return url.href;
+}
+function buildChartPointSelectionKey(prefix,context){
+  const itemIndex=Math.max(Number(context?.itemIndex??context?.pointIndex)||0,0);
+  return `${prefix}:${normalizeSelectionValue(context?.panelKey||context?.canvasId||'chart')}:${Math.max(Number(context?.seriesIndex)||0,0)}:${itemIndex}`;
+}
+function getChartInteractionSourceLabel(context,suffix){
+  return context?.interactionKind==='bar'
+    ? `chart_bar_${suffix}`
+    : `chart_point_${suffix}`;
+}
+function buildChartPointBaseUrl(context,sourceLabel,resultsCompanion='interactive'){
+  if(!context)return null;
+  const resultsCard=getLinePanelResultsCard(context)||((context.groupKey||state.activeTab)==='timeseries'?'time-history':'envelope');
+  if(!resultsCard)return null;
+  const memberId=normalizeSelectionValue(context.memberId||currentMember()?.id||readSharedSelection().memberId);
+  const loadCase=normalizeSelectionValue(context.loadCase||currentLoadCase()||readSharedSelection().loadCase);
+  const caseId=normalizeSelectionValue(context.caseId||loadCase);
+  const selection=getCurrentSelectionState();
+  const sampleIndex=Math.max(Number(context.itemIndex??context.pointIndex)||0,0);
+  const seriesIndex=Math.max(Number(context.seriesIndex)||0,0);
+  const focusKey=normalizeSelectionValue(context.focusKey)||buildLinePointFocusKey(sampleIndex);
+  const url=getResultsExplorerBaseUrl();
+  url.searchParams.set('source',sourceLabel);
+  url.searchParams.set('focus','results');
+  url.searchParams.set('view','midas');
+  if(memberId){
+    url.searchParams.set('focus_member',memberId);
+    url.searchParams.set('member_id',memberId);
+    url.searchParams.set('baseline_focus_member_id',memberId);
+  }
+  if(selection.memberIds?.length)url.searchParams.set('member_set',selection.memberIds.join('|'));
+  if(loadCase)url.searchParams.set('combination',loadCase);
+  if(caseId)url.searchParams.set('case_id',caseId);
+  url.searchParams.set('results_card',resultsCard);
+  url.searchParams.set('results_series',String(seriesIndex));
+  url.searchParams.set('results_series_index',String(seriesIndex));
+  url.searchParams.set('results_sample',String(sampleIndex));
+  url.searchParams.set('results_sample_index',String(sampleIndex));
+  url.searchParams.set('results_detail_block','chart');
+  url.searchParams.set('results_detail_item_index',String(sampleIndex));
+  url.searchParams.set('results_detail_focus_key',focusKey);
+  url.searchParams.set('results_detail_selection_key','results-detail:chart');
+  url.searchParams.set('results_companion',resultsCompanion);
+  url.searchParams.set('results_companion_item_index',String(sampleIndex));
+  url.searchParams.set('results_companion_focus_key',resultsCompanion==='checks'?'check:0':focusKey);
+  url.searchParams.set('results_companion_selection_key',`results-companion:${resultsCompanion}`);
+  url.searchParams.set('interactive_detail_more','open');
+  url.searchParams.set('overlay_detail_more','open');
+  return url;
+}
+function buildChartPointCaseDetailUrl(context){
+  const url=buildChartPointBaseUrl(context,getChartInteractionSourceLabel(context,'case_detail'),'interactive');
+  return url?url.href:'';
+}
+function buildChartPointProvenanceUrl(context){
+  const url=buildChartPointBaseUrl(context,getChartInteractionSourceLabel(context,'row_provenance'),'checks');
+  if(!url){
+    return buildReviewRowProvenanceUrl(context?.memberId||currentMember()?.id||'',context?.loadCase||currentLoadCase()||'');
+  }
+  const pointSelectionKey=buildChartPointSelectionKey(context?.interactionKind==='bar'?'chart-bar':'chart-point',context);
+  const subsetSelectionKey=normalizeSelectionValue(context?.loadCase||context?.caseId)
+    ? `subset:${normalizeSelectionValue(context.loadCase||context.caseId)}`
+    : 'subset:current-slice';
+  url.searchParams.set('codecheck_surface','drilldown');
+  url.searchParams.set('codecheck_companion','detail');
+  url.searchParams.set('codecheck_companion_item_index','0');
+  url.searchParams.set('codecheck_companion_focus_key','row-provenance:jump-row');
+  url.searchParams.set('codecheck_companion_selection_key',pointSelectionKey);
+  url.searchParams.set('codecheck_detail_block','row-provenance');
+  url.searchParams.set('codecheck_detail_item_index','0');
+  url.searchParams.set('codecheck_detail_focus_key','row-provenance:jump-row');
+  url.searchParams.set('codecheck_detail_selection_key',pointSelectionKey);
+  url.searchParams.set('codecheck_appendix_block','subset-summary');
+  url.searchParams.set('codecheck_appendix_item_index','0');
+  url.searchParams.set('codecheck_appendix_focus_key','subset:current-slice');
+  url.searchParams.set('codecheck_appendix_selection_key',subsetSelectionKey);
+  return url.href;
+}
+function formatLineInteractionSummary(context){
+  if(!context)return 'Point: hover/select a line sample';
+  const modeLabel=context.kind==='selected'?'pinned':'hover';
+  return `Point: ${context.panelLabel||context.canvasId} · ${context.seriesLabel} · ${context.xLabel}=${formatNumber(context.xValue,2)} · ${formatNumber(context.yValue,3)} · ${modeLabel}`;
+}
+function formatGroupedBarInteractionSummary(context){
+  if(!context)return 'Point: hover/select a line sample';
+  const modeLabel=context.kind==='selected'?'pinned':'hover';
+  return `Point: ${context.panelLabel||context.canvasId} · ${context.seriesLabel} · ${context.category}=${formatNumber(context.value,3)} · ${modeLabel}`;
+}
+function formatChartInteractionSummary(context){
+  if(!context)return 'Point: hover/select a line sample';
+  return context.interactionKind==='bar'
+    ? formatGroupedBarInteractionSummary(context)
+    : formatLineInteractionSummary(context);
+}
+function updatePointDrilldownLinks(){
+  const reviewLink=document.getElementById('review-row-link');
+  const caseLink=document.getElementById('case-detail-link');
+  const pointLabel=document.getElementById('point-focus-label');
+  const context=getActiveChartInteractionContext();
+  const memberId=currentMember()?.id||readSharedSelection().memberId;
+  const loadCase=currentLoadCase()||readSharedSelection().loadCase;
+  const fallbackReviewUrl=buildReviewRowProvenanceUrl(memberId,loadCase);
+  if(pointLabel)pointLabel.textContent=formatChartInteractionSummary(context);
+  if(reviewLink instanceof HTMLAnchorElement){
+    const href=context?buildChartPointProvenanceUrl(context):fallbackReviewUrl;
+    reviewLink.href=href||'#';
+    reviewLink.classList.toggle('is-disabled',!href);
+    reviewLink.textContent=context&&href
+      ? (context.interactionKind==='bar'
+        ? `Bar provenance · ${context.seriesLabel} / ${context.category}`
+        : `Point provenance · ${context.seriesLabel} @ ${formatNumber(context.xValue,2)}`)
+      : (fallbackReviewUrl
+        ? `Review row provenance${memberId?` · ${memberId}`:''}${loadCase?` · ${loadCase}`:''}`
+        : 'Review row provenance unavailable');
+  }
+  if(caseLink instanceof HTMLAnchorElement){
+    const href=context?buildChartPointCaseDetailUrl(context):'';
+    caseLink.href=href||'#';
+    caseLink.classList.toggle('is-disabled',!href);
+    caseLink.textContent=href&&context
+      ? (context.interactionKind==='bar'
+        ? `Open case detail · ${context.panelLabel||context.category}`
+        : `Open case detail · ${context.panelLabel||context.seriesLabel}`)
+      : 'Open case detail unavailable';
+  }
+  updateProvenanceBlock();
+}
+function ensureDatasetProvenance(dataset){
+  if(!Array.isArray(dataset.reportNames)) dataset.reportNames=[];
+  return dataset.reportNames;
+}
+function registerDatasetReportName(dataset,value){
+  const reportNames=ensureDatasetProvenance(dataset);
+  const label=basenameLabel(value,'');
+  if(label&&!reportNames.includes(label)) reportNames.push(label);
+}
+function updateProvenanceBlock(){
+  const sourceValue=document.getElementById('provenance-source-label');
+  const reportValue=document.getElementById('provenance-report-name');
+  const timestampValue=document.getElementById('provenance-timestamp');
+  const selectionValue=document.getElementById('provenance-selection');
+  if(!(sourceValue&&reportValue&&timestampValue&&selectionValue)) return;
+  const selection=getCurrentSelectionState();
+  const reportLabel=Array.isArray(state.dataset?.reportNames)&&state.dataset.reportNames.length
+    ? state.dataset.reportNames.join(' + ')
+    : '--';
+  const pointContext=getActiveChartInteractionContext();
+  const pointLabel=pointContext
+    ? (pointContext.interactionKind==='bar'
+      ? ` | bar=${pointContext.seriesLabel}/${pointContext.category}`
+      : ` | point=${pointContext.seriesLabel}@${formatNumber(pointContext.xValue,2)}`)
+    : '';
+  sourceValue.textContent=String(state.dataset?.sourceLabel||'--');
+  reportValue.textContent=reportLabel;
+  timestampValue.textContent=String(state.dataset?.generatedLabel||'--');
+  selectionValue.textContent=`member=${selection.memberId||'--'} | selected=${selection.selectionSetCount||0} | load_case=${selection.loadCase||'--'} | tab=${selection.tab||'timeseries'}${pointLabel}`;
+}
+function setActiveChartShellTab(tabKey){
+  const normalized=normalizeTabKey(tabKey)||'timeseries';
+  document.querySelectorAll('.tabs button[data-tab-key]').forEach(button=>{
+    button.classList.toggle('active',button.getAttribute('data-tab-key')===normalized);
+  });
+  document.querySelectorAll('.shell-nav-item[data-rail-tab-key]').forEach(button=>{
+    const isActive=button.getAttribute('data-rail-tab-key')===normalized;
+    button.classList.toggle('is-active',isActive);
+    button.setAttribute('aria-pressed',isActive?'true':'false');
+  });
+}
+function applySelectionState(selection){
+  if(!state.dataset)return;
+  const memberSelect=document.getElementById('member-select');
+  const loadCaseSelect=document.getElementById('lc-select');
+  const requestedTab=normalizeTabKey(selection.tab)||state.activeTab||'timeseries';
+  suppressSelectionPublish=true;
+  if(selection.memberId&&[...memberSelect.options].some(option=>option.value===selection.memberId)){
+    memberSelect.value=selection.memberId;
+  }
+  if(selection.loadCase&&[...loadCaseSelect.options].some(option=>option.value===selection.loadCase)){
+    loadCaseSelect.value=selection.loadCase;
+  }
+  if(requestedTab!==state.activeTab){
+    state.activeTab=requestedTab;
+    document.querySelectorAll('.chart-container').forEach(el=>el.classList.add('hidden'));
+    document.getElementById(`tab-${requestedTab}`)?.classList.remove('hidden');
+    setActiveChartShellTab(requestedTab);
+  }
+  updateViewerQueryParams({
+    memberId:memberSelect.value||selection.memberId||'',
+    memberIds:normalizeSelectionValues(selection.memberIds||memberSelect.value||[]),
+    loadCase:loadCaseSelect.value||selection.loadCase||'',
+    tab:requestedTab
+  });
+  updateAll();
+  suppressSelectionPublish=false;
+}
+function formatNumber(value,digits=3){
+  if(!Number.isFinite(value)) return '--';
+  const abs=Math.abs(value);
+  if(abs>=1_000_000) return `${(value/1_000_000).toFixed(2)}M`;
+  if(abs>=1_000) return `${(value/1_000).toFixed(2)}k`;
+  if(abs===0) return '0';
+  if(abs>=100) return value.toFixed(0);
+  if(abs>=10) return value.toFixed(1);
+  return value.toFixed(digits);
+}
+
+function isoToLabel(value){
+  if(!value) return '--';
+  const date=new Date(value);
+  return Number.isNaN(date.getTime())?String(value):date.toLocaleString('ko-KR',{hour12:false});
+}
+
+function createChartPoint(xValue,yValue,meta={}){
+  const point=[
+    Number.isFinite(xValue)?xValue:0,
+    Number.isFinite(yValue)?yValue:0,
+  ];
+  if(meta&&typeof meta==='object'){
+    point.meta=Object.assign({},meta);
+  }
+  return point;
+}
+
+function normalizePoints(points){
+  if(!Array.isArray(points)) return [];
+  return points.map((point,index)=>{
+    if(Array.isArray(point)){
+      return createChartPoint(Number(point[0])||0,Number(point[1])||0,{
+        sourceIndex:index,
+        point_kind:'tuple',
+      });
+    }
+    if(point&&typeof point==='object'){
+      const x=Number(point.x??point.time??point.step??point.story??point.index??index);
+      const y=Number(point.y??point.value??point.v??point.drift??point.response??0);
+      const meta=Object.assign({sourceIndex:index,point_kind:'object'},point);
+      delete meta.x;
+      delete meta.y;
+      delete meta.time;
+      delete meta.step;
+      delete meta.story;
+      delete meta.index;
+      delete meta.value;
+      delete meta.v;
+      delete meta.drift;
+      delete meta.response;
+      return createChartPoint(Number.isFinite(x)?x:index,Number.isFinite(y)?y:0,meta);
+    }
+    return createChartPoint(index,Number(point)||0,{sourceIndex:index,point_kind:'scalar'});
+  }).filter(point=>Number.isFinite(point[0])&&Number.isFinite(point[1]));
+}
+
+function buildExplicitDistributionChart(chart,defaultTitle,defaultInfo){
+  if(!chart||typeof chart!=='object'||!Array.isArray(chart.series)) return null;
+  const series=(chart.series||[]).map((item,index)=>({
+    label:item.label||`series ${index+1}`,
+    color:item.color||COLORS[index%COLORS.length],
+    valueLabel:item.valueLabel||'',
+    points:normalizePoints(item.points),
+  })).filter(item=>item.points.length);
+  if(!series.length) return null;
+  return {
+    title:chart.title||defaultTitle,
+    info:chart.info||defaultInfo,
+    xLabel:chart.xLabel||'Normalized Member Length',
+    series,
+  };
+}
+
+function buildDerivedDistributionChart(components,caseId,pathLabel){
+  const hfMoment=Math.max(
+    Math.abs(getComponentValue(components,'moment_y','hf')),
+    Math.abs(getComponentValue(components,'moment_z','hf')),
+  );
+  const lfMoment=Math.max(
+    Math.abs(getComponentValue(components,'moment_y','lf')),
+    Math.abs(getComponentValue(components,'moment_z','lf')),
+  );
+  const hfShear=Math.max(
+    Math.abs(getComponentValue(components,'shear_y','hf')),
+    Math.abs(getComponentValue(components,'shear_z','hf')),
+  );
+  const lfShear=Math.max(
+    Math.abs(getComponentValue(components,'shear_y','lf')),
+    Math.abs(getComponentValue(components,'shear_z','lf')),
+  );
+  const hfAxial=Math.abs(getComponentValue(components,'axial','hf'));
+  const lfAxial=Math.abs(getComponentValue(components,'axial','lf'));
+  const stations=[0,0.25,0.5,0.75,1];
+  const momentProfile=value=>stations.map(station=>[station,value*(1-Math.abs(station-0.5)*2)]);
+  const constantProfile=value=>stations.map(station=>[station,value]);
+  return {
+    title:`Member Force Distribution — ${caseId}`,
+    info:`derived normalized profile · ${pathLabel}`,
+    xLabel:'Normalized Member Length',
+    series:[
+      {label:'HF moment env',color:'#F4B56B',valueLabel:'kN·m',points:momentProfile(hfMoment)},
+      {label:'LF moment env',color:'#4FB7AD',valueLabel:'kN·m',points:momentProfile(lfMoment)},
+      {label:'HF shear/axial ref',color:'#fb923c',valueLabel:'kN',points:constantProfile(Math.max(hfShear,hfAxial))},
+      {label:'LF shear/axial ref',color:'#34d399',valueLabel:'kN',points:constantProfile(Math.max(lfShear,lfAxial))},
+    ],
+  };
+}
+
+function zipPoints(xs,ys){
+  const points=[];
+  const n=Math.min(Array.isArray(xs)?xs.length:0,Array.isArray(ys)?ys.length:0);
+  for(let i=0;i<n;i++){
+    points.push(createChartPoint(Number(xs[i])||0,Number(ys[i])||0,{
+      sourceIndex:i,
+      point_kind:'zip',
+    }));
+  }
+  return points;
+}
+
+function buildLegend(containerId,series){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML='';
+  (series||[]).forEach(item=>{
+    const wrapper=document.createElement('div');
+    wrapper.className='legend-item';
+    const dot=document.createElement('div');
+    dot.className='legend-dot';
+    dot.style.background=item.color||COLORS[0];
+    const label=document.createElement('span');
+    label.textContent=item.valueLabel?`${item.label} (${item.valueLabel})`:item.label;
+    wrapper.append(dot,label);
+    el.appendChild(wrapper);
+  });
+}
+
+function setText(id,value){
+  const el=document.getElementById(id);
+  if(el) el.textContent=value;
+}
+
+function parseJsonScript(id){
+  const el=document.getElementById(id);
+  if(!el) return null;
+  try{
+    return JSON.parse(el.textContent);
+  }catch(error){
+    console.warn(`[charts] Failed to parse inline JSON from #${id}`,error);
+    return null;
+  }
+}
+
+function cloneData(value){
+  return value?JSON.parse(JSON.stringify(value)):value;
+}
+
+function isNormalizedDataset(payload){
+  return !!(payload&&typeof payload==='object'&&payload.timeHistory&&payload.memberForce&&payload.storyDrift&&payload.envelope);
+}
+
+function normalizeInlineBundle(payload){
+  if(!payload||typeof payload!=='object') return {normalized:null,fragments:{}};
+  if(isNormalizedDataset(payload)) return {normalized:cloneData(payload),fragments:{}};
+  if(payload.charts&&isNormalizedDataset(payload.charts)) return {normalized:cloneData(payload.charts),fragments:{}};
+  return {
+    normalized:null,
+    fragments:{
+      resultsExplorer:payload.results_explorer||payload.resultsExplorer||null,
+      dynamic:payload.dynamic_time_history_report||payload.dynamicTimeHistoryReport||null,
+      ndtha:payload.nonlinear_ndtha_stress_report||payload.nonlinearNdthaStressReport||null,
+      memberForce:payload.member_force_soft_accept_report||payload.memberForceSoftAcceptReport||null,
+    },
+  };
+}
+
+function readInlineArtifactPayload(){
+  for(const key of GLOBAL_INLINE_KEYS){
+    const payload=window[key];
+    if(payload&&typeof payload==='object') return payload;
+  }
+  for(const id of INLINE_DATA_IDS){
+    const payload=parseJsonScript(id);
+    if(payload&&typeof payload==='object') return payload;
+  }
+  return null;
+}
+
+async function tryFetchJson(path){
+  try{
+    const response=await fetch(path,{cache:'no-store'});
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  }catch(error){
+    return null;
+  }
+}
+
+function buildDemoDataset(){
+  function genTimeSeries(n,dt,freq,amp,decay){
+    const points=[];
+    for(let i=0;i<n;i++){
+      const x=i*dt;
+      const y=amp*Math.sin(2*Math.PI*freq*x)*Math.exp(-decay*x)+(Math.random()-.5)*amp*.15;
+      points.push([x,y]);
+    }
+    return points;
+  }
+
+  const combos=['1.2D+1.6L','1.2D+1.0L+1.0E','0.9D+1.0E'];
+  const accelX=genTimeSeries(1200,.01,2.5,.35,.08);
+  const accelY=genTimeSeries(1200,.01,1.8,.25,.06);
+  const dispX=genTimeSeries(1200,.01,1.2,.045,.05);
+  const dispY=genTimeSeries(1200,.01,0.9,.03,.04);
+
+  const driftCases={};
+  const responseCases={};
+  const envelopeCases={};
+  combos.forEach((combo,index)=>{
+    const scale=1+(index*0.08);
+    const envelopeRows=[];
+    const residualRows=[];
+    const envelopeSeries=[];
+    const residualSeries=[];
+    for(let story=1;story<=8;story++){
+      const zr=story/8;
+      const envelopePct=(0.10+zr*zr*0.42+index*0.03)*scale;
+      const residualPct=(0.06+zr*zr*0.18+index*0.01)*scale;
+      envelopeRows.push({story,drift:envelopePct/100});
+      residualRows.push({story,drift:residualPct/100});
+      envelopeSeries.push([story,envelopePct]);
+      residualSeries.push([story,residualPct]);
+    }
+    driftCases[combo]={
+      left:{title:`Story Drift Envelope — ${combo}`,info:'demo fallback',rows:envelopeRows,limit:DEFAULT_DRIFT_LIMIT},
+      right:{title:`Residual Story Drift — ${combo}`,info:'demo fallback',rows:residualRows,limit:DEFAULT_DRIFT_LIMIT},
+    };
+    responseCases[combo]={
+      title:`Response History — ${combo}`,
+      info:'demo fallback',
+      xLabel:'Time (s)',
+      series:[
+        {label:'X-disp (m)',color:'#34d399',points:dispX.map(([x,y])=>[x,y*scale])},
+        {label:'Y-disp (m)',color:'#fbbf24',points:dispY.map(([x,y])=>[x,y*scale])},
+      ],
+    };
+    envelopeCases[combo]={
+      kind:'bars',
+      title:`Force Envelope — ${combo}`,
+      info:'demo fallback',
+      bars:[
+        {label:'My max',value:240*scale},
+        {label:'My min',value:-180*scale},
+        {label:'Vz max',value:130*scale},
+        {label:'N max',value:820*scale},
+        {label:'Allowable',value:260*scale},
+      ],
+      valueLabel:'component envelope',
+    };
+  });
+
+  const members=[];
+  for(let i=0;i<12;i++){
+    const type=i<4?'column':i<9?'beam':'brace';
+    const caseId=`M-${String(i+1).padStart(3,'0')}`;
+    const hfMomentY=120+Math.random()*260;
+    const hfMomentZ=80+Math.random()*180;
+    const lfMomentY=hfMomentY*(0.97+Math.random()*0.06);
+    const lfMomentZ=hfMomentZ*(0.97+Math.random()*0.06);
+    const hfAxial=type==='column'?900+Math.random()*1100:40+Math.random()*120;
+    const lfAxial=hfAxial*(0.96+Math.random()*0.07);
+    const hfShearY=60+Math.random()*150;
+    const hfShearZ=40+Math.random()*120;
+    const lfShearY=hfShearY*(0.97+Math.random()*0.05);
+    const lfShearZ=hfShearZ*(0.97+Math.random()*0.05);
+    const errorPct=Math.max(
+      Math.abs(lfMomentY-hfMomentY)/Math.max(Math.abs(hfMomentY),1)*100,
+      Math.abs(lfMomentZ-hfMomentZ)/Math.max(Math.abs(hfMomentZ),1)*100,
+      Math.abs(lfAxial-hfAxial)/Math.max(Math.abs(hfAxial),1)*100,
+      Math.abs(lfShearY-hfShearY)/Math.max(Math.abs(hfShearY),1)*100,
+      Math.abs(lfShearZ-hfShearZ)/Math.max(Math.abs(hfShearZ),1)*100,
+    );
+    members.push({
+      id:caseId,
+      label:`${caseId} · ${type} · demo`,
+      type,
+      section:type==='column'?'H400x400':'H500x200',
+      stats:{
+        maxMoment:Math.max(Math.abs(hfMomentY),Math.abs(hfMomentZ),Math.abs(lfMomentY),Math.abs(lfMomentZ)),
+        maxShear:Math.max(Math.abs(hfShearY),Math.abs(hfShearZ),Math.abs(lfShearY),Math.abs(lfShearZ)),
+        maxAxial:Math.max(Math.abs(hfAxial),Math.abs(lfAxial)),
+        maxErrorPct:errorPct,
+      },
+      momentChart:{
+        title:'Moment Components — demo',
+        info:'demo fallback',
+        categories:['moment_y','moment_z'],
+        valueLabel:'kN·m',
+        series:[
+          {label:'HF',color:'#F4B56B',values:[hfMomentY,hfMomentZ]},
+          {label:'LF',color:'#4FB7AD',values:[lfMomentY,lfMomentZ]},
+        ],
+      },
+      forceChart:{
+        title:'Axial / Shear Components — demo',
+        info:'demo fallback',
+        categories:['axial','shear_y','shear_z'],
+        valueLabel:'kN',
+        series:[
+          {label:'HF',color:'#fb923c',values:[hfAxial,hfShearY,hfShearZ]},
+          {label:'LF',color:'#34d399',values:[lfAxial,lfShearY,lfShearZ]},
+        ],
+      },
+      distributionChart:{
+        title:`Member Force Distribution — ${caseId}`,
+        info:'derived normalized profile · demo fallback',
+        xLabel:'Normalized Member Length',
+        series:[
+          {label:'HF moment env',color:'#F4B56B',valueLabel:'kN·m',points:[[0,0],[0.25,hfMomentY*0.65],[0.5,hfMomentY],[0.75,hfMomentY*0.65],[1,0]]},
+          {label:'LF moment env',color:'#4FB7AD',valueLabel:'kN·m',points:[[0,0],[0.25,lfMomentY*0.65],[0.5,lfMomentY],[0.75,lfMomentY*0.65],[1,0]]},
+          {label:'HF shear ref',color:'#fb923c',valueLabel:'kN',points:[[0,hfShearY],[1,hfShearY]]},
+          {label:'LF shear ref',color:'#34d399',valueLabel:'kN',points:[[0,lfShearY],[1,lfShearY]]},
+        ],
+      },
+    });
+  }
+
+  return {
+    sourceMode:'demo',
+    sourceLabel:'demo fallback',
+    generatedLabel:'demo dataset',
+    reportNames:[],
+    coverage:{timeHistory:false,memberForce:false,storyDrift:false,envelope:false},
+    loadCases:combos.map(combo=>({id:combo,label:combo})),
+    defaultLoadCase:combos[0],
+    timeHistory:{
+      primary:{
+        title:'Acceleration Time History — demo',
+        info:'demo fallback',
+        xLabel:'Time (s)',
+        series:[
+          {label:'X-dir (g)',color:'#4FB7AD',points:accelX},
+          {label:'Y-dir (g)',color:'#EF7D73',points:accelY},
+        ],
+      },
+      byCase:responseCases,
+    },
+    memberForce:{members},
+    storyDrift:{byCase:driftCases},
+    envelope:{byCase:envelopeCases},
+  };
+}
+
+function applyResultsExplorer(dataset,results,pathLabel){
+  if(!results||typeof results!=='object') return;
+  registerDatasetReportName(dataset,results.report_label||pathLabel);
+  if(results.time_history&&results.time_history.available&&Array.isArray(results.time_history.series)){
+    dataset.timeHistory.primary={
+      title:'Dynamic Response History',
+      info:`real artifact · ${results.time_history.report_label||pathLabel}`,
+      xLabel:'Time / Step',
+      series:results.time_history.series.map((series,index)=>({
+        label:series.label||`series ${index+1}`,
+        color:series.color||COLORS[index%COLORS.length],
+        valueLabel:series.value_label||'',
+        points:normalizePoints(series.points),
+      })),
+    };
+    dataset.coverage.timeHistory=true;
+  }
+  if(results.envelope&&results.envelope.available&&Array.isArray(results.envelope.series)){
+    const reference=results.envelope.reference_case_label||'results explorer';
+    dataset.envelope.byCase[reference]={
+      kind:'lines',
+      title:'Envelope Explorer',
+      info:`real artifact · ${results.envelope.report_label||pathLabel}`,
+      xLabel:'Story',
+      series:results.envelope.series.map((series,index)=>({
+        label:series.label||`series ${index+1}`,
+        color:series.color||COLORS[index%COLORS.length],
+        valueLabel:series.value_label||'',
+        points:normalizePoints(series.points),
+      })),
+    };
+    if(!dataset.loadCases.some(item=>item.id===reference)){
+      dataset.loadCases.unshift({id:reference,label:reference});
+    }
+    dataset.defaultLoadCase=reference;
+    dataset.coverage.envelope=true;
+  }
+}
+
+function applyDynamicReport(dataset,dynamic,pathLabel){
+  if(!dynamic||!Array.isArray(dynamic.trace_head)||!dynamic.trace_head.length) return;
+  registerDatasetReportName(dataset,dynamic.report_label||pathLabel);
+  dataset.timeHistory.primary={
+    title:'Dynamic Time-History Trace',
+    info:`real artifact · ${pathLabel}`,
+    xLabel:'Step',
+    series:[
+      {label:'Displacement u (m)',color:'#34d399',points:dynamic.trace_head.map(row=>[row.step,row.u_m])},
+      {label:'Velocity v (m/s)',color:'#fbbf24',points:dynamic.trace_head.map(row=>[row.step,row.v_mps])},
+      {label:'Acceleration a (m/s²)',color:'#4FB7AD',points:dynamic.trace_head.map(row=>[row.step,row.a_mps2])},
+    ],
+  };
+  dataset.coverage.timeHistory=true;
+  if(dynamic.generated_at) dataset.generatedLabel=isoToLabel(dynamic.generated_at);
+}
+
+function toStoryRows(values){
+  if(!Array.isArray(values)) return [];
+  return values.map((value,index)=>({story:index+1,drift:(Number(value)||0)/100}));
+}
+
+function applyNdthaReport(dataset,ndtha,pathLabel){
+  if(!ndtha||!Array.isArray(ndtha.rows)||!ndtha.rows.length) return;
+  registerDatasetReportName(dataset,ndtha.report_label||pathLabel);
+  ndtha.rows.forEach((row,index)=>{
+    const caseId=row.case_id||`case-${index+1}`;
+    if(!dataset.loadCases.some(item=>item.id===caseId)){
+      dataset.loadCases.push({id:caseId,label:`${caseId} · ${row.topology_type||'ndtha'} · ${row.hazard_type||'response'}`});
+    }
+    dataset.timeHistory.byCase[caseId]={
+      title:`Case Response — ${caseId}`,
+      info:`real artifact · ${pathLabel} · ${row.topology_type||'unknown'} · ${row.hazard_type||'unknown'}`,
+      xLabel:'Time (s)',
+      series:[
+        {label:'Top disp (m)',color:'#34d399',points:zipPoints(row.response?.time_s,row.response?.top_displacement_m)},
+        {label:'Drift ratio (%)',color:'#fbbf24',points:zipPoints(row.response?.time_s,row.response?.drift_ratio_pct)},
+      ],
+    };
+    dataset.storyDrift.byCase[caseId]={
+      left:{
+        title:`Story Drift Envelope — ${caseId}`,
+        info:`real artifact · ${pathLabel}`,
+        rows:toStoryRows(row.response?.story_drift_envelope_pct),
+        limit:DEFAULT_DRIFT_LIMIT,
+      },
+      right:{
+        title:`Final Story Drift — ${caseId}`,
+        info:`real artifact · ${pathLabel}`,
+        rows:toStoryRows(row.response?.final_story_drift_pct),
+        limit:DEFAULT_DRIFT_LIMIT,
+      },
+    };
+    dataset.envelope.byCase[caseId]={
+      kind:'lines',
+      title:`Envelope Drift — ${caseId}`,
+      info:`real artifact · ${pathLabel} · residual=${formatNumber(row.summary?.residual_drift_ratio_pct,2)}%`,
+      xLabel:'Story',
+      series:[
+        {
+          label:'Envelope drift (%)',
+          color:'#4FB7AD',
+          points:(row.response?.story_drift_envelope_pct||[]).map((value,story)=>[story+1,Number(value)||0]),
+          valueLabel:`max=${formatNumber(row.summary?.max_drift_ratio_pct_max,2)}%`,
+        },
+        {
+          label:'Final drift (%)',
+          color:'#EF7D73',
+          points:(row.response?.final_story_drift_pct||[]).map((value,story)=>[story+1,Number(value)||0]),
+          valueLabel:`residual=${formatNumber(row.summary?.residual_drift_ratio_pct,2)}%`,
+        },
+      ],
+    };
+  });
+  dataset.coverage.storyDrift=true;
+  dataset.coverage.envelope=true;
+  if(ndtha.generated_at) dataset.generatedLabel=isoToLabel(ndtha.generated_at);
+}
+
+function getComponentValue(components,key,field){
+  return Number(components?.[key]?.[field]||0);
+}
+
+function getComponentError(components,key){
+  return Number(components?.[key]?.error_pct||0);
+}
+
+function applyMemberForceReport(dataset,memberForce,pathLabel){
+  if(!memberForce||!Array.isArray(memberForce.rows)||!memberForce.rows.length) return;
+  registerDatasetReportName(dataset,memberForce.report_label||pathLabel);
+  dataset.memberForce.members=memberForce.rows.map((row,index)=>{
+    const components=row.components||{};
+    const caseId=row.case_id||`member-${index+1}`;
+    const memberId=row.member_id||row.memberId||caseId;
+    const maxErrorPct=Math.max(
+      getComponentError(components,'axial'),
+      getComponentError(components,'shear_y'),
+      getComponentError(components,'shear_z'),
+      getComponentError(components,'moment_y'),
+      getComponentError(components,'moment_z'),
+    );
+    return {
+      id:memberId,
+      memberId,
+      caseId,
+      label:`${memberId} · ${caseId} · 5D component check`,
+      type:'artifact-row',
+      section:'member_force_soft_accept',
+      stats:{
+        maxMoment:Math.max(
+          Math.abs(getComponentValue(components,'moment_y','hf')),
+          Math.abs(getComponentValue(components,'moment_y','lf')),
+          Math.abs(getComponentValue(components,'moment_z','hf')),
+          Math.abs(getComponentValue(components,'moment_z','lf')),
+        ),
+        maxShear:Math.max(
+          Math.abs(getComponentValue(components,'shear_y','hf')),
+          Math.abs(getComponentValue(components,'shear_y','lf')),
+          Math.abs(getComponentValue(components,'shear_z','hf')),
+          Math.abs(getComponentValue(components,'shear_z','lf')),
+        ),
+        maxAxial:Math.max(
+          Math.abs(getComponentValue(components,'axial','hf')),
+          Math.abs(getComponentValue(components,'axial','lf')),
+        ),
+        maxErrorPct,
+      },
+      momentChart:{
+        title:`Moment Components — ${memberId}`,
+        info:`real artifact · ${pathLabel} · case=${caseId}`,
+        categories:['moment_y','moment_z'],
+        valueLabel:'kN·m',
+        series:[
+          {label:'HF',color:'#F4B56B',values:[getComponentValue(components,'moment_y','hf'),getComponentValue(components,'moment_z','hf')]},
+          {label:'LF',color:'#4FB7AD',values:[getComponentValue(components,'moment_y','lf'),getComponentValue(components,'moment_z','lf')]},
+        ],
+      },
+      forceChart:{
+        title:`Axial / Shear Components — ${memberId}`,
+        info:`real artifact · ${pathLabel} · case=${caseId}`,
+        categories:['axial','shear_y','shear_z'],
+        valueLabel:'kN',
+        series:[
+          {label:'HF',color:'#fb923c',values:[getComponentValue(components,'axial','hf'),getComponentValue(components,'shear_y','hf'),getComponentValue(components,'shear_z','hf')]},
+          {label:'LF',color:'#34d399',values:[getComponentValue(components,'axial','lf'),getComponentValue(components,'shear_y','lf'),getComponentValue(components,'shear_z','lf')]},
+        ],
+      },
+      distributionChart:
+        buildExplicitDistributionChart(
+          row.distribution_chart||row.force_distribution_chart,
+          `Member Force Distribution — ${memberId}`,
+          `real artifact · ${pathLabel} · case=${caseId}`,
+        )
+        || buildDerivedDistributionChart(components,memberId,pathLabel),
+    };
+  });
+  dataset.coverage.memberForce=true;
+  if(memberForce.generated_at) dataset.generatedLabel=isoToLabel(memberForce.generated_at);
+}
+
+function coverageLabel(dataset){
+  return `time=${dataset.coverage.timeHistory?'real':'demo'} | member=${dataset.coverage.memberForce?'real':'demo'} | drift=${dataset.coverage.storyDrift?'real':'demo'} | envelope=${dataset.coverage.envelope?'real':'demo'}`;
+}
+
+function fillNormalizedDataset(base,payload){
+  if(!payload||typeof payload!=='object') return base;
+  const next=Object.assign(base,cloneData(payload));
+  next.coverage=Object.assign({timeHistory:false,memberForce:false,storyDrift:false,envelope:false},payload.coverage||{});
+  next.loadCases=Array.isArray(next.loadCases)&&next.loadCases.length?next.loadCases:base.loadCases;
+  next.defaultLoadCase=next.defaultLoadCase||next.loadCases[0]?.id||base.defaultLoadCase;
+  return next;
+}
+
+async function buildDataset(){
+  const demo=buildDemoDataset();
+  const inlineRaw=readInlineArtifactPayload();
+  const inlineResultsExplorer=parseJsonScript('results-explorer-data');
+  const inlineBundle=normalizeInlineBundle(inlineRaw);
+  if(inlineBundle.normalized){
+    const dataset=fillNormalizedDataset(demo,inlineBundle.normalized);
+    dataset.sourceMode='inline';
+    dataset.sourceLabel='embedded inline charts bundle';
+    dataset.generatedLabel=dataset.generatedLabel||'embedded inline bundle';
+    dataset.reportNames=['embedded inline charts bundle'];
+    return dataset;
+  }
+
+  const dataset=demo;
+  const fragments={
+    resultsExplorer:inlineBundle.fragments.resultsExplorer||inlineResultsExplorer||null,
+    dynamic:inlineBundle.fragments.dynamic||null,
+    ndtha:inlineBundle.fragments.ndtha||null,
+    memberForce:inlineBundle.fragments.memberForce||null,
+  };
+
+  let sourceMode=fragments.resultsExplorer||fragments.dynamic||fragments.ndtha||fragments.memberForce?'inline':'demo';
+  let sourceLabel=sourceMode==='inline'?'embedded inline fragments':'demo fallback';
+
+  if(!IS_SINGLEFILE_VIEWER&&!fragments.resultsExplorer&&!fragments.dynamic&&!fragments.ndtha&&!fragments.memberForce){
+    const [viewer,dynamic,ndtha,memberForce]=await Promise.all([
+      tryFetchJson(ARTIFACT_PATHS.viewer),
+      tryFetchJson(ARTIFACT_PATHS.dynamic),
+      tryFetchJson(ARTIFACT_PATHS.ndtha),
+      tryFetchJson(ARTIFACT_PATHS.memberForce),
+    ]);
+    if(viewer&&viewer.results_explorer) fragments.resultsExplorer=viewer.results_explorer;
+    if(dynamic) fragments.dynamic=dynamic;
+    if(ndtha) fragments.ndtha=ndtha;
+    if(memberForce) fragments.memberForce=memberForce;
+    if(fragments.resultsExplorer||fragments.dynamic||fragments.ndtha||fragments.memberForce){
+      sourceMode='artifact';
+      sourceLabel='local repo artifacts';
+    }
+  }
+
+  if(fragments.resultsExplorer) applyResultsExplorer(dataset,fragments.resultsExplorer,ARTIFACT_PATHS.viewer);
+  if(fragments.dynamic) applyDynamicReport(dataset,fragments.dynamic,ARTIFACT_PATHS.dynamic);
+  if(fragments.ndtha) applyNdthaReport(dataset,fragments.ndtha,ARTIFACT_PATHS.ndtha);
+  if(fragments.memberForce) applyMemberForceReport(dataset,fragments.memberForce,ARTIFACT_PATHS.memberForce);
+
+  dataset.sourceMode=dataset.coverage.timeHistory||dataset.coverage.memberForce||dataset.coverage.storyDrift||dataset.coverage.envelope?sourceMode:'demo';
+  dataset.sourceLabel=dataset.sourceMode==='demo'?'demo fallback':sourceLabel;
+  ensureDatasetProvenance(dataset);
+  if(dataset.sourceMode==='demo'&&!dataset.reportNames.length) dataset.reportNames=['demo fallback'];
+  return dataset;
+}
+
+function getVisibleLinePanelDomain(series,panelState){
+  let xMin=Infinity,xMax=-Infinity,yMin=Infinity,yMax=-Infinity;
+  series.forEach(item=>{
+    item.points.forEach(point=>{
+      xMin=Math.min(xMin,point[0]);
+      xMax=Math.max(xMax,point[0]);
+      yMin=Math.min(yMin,point[1]);
+      yMax=Math.max(yMax,point[1]);
+    });
+  });
+  if(!Number.isFinite(xMin)||!Number.isFinite(xMax)||!Number.isFinite(yMin)||!Number.isFinite(yMax)){
+    return null;
+  }
+  if(xMin===xMax){xMin-=1;xMax+=1;}
+  const requested=panelState?.xDomain;
+  const visibleXMin=requested&&Number.isFinite(requested[0])?requested[0]:xMin;
+  const visibleXMax=requested&&Number.isFinite(requested[1])?requested[1]:xMax;
+  let yVisibleMin=Infinity,yVisibleMax=-Infinity;
+  series.forEach(item=>{
+    item.points.forEach(point=>{
+      if(point[0]<visibleXMin||point[0]>visibleXMax)return;
+      yVisibleMin=Math.min(yVisibleMin,point[1]);
+      yVisibleMax=Math.max(yVisibleMax,point[1]);
+    });
+  });
+  if(!Number.isFinite(yVisibleMin)||!Number.isFinite(yVisibleMax)){
+    yVisibleMin=yMin;
+    yVisibleMax=yMax;
+  }
+  if(yVisibleMin===yVisibleMax){yVisibleMin-=1;yVisibleMax+=1;}
+  const yPad=(yVisibleMax-yVisibleMin)*0.08||1;
+  return{
+    fullXMin:xMin,
+    fullXMax:xMax,
+    xMin:visibleXMin,
+    xMax:visibleXMax,
+    yMin:yVisibleMin-yPad,
+    yMax:yVisibleMax+yPad,
+  };
+}
+function getLinePanelInteraction(canvas,domain,pad,event){
+  const rect=canvas.getBoundingClientRect();
+  const localX=event.clientX-rect.left;
+  const localY=event.clientY-rect.top;
+  const pw=canvas.width-pad.l-pad.r;
+  const ph=canvas.height-pad.t-pad.b;
+  const inside=localX>=pad.l&&localX<=pad.l+pw&&localY>=pad.t&&localY<=pad.t+ph;
+  const xValue=domain.xMin+((localX-pad.l)/Math.max(pw,1))*(domain.xMax-domain.xMin);
+  return{rect,localX,localY,inside,xValue};
+}
+function projectLinePanelPoint(point,domain,pad,canvas){
+  const pw=canvas.width-pad.l-pad.r;
+  const ph=canvas.height-pad.t-pad.b;
+  return{
+    x:pad.l+pw*(point[0]-domain.xMin)/Math.max(domain.xMax-domain.xMin,1e-9),
+    y:pad.t+ph*(1-(point[1]-domain.yMin)/Math.max(domain.yMax-domain.yMin,1e-9)),
+  };
+}
+function findNearestSeriesPoint(series,xValue){
+  let best=null;
+  series.forEach((item,seriesIndex)=>{
+    item.points.forEach((point,pointIndex)=>{
+      const dx=Math.abs(point[0]-xValue);
+      if(!best||dx<best.dx){
+        best={series:item,seriesIndex,point,pointIndex,dx};
+      }
+    });
+  });
+  return best;
+}
+function findNearestSeriesPointByPixels(series,domain,pad,canvas,localX,localY,maxDistancePx=16){
+  let best=null;
+  const maxDistanceSq=maxDistancePx*maxDistancePx;
+  series.forEach((item,seriesIndex)=>{
+    item.points.forEach((point,pointIndex)=>{
+      if(point[0]<domain.xMin||point[0]>domain.xMax)return;
+      const projected=projectLinePanelPoint(point,domain,pad,canvas);
+      const dx=projected.x-localX;
+      const dy=projected.y-localY;
+      const distanceSq=dx*dx+dy*dy;
+      if(distanceSq>maxDistanceSq)return;
+      if(!best||distanceSq<best.distanceSq){
+        best={
+          series:item,
+          seriesIndex,
+          point,
+          pointIndex,
+          color:item.color||COLORS[seriesIndex%COLORS.length],
+          distanceSq,
+        };
+      }
+    });
+  });
+  return best;
+}
+function clampLinePanelDomain([nextXMin,nextXMax],fullXMin,fullXMax){
+  const fullWidth=fullXMax-fullXMin;
+  let width=Math.max(Math.min(nextXMax-nextXMin,fullWidth),Math.max(fullWidth*0.02,1e-6));
+  let xMin=nextXMin;
+  let xMax=xMin+width;
+  if(xMin<fullXMin){
+    xMax+=fullXMin-xMin;
+    xMin=fullXMin;
+  }
+  if(xMax>fullXMax){
+    xMin-=xMax-fullXMax;
+    xMax=fullXMax;
+  }
+  xMin=Math.max(fullXMin,xMin);
+  xMax=Math.min(fullXMax,xMax);
+  if(xMax-xMin<width){
+    xMin=Math.max(fullXMin,xMax-width);
+  }
+  return[xMin,xMax];
+}
+function drawLinePanelFocusOverlay(ctx,focus,domain,pad,pw,ph,{
+  lineColor='rgba(148,163,184,.45)',
+  markerRadius=4,
+  markerStroke='#f8fafc',
+  markerLineColor='rgba(148,163,184,.45)',
+  markerFill='#f8fafc',
+}={}){
+  if(!focus||!Array.isArray(focus.point))return;
+  const cursorXValue=Number.isFinite(focus.cursorXValue)?focus.cursorXValue:(Number(focus.point[0])||0);
+  if(cursorXValue<domain.xMin||cursorXValue>domain.xMax)return;
+  const pointXValue=Number(focus.point[0])||0;
+  const pointYValue=Number(focus.point[1])||0;
+  const pointVisible=pointXValue>=domain.xMin&&pointXValue<=domain.xMax;
+  const cursorX=pad.l+pw*(cursorXValue-domain.xMin)/Math.max(domain.xMax-domain.xMin,1e-9);
+  const pointX=pad.l+pw*(pointXValue-domain.xMin)/Math.max(domain.xMax-domain.xMin,1e-9);
+  const pointY=pad.t+ph*(1-(pointYValue-domain.yMin)/Math.max(domain.yMax-domain.yMin,1e-9));
+
+  ctx.strokeStyle=lineColor;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();
+  ctx.moveTo(cursorX,pad.t);
+  ctx.lineTo(cursorX,pad.t+ph);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(pad.l,pointY);
+  ctx.lineTo(pad.l+pw,pointY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  if(pointVisible){
+    ctx.strokeStyle=markerLineColor;
+    ctx.beginPath();
+    ctx.moveTo(pointX,pad.t);
+    ctx.lineTo(pointX,pad.t+ph);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle=markerFill;
+  ctx.beginPath();
+  ctx.arc(pointVisible?pointX:cursorX,pointY,markerRadius,0,Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle=markerStroke;
+  ctx.lineWidth=1.25;
+  ctx.stroke();
+}
+function bindLinePanelInteractions(canvasId,canvas,series,domain,pad){
+  const stateForPanel=getLinePanelState(canvasId);
+  if(stateForPanel.bound)return;
+  stateForPanel.bound=true;
+  const finishDrag=()=>{
+    const current=getLinePanelState(canvasId);
+    if(!current.pointerDown)return;
+    if(current.dragMode==='brush'&&current.dragMoved&&Array.isArray(current.dragStartDomain)){
+      const fullDomain=current.dragStartDomain;
+      const pw=canvas.width-pad.l-pad.r;
+      const startRatio=clamp((Math.min(current.dragStartX,current.dragCurrentX)-pad.l)/Math.max(pw,1),0,1);
+      const endRatio=clamp((Math.max(current.dragStartX,current.dragCurrentX)-pad.l)/Math.max(pw,1),0,1);
+      if(Math.abs(endRatio-startRatio)>0.015){
+        const fullWidth=fullDomain[1]-fullDomain[0];
+        current.xDomain=[
+          fullDomain[0]+fullWidth*startRatio,
+          fullDomain[0]+fullWidth*endRatio,
+        ];
+      }
+    }
+    current.suppressNextClick=Boolean(current.dragMoved);
+    current.pointerDown=false;
+    current.dragMode='';
+    current.dragMoved=false;
+    current.dragStartDomain=null;
+    current.dragStartX=0;
+    current.dragCurrentX=0;
+    drawLinePanel(canvasId,current.panel);
+  };
+  window.addEventListener('mouseup',finishDrag);
+  canvas.addEventListener('mousedown',event=>{
+    const current=getLinePanelState(canvasId);
+    const activeDomain=getVisibleLinePanelDomain(current.series||series,current);
+    if(!activeDomain)return;
+    const interaction=getLinePanelInteraction(canvas,activeDomain,pad,event);
+    if(!interaction.inside)return;
+    current.pointerDown=true;
+    current.dragMode=event.shiftKey?'brush':'pan';
+    current.dragMoved=false;
+    current.dragStartX=interaction.localX;
+    current.dragCurrentX=interaction.localX;
+    current.dragStartDomain=[activeDomain.xMin,activeDomain.xMax];
+    current.hover=null;
+    clearSharedLineInteraction('hover',canvasId);
+    hideChartTooltip();
+    drawLinePanel(canvasId,current.panel);
+  });
+  canvas.addEventListener('mousemove',event=>{
+    const current=getLinePanelState(canvasId);
+    const activeDomain=getVisibleLinePanelDomain(current.series||series,current);
+    if(!activeDomain)return;
+    const interaction=getLinePanelInteraction(canvas,activeDomain,pad,event);
+    if(current.pointerDown&&Array.isArray(current.dragStartDomain)){
+      current.dragCurrentX=interaction.localX;
+      if(Math.abs(current.dragCurrentX-current.dragStartX)>3){
+        current.dragMoved=true;
+      }
+      if(current.dragMode==='pan'&&current.dragMoved){
+        const span=current.dragStartDomain[1]-current.dragStartDomain[0];
+        const deltaRatio=(interaction.localX-current.dragStartX)/Math.max(canvas.width-pad.l-pad.r,1);
+        current.xDomain=clampLinePanelDomain(
+          [
+            current.dragStartDomain[0]-span*deltaRatio,
+            current.dragStartDomain[1]-span*deltaRatio,
+          ],
+          activeDomain.fullXMin,
+          activeDomain.fullXMax,
+        );
+      }
+      current.hover=null;
+      clearSharedLineInteraction('hover',canvasId);
+      hideChartTooltip();
+      drawLinePanel(canvasId,current.panel);
+      return;
+    }
+    if(!interaction.inside){
+      current.hover=null;
+      clearSharedLineInteraction('hover',canvasId);
+      hideChartTooltip();
+      drawLinePanel(canvasId,current.panel);
+      return;
+    }
+    const nearest=findNearestSeriesPointByPixels(current.series||series,activeDomain,pad,canvas,interaction.localX,interaction.localY)
+      || findNearestSeriesPoint(current.series||series,interaction.xValue);
+    current.hover=nearest?buildLineInteractionContext(canvasId,current.panel,nearest,interaction.xValue,'hover'):null;
+    if(current.hover){
+      setSharedLineInteraction('hover',current.hover);
+      showChartTooltip(event,{
+        title:current.hover.seriesLabel,
+        metaLines:[
+          `${current.hover.xLabel} = ${formatNumber(current.hover.xValue,3)}`,
+          `${current.hover.yLabel} = ${formatNumber(current.hover.yValue,3)}`,
+          current.panel?.info||'',
+        ],
+      });
+    }else{
+      clearSharedLineInteraction('hover',canvasId);
+      hideChartTooltip();
+    }
+    drawLinePanel(canvasId,current.panel);
+  },{passive:true});
+  canvas.addEventListener('mouseleave',()=>{
+    const current=getLinePanelState(canvasId);
+    if(current.pointerDown)return;
+    current.hover=null;
+    clearSharedLineInteraction('hover',canvasId);
+    hideChartTooltip();
+    drawLinePanel(canvasId,current.panel);
+  });
+  canvas.addEventListener('click',event=>{
+    const current=getLinePanelState(canvasId);
+    if(current.suppressNextClick){
+      current.suppressNextClick=false;
+      return;
+    }
+    const activeDomain=getVisibleLinePanelDomain(current.series||series,current);
+    if(!activeDomain)return;
+    const interaction=getLinePanelInteraction(canvas,activeDomain,pad,event);
+    if(!interaction.inside){
+      current.selectedPoint=null;
+      clearSharedLineInteraction('selected',canvasId);
+      hideChartTooltip();
+      drawLinePanel(canvasId,current.panel);
+      return;
+    }
+    const nearest=findNearestSeriesPointByPixels(current.series||series,activeDomain,pad,canvas,interaction.localX,interaction.localY,18);
+    current.selectedPoint=nearest?buildLineInteractionContext(canvasId,current.panel,nearest,interaction.xValue,'selected'):null;
+    if(current.selectedPoint){
+      setSharedLineInteraction('selected',current.selectedPoint);
+      showChartTooltip(event,{
+        title:`Pinned · ${current.selectedPoint.seriesLabel}`,
+        metaLines:[
+          `${current.selectedPoint.xLabel} = ${formatNumber(current.selectedPoint.xValue,3)}`,
+          `${current.selectedPoint.yLabel} = ${formatNumber(current.selectedPoint.yValue,3)}`,
+          current.panel?.info||'',
+        ],
+      });
+    }else{
+      clearSharedLineInteraction('selected',canvasId);
+      hideChartTooltip();
+    }
+    drawLinePanel(canvasId,current.panel);
+  });
+  canvas.addEventListener('dblclick',()=>{
+    const current=getLinePanelState(canvasId);
+    current.xDomain=null;
+    current.hover=null;
+    current.selectedPoint=null;
+    current.pointerDown=false;
+    current.dragMode='';
+    current.dragMoved=false;
+    clearSharedLineInteraction('hover',canvasId);
+    clearSharedLineInteraction('selected',canvasId);
+    hideChartTooltip();
+    drawLinePanel(canvasId,current.panel);
+  });
+  canvas.addEventListener('wheel',event=>{
+    const current=getLinePanelState(canvasId);
+    const nextDomain=getVisibleLinePanelDomain(current.series||series,current);
+    if(!nextDomain)return;
+    const interaction=getLinePanelInteraction(canvas,nextDomain,pad,event);
+    if(!interaction.inside)return;
+    event.preventDefault();
+    const fullWidth=nextDomain.fullXMax-nextDomain.fullXMin;
+    const currentWidth=nextDomain.xMax-nextDomain.xMin;
+    const zoomFactor=event.deltaY<0?0.88:1.14;
+    const nextWidth=clamp(currentWidth*zoomFactor,Math.max(fullWidth*0.05,1e-6),fullWidth);
+    const pivotRatio=(interaction.xValue-nextDomain.xMin)/Math.max(currentWidth,1e-9);
+    let nextXMin=interaction.xValue-nextWidth*pivotRatio;
+    let nextXMax=nextXMin+nextWidth;
+    if(nextXMin<nextDomain.fullXMin){
+      nextXMax+=nextDomain.fullXMin-nextXMin;
+      nextXMin=nextDomain.fullXMin;
+    }
+    if(nextXMax>nextDomain.fullXMax){
+      nextXMin-=nextXMax-nextDomain.fullXMax;
+      nextXMax=nextDomain.fullXMax;
+    }
+    current.xDomain=[nextXMin,nextXMax];
+    current.hover=null;
+    clearSharedLineInteraction('hover',canvasId);
+    hideChartTooltip();
+    drawLinePanel(canvasId,current.panel);
+  },{passive:false});
+}
+function drawLinePanel(canvasId,panel){
+  const canvas=document.getElementById(canvasId);
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width=Math.max((canvas.parentElement?.clientWidth||0)-32,320);
+  const H=canvas.height;
+  const pad={t:16,r:16,b:34,l:56};
+  const pw=W-pad.l-pad.r;
+  const ph=H-pad.t-pad.b;
+  const series=(panel?.series||[]).filter(item=>Array.isArray(item.points)&&item.points.length);
+  const panelState=getLinePanelState(canvasId);
+  const nextPanelKey=normalizeSelectionValue(panel?.panelKey||canvasId);
+  let staleInteractionDropped=false;
+  if(panelState.panelKey&&panelState.panelKey!==nextPanelKey){
+    panelState.xDomain=null;
+    panelState.hover=null;
+    panelState.selectedPoint=null;
+    if(lineInteractionState.hover?.canvasId===canvasId){
+      lineInteractionState.hover=null;
+      staleInteractionDropped=true;
+    }
+    if(lineInteractionState.selected?.canvasId===canvasId){
+      lineInteractionState.selected=null;
+      staleInteractionDropped=true;
+    }
+  }
+  panelState.panelKey=nextPanelKey;
+  panelState.panel=panel;
+  panelState.series=series;
+  if(staleInteractionDropped)updatePointDrilldownLinks();
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='rgba(10,14,26,.5)';
+  ctx.fillRect(0,0,W,H);
+
+  if(!series.length){
+    ctx.fillStyle='#64748b';
+    ctx.font=CANVAS_BODY_FONT;
+    ctx.fillText('No series available',pad.l,Math.max(H/2,24));
+    return;
+  }
+  bindLinePanelInteractions(canvasId,canvas,series,getVisibleLinePanelDomain(series,panelState)||{},pad);
+  const domain=getVisibleLinePanelDomain(series,panelState);
+  if(!domain)return;
+  const{xMin,xMax,yMin,yMax}=domain;
+  const hoverContext=panelState.pointerDown
+    ?null
+    :resolveSharedLineInteractionForPanel('hover',panelState,canvasId,series,panel);
+  const selectedContext=resolveSharedLineInteractionForPanel('selected',panelState,canvasId,series,panel);
+
+  ctx.strokeStyle='#1e293b';
+  ctx.lineWidth=.5;
+  for(let i=0;i<=5;i++){
+    const y=pad.t+ph*(1-i/5);
+    ctx.beginPath();
+    ctx.moveTo(pad.l,y);
+    ctx.lineTo(pad.l+pw,y);
+    ctx.stroke();
+    ctx.fillStyle='#64748b';
+    ctx.font=CANVAS_TINY_FONT;
+    ctx.textAlign='right';
+    ctx.fillText(formatNumber(yMin+(yMax-yMin)*i/5,2),pad.l-6,y+3);
+  }
+  for(let i=0;i<=5;i++){
+    const x=pad.l+pw*i/5;
+    ctx.fillStyle='#64748b';
+    ctx.font=CANVAS_TINY_FONT;
+    ctx.textAlign='center';
+    ctx.fillText(formatNumber(xMin+(xMax-xMin)*i/5,2),x,H-pad.b+16);
+  }
+
+  if(yMin<0&&yMax>0){
+    const zeroY=pad.t+ph*(1-(0-yMin)/(yMax-yMin));
+    ctx.strokeStyle='#334155';
+    ctx.lineWidth=1;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath();
+    ctx.moveTo(pad.l,zeroY);
+    ctx.lineTo(pad.l+pw,zeroY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  series.forEach((item,index)=>{
+    ctx.strokeStyle=item.color||COLORS[index%COLORS.length];
+    ctx.lineWidth=1.5;
+    ctx.beginPath();
+    let started=false;
+    item.points.forEach((point,pointIndex)=>{
+      if(point[0]<xMin||point[0]>xMax)return;
+      const x=pad.l+pw*(point[0]-xMin)/(xMax-xMin);
+      const y=pad.t+ph*(1-(point[1]-yMin)/(yMax-yMin));
+      if(!started){
+        ctx.moveTo(x,y);
+        started=true;
+      }else{
+        ctx.lineTo(x,y);
+      }
+    });
+    if(started)ctx.stroke();
+  });
+
+  if(panelState.pointerDown&&panelState.dragMode==='brush'&&Math.abs(panelState.dragCurrentX-panelState.dragStartX)>2){
+    const brushX=Math.min(panelState.dragStartX,panelState.dragCurrentX);
+    const brushWidth=Math.abs(panelState.dragCurrentX-panelState.dragStartX);
+    ctx.fillStyle='rgba(56,189,248,.14)';
+    ctx.strokeStyle='rgba(56,189,248,.85)';
+    ctx.lineWidth=1;
+    ctx.fillRect(brushX,pad.t,brushWidth,ph);
+    ctx.strokeRect(brushX,pad.t,brushWidth,ph);
+  }
+
+  if(hoverContext&&Array.isArray(hoverContext.point)){
+    drawLinePanelFocusOverlay(ctx,hoverContext,domain,pad,pw,ph,{
+      lineColor:'rgba(148,163,184,.45)',
+      markerRadius:hoverContext.canvasId===canvasId?4:3.5,
+      markerStroke:'#f8fafc',
+      markerLineColor:'rgba(148,163,184,.32)',
+      markerFill:hoverContext.color||'#f8fafc',
+    });
+  }
+
+  if(selectedContext&&Array.isArray(selectedContext.point)){
+    drawLinePanelFocusOverlay(ctx,selectedContext,domain,pad,pw,ph,{
+      lineColor:'rgba(248,250,252,.72)',
+      markerRadius:selectedContext.canvasId===canvasId?5.5:4.5,
+      markerStroke:'#020617',
+      markerLineColor:'rgba(248,250,252,.9)',
+      markerFill:selectedContext.color||'#f8fafc',
+    });
+  }
+
+  ctx.fillStyle='#64748b';
+  ctx.font=CANVAS_TINY_FONT;
+  ctx.textAlign='left';
+  ctx.fillText('hover: crosshair sync · wheel: zoom · drag: pan · shift+drag: brush zoom · click: pin + detail · dblclick: reset',pad.l,H-6);
+}
+
+function drawGroupedBarChart(canvasId,chart){
+  const canvas=document.getElementById(canvasId);
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width=Math.max((canvas.parentElement?.clientWidth||0)-32,320);
+  const H=canvas.height;
+  const pad={t:16,r:16,b:50,l:56};
+  const pw=W-pad.l-pad.r;
+  const ph=H-pad.t-pad.b;
+  const categories=chart?.categories||[];
+  const series=chart?.series||[];
+  const values=series.flatMap(item=>item.values||[]);
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='rgba(10,14,26,.5)';
+  ctx.fillRect(0,0,W,H);
+
+  if(!categories.length||!series.length||!values.length){
+    ctx.fillStyle='#64748b';
+    ctx.font=CANVAS_BODY_FONT;
+    ctx.fillText('No component values available',pad.l,Math.max(H/2,24));
+    return;
+  }
+
+  let yMin=Math.min(0,...values);
+  let yMax=Math.max(0,...values);
+  if(yMin===yMax){yMin-=1;yMax+=1;}
+  const padY=(yMax-yMin)*0.12||1;
+  yMin-=padY;
+  yMax+=padY;
+  const range=yMax-yMin;
+  const groupW=pw/categories.length;
+  const barW=Math.max(groupW/(series.length+1),18);
+  const zeroY=pad.t+ph*(1-(0-yMin)/range);
+  const panelState=getGroupedBarState(canvasId);
+  const nextPanelKey=normalizeSelectionValue(chart?.panelKey||canvasId);
+  let staleInteractionDropped=false;
+  if(panelState.panelKey&&panelState.panelKey!==nextPanelKey){
+    panelState.hover=null;
+    panelState.selectedBar=null;
+    if(groupedBarInteractionState.hover?.canvasId===canvasId){
+      groupedBarInteractionState.hover=null;
+      staleInteractionDropped=true;
+    }
+    if(groupedBarInteractionState.selected?.canvasId===canvasId){
+      groupedBarInteractionState.selected=null;
+      staleInteractionDropped=true;
+    }
+  }
+  panelState.panelKey=nextPanelKey;
+  panelState.chart=chart;
+  panelState.bars=[];
+  if(staleInteractionDropped)updatePointDrilldownLinks();
+
+  if(!panelState.bound){
+    panelState.bound=true;
+    canvas.addEventListener('mousemove',event=>{
+      const current=getGroupedBarState(canvasId);
+      const rect=canvas.getBoundingClientRect();
+      const localX=event.clientX-rect.left;
+      const localY=event.clientY-rect.top;
+      const hovered=(current.bars||[]).find(bar=>
+        localX>=bar.x&&localX<=bar.x+bar.w&&localY>=bar.y&&localY<=bar.y+bar.h
+      )||null;
+      current.hover=hovered;
+      if(hovered){
+        const hoverContext=buildGroupedBarInteractionContext(canvasId,current.chart,hovered,'hover');
+        setSharedGroupedBarInteraction('hover',hoverContext);
+        showChartTooltip(event,{
+          title:`${hovered.category} · ${hovered.seriesLabel}`,
+          metaLines:[
+            `value = ${formatNumber(hovered.value,3)}`,
+            String(current.chart?.info||''),
+          ],
+        });
+      }else{
+        clearSharedGroupedBarInteraction('hover',canvasId);
+        hideChartTooltip();
+      }
+      drawGroupedBarChart(canvasId,current.chart);
+    },{passive:true});
+    canvas.addEventListener('mouseleave',()=>{
+      const current=getGroupedBarState(canvasId);
+      current.hover=null;
+      clearSharedGroupedBarInteraction('hover',canvasId);
+      hideChartTooltip();
+      drawGroupedBarChart(canvasId,current.chart);
+    });
+    canvas.addEventListener('click',event=>{
+      const current=getGroupedBarState(canvasId);
+      const rect=canvas.getBoundingClientRect();
+      const localX=event.clientX-rect.left;
+      const localY=event.clientY-rect.top;
+      const selected=(current.bars||[]).find(bar=>
+        localX>=bar.x&&localX<=bar.x+bar.w&&localY>=bar.y&&localY<=bar.y+bar.h
+      )||null;
+      current.selectedBar=selected;
+      if(selected){
+        const selectedContext=buildGroupedBarInteractionContext(canvasId,current.chart,selected,'selected');
+        setSharedGroupedBarInteraction('selected',selectedContext);
+        showChartTooltip(event,{
+          title:`Selected · ${selected.category} · ${selected.seriesLabel}`,
+          metaLines:[
+            `value = ${formatNumber(selected.value,3)}`,
+            String(current.chart?.info||''),
+          ],
+        });
+      }else{
+        clearSharedGroupedBarInteraction('selected',canvasId);
+        hideChartTooltip();
+      }
+      drawGroupedBarChart(canvasId,current.chart);
+    });
+    canvas.addEventListener('dblclick',()=>{
+      const current=getGroupedBarState(canvasId);
+      current.selectedBar=null;
+      current.hover=null;
+      clearSharedGroupedBarInteraction('selected',canvasId);
+      clearSharedGroupedBarInteraction('hover',canvasId);
+      hideChartTooltip();
+      drawGroupedBarChart(canvasId,current.chart);
+    });
+  }
+
+  ctx.strokeStyle='#1e293b';
+  ctx.lineWidth=.5;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+ph*i/4;
+    ctx.beginPath();
+    ctx.moveTo(pad.l,y);
+    ctx.lineTo(pad.l+pw,y);
+    ctx.stroke();
+    ctx.fillStyle='#64748b';
+    ctx.font=CANVAS_TINY_FONT;
+    ctx.textAlign='right';
+    ctx.fillText(formatNumber(yMax-range*i/4,2),pad.l-6,y+3);
+  }
+  ctx.strokeStyle='#475569';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(pad.l,zeroY);
+  ctx.lineTo(pad.l+pw,zeroY);
+  ctx.stroke();
+
+  categories.forEach((category,categoryIndex)=>{
+    const groupX=pad.l+groupW*categoryIndex;
+    series.forEach((item,seriesIndex)=>{
+      const value=Number(item.values?.[categoryIndex]||0);
+      const x=groupX+(seriesIndex+0.5)*barW;
+      const y=pad.t+ph*(1-(value-yMin)/range);
+      const bar={
+        category,
+        categoryIndex,
+        seriesLabel:item.label||`series ${seriesIndex+1}`,
+        seriesIndex,
+        value,
+        x,
+        y:Math.min(zeroY,y),
+        w:barW*0.8,
+        h:Math.abs(zeroY-y),
+        color:item.color||COLORS[seriesIndex%COLORS.length],
+      };
+      panelState.bars.push(bar);
+      const selected=panelState.selectedBar&&panelState.selectedBar.categoryIndex===bar.categoryIndex&&panelState.selectedBar.seriesIndex===bar.seriesIndex;
+      const hovered=panelState.hover&&panelState.hover.categoryIndex===bar.categoryIndex&&panelState.hover.seriesIndex===bar.seriesIndex;
+      ctx.fillStyle=bar.color;
+      ctx.globalAlpha=selected?1:(hovered?.92:.82);
+      ctx.fillRect(bar.x,bar.y,bar.w,Math.max(bar.h,1));
+      ctx.globalAlpha=1;
+      if(selected||hovered){
+        ctx.strokeStyle=selected?'#f8fafc':'rgba(248,250,252,.72)';
+        ctx.lineWidth=selected?2:1.25;
+        ctx.strokeRect(bar.x,bar.y,bar.w,Math.max(bar.h,1));
+      }
+    });
+    ctx.save();
+    ctx.translate(groupX+groupW/2,H-pad.b+14);
+    ctx.rotate(-Math.PI/8);
+    ctx.fillStyle='#96A8BB';
+    ctx.font=CANVAS_TINY_FONT;
+    ctx.textAlign='right';
+    ctx.fillText(category,0,0);
+    ctx.restore();
+  });
+  ctx.fillStyle='#64748b';
+  ctx.font=CANVAS_TINY_FONT;
+  ctx.textAlign='left';
+  ctx.fillText('hover: inspect · click: pin bar · dblclick: clear',pad.l,H-6);
+}
+
+function buildStoryDrift(containerId,panel){
+  const el=document.getElementById(containerId);
+  const rows=panel?.rows||[];
+  const limit=Number(panel?.limit||DEFAULT_DRIFT_LIMIT);
+  el.innerHTML='';
+  rows.slice().reverse().forEach(row=>{
+    const ratio=Number(row.drift)||0;
+    const pct=Math.min(ratio/limit*100,100);
+    const color=ratio>limit?'var(--danger)':ratio>0.01?'var(--warn)':'var(--success)';
+    const wrapper=document.createElement('div');
+    wrapper.className='story-drift-row';
+    wrapper.innerHTML=`
+      <span class="story-label">${row.story}F</span>
+      <div class="drift-bar-container">
+        <div class="drift-bar" style="width:${pct}%;background:${color}"></div>
+        <div class="drift-limit" style="left:100%" title="Limit: ${(limit*100).toFixed(2)}%"></div>
+        <span class="drift-value" style="color:${color}">${(ratio*100).toFixed(3)}%</span>
+      </div>`;
+    el.appendChild(wrapper);
+  });
+}
+
+function drawEnvelopePanel(panel){
+  if(panel?.kind==='bars'){
+    const canvas=document.getElementById('envelope-chart');
+    const ctx=canvas.getContext('2d');
+    const W=canvas.width=Math.max((canvas.parentElement?.clientWidth||0)-32,320);
+    const H=canvas.height;
+    const pad={t:20,r:20,b:60,l:60};
+    const pw=W-pad.l-pad.r;
+    const ph=H-pad.t-pad.b;
+    const items=panel?.bars||[];
+    const values=items.map(item=>Number(item.value)||0);
+    const yMin=Math.min(0,...values)*1.1;
+    const yMax=Math.max(0,...values)*1.1||1;
+    const range=(yMax-yMin)||1;
+    const barW=Math.max(pw/Math.max(items.length,1)*0.45,18);
+
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='rgba(10,14,26,.5)';
+    ctx.fillRect(0,0,W,H);
+
+    for(let i=0;i<=6;i++){
+      const y=pad.t+ph*i/6;
+      ctx.strokeStyle='#1e293b';
+      ctx.lineWidth=.5;
+      ctx.beginPath();
+      ctx.moveTo(pad.l,y);
+      ctx.lineTo(pad.l+pw,y);
+      ctx.stroke();
+    ctx.fillStyle='#64748b';
+    ctx.font=CANVAS_TINY_FONT;
+    ctx.textAlign='right';
+    ctx.fillText(formatNumber(yMax-range*i/6,2),pad.l-6,y+3);
+    }
+
+    const zeroY=pad.t+ph*(yMax/range);
+    ctx.strokeStyle='#475569';
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    ctx.moveTo(pad.l,zeroY);
+    ctx.lineTo(pad.l+pw,zeroY);
+    ctx.stroke();
+
+    items.forEach((item,index)=>{
+      const value=Number(item.value)||0;
+      const x=pad.l+pw*(index+0.5)/Math.max(items.length,1);
+      const y=pad.t+ph*(1-(value-yMin)/range);
+      ctx.fillStyle=value>=0?COLORS[index%COLORS.length]:'#EF7D73';
+      ctx.fillRect(x-barW/2,Math.min(zeroY,y),barW,Math.abs(zeroY-y));
+      ctx.save();
+      ctx.translate(x,H-pad.b+10);
+      ctx.rotate(-Math.PI/6);
+      ctx.fillStyle='#96A8BB';
+      ctx.font=CANVAS_TINY_FONT;
+      ctx.textAlign='left';
+      ctx.fillText(item.label,0,0);
+      ctx.restore();
+    });
+    buildLegend('envelope-legend',items.map((item,index)=>({label:item.label,color:item.value>=0?COLORS[index%COLORS.length]:'#EF7D73'})));
+    return;
+  }
+
+  const linePanel=createLinePanelConfig(panel,{
+    groupKey:'envelope',
+    panelKey:`envelope:${currentLoadCase()||'default'}`,
+    panelLabel:panel?.title||'Envelope Explorer',
+    resultsCard:'envelope',
+    memberId:currentMember()?.id||readSharedSelection().memberId,
+    loadCase:currentLoadCase(),
+    caseId:currentLoadCase(),
+  });
+  drawLinePanel('envelope-chart',linePanel);
+  buildLegend('envelope-legend',linePanel?.series||[]);
+}
+
+function populateControls(dataset){
+  const memberSelect=document.getElementById('member-select');
+  const loadCaseSelect=document.getElementById('lc-select');
+  memberSelect.innerHTML='';
+  loadCaseSelect.innerHTML='';
+
+  (dataset.memberForce.members||[]).forEach((member,index)=>{
+    const option=document.createElement('option');
+    option.value=member.id;
+    option.selected=index===0;
+    option.textContent=member.label;
+    memberSelect.appendChild(option);
+  });
+
+  (dataset.loadCases||[]).forEach((item,index)=>{
+    const option=document.createElement('option');
+    option.value=item.id;
+    option.selected=item.id===dataset.defaultLoadCase||(index===0&&!dataset.defaultLoadCase);
+    option.textContent=item.label||item.id;
+    loadCaseSelect.appendChild(option);
+  });
+
+  const selection=readSharedSelection();
+  if(selection.memberId&&[...memberSelect.options].some(option=>option.value===selection.memberId)){
+    memberSelect.value=selection.memberId;
+  }
+  if(selection.loadCase&&[...loadCaseSelect.options].some(option=>option.value===selection.loadCase)){
+    loadCaseSelect.value=selection.loadCase;
+  }
+}
+
+function currentLoadCase(){
+  const select=document.getElementById('lc-select');
+  return select.value||state.dataset?.defaultLoadCase||state.dataset?.loadCases?.[0]?.id||'';
+}
+
+function currentMember(){
+  const select=document.getElementById('member-select');
+  return state.dataset?.memberForce?.members?.find(member=>member.id===select.value)||state.dataset?.memberForce?.members?.[0]||null;
+}
+function updateReviewRowLink(){
+  const link=document.getElementById('review-row-link');
+  if(!(link instanceof HTMLAnchorElement))return;
+  const memberId=currentMember()?.id||readSharedSelection().memberId;
+  const loadCase=currentLoadCase()||readSharedSelection().loadCase;
+  const href=buildReviewRowProvenanceUrl(memberId,loadCase);
+  link.href=href||'#';
+  link.classList.toggle('is-disabled',!href);
+  link.textContent=href
+    ? `Review row provenance${memberId?` · ${memberId}`:''}${loadCase?` · ${loadCase}`:''}`
+    : 'Review row provenance unavailable';
+  updatePointDrilldownLinks();
+}
+
+function resolveCasePanel(collection,loadCase){
+  if(collection?.[loadCase]) return collection[loadCase];
+  const firstKey=Object.keys(collection||{})[0];
+  return firstKey?collection[firstKey]:null;
+}
+
+function updateMemberCharts(){
+  if(!state.dataset) return;
+  const member=currentMember();
+  if(!member) return;
+  const loadCase=currentLoadCase();
+  const shared=readSharedSelection();
+  const memberIds=normalizeSelectionValues(shared.memberIds||[]);
+  publishSharedSelection({
+    memberId:member.id,
+    memberIds:memberIds.includes(member.id)?memberIds:[member.id],
+    loadCase,
+    tab:state.activeTab
+  });
+  updateReviewRowLink();
+
+  setText('max-moment',formatNumber(member.stats.maxMoment,2));
+  setText('max-shear',formatNumber(member.stats.maxShear,2));
+  setText('max-axial',formatNumber(member.stats.maxAxial,2));
+  setText('max-dcr',`${formatNumber(member.stats.maxErrorPct,2)}%`);
+  document.getElementById('max-dcr').style.color=member.stats.maxErrorPct>5?'var(--danger)':member.stats.maxErrorPct>2?'var(--warn)':'var(--success)';
+  setText('max-moment-label','Max |Moment|');
+  setText('max-shear-label','Max |Shear|');
+  setText('max-axial-label','Max |Axial|');
+  setText('max-dcr-label','Max Error (%)');
+
+  setText('moment-panel-title',member.momentChart.title);
+  setText('moment-panel-info',member.momentChart.info);
+  drawGroupedBarChart('moment-chart',createGroupedBarChartConfig(member.momentChart,{
+    groupKey:'memberforce',
+    panelKey:`memberforce-moment:${member.id}:${member.caseId||'default'}:${loadCase||'default'}`,
+    panelLabel:member.momentChart.title,
+    resultsCard:'envelope',
+    memberId:member.id,
+    loadCase,
+    caseId:member.caseId||loadCase,
+    categoryLabel:'component',
+  }));
+  buildLegend('moment-chart-legend',member.momentChart.series);
+
+  setText('shear-panel-title',member.forceChart.title);
+  setText('shear-panel-info',member.forceChart.info);
+  drawGroupedBarChart('shear-chart',createGroupedBarChartConfig(member.forceChart,{
+    groupKey:'memberforce',
+    panelKey:`memberforce-force:${member.id}:${member.caseId||'default'}:${loadCase||'default'}`,
+    panelLabel:member.forceChart.title,
+    resultsCard:'envelope',
+    memberId:member.id,
+    loadCase,
+    caseId:member.caseId||loadCase,
+    categoryLabel:'component',
+  }));
+  buildLegend('shear-chart-legend',member.forceChart.series);
+
+  setText('distribution-panel-title',member.distributionChart?.title||`Member Force Distribution — ${member.id}`);
+  setText('distribution-panel-info',member.distributionChart?.info||'derived normalized profile');
+  drawLinePanel('distribution-chart',createLinePanelConfig(member.distributionChart||{series:[]},{
+    groupKey:'memberforce',
+    panelKey:`memberforce-distribution:${member.id}:${member.caseId||'default'}:${loadCase||'default'}`,
+    panelLabel:member.distributionChart?.title||`Member Force Distribution — ${member.id}`,
+    resultsCard:'envelope',
+    memberId:member.id,
+    loadCase,
+    caseId:member.caseId||loadCase,
+  }));
+  buildLegend('distribution-chart-legend',member.distributionChart?.series||[]);
+  updatePointDrilldownLinks();
+}
+
+function updateAll(){
+  if(!state.dataset) return;
+  const loadCase=currentLoadCase();
+  const shared=readSharedSelection();
+  const memberId=currentMember()?.id||'';
+  const memberIds=normalizeSelectionValues(shared.memberIds||[]);
+  publishSharedSelection({
+    memberId,
+    memberIds:memberIds.includes(memberId)?memberIds:(memberId?[memberId]:memberIds),
+    loadCase,
+    tab:state.activeTab
+  });
+  updateReviewRowLink();
+  const timePrimary=state.dataset.timeHistory.primary;
+  const timeSecondary=resolveCasePanel(state.dataset.timeHistory.byCase,loadCase);
+  const driftPanels=resolveCasePanel(state.dataset.storyDrift.byCase,loadCase);
+  const envelopePanel=resolveCasePanel(state.dataset.envelope.byCase,loadCase);
+  const timePrimaryPanel=createLinePanelConfig(timePrimary,{
+    groupKey:'timeseries',
+    panelKey:'timeseries-primary',
+    panelLabel:timePrimary?.title||'Dynamic Response History',
+    resultsCard:'time-history',
+    memberId,
+    loadCase,
+    caseId:loadCase||'dynamic_time_history',
+  });
+  const timeSecondaryPanel=createLinePanelConfig(timeSecondary,{
+    groupKey:'timeseries',
+    panelKey:`timeseries-case:${loadCase||'default'}`,
+    panelLabel:timeSecondary?.title||'Case Response History',
+    resultsCard:'time-history',
+    memberId,
+    loadCase,
+    caseId:loadCase,
+  });
+
+  setText('time-history-title',timePrimaryPanel?.title||'Dynamic Response History');
+  setText('time-history-info',timePrimaryPanel?.info||'');
+  drawLinePanel('accel-chart',timePrimaryPanel);
+  buildLegend('time-history-legend',timePrimaryPanel?.series||[]);
+
+  setText('case-response-title',timeSecondaryPanel?.title||'Case Response History');
+  setText('case-response-info',timeSecondaryPanel?.info||'');
+  drawLinePanel('disp-chart',timeSecondaryPanel);
+  buildLegend('case-response-legend',timeSecondaryPanel?.series||[]);
+
+  setText('story-drift-left-title',driftPanels?.left?.title||'Story Drift');
+  setText('story-drift-left-info',driftPanels?.left?.info||'');
+  buildStoryDrift('drift-x',driftPanels?.left||{rows:[]});
+
+  setText('story-drift-right-title',driftPanels?.right?.title||'Residual Drift');
+  setText('story-drift-right-info',driftPanels?.right?.info||'');
+  buildStoryDrift('drift-y',driftPanels?.right||{rows:[]});
+
+  setText('envelope-title',envelopePanel?.title||'Envelope Explorer');
+  setText('envelope-info',envelopePanel?.info||'');
+  drawEnvelopePanel(envelopePanel||{kind:'lines',series:[]});
+
+  updateMemberCharts();
+  updatePointDrilldownLinks();
+}
+
+function showTab(name,button){
+  state.activeTab=name;
+  document.querySelectorAll('.chart-container').forEach(el=>el.classList.add('hidden'));
+  document.getElementById(`tab-${name}`).classList.remove('hidden');
+  setActiveChartShellTab(name);
+  updateViewerQueryParams({...getCurrentSelectionState(),tab:name});
+  updatePointDrilldownLinks();
+  requestAnimationFrame(updateAll);
+}
+
+async function init(){
+  applySavedThemeMode();
+  const dataset=await buildDataset();
+  state.dataset=dataset;
+  populateControls(dataset);
+  setText('artifact-source-pill',`Source: ${dataset.sourceLabel}`);
+  setText('artifact-coverage-pill',coverageLabel(dataset));
+  setText('artifact-status-label',`Source: ${dataset.sourceLabel} (${dataset.sourceMode})`);
+  setText('artifact-generated-label',`Generated: ${dataset.generatedLabel||'--'}`);
+  const requestedTab=readRequestedTab();
+  if(requestedTab){
+    const button=document.querySelector(`.tabs button[data-tab-key="${requestedTab}"]`);
+    showTab(requestedTab,button instanceof HTMLButtonElement?button:null);
+    return;
+  }
+  updateProvenanceBlock();
+  updateAll();
+}
+
+window.showTab=showTab;
+window.updateMemberCharts=updateMemberCharts;
+window.updateAll=updateAll;
+window.toggleLightMode=toggleLightMode;
+window.toggleShortcutHelp=toggleShortcutHelp;
+window.addEventListener('resize',()=>requestAnimationFrame(updateAll));
+window.addEventListener('keydown',event=>{
+  const target=event.target;
+  if(target instanceof HTMLInputElement||target instanceof HTMLTextAreaElement||target instanceof HTMLSelectElement)return;
+  if(event.key==='?'||(event.key==='/'&&event.shiftKey)){
+    event.preventDefault();
+    toggleShortcutHelp();
+    return;
+  }
+  if(event.key==='l'||event.key==='L'){
+    event.preventDefault();
+    toggleLightMode();
+    return;
+  }
+  if(event.key==='p'||event.key==='P'){
+    event.preventDefault();
+    exportActiveChartsPng();
+    return;
+  }
+  if(['1','2','3','4'].includes(event.key)){
+    const tabKey={1:'timeseries',2:'memberforce',3:'storydrift',4:'envelope'}[event.key];
+    const button=document.querySelector(`.tabs button[data-tab-key="${tabKey}"]`);
+    showTab(tabKey,button instanceof HTMLButtonElement?button:null);
+  }
+});
+window.addEventListener('storage',event=>{
+  if(event.key!==SHARED_SELECTION_KEY||!state.dataset)return;
+  applySelectionState(readSharedSelection());
+});
+selectionChannel?.addEventListener('message',()=>{
+  if(!state.dataset)return;
+  applySelectionState(readSharedSelection());
+});
+window.addEventListener('popstate',()=>{
+  if(!state.dataset)return;
+  applySelectionState(readSharedSelection());
+});
+init();
+</script>
+</body>
+</html>

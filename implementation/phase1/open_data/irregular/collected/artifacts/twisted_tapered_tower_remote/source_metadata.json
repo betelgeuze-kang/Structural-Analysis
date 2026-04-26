@@ -1,0 +1,17 @@
+{
+  "bytes_copied": 38728810,
+  "collector_version": "0.2.0",
+  "content_type": "application/octet-stream",
+  "download_mode": "remote_provider_asset",
+  "family_id": "twisted_tapered_tower",
+  "original_reference": "",
+  "remote_candidate_url": "https://zenodo.org/records/15782433/files/DS3_TalTech_V4.ifc?download=1",
+  "schema_version": "1.0",
+  "sha256": "05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+  "source_format": "ifc",
+  "source_id": "twisted_tapered_tower_remote",
+  "source_urls": [
+    "https://www.rhino3d.com/inside/revit/"
+  ],
+  "title": "Twisted tapered tower candidate"
+}

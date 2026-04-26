@@ -1,0 +1,950 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-05T12:04:25.256067+09:00",
+  "family_id": "transfer_podium_tower",
+  "as_of_date": "2026-04-05",
+  "summary": {
+    "seed_url_count": 14,
+    "scanned_record_count": 14,
+    "strong_raw_candidate_count": 0,
+    "reference_pdf_candidate_count": 9,
+    "recursive_reference_scan_count": 9,
+    "whitelist_followup_scan_count": 14,
+    "guessed_pdf_url_count": 0,
+    "guessed_pdf_hit_count": 0,
+    "verified_native_package_found": false,
+    "summary_line": "Transfer podium raw source scan: CHECK | seed_urls=14 | scanned=14 | strong_candidates=0 | reference_pdfs=9 | recursive_reference_scans=9 | whitelist_html_scans=14 | guessed_pdf_urls=0 | guessed_pdf_hits=0 | verified_native_package_found=no"
+  },
+  "records": [
+    {
+      "url": "https://engineering.uci.edu/users/farzin-zareian",
+      "source_kind": "personal_page",
+      "owner": "Farzin Zareian",
+      "note": "checked_found",
+      "whitelist_suffixes": [],
+      "whitelist_keywords": [],
+      "follow_pdf_recursively": null,
+      "status_code": 200,
+      "content_type": "text/html; charset=utf-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 9,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 6,
+      "recursive_reference_scan_count": 6,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [
+        {
+          "pdf_url": "https://engineering.uci.edu/files/fall_2024-_seminar_series_flyer.pdf",
+          "extracted_url_count": 0,
+          "topic_hits": [],
+          "guessed_url_count": 0,
+          "guessed_hit_count": 0,
+          "extracted_candidates": [],
+          "guessed_probe_records": []
+        },
+        {
+          "pdf_url": "https://engineering.uci.edu/files/travelers-guidelines-2022.pdf",
+          "extracted_url_count": 0,
+          "topic_hits": [],
+          "guessed_url_count": 0,
+          "guessed_hit_count": 0,
+          "extracted_candidates": [],
+          "guessed_probe_records": []
+        },
+        {
+          "pdf_url": "http://www.eng.uci.edu/files/UCI_walking_map.pdf",
+          "extracted_url_count": 0,
+          "topic_hits": [
+            "building",
+            "tower"
+          ],
+          "guessed_url_count": 0,
+          "guessed_hit_count": 0,
+          "extracted_candidates": [],
+          "guessed_probe_records": []
+        },
+        {
+          "pdf_url": "https://engineering.uci.edu/files/fall_2024-_seminar_series_flyer.pdf",
+          "extracted_url_count": 0,
+          "topic_hits": [],
+          "guessed_url_count": 0,
+          "guessed_hit_count": 0,
+          "extracted_candidates": [],
+          "guessed_probe_records": []
+        },
+        {
+          "pdf_url": "https://engineering.uci.edu/files/travelers-guidelines-2022.pdf",
+          "extracted_url_count": 0,
+          "topic_hits": [],
+          "guessed_url_count": 0,
+          "guessed_hit_count": 0,
+          "extracted_candidates": [],
+          "guessed_probe_records": []
+        },
+        {
+          "pdf_url": "http://www.eng.uci.edu/files/UCI_walking_map.pdf",
+          "extracted_url_count": 0,
+          "topic_hits": [
+            "building",
+            "tower"
+          ],
+          "guessed_url_count": 0,
+          "guessed_hit_count": 0,
+          "extracted_candidates": [],
+          "guessed_probe_records": []
+        }
+      ],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": [
+        {
+          "href": "https://engineering.uci.edu/files/fall_2024-_seminar_series_flyer.pdf",
+          "text": "MSE 298 Seminars",
+          "suffix": ".pdf",
+          "strength": "reference_pdf",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://engineering.uci.edu/users/farzin-zareian",
+          "match_reasons": [
+            "reference_pdf"
+          ]
+        },
+        {
+          "href": "https://engineering.uci.edu/files/travelers-guidelines-2022.pdf",
+          "text": "Travel Tips",
+          "suffix": ".pdf",
+          "strength": "reference_pdf",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://engineering.uci.edu/users/farzin-zareian",
+          "match_reasons": [
+            "reference_pdf"
+          ]
+        },
+        {
+          "href": "https://designandconstruction.uci.edu/projects/interdisciplinary-science-and-engineering-building/index.php",
+          "text": "Interdisciplinary Science and Engineering Building (ISEB)",
+          "suffix": ".php",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://engineering.uci.edu/users/farzin-zareian",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        },
+        {
+          "href": "http://www.eng.uci.edu/files/UCI_walking_map.pdf",
+          "text": "Walking Map",
+          "suffix": ".pdf",
+          "strength": "reference_pdf",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://engineering.uci.edu/users/farzin-zareian",
+          "match_reasons": [
+            "reference_pdf"
+          ]
+        },
+        {
+          "href": "https://engineering.uci.edu/admissions/undergraduate/newly-admitted/transfers",
+          "text": "Transfers",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://engineering.uci.edu/users/farzin-zareian",
+          "match_reasons": [
+            "keywords:transfer"
+          ]
+        },
+        {
+          "href": "https://engineering.uci.edu/files/fall_2024-_seminar_series_flyer.pdf",
+          "text": "https://engineering.uci.edu/files/fall_2024-_seminar_series_flyer.pdf",
+          "suffix": ".pdf",
+          "strength": "reference_pdf",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://engineering.uci.edu/users/farzin-zareian",
+          "match_reasons": [
+            "reference_pdf"
+          ]
+        },
+        {
+          "href": "https://engineering.uci.edu/files/travelers-guidelines-2022.pdf",
+          "text": "https://engineering.uci.edu/files/travelers-guidelines-2022.pdf",
+          "suffix": ".pdf",
+          "strength": "reference_pdf",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://engineering.uci.edu/users/farzin-zareian",
+          "match_reasons": [
+            "reference_pdf"
+          ]
+        },
+        {
+          "href": "https://designandconstruction.uci.edu/projects/interdisciplinary-science-and-engineering-building/index.php",
+          "text": "https://designandconstruction.uci.edu/projects/interdisciplinary-science-and-engineering-building/index.php",
+          "suffix": ".php",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://engineering.uci.edu/users/farzin-zareian",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        },
+        {
+          "href": "http://www.eng.uci.edu/files/UCI_walking_map.pdf",
+          "text": "http://www.eng.uci.edu/files/UCI_walking_map.pdf",
+          "suffix": ".pdf",
+          "strength": "reference_pdf",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://engineering.uci.edu/users/farzin-zareian",
+          "match_reasons": [
+            "reference_pdf"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://ics.uci.edu/~hjafarpo/Farzin/Dr.Zareian.htm",
+      "source_kind": "publication_cv_candidate",
+      "owner": "Farzin Zareian",
+      "note": "legacy_profile_page",
+      "whitelist_suffixes": [
+        ".pdf",
+        ".zip"
+      ],
+      "whitelist_keywords": [
+        "benchmark",
+        "podium",
+        "tower",
+        "transfer"
+      ],
+      "follow_pdf_recursively": true,
+      "status_code": 200,
+      "content_type": "text/html",
+      "scan_status": "scanned_html",
+      "candidate_count": 0,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": []
+    },
+    {
+      "url": "https://ics.uci.edu/~hjafarpo/Farzin/Publications.htm",
+      "source_kind": "publication_cv_candidate",
+      "owner": "Farzin Zareian",
+      "note": "legacy_publications_page",
+      "whitelist_suffixes": [
+        ".pdf",
+        ".zip"
+      ],
+      "whitelist_keywords": [
+        "transfer",
+        "podium",
+        "task12",
+        "tbi",
+        "tower"
+      ],
+      "follow_pdf_recursively": true,
+      "status_code": 200,
+      "content_type": "text/html",
+      "scan_status": "scanned_html",
+      "candidate_count": 0,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": []
+    },
+    {
+      "url": "https://seas.ucla.edu/~wallace/earthquakes.htm",
+      "source_kind": "checked_subtarget",
+      "owner": "John Wallace",
+      "note": "",
+      "whitelist_suffixes": [],
+      "whitelist_keywords": [],
+      "follow_pdf_recursively": null,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 2,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 2,
+      "recursive_reference_scan_count": 2,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [
+        {
+          "pdf_url": "https://seas.ucla.edu/~wallace/EERI%20Ji-Ji%20Bridge%20Chapter.pdf",
+          "extracted_url_count": 0,
+          "topic_hits": [],
+          "guessed_url_count": 0,
+          "guessed_hit_count": 0,
+          "extracted_candidates": [],
+          "guessed_probe_records": []
+        },
+        {
+          "pdf_url": "https://seas.ucla.edu/~wallace/Files%20-%20Earthquake%20Page/Turkey%20Paper.pdf",
+          "extracted_url_count": 0,
+          "topic_hits": [
+            "building"
+          ],
+          "guessed_url_count": 0,
+          "guessed_hit_count": 0,
+          "extracted_candidates": [],
+          "guessed_probe_records": []
+        }
+      ],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": [
+        {
+          "href": "https://seas.ucla.edu/~wallace/EERI%20Ji-Ji%20Bridge%20Chapter.pdf",
+          "text": "Download PDF File",
+          "suffix": ".pdf",
+          "strength": "reference_pdf",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://seas.ucla.edu/~wallace/earthquakes.htm",
+          "match_reasons": [
+            "reference_pdf"
+          ]
+        },
+        {
+          "href": "https://seas.ucla.edu/~wallace/Files%20-%20Earthquake%20Page/Turkey%20Paper.pdf",
+          "text": "Summary Paper",
+          "suffix": ".pdf",
+          "strength": "reference_pdf",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://seas.ucla.edu/~wallace/earthquakes.htm",
+          "match_reasons": [
+            "reference_pdf"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://www.seas.ucla.edu/",
+      "source_kind": "lab_site",
+      "owner": "John Wallace",
+      "note": "checked_partial",
+      "whitelist_suffixes": [],
+      "whitelist_keywords": [],
+      "follow_pdf_recursively": null,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 0,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": []
+    },
+    {
+      "url": "https://seas.ucla.edu/~wallace/",
+      "source_kind": "personal_page",
+      "owner": "John Wallace",
+      "note": "checked_partial",
+      "whitelist_suffixes": [],
+      "whitelist_keywords": [],
+      "follow_pdf_recursively": null,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 0,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": []
+    },
+    {
+      "url": "https://seas.ucla.edu/~wallace/peer_center.htm",
+      "source_kind": "publication_cv_candidate",
+      "owner": "John Wallace",
+      "note": "peer_center_page",
+      "whitelist_suffixes": [
+        ".pdf",
+        ".zip"
+      ],
+      "whitelist_keywords": [
+        "benchmark",
+        "podium",
+        "task12",
+        "tbi",
+        "transfer"
+      ],
+      "follow_pdf_recursively": true,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 0,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": []
+    },
+    {
+      "url": "https://seas.ucla.edu/~wallace/research.htm",
+      "source_kind": "publication_cv_candidate",
+      "owner": "John Wallace",
+      "note": "research_page",
+      "whitelist_suffixes": [
+        ".pdf",
+        ".zip"
+      ],
+      "whitelist_keywords": [
+        "backstay",
+        "diaphragm",
+        "girder",
+        "podium",
+        "task12",
+        "tbi",
+        "transfer"
+      ],
+      "follow_pdf_recursively": true,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 1,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 1,
+      "recursive_reference_scan_count": 1,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [
+        {
+          "pdf_url": "https://seas.ucla.edu/~wallace/Files%20-%20Research%20Page/Thomas%20Kang/CUREe-Kajima%20Quarterly%20Report%20Oct%20-%20Dec%2000.pdf",
+          "extracted_url_count": 0,
+          "topic_hits": [
+            "building",
+            "transfer"
+          ],
+          "guessed_url_count": 0,
+          "guessed_hit_count": 0,
+          "extracted_candidates": [],
+          "guessed_probe_records": []
+        }
+      ],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": [
+        {
+          "href": "https://seas.ucla.edu/~wallace/Files%20-%20Research%20Page/Thomas%20Kang/CUREe-Kajima%20Quarterly%20Report%20Oct%20-%20Dec%2000.pdf",
+          "text": "October - December 2000",
+          "suffix": ".pdf",
+          "strength": "reference_pdf",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://seas.ucla.edu/~wallace/research.htm",
+          "match_reasons": [
+            "reference_pdf"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://garciastructural.com/our-team/",
+      "source_kind": "personal_page",
+      "owner": "Pierson Jones",
+      "note": "checked_found",
+      "whitelist_suffixes": [],
+      "whitelist_keywords": [],
+      "follow_pdf_recursively": null,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 0,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": []
+    },
+    {
+      "url": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+      "source_kind": "checked_subtarget",
+      "owner": "Tony Yang",
+      "note": "",
+      "whitelist_suffixes": [],
+      "whitelist_keywords": [],
+      "follow_pdf_recursively": null,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 6,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 5,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": [
+        {
+          "href": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "text": "OpenSees Navigator",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "text": "Prototype Building",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fsmartstructures.civil.ubc.ca%2Filee-eerf-collaboration%2Fprototype-building%2F",
+          "text": "https://smartstructures.civil.ubc.ca/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fsmartstructures.civil.ubc.ca%2Filee-eerf-collaboration%2Fprototype-building%2F",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fsmartstructures.civil.ubc.ca%2Filee-eerf-collaboration%2Fprototype-building%2F&#038;format=xml",
+          "text": "https://smartstructures.civil.ubc.ca/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fsmartstructures.civil.ubc.ca%2Filee-eerf-collaboration%2Fprototype-building%2F&#038;format=xml",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "text": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "text": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://smartstructures.civil.ubc.ca/about/",
+      "source_kind": "lab_site",
+      "owner": "Tony Yang",
+      "note": "checked_found",
+      "whitelist_suffixes": [],
+      "whitelist_keywords": [],
+      "follow_pdf_recursively": null,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 4,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": [
+        {
+          "href": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "text": "OpenSees Navigator",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://smartstructures.civil.ubc.ca/about/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "text": "Prototype Building",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://smartstructures.civil.ubc.ca/about/",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "text": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/about/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "text": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/about/",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        }
+      ]
+    },
+    {
+      "url": "https://civil.ubc.ca/tony-yang/",
+      "source_kind": "personal_page",
+      "owner": "Tony Yang",
+      "note": "checked_found",
+      "whitelist_suffixes": [],
+      "whitelist_keywords": [],
+      "follow_pdf_recursively": null,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 0,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": []
+    },
+    {
+      "url": "https://civil.ubc.ca/research/research-areas/structural-earthquake-engineering/",
+      "source_kind": "publication_cv_candidate",
+      "owner": "Tony Yang",
+      "note": "research_area_page",
+      "whitelist_suffixes": [
+        ".pdf",
+        ".zip"
+      ],
+      "whitelist_keywords": [
+        "transfer",
+        "podium",
+        "benchmark",
+        "opensees",
+        "tower"
+      ],
+      "follow_pdf_recursively": true,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 0,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 0,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": []
+    },
+    {
+      "url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+      "source_kind": "publication_cv_candidate",
+      "owner": "Tony Yang",
+      "note": "opensees_navigator_page",
+      "whitelist_suffixes": [
+        ".inp",
+        ".pdf",
+        ".tcl",
+        ".zip"
+      ],
+      "whitelist_keywords": [
+        "opensees",
+        "podium",
+        "prototype",
+        "tower",
+        "transfer"
+      ],
+      "follow_pdf_recursively": true,
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "scan_status": "scanned_html",
+      "candidate_count": 10,
+      "strong_raw_candidate_count": 0,
+      "reference_pdf_candidate_count": 0,
+      "recursive_reference_scan_count": 0,
+      "whitelist_followup_scan_count": 9,
+      "reference_pdf_records": [],
+      "guessed_pdf_url_count": 0,
+      "guessed_pdf_hit_count": 0,
+      "candidates": [
+        {
+          "href": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "text": "OpenSees Navigator",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "text": "Prototype Building",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        },
+        {
+          "href": "http://openseesnavigator.berkeley.edu/",
+          "text": "here!",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures-civil.sites.olt.ubc.ca/software/opensees-navigator/opensees-navigator-training/",
+          "text": "here",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "html_anchor",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fsmartstructures.civil.ubc.ca%2Fopensees-navigator%2F",
+          "text": "https://smartstructures.civil.ubc.ca/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fsmartstructures.civil.ubc.ca%2Fopensees-navigator%2F",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fsmartstructures.civil.ubc.ca%2Fopensees-navigator%2F&#038;format=xml",
+          "text": "https://smartstructures.civil.ubc.ca/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fsmartstructures.civil.ubc.ca%2Fopensees-navigator%2F&#038;format=xml",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "text": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "text": "https://smartstructures.civil.ubc.ca/ilee-eerf-collaboration/prototype-building/",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:building"
+          ]
+        },
+        {
+          "href": "http://openseesnavigator.berkeley.edu/",
+          "text": "http://openseesnavigator.berkeley.edu/",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        },
+        {
+          "href": "https://smartstructures-civil.sites.olt.ubc.ca/software/opensees-navigator/opensees-navigator-training/",
+          "text": "https://smartstructures-civil.sites.olt.ubc.ca/software/opensees-navigator/opensees-navigator-training/",
+          "suffix": "n/a",
+          "strength": "keyword_only",
+          "looks_raw_package": false,
+          "discovered_from": "page_text",
+          "parent_url": "https://smartstructures.civil.ubc.ca/opensees-navigator/",
+          "match_reasons": [
+            "keywords:opensees"
+          ]
+        }
+      ]
+    }
+  ],
+  "reference_pdf_records": [
+    {
+      "pdf_url": "https://seas.ucla.edu/~wallace/Files%20-%20Research%20Page/Thomas%20Kang/CUREe-Kajima%20Quarterly%20Report%20Oct%20-%20Dec%2000.pdf",
+      "extracted_url_count": 0,
+      "topic_hits": [
+        "building",
+        "transfer"
+      ],
+      "guessed_url_count": 0,
+      "guessed_hit_count": 0,
+      "extracted_candidates": [],
+      "guessed_probe_records": []
+    },
+    {
+      "pdf_url": "https://seas.ucla.edu/~wallace/EERI%20Ji-Ji%20Bridge%20Chapter.pdf",
+      "extracted_url_count": 0,
+      "topic_hits": [],
+      "guessed_url_count": 0,
+      "guessed_hit_count": 0,
+      "extracted_candidates": [],
+      "guessed_probe_records": []
+    },
+    {
+      "pdf_url": "https://seas.ucla.edu/~wallace/Files%20-%20Earthquake%20Page/Turkey%20Paper.pdf",
+      "extracted_url_count": 0,
+      "topic_hits": [
+        "building"
+      ],
+      "guessed_url_count": 0,
+      "guessed_hit_count": 0,
+      "extracted_candidates": [],
+      "guessed_probe_records": []
+    },
+    {
+      "pdf_url": "https://engineering.uci.edu/files/fall_2024-_seminar_series_flyer.pdf",
+      "extracted_url_count": 0,
+      "topic_hits": [],
+      "guessed_url_count": 0,
+      "guessed_hit_count": 0,
+      "extracted_candidates": [],
+      "guessed_probe_records": []
+    },
+    {
+      "pdf_url": "https://engineering.uci.edu/files/travelers-guidelines-2022.pdf",
+      "extracted_url_count": 0,
+      "topic_hits": [],
+      "guessed_url_count": 0,
+      "guessed_hit_count": 0,
+      "extracted_candidates": [],
+      "guessed_probe_records": []
+    },
+    {
+      "pdf_url": "http://www.eng.uci.edu/files/UCI_walking_map.pdf",
+      "extracted_url_count": 0,
+      "topic_hits": [
+        "building",
+        "tower"
+      ],
+      "guessed_url_count": 0,
+      "guessed_hit_count": 0,
+      "extracted_candidates": [],
+      "guessed_probe_records": []
+    },
+    {
+      "pdf_url": "https://engineering.uci.edu/files/fall_2024-_seminar_series_flyer.pdf",
+      "extracted_url_count": 0,
+      "topic_hits": [],
+      "guessed_url_count": 0,
+      "guessed_hit_count": 0,
+      "extracted_candidates": [],
+      "guessed_probe_records": []
+    },
+    {
+      "pdf_url": "https://engineering.uci.edu/files/travelers-guidelines-2022.pdf",
+      "extracted_url_count": 0,
+      "topic_hits": [],
+      "guessed_url_count": 0,
+      "guessed_hit_count": 0,
+      "extracted_candidates": [],
+      "guessed_probe_records": []
+    },
+    {
+      "pdf_url": "http://www.eng.uci.edu/files/UCI_walking_map.pdf",
+      "extracted_url_count": 0,
+      "topic_hits": [
+        "building",
+        "tower"
+      ],
+      "guessed_url_count": 0,
+      "guessed_hit_count": 0,
+      "extracted_candidates": [],
+      "guessed_probe_records": []
+    }
+  ]
+}

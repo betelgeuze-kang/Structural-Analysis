@@ -1,0 +1,240 @@
+{
+  "cases": [
+    {
+      "abs_tolerance": 1e-12,
+      "case_id": "simple_beam_uniform_load",
+      "description": "Simply supported Euler-Bernoulli beam under a full-span uniform load.",
+      "expected_metrics": {
+        "left_support_reaction": 36.0,
+        "max_deflection": 0.010125,
+        "midspan_bending_moment": 54.0,
+        "right_support_reaction": 36.0
+      },
+      "parameters": {
+        "flexural_rigidity": 20000.0,
+        "span": 6.0,
+        "uniform_load": 12.0
+      },
+      "reference_class": "simple_beam",
+      "rel_tolerance": 1e-10,
+      "tags": [
+        "beam",
+        "closed_form",
+        "static"
+      ]
+    },
+    {
+      "abs_tolerance": 1e-12,
+      "case_id": "two_bar_truss_apex_load",
+      "description": "Symmetric two-bar truss with a vertical apex load.",
+      "expected_metrics": {
+        "apex_vertical_displacement": 0.010416037018,
+        "left_support_vertical_reaction": 60.0,
+        "member_axial_force_abs": 72.11102550928,
+        "right_support_vertical_reaction": 60.0
+      },
+      "parameters": {
+        "apex_load": 120.0,
+        "axial_rigidity": 30000.0,
+        "rise": 3.0,
+        "span": 4.0
+      },
+      "reference_class": "truss",
+      "rel_tolerance": 1e-10,
+      "tags": [
+        "closed_form",
+        "static",
+        "truss"
+      ]
+    },
+    {
+      "abs_tolerance": 1e-12,
+      "case_id": "portal_frame_lateral_sway",
+      "description": "One-story fixed-base portal frame with a rigid beam under lateral sway.",
+      "expected_metrics": {
+        "left_column_base_moment": 52.5,
+        "left_column_shear": 30.0,
+        "right_column_base_moment": 52.5,
+        "right_column_shear": 30.0,
+        "roof_drift": 0.025520833333
+      },
+      "parameters": {
+        "column_flexural_rigidity": 4200.0,
+        "lateral_load": 60.0,
+        "story_height": 3.5
+      },
+      "reference_class": "portal_frame",
+      "rel_tolerance": 1e-10,
+      "tags": [
+        "closed_form",
+        "portal_frame",
+        "static"
+      ]
+    },
+    {
+      "abs_tolerance": 1e-12,
+      "case_id": "three_story_shear_building_static",
+      "description": "Three-story shear building under deterministic lateral floor forces.",
+      "expected_metrics": {
+        "base_shear": 60.0,
+        "roof_displacement": 0.0045,
+        "story1_drift": 0.002,
+        "story2_drift": 0.0015,
+        "story3_drift": 0.001
+      },
+      "parameters": {
+        "floor_forces": [
+          30.0,
+          20.0,
+          10.0
+        ],
+        "story_stiffness": [
+          30000.0,
+          20000.0,
+          10000.0
+        ]
+      },
+      "reference_class": "shear_building",
+      "rel_tolerance": 1e-10,
+      "tags": [
+        "matrix_reduced",
+        "shear_building",
+        "static"
+      ]
+    },
+    {
+      "abs_tolerance": 1e-12,
+      "case_id": "shell_patch_constant_strain",
+      "description": "Plane-stress shell patch with a constant membrane strain field.",
+      "expected_metrics": {
+        "membrane_resultant_x": 12.96875,
+        "membrane_resultant_xy": 1.25,
+        "membrane_resultant_y": 8.59375,
+        "membrane_shear_stress": 5.0,
+        "membrane_stress_x": 51.875,
+        "membrane_stress_y": 34.375,
+        "strain_energy": 0.0134140625
+      },
+      "parameters": {
+        "area": 1.0,
+        "gamma_xy": 0.0004,
+        "poissons_ratio": 0.2,
+        "strain_x": 0.0015,
+        "strain_y": 0.0008,
+        "thickness": 0.25,
+        "youngs_modulus": 30000.0
+      },
+      "reference_class": "shell_patch",
+      "rel_tolerance": 1e-10,
+      "tags": [
+        "closed_form",
+        "membrane",
+        "shell_patch"
+      ]
+    },
+    {
+      "abs_tolerance": 1e-12,
+      "case_id": "euler_column_buckling",
+      "description": "Pinned-pinned Euler column critical load reference.",
+      "expected_metrics": {
+        "critical_load": 31.582734083486,
+        "normalized_critical_load": 1.579136704174
+      },
+      "parameters": {
+        "effective_length_factor": 1.0,
+        "length": 2.5,
+        "second_moment": 0.0001,
+        "youngs_modulus": 200000.0
+      },
+      "reference_class": "buckling",
+      "rel_tolerance": 1e-10,
+      "tags": [
+        "buckling",
+        "closed_form",
+        "eigenvalue"
+      ]
+    },
+    {
+      "abs_tolerance": 1e-12,
+      "case_id": "two_dof_modal_frequency",
+      "description": "Closed-form modal frequencies for a 2-DOF unit mass-spring chain.",
+      "expected_metrics": {
+        "frequency_ratio": 2.61803398875,
+        "fundamental_frequency_hz": 0.098363164308,
+        "second_frequency_hz": 0.2575181074
+      },
+      "parameters": {
+        "mass_matrix": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "stiffness_matrix": [
+          [
+            2.0,
+            -1.0
+          ],
+          [
+            -1.0,
+            1.0
+          ]
+        ]
+      },
+      "reference_class": "modal_frequency",
+      "rel_tolerance": 1e-10,
+      "tags": [
+        "closed_form",
+        "eigenvalue",
+        "modal_frequency"
+      ]
+    },
+    {
+      "abs_tolerance": 1e-12,
+      "case_id": "beam_reaction_balance_mixed_load",
+      "description": "Static reaction balance for a simply supported beam with point and distributed loads.",
+      "expected_metrics": {
+        "left_support_reaction": 16.0,
+        "moment_balance_error": 0.0,
+        "right_support_reaction": 14.0,
+        "vertical_balance_error": 0.0
+      },
+      "parameters": {
+        "point_load": 10.0,
+        "point_load_location": 2.0,
+        "span": 5.0,
+        "uniform_load": 4.0
+      },
+      "reference_class": "reaction_balance",
+      "rel_tolerance": 1e-10,
+      "tags": [
+        "closed_form",
+        "equilibrium",
+        "reaction_balance"
+      ]
+    }
+  ],
+  "generated_at": "2026-04-21T00:00:00+00:00",
+  "reference_classes": [
+    "buckling",
+    "modal_frequency",
+    "portal_frame",
+    "reaction_balance",
+    "shear_building",
+    "shell_patch",
+    "simple_beam",
+    "truss"
+  ],
+  "run_id": "phase1-reference-regression-baseline",
+  "schema_version": "1.0",
+  "summary": {
+    "case_count": 8,
+    "metric_count": 34,
+    "reference_class_count": 8
+  },
+  "summary_line": "Reference baseline: cases=8 | classes=8 | metrics=34"
+}

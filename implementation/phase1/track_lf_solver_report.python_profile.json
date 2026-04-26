@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-track-lf-solver",
+  "generated_at": "2026-02-27T13:45:10.039711+00:00",
+  "inputs": {
+    "node_count": 201,
+    "length_m": 25.0,
+    "bending_stiffness_n_m2": 6500000.0,
+    "shear_stiffness_n": 245000000.0,
+    "point_force_n": 100000.0,
+    "max_relative_error": 0.05,
+    "engine_requested": "python",
+    "rust_bridge_available": true,
+    "rust_bridge_import_error": null
+  },
+  "benchmarks": {
+    "euler": {
+      "theory": "euler",
+      "backend": "python",
+      "converged": true,
+      "iterations": 1831,
+      "residual_inf": 7.780474757912395e-09,
+      "w_mid_m": 5.008263220628949,
+      "analytic_w_mid_m": 5.00801282051282,
+      "relative_error": 4.9999895188634585e-05,
+      "elapsed_seconds": 0.6014993919998233,
+      "iterations_per_second": 3044.0596023088547,
+      "node_updates_per_second": 334.1649263047951
+    },
+    "timoshenko": {
+      "theory": "timoshenko",
+      "backend": "python",
+      "converged": true,
+      "iterations": 1831,
+      "residual_inf": 7.780474757912395e-09,
+      "w_mid_m": 5.010814368587866,
+      "analytic_w_mid_m": 5.010563840920984,
+      "relative_error": 4.9999895188642256e-05,
+      "elapsed_seconds": 0.5966218450002998,
+      "iterations_per_second": 3068.9456233354645,
+      "node_updates_per_second": 336.896816106187
+    }
+  },
+  "checks": {
+    "all_converged": true,
+    "accuracy_pass": true,
+    "rust_kernel_used": false,
+    "o_n_operator": true,
+    "matrix_free_euler": true
+  },
+  "performance_profile": {
+    "euler_elapsed_seconds": 0.6014993919998233,
+    "timoshenko_elapsed_seconds": 0.5966218450002998,
+    "euler_node_updates_per_second": 334.1649263047951,
+    "timoshenko_node_updates_per_second": 336.896816106187
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "track LF solver converged and benchmark accuracy is within threshold"
+}

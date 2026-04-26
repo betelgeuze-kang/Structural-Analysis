@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-mega-ndtha-calibration",
+  "generated_at": "2026-03-02T15:02:34.283585+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "target_drift_pct": 0.5,
+    "ref_base_shear_kn": 15000.0
+  },
+  "summary": {
+    "case_count": 12,
+    "hf_drift_median_pct": 1.95,
+    "hf_base_shear_median_kn": 1657.5
+  },
+  "scales": {
+    "stiffness_scale": 3.0,
+    "mass_scale": 0.6,
+    "yield_scale": 1.8,
+    "axial_scale": 0.7,
+    "base_shear_scale": 0.1105
+  },
+  "checks": {
+    "positive_scales": true,
+    "finite_scales": true
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "mega ndtha calibration profile generated"
+}

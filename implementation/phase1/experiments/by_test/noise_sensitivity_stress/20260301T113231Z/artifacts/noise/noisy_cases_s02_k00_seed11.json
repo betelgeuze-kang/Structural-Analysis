@@ -1,0 +1,925 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-commercial-benchmark-cases-rwth-zenodo",
+  "generated_at": "2026-02-27T13:45:16.349145+00:00",
+  "source": {
+    "dataset": "zenodo:14173245",
+    "doi": "10.5281/zenodo.14173245",
+    "reference_url": "https://doi.org/10.5281/zenodo.14173245",
+    "zip_path": "implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip",
+    "member_count": 22,
+    "metric_source": "open_data_measurement"
+  },
+  "split_counts": {
+    "train": 14,
+    "val": 4,
+    "test": 4
+  },
+  "public_benchmark_cases": [
+    {
+      "case_id": "RWTH-07",
+      "hazard_type": "seismic",
+      "topology_type": "outrigger",
+      "source_member": "7_SanLorenzo.csv",
+      "doi": "10.5281/zenodo.14173245",
+      "reference_url": "https://doi.org/10.5281/zenodo.14173245",
+      "hf_metrics": {
+        "drift_ratio_pct": 0.2851378319830804,
+        "base_shear_kN": 627.9402246263246,
+        "mode_shape_mac": 0.9926152013010829,
+        "buckling_factor": 3.5315669203240607,
+        "equilibrium_residual": 1.3347383187254747
+      }
+    },
+    {
+      "case_id": "RWTH-04",
+      "hazard_type": "wind",
+      "topology_type": "truss",
+      "source_member": "4_Linear_Sweep.csv",
+      "doi": "10.5281/zenodo.14173245",
+      "reference_url": "https://doi.org/10.5281/zenodo.14173245",
+      "hf_metrics": {
+        "drift_ratio_pct": 0.056466742041784486,
+        "base_shear_kN": 825.0570992574371,
+        "mode_shape_mac": 0.9648342257766492,
+        "buckling_factor": 3.5864479819099717,
+        "equilibrium_residual": 0.6824211640825203
+      }
+    },
+    {
+      "case_id": "RWTH-01",
+      "hazard_type": "combined",
+      "topology_type": "rahmen",
+      "source_member": "1_IM_4mm.csv",
+      "doi": "10.5281/zenodo.14173245",
+      "reference_url": "https://doi.org/10.5281/zenodo.14173245",
+      "hf_metrics": {
+        "drift_ratio_pct": 0.058412610618927246,
+        "base_shear_kN": 3380.177342278807,
+        "mode_shape_mac": 0.9923348707416633,
+        "buckling_factor": 3.5859809734514574,
+        "equilibrium_residual": 0.7854972429024134
+      }
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "RWTH-01",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "combined",
+      "load_scale": 0.6627711536464815,
+      "residual_norm": 0.03550699135023904,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.058412610618927246,
+          "lf": 0.06343481858924817
+        },
+        "base_shear_kN": {
+          "hf": 3380.177342278807,
+          "lf": 3205.804513436364
+        },
+        "mode_shape_mac": {
+          "hf": 0.9923348707416633,
+          "lf": 0.9708403342147613
+        },
+        "buckling_factor": {
+          "hf": 3.5859809734514574,
+          "lf": 3.3701597761993005
+        },
+        "equilibrium_residual": {
+          "hf": 0.7854972429024134,
+          "lf": 0.815589594040076
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "1_IM_4mm.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "1_IM_4mm.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-02",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "combined",
+      "load_scale": 0.7775361479040502,
+      "residual_norm": 0.03973091351945585,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.09213372440702813,
+          "lf": 0.10023033578200857
+        },
+        "base_shear_kN": {
+          "hf": 3965.4865114269696,
+          "lf": 3756.396929502057
+        },
+        "mode_shape_mac": {
+          "hf": 0.9840086635340842,
+          "lf": 0.9620389357631455
+        },
+        "buckling_factor": {
+          "hf": 3.5778879061423132,
+          "lf": 3.3577932809222473
+        },
+        "equilibrium_residual": {
+          "hf": 0.9951872539023573,
+          "lf": 1.0259448727816716
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "2_IM_6mm.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "2_IM_6mm.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-03",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "combined",
+      "load_scale": 1.0,
+      "residual_norm": 0.03627820643451925,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.11873372716470251,
+          "lf": 0.13017077633704816
+        },
+        "base_shear_kN": {
+          "hf": 5100.067079989083,
+          "lf": 4805.308112833018
+        },
+        "mode_shape_mac": {
+          "hf": 0.9934538282406172,
+          "lf": 0.9693725300167338
+        },
+        "buckling_factor": {
+          "hf": 3.5715039054804714,
+          "lf": 3.3306858436446807
+        },
+        "equilibrium_residual": {
+          "hf": 1.1246789474791612,
+          "lf": 1.158392764992598
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "3_IM_8mm.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "3_IM_8mm.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-04",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "wind",
+      "load_scale": 0.2,
+      "residual_norm": 0.11247230333352104,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.056466742041784486,
+          "lf": 0.06101866934566869
+        },
+        "base_shear_kN": {
+          "hf": 825.0570992574371,
+          "lf": 785.1511319403107
+        },
+        "mode_shape_mac": {
+          "hf": 0.9648342257766492,
+          "lf": 0.9446810916516282
+        },
+        "buckling_factor": {
+          "hf": 3.5864479819099717,
+          "lf": 3.3840691137168117
+        },
+        "equilibrium_residual": {
+          "hf": 0.6824211640825203,
+          "lf": 0.7106355518575499
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "4_Linear_Sweep.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "4_Linear_Sweep.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-05",
+      "split": "test",
+      "ood_tag": "ood_topology",
+      "topology_type": "wall-frame",
+      "hazard_type": "wind",
+      "load_scale": 0.2,
+      "residual_norm": 0.312334072761525,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.023354741057670828,
+          "lf": 0.028448527723791042
+        },
+        "base_shear_kN": {
+          "hf": 339.8404917964951,
+          "lf": 301.8628567704936
+        },
+        "mode_shape_mac": {
+          "hf": 0.9378297547211653,
+          "lf": 0.8869485714043971
+        },
+        "buckling_factor": {
+          "hf": 3.7023085021105966,
+          "lf": 3.1355400841485914
+        },
+        "equilibrium_residual": {
+          "hf": 0.9962370864513527,
+          "lf": 1.0480807636905258
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "5_WN_1-50.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "5_WN_1-50.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-06",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "wind",
+      "load_scale": 0.2,
+      "residual_norm": 0.6302915712353557,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.0589857018769597,
+          "lf": 0.07748545875567064
+        },
+        "base_shear_kN": {
+          "hf": 257.1118374939543,
+          "lf": 208.72885992899919
+        },
+        "mode_shape_mac": {
+          "hf": 0.9714971901984925,
+          "lf": 0.8930893884345149
+        },
+        "buckling_factor": {
+          "hf": 3.5858434315495296,
+          "lf": 2.7986007489242595
+        },
+        "equilibrium_residual": {
+          "hf": 1.4162125287550813,
+          "lf": 1.4962125287550814
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "6_WN_0p625-25.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "6_WN_0p625-25.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-07",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.30386805106630926,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.2851378319830804,
+          "lf": 0.33838464836272153
+        },
+        "base_shear_kN": {
+          "hf": 627.9402246263246,
+          "lf": 557.5830553818325
+        },
+        "mode_shape_mac": {
+          "hf": 0.9926152013010829,
+          "lf": 0.9459300455561231
+        },
+        "buckling_factor": {
+          "hf": 3.5315669203240607,
+          "lf": 3.069926015566646
+        },
+        "equilibrium_residual": {
+          "hf": 1.3347383187254747,
+          "lf": 1.4000975367684183
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "7_SanLorenzo.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "7_SanLorenzo.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-08",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.3260395163242576,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.5073466064421052,
+          "lf": 0.6122241718065433
+        },
+        "base_shear_kN": {
+          "hf": 726.3399946469555,
+          "lf": 636.2515588934176
+        },
+        "mode_shape_mac": {
+          "hf": 0.9877476037331102,
+          "lf": 0.9360681581466312
+        },
+        "buckling_factor": {
+          "hf": 3.478236814453895,
+          "lf": 2.9749274339234124
+        },
+        "equilibrium_residual": {
+          "hf": 1.4833568920535052,
+          "lf": 1.5557081158745758
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "8_Quarantoli.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "8_Quarantoli.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-09",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.3656963866387377,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.468304271749434,
+          "lf": 0.5687852163487198
+        },
+        "base_shear_kN": {
+          "hf": 671.4640665212867,
+          "lf": 585.0211091468094
+        },
+        "mode_shape_mac": {
+          "hf": 0.9855697529130162,
+          "lf": 0.9319289094161582
+        },
+        "buckling_factor": {
+          "hf": 3.4876069747801357,
+          "lf": 2.9637880710244873
+        },
+        "equilibrium_residual": {
+          "hf": 1.62862884809685,
+          "lf": 1.7037260289924512
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "9_Mirandola.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "9_Mirandola.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-10",
+      "split": "test",
+      "ood_tag": "ood_topology",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.3196241464946699,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.3242596383370998,
+          "lf": 0.3900366913222342
+        },
+        "base_shear_kN": {
+          "hf": 588.6706946045167,
+          "lf": 505.97657974431814
+        },
+        "mode_shape_mac": {
+          "hf": 0.9882542971041252,
+          "lf": 0.9334084518578903
+        },
+        "buckling_factor": {
+          "hf": 3.548011568497987,
+          "lf": 3.0020364273218614
+        },
+        "equilibrium_residual": {
+          "hf": 1.0810491647680316,
+          "lf": 1.138526445597487
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "10_Novi_di_Modena.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "10_Novi_di_Modena.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-11",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.3185562689272236,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.5092550599664456,
+          "lf": 0.6077196892906171
+        },
+        "base_shear_kN": {
+          "hf": 817.7293101877175,
+          "lf": 722.8643754097114
+        },
+        "mode_shape_mac": {
+          "hf": 0.981846195905311,
+          "lf": 0.9335086156509983
+        },
+        "buckling_factor": {
+          "hf": 3.477778785608053,
+          "lf": 3.0070780343710424
+        },
+        "equilibrium_residual": {
+          "hf": 1.6250986814661594,
+          "lf": 1.6927712938221973
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "11_Friuli.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "11_Friuli.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-12",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.11735639023965826,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.2701641131728491,
+          "lf": 0.2979397871239104
+        },
+        "base_shear_kN": {
+          "hf": 846.059070850145,
+          "lf": 793.8688803338277
+        },
+        "mode_shape_mac": {
+          "hf": 0.9989302118814647,
+          "lf": 0.9732276179795032
+        },
+        "buckling_factor": {
+          "hf": 3.5351606128385162,
+          "lf": 3.280744779530522
+        },
+        "equilibrium_residual": {
+          "hf": 0.6679861932577222,
+          "lf": 0.7039698247204684
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "12_Kreta.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "12_Kreta.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-13",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "load_scale": 0.221357022425375,
+      "residual_norm": 0.3395184695873545,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.9319206216057146,
+          "lf": 1.1302177773530684
+        },
+        "base_shear_kN": {
+          "hf": 1128.9356629960603,
+          "lf": 984.8044618161899
+        },
+        "mode_shape_mac": {
+          "hf": 0.9879367321542347,
+          "lf": 0.9347409043256574
+        },
+        "buckling_factor": {
+          "hf": 3.3763390508146287,
+          "lf": 2.873439028468124
+        },
+        "equilibrium_residual": {
+          "hf": 2.7552386361232335,
+          "lf": 2.8297127950832417
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "13_Lefkada.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "13_Lefkada.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-14",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.3109346501110833,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.5251248313739302,
+          "lf": 0.6248568505111793
+        },
+        "base_shear_kN": {
+          "hf": 800.4633503481103,
+          "lf": 709.2486660605135
+        },
+        "mode_shape_mac": {
+          "hf": 0.9827751784001855,
+          "lf": 0.9352950302626886
+        },
+        "buckling_factor": {
+          "hf": 3.473970040470257,
+          "lf": 3.0121251264593463
+        },
+        "equilibrium_residual": {
+          "hf": 1.5756108660289652,
+          "lf": 1.6420830734214609
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "14_Imperial_Valley.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "14_Imperial_Valley.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-15",
+      "split": "test",
+      "ood_tag": "ood_topology",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.1740055890929445,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.1926000410771083,
+          "lf": 0.22040676233757242
+        },
+        "base_shear_kN": {
+          "hf": 850.2995252722945,
+          "lf": 764.9209872673081
+        },
+        "mode_shape_mac": {
+          "hf": 0.9886938075775886,
+          "lf": 0.9392083290131502
+        },
+        "buckling_factor": {
+          "hf": 3.5691064598395035,
+          "lf": 3.1907923362286263
+        },
+        "equilibrium_residual": {
+          "hf": 0.9046122857489128,
+          "lf": 0.9538908881000644
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "15_ChiChi.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "15_ChiChi.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-16",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.4505559616609347,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.6268241639237213,
+          "lf": 0.7852540859059409
+        },
+        "base_shear_kN": {
+          "hf": 833.043317674183,
+          "lf": 706.7122072069826
+        },
+        "mode_shape_mac": {
+          "hf": 0.9851889712099979,
+          "lf": 0.9220014255231428
+        },
+        "buckling_factor": {
+          "hf": 3.449562200658307,
+          "lf": 2.83924796702782
+        },
+        "equilibrium_residual": {
+          "hf": 2.602658786088059,
+          "lf": 2.682658786088059
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "16_Kobe.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "16_Kobe.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-17",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "load_scale": 0.2,
+      "residual_norm": 0.2932963106488868,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.7846953935251573,
+          "lf": 0.9274968819582623
+        },
+        "base_shear_kN": {
+          "hf": 953.4063653310648,
+          "lf": 849.303920605926
+        },
+        "mode_shape_mac": {
+          "hf": 0.9841073766768537,
+          "lf": 0.9386115417288539
+        },
+        "buckling_factor": {
+          "hf": 3.4116731055539624,
+          "lf": 2.9770657393348867
+        },
+        "equilibrium_residual": {
+          "hf": 1.8106066727840946,
+          "lf": 1.8743008417112943
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "17_LomaPrieta.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "17_LomaPrieta.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-18",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "load_scale": 0.24269015288241177,
+      "residual_norm": 0.25217219216907916,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.7652175812468538,
+          "lf": 0.8979656038488679
+        },
+        "base_shear_kN": {
+          "hf": 1237.736059353106,
+          "lf": 1108.9044550546707
+        },
+        "mode_shape_mac": {
+          "hf": 0.9850068658023433,
+          "lf": 0.9416374941833219
+        },
+        "buckling_factor": {
+          "hf": 3.416347780500755,
+          "lf": 3.001486182378158
+        },
+        "equilibrium_residual": {
+          "hf": 2.1342946618017704,
+          "lf": 2.1950117820684003
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "18_Norhtridge.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "18_Norhtridge.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-19",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "wind",
+      "load_scale": 0.2,
+      "residual_norm": 0.3080817463058824,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.027292358965334638,
+          "lf": 0.031894854659175964
+        },
+        "base_shear_kN": {
+          "hf": 309.6864778712232,
+          "lf": 278.3517585238724
+        },
+        "mode_shape_mac": {
+          "hf": 0.9543407318869598,
+          "lf": 0.912181535427548
+        },
+        "buckling_factor": {
+          "hf": 3.59344983384832,
+          "lf": 3.1692583528140146
+        },
+        "equilibrium_residual": {
+          "hf": 0.8410241612505048,
+          "lf": 0.9000470362936813
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "19_WN_0p625-25.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "19_WN_0p625-25.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-20",
+      "split": "test",
+      "ood_tag": "ood_topology",
+      "topology_type": "wall-frame",
+      "hazard_type": "wind",
+      "load_scale": 0.2,
+      "residual_norm": 0.07701513184462208,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.07099203673624899,
+          "lf": 0.07584637127843348
+        },
+        "base_shear_kN": {
+          "hf": 261.9325563639677,
+          "lf": 247.22975268665905
+        },
+        "mode_shape_mac": {
+          "hf": 0.9802942033331563,
+          "lf": 0.9419265661775363
+        },
+        "buckling_factor": {
+          "hf": 3.6336129331896694,
+          "lf": 3.3808153622177066
+        },
+        "equilibrium_residual": {
+          "hf": 0.1725225939442414,
+          "lf": 0.20362018177228858
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "20_WN_1-50.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "20_WN_1-50.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-21",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "load_scale": 0.8800477154676195,
+      "residual_norm": 0.03028194388269715,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.08826096210528582,
+          "lf": 0.09564195052833313
+        },
+        "base_shear_kN": {
+          "hf": 4488.302382476006,
+          "lf": 4263.096761775841
+        },
+        "mode_shape_mac": {
+          "hf": 0.9916250240103868,
+          "lf": 0.9707183053235834
+        },
+        "buckling_factor": {
+          "hf": 3.5788173690947316,
+          "lf": 3.369317650786825
+        },
+        "equilibrium_residual": {
+          "hf": 0.712677156780402,
+          "lf": 0.7419465629419268
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "21_IM_6mm.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "21_IM_6mm.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    },
+    {
+      "case_id": "RWTH-22",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "combined",
+      "load_scale": 0.5424048719071211,
+      "residual_norm": 0.034582376398446885,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.06804988934855037,
+          "lf": 0.0738723787022448
+        },
+        "base_shear_kN": {
+          "hf": 2766.3012312392034,
+          "lf": 2624.2869565164024
+        },
+        "mode_shape_mac": {
+          "hf": 0.988213552263088,
+          "lf": 0.9668230349182627
+        },
+        "buckling_factor": {
+          "hf": 3.583668026556348,
+          "lf": 3.36902978993193
+        },
+        "equilibrium_residual": {
+          "hf": 0.55676704980239,
+          "lf": 0.5867137740851454
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "22_IM_4mm.csv",
+      "hf_source": {
+        "dataset": "zenodo:14173245",
+        "doi": "10.5281/zenodo.14173245",
+        "member": "22_IM_4mm.csv",
+        "hf_metric_extraction": "direct_from_measured_timeseries"
+      }
+    }
+  ]
+}

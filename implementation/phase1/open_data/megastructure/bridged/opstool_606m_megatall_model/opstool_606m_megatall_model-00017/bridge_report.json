@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "report_type": "synthetic_606m_outrigger_bridge",
+  "generated_at": "2026-03-22T16:09:50.874576+00:00",
+  "inputs": {
+    "candidate_id": "opstool_606m_megatall_model",
+    "case_id": "opstool_606m_megatall_model-00017",
+    "out_dir": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00017"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "summary": {
+    "story_count": 24,
+    "total_height_m": 606.0,
+    "node_count": 200,
+    "element_count": 440,
+    "changed_group_count": 24,
+    "max_story_drift_envelope_pct": 9.2,
+    "max_final_story_drift_pct": 1.9136,
+    "roof_final_story_drift_pct": 0.0444,
+    "residual_drift_ratio_pct": 1.9136,
+    "drift_hotspot_story": 1,
+    "drift_hotspot_story_label": "S01",
+    "drift_hotspot_family": "mega_column",
+    "dominant_action_family": "perimeter_frame",
+    "dominant_action_family_count": 9,
+    "action_family_counts": {
+      "perimeter_frame": 9,
+      "beam_section": 8,
+      "connection_detailing": 7
+    },
+    "action_family_label": "perimeter_frame=9, beam_section=8, connection_detailing=7",
+    "viewer_ready": true,
+    "ai_overlay_ready": true,
+    "story_family_profile": [
+      "mega_column",
+      "mega_column",
+      "mega_column",
+      "mega_column",
+      "mega_column",
+      "mega_column",
+      "mega_column",
+      "mega_column",
+      "mega_column",
+      "outrigger_beam",
+      "outrigger_beam",
+      "outrigger_beam",
+      "outrigger_beam",
+      "outrigger_beam",
+      "outrigger_beam",
+      "outrigger_beam",
+      "outrigger_beam",
+      "core_column",
+      "core_column",
+      "core_column",
+      "core_column",
+      "core_column",
+      "core_column",
+      "core_column"
+    ],
+    "synthetic_geometry_notice": "Benchmark-derived synthetic 3D bridge. Original CAD/OpenSees geometry is not bundled in this repo."
+  },
+  "artifacts": {
+    "model_json": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00017/model.json",
+    "dataset_npz": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00017/dataset.npz",
+    "changes_json": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00017/synthetic_changes.json",
+    "change_summary_json": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00017/synthetic_change_summary.json",
+    "release_gap_json": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00017/synthetic_release_gap_report.json",
+    "export_report_json": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00017/synthetic_export_report.json"
+  }
+}

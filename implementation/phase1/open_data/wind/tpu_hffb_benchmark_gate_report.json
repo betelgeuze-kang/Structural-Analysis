@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-run-tpu-hffb-benchmark-gate",
+  "generated_at": "2026-03-28T15:37:40.019431+00:00",
+  "inputs": {
+    "asset_registry": "implementation/phase1/open_data/wind/wind_benchmark_asset_registry.json",
+    "min_asset_count": 2,
+    "out": "implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json"
+  },
+  "checks": {
+    "registry_present": true,
+    "tpu_asset_count_pass": true,
+    "source_real_pass": true,
+    "raw_hffb_mapping_eligible_pass": true,
+    "time_axis_present_pass": true,
+    "signal_columns_present_pass": true,
+    "isolated_case_present_pass": true,
+    "interference_case_present_pass": true,
+    "wind_time_history_blocker_visible_pass": true
+  },
+  "artifacts": {
+    "asset_registry": "implementation/phase1/open_data/wind/wind_benchmark_asset_registry.json",
+    "report_json": "implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json"
+  },
+  "summary": {
+    "benchmark_scope": "raw_hffb_mapping_diversification_only",
+    "selected_asset_count": 2,
+    "isolated_case_count": 1,
+    "interference_case_count": 1,
+    "raw_hffb_mapping_eligible_count": 2,
+    "wind_time_history_gate_eligible_count": 0,
+    "signal_column_count_min": 200,
+    "signal_column_count_max": 252,
+    "dt_s_min": 0.0009999999999976694,
+    "dt_s_max": 0.00128040973111343,
+    "duration_hours_min": 0.0020831554986484565,
+    "duration_hours_max": 0.009101944444444445,
+    "holdout_splits": [
+      "holdout",
+      "val"
+    ],
+    "case_roles": [
+      "baseline_isolated_highrise",
+      "neighbor_interference_highrise"
+    ]
+  },
+  "rows": [
+    {
+      "benchmark_seed_id": "tpu_hffb_isolated_highrise_seed_01",
+      "source_name": "TPU Aerodynamic Database - High-rise Buildings with Rectangular/Square Plan > T312_4",
+      "source_url": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=616",
+      "case_role": "baseline_isolated_highrise",
+      "holdout_split": "val",
+      "data_path": "implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.csv",
+      "row_count": 32768,
+      "signal_column_count": 200,
+      "dt_s": 0.0009999999999976694,
+      "duration_hours": 0.009101944444444445,
+      "raw_hffb_mapping_eligible": true,
+      "wind_time_history_gate_eligible": false,
+      "wind_time_history_gate_blocker": "missing_across_wind_force_kN_column"
+    },
+    {
+      "benchmark_seed_id": "tpu_hffb_interference_highrise_seed_01",
+      "source_name": "TPU Aerodynamic Database - Two Adjacent High-rise Buildings with Square Plan > P114_A114_case01",
+      "source_url": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=917",
+      "case_role": "neighbor_interference_highrise",
+      "holdout_split": "holdout",
+      "data_path": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+      "row_count": 5858,
+      "signal_column_count": 252,
+      "dt_s": 0.00128040973111343,
+      "duration_hours": 0.0020831554986484565,
+      "raw_hffb_mapping_eligible": true,
+      "wind_time_history_gate_eligible": false,
+      "wind_time_history_gate_blocker": "missing_across_wind_force_kN_column"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "Official TPU raw HFFB benchmark assets cover isolated and interference high-rise cases for diversified mapping validation."
+}

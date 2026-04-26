@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-06T00:00:00Z",
+  "catalog_name": "nheri_damped_frame_holdout_catalog",
+  "cases": [
+    {
+      "case_id": "NHERI_DAMPED_CASE_01",
+      "real_source": true,
+      "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+      "sensor_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case01_sensor.csv",
+      "baseline_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case01_baseline.csv",
+      "sensor_csv_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+      "baseline_csv_sha256": "653d2c6d6ae1831a5109881f97cf8adf23e495e1858d31c4eb66853374256bff",
+      "damper_type": "viscoelastic",
+      "damper_params": {
+        "c": 0.12,
+        "k": 0.05
+      }
+    },
+    {
+      "case_id": "NHERI_DAMPED_CASE_02",
+      "real_source": true,
+      "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+      "sensor_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case02_sensor.csv",
+      "baseline_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case02_baseline.csv",
+      "sensor_csv_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+      "baseline_csv_sha256": "d05e399fcf906492ae339f2a7223110497c5dd3d32648d4e054b689d8e50af08",
+      "damper_type": "tmd",
+      "damper_params": {
+        "c": 0.07,
+        "k": 0.03,
+        "omega": 2.2,
+        "zeta": 0.16
+      }
+    },
+    {
+      "case_id": "NHERI_DAMPED_CASE_03",
+      "real_source": true,
+      "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+      "sensor_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_sensor.csv",
+      "baseline_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_baseline.csv",
+      "sensor_csv_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+      "baseline_csv_sha256": "cbefad1fe1ccfbee57c32d7120cbed2779e3deac153fa45833a76da7c9a06f0e",
+      "damper_type": "fps",
+      "damper_params": {
+        "c": 0.06,
+        "mu": 0.05,
+        "slip_mm": 0.9
+      }
+    }
+  ]
+}

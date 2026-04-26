@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-01T11:22:42.231542+00:00",
+  "test_name": "nightly_release_gate",
+  "run_dir": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z",
+  "mode": "copy",
+  "archived_count": 12,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/release/nightly_release_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/nightly_release_gate_report.json",
+      "kind": "file",
+      "bytes": 7329,
+      "sha256": "5650179f15d7c87a587e2a383606340168ae53957564b810caa4bf033213b6c0",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_csv_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/commercial_csv_gate_report.json",
+      "kind": "file",
+      "bytes": 3063,
+      "sha256": "1fe503488737a153b5f7003ab64d1cfbb31ea4fa2d32447c45b2c57e2efb2b70",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/phase3_megastructure_pipeline_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/phase3_megastructure_pipeline_report.json",
+      "kind": "file",
+      "bytes": 9335,
+      "sha256": "8d22f6d7ae94395fe590b61cba6b16fbbf830f26687203a1b7555148e1dea42a",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/opensees_topology_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/opensees_topology_report.json",
+      "kind": "file",
+      "bytes": 2456,
+      "sha256": "4c7abca09f43164b061a940104ef05a6a144605b91b94fe513da640b7eac824e",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/partitioned_scaleout_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/partitioned_scaleout_report.json",
+      "kind": "file",
+      "bytes": 9040,
+      "sha256": "3034e031b5af17a3379da841726f17f3edced6814f939551d35ceaab6a337407",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/sync_stress_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/sync_stress_gate_report.json",
+      "kind": "file",
+      "bytes": 4691,
+      "sha256": "eae6dbabd9b4bba17d55100531e83fdcde17c3527a9a60117a71905c2ddd5d6f",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/noise_convergence_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/noise_convergence_gate_report.json",
+      "kind": "file",
+      "bytes": 12836,
+      "sha256": "7c6f77c18ccc620f1da6c83ff9798a6a8cc2bc150bd01cfd7ba513086de4c193",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/scaleout_io_profile_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/scaleout_io_profile_report.json",
+      "kind": "file",
+      "bytes": 4743,
+      "sha256": "fe1804f81368deb38aacd17a079fd1be70115620dba316089483abf4e6076290",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/ci_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/ci_gate_report.json",
+      "kind": "file",
+      "bytes": 1525,
+      "sha256": "3bf18593c50be1697dcececa2e4a4499613121c658b5e878ba097505f2f0d85b",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/static_artifact_validation_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/static_artifact_validation_report.json",
+      "kind": "file",
+      "bytes": 5352,
+      "sha256": "a1568b252543b599f291dcb50e61eb030259008393f99e9aa53cde4993911c83",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/release/freeze_release_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/freeze_release_report.json",
+      "kind": "file",
+      "bytes": 677,
+      "sha256": "cfe7738e20731cfeae1f96a539a95ff684ebb1a470adac5a2951151412c44976",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/release/release_candidate_promotion_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_release_gate/20260301T112242Z/artifacts/release_candidate_promotion_report.json",
+      "kind": "file",
+      "bytes": 827,
+      "sha256": "e6292b8adf4e11bfd1975d7c1ba0edb98b7d179ff9a1884adc4c810aa9a18910",
+      "mode": "copy"
+    }
+  ]
+}

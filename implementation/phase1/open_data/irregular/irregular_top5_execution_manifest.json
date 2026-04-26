@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "manifest_version": "0.1.0",
+  "catalog_path": "implementation/phase1/open_data/irregular/irregular_structure_source_catalog.json",
+  "triage_report_path": "implementation/phase1/open_data/irregular/irregular_structure_triage_report.json",
+  "collection_report_path": "implementation/phase1/open_data/irregular/irregular_structure_collection_report.json",
+  "priority_families_path": "implementation/phase1/open_data/irregular/priority_irregular_structure_families.json",
+  "generated_at": "2026-04-06T13:54:20.395963+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "top5 irregular structure execution manifest prepared",
+  "summary_line": "Irregular top5 execution manifest: PASS | top5=5 | native_roundtrip_candidates=18 | solver_benchmark_candidates=13 | ai_learning_candidates=32",
+  "summary": {
+    "catalog_family_count": 20,
+    "catalog_source_record_count": 32,
+    "collection_source_count": 32,
+    "collection_collected_count": 21,
+    "quick_start_local_source_count": 15,
+    "native_roundtrip_candidate_count": 18,
+    "solver_benchmark_candidate_count": 13,
+    "ai_learning_candidate_count": 32,
+    "top5_family_count": 5,
+    "top5_priority_ids": [
+      "transfer_podium_tower",
+      "soft_story_podium_tower",
+      "torsionally_eccentric_core_tower",
+      "setback_tower",
+      "reentrant_corner_tower"
+    ]
+  },
+  "top5_cases": [
+    {
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "source_record_count": 3,
+      "source_ids": [
+        "midas_multifamily_building_meb_local",
+        "peer_transfer_podium_tower_remote",
+        "transfer_podium_tower_proxy_local"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "irregularity_tags": [
+        "transfer_story",
+        "podium",
+        "load_transfer",
+        "vertical_irregularity"
+      ],
+      "recommended_kpi_or_validation_angle": "transfer-story demand ratio; column discontinuity penalty; load-path continuity",
+      "why_it_matters": "Visible transfer podiums expose sharp load-path jumps and are common in real high-rises."
+    },
+    {
+      "family_id": "soft_story_podium_tower",
+      "priority": 2,
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "source_record_count": 3,
+      "source_ids": [
+        "midas_neighborhood_facility_meb_local",
+        "nheri_soft_story_podium_remote",
+        "soft_story_podium_tower_proxy_local"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "irregularity_tags": [
+        "soft_story",
+        "vertical_irregularity",
+        "stiffness_drop",
+        "drift_concentration"
+      ],
+      "recommended_kpi_or_validation_angle": "story stiffness ratio; interstory drift concentration; P-Delta amplification",
+      "why_it_matters": "Canonical soft-story risk with clear drift concentration and strong regression value."
+    },
+    {
+      "family_id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "source_record_count": 3,
+      "source_ids": [
+        "luxinzheng_megatall_tcl_model1_local",
+        "offset_core_megatall_torsion_bridged_local",
+        "tpu_interference_highrise_local"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "irregularity_tags": [
+        "torsion",
+        "core_offset",
+        "plan_asymmetry",
+        "mass_eccentricity"
+      ],
+      "recommended_kpi_or_validation_angle": "torsional irregularity index; corner drift spread; center-of-rigidity offset",
+      "why_it_matters": "Offset core or mass eccentricity makes torsion and modal coupling easy to see and hard to fake."
+    },
+    {
+      "family_id": "setback_tower",
+      "priority": 4,
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "source_record_count": 2,
+      "source_ids": [
+        "peer_setback_tower_remote",
+        "setback_tower_proxy_local"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "irregularity_tags": [
+        "setback",
+        "vertical_irregularity",
+        "massing",
+        "load_path_step"
+      ],
+      "recommended_kpi_or_validation_angle": "setback-level demand jump; story shear redistribution; mode-shape discontinuity",
+      "why_it_matters": "Setbacks are a classic vertical irregularity that break stiffness and mass continuity."
+    },
+    {
+      "family_id": "reentrant_corner_tower",
+      "priority": 5,
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "source_record_count": 2,
+      "source_ids": [
+        "peer_reentrant_corner_remote",
+        "reentrant_corner_tower_proxy_local"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "irregularity_tags": [
+        "reentrant_corner",
+        "plan_irregularity",
+        "diaphragm_torsion",
+        "corner_hotspot"
+      ],
+      "recommended_kpi_or_validation_angle": "corner drift amplification; diaphragm shear concentration; torsion/drift ratio",
+      "why_it_matters": "L/U/T-plan corners concentrate diaphragm shear and edge drift, making them useful for torsion-aware learning."
+    }
+  ],
+  "source_record_count": 32
+}

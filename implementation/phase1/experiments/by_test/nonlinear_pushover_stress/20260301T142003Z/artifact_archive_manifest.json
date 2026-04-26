@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-01T14:20:03.326920+00:00",
+  "test_name": "nonlinear_pushover_stress",
+  "run_dir": "implementation/phase1/experiments/by_test/nonlinear_pushover_stress/20260301T142003Z",
+  "mode": "copy",
+  "archived_count": 2,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/nonlinear_pushover_stress_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nonlinear_pushover_stress/20260301T142003Z/artifacts/nonlinear_pushover_stress_report.json",
+      "kind": "file",
+      "bytes": 9015,
+      "sha256": "ea3be0f70056d80466674a04fa76c401e1ffad2c1064eb0fd59790ca5298c022",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+      "dst": "implementation/phase1/experiments/by_test/nonlinear_pushover_stress/20260301T142003Z/artifacts/commercial_benchmark_cases.from_csv.json",
+      "kind": "file",
+      "bytes": 10464,
+      "sha256": "87622436244a3c2b4504069975969e0556b13430362975896412d91ebe8c08b2",
+      "mode": "copy"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "job_id": "authoring::native-authoring-dual-system-hospital-08s-05b-040h-06lp-steel-h-600x200::project-registry",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "snapshot_id": "authoring_native-authoring-dual-system-hospital-08s-05b-040h-06lp-steel-h-600x200_project-registry__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json",
+      "label": "native_authoring_project_registry.json",
+      "sha256": "1da94094df5e945f7f1cd1e574251e2de071715043b7dcaeea036d94d595247f",
+      "bytes": 10264
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_package.zip",
+      "label": "native_authoring_project_package.zip",
+      "sha256": "dd70f47f0f969fba037196cc70caa409e30560adb887778e69a49efe8483421d",
+      "bytes": 88241
+    },
+    {
+      "path": "implementation/phase1/release/signing/native_authoring_portfolio/dual_system_hospital/native_authoring_project_registry_ed25519.pub.pem",
+      "label": "native_authoring_project_registry_ed25519.pub.pem",
+      "sha256": "227ee66f2b4cdb3049d8088cd2a7d81bc9eb85b138f41c751e80ff0986a6dfc9",
+      "bytes": 113
+    },
+    {
+      "path": "implementation/phase1/release/signing/native_authoring_portfolio/dual_system_hospital/native_authoring_project_registry.signature.b64",
+      "label": "native_authoring_project_registry.signature.b64",
+      "sha256": "9330b9c3ff2e05526dfa14450437103a6deee753458e85b2c993f45b11978e7d",
+      "bytes": 89
+    }
+  ],
+  "summary": {
+    "artifact_count": 4
+  }
+}

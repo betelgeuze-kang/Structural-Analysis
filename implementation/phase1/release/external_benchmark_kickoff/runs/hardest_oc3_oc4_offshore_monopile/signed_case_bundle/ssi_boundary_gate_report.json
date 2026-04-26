@@ -1,0 +1,287 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-ssi-boundary-gate",
+  "generated_at": "2026-03-28T15:53:02.425165+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "ground_motion_csv": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "target_split": "all",
+    "soil_profile": "dense_sand",
+    "min_case_count": 2,
+    "max_case_count": 4,
+    "py_k0": 50000000.0,
+    "py_y50_m": 0.03,
+    "tz_k0": 32000000.0,
+    "tz_z50_m": 0.02,
+    "max_step_iterations": 16,
+    "step_tol": 0.0001,
+    "adaptive_load_decay": 0.82,
+    "damping_force_cap_ratio": 0.6,
+    "collapse_drift_threshold_pct": 10.0,
+    "rayleigh_alpha": 0.03,
+    "rayleigh_beta": 1e-06,
+    "min_shear_delta_ratio": 0.05,
+    "max_shear_delta_ratio": 1.5,
+    "min_nonlinear_ratio_span": 0.05,
+    "case_metrics_npz_out": "implementation/phase1/ssi_boundary_gate_report.metrics.npz",
+    "out": "implementation/phase1/ssi_boundary_gate_report.json"
+  },
+  "checks": {
+    "case_count_pass": true,
+    "ssi_nonlinear_boundary_active": true,
+    "ssi_transfer_finite": true,
+    "all_cases_converged": true,
+    "rust_backend_used_pass": true,
+    "no_collapse_detected": true,
+    "section_family_pass": true,
+    "material_model_pass": true,
+    "shear_delta_pass": true,
+    "residual_trace_pass": true,
+    "device_artifacts_consumed_pass": true
+  },
+  "artifacts": {
+    "report_json": "implementation/phase1/ssi_boundary_gate_report.json",
+    "case_metrics_npz_out": "implementation/phase1/ssi_boundary_gate_report.metrics.npz"
+  },
+  "summary": {
+    "selected_case_count": 4,
+    "soil_profile": "dense_sand",
+    "dominant_frequency_hz": 3.566666666666667,
+    "preprocess_backend": "rocm_torch_full",
+    "nonlinear_ratio_min": 0.2,
+    "nonlinear_ratio_max": 0.48234244841309903,
+    "nonlinear_ratio_span": 0.282342448413099,
+    "shear_delta_ratio_min": 0.6752040251269898,
+    "shear_delta_ratio_max": 0.7330903941632085,
+    "fixed_residual_pre_settle_top_m_max_abs": 0.02853471587086978,
+    "fixed_residual_top_m_max_abs": 0.005935220901140915,
+    "fixed_residual_pre_settle_drift_pct_max_abs": 0.15997248576472914,
+    "fixed_residual_drift_pct_max_abs": 0.03327427703906367,
+    "ssi_residual_pre_settle_top_m_max_abs": 0.007529515430763637,
+    "ssi_residual_top_m_max_abs": 0.0015661392095988364,
+    "ssi_residual_pre_settle_drift_pct_max_abs": 0.019392530941347165,
+    "ssi_residual_drift_pct_max_abs": 0.00403364643580021,
+    "residual_settle_case_count": 4,
+    "device_artifact_consumer": "dlpack_zero_copy",
+    "device_artifact_case_count": 4,
+    "response_storage": "npz_external+inline_summary",
+    "response_binary_consumer": "dlpack_zero_copy_primary",
+    "case_metrics_npz_case_count": 4
+  },
+  "rows": [
+    {
+      "case_id": "C-TRN-003",
+      "split": "train",
+      "topology_type": "rahmen",
+      "fixed": {
+        "converged_all_steps": true,
+        "rust_backend_ok": true,
+        "collapsed": false,
+        "max_drift_ratio_pct": 0.6842641850268,
+        "max_base_shear_kN": -23.67177229199107,
+        "residual_pre_settle_top_displacement_m": 0.006311533656142848,
+        "residual_top_displacement_m": 0.0013127990004777122,
+        "residual_pre_settle_drift_ratio_pct": 0.031173043588129792,
+        "residual_drift_ratio_pct": 0.0064839930663309975,
+        "residual_settle_applied": true,
+        "residual_settle_steps": 48,
+        "response_backend": "dlpack_zero_copy"
+      },
+      "ssi": {
+        "converged_all_steps": true,
+        "rust_backend_ok": true,
+        "collapsed": false,
+        "max_drift_ratio_pct": 0.13776603840161294,
+        "max_base_shear_kN": -7.68849635854915,
+        "residual_pre_settle_top_displacement_m": 0.002052638217531913,
+        "residual_top_displacement_m": 0.00042694874924663795,
+        "residual_pre_settle_drift_ratio_pct": 0.010140603390311462,
+        "residual_drift_ratio_pct": 0.0021092455051847847,
+        "residual_settle_applied": true,
+        "residual_settle_steps": 48,
+        "response_backend": "dlpack_zero_copy"
+      },
+      "shear_delta_ratio": 0.6752040251269898,
+      "section_profile": {
+        "story_count": 12,
+        "stiffness_scale_mean": 0.9800000000000001,
+        "stiffness_scale_min": 0.98,
+        "yield_scale_mean": 0.9800000000000001,
+        "yield_scale_min": 0.98
+      },
+      "section_family_counts": {
+        "frame_column": 6,
+        "beam_strip": 6
+      },
+      "material_model": "steel_elastic_plastic",
+      "material_indices": {
+        "cracking_index_mean": 0.0,
+        "stiffness_scale_mean": 1.0
+      },
+      "material_model_pass": true,
+      "residual_trace_pass": true
+    },
+    {
+      "case_id": "C-TRN-005",
+      "split": "train",
+      "topology_type": "outrigger",
+      "fixed": {
+        "converged_all_steps": true,
+        "rust_backend_ok": true,
+        "collapsed": false,
+        "max_drift_ratio_pct": 1.1935460325887108,
+        "max_base_shear_kN": -110.097672024177,
+        "residual_pre_settle_top_displacement_m": 0.02853471587086978,
+        "residual_top_displacement_m": 0.005935220901140915,
+        "residual_pre_settle_drift_ratio_pct": 0.15997248576472914,
+        "residual_drift_ratio_pct": 0.03327427703906367,
+        "residual_settle_applied": true,
+        "residual_settle_steps": 48,
+        "response_backend": "dlpack_zero_copy"
+      },
+      "ssi": {
+        "converged_all_steps": true,
+        "rust_backend_ok": true,
+        "collapsed": false,
+        "max_drift_ratio_pct": 0.2638796139085364,
+        "max_base_shear_kN": -29.386126243521428,
+        "residual_pre_settle_top_displacement_m": 0.007529515430763637,
+        "residual_top_displacement_m": 0.0015661392095988364,
+        "residual_pre_settle_drift_ratio_pct": 0.019392530941347165,
+        "residual_drift_ratio_pct": 0.00403364643580021,
+        "residual_settle_applied": true,
+        "residual_settle_steps": 48,
+        "response_backend": "dlpack_zero_copy"
+      },
+      "shear_delta_ratio": 0.7330903941632085,
+      "section_profile": {
+        "story_count": 24,
+        "stiffness_scale_mean": 0.9729166666666668,
+        "stiffness_scale_min": 0.97,
+        "yield_scale_mean": 0.9729166666666668,
+        "yield_scale_min": 0.97
+      },
+      "section_family_counts": {
+        "mega_column": 9,
+        "outrigger_beam": 8,
+        "core_column": 7
+      },
+      "material_model": "steel_elastic_plastic",
+      "material_indices": {
+        "cracking_index_mean": 0.0,
+        "stiffness_scale_mean": 1.0
+      },
+      "material_model_pass": true,
+      "residual_trace_pass": true
+    },
+    {
+      "case_id": "C-TRN-006",
+      "split": "train",
+      "topology_type": "truss",
+      "fixed": {
+        "converged_all_steps": true,
+        "rust_backend_ok": true,
+        "collapsed": false,
+        "max_drift_ratio_pct": 0.836365182127346,
+        "max_base_shear_kN": -46.05979198174215,
+        "residual_pre_settle_top_displacement_m": 0.012250575341153463,
+        "residual_top_displacement_m": 0.00254811967095992,
+        "residual_pre_settle_drift_ratio_pct": 0.09001103638457536,
+        "residual_drift_ratio_pct": 0.018722295567991674,
+        "residual_settle_applied": true,
+        "residual_settle_steps": 48,
+        "response_backend": "dlpack_zero_copy"
+      },
+      "ssi": {
+        "converged_all_steps": true,
+        "rust_backend_ok": true,
+        "collapsed": false,
+        "max_drift_ratio_pct": 0.1805495664166058,
+        "max_base_shear_kN": -13.301816879997311,
+        "residual_pre_settle_top_displacement_m": 0.003511692899799318,
+        "residual_top_displacement_m": 0.0007304321231582582,
+        "residual_pre_settle_drift_ratio_pct": 0.013286909446806919,
+        "residual_drift_ratio_pct": 0.0027636771649358397,
+        "residual_settle_applied": true,
+        "residual_settle_steps": 48,
+        "response_backend": "dlpack_zero_copy"
+      },
+      "shear_delta_ratio": 0.7112054504008598,
+      "section_profile": {
+        "story_count": 16,
+        "stiffness_scale_mean": 0.98,
+        "stiffness_scale_min": 0.98,
+        "yield_scale_mean": 0.98,
+        "yield_scale_min": 0.98
+      },
+      "section_family_counts": {
+        "brace_chord": 7,
+        "beam_strip": 9
+      },
+      "material_model": "steel_elastic_plastic",
+      "material_indices": {
+        "cracking_index_mean": 0.0,
+        "stiffness_scale_mean": 1.0
+      },
+      "material_model_pass": true,
+      "residual_trace_pass": true
+    },
+    {
+      "case_id": "C-TRN-007",
+      "split": "train",
+      "topology_type": "wall-frame",
+      "fixed": {
+        "converged_all_steps": true,
+        "rust_backend_ok": true,
+        "collapsed": false,
+        "max_drift_ratio_pct": 1.0288869773168463,
+        "max_base_shear_kN": -70.47766066075151,
+        "residual_pre_settle_top_displacement_m": 0.01827969501217511,
+        "residual_top_displacement_m": 0.0038021765625324234,
+        "residual_pre_settle_drift_ratio_pct": 0.1099792580986597,
+        "residual_drift_ratio_pct": 0.022875685684521214,
+        "residual_settle_applied": true,
+        "residual_settle_steps": 48,
+        "response_backend": "dlpack_zero_copy"
+      },
+      "ssi": {
+        "converged_all_steps": true,
+        "rust_backend_ok": true,
+        "collapsed": false,
+        "max_drift_ratio_pct": 0.2219641186691016,
+        "max_base_shear_kN": -20.57649979019214,
+        "residual_pre_settle_top_displacement_m": 0.005299577373860215,
+        "residual_top_displacement_m": 0.0011023120937629248,
+        "residual_pre_settle_drift_ratio_pct": 0.016326068438015002,
+        "residual_drift_ratio_pct": 0.0033958222351071206,
+        "residual_settle_applied": true,
+        "residual_settle_steps": 48,
+        "response_backend": "dlpack_zero_copy"
+      },
+      "shear_delta_ratio": 0.7080422420767004,
+      "section_profile": {
+        "story_count": 20,
+        "stiffness_scale_mean": 0.9695,
+        "stiffness_scale_min": 0.96,
+        "yield_scale_mean": 0.9695,
+        "yield_scale_min": 0.96
+      },
+      "section_family_counts": {
+        "wall_boundary": 6,
+        "wall_web": 9,
+        "slab_strip": 5
+      },
+      "material_model": "steel_elastic_plastic",
+      "material_indices": {
+        "cracking_index_mean": 0.0,
+        "stiffness_scale_mean": 1.0
+      },
+      "material_model_pass": true,
+      "residual_trace_pass": true
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "ssi boundary gate passed",
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/ssi_boundary_gate/20260328T155302Z/artifact_archive_manifest.json"
+}

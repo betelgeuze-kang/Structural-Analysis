@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-02T12:50:41.708919+00:00",
+  "test_name": "partitioned_scaleout_nightly",
+  "run_dir": "implementation/phase1/experiments/by_test/partitioned_scaleout_nightly/20260302T125041Z",
+  "mode": "copy",
+  "archived_count": 2,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/partitioned_scaleout_report.json",
+      "dst": "implementation/phase1/experiments/by_test/partitioned_scaleout_nightly/20260302T125041Z/artifacts/partitioned_scaleout_report.json",
+      "kind": "file",
+      "bytes": 8920,
+      "sha256": "638e12de5712c841da0e02ad7b0ff5b0ee7111c1da76bad52573ce5abe593889",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/partitioned_scaleout",
+      "dst": "implementation/phase1/experiments/by_test/partitioned_scaleout_nightly/20260302T125041Z/artifacts/partitioned_scaleout",
+      "kind": "directory",
+      "file_count": 12,
+      "bytes": 1190491,
+      "mode": "copy"
+    }
+  ]
+}

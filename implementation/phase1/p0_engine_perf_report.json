@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-profile-p0-engine-path",
+  "generated_at": "2026-02-27T13:45:10.103641+00:00",
+  "inputs": {
+    "producer_cmd": "/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "node_count": 201,
+    "length_m": 25.0,
+    "bending_stiffness": 6500000.0,
+    "shear_stiffness": 245000000.0,
+    "point_force_n": 100000.0,
+    "max_relative_error": 0.05,
+    "allow_cpu_required": true,
+    "require_rust_hip": false,
+    "require_rust_faster": false,
+    "out": "implementation/phase1/p0_engine_perf_report.json"
+  },
+  "checks": {
+    "probe_pass": true,
+    "track_rust_pass": true,
+    "track_python_pass": true,
+    "has_performance_fields": true,
+    "speedup_pass": true
+  },
+  "performance": {
+    "zero_copy_timing_breakdown_seconds": {
+      "compute": 0.0012,
+      "host_copy": 0.0,
+      "serialization": 0.0004
+    },
+    "rust_elapsed_seconds": {
+      "euler": 0.002341479000278923,
+      "timoshenko": 0.001865588000327989
+    },
+    "python_elapsed_seconds": {
+      "euler": 0.6014993919998233,
+      "timoshenko": 0.5966218450002998
+    },
+    "speedup_python_over_rust": {
+      "euler": 256.88865538754396,
+      "timoshenko": 319.8036463010095
+    }
+  },
+  "artifacts": {
+    "probe": "implementation/phase1/zero_copy_real_probe_report_strict.json",
+    "track_rust": "implementation/phase1/track_lf_solver_report.json",
+    "track_python": "implementation/phase1/track_lf_solver_report.python_profile.json"
+  },
+  "steps": [
+    {
+      "step": "zero_copy_probe",
+      "command": "/usr/bin/python3 implementation/phase1/zero_copy_real_probe.py --producer-cmd '/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py' --out implementation/phase1/zero_copy_real_probe_report_strict.json --allow-cpu-required",
+      "ok": true,
+      "return_code": 0,
+      "seconds": 0.10381340980529785,
+      "stdout_tail": "Wrote zero-copy real probe report: implementation/phase1/zero_copy_real_probe_report_strict.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "track_lf_rust",
+      "command": "/usr/bin/python3 implementation/phase1/track_lf_solver.py --engine rust --node-count 201 --length-m 25.0 --bending-stiffness 6500000.0 --shear-stiffness 245000000.0 --point-force-n 100000.0 --max-relative-error 0.05 --out implementation/phase1/track_lf_solver_report.json",
+      "ok": true,
+      "return_code": 0,
+      "seconds": 1.0053455829620361,
+      "stdout_tail": "Wrote track LF solver report: implementation/phase1/track_lf_solver_report.json\n",
+      "stderr_tail": "{\"event\": \"track_lf.start\", \"inputs\": {\"bending_stiffness\": 6500000.0, \"engine\": \"rust\", \"length_m\": 25.0, \"max_relative_error\": 0.05, \"node_count\": 201, \"out\": \"implementation/phase1/track_lf_solver_report.json\", \"point_force_n\": 100000.0, \"shear_stiffness\": 245000000.0}}\n{\"contract_pass\": true, \"event\": \"track_lf.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "track_lf_python",
+      "command": "/usr/bin/python3 implementation/phase1/track_lf_solver.py --engine python --node-count 201 --length-m 25.0 --bending-stiffness 6500000.0 --shear-stiffness 245000000.0 --point-force-n 100000.0 --max-relative-error 0.05 --out implementation/phase1/track_lf_solver_report.python_profile.json",
+      "ok": true,
+      "return_code": 0,
+      "seconds": 2.193840503692627,
+      "stdout_tail": "Wrote track LF solver report: implementation/phase1/track_lf_solver_report.python_profile.json\n",
+      "stderr_tail": "{\"event\": \"track_lf.start\", \"inputs\": {\"bending_stiffness\": 6500000.0, \"engine\": \"python\", \"length_m\": 25.0, \"max_relative_error\": 0.05, \"node_count\": 201, \"out\": \"implementation/phase1/track_lf_solver_report.python_profile.json\", \"point_force_n\": 100000.0, \"shear_stiffness\": 245000000.0}}\n{\"contract_pass\": true, \"event\": \"track_lf.completed\", \"reason_code\": \"PASS\"}\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "p0 engine path profiling completed"
+}

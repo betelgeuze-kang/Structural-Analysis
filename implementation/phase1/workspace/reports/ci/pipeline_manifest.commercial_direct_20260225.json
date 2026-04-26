@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-topk-pipeline",
+  "generated_at": "2026-02-25T14:31:03.609250+00:00",
+  "config_lock": "implementation/phase1/release/pipeline_config.commercial_direct_20260225.lock.json",
+  "config_sha256": "fdcaf265f39ede3495df54529ba3deac65ea0273bf1efce76222cb616258fc06",
+  "step_count": 24,
+  "steps": [
+    {
+      "step": "build_cases",
+      "seconds": 0.026192426681518555,
+      "command": "/usr/bin/python3 implementation/phase1/build_cases_from_commercial_exports.py --metric-source commercial_solver_export --out implementation/phase1/commercial_benchmark_cases.from_csv.json --hf-csv implementation/phase1/commercial_hf_export_sample.csv --lf-csv implementation/phase1/commercial_lf_export_sample.csv"
+    },
+    {
+      "step": "run_phase1_steps",
+      "seconds": 0.6286237239837646,
+      "command": "/usr/bin/python3 implementation/phase1/run_phase1_steps.py --out-dir implementation/phase1/step_outputs --repeats 3 --engine-hook-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --runtime-hook-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --require-runtime-hook --strict"
+    },
+    {
+      "step": "zero_copy_strict_probe",
+      "seconds": 0.050208330154418945,
+      "command": "/usr/bin/python3 implementation/phase1/zero_copy_real_probe.py --producer-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --require-rust-hip --out implementation/phase1/zero_copy_real_probe_report_strict.json"
+    },
+    {
+      "step": "dynamics_contract",
+      "seconds": 0.023851394653320312,
+      "command": "/usr/bin/python3 implementation/phase1/generate_dynamics_boundary_contract.py --out implementation/phase1/dynamics_boundary_report.json"
+    },
+    {
+      "step": "pg_gat_contract",
+      "seconds": 0.0244748592376709,
+      "command": "/usr/bin/python3 implementation/phase1/pg_gat_contract_stub.py --out implementation/phase1/pg_gat_contract_report.json"
+    },
+    {
+      "step": "subgraph_projection_contract",
+      "seconds": 0.025284528732299805,
+      "command": "/usr/bin/python3 implementation/phase1/subgraph_projection_stub.py --out implementation/phase1/subgraph_projection_report.json"
+    },
+    {
+      "step": "soa_contract",
+      "seconds": 0.023422956466674805,
+      "command": "/usr/bin/python3 implementation/phase1/generate_soa_dlpack_contract.py --out implementation/phase1/soa_dlpack_contract_report.json"
+    },
+    {
+      "step": "physics_residual_contract",
+      "seconds": 0.025075912475585938,
+      "command": "/usr/bin/python3 implementation/phase1/physics_residual_contract_stub.py --out implementation/phase1/physics_residual_contract_report.json"
+    },
+    {
+      "step": "meta_learning_contract",
+      "seconds": 0.03147101402282715,
+      "command": "/usr/bin/python3 implementation/phase1/meta_learning_task_stub.py --out implementation/phase1/meta_learning_task_report.json"
+    },
+    {
+      "step": "buckling_contract",
+      "seconds": 0.02509760856628418,
+      "command": "/usr/bin/python3 implementation/phase1/buckling_eigen_contract_stub.py --out implementation/phase1/buckling_contract_report.json"
+    },
+    {
+      "step": "nonlinear_lj_mapping_contract",
+      "seconds": 0.03283858299255371,
+      "command": "/usr/bin/python3 implementation/phase1/validate_nonlinear_lj_mapping.py --out implementation/phase1/nonlinear_lj_mapping_report.json"
+    },
+    {
+      "step": "physics_branching",
+      "seconds": 0.028006315231323242,
+      "command": "/usr/bin/python3 implementation/phase1/physics_guided_branching.py --out implementation/phase1/physics_branching_report.json"
+    },
+    {
+      "step": "bifurcation_detector",
+      "seconds": 0.024161100387573242,
+      "command": "/usr/bin/python3 implementation/phase1/bifurcation_detector_stub.py --out implementation/phase1/bifurcation_detector_report.json"
+    },
+    {
+      "step": "winning_ticket_topk_backprop",
+      "seconds": 1.584644079208374,
+      "command": "/usr/bin/python3 implementation/phase1/winning_ticket_backprop.py --branches 8 --top-k 3 --out implementation/phase1/winning_ticket_backprop_report.json"
+    },
+    {
+      "step": "rust_onnx_contract",
+      "seconds": 0.02446722984313965,
+      "command": "/usr/bin/python3 implementation/phase1/rust_onnx_native_contract_stub.py --strict-probe implementation/phase1/zero_copy_real_probe_report_strict.json --winning-ticket implementation/phase1/winning_ticket_backprop_report.json --require-inputs --out implementation/phase1/rust_onnx_native_contract_report.json"
+    },
+    {
+      "step": "priority3_modules",
+      "seconds": 0.1858530044555664,
+      "command": "/usr/bin/python3 implementation/phase1/run_priority3_modules.py --out-dir implementation/phase1"
+    },
+    {
+      "step": "topk_benchmark",
+      "seconds": 6.543542861938477,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --out implementation/phase1/hf_benchmark_report.json --comparison-out implementation/phase1/topk_comparison_experiment_report.json --target-split test --epochs 180 --branches 8 --top-k 3 --lr 0.06 --epsilon 0.12 --temperature 0.35 --seed 23 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export"
+    },
+    {
+      "step": "topk_precision_suite",
+      "seconds": 32.71770477294922,
+      "command": "/usr/bin/python3 implementation/phase1/run_topk_precision_experiments.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --seeds 11,17,23,31,47 --epochs 180 --branches 8 --top-k 3 --lr 0.06 --epsilon 0.12 --temperature 0.35 --target-split test --out implementation/phase1/topk_precision_suite_report.json --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export"
+    },
+    {
+      "step": "lf_to_gnn_smoke",
+      "seconds": 1.2300529479980469,
+      "command": "/usr/bin/python3 implementation/phase1/lf_to_gnn_e2e_smoke.py --out implementation/phase1/lf_to_gnn_e2e_smoke_report.json"
+    },
+    {
+      "step": "rust_md3bead_parity",
+      "seconds": 0.9030160903930664,
+      "command": "/usr/bin/python3 implementation/phase1/validate_md3bead_rust_parity.py --rust-hook-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --out implementation/phase1/rust_md3bead_parity_report.json"
+    },
+    {
+      "step": "phase1_ci_gate",
+      "seconds": 0.02845621109008789,
+      "command": "/usr/bin/python3 implementation/phase1/phase1_ci_gate.py --strict-probe implementation/phase1/zero_copy_real_probe_report_strict.json --rca implementation/phase1/step_outputs/step5_rca_summary.json --priority3 implementation/phase1/priority3_summary.json --benchmark implementation/phase1/hf_benchmark_report.json --rust-md3bead-parity implementation/phase1/rust_md3bead_parity_report.json --lj-mapping implementation/phase1/nonlinear_lj_mapping_report.json --out implementation/phase1/ci_gate_report.json --manifest implementation/phase1/ci_artifact_manifest.json"
+    },
+    {
+      "step": "static_artifact_validation",
+      "seconds": 0.029439926147460938,
+      "command": "/usr/bin/python3 implementation/phase1/validate_phase1_artifacts.py --smoke implementation/phase1/lf_to_gnn_e2e_smoke_report.json --ci implementation/phase1/ci_gate_report.json --rca implementation/phase1/step_outputs/step5_rca_summary.json --benchmark implementation/phase1/hf_benchmark_report.json --rust-parity implementation/phase1/rust_md3bead_parity_report.json --lj-mapping implementation/phase1/nonlinear_lj_mapping_report.json --out implementation/phase1/static_artifact_validation_report.json"
+    },
+    {
+      "step": "organize_artifacts",
+      "seconds": 0.03255915641784668,
+      "command": "/usr/bin/python3 implementation/phase1/organize_benchmark_artifacts.py --out-root implementation/phase1/experiments --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --benchmark implementation/phase1/hf_benchmark_report.json --comparison implementation/phase1/topk_comparison_experiment_report.json --suite implementation/phase1/topk_precision_suite_report.json --ci implementation/phase1/ci_gate_report.json --validation implementation/phase1/static_artifact_validation_report.json --label commercial_direct_20260225"
+    },
+    {
+      "step": "organize_workspace",
+      "seconds": 0.20432233810424805,
+      "command": "/usr/bin/python3 implementation/phase1/organize_phase1_workspace.py --root implementation/phase1 --workspace implementation/phase1/workspace"
+    }
+  ],
+  "outputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "benchmark": "implementation/phase1/hf_benchmark_report.json",
+    "comparison": "implementation/phase1/topk_comparison_experiment_report.json",
+    "suite": "implementation/phase1/topk_precision_suite_report.json",
+    "strict_probe": "implementation/phase1/zero_copy_real_probe_report_strict.json",
+    "ci": "implementation/phase1/ci_gate_report.json",
+    "ci_manifest": "implementation/phase1/ci_artifact_manifest.json",
+    "validation": "implementation/phase1/static_artifact_validation_report.json",
+    "rust_parity": "implementation/phase1/rust_md3bead_parity_report.json",
+    "lj_mapping": "implementation/phase1/nonlinear_lj_mapping_report.json"
+  }
+}

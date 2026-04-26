@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-04-10T14:16:33.144583+00:00",
+  "output_dir": "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch",
+  "receipt_txt": "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/optimized_drawing_expert_review.batch_receipt.txt",
+  "schema_version": "optimized_drawing_expert_review_pdf.batch_manifest.v1",
+  "source_metadata_json": "implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json",
+  "template_count": 3,
+  "template_order": [
+    "default",
+    "seoul_permit_review",
+    "structural_peer_committee"
+  ],
+  "templates": [
+    {
+      "authority_name": "Authority of Record",
+      "issue_id": "PKG-OPT-2026-0410",
+      "out_pdf": "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/optimized_drawing_expert_review.default.pdf",
+      "package_purpose_label": "Permit / Committee Submission",
+      "page_count": 4,
+      "relative_pdf": "optimized_drawing_expert_review.default.pdf",
+      "revision_code": "REV-00",
+      "template_label": "Default expert review package",
+      "template_name": "default"
+    },
+    {
+      "authority_name": "Seoul Metropolitan Permit Review Office",
+      "issue_id": "PKG-OPT-2026-0410",
+      "out_pdf": "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/optimized_drawing_expert_review.seoul_permit_review.pdf",
+      "package_purpose_label": "Seoul Permit Review Package",
+      "page_count": 4,
+      "relative_pdf": "optimized_drawing_expert_review.seoul_permit_review.pdf",
+      "revision_code": "REV-00",
+      "template_label": "Seoul permit review package",
+      "template_name": "seoul_permit_review"
+    },
+    {
+      "authority_name": "Structural Peer Committee",
+      "issue_id": "PKG-OPT-2026-0410",
+      "out_pdf": "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/optimized_drawing_expert_review.structural_peer_committee.pdf",
+      "package_purpose_label": "Structural Peer Committee Review Package",
+      "page_count": 4,
+      "relative_pdf": "optimized_drawing_expert_review.structural_peer_committee.pdf",
+      "revision_code": "REV-00",
+      "template_label": "Structural peer committee review package",
+      "template_name": "structural_peer_committee"
+    }
+  ]
+}

@@ -1,0 +1,460 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-batch-job-runner",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "inputs": {
+    "snapshot_root": "implementation/phase1/release/authoring/portfolio/snapshots",
+    "out": "implementation/phase1/release/authoring/portfolio/native_authoring_ops_portfolio_batch.json",
+    "materialize_snapshots": true
+  },
+  "summary": {
+    "job_count": 8,
+    "status_counts": {
+      "completed": 8
+    },
+    "snapshot_count": 8,
+    "rerun_requested_count": 0,
+    "completed_count": 8,
+    "failed_count": 0,
+    "planned_count": 0,
+    "blocked_count": 0
+  },
+  "checks": {
+    "queue_rows_present_pass": true,
+    "rerun_requests_tracked_pass": true,
+    "snapshot_manifest_written_pass": true
+  },
+  "queue_rows": [
+    {
+      "job_id": "native_authoring_portfolio::sample_tower",
+      "phase": "authoring_portfolio",
+      "benchmark_family": "sample_tower",
+      "submission_scope": "family_ops_bundle",
+      "lifecycle_status": "completed",
+      "input_path": "sample_tower",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_ops_bundle.json",
+        "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_package.zip",
+        "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_batch_job_report.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring ops bundle: PASS | family=sample_tower | source=generated | ready=True | solver_combos=13 | jobs=3 | snapshots=3 | package_artifacts=4",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_sample_tower/snapshot_manifest.json"
+    },
+    {
+      "job_id": "native_authoring_portfolio::steel_braced_frame",
+      "phase": "authoring_portfolio",
+      "benchmark_family": "steel_braced_frame",
+      "submission_scope": "family_ops_bundle",
+      "lifecycle_status": "completed",
+      "input_path": "steel_braced_frame",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_ops_bundle.json",
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_package.zip",
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_batch_job_report.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring ops bundle: PASS | family=steel_braced_frame | source=generated | ready=True | solver_combos=23 | jobs=3 | snapshots=3 | package_artifacts=4",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_steel_braced_frame/snapshot_manifest.json"
+    },
+    {
+      "job_id": "native_authoring_portfolio::rc_wall_core",
+      "phase": "authoring_portfolio",
+      "benchmark_family": "rc_wall_core",
+      "submission_scope": "family_ops_bundle",
+      "lifecycle_status": "completed",
+      "input_path": "rc_wall_core",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_ops_bundle.json",
+        "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_package.zip",
+        "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_batch_job_report.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring ops bundle: PASS | family=rc_wall_core | source=generated | ready=True | solver_combos=17 | jobs=3 | snapshots=3 | package_artifacts=4",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_rc_wall_core/snapshot_manifest.json"
+    },
+    {
+      "job_id": "native_authoring_portfolio::composite_podium",
+      "phase": "authoring_portfolio",
+      "benchmark_family": "composite_podium",
+      "submission_scope": "family_ops_bundle",
+      "lifecycle_status": "completed",
+      "input_path": "composite_podium",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_ops_bundle.json",
+        "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_package.zip",
+        "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_batch_job_report.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring ops bundle: PASS | family=composite_podium | source=generated | ready=True | solver_combos=23 | jobs=3 | snapshots=3 | package_artifacts=4",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_composite_podium/snapshot_manifest.json"
+    },
+    {
+      "job_id": "native_authoring_portfolio::outrigger_transfer_tower",
+      "phase": "authoring_portfolio",
+      "benchmark_family": "outrigger_transfer_tower",
+      "submission_scope": "family_ops_bundle",
+      "lifecycle_status": "completed",
+      "input_path": "outrigger_transfer_tower",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_ops_bundle.json",
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_package.zip",
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_batch_job_report.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring ops bundle: PASS | family=outrigger_transfer_tower | source=generated | ready=True | solver_combos=23 | jobs=3 | snapshots=3 | package_artifacts=4",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_outrigger_transfer_tower/snapshot_manifest.json"
+    },
+    {
+      "job_id": "native_authoring_portfolio::dual_system_hospital",
+      "phase": "authoring_portfolio",
+      "benchmark_family": "dual_system_hospital",
+      "submission_scope": "family_ops_bundle",
+      "lifecycle_status": "completed",
+      "input_path": "dual_system_hospital",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_ops_bundle.json",
+        "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_package.zip",
+        "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_batch_job_report.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring ops bundle: PASS | family=dual_system_hospital | source=generated | ready=True | solver_combos=17 | jobs=3 | snapshots=3 | package_artifacts=4",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_dual_system_hospital/snapshot_manifest.json"
+    },
+    {
+      "job_id": "native_authoring_portfolio::belt_truss_mega_frame",
+      "phase": "authoring_portfolio",
+      "benchmark_family": "belt_truss_mega_frame",
+      "submission_scope": "family_ops_bundle",
+      "lifecycle_status": "completed",
+      "input_path": "belt_truss_mega_frame",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_ops_bundle.json",
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_package.zip",
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_batch_job_report.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring ops bundle: PASS | family=belt_truss_mega_frame | source=generated | ready=True | solver_combos=23 | jobs=3 | snapshots=3 | package_artifacts=4",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_belt_truss_mega_frame/snapshot_manifest.json"
+    },
+    {
+      "job_id": "native_authoring_portfolio::deep_transfer_basement",
+      "phase": "authoring_portfolio",
+      "benchmark_family": "deep_transfer_basement",
+      "submission_scope": "family_ops_bundle",
+      "lifecycle_status": "completed",
+      "input_path": "deep_transfer_basement",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_ops_bundle.json",
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_package.zip",
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_batch_job_report.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring ops bundle: PASS | family=deep_transfer_basement | source=generated | ready=True | solver_combos=23 | jobs=3 | snapshots=3 | package_artifacts=4",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_deep_transfer_basement/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_rows": [
+    {
+      "schema_version": "1.0",
+      "job_id": "native_authoring_portfolio::sample_tower",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "native_authoring_portfolio_sample_tower__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_ops_bundle.json",
+          "label": "native_authoring_ops_bundle.json",
+          "sha256": "dea009c9f655df935f1c7b0a1d110e5b60471b6bc266cbfb729b2a214549b282",
+          "bytes": 6913
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "c75e2cc17e0a25b19101d27fd84f72c39a61ac4b126d2e207ab6bc3667f2f12b",
+          "bytes": 9848
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "7ba872718e7a4d0bcfc5a14fce60f615c409efc0f6dac8676f1d8593bd3913eb",
+          "bytes": 69222
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_batch_job_report.json",
+          "label": "native_authoring_batch_job_report.json",
+          "sha256": "7846ea160a1624f13dd39689a93ca0fd3100821ed9654b15a28136c3f17ec5c9",
+          "bytes": 8557
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_sample_tower/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "native_authoring_portfolio::steel_braced_frame",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "native_authoring_portfolio_steel_braced_frame__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_ops_bundle.json",
+          "label": "native_authoring_ops_bundle.json",
+          "sha256": "00db8dc167931dc9e50f94973ae23238434af6b2997322732c98253478293532",
+          "bytes": 7335
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "216b319bb9439cfb4fc9909e7153d23710abd16eef13284f83a6cb4a29bb1fdd",
+          "bytes": 10141
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "8a6942a18fb1310784a4ea0161a58965e838b20a0e08a3a88841f0becb286a01",
+          "bytes": 100783
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_batch_job_report.json",
+          "label": "native_authoring_batch_job_report.json",
+          "sha256": "36746682bbd38c053d1ae326bd7803b31f1e475fd3f7621089c221d9aa8cd57d",
+          "bytes": 9409
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_steel_braced_frame/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "native_authoring_portfolio::rc_wall_core",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "native_authoring_portfolio_rc_wall_core__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_ops_bundle.json",
+          "label": "native_authoring_ops_bundle.json",
+          "sha256": "8aea729a1f692f54c6fc764215a798e0a419590e02626d14addf25c0e4faa5ce",
+          "bytes": 7121
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "6fa93a2c2e2cd21bdcefb5b568b3483e7c29773940b7259f609902e63217c9e9",
+          "bytes": 9990
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "99b66b050292a993fd78dd106b1941cc7672a60bd06cf75188e97a05fc20e1d8",
+          "bytes": 86301
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_batch_job_report.json",
+          "label": "native_authoring_batch_job_report.json",
+          "sha256": "5c19eceaa24a29a988f0b6b03aab184921489f8feb9806e8be2e57b45b5a7596",
+          "bytes": 9098
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_rc_wall_core/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "native_authoring_portfolio::composite_podium",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "native_authoring_portfolio_composite_podium__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_ops_bundle.json",
+          "label": "native_authoring_ops_bundle.json",
+          "sha256": "274e911ddcb0e023f0beb71eff7938f59176f4519ef0b28e2b41448642359686",
+          "bytes": 7260
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "994c7f6d0679cf7b2885e2a569705f62e0478e3b0e1b3349e065911b9fcb8d00",
+          "bytes": 10118
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "e6c641e0d3117e2c58a3ccdd62e7c9b35248e70ec99f4b43ca9a78544cee2ab5",
+          "bytes": 101230
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_batch_job_report.json",
+          "label": "native_authoring_batch_job_report.json",
+          "sha256": "36833a166d5d19e5b1d83a645bb1302d93bb2e0fb0710d7f6cc534562cdf0029",
+          "bytes": 9275
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_composite_podium/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "native_authoring_portfolio::outrigger_transfer_tower",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "native_authoring_portfolio_outrigger_transfer_tower__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_ops_bundle.json",
+          "label": "native_authoring_ops_bundle.json",
+          "sha256": "01daf8580d5c398e291d0bb6a90b6c4f569bfa9f89e107f1b55e973e5a28837a",
+          "bytes": 7566
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "1fb77056a0c0cafdc8ac80ca2119a996c1ce5c2eb805d0773c52610fda8abfc5",
+          "bytes": 10416
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "327f60cee474241c29fe076b796d7eacb38f3b2eb999c7eb3ce2582865c6af79",
+          "bytes": 103399
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_batch_job_report.json",
+          "label": "native_authoring_batch_job_report.json",
+          "sha256": "ea28395f036584ba3050ee317ff1c3f20febd0c29cd03b0d23372511ff31ead2",
+          "bytes": 9599
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_outrigger_transfer_tower/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "native_authoring_portfolio::dual_system_hospital",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "native_authoring_portfolio_dual_system_hospital__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_ops_bundle.json",
+          "label": "native_authoring_ops_bundle.json",
+          "sha256": "820848b538b4ca480c65514f3aaab92b739f5c9e7d040a9d92343cce7dd8e5bf",
+          "bytes": 7407
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "1da94094df5e945f7f1cd1e574251e2de071715043b7dcaeea036d94d595247f",
+          "bytes": 10264
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "dd70f47f0f969fba037196cc70caa409e30560adb887778e69a49efe8483421d",
+          "bytes": 88241
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_batch_job_report.json",
+          "label": "native_authoring_batch_job_report.json",
+          "sha256": "5237f671a91ba91bca826e705ca0cd833778fa78e236faa66ca06144abd55456",
+          "bytes": 9422
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_dual_system_hospital/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "native_authoring_portfolio::belt_truss_mega_frame",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "native_authoring_portfolio_belt_truss_mega_frame__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_ops_bundle.json",
+          "label": "native_authoring_ops_bundle.json",
+          "sha256": "9f690c34353fb5a71f226ee07c3a2238ecd77261d1a33595c21e526098687fd0",
+          "bytes": 7455
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "40f1a821304d7e1b4c9b1a3c14be6433bbc0ce5be1c3db3ef33abbf6e4542033",
+          "bytes": 10312
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "d12332a4f4c2b4487f8c676f52090be8d510424ff4da05a50f9402665fac17cb",
+          "bytes": 105818
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_batch_job_report.json",
+          "label": "native_authoring_batch_job_report.json",
+          "sha256": "6ee5ab4543779998a9cef7a8ef9fe2bdefff4d4116af9b1a6c5ab4521896f4f0",
+          "bytes": 9468
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_belt_truss_mega_frame/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "native_authoring_portfolio::deep_transfer_basement",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "native_authoring_portfolio_deep_transfer_basement__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_ops_bundle.json",
+          "label": "native_authoring_ops_bundle.json",
+          "sha256": "8478709e026fc8eb08c3399d90ddcdae8468b4585fe1510e8fa9eef27f3fccd8",
+          "bytes": 7491
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "786a0313720f0b0c574298f9fa9f81176930177888c831f45ab8b1f5c0d1348f",
+          "bytes": 10348
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "b91e4ea9c8877706eac8d6f79517a56053203133aabace43476b9c95cb1f4a30",
+          "bytes": 104985
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_batch_job_report.json",
+          "label": "native_authoring_batch_job_report.json",
+          "sha256": "6fef3db41223e3757713f23f3b2500b48877f704f020d7590baac4126d1c2298",
+          "bytes": 9510
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/snapshots/native_authoring_portfolio_deep_transfer_basement/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_errors": [],
+  "summary_line": "Batch job runner: PASS | jobs=8 | snapshots=8 | reruns=0 | statuses=completed=8",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "batch job queue and snapshots updated"
+}

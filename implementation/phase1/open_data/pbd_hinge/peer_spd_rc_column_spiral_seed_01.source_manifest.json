@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "source_family": "peer_spd_column",
+  "seed_id": "peer_spd_rc_column_spiral_seed_01",
+  "holdout_split": "val",
+  "specimen_id": "276",
+  "source_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=276",
+  "source_file_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.raw.json",
+  "source_sha256": "33f74d1a6629596bd92a91dcc0638df371cb1d973406b7b8e1f51e6f4d710a66",
+  "source_origin_class": "official_external_benchmark"
+}

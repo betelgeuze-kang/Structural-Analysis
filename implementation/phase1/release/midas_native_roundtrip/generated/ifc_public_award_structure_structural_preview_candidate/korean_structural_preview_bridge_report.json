@@ -1,0 +1,16 @@
+{
+  "schema_version": "korean_structural_preview_bridge_report.v1",
+  "source_id": "ifc_public_award_structure",
+  "summary": {
+    "viewer_ready": true,
+    "exact_topology_candidate": true,
+    "node_count": 8,
+    "element_count": 7,
+    "beam_element_count": 7,
+    "shell_element_count": 0,
+    "member_id_count": 7,
+    "preview_surface_status_label": "korean exact-topology structural preview"
+  },
+  "reason_code": "PASS",
+  "reason": "korean exact-topology structural preview materialized from a prepared reconstruction artifact"
+}

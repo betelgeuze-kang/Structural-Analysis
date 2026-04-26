@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-rust-nonlinear-frame-vnv",
+  "generated_at": "2026-03-10T12:47:42.812794+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "target_split": "test",
+    "min_case_count": 3,
+    "max_case_count": 6,
+    "max_drift_error_pct": 5.0,
+    "max_base_shear_error_pct": 5.0,
+    "max_top_disp_error_pct": 8.0,
+    "hardening_ratio": 1.0,
+    "pdelta_factor": 0.0,
+    "tolerance": 1e-07,
+    "max_iter": 60,
+    "accepted_metric_sources": "engine_export_direct,commercial_solver_export,open_data_measurement",
+    "require_top_disp_hf": true,
+    "out": "implementation/phase1/nonlinear_frame_engine_report.json"
+  },
+  "checks": {
+    "metric_source_pass": true,
+    "rust_backend_used_pass": true,
+    "all_cases_converged": true,
+    "drift_p95_pass": true,
+    "base_shear_p95_pass": true,
+    "top_disp_metric_source_available": true,
+    "top_disp_metric_source_required_pass": true,
+    "top_disp_p95_pass": true
+  },
+  "summary": {
+    "case_count": 3,
+    "drift_error_pct_mean": 9.674547770800337e-15,
+    "drift_error_pct_p95": 1.7212760071707852e-14,
+    "base_shear_error_pct_mean": 3.724384528144669e-15,
+    "base_shear_error_pct_p95": 1.1173153584434007e-14,
+    "top_disp_error_pct_mean": 3.2162534883477226e-05,
+    "top_disp_error_pct_p95": 3.976788494340187e-05,
+    "metric_source_invalid_case_ids": [],
+    "top_disp_missing_case_ids": [],
+    "runtime_backends": [
+      "rocm_torch_hip_mainloop"
+    ]
+  },
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "engine": {
+        "backend": "rust_ffi_nonlinear_frame",
+        "rust_version": 0,
+        "converged": true,
+        "iterations": 3,
+        "residual_inf": 0.0,
+        "line_search_backtracks": 0,
+        "plastic_story_count": 0,
+        "runtime": {
+          "main_loop_backend": "rocm_torch_hip_mainloop",
+          "runtime_backend": "rocm_torch_hip_mainloop",
+          "cpu_backend": false,
+          "cpu_required": false,
+          "cpu_fallback_used": false,
+          "hip_kernel_invocation_count": 6,
+          "host_copy_bytes": 0,
+          "device_residency_ratio": 1.0,
+          "solver_array_bytes": 1152
+        }
+      },
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.31,
+          "pred": 2.31,
+          "error_pct": 0.0
+        },
+        "base_shear_kN": {
+          "hf": 2035.0,
+          "pred": 2034.9999999999998,
+          "error_pct": 1.1173153584434007e-14
+        },
+        "top_displacement_m": {
+          "hf": 1.107035,
+          "pred": 1.107034675378623,
+          "error_pct": 2.9323497169500258e-05,
+          "source": "hf_export_direct"
+        }
+      }
+    },
+    {
+      "case_id": "C-TST-002",
+      "split": "test",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "engine": {
+        "backend": "rust_ffi_nonlinear_frame",
+        "rust_version": 0,
+        "converged": true,
+        "iterations": 3,
+        "residual_inf": 0.0,
+        "line_search_backtracks": 0,
+        "plastic_story_count": 0,
+        "runtime": {
+          "main_loop_backend": "rocm_torch_hip_mainloop",
+          "runtime_backend": "rocm_torch_hip_mainloop",
+          "cpu_backend": false,
+          "cpu_required": false,
+          "cpu_fallback_used": false,
+          "hip_kernel_invocation_count": 6,
+          "host_copy_bytes": 0,
+          "device_residency_ratio": 1.0,
+          "solver_array_bytes": 960
+        }
+      },
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.88,
+          "pred": 1.8799999999999997,
+          "error_pct": 1.1810883240693156e-14
+        },
+        "base_shear_kN": {
+          "hf": 1610.0,
+          "pred": 1610.0,
+          "error_pct": 0.0
+        },
+        "top_displacement_m": {
+          "hf": 0.753844,
+          "pred": 0.7538437002121854,
+          "error_pct": 3.976788494340187e-05,
+          "source": "hf_export_direct"
+        }
+      }
+    },
+    {
+      "case_id": "C-TST-003",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "engine": {
+        "backend": "rust_ffi_nonlinear_frame",
+        "rust_version": 0,
+        "converged": true,
+        "iterations": 3,
+        "residual_inf": 0.0,
+        "line_search_backtracks": 0,
+        "plastic_story_count": 0,
+        "runtime": {
+          "main_loop_backend": "rocm_torch_hip_mainloop",
+          "runtime_backend": "rocm_torch_hip_mainloop",
+          "cpu_backend": false,
+          "cpu_required": false,
+          "cpu_fallback_used": false,
+          "hip_kernel_invocation_count": 6,
+          "host_copy_bytes": 0,
+          "device_residency_ratio": 1.0,
+          "solver_array_bytes": 1152
+        }
+      },
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.58,
+          "pred": 2.5799999999999996,
+          "error_pct": 1.7212760071707852e-14
+        },
+        "base_shear_kN": {
+          "hf": 2260.0,
+          "pred": 2260.0,
+          "error_pct": 0.0
+        },
+        "top_displacement_m": {
+          "hf": 1.236428,
+          "pred": 1.2364283387345665,
+          "error_pct": 2.7396222537529555e-05,
+          "source": "hf_export_direct"
+        }
+      }
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "rust nonlinear frame engine passed vnv thresholds",
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/nonlinear_frame_engine_validation/20260310T124742Z/artifact_archive_manifest.json"
+}

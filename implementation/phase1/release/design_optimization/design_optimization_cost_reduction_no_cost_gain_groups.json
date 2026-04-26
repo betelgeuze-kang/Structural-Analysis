@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "no_cost_gain_groups": [
+    {
+      "group_id": "S00:core:nogroup:beam:SB1000X1200",
+      "story_band": 0,
+      "zone_label": "core",
+      "member_type": "foundation",
+      "semantic_group": "",
+      "blocked_action_count": 1,
+      "action_names": [
+        "detailing_down"
+      ],
+      "priority_max": 398.9181179852934,
+      "max_dcr": 0.0,
+      "detail_examples": [
+        "trial_cost=147102.5710;current_cost=147096.7988;projected_cost_delta=-5.772186"
+      ]
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.81",
+      "story_band": 4,
+      "zone_label": "transfer",
+      "member_type": "beam",
+      "semantic_group": "",
+      "blocked_action_count": 2,
+      "action_names": [
+        "connection_detailing_down",
+        "detailing_down"
+      ],
+      "priority_max": 338.7432863849766,
+      "max_dcr": 0.0,
+      "detail_examples": [
+        "trial_cost=147104.4950;current_cost=147096.7988;projected_cost_delta=-7.696247"
+      ]
+    },
+    {
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "story_band": 5,
+      "zone_label": "perimeter",
+      "member_type": "column",
+      "semantic_group": "2",
+      "blocked_action_count": 2,
+      "action_names": [
+        "connection_detailing_down",
+        "detailing_down"
+      ],
+      "priority_max": 293.8160948791812,
+      "max_dcr": 0.0,
+      "detail_examples": [
+        "trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337"
+      ]
+    },
+    {
+      "group_id": "S05:intermediate:2:column:P 50x4",
+      "story_band": 5,
+      "zone_label": "intermediate",
+      "member_type": "column",
+      "semantic_group": "2",
+      "blocked_action_count": 1,
+      "action_names": [
+        "detailing_down"
+      ],
+      "priority_max": 281.7633361090662,
+      "max_dcr": 0.0,
+      "detail_examples": [
+        "trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337"
+      ]
+    },
+    {
+      "group_id": "S05:core:2:column:P 50x4",
+      "story_band": 5,
+      "zone_label": "core",
+      "member_type": "column",
+      "semantic_group": "2",
+      "blocked_action_count": 2,
+      "action_names": [
+        "connection_detailing_down",
+        "detailing_down"
+      ],
+      "priority_max": 257.95458314558863,
+      "max_dcr": 0.0,
+      "detail_examples": [
+        "trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337"
+      ]
+    }
+  ]
+}

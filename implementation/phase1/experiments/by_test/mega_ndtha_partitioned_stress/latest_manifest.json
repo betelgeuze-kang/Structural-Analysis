@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-05T15:00:27.894983+00:00",
+  "test_name": "mega_ndtha_partitioned_stress",
+  "latest_run_dir": "implementation/phase1/experiments/by_test/mega_ndtha_partitioned_stress/20260405T150027Z",
+  "latest_manifest": "implementation/phase1/experiments/by_test/mega_ndtha_partitioned_stress/20260405T150027Z/artifact_archive_manifest.json"
+}

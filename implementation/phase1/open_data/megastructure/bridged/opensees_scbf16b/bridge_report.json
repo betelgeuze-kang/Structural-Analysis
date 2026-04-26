@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "report_type": "opensees_text_baseline_bridge",
+  "generated_at": "2026-03-26T14:03:25.352638+00:00",
+  "source_id": "SCBF16B",
+  "inputs": {
+    "opensees_model": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+    "model_json_out": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b/model.json",
+    "npz_out": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b/dataset.npz",
+    "report_out": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b/bridge_report.json"
+  },
+  "source_provenance": {
+    "source_class": "opensees_text",
+    "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl"
+  },
+  "parse_counters": {
+    "ignored": 1103,
+    "node": 452,
+    "element": 214,
+    "constraint": 40
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "summary": {
+    "viewer_ready": true,
+    "accepted_object_count": 50,
+    "node_count": 134,
+    "element_count": 50,
+    "resolved_node_count": 134,
+    "variable_count": 127,
+    "story_band_count": 17,
+    "family_assumption": "opensees_text_orientation_classification",
+    "source_profile_label": "frame-brace mix",
+    "accepted_type_label": "elasticBeamColumn=34, constraint_equalDOF=16",
+    "element_class_label": "beam=32, column=18",
+    "max_radius": 878.507,
+    "bbox_label": "x=0.0..1080.0 | y=0.0..0.0 | z=0.0..2880.0"
+  },
+  "artifacts": {
+    "model_json": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b/model.json",
+    "dataset_npz": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b/dataset.npz"
+  }
+}

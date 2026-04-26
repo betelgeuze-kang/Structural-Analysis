@@ -1,0 +1,122 @@
+{
+  "source": {
+    "path": "tests/fixtures/foundation_realish/foundation_small.mgt"
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": 1,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 2,
+        "x": 4.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 3,
+        "x": 4.0,
+        "y": 4.0,
+        "z": 0.0
+      },
+      {
+        "id": 4,
+        "x": 0.0,
+        "y": 4.0,
+        "z": 0.0
+      },
+      {
+        "id": 5,
+        "x": 0.0,
+        "y": 0.0,
+        "z": -2.0
+      },
+      {
+        "id": 6,
+        "x": 4.0,
+        "y": 0.0,
+        "z": -2.0
+      },
+      {
+        "id": 7,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 3.0
+      },
+      {
+        "id": 8,
+        "x": 4.0,
+        "y": 0.0,
+        "z": 3.0
+      }
+    ],
+    "elements": [
+      {
+        "id": 101,
+        "type": "PLATE",
+        "section": 21,
+        "nodes": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "name": "MAT-A"
+      },
+      {
+        "id": 102,
+        "type": "BEAM",
+        "section": 22,
+        "nodes": [
+          5,
+          6
+        ],
+        "name": "PILECAP-B1"
+      },
+      {
+        "id": 103,
+        "type": "BEAM",
+        "section": 23,
+        "nodes": [
+          7,
+          8
+        ],
+        "name": "B-01"
+      }
+    ],
+    "sections": [
+      {
+        "id": 21,
+        "name": "RAFT-1200"
+      },
+      {
+        "id": 22,
+        "name": "PILE-CAP-700"
+      },
+      {
+        "id": 23,
+        "name": "B-SEC-450"
+      }
+    ],
+    "metadata": {
+      "groups": [
+        {
+          "name": "FOUNDATION_ZONE",
+          "element_ids": [
+            101,
+            102
+          ]
+        },
+        {
+          "name": "PERIM_FRAME",
+          "element_ids": [
+            103
+          ]
+        }
+      ]
+    }
+  }
+}

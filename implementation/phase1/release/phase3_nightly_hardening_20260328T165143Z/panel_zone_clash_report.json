@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-panel-zone-clash-readiness",
+  "generated_at": "2026-03-28T16:51:24.586622+00:00",
+  "inputs": {
+    "design_optimization_dataset": "implementation/phase1/release/design_optimization/design_optimization_dataset_report.json",
+    "pbd_review_package": "implementation/phase1/release/pbd_review/pbd_review_package_report.json",
+    "panel_zone_clash_artifact": "implementation/phase1/panel_zone_clash_artifact.json"
+  },
+  "summary": {
+    "constructability_mode": "internal_engine_panel_zone_3d_clash_and_anchorage_complete",
+    "sample_member_count": 32,
+    "constructability_low_outlier_count": 45,
+    "max_constructability_score": 0.3059663083961721,
+    "max_anchorage_complexity": 0.22,
+    "max_detailing_violation_ratio": 0.5959511014149006,
+    "design_opt_constructability_avg": 0.0,
+    "design_opt_detailing_complexity_avg": 0.0,
+    "hinge_proxy_artifact_present": true,
+    "panel_zone_clash_report_attached": true,
+    "panel_zone_clash_row_count": 45,
+    "panel_zone_proxy_candidate_count": 45,
+    "panel_zone_source_artifact_kind": "design_optimization_dataset_npz",
+    "panel_zone_source_artifact_path": "implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "panel_zone_source_contract_mode": "topology_projected_3d_clash_and_anchorage_bridge",
+    "panel_zone_missing_required_sources": [],
+    "panel_zone_topology_capable_input": true,
+    "panel_zone_true_3d_clash_verified": false,
+    "panel_zone_true_3d_anchorage_verified": false,
+    "panel_zone_required_sources_complete": true,
+    "panel_zone_true_3d_bridge_complete": false,
+    "panel_zone_topology_projected_bridge_complete": true,
+    "panel_zone_solver_verified_bridge_complete": false,
+    "panel_zone_internal_engine_complete": true,
+    "panel_zone_external_validation_pending": true,
+    "panel_zone_validation_boundary": "external_validation_only",
+    "panel_zone_source_valid_row_counts": {
+      "panel_zone_joint_geometry_3d": 45,
+      "panel_zone_rebar_anchorage_3d": 45,
+      "panel_zone_clash_verification_3d": 45
+    },
+    "panel_zone_source_overlap_member_counts": {
+      "panel_zone_joint_geometry_3d": 45,
+      "panel_zone_rebar_anchorage_3d": 45,
+      "panel_zone_clash_verification_3d": 45
+    },
+    "panel_zone_source_candidate_scan_modes": {
+      "panel_zone_joint_geometry_3d": "npz_full",
+      "panel_zone_rebar_anchorage_3d": "npz_full",
+      "panel_zone_clash_verification_3d": "npz_full"
+    },
+    "panel_zone_source_producer_backends": {
+      "panel_zone_joint_geometry_3d": "midas_topology_projection",
+      "panel_zone_rebar_anchorage_3d": "midas_topology_projection",
+      "panel_zone_clash_verification_3d": "midas_topology_projection"
+    },
+    "panel_zone_source_bundle_modes": {
+      "panel_zone_joint_geometry_3d": "midas_topology_projection",
+      "panel_zone_rebar_anchorage_3d": "midas_topology_projection",
+      "panel_zone_clash_verification_3d": "midas_topology_projection"
+    },
+    "panel_zone_source_upstream_verification_tiers": {
+      "panel_zone_joint_geometry_3d": "panel_zone_joint_geometry_3d_topology_projected_validated_source",
+      "panel_zone_rebar_anchorage_3d": "panel_zone_rebar_anchorage_3d_topology_projected_validated_source",
+      "panel_zone_clash_verification_3d": "panel_zone_clash_verification_3d_topology_projected_validated_source"
+    },
+    "panel_zone_instruction_sidecar_present": true,
+    "panel_zone_instruction_sidecar_change_count": 0,
+    "panel_zone_instruction_sidecar_candidate_overlap_mode": "none",
+    "panel_zone_instruction_sidecar_overlap_row_count": 0,
+    "panel_zone_instruction_sidecar_overlap_member_count": 0,
+    "panel_zone_instruction_sidecar_overlap_group_count": 0,
+    "panel_zone_instruction_sidecar_evidence_model": "direct_patch_plus_audit_review_manifest",
+    "panel_zone_instruction_sidecar_rebar_delivery_mode": "direct_patch_eligible",
+    "panel_zone_validated_source_row_count_total": 135,
+    "panel_zone_validated_source_overlap_member_count_min": 45,
+    "pbd_contract_pass": true,
+    "dataset_contract_pass": true
+  },
+  "checks": {
+    "constructability_proxy_only": false,
+    "panel_zone_clash_artifact_present": true,
+    "panel_zone_clash_artifact_contract_pass": true,
+    "panel_zone_clash_artifact_3d_verified": false,
+    "panel_zone_clash_artifact_source_detected": true,
+    "panel_zone_topology_capable_input": true,
+    "panel_zone_true_3d_clash_verified": false,
+    "panel_zone_true_3d_anchorage_verified": false,
+    "panel_zone_required_sources_complete": true,
+    "panel_zone_true_3d_bridge_complete": false,
+    "panel_zone_topology_projected_bridge_complete": true,
+    "panel_zone_solver_verified_bridge_complete": false,
+    "panel_zone_internal_engine_complete": true,
+    "panel_zone_external_validation_pending": true,
+    "panel_zone_missing_required_sources": false,
+    "panel_zone_topology_projected_artifact_present": true,
+    "panel_zone_proxy_artifact_present": false,
+    "dataset_contract_pass": true,
+    "pbd_contract_pass": true
+  },
+  "artifact_meta": {
+    "design_optimization_dataset": "implementation/phase1/release/design_optimization/design_optimization_dataset_report.json",
+    "pbd_review_package": "implementation/phase1/release/pbd_review/pbd_review_package_report.json",
+    "panel_zone_clash_artifact": "implementation/phase1/panel_zone_clash_artifact.json"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "Internal engine completed panel-zone joint geometry, anchorage, and clash recomputation with validated member overlap; external verification now serves as an optional audit boundary."
+}

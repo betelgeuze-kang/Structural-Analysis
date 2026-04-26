@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-batch-job-runner",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "inputs": {
+    "snapshot_root": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/snapshots",
+    "out": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_batch_job_report.json",
+    "materialize_snapshots": true
+  },
+  "summary": {
+    "job_count": 3,
+    "status_counts": {
+      "completed": 3
+    },
+    "snapshot_count": 3,
+    "rerun_requested_count": 0,
+    "completed_count": 3,
+    "failed_count": 0,
+    "planned_count": 0,
+    "blocked_count": 0
+  },
+  "checks": {
+    "queue_rows_present_pass": true,
+    "rerun_requests_tracked_pass": true,
+    "snapshot_manifest_written_pass": true
+  },
+  "queue_rows": [
+    {
+      "job_id": "authoring::native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200::workspace-summary",
+      "phase": "authoring_release",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "workspace_summary",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_workspace_summary.json",
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_workspace_draft.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring bundle: PASS | stories=10 | nodes=66 | members=170 | loads=6 | unsupported=0 | unresolved=0 | score=100.0 | family=outrigger_transfer_tower",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/snapshots/authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200::solver-session",
+      "phase": "authoring_solver",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "solver_session",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_solver_session.json",
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_solver_session.loadcomb_preview.mgt"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring solver session: PASS | meshes=4 | cells=486 | combos=23 | family=KDS-2022 | authoring_family=outrigger_transfer_tower",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/snapshots/authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_solver-session/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200::project-registry",
+      "phase": "authoring_registry",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "signed_project_registry",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_package.zip",
+        "implementation/phase1/release/signing/native_authoring_portfolio/outrigger_transfer_tower/native_authoring_project_registry_ed25519.pub.pem",
+        "implementation/phase1/release/signing/native_authoring_portfolio/outrigger_transfer_tower/native_authoring_project_registry.signature.b64"
+      ],
+      "rerun_count": 0,
+      "note": "Project registry service: PASS | artifacts=4 | audit=4 | approvals=3/3 | package_repro=True | signature_verified=True",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/snapshots/authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_rows": [
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200::workspace-summary",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_workspace-summary__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_workspace_summary.json",
+          "label": "native_authoring_workspace_summary.json",
+          "sha256": "165aff74c53ea4b573926d41b4c0ff4d4d3873d56c2d517b5fdbd4d3d287bf53",
+          "bytes": 14999
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_workspace_draft.json",
+          "label": "native_authoring_workspace_draft.json",
+          "sha256": "71e7b232936113a6f71430c7e713e96f1c3de56f32d4d3b78c3d6dd17a3757d9",
+          "bytes": 1111
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/snapshots/authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200::solver-session",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_solver-session__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_solver_session.json",
+          "label": "native_authoring_solver_session.json",
+          "sha256": "690c2cf7632a800865acad222b64be6adc8b92bd55238ad868339fac793119d7",
+          "bytes": 81404
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_solver_session.loadcomb_preview.mgt",
+          "label": "native_authoring_solver_session.loadcomb_preview.mgt",
+          "sha256": "dc52f7b14bfa7ea65f5adb0d314bc239749116cd945022a0f0dcfed297c3df14",
+          "bytes": 2998
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/snapshots/authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_solver-session/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200::project-registry",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_project-registry__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "1fb77056a0c0cafdc8ac80ca2119a996c1ce5c2eb805d0773c52610fda8abfc5",
+          "bytes": 10416
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "327f60cee474241c29fe076b796d7eacb38f3b2eb999c7eb3ce2582865c6af79",
+          "bytes": 103399
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_portfolio/outrigger_transfer_tower/native_authoring_project_registry_ed25519.pub.pem",
+          "label": "native_authoring_project_registry_ed25519.pub.pem",
+          "sha256": "e56f8421206e84f5ec409c7ffff0e34b4db7f17289344624e8ca69b26a47c62a",
+          "bytes": 113
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_portfolio/outrigger_transfer_tower/native_authoring_project_registry.signature.b64",
+          "label": "native_authoring_project_registry.signature.b64",
+          "sha256": "15bc6f0711500486e0391add91146f854de7d6c6b3b33d5b58e8efa02002d1c4",
+          "bytes": 89
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/snapshots/authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_errors": [],
+  "summary_line": "Batch job runner: PASS | jobs=3 | snapshots=3 | reruns=0 | statuses=completed=3",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "batch job queue and snapshots updated"
+}

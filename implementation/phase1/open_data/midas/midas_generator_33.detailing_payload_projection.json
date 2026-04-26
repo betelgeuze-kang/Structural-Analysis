@@ -1,0 +1,264 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-06T13:54:53Z",
+  "inputs": {
+    "parsed_model_json": "implementation/phase1/open_data/midas/midas_generator_33.json",
+    "dataset_npz": "implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "changes_json": "implementation/phase1/release/design_optimization/design_optimization_cost_reduction_changes.json"
+  },
+  "source_kind": "internal_group_local_detailing_payload_projection",
+  "summary": {
+    "group_local_detailing_payload_row_count": 5,
+    "group_local_detailing_payload_available_count": 5,
+    "blocked_group_local_detailing_payload_row_count": 0,
+    "blocked_reason_counts": {},
+    "projected_member_type_counts": {
+      "wall": 5
+    },
+    "projected_zone_label_counts": {
+      "perimeter": 5
+    }
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "projected internal group-local detailing payloads were generated",
+  "group_local_detailing_payloads": [
+    {
+      "group_id": "S03:perimeter:nogroup:slab:default",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_detailing_projection",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 73,
+      "element_ids_head": [
+        1415,
+        1416,
+        1417,
+        1418,
+        1419,
+        1420,
+        8043,
+        8044,
+        8051,
+        8052,
+        8959,
+        8960,
+        8961,
+        8983,
+        8984,
+        8985
+      ],
+      "section_ids": [
+        1,
+        2,
+        5
+      ],
+      "material_ids": [
+        1,
+        4
+      ],
+      "section_signature": "default",
+      "zone_label": "perimeter",
+      "story_band": 3,
+      "semantic_group": "",
+      "action_name": "detailing_down",
+      "baseline_detailing_quality": 1.0999999999999996,
+      "target_detailing_quality": 1.0599999999999996,
+      "detailing_quality_delta": -0.040000000000000036,
+      "baseline_rebar_ratio": 0.010000000000000005,
+      "target_rebar_ratio": 0.010000000000000005,
+      "review_priority": "medium",
+      "followup_type": "detailing_manual_review",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    },
+    {
+      "group_id": "S04:perimeter:nogroup:slab:default",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_detailing_projection",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 73,
+      "element_ids_head": [
+        1409,
+        1410,
+        1411,
+        1412,
+        1413,
+        1414,
+        27471,
+        27472,
+        27479,
+        27480,
+        27811,
+        27812,
+        27813,
+        27839,
+        27840,
+        27841
+      ],
+      "section_ids": [
+        1,
+        2,
+        5
+      ],
+      "material_ids": [
+        1,
+        4
+      ],
+      "section_signature": "default",
+      "zone_label": "perimeter",
+      "story_band": 4,
+      "semantic_group": "",
+      "action_name": "detailing_down",
+      "baseline_detailing_quality": 1.0999999999999996,
+      "target_detailing_quality": 1.0599999999999996,
+      "detailing_quality_delta": -0.040000000000000036,
+      "baseline_rebar_ratio": 0.010000000000000005,
+      "target_rebar_ratio": 0.010000000000000005,
+      "review_priority": "medium",
+      "followup_type": "detailing_manual_review",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    },
+    {
+      "group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_detailing_projection",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 16,
+      "element_ids_head": [
+        26918,
+        26919,
+        26920,
+        26921,
+        27930,
+        27932,
+        27938,
+        27940,
+        27946,
+        27948,
+        27954,
+        27956,
+        27962,
+        27964,
+        28814,
+        28816
+      ],
+      "section_ids": [
+        7
+      ],
+      "material_ids": [
+        1,
+        4
+      ],
+      "section_signature": "SB1500X800",
+      "zone_label": "perimeter",
+      "story_band": 6,
+      "semantic_group": "",
+      "action_name": "detailing_down",
+      "baseline_detailing_quality": 1.0999999999999999,
+      "target_detailing_quality": 1.0599999999999998,
+      "detailing_quality_delta": -0.040000000000000036,
+      "baseline_rebar_ratio": 0.01,
+      "target_rebar_ratio": 0.01,
+      "review_priority": "medium",
+      "followup_type": "detailing_manual_review",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    },
+    {
+      "group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_detailing_projection",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 4,
+      "element_ids_head": [
+        26923,
+        26925,
+        26927,
+        26929
+      ],
+      "section_ids": [
+        7
+      ],
+      "material_ids": [
+        4
+      ],
+      "section_signature": "SB1500X800",
+      "zone_label": "perimeter",
+      "story_band": 7,
+      "semantic_group": "",
+      "action_name": "detailing_down",
+      "baseline_detailing_quality": 1.1,
+      "target_detailing_quality": 1.06,
+      "detailing_quality_delta": -0.040000000000000036,
+      "baseline_rebar_ratio": 0.01,
+      "target_rebar_ratio": 0.01,
+      "review_priority": "medium",
+      "followup_type": "detailing_manual_review",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    },
+    {
+      "group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_detailing_projection",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 16,
+      "element_ids_head": [
+        26922,
+        26924,
+        26926,
+        26928,
+        27925,
+        27926,
+        27933,
+        27934,
+        27941,
+        27942,
+        27949,
+        27950,
+        27957,
+        27958,
+        28809,
+        28810
+      ],
+      "section_ids": [
+        7
+      ],
+      "material_ids": [
+        1,
+        4
+      ],
+      "section_signature": "SB1500X800",
+      "zone_label": "perimeter",
+      "story_band": 8,
+      "semantic_group": "",
+      "action_name": "detailing_down",
+      "baseline_detailing_quality": 1.0999999999999999,
+      "target_detailing_quality": 1.0599999999999998,
+      "detailing_quality_delta": -0.040000000000000036,
+      "baseline_rebar_ratio": 0.01,
+      "target_rebar_ratio": 0.01,
+      "review_priority": "medium",
+      "followup_type": "detailing_manual_review",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    }
+  ],
+  "blocked_group_local_detailing_payload_rows": []
+}

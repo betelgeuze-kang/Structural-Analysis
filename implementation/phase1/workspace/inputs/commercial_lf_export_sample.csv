@@ -1,0 +1,13 @@
+case_id,split,ood_tag,topology_type,hazard_type,load_scale,residual_norm,drift_ratio_pct,base_shear_kN,mode_shape_mac,buckling_factor,equilibrium_residual
+C-TRN-001,train,in_distribution,rahmen,wind,1.0,0.02,1.67,1195.0,0.948,2.62,0.021
+C-TRN-002,train,in_distribution,truss,wind,0.92,0.017,1.2,868.0,0.96,3.0,0.017
+C-TRN-003,train,in_distribution,rahmen,seismic,1.2,0.027,2.31,1614.0,0.938,2.24,0.03
+C-TRN-004,train,in_distribution,wall-frame,wind,1.08,0.021,1.55,1248.0,0.951,2.72,0.022
+C-TRN-005,train,in_distribution,outrigger,combined,1.28,0.033,2.75,1978.0,0.928,1.94,0.035
+C-TRN-006,train,in_distribution,truss,seismic,1.14,0.024,1.9,1352.0,0.943,2.49,0.027
+C-TRN-007,train,in_distribution,wall-frame,combined,1.25,0.03,2.41,1766.0,0.933,2.1,0.032
+C-VAL-001,val,in_distribution,rahmen,combined,1.18,0.028,2.25,1593.0,0.937,2.21,0.029
+C-VAL-002,val,in_distribution,truss,wind,0.95,0.018,1.27,939.0,0.958,2.92,0.018
+C-TST-001,test,ood_topology,outrigger,seismic,1.22,0.031,2.6,1878.0,0.93,1.99,0.033
+C-TST-002,test,ood_hazard,wall-frame,seismic,1.16,0.026,2.09,1499.0,0.941,2.31,0.028
+C-TST-003,test,ood_combined,outrigger,combined,1.3,0.035,2.93,2082.0,0.923,1.84,0.037

@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-01T11:59:10.113117+00:00",
+  "test_name": "megastructure_commercial_readiness",
+  "run_dir": "implementation/phase1/experiments/by_test/megastructure_commercial_readiness/20260301T115910Z",
+  "mode": "copy",
+  "archived_count": 7,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/commercial_readiness_report.json",
+      "dst": "implementation/phase1/experiments/by_test/megastructure_commercial_readiness/20260301T115910Z/artifacts/commercial_readiness_report.json",
+      "kind": "file",
+      "bytes": 14568,
+      "sha256": "f9bd514feb2e0844f2ac0f391abd0aa13f9d594c9b0904741f53773b43bf520f",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/commercial_readiness",
+      "dst": "implementation/phase1/experiments/by_test/megastructure_commercial_readiness/20260301T115910Z/artifacts/commercial_readiness",
+      "kind": "directory",
+      "file_count": 17,
+      "bytes": 263211,
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/commercial_readiness/phase_correction_assimilation_report.json",
+      "dst": "implementation/phase1/experiments/by_test/megastructure_commercial_readiness/20260301T115910Z/artifacts/phase_correction_assimilation_report.json",
+      "kind": "file",
+      "bytes": 24064,
+      "sha256": "e1aa3a20bdb1ec286aab6abd070818b44f68f147cff9188a73b0e75fac46a30f",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/commercial_readiness/heterogeneous_soil_ood_report.json",
+      "dst": "implementation/phase1/experiments/by_test/megastructure_commercial_readiness/20260301T115910Z/artifacts/heterogeneous_soil_ood_report.json",
+      "kind": "file",
+      "bytes": 23075,
+      "sha256": "027a01d5a47e13e09971599ef47e219966a2f9f6c731ca333fe0b6cd245278ed",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/commercial_readiness/multiscale_l3_streaming_report.json",
+      "dst": "implementation/phase1/experiments/by_test/megastructure_commercial_readiness/20260301T115910Z/artifacts/multiscale_l3_streaming_report.json",
+      "kind": "file",
+      "bytes": 2443,
+      "sha256": "36b9a0fc67d50d1c3128879d8e0ce21798e496b5c722cbbe7737e6aacc953cd0",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/commercial_readiness/partitioned_scaleout_report.json",
+      "dst": "implementation/phase1/experiments/by_test/megastructure_commercial_readiness/20260301T115910Z/artifacts/partitioned_scaleout_report.json",
+      "kind": "file",
+      "bytes": 9070,
+      "sha256": "02a15f80efefd98bae9d1c9188e00ace3e579725f0408e2c2f7b9832c6ed0515",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/commercial_readiness/scaleout_io_profile_report.json",
+      "dst": "implementation/phase1/experiments/by_test/megastructure_commercial_readiness/20260301T115910Z/artifacts/scaleout_io_profile_report.json",
+      "kind": "file",
+      "bytes": 4744,
+      "sha256": "c9fe438333d53f95775472d97ff44ab484ffc223c826c79426a5cb99bb0a03bf",
+      "mode": "copy"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/peer_transfer_podium_tower_remote",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/peer_transfer_podium_tower_remote/final_tbi_report_10.9.2017_0.pdf",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/peer_transfer_podium_tower_remote/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/peer_transfer_podium_tower_remote.json"
+  },
+  "bytes_copied": 2918230,
+  "declared_format": "report_pdf",
+  "family_id": "transfer_podium_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "official_final_report_url": "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+    "official_task12_report_url": "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf",
+    "official_task_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative/tasks"
+  },
+  "original_reference": "",
+  "reference_scheme": "",
+  "reject_reason": "",
+  "remote_candidate_urls": [
+    "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+    "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf"
+  ],
+  "remote_fetch_note": "provider_remote_asset",
+  "resolved_path": "",
+  "sha256": "2d8ba0cc836ab3f6f488d37c534f6dfd6d3a1133761a1ef3ed0572b74849e510",
+  "source_exists": true,
+  "source_format": "report_pdf",
+  "source_id": "peer_transfer_podium_tower_remote",
+  "source_index": 2,
+  "source_urls": [
+    "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
+    "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+    "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf"
+  ],
+  "status": "collected",
+  "title": "PEER transfer podium tower benchmark candidate"
+}

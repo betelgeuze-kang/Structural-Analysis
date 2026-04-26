@@ -1,0 +1,37 @@
+{
+  "source": {
+    "path": "tests/fixtures/foundation_realish/foundation_deep_small.mgt"
+  },
+  "model": {
+    "nodes": [
+      {"id": 1, "x": 0.0, "y": 0.0, "z": 0.0},
+      {"id": 2, "x": 5.0, "y": 0.0, "z": 0.0},
+      {"id": 3, "x": 5.0, "y": 5.0, "z": 0.0},
+      {"id": 4, "x": 0.0, "y": 5.0, "z": 0.0},
+      {"id": 5, "x": 0.0, "y": 0.0, "z": -3.0},
+      {"id": 6, "x": 5.0, "y": 0.0, "z": -3.0},
+      {"id": 7, "x": 0.0, "y": 0.0, "z": -6.0},
+      {"id": 8, "x": 5.0, "y": 0.0, "z": -6.0},
+      {"id": 9, "x": 0.0, "y": 0.0, "z": 3.5},
+      {"id": 10, "x": 5.0, "y": 0.0, "z": 3.5}
+    ],
+    "elements": [
+      {"id": 201, "type": "PLATE", "section": 31, "nodes": [1, 2, 3, 4], "name": "MAT-B"},
+      {"id": 202, "type": "BEAM", "section": 32, "nodes": [5, 6], "name": "CAISSON-C1"},
+      {"id": 203, "type": "BEAM", "section": 33, "nodes": [7, 8], "name": "PILE-D1"},
+      {"id": 204, "type": "BEAM", "section": 34, "nodes": [9, 10], "name": "G-01"}
+    ],
+    "sections": [
+      {"id": 31, "name": "MAT-1500"},
+      {"id": 32, "name": "CAISSON-900"},
+      {"id": 33, "name": "PILE-600"},
+      {"id": 34, "name": "G-SEC-500"}
+    ],
+    "metadata": {
+      "groups": [
+        {"name": "DEEP_FOUNDATION_ZONE", "element_ids": [201, 202, 203]},
+        {"name": "UPPER_FRAME", "element_ids": [204]}
+      ]
+    }
+  }
+}

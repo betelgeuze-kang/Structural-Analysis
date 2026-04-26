@@ -1,0 +1,91 @@
+{
+  "bundle_sha256": "20a1f433dde813304903fcf488b772dcb18c47f71ae8ef265fe5e158103db545",
+  "bytes_copied": 534400,
+  "collector_version": "0.2.0",
+  "designsafe_listing_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis",
+  "designsafe_preview_api_base": "https://www.designsafe-ci.org/api/datafiles/agave/public/preview/designsafe.storage.published",
+  "designsafe_primary_preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl",
+  "download_mode": "designsafe_preview_bundle",
+  "original_reference": "",
+  "preview_entries": [
+    {
+      "bytes": 22815,
+      "content_type": "application/x-tcl",
+      "copied_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/analysis_steps.tcl",
+      "file_type": "text",
+      "preview_href": "https://designsafe.tapis.io/v3/files/postits/redeem/6e001183-0a17-4aa7-a178-22b0fa019f89-010",
+      "preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/analysis_steps.tcl",
+      "sha256": "cf349aed689744fe19c42f8c1d0b4852b6185e04b25f781ccfd1c7d0dd1ef3f1"
+    },
+    {
+      "bytes": 44,
+      "content_type": "application/x-tcl",
+      "copied_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/definitions.tcl",
+      "file_type": "text",
+      "preview_href": "https://designsafe.tapis.io/v3/files/postits/redeem/6454232f-bf1c-4ba0-a8a0-dcfb3d4032f4-010",
+      "preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/definitions.tcl",
+      "sha256": "0222bae2cf522d5f2c2060352d804f44272344982626afe2cc55a9e78cd35f4e"
+    },
+    {
+      "bytes": 334503,
+      "content_type": "application/x-tcl",
+      "copied_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/elements.tcl",
+      "file_type": "text",
+      "preview_href": "https://designsafe.tapis.io/v3/files/postits/redeem/62b102ee-dc24-42e5-9894-c811342e0edd-010",
+      "preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/elements.tcl",
+      "sha256": "cb74172ac39b31cd858b4d4577424b100fce4199c0eb8dd4b7462df219c97526"
+    },
+    {
+      "bytes": 2701,
+      "content_type": "application/x-tcl",
+      "copied_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/main.tcl",
+      "file_type": "text",
+      "preview_href": "https://designsafe.tapis.io/v3/files/postits/redeem/1c1ebf88-cc8c-4964-85b6-aa6514290769-010",
+      "preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl",
+      "sha256": "8e80be8849fa4529ad0138767ee066a8ce56a98839e3bc3ceb8bb43625edc728"
+    },
+    {
+      "bytes": 4191,
+      "content_type": "application/x-tcl",
+      "copied_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/materials.tcl",
+      "file_type": "text",
+      "preview_href": "https://designsafe.tapis.io/v3/files/postits/redeem/0d1ce425-4a16-46ce-bf44-934e4bc508db-010",
+      "preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/materials.tcl",
+      "sha256": "bf0b579bf474f46081939d8b46fb314b75f84ed5da94a07a82304f594a371889"
+    },
+    {
+      "bytes": 15971,
+      "content_type": "application/x-tcl",
+      "copied_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/nodes.tcl",
+      "file_type": "text",
+      "preview_href": "https://designsafe.tapis.io/v3/files/postits/redeem/3956b658-dc05-41bd-b598-fd4ca89ef9e0-010",
+      "preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/nodes.tcl",
+      "sha256": "b732f469d9089745e1d9796149f0b47aeb33033f256193fc729aa0c0df32a756"
+    },
+    {
+      "bytes": 38867,
+      "content_type": "application/x-tcl",
+      "copied_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/RCJointModel3D.tcl",
+      "file_type": "text",
+      "preview_href": "https://designsafe.tapis.io/v3/files/postits/redeem/0ed9c258-9d8a-4fb6-aa37-307ad92225c1-010",
+      "preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/RCJointModel3D.tcl",
+      "sha256": "024ddcde3bf10e6b5d5cf10db1c44ac8ea13b558fefbd40d48f620fd022e6108"
+    },
+    {
+      "bytes": 115308,
+      "content_type": "application/x-tcl",
+      "copied_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/sections.tcl",
+      "file_type": "text",
+      "preview_href": "https://designsafe.tapis.io/v3/files/postits/redeem/d3ebf6c6-8f0f-4893-bf76-dc28eab1dad5-010",
+      "preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/sections.tcl",
+      "sha256": "876310b61b2d29ed362c22027a2c9dc19b0f3dc1135a51fd7a0e0abfe9c64611"
+    }
+  ],
+  "schema_version": "1.0",
+  "source_format": "tcl",
+  "source_id": "nheri_soft_story_podium_remote",
+  "source_urls": [
+    "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+    "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7%20Infilled%20Frame/Fly%20Ash%20Brick%20Infill/Pilotis"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_section_e1_03_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_section_e1_03_local/gtc_public_bridge_section_e1_03.mgt",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_section_e1_03_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/gtc_public_bridge_section_e1_03_local.json"
+  },
+  "bytes_copied": 143351,
+  "declared_format": "mgt",
+  "family_id": "curved_plan_bridge_torsion",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {},
+  "original_reference": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_e1_03.mgt",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_e1_03.mgt",
+  "sha256": "07b32b0cf376d0eb81174e53873e79a92c36b54a770996d2b4d068b8f585c14e",
+  "source_exists": true,
+  "source_format": "mgt",
+  "source_id": "gtc_public_bridge_section_e1_03_local",
+  "source_index": 29,
+  "source_urls": [
+    "https://gtc.midasuser.com/"
+  ],
+  "status": "collected",
+  "title": "GTC public curved bridge section E1-03 raw MIDAS model"
+}

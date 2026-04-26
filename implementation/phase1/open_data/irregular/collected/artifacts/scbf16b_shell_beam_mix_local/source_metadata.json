@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 118474,
+  "collector_version": "0.2.0",
+  "family_id": "discontinuous_braced_frame_tower",
+  "original_reference": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+  "schema_version": "1.0",
+  "sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+  "source_format": "tcl",
+  "source_id": "scbf16b_shell_beam_mix_local",
+  "source_urls": [
+    "https://opensees.berkeley.edu/"
+  ],
+  "title": "SCBF16B shell-beam mixed OpenSees model"
+}

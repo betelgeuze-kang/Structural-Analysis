@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-commercial-direct-deployment-freeze",
+  "generated_at": "2026-02-25T14:31:39.388899+00:00",
+  "label": "commercial_direct_20260225",
+  "status": {
+    "benchmark_contract_pass": true,
+    "benchmark_kpi_pass": true,
+    "suite_pass": true,
+    "ci_all_pass": true,
+    "static_validation_pass": true
+  },
+  "benchmark_metrics": {
+    "drift_error_pct": 0.3757816738749323,
+    "base_shear_error_pct": 0.23269973309962022,
+    "mode_shape_mac": 0.9756213029225668,
+    "buckling_factor_error_pct": 0.43781504424297807
+  },
+  "improvement_pct": {
+    "drift_error_reduction_pct": 96.97683435876864,
+    "base_shear_error_reduction_pct": 96.8953366398573,
+    "buckling_error_reduction_pct": 96.09771942936246,
+    "mode_shape_mac_gain_pct": 4.755329590826781
+  },
+  "metric_source_validation": {
+    "enabled": true,
+    "accepted_metric_sources": [
+      "commercial_solver_export",
+      "engine_export_direct"
+    ],
+    "global_metric_source": "commercial_solver_export",
+    "missing_metric_source_case_ids": [],
+    "invalid_metric_source_case_ids": [],
+    "pass": true
+  },
+  "ci_reason_code": "PASS",
+  "ci_reason": "all gates satisfied",
+  "artifact_hashes": [
+    {
+      "path": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+      "bytes": 9185,
+      "sha256": "a1a6767edbab3d4a90ef3f591575bde04287c2590da8bc6e4b1156451e145b9e"
+    },
+    {
+      "path": "implementation/phase1/hf_benchmark_report.json",
+      "bytes": 4714,
+      "sha256": "2bb34f9db2ae00eceb38fa5348a109d91dd4ba864ce4842b23bfd6ec3625a15f"
+    },
+    {
+      "path": "implementation/phase1/topk_comparison_experiment_report.json",
+      "bytes": 19520,
+      "sha256": "4fb4ee7e01dea462c221bc84cd1d68dc6d08f06fb91ab50a9ada04910ae6cba6"
+    },
+    {
+      "path": "implementation/phase1/topk_precision_suite_report.json",
+      "bytes": 5130,
+      "sha256": "e98913b2bb8d7a3f1baf59098cb3622d8ff1009529f1e7e517dd3b82110bdcb8"
+    },
+    {
+      "path": "implementation/phase1/ci_gate_report.json",
+      "bytes": 855,
+      "sha256": "cfaa7fc21fa3fddae85585766ebf1f91c1118a66367d4a1acc7aed02ad2e5f5a"
+    },
+    {
+      "path": "implementation/phase1/ci_artifact_manifest.json",
+      "bytes": 1223,
+      "sha256": "d9f5ed9a64a82e53af95759a9b521682930264d2f099ca1bf39ebc88d5a53df9"
+    },
+    {
+      "path": "implementation/phase1/static_artifact_validation_report.json",
+      "bytes": 1844,
+      "sha256": "e2a0fe2dc62745d8ab9bdbab20e54ed603b779d19f5b0ab6591462059de06d17"
+    },
+    {
+      "path": "implementation/phase1/rust_md3bead_parity_report.json",
+      "bytes": 6045,
+      "sha256": "d18ef34ee2d036c22be3952482a5fc5ec75a3666fa793e171ba4e75309faefa8"
+    },
+    {
+      "path": "implementation/phase1/nonlinear_lj_mapping_report.json",
+      "bytes": 74552,
+      "sha256": "06a595fb8b3b1e7e27be4108e2a7260446d4a06d67013b8e5d38d48ec8459b9d"
+    },
+    {
+      "path": "implementation/phase1/winning_ticket_backprop_report.json",
+      "bytes": 4495,
+      "sha256": "46dd897123eb90b7286ddac83a1542fe584bb2c04954358e7235c0c5e97a44c3"
+    },
+    {
+      "path": "implementation/phase1/experiments/commercial_direct_20260225/artifact_bundle_report.json",
+      "bytes": 599,
+      "sha256": "7e1cfb2303f309c582ddfe8c5be505c54a4b715f3a57f807d900ade641a8c9ae"
+    },
+    {
+      "path": "implementation/phase1/release/pipeline_config.commercial_direct_20260225.lock.json",
+      "bytes": 2161,
+      "sha256": "2fbe7260aeec9b2be30f00613b4ce9c5f0cc627b566a1260fd0ce2287f1dda81"
+    },
+    {
+      "path": "implementation/phase1/release/pipeline_manifest.commercial_direct_20260225.json",
+      "bytes": 9339,
+      "sha256": "83b2206a1e31e4b5e2328153da33563f1ecfc099598f5b79a10eddb1db237073"
+    }
+  ]
+}

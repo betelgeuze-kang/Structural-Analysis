@@ -1,0 +1,7727 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-peer-spd-hysteresis-resources",
+  "generated_at": "2026-03-20T03:51:33.602891+00:00",
+  "seed_id": "peer_spd_rc_column_spiral_seed_01",
+  "holdout_split": "val",
+  "source_name": "PEER Structural Performance Database",
+  "source_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=276",
+  "source_origin_class": "official_external_benchmark",
+  "selection_mode": "properties_based_preselection_plus_specimen_page_snapshot_plus_text_resource",
+  "specimen_display_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=276",
+  "resource_text_url": "http://depts.washington.edu/columdat/circol/txfiles/ang85u10.txt",
+  "resource_text_snapshot_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_resources/peer_spd_rc_column_spiral_seed_01.hysteresis.txt",
+  "resource_text_sha256": "f4f95540e1a2938bb5b6286751df2131425fe2c6e3d35401b10d7e82995cbdaf",
+  "specimen": {
+    "specimen_id": "276",
+    "specimen_name": "Ang et al. 1985, No. 10",
+    "family_name": "Ang et al. 1985",
+    "column_shape": "circular_or_spiral",
+    "confinement_type": "spiral",
+    "confinement_detail": "CFB",
+    "axial_load_kn": 784.0,
+    "axial_load_ratio": 0.19996390285904797,
+    "longitudinal_rebar_ratio": 0.032,
+    "transverse_reinforcement_ratio": 1.02,
+    "fc_mpa": 31.2,
+    "height_mm": 800.0,
+    "section_width_mm": 400.0,
+    "section_depth_mm": 400.0
+  },
+  "hysteresis": {
+    "title": "Ang et al. 1985, Spec. 10",
+    "point_count_declared": 960,
+    "point_count_parsed": 960,
+    "point_count_mismatch": false,
+    "displacement_unit_assumed": "mm",
+    "lateral_force_unit_assumed": "kN",
+    "rows": [
+      {
+        "step_index": 0,
+        "displacement_mm": 0.0,
+        "drift_ratio": 0.0,
+        "lateral_force_kN": 0.0
+      },
+      {
+        "step_index": 1,
+        "displacement_mm": -0.97539,
+        "drift_ratio": -0.0012192375,
+        "lateral_force_kN": -0.97407
+      },
+      {
+        "step_index": 2,
+        "displacement_mm": -0.55738,
+        "drift_ratio": -0.000696725,
+        "lateral_force_kN": 4.8704
+      },
+      {
+        "step_index": 3,
+        "displacement_mm": -0.13934,
+        "drift_ratio": -0.000174175,
+        "lateral_force_kN": 18.507
+      },
+      {
+        "step_index": 4,
+        "displacement_mm": 0.20901,
+        "drift_ratio": 0.0002612625,
+        "lateral_force_kN": 30.196
+      },
+      {
+        "step_index": 5,
+        "displacement_mm": 0.83607,
+        "drift_ratio": 0.0010450875,
+        "lateral_force_kN": 44.807
+      },
+      {
+        "step_index": 6,
+        "displacement_mm": 1.7418,
+        "drift_ratio": 0.00217725,
+        "lateral_force_kN": 67.208
+      },
+      {
+        "step_index": 7,
+        "displacement_mm": 2.4385,
+        "drift_ratio": 0.003048125,
+        "lateral_force_kN": 87.666
+      },
+      {
+        "step_index": 8,
+        "displacement_mm": 3.3442,
+        "drift_ratio": 0.00418025,
+        "lateral_force_kN": 108.12
+      },
+      {
+        "step_index": 9,
+        "displacement_mm": 4.459,
+        "drift_ratio": 0.00557375,
+        "lateral_force_kN": 137.34
+      },
+      {
+        "step_index": 10,
+        "displacement_mm": 5.8524,
+        "drift_ratio": 0.0073155,
+        "lateral_force_kN": 169.49
+      },
+      {
+        "step_index": 11,
+        "displacement_mm": 6.8974,
+        "drift_ratio": 0.008621750000000001,
+        "lateral_force_kN": 196.76
+      },
+      {
+        "step_index": 12,
+        "displacement_mm": 8.0122,
+        "drift_ratio": 0.01001525,
+        "lateral_force_kN": 226.96
+      },
+      {
+        "step_index": 13,
+        "displacement_mm": 9.1966,
+        "drift_ratio": 0.01149575,
+        "lateral_force_kN": 257.15
+      },
+      {
+        "step_index": 14,
+        "displacement_mm": 10.172,
+        "drift_ratio": 0.012715,
+        "lateral_force_kN": 281.5
+      },
+      {
+        "step_index": 15,
+        "displacement_mm": 11.078,
+        "drift_ratio": 0.013847499999999999,
+        "lateral_force_kN": 300.98
+      },
+      {
+        "step_index": 16,
+        "displacement_mm": 12.053,
+        "drift_ratio": 0.015066250000000002,
+        "lateral_force_kN": 325.33
+      },
+      {
+        "step_index": 17,
+        "displacement_mm": 12.819,
+        "drift_ratio": 0.01602375,
+        "lateral_force_kN": 338.97
+      },
+      {
+        "step_index": 18,
+        "displacement_mm": 13.307,
+        "drift_ratio": 0.01663375,
+        "lateral_force_kN": 357.48
+      },
+      {
+        "step_index": 19,
+        "displacement_mm": 14.213,
+        "drift_ratio": 0.017766249999999997,
+        "lateral_force_kN": 375.01
+      },
+      {
+        "step_index": 20,
+        "displacement_mm": 14.84,
+        "drift_ratio": 0.01855,
+        "lateral_force_kN": 389.62
+      },
+      {
+        "step_index": 21,
+        "displacement_mm": 15.537,
+        "drift_ratio": 0.01942125,
+        "lateral_force_kN": 402.28
+      },
+      {
+        "step_index": 22,
+        "displacement_mm": 16.582,
+        "drift_ratio": 0.0207275,
+        "lateral_force_kN": 415.92
+      },
+      {
+        "step_index": 23,
+        "displacement_mm": 17.696,
+        "drift_ratio": 0.02212,
+        "lateral_force_kN": 423.72
+      },
+      {
+        "step_index": 24,
+        "displacement_mm": 18.672,
+        "drift_ratio": 0.02334,
+        "lateral_force_kN": 425.66
+      },
+      {
+        "step_index": 25,
+        "displacement_mm": 19.647,
+        "drift_ratio": 0.024558749999999997,
+        "lateral_force_kN": 424.69
+      },
+      {
+        "step_index": 26,
+        "displacement_mm": 20.553,
+        "drift_ratio": 0.025691250000000002,
+        "lateral_force_kN": 421.77
+      },
+      {
+        "step_index": 27,
+        "displacement_mm": 21.041,
+        "drift_ratio": 0.02630125,
+        "lateral_force_kN": 418.84
+      },
+      {
+        "step_index": 28,
+        "displacement_mm": 21.18,
+        "drift_ratio": 0.026475,
+        "lateral_force_kN": 412.03
+      },
+      {
+        "step_index": 29,
+        "displacement_mm": 20.901,
+        "drift_ratio": 0.02612625,
+        "lateral_force_kN": 398.39
+      },
+      {
+        "step_index": 30,
+        "displacement_mm": 20.553,
+        "drift_ratio": 0.025691250000000002,
+        "lateral_force_kN": 379.88
+      },
+      {
+        "step_index": 31,
+        "displacement_mm": 19.996,
+        "drift_ratio": 0.024995,
+        "lateral_force_kN": 360.4
+      },
+      {
+        "step_index": 32,
+        "displacement_mm": 19.369,
+        "drift_ratio": 0.02421125,
+        "lateral_force_kN": 336.05
+      },
+      {
+        "step_index": 33,
+        "displacement_mm": 18.393,
+        "drift_ratio": 0.02299125,
+        "lateral_force_kN": 303.91
+      },
+      {
+        "step_index": 34,
+        "displacement_mm": 17.627,
+        "drift_ratio": 0.022033749999999998,
+        "lateral_force_kN": 276.63
+      },
+      {
+        "step_index": 35,
+        "displacement_mm": 16.373,
+        "drift_ratio": 0.020466250000000002,
+        "lateral_force_kN": 244.49
+      },
+      {
+        "step_index": 36,
+        "displacement_mm": 15.188,
+        "drift_ratio": 0.018985000000000002,
+        "lateral_force_kN": 214.29
+      },
+      {
+        "step_index": 37,
+        "displacement_mm": 13.934,
+        "drift_ratio": 0.0174175,
+        "lateral_force_kN": 183.12
+      },
+      {
+        "step_index": 38,
+        "displacement_mm": 12.889,
+        "drift_ratio": 0.01611125,
+        "lateral_force_kN": 156.82
+      },
+      {
+        "step_index": 39,
+        "displacement_mm": 11.565,
+        "drift_ratio": 0.014456249999999999,
+        "lateral_force_kN": 127.6
+      },
+      {
+        "step_index": 40,
+        "displacement_mm": 10.242,
+        "drift_ratio": 0.012802500000000001,
+        "lateral_force_kN": 94.485
+      },
+      {
+        "step_index": 41,
+        "displacement_mm": 8.8483,
+        "drift_ratio": 0.011060375,
+        "lateral_force_kN": 63.312
+      },
+      {
+        "step_index": 42,
+        "displacement_mm": 7.5941,
+        "drift_ratio": 0.009492625,
+        "lateral_force_kN": 36.04
+      },
+      {
+        "step_index": 43,
+        "displacement_mm": 6.1311,
+        "drift_ratio": 0.007663875,
+        "lateral_force_kN": 9.7407
+      },
+      {
+        "step_index": 44,
+        "displacement_mm": 4.5286,
+        "drift_ratio": 0.00566075,
+        "lateral_force_kN": -23.377
+      },
+      {
+        "step_index": 45,
+        "displacement_mm": 2.8565,
+        "drift_ratio": 0.003570625,
+        "lateral_force_kN": -51.626
+      },
+      {
+        "step_index": 46,
+        "displacement_mm": 1.1147,
+        "drift_ratio": 0.001393375,
+        "lateral_force_kN": -87.666
+      },
+      {
+        "step_index": 47,
+        "displacement_mm": -0.48771,
+        "drift_ratio": -0.0006096375,
+        "lateral_force_kN": -113.96
+      },
+      {
+        "step_index": 48,
+        "displacement_mm": -2.7173,
+        "drift_ratio": -0.003396625,
+        "lateral_force_kN": -154.87
+      },
+      {
+        "step_index": 49,
+        "displacement_mm": -4.3195,
+        "drift_ratio": -0.005399375,
+        "lateral_force_kN": -186.05
+      },
+      {
+        "step_index": 50,
+        "displacement_mm": -5.713,
+        "drift_ratio": -0.00714125,
+        "lateral_force_kN": -218.19
+      },
+      {
+        "step_index": 51,
+        "displacement_mm": -7.0368,
+        "drift_ratio": -0.008796,
+        "lateral_force_kN": -245.46
+      },
+      {
+        "step_index": 52,
+        "displacement_mm": -8.2212,
+        "drift_ratio": -0.0102765,
+        "lateral_force_kN": -275.66
+      },
+      {
+        "step_index": 53,
+        "displacement_mm": -9.7539,
+        "drift_ratio": -0.012192375,
+        "lateral_force_kN": -313.64
+      },
+      {
+        "step_index": 54,
+        "displacement_mm": -10.869,
+        "drift_ratio": -0.01358625,
+        "lateral_force_kN": -339.95
+      },
+      {
+        "step_index": 55,
+        "displacement_mm": -12.053,
+        "drift_ratio": -0.015066250000000002,
+        "lateral_force_kN": -362.35
+      },
+      {
+        "step_index": 56,
+        "displacement_mm": -13.307,
+        "drift_ratio": -0.01663375,
+        "lateral_force_kN": -388.65
+      },
+      {
+        "step_index": 57,
+        "displacement_mm": -14.631,
+        "drift_ratio": -0.01828875,
+        "lateral_force_kN": -412.03
+      },
+      {
+        "step_index": 58,
+        "displacement_mm": -15.885,
+        "drift_ratio": -0.01985625,
+        "lateral_force_kN": -429.56
+      },
+      {
+        "step_index": 59,
+        "displacement_mm": -17.418,
+        "drift_ratio": -0.0217725,
+        "lateral_force_kN": -439.3
+      },
+      {
+        "step_index": 60,
+        "displacement_mm": -18.811,
+        "drift_ratio": -0.02351375,
+        "lateral_force_kN": -445.13
+      },
+      {
+        "step_index": 61,
+        "displacement_mm": -19.717,
+        "drift_ratio": -0.024646249999999998,
+        "lateral_force_kN": -447.09
+      },
+      {
+        "step_index": 62,
+        "displacement_mm": -20.135,
+        "drift_ratio": -0.025168750000000004,
+        "lateral_force_kN": -444.17
+      },
+      {
+        "step_index": 63,
+        "displacement_mm": -20.344,
+        "drift_ratio": -0.02543,
+        "lateral_force_kN": -439.3
+      },
+      {
+        "step_index": 64,
+        "displacement_mm": -20.065,
+        "drift_ratio": -0.025081250000000003,
+        "lateral_force_kN": -435.41
+      },
+      {
+        "step_index": 65,
+        "displacement_mm": -19.856,
+        "drift_ratio": -0.024820000000000002,
+        "lateral_force_kN": -422.74
+      },
+      {
+        "step_index": 66,
+        "displacement_mm": -19.369,
+        "drift_ratio": -0.02421125,
+        "lateral_force_kN": -391.57
+      },
+      {
+        "step_index": 67,
+        "displacement_mm": -18.742,
+        "drift_ratio": -0.0234275,
+        "lateral_force_kN": -364.3
+      },
+      {
+        "step_index": 68,
+        "displacement_mm": -17.766,
+        "drift_ratio": -0.022207499999999998,
+        "lateral_force_kN": -331.18
+      },
+      {
+        "step_index": 69,
+        "displacement_mm": -16.791,
+        "drift_ratio": -0.02098875,
+        "lateral_force_kN": -298.06
+      },
+      {
+        "step_index": 70,
+        "displacement_mm": -15.746,
+        "drift_ratio": -0.019682500000000002,
+        "lateral_force_kN": -263.97
+      },
+      {
+        "step_index": 71,
+        "displacement_mm": -14.561,
+        "drift_ratio": -0.01820125,
+        "lateral_force_kN": -230.85
+      },
+      {
+        "step_index": 72,
+        "displacement_mm": -13.795,
+        "drift_ratio": -0.01724375,
+        "lateral_force_kN": -211.37
+      },
+      {
+        "step_index": 73,
+        "displacement_mm": -12.541,
+        "drift_ratio": -0.01567625,
+        "lateral_force_kN": -181.18
+      },
+      {
+        "step_index": 74,
+        "displacement_mm": -11.426,
+        "drift_ratio": -0.0142825,
+        "lateral_force_kN": -153.9
+      },
+      {
+        "step_index": 75,
+        "displacement_mm": -10.242,
+        "drift_ratio": -0.012802500000000001,
+        "lateral_force_kN": -123.71
+      },
+      {
+        "step_index": 76,
+        "displacement_mm": -9.2662,
+        "drift_ratio": -0.01158275,
+        "lateral_force_kN": -101.3
+      },
+      {
+        "step_index": 77,
+        "displacement_mm": -7.8727,
+        "drift_ratio": -0.009840875,
+        "lateral_force_kN": -71.105
+      },
+      {
+        "step_index": 78,
+        "displacement_mm": -6.2006,
+        "drift_ratio": -0.00775075,
+        "lateral_force_kN": -37.988
+      },
+      {
+        "step_index": 79,
+        "displacement_mm": -4.3894,
+        "drift_ratio": -0.00548675,
+        "lateral_force_kN": 0.0
+      },
+      {
+        "step_index": 80,
+        "displacement_mm": -2.5082,
+        "drift_ratio": -0.00313525,
+        "lateral_force_kN": 31.17
+      },
+      {
+        "step_index": 81,
+        "displacement_mm": -0.34836,
+        "drift_ratio": -0.00043545,
+        "lateral_force_kN": 64.286
+      },
+      {
+        "step_index": 82,
+        "displacement_mm": 1.5328,
+        "drift_ratio": 0.001916,
+        "lateral_force_kN": 96.433
+      },
+      {
+        "step_index": 83,
+        "displacement_mm": 3.2746,
+        "drift_ratio": 0.00409325,
+        "lateral_force_kN": 126.63
+      },
+      {
+        "step_index": 84,
+        "displacement_mm": 4.3894,
+        "drift_ratio": 0.00548675,
+        "lateral_force_kN": 153.9
+      },
+      {
+        "step_index": 85,
+        "displacement_mm": 6.0615,
+        "drift_ratio": 0.007576874999999999,
+        "lateral_force_kN": 181.18
+      },
+      {
+        "step_index": 86,
+        "displacement_mm": 7.5941,
+        "drift_ratio": 0.009492625,
+        "lateral_force_kN": 209.42
+      },
+      {
+        "step_index": 87,
+        "displacement_mm": 9.1966,
+        "drift_ratio": 0.01149575,
+        "lateral_force_kN": 237.67
+      },
+      {
+        "step_index": 88,
+        "displacement_mm": 11.078,
+        "drift_ratio": 0.013847499999999999,
+        "lateral_force_kN": 270.79
+      },
+      {
+        "step_index": 89,
+        "displacement_mm": 13.168,
+        "drift_ratio": 0.01646,
+        "lateral_force_kN": 303.91
+      },
+      {
+        "step_index": 90,
+        "displacement_mm": 14.84,
+        "drift_ratio": 0.01855,
+        "lateral_force_kN": 332.15
+      },
+      {
+        "step_index": 91,
+        "displacement_mm": 16.303,
+        "drift_ratio": 0.02037875,
+        "lateral_force_kN": 353.58
+      },
+      {
+        "step_index": 92,
+        "displacement_mm": 17.627,
+        "drift_ratio": 0.022033749999999998,
+        "lateral_force_kN": 375.01
+      },
+      {
+        "step_index": 93,
+        "displacement_mm": 19.229,
+        "drift_ratio": 0.02403625,
+        "lateral_force_kN": 396.44
+      },
+      {
+        "step_index": 94,
+        "displacement_mm": 20.065,
+        "drift_ratio": 0.025081250000000003,
+        "lateral_force_kN": 404.23
+      },
+      {
+        "step_index": 95,
+        "displacement_mm": 20.762,
+        "drift_ratio": 0.0259525,
+        "lateral_force_kN": 409.1
+      },
+      {
+        "step_index": 96,
+        "displacement_mm": 21.25,
+        "drift_ratio": 0.0265625,
+        "lateral_force_kN": 413.0
+      },
+      {
+        "step_index": 97,
+        "displacement_mm": 21.459,
+        "drift_ratio": 0.02682375,
+        "lateral_force_kN": 412.03
+      },
+      {
+        "step_index": 98,
+        "displacement_mm": 21.11,
+        "drift_ratio": 0.026387499999999998,
+        "lateral_force_kN": 393.52
+      },
+      {
+        "step_index": 99,
+        "displacement_mm": 20.553,
+        "drift_ratio": 0.025691250000000002,
+        "lateral_force_kN": 375.01
+      },
+      {
+        "step_index": 100,
+        "displacement_mm": 20.135,
+        "drift_ratio": 0.025168750000000004,
+        "lateral_force_kN": 357.48
+      },
+      {
+        "step_index": 101,
+        "displacement_mm": 19.438,
+        "drift_ratio": 0.0242975,
+        "lateral_force_kN": 331.18
+      },
+      {
+        "step_index": 102,
+        "displacement_mm": 18.533,
+        "drift_ratio": 0.023166250000000003,
+        "lateral_force_kN": 300.98
+      },
+      {
+        "step_index": 103,
+        "displacement_mm": 17.348,
+        "drift_ratio": 0.021685,
+        "lateral_force_kN": 264.95
+      },
+      {
+        "step_index": 104,
+        "displacement_mm": 16.512,
+        "drift_ratio": 0.020640000000000002,
+        "lateral_force_kN": 243.51
+      },
+      {
+        "step_index": 105,
+        "displacement_mm": 15.258,
+        "drift_ratio": 0.0190725,
+        "lateral_force_kN": 211.37
+      },
+      {
+        "step_index": 106,
+        "displacement_mm": 14.283,
+        "drift_ratio": 0.017853749999999998,
+        "lateral_force_kN": 186.05
+      },
+      {
+        "step_index": 107,
+        "displacement_mm": 12.959,
+        "drift_ratio": 0.016198749999999998,
+        "lateral_force_kN": 152.93
+      },
+      {
+        "step_index": 108,
+        "displacement_mm": 11.774,
+        "drift_ratio": 0.0147175,
+        "lateral_force_kN": 123.71
+      },
+      {
+        "step_index": 109,
+        "displacement_mm": 10.52,
+        "drift_ratio": 0.01315,
+        "lateral_force_kN": 96.433
+      },
+      {
+        "step_index": 110,
+        "displacement_mm": 8.7785,
+        "drift_ratio": 0.010973124999999999,
+        "lateral_force_kN": 61.368
+      },
+      {
+        "step_index": 111,
+        "displacement_mm": 6.8974,
+        "drift_ratio": 0.008621750000000001,
+        "lateral_force_kN": 19.481
+      },
+      {
+        "step_index": 112,
+        "displacement_mm": 5.5039,
+        "drift_ratio": 0.006879875,
+        "lateral_force_kN": -2.9222
+      },
+      {
+        "step_index": 113,
+        "displacement_mm": 4.1105,
+        "drift_ratio": 0.005138125,
+        "lateral_force_kN": -27.273
+      },
+      {
+        "step_index": 114,
+        "displacement_mm": 2.9261,
+        "drift_ratio": 0.003657625,
+        "lateral_force_kN": -45.781
+      },
+      {
+        "step_index": 115,
+        "displacement_mm": 1.2541,
+        "drift_ratio": 0.001567625,
+        "lateral_force_kN": -73.053
+      },
+      {
+        "step_index": 116,
+        "displacement_mm": -0.48771,
+        "drift_ratio": -0.0006096375,
+        "lateral_force_kN": -99.355
+      },
+      {
+        "step_index": 117,
+        "displacement_mm": -2.5082,
+        "drift_ratio": -0.00313525,
+        "lateral_force_kN": -135.39
+      },
+      {
+        "step_index": 118,
+        "displacement_mm": -4.5984,
+        "drift_ratio": -0.005748,
+        "lateral_force_kN": -171.43
+      },
+      {
+        "step_index": 119,
+        "displacement_mm": -6.4795,
+        "drift_ratio": -0.008099374999999999,
+        "lateral_force_kN": -204.55
+      },
+      {
+        "step_index": 120,
+        "displacement_mm": -8.9179,
+        "drift_ratio": -0.011147375,
+        "lateral_force_kN": -245.46
+      },
+      {
+        "step_index": 121,
+        "displacement_mm": -11.217,
+        "drift_ratio": -0.01402125,
+        "lateral_force_kN": -289.29
+      },
+      {
+        "step_index": 122,
+        "displacement_mm": -13.028,
+        "drift_ratio": -0.016285,
+        "lateral_force_kN": -327.28
+      },
+      {
+        "step_index": 123,
+        "displacement_mm": -14.631,
+        "drift_ratio": -0.01828875,
+        "lateral_force_kN": -352.61
+      },
+      {
+        "step_index": 124,
+        "displacement_mm": -16.721,
+        "drift_ratio": -0.02090125,
+        "lateral_force_kN": -386.7
+      },
+      {
+        "step_index": 125,
+        "displacement_mm": -18.393,
+        "drift_ratio": -0.02299125,
+        "lateral_force_kN": -409.1
+      },
+      {
+        "step_index": 126,
+        "displacement_mm": -19.369,
+        "drift_ratio": -0.02421125,
+        "lateral_force_kN": -423.72
+      },
+      {
+        "step_index": 127,
+        "displacement_mm": -19.717,
+        "drift_ratio": -0.024646249999999998,
+        "lateral_force_kN": -425.66
+      },
+      {
+        "step_index": 128,
+        "displacement_mm": -19.996,
+        "drift_ratio": -0.024995,
+        "lateral_force_kN": -418.84
+      },
+      {
+        "step_index": 129,
+        "displacement_mm": -19.647,
+        "drift_ratio": -0.024558749999999997,
+        "lateral_force_kN": -399.36
+      },
+      {
+        "step_index": 130,
+        "displacement_mm": -19.159,
+        "drift_ratio": -0.023948749999999998,
+        "lateral_force_kN": -375.99
+      },
+      {
+        "step_index": 131,
+        "displacement_mm": -18.602,
+        "drift_ratio": -0.0232525,
+        "lateral_force_kN": -347.74
+      },
+      {
+        "step_index": 132,
+        "displacement_mm": -17.766,
+        "drift_ratio": -0.022207499999999998,
+        "lateral_force_kN": -317.54
+      },
+      {
+        "step_index": 133,
+        "displacement_mm": -16.861,
+        "drift_ratio": -0.02107625,
+        "lateral_force_kN": -289.29
+      },
+      {
+        "step_index": 134,
+        "displacement_mm": -15.815,
+        "drift_ratio": -0.019768749999999998,
+        "lateral_force_kN": -256.18
+      },
+      {
+        "step_index": 135,
+        "displacement_mm": -14.701,
+        "drift_ratio": -0.01837625,
+        "lateral_force_kN": -225.01
+      },
+      {
+        "step_index": 136,
+        "displacement_mm": -13.656,
+        "drift_ratio": -0.017070000000000002,
+        "lateral_force_kN": -192.86
+      },
+      {
+        "step_index": 137,
+        "displacement_mm": -12.402,
+        "drift_ratio": -0.015502499999999999,
+        "lateral_force_kN": -159.74
+      },
+      {
+        "step_index": 138,
+        "displacement_mm": -11.147,
+        "drift_ratio": -0.01393375,
+        "lateral_force_kN": -130.52
+      },
+      {
+        "step_index": 139,
+        "displacement_mm": -9.7539,
+        "drift_ratio": -0.012192375,
+        "lateral_force_kN": -102.28
+      },
+      {
+        "step_index": 140,
+        "displacement_mm": -8.5695,
+        "drift_ratio": -0.010711875,
+        "lateral_force_kN": -75.001
+      },
+      {
+        "step_index": 141,
+        "displacement_mm": -7.176,
+        "drift_ratio": -0.00897,
+        "lateral_force_kN": -43.832
+      },
+      {
+        "step_index": 142,
+        "displacement_mm": -5.7828,
+        "drift_ratio": -0.0072285,
+        "lateral_force_kN": -14.611
+      },
+      {
+        "step_index": 143,
+        "displacement_mm": -4.2499,
+        "drift_ratio": -0.005312375,
+        "lateral_force_kN": 10.714
+      },
+      {
+        "step_index": 144,
+        "displacement_mm": -2.5082,
+        "drift_ratio": -0.00313525,
+        "lateral_force_kN": 39.936
+      },
+      {
+        "step_index": 145,
+        "displacement_mm": -0.48771,
+        "drift_ratio": -0.0006096375,
+        "lateral_force_kN": 73.053
+      },
+      {
+        "step_index": 146,
+        "displacement_mm": 0.34836,
+        "drift_ratio": 0.00043545,
+        "lateral_force_kN": 84.743
+      },
+      {
+        "step_index": 147,
+        "displacement_mm": 1.8115,
+        "drift_ratio": 0.0022643750000000003,
+        "lateral_force_kN": 111.04
+      },
+      {
+        "step_index": 148,
+        "displacement_mm": 3.7622,
+        "drift_ratio": 0.00470275,
+        "lateral_force_kN": 137.34
+      },
+      {
+        "step_index": 149,
+        "displacement_mm": 5.2949,
+        "drift_ratio": 0.006618625,
+        "lateral_force_kN": 161.69
+      },
+      {
+        "step_index": 150,
+        "displacement_mm": 6.8974,
+        "drift_ratio": 0.008621750000000001,
+        "lateral_force_kN": 187.99
+      },
+      {
+        "step_index": 151,
+        "displacement_mm": 8.2908,
+        "drift_ratio": 0.010363500000000001,
+        "lateral_force_kN": 213.32
+      },
+      {
+        "step_index": 152,
+        "displacement_mm": 10.033,
+        "drift_ratio": 0.012541249999999999,
+        "lateral_force_kN": 245.46
+      },
+      {
+        "step_index": 153,
+        "displacement_mm": 11.565,
+        "drift_ratio": 0.014456249999999999,
+        "lateral_force_kN": 269.82
+      },
+      {
+        "step_index": 154,
+        "displacement_mm": 13.725,
+        "drift_ratio": 0.017156249999999998,
+        "lateral_force_kN": 307.8
+      },
+      {
+        "step_index": 155,
+        "displacement_mm": 15.606,
+        "drift_ratio": 0.0195075,
+        "lateral_force_kN": 334.1
+      },
+      {
+        "step_index": 156,
+        "displacement_mm": 17.487,
+        "drift_ratio": 0.021858749999999996,
+        "lateral_force_kN": 359.43
+      },
+      {
+        "step_index": 157,
+        "displacement_mm": 18.881,
+        "drift_ratio": 0.02360125,
+        "lateral_force_kN": 380.86
+      },
+      {
+        "step_index": 158,
+        "displacement_mm": 20.135,
+        "drift_ratio": 0.025168750000000004,
+        "lateral_force_kN": 396.44
+      },
+      {
+        "step_index": 159,
+        "displacement_mm": 20.832,
+        "drift_ratio": 0.02604,
+        "lateral_force_kN": 405.21
+      },
+      {
+        "step_index": 160,
+        "displacement_mm": 21.389,
+        "drift_ratio": 0.02673625,
+        "lateral_force_kN": 409.1
+      },
+      {
+        "step_index": 161,
+        "displacement_mm": 20.901,
+        "drift_ratio": 0.02612625,
+        "lateral_force_kN": 387.68
+      },
+      {
+        "step_index": 162,
+        "displacement_mm": 20.483,
+        "drift_ratio": 0.02560375,
+        "lateral_force_kN": 365.27
+      },
+      {
+        "step_index": 163,
+        "displacement_mm": 19.717,
+        "drift_ratio": 0.024646249999999998,
+        "lateral_force_kN": 336.05
+      },
+      {
+        "step_index": 164,
+        "displacement_mm": 18.742,
+        "drift_ratio": 0.0234275,
+        "lateral_force_kN": 305.86
+      },
+      {
+        "step_index": 165,
+        "displacement_mm": 18.045,
+        "drift_ratio": 0.022556250000000003,
+        "lateral_force_kN": 276.63
+      },
+      {
+        "step_index": 166,
+        "displacement_mm": 16.094,
+        "drift_ratio": 0.0201175,
+        "lateral_force_kN": 228.91
+      },
+      {
+        "step_index": 167,
+        "displacement_mm": 14.701,
+        "drift_ratio": 0.01837625,
+        "lateral_force_kN": 189.94
+      },
+      {
+        "step_index": 168,
+        "displacement_mm": 12.959,
+        "drift_ratio": 0.016198749999999998,
+        "lateral_force_kN": 149.03
+      },
+      {
+        "step_index": 169,
+        "displacement_mm": 11.565,
+        "drift_ratio": 0.014456249999999999,
+        "lateral_force_kN": 114.94
+      },
+      {
+        "step_index": 170,
+        "displacement_mm": 9.8933,
+        "drift_ratio": 0.012366625,
+        "lateral_force_kN": 80.846
+      },
+      {
+        "step_index": 171,
+        "displacement_mm": 8.0818,
+        "drift_ratio": 0.01010225,
+        "lateral_force_kN": 41.884
+      },
+      {
+        "step_index": 172,
+        "displacement_mm": 6.4097,
+        "drift_ratio": 0.008012125,
+        "lateral_force_kN": 15.585
+      },
+      {
+        "step_index": 173,
+        "displacement_mm": 4.7376,
+        "drift_ratio": 0.005921999999999999,
+        "lateral_force_kN": -15.585
+      },
+      {
+        "step_index": 174,
+        "displacement_mm": 3.0655,
+        "drift_ratio": 0.003831875,
+        "lateral_force_kN": -44.807
+      },
+      {
+        "step_index": 175,
+        "displacement_mm": 1.3237,
+        "drift_ratio": 0.001654625,
+        "lateral_force_kN": -73.053
+      },
+      {
+        "step_index": 176,
+        "displacement_mm": -1.1844,
+        "drift_ratio": -0.0014804999999999998,
+        "lateral_force_kN": -112.99
+      },
+      {
+        "step_index": 177,
+        "displacement_mm": -2.9959,
+        "drift_ratio": -0.003744875,
+        "lateral_force_kN": -142.21
+      },
+      {
+        "step_index": 178,
+        "displacement_mm": -4.3894,
+        "drift_ratio": -0.00548675,
+        "lateral_force_kN": -168.51
+      },
+      {
+        "step_index": 179,
+        "displacement_mm": -7.176,
+        "drift_ratio": -0.00897,
+        "lateral_force_kN": -217.22
+      },
+      {
+        "step_index": 180,
+        "displacement_mm": -9.4056,
+        "drift_ratio": -0.011757,
+        "lateral_force_kN": -255.2
+      },
+      {
+        "step_index": 181,
+        "displacement_mm": -11.844,
+        "drift_ratio": -0.014804999999999999,
+        "lateral_force_kN": -305.86
+      },
+      {
+        "step_index": 182,
+        "displacement_mm": -14.074,
+        "drift_ratio": -0.0175925,
+        "lateral_force_kN": -343.84
+      },
+      {
+        "step_index": 183,
+        "displacement_mm": -15.606,
+        "drift_ratio": -0.0195075,
+        "lateral_force_kN": -368.19
+      },
+      {
+        "step_index": 184,
+        "displacement_mm": -17.487,
+        "drift_ratio": -0.021858749999999996,
+        "lateral_force_kN": -398.39
+      },
+      {
+        "step_index": 185,
+        "displacement_mm": -19.09,
+        "drift_ratio": -0.0238625,
+        "lateral_force_kN": -418.84
+      },
+      {
+        "step_index": 186,
+        "displacement_mm": -19.787,
+        "drift_ratio": -0.02473375,
+        "lateral_force_kN": -423.72
+      },
+      {
+        "step_index": 187,
+        "displacement_mm": -19.787,
+        "drift_ratio": -0.02473375,
+        "lateral_force_kN": -413.97
+      },
+      {
+        "step_index": 188,
+        "displacement_mm": -19.369,
+        "drift_ratio": -0.02421125,
+        "lateral_force_kN": -388.65
+      },
+      {
+        "step_index": 189,
+        "displacement_mm": -18.602,
+        "drift_ratio": -0.0232525,
+        "lateral_force_kN": -355.53
+      },
+      {
+        "step_index": 190,
+        "displacement_mm": -17.209,
+        "drift_ratio": -0.02151125,
+        "lateral_force_kN": -311.7
+      },
+      {
+        "step_index": 191,
+        "displacement_mm": -16.024,
+        "drift_ratio": -0.020030000000000003,
+        "lateral_force_kN": -265.92
+      },
+      {
+        "step_index": 192,
+        "displacement_mm": -14.701,
+        "drift_ratio": -0.01837625,
+        "lateral_force_kN": -225.01
+      },
+      {
+        "step_index": 193,
+        "displacement_mm": -13.098,
+        "drift_ratio": -0.0163725,
+        "lateral_force_kN": -181.18
+      },
+      {
+        "step_index": 194,
+        "displacement_mm": -11.565,
+        "drift_ratio": -0.014456249999999999,
+        "lateral_force_kN": -140.27
+      },
+      {
+        "step_index": 195,
+        "displacement_mm": -9.8237,
+        "drift_ratio": -0.012279625,
+        "lateral_force_kN": -100.33
+      },
+      {
+        "step_index": 196,
+        "displacement_mm": -8.2908,
+        "drift_ratio": -0.010363500000000001,
+        "lateral_force_kN": -67.208
+      },
+      {
+        "step_index": 197,
+        "displacement_mm": -6.2705,
+        "drift_ratio": -0.007838125,
+        "lateral_force_kN": -27.273
+      },
+      {
+        "step_index": 198,
+        "displacement_mm": -4.5984,
+        "drift_ratio": -0.005748,
+        "lateral_force_kN": 5.8445
+      },
+      {
+        "step_index": 199,
+        "displacement_mm": -2.8565,
+        "drift_ratio": -0.003570625,
+        "lateral_force_kN": 35.066
+      },
+      {
+        "step_index": 200,
+        "displacement_mm": -0.83607,
+        "drift_ratio": -0.0010450875,
+        "lateral_force_kN": 68.182
+      },
+      {
+        "step_index": 201,
+        "displacement_mm": 1.3237,
+        "drift_ratio": 0.001654625,
+        "lateral_force_kN": 101.3
+      },
+      {
+        "step_index": 202,
+        "displacement_mm": 3.7622,
+        "drift_ratio": 0.00470275,
+        "lateral_force_kN": 137.34
+      },
+      {
+        "step_index": 203,
+        "displacement_mm": 5.6434,
+        "drift_ratio": 0.00705425,
+        "lateral_force_kN": 170.46
+      },
+      {
+        "step_index": 204,
+        "displacement_mm": 7.7335,
+        "drift_ratio": 0.009666875,
+        "lateral_force_kN": 198.71
+      },
+      {
+        "step_index": 205,
+        "displacement_mm": 9.0571,
+        "drift_ratio": 0.011321375,
+        "lateral_force_kN": 221.11
+      },
+      {
+        "step_index": 206,
+        "displacement_mm": 10.729,
+        "drift_ratio": 0.01341125,
+        "lateral_force_kN": 246.44
+      },
+      {
+        "step_index": 207,
+        "displacement_mm": 12.262,
+        "drift_ratio": 0.0153275,
+        "lateral_force_kN": 274.68
+      },
+      {
+        "step_index": 208,
+        "displacement_mm": 13.934,
+        "drift_ratio": 0.0174175,
+        "lateral_force_kN": 299.04
+      },
+      {
+        "step_index": 209,
+        "displacement_mm": 15.537,
+        "drift_ratio": 0.01942125,
+        "lateral_force_kN": 326.31
+      },
+      {
+        "step_index": 210,
+        "displacement_mm": 17.278,
+        "drift_ratio": 0.0215975,
+        "lateral_force_kN": 349.69
+      },
+      {
+        "step_index": 211,
+        "displacement_mm": 19.229,
+        "drift_ratio": 0.02403625,
+        "lateral_force_kN": 375.99
+      },
+      {
+        "step_index": 212,
+        "displacement_mm": 20.623,
+        "drift_ratio": 0.025778750000000003,
+        "lateral_force_kN": 394.5
+      },
+      {
+        "step_index": 213,
+        "displacement_mm": 21.11,
+        "drift_ratio": 0.026387499999999998,
+        "lateral_force_kN": 400.34
+      },
+      {
+        "step_index": 214,
+        "displacement_mm": 21.319,
+        "drift_ratio": 0.02664875,
+        "lateral_force_kN": 402.28
+      },
+      {
+        "step_index": 215,
+        "displacement_mm": 20.901,
+        "drift_ratio": 0.02612625,
+        "lateral_force_kN": 383.78
+      },
+      {
+        "step_index": 216,
+        "displacement_mm": 20.344,
+        "drift_ratio": 0.02543,
+        "lateral_force_kN": 358.45
+      },
+      {
+        "step_index": 217,
+        "displacement_mm": 19.647,
+        "drift_ratio": 0.024558749999999997,
+        "lateral_force_kN": 333.13
+      },
+      {
+        "step_index": 218,
+        "displacement_mm": 18.672,
+        "drift_ratio": 0.02334,
+        "lateral_force_kN": 303.91
+      },
+      {
+        "step_index": 219,
+        "displacement_mm": 17.905,
+        "drift_ratio": 0.022381250000000002,
+        "lateral_force_kN": 277.6
+      },
+      {
+        "step_index": 220,
+        "displacement_mm": 17.0,
+        "drift_ratio": 0.02125,
+        "lateral_force_kN": 249.36
+      },
+      {
+        "step_index": 221,
+        "displacement_mm": 15.746,
+        "drift_ratio": 0.019682500000000002,
+        "lateral_force_kN": 219.16
+      },
+      {
+        "step_index": 222,
+        "displacement_mm": 14.561,
+        "drift_ratio": 0.01820125,
+        "lateral_force_kN": 187.02
+      },
+      {
+        "step_index": 223,
+        "displacement_mm": 13.237,
+        "drift_ratio": 0.01654625,
+        "lateral_force_kN": 154.87
+      },
+      {
+        "step_index": 224,
+        "displacement_mm": 11.565,
+        "drift_ratio": 0.014456249999999999,
+        "lateral_force_kN": 118.83
+      },
+      {
+        "step_index": 225,
+        "displacement_mm": 9.9629,
+        "drift_ratio": 0.012453625,
+        "lateral_force_kN": 82.795
+      },
+      {
+        "step_index": 226,
+        "displacement_mm": 8.2212,
+        "drift_ratio": 0.0102765,
+        "lateral_force_kN": 47.729
+      },
+      {
+        "step_index": 227,
+        "displacement_mm": 6.0615,
+        "drift_ratio": 0.007576874999999999,
+        "lateral_force_kN": 9.7407
+      },
+      {
+        "step_index": 228,
+        "displacement_mm": 4.5984,
+        "drift_ratio": 0.005748,
+        "lateral_force_kN": -18.507
+      },
+      {
+        "step_index": 229,
+        "displacement_mm": 3.4836,
+        "drift_ratio": 0.0043545,
+        "lateral_force_kN": -37.014
+      },
+      {
+        "step_index": 230,
+        "displacement_mm": 1.3237,
+        "drift_ratio": 0.001654625,
+        "lateral_force_kN": -73.053
+      },
+      {
+        "step_index": 231,
+        "displacement_mm": -0.90571,
+        "drift_ratio": -0.0011321375,
+        "lateral_force_kN": -109.09
+      },
+      {
+        "step_index": 232,
+        "displacement_mm": -3.4836,
+        "drift_ratio": -0.0043545,
+        "lateral_force_kN": -150.98
+      },
+      {
+        "step_index": 233,
+        "displacement_mm": -7.1064,
+        "drift_ratio": -0.008883,
+        "lateral_force_kN": -212.34
+      },
+      {
+        "step_index": 234,
+        "displacement_mm": -9.336,
+        "drift_ratio": -0.01167,
+        "lateral_force_kN": -252.28
+      },
+      {
+        "step_index": 235,
+        "displacement_mm": -11.565,
+        "drift_ratio": -0.014456249999999999,
+        "lateral_force_kN": -295.14
+      },
+      {
+        "step_index": 236,
+        "displacement_mm": -13.028,
+        "drift_ratio": -0.016285,
+        "lateral_force_kN": -323.39
+      },
+      {
+        "step_index": 237,
+        "displacement_mm": -14.701,
+        "drift_ratio": -0.01837625,
+        "lateral_force_kN": -352.61
+      },
+      {
+        "step_index": 238,
+        "displacement_mm": -16.303,
+        "drift_ratio": -0.02037875,
+        "lateral_force_kN": -380.86
+      },
+      {
+        "step_index": 239,
+        "displacement_mm": -17.766,
+        "drift_ratio": -0.022207499999999998,
+        "lateral_force_kN": -400.34
+      },
+      {
+        "step_index": 240,
+        "displacement_mm": -18.951,
+        "drift_ratio": -0.02368875,
+        "lateral_force_kN": -415.92
+      },
+      {
+        "step_index": 241,
+        "displacement_mm": -19.856,
+        "drift_ratio": -0.024820000000000002,
+        "lateral_force_kN": -424.69
+      },
+      {
+        "step_index": 242,
+        "displacement_mm": -19.787,
+        "drift_ratio": -0.02473375,
+        "lateral_force_kN": -408.13
+      },
+      {
+        "step_index": 243,
+        "displacement_mm": -19.159,
+        "drift_ratio": -0.023948749999999998,
+        "lateral_force_kN": -375.01
+      },
+      {
+        "step_index": 244,
+        "displacement_mm": -18.184,
+        "drift_ratio": -0.02273,
+        "lateral_force_kN": -333.13
+      },
+      {
+        "step_index": 245,
+        "displacement_mm": -16.861,
+        "drift_ratio": -0.02107625,
+        "lateral_force_kN": -292.22
+      },
+      {
+        "step_index": 246,
+        "displacement_mm": -15.676,
+        "drift_ratio": -0.019595,
+        "lateral_force_kN": -250.33
+      },
+      {
+        "step_index": 247,
+        "displacement_mm": -14.422,
+        "drift_ratio": -0.018027500000000002,
+        "lateral_force_kN": -216.24
+      },
+      {
+        "step_index": 248,
+        "displacement_mm": -12.889,
+        "drift_ratio": -0.01611125,
+        "lateral_force_kN": -176.31
+      },
+      {
+        "step_index": 249,
+        "displacement_mm": -11.217,
+        "drift_ratio": -0.01402125,
+        "lateral_force_kN": -134.42
+      },
+      {
+        "step_index": 250,
+        "displacement_mm": -9.9629,
+        "drift_ratio": -0.012453625,
+        "lateral_force_kN": -104.22
+      },
+      {
+        "step_index": 251,
+        "displacement_mm": -8.2908,
+        "drift_ratio": -0.010363500000000001,
+        "lateral_force_kN": -68.182
+      },
+      {
+        "step_index": 252,
+        "displacement_mm": -6.4097,
+        "drift_ratio": -0.008012125,
+        "lateral_force_kN": -30.196
+      },
+      {
+        "step_index": 253,
+        "displacement_mm": -4.2499,
+        "drift_ratio": -0.005312375,
+        "lateral_force_kN": 12.663
+      },
+      {
+        "step_index": 254,
+        "displacement_mm": -1.7418,
+        "drift_ratio": -0.00217725,
+        "lateral_force_kN": 50.652
+      },
+      {
+        "step_index": 255,
+        "displacement_mm": 0.20901,
+        "drift_ratio": 0.0002612625,
+        "lateral_force_kN": 79.872
+      },
+      {
+        "step_index": 256,
+        "displacement_mm": 2.4385,
+        "drift_ratio": 0.003048125,
+        "lateral_force_kN": 116.89
+      },
+      {
+        "step_index": 257,
+        "displacement_mm": 4.8771,
+        "drift_ratio": 0.006096375,
+        "lateral_force_kN": 151.95
+      },
+      {
+        "step_index": 258,
+        "displacement_mm": 7.0368,
+        "drift_ratio": 0.008796,
+        "lateral_force_kN": 187.02
+      },
+      {
+        "step_index": 259,
+        "displacement_mm": 8.7785,
+        "drift_ratio": 0.010973124999999999,
+        "lateral_force_kN": 216.24
+      },
+      {
+        "step_index": 260,
+        "displacement_mm": 10.52,
+        "drift_ratio": 0.01315,
+        "lateral_force_kN": 246.44
+      },
+      {
+        "step_index": 261,
+        "displacement_mm": 12.68,
+        "drift_ratio": 0.01585,
+        "lateral_force_kN": 279.55
+      },
+      {
+        "step_index": 262,
+        "displacement_mm": 14.283,
+        "drift_ratio": 0.017853749999999998,
+        "lateral_force_kN": 306.83
+      },
+      {
+        "step_index": 263,
+        "displacement_mm": 16.233,
+        "drift_ratio": 0.02029125,
+        "lateral_force_kN": 336.05
+      },
+      {
+        "step_index": 264,
+        "displacement_mm": 17.975,
+        "drift_ratio": 0.022468750000000003,
+        "lateral_force_kN": 360.4
+      },
+      {
+        "step_index": 265,
+        "displacement_mm": 19.856,
+        "drift_ratio": 0.024820000000000002,
+        "lateral_force_kN": 384.75
+      },
+      {
+        "step_index": 266,
+        "displacement_mm": 20.901,
+        "drift_ratio": 0.02612625,
+        "lateral_force_kN": 394.5
+      },
+      {
+        "step_index": 267,
+        "displacement_mm": 21.319,
+        "drift_ratio": 0.02664875,
+        "lateral_force_kN": 394.5
+      },
+      {
+        "step_index": 268,
+        "displacement_mm": 21.528,
+        "drift_ratio": 0.02691,
+        "lateral_force_kN": 387.68
+      },
+      {
+        "step_index": 269,
+        "displacement_mm": 20.692,
+        "drift_ratio": 0.025865,
+        "lateral_force_kN": 358.45
+      },
+      {
+        "step_index": 270,
+        "displacement_mm": 19.926,
+        "drift_ratio": 0.0249075,
+        "lateral_force_kN": 326.31
+      },
+      {
+        "step_index": 271,
+        "displacement_mm": 18.951,
+        "drift_ratio": 0.02368875,
+        "lateral_force_kN": 292.22
+      },
+      {
+        "step_index": 272,
+        "displacement_mm": 17.696,
+        "drift_ratio": 0.02212,
+        "lateral_force_kN": 255.2
+      },
+      {
+        "step_index": 273,
+        "displacement_mm": 16.373,
+        "drift_ratio": 0.020466250000000002,
+        "lateral_force_kN": 219.16
+      },
+      {
+        "step_index": 274,
+        "displacement_mm": 14.84,
+        "drift_ratio": 0.01855,
+        "lateral_force_kN": 182.15
+      },
+      {
+        "step_index": 275,
+        "displacement_mm": 13.307,
+        "drift_ratio": 0.01663375,
+        "lateral_force_kN": 149.03
+      },
+      {
+        "step_index": 276,
+        "displacement_mm": 11.565,
+        "drift_ratio": 0.014456249999999999,
+        "lateral_force_kN": 112.99
+      },
+      {
+        "step_index": 277,
+        "displacement_mm": 9.4752,
+        "drift_ratio": 0.011843999999999999,
+        "lateral_force_kN": 73.053
+      },
+      {
+        "step_index": 278,
+        "displacement_mm": 7.176,
+        "drift_ratio": 0.00897,
+        "lateral_force_kN": 31.17
+      },
+      {
+        "step_index": 279,
+        "displacement_mm": 5.0861,
+        "drift_ratio": 0.006357625,
+        "lateral_force_kN": -5.8445
+      },
+      {
+        "step_index": 280,
+        "displacement_mm": 3.4836,
+        "drift_ratio": 0.0043545,
+        "lateral_force_kN": -28.248
+      },
+      {
+        "step_index": 281,
+        "displacement_mm": 1.7418,
+        "drift_ratio": 0.00217725,
+        "lateral_force_kN": -60.394
+      },
+      {
+        "step_index": 282,
+        "displacement_mm": -1.1147,
+        "drift_ratio": -0.001393375,
+        "lateral_force_kN": -103.25
+      },
+      {
+        "step_index": 283,
+        "displacement_mm": -3.1351,
+        "drift_ratio": -0.003918875,
+        "lateral_force_kN": -138.32
+      },
+      {
+        "step_index": 284,
+        "displacement_mm": -5.3647,
+        "drift_ratio": -0.006705875,
+        "lateral_force_kN": -175.33
+      },
+      {
+        "step_index": 285,
+        "displacement_mm": -7.0368,
+        "drift_ratio": -0.008796,
+        "lateral_force_kN": -206.5
+      },
+      {
+        "step_index": 286,
+        "displacement_mm": -9.1966,
+        "drift_ratio": -0.01149575,
+        "lateral_force_kN": -243.51
+      },
+      {
+        "step_index": 287,
+        "displacement_mm": -11.356,
+        "drift_ratio": -0.014195,
+        "lateral_force_kN": -279.55
+      },
+      {
+        "step_index": 288,
+        "displacement_mm": -13.098,
+        "drift_ratio": -0.0163725,
+        "lateral_force_kN": -312.67
+      },
+      {
+        "step_index": 289,
+        "displacement_mm": -15.119,
+        "drift_ratio": -0.01889875,
+        "lateral_force_kN": -346.77
+      },
+      {
+        "step_index": 290,
+        "displacement_mm": -16.791,
+        "drift_ratio": -0.02098875,
+        "lateral_force_kN": -375.99
+      },
+      {
+        "step_index": 291,
+        "displacement_mm": -18.045,
+        "drift_ratio": -0.022556250000000003,
+        "lateral_force_kN": -395.47
+      },
+      {
+        "step_index": 292,
+        "displacement_mm": -18.881,
+        "drift_ratio": -0.02360125,
+        "lateral_force_kN": -408.13
+      },
+      {
+        "step_index": 293,
+        "displacement_mm": -19.508,
+        "drift_ratio": -0.024385,
+        "lateral_force_kN": -415.92
+      },
+      {
+        "step_index": 294,
+        "displacement_mm": -20.205,
+        "drift_ratio": -0.025256249999999997,
+        "lateral_force_kN": -420.79
+      },
+      {
+        "step_index": 295,
+        "displacement_mm": -19.856,
+        "drift_ratio": -0.024820000000000002,
+        "lateral_force_kN": -399.36
+      },
+      {
+        "step_index": 296,
+        "displacement_mm": -19.229,
+        "drift_ratio": -0.02403625,
+        "lateral_force_kN": -375.01
+      },
+      {
+        "step_index": 297,
+        "displacement_mm": -18.533,
+        "drift_ratio": -0.023166250000000003,
+        "lateral_force_kN": -344.82
+      },
+      {
+        "step_index": 298,
+        "displacement_mm": -17.696,
+        "drift_ratio": -0.02212,
+        "lateral_force_kN": -313.64
+      },
+      {
+        "step_index": 299,
+        "displacement_mm": -16.442,
+        "drift_ratio": -0.0205525,
+        "lateral_force_kN": -273.71
+      },
+      {
+        "step_index": 300,
+        "displacement_mm": -15.467,
+        "drift_ratio": -0.01933375,
+        "lateral_force_kN": -243.51
+      },
+      {
+        "step_index": 301,
+        "displacement_mm": -14.283,
+        "drift_ratio": -0.017853749999999998,
+        "lateral_force_kN": -209.42
+      },
+      {
+        "step_index": 302,
+        "displacement_mm": -12.959,
+        "drift_ratio": -0.016198749999999998,
+        "lateral_force_kN": -174.36
+      },
+      {
+        "step_index": 303,
+        "displacement_mm": -11.078,
+        "drift_ratio": -0.013847499999999999,
+        "lateral_force_kN": -132.47
+      },
+      {
+        "step_index": 304,
+        "displacement_mm": -9.6147,
+        "drift_ratio": -0.012018375,
+        "lateral_force_kN": -97.407
+      },
+      {
+        "step_index": 305,
+        "displacement_mm": -8.1516,
+        "drift_ratio": -0.0101895,
+        "lateral_force_kN": -65.26
+      },
+      {
+        "step_index": 306,
+        "displacement_mm": -6.5491,
+        "drift_ratio": -0.008186375000000001,
+        "lateral_force_kN": -32.144
+      },
+      {
+        "step_index": 307,
+        "displacement_mm": -5.0162,
+        "drift_ratio": -0.006270250000000001,
+        "lateral_force_kN": 0.0
+      },
+      {
+        "step_index": 308,
+        "displacement_mm": -2.9959,
+        "drift_ratio": -0.003744875,
+        "lateral_force_kN": 34.092
+      },
+      {
+        "step_index": 309,
+        "displacement_mm": -0.13934,
+        "drift_ratio": -0.000174175,
+        "lateral_force_kN": 75.001
+      },
+      {
+        "step_index": 310,
+        "displacement_mm": 2.0205,
+        "drift_ratio": 0.002525625,
+        "lateral_force_kN": 108.12
+      },
+      {
+        "step_index": 311,
+        "displacement_mm": 3.8318,
+        "drift_ratio": 0.00478975,
+        "lateral_force_kN": 135.39
+      },
+      {
+        "step_index": 312,
+        "displacement_mm": 5.5039,
+        "drift_ratio": 0.006879875,
+        "lateral_force_kN": 159.74
+      },
+      {
+        "step_index": 313,
+        "displacement_mm": 6.9672,
+        "drift_ratio": 0.008709,
+        "lateral_force_kN": 183.12
+      },
+      {
+        "step_index": 314,
+        "displacement_mm": 8.6393,
+        "drift_ratio": 0.010799125,
+        "lateral_force_kN": 212.34
+      },
+      {
+        "step_index": 315,
+        "displacement_mm": 11.008,
+        "drift_ratio": 0.01376,
+        "lateral_force_kN": 251.31
+      },
+      {
+        "step_index": 316,
+        "displacement_mm": 13.237,
+        "drift_ratio": 0.01654625,
+        "lateral_force_kN": 288.32
+      },
+      {
+        "step_index": 317,
+        "displacement_mm": 15.049,
+        "drift_ratio": 0.018811249999999998,
+        "lateral_force_kN": 314.62
+      },
+      {
+        "step_index": 318,
+        "displacement_mm": 17.0,
+        "drift_ratio": 0.02125,
+        "lateral_force_kN": 344.82
+      },
+      {
+        "step_index": 319,
+        "displacement_mm": 18.672,
+        "drift_ratio": 0.02334,
+        "lateral_force_kN": 369.17
+      },
+      {
+        "step_index": 320,
+        "displacement_mm": 20.762,
+        "drift_ratio": 0.0259525,
+        "lateral_force_kN": 395.47
+      },
+      {
+        "step_index": 321,
+        "displacement_mm": 22.643,
+        "drift_ratio": 0.028303750000000003,
+        "lateral_force_kN": 416.9
+      },
+      {
+        "step_index": 322,
+        "displacement_mm": 24.803,
+        "drift_ratio": 0.03100375,
+        "lateral_force_kN": 433.46
+      },
+      {
+        "step_index": 323,
+        "displacement_mm": 26.058,
+        "drift_ratio": 0.0325725,
+        "lateral_force_kN": 437.35
+      },
+      {
+        "step_index": 324,
+        "displacement_mm": 26.962,
+        "drift_ratio": 0.033702499999999996,
+        "lateral_force_kN": 432.48
+      },
+      {
+        "step_index": 325,
+        "displacement_mm": 27.661,
+        "drift_ratio": 0.03457625,
+        "lateral_force_kN": 429.56
+      },
+      {
+        "step_index": 326,
+        "displacement_mm": 27.869,
+        "drift_ratio": 0.03483625,
+        "lateral_force_kN": 426.64
+      },
+      {
+        "step_index": 327,
+        "displacement_mm": 27.521,
+        "drift_ratio": 0.03440125,
+        "lateral_force_kN": 411.05
+      },
+      {
+        "step_index": 328,
+        "displacement_mm": 26.962,
+        "drift_ratio": 0.033702499999999996,
+        "lateral_force_kN": 385.73
+      },
+      {
+        "step_index": 329,
+        "displacement_mm": 26.126,
+        "drift_ratio": 0.0326575,
+        "lateral_force_kN": 352.61
+      },
+      {
+        "step_index": 330,
+        "displacement_mm": 25.082,
+        "drift_ratio": 0.0313525,
+        "lateral_force_kN": 326.31
+      },
+      {
+        "step_index": 331,
+        "displacement_mm": 23.688,
+        "drift_ratio": 0.029609999999999997,
+        "lateral_force_kN": 281.5
+      },
+      {
+        "step_index": 332,
+        "displacement_mm": 21.877,
+        "drift_ratio": 0.02734625,
+        "lateral_force_kN": 236.69
+      },
+      {
+        "step_index": 333,
+        "displacement_mm": 20.274,
+        "drift_ratio": 0.0253425,
+        "lateral_force_kN": 197.73
+      },
+      {
+        "step_index": 334,
+        "displacement_mm": 18.045,
+        "drift_ratio": 0.022556250000000003,
+        "lateral_force_kN": 148.05
+      },
+      {
+        "step_index": 335,
+        "displacement_mm": 16.373,
+        "drift_ratio": 0.020466250000000002,
+        "lateral_force_kN": 109.09
+      },
+      {
+        "step_index": 336,
+        "displacement_mm": 14.213,
+        "drift_ratio": 0.017766249999999997,
+        "lateral_force_kN": 69.157
+      },
+      {
+        "step_index": 337,
+        "displacement_mm": 12.402,
+        "drift_ratio": 0.015502499999999999,
+        "lateral_force_kN": 33.118
+      },
+      {
+        "step_index": 338,
+        "displacement_mm": 11.217,
+        "drift_ratio": 0.01402125,
+        "lateral_force_kN": 12.663
+      },
+      {
+        "step_index": 339,
+        "displacement_mm": 9.1966,
+        "drift_ratio": 0.01149575,
+        "lateral_force_kN": -21.429
+      },
+      {
+        "step_index": 340,
+        "displacement_mm": 7.385,
+        "drift_ratio": 0.00923125,
+        "lateral_force_kN": -45.781
+      },
+      {
+        "step_index": 341,
+        "displacement_mm": 5.2253,
+        "drift_ratio": 0.006531625,
+        "lateral_force_kN": -75.001
+      },
+      {
+        "step_index": 342,
+        "displacement_mm": 2.7869,
+        "drift_ratio": 0.003483625,
+        "lateral_force_kN": -104.22
+      },
+      {
+        "step_index": 343,
+        "displacement_mm": 0.83607,
+        "drift_ratio": 0.0010450875,
+        "lateral_force_kN": -127.6
+      },
+      {
+        "step_index": 344,
+        "displacement_mm": -1.1844,
+        "drift_ratio": -0.0014804999999999998,
+        "lateral_force_kN": -150.98
+      },
+      {
+        "step_index": 345,
+        "displacement_mm": -3.8318,
+        "drift_ratio": -0.00478975,
+        "lateral_force_kN": -187.99
+      },
+      {
+        "step_index": 346,
+        "displacement_mm": -5.4343,
+        "drift_ratio": -0.006792875,
+        "lateral_force_kN": -208.45
+      },
+      {
+        "step_index": 347,
+        "displacement_mm": -7.4549,
+        "drift_ratio": -0.009318625,
+        "lateral_force_kN": -237.67
+      },
+      {
+        "step_index": 348,
+        "displacement_mm": -9.336,
+        "drift_ratio": -0.01167,
+        "lateral_force_kN": -266.89
+      },
+      {
+        "step_index": 349,
+        "displacement_mm": -11.496,
+        "drift_ratio": -0.01437,
+        "lateral_force_kN": -296.11
+      },
+      {
+        "step_index": 350,
+        "displacement_mm": -12.402,
+        "drift_ratio": -0.015502499999999999,
+        "lateral_force_kN": -312.67
+      },
+      {
+        "step_index": 351,
+        "displacement_mm": -14.074,
+        "drift_ratio": -0.0175925,
+        "lateral_force_kN": -341.89
+      },
+      {
+        "step_index": 352,
+        "displacement_mm": -15.467,
+        "drift_ratio": -0.01933375,
+        "lateral_force_kN": -362.35
+      },
+      {
+        "step_index": 353,
+        "displacement_mm": -16.861,
+        "drift_ratio": -0.02107625,
+        "lateral_force_kN": -386.7
+      },
+      {
+        "step_index": 354,
+        "displacement_mm": -17.905,
+        "drift_ratio": -0.022381250000000002,
+        "lateral_force_kN": -400.34
+      },
+      {
+        "step_index": 355,
+        "displacement_mm": -19.438,
+        "drift_ratio": -0.0242975,
+        "lateral_force_kN": -415.92
+      },
+      {
+        "step_index": 356,
+        "displacement_mm": -20.692,
+        "drift_ratio": -0.025865,
+        "lateral_force_kN": -429.56
+      },
+      {
+        "step_index": 357,
+        "displacement_mm": -22.086,
+        "drift_ratio": -0.027607499999999997,
+        "lateral_force_kN": -443.19
+      },
+      {
+        "step_index": 358,
+        "displacement_mm": -23.549,
+        "drift_ratio": -0.02943625,
+        "lateral_force_kN": -447.09
+      },
+      {
+        "step_index": 359,
+        "displacement_mm": -24.942,
+        "drift_ratio": -0.0311775,
+        "lateral_force_kN": -450.03
+      },
+      {
+        "step_index": 360,
+        "displacement_mm": -25.639,
+        "drift_ratio": -0.03204875,
+        "lateral_force_kN": -451.01
+      },
+      {
+        "step_index": 361,
+        "displacement_mm": -26.126,
+        "drift_ratio": -0.0326575,
+        "lateral_force_kN": -450.03
+      },
+      {
+        "step_index": 362,
+        "displacement_mm": -26.058,
+        "drift_ratio": -0.0325725,
+        "lateral_force_kN": -437.35
+      },
+      {
+        "step_index": 363,
+        "displacement_mm": -25.71,
+        "drift_ratio": -0.0321375,
+        "lateral_force_kN": -415.92
+      },
+      {
+        "step_index": 364,
+        "displacement_mm": -24.942,
+        "drift_ratio": -0.0311775,
+        "lateral_force_kN": -382.81
+      },
+      {
+        "step_index": 365,
+        "displacement_mm": -24.037,
+        "drift_ratio": -0.03004625,
+        "lateral_force_kN": -348.71
+      },
+      {
+        "step_index": 366,
+        "displacement_mm": -23.201,
+        "drift_ratio": -0.02900125,
+        "lateral_force_kN": -320.46
+      },
+      {
+        "step_index": 367,
+        "displacement_mm": -22.295,
+        "drift_ratio": -0.02786875,
+        "lateral_force_kN": -290.27
+      },
+      {
+        "step_index": 368,
+        "displacement_mm": -20.971,
+        "drift_ratio": -0.02621375,
+        "lateral_force_kN": -256.18
+      },
+      {
+        "step_index": 369,
+        "displacement_mm": -19.578,
+        "drift_ratio": -0.024472499999999998,
+        "lateral_force_kN": -225.01
+      },
+      {
+        "step_index": 370,
+        "displacement_mm": -18.324,
+        "drift_ratio": -0.022905000000000002,
+        "lateral_force_kN": -191.89
+      },
+      {
+        "step_index": 371,
+        "displacement_mm": -17.139,
+        "drift_ratio": -0.02142375,
+        "lateral_force_kN": -167.54
+      },
+      {
+        "step_index": 372,
+        "displacement_mm": -15.885,
+        "drift_ratio": -0.01985625,
+        "lateral_force_kN": -139.29
+      },
+      {
+        "step_index": 373,
+        "displacement_mm": -14.352,
+        "drift_ratio": -0.01794,
+        "lateral_force_kN": -110.07
+      },
+      {
+        "step_index": 374,
+        "displacement_mm": -12.819,
+        "drift_ratio": -0.01602375,
+        "lateral_force_kN": -80.846
+      },
+      {
+        "step_index": 375,
+        "displacement_mm": -11.496,
+        "drift_ratio": -0.01437,
+        "lateral_force_kN": -56.497
+      },
+      {
+        "step_index": 376,
+        "displacement_mm": -9.7539,
+        "drift_ratio": -0.012192375,
+        "lateral_force_kN": -26.3
+      },
+      {
+        "step_index": 377,
+        "displacement_mm": -7.385,
+        "drift_ratio": -0.00923125,
+        "lateral_force_kN": 6.8182
+      },
+      {
+        "step_index": 378,
+        "displacement_mm": -4.3894,
+        "drift_ratio": -0.00548675,
+        "lateral_force_kN": 44.807
+      },
+      {
+        "step_index": 379,
+        "displacement_mm": -0.69672,
+        "drift_ratio": -0.0008709,
+        "lateral_force_kN": 87.666
+      },
+      {
+        "step_index": 380,
+        "displacement_mm": 2.0901,
+        "drift_ratio": 0.002612625,
+        "lateral_force_kN": 118.83
+      },
+      {
+        "step_index": 381,
+        "displacement_mm": 4.5984,
+        "drift_ratio": 0.005748,
+        "lateral_force_kN": 147.08
+      },
+      {
+        "step_index": 382,
+        "displacement_mm": 7.176,
+        "drift_ratio": 0.00897,
+        "lateral_force_kN": 180.2
+      },
+      {
+        "step_index": 383,
+        "displacement_mm": 9.8237,
+        "drift_ratio": 0.012279625,
+        "lateral_force_kN": 214.29
+      },
+      {
+        "step_index": 384,
+        "displacement_mm": 11.914,
+        "drift_ratio": 0.0148925,
+        "lateral_force_kN": 246.44
+      },
+      {
+        "step_index": 385,
+        "displacement_mm": 13.934,
+        "drift_ratio": 0.0174175,
+        "lateral_force_kN": 274.68
+      },
+      {
+        "step_index": 386,
+        "displacement_mm": 16.233,
+        "drift_ratio": 0.02029125,
+        "lateral_force_kN": 303.91
+      },
+      {
+        "step_index": 387,
+        "displacement_mm": 18.533,
+        "drift_ratio": 0.023166250000000003,
+        "lateral_force_kN": 332.15
+      },
+      {
+        "step_index": 388,
+        "displacement_mm": 20.553,
+        "drift_ratio": 0.025691250000000002,
+        "lateral_force_kN": 354.55
+      },
+      {
+        "step_index": 389,
+        "displacement_mm": 22.783,
+        "drift_ratio": 0.02847875,
+        "lateral_force_kN": 375.99
+      },
+      {
+        "step_index": 390,
+        "displacement_mm": 24.106,
+        "drift_ratio": 0.030132500000000003,
+        "lateral_force_kN": 389.62
+      },
+      {
+        "step_index": 391,
+        "displacement_mm": 26.058,
+        "drift_ratio": 0.0325725,
+        "lateral_force_kN": 407.15
+      },
+      {
+        "step_index": 392,
+        "displacement_mm": 27.31,
+        "drift_ratio": 0.0341375,
+        "lateral_force_kN": 414.95
+      },
+      {
+        "step_index": 393,
+        "displacement_mm": 27.869,
+        "drift_ratio": 0.03483625,
+        "lateral_force_kN": 416.9
+      },
+      {
+        "step_index": 394,
+        "displacement_mm": 28.217,
+        "drift_ratio": 0.03527125,
+        "lateral_force_kN": 416.9
+      },
+      {
+        "step_index": 395,
+        "displacement_mm": 27.937,
+        "drift_ratio": 0.03492125,
+        "lateral_force_kN": 403.26
+      },
+      {
+        "step_index": 396,
+        "displacement_mm": 27.31,
+        "drift_ratio": 0.0341375,
+        "lateral_force_kN": 382.81
+      },
+      {
+        "step_index": 397,
+        "displacement_mm": 26.754,
+        "drift_ratio": 0.0334425,
+        "lateral_force_kN": 362.35
+      },
+      {
+        "step_index": 398,
+        "displacement_mm": 25.918,
+        "drift_ratio": 0.032397499999999996,
+        "lateral_force_kN": 331.18
+      },
+      {
+        "step_index": 399,
+        "displacement_mm": 24.873,
+        "drift_ratio": 0.03109125,
+        "lateral_force_kN": 299.04
+      },
+      {
+        "step_index": 400,
+        "displacement_mm": 23.618,
+        "drift_ratio": 0.029522499999999997,
+        "lateral_force_kN": 271.76
+      },
+      {
+        "step_index": 401,
+        "displacement_mm": 22.364,
+        "drift_ratio": 0.027955,
+        "lateral_force_kN": 236.69
+      },
+      {
+        "step_index": 402,
+        "displacement_mm": 21.18,
+        "drift_ratio": 0.026475,
+        "lateral_force_kN": 207.47
+      },
+      {
+        "step_index": 403,
+        "displacement_mm": 19.647,
+        "drift_ratio": 0.024558749999999997,
+        "lateral_force_kN": 165.59
+      },
+      {
+        "step_index": 404,
+        "displacement_mm": 18.115,
+        "drift_ratio": 0.022643749999999997,
+        "lateral_force_kN": 126.63
+      },
+      {
+        "step_index": 405,
+        "displacement_mm": 16.233,
+        "drift_ratio": 0.02029125,
+        "lateral_force_kN": 90.588
+      },
+      {
+        "step_index": 406,
+        "displacement_mm": 14.631,
+        "drift_ratio": 0.01828875,
+        "lateral_force_kN": 60.394
+      },
+      {
+        "step_index": 407,
+        "displacement_mm": 12.75,
+        "drift_ratio": 0.0159375,
+        "lateral_force_kN": 28.248
+      },
+      {
+        "step_index": 408,
+        "displacement_mm": 10.59,
+        "drift_ratio": 0.0132375,
+        "lateral_force_kN": -4.8704
+      },
+      {
+        "step_index": 409,
+        "displacement_mm": 9.336,
+        "drift_ratio": 0.01167,
+        "lateral_force_kN": -18.507
+      },
+      {
+        "step_index": 410,
+        "displacement_mm": 7.0368,
+        "drift_ratio": 0.008796,
+        "lateral_force_kN": -50.652
+      },
+      {
+        "step_index": 411,
+        "displacement_mm": 4.459,
+        "drift_ratio": 0.00557375,
+        "lateral_force_kN": -81.821
+      },
+      {
+        "step_index": 412,
+        "displacement_mm": 2.7869,
+        "drift_ratio": 0.003483625,
+        "lateral_force_kN": -99.355
+      },
+      {
+        "step_index": 413,
+        "displacement_mm": 0.76639,
+        "drift_ratio": 0.0009579875,
+        "lateral_force_kN": -122.73
+      },
+      {
+        "step_index": 414,
+        "displacement_mm": -1.7418,
+        "drift_ratio": -0.00217725,
+        "lateral_force_kN": -151.95
+      },
+      {
+        "step_index": 415,
+        "displacement_mm": -4.5286,
+        "drift_ratio": -0.00566075,
+        "lateral_force_kN": -181.18
+      },
+      {
+        "step_index": 416,
+        "displacement_mm": -7.1064,
+        "drift_ratio": -0.008883,
+        "lateral_force_kN": -213.32
+      },
+      {
+        "step_index": 417,
+        "displacement_mm": -9.336,
+        "drift_ratio": -0.01167,
+        "lateral_force_kN": -243.51
+      },
+      {
+        "step_index": 418,
+        "displacement_mm": -12.471,
+        "drift_ratio": -0.01558875,
+        "lateral_force_kN": -288.32
+      },
+      {
+        "step_index": 419,
+        "displacement_mm": -14.561,
+        "drift_ratio": -0.01820125,
+        "lateral_force_kN": -319.49
+      },
+      {
+        "step_index": 420,
+        "displacement_mm": -16.582,
+        "drift_ratio": -0.0207275,
+        "lateral_force_kN": -340.92
+      },
+      {
+        "step_index": 421,
+        "displacement_mm": -18.533,
+        "drift_ratio": -0.023166250000000003,
+        "lateral_force_kN": -366.24
+      },
+      {
+        "step_index": 422,
+        "displacement_mm": -20.135,
+        "drift_ratio": -0.025168750000000004,
+        "lateral_force_kN": -384.75
+      },
+      {
+        "step_index": 423,
+        "displacement_mm": -21.459,
+        "drift_ratio": -0.02682375,
+        "lateral_force_kN": -398.39
+      },
+      {
+        "step_index": 424,
+        "displacement_mm": -22.783,
+        "drift_ratio": -0.02847875,
+        "lateral_force_kN": -412.03
+      },
+      {
+        "step_index": 425,
+        "displacement_mm": -24.106,
+        "drift_ratio": -0.030132500000000003,
+        "lateral_force_kN": -422.74
+      },
+      {
+        "step_index": 426,
+        "displacement_mm": -25.082,
+        "drift_ratio": -0.0313525,
+        "lateral_force_kN": -431.51
+      },
+      {
+        "step_index": 427,
+        "displacement_mm": -25.57,
+        "drift_ratio": -0.0319625,
+        "lateral_force_kN": -437.35
+      },
+      {
+        "step_index": 428,
+        "displacement_mm": -25.918,
+        "drift_ratio": -0.032397499999999996,
+        "lateral_force_kN": -437.35
+      },
+      {
+        "step_index": 429,
+        "displacement_mm": -25.918,
+        "drift_ratio": -0.032397499999999996,
+        "lateral_force_kN": -423.72
+      },
+      {
+        "step_index": 430,
+        "displacement_mm": -25.36,
+        "drift_ratio": -0.0317,
+        "lateral_force_kN": -399.36
+      },
+      {
+        "step_index": 431,
+        "displacement_mm": -24.733,
+        "drift_ratio": -0.03091625,
+        "lateral_force_kN": -368.19
+      },
+      {
+        "step_index": 432,
+        "displacement_mm": -23.967,
+        "drift_ratio": -0.02995875,
+        "lateral_force_kN": -339.95
+      },
+      {
+        "step_index": 433,
+        "displacement_mm": -23.34,
+        "drift_ratio": -0.029175,
+        "lateral_force_kN": -317.54
+      },
+      {
+        "step_index": 434,
+        "displacement_mm": -22.504,
+        "drift_ratio": -0.028130000000000002,
+        "lateral_force_kN": -292.22
+      },
+      {
+        "step_index": 435,
+        "displacement_mm": -21.041,
+        "drift_ratio": -0.02630125,
+        "lateral_force_kN": -254.23
+      },
+      {
+        "step_index": 436,
+        "displacement_mm": -20.065,
+        "drift_ratio": -0.025081250000000003,
+        "lateral_force_kN": -229.88
+      },
+      {
+        "step_index": 437,
+        "displacement_mm": -18.951,
+        "drift_ratio": -0.02368875,
+        "lateral_force_kN": -199.68
+      },
+      {
+        "step_index": 438,
+        "displacement_mm": -17.487,
+        "drift_ratio": -0.021858749999999996,
+        "lateral_force_kN": -167.54
+      },
+      {
+        "step_index": 439,
+        "displacement_mm": -15.955,
+        "drift_ratio": -0.01994375,
+        "lateral_force_kN": -133.45
+      },
+      {
+        "step_index": 440,
+        "displacement_mm": -14.77,
+        "drift_ratio": -0.0184625,
+        "lateral_force_kN": -109.09
+      },
+      {
+        "step_index": 441,
+        "displacement_mm": -13.237,
+        "drift_ratio": -0.01654625,
+        "lateral_force_kN": -78.898
+      },
+      {
+        "step_index": 442,
+        "displacement_mm": -11.774,
+        "drift_ratio": -0.0147175,
+        "lateral_force_kN": -51.626
+      },
+      {
+        "step_index": 443,
+        "displacement_mm": -9.6147,
+        "drift_ratio": -0.012018375,
+        "lateral_force_kN": -21.429
+      },
+      {
+        "step_index": 444,
+        "displacement_mm": -7.4549,
+        "drift_ratio": -0.009318625,
+        "lateral_force_kN": 8.7666
+      },
+      {
+        "step_index": 445,
+        "displacement_mm": -5.6434,
+        "drift_ratio": -0.00705425,
+        "lateral_force_kN": 31.17
+      },
+      {
+        "step_index": 446,
+        "displacement_mm": -3.414,
+        "drift_ratio": -0.0042675000000000005,
+        "lateral_force_kN": 56.497
+      },
+      {
+        "step_index": 447,
+        "displacement_mm": -0.069672,
+        "drift_ratio": -8.709e-05,
+        "lateral_force_kN": 93.511
+      },
+      {
+        "step_index": 448,
+        "displacement_mm": 2.7173,
+        "drift_ratio": 0.003396625,
+        "lateral_force_kN": 122.73
+      },
+      {
+        "step_index": 449,
+        "displacement_mm": 4.8072,
+        "drift_ratio": 0.006009,
+        "lateral_force_kN": 147.08
+      },
+      {
+        "step_index": 450,
+        "displacement_mm": 6.8974,
+        "drift_ratio": 0.008621750000000001,
+        "lateral_force_kN": 174.36
+      },
+      {
+        "step_index": 451,
+        "displacement_mm": 8.8483,
+        "drift_ratio": 0.011060375,
+        "lateral_force_kN": 199.68
+      },
+      {
+        "step_index": 452,
+        "displacement_mm": 10.938,
+        "drift_ratio": 0.0136725,
+        "lateral_force_kN": 227.93
+      },
+      {
+        "step_index": 453,
+        "displacement_mm": 12.889,
+        "drift_ratio": 0.01611125,
+        "lateral_force_kN": 252.28
+      },
+      {
+        "step_index": 454,
+        "displacement_mm": 15.606,
+        "drift_ratio": 0.0195075,
+        "lateral_force_kN": 285.4
+      },
+      {
+        "step_index": 455,
+        "displacement_mm": 17.766,
+        "drift_ratio": 0.022207499999999998,
+        "lateral_force_kN": 311.7
+      },
+      {
+        "step_index": 456,
+        "displacement_mm": 19.438,
+        "drift_ratio": 0.0242975,
+        "lateral_force_kN": 331.18
+      },
+      {
+        "step_index": 457,
+        "displacement_mm": 21.25,
+        "drift_ratio": 0.0265625,
+        "lateral_force_kN": 351.64
+      },
+      {
+        "step_index": 458,
+        "displacement_mm": 23.409,
+        "drift_ratio": 0.02926125,
+        "lateral_force_kN": 375.99
+      },
+      {
+        "step_index": 459,
+        "displacement_mm": 25.221,
+        "drift_ratio": 0.03152625,
+        "lateral_force_kN": 392.55
+      },
+      {
+        "step_index": 460,
+        "displacement_mm": 26.894,
+        "drift_ratio": 0.033617499999999995,
+        "lateral_force_kN": 402.28
+      },
+      {
+        "step_index": 461,
+        "displacement_mm": 27.729,
+        "drift_ratio": 0.03466125,
+        "lateral_force_kN": 403.26
+      },
+      {
+        "step_index": 462,
+        "displacement_mm": 28.009,
+        "drift_ratio": 0.03501125,
+        "lateral_force_kN": 403.26
+      },
+      {
+        "step_index": 463,
+        "displacement_mm": 28.217,
+        "drift_ratio": 0.03527125,
+        "lateral_force_kN": 400.34
+      },
+      {
+        "step_index": 464,
+        "displacement_mm": 27.661,
+        "drift_ratio": 0.03457625,
+        "lateral_force_kN": 381.83
+      },
+      {
+        "step_index": 465,
+        "displacement_mm": 26.962,
+        "drift_ratio": 0.033702499999999996,
+        "lateral_force_kN": 354.55
+      },
+      {
+        "step_index": 466,
+        "displacement_mm": 26.126,
+        "drift_ratio": 0.0326575,
+        "lateral_force_kN": 331.18
+      },
+      {
+        "step_index": 467,
+        "displacement_mm": 25.082,
+        "drift_ratio": 0.0313525,
+        "lateral_force_kN": 299.04
+      },
+      {
+        "step_index": 468,
+        "displacement_mm": 24.037,
+        "drift_ratio": 0.03004625,
+        "lateral_force_kN": 267.87
+      },
+      {
+        "step_index": 469,
+        "displacement_mm": 22.643,
+        "drift_ratio": 0.028303750000000003,
+        "lateral_force_kN": 234.75
+      },
+      {
+        "step_index": 470,
+        "displacement_mm": 21.459,
+        "drift_ratio": 0.02682375,
+        "lateral_force_kN": 205.53
+      },
+      {
+        "step_index": 471,
+        "displacement_mm": 20.344,
+        "drift_ratio": 0.02543,
+        "lateral_force_kN": 176.31
+      },
+      {
+        "step_index": 472,
+        "displacement_mm": 19.229,
+        "drift_ratio": 0.02403625,
+        "lateral_force_kN": 151.95
+      },
+      {
+        "step_index": 473,
+        "displacement_mm": 17.766,
+        "drift_ratio": 0.022207499999999998,
+        "lateral_force_kN": 121.76
+      },
+      {
+        "step_index": 474,
+        "displacement_mm": 16.303,
+        "drift_ratio": 0.02037875,
+        "lateral_force_kN": 89.614
+      },
+      {
+        "step_index": 475,
+        "displacement_mm": 14.631,
+        "drift_ratio": 0.01828875,
+        "lateral_force_kN": 64.286
+      },
+      {
+        "step_index": 476,
+        "displacement_mm": 12.68,
+        "drift_ratio": 0.01585,
+        "lateral_force_kN": 30.196
+      },
+      {
+        "step_index": 477,
+        "displacement_mm": 10.869,
+        "drift_ratio": 0.01358625,
+        "lateral_force_kN": -0.97407
+      },
+      {
+        "step_index": 478,
+        "displacement_mm": 9.127,
+        "drift_ratio": 0.01140875,
+        "lateral_force_kN": -21.429
+      },
+      {
+        "step_index": 479,
+        "displacement_mm": 7.176,
+        "drift_ratio": 0.00897,
+        "lateral_force_kN": -47.729
+      },
+      {
+        "step_index": 480,
+        "displacement_mm": 4.8072,
+        "drift_ratio": 0.006009,
+        "lateral_force_kN": -74.027
+      },
+      {
+        "step_index": 481,
+        "displacement_mm": 2.6474,
+        "drift_ratio": 0.00330925,
+        "lateral_force_kN": -100.33
+      },
+      {
+        "step_index": 482,
+        "displacement_mm": 0.27869,
+        "drift_ratio": 0.0003483625,
+        "lateral_force_kN": -123.71
+      },
+      {
+        "step_index": 483,
+        "displacement_mm": -1.8811,
+        "drift_ratio": -0.002351375,
+        "lateral_force_kN": -147.08
+      },
+      {
+        "step_index": 484,
+        "displacement_mm": -3.9713,
+        "drift_ratio": -0.004964125,
+        "lateral_force_kN": -173.38
+      },
+      {
+        "step_index": 485,
+        "displacement_mm": -5.2949,
+        "drift_ratio": -0.006618625,
+        "lateral_force_kN": -189.94
+      },
+      {
+        "step_index": 486,
+        "displacement_mm": -7.4549,
+        "drift_ratio": -0.009318625,
+        "lateral_force_kN": -216.24
+      },
+      {
+        "step_index": 487,
+        "displacement_mm": -9.7539,
+        "drift_ratio": -0.012192375,
+        "lateral_force_kN": -250.33
+      },
+      {
+        "step_index": 488,
+        "displacement_mm": -12.611,
+        "drift_ratio": -0.01576375,
+        "lateral_force_kN": -285.4
+      },
+      {
+        "step_index": 489,
+        "displacement_mm": -14.492,
+        "drift_ratio": -0.018115000000000003,
+        "lateral_force_kN": -311.7
+      },
+      {
+        "step_index": 490,
+        "displacement_mm": -16.512,
+        "drift_ratio": -0.020640000000000002,
+        "lateral_force_kN": -334.1
+      },
+      {
+        "step_index": 491,
+        "displacement_mm": -18.324,
+        "drift_ratio": -0.022905000000000002,
+        "lateral_force_kN": -356.5
+      },
+      {
+        "step_index": 492,
+        "displacement_mm": -20.274,
+        "drift_ratio": -0.0253425,
+        "lateral_force_kN": -375.01
+      },
+      {
+        "step_index": 493,
+        "displacement_mm": -22.086,
+        "drift_ratio": -0.027607499999999997,
+        "lateral_force_kN": -397.41
+      },
+      {
+        "step_index": 494,
+        "displacement_mm": -23.479,
+        "drift_ratio": -0.02934875,
+        "lateral_force_kN": -409.1
+      },
+      {
+        "step_index": 495,
+        "displacement_mm": -24.664,
+        "drift_ratio": -0.030830000000000003,
+        "lateral_force_kN": -418.84
+      },
+      {
+        "step_index": 496,
+        "displacement_mm": -25.43,
+        "drift_ratio": -0.031787499999999996,
+        "lateral_force_kN": -423.72
+      },
+      {
+        "step_index": 497,
+        "displacement_mm": -26.058,
+        "drift_ratio": -0.0325725,
+        "lateral_force_kN": -428.59
+      },
+      {
+        "step_index": 498,
+        "displacement_mm": -25.778,
+        "drift_ratio": -0.0322225,
+        "lateral_force_kN": -412.03
+      },
+      {
+        "step_index": 499,
+        "displacement_mm": -25.36,
+        "drift_ratio": -0.0317,
+        "lateral_force_kN": -386.7
+      },
+      {
+        "step_index": 500,
+        "displacement_mm": -24.176,
+        "drift_ratio": -0.030219999999999997,
+        "lateral_force_kN": -343.84
+      },
+      {
+        "step_index": 501,
+        "displacement_mm": -23.409,
+        "drift_ratio": -0.02926125,
+        "lateral_force_kN": -304.88
+      },
+      {
+        "step_index": 502,
+        "displacement_mm": -22.155,
+        "drift_ratio": -0.027693750000000003,
+        "lateral_force_kN": -273.71
+      },
+      {
+        "step_index": 503,
+        "displacement_mm": -21.041,
+        "drift_ratio": -0.02630125,
+        "lateral_force_kN": -238.64
+      },
+      {
+        "step_index": 504,
+        "displacement_mm": -19.578,
+        "drift_ratio": -0.024472499999999998,
+        "lateral_force_kN": -204.55
+      },
+      {
+        "step_index": 505,
+        "displacement_mm": -18.045,
+        "drift_ratio": -0.022556250000000003,
+        "lateral_force_kN": -167.54
+      },
+      {
+        "step_index": 506,
+        "displacement_mm": -16.373,
+        "drift_ratio": -0.020466250000000002,
+        "lateral_force_kN": -131.5
+      },
+      {
+        "step_index": 507,
+        "displacement_mm": -15.188,
+        "drift_ratio": -0.018985000000000002,
+        "lateral_force_kN": -105.2
+      },
+      {
+        "step_index": 508,
+        "displacement_mm": -13.586,
+        "drift_ratio": -0.0169825,
+        "lateral_force_kN": -77.924
+      },
+      {
+        "step_index": 509,
+        "displacement_mm": -12.262,
+        "drift_ratio": -0.0153275,
+        "lateral_force_kN": -52.6
+      },
+      {
+        "step_index": 510,
+        "displacement_mm": -9.4056,
+        "drift_ratio": -0.011757,
+        "lateral_force_kN": -14.611
+      },
+      {
+        "step_index": 511,
+        "displacement_mm": -7.1064,
+        "drift_ratio": -0.008883,
+        "lateral_force_kN": 14.611
+      },
+      {
+        "step_index": 512,
+        "displacement_mm": -4.459,
+        "drift_ratio": -0.00557375,
+        "lateral_force_kN": 42.859
+      },
+      {
+        "step_index": 513,
+        "displacement_mm": -0.55738,
+        "drift_ratio": -0.000696725,
+        "lateral_force_kN": 87.666
+      },
+      {
+        "step_index": 514,
+        "displacement_mm": 1.5328,
+        "drift_ratio": 0.001916,
+        "lateral_force_kN": 112.99
+      },
+      {
+        "step_index": 515,
+        "displacement_mm": 3.8318,
+        "drift_ratio": 0.00478975,
+        "lateral_force_kN": 137.34
+      },
+      {
+        "step_index": 516,
+        "displacement_mm": 6.4097,
+        "drift_ratio": 0.008012125,
+        "lateral_force_kN": 166.56
+      },
+      {
+        "step_index": 517,
+        "displacement_mm": 8.4303,
+        "drift_ratio": 0.010537875,
+        "lateral_force_kN": 192.86
+      },
+      {
+        "step_index": 518,
+        "displacement_mm": 10.242,
+        "drift_ratio": 0.012802500000000001,
+        "lateral_force_kN": 217.22
+      },
+      {
+        "step_index": 519,
+        "displacement_mm": 11.914,
+        "drift_ratio": 0.0148925,
+        "lateral_force_kN": 237.67
+      },
+      {
+        "step_index": 520,
+        "displacement_mm": 13.447,
+        "drift_ratio": 0.016808749999999997,
+        "lateral_force_kN": 257.15
+      },
+      {
+        "step_index": 521,
+        "displacement_mm": 15.606,
+        "drift_ratio": 0.0195075,
+        "lateral_force_kN": 283.45
+      },
+      {
+        "step_index": 522,
+        "displacement_mm": 18.115,
+        "drift_ratio": 0.022643749999999997,
+        "lateral_force_kN": 312.67
+      },
+      {
+        "step_index": 523,
+        "displacement_mm": 20.414,
+        "drift_ratio": 0.025517500000000002,
+        "lateral_force_kN": 336.05
+      },
+      {
+        "step_index": 524,
+        "displacement_mm": 21.946,
+        "drift_ratio": 0.027432500000000002,
+        "lateral_force_kN": 353.58
+      },
+      {
+        "step_index": 525,
+        "displacement_mm": 23.827,
+        "drift_ratio": 0.02978375,
+        "lateral_force_kN": 373.06
+      },
+      {
+        "step_index": 526,
+        "displacement_mm": 25.291,
+        "drift_ratio": 0.03161375,
+        "lateral_force_kN": 387.68
+      },
+      {
+        "step_index": 527,
+        "displacement_mm": 27.102,
+        "drift_ratio": 0.0338775,
+        "lateral_force_kN": 398.39
+      },
+      {
+        "step_index": 528,
+        "displacement_mm": 27.798,
+        "drift_ratio": 0.0347475,
+        "lateral_force_kN": 398.39
+      },
+      {
+        "step_index": 529,
+        "displacement_mm": 28.009,
+        "drift_ratio": 0.03501125,
+        "lateral_force_kN": 396.44
+      },
+      {
+        "step_index": 530,
+        "displacement_mm": 27.521,
+        "drift_ratio": 0.03440125,
+        "lateral_force_kN": 377.93
+      },
+      {
+        "step_index": 531,
+        "displacement_mm": 26.822,
+        "drift_ratio": 0.0335275,
+        "lateral_force_kN": 353.58
+      },
+      {
+        "step_index": 532,
+        "displacement_mm": 25.639,
+        "drift_ratio": 0.03204875,
+        "lateral_force_kN": 318.51
+      },
+      {
+        "step_index": 533,
+        "displacement_mm": 24.315,
+        "drift_ratio": 0.03039375,
+        "lateral_force_kN": 277.6
+      },
+      {
+        "step_index": 534,
+        "displacement_mm": 23.201,
+        "drift_ratio": 0.02900125,
+        "lateral_force_kN": 239.62
+      },
+      {
+        "step_index": 535,
+        "displacement_mm": 21.25,
+        "drift_ratio": 0.0265625,
+        "lateral_force_kN": 194.81
+      },
+      {
+        "step_index": 536,
+        "displacement_mm": 19.438,
+        "drift_ratio": 0.0242975,
+        "lateral_force_kN": 159.74
+      },
+      {
+        "step_index": 537,
+        "displacement_mm": 17.418,
+        "drift_ratio": 0.0217725,
+        "lateral_force_kN": 117.86
+      },
+      {
+        "step_index": 538,
+        "displacement_mm": 15.815,
+        "drift_ratio": 0.019768749999999998,
+        "lateral_force_kN": 84.743
+      },
+      {
+        "step_index": 539,
+        "displacement_mm": 13.795,
+        "drift_ratio": 0.01724375,
+        "lateral_force_kN": 48.704
+      },
+      {
+        "step_index": 540,
+        "displacement_mm": 11.565,
+        "drift_ratio": 0.014456249999999999,
+        "lateral_force_kN": 10.714
+      },
+      {
+        "step_index": 541,
+        "displacement_mm": 10.311,
+        "drift_ratio": 0.01288875,
+        "lateral_force_kN": -7.7924
+      },
+      {
+        "step_index": 542,
+        "displacement_mm": 8.2212,
+        "drift_ratio": 0.0102765,
+        "lateral_force_kN": -37.014
+      },
+      {
+        "step_index": 543,
+        "displacement_mm": 5.7828,
+        "drift_ratio": 0.0072285,
+        "lateral_force_kN": -61.368
+      },
+      {
+        "step_index": 544,
+        "displacement_mm": 3.7622,
+        "drift_ratio": 0.00470275,
+        "lateral_force_kN": -88.64
+      },
+      {
+        "step_index": 545,
+        "displacement_mm": 0.97539,
+        "drift_ratio": 0.0012192375,
+        "lateral_force_kN": -114.94
+      },
+      {
+        "step_index": 546,
+        "displacement_mm": -0.83607,
+        "drift_ratio": -0.0010450875,
+        "lateral_force_kN": -137.34
+      },
+      {
+        "step_index": 547,
+        "displacement_mm": -1.8811,
+        "drift_ratio": -0.002351375,
+        "lateral_force_kN": -150.0
+      },
+      {
+        "step_index": 548,
+        "displacement_mm": -4.7376,
+        "drift_ratio": -0.005921999999999999,
+        "lateral_force_kN": -181.18
+      },
+      {
+        "step_index": 549,
+        "displacement_mm": -6.4097,
+        "drift_ratio": -0.008012125,
+        "lateral_force_kN": -203.58
+      },
+      {
+        "step_index": 550,
+        "displacement_mm": -7.9426,
+        "drift_ratio": -0.00992825,
+        "lateral_force_kN": -225.98
+      },
+      {
+        "step_index": 551,
+        "displacement_mm": -9.9629,
+        "drift_ratio": -0.012453625,
+        "lateral_force_kN": -252.28
+      },
+      {
+        "step_index": 552,
+        "displacement_mm": -11.635,
+        "drift_ratio": -0.01454375,
+        "lateral_force_kN": -275.66
+      },
+      {
+        "step_index": 553,
+        "displacement_mm": -13.586,
+        "drift_ratio": -0.0169825,
+        "lateral_force_kN": -299.04
+      },
+      {
+        "step_index": 554,
+        "displacement_mm": -16.094,
+        "drift_ratio": -0.0201175,
+        "lateral_force_kN": -328.26
+      },
+      {
+        "step_index": 555,
+        "displacement_mm": -17.766,
+        "drift_ratio": -0.022207499999999998,
+        "lateral_force_kN": -344.82
+      },
+      {
+        "step_index": 556,
+        "displacement_mm": -19.438,
+        "drift_ratio": -0.0242975,
+        "lateral_force_kN": -365.27
+      },
+      {
+        "step_index": 557,
+        "displacement_mm": -21.041,
+        "drift_ratio": -0.02630125,
+        "lateral_force_kN": -378.91
+      },
+      {
+        "step_index": 558,
+        "displacement_mm": -22.504,
+        "drift_ratio": -0.028130000000000002,
+        "lateral_force_kN": -390.6
+      },
+      {
+        "step_index": 559,
+        "displacement_mm": -24.106,
+        "drift_ratio": -0.030132500000000003,
+        "lateral_force_kN": -406.18
+      },
+      {
+        "step_index": 560,
+        "displacement_mm": -25.43,
+        "drift_ratio": -0.031787499999999996,
+        "lateral_force_kN": -415.92
+      },
+      {
+        "step_index": 561,
+        "displacement_mm": -26.126,
+        "drift_ratio": -0.0326575,
+        "lateral_force_kN": -420.79
+      },
+      {
+        "step_index": 562,
+        "displacement_mm": -26.546,
+        "drift_ratio": -0.0331825,
+        "lateral_force_kN": -418.84
+      },
+      {
+        "step_index": 563,
+        "displacement_mm": -26.198,
+        "drift_ratio": -0.0327475,
+        "lateral_force_kN": -403.26
+      },
+      {
+        "step_index": 564,
+        "displacement_mm": -25.57,
+        "drift_ratio": -0.0319625,
+        "lateral_force_kN": -378.91
+      },
+      {
+        "step_index": 565,
+        "displacement_mm": -24.803,
+        "drift_ratio": -0.03100375,
+        "lateral_force_kN": -355.53
+      },
+      {
+        "step_index": 566,
+        "displacement_mm": -24.037,
+        "drift_ratio": -0.03004625,
+        "lateral_force_kN": -323.39
+      },
+      {
+        "step_index": 567,
+        "displacement_mm": -22.992,
+        "drift_ratio": -0.02874,
+        "lateral_force_kN": -296.11
+      },
+      {
+        "step_index": 568,
+        "displacement_mm": -21.877,
+        "drift_ratio": -0.02734625,
+        "lateral_force_kN": -263.0
+      },
+      {
+        "step_index": 569,
+        "displacement_mm": -21.041,
+        "drift_ratio": -0.02630125,
+        "lateral_force_kN": -234.75
+      },
+      {
+        "step_index": 570,
+        "displacement_mm": -19.647,
+        "drift_ratio": -0.024558749999999997,
+        "lateral_force_kN": -200.65
+      },
+      {
+        "step_index": 571,
+        "displacement_mm": -18.324,
+        "drift_ratio": -0.022905000000000002,
+        "lateral_force_kN": -171.43
+      },
+      {
+        "step_index": 572,
+        "displacement_mm": -16.791,
+        "drift_ratio": -0.02098875,
+        "lateral_force_kN": -137.34
+      },
+      {
+        "step_index": 573,
+        "displacement_mm": -15.049,
+        "drift_ratio": -0.018811249999999998,
+        "lateral_force_kN": -108.12
+      },
+      {
+        "step_index": 574,
+        "displacement_mm": -12.959,
+        "drift_ratio": -0.016198749999999998,
+        "lateral_force_kN": -67.208
+      },
+      {
+        "step_index": 575,
+        "displacement_mm": -11.426,
+        "drift_ratio": -0.0142825,
+        "lateral_force_kN": -40.91
+      },
+      {
+        "step_index": 576,
+        "displacement_mm": -9.6147,
+        "drift_ratio": -0.012018375,
+        "lateral_force_kN": -16.559
+      },
+      {
+        "step_index": 577,
+        "displacement_mm": -6.7582,
+        "drift_ratio": -0.00844775,
+        "lateral_force_kN": 23.377
+      },
+      {
+        "step_index": 578,
+        "displacement_mm": -3.9017,
+        "drift_ratio": -0.0048771249999999995,
+        "lateral_force_kN": 52.6
+      },
+      {
+        "step_index": 579,
+        "displacement_mm": 0.0,
+        "drift_ratio": 0.0,
+        "lateral_force_kN": 93.511
+      },
+      {
+        "step_index": 580,
+        "displacement_mm": 2.5082,
+        "drift_ratio": 0.00313525,
+        "lateral_force_kN": 120.78
+      },
+      {
+        "step_index": 581,
+        "displacement_mm": 4.3195,
+        "drift_ratio": 0.005399375,
+        "lateral_force_kN": 140.27
+      },
+      {
+        "step_index": 582,
+        "displacement_mm": 6.2705,
+        "drift_ratio": 0.007838125,
+        "lateral_force_kN": 163.64
+      },
+      {
+        "step_index": 583,
+        "displacement_mm": 8.4999,
+        "drift_ratio": 0.010624875,
+        "lateral_force_kN": 189.94
+      },
+      {
+        "step_index": 584,
+        "displacement_mm": 11.078,
+        "drift_ratio": 0.013847499999999999,
+        "lateral_force_kN": 225.01
+      },
+      {
+        "step_index": 585,
+        "displacement_mm": 13.865,
+        "drift_ratio": 0.01733125,
+        "lateral_force_kN": 256.18
+      },
+      {
+        "step_index": 586,
+        "displacement_mm": 16.512,
+        "drift_ratio": 0.020640000000000002,
+        "lateral_force_kN": 287.35
+      },
+      {
+        "step_index": 587,
+        "displacement_mm": 18.881,
+        "drift_ratio": 0.02360125,
+        "lateral_force_kN": 312.67
+      },
+      {
+        "step_index": 588,
+        "displacement_mm": 20.971,
+        "drift_ratio": 0.02621375,
+        "lateral_force_kN": 334.1
+      },
+      {
+        "step_index": 589,
+        "displacement_mm": 22.713,
+        "drift_ratio": 0.02839125,
+        "lateral_force_kN": 354.55
+      },
+      {
+        "step_index": 590,
+        "displacement_mm": 24.733,
+        "drift_ratio": 0.03091625,
+        "lateral_force_kN": 373.06
+      },
+      {
+        "step_index": 591,
+        "displacement_mm": 26.685,
+        "drift_ratio": 0.03335625,
+        "lateral_force_kN": 391.57
+      },
+      {
+        "step_index": 592,
+        "displacement_mm": 27.729,
+        "drift_ratio": 0.03466125,
+        "lateral_force_kN": 397.41
+      },
+      {
+        "step_index": 593,
+        "displacement_mm": 28.148,
+        "drift_ratio": 0.035185,
+        "lateral_force_kN": 397.41
+      },
+      {
+        "step_index": 594,
+        "displacement_mm": 28.217,
+        "drift_ratio": 0.03527125,
+        "lateral_force_kN": 395.47
+      },
+      {
+        "step_index": 595,
+        "displacement_mm": 27.729,
+        "drift_ratio": 0.03466125,
+        "lateral_force_kN": 373.06
+      },
+      {
+        "step_index": 596,
+        "displacement_mm": 26.962,
+        "drift_ratio": 0.033702499999999996,
+        "lateral_force_kN": 344.82
+      },
+      {
+        "step_index": 597,
+        "displacement_mm": 26.126,
+        "drift_ratio": 0.0326575,
+        "lateral_force_kN": 316.57
+      },
+      {
+        "step_index": 598,
+        "displacement_mm": 25.291,
+        "drift_ratio": 0.03161375,
+        "lateral_force_kN": 290.27
+      },
+      {
+        "step_index": 599,
+        "displacement_mm": 23.967,
+        "drift_ratio": 0.02995875,
+        "lateral_force_kN": 253.26
+      },
+      {
+        "step_index": 600,
+        "displacement_mm": 22.086,
+        "drift_ratio": 0.027607499999999997,
+        "lateral_force_kN": 209.42
+      },
+      {
+        "step_index": 601,
+        "displacement_mm": 20.762,
+        "drift_ratio": 0.0259525,
+        "lateral_force_kN": 181.18
+      },
+      {
+        "step_index": 602,
+        "displacement_mm": 19.09,
+        "drift_ratio": 0.0238625,
+        "lateral_force_kN": 146.11
+      },
+      {
+        "step_index": 603,
+        "displacement_mm": 17.209,
+        "drift_ratio": 0.02151125,
+        "lateral_force_kN": 108.12
+      },
+      {
+        "step_index": 604,
+        "displacement_mm": 15.397,
+        "drift_ratio": 0.01924625,
+        "lateral_force_kN": 74.027
+      },
+      {
+        "step_index": 605,
+        "displacement_mm": 13.377,
+        "drift_ratio": 0.01672125,
+        "lateral_force_kN": 39.936
+      },
+      {
+        "step_index": 606,
+        "displacement_mm": 10.938,
+        "drift_ratio": 0.0136725,
+        "lateral_force_kN": 0.97407
+      },
+      {
+        "step_index": 607,
+        "displacement_mm": 8.6393,
+        "drift_ratio": 0.010799125,
+        "lateral_force_kN": -28.248
+      },
+      {
+        "step_index": 608,
+        "displacement_mm": 6.8974,
+        "drift_ratio": 0.008621750000000001,
+        "lateral_force_kN": -50.652
+      },
+      {
+        "step_index": 609,
+        "displacement_mm": 3.6927,
+        "drift_ratio": 0.004615875,
+        "lateral_force_kN": -85.717
+      },
+      {
+        "step_index": 610,
+        "displacement_mm": 1.0451,
+        "drift_ratio": 0.0013063749999999998,
+        "lateral_force_kN": -112.99
+      },
+      {
+        "step_index": 611,
+        "displacement_mm": -1.8115,
+        "drift_ratio": -0.0022643750000000003,
+        "lateral_force_kN": -145.14
+      },
+      {
+        "step_index": 612,
+        "displacement_mm": -4.3894,
+        "drift_ratio": -0.00548675,
+        "lateral_force_kN": -171.43
+      },
+      {
+        "step_index": 613,
+        "displacement_mm": -6.3401,
+        "drift_ratio": -0.007925125,
+        "lateral_force_kN": -194.81
+      },
+      {
+        "step_index": 614,
+        "displacement_mm": -8.4999,
+        "drift_ratio": -0.010624875,
+        "lateral_force_kN": -223.06
+      },
+      {
+        "step_index": 615,
+        "displacement_mm": -10.799,
+        "drift_ratio": -0.013498749999999999,
+        "lateral_force_kN": -252.28
+      },
+      {
+        "step_index": 616,
+        "displacement_mm": -13.656,
+        "drift_ratio": -0.017070000000000002,
+        "lateral_force_kN": -292.22
+      },
+      {
+        "step_index": 617,
+        "displacement_mm": -15.537,
+        "drift_ratio": -0.01942125,
+        "lateral_force_kN": -314.62
+      },
+      {
+        "step_index": 618,
+        "displacement_mm": -18.045,
+        "drift_ratio": -0.022556250000000003,
+        "lateral_force_kN": -341.89
+      },
+      {
+        "step_index": 619,
+        "displacement_mm": -19.717,
+        "drift_ratio": -0.024646249999999998,
+        "lateral_force_kN": -361.37
+      },
+      {
+        "step_index": 620,
+        "displacement_mm": -21.459,
+        "drift_ratio": -0.02682375,
+        "lateral_force_kN": -379.88
+      },
+      {
+        "step_index": 621,
+        "displacement_mm": -23.131,
+        "drift_ratio": -0.028913750000000002,
+        "lateral_force_kN": -394.5
+      },
+      {
+        "step_index": 622,
+        "displacement_mm": -24.873,
+        "drift_ratio": -0.03109125,
+        "lateral_force_kN": -408.13
+      },
+      {
+        "step_index": 623,
+        "displacement_mm": -25.847,
+        "drift_ratio": -0.032308750000000004,
+        "lateral_force_kN": -413.0
+      },
+      {
+        "step_index": 624,
+        "displacement_mm": -26.474,
+        "drift_ratio": -0.0330925,
+        "lateral_force_kN": -413.97
+      },
+      {
+        "step_index": 625,
+        "displacement_mm": -25.987,
+        "drift_ratio": -0.03248375,
+        "lateral_force_kN": -387.68
+      },
+      {
+        "step_index": 626,
+        "displacement_mm": -25.221,
+        "drift_ratio": -0.03152625,
+        "lateral_force_kN": -355.53
+      },
+      {
+        "step_index": 627,
+        "displacement_mm": -24.455,
+        "drift_ratio": -0.03056875,
+        "lateral_force_kN": -328.26
+      },
+      {
+        "step_index": 628,
+        "displacement_mm": -23.688,
+        "drift_ratio": -0.029609999999999997,
+        "lateral_force_kN": -300.98
+      },
+      {
+        "step_index": 629,
+        "displacement_mm": -22.295,
+        "drift_ratio": -0.02786875,
+        "lateral_force_kN": -263.97
+      },
+      {
+        "step_index": 630,
+        "displacement_mm": -21.18,
+        "drift_ratio": -0.026475,
+        "lateral_force_kN": -233.77
+      },
+      {
+        "step_index": 631,
+        "displacement_mm": -20.065,
+        "drift_ratio": -0.025081250000000003,
+        "lateral_force_kN": -206.5
+      },
+      {
+        "step_index": 632,
+        "displacement_mm": -18.602,
+        "drift_ratio": -0.0232525,
+        "lateral_force_kN": -176.31
+      },
+      {
+        "step_index": 633,
+        "displacement_mm": -17.0,
+        "drift_ratio": -0.02125,
+        "lateral_force_kN": -145.14
+      },
+      {
+        "step_index": 634,
+        "displacement_mm": -15.397,
+        "drift_ratio": -0.01924625,
+        "lateral_force_kN": -112.02
+      },
+      {
+        "step_index": 635,
+        "displacement_mm": -13.725,
+        "drift_ratio": -0.017156249999999998,
+        "lateral_force_kN": -77.924
+      },
+      {
+        "step_index": 636,
+        "displacement_mm": -11.635,
+        "drift_ratio": -0.01454375,
+        "lateral_force_kN": -41.884
+      },
+      {
+        "step_index": 637,
+        "displacement_mm": -8.9179,
+        "drift_ratio": -0.011147375,
+        "lateral_force_kN": -4.8704
+      },
+      {
+        "step_index": 638,
+        "displacement_mm": -7.1064,
+        "drift_ratio": -0.008883,
+        "lateral_force_kN": 19.481
+      },
+      {
+        "step_index": 639,
+        "displacement_mm": -4.1803,
+        "drift_ratio": -0.005225375,
+        "lateral_force_kN": 50.652
+      },
+      {
+        "step_index": 640,
+        "displacement_mm": -1.3237,
+        "drift_ratio": -0.001654625,
+        "lateral_force_kN": 78.898
+      },
+      {
+        "step_index": 641,
+        "displacement_mm": 1.3934,
+        "drift_ratio": 0.00174175,
+        "lateral_force_kN": 111.04
+      },
+      {
+        "step_index": 642,
+        "displacement_mm": 3.5532,
+        "drift_ratio": 0.0044415,
+        "lateral_force_kN": 135.39
+      },
+      {
+        "step_index": 643,
+        "displacement_mm": 6.6187,
+        "drift_ratio": 0.008273375,
+        "lateral_force_kN": 169.49
+      },
+      {
+        "step_index": 644,
+        "displacement_mm": 9.6147,
+        "drift_ratio": 0.012018375,
+        "lateral_force_kN": 209.42
+      },
+      {
+        "step_index": 645,
+        "displacement_mm": 12.471,
+        "drift_ratio": 0.01558875,
+        "lateral_force_kN": 242.54
+      },
+      {
+        "step_index": 646,
+        "displacement_mm": 15.188,
+        "drift_ratio": 0.018985000000000002,
+        "lateral_force_kN": 275.66
+      },
+      {
+        "step_index": 647,
+        "displacement_mm": 18.254,
+        "drift_ratio": 0.0228175,
+        "lateral_force_kN": 308.78
+      },
+      {
+        "step_index": 648,
+        "displacement_mm": 21.041,
+        "drift_ratio": 0.02630125,
+        "lateral_force_kN": 337.02
+      },
+      {
+        "step_index": 649,
+        "displacement_mm": 23.549,
+        "drift_ratio": 0.02943625,
+        "lateral_force_kN": 363.32
+      },
+      {
+        "step_index": 650,
+        "displacement_mm": 26.335,
+        "drift_ratio": 0.032918750000000004,
+        "lateral_force_kN": 387.68
+      },
+      {
+        "step_index": 651,
+        "displacement_mm": 28.217,
+        "drift_ratio": 0.03527125,
+        "lateral_force_kN": 402.28
+      },
+      {
+        "step_index": 652,
+        "displacement_mm": 30.795,
+        "drift_ratio": 0.03849375,
+        "lateral_force_kN": 418.84
+      },
+      {
+        "step_index": 653,
+        "displacement_mm": 32.814,
+        "drift_ratio": 0.0410175,
+        "lateral_force_kN": 426.64
+      },
+      {
+        "step_index": 654,
+        "displacement_mm": 34.976,
+        "drift_ratio": 0.04372,
+        "lateral_force_kN": 428.59
+      },
+      {
+        "step_index": 655,
+        "displacement_mm": 36.299,
+        "drift_ratio": 0.04537375,
+        "lateral_force_kN": 427.61
+      },
+      {
+        "step_index": 656,
+        "displacement_mm": 36.927,
+        "drift_ratio": 0.04615875,
+        "lateral_force_kN": 419.82
+      },
+      {
+        "step_index": 657,
+        "displacement_mm": 37.902,
+        "drift_ratio": 0.0473775,
+        "lateral_force_kN": 426.64
+      },
+      {
+        "step_index": 658,
+        "displacement_mm": 38.598,
+        "drift_ratio": 0.0482475,
+        "lateral_force_kN": 422.74
+      },
+      {
+        "step_index": 659,
+        "displacement_mm": 38.946,
+        "drift_ratio": 0.0486825,
+        "lateral_force_kN": 414.95
+      },
+      {
+        "step_index": 660,
+        "displacement_mm": 39.086,
+        "drift_ratio": 0.0488575,
+        "lateral_force_kN": 412.03
+      },
+      {
+        "step_index": 661,
+        "displacement_mm": 39.853,
+        "drift_ratio": 0.04981625,
+        "lateral_force_kN": 414.95
+      },
+      {
+        "step_index": 662,
+        "displacement_mm": 40.34,
+        "drift_ratio": 0.050425000000000005,
+        "lateral_force_kN": 409.1
+      },
+      {
+        "step_index": 663,
+        "displacement_mm": 41.105,
+        "drift_ratio": 0.051381249999999996,
+        "lateral_force_kN": 399.36
+      },
+      {
+        "step_index": 664,
+        "displacement_mm": 41.664,
+        "drift_ratio": 0.05208,
+        "lateral_force_kN": 384.75
+      },
+      {
+        "step_index": 665,
+        "displacement_mm": 41.316,
+        "drift_ratio": 0.051645,
+        "lateral_force_kN": 362.35
+      },
+      {
+        "step_index": 666,
+        "displacement_mm": 40.828,
+        "drift_ratio": 0.051035000000000004,
+        "lateral_force_kN": 339.95
+      },
+      {
+        "step_index": 667,
+        "displacement_mm": 39.921,
+        "drift_ratio": 0.04990125,
+        "lateral_force_kN": 310.73
+      },
+      {
+        "step_index": 668,
+        "displacement_mm": 38.738,
+        "drift_ratio": 0.0484225,
+        "lateral_force_kN": 278.58
+      },
+      {
+        "step_index": 669,
+        "displacement_mm": 37.622,
+        "drift_ratio": 0.0470275,
+        "lateral_force_kN": 249.36
+      },
+      {
+        "step_index": 670,
+        "displacement_mm": 36.716,
+        "drift_ratio": 0.045895,
+        "lateral_force_kN": 221.11
+      },
+      {
+        "step_index": 671,
+        "displacement_mm": 35.532,
+        "drift_ratio": 0.044414999999999996,
+        "lateral_force_kN": 190.91
+      },
+      {
+        "step_index": 672,
+        "displacement_mm": 34.348,
+        "drift_ratio": 0.042935,
+        "lateral_force_kN": 164.62
+      },
+      {
+        "step_index": 673,
+        "displacement_mm": 33.025,
+        "drift_ratio": 0.04128125,
+        "lateral_force_kN": 134.42
+      },
+      {
+        "step_index": 674,
+        "displacement_mm": 31.699,
+        "drift_ratio": 0.03962375,
+        "lateral_force_kN": 109.09
+      },
+      {
+        "step_index": 675,
+        "displacement_mm": 30.099,
+        "drift_ratio": 0.03762375,
+        "lateral_force_kN": 82.795
+      },
+      {
+        "step_index": 676,
+        "displacement_mm": 28.148,
+        "drift_ratio": 0.035185,
+        "lateral_force_kN": 51.626
+      },
+      {
+        "step_index": 677,
+        "displacement_mm": 26.406,
+        "drift_ratio": 0.033007499999999995,
+        "lateral_force_kN": 28.248
+      },
+      {
+        "step_index": 678,
+        "displacement_mm": 24.524,
+        "drift_ratio": 0.030655,
+        "lateral_force_kN": 1.9481
+      },
+      {
+        "step_index": 679,
+        "displacement_mm": 22.643,
+        "drift_ratio": 0.028303750000000003,
+        "lateral_force_kN": -16.559
+      },
+      {
+        "step_index": 680,
+        "displacement_mm": 20.623,
+        "drift_ratio": 0.025778750000000003,
+        "lateral_force_kN": -37.988
+      },
+      {
+        "step_index": 681,
+        "displacement_mm": 18.463,
+        "drift_ratio": 0.023078750000000002,
+        "lateral_force_kN": -61.368
+      },
+      {
+        "step_index": 682,
+        "displacement_mm": 15.606,
+        "drift_ratio": 0.0195075,
+        "lateral_force_kN": -86.691
+      },
+      {
+        "step_index": 683,
+        "displacement_mm": 12.889,
+        "drift_ratio": 0.01611125,
+        "lateral_force_kN": -106.17
+      },
+      {
+        "step_index": 684,
+        "displacement_mm": 9.6843,
+        "drift_ratio": 0.012105375,
+        "lateral_force_kN": -130.52
+      },
+      {
+        "step_index": 685,
+        "displacement_mm": 6.6187,
+        "drift_ratio": 0.008273375,
+        "lateral_force_kN": -155.85
+      },
+      {
+        "step_index": 686,
+        "displacement_mm": 3.6927,
+        "drift_ratio": 0.004615875,
+        "lateral_force_kN": -181.18
+      },
+      {
+        "step_index": 687,
+        "displacement_mm": -0.27869,
+        "drift_ratio": -0.0003483625,
+        "lateral_force_kN": -205.53
+      },
+      {
+        "step_index": 688,
+        "displacement_mm": -3.5532,
+        "drift_ratio": -0.0044415,
+        "lateral_force_kN": -233.77
+      },
+      {
+        "step_index": 689,
+        "displacement_mm": -7.0368,
+        "drift_ratio": -0.008796,
+        "lateral_force_kN": -265.92
+      },
+      {
+        "step_index": 690,
+        "displacement_mm": -9.0571,
+        "drift_ratio": -0.011321375,
+        "lateral_force_kN": -282.48
+      },
+      {
+        "step_index": 691,
+        "displacement_mm": -13.725,
+        "drift_ratio": -0.017156249999999998,
+        "lateral_force_kN": -322.41
+      },
+      {
+        "step_index": 692,
+        "displacement_mm": -17.766,
+        "drift_ratio": -0.022207499999999998,
+        "lateral_force_kN": -360.4
+      },
+      {
+        "step_index": 693,
+        "displacement_mm": -19.856,
+        "drift_ratio": -0.024820000000000002,
+        "lateral_force_kN": -378.91
+      },
+      {
+        "step_index": 694,
+        "displacement_mm": -22.225,
+        "drift_ratio": -0.02778125,
+        "lateral_force_kN": -397.41
+      },
+      {
+        "step_index": 695,
+        "displacement_mm": -25.221,
+        "drift_ratio": -0.03152625,
+        "lateral_force_kN": -417.87
+      },
+      {
+        "step_index": 696,
+        "displacement_mm": -27.45,
+        "drift_ratio": -0.034312499999999996,
+        "lateral_force_kN": -429.56
+      },
+      {
+        "step_index": 697,
+        "displacement_mm": -30.376,
+        "drift_ratio": -0.037970000000000004,
+        "lateral_force_kN": -439.3
+      },
+      {
+        "step_index": 698,
+        "displacement_mm": -33.233,
+        "drift_ratio": -0.041541249999999995,
+        "lateral_force_kN": -443.19
+      },
+      {
+        "step_index": 699,
+        "displacement_mm": -36.439,
+        "drift_ratio": -0.04554875,
+        "lateral_force_kN": -442.22
+      },
+      {
+        "step_index": 700,
+        "displacement_mm": -38.25,
+        "drift_ratio": -0.0478125,
+        "lateral_force_kN": -433.46
+      },
+      {
+        "step_index": 701,
+        "displacement_mm": -39.154,
+        "drift_ratio": -0.04894250000000001,
+        "lateral_force_kN": -418.84
+      },
+      {
+        "step_index": 702,
+        "displacement_mm": -39.017,
+        "drift_ratio": -0.04877125,
+        "lateral_force_kN": -395.47
+      },
+      {
+        "step_index": 703,
+        "displacement_mm": -38.179,
+        "drift_ratio": -0.04772375,
+        "lateral_force_kN": -368.19
+      },
+      {
+        "step_index": 704,
+        "displacement_mm": -37.343,
+        "drift_ratio": -0.046678750000000005,
+        "lateral_force_kN": -338.97
+      },
+      {
+        "step_index": 705,
+        "displacement_mm": -36.228,
+        "drift_ratio": -0.045285,
+        "lateral_force_kN": -307.8
+      },
+      {
+        "step_index": 706,
+        "displacement_mm": -34.836,
+        "drift_ratio": -0.043545,
+        "lateral_force_kN": -273.71
+      },
+      {
+        "step_index": 707,
+        "displacement_mm": -33.65,
+        "drift_ratio": -0.042062499999999996,
+        "lateral_force_kN": -242.54
+      },
+      {
+        "step_index": 708,
+        "displacement_mm": -32.466,
+        "drift_ratio": -0.0405825,
+        "lateral_force_kN": -217.22
+      },
+      {
+        "step_index": 709,
+        "displacement_mm": -31.491,
+        "drift_ratio": -0.03936375,
+        "lateral_force_kN": -194.81
+      },
+      {
+        "step_index": 710,
+        "displacement_mm": -29.959,
+        "drift_ratio": -0.03744875,
+        "lateral_force_kN": -162.67
+      },
+      {
+        "step_index": 711,
+        "displacement_mm": -28.705,
+        "drift_ratio": -0.035881249999999996,
+        "lateral_force_kN": -137.34
+      },
+      {
+        "step_index": 712,
+        "displacement_mm": -27.102,
+        "drift_ratio": -0.0338775,
+        "lateral_force_kN": -108.12
+      },
+      {
+        "step_index": 713,
+        "displacement_mm": -25.43,
+        "drift_ratio": -0.031787499999999996,
+        "lateral_force_kN": -82.795
+      },
+      {
+        "step_index": 714,
+        "displacement_mm": -23.827,
+        "drift_ratio": -0.02978375,
+        "lateral_force_kN": -60.394
+      },
+      {
+        "step_index": 715,
+        "displacement_mm": -22.016,
+        "drift_ratio": -0.02752,
+        "lateral_force_kN": -37.988
+      },
+      {
+        "step_index": 716,
+        "displacement_mm": -19.647,
+        "drift_ratio": -0.024558749999999997,
+        "lateral_force_kN": -11.689
+      },
+      {
+        "step_index": 717,
+        "displacement_mm": -17.905,
+        "drift_ratio": -0.022381250000000002,
+        "lateral_force_kN": 6.8182
+      },
+      {
+        "step_index": 718,
+        "displacement_mm": -15.606,
+        "drift_ratio": -0.0195075,
+        "lateral_force_kN": 28.248
+      },
+      {
+        "step_index": 719,
+        "displacement_mm": -12.262,
+        "drift_ratio": -0.0153275,
+        "lateral_force_kN": 51.626
+      },
+      {
+        "step_index": 720,
+        "displacement_mm": -8.9179,
+        "drift_ratio": -0.011147375,
+        "lateral_force_kN": 73.053
+      },
+      {
+        "step_index": 721,
+        "displacement_mm": -5.7828,
+        "drift_ratio": -0.0072285,
+        "lateral_force_kN": 95.459
+      },
+      {
+        "step_index": 722,
+        "displacement_mm": -3.0655,
+        "drift_ratio": -0.003831875,
+        "lateral_force_kN": 112.99
+      },
+      {
+        "step_index": 723,
+        "displacement_mm": -0.48771,
+        "drift_ratio": -0.0006096375,
+        "lateral_force_kN": 131.5
+      },
+      {
+        "step_index": 724,
+        "displacement_mm": 3.1351,
+        "drift_ratio": 0.003918875,
+        "lateral_force_kN": 159.74
+      },
+      {
+        "step_index": 725,
+        "displacement_mm": 5.7828,
+        "drift_ratio": 0.0072285,
+        "lateral_force_kN": 178.25
+      },
+      {
+        "step_index": 726,
+        "displacement_mm": 8.6393,
+        "drift_ratio": 0.010799125,
+        "lateral_force_kN": 196.76
+      },
+      {
+        "step_index": 727,
+        "displacement_mm": 11.147,
+        "drift_ratio": 0.01393375,
+        "lateral_force_kN": 216.24
+      },
+      {
+        "step_index": 728,
+        "displacement_mm": 14.213,
+        "drift_ratio": 0.017766249999999997,
+        "lateral_force_kN": 234.75
+      },
+      {
+        "step_index": 729,
+        "displacement_mm": 16.791,
+        "drift_ratio": 0.02098875,
+        "lateral_force_kN": 253.26
+      },
+      {
+        "step_index": 730,
+        "displacement_mm": 19.578,
+        "drift_ratio": 0.024472499999999998,
+        "lateral_force_kN": 271.76
+      },
+      {
+        "step_index": 731,
+        "displacement_mm": 21.877,
+        "drift_ratio": 0.02734625,
+        "lateral_force_kN": 285.4
+      },
+      {
+        "step_index": 732,
+        "displacement_mm": 25.012,
+        "drift_ratio": 0.031265,
+        "lateral_force_kN": 300.98
+      },
+      {
+        "step_index": 733,
+        "displacement_mm": 27.102,
+        "drift_ratio": 0.0338775,
+        "lateral_force_kN": 310.73
+      },
+      {
+        "step_index": 734,
+        "displacement_mm": 30.099,
+        "drift_ratio": 0.03762375,
+        "lateral_force_kN": 322.41
+      },
+      {
+        "step_index": 735,
+        "displacement_mm": 32.814,
+        "drift_ratio": 0.0410175,
+        "lateral_force_kN": 327.28
+      },
+      {
+        "step_index": 736,
+        "displacement_mm": 35.74,
+        "drift_ratio": 0.044675,
+        "lateral_force_kN": 330.2
+      },
+      {
+        "step_index": 737,
+        "displacement_mm": 37.762,
+        "drift_ratio": 0.0472025,
+        "lateral_force_kN": 329.23
+      },
+      {
+        "step_index": 738,
+        "displacement_mm": 39.433,
+        "drift_ratio": 0.04929125,
+        "lateral_force_kN": 322.41
+      },
+      {
+        "step_index": 739,
+        "displacement_mm": 40.617,
+        "drift_ratio": 0.05077125,
+        "lateral_force_kN": 313.64
+      },
+      {
+        "step_index": 740,
+        "displacement_mm": 40.897,
+        "drift_ratio": 0.05112125,
+        "lateral_force_kN": 300.98
+      },
+      {
+        "step_index": 741,
+        "displacement_mm": 40.688,
+        "drift_ratio": 0.05086,
+        "lateral_force_kN": 280.53
+      },
+      {
+        "step_index": 742,
+        "displacement_mm": 40.061,
+        "drift_ratio": 0.05007625,
+        "lateral_force_kN": 259.1
+      },
+      {
+        "step_index": 743,
+        "displacement_mm": 39.154,
+        "drift_ratio": 0.04894250000000001,
+        "lateral_force_kN": 233.77
+      },
+      {
+        "step_index": 744,
+        "displacement_mm": 38.25,
+        "drift_ratio": 0.0478125,
+        "lateral_force_kN": 210.4
+      },
+      {
+        "step_index": 745,
+        "displacement_mm": 37.343,
+        "drift_ratio": 0.046678750000000005,
+        "lateral_force_kN": 187.99
+      },
+      {
+        "step_index": 746,
+        "displacement_mm": 36.439,
+        "drift_ratio": 0.04554875,
+        "lateral_force_kN": 169.49
+      },
+      {
+        "step_index": 747,
+        "displacement_mm": 35.324,
+        "drift_ratio": 0.044155,
+        "lateral_force_kN": 146.11
+      },
+      {
+        "step_index": 748,
+        "displacement_mm": 34.209,
+        "drift_ratio": 0.04276125,
+        "lateral_force_kN": 122.73
+      },
+      {
+        "step_index": 749,
+        "displacement_mm": 32.954,
+        "drift_ratio": 0.0411925,
+        "lateral_force_kN": 98.381
+      },
+      {
+        "step_index": 750,
+        "displacement_mm": 31.351,
+        "drift_ratio": 0.03918875,
+        "lateral_force_kN": 66.234
+      },
+      {
+        "step_index": 751,
+        "displacement_mm": 29.261,
+        "drift_ratio": 0.03657625,
+        "lateral_force_kN": 37.014
+      },
+      {
+        "step_index": 752,
+        "displacement_mm": 27.102,
+        "drift_ratio": 0.0338775,
+        "lateral_force_kN": 9.7407
+      },
+      {
+        "step_index": 753,
+        "displacement_mm": 24.733,
+        "drift_ratio": 0.03091625,
+        "lateral_force_kN": -11.689
+      },
+      {
+        "step_index": 754,
+        "displacement_mm": 22.852,
+        "drift_ratio": 0.028565,
+        "lateral_force_kN": -31.17
+      },
+      {
+        "step_index": 755,
+        "displacement_mm": 20.553,
+        "drift_ratio": 0.025691250000000002,
+        "lateral_force_kN": -50.652
+      },
+      {
+        "step_index": 756,
+        "displacement_mm": 17.557,
+        "drift_ratio": 0.021946249999999997,
+        "lateral_force_kN": -73.053
+      },
+      {
+        "step_index": 757,
+        "displacement_mm": 14.492,
+        "drift_ratio": 0.018115000000000003,
+        "lateral_force_kN": -93.511
+      },
+      {
+        "step_index": 758,
+        "displacement_mm": 10.938,
+        "drift_ratio": 0.0136725,
+        "lateral_force_kN": -115.91
+      },
+      {
+        "step_index": 759,
+        "displacement_mm": 6.1311,
+        "drift_ratio": 0.007663875,
+        "lateral_force_kN": -145.14
+      },
+      {
+        "step_index": 760,
+        "displacement_mm": 1.8115,
+        "drift_ratio": 0.0022643750000000003,
+        "lateral_force_kN": -176.31
+      },
+      {
+        "step_index": 761,
+        "displacement_mm": -2.4385,
+        "drift_ratio": -0.003048125,
+        "lateral_force_kN": -206.5
+      },
+      {
+        "step_index": 762,
+        "displacement_mm": -5.1557,
+        "drift_ratio": -0.006444625000000001,
+        "lateral_force_kN": -227.93
+      },
+      {
+        "step_index": 763,
+        "displacement_mm": -7.8031,
+        "drift_ratio": -0.009753875,
+        "lateral_force_kN": -247.41
+      },
+      {
+        "step_index": 764,
+        "displacement_mm": -11.565,
+        "drift_ratio": -0.014456249999999999,
+        "lateral_force_kN": -273.71
+      },
+      {
+        "step_index": 765,
+        "displacement_mm": -15.676,
+        "drift_ratio": -0.019595,
+        "lateral_force_kN": -302.93
+      },
+      {
+        "step_index": 766,
+        "displacement_mm": -18.184,
+        "drift_ratio": -0.02273,
+        "lateral_force_kN": -318.51
+      },
+      {
+        "step_index": 767,
+        "displacement_mm": -20.553,
+        "drift_ratio": -0.025691250000000002,
+        "lateral_force_kN": -331.18
+      },
+      {
+        "step_index": 768,
+        "displacement_mm": -23.201,
+        "drift_ratio": -0.02900125,
+        "lateral_force_kN": -346.77
+      },
+      {
+        "step_index": 769,
+        "displacement_mm": -25.778,
+        "drift_ratio": -0.0322225,
+        "lateral_force_kN": -358.45
+      },
+      {
+        "step_index": 770,
+        "displacement_mm": -28.773,
+        "drift_ratio": -0.03596625,
+        "lateral_force_kN": -369.17
+      },
+      {
+        "step_index": 771,
+        "displacement_mm": -31.143,
+        "drift_ratio": -0.03892875,
+        "lateral_force_kN": -373.06
+      },
+      {
+        "step_index": 772,
+        "displacement_mm": -33.65,
+        "drift_ratio": -0.042062499999999996,
+        "lateral_force_kN": -378.91
+      },
+      {
+        "step_index": 773,
+        "displacement_mm": -36.439,
+        "drift_ratio": -0.04554875,
+        "lateral_force_kN": -376.96
+      },
+      {
+        "step_index": 774,
+        "displacement_mm": -38.318,
+        "drift_ratio": -0.047897499999999996,
+        "lateral_force_kN": -373.06
+      },
+      {
+        "step_index": 775,
+        "displacement_mm": -38.877,
+        "drift_ratio": -0.04859625,
+        "lateral_force_kN": -363.32
+      },
+      {
+        "step_index": 776,
+        "displacement_mm": -39.154,
+        "drift_ratio": -0.04894250000000001,
+        "lateral_force_kN": -338.97
+      },
+      {
+        "step_index": 777,
+        "displacement_mm": -38.179,
+        "drift_ratio": -0.04772375,
+        "lateral_force_kN": -314.62
+      },
+      {
+        "step_index": 778,
+        "displacement_mm": -37.066,
+        "drift_ratio": -0.046332500000000006,
+        "lateral_force_kN": -282.48
+      },
+      {
+        "step_index": 779,
+        "displacement_mm": -35.603,
+        "drift_ratio": -0.04450375,
+        "lateral_force_kN": -247.41
+      },
+      {
+        "step_index": 780,
+        "displacement_mm": -34.277,
+        "drift_ratio": -0.04284625,
+        "lateral_force_kN": -215.27
+      },
+      {
+        "step_index": 781,
+        "displacement_mm": -33.373,
+        "drift_ratio": -0.041716249999999996,
+        "lateral_force_kN": -187.99
+      },
+      {
+        "step_index": 782,
+        "displacement_mm": -31.491,
+        "drift_ratio": -0.03936375,
+        "lateral_force_kN": -153.9
+      },
+      {
+        "step_index": 783,
+        "displacement_mm": -29.611,
+        "drift_ratio": -0.03701375,
+        "lateral_force_kN": -122.73
+      },
+      {
+        "step_index": 784,
+        "displacement_mm": -28.077,
+        "drift_ratio": -0.03509625,
+        "lateral_force_kN": -90.588
+      },
+      {
+        "step_index": 785,
+        "displacement_mm": -25.778,
+        "drift_ratio": -0.0322225,
+        "lateral_force_kN": -60.394
+      },
+      {
+        "step_index": 786,
+        "displacement_mm": -23.758,
+        "drift_ratio": -0.029697499999999998,
+        "lateral_force_kN": -36.04
+      },
+      {
+        "step_index": 787,
+        "displacement_mm": -21.598,
+        "drift_ratio": -0.026997499999999997,
+        "lateral_force_kN": -12.663
+      },
+      {
+        "step_index": 788,
+        "displacement_mm": -18.951,
+        "drift_ratio": -0.02368875,
+        "lateral_force_kN": 6.8182
+      },
+      {
+        "step_index": 789,
+        "displacement_mm": -16.791,
+        "drift_ratio": -0.02098875,
+        "lateral_force_kN": 16.559
+      },
+      {
+        "step_index": 790,
+        "displacement_mm": -14.422,
+        "drift_ratio": -0.018027500000000002,
+        "lateral_force_kN": 30.196
+      },
+      {
+        "step_index": 791,
+        "displacement_mm": -10.799,
+        "drift_ratio": -0.013498749999999999,
+        "lateral_force_kN": 46.755
+      },
+      {
+        "step_index": 792,
+        "displacement_mm": -7.385,
+        "drift_ratio": -0.00923125,
+        "lateral_force_kN": 63.312
+      },
+      {
+        "step_index": 793,
+        "displacement_mm": -4.3195,
+        "drift_ratio": -0.005399375,
+        "lateral_force_kN": 75.976
+      },
+      {
+        "step_index": 794,
+        "displacement_mm": -1.3237,
+        "drift_ratio": -0.001654625,
+        "lateral_force_kN": 93.511
+      },
+      {
+        "step_index": 795,
+        "displacement_mm": 1.9508,
+        "drift_ratio": 0.0024385,
+        "lateral_force_kN": 112.99
+      },
+      {
+        "step_index": 796,
+        "displacement_mm": 4.9467,
+        "drift_ratio": 0.006183375,
+        "lateral_force_kN": 134.42
+      },
+      {
+        "step_index": 797,
+        "displacement_mm": 8.1516,
+        "drift_ratio": 0.0101895,
+        "lateral_force_kN": 154.87
+      },
+      {
+        "step_index": 798,
+        "displacement_mm": 11.217,
+        "drift_ratio": 0.01402125,
+        "lateral_force_kN": 173.38
+      },
+      {
+        "step_index": 799,
+        "displacement_mm": 13.795,
+        "drift_ratio": 0.01724375,
+        "lateral_force_kN": 187.99
+      },
+      {
+        "step_index": 800,
+        "displacement_mm": 16.512,
+        "drift_ratio": 0.020640000000000002,
+        "lateral_force_kN": 204.55
+      },
+      {
+        "step_index": 801,
+        "displacement_mm": 18.881,
+        "drift_ratio": 0.02360125,
+        "lateral_force_kN": 215.27
+      },
+      {
+        "step_index": 802,
+        "displacement_mm": 21.737,
+        "drift_ratio": 0.027171249999999997,
+        "lateral_force_kN": 226.96
+      },
+      {
+        "step_index": 803,
+        "displacement_mm": 24.873,
+        "drift_ratio": 0.03109125,
+        "lateral_force_kN": 236.69
+      },
+      {
+        "step_index": 804,
+        "displacement_mm": 28.009,
+        "drift_ratio": 0.03501125,
+        "lateral_force_kN": 244.49
+      },
+      {
+        "step_index": 805,
+        "displacement_mm": 31.351,
+        "drift_ratio": 0.03918875,
+        "lateral_force_kN": 243.51
+      },
+      {
+        "step_index": 806,
+        "displacement_mm": 33.861,
+        "drift_ratio": 0.042326249999999996,
+        "lateral_force_kN": 240.59
+      },
+      {
+        "step_index": 807,
+        "displacement_mm": 36.855,
+        "drift_ratio": 0.04606875,
+        "lateral_force_kN": 232.8
+      },
+      {
+        "step_index": 808,
+        "displacement_mm": 38.877,
+        "drift_ratio": 0.04859625,
+        "lateral_force_kN": 228.91
+      },
+      {
+        "step_index": 809,
+        "displacement_mm": 40.549,
+        "drift_ratio": 0.05068625,
+        "lateral_force_kN": 216.24
+      },
+      {
+        "step_index": 810,
+        "displacement_mm": 41.176,
+        "drift_ratio": 0.05147,
+        "lateral_force_kN": 202.6
+      },
+      {
+        "step_index": 811,
+        "displacement_mm": 41.036,
+        "drift_ratio": 0.051295,
+        "lateral_force_kN": 188.96
+      },
+      {
+        "step_index": 812,
+        "displacement_mm": 39.921,
+        "drift_ratio": 0.04990125,
+        "lateral_force_kN": 166.56
+      },
+      {
+        "step_index": 813,
+        "displacement_mm": 38.806,
+        "drift_ratio": 0.048507499999999995,
+        "lateral_force_kN": 145.14
+      },
+      {
+        "step_index": 814,
+        "displacement_mm": 37.622,
+        "drift_ratio": 0.0470275,
+        "lateral_force_kN": 115.91
+      },
+      {
+        "step_index": 815,
+        "displacement_mm": 36.091,
+        "drift_ratio": 0.04511375,
+        "lateral_force_kN": 86.691
+      },
+      {
+        "step_index": 816,
+        "displacement_mm": 34.209,
+        "drift_ratio": 0.04276125,
+        "lateral_force_kN": 60.394
+      },
+      {
+        "step_index": 817,
+        "displacement_mm": 32.954,
+        "drift_ratio": 0.0411925,
+        "lateral_force_kN": 41.884
+      },
+      {
+        "step_index": 818,
+        "displacement_mm": 31.422,
+        "drift_ratio": 0.0392775,
+        "lateral_force_kN": 25.326
+      },
+      {
+        "step_index": 819,
+        "displacement_mm": 29.472,
+        "drift_ratio": 0.036840000000000005,
+        "lateral_force_kN": 3.8962
+      },
+      {
+        "step_index": 820,
+        "displacement_mm": 27.798,
+        "drift_ratio": 0.0347475,
+        "lateral_force_kN": -12.663
+      },
+      {
+        "step_index": 821,
+        "displacement_mm": 25.639,
+        "drift_ratio": 0.03204875,
+        "lateral_force_kN": -29.222
+      },
+      {
+        "step_index": 822,
+        "displacement_mm": 23.27,
+        "drift_ratio": 0.0290875,
+        "lateral_force_kN": -40.91
+      },
+      {
+        "step_index": 823,
+        "displacement_mm": 20.971,
+        "drift_ratio": 0.02621375,
+        "lateral_force_kN": -49.678
+      },
+      {
+        "step_index": 824,
+        "displacement_mm": 18.602,
+        "drift_ratio": 0.0232525,
+        "lateral_force_kN": -55.523
+      },
+      {
+        "step_index": 825,
+        "displacement_mm": 15.885,
+        "drift_ratio": 0.01985625,
+        "lateral_force_kN": -63.312
+      },
+      {
+        "step_index": 826,
+        "displacement_mm": 12.68,
+        "drift_ratio": 0.01585,
+        "lateral_force_kN": -69.157
+      },
+      {
+        "step_index": 827,
+        "displacement_mm": 9.7539,
+        "drift_ratio": 0.012192375,
+        "lateral_force_kN": -82.795
+      },
+      {
+        "step_index": 828,
+        "displacement_mm": 6.9672,
+        "drift_ratio": 0.008709,
+        "lateral_force_kN": -96.433
+      },
+      {
+        "step_index": 829,
+        "displacement_mm": 4.668,
+        "drift_ratio": 0.005835,
+        "lateral_force_kN": -109.09
+      },
+      {
+        "step_index": 830,
+        "displacement_mm": 1.2541,
+        "drift_ratio": 0.001567625,
+        "lateral_force_kN": -127.6
+      },
+      {
+        "step_index": 831,
+        "displacement_mm": -1.1844,
+        "drift_ratio": -0.0014804999999999998,
+        "lateral_force_kN": -142.21
+      },
+      {
+        "step_index": 832,
+        "displacement_mm": -4.3894,
+        "drift_ratio": -0.00548675,
+        "lateral_force_kN": -161.69
+      },
+      {
+        "step_index": 833,
+        "displacement_mm": -7.8031,
+        "drift_ratio": -0.009753875,
+        "lateral_force_kN": -187.02
+      },
+      {
+        "step_index": 834,
+        "displacement_mm": -10.311,
+        "drift_ratio": -0.01288875,
+        "lateral_force_kN": -200.65
+      },
+      {
+        "step_index": 835,
+        "displacement_mm": -12.959,
+        "drift_ratio": -0.016198749999999998,
+        "lateral_force_kN": -216.24
+      },
+      {
+        "step_index": 836,
+        "displacement_mm": -15.258,
+        "drift_ratio": -0.0190725,
+        "lateral_force_kN": -226.96
+      },
+      {
+        "step_index": 837,
+        "displacement_mm": -17.348,
+        "drift_ratio": -0.021685,
+        "lateral_force_kN": -238.64
+      },
+      {
+        "step_index": 838,
+        "displacement_mm": -19.09,
+        "drift_ratio": -0.0238625,
+        "lateral_force_kN": -247.41
+      },
+      {
+        "step_index": 839,
+        "displacement_mm": -20.901,
+        "drift_ratio": -0.02612625,
+        "lateral_force_kN": -256.18
+      },
+      {
+        "step_index": 840,
+        "displacement_mm": -22.922,
+        "drift_ratio": -0.0286525,
+        "lateral_force_kN": -265.92
+      },
+      {
+        "step_index": 841,
+        "displacement_mm": -25.221,
+        "drift_ratio": -0.03152625,
+        "lateral_force_kN": -275.66
+      },
+      {
+        "step_index": 842,
+        "displacement_mm": -27.661,
+        "drift_ratio": -0.03457625,
+        "lateral_force_kN": -284.42
+      },
+      {
+        "step_index": 843,
+        "displacement_mm": -29.888,
+        "drift_ratio": -0.037360000000000004,
+        "lateral_force_kN": -291.24
+      },
+      {
+        "step_index": 844,
+        "displacement_mm": -31.91,
+        "drift_ratio": -0.0398875,
+        "lateral_force_kN": -298.06
+      },
+      {
+        "step_index": 845,
+        "displacement_mm": -34.069,
+        "drift_ratio": -0.042586250000000006,
+        "lateral_force_kN": -301.96
+      },
+      {
+        "step_index": 846,
+        "displacement_mm": -36.159,
+        "drift_ratio": -0.045198749999999996,
+        "lateral_force_kN": -303.91
+      },
+      {
+        "step_index": 847,
+        "displacement_mm": -37.691,
+        "drift_ratio": -0.04711375,
+        "lateral_force_kN": -301.96
+      },
+      {
+        "step_index": 848,
+        "displacement_mm": -38.806,
+        "drift_ratio": -0.048507499999999995,
+        "lateral_force_kN": -300.98
+      },
+      {
+        "step_index": 849,
+        "displacement_mm": -39.154,
+        "drift_ratio": -0.04894250000000001,
+        "lateral_force_kN": -291.24
+      },
+      {
+        "step_index": 850,
+        "displacement_mm": -38.806,
+        "drift_ratio": -0.048507499999999995,
+        "lateral_force_kN": -262.02
+      },
+      {
+        "step_index": 851,
+        "displacement_mm": -37.483,
+        "drift_ratio": -0.04685375,
+        "lateral_force_kN": -225.01
+      },
+      {
+        "step_index": 852,
+        "displacement_mm": -36.159,
+        "drift_ratio": -0.045198749999999996,
+        "lateral_force_kN": -196.76
+      },
+      {
+        "step_index": 853,
+        "displacement_mm": -34.976,
+        "drift_ratio": -0.04372,
+        "lateral_force_kN": -164.62
+      },
+      {
+        "step_index": 854,
+        "displacement_mm": -33.581,
+        "drift_ratio": -0.04197625000000001,
+        "lateral_force_kN": -135.39
+      },
+      {
+        "step_index": 855,
+        "displacement_mm": -32.05,
+        "drift_ratio": -0.040062499999999994,
+        "lateral_force_kN": -109.09
+      },
+      {
+        "step_index": 856,
+        "displacement_mm": -31.003,
+        "drift_ratio": -0.038753750000000003,
+        "lateral_force_kN": -88.64
+      },
+      {
+        "step_index": 857,
+        "displacement_mm": -29.332,
+        "drift_ratio": -0.036665,
+        "lateral_force_kN": -65.26
+      },
+      {
+        "step_index": 858,
+        "displacement_mm": -27.521,
+        "drift_ratio": -0.03440125,
+        "lateral_force_kN": -42.859
+      },
+      {
+        "step_index": 859,
+        "displacement_mm": -25.639,
+        "drift_ratio": -0.03204875,
+        "lateral_force_kN": -26.3
+      },
+      {
+        "step_index": 860,
+        "displacement_mm": -23.688,
+        "drift_ratio": -0.029609999999999997,
+        "lateral_force_kN": -9.7407
+      },
+      {
+        "step_index": 861,
+        "displacement_mm": -21.25,
+        "drift_ratio": -0.0265625,
+        "lateral_force_kN": 0.0
+      },
+      {
+        "step_index": 862,
+        "displacement_mm": -18.742,
+        "drift_ratio": -0.0234275,
+        "lateral_force_kN": 11.689
+      },
+      {
+        "step_index": 863,
+        "displacement_mm": -16.791,
+        "drift_ratio": -0.02098875,
+        "lateral_force_kN": 14.611
+      },
+      {
+        "step_index": 864,
+        "displacement_mm": -14.701,
+        "drift_ratio": -0.01837625,
+        "lateral_force_kN": 16.559
+      },
+      {
+        "step_index": 865,
+        "displacement_mm": -11.914,
+        "drift_ratio": -0.0148925,
+        "lateral_force_kN": 17.533
+      },
+      {
+        "step_index": 866,
+        "displacement_mm": -8.3607,
+        "drift_ratio": -0.010450875,
+        "lateral_force_kN": 24.351
+      },
+      {
+        "step_index": 867,
+        "displacement_mm": -5.713,
+        "drift_ratio": -0.00714125,
+        "lateral_force_kN": 30.196
+      },
+      {
+        "step_index": 868,
+        "displacement_mm": -2.2295,
+        "drift_ratio": -0.002786875,
+        "lateral_force_kN": 36.04
+      },
+      {
+        "step_index": 869,
+        "displacement_mm": 1.1844,
+        "drift_ratio": 0.0014804999999999998,
+        "lateral_force_kN": 47.729
+      },
+      {
+        "step_index": 870,
+        "displacement_mm": 5.4343,
+        "drift_ratio": 0.006792875,
+        "lateral_force_kN": 66.234
+      },
+      {
+        "step_index": 871,
+        "displacement_mm": 9.1966,
+        "drift_ratio": 0.01149575,
+        "lateral_force_kN": 77.924
+      },
+      {
+        "step_index": 872,
+        "displacement_mm": 12.123,
+        "drift_ratio": 0.015153749999999999,
+        "lateral_force_kN": 90.588
+      },
+      {
+        "step_index": 873,
+        "displacement_mm": 15.258,
+        "drift_ratio": 0.0190725,
+        "lateral_force_kN": 104.22
+      },
+      {
+        "step_index": 874,
+        "displacement_mm": 17.766,
+        "drift_ratio": 0.022207499999999998,
+        "lateral_force_kN": 116.89
+      },
+      {
+        "step_index": 875,
+        "displacement_mm": 20.135,
+        "drift_ratio": 0.025168750000000004,
+        "lateral_force_kN": 127.6
+      },
+      {
+        "step_index": 876,
+        "displacement_mm": 23.479,
+        "drift_ratio": 0.02934875,
+        "lateral_force_kN": 140.27
+      },
+      {
+        "step_index": 877,
+        "displacement_mm": 25.71,
+        "drift_ratio": 0.0321375,
+        "lateral_force_kN": 149.03
+      },
+      {
+        "step_index": 878,
+        "displacement_mm": 28.773,
+        "drift_ratio": 0.03596625,
+        "lateral_force_kN": 156.82
+      },
+      {
+        "step_index": 879,
+        "displacement_mm": 31.839,
+        "drift_ratio": 0.03979875,
+        "lateral_force_kN": 158.77
+      },
+      {
+        "step_index": 880,
+        "displacement_mm": 34.348,
+        "drift_ratio": 0.042935,
+        "lateral_force_kN": 156.82
+      },
+      {
+        "step_index": 881,
+        "displacement_mm": 36.787,
+        "drift_ratio": 0.04598375,
+        "lateral_force_kN": 150.98
+      },
+      {
+        "step_index": 882,
+        "displacement_mm": 38.946,
+        "drift_ratio": 0.0486825,
+        "lateral_force_kN": 145.14
+      },
+      {
+        "step_index": 883,
+        "displacement_mm": 40.617,
+        "drift_ratio": 0.05077125,
+        "lateral_force_kN": 140.27
+      },
+      {
+        "step_index": 884,
+        "displacement_mm": 40.828,
+        "drift_ratio": 0.051035000000000004,
+        "lateral_force_kN": 124.68
+      },
+      {
+        "step_index": 885,
+        "displacement_mm": 40.129,
+        "drift_ratio": 0.05016125,
+        "lateral_force_kN": 105.2
+      },
+      {
+        "step_index": 886,
+        "displacement_mm": 39.086,
+        "drift_ratio": 0.0488575,
+        "lateral_force_kN": 81.821
+      },
+      {
+        "step_index": 887,
+        "displacement_mm": 37.554,
+        "drift_ratio": 0.046942500000000005,
+        "lateral_force_kN": 58.445
+      },
+      {
+        "step_index": 888,
+        "displacement_mm": 36.579,
+        "drift_ratio": 0.04572375,
+        "lateral_force_kN": 45.781
+      },
+      {
+        "step_index": 889,
+        "displacement_mm": 35.324,
+        "drift_ratio": 0.044155,
+        "lateral_force_kN": 29.222
+      },
+      {
+        "step_index": 890,
+        "displacement_mm": 34.557,
+        "drift_ratio": 0.043196250000000005,
+        "lateral_force_kN": 14.611
+      },
+      {
+        "step_index": 891,
+        "displacement_mm": 32.675,
+        "drift_ratio": 0.04084375,
+        "lateral_force_kN": -3.8962
+      },
+      {
+        "step_index": 892,
+        "displacement_mm": 30.516,
+        "drift_ratio": 0.038145,
+        "lateral_force_kN": -20.455
+      },
+      {
+        "step_index": 893,
+        "displacement_mm": 27.521,
+        "drift_ratio": 0.03440125,
+        "lateral_force_kN": -39.936
+      },
+      {
+        "step_index": 894,
+        "displacement_mm": 26.198,
+        "drift_ratio": 0.0327475,
+        "lateral_force_kN": -48.704
+      },
+      {
+        "step_index": 895,
+        "displacement_mm": 23.827,
+        "drift_ratio": 0.02978375,
+        "lateral_force_kN": -57.471
+      },
+      {
+        "step_index": 896,
+        "displacement_mm": 21.319,
+        "drift_ratio": 0.02664875,
+        "lateral_force_kN": -64.286
+      },
+      {
+        "step_index": 897,
+        "displacement_mm": 19.159,
+        "drift_ratio": 0.023948749999999998,
+        "lateral_force_kN": -69.157
+      },
+      {
+        "step_index": 898,
+        "displacement_mm": 16.024,
+        "drift_ratio": 0.020030000000000003,
+        "lateral_force_kN": -72.079
+      },
+      {
+        "step_index": 899,
+        "displacement_mm": 12.471,
+        "drift_ratio": 0.01558875,
+        "lateral_force_kN": -72.079
+      },
+      {
+        "step_index": 900,
+        "displacement_mm": 9.1966,
+        "drift_ratio": 0.01149575,
+        "lateral_force_kN": -73.053
+      },
+      {
+        "step_index": 901,
+        "displacement_mm": 5.1557,
+        "drift_ratio": 0.006444625000000001,
+        "lateral_force_kN": -75.001
+      },
+      {
+        "step_index": 902,
+        "displacement_mm": 2.6474,
+        "drift_ratio": 0.00330925,
+        "lateral_force_kN": -77.924
+      },
+      {
+        "step_index": 903,
+        "displacement_mm": 0.41803,
+        "drift_ratio": 0.0005225375000000001,
+        "lateral_force_kN": -82.795
+      },
+      {
+        "step_index": 904,
+        "displacement_mm": -2.1598,
+        "drift_ratio": -0.0026997500000000003,
+        "lateral_force_kN": -86.691
+      },
+      {
+        "step_index": 905,
+        "displacement_mm": -5.0162,
+        "drift_ratio": -0.006270250000000001,
+        "lateral_force_kN": -93.511
+      },
+      {
+        "step_index": 906,
+        "displacement_mm": -7.3155,
+        "drift_ratio": -0.009144375,
+        "lateral_force_kN": -97.407
+      },
+      {
+        "step_index": 907,
+        "displacement_mm": -9.8237,
+        "drift_ratio": -0.012279625,
+        "lateral_force_kN": -107.14
+      },
+      {
+        "step_index": 908,
+        "displacement_mm": -12.68,
+        "drift_ratio": -0.01585,
+        "lateral_force_kN": -119.81
+      },
+      {
+        "step_index": 909,
+        "displacement_mm": -15.537,
+        "drift_ratio": -0.01942125,
+        "lateral_force_kN": -131.5
+      },
+      {
+        "step_index": 910,
+        "displacement_mm": -17.905,
+        "drift_ratio": -0.022381250000000002,
+        "lateral_force_kN": -137.34
+      },
+      {
+        "step_index": 911,
+        "displacement_mm": -19.996,
+        "drift_ratio": -0.024995,
+        "lateral_force_kN": -150.0
+      },
+      {
+        "step_index": 912,
+        "displacement_mm": -22.086,
+        "drift_ratio": -0.027607499999999997,
+        "lateral_force_kN": -156.82
+      },
+      {
+        "step_index": 913,
+        "displacement_mm": -24.524,
+        "drift_ratio": -0.030655,
+        "lateral_force_kN": -164.62
+      },
+      {
+        "step_index": 914,
+        "displacement_mm": -26.406,
+        "drift_ratio": -0.033007499999999995,
+        "lateral_force_kN": -172.41
+      },
+      {
+        "step_index": 915,
+        "displacement_mm": -28.496,
+        "drift_ratio": -0.03562,
+        "lateral_force_kN": -177.28
+      },
+      {
+        "step_index": 916,
+        "displacement_mm": -30.447,
+        "drift_ratio": -0.03805875,
+        "lateral_force_kN": -180.2
+      },
+      {
+        "step_index": 917,
+        "displacement_mm": -32.954,
+        "drift_ratio": -0.0411925,
+        "lateral_force_kN": -185.07
+      },
+      {
+        "step_index": 918,
+        "displacement_mm": -34.628,
+        "drift_ratio": -0.043285,
+        "lateral_force_kN": -185.07
+      },
+      {
+        "step_index": 919,
+        "displacement_mm": -36.855,
+        "drift_ratio": -0.04606875,
+        "lateral_force_kN": -186.05
+      },
+      {
+        "step_index": 920,
+        "displacement_mm": -38.529,
+        "drift_ratio": -0.04816125,
+        "lateral_force_kN": -189.94
+      },
+      {
+        "step_index": 921,
+        "displacement_mm": -39.294,
+        "drift_ratio": -0.049117499999999994,
+        "lateral_force_kN": -186.05
+      },
+      {
+        "step_index": 922,
+        "displacement_mm": -39.225,
+        "drift_ratio": -0.04903125,
+        "lateral_force_kN": -170.46
+      },
+      {
+        "step_index": 923,
+        "displacement_mm": -38.738,
+        "drift_ratio": -0.0484225,
+        "lateral_force_kN": -153.9
+      },
+      {
+        "step_index": 924,
+        "displacement_mm": -37.762,
+        "drift_ratio": -0.0472025,
+        "lateral_force_kN": -134.42
+      },
+      {
+        "step_index": 925,
+        "displacement_mm": -36.439,
+        "drift_ratio": -0.04554875,
+        "lateral_force_kN": -109.09
+      },
+      {
+        "step_index": 926,
+        "displacement_mm": -34.976,
+        "drift_ratio": -0.04372,
+        "lateral_force_kN": -81.821
+      },
+      {
+        "step_index": 927,
+        "displacement_mm": -33.513,
+        "drift_ratio": -0.04189125,
+        "lateral_force_kN": -57.471
+      },
+      {
+        "step_index": 928,
+        "displacement_mm": -32.05,
+        "drift_ratio": -0.040062499999999994,
+        "lateral_force_kN": -41.884
+      },
+      {
+        "step_index": 929,
+        "displacement_mm": -30.236,
+        "drift_ratio": -0.037795,
+        "lateral_force_kN": -25.326
+      },
+      {
+        "step_index": 930,
+        "displacement_mm": -28.217,
+        "drift_ratio": -0.03527125,
+        "lateral_force_kN": -12.663
+      },
+      {
+        "step_index": 931,
+        "displacement_mm": -25.778,
+        "drift_ratio": -0.0322225,
+        "lateral_force_kN": 0.0
+      },
+      {
+        "step_index": 932,
+        "displacement_mm": -22.573,
+        "drift_ratio": -0.028216250000000002,
+        "lateral_force_kN": 7.7924
+      },
+      {
+        "step_index": 933,
+        "displacement_mm": -20.135,
+        "drift_ratio": -0.025168750000000004,
+        "lateral_force_kN": 10.714
+      },
+      {
+        "step_index": 934,
+        "displacement_mm": -17.557,
+        "drift_ratio": -0.021946249999999997,
+        "lateral_force_kN": 13.637
+      },
+      {
+        "step_index": 935,
+        "displacement_mm": -15.119,
+        "drift_ratio": -0.01889875,
+        "lateral_force_kN": 15.585
+      },
+      {
+        "step_index": 936,
+        "displacement_mm": -12.889,
+        "drift_ratio": -0.01611125,
+        "lateral_force_kN": 15.585
+      },
+      {
+        "step_index": 937,
+        "displacement_mm": -10.451,
+        "drift_ratio": -0.01306375,
+        "lateral_force_kN": 19.481
+      },
+      {
+        "step_index": 938,
+        "displacement_mm": -8.2908,
+        "drift_ratio": -0.010363500000000001,
+        "lateral_force_kN": 21.429
+      },
+      {
+        "step_index": 939,
+        "displacement_mm": -5.7828,
+        "drift_ratio": -0.0072285,
+        "lateral_force_kN": 23.377
+      },
+      {
+        "step_index": 940,
+        "displacement_mm": -3.4836,
+        "drift_ratio": -0.0043545,
+        "lateral_force_kN": 26.3
+      },
+      {
+        "step_index": 941,
+        "displacement_mm": -0.83607,
+        "drift_ratio": -0.0010450875,
+        "lateral_force_kN": 29.222
+      },
+      {
+        "step_index": 942,
+        "displacement_mm": 1.9508,
+        "drift_ratio": 0.0024385,
+        "lateral_force_kN": 34.092
+      },
+      {
+        "step_index": 943,
+        "displacement_mm": 4.8072,
+        "drift_ratio": 0.006009,
+        "lateral_force_kN": 39.936
+      },
+      {
+        "step_index": 944,
+        "displacement_mm": 7.3155,
+        "drift_ratio": 0.009144375,
+        "lateral_force_kN": 42.859
+      },
+      {
+        "step_index": 945,
+        "displacement_mm": 10.172,
+        "drift_ratio": 0.012715,
+        "lateral_force_kN": 46.755
+      },
+      {
+        "step_index": 946,
+        "displacement_mm": 13.516,
+        "drift_ratio": 0.016895,
+        "lateral_force_kN": 53.574
+      },
+      {
+        "step_index": 947,
+        "displacement_mm": 16.094,
+        "drift_ratio": 0.0201175,
+        "lateral_force_kN": 56.497
+      },
+      {
+        "step_index": 948,
+        "displacement_mm": 18.881,
+        "drift_ratio": 0.02360125,
+        "lateral_force_kN": 59.419
+      },
+      {
+        "step_index": 949,
+        "displacement_mm": 21.319,
+        "drift_ratio": 0.02664875,
+        "lateral_force_kN": 61.368
+      },
+      {
+        "step_index": 950,
+        "displacement_mm": 23.967,
+        "drift_ratio": 0.02995875,
+        "lateral_force_kN": 62.342
+      },
+      {
+        "step_index": 951,
+        "displacement_mm": 26.614,
+        "drift_ratio": 0.0332675,
+        "lateral_force_kN": 63.312
+      },
+      {
+        "step_index": 952,
+        "displacement_mm": 28.705,
+        "drift_ratio": 0.035881249999999996,
+        "lateral_force_kN": 56.497
+      },
+      {
+        "step_index": 953,
+        "displacement_mm": 30.864,
+        "drift_ratio": 0.03858,
+        "lateral_force_kN": 45.781
+      },
+      {
+        "step_index": 954,
+        "displacement_mm": 32.187,
+        "drift_ratio": 0.04023375,
+        "lateral_force_kN": 43.832
+      },
+      {
+        "step_index": 955,
+        "displacement_mm": 33.513,
+        "drift_ratio": 0.04189125,
+        "lateral_force_kN": 36.04
+      },
+      {
+        "step_index": 956,
+        "displacement_mm": 34.277,
+        "drift_ratio": 0.04284625,
+        "lateral_force_kN": 23.377
+      },
+      {
+        "step_index": 957,
+        "displacement_mm": 34.765,
+        "drift_ratio": 0.04345625,
+        "lateral_force_kN": 6.8182
+      },
+      {
+        "step_index": 958,
+        "displacement_mm": 35.253,
+        "drift_ratio": 0.04406625,
+        "lateral_force_kN": -7.7924
+      },
+      {
+        "step_index": 959,
+        "displacement_mm": 35.672,
+        "drift_ratio": 0.04459,
+        "lateral_force_kN": -17.533
+      }
+    ],
+    "drift_ratio": [
+      0.0,
+      -0.0012192375,
+      -0.000696725,
+      -0.000174175,
+      0.0002612625,
+      0.0010450875,
+      0.00217725,
+      0.003048125,
+      0.00418025,
+      0.00557375,
+      0.0073155,
+      0.008621750000000001,
+      0.01001525,
+      0.01149575,
+      0.012715,
+      0.013847499999999999,
+      0.015066250000000002,
+      0.01602375,
+      0.01663375,
+      0.017766249999999997,
+      0.01855,
+      0.01942125,
+      0.0207275,
+      0.02212,
+      0.02334,
+      0.024558749999999997,
+      0.025691250000000002,
+      0.02630125,
+      0.026475,
+      0.02612625,
+      0.025691250000000002,
+      0.024995,
+      0.02421125,
+      0.02299125,
+      0.022033749999999998,
+      0.020466250000000002,
+      0.018985000000000002,
+      0.0174175,
+      0.01611125,
+      0.014456249999999999,
+      0.012802500000000001,
+      0.011060375,
+      0.009492625,
+      0.007663875,
+      0.00566075,
+      0.003570625,
+      0.001393375,
+      -0.0006096375,
+      -0.003396625,
+      -0.005399375,
+      -0.00714125,
+      -0.008796,
+      -0.0102765,
+      -0.012192375,
+      -0.01358625,
+      -0.015066250000000002,
+      -0.01663375,
+      -0.01828875,
+      -0.01985625,
+      -0.0217725,
+      -0.02351375,
+      -0.024646249999999998,
+      -0.025168750000000004,
+      -0.02543,
+      -0.025081250000000003,
+      -0.024820000000000002,
+      -0.02421125,
+      -0.0234275,
+      -0.022207499999999998,
+      -0.02098875,
+      -0.019682500000000002,
+      -0.01820125,
+      -0.01724375,
+      -0.01567625,
+      -0.0142825,
+      -0.012802500000000001,
+      -0.01158275,
+      -0.009840875,
+      -0.00775075,
+      -0.00548675,
+      -0.00313525,
+      -0.00043545,
+      0.001916,
+      0.00409325,
+      0.00548675,
+      0.007576874999999999,
+      0.009492625,
+      0.01149575,
+      0.013847499999999999,
+      0.01646,
+      0.01855,
+      0.02037875,
+      0.022033749999999998,
+      0.02403625,
+      0.025081250000000003,
+      0.0259525,
+      0.0265625,
+      0.02682375,
+      0.026387499999999998,
+      0.025691250000000002,
+      0.025168750000000004,
+      0.0242975,
+      0.023166250000000003,
+      0.021685,
+      0.020640000000000002,
+      0.0190725,
+      0.017853749999999998,
+      0.016198749999999998,
+      0.0147175,
+      0.01315,
+      0.010973124999999999,
+      0.008621750000000001,
+      0.006879875,
+      0.005138125,
+      0.003657625,
+      0.001567625,
+      -0.0006096375,
+      -0.00313525,
+      -0.005748,
+      -0.008099374999999999,
+      -0.011147375,
+      -0.01402125,
+      -0.016285,
+      -0.01828875,
+      -0.02090125,
+      -0.02299125,
+      -0.02421125,
+      -0.024646249999999998,
+      -0.024995,
+      -0.024558749999999997,
+      -0.023948749999999998,
+      -0.0232525,
+      -0.022207499999999998,
+      -0.02107625,
+      -0.019768749999999998,
+      -0.01837625,
+      -0.017070000000000002,
+      -0.015502499999999999,
+      -0.01393375,
+      -0.012192375,
+      -0.010711875,
+      -0.00897,
+      -0.0072285,
+      -0.005312375,
+      -0.00313525,
+      -0.0006096375,
+      0.00043545,
+      0.0022643750000000003,
+      0.00470275,
+      0.006618625,
+      0.008621750000000001,
+      0.010363500000000001,
+      0.012541249999999999,
+      0.014456249999999999,
+      0.017156249999999998,
+      0.0195075,
+      0.021858749999999996,
+      0.02360125,
+      0.025168750000000004,
+      0.02604,
+      0.02673625,
+      0.02612625,
+      0.02560375,
+      0.024646249999999998,
+      0.0234275,
+      0.022556250000000003,
+      0.0201175,
+      0.01837625,
+      0.016198749999999998,
+      0.014456249999999999,
+      0.012366625,
+      0.01010225,
+      0.008012125,
+      0.005921999999999999,
+      0.003831875,
+      0.001654625,
+      -0.0014804999999999998,
+      -0.003744875,
+      -0.00548675,
+      -0.00897,
+      -0.011757,
+      -0.014804999999999999,
+      -0.0175925,
+      -0.0195075,
+      -0.021858749999999996,
+      -0.0238625,
+      -0.02473375,
+      -0.02473375,
+      -0.02421125,
+      -0.0232525,
+      -0.02151125,
+      -0.020030000000000003,
+      -0.01837625,
+      -0.0163725,
+      -0.014456249999999999,
+      -0.012279625,
+      -0.010363500000000001,
+      -0.007838125,
+      -0.005748,
+      -0.003570625,
+      -0.0010450875,
+      0.001654625,
+      0.00470275,
+      0.00705425,
+      0.009666875,
+      0.011321375,
+      0.01341125,
+      0.0153275,
+      0.0174175,
+      0.01942125,
+      0.0215975,
+      0.02403625,
+      0.025778750000000003,
+      0.026387499999999998,
+      0.02664875,
+      0.02612625,
+      0.02543,
+      0.024558749999999997,
+      0.02334,
+      0.022381250000000002,
+      0.02125,
+      0.019682500000000002,
+      0.01820125,
+      0.01654625,
+      0.014456249999999999,
+      0.012453625,
+      0.0102765,
+      0.007576874999999999,
+      0.005748,
+      0.0043545,
+      0.001654625,
+      -0.0011321375,
+      -0.0043545,
+      -0.008883,
+      -0.01167,
+      -0.014456249999999999,
+      -0.016285,
+      -0.01837625,
+      -0.02037875,
+      -0.022207499999999998,
+      -0.02368875,
+      -0.024820000000000002,
+      -0.02473375,
+      -0.023948749999999998,
+      -0.02273,
+      -0.02107625,
+      -0.019595,
+      -0.018027500000000002,
+      -0.01611125,
+      -0.01402125,
+      -0.012453625,
+      -0.010363500000000001,
+      -0.008012125,
+      -0.005312375,
+      -0.00217725,
+      0.0002612625,
+      0.003048125,
+      0.006096375,
+      0.008796,
+      0.010973124999999999,
+      0.01315,
+      0.01585,
+      0.017853749999999998,
+      0.02029125,
+      0.022468750000000003,
+      0.024820000000000002,
+      0.02612625,
+      0.02664875,
+      0.02691,
+      0.025865,
+      0.0249075,
+      0.02368875,
+      0.02212,
+      0.020466250000000002,
+      0.01855,
+      0.01663375,
+      0.014456249999999999,
+      0.011843999999999999,
+      0.00897,
+      0.006357625,
+      0.0043545,
+      0.00217725,
+      -0.001393375,
+      -0.003918875,
+      -0.006705875,
+      -0.008796,
+      -0.01149575,
+      -0.014195,
+      -0.0163725,
+      -0.01889875,
+      -0.02098875,
+      -0.022556250000000003,
+      -0.02360125,
+      -0.024385,
+      -0.025256249999999997,
+      -0.024820000000000002,
+      -0.02403625,
+      -0.023166250000000003,
+      -0.02212,
+      -0.0205525,
+      -0.01933375,
+      -0.017853749999999998,
+      -0.016198749999999998,
+      -0.013847499999999999,
+      -0.012018375,
+      -0.0101895,
+      -0.008186375000000001,
+      -0.006270250000000001,
+      -0.003744875,
+      -0.000174175,
+      0.002525625,
+      0.00478975,
+      0.006879875,
+      0.008709,
+      0.010799125,
+      0.01376,
+      0.01654625,
+      0.018811249999999998,
+      0.02125,
+      0.02334,
+      0.0259525,
+      0.028303750000000003,
+      0.03100375,
+      0.0325725,
+      0.033702499999999996,
+      0.03457625,
+      0.03483625,
+      0.03440125,
+      0.033702499999999996,
+      0.0326575,
+      0.0313525,
+      0.029609999999999997,
+      0.02734625,
+      0.0253425,
+      0.022556250000000003,
+      0.020466250000000002,
+      0.017766249999999997,
+      0.015502499999999999,
+      0.01402125,
+      0.01149575,
+      0.00923125,
+      0.006531625,
+      0.003483625,
+      0.0010450875,
+      -0.0014804999999999998,
+      -0.00478975,
+      -0.006792875,
+      -0.009318625,
+      -0.01167,
+      -0.01437,
+      -0.015502499999999999,
+      -0.0175925,
+      -0.01933375,
+      -0.02107625,
+      -0.022381250000000002,
+      -0.0242975,
+      -0.025865,
+      -0.027607499999999997,
+      -0.02943625,
+      -0.0311775,
+      -0.03204875,
+      -0.0326575,
+      -0.0325725,
+      -0.0321375,
+      -0.0311775,
+      -0.03004625,
+      -0.02900125,
+      -0.02786875,
+      -0.02621375,
+      -0.024472499999999998,
+      -0.022905000000000002,
+      -0.02142375,
+      -0.01985625,
+      -0.01794,
+      -0.01602375,
+      -0.01437,
+      -0.012192375,
+      -0.00923125,
+      -0.00548675,
+      -0.0008709,
+      0.002612625,
+      0.005748,
+      0.00897,
+      0.012279625,
+      0.0148925,
+      0.0174175,
+      0.02029125,
+      0.023166250000000003,
+      0.025691250000000002,
+      0.02847875,
+      0.030132500000000003,
+      0.0325725,
+      0.0341375,
+      0.03483625,
+      0.03527125,
+      0.03492125,
+      0.0341375,
+      0.0334425,
+      0.032397499999999996,
+      0.03109125,
+      0.029522499999999997,
+      0.027955,
+      0.026475,
+      0.024558749999999997,
+      0.022643749999999997,
+      0.02029125,
+      0.01828875,
+      0.0159375,
+      0.0132375,
+      0.01167,
+      0.008796,
+      0.00557375,
+      0.003483625,
+      0.0009579875,
+      -0.00217725,
+      -0.00566075,
+      -0.008883,
+      -0.01167,
+      -0.01558875,
+      -0.01820125,
+      -0.0207275,
+      -0.023166250000000003,
+      -0.025168750000000004,
+      -0.02682375,
+      -0.02847875,
+      -0.030132500000000003,
+      -0.0313525,
+      -0.0319625,
+      -0.032397499999999996,
+      -0.032397499999999996,
+      -0.0317,
+      -0.03091625,
+      -0.02995875,
+      -0.029175,
+      -0.028130000000000002,
+      -0.02630125,
+      -0.025081250000000003,
+      -0.02368875,
+      -0.021858749999999996,
+      -0.01994375,
+      -0.0184625,
+      -0.01654625,
+      -0.0147175,
+      -0.012018375,
+      -0.009318625,
+      -0.00705425,
+      -0.0042675000000000005,
+      -8.709e-05,
+      0.003396625,
+      0.006009,
+      0.008621750000000001,
+      0.011060375,
+      0.0136725,
+      0.01611125,
+      0.0195075,
+      0.022207499999999998,
+      0.0242975,
+      0.0265625,
+      0.02926125,
+      0.03152625,
+      0.033617499999999995,
+      0.03466125,
+      0.03501125,
+      0.03527125,
+      0.03457625,
+      0.033702499999999996,
+      0.0326575,
+      0.0313525,
+      0.03004625,
+      0.028303750000000003,
+      0.02682375,
+      0.02543,
+      0.02403625,
+      0.022207499999999998,
+      0.02037875,
+      0.01828875,
+      0.01585,
+      0.01358625,
+      0.01140875,
+      0.00897,
+      0.006009,
+      0.00330925,
+      0.0003483625,
+      -0.002351375,
+      -0.004964125,
+      -0.006618625,
+      -0.009318625,
+      -0.012192375,
+      -0.01576375,
+      -0.018115000000000003,
+      -0.020640000000000002,
+      -0.022905000000000002,
+      -0.0253425,
+      -0.027607499999999997,
+      -0.02934875,
+      -0.030830000000000003,
+      -0.031787499999999996,
+      -0.0325725,
+      -0.0322225,
+      -0.0317,
+      -0.030219999999999997,
+      -0.02926125,
+      -0.027693750000000003,
+      -0.02630125,
+      -0.024472499999999998,
+      -0.022556250000000003,
+      -0.020466250000000002,
+      -0.018985000000000002,
+      -0.0169825,
+      -0.0153275,
+      -0.011757,
+      -0.008883,
+      -0.00557375,
+      -0.000696725,
+      0.001916,
+      0.00478975,
+      0.008012125,
+      0.010537875,
+      0.012802500000000001,
+      0.0148925,
+      0.016808749999999997,
+      0.0195075,
+      0.022643749999999997,
+      0.025517500000000002,
+      0.027432500000000002,
+      0.02978375,
+      0.03161375,
+      0.0338775,
+      0.0347475,
+      0.03501125,
+      0.03440125,
+      0.0335275,
+      0.03204875,
+      0.03039375,
+      0.02900125,
+      0.0265625,
+      0.0242975,
+      0.0217725,
+      0.019768749999999998,
+      0.01724375,
+      0.014456249999999999,
+      0.01288875,
+      0.0102765,
+      0.0072285,
+      0.00470275,
+      0.0012192375,
+      -0.0010450875,
+      -0.002351375,
+      -0.005921999999999999,
+      -0.008012125,
+      -0.00992825,
+      -0.012453625,
+      -0.01454375,
+      -0.0169825,
+      -0.0201175,
+      -0.022207499999999998,
+      -0.0242975,
+      -0.02630125,
+      -0.028130000000000002,
+      -0.030132500000000003,
+      -0.031787499999999996,
+      -0.0326575,
+      -0.0331825,
+      -0.0327475,
+      -0.0319625,
+      -0.03100375,
+      -0.03004625,
+      -0.02874,
+      -0.02734625,
+      -0.02630125,
+      -0.024558749999999997,
+      -0.022905000000000002,
+      -0.02098875,
+      -0.018811249999999998,
+      -0.016198749999999998,
+      -0.0142825,
+      -0.012018375,
+      -0.00844775,
+      -0.0048771249999999995,
+      0.0,
+      0.00313525,
+      0.005399375,
+      0.007838125,
+      0.010624875,
+      0.013847499999999999,
+      0.01733125,
+      0.020640000000000002,
+      0.02360125,
+      0.02621375,
+      0.02839125,
+      0.03091625,
+      0.03335625,
+      0.03466125,
+      0.035185,
+      0.03527125,
+      0.03466125,
+      0.033702499999999996,
+      0.0326575,
+      0.03161375,
+      0.02995875,
+      0.027607499999999997,
+      0.0259525,
+      0.0238625,
+      0.02151125,
+      0.01924625,
+      0.01672125,
+      0.0136725,
+      0.010799125,
+      0.008621750000000001,
+      0.004615875,
+      0.0013063749999999998,
+      -0.0022643750000000003,
+      -0.00548675,
+      -0.007925125,
+      -0.010624875,
+      -0.013498749999999999,
+      -0.017070000000000002,
+      -0.01942125,
+      -0.022556250000000003,
+      -0.024646249999999998,
+      -0.02682375,
+      -0.028913750000000002,
+      -0.03109125,
+      -0.032308750000000004,
+      -0.0330925,
+      -0.03248375,
+      -0.03152625,
+      -0.03056875,
+      -0.029609999999999997,
+      -0.02786875,
+      -0.026475,
+      -0.025081250000000003,
+      -0.0232525,
+      -0.02125,
+      -0.01924625,
+      -0.017156249999999998,
+      -0.01454375,
+      -0.011147375,
+      -0.008883,
+      -0.005225375,
+      -0.001654625,
+      0.00174175,
+      0.0044415,
+      0.008273375,
+      0.012018375,
+      0.01558875,
+      0.018985000000000002,
+      0.0228175,
+      0.02630125,
+      0.02943625,
+      0.032918750000000004,
+      0.03527125,
+      0.03849375,
+      0.0410175,
+      0.04372,
+      0.04537375,
+      0.04615875,
+      0.0473775,
+      0.0482475,
+      0.0486825,
+      0.0488575,
+      0.04981625,
+      0.050425000000000005,
+      0.051381249999999996,
+      0.05208,
+      0.051645,
+      0.051035000000000004,
+      0.04990125,
+      0.0484225,
+      0.0470275,
+      0.045895,
+      0.044414999999999996,
+      0.042935,
+      0.04128125,
+      0.03962375,
+      0.03762375,
+      0.035185,
+      0.033007499999999995,
+      0.030655,
+      0.028303750000000003,
+      0.025778750000000003,
+      0.023078750000000002,
+      0.0195075,
+      0.01611125,
+      0.012105375,
+      0.008273375,
+      0.004615875,
+      -0.0003483625,
+      -0.0044415,
+      -0.008796,
+      -0.011321375,
+      -0.017156249999999998,
+      -0.022207499999999998,
+      -0.024820000000000002,
+      -0.02778125,
+      -0.03152625,
+      -0.034312499999999996,
+      -0.037970000000000004,
+      -0.041541249999999995,
+      -0.04554875,
+      -0.0478125,
+      -0.04894250000000001,
+      -0.04877125,
+      -0.04772375,
+      -0.046678750000000005,
+      -0.045285,
+      -0.043545,
+      -0.042062499999999996,
+      -0.0405825,
+      -0.03936375,
+      -0.03744875,
+      -0.035881249999999996,
+      -0.0338775,
+      -0.031787499999999996,
+      -0.02978375,
+      -0.02752,
+      -0.024558749999999997,
+      -0.022381250000000002,
+      -0.0195075,
+      -0.0153275,
+      -0.011147375,
+      -0.0072285,
+      -0.003831875,
+      -0.0006096375,
+      0.003918875,
+      0.0072285,
+      0.010799125,
+      0.01393375,
+      0.017766249999999997,
+      0.02098875,
+      0.024472499999999998,
+      0.02734625,
+      0.031265,
+      0.0338775,
+      0.03762375,
+      0.0410175,
+      0.044675,
+      0.0472025,
+      0.04929125,
+      0.05077125,
+      0.05112125,
+      0.05086,
+      0.05007625,
+      0.04894250000000001,
+      0.0478125,
+      0.046678750000000005,
+      0.04554875,
+      0.044155,
+      0.04276125,
+      0.0411925,
+      0.03918875,
+      0.03657625,
+      0.0338775,
+      0.03091625,
+      0.028565,
+      0.025691250000000002,
+      0.021946249999999997,
+      0.018115000000000003,
+      0.0136725,
+      0.007663875,
+      0.0022643750000000003,
+      -0.003048125,
+      -0.006444625000000001,
+      -0.009753875,
+      -0.014456249999999999,
+      -0.019595,
+      -0.02273,
+      -0.025691250000000002,
+      -0.02900125,
+      -0.0322225,
+      -0.03596625,
+      -0.03892875,
+      -0.042062499999999996,
+      -0.04554875,
+      -0.047897499999999996,
+      -0.04859625,
+      -0.04894250000000001,
+      -0.04772375,
+      -0.046332500000000006,
+      -0.04450375,
+      -0.04284625,
+      -0.041716249999999996,
+      -0.03936375,
+      -0.03701375,
+      -0.03509625,
+      -0.0322225,
+      -0.029697499999999998,
+      -0.026997499999999997,
+      -0.02368875,
+      -0.02098875,
+      -0.018027500000000002,
+      -0.013498749999999999,
+      -0.00923125,
+      -0.005399375,
+      -0.001654625,
+      0.0024385,
+      0.006183375,
+      0.0101895,
+      0.01402125,
+      0.01724375,
+      0.020640000000000002,
+      0.02360125,
+      0.027171249999999997,
+      0.03109125,
+      0.03501125,
+      0.03918875,
+      0.042326249999999996,
+      0.04606875,
+      0.04859625,
+      0.05068625,
+      0.05147,
+      0.051295,
+      0.04990125,
+      0.048507499999999995,
+      0.0470275,
+      0.04511375,
+      0.04276125,
+      0.0411925,
+      0.0392775,
+      0.036840000000000005,
+      0.0347475,
+      0.03204875,
+      0.0290875,
+      0.02621375,
+      0.0232525,
+      0.01985625,
+      0.01585,
+      0.012192375,
+      0.008709,
+      0.005835,
+      0.001567625,
+      -0.0014804999999999998,
+      -0.00548675,
+      -0.009753875,
+      -0.01288875,
+      -0.016198749999999998,
+      -0.0190725,
+      -0.021685,
+      -0.0238625,
+      -0.02612625,
+      -0.0286525,
+      -0.03152625,
+      -0.03457625,
+      -0.037360000000000004,
+      -0.0398875,
+      -0.042586250000000006,
+      -0.045198749999999996,
+      -0.04711375,
+      -0.048507499999999995,
+      -0.04894250000000001,
+      -0.048507499999999995,
+      -0.04685375,
+      -0.045198749999999996,
+      -0.04372,
+      -0.04197625000000001,
+      -0.040062499999999994,
+      -0.038753750000000003,
+      -0.036665,
+      -0.03440125,
+      -0.03204875,
+      -0.029609999999999997,
+      -0.0265625,
+      -0.0234275,
+      -0.02098875,
+      -0.01837625,
+      -0.0148925,
+      -0.010450875,
+      -0.00714125,
+      -0.002786875,
+      0.0014804999999999998,
+      0.006792875,
+      0.01149575,
+      0.015153749999999999,
+      0.0190725,
+      0.022207499999999998,
+      0.025168750000000004,
+      0.02934875,
+      0.0321375,
+      0.03596625,
+      0.03979875,
+      0.042935,
+      0.04598375,
+      0.0486825,
+      0.05077125,
+      0.051035000000000004,
+      0.05016125,
+      0.0488575,
+      0.046942500000000005,
+      0.04572375,
+      0.044155,
+      0.043196250000000005,
+      0.04084375,
+      0.038145,
+      0.03440125,
+      0.0327475,
+      0.02978375,
+      0.02664875,
+      0.023948749999999998,
+      0.020030000000000003,
+      0.01558875,
+      0.01149575,
+      0.006444625000000001,
+      0.00330925,
+      0.0005225375000000001,
+      -0.0026997500000000003,
+      -0.006270250000000001,
+      -0.009144375,
+      -0.012279625,
+      -0.01585,
+      -0.01942125,
+      -0.022381250000000002,
+      -0.024995,
+      -0.027607499999999997,
+      -0.030655,
+      -0.033007499999999995,
+      -0.03562,
+      -0.03805875,
+      -0.0411925,
+      -0.043285,
+      -0.04606875,
+      -0.04816125,
+      -0.049117499999999994,
+      -0.04903125,
+      -0.0484225,
+      -0.0472025,
+      -0.04554875,
+      -0.04372,
+      -0.04189125,
+      -0.040062499999999994,
+      -0.037795,
+      -0.03527125,
+      -0.0322225,
+      -0.028216250000000002,
+      -0.025168750000000004,
+      -0.021946249999999997,
+      -0.01889875,
+      -0.01611125,
+      -0.01306375,
+      -0.010363500000000001,
+      -0.0072285,
+      -0.0043545,
+      -0.0010450875,
+      0.0024385,
+      0.006009,
+      0.009144375,
+      0.012715,
+      0.016895,
+      0.0201175,
+      0.02360125,
+      0.02664875,
+      0.02995875,
+      0.0332675,
+      0.035881249999999996,
+      0.03858,
+      0.04023375,
+      0.04189125,
+      0.04284625,
+      0.04345625,
+      0.04406625,
+      0.04459
+    ],
+    "lateral_force_kN": [
+      0.0,
+      -0.97407,
+      4.8704,
+      18.507,
+      30.196,
+      44.807,
+      67.208,
+      87.666,
+      108.12,
+      137.34,
+      169.49,
+      196.76,
+      226.96,
+      257.15,
+      281.5,
+      300.98,
+      325.33,
+      338.97,
+      357.48,
+      375.01,
+      389.62,
+      402.28,
+      415.92,
+      423.72,
+      425.66,
+      424.69,
+      421.77,
+      418.84,
+      412.03,
+      398.39,
+      379.88,
+      360.4,
+      336.05,
+      303.91,
+      276.63,
+      244.49,
+      214.29,
+      183.12,
+      156.82,
+      127.6,
+      94.485,
+      63.312,
+      36.04,
+      9.7407,
+      -23.377,
+      -51.626,
+      -87.666,
+      -113.96,
+      -154.87,
+      -186.05,
+      -218.19,
+      -245.46,
+      -275.66,
+      -313.64,
+      -339.95,
+      -362.35,
+      -388.65,
+      -412.03,
+      -429.56,
+      -439.3,
+      -445.13,
+      -447.09,
+      -444.17,
+      -439.3,
+      -435.41,
+      -422.74,
+      -391.57,
+      -364.3,
+      -331.18,
+      -298.06,
+      -263.97,
+      -230.85,
+      -211.37,
+      -181.18,
+      -153.9,
+      -123.71,
+      -101.3,
+      -71.105,
+      -37.988,
+      0.0,
+      31.17,
+      64.286,
+      96.433,
+      126.63,
+      153.9,
+      181.18,
+      209.42,
+      237.67,
+      270.79,
+      303.91,
+      332.15,
+      353.58,
+      375.01,
+      396.44,
+      404.23,
+      409.1,
+      413.0,
+      412.03,
+      393.52,
+      375.01,
+      357.48,
+      331.18,
+      300.98,
+      264.95,
+      243.51,
+      211.37,
+      186.05,
+      152.93,
+      123.71,
+      96.433,
+      61.368,
+      19.481,
+      -2.9222,
+      -27.273,
+      -45.781,
+      -73.053,
+      -99.355,
+      -135.39,
+      -171.43,
+      -204.55,
+      -245.46,
+      -289.29,
+      -327.28,
+      -352.61,
+      -386.7,
+      -409.1,
+      -423.72,
+      -425.66,
+      -418.84,
+      -399.36,
+      -375.99,
+      -347.74,
+      -317.54,
+      -289.29,
+      -256.18,
+      -225.01,
+      -192.86,
+      -159.74,
+      -130.52,
+      -102.28,
+      -75.001,
+      -43.832,
+      -14.611,
+      10.714,
+      39.936,
+      73.053,
+      84.743,
+      111.04,
+      137.34,
+      161.69,
+      187.99,
+      213.32,
+      245.46,
+      269.82,
+      307.8,
+      334.1,
+      359.43,
+      380.86,
+      396.44,
+      405.21,
+      409.1,
+      387.68,
+      365.27,
+      336.05,
+      305.86,
+      276.63,
+      228.91,
+      189.94,
+      149.03,
+      114.94,
+      80.846,
+      41.884,
+      15.585,
+      -15.585,
+      -44.807,
+      -73.053,
+      -112.99,
+      -142.21,
+      -168.51,
+      -217.22,
+      -255.2,
+      -305.86,
+      -343.84,
+      -368.19,
+      -398.39,
+      -418.84,
+      -423.72,
+      -413.97,
+      -388.65,
+      -355.53,
+      -311.7,
+      -265.92,
+      -225.01,
+      -181.18,
+      -140.27,
+      -100.33,
+      -67.208,
+      -27.273,
+      5.8445,
+      35.066,
+      68.182,
+      101.3,
+      137.34,
+      170.46,
+      198.71,
+      221.11,
+      246.44,
+      274.68,
+      299.04,
+      326.31,
+      349.69,
+      375.99,
+      394.5,
+      400.34,
+      402.28,
+      383.78,
+      358.45,
+      333.13,
+      303.91,
+      277.6,
+      249.36,
+      219.16,
+      187.02,
+      154.87,
+      118.83,
+      82.795,
+      47.729,
+      9.7407,
+      -18.507,
+      -37.014,
+      -73.053,
+      -109.09,
+      -150.98,
+      -212.34,
+      -252.28,
+      -295.14,
+      -323.39,
+      -352.61,
+      -380.86,
+      -400.34,
+      -415.92,
+      -424.69,
+      -408.13,
+      -375.01,
+      -333.13,
+      -292.22,
+      -250.33,
+      -216.24,
+      -176.31,
+      -134.42,
+      -104.22,
+      -68.182,
+      -30.196,
+      12.663,
+      50.652,
+      79.872,
+      116.89,
+      151.95,
+      187.02,
+      216.24,
+      246.44,
+      279.55,
+      306.83,
+      336.05,
+      360.4,
+      384.75,
+      394.5,
+      394.5,
+      387.68,
+      358.45,
+      326.31,
+      292.22,
+      255.2,
+      219.16,
+      182.15,
+      149.03,
+      112.99,
+      73.053,
+      31.17,
+      -5.8445,
+      -28.248,
+      -60.394,
+      -103.25,
+      -138.32,
+      -175.33,
+      -206.5,
+      -243.51,
+      -279.55,
+      -312.67,
+      -346.77,
+      -375.99,
+      -395.47,
+      -408.13,
+      -415.92,
+      -420.79,
+      -399.36,
+      -375.01,
+      -344.82,
+      -313.64,
+      -273.71,
+      -243.51,
+      -209.42,
+      -174.36,
+      -132.47,
+      -97.407,
+      -65.26,
+      -32.144,
+      0.0,
+      34.092,
+      75.001,
+      108.12,
+      135.39,
+      159.74,
+      183.12,
+      212.34,
+      251.31,
+      288.32,
+      314.62,
+      344.82,
+      369.17,
+      395.47,
+      416.9,
+      433.46,
+      437.35,
+      432.48,
+      429.56,
+      426.64,
+      411.05,
+      385.73,
+      352.61,
+      326.31,
+      281.5,
+      236.69,
+      197.73,
+      148.05,
+      109.09,
+      69.157,
+      33.118,
+      12.663,
+      -21.429,
+      -45.781,
+      -75.001,
+      -104.22,
+      -127.6,
+      -150.98,
+      -187.99,
+      -208.45,
+      -237.67,
+      -266.89,
+      -296.11,
+      -312.67,
+      -341.89,
+      -362.35,
+      -386.7,
+      -400.34,
+      -415.92,
+      -429.56,
+      -443.19,
+      -447.09,
+      -450.03,
+      -451.01,
+      -450.03,
+      -437.35,
+      -415.92,
+      -382.81,
+      -348.71,
+      -320.46,
+      -290.27,
+      -256.18,
+      -225.01,
+      -191.89,
+      -167.54,
+      -139.29,
+      -110.07,
+      -80.846,
+      -56.497,
+      -26.3,
+      6.8182,
+      44.807,
+      87.666,
+      118.83,
+      147.08,
+      180.2,
+      214.29,
+      246.44,
+      274.68,
+      303.91,
+      332.15,
+      354.55,
+      375.99,
+      389.62,
+      407.15,
+      414.95,
+      416.9,
+      416.9,
+      403.26,
+      382.81,
+      362.35,
+      331.18,
+      299.04,
+      271.76,
+      236.69,
+      207.47,
+      165.59,
+      126.63,
+      90.588,
+      60.394,
+      28.248,
+      -4.8704,
+      -18.507,
+      -50.652,
+      -81.821,
+      -99.355,
+      -122.73,
+      -151.95,
+      -181.18,
+      -213.32,
+      -243.51,
+      -288.32,
+      -319.49,
+      -340.92,
+      -366.24,
+      -384.75,
+      -398.39,
+      -412.03,
+      -422.74,
+      -431.51,
+      -437.35,
+      -437.35,
+      -423.72,
+      -399.36,
+      -368.19,
+      -339.95,
+      -317.54,
+      -292.22,
+      -254.23,
+      -229.88,
+      -199.68,
+      -167.54,
+      -133.45,
+      -109.09,
+      -78.898,
+      -51.626,
+      -21.429,
+      8.7666,
+      31.17,
+      56.497,
+      93.511,
+      122.73,
+      147.08,
+      174.36,
+      199.68,
+      227.93,
+      252.28,
+      285.4,
+      311.7,
+      331.18,
+      351.64,
+      375.99,
+      392.55,
+      402.28,
+      403.26,
+      403.26,
+      400.34,
+      381.83,
+      354.55,
+      331.18,
+      299.04,
+      267.87,
+      234.75,
+      205.53,
+      176.31,
+      151.95,
+      121.76,
+      89.614,
+      64.286,
+      30.196,
+      -0.97407,
+      -21.429,
+      -47.729,
+      -74.027,
+      -100.33,
+      -123.71,
+      -147.08,
+      -173.38,
+      -189.94,
+      -216.24,
+      -250.33,
+      -285.4,
+      -311.7,
+      -334.1,
+      -356.5,
+      -375.01,
+      -397.41,
+      -409.1,
+      -418.84,
+      -423.72,
+      -428.59,
+      -412.03,
+      -386.7,
+      -343.84,
+      -304.88,
+      -273.71,
+      -238.64,
+      -204.55,
+      -167.54,
+      -131.5,
+      -105.2,
+      -77.924,
+      -52.6,
+      -14.611,
+      14.611,
+      42.859,
+      87.666,
+      112.99,
+      137.34,
+      166.56,
+      192.86,
+      217.22,
+      237.67,
+      257.15,
+      283.45,
+      312.67,
+      336.05,
+      353.58,
+      373.06,
+      387.68,
+      398.39,
+      398.39,
+      396.44,
+      377.93,
+      353.58,
+      318.51,
+      277.6,
+      239.62,
+      194.81,
+      159.74,
+      117.86,
+      84.743,
+      48.704,
+      10.714,
+      -7.7924,
+      -37.014,
+      -61.368,
+      -88.64,
+      -114.94,
+      -137.34,
+      -150.0,
+      -181.18,
+      -203.58,
+      -225.98,
+      -252.28,
+      -275.66,
+      -299.04,
+      -328.26,
+      -344.82,
+      -365.27,
+      -378.91,
+      -390.6,
+      -406.18,
+      -415.92,
+      -420.79,
+      -418.84,
+      -403.26,
+      -378.91,
+      -355.53,
+      -323.39,
+      -296.11,
+      -263.0,
+      -234.75,
+      -200.65,
+      -171.43,
+      -137.34,
+      -108.12,
+      -67.208,
+      -40.91,
+      -16.559,
+      23.377,
+      52.6,
+      93.511,
+      120.78,
+      140.27,
+      163.64,
+      189.94,
+      225.01,
+      256.18,
+      287.35,
+      312.67,
+      334.1,
+      354.55,
+      373.06,
+      391.57,
+      397.41,
+      397.41,
+      395.47,
+      373.06,
+      344.82,
+      316.57,
+      290.27,
+      253.26,
+      209.42,
+      181.18,
+      146.11,
+      108.12,
+      74.027,
+      39.936,
+      0.97407,
+      -28.248,
+      -50.652,
+      -85.717,
+      -112.99,
+      -145.14,
+      -171.43,
+      -194.81,
+      -223.06,
+      -252.28,
+      -292.22,
+      -314.62,
+      -341.89,
+      -361.37,
+      -379.88,
+      -394.5,
+      -408.13,
+      -413.0,
+      -413.97,
+      -387.68,
+      -355.53,
+      -328.26,
+      -300.98,
+      -263.97,
+      -233.77,
+      -206.5,
+      -176.31,
+      -145.14,
+      -112.02,
+      -77.924,
+      -41.884,
+      -4.8704,
+      19.481,
+      50.652,
+      78.898,
+      111.04,
+      135.39,
+      169.49,
+      209.42,
+      242.54,
+      275.66,
+      308.78,
+      337.02,
+      363.32,
+      387.68,
+      402.28,
+      418.84,
+      426.64,
+      428.59,
+      427.61,
+      419.82,
+      426.64,
+      422.74,
+      414.95,
+      412.03,
+      414.95,
+      409.1,
+      399.36,
+      384.75,
+      362.35,
+      339.95,
+      310.73,
+      278.58,
+      249.36,
+      221.11,
+      190.91,
+      164.62,
+      134.42,
+      109.09,
+      82.795,
+      51.626,
+      28.248,
+      1.9481,
+      -16.559,
+      -37.988,
+      -61.368,
+      -86.691,
+      -106.17,
+      -130.52,
+      -155.85,
+      -181.18,
+      -205.53,
+      -233.77,
+      -265.92,
+      -282.48,
+      -322.41,
+      -360.4,
+      -378.91,
+      -397.41,
+      -417.87,
+      -429.56,
+      -439.3,
+      -443.19,
+      -442.22,
+      -433.46,
+      -418.84,
+      -395.47,
+      -368.19,
+      -338.97,
+      -307.8,
+      -273.71,
+      -242.54,
+      -217.22,
+      -194.81,
+      -162.67,
+      -137.34,
+      -108.12,
+      -82.795,
+      -60.394,
+      -37.988,
+      -11.689,
+      6.8182,
+      28.248,
+      51.626,
+      73.053,
+      95.459,
+      112.99,
+      131.5,
+      159.74,
+      178.25,
+      196.76,
+      216.24,
+      234.75,
+      253.26,
+      271.76,
+      285.4,
+      300.98,
+      310.73,
+      322.41,
+      327.28,
+      330.2,
+      329.23,
+      322.41,
+      313.64,
+      300.98,
+      280.53,
+      259.1,
+      233.77,
+      210.4,
+      187.99,
+      169.49,
+      146.11,
+      122.73,
+      98.381,
+      66.234,
+      37.014,
+      9.7407,
+      -11.689,
+      -31.17,
+      -50.652,
+      -73.053,
+      -93.511,
+      -115.91,
+      -145.14,
+      -176.31,
+      -206.5,
+      -227.93,
+      -247.41,
+      -273.71,
+      -302.93,
+      -318.51,
+      -331.18,
+      -346.77,
+      -358.45,
+      -369.17,
+      -373.06,
+      -378.91,
+      -376.96,
+      -373.06,
+      -363.32,
+      -338.97,
+      -314.62,
+      -282.48,
+      -247.41,
+      -215.27,
+      -187.99,
+      -153.9,
+      -122.73,
+      -90.588,
+      -60.394,
+      -36.04,
+      -12.663,
+      6.8182,
+      16.559,
+      30.196,
+      46.755,
+      63.312,
+      75.976,
+      93.511,
+      112.99,
+      134.42,
+      154.87,
+      173.38,
+      187.99,
+      204.55,
+      215.27,
+      226.96,
+      236.69,
+      244.49,
+      243.51,
+      240.59,
+      232.8,
+      228.91,
+      216.24,
+      202.6,
+      188.96,
+      166.56,
+      145.14,
+      115.91,
+      86.691,
+      60.394,
+      41.884,
+      25.326,
+      3.8962,
+      -12.663,
+      -29.222,
+      -40.91,
+      -49.678,
+      -55.523,
+      -63.312,
+      -69.157,
+      -82.795,
+      -96.433,
+      -109.09,
+      -127.6,
+      -142.21,
+      -161.69,
+      -187.02,
+      -200.65,
+      -216.24,
+      -226.96,
+      -238.64,
+      -247.41,
+      -256.18,
+      -265.92,
+      -275.66,
+      -284.42,
+      -291.24,
+      -298.06,
+      -301.96,
+      -303.91,
+      -301.96,
+      -300.98,
+      -291.24,
+      -262.02,
+      -225.01,
+      -196.76,
+      -164.62,
+      -135.39,
+      -109.09,
+      -88.64,
+      -65.26,
+      -42.859,
+      -26.3,
+      -9.7407,
+      0.0,
+      11.689,
+      14.611,
+      16.559,
+      17.533,
+      24.351,
+      30.196,
+      36.04,
+      47.729,
+      66.234,
+      77.924,
+      90.588,
+      104.22,
+      116.89,
+      127.6,
+      140.27,
+      149.03,
+      156.82,
+      158.77,
+      156.82,
+      150.98,
+      145.14,
+      140.27,
+      124.68,
+      105.2,
+      81.821,
+      58.445,
+      45.781,
+      29.222,
+      14.611,
+      -3.8962,
+      -20.455,
+      -39.936,
+      -48.704,
+      -57.471,
+      -64.286,
+      -69.157,
+      -72.079,
+      -72.079,
+      -73.053,
+      -75.001,
+      -77.924,
+      -82.795,
+      -86.691,
+      -93.511,
+      -97.407,
+      -107.14,
+      -119.81,
+      -131.5,
+      -137.34,
+      -150.0,
+      -156.82,
+      -164.62,
+      -172.41,
+      -177.28,
+      -180.2,
+      -185.07,
+      -185.07,
+      -186.05,
+      -189.94,
+      -186.05,
+      -170.46,
+      -153.9,
+      -134.42,
+      -109.09,
+      -81.821,
+      -57.471,
+      -41.884,
+      -25.326,
+      -12.663,
+      0.0,
+      7.7924,
+      10.714,
+      13.637,
+      15.585,
+      15.585,
+      19.481,
+      21.429,
+      23.377,
+      26.3,
+      29.222,
+      34.092,
+      39.936,
+      42.859,
+      46.755,
+      53.574,
+      56.497,
+      59.419,
+      61.368,
+      62.342,
+      63.312,
+      56.497,
+      45.781,
+      43.832,
+      36.04,
+      23.377,
+      6.8182,
+      -7.7924,
+      -17.533
+    ]
+  },
+  "contract_pass": true,
+  "reason_code": "PASS"
+}

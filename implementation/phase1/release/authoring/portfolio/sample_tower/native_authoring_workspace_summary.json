@@ -1,0 +1,452 @@
+{
+  "schema_version": "1.0",
+  "report_family": "native_authoring_workspace",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "authoring_controls": {
+    "family_id": "sample_tower",
+    "story_count": 5,
+    "bay_count": 3,
+    "floor_height_m": 3.9,
+    "load_pattern_count": 4,
+    "section_id": "steel_h_600x200",
+    "section_palette": [
+      "steel_h_600x200",
+      "steel_box_400x400x16",
+      "rc_column_700x700",
+      "rc_wall_300x3000",
+      "cft_box_700x700",
+      "deck_beam_500x250"
+    ]
+  },
+  "selected_family": {
+    "family_id": "sample_tower",
+    "label": "Sample Tower",
+    "description": "Baseline mixed RC-steel tower scaffold with RC columns and frame beams.",
+    "default_section_id": "steel_h_600x200",
+    "preferred_design_family": "KDS-2022",
+    "default_bay_width_m": 8.0,
+    "default_story_count": 5,
+    "default_bay_count": 3,
+    "default_floor_height_m": 3.9,
+    "default_load_pattern_count": 4,
+    "representative_member_types": [
+      "column",
+      "beam"
+    ]
+  },
+  "summary": {
+    "model_id": "native-authoring-sample-tower",
+    "story_count": 5,
+    "node_count": 24,
+    "member_count": 35,
+    "load_pattern_count": 4,
+    "section_usage_counts": {
+      "rc_column_700x700": 20,
+      "steel_h_600x200": 15
+    },
+    "member_type_counts": {
+      "beam": 15,
+      "column": 20
+    },
+    "unsupported_section_ids": [],
+    "unresolved_node_refs": [],
+    "orphan_story_node_count": 0,
+    "max_member_span_m": 8.0,
+    "bounding_box_m": {
+      "x_span_m": 24.0,
+      "y_span_m": 0.0,
+      "z_span_m": 19.5
+    },
+    "native_authoring_ready": true,
+    "solver_ready_score": 100.0,
+    "summary_line": "Native authoring bundle: PASS | stories=5 | nodes=24 | members=35 | loads=4 | unsupported=0 | unresolved=0 | score=100.0"
+  },
+  "model_preview": {
+    "story_levels": [
+      {
+        "story_id": "L1",
+        "elevation_m": 0.0,
+        "height_m": 3.9,
+        "label": "Level 1"
+      },
+      {
+        "story_id": "L2",
+        "elevation_m": 3.9,
+        "height_m": 3.9,
+        "label": "Level 2"
+      },
+      {
+        "story_id": "L3",
+        "elevation_m": 7.8,
+        "height_m": 3.9,
+        "label": "Level 3"
+      },
+      {
+        "story_id": "L4",
+        "elevation_m": 11.7,
+        "height_m": 3.9,
+        "label": "Level 4"
+      },
+      {
+        "story_id": "L5",
+        "elevation_m": 15.6,
+        "height_m": 3.9,
+        "label": "Level 5"
+      }
+    ],
+    "member_preview_rows": [
+      {
+        "member_id": "C-01-01",
+        "member_type": "column",
+        "start_node_id": "N-00-00",
+        "end_node_id": "N-01-00",
+        "section_id": "rc_column_700x700",
+        "analysis_kind": "fiber_section",
+        "tags": [
+          "gravity",
+          "lateral"
+        ]
+      },
+      {
+        "member_id": "C-01-02",
+        "member_type": "column",
+        "start_node_id": "N-00-01",
+        "end_node_id": "N-01-01",
+        "section_id": "rc_column_700x700",
+        "analysis_kind": "fiber_section",
+        "tags": [
+          "gravity",
+          "lateral"
+        ]
+      },
+      {
+        "member_id": "C-01-03",
+        "member_type": "column",
+        "start_node_id": "N-00-02",
+        "end_node_id": "N-01-02",
+        "section_id": "rc_column_700x700",
+        "analysis_kind": "fiber_section",
+        "tags": [
+          "gravity",
+          "lateral"
+        ]
+      },
+      {
+        "member_id": "C-01-04",
+        "member_type": "column",
+        "start_node_id": "N-00-03",
+        "end_node_id": "N-01-03",
+        "section_id": "rc_column_700x700",
+        "analysis_kind": "fiber_section",
+        "tags": [
+          "gravity",
+          "lateral"
+        ]
+      },
+      {
+        "member_id": "B-01-01",
+        "member_type": "beam",
+        "start_node_id": "N-01-00",
+        "end_node_id": "N-01-01",
+        "section_id": "steel_h_600x200",
+        "analysis_kind": "frame",
+        "tags": [
+          "gravity"
+        ]
+      },
+      {
+        "member_id": "B-01-02",
+        "member_type": "beam",
+        "start_node_id": "N-01-01",
+        "end_node_id": "N-01-02",
+        "section_id": "steel_h_600x200",
+        "analysis_kind": "frame",
+        "tags": [
+          "gravity"
+        ]
+      },
+      {
+        "member_id": "B-01-03",
+        "member_type": "beam",
+        "start_node_id": "N-01-02",
+        "end_node_id": "N-01-03",
+        "section_id": "steel_h_600x200",
+        "analysis_kind": "frame",
+        "tags": [
+          "gravity"
+        ]
+      },
+      {
+        "member_id": "C-02-01",
+        "member_type": "column",
+        "start_node_id": "N-01-00",
+        "end_node_id": "N-02-00",
+        "section_id": "rc_column_700x700",
+        "analysis_kind": "fiber_section",
+        "tags": [
+          "gravity",
+          "lateral"
+        ]
+      }
+    ],
+    "load_patterns": [
+      {
+        "pattern_id": "lp-dead",
+        "label": "Dead load",
+        "design_situation": "ULS",
+        "primitive_count": 1,
+        "primitive_counts": {
+          "self_weight": 1
+        },
+        "tags": [
+          "gravity"
+        ],
+        "primitives": [
+          {
+            "kind": "self_weight",
+            "case_name": "D",
+            "target_scope": "global",
+            "magnitude": 1.0,
+            "direction": "global_z",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "pattern_id": "lp-live",
+        "label": "Live load",
+        "design_situation": "SLS",
+        "primitive_count": 1,
+        "primitive_counts": {
+          "surface_pressure": 1
+        },
+        "tags": [
+          "gravity",
+          "service"
+        ],
+        "primitives": [
+          {
+            "kind": "surface_pressure",
+            "case_name": "L",
+            "target_scope": "floor",
+            "magnitude": 3.5,
+            "direction": "global_z",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "pattern_id": "lp-windx",
+        "label": "Wind +X",
+        "design_situation": "ULS",
+        "primitive_count": 1,
+        "primitive_counts": {
+          "line_load": 1
+        },
+        "tags": [
+          "wind"
+        ],
+        "primitives": [
+          {
+            "kind": "line_load",
+            "case_name": "Wx",
+            "target_scope": "frame-east",
+            "magnitude": 22.0,
+            "direction": "global_x",
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "pattern_id": "lp-seisx",
+        "label": "Seismic X",
+        "design_situation": "ULS",
+        "primitive_count": 1,
+        "primitive_counts": {
+          "displacement": 1
+        },
+        "tags": [
+          "seismic"
+        ],
+        "primitives": [
+          {
+            "kind": "displacement",
+            "case_name": "Ex",
+            "target_scope": "story:L5",
+            "magnitude": 0.0175,
+            "direction": "global_x",
+            "notes": ""
+          }
+        ]
+      }
+    ]
+  },
+  "editor_controls": {
+    "family_id": "sample_tower",
+    "story_count": 5,
+    "bay_count": 3,
+    "floor_height_m": 3.9,
+    "load_pattern_count": 4,
+    "section_id": "steel_h_600x200",
+    "section_palette": [
+      "steel_h_600x200",
+      "steel_box_400x400x16",
+      "rc_column_700x700",
+      "rc_wall_300x3000",
+      "cft_box_700x700",
+      "deck_beam_500x250"
+    ],
+    "bay_width_m": 8.0,
+    "default_section_id": "steel_h_600x200",
+    "default_family_id": "sample_tower",
+    "family_palette": [
+      {
+        "family_id": "sample_tower",
+        "label": "Sample Tower",
+        "description": "Baseline mixed RC-steel tower scaffold with RC columns and frame beams.",
+        "default_section_id": "steel_h_600x200",
+        "preferred_design_family": "KDS-2022",
+        "default_bay_width_m": 8.0,
+        "default_story_count": 5,
+        "default_bay_count": 3,
+        "default_floor_height_m": 3.9,
+        "default_load_pattern_count": 4,
+        "representative_member_types": [
+          "column",
+          "beam"
+        ]
+      },
+      {
+        "family_id": "steel_braced_frame",
+        "label": "Steel Braced Frame",
+        "description": "Lateral steel braced frame with tube columns, frame beams, deck strips, and X braces.",
+        "default_section_id": "steel_h_600x200",
+        "preferred_design_family": "KDS-2022-STEEL-BASIC",
+        "default_bay_width_m": 8.5,
+        "default_story_count": 6,
+        "default_bay_count": 4,
+        "default_floor_height_m": 4.5,
+        "default_load_pattern_count": 6,
+        "representative_member_types": [
+          "column",
+          "beam",
+          "brace",
+          "slab"
+        ]
+      },
+      {
+        "family_id": "rc_wall_core",
+        "label": "RC Wall Core",
+        "description": "RC wall-core scaffold with shell walls, coupling/gravity members, and slab strips.",
+        "default_section_id": "rc_column_700x700",
+        "preferred_design_family": "KDS-2022",
+        "default_bay_width_m": 7.2,
+        "default_story_count": 9,
+        "default_bay_count": 4,
+        "default_floor_height_m": 3.2,
+        "default_load_pattern_count": 6,
+        "representative_member_types": [
+          "wall",
+          "column",
+          "beam",
+          "slab"
+        ]
+      },
+      {
+        "family_id": "composite_podium",
+        "label": "Composite Podium",
+        "description": "Composite podium scaffold with CFT columns, composite beams, and slab strips.",
+        "default_section_id": "deck_beam_500x250",
+        "preferred_design_family": "KDS-2022-STEEL-BASIC",
+        "default_bay_width_m": 9.0,
+        "default_story_count": 7,
+        "default_bay_count": 4,
+        "default_floor_height_m": 4.2,
+        "default_load_pattern_count": 6,
+        "representative_member_types": [
+          "column",
+          "beam",
+          "slab"
+        ]
+      },
+      {
+        "family_id": "outrigger_transfer_tower",
+        "label": "Outrigger Transfer Tower",
+        "description": "Composite mega-columns with outrigger transfer beams, braces, and deck diaphragms.",
+        "default_section_id": "steel_h_600x200",
+        "preferred_design_family": "KDS-2022-STEEL-BASIC",
+        "default_bay_width_m": 8.8,
+        "default_story_count": 10,
+        "default_bay_count": 5,
+        "default_floor_height_m": 4.1,
+        "default_load_pattern_count": 6,
+        "representative_member_types": [
+          "column",
+          "beam",
+          "brace",
+          "slab"
+        ]
+      },
+      {
+        "family_id": "dual_system_hospital",
+        "label": "Dual-System Hospital",
+        "description": "RC wall-core and gravity frame hospital scaffold with mixed RC/CFT supports and floor shells.",
+        "default_section_id": "steel_h_600x200",
+        "preferred_design_family": "KDS-2022",
+        "default_bay_width_m": 8.2,
+        "default_story_count": 8,
+        "default_bay_count": 5,
+        "default_floor_height_m": 4.0,
+        "default_load_pattern_count": 6,
+        "representative_member_types": [
+          "wall",
+          "column",
+          "beam",
+          "slab"
+        ]
+      },
+      {
+        "family_id": "belt_truss_mega_frame",
+        "label": "Belt-Truss Mega Frame",
+        "description": "RC core walls with composite perimeter mega-columns, steel belt truss braces, and deck floors.",
+        "default_section_id": "steel_h_600x200",
+        "preferred_design_family": "KDS-2022-STEEL-BASIC",
+        "default_bay_width_m": 9.2,
+        "default_story_count": 12,
+        "default_bay_count": 6,
+        "default_floor_height_m": 4.2,
+        "default_load_pattern_count": 6,
+        "representative_member_types": [
+          "wall",
+          "column",
+          "beam",
+          "brace",
+          "slab"
+        ]
+      },
+      {
+        "family_id": "deep_transfer_basement",
+        "label": "Deep Transfer Basement",
+        "description": "Deep transfer podium and basement scaffold with solid foundations, RC walls, mixed columns, and steel girders.",
+        "default_section_id": "steel_h_600x200",
+        "preferred_design_family": "KDS-2022",
+        "default_bay_width_m": 8.4,
+        "default_story_count": 6,
+        "default_bay_count": 4,
+        "default_floor_height_m": 4.4,
+        "default_load_pattern_count": 6,
+        "representative_member_types": [
+          "foundation",
+          "wall",
+          "column",
+          "beam",
+          "slab"
+        ]
+      }
+    ]
+  },
+  "summary_line": "Native authoring bundle: PASS | stories=5 | nodes=24 | members=35 | loads=4 | unsupported=0 | unresolved=0 | score=100.0 | family=sample_tower",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "native authoring workspace summary generated"
+}

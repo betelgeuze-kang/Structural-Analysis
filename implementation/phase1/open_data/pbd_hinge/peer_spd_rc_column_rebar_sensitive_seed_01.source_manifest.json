@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "source_family": "peer_spd_column",
+  "seed_id": "peer_spd_rc_column_rebar_sensitive_seed_01",
+  "holdout_split": "val",
+  "specimen_id": "121",
+  "source_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121",
+  "source_file_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.raw.json",
+  "source_sha256": "ef4074c5bc6de488486cf15e9869a24dc592fe40de7c2f04ba6af1e04ef19157",
+  "source_origin_class": "official_external_benchmark"
+}

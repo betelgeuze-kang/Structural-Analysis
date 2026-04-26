@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-28T12:13:19.223453+00:00",
+  "test_name": "noise_sensitivity_stress",
+  "latest_run_dir": "implementation/phase1/experiments/by_test/noise_sensitivity_stress/20260328T121319Z",
+  "latest_manifest": "implementation/phase1/experiments/by_test/noise_sensitivity_stress/20260328T121319Z/artifact_archive_manifest.json"
+}

@@ -1,0 +1,27 @@
+{
+  "description": "Demo structural models for expert review",
+  "generated": "2026-04-12",
+  "models": {
+    "demo_5f_rc_office": {
+      "file": "demo_5f_rc_office.json",
+      "nodes": 120,
+      "elements": 255,
+      "stories": 5,
+      "type": "RC"
+    },
+    "demo_15f_rc_corewall": {
+      "file": "demo_15f_rc_corewall.json",
+      "nodes": 384,
+      "elements": 975,
+      "stories": 15,
+      "type": "RC+Wall"
+    },
+    "demo_30f_composite_highrise": {
+      "file": "demo_30f_composite_highrise.json",
+      "nodes": 1085,
+      "elements": 3060,
+      "stories": 30,
+      "type": "SRC+Wall"
+    }
+  }
+}

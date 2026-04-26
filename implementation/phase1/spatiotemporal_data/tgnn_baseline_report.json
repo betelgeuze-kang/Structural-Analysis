@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-train-tgnn-baseline",
+  "generated_at": "2026-02-25T15:21:34.345225+00:00",
+  "inputs": {
+    "dataset": "implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl",
+    "max_cases": 180,
+    "epochs": 3,
+    "hidden_dim": 48,
+    "lr": 0.001,
+    "seed": 23
+  },
+  "split_counts": {
+    "train": 97,
+    "val": 17,
+    "test": 30
+  },
+  "validation_metrics": {
+    "case_count": 17,
+    "mae": 0.0051432723113355745,
+    "mae_pct": 8.564530296784628,
+    "peak_error_pct": 8.848700482569976,
+    "torsion_mae_pct": 8.014127610036406
+  },
+  "validation_rollout_metrics": {
+    "case_count": 17,
+    "mae": 0.082150715943395,
+    "mae_pct": 136.79662537973851,
+    "peak_error_pct": 158.0090799749121,
+    "torsion_mae_pct": 138.801819441941
+  },
+  "test_metrics": {
+    "case_count": 30,
+    "mae": 0.005994688030345509,
+    "mae_pct": 9.124749197238796,
+    "peak_error_pct": 9.164673664203951,
+    "torsion_mae_pct": 9.020706481870773
+  },
+  "test_rollout_metrics": {
+    "case_count": 30,
+    "mae": 0.09567491716302547,
+    "mae_pct": 145.63053476010296,
+    "peak_error_pct": 156.38727542439463,
+    "torsion_mae_pct": 139.0052419997911
+  },
+  "history_tail": [
+    {
+      "epoch": 1,
+      "train_loss": 0.0032100414178813414,
+      "train_mae_pct": 8.666482644047315,
+      "val_mae_pct": 8.463863516968052,
+      "val_peak_error_pct": 8.785244276542738,
+      "val_rollout_mae_pct": 125.1848431504121
+    },
+    {
+      "epoch": 2,
+      "train_loss": 4.467602092724341e-05,
+      "train_mae_pct": 9.073543767544132,
+      "val_mae_pct": 8.118992100786407,
+      "val_peak_error_pct": 8.47394270821332,
+      "val_rollout_mae_pct": 138.79050338928593
+    },
+    {
+      "epoch": 3,
+      "train_loss": 4.6121737753863494e-05,
+      "train_mae_pct": 8.712781883477811,
+      "val_mae_pct": 8.564530296784628,
+      "val_peak_error_pct": 8.848700482569976,
+      "val_rollout_mae_pct": 136.79662537973851
+    }
+  ],
+  "checkpoint": "implementation/phase1/spatiotemporal_data/tgnn_baseline.pt",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "t-gnn baseline trained and validated"
+}

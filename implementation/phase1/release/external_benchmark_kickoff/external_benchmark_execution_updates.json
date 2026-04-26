@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:04.471946+00:00",
+  "updates": [
+    {
+      "task_id": "hardest::peer_tbi_tall_building_ndtha",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:03.138072+00:00",
+      "note": "executed highrise_ndtha",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/signed_case_bundle.zip",
+      "bundle_id": "20260401T134803Z-peer_tbi_tall_building_ndtha"
+    },
+    {
+      "task_id": "hardest::nheri_designsafe_ssi",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:03.279871+00:00",
+      "note": "executed soil_structure_interaction",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nheri_designsafe_ssi/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nheri_designsafe_ssi/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nheri_designsafe_ssi/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nheri_designsafe_ssi/signed_case_bundle.zip",
+      "bundle_id": "20260401T134803Z-nheri_designsafe_ssi"
+    },
+    {
+      "task_id": "hardest::uic_erri_rail_bridge",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:03.421696+00:00",
+      "note": "executed moving_load_track_bridge",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/signed_case_bundle.zip",
+      "bundle_id": "20260401T134803Z-uic_erri_rail_bridge"
+    },
+    {
+      "task_id": "hardest::nist_fema_progressive_collapse",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:03.573488+00:00",
+      "note": "executed progressive_collapse",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/signed_case_bundle.zip",
+      "bundle_id": "20260401T134803Z-nist_fema_progressive_collapse"
+    },
+    {
+      "task_id": "hardest::caarc_wind_standard_tower",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:03.712715+00:00",
+      "note": "executed wind_time_history",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_caarc_wind_standard_tower/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_caarc_wind_standard_tower/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_caarc_wind_standard_tower/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_caarc_wind_standard_tower/signed_case_bundle.zip",
+      "bundle_id": "20260401T134803Z-caarc_wind_standard_tower"
+    },
+    {
+      "task_id": "hardest::nceer_mceer_isolation_damper",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:03.850946+00:00",
+      "note": "executed seismic_isolation_damping",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/signed_case_bundle.zip",
+      "bundle_id": "20260401T134803Z-nceer_mceer_isolation_damper"
+    },
+    {
+      "task_id": "hardest::iass_dome_snapthrough",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:03.989589+00:00",
+      "note": "executed buckling_snapthrough",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_iass_dome_snapthrough/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_iass_dome_snapthrough/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_iass_dome_snapthrough/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_iass_dome_snapthrough/signed_case_bundle.zip",
+      "bundle_id": "20260401T134803Z-iass_dome_snapthrough"
+    },
+    {
+      "task_id": "hardest::aci_fib_construction_stage_csa",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:04.151160+00:00",
+      "note": "executed construction_stage_time_dependent",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_aci_fib_construction_stage_csa/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_aci_fib_construction_stage_csa/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_aci_fib_construction_stage_csa/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_aci_fib_construction_stage_csa/signed_case_bundle.zip",
+      "bundle_id": "20260401T134804Z-aci_fib_construction_stage_csa"
+    },
+    {
+      "task_id": "hardest::oc3_oc4_offshore_monopile",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:04.293521+00:00",
+      "note": "executed offshore_multiphysics_ssi",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_oc3_oc4_offshore_monopile/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_oc3_oc4_offshore_monopile/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_oc3_oc4_offshore_monopile/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_oc3_oc4_offshore_monopile/signed_case_bundle.zip",
+      "bundle_id": "20260401T134804Z-oc3_oc4_offshore_monopile"
+    },
+    {
+      "task_id": "hardest::tc204_excavation_tunnel",
+      "lifecycle_status": "completed",
+      "updated_at": "2026-04-01T13:48:04.435549+00:00",
+      "note": "executed excavation_tunnel_ground_interaction",
+      "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/benchmark_task_result.json",
+      "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/benchmark_task_kpi_receipt.json",
+      "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/signed_case_bundle",
+      "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/signed_case_bundle.zip",
+      "bundle_id": "20260401T134804Z-tc204_excavation_tunnel"
+    }
+  ]
+}

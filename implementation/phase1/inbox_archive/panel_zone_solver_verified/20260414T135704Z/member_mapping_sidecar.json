@@ -1,0 +1,10 @@
+{
+  "mapping_mode": "explicit_member_id_map",
+  "rows": [
+    {
+      "source_member_id": "B401",
+      "candidate_member_id": "26705",
+      "evidence": "trusted_solver_drop_fixture_to_active_release_dataset"
+    }
+  ]
+}

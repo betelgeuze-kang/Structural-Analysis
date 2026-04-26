@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-korean-ifc-solver-ready-reconstruction",
+  "generated_at": "2026-04-08T10:41:51.754553+00:00",
+  "source_id": "ifc_public_award_reference_2022",
+  "title": "buildingSMART Korea BIM Awards 2022 구조 골조 curated IFC",
+  "source_class": "ifc_public",
+  "local_ifc_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_award_reference_2022/ifc_public_award_reference_2022.ifc",
+  "structural_preview_case_id": "ifc_public_award_reference_2022__structural_preview_candidate",
+  "structural_preview_writeback_case_id": "ifc_public_award_reference_2022__structural_preview_candidate__identity_writeback",
+  "metrics": {
+    "ifc_beam_count": 1,
+    "ifc_column_count": 1,
+    "ifc_slab_count": 1,
+    "ifc_wall_count": 1,
+    "ifc_plate_count": 0,
+    "ifc_member_count": 0,
+    "ifc_footing_count": 1,
+    "ifc_storey_count": 2,
+    "ifc_structural_entity_total": 5
+  },
+  "summary": {
+    "reconstruction_ready": true
+  },
+  "summary_line": "Korean IFC solver-ready reconstruction artifact: PASS | source=ifc_public_award_reference_2022 | storeys=2 | structural_entities=5",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "IFC local reference scanned into a solver-ready reconstruction artifact"
+}

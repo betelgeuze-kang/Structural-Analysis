@@ -3,6 +3,9 @@
 - 버전: 1.0
 - 목표: FEM 연산 병목을 줄이고, GNN + 잔차 보정 학습 + 물리 제약 기반 검증을 통해 상용 구조해석 툴 수준 이상의 속도/정확도/확장성 확보
 
+철도(궤도) + 터널 동역학 통합 확장 실행계획은
+`implementation/phase1/railway_tunnel_dynamics_reinforcement_plan.md`를 기준으로 운영한다.
+
 ## 1) 시스템 개요
 
 본 아키텍처는 BIM/CAD 구조 모델을 그래프 기반 표현으로 변환하고,
@@ -574,9 +577,10 @@ Rust/HIP Low-Fidelity 결과를 Phase 2 GNN 입력으로 직접 연결한다.
 3. **Fallback 정책 운영화**
    - 물리 위반(`||R_eq|| > ε`) 발생 시 어떤 서브그래프를 HF로 보낼지 기준을 정책 파일로 분리
 
-### 13-5) 권장 진행 순서 (다음 4주)
+### 13-5) 권장 진행 순서 (닫힘 기준 기반)
 
-- **Week 1:** White-box validation 자동화 + 단위계 회귀 테스트 확장
-- **Week 2:** 실 DLPack zero-copy 검증 + I/O 병목 분리 계측
-- **Week 3:** Parser 룰셋 버전관리 + warning 등급 기반 Gate 연동
-- **Week 4:** LF→GNN E2E CI smoke + fallback 정책 파일화
+- 아래 순서는 달력 주차가 아니라, 앞 항목이 닫힐 때 다음 항목으로 넘기는 실행 순서다.
+- **1:** White-box validation 자동화 + 단위계 회귀 테스트 확장
+- **2:** 실 DLPack zero-copy 검증 + I/O 병목 분리 계측
+- **3:** Parser 룰셋 버전관리 + warning 등급 기반 Gate 연동
+- **4:** LF→GNN E2E CI smoke + fallback 정책 파일화

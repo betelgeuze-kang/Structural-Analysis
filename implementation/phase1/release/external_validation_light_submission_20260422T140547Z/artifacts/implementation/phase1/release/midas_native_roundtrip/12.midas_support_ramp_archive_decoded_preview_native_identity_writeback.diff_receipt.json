@@ -1,0 +1,219 @@
+{
+  "schema_version": "1.0",
+  "case_id": "midas_support_ramp_archive__decoded_preview_native__identity_writeback",
+  "generated_at": "2026-04-08T10:41:53.908071+00:00",
+  "structure_type": "ramp",
+  "writeback_mode": "public_archive_decoded_preview_identity_baseline",
+  "checks": {
+    "artifact_presence_pass": true,
+    "topology_stability_pass": true,
+    "load_contract_stability_pass": true,
+    "unknown_rows_zero_pass": true,
+    "loadcomb_exact_roundtrip_pass": true
+  },
+  "summary": {
+    "topology_metric_count": 8,
+    "topology_stable_metric_count": 8,
+    "load_metric_count": 5,
+    "load_stable_metric_count": 5,
+    "source_unknown_row_total": 0,
+    "writeback_unknown_row_total": 0,
+    "unknown_rows_preserved_public_raw": false,
+    "direct_patch_change_count": 0,
+    "review_pending_count": 0,
+    "instruction_sidecar_audit_only_change_count": 0
+  },
+  "topology_deltas": [
+    {
+      "metric": "section_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "node_count",
+      "source": 39,
+      "writeback": 39,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "element_count",
+      "source": 49,
+      "writeback": 49,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "beam_element_count",
+      "source": 49,
+      "writeback": 49,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "shell_element_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "member_row_count",
+      "source": 49,
+      "writeback": 49,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "group_row_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "design_section_row_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    }
+  ],
+  "load_deltas": [
+    {
+      "metric": "static_load_case_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "load_combination_row_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "nodal_load_row_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "pressure_load_row_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "selfweight_row_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    }
+  ],
+  "informational_deltas": [
+    {
+      "metric": "typed_row_total",
+      "source": 88,
+      "writeback": 88,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "thickness_row_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    },
+    {
+      "metric": "section_scale_row_count",
+      "source": 0,
+      "writeback": 0,
+      "delta": 0,
+      "stable": true
+    }
+  ],
+  "artifacts": {
+    "source_mgt": {
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/midas_native_roundtrip/generated/midas_support_ramp_archive_decoded_preview_native/midas_support_ramp_archive__decoded_preview_native.mgt",
+      "exists": true
+    },
+    "source_conversion_report": {
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/midas_native_roundtrip/generated/midas_support_ramp_archive_decoded_preview_native/source_conversion_report.json",
+      "exists": true
+    },
+    "writeback_mgt": {
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/midas_native_roundtrip/generated/midas_support_ramp_archive_decoded_preview_native/midas_support_ramp_archive__decoded_preview_native.identity_writeback.mgt",
+      "exists": true
+    },
+    "writeback_roundtrip_report": {
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/midas_native_roundtrip/generated/midas_support_ramp_archive_decoded_preview_native/writeback_roundtrip_report.json",
+      "exists": true
+    },
+    "export_report": {
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/midas_native_roundtrip/generated/midas_support_ramp_archive_decoded_preview_native/fixture_export_report.json",
+      "exists": true
+    },
+    "patch_manifest": {
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/midas_native_roundtrip/generated/midas_support_ramp_archive_decoded_preview_native/fixture_patch_manifest.json",
+      "exists": true
+    },
+    "loadcomb_roundtrip_report": {
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/midas_native_roundtrip/generated/midas_support_ramp_archive_decoded_preview_native/fixture_loadcomb_roundtrip_report.json",
+      "exists": true
+    },
+    "decoded_preview_model_json": {
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_ramp_archive_decoded_preview/model.json",
+      "exists": true,
+      "sha256": "64cd96fc5586f4b41007f10682a304191be0d776a1ccb510a9f09f828b9aa34a",
+      "size_bytes": 26408
+    },
+    "decoded_preview_bridge_report": {
+      "path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_ramp_archive_decoded_preview/bridge_report.json",
+      "exists": true,
+      "sha256": "dd2fc990ecfcaea247a18b3215619a830f083e1b57ca100683ed4f11a92e1452",
+      "size_bytes": 5552
+    },
+    "bridge_model_json": {
+      "path": "/home/betelgeuze/건축구조분석/.phase1_missing_artifact",
+      "exists": true
+    },
+    "bridge_report": {
+      "path": "/home/betelgeuze/건축구조분석/.phase1_missing_artifact",
+      "exists": true
+    }
+  },
+  "taxonomy": {
+    "labels": [
+      "preserved_exact",
+      "public_archive_preview"
+    ],
+    "risk_level": "low",
+    "counts": {
+      "preserved_exact": 1,
+      "canonical_rewrite": 0,
+      "lossy_rewrite": 0,
+      "unsupported_card": 0,
+      "manual_review_required": 0,
+      "parser_drop_suspected": 0
+    },
+    "card_family_histogram": {
+      "supported_action_families": {},
+      "direct_patch_action_families": {},
+      "audit_only_action_families": {},
+      "audit_manifest_action_families": {},
+      "unsupported_reason_counts": {}
+    }
+  },
+  "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_ramp_archive__decoded_preview_native__identity_writeback | type=ramp | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+  "contract_pass": true,
+  "reason_code": "PASS"
+}

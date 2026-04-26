@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-19T00:00:00Z",
+  "manifest_family": "pbd_hinge_seed_selection",
+  "source_name": "PEER Structural Performance Database RC column hinge seeds",
+  "source_urls": [
+    "https://peer.berkeley.edu/node/123"
+  ],
+  "real_source_required": true,
+  "target_gap": "pbd_dynamic_hinge_refresh_validation",
+  "integration_targets": [
+    "implementation/phase1/generate_pbd_hinge_refresh_source.py",
+    "implementation/phase1/generate_pbd_hinge_refresh_artifact.py",
+    "implementation/phase1/generate_pbd_hinge_refresh_report.py"
+  ],
+  "selection_strategy": {
+    "specimen_family": "reinforced_concrete_columns",
+    "required_metadata": [
+      "section_geometry",
+      "longitudinal_rebar_ratio",
+      "transverse_reinforcement_details",
+      "axial_load_ratio",
+      "lateral_force_displacement_history"
+    ],
+    "preferred_variation_axes": [
+      "spiral_vs_rectangular_confinement",
+      "low_vs_high_axial_load_ratio",
+      "lower_vs_higher_longitudinal_rebar_ratio",
+      "older_vs_newer_detailing_regime"
+    ]
+  },
+  "seed_cases": [
+    {
+      "seed_id": "peer_spd_rc_column_rectangular_seed_01",
+      "priority": 1,
+      "selection_filters": {
+        "column_shape": "rectangular",
+        "confinement_type": "tied",
+        "axial_load_ratio_band": "moderate",
+        "requires_complete_hysteresis_history": true
+      },
+      "holdout_split": "train",
+      "expected_local_targets": {
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.raw.json",
+        "source_manifest": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.source_manifest.json",
+        "hinge_fixture": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.hinge_fixture.json"
+      },
+      "why": "Baseline tied rectangular column for first hinge-refresh calibration pass."
+    },
+    {
+      "seed_id": "peer_spd_rc_column_rectangular_seed_02",
+      "priority": 2,
+      "selection_filters": {
+        "column_shape": "rectangular",
+        "confinement_type": "tied",
+        "axial_load_ratio_band": "high",
+        "requires_complete_hysteresis_history": true
+      },
+      "holdout_split": "train",
+      "expected_local_targets": {
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.raw.json",
+        "source_manifest": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.source_manifest.json",
+        "hinge_fixture": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.hinge_fixture.json"
+      },
+      "why": "Adds axial-load sensitivity without changing the broad specimen family."
+    },
+    {
+      "seed_id": "peer_spd_rc_column_spiral_seed_01",
+      "priority": 3,
+      "selection_filters": {
+        "column_shape": "circular_or_spiral",
+        "confinement_type": "spiral",
+        "axial_load_ratio_band": "moderate",
+        "requires_complete_hysteresis_history": true
+      },
+      "holdout_split": "val",
+      "expected_local_targets": {
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.raw.json",
+        "source_manifest": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.source_manifest.json",
+        "hinge_fixture": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.hinge_fixture.json"
+      },
+      "why": "Checks whether projected hinge refresh generalizes across confinement type."
+    },
+    {
+      "seed_id": "peer_spd_rc_column_rebar_sensitive_seed_01",
+      "priority": 4,
+      "selection_filters": {
+        "rebar_ratio_band": "higher",
+        "transverse_reinforcement_variation_required": true,
+        "requires_complete_hysteresis_history": true
+      },
+      "holdout_split": "val",
+      "expected_local_targets": {
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.raw.json",
+        "source_manifest": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.source_manifest.json",
+        "hinge_fixture": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.hinge_fixture.json"
+      },
+      "why": "Targets the exact rebar-sensitive branch that the current hinge refresh logic claims to cover."
+    },
+    {
+      "seed_id": "peer_spd_rc_column_holdout_seed_01",
+      "priority": 5,
+      "selection_filters": {
+        "specimen_family_distance": "out_of_family_relative_to_train_seeds",
+        "requires_complete_hysteresis_history": true
+      },
+      "holdout_split": "holdout",
+      "expected_local_targets": {
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.raw.json",
+        "source_manifest": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.source_manifest.json",
+        "hinge_fixture": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.hinge_fixture.json"
+      },
+      "why": "Keeps a small but meaningful experimental holdout so hinge refresh does not get validated only on near-duplicate specimens."
+    }
+  ],
+  "ingestion_rules": {
+    "require_source_manifest": true,
+    "require_sha256": true,
+    "require_real_source": true,
+    "forbid_synthetic_hysteresis_substitution": true,
+    "recommended_min_case_count": 5
+  },
+  "next_action": "Select 3 train, 1 val, and 1 holdout RC column specimens from PEER SPD, normalize them into hinge fixtures, and wire them into hinge refresh regression and committee provenance."
+}

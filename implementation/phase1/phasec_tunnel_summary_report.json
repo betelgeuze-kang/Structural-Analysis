@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-phasec-tunnel-modules",
+  "generated_at": "2026-02-27T12:41:39.835620+00:00",
+  "checks": {
+    "C1_tunnel_graph_converter": true,
+    "C2_tunnel_segment_joint_nonlinear": true,
+    "C3_soil_tunnel_ssi": true,
+    "C4_train_passage_load_generator": true,
+    "C5_tunnel_seismic_longitudinal": true
+  },
+  "reports": {
+    "C1": "implementation/phase1/tunnel_graph_converter_report.json",
+    "C2": "implementation/phase1/tunnel_segment_joint_report.json",
+    "C3": "implementation/phase1/soil_tunnel_ssi_report.json",
+    "C4": "implementation/phase1/train_passage_load_report.json",
+    "C5": "implementation/phase1/tunnel_seismic_longitudinal_report.json",
+    "graph_json": "implementation/phase1/tunnel_graph.json",
+    "load_csv": "implementation/phase1/open_data/tunnel/train_passage_load.csv"
+  },
+  "steps": [
+    {
+      "step": "C1_tunnel_graph_converter",
+      "seconds": 0.9187994003295898,
+      "command": "/usr/bin/python3 implementation/phase1/tunnel_graph_converter.py --out-graph implementation/phase1/tunnel_graph.json --out implementation/phase1/tunnel_graph_converter_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote tunnel graph converter report: implementation/phase1/tunnel_graph_converter_report.json\n",
+      "stderr_tail": "{\"event\": \"tunnel_graph.start\", \"inputs\": {\"out\": \"implementation/phase1/tunnel_graph_converter_report.json\", \"out_graph\": \"implementation/phase1/tunnel_graph.json\", \"radius_m\": 4.1, \"ring_count\": 80, \"ring_spacing_m\": 1.5, \"segments_per_ring\": 7}}\n{\"contract_pass\": true, \"event\": \"tunnel_graph.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "C2_tunnel_segment_joint_nonlinear",
+      "seconds": 1.0691590309143066,
+      "command": "/usr/bin/python3 implementation/phase1/tunnel_segment_joint_nonlinear.py --out implementation/phase1/tunnel_segment_joint_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote tunnel segment joint report: implementation/phase1/tunnel_segment_joint_report.json\n",
+      "stderr_tail": "{\"event\": \"tunnel_joint.start\", \"inputs\": {\"k0\": 25000000.0, \"out\": \"implementation/phase1/tunnel_segment_joint_report.json\", \"points\": 240, \"soft_beta\": 2.4, \"theta_max\": 0.018, \"theta_y\": 0.004, \"unload_ratio\": 0.62}}\n{\"contract_pass\": true, \"event\": \"tunnel_joint.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "C3_soil_tunnel_ssi",
+      "seconds": 0.9807050228118896,
+      "command": "/usr/bin/python3 implementation/phase1/soil_tunnel_ssi.py --out implementation/phase1/soil_tunnel_ssi_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote soil-tunnel SSI report: implementation/phase1/soil_tunnel_ssi_report.json\n",
+      "stderr_tail": "{\"event\": \"soil_ssi.start\", \"inputs\": {\"f_count\": 180, \"f_max_hz\": 30.0, \"f_min_hz\": 0.5, \"out\": \"implementation/phase1/soil_tunnel_ssi_report.json\", \"ref_hz\": 5.0, \"ring_mass_kg\": 9500.0, \"soil\": \"dense_sand\"}}\n{\"contract_pass\": true, \"event\": \"soil_ssi.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "C4_train_passage_load_generator",
+      "seconds": 1.0229649543762207,
+      "command": "/usr/bin/python3 implementation/phase1/train_passage_load_generator.py --out-csv implementation/phase1/open_data/tunnel/train_passage_load.csv --out implementation/phase1/train_passage_load_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote train passage load report: implementation/phase1/train_passage_load_report.json\n",
+      "stderr_tail": "{\"event\": \"train_passage.start\", \"inputs\": {\"axle_load_n\": 85000.0, \"axle_spacing_m\": [2.5, 2.5, 2.5], \"car_gap_m\": 12.0, \"cars\": 8, \"dt_s\": 0.01, \"duration_s\": 60.0, \"entry_offset_m\": 80.0, \"out\": \"implementation/phase1/train_passage_load_report.json\", \"out_csv\": \"implementation/phase1/open_data/tunnel/train_passage_load.csv\", \"pressure_peak_pa\": 1200.0, \"speed_m_s\": 25.0, \"tunnel_length_m\": 1200.0}}\n{\"contract_pass\": true, \"event\": \"train_passage.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "C5_tunnel_seismic_longitudinal",
+      "seconds": 1.2475359439849854,
+      "command": "/usr/bin/python3 implementation/phase1/tunnel_seismic_longitudinal.py --out implementation/phase1/tunnel_seismic_longitudinal_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote tunnel seismic longitudinal report: implementation/phase1/tunnel_seismic_longitudinal_report.json\n",
+      "stderr_tail": "{\"event\": \"tunnel_seismic.start\", \"inputs\": {\"c_soil_n_s_m\": 120000.0, \"dt_s\": 0.002, \"duration_s\": 20.0, \"k_axial_n_m\": 1100000000.0, \"k_soil_n_m\": 26000000.0, \"max_disp_m\": 0.18, \"max_strain\": 0.015, \"out\": \"implementation/phase1/tunnel_seismic_longitudinal_report.json\", \"ring_count\": 120, \"ring_mass_kg\": 9500.0, \"ring_spacing_m\": 1.5}}\n{\"contract_pass\": true, \"event\": \"tunnel_seismic.completed\", \"reason_code\": \"PASS\"}\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "all phase-c tunnel modules passed"
+}

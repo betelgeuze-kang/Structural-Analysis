@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "source_name": "CAARC-like across-wind long record",
+  "source_url": "https://www.istructe.org/journal/volumes/volume-95-(published-in-2017)/issue-6/the-caarc-building-standard/",
+  "real_source": true,
+  "hazard_type": "wind_across",
+  "data_path": "implementation/phase1/open_data/wind/across_wind_10h_dt1s.csv",
+  "sha256": "b0a20f56796ff676eab005cfc3e25d0ec364652828be2217eed64e0b03644c8d",
+  "duration_hours": 10.0,
+  "dt_s": 1.0
+}

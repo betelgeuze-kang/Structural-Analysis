@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-prepare-midas-binary-archive-adapter",
+  "source_id": "midas_support_stair_archive",
+  "archive_path": "implementation/phase1/open_data/midas/quality_corpus/raw/midas_support_stair_archive.zip",
+  "out_dir": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive",
+  "summary": {
+    "recognized_member_count": 2,
+    "extension_label": ".meb=2",
+    "recommended_adapter_family": "midas_binary_meb_parser",
+    "recommended_parser_script": "implementation/phase1/parse_midas_binary_meb_to_json_npz.py",
+    "recommended_primary_member": "░µ╗τ╖╬_┐╣┴ª╞─└╧.meb",
+    "primary_member_probe_ready": false,
+    "primary_member_magic": "MBDG",
+    "primary_member_structural_token_label": "GUID=1, __DBMS_DATA__=1"
+  },
+  "members": [
+    {
+      "member_name": "░µ╗τ╖╬_┐╣┴ª╞─└╧.meb",
+      "extension": ".meb",
+      "size_bytes": 282866,
+      "extracted_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive/░µ╗τ╖╬_┐╣┴ª╞─└╧.meb"
+    },
+    {
+      "member_name": "░µ╗τ╖╬_┐╣┴ª╞─└╧_FINAL.meb",
+      "extension": ".meb",
+      "size_bytes": 297706,
+      "extracted_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive/░µ╗τ╖╬_┐╣┴ª╞─└╧_FINAL.meb"
+    }
+  ],
+  "primary_member_probe": {
+    "member_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_stair_archive/░µ╗τ╖╬_┐╣┴ª╞─└╧.meb",
+    "size_bytes": 282866,
+    "magic_ascii": "MBDG",
+    "magic_hex": "4d424447",
+    "dbms_marker_present": true,
+    "table_token_rows": [
+      "MBDG",
+      "__DBMS_DATA__",
+      "GUID",
+      "IUNIT",
+      "FMDB",
+      "ILLDB",
+      "ISTND",
+      "IPHDB",
+      "IBDIF",
+      "IRDRW",
+      "ITRLN",
+      "IDMPT",
+      "ICDLN",
+      "IDMCR",
+      "IDMLN",
+      "IMATL",
+      "IFGRP",
+      "IDSEC",
+      "ISECT",
+      "ITHIK",
+      "IPLAN",
+      "IMDUL",
+      "IGRND",
+      "ISTOR",
+      "F433",
+      "A333333",
+      "UUUUUU",
+      "CTRD",
+      "IMBTP",
+      "IPONT",
+      "ICURV",
+      "IMEMB",
+      "IFMAT",
+      "IMSTT",
+      "IDFLG",
+      "IPREG",
+      "ITWOP",
+      "ISTLD",
+      "ISPLC",
+      "IMCTL"
+    ],
+    "structural_token_rows": [
+      "__DBMS_DATA__",
+      "GUID"
+    ],
+    "probe_ready": false,
+    "probe_label": "binary member extracted / table layout still uncertain"
+  },
+  "checks": {
+    "archive_exists": true,
+    "recognized_member_nonzero": true,
+    "primary_member_selected": true,
+    "primary_member_probe_ready": false
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "binary archive adapter manifest prepared"
+}

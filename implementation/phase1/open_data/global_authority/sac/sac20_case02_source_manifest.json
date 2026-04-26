@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "source_family": "sac_benchmark",
+  "case_id": "SAC20_SEA_holdout_02",
+  "source_url": "https://femap58.atcouncil.org/index.php?option=com_content&view=article&id=5:sac-steel-project&catid=2:uncategorised",
+  "source_file_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+  "source_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+  "hf_csv_path": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case02_hf.csv",
+  "lf_csv_path": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case02_lf.csv",
+  "hf_csv_sha256": "d63a98a3b39ecc398110157ca40a5b17596c2e10a1cdf87697b2a708bdec5248",
+  "lf_csv_sha256": "83064dec3cae07b0c17784de600d3f5d11804271e7d55c03d4efff32d8cbc712"
+}

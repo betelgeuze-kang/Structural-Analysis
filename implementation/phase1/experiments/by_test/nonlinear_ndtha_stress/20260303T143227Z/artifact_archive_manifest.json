@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-03T14:32:27.843062+00:00",
+  "test_name": "nonlinear_ndtha_stress",
+  "run_dir": "implementation/phase1/experiments/by_test/nonlinear_ndtha_stress/20260303T143227Z",
+  "mode": "copy",
+  "archived_count": 3,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/nonlinear_ndtha_stress_report.dynamic_smoke.json",
+      "dst": "implementation/phase1/experiments/by_test/nonlinear_ndtha_stress/20260303T143227Z/artifacts/nonlinear_ndtha_stress_report.dynamic_smoke.json",
+      "kind": "file",
+      "bytes": 94600,
+      "sha256": "9e067b28021b9ea76a0ba853e3a4f8b8cac96751fe8fc714f3fb3a3e618139ff",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json",
+      "dst": "implementation/phase1/experiments/by_test/nonlinear_ndtha_stress/20260303T143227Z/artifacts/commercial_benchmark_cases.opstool_nightly.json",
+      "kind": "file",
+      "bytes": 34816,
+      "sha256": "45928c187dad03c16205f41707e6bf9b8bb82fadbb1905d9a8303e09610f93c3",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+      "dst": "implementation/phase1/experiments/by_test/nonlinear_ndtha_stress/20260303T143227Z/artifacts/el_centro_like_60s_dt0p01.csv",
+      "kind": "file",
+      "bytes": 134038,
+      "sha256": "902e10e1e8a14bf40bebb35a1191123f15dbc775c2962ce693615f6f1952791a",
+      "mode": "copy"
+    }
+  ]
+}

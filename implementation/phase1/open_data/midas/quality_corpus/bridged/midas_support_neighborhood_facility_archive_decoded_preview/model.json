@@ -1,0 +1,494 @@
+{
+  "schema_version": "1.0",
+  "source_provenance": {
+    "source_family": "midas_binary_decoded_preview_bridge",
+    "source_id": "midas_support_neighborhood_facility_archive",
+    "path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/meb_decoded_inventory.json"
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": 1,
+        "x": 0.049389,
+        "y": 0.015625,
+        "z": 0.0
+      },
+      {
+        "id": 2,
+        "x": 0.015625,
+        "y": 0.140625,
+        "z": 0.0
+      },
+      {
+        "id": 3,
+        "x": 0.0625,
+        "y": 0.1875,
+        "z": 0.0
+      },
+      {
+        "id": 4,
+        "x": 0.03125,
+        "y": 0.28125,
+        "z": 0.0
+      },
+      {
+        "id": 5,
+        "x": 0.09375,
+        "y": 0.28125,
+        "z": 0.0
+      },
+      {
+        "id": 6,
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.0
+      },
+      {
+        "id": 7,
+        "x": 0.28125,
+        "y": 0.144338,
+        "z": 0.0
+      },
+      {
+        "id": 8,
+        "x": 0.25,
+        "y": 0.0625,
+        "z": 0.0
+      },
+      {
+        "id": 9,
+        "x": 0.25,
+        "y": 0.03125,
+        "z": 0.0
+      },
+      {
+        "id": 10,
+        "x": 0.1875,
+        "y": 0.09375,
+        "z": 0.0
+      },
+      {
+        "id": 11,
+        "x": 0.144338,
+        "y": 0.433013,
+        "z": 0.0
+      },
+      {
+        "id": 12,
+        "x": 0.140625,
+        "y": 0.75,
+        "z": 0.0
+      },
+      {
+        "id": 13,
+        "x": 0.0,
+        "y": 0.75,
+        "z": 0.0
+      },
+      {
+        "id": 14,
+        "x": 0.28125,
+        "y": 0.75,
+        "z": 0.0
+      },
+      {
+        "id": 15,
+        "x": 0.625,
+        "y": 0.625,
+        "z": 0.0
+      },
+      {
+        "id": 16,
+        "x": 0.75,
+        "y": 0.625,
+        "z": 0.0
+      },
+      {
+        "id": 17,
+        "x": 0.75,
+        "y": 0.75,
+        "z": 0.0
+      },
+      {
+        "id": 18,
+        "x": 0.75,
+        "y": 1.0,
+        "z": 0.0
+      },
+      {
+        "id": 19,
+        "x": 1.0,
+        "y": 1.0,
+        "z": 0.0
+      },
+      {
+        "id": 20,
+        "x": 0.5,
+        "y": 1.5,
+        "z": 0.0
+      },
+      {
+        "id": 21,
+        "x": 0.75,
+        "y": 0.25,
+        "z": 0.0
+      },
+      {
+        "id": 22,
+        "x": 0.625,
+        "y": 0.049389,
+        "z": 0.0
+      },
+      {
+        "id": 23,
+        "x": 4.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    ],
+    "elements": [
+      {
+        "id": 1,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          1,
+          2
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 2,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          2,
+          3
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 3,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          3,
+          4
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 4,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          4,
+          5
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 5,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          5,
+          6
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 6,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          6,
+          7
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 7,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          7,
+          8
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 8,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          8,
+          9
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 9,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          9,
+          10
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 10,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          10,
+          11
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 11,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          11,
+          12
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 12,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          12,
+          13
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 13,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          13,
+          14
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 14,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          14,
+          15
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 15,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          15,
+          16
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 16,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          16,
+          17
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 17,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          17,
+          18
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 18,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          18,
+          19
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 19,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          19,
+          20
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 20,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          20,
+          21
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 21,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          21,
+          22
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      },
+      {
+        "id": 22,
+        "type": "BEAM",
+        "family": "point_scan_preview",
+        "node_ids": [
+          22,
+          23
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "windowed_f64_xyz_scan",
+        "preview_mode": "sparse_local_xyz_point_scan",
+        "bridge_mode": "point_scan_chain"
+      }
+    ],
+    "materials": [],
+    "sections": [],
+    "loads": {},
+    "metadata": {
+      "bridge_family": "decoded_preview_baseline",
+      "family_assumption": "point_scan_preview",
+      "accepted_type_label": "heuristic_point_link=22",
+      "selected_member_name": "C07_T02_P000_RC_02_▒┘╕░╗²╚░╜├.meb",
+      "preview_state_label": "unverified heuristic preview",
+      "preview_mode": "sparse_local_xyz_point_scan",
+      "preview_basis": "raw_xyz_scan",
+      "preview_projection_label": "XY",
+      "preview_anchor_table_names": [],
+      "bridge_mode": "point_scan_chain",
+      "source_table": "windowed_f64_xyz_scan",
+      "topology_preview_ready": false,
+      "topology_signal_field_sources": {
+        "topology_preview_ready": "inventory_summary"
+      },
+      "preview_exactness_tier": "heuristic-preview",
+      "preview_exactness_label": "heuristic preview",
+      "preview_exactness_signal_source": "bridge-default",
+      "preview_surface_bucket": "heuristic-preview",
+      "preview_surface_status_label": "decoded heuristic preview 3d candidate",
+      "preview_surface_status_tone": "warn",
+      "preview_readiness_stage_label": "heuristic preview candidate"
+    }
+  },
+  "topology_metrics": {
+    "node_count": 23,
+    "element_count": 22,
+    "edge_count_undirected": 22,
+    "beam_element_count": 22,
+    "shell_element_count": 0
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-build-cases-from-open-megastructure",
+  "generated_at": "2026-04-16T13:45:57.243581+00:00",
+  "inputs": {
+    "input_path": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm",
+    "candidate_id": "canton_tower_reduced_shm_benchmark",
+    "catalog": "implementation/phase1/open_data/megastructure/mega_structure_catalog.json",
+    "download_if_missing": false,
+    "max_download_bytes": 600000000,
+    "require_source_manifest": true,
+    "source_manifest_out": "implementation/phase1/open_data/megastructure/canton_tower_conversion_report.source_manifest.json",
+    "forbid_local_sanity_wave": true,
+    "dynamic_out": "implementation/phase1/spatiotemporal_data/canton_tower_dynamic_cases.jsonl",
+    "benchmark_out": "implementation/phase1/commercial_benchmark_cases.canton_tower_open.json",
+    "report_out": "implementation/phase1/open_data/megastructure/canton_tower_conversion_report.json",
+    "window_len": 120,
+    "window_stride": 60,
+    "max_cases": 220,
+    "max_nodes": 12,
+    "seed": 23,
+    "effective_mass_kg": 280000.0,
+    "story_height_m": 3.0,
+    "public_case_count": 3,
+    "metric_source": "open_data_measurement",
+    "min_topology_types": 3,
+    "min_hazard_types": 2,
+    "min_material_types": 2,
+    "allow_synthetic_displacement": false,
+    "case_id_prefix": "canton_tower_reduced_shm"
+  },
+  "catalog_entry": {
+    "id": "canton_tower_reduced_shm_benchmark",
+    "priority": 2,
+    "domain": "building",
+    "scale": "600m-class diagrid megatall (reduced-order SHM benchmark)",
+    "data_type": "official reduced-order system matrices + measured response",
+    "source": "PolyU SHM benchmark",
+    "url": "https://polyucee.hk/ceyxia/benchmark/benchmark.htm",
+    "license": "Public benchmark portal terms",
+    "pipeline_fit": [
+      "measured_benchmark_breadth",
+      "viewer_results_provenance",
+      "megatall_response_onboarding"
+    ],
+    "source_manifest_stub": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm.source_manifest.json",
+    "prepare_manifest_script": "implementation/phase1/prepare_canton_tower_reduced_shm_source_manifest.py",
+    "integration_hint": "Ingest as an official reduced-order SHM benchmark; stage local matrices/docs/response zips into a source manifest before converting measured channels into dynamic_cases.jsonl."
+  },
+  "downloaded_files": [],
+  "remote_file_manifest": [],
+  "source_provenance": [
+    {
+      "source_name": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/normalized_csv/accdata_2010-01-19-18.csv",
+      "sha256": "f926b4817d82898f64415c56be7af9fd8dca588e0f30967f47c36e7204228c83",
+      "bytes": 137688656,
+      "synthetic_flag": false
+    }
+  ],
+  "raw_file_hashes": {
+    "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/normalized_csv/accdata_2010-01-19-18.csv": "f926b4817d82898f64415c56be7af9fd8dca588e0f30967f47c36e7204228c83"
+  },
+  "source_count": 1,
+  "source_stats": [
+    {
+      "source": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/normalized_csv/accdata_2010-01-19-18.csv",
+      "rows": 180000,
+      "dt": 0.01999999999998181,
+      "generated_cases": 220
+    }
+  ],
+  "outputs": {
+    "dynamic_out": "implementation/phase1/spatiotemporal_data/canton_tower_dynamic_cases.jsonl",
+    "benchmark_out": "implementation/phase1/commercial_benchmark_cases.canton_tower_open.json",
+    "dynamic_case_count": 220,
+    "benchmark_case_count": 220
+  },
+  "checks": {
+    "has_train": true,
+    "has_test": true,
+    "public_cases_ready": true,
+    "parse_error_free": true,
+    "source_manifest_pass": true,
+    "synthetic_source_detected": false,
+    "topology_diversity_pass": true,
+    "hazard_diversity_pass": true,
+    "material_diversity_pass": true
+  },
+  "summary": {
+    "topology_type_count": 4,
+    "hazard_type_count": 2,
+    "material_type_count": 3,
+    "source_family_count": 1,
+    "source_families": [
+      "canton_tower_reduced_shm_benchmark"
+    ],
+    "shell_beam_mix_case_count": 119,
+    "rom_global_present": true,
+    "rom_global_dof_count": 185,
+    "rom_segment_count": 37,
+    "rom_compare_case_count": 220
+  },
+  "parse_errors": [],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "open mega-structure dataset converted"
+}

@@ -1,0 +1,6 @@
+numpy>=1.23
+matplotlib>=3.7
+jsonschema>=4.20
+# Optional ML/runtime:
+# torch>=2.1
+

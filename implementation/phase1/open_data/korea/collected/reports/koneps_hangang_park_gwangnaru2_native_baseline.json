@@ -1,0 +1,23 @@
+{
+  "byte_count": 285,
+  "collection_policy": "local_first_manual_attach",
+  "content_kind": "native_text_model",
+  "curated_local_ifc_reference": "",
+  "curated_local_ifc_required": false,
+  "curated_local_ifc_status": "not_applicable",
+  "download_mode": "local_copy",
+  "exact_topology_candidate": false,
+  "format": "mgt",
+  "license_hint": "public_attachment_check_terms",
+  "native_writeback_candidate": true,
+  "promotion_hint": "native_writeback_candidate",
+  "provenance_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK00667779&bidPbancOrd=000&fileSeq=2&fileType=",
+  "reference_scheme": "local_path",
+  "resolved_reference": "implementation/phase1/open_data/korea/curated/koneps_hangang_park_gwangnaru2_native_baseline.mgt",
+  "retrieved_at_utc": "2026-04-08T10:41:49.841878+00:00",
+  "schema_version": "1.0",
+  "seed_basis": "official g2b attachment seed with a committed manual local MIDAS baseline for truthful native writeback validation",
+  "seed_priority": "P0",
+  "sha256": "3ad30305644241319450b42e56316ff3b36ee9db8eb2b393737a61a6272aa870",
+  "source_id": "koneps_hangang_park_gwangnaru2_native_baseline"
+}

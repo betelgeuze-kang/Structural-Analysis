@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-03T13:25:25.015706+00:00",
+  "test_name": "mega_ndtha_partitioned_stress",
+  "run_dir": "implementation/phase1/experiments/by_test/mega_ndtha_partitioned_stress/20260303T132525Z",
+  "mode": "copy",
+  "archived_count": 5,
+  "artifacts": [
+    {
+      "src": "/tmp/mega_ndtha_smoke_test3.json",
+      "dst": "implementation/phase1/experiments/by_test/mega_ndtha_partitioned_stress/20260303T132525Z/artifacts/mega_ndtha_smoke_test3.json",
+      "kind": "file",
+      "bytes": 17354,
+      "sha256": "1bfaf82a19668871a48be72c85f910c7e391052bec32c49e6a926d330c2a4d27",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/partitioned_scaleout_report.json",
+      "dst": "implementation/phase1/experiments/by_test/mega_ndtha_partitioned_stress/20260303T132525Z/artifacts/partitioned_scaleout_report.json",
+      "kind": "file",
+      "bytes": 9056,
+      "sha256": "b5e812769039b4a32fbf18088874c7bb080b6358284bb4cbed005f7e02098012",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/opensees_topology_report.json",
+      "dst": "implementation/phase1/experiments/by_test/mega_ndtha_partitioned_stress/20260303T132525Z/artifacts/opensees_topology_report.json",
+      "kind": "file",
+      "bytes": 2456,
+      "sha256": "8a5b03f5141f4944aa5b4080056256055744ff8cf84c9f75204cf85202d975ec",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+      "dst": "implementation/phase1/experiments/by_test/mega_ndtha_partitioned_stress/20260303T132525Z/artifacts/el_centro_like_60s_dt0p01.csv",
+      "kind": "file",
+      "bytes": 134038,
+      "sha256": "902e10e1e8a14bf40bebb35a1191123f15dbc775c2962ce693615f6f1952791a",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/partitioned_scaleout/partition_quality_n10000000.json",
+      "dst": "implementation/phase1/experiments/by_test/mega_ndtha_partitioned_stress/20260303T132525Z/artifacts/partition_quality_n10000000.json",
+      "kind": "file",
+      "bytes": 188897,
+      "sha256": "7ff11a954d6eb0b4cc8942d942a082e06ed84f9083e99ba25467a9144d11259f",
+      "mode": "copy"
+    }
+  ]
+}

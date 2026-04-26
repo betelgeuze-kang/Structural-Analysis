@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-30T15:06:21.522069+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "case_id": "nceer_mceer_isolation_damper",
+  "case_label": "NCEER / MCEER Isolation-Damper",
+  "benchmark_family": "seismic_isolation_damping",
+  "hazard_family": "seismic_isolated",
+  "topology_family": "base_isolation_damper_network",
+  "load_path_family": "hysteretic_device_sequence",
+  "primary_report": {
+    "path": "implementation/phase1/damper_validation_gate_report.json",
+    "reason_code": "PASS",
+    "contract_pass": true,
+    "summary_head": {
+      "case_count": 3,
+      "damper_types": [
+        "fps",
+        "tmd",
+        "viscoelastic"
+      ],
+      "waveform_corr_min": 0.962532707045799,
+      "waveform_corr_mean": 0.9805370000626036,
+      "phase_error_ms_max": 30.0,
+      "residual_drift_mm_max": 0.66292,
+      "damping_reduction_ratio_mean": 0.0003541342972751874,
+      "section_family_coverage_min": 1.0000000000000007
+    }
+  },
+  "supporting_reports": [
+    {
+      "role": "nonlinear_generalization",
+      "path": "implementation/phase1/nonlinear_generalization_gate_report.json",
+      "reason_code": "PASS",
+      "contract_pass": true
+    }
+  ],
+  "kpi_rows": [
+    {
+      "label": "case_count",
+      "source": "primary.summary.case_count",
+      "value": 3
+    },
+    {
+      "label": "waveform_corr_min",
+      "source": "primary.summary.waveform_corr_min",
+      "value": 0.962532707045799
+    },
+    {
+      "label": "phase_error_ms_max",
+      "source": "primary.summary.phase_error_ms_max",
+      "value": 30.0
+    },
+    {
+      "label": "residual_drift_mm_max",
+      "source": "primary.summary.residual_drift_mm_max",
+      "value": 0.66292
+    },
+    {
+      "label": "damping_reduction_ratio_mean",
+      "source": "primary.summary.damping_reduction_ratio_mean",
+      "value": 0.0003541342972751874
+    },
+    {
+      "label": "device_section_family_count",
+      "source": "supporting.nonlinear_generalization.summary.device_section_family_count",
+      "value": 4
+    }
+  ],
+  "summary": {
+    "kpi_count": 6,
+    "supporting_report_count": 1
+  }
+}

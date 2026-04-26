@@ -1,0 +1,179 @@
+{
+  "case_id": "peer_tbi_tall_building_ndtha",
+  "case_label": "PEER TBI Tall Building NDTHA",
+  "task_id": "hardest::peer_tbi_tall_building_ndtha",
+  "benchmark_family": "highrise_ndtha",
+  "hazard_family": "seismic",
+  "topology_family": "tall_building_core_outrigger",
+  "load_path_family": "ndtha_multi_record",
+  "source_origin_class": "official_external_benchmark_fullcase",
+  "execution_status": "ready",
+  "lifecycle_status": "completed",
+  "submission_scope": "hardest_external_benchmark_program",
+  "kpi_rows": [
+    {
+      "label": "case_count",
+      "source": "primary.summary.case_count",
+      "value": 3
+    },
+    {
+      "label": "max_drift_ratio_pct_max",
+      "source": "primary.summary.max_drift_ratio_pct_max",
+      "value": 9.200000000000003
+    },
+    {
+      "label": "peak_plastic_story_count_mean",
+      "source": "primary.summary.peak_plastic_story_count_mean",
+      "value": 22.666666666666668
+    },
+    {
+      "label": "avg_step_iterations_mean",
+      "source": "primary.summary.avg_step_iterations_mean",
+      "value": 16.0
+    },
+    {
+      "label": "residual_drift_ratio_pct_max_abs",
+      "source": "primary.summary.residual_drift_ratio_pct_max_abs",
+      "value": 1.9136000000000006
+    },
+    {
+      "label": "solver_hip_variants",
+      "source": "supporting.solver_hip.summary.solver_count",
+      "value": 20
+    }
+  ],
+  "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json",
+  "irregular_benchmark_execution_manifest_json": "implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json",
+  "irregular_benchmark_receipt_index_json": "implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json",
+  "irregular_benchmark_receipt_count": 0,
+  "irregular_benchmark_receipt_rows": [],
+  "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/signed_case_bundle.zip",
+  "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/signed_case_bundle",
+  "native_roundtrip_appendix_markdown": "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md",
+  "native_roundtrip_appendix_json": "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.json",
+  "native_roundtrip_receipts_report_json": "implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
+  "special_member_direct_patch_action_family_label": "core_beam_connection_detailing=1, intermediate_beam_section=1, intermediate_wall_rebar=4, intermediate_wall_thickness=3, perimeter_frame_column=1, perimeter_slab_thickness=2, perimeter_wall_detailing=5, perimeter_wall_rebar=1, perimeter_wall_thickness=2, transfer_beam_connection_detailing=5",
+  "special_member_supported_action_family_label": "core_beam_connection_detailing=2, intermediate_beam_section=1, intermediate_wall_rebar=4, intermediate_wall_thickness=3, perimeter_frame_column=1, perimeter_slab_thickness=2, perimeter_wall_detailing=10, perimeter_wall_rebar=1, perimeter_wall_thickness=2, transfer_beam_connection_detailing=10",
+  "special_member_zero_touch_verified_action_family_label": "core_beam_connection_detailing=1, perimeter_wall_detailing=5, transfer_beam_connection_detailing=5",
+  "exact_topology_structural_preview_promotion_queue_json": "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.json",
+  "exact_topology_structural_preview_promotion_queue_md": "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.md",
+  "exact_topology_structural_preview_pending_candidate_rows": [],
+  "row_provenance_report": "implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json",
+  "row_provenance_csv": "implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.csv",
+  "case_attestation_status": "MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED",
+  "case_attestation_source_kind": "manifest",
+  "case_attestation_missing_fields": [],
+  "case_attestation_manifest_bundle": "external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_manifest.json",
+  "case_attestation_template_bundle": "external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_template.json",
+  "case_attestation_receipt_bundle": "external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_receipt.json",
+  "case_attestation_manifest_source": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_manifests/01.peer_tbi_tall_building_ndtha.authority_onepage.reviewer_attestation.manifest.json",
+  "case_attestation_template_source": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_templates/01.peer_tbi_tall_building_ndtha.authority_onepage.reviewer_attestation.template.json",
+  "case_attestation_receipt_source": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_receipts/01.peer_tbi_tall_building_ndtha.authority_onepage.reviewer_attestation.receipt.json",
+  "case_attestation_workflow_connection": {
+    "audit_review_decision_batch_template_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_template.json",
+    "audit_review_decision_batch_run_report_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_run_report.json",
+    "audit_review_decision_batch_live_preview_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch.live_preview.json",
+    "audit_review_decision_batch_approve_all_live_ready_template_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_approve_all.live_ready_template.json",
+    "execution_status_manifest_json": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json"
+  },
+  "cover_sheet_title": "Reviewer / Authority Cover Sheet",
+  "cover_sheet_note": "Auto-generated from the execution status manifest and KPI receipt.",
+  "cover_sheet_instruction": "Review this cover sheet first, then the KPI receipt and shared appendices.",
+  "cover_sheet_disclaimer": "real reviewer/authority values loaded from case attestation manifest; status=MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED; receipt=external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_receipt.json",
+  "cover_sheet_slots": {
+    "reviewer_name_slot": "Friend Demo Reviewer",
+    "reviewer_role_or_license_slot": "reviewer_role=informal external reviewer; reviewer_license_id=demo-review-no-license",
+    "reviewer_signature_slot": "Friend Demo Reviewer",
+    "receipt_id_slot": "DEMO-RECEIPT-08-PEER_TBI_TALL_BUILDING_NDTHA",
+    "receipt_issued_at_slot": "2026-04-01T15:24:49.235684+00:00",
+    "authority_receipt_slot": "authority_name=informal demo receipt authority; authority_note=non-regulatory demo receipt for friend walkthrough | case_id=peer_tbi_tall_building_ndtha",
+    "approval_signature_slot": "Friend Demo Reviewer",
+    "attestation_disclaimer": "real reviewer/authority values loaded from case attestation manifest; status=MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED; receipt=external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_receipt.json"
+  },
+  "cover_sheet_fields": [
+    {
+      "label": "Prepared for",
+      "value": "reviewer / authority"
+    },
+    {
+      "label": "Case identity",
+      "value": "case_label=PEER TBI Tall Building NDTHA; task_id=hardest::peer_tbi_tall_building_ndtha; case_id=peer_tbi_tall_building_ndtha"
+    },
+    {
+      "label": "Benchmark family",
+      "value": "benchmark_family=highrise_ndtha; hazard_family=seismic; topology_family=tall_building_core_outrigger; load_path_family=ndtha_multi_record"
+    },
+    {
+      "label": "Status",
+      "value": "execution=ready; lifecycle=completed; receipt_contract_pass=True; receipt_reason=PASS"
+    },
+    {
+      "label": "Submission scope",
+      "value": "submission_scope=hardest_external_benchmark_program; source_origin_class=official_external_benchmark_fullcase"
+    },
+    {
+      "label": "Submission readiness",
+      "value": "ready_now=True; reason=PASS_START_NOW_FULL; start_mode=start_now_full_external_submission; scope=full_external_submission_package; caution=panel_zone_external_validation_only_boundary"
+    },
+    {
+      "label": "Evidence artifacts",
+      "value": "kpi_receipt=implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json; primary_report=implementation/phase1/nonlinear_ndtha_stress_report.json; case_bundle_zip=implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/signed_case_bundle.zip; case_bundle_dir=implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/signed_case_bundle"
+    },
+    {
+      "label": "Irregular benchmark receipts",
+      "value": "count=0; index=implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json; cases=n/a"
+    },
+    {
+      "label": "Reviewer name",
+      "value": "Friend Demo Reviewer"
+    },
+    {
+      "label": "Reviewer role / license",
+      "value": "reviewer_role=informal external reviewer; reviewer_license_id=demo-review-no-license"
+    },
+    {
+      "label": "Reviewer signature",
+      "value": "Friend Demo Reviewer"
+    },
+    {
+      "label": "Receipt id",
+      "value": "DEMO-RECEIPT-08-PEER_TBI_TALL_BUILDING_NDTHA"
+    },
+    {
+      "label": "Receipt issued at",
+      "value": "2026-04-01T15:24:49.235684+00:00"
+    },
+    {
+      "label": "Authority receipt",
+      "value": "authority_name=informal demo receipt authority; authority_note=non-regulatory demo receipt for friend walkthrough | case_id=peer_tbi_tall_building_ndtha"
+    },
+    {
+      "label": "Approval signature",
+      "value": "Friend Demo Reviewer"
+    },
+    {
+      "label": "Attestation workflow",
+      "value": "status=MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED; source_kind=manifest; missing_fields=none"
+    },
+    {
+      "label": "Attestation artifacts",
+      "value": "manifest=external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_manifest.json; template=external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_template.json; receipt=external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_receipt.json"
+    },
+    {
+      "label": "Attestation disclaimer",
+      "value": "real reviewer/authority values loaded from case attestation manifest; status=MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED; receipt=external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_receipt.json"
+    },
+    {
+      "label": "Review boundary",
+      "value": "execution_mode=limited; ready_tasks=10; blocked_tasks=0; pending=0; resolution=approve_all=PASS_NO_OPEN_DECISION_ITEMS/ready_full=yes; reject_one=PASS_NO_OPEN_DECISION_ITEMS/open_revision=0; owner=none; priority=none; family=none; followup=n/a"
+    },
+    {
+      "label": "Authority routing",
+      "value": "baseline_seeded=False; changes=0; added=0; removed=0; warning_active=False"
+    },
+    {
+      "label": "Instruction",
+      "value": "Review this cover sheet first, then the KPI receipt and shared appendices."
+    }
+  ]
+}

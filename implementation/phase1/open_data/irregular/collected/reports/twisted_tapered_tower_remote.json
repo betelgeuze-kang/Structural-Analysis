@@ -1,0 +1,34 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/twisted_tapered_tower_remote.json"
+  },
+  "bytes_copied": 38728810,
+  "declared_format": "ifc",
+  "family_id": "twisted_tapered_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "provider_asset_kind": "ifc_geometry_proxy",
+    "zenodo_download_url": "https://zenodo.org/records/15782433/files/DS3_TalTech_V4.ifc?download=1"
+  },
+  "original_reference": "",
+  "reference_scheme": "",
+  "reject_reason": "",
+  "remote_candidate_urls": [
+    "https://zenodo.org/records/15782433/files/DS3_TalTech_V4.ifc?download=1"
+  ],
+  "remote_fetch_note": "provider_remote_asset",
+  "resolved_path": "",
+  "sha256": "05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+  "source_exists": true,
+  "source_format": "ifc",
+  "source_id": "twisted_tapered_tower_remote",
+  "source_index": 24,
+  "source_urls": [
+    "https://www.rhino3d.com/inside/revit/"
+  ],
+  "status": "collected",
+  "title": "Twisted tapered tower candidate"
+}

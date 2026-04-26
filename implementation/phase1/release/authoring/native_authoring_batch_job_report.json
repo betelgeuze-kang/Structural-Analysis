@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-batch-job-runner",
+  "generated_at": "2026-04-19T10:34:24.153789+00:00",
+  "inputs": {
+    "snapshot_root": "implementation/phase1/release/authoring/snapshots",
+    "out": "implementation/phase1/release/authoring/native_authoring_batch_job_report.json",
+    "materialize_snapshots": true
+  },
+  "summary": {
+    "job_count": 3,
+    "status_counts": {
+      "completed": 3
+    },
+    "snapshot_count": 3,
+    "rerun_requested_count": 0,
+    "completed_count": 3,
+    "failed_count": 0,
+    "planned_count": 0,
+    "blocked_count": 0
+  },
+  "checks": {
+    "queue_rows_present_pass": true,
+    "rerun_requests_tracked_pass": true,
+    "snapshot_manifest_written_pass": true
+  },
+  "queue_rows": [
+    {
+      "job_id": "authoring::native-authoring-sample-tower::workspace-summary",
+      "phase": "authoring_release",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "workspace_summary",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/native_authoring_workspace_summary.json",
+        "implementation/phase1/release/authoring/native_authoring_workspace_draft.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring bundle: PASS | stories=5 | nodes=24 | members=35 | loads=4 | unsupported=0 | unresolved=0 | score=100.0 | family=sample_tower",
+      "latest_snapshot": "implementation/phase1/release/authoring/snapshots/authoring_native-authoring-sample-tower_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-sample-tower::solver-session",
+      "phase": "authoring_solver",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "solver_session",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/native_authoring_solver_session.json",
+        "implementation/phase1/release/authoring/native_authoring_solver_session.loadcomb_preview.mgt"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring solver session: PASS | meshes=2 | cells=588 | combos=13 | family=KDS-2022 | authoring_family=sample_tower",
+      "latest_snapshot": "implementation/phase1/release/authoring/snapshots/authoring_native-authoring-sample-tower_solver-session/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-sample-tower::project-registry",
+      "phase": "authoring_registry",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "signed_project_registry",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/native_authoring_project_package.zip",
+        "implementation/phase1/release/signing/native_authoring_project_registry_ed25519.pub.pem",
+        "implementation/phase1/release/signing/native_authoring_project_registry.signature.b64"
+      ],
+      "rerun_count": 0,
+      "note": "Project registry service: PASS | artifacts=4 | audit=4 | approvals=3/3 | package_repro=True | signature_verified=True",
+      "latest_snapshot": "implementation/phase1/release/authoring/snapshots/authoring_native-authoring-sample-tower_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_rows": [
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-sample-tower::workspace-summary",
+      "generated_at": "2026-04-19T10:34:24.153789+00:00",
+      "snapshot_id": "authoring_native-authoring-sample-tower_workspace-summary__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/native_authoring_workspace_summary.json",
+          "label": "native_authoring_workspace_summary.json",
+          "sha256": "0609334cc1f295122e0daba97a64d1e9f18345bd6ea29794c913b608899f76cd",
+          "bytes": 10092
+        },
+        {
+          "path": "implementation/phase1/release/authoring/native_authoring_workspace_draft.json",
+          "label": "native_authoring_workspace_draft.json",
+          "sha256": "1fe31596d012fcbc5ed53e3bfff0716dc29fdae25c0f7d1c028f3ce804eacd2a",
+          "bytes": 1036
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/snapshots/authoring_native-authoring-sample-tower_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-sample-tower::solver-session",
+      "generated_at": "2026-04-19T10:34:24.153789+00:00",
+      "snapshot_id": "authoring_native-authoring-sample-tower_solver-session__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/native_authoring_solver_session.json",
+          "label": "native_authoring_solver_session.json",
+          "sha256": "1a1a1956948061aee45b95626ebe812c65d2f235796e5659ff0cf28cd585da03",
+          "bytes": 45217
+        },
+        {
+          "path": "implementation/phase1/release/authoring/native_authoring_solver_session.loadcomb_preview.mgt",
+          "label": "native_authoring_solver_session.loadcomb_preview.mgt",
+          "sha256": "6cc69022772ec586737b85481f4bc3acdbe09201b345e79c30e825b7f6a499a6",
+          "bytes": 1697
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/snapshots/authoring_native-authoring-sample-tower_solver-session/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-sample-tower::project-registry",
+      "generated_at": "2026-04-19T10:34:24.153789+00:00",
+      "snapshot_id": "authoring_native-authoring-sample-tower_project-registry__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "6d281116abca673d9fa03f927f8dae1cf52b3f428ae9f4c4d5423525deb5ce2f",
+          "bytes": 9417
+        },
+        {
+          "path": "implementation/phase1/release/authoring/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "9545290143f28cbbd3d1da8c47e8a8f916e0a6e907d31ac864210397a58cced1",
+          "bytes": 60645
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_project_registry_ed25519.pub.pem",
+          "label": "native_authoring_project_registry_ed25519.pub.pem",
+          "sha256": "bcf1fc86ef0313db7cd7dd24e40602c3edac048aa6c7649a5ed4d30d448b8987",
+          "bytes": 113
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_project_registry.signature.b64",
+          "label": "native_authoring_project_registry.signature.b64",
+          "sha256": "34b7cb9c3aefc363751b5c49efeee5683df539f2735e11c5c2eeb0b54f56c604",
+          "bytes": 89
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/snapshots/authoring_native-authoring-sample-tower_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_errors": [],
+  "summary_line": "Batch job runner: PASS | jobs=3 | snapshots=3 | reruns=0 | statuses=completed=3",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "batch job queue and snapshots updated"
+}

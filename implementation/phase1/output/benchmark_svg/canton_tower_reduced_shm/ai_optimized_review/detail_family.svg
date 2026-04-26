@@ -1,0 +1,31 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 760' role='img' aria-label='Canton Tower Family Zoom — AI Optimized'>
+  <rect width='100%' height='100%' fill='#0b1420'/>
+  <text x='56' y='54' fill='#f8fafc' font-size='28' font-weight='700'>Canton Tower Family Zoom — AI Optimized</text>
+  <text x='56' y='82' fill='#93c5fd' font-size='14'>case=canton_tower_reduced_shm-00193 · topology=rahmen · element_mix=beam_only</text>
+
+  <rect x='48' y='120' width='620' height='592' rx='18' fill='#0f1b2b' stroke='#28425d'/>
+  <text x='76' y='154' fill='#e2e8f0' font-size='20' font-weight='700'>Diagrid / Ring / Vertical Family Read</text>
+  <text x='76' y='180' fill='#9db1c8' font-size='13'>drift=151.322% · base_shear=0.630003 kN</text>
+  <path d='M130 620 L300 240 L460 210 L572 340' fill='none' stroke='#a78bfa' stroke-width='10' stroke-linejoin='round'/>
+  <path d='M150 640 L330 300 L510 284' fill='none' stroke='#7dd3fc' stroke-width='8' stroke-linecap='round'/>
+  <line x1='312' y1='620' x2='312' y2='258' stroke='#bfdbfe' stroke-width='7'/>
+  <line x1='360' y1='620' x2='360' y2='242' stroke='#bfdbfe' stroke-width='7'/>
+  <path d='M210 520 L360 402 L486 452' fill='none' stroke='#f59e0b' stroke-width='6' stroke-dasharray='16 10'/>
+  <line x1='486' y1='452' x2='610' y2='380' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+  <text x='614' y='384' fill='#cbd5e1' font-size='13'>diagrid action family</text>
+  <line x1='360' y1='242' x2='524' y2='154' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+  <text x='530' y='158' fill='#cbd5e1' font-size='13'>ring beam family</text>
+  <line x1='312' y1='426' x2='520' y2='560' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+  <text x='526' y='564' fill='#cbd5e1' font-size='13'>vertical line family</text>
+
+  <rect x='696' y='120' width='456' height='220' rx='18' fill='#0f1b2b' stroke='#28425d'/>
+  <text x='722' y='154' fill='#e2e8f0' font-size='20' font-weight='700'>Legend / Intent</text>
+  <text x='722' y='184' fill='#a78bfa' font-size='14'>Ring beam family</text>
+  <text x='722' y='210' fill='#7dd3fc' font-size='14'>Vertical line / mega-column family</text>
+  <text x='722' y='236' fill='#f59e0b' font-size='14'>Diagrid / tuned action family</text>
+  <text x='722' y='278' fill='#cbd5e1' font-size='13'>Use this sheet as a drawing-like family zoom, closer to the MIDAS33 compare reading surface.</text>
+
+  <rect x='696' y='360' width='456' height='352' rx='18' fill='#0f1b2b' stroke='#28425d'/>
+  <text x='722' y='392' fill='#e2e8f0' font-size='20' font-weight='700'>Family Change Register</text>
+  <text x='708' y='378' fill='#e2e8f0' font-size='13'>01</text><text x='748' y='378' fill='#cbd5e1' font-size='13'>diagrid-panel-0-2</text><text x='948' y='378' fill='#93c5fd' font-size='13'>DIAGRID → DIAGRID tuned</text>
+</svg>

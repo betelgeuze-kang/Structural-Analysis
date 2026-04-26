@@ -1,0 +1,286 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-rust-nonlinear-pushover-stress",
+  "generated_at": "2026-03-01T13:18:49.339355+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "target_split": "test",
+    "min_case_count": 3,
+    "max_case_count": 6,
+    "load_factors": "1.0,1.25,1.5,2.0,3.0",
+    "yield_drift_scale": 0.35,
+    "min_plastic_story_count": 1,
+    "min_drift_amplification": 1.8,
+    "hardening_ratio": 0.05,
+    "pdelta_factor": 1.2,
+    "tolerance": 1e-07,
+    "max_iter": 80,
+    "accepted_metric_sources": "engine_export_direct,commercial_solver_export,open_data_measurement",
+    "out": "implementation/phase1/nonlinear_pushover_stress_report.json"
+  },
+  "checks": {
+    "metric_source_pass": true,
+    "all_cases_converged": false,
+    "plasticity_triggered_all_cases": true,
+    "collapse_path_pass": true,
+    "min_plastic_story_count_pass": true
+  },
+  "summary": {
+    "case_count": 3,
+    "load_factors": [
+      1.0,
+      1.25,
+      1.5,
+      2.0,
+      3.0
+    ],
+    "first_yield_load_factor_mean": 1.0,
+    "peak_plastic_story_count_min": 19,
+    "peak_plastic_story_count_mean": 21.666666666666668,
+    "drift_amplification_min": 2.9999999999999982,
+    "drift_amplification_mean": 2.9999999999999987,
+    "metric_source_invalid_case_ids": []
+  },
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "hf_reference": {
+        "drift_ratio_pct": 2.31,
+        "base_shear_kN": 2035.0
+      },
+      "checks": {
+        "converged_all_load_levels": false,
+        "plasticity_triggered": true,
+        "collapse_path_pass": true
+      },
+      "summary": {
+        "first_yield_load_factor": 1.0,
+        "peak_plastic_story_count": 23,
+        "drift_amplification": 2.9999999999999982,
+        "monotonic_drift_pass": true,
+        "monotonic_plastic_pass": true
+      },
+      "runs": [
+        {
+          "load_factor": 1.0,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 122911.21986896382,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 19,
+          "top_displacement_m": 1.1922234867096853,
+          "base_shear_kN": 788.1133787488285,
+          "drift_ratio_pct": 2.530803733757185
+        },
+        {
+          "load_factor": 1.25,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 159859.53891366583,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 20,
+          "top_displacement_m": 1.4902793583871066,
+          "base_shear_kN": 815.9823484360355,
+          "drift_ratio_pct": 3.163504667196481
+        },
+        {
+          "load_factor": 1.5,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 200032.9934479954,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 21,
+          "top_displacement_m": 1.7883352300645283,
+          "base_shear_kN": 843.8513181232425,
+          "drift_ratio_pct": 3.7962056006357754
+        },
+        {
+          "load_factor": 2.0,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 277157.5953120233,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 22,
+          "top_displacement_m": 2.3844469734193705,
+          "base_shear_kN": 899.5892574976568,
+          "drift_ratio_pct": 5.06160746751437
+        },
+        {
+          "load_factor": 3.0,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 431409.47281243495,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 23,
+          "top_displacement_m": 3.5766704601290567,
+          "base_shear_kN": 1011.0651362464852,
+          "drift_ratio_pct": 7.592411201271551
+        }
+      ]
+    },
+    {
+      "case_id": "C-TST-002",
+      "split": "test",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "hf_reference": {
+        "drift_ratio_pct": 1.88,
+        "base_shear_kN": 1610.0
+      },
+      "checks": {
+        "converged_all_load_levels": false,
+        "plasticity_triggered": true,
+        "collapse_path_pass": true
+      },
+      "summary": {
+        "first_yield_load_factor": 1.0,
+        "peak_plastic_story_count": 19,
+        "drift_amplification": 2.9999999999999996,
+        "monotonic_drift_pass": true,
+        "monotonic_plastic_pass": true
+      },
+      "runs": [
+        {
+          "load_factor": 1.0,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 115889.01524693298,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 16,
+          "top_displacement_m": 0.8104952912117435,
+          "base_shear_kN": 623.3354272035168,
+          "drift_ratio_pct": 2.0553987968026255
+        },
+        {
+          "load_factor": 1.25,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 152209.33792484933,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 17,
+          "top_displacement_m": 1.0131191140146796,
+          "base_shear_kN": 645.3380340043959,
+          "drift_ratio_pct": 2.5692484960032824
+        },
+        {
+          "load_factor": 1.5,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 192175.17660895467,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 18,
+          "top_displacement_m": 1.2157429368176147,
+          "base_shear_kN": 667.340640805275,
+          "drift_ratio_pct": 3.0830981952039376
+        },
+        {
+          "load_factor": 2.0,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 253885.6521452724,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 18,
+          "top_displacement_m": 1.620990582423487,
+          "base_shear_kN": 711.3458544070336,
+          "drift_ratio_pct": 4.110797593605251
+        },
+        {
+          "load_factor": 3.0,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 399175.682576873,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 19,
+          "top_displacement_m": 2.4314858736352294,
+          "base_shear_kN": 799.3562816105501,
+          "drift_ratio_pct": 6.166196390407875
+        }
+      ]
+    },
+    {
+      "case_id": "C-TST-003",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "hf_reference": {
+        "drift_ratio_pct": 2.58,
+        "base_shear_kN": 2260.0
+      },
+      "checks": {
+        "converged_all_load_levels": false,
+        "plasticity_triggered": true,
+        "collapse_path_pass": true
+      },
+      "summary": {
+        "first_yield_load_factor": 1.0,
+        "peak_plastic_story_count": 23,
+        "drift_amplification": 2.999999999999999,
+        "monotonic_drift_pass": true,
+        "monotonic_plastic_pass": true
+      },
+      "runs": [
+        {
+          "load_factor": 1.0,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 136463.41510839027,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 19,
+          "top_displacement_m": 1.3389696369131896,
+          "base_shear_kN": 876.1047807436731,
+          "drift_ratio_pct": 2.846100303705099
+        },
+        {
+          "load_factor": 1.25,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 177488.06129431934,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 20,
+          "top_displacement_m": 1.6737120461414867,
+          "base_shear_kN": 907.2684759295912,
+          "drift_ratio_pct": 3.557625379631372
+        },
+        {
+          "load_factor": 1.5,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 222094.74703886255,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 21,
+          "top_displacement_m": 2.008454455369784,
+          "base_shear_kN": 938.4321711155095,
+          "drift_ratio_pct": 4.269150455557647
+        },
+        {
+          "load_factor": 2.0,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 307729.4406221827,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 22,
+          "top_displacement_m": 2.677939273826379,
+          "base_shear_kN": 1000.7595614873461,
+          "drift_ratio_pct": 5.692200607410198
+        },
+        {
+          "load_factor": 3.0,
+          "converged": false,
+          "iterations": 2,
+          "residual_inf": 479002.00378758664,
+          "line_search_backtracks": 6,
+          "plastic_story_count": 23,
+          "top_displacement_m": 4.016908910739568,
+          "base_shear_kN": 1125.414342231019,
+          "drift_ratio_pct": 8.538300911115295
+        }
+      ]
+    }
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_ENGINE_FAIL",
+  "reason": "rust nonlinear engine diverged under pushover stress"
+}

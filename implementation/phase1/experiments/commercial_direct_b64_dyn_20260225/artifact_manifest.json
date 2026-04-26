@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-artifact-bundle",
+  "generated_at": "2026-02-25T14:43:54.137848+00:00",
+  "bundle_label": "commercial_direct_b64_dyn_20260225",
+  "bundle_dir": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225",
+  "artifact_count": 31,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/inputs/commercial_benchmark_cases.from_csv.json",
+      "bytes": 9221,
+      "sha256": "9e6d41957861d1be1cd8986832c37418a947cc184080e69fc5b1e7e50aa30156"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/hf_benchmark_report.json",
+      "bytes": 4714,
+      "sha256": "0179c483cd36f859e74c4c71000e1630ad9581e741b017039045b1cdef5aa1c4"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/topk_comparison_experiment_report.json",
+      "bytes": 19520,
+      "sha256": "09f57eed7b834526a2a854efc6efb821771b7936ec649ed0356573f5fd32296d"
+    },
+    {
+      "src": "implementation/phase1/topk_precision_suite_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/topk_precision_suite_report.json",
+      "bytes": 5130,
+      "sha256": "cbff7208b0e28ff8516c7137621cc7542f05cd293736897a426a6bdbab49f640"
+    },
+    {
+      "src": "implementation/phase1/ci_gate_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/ci_gate_report.json",
+      "bytes": 922,
+      "sha256": "e180cb8e32efb4aed2d560f1ffb97d7e91abc9ccd91aaf44ed23ee39d803fee6"
+    },
+    {
+      "src": "implementation/phase1/static_artifact_validation_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/static_artifact_validation_report.json",
+      "bytes": 2073,
+      "sha256": "9d1043ca39de04b57cbe1616d6f1205a1125788f7273052b6934b89c7c9390ca"
+    },
+    {
+      "src": "implementation/phase1/dynamics_boundary_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/dynamics_boundary_report.json",
+      "bytes": 1420,
+      "sha256": "4c111f463ad5b4d89b69e99cc182ca8ed7ff10761bbdfce1c688a1ca2b418f9b"
+    },
+    {
+      "src": "implementation/phase1/pg_gat_contract_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/pg_gat_contract_report.json",
+      "bytes": 877,
+      "sha256": "dc058e837677a15fd941b0491c17b6f62ed62f9ebbaae3f4e12d34924e6cb12d"
+    },
+    {
+      "src": "implementation/phase1/subgraph_projection_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/subgraph_projection_report.json",
+      "bytes": 1081,
+      "sha256": "f77ad415726848c291cdc02c6ebcc2386d94b537b376e8fff28980a863f39846"
+    },
+    {
+      "src": "implementation/phase1/soa_dlpack_contract_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/soa_dlpack_contract_report.json",
+      "bytes": 762,
+      "sha256": "f93120f2062f7724112416a90595f00c0ecbaaa679d63a0145175082c4763aa6"
+    },
+    {
+      "src": "implementation/phase1/physics_residual_contract_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/physics_residual_contract_report.json",
+      "bytes": 1180,
+      "sha256": "d5d29ed7bb8d93a83402d7d944b8a312071796a94bf584488a696250d3032c32"
+    },
+    {
+      "src": "implementation/phase1/meta_learning_task_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/meta_learning_task_report.json",
+      "bytes": 5078,
+      "sha256": "091d267f381d24da3c2eb1e70f5458707fca48c0d89aa79ef07f04c6534e779d"
+    },
+    {
+      "src": "implementation/phase1/buckling_contract_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/buckling_contract_report.json",
+      "bytes": 873,
+      "sha256": "fad5535f188f66571bef5357895d88dc05c32263f2cdcbad75e2a84cecbd8c53"
+    },
+    {
+      "src": "implementation/phase1/physics_branching_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/physics_branching_report.json",
+      "bytes": 2754,
+      "sha256": "0f4e6305e5aa686d3646dc60570f31542f2cb00e72a0490cc4c733249ba98a39"
+    },
+    {
+      "src": "implementation/phase1/bifurcation_detector_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/bifurcation_detector_report.json",
+      "bytes": 409,
+      "sha256": "b8a552afba3c6f0148545a523bb6eb7c8d02447559a14ffe665ac70b73f7f57a"
+    },
+    {
+      "src": "implementation/phase1/rust_onnx_native_contract_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/rust_onnx_native_contract_report.json",
+      "bytes": 738,
+      "sha256": "92f87616c598342a587a72001246a58cdc329edc70df41e1d7d1520fa62dce0d"
+    },
+    {
+      "src": "implementation/phase1/winning_ticket_backprop_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/winning_ticket_backprop_report.json",
+      "bytes": 4495,
+      "sha256": "069c95255d6ad4efb61350f9a5f1615cec62a09cbf92e9fe559c9e6916dc6c94"
+    },
+    {
+      "src": "implementation/phase1/dynamic_time_history_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/dynamic_time_history_report.json",
+      "bytes": 89042,
+      "sha256": "e5d933e049274e1371c440408e3de2dfe1ff1da6d0ee06f0457757942b49e1f3"
+    },
+    {
+      "src": "implementation/phase1/branch64_microbatch_profile_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/branch64_microbatch_profile_report.json",
+      "bytes": 4238,
+      "sha256": "2320959c8417043ceb3c4a684cf57bc207a71a8b5d1e36d38d417059877771e5"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_11.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_11.json",
+      "bytes": 4726,
+      "sha256": "244bf69d821ebba9e4634b97398c0e49a8c222a5275f064121b2045b2cf6b6da"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_17.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_17.json",
+      "bytes": 4725,
+      "sha256": "e31f48ae1af453125db5d41d0d6b99b60859c3603177ab39e98f4f6cd160461b"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_23.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_23.json",
+      "bytes": 4714,
+      "sha256": "8210c5698d58a0cea5eb3ef40252226d4ac4170b87e71a76d604093fea637f1a"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_31.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_31.json",
+      "bytes": 4729,
+      "sha256": "3eda5d79e6ed40d0760e414397d99d50856ae67c8ef9c5de689dc34f41c908e8"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_47.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_47.json",
+      "bytes": 4727,
+      "sha256": "f4e33470a9705022c32ad2945dded004a53417f3f5242b83af79d2ac24471602"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_11.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_11.json",
+      "bytes": 19549,
+      "sha256": "2f474166a36993f3a2c987653dca63d36f4335e8407e7f6fa2d64cead493c212"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_17.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_17.json",
+      "bytes": 19536,
+      "sha256": "e40e3b49f150b04310cf4e3c8d583bd2167f955e1a3450b7240a70775afdde6d"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_23.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_23.json",
+      "bytes": 19520,
+      "sha256": "49208226a51e90a657b0a8d3d2034aff79bdd05b8fa325a4a358f53ec2455dfd"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_31.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_31.json",
+      "bytes": 19543,
+      "sha256": "b72c0887315d1bdaf46dc2a0bcf90e6fd3c4ee1bafd97656ad3cb0ce52f528d9"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_47.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_47.json",
+      "bytes": 19549,
+      "sha256": "205953fb7238b2a753ddccc3648578f38294ccb9c534ec8010d4c18ead83914f"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/summary/baseline_summary.json",
+      "bytes": 1275,
+      "sha256": "ce5669e9208190569048026eca3cbe28c7e381178df71edb408b56f22f173a02"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.json",
+      "dst": "implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/summary/topk_summary.json",
+      "bytes": 1574,
+      "sha256": "4d137df3579c5dc5a588daf8b9dd310fd255831a9aad7ea2dc8ec84f13038613"
+    }
+  ]
+}

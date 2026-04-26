@@ -1,0 +1,53 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 760' role='img' aria-label='PEER Blind Prediction Detail Section — AI Optimized'>
+  <rect width='100%' height='100%' fill='#0b1420'/>
+  <text x='60' y='56' fill='#f8fafc' font-size='28' font-weight='700'>PEER Blind Prediction Detail Section — AI Optimized</text>
+  <text x='60' y='86' fill='#93c5fd' font-size='14'>Document-derived proxy detail sheet for HTML review. PT/anchorage/rebar are schematic but dimension-backed.</text>
+
+  <g transform='translate(70,140)'>
+    <rect x='0' y='0' width='420' height='540' rx='18' fill='#0f1b2b' stroke='#28425d'/>
+    <text x='24' y='34' fill='#e2e8f0' font-size='20' font-weight='700'>Section A-A · Column Cage</text>
+    <text x='24' y='58' fill='#9db1c8' font-size='13'>OD 16.0" · section SLV01+</text>
+    <circle cx='210' cy='285' r='118' fill='rgba(125,211,252,0.06)' stroke='#7dd3fc' stroke-width='4'/>
+    <circle cx='210' cy='285' r='92' fill='none' stroke='#475569' stroke-width='2' stroke-dasharray='8 6'/>
+    <circle cx='140' cy='215' r='8' fill='#f59e0b'/>
+    <circle cx='280' cy='215' r='8' fill='#f59e0b'/>
+    <circle cx='140' cy='355' r='8' fill='#f59e0b'/>
+    <circle cx='280' cy='355' r='8' fill='#f59e0b'/>
+    <line x1='210' y1='167' x2='210' y2='95' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+    <line x1='210' y1='403' x2='210' y2='475' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+    <text x='230' y='120' fill='#cbd5e1' font-size='13'>shell / confinement ring</text>
+    <text x='230' y='142' fill='#93c5fd' font-size='12'>column cage bars=8</text>
+    <text x='72' y='492' fill='#cbd5e1' font-size='13'>4 principal cage bars shown</text>
+    <text x='72' y='514' fill='#cbd5e1' font-size='13'>inner dashed ring = tie / hoop zone</text>
+    <text x='72' y='536' fill='#cbd5e1' font-size='13'>AI optimized sheet upgrades shell and confinement intent</text>
+  </g>
+
+  <g transform='translate(520,140)'>
+    <rect x='0' y='0' width='610' height='260' rx='18' fill='#0f1b2b' stroke='#28425d'/>
+    <text x='24' y='34' fill='#e2e8f0' font-size='20' font-weight='700'>Detail B · Cap-End Anchorage Pocket</text>
+    <text x='24' y='58' fill='#9db1c8' font-size='13'>cap CMP01 tuned · plate 14.0" × 12.0" · anchorage zones=2</text>
+    <rect x='80' y='138' width='420' height='44' rx='10' fill='rgba(167,139,250,0.12)' stroke='#a78bfa' stroke-width='3'/>
+    <rect x='428' y='124' width='92' height='72' rx='8' fill='rgba(52,211,153,0.10)' stroke='#34d399' stroke-width='3'/>
+    <path d='M120 160 C220 120, 320 120, 474 160' fill='none' stroke='#f59e0b' stroke-width='5'/>
+    <path d='M120 170 C220 130, 320 130, 474 170' fill='none' stroke='#fbbf24' stroke-width='3'/>
+    <line x1='474' y1='160' x2='560' y2='96' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+    <text x='566' y='100' fill='#cbd5e1' font-size='13'>anchorage pocket / force-transfer zone</text>
+    <line x1='176' y1='148' x2='176' y2='92' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+    <text x='184' y='96' fill='#cbd5e1' font-size='13'>top cap bars = 2</text>
+    <text x='80' y='220' fill='#cbd5e1' font-size='13'>post-tension paths shown = 4</text>
+  </g>
+
+  <g transform='translate(520,430)'>
+    <rect x='0' y='0' width='610' height='250' rx='18' fill='#0f1b2b' stroke='#28425d'/>
+    <text x='24' y='34' fill='#e2e8f0' font-size='20' font-weight='700'>Detail C · Elevation Read</text>
+    <text x='24' y='58' fill='#9db1c8' font-size='13'>column OD 16.0" · cap OD 22.0" · tendon path and anchor pocket are aligned to compare-ready lane</text>
+    <line x1='80' y1='198' x2='80' y2='86' stroke='#7dd3fc' stroke-width='10'/>
+    <line x1='200' y1='198' x2='200' y2='86' stroke='#7dd3fc' stroke-width='10'/>
+    <line x1='50' y1='86' x2='230' y2='86' stroke='#a78bfa' stroke-width='16' stroke-linecap='round'/>
+    <path d='M80 86 C120 30, 160 30, 200 86' fill='none' stroke='#f59e0b' stroke-width='5'/>
+    <rect x='34' y='198' width='212' height='32' rx='8' fill='rgba(248,250,252,0.04)' stroke='#475569'/>
+    <text x='270' y='106' fill='#cbd5e1' font-size='13'>PT tendon crossing over cap</text>
+    <text x='270' y='132' fill='#cbd5e1' font-size='13'>anchorage pocket at cap end</text>
+    <text x='270' y='158' fill='#cbd5e1' font-size='13'>column shell/cage detail tied to same member family</text>
+  </g>
+</svg>

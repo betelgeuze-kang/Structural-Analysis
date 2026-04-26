@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 29958780,
+  "collector_version": "0.2.0",
+  "family_id": "torsionally_eccentric_core_tower",
+  "original_reference": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+  "schema_version": "1.0",
+  "sha256": "ab57db6f7b6bbc59051159d27b92b2f9a0a16981a3f59bbff746fc1f83719011",
+  "source_format": "csv_tables",
+  "source_id": "tpu_interference_highrise_local",
+  "source_urls": [
+    "https://db.wind.arch.t-kougei.ac.jp/"
+  ],
+  "title": "TPU interference highrise response proxy"
+}

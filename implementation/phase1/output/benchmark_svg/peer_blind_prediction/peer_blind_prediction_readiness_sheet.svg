@@ -1,0 +1,28 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1100 796' role='img' aria-label='PEER blind benchmark readiness sheet'>
+<rect width='100%' height='100%' fill='#09111f'/>
+<rect x='36' y='36' width='1028' height='72' rx='18' fill='#10213b' stroke='#38bdf8' stroke-width='2'/>
+<text x='70' y='82' font-size='34' font-weight='700' fill='#f8fafc'>PEER Blind Prediction Benchmark</text>
+<text x='70' y='110' font-size='18' fill='#7dd3fc'>Official input is compare-ready; drawing-grade geometry extraction is the remaining gap.</text>
+<text x='70' y='86' font-size='18' fill='#dbeafe' font-family='monospace'>PEER Blind Prediction Benchmark</text>
+<text x='70' y='114' font-size='18' fill='#dbeafe' font-family='monospace'>Drawing Readiness Sheet</text>
+<text x='70' y='142' font-size='18' fill='#dbeafe' font-family='monospace'></text>
+<text x='70' y='170' font-size='18' fill='#dbeafe' font-family='monospace'>PEER blind compare lane: READY | cases=10 | measured_response=ready | channels=11 | landing_manifest=recorded</text>
+<text x='70' y='198' font-size='18' fill='#dbeafe' font-family='monospace'>Benchmark cases: 10</text>
+<text x='70' y='226' font-size='18' fill='#dbeafe' font-family='monospace'>Geometry extraction status: official construction drawings are present, but drawing-grade structural geometry has not yet been normalized into SVG model nodes/elements.</text>
+<text x='70' y='254' font-size='18' fill='#dbeafe' font-family='monospace'>Public input ready: yes</text>
+<text x='70' y='282' font-size='18' fill='#dbeafe' font-family='monospace'>Measured response ready: yes</text>
+<text x='70' y='310' font-size='18' fill='#dbeafe' font-family='monospace'>Viewer entry ready: yes</text>
+<text x='70' y='338' font-size='18' fill='#dbeafe' font-family='monospace'></text>
+<text x='70' y='366' font-size='18' fill='#dbeafe' font-family='monospace'>Official drawing/doc bundle:</text>
+<text x='70' y='394' font-size='18' fill='#dbeafe' font-family='monospace'>- Bent-Cap.pdf</text>
+<text x='70' y='422' font-size='18' fill='#dbeafe' font-family='monospace'>- Columns.pdf</text>
+<text x='70' y='450' font-size='18' fill='#dbeafe' font-family='monospace'>- Construction_Drawings.pdf</text>
+<text x='70' y='478' font-size='18' fill='#dbeafe' font-family='monospace'>- Foundation.pdf</text>
+<text x='70' y='506' font-size='18' fill='#dbeafe' font-family='monospace'>- Posttensiondetails.pdf</text>
+<text x='70' y='534' font-size='18' fill='#dbeafe' font-family='monospace'>- Weight_Blocks.pdf</text>
+<text x='70' y='562' font-size='18' fill='#dbeafe' font-family='monospace'></text>
+<text x='70' y='590' font-size='18' fill='#dbeafe' font-family='monospace'>Next step to produce true AI optimized structural drawings:</text>
+<text x='70' y='618' font-size='18' fill='#dbeafe' font-family='monospace'>- normalize Construction_Drawings.pdf / Bent-Cap.pdf / Columns.pdf into nodes, members, and sections</text>
+<text x='70' y='646' font-size='18' fill='#dbeafe' font-family='monospace'>- map measured-response channels to member/story coordinates</text>
+<text x='70' y='674' font-size='18' fill='#dbeafe' font-family='monospace'>- run bounded optimization and emit SVG plan/elevation/isometric sheets</text>
+</svg>

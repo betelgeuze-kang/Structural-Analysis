@@ -1,0 +1,14 @@
+{
+  "rows": [
+    {"member_id": "201", "max_dcr": 0.71, "governing_component": "punching"},
+    {"member_id": "202", "max_dcr": 0.77, "governing_component": "axial"},
+    {"member_id": "203", "max_dcr": 0.69, "governing_component": "shear"},
+    {"member_id": "204", "max_dcr": 0.63, "governing_component": "moment"}
+  ],
+  "member_check_rows": [
+    {"member_id": "201", "member_type": "foundation", "rule_family": "strength", "clause": "KDS-RC-FOUND-PUNCH-001", "dcr": 0.71},
+    {"member_id": "202", "member_type": "foundation", "rule_family": "strength", "clause": "KDS-RC-FOUND-AXIAL-001", "dcr": 0.77},
+    {"member_id": "203", "member_type": "foundation", "rule_family": "strength", "clause": "KDS-RC-FOUND-SHEAR-001", "dcr": 0.69},
+    {"member_id": "204", "member_type": "beam", "rule_family": "strength", "clause": "KDS-RC-BEAM-MOMENT-001", "dcr": 0.63}
+  ]
+}

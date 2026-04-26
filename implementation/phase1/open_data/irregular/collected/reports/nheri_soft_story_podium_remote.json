@@ -1,0 +1,61 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/main.tcl",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/nheri_soft_story_podium_remote.json"
+  },
+  "bytes_copied": 534400,
+  "declared_format": "tcl",
+  "designsafe_preview_bundle": {
+    "copied_paths": [
+      "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/analysis_steps.tcl",
+      "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/definitions.tcl",
+      "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/elements.tcl",
+      "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/main.tcl",
+      "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/materials.tcl",
+      "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/nodes.tcl",
+      "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/RCJointModel3D.tcl",
+      "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/sections.tcl"
+    ],
+    "entry_count": 8,
+    "listing_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis",
+    "primary_preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl"
+  },
+  "family_id": "soft_story_podium_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "designsafe_listing_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis",
+    "designsafe_model_variant": "G+7 Infilled Frame / Fly Ash Brick Infill / Pilotis",
+    "designsafe_preview_paths": [
+      "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/analysis_steps.tcl",
+      "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/definitions.tcl",
+      "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/elements.tcl",
+      "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl",
+      "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/materials.tcl",
+      "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/nodes.tcl",
+      "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/RCJointModel3D.tcl",
+      "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/sections.tcl"
+    ],
+    "designsafe_primary_preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl",
+    "designsafe_project_id": "PRJ-4831",
+    "provider_asset_kind": "official_native_text_preview_bundle"
+  },
+  "original_reference": "",
+  "reference_scheme": "",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "designsafe_preview_bundle",
+  "resolved_path": "",
+  "sha256": "20a1f433dde813304903fcf488b772dcb18c47f71ae8ef265fe5e158103db545",
+  "source_exists": true,
+  "source_format": "tcl",
+  "source_id": "nheri_soft_story_podium_remote",
+  "source_index": 5,
+  "source_urls": [
+    "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+    "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7%20Infilled%20Frame/Fly%20Ash%20Brick%20Infill/Pilotis"
+  ],
+  "status": "collected",
+  "title": "DesignSafe OpenSees pilotis RC frame package"
+}

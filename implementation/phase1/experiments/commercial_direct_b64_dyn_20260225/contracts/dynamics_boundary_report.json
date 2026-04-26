@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-dynamics-boundary-contract",
+  "generated_at": "2026-02-25T14:43:06.559665+00:00",
+  "interface_version": "1.0.0",
+  "supports_summary": {
+    "node_count": 2,
+    "support_types": [
+      "fixed",
+      "hinge"
+    ],
+    "fixed_count": 1
+  },
+  "damping_summary": {
+    "damping_model": "rayleigh",
+    "alpha_m": 0.02,
+    "beta_k": 0.001,
+    "time_step_dt": 0.01,
+    "external_force_profile": "combined"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "contract satisfies required boundary/dynamics keys",
+  "payload": {
+    "interface_version": "1.0.0",
+    "nodes": [
+      {
+        "node_id": "N1",
+        "mass": 1e+20,
+        "is_fixed_mask": true,
+        "support_type": "fixed",
+        "dof_lock": {
+          "ux": true,
+          "uy": true,
+          "uz": true,
+          "rx": true,
+          "ry": true,
+          "rz": true
+        }
+      },
+      {
+        "node_id": "N2",
+        "mass": 1200.0,
+        "is_fixed_mask": false,
+        "support_type": "hinge",
+        "dof_lock": {
+          "ux": true,
+          "uy": true,
+          "uz": true,
+          "rx": false,
+          "ry": false,
+          "rz": false
+        }
+      }
+    ],
+    "dynamics": {
+      "damping_model": "rayleigh",
+      "alpha_m": 0.02,
+      "beta_k": 0.001,
+      "time_step_dt": 0.01,
+      "external_force_profile": "combined"
+    }
+  }
+}

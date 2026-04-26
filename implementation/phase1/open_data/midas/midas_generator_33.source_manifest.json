@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-open-mgt-sample",
+  "generated_at": "2026-03-04T13:43:28.826920+00:00",
+  "url": "https://raw.githubusercontent.com/chen39137112/MidasMgtGenerator/f704e6300795f35d7d7d2c05bce2b9b6a15ccbb1/33.mgt",
+  "http_status": 200,
+  "out": "implementation/phase1/open_data/midas/midas_generator_33.mgt",
+  "size_bytes": 2210018,
+  "sha256": "269419de4b0ae9aacbfd2aeed05766d2c8bb065f7b64e81fee8c295129bbf2cc",
+  "contract_pass": true,
+  "reason_code": "PASS"
+}

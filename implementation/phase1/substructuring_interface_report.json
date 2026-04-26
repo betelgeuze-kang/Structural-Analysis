@@ -1,0 +1,258 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-substructuring-interface",
+  "generated_at": "2026-02-26T14:13:30.148462+00:00",
+  "inputs": {
+    "f_min_hz": 4.0,
+    "f_max_hz": 80.0,
+    "f_count": 28,
+    "input_force_n": 12000.0,
+    "subsystems": [
+      "track",
+      "tunnel",
+      "soil",
+      "building"
+    ]
+  },
+  "checks": {
+    "interface_dof_match": true,
+    "finite_transfer": true,
+    "monotonic_path_attenuation": false,
+    "coupling_stability": true
+  },
+  "metrics": {
+    "max_condition_number": 7.996507598292821,
+    "max_track_disp_m": 8.69488926102655e-05,
+    "max_building_disp_m": 0.00013013719795112815,
+    "mean_transfer_ratio_building_to_track": 0.4499073737406269
+  },
+  "curve_head": [
+    {
+      "f_hz": 4.0,
+      "track_disp_m": 4.2318534598818105e-05,
+      "tunnel_disp_m": 1.0199353061938833e-05,
+      "soil_disp_m": 1.554008361859567e-05,
+      "building_disp_m": 8.17004751829003e-06,
+      "coupled_total_disp_m": 7.621934379223884e-05
+    },
+    {
+      "f_hz": 6.814814814814815,
+      "track_disp_m": 4.241973557033827e-05,
+      "tunnel_disp_m": 1.0290273958910858e-05,
+      "soil_disp_m": 1.5889631575851557e-05,
+      "building_disp_m": 8.328753656734487e-06,
+      "coupled_total_disp_m": 7.691976708556531e-05
+    },
+    {
+      "f_hz": 9.62962962962963,
+      "track_disp_m": 4.25745706401563e-05,
+      "tunnel_disp_m": 1.0431737004406896e-05,
+      "soil_disp_m": 1.6452688145797535e-05,
+      "building_disp_m": 8.582431434309131e-06,
+      "coupled_total_disp_m": 7.803270079857993e-05
+    },
+    {
+      "f_hz": 12.444444444444445,
+      "track_disp_m": 4.2784243033256425e-05,
+      "tunnel_disp_m": 1.062799133770208e-05,
+      "soil_disp_m": 1.7275190250820343e-05,
+      "building_disp_m": 8.948698886221127e-06,
+      "coupled_total_disp_m": 7.962682207544805e-05
+    },
+    {
+      "f_hz": 15.25925925925926,
+      "track_disp_m": 4.305040454621939e-05,
+      "tunnel_disp_m": 1.0885240016678456e-05,
+      "soil_disp_m": 1.843338754676063e-05,
+      "building_disp_m": 9.455983975966785e-06,
+      "coupled_total_disp_m": 8.181391520609362e-05
+    },
+    {
+      "f_hz": 18.074074074074076,
+      "track_disp_m": 4.337518948102698e-05,
+      "tunnel_disp_m": 1.1212174294200699e-05,
+      "soil_disp_m": 2.0054637456720745e-05,
+      "building_disp_m": 1.0149938656062955e-05,
+      "coupled_total_disp_m": 8.477604704211943e-05
+    },
+    {
+      "f_hz": 20.88888888888889,
+      "track_disp_m": 4.376125964697401e-05,
+      "tunnel_disp_m": 1.1620796547953298e-05,
+      "soil_disp_m": 2.236111682415713e-05,
+      "building_disp_m": 1.1106053365240978e-05,
+      "coupled_total_disp_m": 8.882105863256321e-05
+    },
+    {
+      "f_hz": 23.703703703703702,
+      "track_disp_m": 4.421186229350093e-05,
+      "tunnel_disp_m": 1.2127695278925373e-05,
+      "soil_disp_m": 2.577148623830609e-05,
+      "building_disp_m": 1.245650600135743e-05,
+      "coupled_total_disp_m": 9.450691772855e-05
+    },
+    {
+      "f_hz": 26.51851851851852,
+      "track_disp_m": 4.473090347194008e-05,
+      "tunnel_disp_m": 1.2756063391407005e-05,
+      "soil_disp_m": 3.117589702894347e-05,
+      "building_disp_m": 1.4454526805142108e-05,
+      "coupled_total_disp_m": 0.00010296174437757396
+    },
+    {
+      "f_hz": 29.333333333333336,
+      "track_disp_m": 4.532304014246122e-05,
+      "tunnel_disp_m": 1.3539001198272857e-05,
+      "soil_disp_m": 4.087150617955825e-05,
+      "building_disp_m": 1.7658860512980055e-05,
+      "coupled_total_disp_m": 0.00011689477507547258
+    },
+    {
+      "f_hz": 32.14814814814815,
+      "track_disp_m": 4.599379541766802e-05,
+      "tunnel_disp_m": 1.4525168309718338e-05,
+      "soil_disp_m": 6.312100601492189e-05,
+      "building_disp_m": 2.364185678512286e-05,
+      "coupled_total_disp_m": 0.00014486562880227058
+    },
+    {
+      "f_hz": 34.96296296296296,
+      "track_disp_m": 4.6749702770992424e-05,
+      "tunnel_disp_m": 1.5789027449116196e-05,
+      "soil_disp_m": 0.00012614700054986295,
+      "building_disp_m": 3.982869607093725e-05,
+      "coupled_total_disp_m": 0.0001983737707144723
+    },
+    {
+      "f_hz": 37.77777777777778,
+      "track_disp_m": 4.759848698737523e-05,
+      "tunnel_disp_m": 1.7450845257942094e-05,
+      "soil_disp_m": 0.00014534872625779463,
+      "building_disp_m": 0.00013013719795112815,
+      "coupled_total_disp_m": 0.00025101042837489455
+    },
+    {
+      "f_hz": 40.592592592592595,
+      "track_disp_m": 4.854929231751949e-05,
+      "tunnel_disp_m": 1.9719782966546275e-05,
+      "soil_disp_m": 0.00010180227293328722,
+      "building_disp_m": 0.00012573807069506796,
+      "coupled_total_disp_m": 0.00015548976718032475
+    },
+    {
+      "f_hz": 43.407407407407405,
+      "track_disp_m": 4.961297204623159e-05,
+      "tunnel_disp_m": 2.300017262541943e-05,
+      "soil_disp_m": 4.9049273911415757e-05,
+      "building_disp_m": 6.975399578004094e-05,
+      "coupled_total_disp_m": 6.809049850806501e-05
+    },
+    {
+      "f_hz": 46.22222222222222,
+      "track_disp_m": 5.080245900231603e-05,
+      "tunnel_disp_m": 2.821043631852517e-05,
+      "soil_disp_m": 3.1125373694122675e-05,
+      "building_disp_m": 2.9172574948911568e-05,
+      "coupled_total_disp_m": 3.424804375156479e-05
+    },
+    {
+      "f_hz": 49.03703703703704,
+      "track_disp_m": 5.213324419828248e-05,
+      "tunnel_disp_m": 3.808710623549903e-05,
+      "soil_disp_m": 2.2423445316741417e-05,
+      "building_disp_m": 1.8124172738268626e-05,
+      "coupled_total_disp_m": 5.485812972233342e-05
+    },
+    {
+      "f_hz": 51.851851851851855,
+      "track_disp_m": 5.362400201530667e-05,
+      "tunnel_disp_m": 6.656766256409739e-05,
+      "soil_disp_m": 1.731106510138128e-05,
+      "building_disp_m": 1.2977541494269994e-05,
+      "coupled_total_disp_m": 9.172672021753373e-05
+    },
+    {
+      "f_hz": 54.66666666666667,
+      "track_disp_m": 5.529741710892091e-05,
+      "tunnel_disp_m": 0.00017921479093137283,
+      "soil_disp_m": 1.3957780707343696e-05,
+      "building_disp_m": 9.998753137322263e-06,
+      "coupled_total_disp_m": 0.0001807769723880794
+    },
+    {
+      "f_hz": 57.48148148148148,
+      "track_disp_m": 5.7181293739749694e-05,
+      "tunnel_disp_m": 8.347675577333019e-05,
+      "soil_disp_m": 1.1595979871021277e-05,
+      "building_disp_m": 8.05849828885015e-06,
+      "coupled_total_disp_m": 9.943935468723604e-05
+    },
+    {
+      "f_hz": 60.2962962962963,
+      "track_disp_m": 5.931006799115709e-05,
+      "tunnel_disp_m": 0.00021085882382542394,
+      "soil_disp_m": 9.847607566859495e-06,
+      "building_disp_m": 6.696874382890637e-06,
+      "coupled_total_disp_m": 0.00023560298075805513
+    },
+    {
+      "f_hz": 63.111111111111114,
+      "track_disp_m": 6.172690679185657e-05,
+      "tunnel_disp_m": 0.00012464630999800907,
+      "soil_disp_m": 8.504856910553723e-06,
+      "building_disp_m": 5.690856689798308e-06,
+      "coupled_total_disp_m": 9.464756077218935e-05
+    },
+    {
+      "f_hz": 65.92592592592592,
+      "track_disp_m": 6.448668175143314e-05,
+      "tunnel_disp_m": 5.346807120551505e-05,
+      "soil_disp_m": 7.44402191025503e-06,
+      "building_disp_m": 4.9189973653620485e-06,
+      "coupled_total_disp_m": 2.850767873950519e-05
+    },
+    {
+      "f_hz": 68.74074074074075,
+      "track_disp_m": 6.766028187541433e-05,
+      "tunnel_disp_m": 3.3529467626367354e-05,
+      "soil_disp_m": 6.586864620153763e-06,
+      "building_disp_m": 4.309441878585039e-06,
+      "coupled_total_disp_m": 3.119916640922535e-05
+    },
+    {
+      "f_hz": 71.55555555555556,
+      "track_disp_m": 7.134103749285303e-05,
+      "tunnel_disp_m": 2.4236192110863848e-05,
+      "soil_disp_m": 5.881492582080017e-06,
+      "building_disp_m": 3.816937806265809e-06,
+      "coupled_total_disp_m": 4.121988878707922e-05
+    },
+    {
+      "f_hz": 74.37037037037037,
+      "track_disp_m": 7.56545891170134e-05,
+      "tunnel_disp_m": 1.8852780900716193e-05,
+      "soil_disp_m": 5.292140755632783e-06,
+      "building_disp_m": 3.411561255387406e-06,
+      "coupled_total_disp_m": 5.0531842792707606e-05
+    },
+    {
+      "f_hz": 77.18518518518519,
+      "track_disp_m": 8.07746044022174e-05,
+      "tunnel_disp_m": 1.5337517927966535e-05,
+      "soil_disp_m": 4.793367336520677e-06,
+      "building_disp_m": 3.0727334393241194e-06,
+      "coupled_total_disp_m": 5.9386918968961736e-05
+    },
+    {
+      "f_hz": 80.0,
+      "track_disp_m": 8.69488926102655e-05,
+      "tunnel_disp_m": 1.2861475511729612e-05,
+      "soil_disp_m": 4.366587735769724e-06,
+      "building_disp_m": 2.7858390026511137e-06,
+      "coupled_total_disp_m": 6.843495016841858e-05
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "substructuring interface coupling passed"
+}

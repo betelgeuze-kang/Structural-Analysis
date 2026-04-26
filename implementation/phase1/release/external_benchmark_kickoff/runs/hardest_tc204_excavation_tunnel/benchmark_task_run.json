@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:04.328939+00:00",
+  "task_id": "hardest::tc204_excavation_tunnel",
+  "phase": "hardest_case",
+  "benchmark_family": "excavation_tunnel_ground_interaction",
+  "submission_scope": "hardest_external_benchmark_program",
+  "status": "in_progress",
+  "started_at": "2026-04-01T13:48:04.328939+00:00",
+  "input_path": "implementation/phase1/tunnel_dynamics_dataset_report.json",
+  "source_origin_class": "official_external_benchmark_fullcase",
+  "holdout_split": "",
+  "execution_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+  "note": "hardest external 10-case kickoff",
+  "task": {
+    "task_id": "hardest::tc204_excavation_tunnel",
+    "case_id": "tc204_excavation_tunnel",
+    "case_label": "TC204 Excavation and Adjacent Tunnel",
+    "phase": "hardest_case",
+    "benchmark_family": "excavation_tunnel_ground_interaction",
+    "hazard_family": "excavation_settlement",
+    "topology_family": "deep_excavation_adjacent_tunnel",
+    "load_path_family": "soil_tunnel_surface_sequence",
+    "submission_scope": "hardest_external_benchmark_program",
+    "execution_status": "ready",
+    "input_path": "implementation/phase1/tunnel_dynamics_dataset_report.json",
+    "source_origin_class": "official_external_benchmark_fullcase",
+    "primary_report_path": "implementation/phase1/tunnel_dynamics_dataset_report.json",
+    "supporting_report_paths": {
+      "ssi_boundary": "implementation/phase1/ssi_boundary_gate_report.json",
+      "foundation_soil_link": "implementation/phase1/foundation_soil_link_gate_report.json",
+      "surface_interaction": "implementation/phase1/surface_interaction_benchmark_gate_report.json"
+    },
+    "kpi_specs": [
+      {
+        "label": "production_seed_success_count",
+        "source": "primary.production_seed_success_count"
+      },
+      {
+        "label": "dataset_case_count",
+        "source": "primary.outputs.case_count"
+      },
+      {
+        "label": "max_equilibrium_residual",
+        "source": "primary.metrics.max_equilibrium_residual"
+      },
+      {
+        "label": "mean_displacement_m",
+        "source": "primary.metrics.mean_displacement_m"
+      },
+      {
+        "label": "soil_tunnel_interaction_count",
+        "source": "supporting.surface_interaction.summary.interaction_family_group_ready_counts.soil_tunnel"
+      },
+      {
+        "label": "foundation_member_type_count",
+        "source": "supporting.foundation_soil_link.summary.foundation_member_type_count"
+      }
+    ]
+  }
+}

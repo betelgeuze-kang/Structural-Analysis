@@ -1,0 +1,40 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/soft_story_podium_tower_proxy_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/soft_story_podium_tower_proxy_local/model.json",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/soft_story_podium_tower_proxy_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/soft_story_podium_tower_proxy_local.json"
+  },
+  "bytes_copied": 11738,
+  "declared_format": "json_graph",
+  "family_id": "soft_story_podium_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "bridge_contract_pass": true,
+    "bridge_exactness_tier": "heuristic-preview",
+    "bridge_mode": "point_scan_chain",
+    "bridge_report_path": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/bridge_report.json",
+    "bridge_source_id": "midas_support_neighborhood_facility_archive",
+    "canonical_promotion_blocker": "Measured or model-text upstream source is not collected locally; current local evidence is a bridged decoded-preview graph.",
+    "canonical_promotion_next_source_id": "nheri_soft_story_podium_remote",
+    "canonical_promotion_next_source_url": "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+    "canonical_promotion_priority": 2,
+    "canonical_promotion_status": "source_hunt_pending"
+  },
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/model.json",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/model.json",
+  "sha256": "d650f6899d885a48dd4ac72480ce5caf01b58e2bd2a576b81944aaf61c80206a",
+  "source_exists": true,
+  "source_format": "json_graph",
+  "source_id": "soft_story_podium_tower_proxy_local",
+  "source_index": 6,
+  "source_urls": [
+    "https://support.midasuser.com/"
+  ],
+  "status": "collected",
+  "title": "Soft-story podium tower local bridged graph from MIDAS neighborhood facility archive"
+}

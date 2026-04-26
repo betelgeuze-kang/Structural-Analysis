@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-16T14:12:49.026862+00:00",
+  "input_root": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01_sample_measured_response",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "Measured response bundle is landed and normalized for blind-prediction compare flow.",
+  "summary_line": "E-Defense/PEER measured-response normalize: PASS | accel_channels=3 | drift_channels=2 | sensor_rows=3 | case_labels=1",
+  "summary": {
+    "acceleration_channel_count": 3,
+    "drift_channel_count": 2,
+    "sensor_row_count": 3,
+    "case_label_count": 1
+  },
+  "bundle_state": {
+    "acceleration_present": true,
+    "drift_present": true,
+    "sensor_manifest_present": true
+  },
+  "acceleration_summary": {
+    "path": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01_sample_measured_response/measured_response_acceleration.csv",
+    "headers": [
+      "time_s",
+      "sensor_id",
+      "case_label",
+      "accel_x_g",
+      "accel_y_g",
+      "accel_z_g"
+    ],
+    "time_headers": [
+      "time_s"
+    ],
+    "id_headers": [
+      "sensor_id",
+      "case_label"
+    ],
+    "channel_headers": [
+      "accel_x_g",
+      "accel_y_g",
+      "accel_z_g"
+    ],
+    "channel_count": 3,
+    "row_count": 210,
+    "sample_rows": [
+      {
+        "time_s": "0.0000",
+        "sensor_id": "S01",
+        "case_label": "Random Noise",
+        "accel_x_g": "0.000000",
+        "accel_y_g": "0.008000",
+        "accel_z_g": "0.000000"
+      },
+      {
+        "time_s": "0.0500",
+        "sensor_id": "S01",
+        "case_label": "Random Noise",
+        "accel_x_g": "0.003272",
+        "accel_y_g": "0.007751",
+        "accel_z_g": "0.000397"
+      },
+      {
+        "time_s": "0.1000",
+        "sensor_id": "S01",
+        "case_label": "Random Noise",
+        "accel_x_g": "0.006184",
+        "accel_y_g": "0.007021",
+        "accel_z_g": "0.000779"
+      },
+      {
+        "time_s": "0.1500",
+        "sensor_id": "S01",
+        "case_label": "Random Noise",
+        "accel_x_g": "0.008415",
+        "accel_y_g": "0.005854",
+        "accel_z_g": "0.001129"
+      },
+      {
+        "time_s": "0.2000",
+        "sensor_id": "S01",
+        "case_label": "Random Noise",
+        "accel_x_g": "0.009719",
+        "accel_y_g": "0.004322",
+        "accel_z_g": "0.001435"
+      }
+    ],
+    "case_labels": [
+      "Random Noise"
+    ]
+  },
+  "drift_summary": {
+    "path": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01_sample_measured_response/measured_response_drift.csv",
+    "headers": [
+      "time_s",
+      "story_label",
+      "case_label",
+      "drift_ratio_x",
+      "drift_ratio_y"
+    ],
+    "time_headers": [
+      "time_s"
+    ],
+    "id_headers": [
+      "story_label",
+      "case_label"
+    ],
+    "channel_headers": [
+      "drift_ratio_x",
+      "drift_ratio_y"
+    ],
+    "channel_count": 2,
+    "row_count": 110,
+    "sample_rows": [
+      {
+        "time_s": "0.0000",
+        "story_label": "L1",
+        "case_label": "Random Noise",
+        "drift_ratio_x": "0.000500",
+        "drift_ratio_y": "0.000300"
+      },
+      {
+        "time_s": "0.1000",
+        "story_label": "L1",
+        "case_label": "Random Noise",
+        "drift_ratio_x": "0.001000",
+        "drift_ratio_y": "0.000600"
+      },
+      {
+        "time_s": "0.2000",
+        "story_label": "L1",
+        "case_label": "Random Noise",
+        "drift_ratio_x": "0.001500",
+        "drift_ratio_y": "0.000900"
+      },
+      {
+        "time_s": "0.3000",
+        "story_label": "L1",
+        "case_label": "Random Noise",
+        "drift_ratio_x": "0.002000",
+        "drift_ratio_y": "0.001200"
+      },
+      {
+        "time_s": "0.4000",
+        "story_label": "L1",
+        "case_label": "Random Noise",
+        "drift_ratio_x": "0.002500",
+        "drift_ratio_y": "0.001500"
+      }
+    ],
+    "case_labels": [
+      "Random Noise"
+    ]
+  },
+  "sensor_manifest_summary": {
+    "path": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01_sample_measured_response/sensor_manifest.json",
+    "sensor_row_count": 3,
+    "sensors": [
+      {
+        "sensor_id": "S01",
+        "story_label": "L1",
+        "component": "x/y/z",
+        "units": "g"
+      },
+      {
+        "sensor_id": "S02",
+        "story_label": "L3",
+        "component": "x/y/z",
+        "units": "g"
+      },
+      {
+        "sensor_id": "S03",
+        "story_label": "L5",
+        "component": "x/y/z",
+        "units": "g"
+      }
+    ]
+  },
+  "case_labels": [
+    "Random Noise"
+  ],
+  "next_action": "Proceed to blind-prediction benchmark-case generation."
+}

@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-run-peer-spd-hinge-refresh-alignment",
+  "generated_at": "2026-04-06T13:54:59.307557+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "Current hinge-refresh source covers column and rebar-sensitive benchmark scope within the PEER SPD rebar envelope.",
+  "inputs": {
+    "asset_registry": "implementation/phase1/open_data/pbd_hinge/pbd_hinge_benchmark_asset_registry.json",
+    "hinge_refresh_source": "implementation/phase1/pbd_hinge_refresh_source.json",
+    "out": "implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_refresh_alignment_report.json"
+  },
+  "contract": {
+    "min_column_refresh_count": 1,
+    "min_rebar_sensitive_column_count": 1,
+    "rebar_envelope_pad_abs": 0.02
+  },
+  "observed": {
+    "benchmark_fixture_count": 5,
+    "benchmark_holdout_count": 1,
+    "benchmark_rebar_sensitive_count": 1,
+    "benchmark_longitudinal_rebar_ratio_min": 0.0127,
+    "benchmark_longitudinal_rebar_ratio_max": 0.0603,
+    "benchmark_peak_abs_drift_ratio_min": 0.03662513089005235,
+    "benchmark_peak_abs_drift_ratio_max": 0.05208,
+    "refresh_row_count": 670,
+    "refresh_column_row_count": 5,
+    "refresh_rebar_sensitive_column_count": 5,
+    "refresh_before_rebar_ratio_min": 0.074,
+    "refresh_before_rebar_ratio_max": 0.074,
+    "refresh_after_rebar_ratio_min": 0.064,
+    "refresh_after_rebar_ratio_max": 0.064,
+    "refresh_combined_rebar_ratio_min": 0.064,
+    "refresh_combined_rebar_ratio_max": 0.074,
+    "rebar_envelope_overlap_with_padding": true,
+    "source_artifact_kind": "hinge_refresh_projected_from_optimization_changes",
+    "source_mode": "projected_member_local_hinge_refresh",
+    "source_unique_member_count": 670,
+    "source_member_type_counts": {
+      "wall": 568,
+      "beam": 69,
+      "column": 5,
+      "foundation": 10,
+      "slab": 18
+    }
+  },
+  "benchmark_rows_head": [
+    {
+      "seed_id": "peer_spd_rc_column_rectangular_seed_01",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.hinge_fixture.json",
+      "holdout_split": "train",
+      "longitudinal_rebar_ratio": 0.0603,
+      "peak_abs_drift_ratio": 0.04344736842105263,
+      "rebar_sensitive_expected": false
+    },
+    {
+      "seed_id": "peer_spd_rc_column_rectangular_seed_02",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.hinge_fixture.json",
+      "holdout_split": "train",
+      "longitudinal_rebar_ratio": 0.0127,
+      "peak_abs_drift_ratio": 0.04056666666666667,
+      "rebar_sensitive_expected": false
+    },
+    {
+      "seed_id": "peer_spd_rc_column_spiral_seed_01",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.hinge_fixture.json",
+      "holdout_split": "val",
+      "longitudinal_rebar_ratio": 0.032,
+      "peak_abs_drift_ratio": 0.05208,
+      "rebar_sensitive_expected": false
+    },
+    {
+      "seed_id": "peer_spd_rc_column_rebar_sensitive_seed_01",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.hinge_fixture.json",
+      "holdout_split": "val",
+      "longitudinal_rebar_ratio": 0.0603,
+      "peak_abs_drift_ratio": 0.04344736842105263,
+      "rebar_sensitive_expected": true
+    },
+    {
+      "seed_id": "peer_spd_rc_column_holdout_seed_01",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.hinge_fixture.json",
+      "holdout_split": "holdout",
+      "longitudinal_rebar_ratio": 0.0183,
+      "peak_abs_drift_ratio": 0.03662513089005235,
+      "rebar_sensitive_expected": false
+    }
+  ],
+  "rows_head": [
+    {
+      "member_id": "31766",
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "yield_rotation": 0.001586388975783495,
+      "ultimate_rotation": 0.005354062793269296,
+      "before_rebar_ratio": 0.074,
+      "after_rebar_ratio": 0.064,
+      "rebar_sensitive": true,
+      "action_family": "perimeter_frame"
+    },
+    {
+      "member_id": "31773",
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "yield_rotation": 0.001586388975783495,
+      "ultimate_rotation": 0.005354062793269296,
+      "before_rebar_ratio": 0.074,
+      "after_rebar_ratio": 0.064,
+      "rebar_sensitive": true,
+      "action_family": "perimeter_frame"
+    },
+    {
+      "member_id": "32228",
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "yield_rotation": 0.001586388975783495,
+      "ultimate_rotation": 0.005354062793269296,
+      "before_rebar_ratio": 0.074,
+      "after_rebar_ratio": 0.064,
+      "rebar_sensitive": true,
+      "action_family": "perimeter_frame"
+    },
+    {
+      "member_id": "32229",
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "yield_rotation": 0.001586388975783495,
+      "ultimate_rotation": 0.005354062793269296,
+      "before_rebar_ratio": 0.074,
+      "after_rebar_ratio": 0.064,
+      "rebar_sensitive": true,
+      "action_family": "perimeter_frame"
+    },
+    {
+      "member_id": "32235",
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "yield_rotation": 0.001586388975783495,
+      "ultimate_rotation": 0.005354062793269296,
+      "before_rebar_ratio": 0.074,
+      "after_rebar_ratio": 0.064,
+      "rebar_sensitive": true,
+      "action_family": "perimeter_frame"
+    }
+  ]
+}

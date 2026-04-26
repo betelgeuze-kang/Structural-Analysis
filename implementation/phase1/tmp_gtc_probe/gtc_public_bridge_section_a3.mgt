@@ -1,0 +1,1644 @@
+*UNIT    ; Unit System
+; FORCE, LENGTH, HEAT, TEMPER
+   KN   , M, BTU, F
+
+*NODE    ; Nodes
+; iNO, X, Y, Z
+   201, 0, 0, 0
+   202, 0, 0, 0.5
+   203, 0, 0, 1
+   204, 0, 0, 1.5
+   205, 0, 0, 2
+   206, 0, 0, 2.5
+   207, 0, 0, 3
+   208, 0, 0, 3.5
+   209, 0, 0, 4
+   210, 0, 0, 4.5
+   211, 0, 0, 5
+   212, 0, 0, 5.5
+   213, 0, 0, 6
+   214, 0, 0, 6.5
+   215, 0, 0, 7
+   216, 0, 0, 7.5
+   301, 9.5, 0, 0
+   302, 9.5, 0, 0.5
+   303, 9.5, 0, 1
+   304, 9.5, 0, 1.5
+   305, 9.5, 0, 2
+   306, 9.5, 0, 2.5
+   307, 9.5, 0, 3
+   308, 9.5, 0, 3.5
+   309, 9.5, 0, 4
+   310, 9.5, 0, 4.5
+   311, 9.5, 0, 5
+   312, 9.5, 0, 5.5
+   313, 9.5, 0, 6
+   314, 9.5, 0, 6.5
+   315, 9.5, 0, 7
+   316, 9.5, 0, 7.5
+   401, 0.5, 0, 0
+   402, 1, 0, 0
+   403, 1.5, 0, 0
+   404, 2, 0, 0
+   405, 2.5, 0, 0
+   406, 3, 0, 0
+   407, 3.5, 0, 0
+   408, 4, 0, 0
+   409, 4.5, 0, 0
+   410, 5, 0, 0
+   411, 5.5, 0, 0
+   412, 6, 0, 0
+   413, 6.5, 0, 0
+   414, 7, 0, 0
+   415, 7.5, 0, 0
+   416, 8, 0, 0
+   417, 8.5, 0, 0
+   418, 9, 0, 0
+   601, 15, 0, 0
+   602, 15, 0, 0.5
+   603, 15, 0, 1
+   604, 15, 0, 1.5
+   605, 15, 0, 2
+   606, 15, 0, 2.5
+   607, 15, 0, 3
+   608, 15, 0, 3.5
+   609, 15, 0, 4
+   610, 15, 0, 4.5
+   611, 15, 0, 5
+   612, 15, 0, 5.5
+   613, 15, 0, 6
+   614, 15, 0, 6.5
+   615, 15, 0, 7
+   616, 15, 0, 7.5
+   701, 24.5, 0, 0
+   702, 24.5, 0, 0.5
+   703, 24.5, 0, 1
+   704, 24.5, 0, 1.5
+   705, 24.5, 0, 2
+   706, 24.5, 0, 2.5
+   707, 24.5, 0, 3
+   708, 24.5, 0, 3.5
+   709, 24.5, 0, 4
+   710, 24.5, 0, 4.5
+   711, 24.5, 0, 5
+   712, 24.5, 0, 5.5
+   713, 24.5, 0, 6
+   714, 24.5, 0, 6.5
+   715, 24.5, 0, 7
+   716, 24.5, 0, 7.5
+   801, 15.5, 0, 0
+   802, 16, 0, 0
+   803, 16.5, 0, 0
+   804, 17, 0, 0
+   805, 17.5, 0, 0
+   806, 18, 0, 0
+   807, 18.5, 0, 0
+   808, 19, 0, 0
+   809, 19.5, 0, 0
+   810, 20, 0, 0
+   811, 20.5, 0, 0
+   812, 21, 0, 0
+   813, 21.5, 0, 0
+   814, 22, 0, 0
+   815, 22.5, 0, 0
+   816, 23, 0, 0
+   817, 23.5, 0, 0
+   818, 24, 0, 0
+  1001, 30, 0, 0
+  1002, 30, 0, 0.5
+  1003, 30, 0, 1
+  1004, 30, 0, 1.5
+  1005, 30, 0, 2
+  1006, 30, 0, 2.5
+  1007, 30, 0, 3
+  1008, 30, 0, 3.5
+  1009, 30, 0, 4
+  1010, 30, 0, 4.5
+  1011, 30, 0, 5
+  1012, 30, 0, 5.5
+  1013, 30, 0, 6
+  1014, 30, 0, 6.5
+  1015, 30, 0, 7
+  1016, 30, 0, 7.5
+  1101, 39.5, 0, 0
+  1102, 39.5, 0, 0.5
+  1103, 39.5, 0, 1
+  1104, 39.5, 0, 1.5
+  1105, 39.5, 0, 2
+  1106, 39.5, 0, 2.5
+  1107, 39.5, 0, 3
+  1108, 39.5, 0, 3.5
+  1109, 39.5, 0, 4
+  1110, 39.5, 0, 4.5
+  1111, 39.5, 0, 5
+  1112, 39.5, 0, 5.5
+  1113, 39.5, 0, 6
+  1114, 39.5, 0, 6.5
+  1115, 39.5, 0, 7
+  1116, 39.5, 0, 7.5
+  1201, 30.5, 0, 0
+  1202, 31, 0, 0
+  1203, 31.5, 0, 0
+  1204, 32, 0, 0
+  1205, 32.5, 0, 0
+  1206, 33, 0, 0
+  1207, 33.5, 0, 0
+  1208, 34, 0, 0
+  1209, 34.5, 0, 0
+  1210, 35, 0, 0
+  1211, 35.5, 0, 0
+  1212, 36, 0, 0
+  1213, 36.5, 0, 0
+  1214, 37, 0, 0
+  1215, 37.5, 0, 0
+  1216, 38, 0, 0
+  1217, 38.5, 0, 0
+  1218, 39, 0, 0
+
+*ELEMENT    ; Elements
+; iEL, TYPE, iMAT, iPRO, iN1, iN2, ANGLE, iSUB, EXVAL, iOPT(EXVAL2) ; Frame  Element
+; iEL, TYPE, iMAT, iPRO, iN1, iN2, ANGLE, iSUB, EXVAL, EXVAL2, bLMT ; Comp/Tens Truss
+; iEL, TYPE, iMAT, iPRO, iN1, iN2, iN3, iN4, iSUB, iWID , LCAXIS    ; Planar Element
+; iEL, TYPE, iMAT, iPRO, iN1, iN2, iN3, iN4, iN5, iN6, iN7, iN8     ; Solid  Element
+   201, BEAM  ,    1,     1,   216,   215,   180,     0
+   202, BEAM  ,    1,     1,   215,   214,   180,     0
+   203, BEAM  ,    1,     1,   214,   213,   180,     0
+   204, BEAM  ,    1,     1,   213,   212,   180,     0
+   205, BEAM  ,    1,     1,   212,   211,   180,     0
+   206, BEAM  ,    1,     1,   211,   210,   180,     0
+   207, BEAM  ,    1,     1,   210,   209,   180,     0
+   208, BEAM  ,    1,     1,   209,   208,   180,     0
+   209, BEAM  ,    1,     1,   208,   207,   180,     0
+   210, BEAM  ,    1,     1,   207,   206,   180,     0
+   211, BEAM  ,    1,     5,   206,   205,   180,     0
+   212, BEAM  ,    1,     5,   205,   204,   180,     0
+   213, BEAM  ,    1,     2,   204,   203,   180,     0
+   214, BEAM  ,    1,     2,   203,   202,   180,     0
+   215, BEAM  ,    1,     2,   202,   201,   180,     0
+   301, BEAM  ,    1,     1,   316,   315,     0,     0
+   302, BEAM  ,    1,     1,   315,   314,     0,     0
+   303, BEAM  ,    1,     1,   314,   313,     0,     0
+   304, BEAM  ,    1,     1,   313,   312,     0,     0
+   305, BEAM  ,    1,     1,   312,   311,     0,     0
+   306, BEAM  ,    1,     1,   311,   310,     0,     0
+   307, BEAM  ,    1,     1,   310,   309,     0,     0
+   308, BEAM  ,    1,     1,   309,   308,     0,     0
+   309, BEAM  ,    1,     1,   308,   307,     0,     0
+   310, BEAM  ,    1,     1,   307,   306,     0,     0
+   311, BEAM  ,    1,     5,   306,   305,     0,     0
+   312, BEAM  ,    1,     5,   305,   304,     0,     0
+   313, BEAM  ,    1,     2,   304,   303,     0,     0
+   314, BEAM  ,    1,     2,   303,   302,     0,     0
+   315, BEAM  ,    1,     2,   302,   301,     0,     0
+   401, BEAM  ,    1,     2,   201,   401,   180,     0
+   402, BEAM  ,    1,     2,   401,   402,   180,     0
+   403, BEAM  ,    1,     2,   402,   403,   180,     0
+   404, BEAM  ,    1,     2,   403,   404,   180,     0
+   405, BEAM  ,    1,     2,   404,   405,   180,     0
+   406, BEAM  ,    1,     2,   405,   406,   180,     0
+   407, BEAM  ,    1,     2,   406,   407,   180,     0
+   408, BEAM  ,    1,     2,   407,   408,   180,     0
+   409, BEAM  ,    1,     2,   408,   409,   180,     0
+   410, BEAM  ,    1,     2,   409,   410,   180,     0
+   411, BEAM  ,    1,     2,   410,   411,   180,     0
+   412, BEAM  ,    1,     2,   411,   412,   180,     0
+   413, BEAM  ,    1,     2,   412,   413,   180,     0
+   414, BEAM  ,    1,     2,   413,   414,   180,     0
+   415, BEAM  ,    1,     2,   414,   415,   180,     0
+   416, BEAM  ,    1,     2,   415,   416,   180,     0
+   417, BEAM  ,    1,     2,   416,   417,   180,     0
+   418, BEAM  ,    1,     2,   417,   418,   180,     0
+   419, BEAM  ,    1,     2,   418,   301,   180,     0
+   601, BEAM  ,    1,     1,   616,   615,   180,     0
+   602, BEAM  ,    1,     1,   615,   614,   180,     0
+   603, BEAM  ,    1,     1,   614,   613,   180,     0
+   604, BEAM  ,    1,     1,   613,   612,   180,     0
+   605, BEAM  ,    1,     1,   612,   611,   180,     0
+   606, BEAM  ,    1,     1,   611,   610,   180,     0
+   607, BEAM  ,    1,     1,   610,   609,   180,     0
+   608, BEAM  ,    1,     1,   609,   608,   180,     0
+   609, BEAM  ,    1,     1,   608,   607,   180,     0
+   610, BEAM  ,    1,     1,   607,   606,   180,     0
+   611, BEAM  ,    1,     5,   606,   605,   180,     0
+   612, BEAM  ,    1,     5,   605,   604,   180,     0
+   613, BEAM  ,    1,     2,   604,   603,   180,     0
+   614, BEAM  ,    1,     2,   603,   602,   180,     0
+   615, BEAM  ,    1,     2,   602,   601,   180,     0
+   701, BEAM  ,    1,     1,   716,   715,     0,     0
+   702, BEAM  ,    1,     1,   715,   714,     0,     0
+   703, BEAM  ,    1,     1,   714,   713,     0,     0
+   704, BEAM  ,    1,     1,   713,   712,     0,     0
+   705, BEAM  ,    1,     1,   712,   711,     0,     0
+   706, BEAM  ,    1,     1,   711,   710,     0,     0
+   707, BEAM  ,    1,     1,   710,   709,     0,     0
+   708, BEAM  ,    1,     1,   709,   708,     0,     0
+   709, BEAM  ,    1,     1,   708,   707,     0,     0
+   710, BEAM  ,    1,     1,   707,   706,     0,     0
+   711, BEAM  ,    1,     5,   706,   705,     0,     0
+   712, BEAM  ,    1,     5,   705,   704,     0,     0
+   713, BEAM  ,    1,     2,   704,   703,     0,     0
+   714, BEAM  ,    1,     2,   703,   702,     0,     0
+   715, BEAM  ,    1,     2,   702,   701,     0,     0
+   801, BEAM  ,    1,     2,   601,   801,   180,     0
+   802, BEAM  ,    1,     2,   801,   802,   180,     0
+   803, BEAM  ,    1,     2,   802,   803,   180,     0
+   804, BEAM  ,    1,     2,   803,   804,   180,     0
+   805, BEAM  ,    1,     2,   804,   805,   180,     0
+   806, BEAM  ,    1,     2,   805,   806,   180,     0
+   807, BEAM  ,    1,     2,   806,   807,   180,     0
+   808, BEAM  ,    1,     2,   807,   808,   180,     0
+   809, BEAM  ,    1,     2,   808,   809,   180,     0
+   810, BEAM  ,    1,     2,   809,   810,   180,     0
+   811, BEAM  ,    1,     2,   810,   811,   180,     0
+   812, BEAM  ,    1,     2,   811,   812,   180,     0
+   813, BEAM  ,    1,     2,   812,   813,   180,     0
+   814, BEAM  ,    1,     2,   813,   814,   180,     0
+   815, BEAM  ,    1,     2,   814,   815,   180,     0
+   816, BEAM  ,    1,     2,   815,   816,   180,     0
+   817, BEAM  ,    1,     2,   816,   817,   180,     0
+   818, BEAM  ,    1,     2,   817,   818,   180,     0
+   819, BEAM  ,    1,     2,   818,   701,   180,     0
+  1001, BEAM  ,    1,     1,  1016,  1015,   180,     0
+  1002, BEAM  ,    1,     1,  1015,  1014,   180,     0
+  1003, BEAM  ,    1,     1,  1014,  1013,   180,     0
+  1004, BEAM  ,    1,     1,  1013,  1012,   180,     0
+  1005, BEAM  ,    1,     1,  1012,  1011,   180,     0
+  1006, BEAM  ,    1,     1,  1011,  1010,   180,     0
+  1007, BEAM  ,    1,     1,  1010,  1009,   180,     0
+  1008, BEAM  ,    1,     1,  1009,  1008,   180,     0
+  1009, BEAM  ,    1,     1,  1008,  1007,   180,     0
+  1010, BEAM  ,    1,     1,  1007,  1006,   180,     0
+  1011, BEAM  ,    1,     5,  1006,  1005,   180,     0
+  1012, BEAM  ,    1,     5,  1005,  1004,   180,     0
+  1013, BEAM  ,    1,     2,  1004,  1003,   180,     0
+  1014, BEAM  ,    1,     2,  1003,  1002,   180,     0
+  1015, BEAM  ,    1,     2,  1002,  1001,   180,     0
+  1101, BEAM  ,    1,     1,  1116,  1115,     0,     0
+  1102, BEAM  ,    1,     1,  1115,  1114,     0,     0
+  1103, BEAM  ,    1,     1,  1114,  1113,     0,     0
+  1104, BEAM  ,    1,     1,  1113,  1112,     0,     0
+  1105, BEAM  ,    1,     1,  1112,  1111,     0,     0
+  1106, BEAM  ,    1,     1,  1111,  1110,     0,     0
+  1107, BEAM  ,    1,     1,  1110,  1109,     0,     0
+  1108, BEAM  ,    1,     1,  1109,  1108,     0,     0
+  1109, BEAM  ,    1,     1,  1108,  1107,     0,     0
+  1110, BEAM  ,    1,     1,  1107,  1106,     0,     0
+  1111, BEAM  ,    1,     5,  1106,  1105,     0,     0
+  1112, BEAM  ,    1,     5,  1105,  1104,     0,     0
+  1113, BEAM  ,    1,     2,  1104,  1103,     0,     0
+  1114, BEAM  ,    1,     2,  1103,  1102,     0,     0
+  1115, BEAM  ,    1,     2,  1102,  1101,     0,     0
+  1201, BEAM  ,    1,     2,  1001,  1201,   180,     0
+  1202, BEAM  ,    1,     2,  1201,  1202,   180,     0
+  1203, BEAM  ,    1,     2,  1202,  1203,   180,     0
+  1204, BEAM  ,    1,     2,  1203,  1204,   180,     0
+  1205, BEAM  ,    1,     2,  1204,  1205,   180,     0
+  1206, BEAM  ,    1,     2,  1205,  1206,   180,     0
+  1207, BEAM  ,    1,     2,  1206,  1207,   180,     0
+  1208, BEAM  ,    1,     2,  1207,  1208,   180,     0
+  1209, BEAM  ,    1,     2,  1208,  1209,   180,     0
+  1210, BEAM  ,    1,     2,  1209,  1210,   180,     0
+  1211, BEAM  ,    1,     2,  1210,  1211,   180,     0
+  1212, BEAM  ,    1,     2,  1211,  1212,   180,     0
+  1213, BEAM  ,    1,     2,  1212,  1213,   180,     0
+  1214, BEAM  ,    1,     2,  1213,  1214,   180,     0
+  1215, BEAM  ,    1,     2,  1214,  1215,   180,     0
+  1216, BEAM  ,    1,     2,  1215,  1216,   180,     0
+  1217, BEAM  ,    1,     2,  1216,  1217,   180,     0
+  1218, BEAM  ,    1,     2,  1217,  1218,   180,     0
+  1219, BEAM  ,    1,     2,  1218,  1101,   180,     0
+
+*MATERIAL    ; Material
+; iMAT, TYPE, MNAME, SPHEAT, HEATCO, PLAST, TUNIT, bMASS, DAMPRATIO, [DATA1]           ; STEEL, CONC, USER
+; iMAT, TYPE, MNAME, SPHEAT, HEATCO, PLAST, TUNIT, bMASS, DAMPRATIO, [DATA2], [DATA2]  ; SRC
+; [DATA1] : 1, DB, NAME, CODE, USEELAST, ELAST
+; [DATA1] : 2, ELAST, POISN, THERMAL, DEN, MASS
+; [DATA1] : 3, Ex, Ey, Ez, Tx, Ty, Tz, Sxy, Sxz, Syz, Pxy, Pxz, Pyz, DEN, MASS         ; Orthotropic
+; [DATA2] : 1, DB, NAME, CODE, USEELAST, ELAST or 2, ELAST, POISN, THERMAL, DEN, MASS
+    1, CONC , C35/45            , 0, 0, , C, NO, 0.05, 1, EN04(RC)   ,            , C35/45        , NO, 3.4077e+007
+
+*MATL-COLOR
+; iMAT, W_R, W_G, W_B, HF_R, HF_G, HF_B, HE_R, HE_G, HE_B, bBLEND, FACT
+    1, 255,   0,   0,    0, 255,   0,    0,   0, 255,  NO, 0.5
+
+
+*SECTION    ; Section
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE, [DATA1], [DATA2]                    ; 1st line - DB/USER
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE, BLT, D1, ..., D8, iCEL              ; 1st line - VALUE
+;       AREA, ASy, ASz, Ixx, Iyy, Izz                                               ; 2nd line
+;       CyP, CyM, CzP, CzM, QyB, QzB, PERI_OUT, PERI_IN, Cy, Cz                     ; 3rd line
+;       Y1, Y2, Y3, Y4, Z1, Z2, Z3, Z4, Zyy, Zzz                                    ; 4th line
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE, ELAST, DEN, POIS, POIC, SF, THERMAL ; 1st line - SRC
+;       D1, D2, [SRC]                                                               ; 2nd line
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE, 1, DB, NAME1, NAME2, D1, D2         ; 1st line - COMBINED
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE, 2, D11, D12, D13, D14, D15, D21, D22, D23, D24
+; iSEC, TYPE, SNAME, [OFFSET2], bSD, bWE, SHAPE, iyVAR, izVAR, STYPE                ; 1st line - TAPERED
+;       DB, NAME1, NAME2                                                            ; 2nd line(STYPE=DB)
+;       [DIM1], [DIM2]                                                              ; 2nd line(STYPE=USER)
+;       D11, D12, D13, D14, D15, D16, D17, D18                                      ; 2nd line(STYPE=VALUE)
+;       AREA1, ASy1, ASz1, Ixx1, Iyy1, Izz1                                         ; 3rd line(STYPE=VALUE)
+;       CyP1, CyM1, CzP1, CzM1, QyB1, QzB1, PERI_OUT1, PERI_IN1, Cy1, Cz1           ; 4th line(STYPE=VALUE)
+;       Y11, Y12, Y13, Y14, Z11, Z12, Z13, Z14, Zyy1, Zyy2                          ; 5th line(STYPE=VALUE)
+;       D21, D22, D23, D24, D25, D26, D27, D28                                      ; 6th line(STYPE=VALUE)
+;       AREA2, ASy2, ASz2, Ixx2, Iyy2, Izz2                                         ; 7th line(STYPE=VALUE)
+;       CyP2, CyM2, CzP2, CzM2, QyB2, QzB2, PERI_OUT2, PERI_IN2, Cy2, Cz2           ; 8th line(STYPE=VALUE)
+;       Y21, Y22, Y23, Y24, Z21, Z22, Z23, Z24, Zyy2, Zzz2                          ; 9th line(STYPE=VALUE)
+;       OPT1, OPT2, [JOINT]                                                    ; 2nd line(STYPE=PSC)
+;       ELAST, DEN, POIS, POIC, THERMAL                                        ; 2nd line(STYPE=PSC-CMPW)
+;       bSHEARCHK, [SCHK-I], [SCHK-J], [WT-I], [WT-J], WI, WJ, bSYM, bSIDEHOLE ; 3rd line(STYPE=PSC)
+;       bSHEARCHK, bSYM, bHUNCH, [CMPWEB-I], [CMPWEB-J]                        ; 3rd line(STYPE=PSC-CMPW)
+;       bUSERDEFMESHSIZE, MESHSIZE, bUSERINPSTIFF, [STIFF-I], [STIFF-J]        ; 4th line(STYPE=PSC)
+;       [SIZE-A]-i                                                             ; 5th line(STYPE=PSC)
+;       [SIZE-B]-i                                                             ; 6th line(STYPE=PSC)
+;       [SIZE-C]-i                                                             ; 7th line(STYPE=PSC)
+;       [SIZE-D]-i                                                             ; 8th line(STYPE=PSC)
+;       [SIZE-A]-j                                                             ; 9th line(STYPE=PSC)
+;       [SIZE-B]-j                                                             ; 10th line(STYPE=PSC)
+;       [SIZE-C]-j                                                             ; 11th line(STYPE=PSC)
+;       [SIZE-D]-j                                                             ; 12th line(STYPE=PSC)
+;       GN, CTC, Bc, Tc, Hh, EsEc, DsDc, Ps, Pc, bMULTI, EsEc-L, EsEc-S        ; 2nd line(STYPE=CMP-B/I)
+;       SW_i, Hw_i, tw_i, B_i, Bf1_i, tf1_i, B2_i, Bf2_i, tf2_i                ; 3rd line(STYPE=CMP-B/I)
+;       SW_j, Hw_j, tw_j, B_j, Bf1_j, tf1_j, B2_j, Bf2_j, tf2_j                ; 4th line(STYPE=CMP-B/I)
+;       N1, N2, Hr, Hr2, tr1, tr2                                              ; 5th line(STYPE=CMP-B)
+;       GN, CTC, Bc, Tc, Hh, EgdEsb, DgdDsb, Pgd, Psb, bSYM, SW_i, SW_j        ; 2nd line(STYPE=CMP-CI/CT)
+;       OPT1, OPT2, [JOINT]                                                    ; 3rd line(STYPE=CMP-CI/CT)
+;       [SIZE-A]-i                                                             ; 4th line(STYPE=CMP-CI/CT)
+;       [SIZE-B]-i                                                             ; 5th line(STYPE=CMP-CI/CT)
+;       [SIZE-C]-i                                                             ; 6th line(STYPE=CMP-CI/CT)
+;       [SIZE-D]-i                                                             ; 7th line(STYPE=CMP-CI/CT)
+;       [SIZE-A]-j                                                             ; 8th line(STYPE=CMP-CI/CT)
+;       [SIZE-B]-j                                                             ; 9th line(STYPE=CMP-CI/CT)
+;       [SIZE-C]-j                                                             ; 10th line(STYPE=CMP-CI/CT)
+;       [SIZE-D]-j                                                             ; 11th line(STYPE=CMP-CI/CT)
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, STYPE1, STYPE2                        ; 1st line - CONSTRUCT
+;       SHAPE, ...(same with other type data from shape)                       ; Before (STYPE1)
+;       SHAPE, ...(same with other type data from shape)                       ; After  (STYPE2)
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE                                 ; 1st line - COMPOSITE-SB
+;       Hw, tw, B, Bf1, tf1, B2, Bf2, tf2                                      ; 2nd line
+;       N1, N2, Hr, Hr2, tr1, tr2                                              ; 3rd line
+;       SW, GN, CTC, Bc, Tc, Hh, EsEc, DsDc, Ps, Pc, bMulti, Elong, Esh        ; 4th line
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE                                 ; 1st line - COMPOSITE-SI
+;       Hw, tw, B, tf1, B2, tf2                                                ; 2nd line
+;       SW, GN, CTC, Bc, Tc, Hh, EsEc, DsDc, Ps, Pc, bMulti, Elong, Esh        ; 3rd line
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE                                 ; 1st line - COMPOSITE-CI/CT
+;       OPT1, OPT2, [JOINT]                                                    ; 2nd line
+;       [SIZE-A]                                                               ; 3rd line
+;       [SIZE-B]                                                               ; 4th line
+;       [SIZE-C]                                                               ; 5th line
+;       [SIZE-D]                                                               ; 6th line
+;       SW, GN, CTC, Bc, Tc, Hh, EgdEsb, DgdDsb, Pgd, Psb                      ; 7th line
+; iSEC, TYPE, SNAME, [OFFSET], bSD, bWE, SHAPE                                 ; 1st line - PSC
+;       OPT1, OPT2, [JOINT]                                                    ; 2nd line
+;       bSHEARCHK, [SCHK], [WT], WIDTH, bSYM, bSIDEHOLE                        ; 3rd line
+;       bUSERDEFMESHSIZE, MESHSIZE, bUSERINPSTIFF, [STIFF]                     ; 4th line
+;       bWE, [WARPING POINT]-i, [WARPING POINT]-j                              ; 5th line
+;       [SIZE-A]                                                               ; 6th line
+;       [SIZE-B]                                                               ; 7th line
+;       [SIZE-C]                                                               ; 8th line
+;       [SIZE-D]                                                               ; 9th line
+; [DATA1] : 1, DB, NAME or 2, D1, D2, D3, D4, D5, D6, D7, D8, D9, D10
+; [DATA2] : CCSHAPE or iCEL or iN1, iN2
+; [SRC]  : 1, DB, NAME1, NAME2 or 2, D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, iN1, iN2
+; [DIM1], [DIM2] : D1, D2, D3, D4, D5, D6, D7, D8
+; [OFFSET] : OFFSET, iCENT, iREF, iHORZ, HUSER, iVERT, VUSER
+; [OFFSET2]: OFFSET, iCENT, iREF, iHORZ, HUSERI, HUSERJ, iVERT, VUSERI, VUSERJ
+; [JOINT]  :  8(1CELL, 2CELL), 13(3CELL),  9(PSCM),  8(PSCH), 9(PSCT),  2(PSCB), 0(nCELL),  2(nCEL2)
+; [SIZE-A] :  6(1CELL, 2CELL), 10(3CELL), 10(PSCM),  6(PSCH), 8(PSCT), 10(PSCB), 5(nCELL), 11(nCEL2)
+; [SIZE-B] :  6(1CELL, 2CELL), 12(3CELL),  6(PSCM),  6(PSCH), 8(PSCT),  6(PSCB), 8(nCELL), 18(nCEL2)
+; [SIZE-C] : 10(1CELL, 2CELL), 13(3CELL),  9(PSCM), 10(PSCH), 7(PSCT),  8(PSCB), 0(nCELL), 11(nCEL2)
+; [SIZE-D] :  8(1CELL, 2CELL), 13(3CELL),  6(PSCM),  7(PSCH), 8(PSCT),  5(PSCB), 0(nCELL), 18(nCEL2)
+; [STIFF]  : AREA, ASy, ASz, Ixx, Iyy, Izz
+; [SCHK]   : bAUTO_Z1, Z1, bAUTO_Z3, Z3
+; [WT]     : bAUTO_TOR, TOR, bAUTO_SHR1, SHR1, bAUTO_SHR2, SHR2, bAUTO_SHR3, SHR3
+; [CMPWEB] : EFD, LRF, A, B, H, T
+; [WARPING POINT] : nWarpingCheck, X1,X2,X3,X4,X5,X6, Y1,Y2,Y3,Y4,Y5,Y6
+    1, DBUSER    , 0.8*1             , CC, 0, 0, 0, 0, 0, 0, YES, NO, SB , 2, 0.8, 1, 0, 0, 0, 0, 0, 0, 0, 0
+    2, DBUSER    , 1.2*1             , CC, 0, 0, 0, 0, 0, 0, YES, NO, SB , 2, 1.2, 1, 0, 0, 0, 0, 0, 0, 0, 0
+    3, DBUSER    , 1.4*1             , CC, 0, 0, 0, 0, 0, 0, YES, NO, SB , 2, 1.4, 1, 0, 0, 0, 0, 0, 0, 0, 0
+    4, DBUSER    , 0.63*1            , CC, 0, 0, 0, 0, 0, 0, YES, NO, SB , 2, 0.63, 1, 0, 0, 0, 0, 0, 0, 0, 0
+    5, DBUSER    , 1.0*1             , CC, 0, 0, 0, 0, 0, 0, YES, NO, SB , 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0
+
+*SECT-COLOR
+; iSEC, W_R, W_G, W_B, HF_R, HF_G, HF_B, HE_R, HE_G, HE_B, bBLEND, FACT
+    1, 255,   0,   0,    0, 255,   0,    0,   0, 255,  NO, 0.5
+    2, 255,   0,   0,    0, 255,   0,    0,   0, 255,  NO, 0.5
+    3, 255,   0,   0,    0, 255,   0,    0,   0, 255,  NO, 0.5
+    4, 255,   0,   0,    0, 255,   0,    0,   0, 255,  NO, 0.5
+    5, 255,   0,   0,    0, 255,   0,    0,   0, 255,  NO, 0.5
+
+
+*STLDCASE    ; Static Load Cases
+; LCNAME, LCTYPE, DESC
+   LC1ASLS, USER, 
+   LC1AULS, USER, 
+   LC1BSLS, USER, 
+   LC1BULS, USER, 
+   LC1CSLS, USER, 
+   LC1CULS, USER, 
+   LC2SLS, USER, 
+   LC2ULS, USER, 
+   LC3SLS, USER, 
+   LC3ULS, USER, 
+   LC4ASLS, USER, 
+   LC4AULS, USER, 
+   LC4BSLS, USER, 
+   LC4BULS, USER, 
+
+
+*CONSTRAINT    ; Supports
+; NODE_LIST, CONST(Dx,Dy,Dz,Rx,Ry,Rz), GROUP
+   301 701 1001, 111101, 
+   201 601 1101, 001000, 
+
+*SPRING    ; Point Spring Supports
+; NODE_LIST, Type, SDx, SDy, SDz, SRx, SRy, SRz, GROUP, FROMTYPE, EFFAREA, Kx, Ky, Kz                                                  ; LINEAR
+; NODE_LIST, Type, Direction, Vx, Vy, Vz, Stiffness, GROUP, FROMTYPE, EFFAREA                                                          ; COMP, TENS
+; NODE_LIST, Type, Multi-Linear Type, Direction, Vx, Vy, Vz, ax, ay, bx, by, cx, cy, dx, dy, ex, ey, fx, fy, GROUP, FROMTYPE, EFFAREA  ; MULTI
+   1016, COMP  ,  1, 0, 0, 0, 3332.72, , 0, 0, 0, 0, 0
+   1005to1015, COMP  ,  1, 0, 0, 0, 1013.72, , 0, 0, 0, 0, 0
+   1001to1004, COMP  ,  1, 0, 0, 0, 1572.83, , 0, 0, 0, 0, 0
+   716, COMP  ,  0, 0, 0, 0, 3332.72, , 0, 0, 0, 0, 0
+   705to715, COMP  ,  0, 0, 0, 0, 1013.72, , 0, 0, 0, 0, 0
+   701to704, COMP  ,  0, 0, 0, 0, 1572.83, , 0, 0, 0, 0, 0
+   401to418 801to818 1201to1218, COMP  ,  5, 0, 0, 0, 817, , 0, 0, 0, 0, 0
+
+*USE-STLD, LC1ASLS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 89.25, 0, 0, 0, 0, 0, 
+ 202, 85.125, 0, 0, 0, 0, 0, 
+ 203, 81, 0, 0, 0, 0, 0, 
+ 204, 76.875, 0, 0, 0, 0, 0, 
+ 205, 72.75, 0, 0, 0, 0, 0, 
+ 206, 69, 0, 0, 0, 0, 0, 
+ 207, 65.25, 0, 0, 0, 0, 0, 
+ 208, 61.5, 0, 0, 0, 0, 0, 
+ 209, 57.75, 0, 0, 0, 0, 0, 
+ 210, 54, 0, 0, 0, 0, 0, 
+ 211, 50.25, 0, 0, 0, 0, 0, 
+ 212, 46.5, 0, 0, 0, 0, 0, 
+ 213, 42.75, 0, 0, 0, 0, 0, 
+ 214, 39, 0, 0, 0, 0, 0, 
+ 215, 35.25, 0, 0, 0, 0, 0, 
+ 216, 20.75, 0, 0, 0, 0, 0, 
+ 301, -89.25, 0, 0, 0, 0, 0, 
+ 302, -85.125, 0, 0, 0, 0, 0, 
+ 303, -81, 0, 0, 0, 0, 0, 
+ 304, -76.875, 0, 0, 0, 0, 0, 
+ 305, -72.75, 0, 0, 0, 0, 0, 
+ 306, -69, 0, 0, 0, 0, 0, 
+ 307, -65.25, 0, 0, 0, 0, 0, 
+ 308, -61.5, 0, 0, 0, 0, 0, 
+ 309, -57.75, 0, 0, 0, 0, 0, 
+ 310, -54, 0, 0, 0, 0, 0, 
+ 311, -50.25, 0, 0, 0, 0, 0, 
+ 312, -46.5, 0, 0, 0, 0, 0, 
+ 313, -42.75, 0, 0, 0, 0, 0, 
+ 314, -39, 0, 0, 0, 0, 0, 
+ 315, -35.25, 0, 0, 0, 0, 0, 
+ 316, -20.75, 0, 0, 0, 0, 0, 
+ 401, 0, 0, 47.5, 0, 0, 0, 
+ 402, 0, 0, 47.5, 0, 0, 0, 
+ 403, 0, 0, 47.5, 0, 0, 0, 
+ 404, 0, 0, 47.5, 0, 0, 0, 
+ 405, 0, 0, 47.5, 0, 0, 0, 
+ 406, 0, 0, 47.5, 0, 0, 0, 
+ 407, 0, 0, 47.5, 0, 0, 0, 
+ 408, 0, 0, 47.5, 0, 0, 0, 
+ 409, 0, 0, 47.5, 0, 0, 0, 
+ 410, 0, 0, 47.5, 0, 0, 0, 
+ 411, 0, 0, 47.5, 0, 0, 0, 
+ 412, 0, 0, 47.5, 0, 0, 0, 
+ 413, 0, 0, 47.5, 0, 0, 0, 
+ 414, 0, 0, 47.5, 0, 0, 0, 
+ 415, 0, 0, 47.5, 0, 0, 0, 
+ 416, 0, 0, 47.5, 0, 0, 0, 
+ 417, 0, 0, 47.5, 0, 0, 0, 
+ 418, 0, 0, 47.5, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC1ASLS] -------------------------
+
+*USE-STLD, LC1AULS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1.35, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 122.363, 0, 0, 0, 0, 0, 
+ 202, 116.794, 0, 0, 0, 0, 0, 
+ 203, 111.225, 0, 0, 0, 0, 0, 
+ 204, 105.656, 0, 0, 0, 0, 0, 
+ 205, 100.088, 0, 0, 0, 0, 0, 
+ 206, 95.025, 0, 0, 0, 0, 0, 
+ 207, 89.9625, 0, 0, 0, 0, 0, 
+ 208, 84.9, 0, 0, 0, 0, 0, 
+ 209, 79.8375, 0, 0, 0, 0, 0, 
+ 210, 74.775, 0, 0, 0, 0, 0, 
+ 211, 69.7125, 0, 0, 0, 0, 0, 
+ 212, 64.65, 0, 0, 0, 0, 0, 
+ 213, 59.5875, 0, 0, 0, 0, 0, 
+ 214, 54.525, 0, 0, 0, 0, 0, 
+ 215, 49.4625, 0, 0, 0, 0, 0, 
+ 216, 28.95, 0, 0, 0, 0, 0, 
+ 301, -122.363, 0, 0, 0, 0, 0, 
+ 302, -116.794, 0, 0, 0, 0, 0, 
+ 303, -111.225, 0, 0, 0, 0, 0, 
+ 304, -105.656, 0, 0, 0, 0, 0, 
+ 305, -100.088, 0, 0, 0, 0, 0, 
+ 306, -95.025, 0, 0, 0, 0, 0, 
+ 307, -89.9625, 0, 0, 0, 0, 0, 
+ 308, -84.9, 0, 0, 0, 0, 0, 
+ 309, -79.8375, 0, 0, 0, 0, 0, 
+ 310, -74.775, 0, 0, 0, 0, 0, 
+ 311, -69.7125, 0, 0, 0, 0, 0, 
+ 312, -64.65, 0, 0, 0, 0, 0, 
+ 313, -59.5875, 0, 0, 0, 0, 0, 
+ 314, -54.525, 0, 0, 0, 0, 0, 
+ 315, -49.4625, 0, 0, 0, 0, 0, 
+ 316, -28.95, 0, 0, 0, 0, 0, 
+ 401, 0, 0, 64.125, 0, 0, 0, 
+ 402, 0, 0, 64.125, 0, 0, 0, 
+ 403, 0, 0, 64.125, 0, 0, 0, 
+ 404, 0, 0, 64.125, 0, 0, 0, 
+ 405, 0, 0, 64.125, 0, 0, 0, 
+ 406, 0, 0, 64.125, 0, 0, 0, 
+ 407, 0, 0, 64.125, 0, 0, 0, 
+ 408, 0, 0, 64.125, 0, 0, 0, 
+ 409, 0, 0, 64.125, 0, 0, 0, 
+ 410, 0, 0, 64.125, 0, 0, 0, 
+ 411, 0, 0, 64.125, 0, 0, 0, 
+ 412, 0, 0, 64.125, 0, 0, 0, 
+ 413, 0, 0, 64.125, 0, 0, 0, 
+ 414, 0, 0, 64.125, 0, 0, 0, 
+ 415, 0, 0, 64.125, 0, 0, 0, 
+ 416, 0, 0, 64.125, 0, 0, 0, 
+ 417, 0, 0, 64.125, 0, 0, 0, 
+ 418, 0, 0, 64.125, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC1AULS] -------------------------
+
+*USE-STLD, LC1BSLS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 95.75, 0, 0, 0, 0, 0, 
+ 202, 91.625, 0, 0, 0, 0, 0, 
+ 203, 87.5, 0, 0, 0, 0, 0, 
+ 204, 83.375, 0, 0, 0, 0, 0, 
+ 205, 79.25, 0, 0, 0, 0, 0, 
+ 206, 75.5, 0, 0, 0, 0, 0, 
+ 207, 71.75, 0, 0, 0, 0, 0, 
+ 208, 68, 0, 0, 0, 0, 0, 
+ 209, 64.25, 0, 0, 0, 0, 0, 
+ 210, 60.5, 0, 0, 0, 0, 0, 
+ 211, 56.75, 0, 0, 0, 0, 0, 
+ 212, 53, 0, 0, 0, 0, 0, 
+ 213, 49.25, 0, 0, 0, 0, 0, 
+ 214, 45.5, 0, 0, 0, 0, 0, 
+ 215, 41.75, 0, 0, 0, 0, 0, 
+ 216, 27.25, 0, 0, 0, 0, 0, 
+ 301, -95.75, 0, 0, 0, 0, 0, 
+ 302, -91.625, 0, 0, 0, 0, 0, 
+ 303, -87.5, 0, 0, 0, 0, 0, 
+ 304, -83.375, 0, 0, 0, 0, 0, 
+ 305, -79.25, 0, 0, 0, 0, 0, 
+ 306, -75.5, 0, 0, 0, 0, 0, 
+ 307, -71.75, 0, 0, 0, 0, 0, 
+ 308, -68, 0, 0, 0, 0, 0, 
+ 309, -64.25, 0, 0, 0, 0, 0, 
+ 310, -60.5, 0, 0, 0, 0, 0, 
+ 311, -56.75, 0, 0, 0, 0, 0, 
+ 312, -53, 0, 0, 0, 0, 0, 
+ 313, -49.25, 0, 0, 0, 0, 0, 
+ 314, -45.5, 0, 0, 0, 0, 0, 
+ 315, -41.75, 0, 0, 0, 0, 0, 
+ 316, -27.25, 0, 0, 0, 0, 0, 
+ 401, 0, 0, 54, 0, 0, 0, 
+ 402, 0, 0, 54, 0, 0, 0, 
+ 403, 0, 0, 54, 0, 0, 0, 
+ 404, 0, 0, 54, 0, 0, 0, 
+ 405, 0, 0, 54, 0, 0, 0, 
+ 406, 0, 0, 54, 0, 0, 0, 
+ 407, 0, 0, 54, 0, 0, 0, 
+ 408, 0, 0, 54, 0, 0, 0, 
+ 409, 0, 0, 54, 0, 0, 0, 
+ 410, 0, 0, 54, 0, 0, 0, 
+ 411, 0, 0, 54, 0, 0, 0, 
+ 412, 0, 0, 54, 0, 0, 0, 
+ 413, 0, 0, 54, 0, 0, 0, 
+ 414, 0, 0, 54, 0, 0, 0, 
+ 415, 0, 0, 54, 0, 0, 0, 
+ 416, 0, 0, 54, 0, 0, 0, 
+ 417, 0, 0, 54, 0, 0, 0, 
+ 418, 0, 0, 54, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC1BSLS] -------------------------
+
+*USE-STLD, LC1BULS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1.35, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 114.938, 0, 0, 0, 0, 0, 
+ 202, 110.119, 0, 0, 0, 0, 0, 
+ 203, 105.3, 0, 0, 0, 0, 0, 
+ 204, 100.481, 0, 0, 0, 0, 0, 
+ 205, 95.6625, 0, 0, 0, 0, 0, 
+ 206, 91.35, 0, 0, 0, 0, 0, 
+ 207, 87.0375, 0, 0, 0, 0, 0, 
+ 208, 82.725, 0, 0, 0, 0, 0, 
+ 209, 78.4125, 0, 0, 0, 0, 0, 
+ 210, 74.1, 0, 0, 0, 0, 0, 
+ 211, 69.7875, 0, 0, 0, 0, 0, 
+ 212, 65.475, 0, 0, 0, 0, 0, 
+ 213, 61.1625, 0, 0, 0, 0, 0, 
+ 214, 56.85, 0, 0, 0, 0, 0, 
+ 215, 52.5375, 0, 0, 0, 0, 0, 
+ 216, 32.775, 0, 0, 0, 0, 0, 
+ 301, -114.938, 0, 0, 0, 0, 0, 
+ 302, -110.119, 0, 0, 0, 0, 0, 
+ 303, -105.3, 0, 0, 0, 0, 0, 
+ 304, -100.481, 0, 0, 0, 0, 0, 
+ 305, -95.6625, 0, 0, 0, 0, 0, 
+ 306, -91.35, 0, 0, 0, 0, 0, 
+ 307, -87.0375, 0, 0, 0, 0, 0, 
+ 308, -82.725, 0, 0, 0, 0, 0, 
+ 309, -78.4125, 0, 0, 0, 0, 0, 
+ 310, -74.1, 0, 0, 0, 0, 0, 
+ 311, -69.7875, 0, 0, 0, 0, 0, 
+ 312, -65.475, 0, 0, 0, 0, 0, 
+ 313, -61.1625, 0, 0, 0, 0, 0, 
+ 314, -56.85, 0, 0, 0, 0, 0, 
+ 315, -52.5375, 0, 0, 0, 0, 0, 
+ 316, -32.775, 0, 0, 0, 0, 0, 
+ 401, 0, 0, 56.7, 0, 0, 0, 
+ 402, 0, 0, 56.7, 0, 0, 0, 
+ 403, 0, 0, 56.7, 0, 0, 0, 
+ 404, 0, 0, 56.7, 0, 0, 0, 
+ 405, 0, 0, 56.7, 0, 0, 0, 
+ 406, 0, 0, 56.7, 0, 0, 0, 
+ 407, 0, 0, 56.7, 0, 0, 0, 
+ 408, 0, 0, 56.7, 0, 0, 0, 
+ 409, 0, 0, 56.7, 0, 0, 0, 
+ 410, 0, 0, 56.7, 0, 0, 0, 
+ 411, 0, 0, 56.7, 0, 0, 0, 
+ 412, 0, 0, 56.7, 0, 0, 0, 
+ 413, 0, 0, 56.7, 0, 0, 0, 
+ 414, 0, 0, 56.7, 0, 0, 0, 
+ 415, 0, 0, 56.7, 0, 0, 0, 
+ 416, 0, 0, 56.7, 0, 0, 0, 
+ 417, 0, 0, 56.7, 0, 0, 0, 
+ 418, 0, 0, 56.7, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC1BULS] -------------------------
+
+*USE-STLD, LC1CSLS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 41.75, 0, 0, 0, 0, 0, 
+ 202, 40.125, 0, 0, 0, 0, 0, 
+ 203, 38.5, 0, 0, 0, 0, 0, 
+ 204, 36.875, 0, 0, 0, 0, 0, 
+ 205, 35.25, 0, 0, 0, 0, 0, 
+ 206, 34, 0, 0, 0, 0, 0, 
+ 207, 32.75, 0, 0, 0, 0, 0, 
+ 208, 31.5, 0, 0, 0, 0, 0, 
+ 209, 30.25, 0, 0, 0, 0, 0, 
+ 210, 29, 0, 0, 0, 0, 0, 
+ 211, 27.75, 0, 0, 0, 0, 0, 
+ 212, 26.5, 0, 0, 0, 0, 0, 
+ 213, 25.25, 0, 0, 0, 0, 0, 
+ 214, 24, 0, 0, 0, 0, 0, 
+ 215, 22.75, 0, 0, 0, 0, 0, 
+ 216, 10.75, 0, 0, 0, 0, 0, 
+ 301, -41.75, 0, 0, 0, 0, 0, 
+ 302, -40.125, 0, 0, 0, 0, 0, 
+ 303, -38.5, 0, 0, 0, 0, 0, 
+ 304, -36.875, 0, 0, 0, 0, 0, 
+ 305, -35.25, 0, 0, 0, 0, 0, 
+ 306, -34, 0, 0, 0, 0, 0, 
+ 307, -32.75, 0, 0, 0, 0, 0, 
+ 308, -31.5, 0, 0, 0, 0, 0, 
+ 309, -30.25, 0, 0, 0, 0, 0, 
+ 310, -29, 0, 0, 0, 0, 0, 
+ 311, -27.75, 0, 0, 0, 0, 0, 
+ 312, -26.5, 0, 0, 0, 0, 0, 
+ 313, -25.25, 0, 0, 0, 0, 0, 
+ 314, -24, 0, 0, 0, 0, 0, 
+ 315, -22.75, 0, 0, 0, 0, 0, 
+ 316, -10.75, 0, 0, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC1CSLS] -------------------------
+
+*USE-STLD, LC1CULS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1.35, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 58.2375, 0, 0, 0, 0, 0, 
+ 202, 56.0438, 0, 0, 0, 0, 0, 
+ 203, 53.85, 0, 0, 0, 0, 0, 
+ 204, 51.6563, 0, 0, 0, 0, 0, 
+ 205, 49.4625, 0, 0, 0, 0, 0, 
+ 206, 47.775, 0, 0, 0, 0, 0, 
+ 207, 46.0875, 0, 0, 0, 0, 0, 
+ 208, 44.4, 0, 0, 0, 0, 0, 
+ 209, 42.7125, 0, 0, 0, 0, 0, 
+ 210, 41.025, 0, 0, 0, 0, 0, 
+ 211, 39.3375, 0, 0, 0, 0, 0, 
+ 212, 37.65, 0, 0, 0, 0, 0, 
+ 213, 35.9625, 0, 0, 0, 0, 0, 
+ 214, 34.275, 0, 0, 0, 0, 0, 
+ 215, 32.5875, 0, 0, 0, 0, 0, 
+ 216, 15.45, 0, 0, 0, 0, 0, 
+ 301, -58.2375, 0, 0, 0, 0, 0, 
+ 302, -56.0438, 0, 0, 0, 0, 0, 
+ 303, -53.85, 0, 0, 0, 0, 0, 
+ 304, -51.6563, 0, 0, 0, 0, 0, 
+ 305, -49.4625, 0, 0, 0, 0, 0, 
+ 306, -47.775, 0, 0, 0, 0, 0, 
+ 307, -46.0875, 0, 0, 0, 0, 0, 
+ 308, -44.4, 0, 0, 0, 0, 0, 
+ 309, -42.7125, 0, 0, 0, 0, 0, 
+ 310, -41.025, 0, 0, 0, 0, 0, 
+ 311, -39.3375, 0, 0, 0, 0, 0, 
+ 312, -37.65, 0, 0, 0, 0, 0, 
+ 313, -35.9625, 0, 0, 0, 0, 0, 
+ 314, -34.275, 0, 0, 0, 0, 0, 
+ 315, -32.5875, 0, 0, 0, 0, 0, 
+ 316, -15.45, 0, 0, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC1CULS] -------------------------
+
+*USE-STLD, LC2SLS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 48.1253, 0, 0, 0, 0, 0, 
+ 202, 44.8577, 0, 0, 0, 0, 0, 
+ 203, 41.5901, 0, 0, 0, 0, 0, 
+ 204, 38.3225, 0, 0, 0, 0, 0, 
+ 205, 31.8797, 0, 0, 0, 0, 0, 
+ 206, 28.8724, 0, 0, 0, 0, 0, 
+ 207, 25.8651, 0, 0, 0, 0, 0, 
+ 208, 22.8578, 0, 0, 0, 0, 0, 
+ 209, 19.8505, 0, 0, 0, 0, 0, 
+ 210, 16.8431, 0, 0, 0, 0, 0, 
+ 211, 15.3212, 0, 0, 0, 0, 0, 
+ 212, 13.7992, 0, 0, 0, 0, 0, 
+ 213, 12.2772, 0, 0, 0, 0, 0, 
+ 214, 10.7553, 0, 0, 0, 0, 0, 
+ 215, 9.23328, 0, 0, 0, 0, 0, 
+ 216, 6.33333, 0, 0, 0, 0, 0, 
+ 301, -48.1253, 0, 0, 0, 0, 0, 
+ 302, -44.8577, 0, 0, 0, 0, 0, 
+ 303, -41.5901, 0, 0, 0, 0, 0, 
+ 304, -38.3225, 0, 0, 0, 0, 0, 
+ 305, -31.8797, 0, 0, 0, 0, 0, 
+ 306, -28.8724, 0, 0, 0, 0, 0, 
+ 307, -25.8651, 0, 0, 0, 0, 0, 
+ 308, -22.8578, 0, 0, 0, 0, 0, 
+ 309, -19.8505, 0, 0, 0, 0, 0, 
+ 310, -16.8431, 0, 0, 0, 0, 0, 
+ 311, -15.3212, 0, 0, 0, 0, 0, 
+ 312, -13.7992, 0, 0, 0, 0, 0, 
+ 313, -12.2772, 0, 0, 0, 0, 0, 
+ 314, -10.7553, 0, 0, 0, 0, 0, 
+ 315, -9.23328, 0, 0, 0, 0, 0, 
+ 316, -6.33333, 0, 0, 0, 0, 0, 
+ 401, 0, 0, 22.5, 0, 0, 0, 
+ 402, 0, 0, 22.5, 0, 0, 0, 
+ 403, 0, 0, 22.5, 0, 0, 0, 
+ 404, 0, 0, 22.5, 0, 0, 0, 
+ 405, 0, 0, 22.5, 0, 0, 0, 
+ 406, 0, 0, 22.5, 0, 0, 0, 
+ 407, 0, 0, 22.5, 0, 0, 0, 
+ 408, 0, 0, 22.5, 0, 0, 0, 
+ 409, 0, 0, 22.5, 0, 0, 0, 
+ 410, 0, 0, 22.5, 0, 0, 0, 
+ 411, 0, 0, 22.5, 0, 0, 0, 
+ 412, 0, 0, 22.5, 0, 0, 0, 
+ 413, 0, 0, 22.5, 0, 0, 0, 
+ 414, 0, 0, 22.5, 0, 0, 0, 
+ 415, 0, 0, 22.5, 0, 0, 0, 
+ 416, 0, 0, 22.5, 0, 0, 0, 
+ 417, 0, 0, 22.5, 0, 0, 0, 
+ 418, 0, 0, 22.5, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -14, 1, -14, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC2SLS] -------------------------
+
+*USE-STLD, LC2ULS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1.35, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 48.1253, 0, 0, 0, 0, 0, 
+ 202, 44.8577, 0, 0, 0, 0, 0, 
+ 203, 41.5901, 0, 0, 0, 0, 0, 
+ 204, 38.3225, 0, 0, 0, 0, 0, 
+ 205, 31.8797, 0, 0, 0, 0, 0, 
+ 206, 28.8724, 0, 0, 0, 0, 0, 
+ 207, 25.8651, 0, 0, 0, 0, 0, 
+ 208, 22.8578, 0, 0, 0, 0, 0, 
+ 209, 19.8505, 0, 0, 0, 0, 0, 
+ 210, 16.8431, 0, 0, 0, 0, 0, 
+ 211, 15.3212, 0, 0, 0, 0, 0, 
+ 212, 13.7992, 0, 0, 0, 0, 0, 
+ 213, 12.2772, 0, 0, 0, 0, 0, 
+ 214, 10.7553, 0, 0, 0, 0, 0, 
+ 215, 9.23328, 0, 0, 0, 0, 0, 
+ 216, 6.33333, 0, 0, 0, 0, 0, 
+ 301, -48.1253, 0, 0, 0, 0, 0, 
+ 302, -44.8577, 0, 0, 0, 0, 0, 
+ 303, -41.5901, 0, 0, 0, 0, 0, 
+ 304, -38.3225, 0, 0, 0, 0, 0, 
+ 305, -31.8797, 0, 0, 0, 0, 0, 
+ 306, -28.8724, 0, 0, 0, 0, 0, 
+ 307, -25.8651, 0, 0, 0, 0, 0, 
+ 308, -22.8578, 0, 0, 0, 0, 0, 
+ 309, -19.8505, 0, 0, 0, 0, 0, 
+ 310, -16.8431, 0, 0, 0, 0, 0, 
+ 311, -15.3212, 0, 0, 0, 0, 0, 
+ 312, -13.7992, 0, 0, 0, 0, 0, 
+ 313, -12.2772, 0, 0, 0, 0, 0, 
+ 314, -10.7553, 0, 0, 0, 0, 0, 
+ 315, -9.23328, 0, 0, 0, 0, 0, 
+ 316, -6.33333, 0, 0, 0, 0, 0, 
+ 401, 0, 0, 27, 0, 0, 0, 
+ 402, 0, 0, 27, 0, 0, 0, 
+ 403, 0, 0, 27, 0, 0, 0, 
+ 404, 0, 0, 27, 0, 0, 0, 
+ 405, 0, 0, 27, 0, 0, 0, 
+ 406, 0, 0, 27, 0, 0, 0, 
+ 407, 0, 0, 27, 0, 0, 0, 
+ 408, 0, 0, 27, 0, 0, 0, 
+ 409, 0, 0, 27, 0, 0, 0, 
+ 410, 0, 0, 27, 0, 0, 0, 
+ 411, 0, 0, 27, 0, 0, 0, 
+ 412, 0, 0, 27, 0, 0, 0, 
+ 413, 0, 0, 27, 0, 0, 0, 
+ 414, 0, 0, 27, 0, 0, 0, 
+ 415, 0, 0, 27, 0, 0, 0, 
+ 416, 0, 0, 27, 0, 0, 0, 
+ 417, 0, 0, 27, 0, 0, 0, 
+ 418, 0, 0, 27, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -28, 1, -28, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC2ULS] -------------------------
+
+*USE-STLD, LC3SLS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 75, 0, 0, 0, 0, 0, 
+ 202, 70.875, 0, 0, 0, 0, 0, 
+ 203, 66.75, 0, 0, 0, 0, 0, 
+ 204, 69.375, 0, 0, 0, 0, 0, 
+ 205, 65.25, 0, 0, 0, 0, 0, 
+ 206, 54.75, 0, 0, 0, 0, 0, 
+ 207, 51, 0, 0, 0, 0, 0, 
+ 208, 47.25, 0, 0, 0, 0, 0, 
+ 209, 43.5, 0, 0, 0, 0, 0, 
+ 210, 39.75, 0, 0, 0, 0, 0, 
+ 211, 36, 0, 0, 0, 0, 0, 
+ 212, 32.25, 0, 0, 0, 0, 0, 
+ 213, 28.5, 0, 0, 0, 0, 0, 
+ 214, 31.5, 0, 0, 0, 0, 0, 
+ 215, 27.75, 0, 0, 0, 0, 0, 
+ 216, 9.875, 0, 0, 0, 0, 0, 
+ 301, -81.75, 0, 0, 0, 0, 0, 
+ 302, -77.625, 0, 0, 0, 0, 0, 
+ 303, -66.75, 0, 0, 0, 0, 0, 
+ 304, -62.625, 0, 0, 0, 0, 0, 
+ 305, -58.5, 0, 0, 0, 0, 0, 
+ 306, -54.75, 0, 0, 0, 0, 0, 
+ 307, -51, 0, 0, 0, 0, 0, 
+ 308, -47.25, 0, 0, 0, 0, 0, 
+ 309, -43.5, 0, 0, 0, 0, 0, 
+ 310, -39.75, 0, 0, 0, 0, 0, 
+ 311, -42.75, 0, 0, 0, 0, 0, 
+ 312, -39, 0, 0, 0, 0, 0, 
+ 313, -28.5, 0, 0, 0, 0, 0, 
+ 314, -24.75, 0, 0, 0, 0, 0, 
+ 315, -21, 0, 0, 0, 0, 0, 
+ 316, -9.875, 0, 0, 0, 0, 0, 
+ 401, 0, 0, 40, 0, 0, 0, 
+ 402, 0, 0, 40, 0, 0, 0, 
+ 403, 0, 0, 40, 0, 0, 0, 
+ 404, 0, 0, 40, 0, 0, 0, 
+ 405, 0, 0, 40, 0, 0, 0, 
+ 406, 0, 0, 40, 0, 0, 0, 
+ 407, 0, 0, 40, 0, 0, 0, 
+ 408, 0, 0, 40, 0, 0, 0, 
+ 409, 0, 0, 40, 0, 0, 0, 
+ 410, 0, 0, 40, 0, 0, 0, 
+ 411, 0, 0, 40, 0, 0, 0, 
+ 412, 0, 0, 40, 0, 0, 0, 
+ 413, 0, 0, 40, 0, 0, 0, 
+ 414, 0, 0, 40, 0, 0, 0, 
+ 415, 0, 0, 40, 0, 0, 0, 
+ 416, 0, 0, 40, 0, 0, 0, 
+ 417, 0, 0, 40, 0, 0, 0, 
+ 418, 0, 0, 40, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC3SLS] -------------------------
+
+*USE-STLD, LC3ULS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1.35, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 201, 103.125, 0, 0, 0, 0, 0, 
+ 202, 97.5563, 0, 0, 0, 0, 0, 
+ 203, 91.9875, 0, 0, 0, 0, 0, 
+ 204, 95.5313, 0, 0, 0, 0, 0, 
+ 205, 89.9625, 0, 0, 0, 0, 0, 
+ 206, 75.7875, 0, 0, 0, 0, 0, 
+ 207, 70.725, 0, 0, 0, 0, 0, 
+ 208, 65.6625, 0, 0, 0, 0, 0, 
+ 209, 60.6, 0, 0, 0, 0, 0, 
+ 210, 55.5375, 0, 0, 0, 0, 0, 
+ 211, 50.475, 0, 0, 0, 0, 0, 
+ 212, 45.4125, 0, 0, 0, 0, 0, 
+ 213, 40.35, 0, 0, 0, 0, 0, 
+ 214, 44.4, 0, 0, 0, 0, 0, 
+ 215, 39.3375, 0, 0, 0, 0, 0, 
+ 216, 14.2688, 0, 0, 0, 0, 0, 
+ 301, -112.238, 0, 0, 0, 0, 0, 
+ 302, -106.669, 0, 0, 0, 0, 0, 
+ 303, -91.9875, 0, 0, 0, 0, 0, 
+ 304, -86.4188, 0, 0, 0, 0, 0, 
+ 305, -80.85, 0, 0, 0, 0, 0, 
+ 306, -75.7875, 0, 0, 0, 0, 0, 
+ 307, -70.725, 0, 0, 0, 0, 0, 
+ 308, -65.6625, 0, 0, 0, 0, 0, 
+ 309, -60.6, 0, 0, 0, 0, 0, 
+ 310, -55.5375, 0, 0, 0, 0, 0, 
+ 311, -59.5875, 0, 0, 0, 0, 0, 
+ 312, -54.525, 0, 0, 0, 0, 0, 
+ 313, -40.35, 0, 0, 0, 0, 0, 
+ 314, -35.2875, 0, 0, 0, 0, 0, 
+ 315, -30.225, 0, 0, 0, 0, 0, 
+ 316, -14.2688, 0, 0, 0, 0, 0, 
+ 401, 0, 0, 40, 0, 0, 0, 
+ 402, 0, 0, 40, 0, 0, 0, 
+ 403, 0, 0, 40, 0, 0, 0, 
+ 404, 0, 0, 40, 0, 0, 0, 
+ 405, 0, 0, 40, 0, 0, 0, 
+ 406, 0, 0, 40, 0, 0, 0, 
+ 407, 0, 0, 40, 0, 0, 0, 
+ 408, 0, 0, 40, 0, 0, 0, 
+ 409, 0, 0, 40, 0, 0, 0, 
+ 410, 0, 0, 40, 0, 0, 0, 
+ 411, 0, 0, 40, 0, 0, 0, 
+ 412, 0, 0, 40, 0, 0, 0, 
+ 413, 0, 0, 40, 0, 0, 0, 
+ 414, 0, 0, 40, 0, 0, 0, 
+ 415, 0, 0, 40, 0, 0, 0, 
+ 416, 0, 0, 40, 0, 0, 0, 
+ 417, 0, 0, 40, 0, 0, 0, 
+ 418, 0, 0, 40, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   401, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   402, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   403, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   404, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   405, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   406, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   407, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   408, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   409, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   410, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   411, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   412, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   413, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   414, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   415, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   416, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   417, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   418, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   419, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC3ULS] -------------------------
+
+*USE-STLD, LC4ASLS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 601, 96.75, 0, 0, 0, 0, 0, 
+ 602, 92.625, 0, 0, 0, 0, 0, 
+ 603, 88.5, 0, 0, 0, 0, 0, 
+ 604, 84.375, 0, 0, 0, 0, 0, 
+ 605, 80.25, 0, 0, 0, 0, 0, 
+ 606, 76.5, 0, 0, 0, 0, 0, 
+ 607, 72.75, 0, 0, 0, 0, 0, 
+ 608, 69, 0, 0, 0, 0, 0, 
+ 609, 65.25, 0, 0, 0, 0, 0, 
+ 610, 61.5, 0, 0, 0, 0, 0, 
+ 611, 57.75, 0, 0, 0, 0, 0, 
+ 612, 54, 0, 0, 0, 0, 0, 
+ 613, 50.25, 0, 0, 0, 0, 0, 
+ 614, 46.5, 0, 0, 0, 0, 0, 
+ 615, 42.75, 0, 0, 0, 0, 0, 
+ 616, 24.5, 0, 0, 0, 0, 0, 
+ 701, -77.8488, 0, 0, 0, 0, 0, 
+ 702, -74.5812, 0, 0, 0, 0, 0, 
+ 703, -71.3137, 0, 0, 0, 0, 0, 
+ 704, -68.0461, 0, 0, 0, 0, 0, 
+ 705, -60.9383, 0, 0, 0, 0, 0, 
+ 706, -57.931, 0, 0, 0, 0, 0, 
+ 707, -54.9237, 0, 0, 0, 0, 0, 
+ 708, -51.9164, 0, 0, 0, 0, 0, 
+ 709, -48.909, 0, 0, 0, 0, 0, 
+ 710, -45.9017, 0, 0, 0, 0, 0, 
+ 711, -42.8944, 0, 0, 0, 0, 0, 
+ 712, -38.8724, 0, 0, 0, 0, 0, 
+ 713, -34.8505, 0, 0, 0, 0, 0, 
+ 714, -30.8285, 0, 0, 0, 0, 0, 
+ 715, -26.8065, 0, 0, 0, 0, 0, 
+ 716, -20.5, 0, 0, 0, 0, 0, 
+ 801, 0, 0, 40, 0, 0, 0, 
+ 802, 0, 0, 39.1667, 0, 0, 0, 
+ 803, 0, 0, 38.3333, 0, 0, 0, 
+ 804, 0, 0, 37.5, 0, 0, 0, 
+ 805, 0, 0, 36.6667, 0, 0, 0, 
+ 806, 0, 0, 35.8333, 0, 0, 0, 
+ 807, 0, 0, 35, 0, 0, 0, 
+ 808, 0, 0, 34.1667, 0, 0, 0, 
+ 809, 0, 0, 33.3333, 0, 0, 0, 
+ 810, 0, 0, 32.5, 0, 0, 0, 
+ 811, 0, 0, 31.6667, 0, 0, 0, 
+ 812, 0, 0, 30.8333, 0, 0, 0, 
+ 813, 0, 0, 30, 0, 0, 0, 
+ 814, 0, 0, 29.1667, 0, 0, 0, 
+ 815, 0, 0, 28.3333, 0, 0, 0, 
+ 816, 0, 0, 27.5, 0, 0, 0, 
+ 817, 0, 0, 26.6667, 0, 0, 0, 
+ 818, 0, 0, 25.8333, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   801, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   802, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   803, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   804, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   805, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   806, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   807, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   808, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   809, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   810, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   811, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   812, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   813, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   814, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   815, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   816, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   817, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   818, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   819, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC4ASLS] -------------------------
+
+*USE-STLD, LC4AULS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1.35, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 601, 125.363, 0, 0, 0, 0, 0, 
+ 602, 120.169, 0, 0, 0, 0, 0, 
+ 603, 114.975, 0, 0, 0, 0, 0, 
+ 604, 109.781, 0, 0, 0, 0, 0, 
+ 605, 104.588, 0, 0, 0, 0, 0, 
+ 606, 99.9, 0, 0, 0, 0, 0, 
+ 607, 95.2125, 0, 0, 0, 0, 0, 
+ 608, 90.525, 0, 0, 0, 0, 0, 
+ 609, 85.8375, 0, 0, 0, 0, 0, 
+ 610, 81.15, 0, 0, 0, 0, 0, 
+ 611, 76.4625, 0, 0, 0, 0, 0, 
+ 612, 71.775, 0, 0, 0, 0, 0, 
+ 613, 67.0875, 0, 0, 0, 0, 0, 
+ 614, 62.4, 0, 0, 0, 0, 0, 
+ 615, 57.7125, 0, 0, 0, 0, 0, 
+ 616, 32.5125, 0, 0, 0, 0, 0, 
+ 701, -98.8566, 0, 0, 0, 0, 0, 
+ 702, -94.8203, 0, 0, 0, 0, 0, 
+ 703, -90.7841, 0, 0, 0, 0, 0, 
+ 704, -86.7479, 0, 0, 0, 0, 0, 
+ 705, -77.4027, 0, 0, 0, 0, 0, 
+ 706, -73.7178, 0, 0, 0, 0, 0, 
+ 707, -70.033, 0, 0, 0, 0, 0, 
+ 708, -66.3481, 0, 0, 0, 0, 0, 
+ 709, -62.6632, 0, 0, 0, 0, 0, 
+ 710, -58.9783, 0, 0, 0, 0, 0, 
+ 711, -55.2934, 0, 0, 0, 0, 0, 
+ 712, -50.2388, 0, 0, 0, 0, 0, 
+ 713, -45.1841, 0, 0, 0, 0, 0, 
+ 714, -40.1294, 0, 0, 0, 0, 0, 
+ 715, -35.0748, 0, 0, 0, 0, 0, 
+ 716, -26.8, 0, 0, 0, 0, 0, 
+ 801, 0, 0, 48, 0, 0, 0, 
+ 802, 0, 0, 47, 0, 0, 0, 
+ 803, 0, 0, 46, 0, 0, 0, 
+ 804, 0, 0, 45, 0, 0, 0, 
+ 805, 0, 0, 44, 0, 0, 0, 
+ 806, 0, 0, 43, 0, 0, 0, 
+ 807, 0, 0, 42, 0, 0, 0, 
+ 808, 0, 0, 41, 0, 0, 0, 
+ 809, 0, 0, 40, 0, 0, 0, 
+ 810, 0, 0, 39, 0, 0, 0, 
+ 811, 0, 0, 38, 0, 0, 0, 
+ 812, 0, 0, 37, 0, 0, 0, 
+ 813, 0, 0, 36, 0, 0, 0, 
+ 814, 0, 0, 35, 0, 0, 0, 
+ 815, 0, 0, 34, 0, 0, 0, 
+ 816, 0, 0, 33, 0, 0, 0, 
+ 817, 0, 0, 32, 0, 0, 0, 
+ 818, 0, 0, 31, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+   801, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   802, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   803, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   804, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   805, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   806, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   807, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   808, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   809, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   810, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   811, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   812, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   813, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   814, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   815, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   816, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   817, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   818, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+   819, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC4AULS] -------------------------
+
+*USE-STLD, LC4BSLS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 1001, 77.8488, 0, 0, 0, 0, 0, 
+ 1002, 74.5812, 0, 0, 0, 0, 0, 
+ 1003, 71.3137, 0, 0, 0, 0, 0, 
+ 1004, 68.0461, 0, 0, 0, 0, 0, 
+ 1005, 60.9383, 0, 0, 0, 0, 0, 
+ 1006, 57.931, 0, 0, 0, 0, 0, 
+ 1007, 54.9237, 0, 0, 0, 0, 0, 
+ 1008, 51.9164, 0, 0, 0, 0, 0, 
+ 1009, 48.909, 0, 0, 0, 0, 0, 
+ 1010, 45.9017, 0, 0, 0, 0, 0, 
+ 1011, 42.8944, 0, 0, 0, 0, 0, 
+ 1012, 38.8724, 0, 0, 0, 0, 0, 
+ 1013, 34.8505, 0, 0, 0, 0, 0, 
+ 1014, 30.8285, 0, 0, 0, 0, 0, 
+ 1015, 26.8065, 0, 0, 0, 0, 0, 
+ 1016, 20.5, 0, 0, 0, 0, 0, 
+ 1101, -96.75, 0, 0, 0, 0, 0, 
+ 1102, -92.625, 0, 0, 0, 0, 0, 
+ 1103, -88.5, 0, 0, 0, 0, 0, 
+ 1104, -84.375, 0, 0, 0, 0, 0, 
+ 1105, -80.25, 0, 0, 0, 0, 0, 
+ 1106, -76.5, 0, 0, 0, 0, 0, 
+ 1107, -72.75, 0, 0, 0, 0, 0, 
+ 1108, -69, 0, 0, 0, 0, 0, 
+ 1109, -65.25, 0, 0, 0, 0, 0, 
+ 1110, -61.5, 0, 0, 0, 0, 0, 
+ 1111, -57.75, 0, 0, 0, 0, 0, 
+ 1112, -54, 0, 0, 0, 0, 0, 
+ 1113, -50.25, 0, 0, 0, 0, 0, 
+ 1114, -46.5, 0, 0, 0, 0, 0, 
+ 1115, -42.75, 0, 0, 0, 0, 0, 
+ 1116, -24.5, 0, 0, 0, 0, 0, 
+ 1201, 0, 0, 25, 0, 0, 0, 
+ 1202, 0, 0, 25.8333, 0, 0, 0, 
+ 1203, 0, 0, 26.6667, 0, 0, 0, 
+ 1204, 0, 0, 27.5, 0, 0, 0, 
+ 1205, 0, 0, 28.3333, 0, 0, 0, 
+ 1206, 0, 0, 29.1667, 0, 0, 0, 
+ 1207, 0, 0, 30, 0, 0, 0, 
+ 1208, 0, 0, 30.8333, 0, 0, 0, 
+ 1209, 0, 0, 31.6667, 0, 0, 0, 
+ 1210, 0, 0, 32.5, 0, 0, 0, 
+ 1211, 0, 0, 33.3333, 0, 0, 0, 
+ 1212, 0, 0, 34.1667, 0, 0, 0, 
+ 1213, 0, 0, 35, 0, 0, 0, 
+ 1214, 0, 0, 35.8333, 0, 0, 0, 
+ 1215, 0, 0, 36.6667, 0, 0, 0, 
+ 1216, 0, 0, 37.5, 0, 0, 0, 
+ 1217, 0, 0, 38.3333, 0, 0, 0, 
+ 1218, 0, 0, 39.1667, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+  1201, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1202, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1203, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1204, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1205, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1206, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1207, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1208, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1209, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1210, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1211, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1212, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1213, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1214, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1215, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1216, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1217, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1218, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1219, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -4, 1, -4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC4BSLS] -------------------------
+
+*USE-STLD, LC4BULS
+
+; *SELFWEIGHT, X, Y, Z, GROUP
+*SELFWEIGHT, 0, 0, -1.35, 
+
+*CONLOAD    ; Nodal Loads
+; NODE_LIST, FX, FY, FZ, MX, MY, MZ, GROUP
+ 1001, 98.8566, 0, 0, 0, 0, 0, 
+ 1002, 94.8203, 0, 0, 0, 0, 0, 
+ 1003, 90.7841, 0, 0, 0, 0, 0, 
+ 1004, 86.7479, 0, 0, 0, 0, 0, 
+ 1005, 77.4027, 0, 0, 0, 0, 0, 
+ 1006, 73.7178, 0, 0, 0, 0, 0, 
+ 1007, 70.033, 0, 0, 0, 0, 0, 
+ 1008, 66.3481, 0, 0, 0, 0, 0, 
+ 1009, 62.6632, 0, 0, 0, 0, 0, 
+ 1010, 58.9783, 0, 0, 0, 0, 0, 
+ 1011, 55.2934, 0, 0, 0, 0, 0, 
+ 1012, 50.2388, 0, 0, 0, 0, 0, 
+ 1013, 45.1841, 0, 0, 0, 0, 0, 
+ 1014, 40.1294, 0, 0, 0, 0, 0, 
+ 1015, 35.0748, 0, 0, 0, 0, 0, 
+ 1016, 26.8, 0, 0, 0, 0, 0, 
+ 1101, -125.363, 0, 0, 0, 0, 0, 
+ 1102, -120.169, 0, 0, 0, 0, 0, 
+ 1103, -114.975, 0, 0, 0, 0, 0, 
+ 1104, -109.781, 0, 0, 0, 0, 0, 
+ 1105, -104.588, 0, 0, 0, 0, 0, 
+ 1106, -99.9, 0, 0, 0, 0, 0, 
+ 1107, -95.2125, 0, 0, 0, 0, 0, 
+ 1108, -90.525, 0, 0, 0, 0, 0, 
+ 1109, -85.8375, 0, 0, 0, 0, 0, 
+ 1110, -81.15, 0, 0, 0, 0, 0, 
+ 1111, -76.4625, 0, 0, 0, 0, 0, 
+ 1112, -71.775, 0, 0, 0, 0, 0, 
+ 1113, -67.0875, 0, 0, 0, 0, 0, 
+ 1114, -62.4, 0, 0, 0, 0, 0, 
+ 1115, -57.7125, 0, 0, 0, 0, 0, 
+ 1116, -32.5125, 0, 0, 0, 0, 0, 
+ 1201, 0, 0, 30, 0, 0, 0, 
+ 1202, 0, 0, 31, 0, 0, 0, 
+ 1203, 0, 0, 32, 0, 0, 0, 
+ 1204, 0, 0, 33, 0, 0, 0, 
+ 1205, 0, 0, 34, 0, 0, 0, 
+ 1206, 0, 0, 35, 0, 0, 0, 
+ 1207, 0, 0, 36, 0, 0, 0, 
+ 1208, 0, 0, 37, 0, 0, 0, 
+ 1209, 0, 0, 38, 0, 0, 0, 
+ 1210, 0, 0, 39, 0, 0, 0, 
+ 1211, 0, 0, 40, 0, 0, 0, 
+ 1212, 0, 0, 41, 0, 0, 0, 
+ 1213, 0, 0, 42, 0, 0, 0, 
+ 1214, 0, 0, 43, 0, 0, 0, 
+ 1215, 0, 0, 44, 0, 0, 0, 
+ 1216, 0, 0, 45, 0, 0, 0, 
+ 1217, 0, 0, 46, 0, 0, 0, 
+ 1218, 0, 0, 47, 0, 0, 0, 
+
+*BEAMLOAD    ; Element Beam Loads
+; ELEM_LIST, CMD, TYPE, DIR, bPROJ, [ECCEN], [VALUE], GROUP
+; ELEM_LIST, CMD, TYPE, TYPE, DIR, VX, VY, VZ, bPROJ, [ECCEN], [VALUE], GROUP
+; [VALUE]       : D1, P1, D2, P2, D3, P3, D4, P4
+; [ECCEN]       : bECCEN, ECCDIR, I-END, J-END, bJ-END
+; [ADDITIONAL]  : bADDITIONAL, ADDITIONAL_I-END, ADDITIONAL_J-END, bADDITIONAL_J-END
+  1201, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1202, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1203, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1204, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1205, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1206, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1207, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1208, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1209, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1210, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1211, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1212, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1213, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1214, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1215, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1216, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1217, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1218, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+  1219, BEAM   , UNILOAD, GZ, NO , NO, aDir[1], , , , 0, -5.4, 1, -5.4, 0, 0, 0, 0, , NO, 0, 0, NO, 
+
+; End of data for load case [LC4BULS] -------------------------
+
+
+*LOADCOMB    ; Combinations
+; NAME=NAME, KIND, ACTIVE, bES, iTYPE, DESC, iSERV-TYPE, nLCOMTYPE   ; line 1
+;      ANAL1, LCNAME1, FACT1, ...                                    ; from line 2
+   NAME=ULS, CONC, STRENGTH, 0, 1, , 0, 0
+        ST, LC1AULS, 1, ST, LC1BULS, 1, ST, LC1CULS, 1, ST, LC2ULS, 1
+        ST, LC3ULS, 1, ST, LC4AULS, 1, ST, LC4BULS, 1
+   NAME=SLS, CONC, SERVICE, 0, 1, , 0, 0
+        ST, LC1ASLS, 1, ST, LC1BSLS, 1, ST, LC1CSLS, 1, ST, LC2SLS, 1
+        ST, LC3SLS, 1, ST, LC4ASLS, 1, ST, LC4BSLS, 1
+
+*ENDDATA

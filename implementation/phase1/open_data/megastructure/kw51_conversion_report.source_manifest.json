@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-open-megastructure-source-manifest",
+  "generated_at": "2026-03-01T11:53:12.216569+00:00",
+  "inputs": {
+    "input_path": "implementation/phase1/open_data/tunnel",
+    "candidate_id": "zenodo_kw51_railway_bridge_monitoring_2025",
+    "catalog": "implementation/phase1/open_data/megastructure/mega_structure_catalog.json",
+    "download_if_missing": false,
+    "max_download_bytes": 600000000,
+    "require_source_manifest": true,
+    "source_manifest_out": "implementation/phase1/open_data/megastructure/kw51_conversion_report.source_manifest.json",
+    "forbid_local_sanity_wave": true,
+    "dynamic_out": "implementation/phase1/spatiotemporal_data/kw51_dynamic_cases.jsonl",
+    "benchmark_out": "implementation/phase1/commercial_benchmark_cases.kw51_railway_bridge.json",
+    "report_out": "implementation/phase1/open_data/megastructure/kw51_conversion_report.json",
+    "window_len": 120,
+    "window_stride": 60,
+    "max_cases": 120,
+    "max_nodes": 10,
+    "seed": 23,
+    "effective_mass_kg": 280000.0,
+    "story_height_m": 3.0,
+    "public_case_count": 4,
+    "metric_source": "open_data_measurement"
+  },
+  "source_provenance": [
+    {
+      "source_name": "implementation/phase1/open_data/tunnel/train_passage_load.csv",
+      "sha256": "1e8e2e0895ae7018bb2899e1cf9b8ab15b110cd3bb0c9bf50275cfd698a18628",
+      "bytes": 251237,
+      "synthetic_flag": false
+    }
+  ],
+  "raw_file_hashes": {
+    "implementation/phase1/open_data/tunnel/train_passage_load.csv": "1e8e2e0895ae7018bb2899e1cf9b8ab15b110cd3bb0c9bf50275cfd698a18628"
+  },
+  "source_manifest_pass": true,
+  "synthetic_source_detected": false
+}

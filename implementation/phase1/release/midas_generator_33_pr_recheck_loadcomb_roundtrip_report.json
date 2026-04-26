@@ -1,0 +1,60 @@
+{
+  "contract_version": "0.1.0",
+  "supported": true,
+  "source_model_json": "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json",
+  "recovery_mode": "combination_only_raw_recovery",
+  "raw_combo_count": 8,
+  "export_combo_count": 8,
+  "raw_combo_names": [
+    "STL ENV_SER",
+    "STL ENV_STR",
+    "gLCB1",
+    "gLCB2",
+    "gLCB3",
+    "sLCB1",
+    "sLCB2",
+    "sLCB3"
+  ],
+  "export_combo_names": [
+    "STL ENV_SER",
+    "STL ENV_STR",
+    "gLCB1",
+    "gLCB2",
+    "gLCB3",
+    "sLCB1",
+    "sLCB2",
+    "sLCB3"
+  ],
+  "missing_combo_names": [],
+  "extra_combo_names": [],
+  "shared_combo_names": [
+    "STL ENV_SER",
+    "STL ENV_STR",
+    "gLCB1",
+    "gLCB2",
+    "gLCB3",
+    "sLCB1",
+    "sLCB2",
+    "sLCB3"
+  ],
+  "exact_name_coverage": 1.0,
+  "exact_entry_row_match_count": 8,
+  "exact_entry_row_coverage": 1.0,
+  "exact_header_match_count": 8,
+  "exact_header_coverage": 1.0,
+  "exact_factor_map_match_count": 8,
+  "exact_factor_map_coverage": 1.0,
+  "direct_expression_candidate_count": 6,
+  "exact_expression_match_count": 8,
+  "exact_expression_coverage": 1.3333333333333333,
+  "mismatched_entry_names": [],
+  "mismatched_header_names": [],
+  "mismatched_factor_map_names": [],
+  "mismatched_expression_names": [],
+  "combo_diffs": [],
+  "pass": true,
+  "notes": [
+    "Exact entry-row coverage is the primary round-trip signal for LOADCOMB export fidelity.",
+    "Expression coverage is only scored for direct ST combinations; nested envelope descriptions may be synthesized."
+  ]
+}

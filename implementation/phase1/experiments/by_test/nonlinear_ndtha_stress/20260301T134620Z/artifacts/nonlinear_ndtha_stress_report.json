@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-rust-nonlinear-ndtha-stress",
+  "generated_at": "2026-03-01T13:46:20.763517+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "target_split": "test",
+    "ground_motion_csv": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "min_case_count": 3,
+    "max_case_count": 6,
+    "ag_scale": 2.0,
+    "yield_drift_scale": 0.45,
+    "hardening_ratio": 0.2,
+    "pdelta_factor": 1.0,
+    "dt_scale": 1.0,
+    "newmark_beta": 0.25,
+    "newmark_gamma": 0.5,
+    "max_step_iterations": 16,
+    "step_tol": 0.0001,
+    "max_steps": 2400,
+    "min_load_reversals": 20,
+    "min_plastic_story_count": 1,
+    "accepted_metric_sources": "engine_export_direct,commercial_solver_export,open_data_measurement",
+    "out": "implementation/phase1/nonlinear_ndtha_stress_report.json"
+  },
+  "ground_motion": {
+    "path": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "step_count": 2400,
+    "dt_s": 0.01,
+    "max_abs_accel_g": 1.02479026,
+    "reversal_count": 129,
+    "source": "el_centro_like_synthetic"
+  },
+  "checks": {
+    "metric_source_pass": true,
+    "pdelta_enabled_pass": true,
+    "dynamic_reversal_pass": true,
+    "all_cases_converged": false,
+    "rust_backend_used_pass": false,
+    "plasticity_triggered_all_cases": false,
+    "min_plastic_story_count_pass": false
+  },
+  "summary": {
+    "case_count": 3,
+    "peak_plastic_story_count_min": 0,
+    "peak_plastic_story_count_mean": 0.0,
+    "max_drift_ratio_pct_max": 0.0,
+    "avg_step_iterations_mean": 0.0,
+    "metric_source_invalid_case_ids": []
+  },
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "checks": {
+        "converged_all_steps": false,
+        "rust_backend_all_steps": false,
+        "plasticity_triggered": false
+      },
+      "summary": {
+        "step_count_completed": 1,
+        "max_plastic_story_count": 0,
+        "max_drift_ratio_pct": 0.0,
+        "avg_step_iterations": 0.0
+      },
+      "steps_head": [
+        {
+          "step": 0,
+          "time_s": 0.0,
+          "ag_g": 0.1881674,
+          "converged": false,
+          "rust_backend_ok": false,
+          "iterations": 1
+        }
+      ]
+    },
+    {
+      "case_id": "C-TST-002",
+      "split": "test",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "checks": {
+        "converged_all_steps": false,
+        "rust_backend_all_steps": false,
+        "plasticity_triggered": false
+      },
+      "summary": {
+        "step_count_completed": 1,
+        "max_plastic_story_count": 0,
+        "max_drift_ratio_pct": 0.0,
+        "avg_step_iterations": 0.0
+      },
+      "steps_head": [
+        {
+          "step": 0,
+          "time_s": 0.0,
+          "ag_g": 0.1881674,
+          "converged": false,
+          "rust_backend_ok": false,
+          "iterations": 1
+        }
+      ]
+    },
+    {
+      "case_id": "C-TST-003",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "checks": {
+        "converged_all_steps": false,
+        "rust_backend_all_steps": false,
+        "plasticity_triggered": false
+      },
+      "summary": {
+        "step_count_completed": 1,
+        "max_plastic_story_count": 0,
+        "max_drift_ratio_pct": 0.0,
+        "avg_step_iterations": 0.0
+      },
+      "steps_head": [
+        {
+          "step": 0,
+          "time_s": 0.0,
+          "ag_g": 0.1881674,
+          "converged": false,
+          "rust_backend_ok": false,
+          "iterations": 1
+        }
+      ]
+    }
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_ENGINE_FAIL",
+  "reason": "rust nonlinear solver failed during ndtha step iterations"
+}

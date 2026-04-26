@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-19T00:00:00Z",
+  "manifest_family": "wind_hffb_seed_selection",
+  "source_name": "TPU Aerodynamic Database high-rise HFFB seeds",
+  "source_urls": [
+    "https://db.wind.arch.t-kougei.ac.jp/",
+    "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/experiment/highrise/",
+    "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/experiment/WindForce_UHB/",
+    "https://www.designsafe-ci.org/use-designsafe/tools-applications/hazard-apps/tpu-wind-databases/"
+  ],
+  "real_source_required": true,
+  "target_gap": "raw_wind_tunnel_hffb_mapping_verification",
+  "integration_targets": [
+    "implementation/phase1/build_wind_raw_mapping_artifact.py",
+    "implementation/phase1/wind_tunnel_raw_mapping_report.json",
+    "implementation/phase1/release/release_gap_report.json"
+  ],
+  "seed_cases": [
+    {
+      "seed_id": "tpu_hffb_isolated_highrise_seed_01",
+      "priority": 1,
+      "case_role": "baseline_isolated_highrise",
+      "selection_filters": {
+        "dataset_family": "highrise_pressure_or_force_balance",
+        "interference_condition": "isolated",
+        "geometry_class": "rectangular_or_near_rectangular_tall_building",
+        "minimum_available_outputs": [
+          "time_series",
+          "pressure_or_force_coefficients",
+          "sampling_metadata"
+        ]
+      },
+      "holdout_split": "val",
+      "expected_local_targets": {
+        "raw_csv": "implementation/phase1/open_data/wind/tpu_hffb_isolated_highrise_seed_01.csv",
+        "source_manifest": "implementation/phase1/open_data/wind/tpu_hffb_isolated_highrise_seed_01.manifest.json",
+        "mapping_artifact": "implementation/phase1/tpu_hffb_isolated_highrise_seed_01.mapping.json"
+      },
+      "why": "First direct replacement for the current single CAARC-like wind stream, with official HFFB provenance and clean baseline topology."
+    },
+    {
+      "seed_id": "tpu_hffb_interference_highrise_seed_01",
+      "priority": 2,
+      "case_role": "neighbor_interference_highrise",
+      "selection_filters": {
+        "dataset_family": "highrise_pressure_or_force_balance",
+        "interference_condition": "with_neighboring_building_or_interference",
+        "geometry_class": "tall_building_interference_case",
+        "minimum_available_outputs": [
+          "time_series",
+          "pressure_or_force_coefficients",
+          "sampling_metadata"
+        ]
+      },
+      "holdout_split": "holdout",
+      "expected_local_targets": {
+        "raw_csv": "implementation/phase1/open_data/wind/tpu_hffb_interference_highrise_seed_01.csv",
+        "source_manifest": "implementation/phase1/open_data/wind/tpu_hffb_interference_highrise_seed_01.manifest.json",
+        "mapping_artifact": "implementation/phase1/tpu_hffb_interference_highrise_seed_01.mapping.json"
+      },
+      "why": "Adds a materially different wind-tunnel condition so raw HFFB mapping is not only validated on isolated-tower pressure routing."
+    }
+  ],
+  "ingestion_rules": {
+    "require_source_manifest": true,
+    "require_sha256": true,
+    "require_real_source": true,
+    "forbid_synthetic_substitution": true,
+    "recommended_min_case_count": 2
+  },
+  "next_action": "Download one isolated and one interference TPU high-rise case, convert them into raw CSV plus manifest pairs, then attach them to wind raw mapping validation."
+}

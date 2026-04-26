@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-02T12:54:35.800541+00:00",
+  "test_name": "scaleout_io_profile",
+  "run_dir": "implementation/phase1/experiments/by_test/scaleout_io_profile/20260302T125435Z",
+  "mode": "copy",
+  "archived_count": 2,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/scaleout_io_profile_report.json",
+      "dst": "implementation/phase1/experiments/by_test/scaleout_io_profile/20260302T125435Z/artifacts/scaleout_io_profile_report.json",
+      "kind": "file",
+      "bytes": 4599,
+      "sha256": "c619e54e76a2df2e97c64cfc47515a7d22ee6736f583b14fb216192369fef592",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/scaleout",
+      "dst": "implementation/phase1/experiments/by_test/scaleout_io_profile/20260302T125435Z/artifacts/scaleout",
+      "kind": "directory",
+      "file_count": 21,
+      "bytes": 104486,
+      "mode": "copy"
+    }
+  ]
+}

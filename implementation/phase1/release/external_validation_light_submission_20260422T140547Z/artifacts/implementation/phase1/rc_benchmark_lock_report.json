@@ -1,0 +1,267 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-rc-benchmark-lock-gate",
+  "generated_at": "2026-03-28T15:31:52.729753+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/open_data/rc/rc_benchmark_lock_cases.json",
+    "authority_catalog": "implementation/phase1/open_data/global_authority/authority_source_catalog.json",
+    "require_authority": true,
+    "min_authority_case_count": 3,
+    "min_case_count": 4,
+    "out": "implementation/phase1/rc_benchmark_lock_report.json"
+  },
+  "checks": {
+    "case_count_pass": true,
+    "finite_pass": true,
+    "all_ranges_pass": true,
+    "cracking_case_pass": true,
+    "bond_slip_case_pass": true,
+    "creep_case_pass": true,
+    "slab_wall_case_pass": true,
+    "authority_case_count_pass": true,
+    "authority_public_source_pass": true,
+    "authority_source_integrity_pass": true,
+    "authority_waveform_pass": true,
+    "authority_track_pass": true
+  },
+  "summary": {
+    "case_count": 4,
+    "family_count": 4,
+    "families": [
+      "bond_slip_pullout",
+      "creep_shrinkage_column",
+      "cyclic_wall_cracking",
+      "slab_wall_interaction"
+    ],
+    "authority_case_count": 3,
+    "authority_pass_count": 3,
+    "validation_mode": "hybrid_authority_locked"
+  },
+  "rows": [
+    {
+      "case_id": "RC-CRK-001",
+      "benchmark_family": "cyclic_wall_cracking",
+      "elapsed_hours": 4.0,
+      "cycle_count": 40,
+      "metric_values": {
+        "cracking_index_mean": 1.0,
+        "stiffness_scale_mean": 0.7081266455197994,
+        "yield_scale_mean": 0.8768689694720843
+      },
+      "expected_ranges": {
+        "cracking_index_mean": [
+          0.95,
+          1.0
+        ],
+        "stiffness_scale_mean": [
+          0.68,
+          0.76
+        ],
+        "yield_scale_mean": [
+          0.85,
+          0.9
+        ]
+      },
+      "metric_checks": {
+        "cracking_index_mean": true,
+        "stiffness_scale_mean": true,
+        "yield_scale_mean": true
+      },
+      "case_pass": true
+    },
+    {
+      "case_id": "RC-BND-001",
+      "benchmark_family": "bond_slip_pullout",
+      "elapsed_hours": 1.0,
+      "cycle_count": 120,
+      "metric_values": {
+        "bond_slip_index_mean": 0.910747935940628,
+        "yield_scale_mean": 0.8520522580584705,
+        "stiffness_scale_mean": 0.7140079787092652
+      },
+      "expected_ranges": {
+        "bond_slip_index_mean": [
+          0.8,
+          1.0
+        ],
+        "yield_scale_mean": [
+          0.8,
+          0.9
+        ],
+        "stiffness_scale_mean": [
+          0.7,
+          0.78
+        ]
+      },
+      "metric_checks": {
+        "bond_slip_index_mean": true,
+        "yield_scale_mean": true,
+        "stiffness_scale_mean": true
+      },
+      "case_pass": true
+    },
+    {
+      "case_id": "RC-CRP-001",
+      "benchmark_family": "creep_shrinkage_column",
+      "elapsed_hours": 4320.0,
+      "cycle_count": 2,
+      "metric_values": {
+        "creep_index_mean": 0.999999999999999,
+        "stiffness_scale_mean": 0.6650227413323401,
+        "cracking_index_mean": 0.3090909090909091
+      },
+      "expected_ranges": {
+        "creep_index_mean": [
+          0.95,
+          1.0
+        ],
+        "stiffness_scale_mean": [
+          0.64,
+          0.7
+        ],
+        "cracking_index_mean": [
+          0.1,
+          0.5
+        ]
+      },
+      "metric_checks": {
+        "creep_index_mean": true,
+        "stiffness_scale_mean": true,
+        "cracking_index_mean": true
+      },
+      "case_pass": true
+    },
+    {
+      "case_id": "RC-SLB-001",
+      "benchmark_family": "slab_wall_interaction",
+      "elapsed_hours": 48.0,
+      "cycle_count": 60,
+      "metric_values": {
+        "cracking_index_mean": 1.0,
+        "bond_slip_index_mean": 0.7777200455702608,
+        "yield_scale_mean": 0.8736511395459446
+      },
+      "expected_ranges": {
+        "cracking_index_mean": [
+          0.95,
+          1.0
+        ],
+        "bond_slip_index_mean": [
+          0.6,
+          0.95
+        ],
+        "yield_scale_mean": [
+          0.84,
+          0.93
+        ]
+      },
+      "metric_checks": {
+        "cracking_index_mean": true,
+        "bond_slip_index_mean": true,
+        "yield_scale_mean": true
+      },
+      "case_pass": true
+    }
+  ],
+  "authority_rows": [
+    {
+      "case_id": "NHERI_UCSD_like_holdout_01",
+      "authority_family": "nheri_public_experiment",
+      "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+      "sensor_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case01_sensor.csv",
+      "baseline_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case01_baseline.csv",
+      "waveform_metrics_path": "implementation/phase1/open_data/global_authority/nheri/nheri_case01_waveform_metrics.json",
+      "source_manifest_path": "implementation/phase1/open_data/global_authority/nheri/nheri_case01_source_manifest.json",
+      "sensor_sha256_expected": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+      "sensor_sha256_actual": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+      "baseline_sha256_expected": "653d2c6d6ae1831a5109881f97cf8adf23e495e1858d31c4eb66853374256bff",
+      "baseline_sha256_actual": "653d2c6d6ae1831a5109881f97cf8adf23e495e1858d31c4eb66853374256bff",
+      "metric_values": {
+        "waveform_corr": 1.0,
+        "phase_error_ms": 0.0,
+        "residual_drift_mm": 0.0
+      },
+      "metric_checks": {
+        "waveform_corr_pass": true,
+        "phase_error_pass": true,
+        "residual_drift_pass": true
+      },
+      "integrity_checks": {
+        "real_source": true,
+        "source_url_ok": true,
+        "sensor_sha_ok": true,
+        "baseline_sha_ok": true,
+        "manifest_exists": true,
+        "manifest_source_ok": true
+      },
+      "case_pass": true
+    },
+    {
+      "case_id": "NHERI_UCSD_like_holdout_02",
+      "authority_family": "nheri_public_experiment",
+      "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+      "sensor_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case02_sensor.csv",
+      "baseline_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case02_baseline.csv",
+      "waveform_metrics_path": "implementation/phase1/open_data/global_authority/nheri/nheri_case02_waveform_metrics.json",
+      "source_manifest_path": "implementation/phase1/open_data/global_authority/nheri/nheri_case02_source_manifest.json",
+      "sensor_sha256_expected": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+      "sensor_sha256_actual": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+      "baseline_sha256_expected": "d05e399fcf906492ae339f2a7223110497c5dd3d32648d4e054b689d8e50af08",
+      "baseline_sha256_actual": "d05e399fcf906492ae339f2a7223110497c5dd3d32648d4e054b689d8e50af08",
+      "metric_values": {
+        "waveform_corr": 1.0,
+        "phase_error_ms": 0.0,
+        "residual_drift_mm": 0.0
+      },
+      "metric_checks": {
+        "waveform_corr_pass": true,
+        "phase_error_pass": true,
+        "residual_drift_pass": true
+      },
+      "integrity_checks": {
+        "real_source": true,
+        "source_url_ok": true,
+        "sensor_sha_ok": true,
+        "baseline_sha_ok": true,
+        "manifest_exists": true,
+        "manifest_source_ok": true
+      },
+      "case_pass": true
+    },
+    {
+      "case_id": "NHERI_UCSD_like_holdout_03",
+      "authority_family": "nheri_public_experiment",
+      "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+      "sensor_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_sensor.csv",
+      "baseline_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_baseline.csv",
+      "waveform_metrics_path": "implementation/phase1/open_data/global_authority/nheri/nheri_case03_waveform_metrics.json",
+      "source_manifest_path": "implementation/phase1/open_data/global_authority/nheri/nheri_case03_source_manifest.json",
+      "sensor_sha256_expected": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+      "sensor_sha256_actual": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+      "baseline_sha256_expected": "cbefad1fe1ccfbee57c32d7120cbed2779e3deac153fa45833a76da7c9a06f0e",
+      "baseline_sha256_actual": "cbefad1fe1ccfbee57c32d7120cbed2779e3deac153fa45833a76da7c9a06f0e",
+      "metric_values": {
+        "waveform_corr": 1.0,
+        "phase_error_ms": 0.0,
+        "residual_drift_mm": 0.0
+      },
+      "metric_checks": {
+        "waveform_corr_pass": true,
+        "phase_error_pass": true,
+        "residual_drift_pass": true
+      },
+      "integrity_checks": {
+        "real_source": true,
+        "source_url_ok": true,
+        "sensor_sha_ok": true,
+        "baseline_sha_ok": true,
+        "manifest_exists": true,
+        "manifest_source_ok": true
+      },
+      "case_pass": true
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "rc benchmark lock gate passed"
+}

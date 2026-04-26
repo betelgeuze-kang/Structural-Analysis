@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-peer-spd-properties-tables",
+  "generated_at": "2026-03-19T15:09:55.460084+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "Official PEER SPD property tables fetched.",
+  "inputs": {
+    "out_dir": "implementation/phase1/open_data/pbd_hinge/peer_spd",
+    "rectangular_url": "https://nisee.berkeley.edu/spd/rectangular_properties.txt",
+    "spiral_url": "https://nisee.berkeley.edu/spd/spiral_properties.txt"
+  },
+  "summary": {
+    "table_count": 2,
+    "table_pass_count": 2,
+    "table_fail_count": 0,
+    "fresh_fetch_count": 2,
+    "cache_reuse_count": 0,
+    "line_count_total": 420
+  },
+  "rows": [
+    {
+      "table_kind": "rectangular",
+      "source_url": "https://nisee.berkeley.edu/spd/rectangular_properties.txt",
+      "fetched_url": "https://nisee.berkeley.edu/spd/rectangular_properties.txt",
+      "path": "implementation/phase1/open_data/pbd_hinge/peer_spd/rectangular_properties.txt",
+      "line_count": 255,
+      "sha256": "295ef353428f6a4589fd5737688aed5f9da76309924cb774c1faa8c2564ec3a6",
+      "contract_pass": true,
+      "fresh_fetch": true,
+      "cache_reused": false,
+      "error": ""
+    },
+    {
+      "table_kind": "spiral",
+      "source_url": "https://nisee.berkeley.edu/spd/spiral_properties.txt",
+      "fetched_url": "https://nisee.berkeley.edu/spd/spiral_properties.txt",
+      "path": "implementation/phase1/open_data/pbd_hinge/peer_spd/spiral_properties.txt",
+      "line_count": 165,
+      "sha256": "010fda1fc4f98c251ccdc35223a059aa299a3780e238569015b261162a9c2271",
+      "contract_pass": true,
+      "fresh_fetch": true,
+      "cache_reused": false,
+      "error": ""
+    }
+  ]
+}

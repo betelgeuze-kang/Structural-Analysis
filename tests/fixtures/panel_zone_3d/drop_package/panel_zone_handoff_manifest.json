@@ -1,0 +1,8 @@
+{
+  "source_origin_class": "fixture_sample",
+  "inputs": {
+    "joint_geometry_source": "../joint_geometry_source.json",
+    "rebar_anchorage_source": "../rebar_anchorage_source.json",
+    "clash_verification_source": "../clash_verification_source.json"
+  }
+}

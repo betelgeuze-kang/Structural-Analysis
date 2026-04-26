@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-nightly-release-snapshot",
+  "generated_at": "2026-03-01T12:28:12.713880+00:00",
+  "snapshot": "phase3_nightly_hardening_20260301T122812Z",
+  "source_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1",
+  "release_policy": {
+    "commercial_readiness_pass": true,
+    "commercial_readiness_real_source_pass": true,
+    "commercial_readiness_gpu_strict_pass": true,
+    "forbid_toy_cases_enforced": true,
+    "real_source_multi_pass": true,
+    "real_source_multi_all_real_source_pass": true,
+    "real_source_multi_all_toy_free_pass": true,
+    "phase3_shell_beam_mix_pass": true,
+    "phase3_gpu_strict_pass": true,
+    "phase3_real_source_verified": true,
+    "topology_shell_beam_mix_pass": true,
+    "scaleout_io_gpu_strict_pass": true,
+    "policy_pass": true
+  },
+  "release_policy_sha256": "57e7c18be56c0c5e3d87116570aea9f26642c139a0b010ac6848a37c406a16c1",
+  "files": [
+    {
+      "file": "phase3_megastructure_pipeline_report.json",
+      "bytes": 9336,
+      "sha256": "ab65b35682e2c8e2b8a86e084cca3bc8f75d226268e40dd03c9446e9f60d9a62"
+    },
+    {
+      "file": "opensees_topology_report.json",
+      "bytes": 2456,
+      "sha256": "8c11a78a15f8928996fcfa796bfc2fda413c582c3f71e5f90ab04e94afd2ef05"
+    },
+    {
+      "file": "partitioned_scaleout_report.json",
+      "bytes": 9063,
+      "sha256": "4a71016a4c50315b1faf405290711832aefeb0fa5a15a3557fbea1901293d997"
+    },
+    {
+      "file": "sync_stress_gate_report.json",
+      "bytes": 4690,
+      "sha256": "15c8a3ef21639df656172cae38e2fe75ef799449c96f06ca2689c1b99050c63a"
+    },
+    {
+      "file": "noise_convergence_gate_report.json",
+      "bytes": 12836,
+      "sha256": "ddaaf33d69e0790f5ae6b655d3ab5394d076a69bf8642b52f226e569189036b9"
+    },
+    {
+      "file": "commercial_csv_gate_report.json",
+      "bytes": 3062,
+      "sha256": "015f4de8f37b508b5971236fe926a2caf3653d0b73e1b5e9f5a22414916075e3"
+    },
+    {
+      "file": "commercial_readiness_report.json",
+      "bytes": 14728,
+      "sha256": "587589d52f2e4960187171249e037eefa27f11a02826725ce5d827781411841f"
+    },
+    {
+      "file": "real_source_multi_gate_report.json",
+      "bytes": 1862,
+      "sha256": "4b2192e941dfc5a7d49ecbd147f05fb25f941f541c22c04dc991df85e497dbc9"
+    },
+    {
+      "file": "nightly_10m_repro_report.json",
+      "bytes": 4194,
+      "sha256": "2cdf559a15ba2e9c68ae25e4ed7b6331c0de6d3014fb7bd1c488a6105a25c2a8"
+    },
+    {
+      "file": "scaleout_io_profile_report.json",
+      "bytes": 4745,
+      "sha256": "7402c39638e92c3e3b2f629d720f295b2c988f60beb30050e3d4a4d7ceda6831"
+    },
+    {
+      "file": "ci_gate_report.json",
+      "bytes": 1630,
+      "sha256": "a0b32eda3e2bad79adc0e029c1d98c7671abbe6a4853977e62e581eeda81b4ce"
+    },
+    {
+      "file": "static_artifact_validation_report.json",
+      "bytes": 5693,
+      "sha256": "eabd29878b6eee9c53b58ba5ec779ab06f80ff9796990ef92299d648495a5880"
+    },
+    {
+      "file": "ci_artifact_manifest.json",
+      "bytes": 3362,
+      "sha256": "f530f9151a9eb1df3d2ac1cb3f257f1b09cc2b421c03474811262f1bad68d6f1"
+    }
+  ]
+}

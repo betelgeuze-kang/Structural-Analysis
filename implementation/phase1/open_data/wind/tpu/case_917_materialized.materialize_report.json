@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-materialize-tpu-hffb-seed",
+  "generated_at": "2026-03-19T13:28:17.630629+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU HFFB seed materialized successfully from case page and MAT source.",
+  "inputs": {
+    "seed_id": "tpu_hffb_interference_highrise_seed_01",
+    "out_dir": "implementation/phase1/open_data/wind/tpu/case_917_materialized",
+    "case_id": "917",
+    "case_page_url": "",
+    "case_page_html": "",
+    "mat_url": "",
+    "mat_index": 0,
+    "dataset_key": "",
+    "time_key": ""
+  },
+  "steps": {
+    "fetch": {
+      "returncode": 0,
+      "stdout": "Wrote TPU fetch manifest: implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.fetch_manifest.json\nWrote TPU fetch report: implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.fetch_report.json\n",
+      "stderr": "",
+      "report": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.fetch_report.json"
+    },
+    "convert": {
+      "returncode": 0,
+      "stdout": "Wrote TPU MAT conversion report: implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.convert_report.json\nWrote TPU MAT CSV: implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv\n",
+      "stderr": "",
+      "report": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.convert_report.json"
+    },
+    "prepare": {
+      "returncode": 0,
+      "stdout": "Wrote TPU HFFB source manifest: implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.source_manifest.json\nWrote TPU HFFB seed report: implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.prepare_report.json\n",
+      "stderr": "",
+      "report": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.prepare_report.json"
+    }
+  },
+  "artifacts": {
+    "fetched_mat": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.mat",
+    "out_csv": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+    "out_manifest": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.source_manifest.json"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "bytes_copied": 2918230,
+  "collector_version": "0.2.0",
+  "content_type": "application/pdf",
+  "download_mode": "remote_provider_asset",
+  "family_id": "transfer_podium_tower",
+  "original_reference": "",
+  "remote_candidate_url": "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+  "schema_version": "1.0",
+  "sha256": "2d8ba0cc836ab3f6f488d37c534f6dfd6d3a1133761a1ef3ed0572b74849e510",
+  "source_format": "report_pdf",
+  "source_id": "peer_transfer_podium_tower_remote",
+  "source_urls": [
+    "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
+    "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+    "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf"
+  ],
+  "title": "PEER transfer podium tower benchmark candidate"
+}

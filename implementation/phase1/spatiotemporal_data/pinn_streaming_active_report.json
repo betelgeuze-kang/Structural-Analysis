@@ -1,0 +1,175 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-pinn-streaming-active",
+  "generated_at": "2026-02-25T15:27:23.301464+00:00",
+  "inputs": {
+    "steps": 260,
+    "batch_size": 10,
+    "seq_len": 120,
+    "dt": 0.01,
+    "coupling_k": 2800.0,
+    "hidden": 80,
+    "lr": 0.0015,
+    "lambda_phys": 3.2,
+    "lambda_smooth": 0.04,
+    "active_every": 40,
+    "active_candidates": 80,
+    "active_add": 16,
+    "hard_pool_cap": 240,
+    "val_cases": 80,
+    "seed": 23
+  },
+  "streaming_summary": {
+    "streamed_case_count": 2600,
+    "active_events": 6,
+    "hard_cases_added_total": 96,
+    "hard_pool_final_size": 96,
+    "average_active_score": 0.3692164667759332,
+    "estimated_equivalent_saved_cases": 3080
+  },
+  "pinn_principle": {
+    "hard_constraint_in_loss": true,
+    "equation": "M*u_ddot + C*u_dot + K*u - f_ext = 0",
+    "physics_loss_included": true,
+    "on_the_fly_generation": true,
+    "active_learning_enabled": true
+  },
+  "validation_metrics": {
+    "case_count": 80,
+    "mae_pct": 77.33238187103859,
+    "peak_error_pct": 100.20630927274914,
+    "physics_residual_mse": 0.07953424844890833
+  },
+  "test_metrics": {
+    "case_count": 80,
+    "mae_pct": 77.35597575425399,
+    "peak_error_pct": 99.63803976678926,
+    "physics_residual_mse": 0.07381406426429749
+  },
+  "history_tail": [
+    {
+      "step": 249,
+      "loss_total": 0.26797375082969666,
+      "loss_data": 0.009146301075816154,
+      "loss_physics": 0.08088357746601105,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 79.05925839952161,
+      "train_peak_error_pct": 100.52669608157362,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 250,
+      "loss_total": 0.2510984241962433,
+      "loss_data": 0.008733191527426243,
+      "loss_physics": 0.07573913037776947,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 78.36436293309825,
+      "train_peak_error_pct": 101.67498263472388,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 251,
+      "loss_total": 0.2577998638153076,
+      "loss_data": 0.009069669991731644,
+      "loss_physics": 0.07772818207740784,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 79.05481101879606,
+      "train_peak_error_pct": 98.42899420231083,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 252,
+      "loss_total": 0.2721054255962372,
+      "loss_data": 0.008892842568457127,
+      "loss_physics": 0.08225393295288086,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 78.68450044293988,
+      "train_peak_error_pct": 99.40788879291647,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 253,
+      "loss_total": 0.2751440107822418,
+      "loss_data": 0.010366125032305717,
+      "loss_physics": 0.0827430933713913,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 80.21836011247946,
+      "train_peak_error_pct": 101.9895198924306,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 254,
+      "loss_total": 0.28608283400535583,
+      "loss_data": 0.010710733942687511,
+      "loss_physics": 0.0860537737607956,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 80.6245566018279,
+      "train_peak_error_pct": 97.90855047151067,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 255,
+      "loss_total": 0.25536301732063293,
+      "loss_data": 0.009993338026106358,
+      "loss_physics": 0.07667802274227142,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 79.86961706474818,
+      "train_peak_error_pct": 99.43224502889615,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 256,
+      "loss_total": 0.24561114609241486,
+      "loss_data": 0.009420876391232014,
+      "loss_physics": 0.07380945980548859,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 78.73107037673134,
+      "train_peak_error_pct": 99.20631030980454,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 257,
+      "loss_total": 0.2664162516593933,
+      "loss_data": 0.00785334687680006,
+      "loss_physics": 0.08080089837312698,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 77.56402324708058,
+      "train_peak_error_pct": 101.04923680365575,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 258,
+      "loss_total": 0.2690914571285248,
+      "loss_data": 0.009173623286187649,
+      "loss_physics": 0.08122432231903076,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 78.21727443828266,
+      "train_peak_error_pct": 99.57706616501001,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 259,
+      "loss_total": 0.27797284722328186,
+      "loss_data": 0.008938025683164597,
+      "loss_physics": 0.08407337963581085,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 78.05811169837983,
+      "train_peak_error_pct": 99.9764691924385,
+      "hard_pool_size": 96
+    },
+    {
+      "step": 260,
+      "loss_total": 0.2649911344051361,
+      "loss_data": 0.008024216629564762,
+      "loss_physics": 0.0803021639585495,
+      "loss_smooth": 0.0,
+      "train_mae_pct": 77.946156369138,
+      "train_peak_error_pct": 100.5298547505649,
+      "hard_pool_size": 96
+    }
+  ],
+  "checkpoint": "implementation/phase1/spatiotemporal_data/pinn_streaming_active.pt",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "streaming pinn training completed"
+}

@@ -1,0 +1,15 @@
+{
+  "bytes_copied": 2850355,
+  "collector_version": "0.2.0",
+  "family_id": "torsionally_eccentric_core_tower",
+  "original_reference": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl",
+  "schema_version": "1.0",
+  "sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+  "source_format": "tcl",
+  "source_id": "luxinzheng_megatall_tcl_model1_local",
+  "source_urls": [
+    "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+    "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip"
+  ],
+  "title": "OpenSees 606 m mega-tall building Model 1 TCL"
+}

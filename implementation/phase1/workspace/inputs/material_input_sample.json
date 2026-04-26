@@ -1,0 +1,19 @@
+{
+  "rows": [
+    {
+      "member_id": "J1",
+      "units": "SI",
+      "E": 210000000000,
+      "A": 0.02,
+      "Iy": 0.00009,
+      "Iz": 0.00003,
+      "L0": 6.2,
+      "fy": 355000000,
+      "material_type": "steel",
+      "regulation": "kbc_2021",
+      "section_class": "wide_flange",
+      "temperature_factor": 1.0,
+      "time_factor": 1.0
+    }
+  ]
+}

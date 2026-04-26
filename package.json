@@ -1,0 +1,30 @@
+{
+  "name": "structural-optimization-workbench",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Deterministic Vite/React shell for structural review and release surfaces.",
+  "type": "module",
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": ">=20.19.0 <21",
+    "npm": ">=10.8.2 <11"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "verify:frontend-contract": "node ./scripts/verify-frontend-build-contract.mjs",
+    "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.15",
+    "@types/react-dom": "18.2.7",
+    "@vitejs/plugin-react": "6.0.1",
+    "typescript": "5.0.2",
+    "vite": "8.0.8"
+  }
+}

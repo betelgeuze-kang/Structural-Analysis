@@ -1,0 +1,315 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-design-optimization-baseline",
+  "generated_at": "2026-03-12T10:23:57.109903+00:00",
+  "inputs": {
+    "dataset_npz": "implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "rebar_step": 0.002,
+    "min_rebar_ratio": 0.004,
+    "max_rebar_ratio": 0.08,
+    "max_iterations": 48,
+    "dcr_limit": 1.0,
+    "drift_limit_pct": 2.0,
+    "residual_drift_limit_pct": 0.5
+  },
+  "summary": {
+    "group_count": 517,
+    "baseline_cost_proxy": 142860.3328482246,
+    "final_cost_proxy": 143420.26116822462,
+    "cost_reduction_proxy": -559.9283200000064,
+    "baseline_violation_score": 12022.162625000004,
+    "final_violation_score": 1421.9626250000094,
+    "feasible_after_repair": false,
+    "final_max_dcr": 1.5687850500000038,
+    "final_drift_pct": 0.0,
+    "final_residual_drift_pct": 0.0,
+    "iteration_count_stage1": 28,
+    "iteration_count_stage2": 0
+  },
+  "stage1_actions_head": [
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 11459.608625000008,
+      "estimated_cost": 142880.33028822462,
+      "estimated_max_dcr": 1.8341410500000004,
+      "estimated_drift_pct": 8.827700000000004,
+      "estimated_residual_drift_pct": 1.8122400000000007
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 10897.054625000006,
+      "estimated_cost": 142900.32772822463,
+      "estimated_max_dcr": 1.8243130500000004,
+      "estimated_drift_pct": 8.455400000000003,
+      "estimated_residual_drift_pct": 1.7108800000000006
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 10334.500625000004,
+      "estimated_cost": 142920.3251682246,
+      "estimated_max_dcr": 1.8144850500000005,
+      "estimated_drift_pct": 8.083100000000002,
+      "estimated_residual_drift_pct": 1.6095200000000005
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 9771.946625000004,
+      "estimated_cost": 142940.3226082246,
+      "estimated_max_dcr": 1.8046570500000005,
+      "estimated_drift_pct": 7.710800000000002,
+      "estimated_residual_drift_pct": 1.5081600000000004
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 9209.392625000004,
+      "estimated_cost": 142960.32004822462,
+      "estimated_max_dcr": 1.7948290500000006,
+      "estimated_drift_pct": 7.338500000000002,
+      "estimated_residual_drift_pct": 1.4068000000000003
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 8646.838625000004,
+      "estimated_cost": 142980.3174882246,
+      "estimated_max_dcr": 1.7850010500000006,
+      "estimated_drift_pct": 6.9662000000000015,
+      "estimated_residual_drift_pct": 1.3054400000000002
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 8084.284625000004,
+      "estimated_cost": 143000.3149282246,
+      "estimated_max_dcr": 1.7751730500000007,
+      "estimated_drift_pct": 6.593900000000001,
+      "estimated_residual_drift_pct": 1.20408
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 7521.730625000004,
+      "estimated_cost": 143020.3123682246,
+      "estimated_max_dcr": 1.7653450500000007,
+      "estimated_drift_pct": 6.221600000000001,
+      "estimated_residual_drift_pct": 1.10272
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 6959.176625000004,
+      "estimated_cost": 143040.3098082246,
+      "estimated_max_dcr": 1.7555170500000008,
+      "estimated_drift_pct": 5.849300000000001,
+      "estimated_residual_drift_pct": 1.0013599999999998
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 6396.622625000004,
+      "estimated_cost": 143060.30724822462,
+      "estimated_max_dcr": 1.7456890500000009,
+      "estimated_drift_pct": 5.477000000000001,
+      "estimated_residual_drift_pct": 0.8999999999999997
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 5834.0686250000035,
+      "estimated_cost": 143080.30468822463,
+      "estimated_max_dcr": 1.735861050000001,
+      "estimated_drift_pct": 5.104700000000001,
+      "estimated_residual_drift_pct": 0.7986399999999996
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 5271.514625000003,
+      "estimated_cost": 143100.30212822463,
+      "estimated_max_dcr": 1.726033050000001,
+      "estimated_drift_pct": 4.732400000000001,
+      "estimated_residual_drift_pct": 0.6972799999999995
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 4708.960625000003,
+      "estimated_cost": 143120.2995682246,
+      "estimated_max_dcr": 1.716205050000001,
+      "estimated_drift_pct": 4.360100000000001,
+      "estimated_residual_drift_pct": 0.5959199999999993
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 4151.302625000003,
+      "estimated_cost": 143140.29700822462,
+      "estimated_max_dcr": 1.706377050000001,
+      "estimated_drift_pct": 3.9878000000000005,
+      "estimated_residual_drift_pct": 0.4945599999999992
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 3679.9726250000026,
+      "estimated_cost": 143160.2944482246,
+      "estimated_max_dcr": 1.6965490500000011,
+      "estimated_drift_pct": 3.6155,
+      "estimated_residual_drift_pct": 0.3931999999999991
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 3208.642625000002,
+      "estimated_cost": 143180.2918882246,
+      "estimated_max_dcr": 1.6867210500000012,
+      "estimated_drift_pct": 3.2431999999999994,
+      "estimated_residual_drift_pct": 0.291839999999999
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 2737.3126250000014,
+      "estimated_cost": 143200.2893282246,
+      "estimated_max_dcr": 1.6768930500000012,
+      "estimated_drift_pct": 2.870899999999999,
+      "estimated_residual_drift_pct": 0.1904799999999989
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 2265.982625000001,
+      "estimated_cost": 143220.2867682246,
+      "estimated_max_dcr": 1.6670650500000013,
+      "estimated_drift_pct": 2.4985999999999984,
+      "estimated_residual_drift_pct": 0.08911999999999881
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1794.6526250000009,
+      "estimated_cost": 143240.28420822462,
+      "estimated_max_dcr": 1.6572370500000013,
+      "estimated_drift_pct": 2.126299999999998,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1618.5226250000035,
+      "estimated_cost": 143260.28164822463,
+      "estimated_max_dcr": 1.6474090500000014,
+      "estimated_drift_pct": 1.7539999999999976,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1593.9526250000035,
+      "estimated_cost": 143280.27908822463,
+      "estimated_max_dcr": 1.6375810500000014,
+      "estimated_drift_pct": 1.3816999999999973,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1569.3826250000036,
+      "estimated_cost": 143300.2765282246,
+      "estimated_max_dcr": 1.6277530500000015,
+      "estimated_drift_pct": 1.009399999999997,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1544.812625000004,
+      "estimated_cost": 143320.27396822462,
+      "estimated_max_dcr": 1.6179250500000015,
+      "estimated_drift_pct": 0.6370999999999967,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1520.242625000004,
+      "estimated_cost": 143340.2714082246,
+      "estimated_max_dcr": 1.6080970500000016,
+      "estimated_drift_pct": 0.2647999999999963,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1495.672625000004,
+      "estimated_cost": 143360.2688482246,
+      "estimated_max_dcr": 1.5982690500000016,
+      "estimated_drift_pct": 0.0,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1471.1026250000043,
+      "estimated_cost": 143380.2662882246,
+      "estimated_max_dcr": 1.5884410500000017,
+      "estimated_drift_pct": 0.0,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1446.5326250000044,
+      "estimated_cost": 143400.2637282246,
+      "estimated_max_dcr": 1.5786130500000017,
+      "estimated_drift_pct": 0.0,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "violation_score": 1421.9626250000094,
+      "estimated_cost": 143420.26116822462,
+      "estimated_max_dcr": 1.5687850500000038,
+      "estimated_drift_pct": 0.0,
+      "estimated_residual_drift_pct": 0.0
+    }
+  ],
+  "stage2_actions_head": [],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "design optimization baseline completed"
+}

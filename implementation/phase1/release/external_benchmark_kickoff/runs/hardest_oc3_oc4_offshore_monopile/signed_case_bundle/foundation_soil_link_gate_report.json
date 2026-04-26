@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-foundation-soil-link-gate",
+  "generated_at": "2026-03-28T14:51:41.038199+00:00",
+  "inputs": {
+    "foundation_optimization_report": "implementation/phase1/release/design_optimization/foundation_optimization_report.json",
+    "foundation_optimization_artifact": "implementation/phase1/release/design_optimization/foundation_optimization_artifact.json",
+    "ssi_boundary_report": "implementation/phase1/ssi_boundary_gate_report.json",
+    "soil_tunnel_ssi_report": "implementation/phase1/soil_tunnel_ssi_report.json",
+    "soil_impedance_table": "implementation/phase1/soil_impedance_table.json",
+    "structural_contact_validation_report": "implementation/phase1/structural_contact_validation_report.json",
+    "out": "implementation/phase1/foundation_soil_link_gate_report.json",
+    "input_sha256": {
+      "foundation_optimization_report": "a4a0c756862431107688a84f0437a56f2693f6a58218f8a09372497d4dbabc88",
+      "foundation_optimization_artifact": "ce41b7ffa89582b2529b5802e334f077b569fac805359ae0ad8b9f366c944183",
+      "ssi_boundary_report": "8fb597fc97c2b0751d84d9128946d83672a14990155f620aa7f7f9f8a9414a1c",
+      "soil_tunnel_ssi_report": "b1abbc822d8e5628afaf9bc8578b84615cd79f3a1768eca0683feb1c8b7d74ca",
+      "soil_impedance_table": "23699f08d2402a6698bf82fe8cd40a9447571609614a26a298f4da1f27aa9ee6",
+      "structural_contact_validation_report": "1b3fe0a82287589f90651c86b053337e4ee35144426f8bae3846b8531a548850"
+    }
+  },
+  "checks": {
+    "foundation_scope_ready": true,
+    "foundation_artifact_ready": true,
+    "ssi_boundary_ready": true,
+    "soil_tunnel_ready": true,
+    "impedance_schema_ready": true,
+    "foundation_link_models_ready": true
+  },
+  "summary": {
+    "foundation_member_type_count": 76,
+    "optimized_foundation_group_count": 2,
+    "foundation_scope_source": "dataset_summary",
+    "foundation_optimization_mode": "active_foundation_member_optimization",
+    "soil_link_contract_tokens": [
+      "k_radial_N_m2",
+      "k_tangential_N_m2",
+      "c_radial_Ns_m2",
+      "c_tangential_Ns_m2"
+    ],
+    "foundation_link_model_types": [
+      "bearing_bilinear",
+      "compression_only_penalty",
+      "coulomb_friction",
+      "kelvin_voigt_pounding",
+      "normal_gap_unilateral",
+      "uplift_seat_unilateral"
+    ],
+    "required_foundation_link_models": [
+      "bearing_bilinear",
+      "compression_only_penalty",
+      "normal_gap_unilateral",
+      "uplift_seat_unilateral"
+    ],
+    "missing_foundation_link_models": []
+  },
+  "summary_line": "Foundation/soil link: PASS | foundation_members=76 | optimized_groups=2 | ssi=yes | soil_tunnel=yes | impedance_schema=yes | links=6(bearing_bilinear,compression_only_penalty,coulomb_friction,kelvin_voigt_pounding,normal_gap_unilateral,uplift_seat_unilateral)",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "direct nonlinear foundation/soil-link evidence is present across foundation optimization, SSI, soil-link dynamics, and validated support links",
+  "limitations": [
+    "This gate summarizes checked-in contract evidence and does not solve a full foundation FE interaction benchmark matrix by itself.",
+    "The soil impedance table is treated as a checked-in contract surface for radial/tangential spring-dashpot parameters.",
+    "Foundation link evidence currently relies on validated support-link families plus SSI/foundation optimization artifacts."
+  ]
+}

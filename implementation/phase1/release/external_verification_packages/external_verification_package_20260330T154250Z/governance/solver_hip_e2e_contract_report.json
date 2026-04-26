@@ -1,0 +1,649 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-solver-hip-e2e-contract",
+  "generated_at": "2026-03-30T15:08:09.117171+00:00",
+  "checks": {
+    "strict_probe_pass": true,
+    "nonlinear_frame_gpu_pass": true,
+    "ndtha_gpu_pass": true,
+    "track_gpu_pass": true,
+    "all_main_loops_gpu_pass": true,
+    "nonlinear_frame_production_kernel_pass": true,
+    "ndtha_production_kernel_pass": true,
+    "track_production_kernel_pass": true,
+    "all_production_kernel_pass": true,
+    "nonlinear_frame_surrogate_runtime_free_pass": true,
+    "ndtha_surrogate_runtime_free_pass": true,
+    "track_surrogate_runtime_free_pass": true,
+    "no_surrogate_runtime_markers_pass": true,
+    "no_cpu_backend_pass": true,
+    "no_cpu_required_pass": true,
+    "no_cpu_fallback_pass": true,
+    "all_force_jacobian_consistent_pass": true,
+    "hazard_topology_diversity_pass": true
+  },
+  "strict_probe_summary": {
+    "runtime_backend": "rocm_torch",
+    "gpu_strict_pass": true,
+    "cpu_required": false,
+    "cpu_fallback_used": false
+  },
+  "summary": {
+    "solver_count": 20,
+    "gpu_solver_count": 20,
+    "device_residency_ratio_min": 1.0,
+    "production_kernel_solver_count": 20,
+    "surrogate_runtime_free_solver_count": 20,
+    "force_jacobian_consistent_solver_count": 20,
+    "hazard_family_count": 20,
+    "topology_family_count": 17,
+    "load_path_family_count": 15,
+    "hip_kernel_invocation_count_total": 848
+  },
+  "summary_line": "Solver HIP e2e: PASS | gpu_loops=20/20 | production_kernel=20/20 | surrogate_free=20/20 | variants=20 | hazards=20 | topologies=17 | load_paths=15 | device_residency_min=1.00 | hip_kernels=848",
+  "solver_rows": [
+    {
+      "solver": "nonlinear_frame_static_rc",
+      "elapsed_seconds": 1.427435728999626,
+      "backend": "rust_ffi_nonlinear_frame",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 6,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "gravity_plus_lateral",
+        "topology_family": "regular_rc_frame",
+        "load_path_family": "gravity_biased_static"
+      },
+      "converged": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_static_steel_slender",
+      "elapsed_seconds": 0.0011353819991199998,
+      "backend": "rust_ffi_nonlinear_frame",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 6,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "gravity_plus_wind",
+        "topology_family": "slender_steel_frame",
+        "load_path_family": "gravity_biased_static"
+      },
+      "converged": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_static_transfer_irregular",
+      "elapsed_seconds": 0.0010425470009067794,
+      "backend": "rust_ffi_nonlinear_frame",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 6,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "gravity_plus_transfer",
+        "topology_family": "transfer_irregular_frame",
+        "load_path_family": "gravity_biased_static"
+      },
+      "converged": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_static_soft_story",
+      "elapsed_seconds": 0.0009704939984658267,
+      "backend": "rust_ffi_nonlinear_frame",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 6,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "gravity_plus_setback",
+        "topology_family": "soft_story_frame",
+        "load_path_family": "gravity_biased_static"
+      },
+      "converged": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_static_podium_torsion",
+      "elapsed_seconds": 0.0009685039985924959,
+      "backend": "rust_ffi_nonlinear_frame",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 6,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "gravity_plus_torsion",
+        "topology_family": "podium_setback_frame",
+        "load_path_family": "torsion_biased_static"
+      },
+      "converged": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_static_diaphragm_transfer",
+      "elapsed_seconds": 0.0009611639998183819,
+      "backend": "rust_ffi_nonlinear_frame",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 6,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "gravity_plus_diaphragm",
+        "topology_family": "coupled_diaphragm_frame",
+        "load_path_family": "transfer_static_push"
+      },
+      "converged": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_ndtha_service",
+      "elapsed_seconds": 0.12811014300132229,
+      "backend": "rust_ffi_nonlinear_frame_ndtha",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 112,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "seismic_service",
+        "topology_family": "regular_rc_frame",
+        "load_path_family": "single_axis_response_history"
+      },
+      "converged_all_steps": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_ndtha_pulse",
+      "elapsed_seconds": 0.10636918899945158,
+      "backend": "rust_ffi_nonlinear_frame_ndtha",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 112,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "seismic_pulse",
+        "topology_family": "slender_steel_frame",
+        "load_path_family": "single_axis_response_history"
+      },
+      "converged_all_steps": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_ndtha_wind_burst",
+      "elapsed_seconds": 0.10539672500090091,
+      "backend": "rust_ffi_nonlinear_frame_ndtha",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 112,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "wind_burst",
+        "topology_family": "transfer_irregular_frame",
+        "load_path_family": "single_axis_response_history"
+      },
+      "converged_all_steps": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_ndtha_aftershock",
+      "elapsed_seconds": 0.10558940300143149,
+      "backend": "rust_ffi_nonlinear_frame_ndtha",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 112,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "aftershock_sequence",
+        "topology_family": "dual_system_frame",
+        "load_path_family": "aftershock_response_history"
+      },
+      "converged_all_steps": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_ndtha_bidirectional",
+      "elapsed_seconds": 0.10538092400020105,
+      "backend": "rust_ffi_nonlinear_frame_ndtha",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 112,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "seismic_bidirectional",
+        "topology_family": "torsion_irregular_frame",
+        "load_path_family": "bidirectional_response_history"
+      },
+      "converged_all_steps": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_ndtha_transition_wind",
+      "elapsed_seconds": 0.10541583600024751,
+      "backend": "rust_ffi_nonlinear_frame_ndtha",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 112,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "wind_transition_gust",
+        "topology_family": "setback_transition_frame",
+        "load_path_family": "gust_history_transition"
+      },
+      "converged_all_steps": true,
+      "status": 0
+    },
+    {
+      "solver": "nonlinear_frame_ndtha_pounding_sequence",
+      "elapsed_seconds": 0.10537174299861363,
+      "backend": "rust_ffi_nonlinear_frame_ndtha",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 112,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "seismic_pounding_sequence",
+        "topology_family": "adjacent_tower_frame",
+        "load_path_family": "pounding_history"
+      },
+      "converged_all_steps": true,
+      "status": 0
+    },
+    {
+      "solver": "track_lf_timoshenko",
+      "elapsed_seconds": 0.000820767998447991,
+      "backend": "rust_ffi_kernel",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 4,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "moving_axle",
+        "topology_family": "pinned_timoshenko_track",
+        "load_path_family": "moving_point_load"
+      },
+      "converged": true,
+      "status_code": 0
+    },
+    {
+      "solver": "track_lf_euler_fixed",
+      "elapsed_seconds": 0.000555724998775986,
+      "backend": "rust_ffi_kernel",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 4,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "settlement_contact",
+        "topology_family": "fixed_euler_track",
+        "load_path_family": "settlement_contact_load"
+      },
+      "converged": true,
+      "status_code": 0
+    },
+    {
+      "solver": "track_lf_pasternak_transition",
+      "elapsed_seconds": 0.0007347629998548655,
+      "backend": "rust_ffi_kernel",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 4,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "transition_zone_coupling",
+        "topology_family": "elastic_foundation_track",
+        "load_path_family": "transition_zone_transfer"
+      },
+      "converged": true,
+      "status_code": 0
+    },
+    {
+      "solver": "track_lf_ballasted_wave",
+      "elapsed_seconds": 0.0006823809999332298,
+      "backend": "rust_ffi_kernel",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 4,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "ballast_wave_radiation",
+        "topology_family": "ballasted_transition_track",
+        "load_path_family": "ballast_radiation_wave"
+      },
+      "converged": true,
+      "status_code": 0
+    },
+    {
+      "solver": "track_lf_bridge_approach",
+      "elapsed_seconds": 0.0005438839998532785,
+      "backend": "rust_ffi_kernel",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 4,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "bridge_approach_impact",
+        "topology_family": "bridge_approach_track",
+        "load_path_family": "bridge_approach_point_load"
+      },
+      "converged": true,
+      "status_code": 0
+    },
+    {
+      "solver": "track_lf_tunnel_transition",
+      "elapsed_seconds": 0.0006755100002919789,
+      "backend": "rust_ffi_kernel",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 4,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "tunnel_transition_settlement",
+        "topology_family": "tunnel_transition_track",
+        "load_path_family": "tunnel_transition_wave"
+      },
+      "converged": true,
+      "status_code": 0
+    },
+    {
+      "solver": "track_lf_crosswind_viaduct",
+      "elapsed_seconds": 0.0005406340005720267,
+      "backend": "rust_ffi_kernel",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "hip_kernel_invocation_count": 4,
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "gpu_main_loop_pass": true,
+        "production_kernel_pass": true,
+        "surrogate_runtime_free_pass": true
+      },
+      "metadata": {
+        "hazard_family": "crosswind_viaduct",
+        "topology_family": "viaduct_ballasted_track",
+        "load_path_family": "crosswind_moving_load"
+      },
+      "converged": true,
+      "status_code": 0
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "solver-wide hip end-to-end contract passed"
+}

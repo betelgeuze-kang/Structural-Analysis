@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-batch-job-runner",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "inputs": {
+    "snapshot_root": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/snapshots",
+    "out": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_batch_job_report.json",
+    "materialize_snapshots": true
+  },
+  "summary": {
+    "job_count": 3,
+    "status_counts": {
+      "completed": 3
+    },
+    "snapshot_count": 3,
+    "rerun_requested_count": 0,
+    "completed_count": 3,
+    "failed_count": 0,
+    "planned_count": 0,
+    "blocked_count": 0
+  },
+  "checks": {
+    "queue_rows_present_pass": true,
+    "rerun_requests_tracked_pass": true,
+    "snapshot_manifest_written_pass": true
+  },
+  "queue_rows": [
+    {
+      "job_id": "authoring::native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200::workspace-summary",
+      "phase": "authoring_release",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "workspace_summary",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_workspace_summary.json",
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_workspace_draft.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring bundle: PASS | stories=6 | nodes=35 | members=94 | loads=6 | unsupported=0 | unresolved=0 | score=100.0 | family=deep_transfer_basement",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/snapshots/authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200::solver-session",
+      "phase": "authoring_solver",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "solver_session",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_solver_session.json",
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_solver_session.loadcomb_preview.mgt"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring solver session: PASS | meshes=7 | cells=1762 | combos=23 | family=KDS-2022 | authoring_family=deep_transfer_basement",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/snapshots/authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_solver-session/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200::project-registry",
+      "phase": "authoring_registry",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "signed_project_registry",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_package.zip",
+        "implementation/phase1/release/signing/native_authoring_portfolio/deep_transfer_basement/native_authoring_project_registry_ed25519.pub.pem",
+        "implementation/phase1/release/signing/native_authoring_portfolio/deep_transfer_basement/native_authoring_project_registry.signature.b64"
+      ],
+      "rerun_count": 0,
+      "note": "Project registry service: PASS | artifacts=4 | audit=4 | approvals=3/3 | package_repro=True | signature_verified=True",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/snapshots/authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_rows": [
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200::workspace-summary",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_workspace-summary__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_workspace_summary.json",
+          "label": "native_authoring_workspace_summary.json",
+          "sha256": "e8360a36ced0f8404d51b1a6cc6f441cbf40289a936f2b4f1a8f49df3f380b49",
+          "bytes": 14585
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_workspace_draft.json",
+          "label": "native_authoring_workspace_draft.json",
+          "sha256": "d0e593cad4f88e5e6466d9293d9303df4971f6a258b25e0eca855e765cd53eea",
+          "bytes": 1100
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/snapshots/authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200::solver-session",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_solver-session__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_solver_session.json",
+          "label": "native_authoring_solver_session.json",
+          "sha256": "da736c8803f2c4eb9b5a1a58bc5abbde26dec54b1a8e00447906c94217a311d4",
+          "bytes": 83430
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_solver_session.loadcomb_preview.mgt",
+          "label": "native_authoring_solver_session.loadcomb_preview.mgt",
+          "sha256": "dc52f7b14bfa7ea65f5adb0d314bc239749116cd945022a0f0dcfed297c3df14",
+          "bytes": 2998
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/snapshots/authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_solver-session/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200::project-registry",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_project-registry__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "786a0313720f0b0c574298f9fa9f81176930177888c831f45ab8b1f5c0d1348f",
+          "bytes": 10348
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "b91e4ea9c8877706eac8d6f79517a56053203133aabace43476b9c95cb1f4a30",
+          "bytes": 104985
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_portfolio/deep_transfer_basement/native_authoring_project_registry_ed25519.pub.pem",
+          "label": "native_authoring_project_registry_ed25519.pub.pem",
+          "sha256": "4a7f2df72ee4a5e5c0b9660dd174b2d9bcf89b49f552fb464de8f8f25a49cf44",
+          "bytes": 113
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_portfolio/deep_transfer_basement/native_authoring_project_registry.signature.b64",
+          "label": "native_authoring_project_registry.signature.b64",
+          "sha256": "acb02e34a54d7bdd287a68a3fceb5b221eb901429aa41eb26eb3b17812dc9123",
+          "bytes": 89
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/snapshots/authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_errors": [],
+  "summary_line": "Batch job runner: PASS | jobs=3 | snapshots=3 | reruns=0 | statuses=completed=3",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "batch job queue and snapshots updated"
+}

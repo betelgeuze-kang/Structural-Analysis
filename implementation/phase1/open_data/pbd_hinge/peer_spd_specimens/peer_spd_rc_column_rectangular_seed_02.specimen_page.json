@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-peer-spd-specimen-pages",
+  "generated_at": "2026-03-19T15:55:04.106358+00:00",
+  "seed_id": "peer_spd_rc_column_rectangular_seed_02",
+  "holdout_split": "train",
+  "specimen_id": "29",
+  "specimen_display_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=29",
+  "source_origin_class": "official_external_benchmark",
+  "selection_mode": "properties_based_preselection_plus_specimen_page_snapshot",
+  "page_title": "PEER Structural Performance Database",
+  "sections": {
+    "Specimen Information": {
+      "Name": "Nagasaka 1982, HPRC19-32",
+      "Type": "Rectangular",
+      "Comments": "cover scaled from drawing",
+      "Reference": "Nagasaka, Tomoya, \"Effectiveness of Steel Fiber as Web Reinforcement in Reinforced Concrete Columns,\" Transactions of the Japan Concrete Institute, Vol. 4, 1982, pp. 493-500."
+    },
+    "Material Properties": {
+      "Concrete Strength": "21 (MPa)",
+      "Transverse Steel": "Grade: Yield Stress: 344 (MPa) Strength: 434 (MPa)",
+      "Longitudinal Steel": "Grade: Corner Yield Stress: 371 (MPa) Strength: 541 (MPa)Intermediate Yield Stress: 371 (MPa) Strength: 541 (MPa)"
+    },
+    "Geometry": {
+      "X-Section": "Width: 200 (mm) Depth: 200 (mm)",
+      "Length": "L-Inflection: 300 (mm) L-Measured: 300 (mm)",
+      "Test Configuration": "Double Cantilever"
+    },
+    "Loading": {
+      "Axial Load": "294 (kN)",
+      "P-D": "Shear provided",
+      "L-Top": "0",
+      "L-Bottom": "0"
+    },
+    "Longitudinal Reinforcement": {
+      "Diameter": "12.7 (mm) corner bars | 12.7 (mm) intermediate bars",
+      "Number of Bars": "4",
+      "Perpendicular to Load": "Clear cover: 12 (mm) Number of intermediate bars: 0",
+      "Parallel to Load": "Clear cover: 12 (mm) Number of intermediate bars: 0",
+      "Reinforcement Ratio": "0.0127"
+    },
+    "Transverse Reinforcement": {
+      "Type": "R: Rectangular ties (around perimeter)",
+      "Number of Shear Legs": "2",
+      "Region of Close Spacing": "Bar Diameter: 5.5 (mm) Hoop Sets: 0 Hoop Spacing: 20 (mm)",
+      "Region of Wide Spacing": "Bar Diameter: 5.5 (mm) Hoop Sets: 0 Hoop Spacing: 0 (mm)",
+      "Reinforcement Ratio": "0.014"
+    },
+    "Non-Dimensional Properties": {
+      "Span-to-Depth Ratio": "1.5",
+      "Axial Load Ratio": "0.35"
+    },
+    "Test Results": {
+      "Failure Type": "Flexure-Shear",
+      "Damage Observation": "Concrete Crushing: 0 (mm)Significant Concrete Spalling: 0 (mm)Long Bar Buckling: 0 (mm)Long Bar Fracture: 0 (mm)Spiral Fracture: 0 (mm)Loss of Axial Load Capacity: 0 (mm)",
+      "Resources": "Force Displacement Data (data)"
+    },
+    "Record Information": {
+      "Version": "1 (April 8, 2003)"
+    }
+  },
+  "resource_links": [
+    {
+      "href": "http://depts.washington.edu/columdat/rectcol/txfiles/nag1932.txt",
+      "text": "Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    }
+  ],
+  "hysteresis_link_candidates": [
+    {
+      "href": "http://depts.washington.edu/columdat/rectcol/txfiles/nag1932.txt",
+      "text": "Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS"
+}

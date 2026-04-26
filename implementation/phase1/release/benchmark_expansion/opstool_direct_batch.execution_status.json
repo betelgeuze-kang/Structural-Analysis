@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-26T11:31:32.409957+00:00",
+  "batch_id": "opstool_606m_megatall_model_direct_batch_v1",
+  "selected_case_ids": [
+    "opstool_606m_megatall_model-00020",
+    "opstool_606m_megatall_model-00009",
+    "opstool_606m_megatall_model-00019",
+    "opstool_606m_megatall_model-00027",
+    "opstool_606m_megatall_model-00008"
+  ],
+  "case_count": 5,
+  "split_counts": {
+    "val": 1,
+    "test": 3,
+    "train": 1
+  },
+  "materialized": true,
+  "benchmark_contract_pass": true,
+  "benchmark_reason_code": "PASS",
+  "benchmark_reason": "top-k residual/meta benchmark KPI thresholds satisfied",
+  "noise_contract_pass": true,
+  "noise_reason_code": "PASS",
+  "noise_reason": "noise convergence gate passed",
+  "execution_band": "benchmark_pass_noise_pass",
+  "artifact_paths": {
+    "materialized_cases_json": "implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json",
+    "materialization_status_json": "implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialization_status.json",
+    "benchmark_report_json": "implementation/phase1/release/benchmark_expansion/opstool_direct_batch.benchmark_report.json",
+    "topk_comparison_json": "implementation/phase1/release/benchmark_expansion/opstool_direct_batch.topk_comparison.json",
+    "noise_convergence_json": "implementation/phase1/release/benchmark_expansion/opstool_direct_batch.noise_convergence.json"
+  },
+  "noise_gate_detail": "",
+  "noise_all_converged": true,
+  "noise_has_required_seeds": true,
+  "noise_includes_plus_minus_10": true,
+  "noise_interpretation": "all required seeds and +/-10% noise coverage are present, and all scenarios converged",
+  "next_step_short": "promote the executed 5-pack as a featured megastructure benchmark lane and keep case-level drilldowns attached",
+  "summary": {
+    "selected_case_count": 5,
+    "seed_count": 3,
+    "noise_level_count": 5,
+    "scenario_count": 135,
+    "topology_type_count": 4,
+    "hazard_type_count": 2,
+    "split_type_count": 3,
+    "benchmark_contract_pass": true,
+    "noise_contract_pass": true
+  },
+  "contract_pass": true,
+  "reason_code": "BENCHMARK_PASS_NOISE_PASS",
+  "reason": "direct 5-pack benchmark and noise gates passed"
+}

@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-ndtha-residual-gate",
+  "generated_at": "2026-04-11T15:37:47.404483+00:00",
+  "checks": {
+    "case_count_pass": true,
+    "ndtha_contract_pass": true,
+    "ndtha_no_collapse_pass": true,
+    "summary_residual_finite_pass": true,
+    "residual_metric_trace_pass": true,
+    "residual_top_hard_pass": true,
+    "residual_drift_hard_pass": true,
+    "fallback_rate_pass": true,
+    "recommended_top_pass": true,
+    "recommended_drift_pass": true,
+    "solver_control_trace_pass": true,
+    "solver_control_rollup_pass": true,
+    "solver_control_event_sequence_pass": true
+  },
+  "summary": {
+    "case_count": 3,
+    "residual_top_displacement_m_max_abs": 0.6880580090188355,
+    "residual_drift_ratio_pct_max_abs": 1.9136000000000006,
+    "raw_residual_top_displacement_m_max_abs": 0.6880580090188355,
+    "raw_residual_drift_ratio_pct_max_abs": 1.9136000000000006,
+    "fallback_case_count": 0,
+    "fallback_rate": 0.0,
+    "fallback_case_ids": [],
+    "residual_metric_source_counts": {
+      "solver_raw": 3
+    },
+    "recommended_top_exceed_case_ids": [],
+    "recommended_drift_exceed_case_ids": [],
+    "solver_control_event_count_total": 7200,
+    "solver_control_nonconverged_step_total": 0,
+    "solver_control_cutback_case_ids": [
+      "C-TST-001",
+      "C-TST-002",
+      "C-TST-003"
+    ],
+    "solver_control_recommended_dt_scale_min": 0.5,
+    "solver_control_trace_source_counts": {
+      "solver_control_summary": 3
+    },
+    "summary_line": "NDTHA residual gate: PASS | cases=3 | fallback_rate=0.000 | solver_control=events=7200,nonconverged=0,cutback_cases=3,dt_scale_min=0.500"
+  },
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "collapsed": false,
+      "residual_top_displacement_m": 0.6880580090188355,
+      "residual_drift_ratio_pct": 1.9136000000000006,
+      "raw_residual_top_displacement_m": 0.6880580090188355,
+      "raw_residual_drift_ratio_pct": 1.9136000000000006,
+      "residual_metric_source": "solver_raw",
+      "residual_metric_fallback_used": false,
+      "solver_control_trace_source": "solver_control_summary",
+      "solver_control_event_count": 2400,
+      "solver_control_cutback_step_count": 2400,
+      "solver_control_nonconverged_step_count": 0,
+      "solver_control_recommended_dt_scale_min": 0.5,
+      "checks": {
+        "finite_pass": true,
+        "trace_pass": true,
+        "hard_top_pass": true,
+        "hard_drift_pass": true,
+        "hard_pass": true,
+        "recommended_top_pass": true,
+        "recommended_drift_pass": true,
+        "solver_control_trace_pass": true,
+        "solver_control_event_sequence_pass": true
+      }
+    },
+    {
+      "case_id": "C-TST-002",
+      "collapsed": false,
+      "residual_top_displacement_m": 0.5756788824675577,
+      "residual_drift_ratio_pct": 1.9136000000000006,
+      "raw_residual_top_displacement_m": 0.5756788824675577,
+      "raw_residual_drift_ratio_pct": 1.9136000000000006,
+      "residual_metric_source": "solver_raw",
+      "residual_metric_fallback_used": false,
+      "solver_control_trace_source": "solver_control_summary",
+      "solver_control_event_count": 2400,
+      "solver_control_cutback_step_count": 2400,
+      "solver_control_nonconverged_step_count": 0,
+      "solver_control_recommended_dt_scale_min": 0.5,
+      "checks": {
+        "finite_pass": true,
+        "trace_pass": true,
+        "hard_top_pass": true,
+        "hard_drift_pass": true,
+        "hard_pass": true,
+        "recommended_top_pass": true,
+        "recommended_drift_pass": true,
+        "solver_control_trace_pass": true,
+        "solver_control_event_sequence_pass": true
+      }
+    },
+    {
+      "case_id": "C-TST-003",
+      "collapsed": false,
+      "residual_top_displacement_m": 0.6846960537279713,
+      "residual_drift_ratio_pct": 1.9136000000000004,
+      "raw_residual_top_displacement_m": 0.6846960537279713,
+      "raw_residual_drift_ratio_pct": 1.9136000000000004,
+      "residual_metric_source": "solver_raw",
+      "residual_metric_fallback_used": false,
+      "solver_control_trace_source": "solver_control_summary",
+      "solver_control_event_count": 2400,
+      "solver_control_cutback_step_count": 2400,
+      "solver_control_nonconverged_step_count": 0,
+      "solver_control_recommended_dt_scale_min": 0.5,
+      "checks": {
+        "finite_pass": true,
+        "trace_pass": true,
+        "hard_top_pass": true,
+        "hard_drift_pass": true,
+        "hard_pass": true,
+        "recommended_top_pass": true,
+        "recommended_drift_pass": true,
+        "solver_control_trace_pass": true,
+        "solver_control_event_sequence_pass": true
+      }
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "ndtha residual gate passed",
+  "inputs": {
+    "ndtha_stress": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+    "max_residual_top_displacement_m": 5.0,
+    "max_residual_drift_ratio_pct": 10.0,
+    "recommended_residual_top_displacement_m": 1.0,
+    "recommended_residual_drift_ratio_pct": 2.0,
+    "max_fallback_rate": 1.0,
+    "out": "implementation/phase1/ndtha_residual_gate_report.json"
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-artifact-bundle",
+  "generated_at": "2026-02-25T14:17:46.831942+00:00",
+  "bundle_label": "real_accuracy_rwth_20260225",
+  "bundle_dir": "implementation/phase1/experiments/real_accuracy_rwth_20260225",
+  "artifact_count": 16,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/inputs/commercial_benchmark_cases.rwth_zenodo.json",
+      "bytes": 20387,
+      "sha256": "81534d4005fb6f62f584169ba8208f4f4ea4b6ac94bd783de65f75467437b5b5"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.rwth_zenodo.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/hf_benchmark_report.rwth_zenodo.json",
+      "bytes": 4768,
+      "sha256": "fd07d9cfabd15f33fe1bbd3f294be596f0b0c9a9c7dfd8aeeae0ed95d4161479"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.rwth_zenodo.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/topk_comparison_experiment_report.rwth_zenodo.json",
+      "bytes": 30649,
+      "sha256": "eba40f42d7d53604bac734280b7a76c9d81964c55f0422ace1a6ffaef41efbc4"
+    },
+    {
+      "src": "implementation/phase1/topk_precision_suite_report.rwth_zenodo.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/topk_precision_suite_report.rwth_zenodo.json",
+      "bytes": 5155,
+      "sha256": "92e80d61e3c9aa4ce40937b01f1b037ff28c7644d8354ba41d494af0eb9d351f"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_11.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_11.json",
+      "bytes": 4769,
+      "sha256": "20d1b71212f7c0937e958dd071358b8d2a7a1eba51d48b91376294f4bab9de9a"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_17.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_17.json",
+      "bytes": 4770,
+      "sha256": "5e5fdec2bdd52da2f28e1ba4d01070b1ece66116d70380df56925b90c8cf3755"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_23.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_23.json",
+      "bytes": 4768,
+      "sha256": "e2e689e804c0b9371ccb600f321e7e3a319c643096025407ab93012599004767"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_31.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_31.json",
+      "bytes": 4761,
+      "sha256": "3e4027ca26cc0ba36a55c6bc52442519d7160a438155593b2090ba87a89893d5"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_47.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_47.json",
+      "bytes": 4764,
+      "sha256": "d6e6cd49b43c3b2594224004ed68c7bd7b68e5881dfb4f373ff1c71cc41d3c00"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_11.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_11.json",
+      "bytes": 30649,
+      "sha256": "f8227657cf6fa15decf8b4f528892ac997eb87fc75537dd86fbb606092b3e7e7"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_17.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_17.json",
+      "bytes": 30648,
+      "sha256": "b3f5f78917cc22a9f7cf98833870790b381582afc135d316dd9774f1cbaa6e56"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_23.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_23.json",
+      "bytes": 30649,
+      "sha256": "9a623ab4e71558d4be873bed47381e2614f5f649214910c2220994c5e3bd3b48"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_31.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_31.json",
+      "bytes": 30613,
+      "sha256": "9e6727eb736928218092d170cf52df64adbc7b4d489bd26d61150ea6d90ba9f6"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_47.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_47.json",
+      "bytes": 30656,
+      "sha256": "05f4fe4bc6e258f41f7d5481bf52a644f3965e2e32f9c7b8b0e99c6bb85d402a"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.rwth_zenodo.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/summary/baseline_summary.json",
+      "bytes": 1323,
+      "sha256": "e15e10f67b66265bac4816af5947dd8d5a5f89a9f854448358dce01d174b7549"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.rwth_zenodo.json",
+      "dst": "implementation/phase1/experiments/real_accuracy_rwth_20260225/summary/topk_summary.json",
+      "bytes": 1579,
+      "sha256": "a7643072e46e8b738bbf84f933a6a650eb931fa24483ce3a6bcdd216ff824d57"
+    }
+  ]
+}

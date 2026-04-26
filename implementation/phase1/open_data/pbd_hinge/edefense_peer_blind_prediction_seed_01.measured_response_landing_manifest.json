@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-16T14:46:34.287906+00:00",
+  "source_manifest": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.source_manifest.json",
+  "input_root": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01",
+  "contract_pass": true,
+  "landing_state": "recorded",
+  "reason_code": "PASS",
+  "reason": "Measured-response landing provenance is recorded and ready for normalization.",
+  "summary_line": "E-Defense/PEER measured-response landing manifest: RECORDED | matched=1 | csv=0 | accel_candidates=0 | drift_candidates=0 | sensors=0",
+  "summary": {
+    "matched_file_count": 1,
+    "csv_file_count": 0,
+    "acceleration_candidate_count": 0,
+    "drift_candidate_count": 0,
+    "sensor_candidate_count": 0
+  },
+  "expected_patterns": [
+    "*response*.csv",
+    "*measurement*.csv",
+    "*sensor*.csv",
+    "*drift*.csv",
+    "*accel*.csv",
+    "*response*.xlsx",
+    "*measurement*.xlsx",
+    "*sensor*.xlsx",
+    "*drift*.xlsx",
+    "*accel*.xlsx",
+    "*experimentalresults*.xlsx",
+    "*results*.xlsx"
+  ],
+  "matched_files": [
+    "Experimentalresults.xlsx"
+  ],
+  "file_inventory": [
+    {
+      "path": "Experimentalresults.xlsx",
+      "bytes": 35158,
+      "sha256": "2a89baf766151de31769ed2ccd943e62fa1b3f5bf36b7ac2a26086337407a8b4",
+      "modified_at": "2026-04-16T14:45:00.871039+00:00",
+      "csv_preview": {
+        "headers": [],
+        "sample_rows": [],
+        "row_count": 0
+      }
+    }
+  ],
+  "next_action": "Rerun measured-response normalize/build/compare steps."
+}

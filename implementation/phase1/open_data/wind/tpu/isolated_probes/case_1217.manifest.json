@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-tpu-case-mat",
+  "generated_at": "2026-03-19T13:19:21.505368+00:00",
+  "source_name": "TPU Aerodynamic Database - High-rise Buildings with Various Configurations > 1_Cat2",
+  "source_url": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=1217",
+  "case_id": "1217",
+  "mat_url": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/1_Cat2/time_series_1_0.mat",
+  "mat_source_resolved": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/1_Cat2/time_series_1_0.mat",
+  "real_source": true,
+  "source_origin_class": "official_external_benchmark",
+  "data_path": "implementation/phase1/open_data/wind/tpu/isolated_probes/case_1217.mat",
+  "sha256": "8e9c3b53b7521e313798196c817b326295cf9313bb7fcffad3d3e47064b6ae45",
+  "size_bytes": 630507,
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU case page resolved and MAT file fetched successfully."
+}

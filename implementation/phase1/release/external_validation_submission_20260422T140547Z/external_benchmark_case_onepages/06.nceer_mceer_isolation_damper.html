@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Structural Signal Desk | Authority Case Onepage</title>
+  <style>
+    
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+body.signal-desk-light {
+  --bg:#f4efe7;
+  --surface-light:#fffaf2;
+  --surface-light-soft:#f7efe3;
+  --surface-light-strong:#fffdf8;
+  --panel:#fffaf2;
+  --panel-soft:rgba(255,250,242,.82);
+  --panel-strong:rgba(247,239,227,.92);
+  --panel-2:#fff6ea;
+  --ink:#1c2430;
+  --text:#1c2430;
+  --muted:#5c6678;
+  --line:#d8cfbf;
+  --border:#d8cfbf;
+  --accent:#0f6a73;
+  --accent-2:#4fb7ad;
+  --accent-warm:#f4b56b;
+  --accent-warm-ink:#8f4a19;
+  --brand:#0f6a73;
+  --brand-soft:rgba(15,106,115,.08);
+  --ok:#2f7d5a;
+  --success:#2f7d5a;
+  --warn:#96580e;
+  --bad:#a1492e;
+  --danger:#a1492e;
+  --font-display:'Space Grotesk','IBM Plex Sans KR','Pretendard',sans-serif;
+  --font-ui:'IBM Plex Sans KR','Pretendard','Noto Sans KR',sans-serif;
+  --type-h1-size:44px;
+  --type-h1-weight:700;
+  --type-h1-line-height:1.02;
+  --type-h1-tracking:-.04em;
+  --type-h2-size:28px;
+  --type-h2-weight:700;
+  --type-h2-line-height:1.08;
+  --type-h2-tracking:-.03em;
+  --type-h3-size:18px;
+  --type-h3-weight:700;
+  --type-h3-line-height:1.2;
+  --type-h3-tracking:-.02em;
+  --type-body-size:14px;
+  --type-body-line-height:1.6;
+  --type-body-tracking:-.01em;
+  --type-body-sm-size:12px;
+  --type-body-sm-line-height:1.55;
+  --type-label-size:11px;
+  --type-label-line-height:1.1;
+  --type-label-tracking:.12em;
+  --type-metric-size:28px;
+  --type-metric-line-height:1.05;
+  --type-metric-tracking:-.03em;
+  --radius-sm:10px;
+  --radius-md:16px;
+  --radius-lg:24px;
+  --radius-xl:28px;
+  --radius-pill:999px;
+  --space-xs:4px;
+  --space-sm:8px;
+  --space-md:12px;
+  --space-lg:16px;
+  --space-xl:24px;
+  --space-xxl:32px;
+  --shadow-panel:0 16px 32px rgba(28,36,48,.06);
+  --shadow-card:0 14px 28px rgba(28,36,48,.08);
+  --shadow-hero:0 24px 60px rgba(18,56,71,.18);
+  --review-hero-bg:linear-gradient(135deg,#123847 0%,#0f6a73 56%,#2c8f8e 100%);
+  --review-panel-bg:linear-gradient(180deg,#fffdf8 0%,#f7efe3 100%);
+  --review-panel-quiet-bg:linear-gradient(180deg,rgba(255,253,248,.96) 0%,rgba(247,239,227,.94) 100%);
+  --review-meta-bg:#f7efe3;
+  --review-meta-ink:#5c6678;
+  --review-pill-bg:rgba(15,106,115,.08);
+  --review-pill-border:rgba(15,106,115,.12);
+  --review-pill-ink:#0f6a73;
+  --review-pill-warm-bg:rgba(244,181,107,.18);
+  --review-pill-warm-border:rgba(143,74,25,.14);
+  --review-pill-warm-ink:#8f4a19;
+  --review-divider:rgba(216,207,191,.92);
+  color-scheme:light;
+  margin:0;
+  color:var(--ink);
+  font-family:var(--font-ui);
+  background:
+    radial-gradient(circle at top left, rgba(15,106,115,.06), transparent 26%),
+    radial-gradient(circle at 86% 12%, rgba(244,181,107,.12), transparent 20%),
+    linear-gradient(180deg, #f6f1e8 0%, #f2ece2 46%, #ece4d8 100%);
+  position:relative;
+}
+body.signal-desk-light::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.18;
+  background-image:
+    linear-gradient(rgba(15,36,48,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,36,48,.045) 1px, transparent 1px);
+  background-size:28px 28px;
+  mask-image:radial-gradient(circle at center, black 25%, transparent 85%);
+}
+body.signal-desk-light a {
+  color:inherit;
+  text-decoration:none;
+}
+body.signal-desk-light .route-context-banner {
+  border:1px solid rgba(15,106,115,.24);
+  background:linear-gradient(135deg,rgba(255,250,242,.96) 0%,rgba(229,243,244,.96) 100%);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-card);
+  backdrop-filter:blur(14px);
+}
+body.signal-desk-light .route-context-banner__eyebrow,
+body.signal-desk-light .card-label,
+body.signal-desk-light .section-kicker,
+body.signal-desk-light .hero-kicker,
+body.signal-desk-light .expert-eyebrow,
+body.signal-desk-light .sheet-kicker,
+body.signal-desk-light .review-label-caps {
+  font-size:var(--type-label-size);
+  font-weight:700;
+  line-height:var(--type-label-line-height);
+  letter-spacing:var(--type-label-tracking);
+  text-transform:uppercase;
+}
+body.signal-desk-light .route-context-banner__meta span,
+body.signal-desk-light .chip,
+body.signal-desk-light .pill,
+body.signal-desk-light .link-pill,
+body.signal-desk-light .expert-pill,
+body.signal-desk-light .expert-link-pill,
+body.signal-desk-light .expert-nav-link {
+  border:1px solid rgba(15,106,115,.12);
+  background:rgba(15,106,115,.08);
+  color:var(--review-pill-ink);
+  border-radius:var(--radius-pill);
+  min-height:34px;
+  padding:0 12px;
+  font-family:var(--font-ui);
+  font-size:var(--type-body-sm-size);
+  font-weight:700;
+  line-height:var(--type-body-sm-line-height);
+  letter-spacing:var(--type-body-tracking);
+}
+body.signal-desk-light .route-context-banner__return {
+  background:linear-gradient(135deg,#123847 0%,#0f6a73 56%,#2c8f8e 100%);
+  color:#f4fbfc;
+  border-radius:var(--radius-pill);
+  min-height:36px;
+  padding:0 14px;
+  font-weight:700;
+}
+body.signal-desk-light .card,
+body.signal-desk-light .panel,
+body.signal-desk-light .hero-side,
+body.signal-desk-light .summary-card,
+body.signal-desk-light .expert-hero-side,
+body.signal-desk-light .expert-panel {
+  background:var(--review-panel-bg);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-panel);
+}
+body.signal-desk-light .hero-main,
+body.signal-desk-light .expert-hero-main {
+  background:var(--review-hero-bg);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-hero);
+}
+body.signal-desk-light .hero-main h1,
+body.signal-desk-light .expert-hero-main h1,
+body.signal-desk-light .route-context-banner__title,
+body.signal-desk-light .hero-side .big {
+  font-family:var(--font-display);
+  letter-spacing:var(--type-h1-tracking);
+}
+body.signal-desk-light .panel h2,
+body.signal-desk-light .hero-side h2,
+body.signal-desk-light .expert-hero-side h2,
+body.signal-desk-light .sheet-title,
+body.signal-desk-light .card-value,
+body.signal-desk-light .metric-value {
+  font-family:var(--font-display);
+}
+body.signal-desk-light .panel h2,
+body.signal-desk-light .hero-side h2,
+body.signal-desk-light .expert-hero-side h2,
+body.signal-desk-light .sheet-title {
+  font-size:var(--type-h2-size);
+  font-weight:var(--type-h2-weight);
+  line-height:var(--type-h2-line-height);
+  letter-spacing:var(--type-h2-tracking);
+}
+body.signal-desk-light .card-value,
+body.signal-desk-light .metric-value {
+  font-size:var(--type-metric-size);
+  font-weight:700;
+  line-height:var(--type-metric-line-height);
+  letter-spacing:var(--type-metric-tracking);
+}
+body.signal-desk-light .panel p,
+body.signal-desk-light .hero-side p,
+body.signal-desk-light .expert-hero-side p,
+body.signal-desk-light .card-note,
+body.signal-desk-light .sheet-copy,
+body.signal-desk-light .sheet-note-panel p,
+body.signal-desk-light .sheet-note-panel li {
+  font-size:var(--type-body-size);
+  line-height:var(--type-body-line-height);
+  letter-spacing:var(--type-body-tracking);
+}
+
+    * { box-sizing:border-box; }
+    body {
+      color:var(--ink);
+      font-family:var(--font-ui);
+    }
+    a {
+      color:var(--brand);
+      text-decoration:none;
+    }
+    a:hover {
+      text-decoration:underline;
+    }
+    .wrap {
+      max-width:1320px;
+      margin:0 auto;
+      padding:32px 24px 72px;
+    }
+    .hero {
+      display:grid;
+      grid-template-columns:minmax(0, 1.08fr) minmax(320px, .92fr);
+      gap:20px;
+      align-items:stretch;
+    }
+    .hero-main {
+      padding:30px;
+      border-radius:var(--radius-xl);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,.14), rgba(255,255,255,0) 34%),
+        var(--review-hero-bg);
+      color:#f4fbfc;
+      box-shadow:var(--shadow-hero);
+    }
+    .hero-kicker,
+    .panel-kicker,
+    .signal-label,
+    .receipt-kicker {
+      font-size:var(--type-label-size);
+      font-weight:700;
+      line-height:var(--type-label-line-height);
+      letter-spacing:var(--type-label-tracking);
+      text-transform:uppercase;
+    }
+    .hero-kicker {
+      color:#d5eff0;
+      margin-bottom:12px;
+    }
+    .hero-main h1 {
+      margin:0 0 12px;
+      font-family:var(--font-display);
+      font-size:var(--type-h1-size);
+      line-height:var(--type-h1-line-height);
+      letter-spacing:var(--type-h1-tracking);
+    }
+    .hero-main p {
+      margin:0;
+      max-width:64ch;
+      font-size:15px;
+      line-height:1.72;
+      color:#e1f1f2;
+    }
+    .hero-pill-row,
+    .status-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .hero-pill-row {
+      margin-top:18px;
+    }
+    .hero-pill {
+      display:inline-flex;
+      align-items:center;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:var(--radius-pill);
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      color:#f4fbfc;
+      font-size:12px;
+      font-weight:700;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+    }
+    .hero-side,
+    .panel,
+    .signal-card {
+      border-radius:var(--radius-lg);
+      background:var(--review-panel-bg);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-panel);
+    }
+    .hero-side {
+      padding:24px;
+      display:grid;
+      gap:16px;
+      align-content:start;
+    }
+    .hero-side h2,
+    .panel h2 {
+      margin:0;
+      font-family:var(--font-display);
+      font-size:var(--type-h2-size);
+      line-height:var(--type-h2-line-height);
+      letter-spacing:var(--type-h2-tracking);
+    }
+    .hero-side p,
+    .panel-lead,
+    .note,
+    .mini-note,
+    .detail-row,
+    table {
+      font-size:var(--type-body-size);
+      line-height:var(--type-body-line-height);
+      letter-spacing:var(--type-body-tracking);
+    }
+    .hero-side p,
+    .panel-lead,
+    .note,
+    .mini-note {
+      color:var(--muted);
+    }
+    .receipt-kicker,
+    .panel-kicker {
+      color:var(--brand);
+    }
+    .status-chip {
+      display:inline-flex;
+      align-items:center;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:var(--radius-pill);
+      background:var(--review-pill-bg);
+      border:1px solid var(--review-pill-border);
+      color:var(--review-pill-ink);
+      font-size:12px;
+      font-weight:700;
+      letter-spacing:var(--type-body-tracking);
+    }
+    .status-chip.is-ok {
+      background:rgba(47,125,90,.12);
+      border-color:rgba(47,125,90,.18);
+      color:var(--success);
+    }
+    .status-chip.is-warn {
+      background:var(--review-pill-warm-bg);
+      border-color:var(--review-pill-warm-border);
+      color:var(--accent-warm-ink);
+    }
+    .status-chip.is-danger {
+      background:rgba(161,73,46,.12);
+      border-color:rgba(161,73,46,.18);
+      color:var(--danger);
+    }
+    .status-chip.is-accent {
+      background:rgba(79,183,173,.16);
+      border-color:rgba(15,106,115,.16);
+      color:var(--brand);
+    }
+    .detail-stack {
+      display:grid;
+      gap:12px;
+    }
+    .detail-row {
+      display:grid;
+      grid-template-columns:minmax(116px, 160px) 1fr;
+      gap:12px;
+      padding:12px 14px;
+      border:1px solid rgba(15,106,115,.10);
+      border-radius:var(--radius-md);
+      background:rgba(255,255,255,.58);
+      color:var(--ink);
+      align-items:start;
+    }
+    .detail-row > span:first-child {
+      color:var(--muted);
+      font-size:var(--type-label-size);
+      font-weight:700;
+      line-height:var(--type-label-line-height);
+      letter-spacing:var(--type-label-tracking);
+      text-transform:uppercase;
+    }
+    .detail-row strong {
+      color:var(--ink);
+      font-weight:700;
+    }
+    code {
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:var(--radius-pill);
+      background:var(--review-meta-bg);
+      color:var(--review-meta-ink);
+      font-family:'IBM Plex Mono','SFMono-Regular',monospace;
+      font-size:12px;
+      word-break:break-all;
+    }
+    .signal-strip {
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:16px;
+      margin-top:20px;
+    }
+    .signal-card {
+      padding:18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .signal-card::before,
+    .panel::before {
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.56) 0%, rgba(255,255,255,0) 44%);
+      pointer-events:none;
+    }
+    .signal-label {
+      color:var(--muted);
+      position:relative;
+      z-index:1;
+    }
+    .signal-value {
+      margin-top:8px;
+      position:relative;
+      z-index:1;
+      font-family:var(--font-display);
+      font-size:var(--type-metric-size);
+      line-height:var(--type-metric-line-height);
+      letter-spacing:var(--type-metric-tracking);
+      color:var(--ink);
+    }
+    .signal-note {
+      margin-top:8px;
+      position:relative;
+      z-index:1;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.65;
+    }
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(12, minmax(0, 1fr));
+      gap:18px;
+      margin-top:24px;
+    }
+    .panel {
+      grid-column:span 6;
+      position:relative;
+      overflow:hidden;
+      padding:22px;
+      background:var(--review-panel-quiet-bg);
+    }
+    .panel.panel-wide {
+      grid-column:1 / -1;
+    }
+    .panel.span-7 {
+      grid-column:span 7;
+    }
+    .panel.span-5 {
+      grid-column:span 5;
+    }
+    .panel-head {
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+      margin-bottom:16px;
+    }
+    .panel-lead {
+      margin:10px 0 0;
+      max-width:72ch;
+    }
+    table {
+      position:relative;
+      z-index:1;
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      margin-top:14px;
+      border:1px solid rgba(15,106,115,.12);
+      border-radius:18px;
+      overflow:hidden;
+      background:rgba(255,255,255,.56);
+    }
+    th,
+    td {
+      padding:12px 14px;
+      text-align:left;
+      vertical-align:top;
+      border-bottom:1px solid rgba(216,207,191,.78);
+      color:var(--ink);
+    }
+    thead th,
+    thead td {
+      background:rgba(15,106,115,.08);
+      color:var(--brand);
+      font-size:var(--type-label-size);
+      font-weight:700;
+      line-height:var(--type-label-line-height);
+      letter-spacing:var(--type-label-tracking);
+      text-transform:uppercase;
+    }
+    tbody tr:nth-child(even) td {
+      background:rgba(255,253,248,.84);
+    }
+    tbody tr:last-child td {
+      border-bottom:none;
+    }
+    .cover-table th {
+      width:28%;
+      background:rgba(15,106,115,.06);
+    }
+    ul {
+      position:relative;
+      z-index:1;
+      margin:12px 0 0 18px;
+      padding:0;
+      color:var(--muted);
+    }
+    .appendix-stack > * + * {
+      margin-top:18px;
+    }
+    .panel h3,
+    .panel h4 {
+      position:relative;
+      z-index:1;
+      margin:16px 0 8px;
+      font-family:var(--font-display);
+      color:var(--ink);
+    }
+    @media (max-width:1080px) {
+      .hero,
+      .signal-strip {
+        grid-template-columns:1fr;
+      }
+      .panel,
+      .panel.span-7,
+      .panel.span-5 {
+        grid-column:1 / -1;
+      }
+      .panel-head {
+        flex-direction:column;
+      }
+    }
+    @media (max-width:640px) {
+      .wrap {
+        padding:22px 14px 48px;
+      }
+      .hero-main,
+      .hero-side,
+      .panel,
+      .signal-card {
+        padding:18px;
+      }
+      .detail-row {
+        grid-template-columns:1fr;
+      }
+      th,
+      td {
+        padding:10px 12px;
+      }
+    }
+  </style>
+</head>
+<body class="signal-desk-light">
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-main">
+        <div class="hero-kicker">Structural Signal Desk | External authority evidence</div>
+        <h1>Authority-Facing Case Onepage</h1>
+        <p>This export keeps the reviewer cover sheet, KPI receipt, attestation workflow, and shared structural appendices in one premium evidence package so NCEER / MCEER Isolation-Damper can move through review without reverting to a plain memo surface.</p>
+        <div class="hero-pill-row">
+          <span class="hero-pill">case=nceer_mceer_isolation_damper</span>
+          <span class="hero-pill">kpi_rows=6</span>
+          <span class="hero-pill">missing_fields=0</span>
+          <span class="hero-pill">receipts=2</span>
+        </div>
+      </div>
+      <aside class="hero-side">
+        <div>
+          <div class="receipt-kicker">Review cover</div>
+          <h2>Reviewer / Authority Cover Sheet</h2>
+          <p>Auto-generated from the execution status manifest and KPI receipt. Review this cover sheet first, then the KPI receipt and shared appendices. Generated placeholder slots only; no live reviewer approval is implied.</p>
+        </div>
+        <div class="detail-stack">
+          <div class="detail-row"><span>Case label</span><strong>NCEER / MCEER Isolation-Damper</strong></div>
+          <div class="detail-row"><span>Case id</span><code>nceer_mceer_isolation_damper</code></div>
+          <div class="detail-row"><span>Attestation status</span><span class='status-chip is-ok'>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED</span></div>
+          <div class="detail-row"><span>Review boundary</span><span class='status-chip is-accent'>approve_all=PASS_NO_OPEN_DECISION_ITEMS/ready_full=yes; reject_one=PASS_NO_OPEN_DECISION_ITEMS/open_revision=0</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="signal-strip">
+      <article class="signal-card">
+        <div class="signal-label">KPI receipt rows</div>
+        <div class="signal-value">6</div>
+        <div class="signal-note">Receipt labels, sources, and values stay attached to the authority-facing cover workflow.</div>
+      </article>
+      <article class="signal-card">
+        <div class="signal-label">Missing attestation fields</div>
+        <div class="signal-value">0</div>
+        <div class="signal-note">none</div>
+      </article>
+      <article class="signal-card">
+        <div class="signal-label">Workflow documents</div>
+        <div class="signal-value">6</div>
+        <div class="signal-note">Manifest, template, receipt, and batch-review handoff artifacts linked below.</div>
+      </article>
+      <article class="signal-card">
+        <div class="signal-label">Irregular receipts</div>
+        <div class="signal-value">2</div>
+        <div class="signal-note">Benchmark receipt references remain attached to this case package for reviewer traceability.</div>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="panel panel-wide">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Reviewer handoff</div>
+            <h2>Reviewer / Authority Cover Sheet</h2>
+            <p class="panel-lead">The cover sheet keeps reviewer identity, case routing, and execution context in one structured desk-style table instead of a plain document block.</p>
+          </div>
+          <div class="status-row">
+            <span class='status-chip is-ok'>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED</span>
+            <span class='status-chip is-accent'>approve_all=PASS_NO_OPEN_DECISION_ITEMS/ready_full=yes; reject_one=PASS_NO_OPEN_DECISION_ITEMS/open_revision=0</span>
+          </div>
+        </div>
+        <table class="cover-table">
+          <tbody><tr><th>Prepared for</th><td>reviewer / authority</td></tr><tr><th>Case identity</th><td>case_label=NCEER / MCEER Isolation-Damper; task_id=hardest::nceer_mceer_isolation_damper; case_id=nceer_mceer_isolation_damper</td></tr><tr><th>Benchmark family</th><td>benchmark_family=seismic_isolation_damping; hazard_family=seismic_isolated; topology_family=base_isolation_damper_network; load_path_family=hysteretic_device_sequence</td></tr><tr><th>Status</th><td>execution=ready; lifecycle=completed; receipt_contract_pass=True; receipt_reason=PASS</td></tr><tr><th>Submission scope</th><td>submission_scope=hardest_external_benchmark_program; source_origin_class=official_external_benchmark_fullcase</td></tr><tr><th>Submission readiness</th><td>ready_now=True; reason=PASS_START_NOW_FULL; start_mode=start_now_full_external_submission; scope=full_external_submission_package; caution=panel_zone_external_validation_only_boundary</td></tr><tr><th>Evidence artifacts</th><td>kpi_receipt=implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/benchmark_task_kpi_receipt.json; primary_report=implementation/phase1/damper_validation_gate_report.json; case_bundle_zip=implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/signed_case_bundle.zip; case_bundle_dir=implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/signed_case_bundle</td></tr><tr><th>Irregular benchmark receipts</th><td>count=0; index=implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json; cases=n/a</td></tr><tr><th>Reviewer name</th><td>Friend Demo Reviewer</td></tr><tr><th>Reviewer role / license</th><td>reviewer_role=informal external reviewer; reviewer_license_id=demo-review-no-license</td></tr><tr><th>Reviewer signature</th><td>Friend Demo Reviewer</td></tr><tr><th>Receipt id</th><td>DEMO-RECEIPT-04-NCEER_MCEER_ISOLATION_DAMPER</td></tr><tr><th>Receipt issued at</th><td>2026-04-01T15:24:49.235684+00:00</td></tr><tr><th>Authority receipt</th><td>authority_name=informal demo receipt authority; authority_note=non-regulatory demo receipt for friend walkthrough | case_id=nceer_mceer_isolation_damper</td></tr><tr><th>Approval signature</th><td>Friend Demo Reviewer</td></tr><tr><th>Attestation workflow</th><td>status=MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED; source_kind=manifest; missing_fields=none</td></tr><tr><th>Attestation artifacts</th><td>manifest=external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.authority_onepage.attestation_manifest.json; template=external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.authority_onepage.attestation_template.json; receipt=external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.authority_onepage.attestation_receipt.json</td></tr><tr><th>Attestation disclaimer</th><td>real reviewer/authority values loaded from case attestation manifest; status=MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED; receipt=external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.authority_onepage.attestation_receipt.json</td></tr><tr><th>Review boundary</th><td>execution_mode=limited; ready_tasks=10; blocked_tasks=0; pending=0; resolution=approve_all=PASS_NO_OPEN_DECISION_ITEMS/ready_full=yes; reject_one=PASS_NO_OPEN_DECISION_ITEMS/open_revision=0; owner=none; priority=none; family=none; followup=n/a</td></tr><tr><th>Authority routing</th><td>baseline_seeded=False; changes=0; added=0; removed=0; warning_active=False</td></tr><tr><th>Instruction</th><td>Review this cover sheet first, then the KPI receipt and shared appendices.</td></tr></tbody>
+        </table>
+      </article>
+
+      <article class="panel span-7">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Receipt evidence</div>
+            <h2>KPI Receipt</h2>
+            <p class="panel-lead">Label, source, and value lines are preserved as the authority-facing evidence register for this case.</p>
+          </div>
+          <div class="status-row">
+            <span class='status-chip is-accent'>6 rows</span>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Label</th><th>Source</th><th>Value</th></tr></thead>
+          <tbody><tr><td>case_count</td><td>primary.summary.case_count</td><td>3</td></tr><tr><td>waveform_corr_min</td><td>primary.summary.waveform_corr_min</td><td>0.962532707045799</td></tr><tr><td>phase_error_ms_max</td><td>primary.summary.phase_error_ms_max</td><td>30.0</td></tr><tr><td>residual_drift_mm_max</td><td>primary.summary.residual_drift_mm_max</td><td>0.66292</td></tr><tr><td>damping_reduction_ratio_mean</td><td>primary.summary.damping_reduction_ratio_mean</td><td>0.0003541342972751874</td></tr><tr><td>device_section_family_count</td><td>supporting.nonlinear_generalization.summary.device_section_family_count</td><td>4</td></tr></tbody>
+        </table>
+      </article>
+
+      <article class="panel span-5">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Workflow state</div>
+            <h2>Attestation Workflow</h2>
+            <p class="panel-lead">The current status, source kind, missing fields, and batch-review linkage remain explicit for reviewer follow-through.</p>
+          </div>
+          <div class="status-row">
+            <span class='status-chip is-ok'>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED</span>
+          </div>
+        </div>
+        <div class="detail-stack">
+          <div class="detail-row"><span>Status</span><span class='status-chip is-ok'>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED</span></div>
+          <div class="detail-row"><span>Source kind</span><strong>manifest</strong></div>
+          <div class="detail-row"><span>Missing fields</span><strong>none</strong></div>
+          <div class="detail-row"><span>Attestation manifest</span><strong>external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.authority_onepage.attestation_manifest.json</strong></div>
+          <div class="detail-row"><span>Attestation template</span><strong>external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.authority_onepage.attestation_template.json</strong></div>
+          <div class="detail-row"><span>Attestation receipt</span><strong>external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.authority_onepage.attestation_receipt.json</strong></div>
+          <div class="detail-row"><span>Batch template</span><strong>implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_template.json</strong></div>
+          <div class="detail-row"><span>Batch runner</span><strong>implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_run_report.json</strong></div>
+          <div class="detail-row"><span>Live-ready template</span><strong>implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_approve_all.live_ready_template.json</strong></div>
+        </div>
+      </article>
+
+      <article class="panel panel-wide">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Shared package links</div>
+            <h2>Shared Appendices</h2>
+            <p class="panel-lead">The main external one-page, native roundtrip evidence, row provenance exports, and reviewer-facing bridge notes stay linked as one review family.</p>
+          </div>
+          <div class="status-row">
+            <span class='status-chip is-accent'>shared evidence bundle</span>
+          </div>
+        </div>
+        <div class="appendix-stack">
+          <div class="detail-stack">
+            <div class="detail-row"><span>Main onepage</span><strong>../external_validation_onepage.md</strong></div>
+            <div class="detail-row"><span>native roundtrip appendix markdown</span><strong>../artifacts/implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md</strong></div>
+            <div class="detail-row"><span>native roundtrip appendix json</span><strong>../artifacts/implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.json</strong></div>
+            <div class="detail-row"><span>row provenance report</span><strong>../artifacts/implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json</strong></div>
+            <div class="detail-row"><span>row provenance csv</span><strong>../artifacts/implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.csv</strong></div>
+          </div>
+          
+          <h2>Native Authoring Coverage</h2>
+          <div class="note">special_member_family: direct_patch=core_beam_connection_detailing=1, intermediate_beam_section=1, intermediate_wall_rebar=4, intermediate_wall_thickness=3, perimeter_frame_column=1, perimeter_slab_thickness=2, perimeter_wall_detailing=5, perimeter_wall_rebar=1, perimeter_wall_thickness=2, transfer_beam_connection_detailing=5 | supported=core_beam_connection_detailing=2, intermediate_beam_section=1, intermediate_wall_rebar=4, intermediate_wall_thickness=3, perimeter_frame_column=1, perimeter_slab_thickness=2, perimeter_wall_detailing=10, perimeter_wall_rebar=1, perimeter_wall_thickness=2, transfer_beam_connection_detailing=10 | zero_touch_verified=core_beam_connection_detailing=1, perimeter_wall_detailing=5, transfer_beam_connection_detailing=5</div>
+          <div class="note">kr_promotion_queue: No additional supported exact-topology archive candidates are pending right now. This queue reopens automatically when a new public archive decoded preview lands with exact_topology_candidate=true.</div>
+          <div class="note">kr_promotion_queue_json: ../artifacts/implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.json</div>
+          <div class="note">kr_promotion_queue_md: ../artifacts/implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.md</div>
+    
+          
+        </div>
+      </article>
+
+      <article class="panel panel-wide">
+        <div class="panel-head">
+          <div>
+            <div class="panel-kicker">Receipt traceability</div>
+            <h2>Irregular Benchmark Receipts</h2>
+            <p class="panel-lead">Receipt references remain visible as direct review links rather than getting buried in appendix prose.</p>
+          </div>
+          <div class="status-row">
+            <span class='status-chip is-accent'>2 linked receipts</span>
+          </div>
+        </div>
+        <div class='note'><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a></div><div class='note'><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></div>
+      </article>
+    </section>
+  </div>
+</body>
+</html>

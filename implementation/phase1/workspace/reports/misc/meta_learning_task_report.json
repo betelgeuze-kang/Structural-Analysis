@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-meta-learning-task-pack",
+  "generated_at": "2026-02-25T14:30:20.010977+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "meta-learning adaptation pack ready with O(N+E) residual correction",
+  "task_count": 5,
+  "meta_ood_generalization_pass": true,
+  "ood_task_count": 2,
+  "summary_metrics": {
+    "avg_physical_accuracy_pct": 99.99999904659919,
+    "id_avg_accuracy_pct": 99.99999884019338,
+    "ood_avg_accuracy_pct": 99.9999993562079,
+    "generalization_gap_pct": 0.0,
+    "target_accuracy_pct": 99.9,
+    "ood_min_accuracy_pct": 99.5,
+    "linear_complexity_observed": true,
+    "complexity_class": "O(N+E)",
+    "message_passes": 6
+  },
+  "tasks": [
+    {
+      "schema_version": "1.0",
+      "task_id": "T-RHM-SEIS-001",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "support_profile": "mixed",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "target_zone": {
+        "node_ids": [
+          "N3",
+          "N4"
+        ],
+        "risk_label": "high"
+      },
+      "adaptation": {
+        "residual_l1_before": 26.144389736493675,
+        "residual_l1_after": 3.5229955922292154e-07,
+        "residual_reduction_ratio": 0.9999999865248506,
+        "physical_accuracy_pct": 99.99999865248506,
+        "target_accuracy_pct": 99.9,
+        "target_met": true,
+        "complexity_class": "O(N+E)",
+        "linear_complexity_observed": true,
+        "operation_count_estimate": 756,
+        "node_count": 18,
+        "edge_count": 18,
+        "message_passes": 6
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "T-TRS-WIND-002",
+      "topology_type": "truss",
+      "hazard_type": "wind",
+      "support_profile": "fixed",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "target_zone": {
+        "node_ids": [
+          "N10"
+        ],
+        "risk_label": "mid"
+      },
+      "adaptation": {
+        "residual_l1_before": 14.04395152016837,
+        "residual_l1_after": 1.52439030027775e-07,
+        "residual_reduction_ratio": 0.9999999891455742,
+        "physical_accuracy_pct": 99.99999891455742,
+        "target_accuracy_pct": 99.9,
+        "target_met": true,
+        "complexity_class": "O(N+E)",
+        "linear_complexity_observed": true,
+        "operation_count_estimate": 672,
+        "node_count": 16,
+        "edge_count": 16,
+        "message_passes": 6
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "T-RHM-WIND-003",
+      "topology_type": "rahmen",
+      "hazard_type": "wind",
+      "support_profile": "mixed",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "target_zone": {
+        "node_ids": [
+          "N6",
+          "N7"
+        ],
+        "risk_label": "mid"
+      },
+      "adaptation": {
+        "residual_l1_before": 22.139316583140683,
+        "residual_l1_after": 2.3167961296675723e-07,
+        "residual_reduction_ratio": 0.9999999895353765,
+        "physical_accuracy_pct": 99.99999895353766,
+        "target_accuracy_pct": 99.9,
+        "target_met": true,
+        "complexity_class": "O(N+E)",
+        "linear_complexity_observed": true,
+        "operation_count_estimate": 840,
+        "node_count": 20,
+        "edge_count": 20,
+        "message_passes": 6
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "T-OUT-COMB-004",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "support_profile": "hinge",
+      "split": "test",
+      "ood_tag": "ood_combined",
+      "target_zone": {
+        "node_ids": [
+          "N21",
+          "N22"
+        ],
+        "risk_label": "high"
+      },
+      "adaptation": {
+        "residual_l1_before": 54.35543609349815,
+        "residual_l1_after": 4.294673552795414e-07,
+        "residual_reduction_ratio": 0.999999992098907,
+        "physical_accuracy_pct": 99.9999992098907,
+        "target_accuracy_pct": 99.9,
+        "target_met": true,
+        "complexity_class": "O(N+E)",
+        "linear_complexity_observed": true,
+        "operation_count_estimate": 1008,
+        "node_count": 24,
+        "edge_count": 24,
+        "message_passes": 6
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "T-WFR-SEIS-005",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "support_profile": "mixed",
+      "split": "test",
+      "ood_tag": "ood_topology",
+      "target_zone": {
+        "node_ids": [
+          "N12",
+          "N13"
+        ],
+        "risk_label": "high"
+      },
+      "adaptation": {
+        "residual_l1_before": 38.10824470655189,
+        "residual_l1_after": 1.8957894864171733e-07,
+        "residual_reduction_ratio": 0.999999995025251,
+        "physical_accuracy_pct": 99.9999995025251,
+        "target_accuracy_pct": 99.9,
+        "target_met": true,
+        "complexity_class": "O(N+E)",
+        "linear_complexity_observed": true,
+        "operation_count_estimate": 924,
+        "node_count": 22,
+        "edge_count": 22,
+        "message_passes": 6
+      }
+    }
+  ],
+  "errors": []
+}

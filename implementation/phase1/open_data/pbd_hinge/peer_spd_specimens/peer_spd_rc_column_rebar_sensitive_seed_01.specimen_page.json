@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-peer-spd-specimen-pages",
+  "generated_at": "2026-03-19T15:55:36.673452+00:00",
+  "seed_id": "peer_spd_rc_column_rebar_sensitive_seed_01",
+  "holdout_split": "val",
+  "specimen_id": "121",
+  "specimen_display_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121",
+  "source_origin_class": "official_external_benchmark",
+  "selection_mode": "properties_based_preselection_plus_specimen_page_snapshot",
+  "page_title": "PEER Structural Performance Database",
+  "sections": {
+    "Specimen Information": {
+      "Name": "Galeota et al. 1996, AB1",
+      "Type": "Rectangular",
+      "Reference": "Galeota, D.: Giammatteo, M.M.; Marino, R., \"Seismic Resistance of High Strength Concrete Columns.\" Procedings of the Eleventh World Conference on Earthquake Engineering, Disc 3, Paper No. 1390, 1996."
+    },
+    "Material Properties": {
+      "Concrete Strength": "80 (MPa)",
+      "Transverse Steel": "Grade: Yield Stress: 430 (MPa) Strength: 0 (MPa)",
+      "Longitudinal Steel": "Grade: Corner Yield Stress: 430 (MPa) Strength: 0 (MPa)Intermediate Yield Stress: 430 (MPa) Strength: 0 (MPa)"
+    },
+    "Geometry": {
+      "X-Section": "Width: 250 (mm) Depth: 250 (mm)",
+      "Length": "L-Inflection: 1,140 (mm) L-Measured: 1,140 (mm)",
+      "Test Configuration": "Double Ended"
+    },
+    "Loading": {
+      "Axial Load": "1,000 (kN)",
+      "P-D": "Shear provided",
+      "L-Top": "0",
+      "L-Bottom": "0"
+    },
+    "Longitudinal Reinforcement": {
+      "Diameter": "20 (mm) corner bars | 20 (mm) intermediate bars",
+      "Number of Bars": "12",
+      "Perpendicular to Load": "Clear cover: 30 (mm) Number of intermediate bars: 2",
+      "Parallel to Load": "Clear cover: 30 (mm) Number of intermediate bars: 2",
+      "Reinforcement Ratio": "0.0603"
+    },
+    "Transverse Reinforcement": {
+      "Type": "RI: Rectangular and interlocking ties",
+      "Number of Shear Legs": "4",
+      "Region of Close Spacing": "Bar Diameter: 8 (mm) Hoop Sets: 0 Hoop Spacing: 150 (mm)",
+      "Reinforcement Ratio": "0.012"
+    },
+    "Non-Dimensional Properties": {
+      "Span-to-Depth Ratio": "4.56",
+      "Axial Load Ratio": "0.2"
+    },
+    "Test Results": {
+      "Failure Type": "Flexure",
+      "Damage Observation": "Concrete Crushing: 0 (mm)Significant Concrete Spalling: 0 (mm)Long Bar Buckling: 0 (mm)Long Bar Fracture: 0 (mm)Spiral Fracture: 0 (mm)Loss of Axial Load Capacity: 0 (mm)",
+      "Resources": "Force Displacement Data (data)"
+    },
+    "Record Information": {
+      "Version": "1 (April 8, 2003)"
+    }
+  },
+  "resource_links": [
+    {
+      "href": "http://depts.washington.edu/columdat/rectcol/txfiles/gal96ab1.txt",
+      "text": "Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    }
+  ],
+  "hysteresis_link_candidates": [
+    {
+      "href": "http://depts.washington.edu/columdat/rectcol/txfiles/gal96ab1.txt",
+      "text": "Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS"
+}

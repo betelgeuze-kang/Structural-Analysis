@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-prepare-midas-binary-archive-adapter",
+  "source_id": "midas_support_multifamily_building_archive",
+  "archive_path": "implementation/phase1/open_data/midas/quality_corpus/raw/midas_support_multifamily_building_archive.zip",
+  "out_dir": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive",
+  "summary": {
+    "recognized_member_count": 1,
+    "extension_label": ".meb=1",
+    "recommended_adapter_family": "midas_binary_meb_parser",
+    "recommended_parser_script": "implementation/phase1/parse_midas_binary_meb_to_json_npz.py",
+    "recommended_primary_member": "C07_T01_P000_RC_01_┤┘░í▒╕_┴╓┼├.meb",
+    "primary_member_probe_ready": false,
+    "primary_member_magic": "MBDG",
+    "primary_member_structural_token_label": "GUID=1, __DBMS_DATA__=1"
+  },
+  "members": [
+    {
+      "member_name": "C07_T01_P000_RC_01_┤┘░í▒╕_┴╓┼├.meb",
+      "extension": ".meb",
+      "size_bytes": 1354364,
+      "extracted_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/C07_T01_P000_RC_01_┤┘░í▒╕_┴╓┼├.meb"
+    }
+  ],
+  "primary_member_probe": {
+    "member_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/C07_T01_P000_RC_01_┤┘░í▒╕_┴╓┼├.meb",
+    "size_bytes": 1354364,
+    "magic_ascii": "MBDG",
+    "magic_hex": "4d424447",
+    "dbms_marker_present": true,
+    "table_token_rows": [
+      "MBDG",
+      "__DBMS_DATA__",
+      "GUID",
+      "UNIT",
+      "FMDB",
+      "LLDB",
+      "PHDB",
+      "BDIF",
+      "RDRW",
+      "TRLN",
+      "DMPT",
+      "CDLN",
+      "DMCR",
+      "DMLN",
+      "MATL",
+      "FGRP",
+      "DSEC",
+      "SECT",
+      "THIK",
+      "DECS",
+      "PLAN",
+      "MDUL",
+      "GRND",
+      "STOR",
+      "U33333",
+      "R2333",
+      "H73333",
+      "U3333",
+      "C3333",
+      "R23333",
+      "H3333",
+      "X3333",
+      "X4333",
+      "V83333",
+      "G3333",
+      "B43333",
+      "S3333",
+      "O3333",
+      "B4333",
+      "KS01"
+    ],
+    "structural_token_rows": [
+      "__DBMS_DATA__",
+      "GUID"
+    ],
+    "probe_ready": false,
+    "probe_label": "binary member extracted / table layout still uncertain"
+  },
+  "checks": {
+    "archive_exists": true,
+    "recognized_member_nonzero": true,
+    "primary_member_selected": true,
+    "primary_member_probe_ready": false
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "binary archive adapter manifest prepared"
+}

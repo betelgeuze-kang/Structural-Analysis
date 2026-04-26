@@ -1,0 +1,267 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-design-optimization-solver-loop-long",
+  "generated_at": "2026-03-13T14:13:30.484461+00:00",
+  "mode": "long_budget",
+  "inputs": {
+    "dataset_npz": "implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "rebar_step": 0.002,
+    "thickness_step": 0.01,
+    "detailing_step": 0.03,
+    "min_rebar_ratio": 0.004,
+    "max_rebar_ratio": 0.08,
+    "max_iterations": 32,
+    "dcr_limit": 1.0,
+    "drift_limit_pct": 2.0,
+    "residual_drift_limit_pct": 0.5,
+    "ndtha_step_count": 128,
+    "target_dcr_margin": 0.0,
+    "per_group_escalation_cap": 24,
+    "state_out": "implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
+    "objective_calibration_report": "implementation/phase1/release/design_optimization/design_objective_calibration_report.json"
+  },
+  "summary": {
+    "baseline_cost_proxy": 142860.3328482246,
+    "final_cost_proxy": 147096.7987682246,
+    "cost_reduction_proxy": -4236.465919999988,
+    "baseline_violation_score_heuristic": 12259.682265161711,
+    "final_violation_score_heuristic": 784.0836642253444,
+    "baseline_violation_score_solver": 2347.4422651617083,
+    "final_violation_score_solver": 57.72002786170772,
+    "baseline_max_drift_pct": 1.9872000000000005,
+    "final_max_drift_pct": 1.9872000000000005,
+    "baseline_residual_drift_pct": 0.37399104,
+    "final_residual_drift_pct": 0.37399104000000005,
+    "baseline_max_dcr": 1.9158888949200001,
+    "final_max_dcr": 0.9331636363636363,
+    "accepted_stage1_count": 0,
+    "accepted_stage1_extra_count": 4,
+    "accepted_stage1_dcr_count": 3,
+    "accepted_stage2_count": 0,
+    "solver_backend_static": "rocm_torch_hip_mainloop",
+    "solver_backend_ndtha": "rocm_torch_hip_mainloop",
+    "solver_feasible_final": true,
+    "target_max_dcr": 1.0,
+    "objective_calibration_applied": true
+  },
+  "artifacts": {
+    "state_out": "implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
+    "report_out": "implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json"
+  },
+  "stage1_proposed_head": [
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "direction": 1,
+      "action_name": "thickness_up",
+      "violation_score": 1459.1665047897077,
+      "estimated_cost": 142864.6522952646,
+      "estimated_max_dcr": 1.5605785907712,
+      "estimated_drift_pct": 0.0,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S05:core:2:column:P 50x4",
+      "group_index": 256,
+      "direction": 1,
+      "action_name": "thickness_up",
+      "violation_score": 1041.1543822617073,
+      "estimated_cost": 142868.97174230462,
+      "estimated_max_dcr": 1.3933737417599998,
+      "estimated_drift_pct": 0.0,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S05:intermediate:2:column:P 50x4",
+      "group_index": 261,
+      "direction": 1,
+      "action_name": "thickness_up",
+      "violation_score": 832.1483209977075,
+      "estimated_cost": 142873.2911893446,
+      "estimated_max_dcr": 1.3097713172543999,
+      "estimated_drift_pct": 0.0,
+      "estimated_residual_drift_pct": 0.0
+    },
+    {
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "group_index": 278,
+      "direction": 1,
+      "action_name": "rebar_up",
+      "violation_score": 784.0836642253444,
+      "estimated_cost": 142973.27838934463,
+      "estimated_max_dcr": 1.2905454545454547,
+      "estimated_drift_pct": 0.0,
+      "estimated_residual_drift_pct": 0.0
+    }
+  ],
+  "stage1_accepted_head": [],
+  "stage1_extra_accepted_head": [
+    {
+      "group_id": "S00:transfer:nogroup:column:P 50x4",
+      "group_index": 24,
+      "action_name": "rebar_up",
+      "steps": 5,
+      "violation_score": 1459.1665047897077,
+      "max_drift_pct": 1.9872000000000005,
+      "residual_drift_pct": 0.37399104
+    },
+    {
+      "group_id": "S05:core:2:column:P 50x4",
+      "group_index": 256,
+      "action_name": "rebar_up",
+      "steps": 5,
+      "violation_score": 1041.1543822617073,
+      "max_drift_pct": 1.9872000000000005,
+      "residual_drift_pct": 0.37399104
+    },
+    {
+      "group_id": "S05:intermediate:2:column:P 50x4",
+      "group_index": 261,
+      "action_name": "rebar_up",
+      "steps": 5,
+      "violation_score": 832.1483209977075,
+      "max_drift_pct": 1.9872000000000005,
+      "residual_drift_pct": 0.37399104
+    },
+    {
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "group_index": 278,
+      "action_name": "rebar_up",
+      "steps": 5,
+      "violation_score": 784.0836642253444,
+      "max_drift_pct": 1.9872000000000005,
+      "residual_drift_pct": 0.37399104
+    }
+  ],
+  "stage1_dcr_accepted_head": [
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.81",
+      "group_index": 239,
+      "action_name": "rebar_up",
+      "steps": 8,
+      "max_dcr": 1.2230400000000003,
+      "max_drift_pct": 1.9872000000000005,
+      "residual_drift_pct": 0.37399104
+    },
+    {
+      "group_id": "S00:core:nogroup:beam:SB1000X1200",
+      "group_index": 0,
+      "action_name": "rebar_up",
+      "steps": 8,
+      "max_dcr": 1.0920000000000003,
+      "max_drift_pct": 1.9872000000000005,
+      "residual_drift_pct": 0.37399104
+    },
+    {
+      "group_id": "S01:intermediate:nogroup:beam:SB1900X1200",
+      "group_index": 29,
+      "action_name": "rebar_up",
+      "steps": 8,
+      "max_dcr": 0.9331636363636363,
+      "max_drift_pct": 1.9872000000000005,
+      "residual_drift_pct": 0.37399104000000005
+    }
+  ],
+  "stage2_proposed_head": [
+    {
+      "group_index": 0
+    },
+    {
+      "group_index": 29
+    },
+    {
+      "group_index": 239
+    },
+    {
+      "group_index": 24
+    },
+    {
+      "group_index": 278
+    },
+    {
+      "group_index": 256
+    },
+    {
+      "group_index": 261
+    },
+    {
+      "group_index": 309
+    },
+    {
+      "group_index": 231
+    },
+    {
+      "group_index": 51
+    },
+    {
+      "group_index": 35
+    },
+    {
+      "group_index": 282
+    },
+    {
+      "group_index": 293
+    },
+    {
+      "group_index": 206
+    },
+    {
+      "group_index": 18
+    },
+    {
+      "group_index": 490
+    },
+    {
+      "group_index": 297
+    },
+    {
+      "group_index": 204
+    },
+    {
+      "group_index": 283
+    },
+    {
+      "group_index": 290
+    },
+    {
+      "group_index": 306
+    },
+    {
+      "group_index": 299
+    },
+    {
+      "group_index": 284
+    },
+    {
+      "group_index": 489
+    },
+    {
+      "group_index": 89
+    },
+    {
+      "group_index": 488
+    },
+    {
+      "group_index": 205
+    },
+    {
+      "group_index": 356
+    },
+    {
+      "group_index": 305
+    },
+    {
+      "group_index": 300
+    },
+    {
+      "group_index": 515
+    },
+    {
+      "group_index": 298
+    }
+  ],
+  "stage2_accepted_head": [],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "long-budget solver-validated optimization loop completed"
+}

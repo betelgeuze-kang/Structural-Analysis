@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-nightly-release-gate",
+  "generated_at": "2026-03-04T12:04:41.753304+00:00",
+  "inputs": {
+    "candidate_id": "zenodo_atwood_highrise_shm_2025",
+    "input_path": "implementation/phase1/open_data/megastructure",
+    "download_if_missing": false,
+    "gpu_strict": true,
+    "allow_cpu_required": false,
+    "scale_levels_nightly": "1000000,3000000,10000000",
+    "scale_levels_io": "1000000,3000000",
+    "nightly_10m_repro_runs": 3,
+    "enable_ndtha_long_profile": true,
+    "ndtha_long_profile_runs": 2,
+    "commercial_readiness_model_cases": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json,implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "commercial_readiness_target_split": "all",
+    "ndtha_cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "ndtha_target_split": "test",
+    "ndtha_ground_motion_csv": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "opensees_model": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+    "require_real_topology": true,
+    "require_shell_beam_mix": true,
+    "noise_seeds": "11,23,47",
+    "noise_stiffness_levels_pct": "10",
+    "skip_promotion": false
+  },
+  "reports": {
+    "commercial_csv_gate": "implementation/phase1/commercial_csv_gate_report.json",
+    "commercial_readiness": "implementation/phase1/commercial_readiness_report.json",
+    "real_source_multi": "implementation/phase1/real_source_multi_gate_report.json",
+    "nonlinear_engine": "implementation/phase1/nonlinear_frame_engine_report.json",
+    "pushover_stress": "implementation/phase1/nonlinear_pushover_stress_report.json",
+    "ndtha_stress": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+    "phase3_pipeline": "implementation/phase1/phase3_megastructure_pipeline_report.json",
+    "topology_gate": "implementation/phase1/opensees_topology_report.json",
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "sync_stress": "implementation/phase1/sync_stress_gate_report.json",
+    "noise_convergence": "implementation/phase1/noise_convergence_gate_report.json",
+    "scaleout_io": "implementation/phase1/scaleout_io_profile_report.json",
+    "nightly_10m_repro": "implementation/phase1/nightly_10m_repro_report.json",
+    "ndtha_long_profile": "implementation/phase1/ndtha_long_profile_report.json",
+    "ci_gate": "implementation/phase1/ci_gate_report.json",
+    "static_validation": "implementation/phase1/static_artifact_validation_report.json",
+    "freeze_release": "implementation/phase1/release/freeze_release_report.json",
+    "promotion": "implementation/phase1/release/release_candidate_promotion_report.json"
+  },
+  "steps": [
+    {
+      "step": "commercial_csv_gate",
+      "seconds": 7.319178581237793,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_commercial_csv_gate.py --out implementation/phase1/commercial_csv_gate_report.json",
+      "stdout_tail": "Wrote commercial csv gate report: implementation/phase1/commercial_csv_gate_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "real_source_multi_gate",
+      "seconds": 0.924426794052124,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_real_source_multi_gate.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json,implementation/phase1/commercial_benchmark_cases.from_csv.json --out implementation/phase1/real_source_multi_gate_report.json --forbid-toy-markers",
+      "stdout_tail": "Wrote real-source multi gate report: implementation/phase1/real_source_multi_gate_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "nonlinear_engine_gate",
+      "seconds": 1.0116605758666992,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_nonlinear_frame_engine_validation.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --target-split test --min-case-count 3 --max-case-count 6 --require-top-disp-hf --out implementation/phase1/nonlinear_frame_engine_report.json",
+      "stdout_tail": "Wrote nonlinear frame engine report: implementation/phase1/nonlinear_frame_engine_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "pushover_stress_gate",
+      "seconds": 1.0141808986663818,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/run_nonlinear_pushover_stress.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --target-split test --min-case-count 3 --max-case-count 6 --load-factors 1.0,1.25,1.5,2.0,3.0 --yield-drift-scale 0.45 --hardening-ratio 0.2 --pdelta-factor 1.0 --max-iter 120 --min-plastic-story-count 1 --min-drift-amplification 1.8 --out implementation/phase1/nonlinear_pushover_stress_report.json",
+      "stdout_tail": "Wrote nonlinear pushover stress report: implementation/phase1/nonlinear_pushover_stress_report.json\n",
+      "stderr_tail": "{\"event\": \"pushover.start\", \"inputs\": {\"accepted_metric_sources\": \"engine_export_direct,commercial_solver_export,open_data_measurement\", \"cases\": \"implementation/phase1/commercial_benchmark_cases.from_csv.json\", \"hardening_ratio\": 0.2, \"load_factors\": \"1.0,1.25,1.5,2.0,3.0\", \"material_model\": \"rc_composite\", \"max_case_count\": 6, \"max_iter\": 120, \"min_case_count\": 3, \"min_drift_amplification\": 1.8, \"min_plastic_story_count\": 1, \"out\": \"implementation/phase1/nonlinear_pushover_stress_report.json\", \"pdelta_factor\": 1.0, \"rc_bond_slip_ratio_ref\": 0.003, \"rc_cracking_strain\": 0.00022, \"rc_creep_rate_per_hour\": 0.008, \"target_split\": \"test\", \"tolerance\": 1e-07, \"yield_drift_scale\": 0.45}}\n{\"contract_pass\": false, \"event\": \"pushover.completed\", \"reason_code\": \"ERR_ENGINE_FAIL\"}\n"
+    }
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_PUSHOVER_STRESS_GATE",
+  "reason": "nonlinear pushover stress gate failed",
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/nightly_release_gate/20260304T120441Z/artifact_archive_manifest.json"
+}

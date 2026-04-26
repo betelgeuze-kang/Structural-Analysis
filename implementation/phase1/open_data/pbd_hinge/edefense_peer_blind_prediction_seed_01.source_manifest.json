@@ -1,0 +1,240 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-prepare-edefense-peer-blind-prediction-source-manifest",
+  "generated_at": "2026-04-16T14:46:34.254496+00:00",
+  "source_family": "edefense_peer_blind_prediction",
+  "seed_id": "edefense_peer_blind_prediction_seed_01",
+  "source_name": "E-Defense / PEER blind prediction benchmark",
+  "source_urls": [
+    "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+    "https://peer.berkeley.edu/sites/default/files/news_e-defense_blind_analysis_2009-article.pdf",
+    "https://peer.berkeley.edu/nees-tipse-defense-announce-blind-analysis-contest-seismic-isolation-test",
+    "https://apps.peer.berkeley.edu/prediction_contest/",
+    "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13"
+  ],
+  "source_origin_class": "official_external_benchmark",
+  "benchmark_track": "blind_prediction_dynamic_holdout",
+  "landing_track": "implementation/phase1/open_data/pbd_hinge",
+  "local_input_root": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01",
+  "expected_groups": {
+    "geometry_model": {
+      "required": true,
+      "description": "Specimen or frame geometry / model definition files.",
+      "patterns": [
+        "*geometry*.json",
+        "*geometry*.csv",
+        "*.tcl",
+        "*.inp",
+        "*.dat",
+        "*.mgt",
+        "*construction*drawings*.pdf",
+        "*columns*.pdf",
+        "*bent-cap*.pdf",
+        "*foundation*.pdf",
+        "*weight_blocks*.pdf"
+      ],
+      "matched_file_count": 5,
+      "matched_files": [
+        "Bent-Cap.pdf",
+        "Columns.pdf",
+        "Construction_Drawings.pdf",
+        "Foundation.pdf",
+        "Weight_Blocks.pdf"
+      ],
+      "present": true
+    },
+    "material_properties": {
+      "required": true,
+      "description": "Member, section, and constitutive property tables.",
+      "patterns": [
+        "*material*.json",
+        "*material*.csv",
+        "*section*.json",
+        "*section*.csv",
+        "*property*.csv",
+        "*materials.zip",
+        "*posttensiondetails*.pdf"
+      ],
+      "matched_file_count": 2,
+      "matched_files": [
+        "Materials.zip",
+        "Posttensiondetails.pdf"
+      ],
+      "present": true
+    },
+    "excitation_history": {
+      "required": true,
+      "description": "Input excitation or ground-motion histories used in the blind prediction task.",
+      "patterns": [
+        "*ground*motion*.csv",
+        "*excitation*.csv",
+        "*input*.csv",
+        "*accel*.csv",
+        "*.at2",
+        "*gms*.xlsx"
+      ],
+      "matched_file_count": 1,
+      "matched_files": [
+        "GMs.xlsx"
+      ],
+      "present": true
+    },
+    "measured_response": {
+      "required": true,
+      "description": "Measured response channels for compare/report/viewer validation.",
+      "patterns": [
+        "*response*.csv",
+        "*measurement*.csv",
+        "*sensor*.csv",
+        "*drift*.csv",
+        "*accel*.csv",
+        "*response*.xlsx",
+        "*measurement*.xlsx",
+        "*sensor*.xlsx",
+        "*drift*.xlsx",
+        "*accel*.xlsx",
+        "*experimentalresults*.xlsx",
+        "*results*.xlsx"
+      ],
+      "matched_file_count": 1,
+      "matched_files": [
+        "Experimentalresults.xlsx"
+      ],
+      "present": true
+    },
+    "reference_docs": {
+      "required": false,
+      "description": "Contest notes, benchmark instructions, or reference PDFs.",
+      "patterns": [
+        "*.pdf",
+        "*readme*.txt",
+        "*readme*.md"
+      ],
+      "matched_file_count": 9,
+      "matched_files": [
+        "Bent-Cap.pdf",
+        "Columns.pdf",
+        "Construction_Drawings.pdf",
+        "Foundation.pdf",
+        "Posttensiondetails.pdf",
+        "QA_blindprediction-1.pdf",
+        "Weight_Blocks.pdf",
+        "news_e-defense_blind_analysis_2009-article.pdf",
+        "webPEER-2015-01-Terzic-5.8.15.pdf"
+      ],
+      "present": true
+    }
+  },
+  "local_file_inventory": [
+    {
+      "path": "Bent-Cap.pdf",
+      "bytes": 469999,
+      "sha256": "5be16dbe6bd8ee2aa9db0779e952a1172d7a0249b29ab80ca7d95f21809fef01",
+      "matched_groups": [
+        "geometry_model",
+        "reference_docs"
+      ]
+    },
+    {
+      "path": "Columns.pdf",
+      "bytes": 430521,
+      "sha256": "204e77445c3e03a07573e296340054898318c12f29ce415ad6a60fce4baf16d0",
+      "matched_groups": [
+        "geometry_model",
+        "reference_docs"
+      ]
+    },
+    {
+      "path": "Construction_Drawings.pdf",
+      "bytes": 4821477,
+      "sha256": "5aed2a0b23b46400c13ba4003a2127c339d2aaed6695d012c94efd1fc70e51d5",
+      "matched_groups": [
+        "geometry_model",
+        "reference_docs"
+      ]
+    },
+    {
+      "path": "Experimentalresults.xlsx",
+      "bytes": 35158,
+      "sha256": "2a89baf766151de31769ed2ccd943e62fa1b3f5bf36b7ac2a26086337407a8b4",
+      "matched_groups": [
+        "measured_response"
+      ]
+    },
+    {
+      "path": "Foundation.pdf",
+      "bytes": 445834,
+      "sha256": "092db70bc6053d194d5495c0f685caf90e77e3aa4602d2b272286e2c075aa575",
+      "matched_groups": [
+        "geometry_model",
+        "reference_docs"
+      ]
+    },
+    {
+      "path": "GMs.xlsx",
+      "bytes": 13017109,
+      "sha256": "19800185da6b5a214163c83c073201c71a858d5183f3cae2abaa16cf87bc1018",
+      "matched_groups": [
+        "excitation_history"
+      ]
+    },
+    {
+      "path": "Materials.zip",
+      "bytes": 11302798,
+      "sha256": "fb4a501227b36a73c42c07c0078bbc2b59af225f9a6b14efc7f599f5a0c67454",
+      "matched_groups": [
+        "material_properties"
+      ]
+    },
+    {
+      "path": "Posttensiondetails.pdf",
+      "bytes": 308645,
+      "sha256": "90e5509ae0149cc4109b15d7ea0fc678314249ec59b798aa28e4268df3daedbc",
+      "matched_groups": [
+        "material_properties",
+        "reference_docs"
+      ]
+    },
+    {
+      "path": "QA_blindprediction-1.pdf",
+      "bytes": 99898,
+      "sha256": "aabd213b8f81f09b96768e67a1ac8528a44d04c5f5e910c61f5f18b47b4fa9b4",
+      "matched_groups": [
+        "reference_docs"
+      ]
+    },
+    {
+      "path": "Weight_Blocks.pdf",
+      "bytes": 133415,
+      "sha256": "756f913b06e13e783a2676497b1e68f8e8a0583a90f58a2d4a1568a78f0138ed",
+      "matched_groups": [
+        "geometry_model",
+        "reference_docs"
+      ]
+    },
+    {
+      "path": "news_e-defense_blind_analysis_2009-article.pdf",
+      "bytes": 79462,
+      "sha256": "4dcccb300d003338b0a99c2323ea60a75da6dc60805115f9e758d48c0fda1ec9",
+      "matched_groups": [
+        "reference_docs"
+      ]
+    },
+    {
+      "path": "webPEER-2015-01-Terzic-5.8.15.pdf",
+      "bytes": 3260479,
+      "sha256": "5f7742ef296f690d38a968bad649ccaf1b0b8670e9e2e61ec93cfddd89b8d74c",
+      "matched_groups": [
+        "reference_docs"
+      ]
+    }
+  ],
+  "summary": {
+    "file_count": 12,
+    "required_group_count": 4,
+    "required_group_pass_count": 4
+  },
+  "contract_pass": true,
+  "reason": "Local E-Defense / PEER blind-prediction package covers the required onboarding artifact groups.",
+  "next_action": "Normalize this first blind-prediction family into source_manifest -> benchmark_case -> compare_report -> viewer_entry."
+}

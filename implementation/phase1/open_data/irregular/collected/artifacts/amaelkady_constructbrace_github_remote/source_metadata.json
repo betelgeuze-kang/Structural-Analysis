@@ -1,0 +1,17 @@
+{
+  "bytes_copied": 3062,
+  "collector_version": "0.2.0",
+  "content_type": "text/plain; charset=utf-8",
+  "download_mode": "remote_provider_asset",
+  "family_id": "discontinuous_braced_frame_tower",
+  "original_reference": "",
+  "remote_candidate_url": "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/ConstructBrace.tcl",
+  "schema_version": "1.0",
+  "sha256": "a0d8554dbf0c6f7b3e79ab4581c71b07cdfdd8a936bddfaa12dc6c54ce76d416",
+  "source_format": "tcl",
+  "source_id": "amaelkady_constructbrace_github_remote",
+  "source_urls": [
+    "https://github.com/amaelkady/OpenSEES_Models_CBF"
+  ],
+  "title": "ConstructBrace OpenSees GitHub raw proxy"
+}

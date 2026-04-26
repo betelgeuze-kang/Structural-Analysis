@@ -1,0 +1,427 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-25T14:35:34.871753+00:00",
+  "batch_id": "opstool_606m_megatall_model_direct_batch_v1",
+  "candidate_id": "opstool_606m_megatall_model",
+  "mode": "direct_model_curated_batch",
+  "selection_policy": {
+    "target_case_count": 5,
+    "selection_objectives": [
+      "Cover all four locally available topology_type values when possible.",
+      "Cover both locally available hazard_type values.",
+      "Keep at least one directly bridged holdout case in the batch for immediate optimization follow-through.",
+      "Prefer public benchmark mirrors and low-residual variants when choices are otherwise similar."
+    ],
+    "source_constraints": [
+      "Use existing local artifacts only.",
+      "Do not synthesize new benchmark cases.",
+      "Limit authored outputs to release/benchmark_expansion target files."
+    ]
+  },
+  "input_artifacts": {
+    "benchmark_cases": "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json",
+    "topk_comparison_report": "implementation/phase1/topk_comparison_experiment_report.opstool_nightly.json",
+    "model_bridge_summary": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/synthetic_change_summary.json",
+    "per_case_bridge_summaries_root": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model"
+  },
+  "source_inventory": {
+    "available_case_count": 29,
+    "available_topology_types": [
+      "outrigger",
+      "rahmen",
+      "truss",
+      "wall-frame"
+    ],
+    "available_hazard_types": [
+      "seismic",
+      "wind"
+    ],
+    "available_splits": [
+      "test",
+      "train",
+      "val"
+    ],
+    "bridged_case_ids": [
+      "opstool_606m_megatall_model-00001",
+      "opstool_606m_megatall_model-00005",
+      "opstool_606m_megatall_model-00008",
+      "opstool_606m_megatall_model-00015",
+      "opstool_606m_megatall_model-00017",
+      "opstool_606m_megatall_model-00020",
+      "opstool_606m_megatall_model-00023"
+    ]
+  },
+  "batch_summary": {
+    "selected_case_ids": [
+      "opstool_606m_megatall_model-00020",
+      "opstool_606m_megatall_model-00009",
+      "opstool_606m_megatall_model-00019",
+      "opstool_606m_megatall_model-00027",
+      "opstool_606m_megatall_model-00008"
+    ],
+    "selected_case_count": 5,
+    "selected_topology_types": [
+      "outrigger",
+      "rahmen",
+      "truss",
+      "wall-frame"
+    ],
+    "selected_hazard_types": [
+      "seismic",
+      "wind"
+    ],
+    "selected_splits": [
+      "test",
+      "train",
+      "val"
+    ],
+    "bridge_ready_case_count": 2,
+    "public_benchmark_case_count": 2,
+    "topology_diversity_fraction": "4/4",
+    "hazard_diversity_fraction": "2/2"
+  },
+  "batch_cases": [
+    {
+      "case_id": "opstool_606m_megatall_model-00020",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "selected_variant_role": "bridge_ready_test_holdout_anchor",
+      "selection_reason": "Only bridged test holdout. Keeps the batch anchored to a directly materializable outrigger-seismic case with downstream optimization evidence already present.",
+      "selection_evidence": {
+        "is_public_benchmark_case": false,
+        "residual_norm": 0.039190706,
+        "load_scale": 1.089491,
+        "lf_metrics": {
+          "drift_ratio_pct": 0.007004306,
+          "base_shear_kN": 238.417072,
+          "buckling_factor": 3.671171422,
+          "equilibrium_residual": 0.054341129
+        },
+        "topk_fit": {
+          "drift_error_pct": 0.572403,
+          "base_shear_error_pct": 0.179451,
+          "buckling_factor_error_pct": 0.030406,
+          "equilibrium_residual_error_pct": 11.035396,
+          "mode_shape_mac_topk_pred": 1.0
+        }
+      },
+      "bridge_summary": {
+        "path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00020/synthetic_change_summary.json",
+        "story_band_count": 24,
+        "zones": [
+          "core",
+          "perimeter",
+          "transfer"
+        ],
+        "member_types": [
+          "beam",
+          "column"
+        ],
+        "peak_max_dcr_before": 1.12,
+        "peak_max_dcr_after": 0.9654,
+        "total_cost_proxy_delta_sum": -3417.0446,
+        "total_constructability_delta_sum": -0.721,
+        "total_overdesign_margin_delta_sum": 2952.2813,
+        "selection_gates": [
+          "synthetic_benchmark_story_family_pass"
+        ]
+      },
+      "readiness": {
+        "label": "benchmark_and_optimization_ready",
+        "reason": "Selected case is already in the benchmark corpus and has a local synthetic change summary for direct optimization follow-through.",
+        "bridge_summary_present": true
+      },
+      "next_commands": [
+        {
+          "goal": "materialize_selected_cases_subset",
+          "command": "jq --argfile batch implementation/phase1/release/benchmark_expansion/opstool_direct_batch.json '($batch.batch_cases | map(.case_id)) as $ids | .cases |= [ .cases[] | select(.case_id as $id | $ids | index($id)) ] | .public_benchmark_cases |= [ (.public_benchmark_cases // [])[] | select(.case_id as $id | $ids | index($id)) ] | .split_counts = (reduce .cases[] as $c ({}; .[$c.split] = ((.[ $c.split ] // 0) + 1)))' implementation/phase1/commercial_benchmark_cases.opstool_nightly.json > implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json"
+        },
+        {
+          "goal": "rerun_direct_model_topk_on_subset",
+          "command": "python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.benchmark_report.json --comparison-out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.topk_comparison.json --target-split all --epochs 250 --branches 64 --top-k 8 --seed 23 --max-drift-error-pct 6.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.97 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources open_data_measurement"
+        },
+        {
+          "goal": "run_case_level_noise_stability",
+          "command": "python3 implementation/phase1/run_noise_sensitivity_stress.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --target-split all --required-case-count 1 --target-case-ids opstool_606m_megatall_model-00020 --sensor-noise-levels-pct 0,1,2,3,5 --stiffness-noise-levels-pct 0,1,2,3,5 --seeds 11,17,23 --epochs 250 --branches 64 --top-k 8 --accepted-metric-sources open_data_measurement --out implementation/phase1/release/benchmark_expansion/opstool_606m_megatall_model-00020.noise_stability.json"
+        },
+        {
+          "goal": "run_case_level_noise_convergence",
+          "command": "python3 implementation/phase1/run_noise_convergence_gate.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --target-split all --limit-cases 1 --seeds 11,17,23 --stiffness-noise-levels 0,1,2,3,5 --out implementation/phase1/release/benchmark_expansion/opstool_606m_megatall_model-00020.noise_convergence.json"
+        },
+        {
+          "goal": "inspect_existing_bridge_summary",
+          "command": "jq . implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00020/synthetic_change_summary.json"
+        }
+      ],
+      "artifact_paths": {
+        "benchmark_case_source": "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json",
+        "topk_comparison_source": "implementation/phase1/topk_comparison_experiment_report.opstool_nightly.json",
+        "bridge_model_summary": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/synthetic_change_summary.json"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00009",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "wind",
+      "selected_variant_role": "rahmen_wind_holdout",
+      "selection_reason": "Best rahmen-wind test holdout in the public benchmark mirror, giving wind coverage and a direct-model holdout without relying on synthetic-only variants.",
+      "selection_evidence": {
+        "is_public_benchmark_case": true,
+        "residual_norm": 0.047110138,
+        "load_scale": 1.089491,
+        "lf_metrics": {
+          "drift_ratio_pct": 0.008728338,
+          "base_shear_kN": 238.031756,
+          "buckling_factor": 3.664130134,
+          "equilibrium_residual": 0.06305884
+        },
+        "topk_fit": {
+          "drift_error_pct": 0.074763,
+          "base_shear_error_pct": 0.183213,
+          "buckling_factor_error_pct": 0.409153,
+          "equilibrium_residual_error_pct": 1.929653,
+          "mode_shape_mac_topk_pred": 1.0
+        }
+      },
+      "bridge_summary": null,
+      "readiness": {
+        "label": "benchmark_ready_bridge_missing",
+        "reason": "Selected case is present in the direct-model benchmark corpus, but no per-case bridge summary was found under the local opstool_606m_megatall_model bridge directory.",
+        "bridge_summary_present": false
+      },
+      "next_commands": [
+        {
+          "goal": "materialize_selected_cases_subset",
+          "command": "jq --argfile batch implementation/phase1/release/benchmark_expansion/opstool_direct_batch.json '($batch.batch_cases | map(.case_id)) as $ids | .cases |= [ .cases[] | select(.case_id as $id | $ids | index($id)) ] | .public_benchmark_cases |= [ (.public_benchmark_cases // [])[] | select(.case_id as $id | $ids | index($id)) ] | .split_counts = (reduce .cases[] as $c ({}; .[$c.split] = ((.[ $c.split ] // 0) + 1)))' implementation/phase1/commercial_benchmark_cases.opstool_nightly.json > implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json"
+        },
+        {
+          "goal": "rerun_direct_model_topk_on_subset",
+          "command": "python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.benchmark_report.json --comparison-out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.topk_comparison.json --target-split all --epochs 250 --branches 64 --top-k 8 --seed 23 --max-drift-error-pct 6.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.97 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources open_data_measurement"
+        },
+        {
+          "goal": "run_case_level_noise_stability",
+          "command": "python3 implementation/phase1/run_noise_sensitivity_stress.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --target-split all --required-case-count 1 --target-case-ids opstool_606m_megatall_model-00009 --sensor-noise-levels-pct 0,1,2,3,5 --stiffness-noise-levels-pct 0,1,2,3,5 --seeds 11,17,23 --epochs 250 --branches 64 --top-k 8 --accepted-metric-sources open_data_measurement --out implementation/phase1/release/benchmark_expansion/opstool_606m_megatall_model-00009.noise_stability.json"
+        },
+        {
+          "goal": "inspect_model_level_bridge_template",
+          "command": "jq . implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/synthetic_change_summary.json"
+        }
+      ],
+      "artifact_paths": {
+        "benchmark_case_source": "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json",
+        "topk_comparison_source": "implementation/phase1/topk_comparison_experiment_report.opstool_nightly.json",
+        "bridge_model_summary": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/synthetic_change_summary.json"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00019",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "wall-frame",
+      "hazard_type": "wind",
+      "selected_variant_role": "wall_frame_wind_holdout",
+      "selection_reason": "Wall-frame wind test holdout with lower residual than 00010 and inclusion in public_benchmark_cases, making it the stronger wall-frame representative.",
+      "selection_evidence": {
+        "is_public_benchmark_case": true,
+        "residual_norm": 0.04217797,
+        "load_scale": 1.082708,
+        "lf_metrics": {
+          "drift_ratio_pct": 0.007010432,
+          "base_shear_kN": 220.211844,
+          "buckling_factor": 3.668638871,
+          "equilibrium_residual": 0.057629509
+        },
+        "topk_fit": {
+          "drift_error_pct": 0.259066,
+          "base_shear_error_pct": 0.00455,
+          "buckling_factor_error_pct": 0.180553,
+          "equilibrium_residual_error_pct": 6.89706,
+          "mode_shape_mac_topk_pred": 1.0
+        }
+      },
+      "bridge_summary": null,
+      "readiness": {
+        "label": "benchmark_ready_bridge_missing",
+        "reason": "Selected case is present in the direct-model benchmark corpus, but no per-case bridge summary was found under the local opstool_606m_megatall_model bridge directory.",
+        "bridge_summary_present": false
+      },
+      "next_commands": [
+        {
+          "goal": "materialize_selected_cases_subset",
+          "command": "jq --argfile batch implementation/phase1/release/benchmark_expansion/opstool_direct_batch.json '($batch.batch_cases | map(.case_id)) as $ids | .cases |= [ .cases[] | select(.case_id as $id | $ids | index($id)) ] | .public_benchmark_cases |= [ (.public_benchmark_cases // [])[] | select(.case_id as $id | $ids | index($id)) ] | .split_counts = (reduce .cases[] as $c ({}; .[$c.split] = ((.[ $c.split ] // 0) + 1)))' implementation/phase1/commercial_benchmark_cases.opstool_nightly.json > implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json"
+        },
+        {
+          "goal": "rerun_direct_model_topk_on_subset",
+          "command": "python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.benchmark_report.json --comparison-out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.topk_comparison.json --target-split all --epochs 250 --branches 64 --top-k 8 --seed 23 --max-drift-error-pct 6.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.97 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources open_data_measurement"
+        },
+        {
+          "goal": "run_case_level_noise_stability",
+          "command": "python3 implementation/phase1/run_noise_sensitivity_stress.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --target-split all --required-case-count 1 --target-case-ids opstool_606m_megatall_model-00019 --sensor-noise-levels-pct 0,1,2,3,5 --stiffness-noise-levels-pct 0,1,2,3,5 --seeds 11,17,23 --epochs 250 --branches 64 --top-k 8 --accepted-metric-sources open_data_measurement --out implementation/phase1/release/benchmark_expansion/opstool_606m_megatall_model-00019.noise_stability.json"
+        },
+        {
+          "goal": "inspect_model_level_bridge_template",
+          "command": "jq . implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/synthetic_change_summary.json"
+        }
+      ],
+      "artifact_paths": {
+        "benchmark_case_source": "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json",
+        "topk_comparison_source": "implementation/phase1/topk_comparison_experiment_report.opstool_nightly.json",
+        "bridge_model_summary": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/synthetic_change_summary.json"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00027",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "seismic",
+      "selected_variant_role": "truss_seismic_topology_coverage",
+      "selection_reason": "Only selected truss representative. It extends topology coverage to all four available classes and shows one of the cleanest top-k fits among truss cases.",
+      "selection_evidence": {
+        "is_public_benchmark_case": false,
+        "residual_norm": 0.049319045,
+        "load_scale": 1.07846,
+        "lf_metrics": {
+          "drift_ratio_pct": 0.008392262,
+          "base_shear_kN": 208.596834,
+          "buckling_factor": 3.662323073,
+          "equilibrium_residual": 0.065490405
+        },
+        "topk_fit": {
+          "drift_error_pct": 0.014105,
+          "base_shear_error_pct": 0.126958,
+          "buckling_factor_error_pct": 0.344497,
+          "equilibrium_residual_error_pct": 1.063153,
+          "mode_shape_mac_topk_pred": 1.0
+        }
+      },
+      "bridge_summary": null,
+      "readiness": {
+        "label": "benchmark_ready_bridge_missing",
+        "reason": "Selected case is present in the direct-model benchmark corpus, but no per-case bridge summary was found under the local opstool_606m_megatall_model bridge directory.",
+        "bridge_summary_present": false
+      },
+      "next_commands": [
+        {
+          "goal": "materialize_selected_cases_subset",
+          "command": "jq --argfile batch implementation/phase1/release/benchmark_expansion/opstool_direct_batch.json '($batch.batch_cases | map(.case_id)) as $ids | .cases |= [ .cases[] | select(.case_id as $id | $ids | index($id)) ] | .public_benchmark_cases |= [ (.public_benchmark_cases // [])[] | select(.case_id as $id | $ids | index($id)) ] | .split_counts = (reduce .cases[] as $c ({}; .[$c.split] = ((.[ $c.split ] // 0) + 1)))' implementation/phase1/commercial_benchmark_cases.opstool_nightly.json > implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json"
+        },
+        {
+          "goal": "rerun_direct_model_topk_on_subset",
+          "command": "python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.benchmark_report.json --comparison-out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.topk_comparison.json --target-split all --epochs 250 --branches 64 --top-k 8 --seed 23 --max-drift-error-pct 6.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.97 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources open_data_measurement"
+        },
+        {
+          "goal": "run_case_level_noise_stability",
+          "command": "python3 implementation/phase1/run_noise_sensitivity_stress.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --target-split all --required-case-count 1 --target-case-ids opstool_606m_megatall_model-00027 --sensor-noise-levels-pct 0,1,2,3,5 --stiffness-noise-levels-pct 0,1,2,3,5 --seeds 11,17,23 --epochs 250 --branches 64 --top-k 8 --accepted-metric-sources open_data_measurement --out implementation/phase1/release/benchmark_expansion/opstool_606m_megatall_model-00027.noise_stability.json"
+        },
+        {
+          "goal": "inspect_model_level_bridge_template",
+          "command": "jq . implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/synthetic_change_summary.json"
+        }
+      ],
+      "artifact_paths": {
+        "benchmark_case_source": "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json",
+        "topk_comparison_source": "implementation/phase1/topk_comparison_experiment_report.opstool_nightly.json",
+        "bridge_model_summary": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/synthetic_change_summary.json"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00008",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "selected_variant_role": "bridge_ready_validation_shadow",
+      "selection_reason": "Bridge-ready validation variant. Complements 00020 by giving a non-test outrigger-seismic case for pre-holdout tuning and optimization dry runs.",
+      "selection_evidence": {
+        "is_public_benchmark_case": false,
+        "residual_norm": 0.039780108,
+        "load_scale": 1.089491,
+        "lf_metrics": {
+          "drift_ratio_pct": 0.007938614,
+          "base_shear_kN": 238.388395,
+          "buckling_factor": 3.670492141,
+          "equilibrium_residual": 0.054989943
+        },
+        "topk_fit": {
+          "drift_error_pct": 0.523208,
+          "base_shear_error_pct": 0.151719,
+          "buckling_factor_error_pct": 0.003207,
+          "equilibrium_residual_error_pct": 10.285047,
+          "mode_shape_mac_topk_pred": 1.0
+        }
+      },
+      "bridge_summary": {
+        "path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00008/synthetic_change_summary.json",
+        "story_band_count": 24,
+        "zones": [
+          "core",
+          "perimeter",
+          "transfer"
+        ],
+        "member_types": [
+          "beam",
+          "column"
+        ],
+        "peak_max_dcr_before": 1.12,
+        "peak_max_dcr_after": 0.9654,
+        "total_cost_proxy_delta_sum": -3417.0446,
+        "total_constructability_delta_sum": -0.721,
+        "total_overdesign_margin_delta_sum": 2952.2813,
+        "selection_gates": [
+          "synthetic_benchmark_story_family_pass"
+        ]
+      },
+      "readiness": {
+        "label": "benchmark_ready_with_bridge_for_pre_holdout_optimization",
+        "reason": "Selected case is benchmark-ready and already bridged, but it is better suited to tuning or smoke optimization than final holdout proof because it is not a test split.",
+        "bridge_summary_present": true
+      },
+      "next_commands": [
+        {
+          "goal": "materialize_selected_cases_subset",
+          "command": "jq --argfile batch implementation/phase1/release/benchmark_expansion/opstool_direct_batch.json '($batch.batch_cases | map(.case_id)) as $ids | .cases |= [ .cases[] | select(.case_id as $id | $ids | index($id)) ] | .public_benchmark_cases |= [ (.public_benchmark_cases // [])[] | select(.case_id as $id | $ids | index($id)) ] | .split_counts = (reduce .cases[] as $c ({}; .[$c.split] = ((.[ $c.split ] // 0) + 1)))' implementation/phase1/commercial_benchmark_cases.opstool_nightly.json > implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json"
+        },
+        {
+          "goal": "rerun_direct_model_topk_on_subset",
+          "command": "python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.benchmark_report.json --comparison-out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.topk_comparison.json --target-split all --epochs 250 --branches 64 --top-k 8 --seed 23 --max-drift-error-pct 6.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.97 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources open_data_measurement"
+        },
+        {
+          "goal": "run_case_level_noise_stability",
+          "command": "python3 implementation/phase1/run_noise_sensitivity_stress.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --target-split all --required-case-count 1 --target-case-ids opstool_606m_megatall_model-00008 --sensor-noise-levels-pct 0,1,2,3,5 --stiffness-noise-levels-pct 0,1,2,3,5 --seeds 11,17,23 --epochs 250 --branches 64 --top-k 8 --accepted-metric-sources open_data_measurement --out implementation/phase1/release/benchmark_expansion/opstool_606m_megatall_model-00008.noise_stability.json"
+        },
+        {
+          "goal": "run_case_level_noise_convergence",
+          "command": "python3 implementation/phase1/run_noise_convergence_gate.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --target-split all --limit-cases 1 --seeds 11,17,23 --stiffness-noise-levels 0,1,2,3,5 --out implementation/phase1/release/benchmark_expansion/opstool_606m_megatall_model-00008.noise_convergence.json"
+        },
+        {
+          "goal": "inspect_existing_bridge_summary",
+          "command": "jq . implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00008/synthetic_change_summary.json"
+        }
+      ],
+      "artifact_paths": {
+        "benchmark_case_source": "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json",
+        "topk_comparison_source": "implementation/phase1/topk_comparison_experiment_report.opstool_nightly.json",
+        "bridge_model_summary": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/synthetic_change_summary.json"
+      }
+    }
+  ],
+  "batch_level_next_commands": [
+    {
+      "goal": "materialize_batch_subset",
+      "command": "jq --argfile batch implementation/phase1/release/benchmark_expansion/opstool_direct_batch.json '($batch.batch_cases | map(.case_id)) as $ids | .cases |= [ .cases[] | select(.case_id as $id | $ids | index($id)) ] | .public_benchmark_cases |= [ (.public_benchmark_cases // [])[] | select(.case_id as $id | $ids | index($id)) ] | .split_counts = (reduce .cases[] as $c ({}; .[$c.split] = ((.[ $c.split ] // 0) + 1)))' implementation/phase1/commercial_benchmark_cases.opstool_nightly.json > implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json"
+    },
+    {
+      "goal": "rerun_batch_topk",
+      "command": "python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.benchmark_report.json --comparison-out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.topk_comparison.json --target-split all --epochs 250 --branches 64 --top-k 8 --seed 23 --max-drift-error-pct 6.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.97 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources open_data_measurement"
+    },
+    {
+      "goal": "run_batch_noise_convergence",
+      "command": "python3 implementation/phase1/run_noise_convergence_gate.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --target-split all --limit-cases 5 --seeds 11,17,23 --stiffness-noise-levels 0,1,2,3,5 --out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.noise_convergence.json"
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-refresh-midas-binary-meb-decoded-inventory",
+  "source_id": "midas_support_fcm_bridge_archive",
+  "selection_priority_policy": [
+    "verified preview",
+    "payload-exact member-add preview",
+    "topology-grounded preview",
+    "table-local preview",
+    "hint preview",
+    "raw preview",
+    "inventory only"
+  ],
+  "selected_member_name": "║╕_┐╣┴ª╞─└╧_FINAL.mmbx",
+  "selected_member_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_fcm_bridge_archive/║╕_┐╣┴ª╞─└╧_FINAL.mmbx",
+  "selected_reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+  "selected_contract_pass": true,
+  "selected_score": [
+    1,
+    4,
+    49,
+    72,
+    2,
+    53
+  ],
+  "selected_selection_basis": "payload-exact member-add preview | mode=table_local_ascii_preview | points=72 | segments=49 | tables=53 | payload_tables=2 | contract_pass=True",
+  "selected_preview_quality": {
+    "rank": 4,
+    "label": "payload-exact member-add preview",
+    "mode": "table_local_ascii_preview",
+    "feature_count": 72,
+    "point_count": 72,
+    "segment_count": 49
+  },
+  "selected_summary": {
+    "table_entry_count": 53,
+    "directory_block_count": 6,
+    "in_file_payload_table_count": 2,
+    "directory_sentinel_count": 0,
+    "unresolved_table_count": 51,
+    "geometry_preview_ready": false,
+    "topology_preview_ready": true,
+    "geometry_preview_segment_count": 49,
+    "geometry_preview_point_count": 72,
+    "geometry_preview_source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+    "table_local_preview_probe": {
+      "candidate_point_count": 72,
+      "candidate_segment_count": 49,
+      "projection_label": "XY",
+      "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+      "anchor_table_names": [
+        "PONT",
+        "CURV",
+        "MEMB",
+        "*POINT",
+        "*MEMBER_ADD"
+      ],
+      "topology_grounding_label": "explicit_member_add_paths",
+      "member_path_count": 96,
+      "resolved_member_path_count": 96,
+      "missing_member_path_count": 0,
+      "member_path_resolution_rate": 1.0,
+      "member_reference_count": 232,
+      "resolved_member_reference_count": 232,
+      "missing_member_reference_count": 0,
+      "member_reference_resolution_rate": 1.0,
+      "payload_exact_topology_ready": true,
+      "payload_exactness_label": "payload-exact member-add topology preview",
+      "topology_preview_ready": true,
+      "topology_readiness_label": "payload-exact member-add topology preview",
+      "topology_node_count": 72,
+      "topology_edge_count": 90,
+      "topology_component_count": 8,
+      "dangling_point_count": 26,
+      "junction_point_count": 36,
+      "isolated_preview_point_count": 0,
+      "resolved_member_path_samples": [
+        [
+          46,
+          1
+        ],
+        [
+          47,
+          2
+        ],
+        [
+          48,
+          3
+        ],
+        [
+          49,
+          4
+        ],
+        [
+          50,
+          5
+        ]
+      ],
+      "anchor_directory_position": 156761,
+      "window_start_byte": 272463,
+      "window_end_byte": 291324
+    },
+    "geometry_preview_mode": "table_local_ascii_preview",
+    "layout_family": "MBDG_DB_CONTAINER",
+    "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+    "source_member_name": "║╕_┐╣┴ª╞─└╧_FINAL.mmbx",
+    "table_names": [
+      "MBDG",
+      "GUID",
+      "UNIT",
+      "FMDB",
+      "LLDB",
+      "STND",
+      "PHDB",
+      "BDIF",
+      "RDRW",
+      "TRLN",
+      "DMPT",
+      "CDLN",
+      "DMLN",
+      "MATL",
+      "FGRP",
+      "DSEC",
+      "SECT",
+      "THIK",
+      "PLAN",
+      "MDUL",
+      "GRND",
+      "STOR",
+      "CTRD",
+      "MBTP"
+    ]
+  },
+  "evaluations": [
+    {
+      "member_name": "║╕_┐╣┴ª╞─└╧.mmbx",
+      "member_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_fcm_bridge_archive/║╕_┐╣┴ª╞─└╧.mmbx",
+      "score": [
+        1,
+        4,
+        13,
+        54,
+        2,
+        52
+      ],
+      "selection_basis": "payload-exact member-add preview | mode=table_local_ascii_preview | points=54 | segments=13 | tables=52 | payload_tables=2 | contract_pass=True",
+      "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+      "contract_pass": true,
+      "preview_quality_rank": 4,
+      "preview_quality_label": "payload-exact member-add preview",
+      "geometry_preview_ready": false,
+      "topology_preview_ready": true,
+      "geometry_preview_point_count": 54,
+      "geometry_preview_segment_count": 13,
+      "geometry_preview_mode": "table_local_ascii_preview",
+      "mcvl_node_layout_state_label": "",
+      "mcvl_node_likely_identifier_slots": [],
+      "mcvl_node_likely_counter_slots": [],
+      "mcvl_node_likely_packed_identifier_pairs": [],
+      "table_local_topology_grounding_label": "explicit_member_add_paths",
+      "table_local_topology_edge_count": 52,
+      "table_local_topology_component_count": 16,
+      "table_local_topology_preview_ready": true,
+      "table_local_topology_readiness_label": "payload-exact member-add topology preview",
+      "table_entry_count": 52,
+      "in_file_payload_table_count": 2
+    },
+    {
+      "member_name": "║╕_┐╣┴ª╞─└╧_FINAL.mmbx",
+      "member_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_fcm_bridge_archive/║╕_┐╣┴ª╞─└╧_FINAL.mmbx",
+      "score": [
+        1,
+        4,
+        49,
+        72,
+        2,
+        53
+      ],
+      "selection_basis": "payload-exact member-add preview | mode=table_local_ascii_preview | points=72 | segments=49 | tables=53 | payload_tables=2 | contract_pass=True",
+      "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+      "contract_pass": true,
+      "preview_quality_rank": 4,
+      "preview_quality_label": "payload-exact member-add preview",
+      "geometry_preview_ready": false,
+      "topology_preview_ready": true,
+      "geometry_preview_point_count": 72,
+      "geometry_preview_segment_count": 49,
+      "geometry_preview_mode": "table_local_ascii_preview",
+      "mcvl_node_layout_state_label": "",
+      "mcvl_node_likely_identifier_slots": [],
+      "mcvl_node_likely_counter_slots": [],
+      "mcvl_node_likely_packed_identifier_pairs": [],
+      "table_local_topology_grounding_label": "explicit_member_add_paths",
+      "table_local_topology_edge_count": 90,
+      "table_local_topology_component_count": 8,
+      "table_local_topology_preview_ready": true,
+      "table_local_topology_readiness_label": "payload-exact member-add topology preview",
+      "table_entry_count": 53,
+      "in_file_payload_table_count": 2
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "client_name": "Independent structural review package",
+  "site_name": "Project site to be assigned",
+  "authority_name": "Independent Peer Review Panel",
+  "permit_label": "Authority coordination review",
+  "committee_label": "Structural Peer Committee",
+  "package_purpose_label": "Peer Committee Submission",
+  "issue_phase_label": "Issued for peer review",
+  "revision_status": "Issued for peer committee review",
+  "checklist_head_label": "Peer review checklist",
+  "checklist_title": "Independent structural peer checklist",
+  "signoff_head_label": "Peer committee disposition",
+  "signoff_title": "Independent reviewer sign-off block",
+  "reviewer_label": "Committee reviewer / office",
+  "disposition_label": "Committee disposition",
+  "comments_label": "Peer review comments / conditions",
+  "signature_label": "Reviewer signature / date",
+  "review_route_note": "Machine-verifiable evidence is prefilled; peer review comments, conditions, and sign-off lines remain open."
+}

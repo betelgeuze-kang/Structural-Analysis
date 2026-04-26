@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-04T12:30:50.874861+00:00",
+  "test_name": "real_source_multi_gate",
+  "run_dir": "implementation/phase1/experiments/by_test/real_source_multi_gate/20260304T123050Z",
+  "mode": "copy",
+  "archived_count": 3,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/real_source_multi_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/real_source_multi_gate/20260304T123050Z/artifacts/real_source_multi_gate_report.json",
+      "kind": "file",
+      "bytes": 1715,
+      "sha256": "aa8a6b40bee5bd1846c5463a75c5093ebf038b908e72b0fb7eb0cbf3df53af32",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+      "dst": "implementation/phase1/experiments/by_test/real_source_multi_gate/20260304T123050Z/artifacts/commercial_benchmark_cases.rwth_zenodo.json",
+      "kind": "file",
+      "bytes": 28898,
+      "sha256": "9b1cd4d90a72e9c696fee8dbdf1c89821519bd27b6df4504ebf2ebc1d65bfa48",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+      "dst": "implementation/phase1/experiments/by_test/real_source_multi_gate/20260304T123050Z/artifacts/commercial_benchmark_cases.from_csv.json",
+      "kind": "file",
+      "bytes": 13351,
+      "sha256": "4e73114d5a48b441c620a86b86ca186d6c86f3f4ca8e70f0776623144a78d340",
+      "mode": "copy"
+    }
+  ]
+}

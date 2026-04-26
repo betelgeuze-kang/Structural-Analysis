@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-build-cases-from-open-megastructure",
+  "generated_at": "2026-03-01T06:54:44.910817+00:00",
+  "inputs": {
+    "input_path": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "candidate_id": "zenodo_atwood_highrise_shm_2025",
+    "catalog": "implementation/phase1/open_data/megastructure/mega_structure_catalog.json",
+    "download_if_missing": false,
+    "max_download_bytes": 600000000,
+    "dynamic_out": "implementation/phase1/spatiotemporal_data/atwood_dynamic_cases.sample_scaleout.jsonl",
+    "benchmark_out": "implementation/phase1/commercial_benchmark_cases.atwood_open.sample_scaleout.json",
+    "report_out": "implementation/phase1/open_data/megastructure/atwood_conversion_report.sample_scaleout.json",
+    "window_len": 120,
+    "window_stride": 60,
+    "max_cases": 220,
+    "max_nodes": 12,
+    "seed": 23,
+    "effective_mass_kg": 280000.0,
+    "story_height_m": 3.0,
+    "public_case_count": 3,
+    "metric_source": "open_data_measurement"
+  },
+  "catalog_entry": {
+    "id": "zenodo_atwood_highrise_shm_2025",
+    "priority": 1,
+    "domain": "building",
+    "scale": "20-story high-rise (instrumented)",
+    "data_type": "measured seismic structural response",
+    "source": "Zenodo",
+    "url": "https://zenodo.org/records/16739185",
+    "doi": "10.5281/zenodo.16739185",
+    "license": "CC-BY-4.0",
+    "pipeline_fit": [
+      "dynamic_time_history",
+      "phase_correction_assimilation",
+      "noise_sensitivity_stress"
+    ],
+    "integration_hint": "Convert acceleration/displacement channels to dynamic_cases.jsonl and map sensor metadata into boundary contract."
+  },
+  "downloaded_files": [],
+  "source_count": 1,
+  "source_stats": [
+    {
+      "source": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+      "rows": 6001,
+      "dt": 0.009999999999999787,
+      "generated_cases": 99
+    }
+  ],
+  "outputs": {
+    "dynamic_out": "implementation/phase1/spatiotemporal_data/atwood_dynamic_cases.sample_scaleout.jsonl",
+    "benchmark_out": "implementation/phase1/commercial_benchmark_cases.atwood_open.sample_scaleout.json",
+    "dynamic_case_count": 99,
+    "benchmark_case_count": 99
+  },
+  "checks": {
+    "has_train": true,
+    "has_test": true,
+    "public_cases_ready": true,
+    "parse_error_free": true
+  },
+  "parse_errors": [],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "open mega-structure dataset converted"
+}

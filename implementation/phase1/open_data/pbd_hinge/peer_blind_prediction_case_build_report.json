@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-16T14:46:52.835517+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "Blind-prediction benchmark cases are built and compare-ready.",
+  "summary_line": "PEER blind benchmark-case build: READY | cases=10 | measured_response=ready | channels=11",
+  "summary": {
+    "case_count": 10,
+    "measured_response_ready": true,
+    "acceleration_channel_count": 11,
+    "drift_channel_count": 11
+  },
+  "results_explorer": {
+    "entry_kind": "blind_prediction_compare_family",
+    "entry_label": "PEER Blind Prediction Compare Family",
+    "source_family": "edefense_peer_blind_prediction",
+    "summary_label": "compare-ready blind prediction family"
+  },
+  "outputs": {
+    "benchmark_cases_out": "implementation/phase1/commercial_benchmark_cases.peer_blind_prediction_open.json"
+  }
+}

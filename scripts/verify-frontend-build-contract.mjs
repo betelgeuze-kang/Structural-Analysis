@@ -1,0 +1,132 @@
+import { existsSync, readFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+
+function readJson(relativePath) {
+  const absolutePath = path.join(rootDir, relativePath)
+  return JSON.parse(readFileSync(absolutePath, 'utf8'))
+}
+
+function fail(message) {
+  throw new Error(message)
+}
+
+const packageJson = readJson('package.json')
+const packageLock = readJson('package-lock.json')
+
+const requiredFiles = [
+  'index.html',
+  'tsconfig.json',
+  'vite.config.ts',
+  'src/main.tsx',
+  'src/App.tsx',
+  'scripts/verify-frontend-build-contract.mjs',
+  'scripts/verify-frontend-smoke.mjs',
+  'docs/frontend-build-reproducibility.md',
+]
+
+for (const relativePath of requiredFiles) {
+  if (!existsSync(path.join(rootDir, relativePath))) {
+    fail(`Missing required frontend file: ${relativePath}`)
+  }
+}
+
+if (existsSync(path.join(rootDir, 'pakage.json'))) {
+  fail('Stale typo manifest pakage.json must be removed.')
+}
+
+if (packageJson.name !== 'structural-optimization-workbench') {
+  fail(`Unexpected package name: ${packageJson.name}`)
+}
+
+if ((packageJson.description || '').toLowerCase().includes('monet')) {
+  fail('package.json description still contains stale Monet metadata.')
+}
+
+if (packageJson.packageManager !== 'npm@10.8.2') {
+  fail(`Unexpected package manager pin: ${packageJson.packageManager}`)
+}
+
+const expectedScripts = {
+  dev: 'vite',
+  build: 'tsc --noEmit && vite build',
+  preview: 'vite preview',
+  'verify:frontend-contract': 'node ./scripts/verify-frontend-build-contract.mjs',
+  'verify:frontend-smoke': 'node ./scripts/verify-frontend-smoke.mjs',
+}
+
+for (const [name, command] of Object.entries(expectedScripts)) {
+  if (packageJson.scripts?.[name] !== command) {
+    fail(`Unexpected script for ${name}: ${packageJson.scripts?.[name]}`)
+  }
+}
+
+const expectedDependencies = {
+  react: '18.2.0',
+  'react-dom': '18.2.0',
+}
+
+const expectedDevDependencies = {
+  '@types/react': '18.2.15',
+  '@types/react-dom': '18.2.7',
+  '@vitejs/plugin-react': '6.0.1',
+  typescript: '5.0.2',
+  vite: '8.0.8',
+}
+
+function assertExactDependencies(groupName, actualGroup, expectedGroup) {
+  const actualKeys = Object.keys(actualGroup || {}).sort()
+  const expectedKeys = Object.keys(expectedGroup).sort()
+
+  if (JSON.stringify(actualKeys) !== JSON.stringify(expectedKeys)) {
+    fail(`Unexpected ${groupName} keys: ${actualKeys.join(', ')}`)
+  }
+
+  for (const [name, version] of Object.entries(expectedGroup)) {
+    const actualVersion = actualGroup?.[name]
+    if (actualVersion !== version) {
+      fail(`Unexpected ${groupName} version for ${name}: ${actualVersion}`)
+    }
+    if (/^[~^]/.test(actualVersion)) {
+      fail(`${groupName} ${name} must be pinned exactly, found ${actualVersion}`)
+    }
+  }
+}
+
+assertExactDependencies('dependencies', packageJson.dependencies, expectedDependencies)
+assertExactDependencies('devDependencies', packageJson.devDependencies, expectedDevDependencies)
+
+if (packageLock.name !== packageJson.name) {
+  fail(`package-lock.json name mismatch: ${packageLock.name}`)
+}
+
+if (packageLock.version !== packageJson.version) {
+  fail(`package-lock.json version mismatch: ${packageLock.version}`)
+}
+
+if (packageLock.lockfileVersion < 3) {
+  fail(`Expected npm lockfileVersion >= 3, found ${packageLock.lockfileVersion}`)
+}
+
+const rootPackage = packageLock.packages?.['']
+
+if (!rootPackage) {
+  fail('package-lock.json is missing the root package entry.')
+}
+
+if (rootPackage.name !== packageJson.name || rootPackage.version !== packageJson.version) {
+  fail('package-lock.json root package metadata does not match package.json.')
+}
+
+assertExactDependencies('lockfile root dependencies', rootPackage.dependencies, expectedDependencies)
+assertExactDependencies('lockfile root devDependencies', rootPackage.devDependencies, expectedDevDependencies)
+
+console.log('Frontend build contract OK')
+if (existsSync(path.join(rootDir, 'node_modules'))) {
+  console.log('node_modules present: run `npm run verify:frontend-smoke` to reinstall and rebuild deterministically.')
+} else {
+  console.log('node_modules missing: contract-only verification passed without installed packages.')
+  console.log('Run `npm run verify:frontend-smoke` to install from package-lock.json and build.')
+}

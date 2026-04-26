@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "resolution": {
+    "packet_id": "connection|high",
+    "action_family": "connection_detailing",
+    "followup_type": "connection_detailing_audit_after_material_patch",
+    "review_priority": "high",
+    "queue_status": "approved",
+    "review_owner": "licensed_engineer",
+    "followup_action": "close_packet",
+    "resolution_action": "close_packet",
+    "resolution_owner": "release_coordinator",
+    "resolution_status": "closed_packet",
+    "resolution_required": false,
+    "resolution_note": "approved",
+    "status_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/queue_status/01.connection.review_status.json",
+    "packet_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/packet_01.json",
+    "change_count": 6,
+    "row_count": 6
+  },
+  "summary": {
+    "packet_id": "connection|high",
+    "resolution_action": "close_packet",
+    "resolution_status": "closed_packet",
+    "resolution_owner": "release_coordinator",
+    "change_count": 6,
+    "row_count": 6
+  }
+}

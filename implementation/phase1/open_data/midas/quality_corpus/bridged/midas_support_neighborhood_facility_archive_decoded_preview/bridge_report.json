@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "report_type": "midas_binary_decoded_preview_bridge",
+  "generated_at": "2026-04-01T13:53:50.516018+00:00",
+  "source_id": "midas_support_neighborhood_facility_archive",
+  "inputs": {
+    "decoded_inventory_json": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/meb_decoded_inventory.json",
+    "decoded_inventory_report": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/meb_decoded_inventory_report.json",
+    "refresh_report": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/meb_inventory_refresh_report.json",
+    "model_json_out": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/model.json",
+    "npz_out": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/dataset.npz",
+    "report_out": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/bridge_report.json"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "summary": {
+    "preview_segment_count": 22,
+    "preview_point_count": 23,
+    "viewer_ready": true,
+    "family_assumption": "point_scan_preview",
+    "preview_state_label": "unverified heuristic preview",
+    "preview_mode": "sparse_local_xyz_point_scan",
+    "preview_basis": "raw_xyz_scan",
+    "preview_projection_label": "XY",
+    "preview_anchor_table_names": [],
+    "bridge_mode": "point_scan_chain",
+    "source_table": "windowed_f64_xyz_scan",
+    "topology_preview_ready": false,
+    "topology_signal_field_sources": {
+      "topology_preview_ready": "inventory_summary"
+    },
+    "preview_exactness_tier": "heuristic-preview",
+    "preview_exactness_label": "heuristic preview",
+    "preview_exactness_signal_source": "bridge-default",
+    "preview_surface_bucket": "heuristic-preview",
+    "preview_surface_status_label": "decoded heuristic preview 3d candidate",
+    "preview_surface_status_tone": "warn",
+    "preview_readiness_stage_label": "heuristic preview candidate",
+    "selected_member_name": "C07_T02_P000_RC_02_▒┘╕░╗²╚░╜├.meb",
+    "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+    "accepted_type_label": "heuristic_point_link=22",
+    "bbox_min": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "bbox_max": [
+      4.0,
+      1.5,
+      0.0
+    ],
+    "node_count": 23,
+    "edge_count_directed": 44,
+    "element_count": 22,
+    "member_id_count": 22,
+    "decoded_geometry_preview_point_count": 26,
+    "decoded_geometry_preview_segment_count": 0
+  },
+  "artifacts": {
+    "decoded_inventory_json": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/meb_decoded_inventory.json",
+    "decoded_inventory_report": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/meb_decoded_inventory_report.json",
+    "refresh_report": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/meb_inventory_refresh_report.json",
+    "model_json": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/model.json",
+    "dataset_npz": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/dataset.npz"
+  }
+}

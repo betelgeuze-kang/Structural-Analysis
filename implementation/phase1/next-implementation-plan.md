@@ -9,6 +9,9 @@
 
 본 계획은 "로컬 환경 O(N) + 잔차보정" 원칙을 유지하면서 다음 구현 단계를 바로 실행하기 위한 작업표입니다.
 
+철도/터널 복합 동역학 확장 작업은 별도 계획서
+`implementation/phase1/railway_tunnel_dynamics_reinforcement_plan.md`를 기준으로 진행합니다.
+
 ## 1) FIRE/CG 정적 평형 루프 실장 (Rust/HIP)
 
 ### 작업 항목

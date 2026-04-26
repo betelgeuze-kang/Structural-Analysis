@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-06T13:55:02.350307+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS_NO_OPEN_DECISION_ITEMS",
+  "reason": "preview artifacts were satisfied by zero-touch native authoring with no open decision items",
+  "artifacts": {
+    "approve_all_input_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_approve_all.preview.json",
+    "reject_one_input_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_reject_one.preview.json",
+    "approve_all_readiness_preview_json": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_submission_readiness_preview.approve_all.json",
+    "approve_all_readiness_preview_md": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_submission_readiness_preview.approve_all.md",
+    "reject_one_readiness_preview_json": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_submission_readiness_preview.reject_one.json",
+    "reject_one_readiness_preview_md": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_submission_readiness_preview.reject_one.md",
+    "runner_live_preview_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch.live_preview.json",
+    "runner_live_preview_md": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch.live_preview.md",
+    "runner_run_report_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_run_report.json"
+  },
+  "steps": [
+    {
+      "step": "zero_touch_no_open_decision_items",
+      "command": "",
+      "return_code": 0,
+      "ok": true,
+      "stdout_tail": "",
+      "stderr_tail": ""
+    }
+  ]
+}

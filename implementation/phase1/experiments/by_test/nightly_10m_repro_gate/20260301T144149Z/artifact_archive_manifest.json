@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-01T14:41:49.113486+00:00",
+  "test_name": "nightly_10m_repro_gate",
+  "run_dir": "implementation/phase1/experiments/by_test/nightly_10m_repro_gate/20260301T144149Z",
+  "mode": "copy",
+  "archived_count": 4,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/nightly_10m_repro_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_10m_repro_gate/20260301T144149Z/artifacts/nightly_10m_repro_report.json",
+      "kind": "file",
+      "bytes": 4047,
+      "sha256": "d36cb163f0027a98abee2c582618d453f99103b92468c125249b3f83a7c06197",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/nightly_10m_repro/partitioned_scaleout_run1.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_10m_repro_gate/20260301T144149Z/artifacts/partitioned_scaleout_run1.json",
+      "kind": "file",
+      "bytes": 9068,
+      "sha256": "486dce74689338fce5cfecf7751a51715d3c31053009368e6412bb01e84817e5",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/nightly_10m_repro/partitioned_scaleout_run2.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_10m_repro_gate/20260301T144149Z/artifacts/partitioned_scaleout_run2.json",
+      "kind": "file",
+      "bytes": 9072,
+      "sha256": "4c2a9e53f327341b6bc4aa428944ca722f745567eb017562404c7c5fdf01f7a9",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/nightly_10m_repro/partitioned_scaleout_run3.json",
+      "dst": "implementation/phase1/experiments/by_test/nightly_10m_repro_gate/20260301T144149Z/artifacts/partitioned_scaleout_run3.json",
+      "kind": "file",
+      "bytes": 9080,
+      "sha256": "fbe3a5dc3dbafa9c374f3094c57d49329e1f75bd236e893d5f41d5e42553fc81",
+      "mode": "copy"
+    }
+  ]
+}

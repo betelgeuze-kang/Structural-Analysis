@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T15:24:49.235684+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS_CASE_ATTESTATION_MANIFEST_READY",
+  "reason": "real values supplied for case-level reviewer/authority workflow input",
+  "manifest_mode": "friend_demo_review",
+  "case": {
+    "task_id": "hardest::peer_tbi_tall_building_ndtha",
+    "case_id": "peer_tbi_tall_building_ndtha",
+    "case_label": "PEER TBI Tall Building NDTHA",
+    "benchmark_family": "highrise_ndtha",
+    "hazard_family": "seismic",
+    "topology_family": "tall_building_core_outrigger",
+    "load_path_family": "ndtha_multi_record",
+    "submission_scope": "hardest_external_benchmark_program",
+    "source_origin_class": "official_external_benchmark_fullcase"
+  },
+  "attestation": {
+    "reviewer_name": "Friend Demo Reviewer",
+    "reviewer_role": "informal external reviewer",
+    "reviewer_license_id": "demo-review-no-license",
+    "reviewer_signature_name": "Friend Demo Reviewer",
+    "decision_basis": "friend review of hardest external benchmark bundle for external walkthrough | case_id=peer_tbi_tall_building_ndtha",
+    "review_session_id": "friend-demo-review-20260401T152449Z",
+    "attested_at_utc": "2026-04-01T15:24:49.235684+00:00",
+    "authority_name": "informal demo receipt authority",
+    "authority_receipt_id": "DEMO-RECEIPT-08-PEER_TBI_TALL_BUILDING_NDTHA",
+    "authority_receipt_issued_at_utc": "2026-04-01T15:24:49.235684+00:00",
+    "authority_receipt_note": "non-regulatory demo receipt for friend walkthrough | case_id=peer_tbi_tall_building_ndtha",
+    "approval_signature_name": "Friend Demo Reviewer"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-21T16:52:54.098544+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "summary": {
+    "seed_id": "peer_spd_rc_column_holdout_seed_01",
+    "holdout_split": "holdout",
+    "specimen_id": "299",
+    "point_count": 449,
+    "peak_abs_drift_ratio": 0.03662513089005235,
+    "rebar_sensitive_expected": false,
+    "confinement_sensitive_expected": false,
+    "axial_load_sensitive_expected": false
+  }
+}

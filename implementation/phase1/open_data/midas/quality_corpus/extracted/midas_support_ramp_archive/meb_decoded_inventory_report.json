@@ -1,0 +1,2631 @@
+{
+  "schema_version": "1.0",
+  "input": {
+    "meb": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_ramp_archive/║╕_┐╣┴ª╞─└╧_FINAL.meb"
+  },
+  "probe": {
+    "input_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_ramp_archive/║╕_┐╣┴ª╞─└╧_FINAL.meb",
+    "size_bytes": 289553,
+    "magic_ascii": "MBDG",
+    "magic_hex": "4d424447",
+    "layout_family": "MBDG_DB_CONTAINER",
+    "dbms_marker_present": true,
+    "table_token_rows": [
+      "MBDG",
+      "__DBMS_DATA__",
+      "GUID",
+      "UNIT",
+      "FMDB",
+      "LLDB",
+      "STND",
+      "PHDB",
+      "BDIF",
+      "RDRW",
+      "TRLN",
+      "DMPT",
+      "CDLN",
+      "DMLN",
+      "MATL",
+      "FGRP",
+      "DSEC",
+      "SECT",
+      "THIK",
+      "PLAN",
+      "MDUL",
+      "GRND",
+      "STOR",
+      "CTRD",
+      "A333333",
+      "UUUUUU",
+      "MBTP",
+      "PONT",
+      "CURV",
+      "MEMB",
+      "ATLN",
+      "FMAT",
+      "DFLG",
+      "PREG",
+      "TWOP",
+      "STLD",
+      "SPLC",
+      "MCTL",
+      "SPFC",
+      "LDCT",
+      "WIND",
+      "SPKR",
+      "LLCT",
+      "LCCT",
+      "LCUG",
+      "ERSQ",
+      "ACTL",
+      "PDEL",
+      "STSB",
+      "CLWZ",
+      "MATD",
+      "DCTL",
+      "RSTP",
+      "FTLT",
+      "VERSION",
+      "PRODUCT",
+      "COMERCIAL",
+      "PREFERENCE",
+      "GROUND",
+      "LEVEL",
+      "CTRDSECT",
+      "MODULE",
+      "SS275",
+      "SN275A"
+    ],
+    "structural_token_rows": [
+      "__DBMS_DATA__",
+      "GUID",
+      "UNIT",
+      "MATL",
+      "FGRP",
+      "DSEC",
+      "SECT",
+      "THIK",
+      "PLAN",
+      "MDUL",
+      "GRND",
+      "STOR",
+      "MBTP",
+      "PONT",
+      "CURV",
+      "MEMB"
+    ],
+    "scaffold_ready": true
+  },
+  "directory_blocks": [
+    {
+      "directory_block_index": 0,
+      "entry_count": 1,
+      "token_label": "MBDG",
+      "directory_position_start": 0,
+      "directory_position_end": 0
+    },
+    {
+      "directory_block_index": 1,
+      "entry_count": 2,
+      "token_label": "GUID, UNIT",
+      "directory_position_start": 101,
+      "directory_position_end": 121
+    },
+    {
+      "directory_block_index": 2,
+      "entry_count": 20,
+      "token_label": "FMDB, LLDB, STND, PHDB, BDIF, RDRW, TRLN, DMPT, CDLN, DMLN, MATL, FGRP, DSEC, SECT, THIK, PLAN, MDUL, GRND, STOR, CTRD",
+      "directory_position_start": 581,
+      "directory_position_end": 961
+    },
+    {
+      "directory_block_index": 3,
+      "entry_count": 20,
+      "token_label": "MBTP, PONT, CURV, MEMB, ATLN, FMAT, DFLG, PREG, TWOP, STLD, SPLC, MCTL, SPFC, LDCT, WIND, SPKR, LLCT, LCCT, LCUG, ERSQ",
+      "directory_position_start": 156717,
+      "directory_position_end": 157097
+    },
+    {
+      "directory_block_index": 4,
+      "entry_count": 8,
+      "token_label": "ACTL, PDEL, STSB, CLWZ, MATD, DCTL, RSTP, FTLT",
+      "directory_position_start": 204595,
+      "directory_position_end": 204735
+    },
+    {
+      "directory_block_index": 5,
+      "entry_count": 1,
+      "token_label": "IHDR",
+      "directory_position_start": 284522,
+      "directory_position_end": 284522
+    }
+  ],
+  "table_inventory_rows": [
+    {
+      "table_name": "MBDG",
+      "directory_position": 0,
+      "entry_bytes_hex": "4d42444700000001010507030000000001000000",
+      "metadata_words_hex": [
+        "0x3070501",
+        "0x0",
+        "0x1"
+      ],
+      "metadata_words_uint32": [
+        50791681,
+        0,
+        1
+      ],
+      "candidate_low24_data_position": 460033,
+      "directory_sentinel": false,
+      "directory_block_index": 0,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "GUID",
+      "directory_position": 101,
+      "entry_bytes_hex": "4755494400000000de1dd713c41dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d71dde",
+        "0x13d71dc4",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332864990,
+        332864964,
+        332864976
+      ],
+      "candidate_low24_data_position": 14097886,
+      "directory_sentinel": false,
+      "directory_block_index": 1,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "UNIT",
+      "directory_position": 121,
+      "entry_bytes_hex": "554e495400000000c11dd713dc1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d71dc1",
+        "0x13d71ddc",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332864961,
+        332864988,
+        332864976
+      ],
+      "candidate_low24_data_position": 14097857,
+      "directory_sentinel": false,
+      "directory_block_index": 1,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "FMDB",
+      "directory_position": 581,
+      "entry_bytes_hex": "464d444200000000cf1dd713c41dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d71dcf",
+        "0x13d71dc4",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332864975,
+        332864964,
+        332864976
+      ],
+      "candidate_low24_data_position": 14097871,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "LLDB",
+      "directory_position": 601,
+      "entry_bytes_hex": "4c4c4442000000005f1cd713d41dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d71c5f",
+        "0x13d71dd4",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332864607,
+        332864980,
+        332864976
+      ],
+      "candidate_low24_data_position": 14097503,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "STND",
+      "directory_position": 621,
+      "entry_bytes_hex": "53544e4400000000ba1fd713ca1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d71fba",
+        "0x13d71dca",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332865466,
+        332864970,
+        332864976
+      ],
+      "candidate_low24_data_position": 14098362,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "PHDB",
+      "directory_position": 641,
+      "entry_bytes_hex": "5048444200000000a01fd713c01dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d71fa0",
+        "0x13d71dc0",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332865440,
+        332864960,
+        332864976
+      ],
+      "candidate_low24_data_position": 14098336,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "BDIF",
+      "directory_position": 661,
+      "entry_bytes_hex": "4244494600000000a21fd713d41dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d71fa2",
+        "0x13d71dd4",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332865442,
+        332864980,
+        332864976
+      ],
+      "candidate_low24_data_position": 14098338,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "RDRW",
+      "directory_position": 681,
+      "entry_bytes_hex": "5244525700000000af1fd713ce1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d71faf",
+        "0x13d71dce",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332865455,
+        332864974,
+        332864976
+      ],
+      "candidate_low24_data_position": 14098351,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "TRLN",
+      "directory_position": 701,
+      "entry_bytes_hex": "54524c4e00000000ae1fd713c21dd713d31dd713",
+      "metadata_words_hex": [
+        "0x13d71fae",
+        "0x13d71dc2",
+        "0x13d71dd3"
+      ],
+      "metadata_words_uint32": [
+        332865454,
+        332864962,
+        332864979
+      ],
+      "candidate_low24_data_position": 14098350,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "DMPT",
+      "directory_position": 721,
+      "entry_bytes_hex": "444d505400000000541fd713c21dd7131d1dd713",
+      "metadata_words_hex": [
+        "0x13d71f54",
+        "0x13d71dc2",
+        "0x13d71d1d"
+      ],
+      "metadata_words_uint32": [
+        332865364,
+        332864962,
+        332864797
+      ],
+      "candidate_low24_data_position": 14098260,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "CDLN",
+      "directory_position": 741,
+      "entry_bytes_hex": "43444c4e00000000801ed713ce1dd713d71dd713",
+      "metadata_words_hex": [
+        "0x13d71e80",
+        "0x13d71dce",
+        "0x13d71dd7"
+      ],
+      "metadata_words_uint32": [
+        332865152,
+        332864974,
+        332864983
+      ],
+      "candidate_low24_data_position": 14098048,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "DMLN",
+      "directory_position": 761,
+      "entry_bytes_hex": "444d4c4e000000008d1ed713d21dd713491dd713",
+      "metadata_words_hex": [
+        "0x13d71e8d",
+        "0x13d71dd2",
+        "0x13d71d49"
+      ],
+      "metadata_words_uint32": [
+        332865165,
+        332864978,
+        332864841
+      ],
+      "candidate_low24_data_position": 14098061,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "MATL",
+      "directory_position": 781,
+      "entry_bytes_hex": "4d41544c00000000d619d713de1dd713d61dd713",
+      "metadata_words_hex": [
+        "0x13d719d6",
+        "0x13d71dde",
+        "0x13d71dd6"
+      ],
+      "metadata_words_uint32": [
+        332863958,
+        332864990,
+        332864982
+      ],
+      "candidate_low24_data_position": 14096854,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "FGRP",
+      "directory_position": 801,
+      "entry_bytes_hex": "4647525000000000b819d713cc1dd713d61dd713",
+      "metadata_words_hex": [
+        "0x13d719b8",
+        "0x13d71dcc",
+        "0x13d71dd6"
+      ],
+      "metadata_words_uint32": [
+        332863928,
+        332864972,
+        332864982
+      ],
+      "candidate_low24_data_position": 14096824,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "DSEC",
+      "directory_position": 821,
+      "entry_bytes_hex": "4453454300000000a819d713de1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d719a8",
+        "0x13d71dde",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332863912,
+        332864990,
+        332864976
+      ],
+      "candidate_low24_data_position": 14096808,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "SECT",
+      "directory_position": 841,
+      "entry_bytes_hex": "5345435400000000ab19d713de1dd713c81dd713",
+      "metadata_words_hex": [
+        "0x13d719ab",
+        "0x13d71dde",
+        "0x13d71dc8"
+      ],
+      "metadata_words_uint32": [
+        332863915,
+        332864990,
+        332864968
+      ],
+      "candidate_low24_data_position": 14096811,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "THIK",
+      "directory_position": 861,
+      "entry_bytes_hex": "5448494b00000000de0fd713da1dd713c11dd713",
+      "metadata_words_hex": [
+        "0x13d70fde",
+        "0x13d71dda",
+        "0x13d71dc1"
+      ],
+      "metadata_words_uint32": [
+        332861406,
+        332864986,
+        332864961
+      ],
+      "candidate_low24_data_position": 14094302,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "PLAN",
+      "directory_position": 881,
+      "entry_bytes_hex": "504c414e00000000ed0fd713de1dd713d21dd713",
+      "metadata_words_hex": [
+        "0x13d70fed",
+        "0x13d71dde",
+        "0x13d71dd2"
+      ],
+      "metadata_words_uint32": [
+        332861421,
+        332864990,
+        332864978
+      ],
+      "candidate_low24_data_position": 14094317,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "MDUL",
+      "directory_position": 901,
+      "entry_bytes_hex": "4d44554c00000000970fd713c61dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d70f97",
+        "0x13d71dc6",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332861335,
+        332864966,
+        332864976
+      ],
+      "candidate_low24_data_position": 14094231,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "GRND",
+      "directory_position": 921,
+      "entry_bytes_hex": "47524e4400000000990fd713da1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d70f99",
+        "0x13d71dda",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332861337,
+        332864986,
+        332864976
+      ],
+      "candidate_low24_data_position": 14094233,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "STOR",
+      "directory_position": 941,
+      "entry_bytes_hex": "53544f5200000000980fd713d61dd713d21dd713",
+      "metadata_words_hex": [
+        "0x13d70f98",
+        "0x13d71dd6",
+        "0x13d71dd2"
+      ],
+      "metadata_words_uint32": [
+        332861336,
+        332864982,
+        332864978
+      ],
+      "candidate_low24_data_position": 14094232,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "CTRD",
+      "directory_position": 961,
+      "entry_bytes_hex": "4354524400000000850fd713c21dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d70f85",
+        "0x13d71dc2",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332861317,
+        332864962,
+        332864976
+      ],
+      "candidate_low24_data_position": 14094213,
+      "directory_sentinel": false,
+      "directory_block_index": 2,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "MBTP",
+      "directory_position": 156717,
+      "entry_bytes_hex": "4d42545000000000fc0ed713cc1dd713b41dd713",
+      "metadata_words_hex": [
+        "0x13d70efc",
+        "0x13d71dcc",
+        "0x13d71db4"
+      ],
+      "metadata_words_uint32": [
+        332861180,
+        332864972,
+        332864948
+      ],
+      "candidate_low24_data_position": 14094076,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "PONT",
+      "directory_position": 156737,
+      "entry_bytes_hex": "504f4e54000000005e09d713c81dd713fc1dd713",
+      "metadata_words_hex": [
+        "0x13d7095e",
+        "0x13d71dc8",
+        "0x13d71dfc"
+      ],
+      "metadata_words_uint32": [
+        332859742,
+        332864968,
+        332865020
+      ],
+      "candidate_low24_data_position": 14092638,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "CURV",
+      "directory_position": 156757,
+      "entry_bytes_hex": "43555256000000000209d713c41dd713ca1dd713",
+      "metadata_words_hex": [
+        "0x13d70902",
+        "0x13d71dc4",
+        "0x13d71dca"
+      ],
+      "metadata_words_uint32": [
+        332859650,
+        332864964,
+        332864970
+      ],
+      "candidate_low24_data_position": 14092546,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "MEMB",
+      "directory_position": 156777,
+      "entry_bytes_hex": "4d454d42000000003509d713cc1dd713b11dd713",
+      "metadata_words_hex": [
+        "0x13d70935",
+        "0x13d71dcc",
+        "0x13d71db1"
+      ],
+      "metadata_words_uint32": [
+        332859701,
+        332864972,
+        332864945
+      ],
+      "candidate_low24_data_position": 14092597,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "ATLN",
+      "directory_position": 156797,
+      "entry_bytes_hex": "41544c4e00000000bc0ad713d81dd713d91dd713",
+      "metadata_words_hex": [
+        "0x13d70abc",
+        "0x13d71dd8",
+        "0x13d71dd9"
+      ],
+      "metadata_words_uint32": [
+        332860092,
+        332864984,
+        332864985
+      ],
+      "candidate_low24_data_position": 14092988,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "FMAT",
+      "directory_position": 156817,
+      "entry_bytes_hex": "464d415400000000be0ad713c41dd713c61dd713",
+      "metadata_words_hex": [
+        "0x13d70abe",
+        "0x13d71dc4",
+        "0x13d71dc6"
+      ],
+      "metadata_words_uint32": [
+        332860094,
+        332864964,
+        332864966
+      ],
+      "candidate_low24_data_position": 14092990,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "DFLG",
+      "directory_position": 156837,
+      "entry_bytes_hex": "44464c47000000002b0ad713d61dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d70a2b",
+        "0x13d71dd6",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332859947,
+        332864982,
+        332864976
+      ],
+      "candidate_low24_data_position": 14092843,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "PREG",
+      "directory_position": 156857,
+      "entry_bytes_hex": "50524547000000002b0ad713ca1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d70a2b",
+        "0x13d71dca",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332859947,
+        332864970,
+        332864976
+      ],
+      "candidate_low24_data_position": 14092843,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "TWOP",
+      "directory_position": 156877,
+      "entry_bytes_hex": "54574f50000000002d0ad713de1dd713d51dd713",
+      "metadata_words_hex": [
+        "0x13d70a2d",
+        "0x13d71dde",
+        "0x13d71dd5"
+      ],
+      "metadata_words_uint32": [
+        332859949,
+        332864990,
+        332864981
+      ],
+      "candidate_low24_data_position": 14092845,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "STLD",
+      "directory_position": 156897,
+      "entry_bytes_hex": "53544c4400000000d605d713da1dd713c01dd713",
+      "metadata_words_hex": [
+        "0x13d705d6",
+        "0x13d71dda",
+        "0x13d71dc0"
+      ],
+      "metadata_words_uint32": [
+        332858838,
+        332864986,
+        332864960
+      ],
+      "candidate_low24_data_position": 14091734,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "SPLC",
+      "directory_position": 156917,
+      "entry_bytes_hex": "53504c4300000000e605d713da1dd713d31dd713",
+      "metadata_words_hex": [
+        "0x13d705e6",
+        "0x13d71dda",
+        "0x13d71dd3"
+      ],
+      "metadata_words_uint32": [
+        332858854,
+        332864986,
+        332864979
+      ],
+      "candidate_low24_data_position": 14091750,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "MCTL",
+      "directory_position": 156937,
+      "entry_bytes_hex": "4d43544c00000840ed05d713ca1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d705ed",
+        "0x13d71dca",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858861,
+        332864970,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091757,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "SPFC",
+      "directory_position": 156957,
+      "entry_bytes_hex": "53504643000000009805d713de1dd713d31dd713",
+      "metadata_words_hex": [
+        "0x13d70598",
+        "0x13d71dde",
+        "0x13d71dd3"
+      ],
+      "metadata_words_uint32": [
+        332858776,
+        332864990,
+        332864979
+      ],
+      "candidate_low24_data_position": 14091672,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "LDCT",
+      "directory_position": 156977,
+      "entry_bytes_hex": "4c444354000000001c05d713d61dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d7051c",
+        "0x13d71dd6",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858652,
+        332864982,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091548,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "WIND",
+      "directory_position": 156997,
+      "entry_bytes_hex": "57494e44000000000305d713da1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d70503",
+        "0x13d71dda",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858627,
+        332864986,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091523,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "SPKR",
+      "directory_position": 157017,
+      "entry_bytes_hex": "53504b52000000000c05d713ce1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d7050c",
+        "0x13d71dce",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858636,
+        332864974,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091532,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "LLCT",
+      "directory_position": 157037,
+      "entry_bytes_hex": "4c4c435400cccccc3a05d713c61dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d7053a",
+        "0x13d71dc6",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858682,
+        332864966,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091578,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "LCCT",
+      "directory_position": 157057,
+      "entry_bytes_hex": "4c434354000000003e05d713da1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d7053e",
+        "0x13d71dda",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858686,
+        332864986,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091582,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "LCUG",
+      "directory_position": 157077,
+      "entry_bytes_hex": "4c435547000000002505d713c61dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d70525",
+        "0x13d71dc6",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858661,
+        332864966,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091557,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "ERSQ",
+      "directory_position": 157097,
+      "entry_bytes_hex": "45525351000000002905d713da1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d70529",
+        "0x13d71dda",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858665,
+        332864986,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091561,
+      "directory_sentinel": false,
+      "directory_block_index": 3,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "ACTL",
+      "directory_position": 204595,
+      "entry_bytes_hex": "4143544c00000000d704d713d21dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d704d7",
+        "0x13d71dd2",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858583,
+        332864978,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091479,
+      "directory_sentinel": false,
+      "directory_block_index": 4,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "PDEL",
+      "directory_position": 204615,
+      "entry_bytes_hex": "5044454c00000000d904d713ca1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d704d9",
+        "0x13d71dca",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858585,
+        332864970,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091481,
+      "directory_sentinel": false,
+      "directory_block_index": 4,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "STSB",
+      "directory_position": 204635,
+      "entry_bytes_hex": "5354534200000000de04d713de1dd713d21dd713",
+      "metadata_words_hex": [
+        "0x13d704de",
+        "0x13d71dde",
+        "0x13d71dd2"
+      ],
+      "metadata_words_uint32": [
+        332858590,
+        332864990,
+        332864978
+      ],
+      "candidate_low24_data_position": 14091486,
+      "directory_sentinel": false,
+      "directory_block_index": 4,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "CLWZ",
+      "directory_position": 204655,
+      "entry_bytes_hex": "434c575a00000000c104d713c21dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d704c1",
+        "0x13d71dc2",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858561,
+        332864962,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091457,
+      "directory_sentinel": false,
+      "directory_block_index": 4,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "MATD",
+      "directory_position": 204675,
+      "entry_bytes_hex": "4d415444007f0000c904d713c01dd713d61dd713",
+      "metadata_words_hex": [
+        "0x13d704c9",
+        "0x13d71dc0",
+        "0x13d71dd6"
+      ],
+      "metadata_words_uint32": [
+        332858569,
+        332864960,
+        332864982
+      ],
+      "candidate_low24_data_position": 14091465,
+      "directory_sentinel": false,
+      "directory_block_index": 4,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "DCTL",
+      "directory_position": 204695,
+      "entry_bytes_hex": "4443544c007b14ae7904d713de1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d70479",
+        "0x13d71dde",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858489,
+        332864990,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091385,
+      "directory_sentinel": false,
+      "directory_block_index": 4,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "RSTP",
+      "directory_position": 204715,
+      "entry_bytes_hex": "52535450000000006a04d713ce1dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d7046a",
+        "0x13d71dce",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858474,
+        332864974,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091370,
+      "directory_sentinel": false,
+      "directory_block_index": 4,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "FTLT",
+      "directory_position": 204735,
+      "entry_bytes_hex": "46544c54000000006c04d713c21dd713d01dd713",
+      "metadata_words_hex": [
+        "0x13d7046c",
+        "0x13d71dc2",
+        "0x13d71dd0"
+      ],
+      "metadata_words_uint32": [
+        332858476,
+        332864962,
+        332864976
+      ],
+      "candidate_low24_data_position": 14091372,
+      "directory_sentinel": false,
+      "directory_block_index": 4,
+      "data_position_in_file": false,
+      "inferred_payload_span_bytes": 0,
+      "payload_probe_span_bytes": 0,
+      "payload_ascii_rows": [],
+      "payload_plausible_f64_rows": [],
+      "payload_head_hex": "",
+      "unresolved_reason": "candidate low24 offset falls outside file"
+    },
+    {
+      "table_name": "IHDR",
+      "directory_position": 284522,
+      "entry_bytes_hex": "494844520000012c000000f008020000003594ce",
+      "metadata_words_hex": [
+        "0xf0000000",
+        "0x208",
+        "0xce943500"
+      ],
+      "metadata_words_uint32": [
+        4026531840,
+        520,
+        3465819392
+      ],
+      "candidate_low24_data_position": 0,
+      "directory_sentinel": false,
+      "directory_block_index": 5,
+      "data_position_in_file": true,
+      "inferred_payload_span_bytes": 289553,
+      "payload_probe_span_bytes": 32768,
+      "payload_ascii_rows": [
+        "MBDG",
+        "9.hxV",
+        "__DBMS_DATA__",
+        "GUID",
+        "UNIT",
+        "        ",
+        "Main",
+        "FMDB",
+        "LLDB",
+        "STND",
+        "PHDB",
+        "BDIF",
+        "RDRW",
+        "TRLN",
+        "DMPT",
+        "CDLN",
+        "DMLN",
+        "MATL",
+        "FGRP",
+        "DSEC",
+        "SECT",
+        "THIK",
+        "PLAN",
+        "MDUL"
+      ],
+      "payload_plausible_f64_rows": [
+        {
+          "byte_offset": 11384,
+          "value": -2.016006
+        },
+        {
+          "byte_offset": 15376,
+          "value": -2.015966
+        },
+        {
+          "byte_offset": 15384,
+          "value": -2.019531
+        },
+        {
+          "byte_offset": 22680,
+          "value": 2.0
+        },
+        {
+          "byte_offset": 26776,
+          "value": -2.0
+        }
+      ],
+      "payload_head_hex": "4d4244470000000101050703000000000100000000000000d60da70aff05d613d515392e6878560e000000004000000000000000fd3e03000000000061180100290200000d000000000000005f5f44424d535f444154415f5f14000000020000",
+      "unresolved_reason": ""
+    }
+  ],
+  "geometry_preview": {
+    "mode": "table_local_ascii_preview",
+    "ready": false,
+    "candidate_segments_xy": [
+      {
+        "x1": 13.5,
+        "y1": 0.0,
+        "x2": 22.5,
+        "y2": 0.0
+      },
+      {
+        "x1": 22.5,
+        "y1": 0.0,
+        "x2": 22.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 22.5,
+        "y1": -7.2,
+        "x2": 22.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 13.5,
+        "y1": 0.0,
+        "x2": 13.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 13.5,
+        "y1": -7.2,
+        "x2": 22.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 13.5,
+        "y1": -20.4,
+        "x2": 22.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 53.5,
+        "y1": 0.0,
+        "x2": 62.5,
+        "y2": 0.0
+      },
+      {
+        "x1": 62.5,
+        "y1": 0.0,
+        "x2": 62.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 62.5,
+        "y1": -7.2,
+        "x2": 62.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 53.5,
+        "y1": -20.4,
+        "x2": 62.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 4.5,
+        "y1": -7.2,
+        "x2": 13.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 13.5,
+        "y1": -13.2,
+        "x2": 22.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 4.5,
+        "y1": -13.2,
+        "x2": 13.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 13.5,
+        "y1": -7.2,
+        "x2": 13.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 4.5,
+        "y1": 0.0,
+        "x2": 13.42106,
+        "y2": 0.0
+      },
+      {
+        "x1": 13.42106,
+        "y1": 0.0,
+        "x2": 13.5,
+        "y2": 0.0
+      },
+      {
+        "x1": 4.5,
+        "y1": -13.2,
+        "x2": 4.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 4.5,
+        "y1": -7.2,
+        "x2": 4.5,
+        "y2": 0.0
+      },
+      {
+        "x1": 13.5,
+        "y1": -20.4,
+        "x2": 13.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 4.5,
+        "y1": -13.2,
+        "x2": 13.5,
+        "y2": -20.4
+      },
+      {
+        "x1": 22.5,
+        "y1": -3.6,
+        "x2": 13.5,
+        "y2": -3.6
+      },
+      {
+        "x1": 22.5,
+        "y1": -10.2,
+        "x2": 13.5,
+        "y2": -10.2
+      },
+      {
+        "x1": 4.5,
+        "y1": -10.2,
+        "x2": 13.5,
+        "y2": -10.2
+      },
+      {
+        "x1": 4.5,
+        "y1": -3.6,
+        "x2": 13.5,
+        "y2": -3.6
+      },
+      {
+        "x1": 0.0,
+        "y1": 0.0,
+        "x2": 4.5,
+        "y2": 0.0
+      },
+      {
+        "x1": 0.0,
+        "y1": -7.2,
+        "x2": 4.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 0.0,
+        "y1": -13.2,
+        "x2": 4.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 0.0,
+        "y1": -13.2,
+        "x2": 0.0,
+        "y2": -7.2
+      },
+      {
+        "x1": 0.0,
+        "y1": -7.2,
+        "x2": 0.0,
+        "y2": 0.0
+      },
+      {
+        "x1": 44.5,
+        "y1": 0.0,
+        "x2": 53.5,
+        "y2": 0.0
+      },
+      {
+        "x1": 53.5,
+        "y1": 0.0,
+        "x2": 53.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 53.5,
+        "y1": -7.2,
+        "x2": 53.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 53.5,
+        "y1": -13.2,
+        "x2": 53.5,
+        "y2": -20.4
+      },
+      {
+        "x1": 44.5,
+        "y1": -7.2,
+        "x2": 53.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 53.5,
+        "y1": -7.2,
+        "x2": 62.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 44.5,
+        "y1": -13.2,
+        "x2": 53.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 53.5,
+        "y1": -13.2,
+        "x2": 62.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 44.5,
+        "y1": -13.2,
+        "x2": 53.5,
+        "y2": -20.4
+      },
+      {
+        "x1": 44.5,
+        "y1": -13.2,
+        "x2": 44.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 44.5,
+        "y1": -7.2,
+        "x2": 44.5,
+        "y2": 0.0
+      },
+      {
+        "x1": 40.0,
+        "y1": 0.0,
+        "x2": 44.5,
+        "y2": 0.0
+      },
+      {
+        "x1": 40.0,
+        "y1": 0.0,
+        "x2": 40.0,
+        "y2": -7.2
+      },
+      {
+        "x1": 40.0,
+        "y1": -7.2,
+        "x2": 40.0,
+        "y2": -13.2
+      },
+      {
+        "x1": 40.0,
+        "y1": -13.2,
+        "x2": 44.5,
+        "y2": -13.2
+      },
+      {
+        "x1": 40.0,
+        "y1": -7.2,
+        "x2": 44.5,
+        "y2": -7.2
+      },
+      {
+        "x1": 44.5,
+        "y1": -4.8,
+        "x2": 53.5,
+        "y2": -4.8
+      },
+      {
+        "x1": 53.5,
+        "y1": -4.8,
+        "x2": 62.5,
+        "y2": -4.8
+      },
+      {
+        "x1": 44.5,
+        "y1": -2.4,
+        "x2": 53.5,
+        "y2": -2.4
+      },
+      {
+        "x1": 53.5,
+        "y1": -2.4,
+        "x2": 62.5,
+        "y2": -2.4
+      }
+    ],
+    "candidate_points_xy": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -7.2
+      ],
+      [
+        0.0,
+        -13.2
+      ],
+      [
+        4.5,
+        -13.2
+      ],
+      [
+        4.5,
+        -7.2
+      ],
+      [
+        4.5,
+        0.0
+      ],
+      [
+        13.5,
+        0.0
+      ],
+      [
+        13.5,
+        -7.2
+      ],
+      [
+        13.5,
+        -13.2
+      ],
+      [
+        22.5,
+        -13.2
+      ],
+      [
+        22.5,
+        -7.2
+      ],
+      [
+        22.5,
+        0.0
+      ],
+      [
+        13.5,
+        -20.4
+      ],
+      [
+        44.5,
+        -13.2
+      ],
+      [
+        62.5,
+        -13.2
+      ],
+      [
+        53.5,
+        -20.4
+      ],
+      [
+        40.0,
+        0.0
+      ],
+      [
+        40.0,
+        -7.2
+      ],
+      [
+        40.0,
+        -13.2
+      ],
+      [
+        44.5,
+        0.0
+      ],
+      [
+        13.42106,
+        0.0
+      ],
+      [
+        62.5,
+        0.0
+      ],
+      [
+        44.5,
+        -7.2
+      ],
+      [
+        53.5,
+        0.0
+      ],
+      [
+        62.5,
+        -7.2
+      ],
+      [
+        22.5,
+        -3.6
+      ],
+      [
+        13.5,
+        -3.6
+      ],
+      [
+        22.5,
+        -10.2
+      ],
+      [
+        13.5,
+        -10.2
+      ],
+      [
+        4.5,
+        -10.2
+      ],
+      [
+        4.5,
+        -3.6
+      ],
+      [
+        4.5,
+        0.0
+      ],
+      [
+        4.5,
+        -7.2
+      ],
+      [
+        4.5,
+        -13.2
+      ],
+      [
+        53.5,
+        -13.2
+      ],
+      [
+        53.5,
+        -7.2
+      ],
+      [
+        44.5,
+        0.0
+      ],
+      [
+        44.5,
+        -13.2
+      ],
+      [
+        44.5,
+        -7.2
+      ],
+      [
+        44.5,
+        -4.8
+      ],
+      [
+        62.5,
+        -4.8
+      ],
+      [
+        53.5,
+        -4.8
+      ],
+      [
+        44.5,
+        -2.4
+      ],
+      [
+        62.5,
+        -2.4
+      ],
+      [
+        53.5,
+        -2.4
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -7.2
+      ],
+      [
+        0.0,
+        -13.2
+      ],
+      [
+        4.5,
+        -13.2
+      ],
+      [
+        4.5,
+        -7.2
+      ],
+      [
+        4.5,
+        0.0
+      ],
+      [
+        13.5,
+        0.0
+      ],
+      [
+        13.5,
+        -7.2
+      ],
+      [
+        13.5,
+        -13.2
+      ],
+      [
+        22.5,
+        -13.2
+      ],
+      [
+        22.5,
+        -7.2
+      ],
+      [
+        22.5,
+        0.0
+      ],
+      [
+        13.5,
+        -20.4
+      ],
+      [
+        44.5,
+        -13.2
+      ],
+      [
+        62.5,
+        -13.2
+      ],
+      [
+        53.5,
+        -20.4
+      ],
+      [
+        40.0,
+        0.0
+      ],
+      [
+        40.0,
+        -7.2
+      ],
+      [
+        40.0,
+        -13.2
+      ],
+      [
+        44.5,
+        0.0
+      ],
+      [
+        62.5,
+        0.0
+      ],
+      [
+        44.5,
+        -7.2
+      ],
+      [
+        53.5,
+        0.0
+      ],
+      [
+        62.5,
+        -7.2
+      ],
+      [
+        13.42106,
+        0.0
+      ],
+      [
+        53.5,
+        -13.2
+      ],
+      [
+        53.5,
+        -7.2
+      ]
+    ],
+    "candidate_points_xyz": [
+      [
+        0.0,
+        0.0,
+        3.5
+      ],
+      [
+        0.0,
+        -7.2,
+        3.5
+      ],
+      [
+        0.0,
+        -13.2,
+        3.5
+      ],
+      [
+        4.5,
+        -13.2,
+        4.0
+      ],
+      [
+        4.5,
+        -7.2,
+        4.0
+      ],
+      [
+        4.5,
+        0.0,
+        4.0
+      ],
+      [
+        13.5,
+        0.0,
+        4.0
+      ],
+      [
+        13.5,
+        -7.2,
+        4.0
+      ],
+      [
+        13.5,
+        -13.2,
+        4.0
+      ],
+      [
+        22.5,
+        -13.2,
+        4.0
+      ],
+      [
+        22.5,
+        -7.2,
+        4.0
+      ],
+      [
+        22.5,
+        0.0,
+        4.0
+      ],
+      [
+        13.5,
+        -20.4,
+        4.0
+      ],
+      [
+        44.5,
+        -13.2,
+        4.0
+      ],
+      [
+        62.5,
+        -13.2,
+        4.0
+      ],
+      [
+        53.5,
+        -20.4,
+        4.0
+      ],
+      [
+        40.0,
+        0.0,
+        3.5
+      ],
+      [
+        40.0,
+        -7.2,
+        3.5
+      ],
+      [
+        40.0,
+        -13.2,
+        3.5
+      ],
+      [
+        44.5,
+        0.0,
+        4.0
+      ],
+      [
+        13.42106,
+        0.0,
+        4.0
+      ],
+      [
+        62.5,
+        0.0,
+        4.0
+      ],
+      [
+        44.5,
+        -7.2,
+        4.0
+      ],
+      [
+        53.5,
+        0.0,
+        4.0
+      ],
+      [
+        62.5,
+        -7.2,
+        4.0
+      ],
+      [
+        22.5,
+        -3.6,
+        4.0
+      ],
+      [
+        13.5,
+        -3.6,
+        4.0
+      ],
+      [
+        22.5,
+        -10.2,
+        4.0
+      ],
+      [
+        13.5,
+        -10.2,
+        4.0
+      ],
+      [
+        4.5,
+        -10.2,
+        4.0
+      ],
+      [
+        4.5,
+        -3.6,
+        4.0
+      ],
+      [
+        4.5,
+        0.0,
+        3.5
+      ],
+      [
+        4.5,
+        -7.2,
+        3.5
+      ],
+      [
+        4.5,
+        -13.2,
+        3.5
+      ],
+      [
+        53.5,
+        -13.2,
+        4.0
+      ],
+      [
+        53.5,
+        -7.2,
+        4.0
+      ],
+      [
+        44.5,
+        0.0,
+        3.5
+      ],
+      [
+        44.5,
+        -13.2,
+        3.5
+      ],
+      [
+        44.5,
+        -7.2,
+        3.5
+      ],
+      [
+        44.5,
+        -4.8,
+        4.0
+      ],
+      [
+        62.5,
+        -4.8,
+        4.0
+      ],
+      [
+        53.5,
+        -4.8,
+        4.0
+      ],
+      [
+        44.5,
+        -2.4,
+        4.0
+      ],
+      [
+        62.5,
+        -2.4,
+        4.0
+      ],
+      [
+        53.5,
+        -2.4,
+        4.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        -7.2,
+        0.0
+      ],
+      [
+        0.0,
+        -13.2,
+        0.0
+      ],
+      [
+        4.5,
+        -13.2,
+        0.0
+      ],
+      [
+        4.5,
+        -7.2,
+        0.0
+      ],
+      [
+        4.5,
+        0.0,
+        0.0
+      ],
+      [
+        13.5,
+        0.0,
+        0.0
+      ],
+      [
+        13.5,
+        -7.2,
+        0.0
+      ],
+      [
+        13.5,
+        -13.2,
+        0.0
+      ],
+      [
+        22.5,
+        -13.2,
+        0.0
+      ],
+      [
+        22.5,
+        -7.2,
+        0.0
+      ],
+      [
+        22.5,
+        0.0,
+        0.0
+      ],
+      [
+        13.5,
+        -20.4,
+        0.0
+      ],
+      [
+        44.5,
+        -13.2,
+        0.0
+      ],
+      [
+        62.5,
+        -13.2,
+        0.0
+      ],
+      [
+        53.5,
+        -20.4,
+        0.0
+      ],
+      [
+        40.0,
+        0.0,
+        0.0
+      ],
+      [
+        40.0,
+        -7.2,
+        0.0
+      ],
+      [
+        40.0,
+        -13.2,
+        0.0
+      ],
+      [
+        44.5,
+        0.0,
+        0.0
+      ],
+      [
+        62.5,
+        0.0,
+        0.0
+      ],
+      [
+        44.5,
+        -7.2,
+        0.0
+      ],
+      [
+        53.5,
+        0.0,
+        0.0
+      ],
+      [
+        62.5,
+        -7.2,
+        0.0
+      ],
+      [
+        13.42106,
+        0.0,
+        0.0
+      ],
+      [
+        53.5,
+        -13.2,
+        0.0
+      ],
+      [
+        53.5,
+        -7.2,
+        0.0
+      ]
+    ],
+    "candidate_segment_count": 49,
+    "candidate_point_count": 72,
+    "bounds": {
+      "min_x": 0.0,
+      "max_x": 62.5,
+      "min_y": -20.4,
+      "max_y": 0.0
+    },
+    "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+    "projection_label": "XY",
+    "anchor_table_names": [
+      "PONT",
+      "CURV",
+      "MEMB",
+      "*POINT",
+      "*MEMBER_ADD"
+    ],
+    "member_path_count": 96,
+    "resolved_member_path_count": 96,
+    "member_path_resolution_rate": 1.0,
+    "member_reference_count": 232,
+    "resolved_member_reference_count": 232,
+    "missing_member_path_count": 0,
+    "missing_member_reference_count": 0,
+    "member_reference_resolution_rate": 1.0,
+    "payload_exact_topology_ready": true,
+    "payload_exactness_label": "payload-exact member-add topology preview",
+    "topology_grounding_label": "explicit_member_add_paths",
+    "topology_preview_ready": true,
+    "topology_readiness_label": "payload-exact member-add topology preview",
+    "exact_topology_candidate": true,
+    "exact_topology_promoted": false,
+    "topology_node_count": 72,
+    "topology_edge_count": 90,
+    "topology_component_count": 8,
+    "dangling_point_count": 26,
+    "junction_point_count": 36,
+    "isolated_preview_point_count": 0,
+    "resolved_member_path_samples": [
+      [
+        46,
+        1
+      ],
+      [
+        47,
+        2
+      ],
+      [
+        48,
+        3
+      ],
+      [
+        49,
+        4
+      ],
+      [
+        50,
+        5
+      ]
+    ],
+    "axis_spans": {
+      "X": 62.5,
+      "Y": 20.4,
+      "Z": 4.0
+    },
+    "note": "PONT/CURV/MEMB directory_position 주변 window에서 찾은 embedded ASCII *POINT/*MEMBER_ADD 블록을 이용해 만든 table-local unverified preview입니다. member topology는 explicit consecutive path만 사용하고, implied loop closure는 추가하지 않았습니다. embedded payload 내부의 *POINT/*MEMBER_ADD reference는 exact하게 해석됐지만, full-file verified topology를 주장하지는 않습니다. 모든 member-add path reference가 point set에 해석돼 payload-exact member-add preview candidate로 승격 가능합니다. payload 내부 기준으로는 exact recovered topology candidate evidence도 함께 확보됐습니다.",
+    "anchor_directory_position": 156737,
+    "window_start_byte": 271659,
+    "window_end_byte": 289553,
+    "member_window_start_byte": 269320,
+    "member_window_end_byte": 289553
+  },
+  "summary": {
+    "table_entry_count": 52,
+    "directory_block_count": 6,
+    "in_file_payload_table_count": 1,
+    "directory_sentinel_count": 0,
+    "unresolved_table_count": 51,
+    "geometry_preview_ready": false,
+    "topology_preview_ready": true,
+    "geometry_preview_segment_count": 49,
+    "geometry_preview_point_count": 72,
+    "geometry_preview_source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+    "table_local_preview_probe": {
+      "candidate_point_count": 72,
+      "candidate_segment_count": 49,
+      "projection_label": "XY",
+      "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+      "anchor_table_names": [
+        "PONT",
+        "CURV",
+        "MEMB",
+        "*POINT",
+        "*MEMBER_ADD"
+      ],
+      "topology_grounding_label": "explicit_member_add_paths",
+      "member_path_count": 96,
+      "resolved_member_path_count": 96,
+      "missing_member_path_count": 0,
+      "member_path_resolution_rate": 1.0,
+      "member_reference_count": 232,
+      "resolved_member_reference_count": 232,
+      "missing_member_reference_count": 0,
+      "member_reference_resolution_rate": 1.0,
+      "payload_exact_topology_ready": true,
+      "payload_exactness_label": "payload-exact member-add topology preview",
+      "topology_preview_ready": true,
+      "topology_readiness_label": "payload-exact member-add topology preview",
+      "topology_node_count": 72,
+      "topology_edge_count": 90,
+      "topology_component_count": 8,
+      "dangling_point_count": 26,
+      "junction_point_count": 36,
+      "isolated_preview_point_count": 0,
+      "resolved_member_path_samples": [
+        [
+          46,
+          1
+        ],
+        [
+          47,
+          2
+        ],
+        [
+          48,
+          3
+        ],
+        [
+          49,
+          4
+        ],
+        [
+          50,
+          5
+        ]
+      ],
+      "anchor_directory_position": 156737,
+      "window_start_byte": 271659,
+      "window_end_byte": 289553
+    },
+    "geometry_preview_mode": "table_local_ascii_preview",
+    "layout_family": "MBDG_DB_CONTAINER",
+    "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+    "source_member_name": "║╕_┐╣┴ª╞─└╧_FINAL.meb",
+    "table_names": [
+      "MBDG",
+      "GUID",
+      "UNIT",
+      "FMDB",
+      "LLDB",
+      "STND",
+      "PHDB",
+      "BDIF",
+      "RDRW",
+      "TRLN",
+      "DMPT",
+      "CDLN",
+      "DMLN",
+      "MATL",
+      "FGRP",
+      "DSEC",
+      "SECT",
+      "THIK",
+      "PLAN",
+      "MDUL",
+      "GRND",
+      "STOR",
+      "CTRD",
+      "MBTP"
+    ]
+  },
+  "checks": {
+    "magic_mbdg": true,
+    "dbms_marker_present": true,
+    "table_directory_nonzero": true,
+    "geometry_preview_ready": false
+  },
+  "next_step": {
+    "recommended_decoder": "midas_binary_meb_table_decoder",
+    "recommended_outputs": [
+      "json",
+      "npz",
+      "preview_svg"
+    ],
+    "notes": "Use decoded table inventory and xVPNT heuristic preview as a bridge until full xMEMB/xSEGM topology decoding is implemented."
+  },
+  "contract_pass": true,
+  "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+  "reason": "binary meb directory inventory extracted but no stable geometry preview was inferred"
+}

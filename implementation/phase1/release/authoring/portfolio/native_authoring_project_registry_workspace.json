@@ -1,0 +1,718 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-project-registry-portfolio-workspace",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "summary": {
+    "project_count": 8,
+    "complete_project_count": 8,
+    "signature_verified_count": 8,
+    "package_reproducible_count": 8,
+    "approval_complete_count": 8,
+    "unique_project_count": 8,
+    "family_count": 8,
+    "portfolio_count": 1,
+    "multi_registry_project_count": 0,
+    "invalid_registry_count": 0,
+    "total_approval_count": 24,
+    "total_approved_count": 24,
+    "total_audit_event_count": 32,
+    "latest_registry_generated_at": "2026-04-21T12:42:19.409354+00:00"
+  },
+  "scan": {
+    "filename_patterns": [
+      "project_registry.json",
+      "release_registry.json",
+      "native_authoring_project_registry.json"
+    ],
+    "path_inputs": [
+      "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json"
+    ],
+    "directory_inputs": [],
+    "glob_inputs": [],
+    "discovered_registry_paths": [
+      "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+      "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json"
+    ],
+    "source_details": [
+      {
+        "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+        "source_kinds": [
+          "path"
+        ],
+        "source_specs": [
+          "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json"
+        ]
+      },
+      {
+        "path": "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json",
+        "source_kinds": [
+          "path"
+        ],
+        "source_specs": [
+          "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json"
+        ]
+      },
+      {
+        "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json",
+        "source_kinds": [
+          "path"
+        ],
+        "source_specs": [
+          "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json"
+        ]
+      },
+      {
+        "path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json",
+        "source_kinds": [
+          "path"
+        ],
+        "source_specs": [
+          "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json"
+        ]
+      },
+      {
+        "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+        "source_kinds": [
+          "path"
+        ],
+        "source_specs": [
+          "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json"
+        ]
+      },
+      {
+        "path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json",
+        "source_kinds": [
+          "path"
+        ],
+        "source_specs": [
+          "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json"
+        ]
+      },
+      {
+        "path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json",
+        "source_kinds": [
+          "path"
+        ],
+        "source_specs": [
+          "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json"
+        ]
+      },
+      {
+        "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+        "source_kinds": [
+          "path"
+        ],
+        "source_specs": [
+          "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json"
+        ]
+      }
+    ],
+    "missing_inputs": [],
+    "unmatched_inputs": [],
+    "duplicate_registry_paths": [],
+    "summary": {
+      "path_input_count": 8,
+      "directory_input_count": 0,
+      "glob_input_count": 0,
+      "discovered_registry_count": 8,
+      "missing_input_count": 0,
+      "unmatched_input_count": 0,
+      "duplicate_registry_count": 0
+    }
+  },
+  "project_rows": [
+    {
+      "project_id": "native-authoring-belt-truss-mega-frame",
+      "project_name": "Native Authoring Belt-Truss Mega Frame",
+      "registry_count": 1,
+      "all_contract_pass": true,
+      "any_contract_pass": true,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+      "latest_reason_code": "PASS",
+      "latest_signature_verified": true,
+      "latest_package_reproducible": true,
+      "latest_approval_count": 3,
+      "latest_approved_count": 3,
+      "latest_pending_count": 0,
+      "latest_audit_event_count": 4,
+      "latest_artifact_count": 4,
+      "latest_package_sha256": "d12332a4f4c2b4487f8c676f52090be8d510424ff4da05a50f9402665fac17cb",
+      "latest_family_id": "belt_truss_mega_frame",
+      "latest_portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "latest_draft_label": "belt-truss-mixed",
+      "registry_paths": [
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-composite-podium",
+      "project_name": "Native Authoring Composite Podium",
+      "registry_count": 1,
+      "all_contract_pass": true,
+      "any_contract_pass": true,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json",
+      "latest_reason_code": "PASS",
+      "latest_signature_verified": true,
+      "latest_package_reproducible": true,
+      "latest_approval_count": 3,
+      "latest_approved_count": 3,
+      "latest_pending_count": 0,
+      "latest_audit_event_count": 4,
+      "latest_artifact_count": 4,
+      "latest_package_sha256": "e6c641e0d3117e2c58a3ccdd62e7c9b35248e70ec99f4b43ca9a78544cee2ab5",
+      "latest_family_id": "composite_podium",
+      "latest_portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "latest_draft_label": "podium-heavy",
+      "registry_paths": [
+        "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-deep-transfer-basement",
+      "project_name": "Native Authoring Deep Transfer Basement",
+      "registry_count": 1,
+      "all_contract_pass": true,
+      "any_contract_pass": true,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json",
+      "latest_reason_code": "PASS",
+      "latest_signature_verified": true,
+      "latest_package_reproducible": true,
+      "latest_approval_count": 3,
+      "latest_approved_count": 3,
+      "latest_pending_count": 0,
+      "latest_audit_event_count": 4,
+      "latest_artifact_count": 4,
+      "latest_package_sha256": "b91e4ea9c8877706eac8d6f79517a56053203133aabace43476b9c95cb1f4a30",
+      "latest_family_id": "deep_transfer_basement",
+      "latest_portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "latest_draft_label": "transfer-basement",
+      "registry_paths": [
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-dual-system-hospital",
+      "project_name": "Native Authoring Dual-System Hospital",
+      "registry_count": 1,
+      "all_contract_pass": true,
+      "any_contract_pass": true,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json",
+      "latest_reason_code": "PASS",
+      "latest_signature_verified": true,
+      "latest_package_reproducible": true,
+      "latest_approval_count": 3,
+      "latest_approved_count": 3,
+      "latest_pending_count": 0,
+      "latest_audit_event_count": 4,
+      "latest_artifact_count": 4,
+      "latest_package_sha256": "dd70f47f0f969fba037196cc70caa409e30560adb887778e69a49efe8483421d",
+      "latest_family_id": "dual_system_hospital",
+      "latest_portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "latest_draft_label": "hospital-mixed",
+      "registry_paths": [
+        "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-outrigger-transfer-tower",
+      "project_name": "Native Authoring Outrigger Transfer Tower",
+      "registry_count": 1,
+      "all_contract_pass": true,
+      "any_contract_pass": true,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+      "latest_reason_code": "PASS",
+      "latest_signature_verified": true,
+      "latest_package_reproducible": true,
+      "latest_approval_count": 3,
+      "latest_approved_count": 3,
+      "latest_pending_count": 0,
+      "latest_audit_event_count": 4,
+      "latest_artifact_count": 4,
+      "latest_package_sha256": "327f60cee474241c29fe076b796d7eacb38f3b2eb999c7eb3ce2582865c6af79",
+      "latest_family_id": "outrigger_transfer_tower",
+      "latest_portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "latest_draft_label": "outrigger-mixed",
+      "registry_paths": [
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-rc-wall-core",
+      "project_name": "Native Authoring RC Wall Core",
+      "registry_count": 1,
+      "all_contract_pass": true,
+      "any_contract_pass": true,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json",
+      "latest_reason_code": "PASS",
+      "latest_signature_verified": true,
+      "latest_package_reproducible": true,
+      "latest_approval_count": 3,
+      "latest_approved_count": 3,
+      "latest_pending_count": 0,
+      "latest_audit_event_count": 4,
+      "latest_artifact_count": 4,
+      "latest_package_sha256": "99b66b050292a993fd78dd106b1941cc7672a60bd06cf75188e97a05fc20e1d8",
+      "latest_family_id": "rc_wall_core",
+      "latest_portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "latest_draft_label": "core-residential",
+      "registry_paths": [
+        "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-sample-tower",
+      "project_name": "Native Authoring Sample Tower",
+      "registry_count": 1,
+      "all_contract_pass": true,
+      "any_contract_pass": true,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json",
+      "latest_reason_code": "PASS",
+      "latest_signature_verified": true,
+      "latest_package_reproducible": true,
+      "latest_approval_count": 3,
+      "latest_approved_count": 3,
+      "latest_pending_count": 0,
+      "latest_audit_event_count": 4,
+      "latest_artifact_count": 4,
+      "latest_package_sha256": "7ba872718e7a4d0bcfc5a14fce60f615c409efc0f6dac8676f1d8593bd3913eb",
+      "latest_family_id": "sample_tower",
+      "latest_portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "latest_draft_label": "baseline",
+      "registry_paths": [
+        "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-steel-braced",
+      "project_name": "Native Authoring Steel Braced",
+      "registry_count": 1,
+      "all_contract_pass": true,
+      "any_contract_pass": true,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+      "latest_reason_code": "PASS",
+      "latest_signature_verified": true,
+      "latest_package_reproducible": true,
+      "latest_approval_count": 3,
+      "latest_approved_count": 3,
+      "latest_pending_count": 0,
+      "latest_audit_event_count": 4,
+      "latest_artifact_count": 4,
+      "latest_package_sha256": "8a6942a18fb1310784a4ea0161a58965e838b20a0e08a3a88841f0becb286a01",
+      "latest_family_id": "steel_braced_frame",
+      "latest_portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "latest_draft_label": "steel-alt",
+      "registry_paths": [
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json"
+      ]
+    }
+  ],
+  "family_rows": [
+    {
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "family_id": "belt_truss_mega_frame",
+      "draft_labels": [
+        "belt-truss-mixed"
+      ],
+      "project_ids": [
+        "native-authoring-belt-truss-mega-frame"
+      ],
+      "registry_count": 1,
+      "complete_registry_count": 1,
+      "signature_verified_count": 1,
+      "package_reproducible_count": 1,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+      "latest_project_id": "native-authoring-belt-truss-mega-frame",
+      "latest_project_name": "Native Authoring Belt-Truss Mega Frame"
+    },
+    {
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "family_id": "composite_podium",
+      "draft_labels": [
+        "podium-heavy"
+      ],
+      "project_ids": [
+        "native-authoring-composite-podium"
+      ],
+      "registry_count": 1,
+      "complete_registry_count": 1,
+      "signature_verified_count": 1,
+      "package_reproducible_count": 1,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json",
+      "latest_project_id": "native-authoring-composite-podium",
+      "latest_project_name": "Native Authoring Composite Podium"
+    },
+    {
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "family_id": "deep_transfer_basement",
+      "draft_labels": [
+        "transfer-basement"
+      ],
+      "project_ids": [
+        "native-authoring-deep-transfer-basement"
+      ],
+      "registry_count": 1,
+      "complete_registry_count": 1,
+      "signature_verified_count": 1,
+      "package_reproducible_count": 1,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json",
+      "latest_project_id": "native-authoring-deep-transfer-basement",
+      "latest_project_name": "Native Authoring Deep Transfer Basement"
+    },
+    {
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "family_id": "dual_system_hospital",
+      "draft_labels": [
+        "hospital-mixed"
+      ],
+      "project_ids": [
+        "native-authoring-dual-system-hospital"
+      ],
+      "registry_count": 1,
+      "complete_registry_count": 1,
+      "signature_verified_count": 1,
+      "package_reproducible_count": 1,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json",
+      "latest_project_id": "native-authoring-dual-system-hospital",
+      "latest_project_name": "Native Authoring Dual-System Hospital"
+    },
+    {
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "family_id": "outrigger_transfer_tower",
+      "draft_labels": [
+        "outrigger-mixed"
+      ],
+      "project_ids": [
+        "native-authoring-outrigger-transfer-tower"
+      ],
+      "registry_count": 1,
+      "complete_registry_count": 1,
+      "signature_verified_count": 1,
+      "package_reproducible_count": 1,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+      "latest_project_id": "native-authoring-outrigger-transfer-tower",
+      "latest_project_name": "Native Authoring Outrigger Transfer Tower"
+    },
+    {
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "family_id": "rc_wall_core",
+      "draft_labels": [
+        "core-residential"
+      ],
+      "project_ids": [
+        "native-authoring-rc-wall-core"
+      ],
+      "registry_count": 1,
+      "complete_registry_count": 1,
+      "signature_verified_count": 1,
+      "package_reproducible_count": 1,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json",
+      "latest_project_id": "native-authoring-rc-wall-core",
+      "latest_project_name": "Native Authoring RC Wall Core"
+    },
+    {
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "family_id": "sample_tower",
+      "draft_labels": [
+        "baseline"
+      ],
+      "project_ids": [
+        "native-authoring-sample-tower"
+      ],
+      "registry_count": 1,
+      "complete_registry_count": 1,
+      "signature_verified_count": 1,
+      "package_reproducible_count": 1,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json",
+      "latest_project_id": "native-authoring-sample-tower",
+      "latest_project_name": "Native Authoring Sample Tower"
+    },
+    {
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "family_id": "steel_braced_frame",
+      "draft_labels": [
+        "steel-alt"
+      ],
+      "project_ids": [
+        "native-authoring-steel-braced"
+      ],
+      "registry_count": 1,
+      "complete_registry_count": 1,
+      "signature_verified_count": 1,
+      "package_reproducible_count": 1,
+      "latest_generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "latest_path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+      "latest_project_id": "native-authoring-steel-braced",
+      "latest_project_name": "Native Authoring Steel Braced"
+    }
+  ],
+  "registry_rows": [
+    {
+      "project_id": "native-authoring-belt-truss-mega-frame",
+      "project_name": "Native Authoring Belt-Truss Mega Frame",
+      "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "reason": "signed project registry package generated",
+      "signature_verified": true,
+      "package_reproducible": true,
+      "approval_count": 3,
+      "approved_count": 3,
+      "pending_count": 0,
+      "approval_complete": true,
+      "audit_event_count": 4,
+      "artifact_count": 4,
+      "package_sha256": "d12332a4f4c2b4487f8c676f52090be8d510424ff4da05a50f9402665fac17cb",
+      "registry_body_sha256": "b6e9b948816786b2b1ac4809cd462d091ebdc17f6bdc34e2f7ac646240e73d8b",
+      "family_id": "belt_truss_mega_frame",
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "draft_label": "belt-truss-mixed",
+      "failed_checks": [],
+      "source_kinds": [
+        "path"
+      ],
+      "source_specs": [
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-composite-podium",
+      "project_name": "Native Authoring Composite Podium",
+      "path": "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "reason": "signed project registry package generated",
+      "signature_verified": true,
+      "package_reproducible": true,
+      "approval_count": 3,
+      "approved_count": 3,
+      "pending_count": 0,
+      "approval_complete": true,
+      "audit_event_count": 4,
+      "artifact_count": 4,
+      "package_sha256": "e6c641e0d3117e2c58a3ccdd62e7c9b35248e70ec99f4b43ca9a78544cee2ab5",
+      "registry_body_sha256": "c55bbe3b613099a7d604a82a54c65577c72425083998480e1ee6af441bedcb2e",
+      "family_id": "composite_podium",
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "draft_label": "podium-heavy",
+      "failed_checks": [],
+      "source_kinds": [
+        "path"
+      ],
+      "source_specs": [
+        "implementation/phase1/release/authoring/portfolio/composite_podium/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-deep-transfer-basement",
+      "project_name": "Native Authoring Deep Transfer Basement",
+      "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "reason": "signed project registry package generated",
+      "signature_verified": true,
+      "package_reproducible": true,
+      "approval_count": 3,
+      "approved_count": 3,
+      "pending_count": 0,
+      "approval_complete": true,
+      "audit_event_count": 4,
+      "artifact_count": 4,
+      "package_sha256": "b91e4ea9c8877706eac8d6f79517a56053203133aabace43476b9c95cb1f4a30",
+      "registry_body_sha256": "d359d6b6d837ad65dcdb5dc4ce0990685f81ff5e0c9588b91aa864971854697a",
+      "family_id": "deep_transfer_basement",
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "draft_label": "transfer-basement",
+      "failed_checks": [],
+      "source_kinds": [
+        "path"
+      ],
+      "source_specs": [
+        "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-dual-system-hospital",
+      "project_name": "Native Authoring Dual-System Hospital",
+      "path": "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "reason": "signed project registry package generated",
+      "signature_verified": true,
+      "package_reproducible": true,
+      "approval_count": 3,
+      "approved_count": 3,
+      "pending_count": 0,
+      "approval_complete": true,
+      "audit_event_count": 4,
+      "artifact_count": 4,
+      "package_sha256": "dd70f47f0f969fba037196cc70caa409e30560adb887778e69a49efe8483421d",
+      "registry_body_sha256": "f66fc0cb55a67d5e3397fbcb65401a66fb9e04f744688097ecee00ca286bed58",
+      "family_id": "dual_system_hospital",
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "draft_label": "hospital-mixed",
+      "failed_checks": [],
+      "source_kinds": [
+        "path"
+      ],
+      "source_specs": [
+        "implementation/phase1/release/authoring/portfolio/dual_system_hospital/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-outrigger-transfer-tower",
+      "project_name": "Native Authoring Outrigger Transfer Tower",
+      "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "reason": "signed project registry package generated",
+      "signature_verified": true,
+      "package_reproducible": true,
+      "approval_count": 3,
+      "approved_count": 3,
+      "pending_count": 0,
+      "approval_complete": true,
+      "audit_event_count": 4,
+      "artifact_count": 4,
+      "package_sha256": "327f60cee474241c29fe076b796d7eacb38f3b2eb999c7eb3ce2582865c6af79",
+      "registry_body_sha256": "0f7adcd968247bf9f64ad48a54cb410e190da562625489048ce7bb255873fcd1",
+      "family_id": "outrigger_transfer_tower",
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "draft_label": "outrigger-mixed",
+      "failed_checks": [],
+      "source_kinds": [
+        "path"
+      ],
+      "source_specs": [
+        "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-rc-wall-core",
+      "project_name": "Native Authoring RC Wall Core",
+      "path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "reason": "signed project registry package generated",
+      "signature_verified": true,
+      "package_reproducible": true,
+      "approval_count": 3,
+      "approved_count": 3,
+      "pending_count": 0,
+      "approval_complete": true,
+      "audit_event_count": 4,
+      "artifact_count": 4,
+      "package_sha256": "99b66b050292a993fd78dd106b1941cc7672a60bd06cf75188e97a05fc20e1d8",
+      "registry_body_sha256": "e2a2879ab25f4017b5708d852070ca4a9ccaa3da40a47f4c2ef7377b7b7f5f84",
+      "family_id": "rc_wall_core",
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "draft_label": "core-residential",
+      "failed_checks": [],
+      "source_kinds": [
+        "path"
+      ],
+      "source_specs": [
+        "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-sample-tower",
+      "project_name": "Native Authoring Sample Tower",
+      "path": "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "reason": "signed project registry package generated",
+      "signature_verified": true,
+      "package_reproducible": true,
+      "approval_count": 3,
+      "approved_count": 3,
+      "pending_count": 0,
+      "approval_complete": true,
+      "audit_event_count": 4,
+      "artifact_count": 4,
+      "package_sha256": "7ba872718e7a4d0bcfc5a14fce60f615c409efc0f6dac8676f1d8593bd3913eb",
+      "registry_body_sha256": "869a2cbba04620abbf523eeb78757293e64bf527a138f01f3b27a6a585efc87f",
+      "family_id": "sample_tower",
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "draft_label": "baseline",
+      "failed_checks": [],
+      "source_kinds": [
+        "path"
+      ],
+      "source_specs": [
+        "implementation/phase1/release/authoring/portfolio/sample_tower/native_authoring_project_registry.json"
+      ]
+    },
+    {
+      "project_id": "native-authoring-steel-braced",
+      "project_name": "Native Authoring Steel Braced",
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "reason": "signed project registry package generated",
+      "signature_verified": true,
+      "package_reproducible": true,
+      "approval_count": 3,
+      "approved_count": 3,
+      "pending_count": 0,
+      "approval_complete": true,
+      "audit_event_count": 4,
+      "artifact_count": 4,
+      "package_sha256": "8a6942a18fb1310784a4ea0161a58965e838b20a0e08a3a88841f0becb286a01",
+      "registry_body_sha256": "1b7ed3939cb6e77ca450819cfd6c92ef81c800af679f0fc5df46a8ba6e8cd847",
+      "family_id": "steel_braced_frame",
+      "portfolio_name": "phase1-native-authoring-ops-portfolio",
+      "draft_label": "steel-alt",
+      "failed_checks": [],
+      "source_kinds": [
+        "path"
+      ],
+      "source_specs": [
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json"
+      ]
+    }
+  ],
+  "artifacts": {
+    "project_registry_index_json": "implementation/phase1/release/authoring/portfolio/native_authoring_project_registry_index.json",
+    "project_registry_portfolio_workspace_json": "implementation/phase1/release/authoring/portfolio/native_authoring_project_registry_workspace.json"
+  },
+  "summary_line": "Project registry portfolio workspace: PASS | projects=8 | unique=8 | families=8 | complete=8 | signature=8 | repro=8",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "project registry portfolio index generated"
+}

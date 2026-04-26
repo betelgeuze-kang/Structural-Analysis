@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-30T15:06:20.791625+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "case_id": "peer_tbi_tall_building_ndtha",
+  "case_label": "PEER TBI Tall Building NDTHA",
+  "benchmark_family": "highrise_ndtha",
+  "hazard_family": "seismic",
+  "topology_family": "tall_building_core_outrigger",
+  "load_path_family": "ndtha_multi_record",
+  "primary_report": {
+    "path": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+    "reason_code": "PASS",
+    "contract_pass": true,
+    "summary_head": {
+      "case_count": 3,
+      "peak_plastic_story_count_min": 20,
+      "peak_plastic_story_count_mean": 22.666666666666668,
+      "max_drift_ratio_pct_max": 9.200000000000003,
+      "avg_step_iterations_mean": 16.0,
+      "residual_top_displacement_m_max_abs": 0.6880580090188355,
+      "residual_drift_ratio_pct_max_abs": 1.9136000000000006,
+      "residual_pre_settle_top_displacement_m_max_abs": 3.30797119720594
+    }
+  },
+  "supporting_reports": [
+    {
+      "role": "solver_truthfulness",
+      "path": "implementation/phase1/solver_truthfulness_gate_report.json",
+      "reason_code": "PASS",
+      "contract_pass": true
+    },
+    {
+      "role": "solver_hip",
+      "path": "implementation/phase1/solver_hip_e2e_contract_report.json",
+      "reason_code": "PASS",
+      "contract_pass": true
+    }
+  ],
+  "kpi_rows": [
+    {
+      "label": "case_count",
+      "source": "primary.summary.case_count",
+      "value": 3
+    },
+    {
+      "label": "max_drift_ratio_pct_max",
+      "source": "primary.summary.max_drift_ratio_pct_max",
+      "value": 9.200000000000003
+    },
+    {
+      "label": "peak_plastic_story_count_mean",
+      "source": "primary.summary.peak_plastic_story_count_mean",
+      "value": 22.666666666666668
+    },
+    {
+      "label": "avg_step_iterations_mean",
+      "source": "primary.summary.avg_step_iterations_mean",
+      "value": 16.0
+    },
+    {
+      "label": "residual_drift_ratio_pct_max_abs",
+      "source": "primary.summary.residual_drift_ratio_pct_max_abs",
+      "value": 1.9136000000000006
+    },
+    {
+      "label": "solver_hip_variants",
+      "source": "supporting.solver_hip.summary.solver_count",
+      "value": 20
+    }
+  ],
+  "summary": {
+    "kpi_count": 6,
+    "supporting_report_count": 2
+  }
+}

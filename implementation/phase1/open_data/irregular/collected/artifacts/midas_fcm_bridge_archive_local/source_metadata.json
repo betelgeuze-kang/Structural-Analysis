@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 2067979,
+  "collector_version": "0.2.0",
+  "family_id": "curved_plan_bridge_torsion",
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb",
+  "schema_version": "1.0",
+  "sha256": "2422df2ffba472564b8f071850b4f9187cee58cc5ccfe1f3edddfa83c192130d",
+  "source_format": "mcb",
+  "source_id": "midas_fcm_bridge_archive_local",
+  "source_urls": [
+    "https://gtc.midasuser.com/"
+  ],
+  "title": "MIDAS support FCM bridge archive geometry proxy"
+}

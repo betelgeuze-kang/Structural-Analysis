@@ -1,0 +1,424 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-productization-gate",
+  "generated_at": "2026-02-25T15:22:06.354252+00:00",
+  "inputs": {
+    "dataset": "implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl",
+    "simplicial_report": "implementation/phase1/spatiotemporal_data/simplicial_tgnn_report.json",
+    "dynamic_report": "implementation/phase1/dynamic_time_history_report.json",
+    "cache_report": "implementation/phase1/branch64_microbatch_profile_report.json",
+    "residual_threshold": 0.01,
+    "fallback_max_iter": 12,
+    "min_codecheck_pass_ratio": 0.85,
+    "max_fallback_trigger_ratio": 0.6,
+    "max_cases": 180
+  },
+  "prerequisite_checks": {
+    "dynamic_contract_pass": true,
+    "cache_contract_pass": true,
+    "prereq_pass": true
+  },
+  "fallback_summary": {
+    "case_count": 144,
+    "triggered_count": 0,
+    "trigger_ratio": 0.0,
+    "converged_count": 0,
+    "all_converged": true
+  },
+  "code_check_summary": {
+    "case_count": 144,
+    "pass_count": 135,
+    "pass_ratio": 0.9375,
+    "threshold": 0.85,
+    "pass": true
+  },
+  "samples": {
+    "fallback_head": [
+      {
+        "case_id": "C-0000000",
+        "predicted_residual": 2.758001090290543e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 2.758001090290543e-17
+      },
+      {
+        "case_id": "C-0000001",
+        "predicted_residual": 4.841107200037839e-18,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 4.841107200037839e-18
+      },
+      {
+        "case_id": "C-0000002",
+        "predicted_residual": 3.7487313799754785e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 3.7487313799754785e-17
+      },
+      {
+        "case_id": "C-0000003",
+        "predicted_residual": 7.140412451045012e-18,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 7.140412451045012e-18
+      },
+      {
+        "case_id": "C-0000004",
+        "predicted_residual": 1.2105376741924367e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.2105376741924367e-17
+      },
+      {
+        "case_id": "C-0000005",
+        "predicted_residual": 7.709626404171485e-18,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 7.709626404171485e-18
+      },
+      {
+        "case_id": "C-0000006",
+        "predicted_residual": 7.75285674655859e-18,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 7.75285674655859e-18
+      },
+      {
+        "case_id": "C-0000007",
+        "predicted_residual": 1.4579390476127054e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.4579390476127054e-17
+      },
+      {
+        "case_id": "C-0000008",
+        "predicted_residual": 1.0755507521106289e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.0755507521106289e-17
+      },
+      {
+        "case_id": "C-0000009",
+        "predicted_residual": 1.5177986701950036e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.5177986701950036e-17
+      },
+      {
+        "case_id": "C-0000010",
+        "predicted_residual": 1.9009705349174048e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.9009705349174048e-17
+      },
+      {
+        "case_id": "C-0000011",
+        "predicted_residual": 1.5696390281426995e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.5696390281426995e-17
+      },
+      {
+        "case_id": "C-0000012",
+        "predicted_residual": 1.0763236346811378e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.0763236346811378e-17
+      },
+      {
+        "case_id": "C-0000013",
+        "predicted_residual": 1.602768201070838e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.602768201070838e-17
+      },
+      {
+        "case_id": "C-0000014",
+        "predicted_residual": 7.878207260839494e-18,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 7.878207260839494e-18
+      },
+      {
+        "case_id": "C-0000015",
+        "predicted_residual": 9.835740057960415e-18,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 9.835740057960415e-18
+      },
+      {
+        "case_id": "C-0000016",
+        "predicted_residual": 2.5600362139019233e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 2.5600362139019233e-17
+      },
+      {
+        "case_id": "C-0000017",
+        "predicted_residual": 6.38931866966469e-18,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 6.38931866966469e-18
+      },
+      {
+        "case_id": "C-0000018",
+        "predicted_residual": 1.3204266147852042e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.3204266147852042e-17
+      },
+      {
+        "case_id": "C-0000019",
+        "predicted_residual": 1.674780830878228e-17,
+        "fallback_triggered": false,
+        "fallback_converged": true,
+        "fallback_iterations": 0,
+        "final_residual": 1.674780830878228e-17
+      }
+    ],
+    "code_check_head": [
+      {
+        "case_id": "C-0000000",
+        "max_dcr": 0.730516860762782,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.48136461101530437,
+          "ULS_2": 0.6353358957482664,
+          "ULS_3": 0.4468771093601992,
+          "ULS_4": 0.730516860762782
+        }
+      },
+      {
+        "case_id": "C-0000001",
+        "max_dcr": 0.7373955621911288,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.4399538545789225,
+          "ULS_2": 0.629485763628173,
+          "ULS_3": 0.4572396790524628,
+          "ULS_4": 0.7373955621911288
+        }
+      },
+      {
+        "case_id": "C-0000002",
+        "max_dcr": 0.8266082020237416,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.5261720938683975,
+          "ULS_2": 0.7141398750261215,
+          "ULS_3": 0.5081385363889659,
+          "ULS_4": 0.8266082020237416
+        }
+      },
+      {
+        "case_id": "C-0000003",
+        "max_dcr": 0.7679275619458042,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.49663999367625494,
+          "ULS_2": 0.6654575181484946,
+          "ULS_3": 0.47101827534128166,
+          "ULS_4": 0.7679275619458042
+        }
+      },
+      {
+        "case_id": "C-0000004",
+        "max_dcr": 0.7193370756953561,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.48346136292518477,
+          "ULS_2": 0.6280500587212544,
+          "ULS_3": 0.43877037417979065,
+          "ULS_4": 0.7193370756953561
+        }
+      },
+      {
+        "case_id": "C-0000005",
+        "max_dcr": 0.7989773314065064,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.5232093997512071,
+          "ULS_2": 0.6940352321091577,
+          "ULS_3": 0.4891938161688268,
+          "ULS_4": 0.7989773314065064
+        }
+      },
+      {
+        "case_id": "C-0000006",
+        "max_dcr": 0.7899920793871894,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.5126520156137852,
+          "ULS_2": 0.6850265312904321,
+          "ULS_3": 0.4843184308378652,
+          "ULS_4": 0.7899920793871894
+        }
+      },
+      {
+        "case_id": "C-0000007",
+        "max_dcr": 0.6908192510906341,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.4991245466395239,
+          "ULS_2": 0.6121215901338117,
+          "ULS_3": 0.4167096214023001,
+          "ULS_4": 0.6908192510906341
+        }
+      },
+      {
+        "case_id": "C-0000008",
+        "max_dcr": 0.7579414400278472,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.5651513647881997,
+          "ULS_2": 0.6761121425356993,
+          "ULS_3": 0.45485005160447023,
+          "ULS_4": 0.7579414400278472
+        }
+      },
+      {
+        "case_id": "C-0000009",
+        "max_dcr": 0.7810943535490421,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.4963843845504299,
+          "ULS_2": 0.674608440863827,
+          "ULS_3": 0.4802692714407813,
+          "ULS_4": 0.7810943535490421
+        }
+      },
+      {
+        "case_id": "C-0000010",
+        "max_dcr": 0.8214170978201365,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.608280343034718,
+          "ULS_2": 0.7316528492745464,
+          "ULS_3": 0.4935053564826522,
+          "ULS_4": 0.8214170978201365
+        }
+      },
+      {
+        "case_id": "C-0000011",
+        "max_dcr": 0.8377612530601727,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.6147174344749904,
+          "ULS_2": 0.7447516126248306,
+          "ULS_3": 0.5040839378067921,
+          "ULS_4": 0.8377612530601727
+        }
+      },
+      {
+        "case_id": "C-0000012",
+        "max_dcr": 0.8285304540096412,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.6148479305682767,
+          "ULS_2": 0.738323662188956,
+          "ULS_3": 0.49760489691930054,
+          "ULS_4": 0.8285304540096412
+        }
+      },
+      {
+        "case_id": "C-0000013",
+        "max_dcr": 0.7699797931323097,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.4628466693700081,
+          "ULS_2": 0.6581907049454585,
+          "ULS_3": 0.4769818674090874,
+          "ULS_4": 0.7699797931323097
+        }
+      },
+      {
+        "case_id": "C-0000014",
+        "max_dcr": 0.7787909944115177,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.4816350090446894,
+          "ULS_2": 0.6691974295495721,
+          "ULS_3": 0.48063277978207575,
+          "ULS_4": 0.7787909944115177
+        }
+      },
+      {
+        "case_id": "C-0000015",
+        "max_dcr": 0.7861581273318977,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.5996095613868021,
+          "ULS_2": 0.7047384346593066,
+          "ULS_3": 0.46998563468239823,
+          "ULS_4": 0.7861581273318977
+        }
+      },
+      {
+        "case_id": "C-0000016",
+        "max_dcr": 0.7397582673293924,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.4808753303650271,
+          "ULS_2": 0.6416788674981713,
+          "ULS_3": 0.45341163910054283,
+          "ULS_4": 0.7397582673293924
+        }
+      },
+      {
+        "case_id": "C-0000017",
+        "max_dcr": 0.7883256097104758,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.5526704264866057,
+          "ULS_2": 0.694166630977374,
+          "ULS_3": 0.4777909451359199,
+          "ULS_4": 0.7883256097104758
+        }
+      },
+      {
+        "case_id": "C-0000018",
+        "max_dcr": 0.7082350808274285,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.5175519798208956,
+          "ULS_2": 0.6290586042123175,
+          "ULS_3": 0.4264321215465895,
+          "ULS_4": 0.7082350808274285
+        }
+      },
+      {
+        "case_id": "C-0000019",
+        "max_dcr": 0.7019254740961647,
+        "pass": true,
+        "combination_dcr": {
+          "ULS_1": 0.48140651532646667,
+          "ULS_2": 0.6153327174183769,
+          "ULS_3": 0.42685752509716596,
+          "ULS_4": 0.7019254740961647
+        }
+      }
+    ]
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "productization gate passed (fallback + code checking)"
+}

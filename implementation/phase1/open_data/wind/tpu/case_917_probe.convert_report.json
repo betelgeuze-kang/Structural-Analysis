@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-convert-tpu-mat-to-csv",
+  "generated_at": "2026-03-19T13:06:00.186019+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU MAT file converted into CSV successfully.",
+  "inputs": {
+    "input_mat": "implementation/phase1/open_data/wind/tpu/case_917_probe.mat",
+    "dataset_key": "",
+    "time_key": ""
+  },
+  "summary": {
+    "dataset_name": "Pressure_coefficients",
+    "candidate_dataset_count": 3,
+    "row_count": 5858,
+    "column_count": 252,
+    "has_time_column": false,
+    "dt_s": null
+  },
+  "artifacts": {
+    "out_csv": "implementation/phase1/open_data/wind/tpu/case_917_probe.csv"
+  }
+}

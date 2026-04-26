@@ -1,0 +1,3795 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-topk-comparison-experiment",
+  "generated_at": "2026-03-01T06:47:49.131505+00:00",
+  "target_split": "test",
+  "rows": [
+    {
+      "case_id": "ATWOOD-00001",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 18.62135989292376,
+          "lf": 19.812946509448356,
+          "topk_pred": 18.65279197692871
+        },
+        "base_shear_kN": {
+          "hf": 359.0604477404,
+          "lf": 346.4234333343062,
+          "topk_pred": 358.6973571777344
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998890565300776,
+          "lf": 0.9870909942684981,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0563586076880138,
+          "topk_pred": 1.0983585119247437
+        },
+        "equilibrium_residual": {
+          "hf": 0.06663975363304954,
+          "lf": 0.08455704079926094,
+          "topk_pred": 0.06738600134849548
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00002",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 21.956949595856244,
+          "lf": 23.36123863030179,
+          "topk_pred": 22.012964248657227
+        },
+        "base_shear_kN": {
+          "hf": 792.3398703649798,
+          "lf": 764.4684758136782,
+          "topk_pred": 791.8768310546875
+        },
+        "mode_shape_mac": {
+          "hf": 0.9991465900721626,
+          "lf": 0.9863552956501854,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056381686021058,
+          "topk_pred": 1.0984307527542114
+        },
+        "equilibrium_residual": {
+          "hf": 0.06654575586079373,
+          "lf": 0.08445356805156173,
+          "topk_pred": 0.06723695248365402
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00003",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 24.51491341025891,
+          "lf": 26.089007156455434,
+          "topk_pred": 24.545074462890625
+        },
+        "base_shear_kN": {
+          "hf": 311.64053680382,
+          "lf": 300.63485726054995,
+          "topk_pred": 311.36724853515625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999150985590296,
+          "lf": 0.9870731707100182,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0562090260348713,
+          "topk_pred": 1.0985742807388306
+        },
+        "equilibrium_residual": {
+          "hf": 0.06724899790293536,
+          "lf": 0.08522769689155124,
+          "topk_pred": 0.06777295470237732
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00004",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 5.563518770501896,
+          "lf": 5.903349334877632,
+          "topk_pred": 5.601690769195557
+        },
+        "base_shear_kN": {
+          "hf": 519.75046121138,
+          "lf": 502.28940734966307,
+          "topk_pred": 518.0399780273438
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996782916145455,
+          "lf": 0.9874619020095518,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.6316610581946014,
+          "lf": 2.5319979281294955,
+          "topk_pred": 2.6205852031707764
+        },
+        "equilibrium_residual": {
+          "hf": 0.05856096673602451,
+          "lf": 0.07566391218301578,
+          "topk_pred": 0.062123239040374756
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00005",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 27.8804215105897,
+          "lf": 29.668852720148507,
+          "topk_pred": 27.953617095947266
+        },
+        "base_shear_kN": {
+          "hf": 1004.12084751482,
+          "lf": 968.6948915747303,
+          "topk_pred": 1003.9176025390625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9990036302339727,
+          "lf": 0.9861743320192414,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0562520930877668,
+          "topk_pred": 1.0986804962158203
+        },
+        "equilibrium_residual": {
+          "hf": 0.06707358631571124,
+          "lf": 0.08503460381633493,
+          "topk_pred": 0.06751874089241028
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00006",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 7.023423291306259,
+          "lf": 7.461834950463567,
+          "topk_pred": 7.05522346496582
+        },
+        "base_shear_kN": {
+          "hf": 469.2394510455399,
+          "lf": 453.1296395250992,
+          "topk_pred": 468.2002258300781
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998216735939343,
+          "lf": 0.9873374008689803,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.3250811088256853,
+          "lf": 2.2350975741480084,
+          "topk_pred": 2.3182213306427
+        },
+        "equilibrium_residual": {
+          "hf": 0.0622815656243617,
+          "lf": 0.07975954743929736,
+          "topk_pred": 0.06459558010101318
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00007",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 42.98623802006929,
+          "lf": 45.75974128380114,
+          "topk_pred": 43.07414627075195
+        },
+        "base_shear_kN": {
+          "hf": 1030.8772407669398,
+          "lf": 994.2951196531658,
+          "topk_pred": 1031.02099609375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9981078282273188,
+          "lf": 0.9852036831265684,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.055996865206441,
+          "topk_pred": 1.099075198173523
+        },
+        "equilibrium_residual": {
+          "hf": 0.06811312639931187,
+          "lf": 0.0861789295403625,
+          "topk_pred": 0.06814983487129211
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00008",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 33.94505031777886,
+          "lf": 36.131428341497404,
+          "topk_pred": 33.97221755981445
+        },
+        "base_shear_kN": {
+          "hf": 261.37302968014,
+          "lf": 252.11385541159137,
+          "topk_pred": 261.173828125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999475897028781,
+          "lf": 0.9870657232554837,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560728354143851,
+          "topk_pred": 1.098768949508667
+        },
+        "equilibrium_residual": {
+          "hf": 0.06780370065825542,
+          "lf": 0.08583831368460756,
+          "topk_pred": 0.06812474131584167
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00009",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 26.392896452682326,
+          "lf": 25.735468873656107,
+          "topk_pred": 24.14974594116211
+        },
+        "base_shear_kN": {
+          "hf": 329.655603840405,
+          "lf": 358.5638731411983,
+          "topk_pred": 371.7686462402344
+        },
+        "mode_shape_mac": {
+          "hf": 0.9995321043368067,
+          "lf": 0.9315908681650079,
+          "topk_pred": 0.9891059994697571
+        },
+        "buckling_factor": {
+          "hf": 1.0949379968469999,
+          "lf": 0.8923861692033952,
+          "topk_pred": 0.9294520020484924
+        },
+        "equilibrium_residual": {
+          "hf": 0.06719227289369671,
+          "lf": 0.09902391453215503,
+          "topk_pred": 0.07804343849420547
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00010",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 16.686521597347138,
+          "lf": 19.969357658162053,
+          "topk_pred": 18.792097091674805
+        },
+        "base_shear_kN": {
+          "hf": 812.6988630538934,
+          "lf": 782.6412050914455,
+          "topk_pred": 811.61376953125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9984609237125153,
+          "lf": 0.9742805691364839,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.0980754312245526,
+          "lf": 0.9018374085177585,
+          "topk_pred": 0.9387423396110535
+        },
+        "equilibrium_residual": {
+          "hf": 0.0668985107674859,
+          "lf": 0.08614837877194058,
+          "topk_pred": 0.06807336211204529
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00011",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 30.479357565897836,
+          "lf": 32.4406576695296,
+          "topk_pred": 30.50885581970215
+        },
+        "base_shear_kN": {
+          "hf": 296.25755887293997,
+          "lf": 285.77251210597274,
+          "topk_pred": 296.0274963378906
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999443681730895,
+          "lf": 0.9870746736633458,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561143417217738,
+          "topk_pred": 1.0987144708633423
+        },
+        "equilibrium_residual": {
+          "hf": 0.06763464596866334,
+          "lf": 0.0856522182823046,
+          "topk_pred": 0.06801357865333557
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00012",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 10.805584857512462,
+          "lf": 11.486251812156189,
+          "topk_pred": 10.847932815551758
+        },
+        "base_shear_kN": {
+          "hf": 656.7012895130799,
+          "lf": 633.9494273967975,
+          "topk_pred": 655.6917114257812
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996012147982065,
+          "lf": 0.9870027860482716,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.5308271799223827,
+          "lf": 1.4710405267427635,
+          "topk_pred": 1.5272021293640137
+        },
+        "equilibrium_residual": {
+          "hf": 0.0638670659713172,
+          "lf": 0.08150486622122596,
+          "topk_pred": 0.06557915359735489
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00013",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 36.4589276251202,
+          "lf": 38.80872453150129,
+          "topk_pred": 36.48595428466797
+        },
+        "base_shear_kN": {
+          "hf": 266.96970052577996,
+          "lf": 257.5062154621544,
+          "topk_pred": 266.77703857421875
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999573918616111,
+          "lf": 0.9870672875198582,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560447441946226,
+          "topk_pred": 1.0988130569458008
+        },
+        "equilibrium_residual": {
+          "hf": 0.06791811585767983,
+          "lf": 0.08596426193613396,
+          "topk_pred": 0.06819366663694382
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00014",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 7.227043501478492,
+          "lf": 7.675436036779973,
+          "topk_pred": 7.2661824226379395
+        },
+        "base_shear_kN": {
+          "hf": 606.80277132496,
+          "lf": 586.0962115604192,
+          "topk_pred": 605.3535766601562
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996808829363149,
+          "lf": 0.9872721424822204,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.282320864689517,
+          "lf": 2.194526610236537,
+          "topk_pred": 2.274841785430908
+        },
+        "equilibrium_residual": {
+          "hf": 0.06123250630686704,
+          "lf": 0.07860474294259924,
+          "topk_pred": 0.0638837143778801
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00015",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 16.105064710495963,
+          "lf": 17.13332157002151,
+          "topk_pred": 16.137174606323242
+        },
+        "base_shear_kN": {
+          "hf": 393.64954964062,
+          "lf": 379.82625421655246,
+          "topk_pred": 393.21832275390625
+        },
+        "mode_shape_mac": {
+          "hf": 0.999871608780045,
+          "lf": 0.9871022486065908,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0564564818085211,
+          "topk_pred": 1.0982180833816528
+        },
+        "equilibrium_residual": {
+          "hf": 0.06624111352019751,
+          "lf": 0.08411821776303342,
+          "topk_pred": 0.06713081896305084
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00016",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 37.291856684379,
+          "lf": 39.695852962468294,
+          "topk_pred": 37.31748580932617
+        },
+        "base_shear_kN": {
+          "hf": 250.46786620576,
+          "lf": 241.5874260930662,
+          "topk_pred": 250.28567504882812
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999572931036834,
+          "lf": 0.987064417865877,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.05603529543908,
+          "topk_pred": 1.0988234281539917
+        },
+        "equilibrium_residual": {
+          "hf": 0.06795660052509006,
+          "lf": 0.08600662585801913,
+          "topk_pred": 0.06822074949741364
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00017",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.9842769249065584,
+          "lf": 2.0983505300915377,
+          "topk_pred": 2.009718418121338
+        },
+        "base_shear_kN": {
+          "hf": 517.6200018028201,
+          "lf": 501.25347128523316,
+          "topk_pred": 514.3397827148438
+        },
+        "mode_shape_mac": {
+          "hf": 0.9997419079309424,
+          "lf": 0.9882441574150611,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 3.3833018457696227,
+          "lf": 3.2627107280876246,
+          "topk_pred": 3.357473373413086
+        },
+        "equilibrium_residual": {
+          "hf": 0.048579868276129756,
+          "lf": 0.06467671899836364,
+          "topk_pred": 0.05506117269396782
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00018",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 30.44835571747993,
+          "lf": 32.40331039164169,
+          "topk_pred": 30.52233123779297
+        },
+        "base_shear_kN": {
+          "hf": 952.3341647810199,
+          "lf": 918.7043169415331,
+          "topk_pred": 952.1368408203125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9990068139176908,
+          "lf": 0.9861656957154395,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0562117869303234,
+          "topk_pred": 1.098728895187378
+        },
+        "equilibrium_residual": {
+          "hf": 0.06723775280904444,
+          "lf": 0.08521531829219613,
+          "topk_pred": 0.06763072311878204
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00019",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 14.562410340088137,
+          "lf": 16.515620467251445,
+          "topk_pred": 15.547503471374512
+        },
+        "base_shear_kN": {
+          "hf": 376.61385494472427,
+          "lf": 316.25257341993694,
+          "topk_pred": 327.49273681640625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9995872378117996,
+          "lf": 0.9597300907667901,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.092625197195584,
+          "lf": 0.9891149908172198,
+          "topk_pred": 1.028531551361084
+        },
+        "equilibrium_residual": {
+          "hf": 0.06475696767645413,
+          "lf": 0.0773610790318701,
+          "topk_pred": 0.06161189451813698
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00020",
+      "split": "test",
+      "ood_tag": "ood_hazard",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 26.661443578793033,
+          "lf": 34.27941478207148,
+          "topk_pred": 32.27939224243164
+        },
+        "base_shear_kN": {
+          "hf": 1012.6920365286458,
+          "lf": 923.6895704677454,
+          "topk_pred": 957.6373291015625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9989608726180298,
+          "lf": 0.9778556751269626,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.0854826966961335,
+          "lf": 1.0503512911314778,
+          "topk_pred": 1.0929702520370483
+        },
+        "equilibrium_residual": {
+          "hf": 0.06724912613928055,
+          "lf": 0.07864162785326059,
+          "topk_pred": 0.062275808304548264
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00021",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 27.126457113772506,
+          "lf": 28.869927242901493,
+          "topk_pred": 27.157655715942383
+        },
+        "base_shear_kN": {
+          "hf": 324.93232115274,
+          "lf": 313.4461036032725,
+          "topk_pred": 324.66888427734375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999202260366564,
+          "lf": 0.987065837261767,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561665342776272,
+          "topk_pred": 1.0986422300338745
+        },
+        "equilibrium_residual": {
+          "hf": 0.06742206631790877,
+          "lf": 0.08541821060275398,
+          "topk_pred": 0.06787677854299545
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00022",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 17.773373292447925,
+          "lf": 18.90996459631106,
+          "topk_pred": 17.805618286132812
+        },
+        "base_shear_kN": {
+          "hf": 389.62386882104005,
+          "lf": 375.92001522014704,
+          "topk_pred": 389.2288818359375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998863995956787,
+          "lf": 0.9870965787196824,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0563867108128524,
+          "topk_pred": 1.0983234643936157
+        },
+        "equilibrium_residual": {
+          "hf": 0.06652528994439401,
+          "lf": 0.08443103917078892,
+          "topk_pred": 0.06730851531028748
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00023",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 36.237116819147516,
+          "lf": 38.56942025461656,
+          "topk_pred": 36.32898712158203
+        },
+        "base_shear_kN": {
+          "hf": 1150.85452311564,
+          "lf": 1110.1151319477099,
+          "topk_pred": 1151.0072021484375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9987032406282669,
+          "lf": 0.9858307847587278,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561049254848718,
+          "topk_pred": 1.0989406108856201
+        },
+        "equilibrium_residual": {
+          "hf": 0.0676729981880428,
+          "lf": 0.08569443640539752,
+          "topk_pred": 0.06785565614700317
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00024",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 15.958564463934355,
+          "lf": 16.973913034051463,
+          "topk_pred": 16.005416870117188
+        },
+        "base_shear_kN": {
+          "hf": 698.6502077077599,
+          "lf": 674.2021804396315,
+          "topk_pred": 697.9780883789062
+        },
+        "mode_shape_mac": {
+          "hf": 0.9994315879142783,
+          "lf": 0.9867067770779183,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0566083950480125,
+          "topk_pred": 1.0980623960494995
+        },
+        "equilibrium_residual": {
+          "hf": 0.06562237272722223,
+          "lf": 0.08343710789812622,
+          "topk_pred": 0.06668082624673843
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00025",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 31.336073214325094,
+          "lf": 33.3530456641995,
+          "topk_pred": 31.36548614501953
+        },
+        "base_shear_kN": {
+          "hf": 296.25755887293997,
+          "lf": 285.7696833939431,
+          "topk_pred": 296.03179931640625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999462983320333,
+          "lf": 0.98707313176723,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561025020140207,
+          "topk_pred": 1.098732590675354
+        },
+        "equilibrium_residual": {
+          "hf": 0.06768286895560219,
+          "lf": 0.08570530214632689,
+          "topk_pred": 0.06804318726062775
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00026",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 31.250396444593775,
+          "lf": 33.25746630019124,
+          "topk_pred": 31.33820152282715
+        },
+        "base_shear_kN": {
+          "hf": 1174.55364615834,
+          "lf": 1133.0637350898076,
+          "topk_pred": 1174.60400390625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9990068389719134,
+          "lf": 0.9861617548517426,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561982631502176,
+          "topk_pred": 1.0988044738769531
+        },
+        "equilibrium_residual": {
+          "hf": 0.06729283500237193,
+          "lf": 0.08527595277061102,
+          "topk_pred": 0.06761763244867325
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00027",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 33.079592979726044,
+          "lf": 35.209780796130595,
+          "topk_pred": 33.10738754272461
+        },
+        "base_shear_kN": {
+          "hf": 270.59069620379995,
+          "lf": 261.0069944771352,
+          "topk_pred": 270.3840026855469
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999458133935797,
+          "lf": 0.9870666475724639,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560820445499952,
+          "topk_pred": 1.0987571477890015
+        },
+        "equilibrium_residual": {
+          "hf": 0.06776619195994205,
+          "lf": 0.08579702410950421,
+          "topk_pred": 0.06809977442026138
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00028",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 18.65067624816925,
+          "lf": 19.840430490923122,
+          "topk_pred": 18.70453453063965
+        },
+        "base_shear_kN": {
+          "hf": 824.11786858408,
+          "lf": 795.2034343460515,
+          "topk_pred": 823.5496826171875
+        },
+        "mode_shape_mac": {
+          "hf": 0.9993444939745181,
+          "lf": 0.9865861979543332,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0564942105711699,
+          "topk_pred": 1.0982674360275269
+        },
+        "equilibrium_residual": {
+          "hf": 0.06608744472478953,
+          "lf": 0.08394905915304832,
+          "topk_pred": 0.06694541126489639
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00029",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 38.99479163206259,
+          "lf": 41.50954576735889,
+          "topk_pred": 39.01939392089844
+        },
+        "base_shear_kN": {
+          "hf": 242.99906664851997,
+          "lf": 234.38007972274343,
+          "topk_pred": 242.82553100585938
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999552576487695,
+          "lf": 0.9870573601088909,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056018169389014,
+          "topk_pred": 1.0988473892211914
+        },
+        "equilibrium_residual": {
+          "hf": 0.0680263547205365,
+          "lf": 0.08608341127636658,
+          "topk_pred": 0.06826503574848175
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00030",
+      "split": "test",
+      "ood_tag": "ood_hazard",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 35.468508057364836,
+          "lf": 37.750681603115204,
+          "topk_pred": 35.557281494140625
+        },
+        "base_shear_kN": {
+          "hf": 1116.63383351996,
+          "lf": 1077.1172656094877,
+          "topk_pred": 1116.724609375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9987274495363418,
+          "lf": 0.9858587179727852,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056117625368272,
+          "topk_pred": 1.0989127159118652
+        },
+        "equilibrium_residual": {
+          "hf": 0.06762127171606422,
+          "lf": 0.08563749590504349,
+          "topk_pred": 0.06783126294612885
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00031",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 23.65465212064848,
+          "lf": 25.172905160037384,
+          "topk_pred": 23.684803009033203
+        },
+        "base_shear_kN": {
+          "hf": 312.30456861128,
+          "lf": 301.27982189550096,
+          "topk_pred": 312.02423095703125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999087815295438,
+          "lf": 0.9870719574524431,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0562264298970867,
+          "topk_pred": 1.0985480546951294
+        },
+        "equilibrium_residual": {
+          "hf": 0.06717811218195394,
+          "lf": 0.0851496658898949,
+          "topk_pred": 0.06772907078266144
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00032",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 23.736816292473296,
+          "lf": 25.2561856108888,
+          "topk_pred": 23.79828453063965
+        },
+        "base_shear_kN": {
+          "hf": 860.4717085330799,
+          "lf": 830.1788561361745,
+          "topk_pred": 860.068359375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9990980807114827,
+          "lf": 0.9862962853932346,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0563458779647739,
+          "topk_pred": 1.0985020399093628
+        },
+        "equilibrium_residual": {
+          "hf": 0.06669160164233524,
+          "lf": 0.08461411508788264,
+          "topk_pred": 0.0673130452632904
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00033",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 38.13694866843515,
+          "lf": 40.59592344072211,
+          "topk_pred": 38.160457611083984
+        },
+        "base_shear_kN": {
+          "hf": 224.34354292742,
+          "lf": 216.38773307883804,
+          "topk_pred": 224.17665100097656
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999561199383913,
+          "lf": 0.9870606216977459,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056026350999399,
+          "topk_pred": 1.0988304615020752
+        },
+        "equilibrium_residual": {
+          "hf": 0.0679930311200757,
+          "lf": 0.08604672865697932,
+          "topk_pred": 0.06824861466884613
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00034",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 25.467532792474845,
+          "lf": 27.099073610985815,
+          "topk_pred": 25.534854888916016
+        },
+        "base_shear_kN": {
+          "hf": 938.8151603516,
+          "lf": 905.7360475377458,
+          "topk_pred": 938.4953002929688
+        },
+        "mode_shape_mac": {
+          "hf": 0.9991056726420187,
+          "lf": 0.9862929606152528,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0563086519887288,
+          "topk_pred": 1.0985780954360962
+        },
+        "equilibrium_residual": {
+          "hf": 0.06684322259396902,
+          "lf": 0.08478101943144109,
+          "topk_pred": 0.06739036738872528
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00035",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 13.339040878289765,
+          "lf": 14.184611265215414,
+          "topk_pred": 13.383720397949219
+        },
+        "base_shear_kN": {
+          "hf": 710.2171788413799,
+          "lf": 685.4555605881243,
+          "topk_pred": 709.4032592773438
+        },
+        "mode_shape_mac": {
+          "hf": 0.9995713178009185,
+          "lf": 0.9868931890712603,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0567675810318657,
+          "topk_pred": 1.0978227853775024
+        },
+        "equilibrium_residual": {
+          "hf": 0.06497401013414078,
+          "lf": 0.08272339035566217,
+          "topk_pred": 0.06627079844474792
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00036",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 28.771313200504405,
+          "lf": 30.61751802644344,
+          "topk_pred": 28.83710479736328
+        },
+        "base_shear_kN": {
+          "hf": 841.8226650462999,
+          "lf": 812.1126069485224,
+          "topk_pred": 841.5241088867188
+        },
+        "mode_shape_mac": {
+          "hf": 0.9989836916209865,
+          "lf": 0.9861500415677337,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056237253318408,
+          "topk_pred": 1.0986628532409668
+        },
+        "equilibrium_residual": {
+          "hf": 0.06713402851740066,
+          "lf": 0.08510113859195464,
+          "topk_pred": 0.06759018450975418
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00037",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 11.154196841349801,
+          "lf": 11.860992640703634,
+          "topk_pred": 11.186347961425781
+        },
+        "base_shear_kN": {
+          "hf": 436.71880698992,
+          "lf": 421.4986111776801,
+          "topk_pred": 436.0837097167969
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998570255699708,
+          "lf": 0.9871838441763331,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.4576186633165418,
+          "lf": 1.400353399575359,
+          "topk_pred": 1.4546096324920654
+        },
+        "equilibrium_residual": {
+          "hf": 0.06490529713385673,
+          "lf": 0.08264775108494948,
+          "topk_pred": 0.0662834420800209
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00038",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 22.813608885881997,
+          "lf": 24.27723285549916,
+          "topk_pred": 22.84512710571289
+        },
+        "base_shear_kN": {
+          "hf": 344.12781863614,
+          "lf": 331.98504238499675,
+          "topk_pred": 343.82220458984375
+        },
+        "mode_shape_mac": {
+          "hf": 0.999899888036619,
+          "lf": 0.9870687399535736,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0562457850368152,
+          "topk_pred": 1.0985264778137207
+        },
+        "equilibrium_residual": {
+          "hf": 0.06709927893118643,
+          "lf": 0.08506288624745002,
+          "topk_pred": 0.06767367571592331
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00039",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 35.630317478146914,
+          "lf": 37.92621034970854,
+          "topk_pred": 35.6577262878418
+        },
+        "base_shear_kN": {
+          "hf": 269.28237533666004,
+          "lf": 259.7389880936613,
+          "topk_pred": 269.08551025390625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999553431293963,
+          "lf": 0.9870680435819266,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560543085431284,
+          "topk_pred": 1.098799228668213
+        },
+        "equilibrium_residual": {
+          "hf": 0.06787916038152415,
+          "lf": 0.0859213797479818,
+          "topk_pred": 0.06816931068897247
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00040",
+      "split": "test",
+      "ood_tag": "ood_hazard",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 37.92004431548322,
+          "lf": 40.36200672851608,
+          "topk_pred": 38.017784118652344
+        },
+        "base_shear_kN": {
+          "hf": 1205.59630253384,
+          "lf": 1162.8956279942186,
+          "topk_pred": 1205.861572265625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9985836900940408,
+          "lf": 0.9857041565538557,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560807906279688,
+          "topk_pred": 1.098990797996521
+        },
+        "equilibrium_residual": {
+          "hf": 0.06777129916923824,
+          "lf": 0.08580264612549746,
+          "topk_pred": 0.06790410727262497
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00041",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 10.319193510249807,
+          "lf": 10.971776516213941,
+          "topk_pred": 10.350708961486816
+        },
+        "base_shear_kN": {
+          "hf": 414.98292035998,
+          "lf": 400.5490461693453,
+          "topk_pred": 414.325927734375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998437100209019,
+          "lf": 0.9871957641263717,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.6329693628475406,
+          "lf": 1.568942867586505,
+          "topk_pred": 1.6293957233428955
+        },
+        "equilibrium_residual": {
+          "hf": 0.06455480409069753,
+          "lf": 0.08226192834303983,
+          "topk_pred": 0.06606591492891312
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00042",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 19.484700580926585,
+          "lf": 20.732245227707804,
+          "topk_pred": 19.515419006347656
+        },
+        "base_shear_kN": {
+          "hf": 332.24935691723994,
+          "lf": 320.54926700857624,
+          "topk_pred": 331.9142150878906
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998877839147351,
+          "lf": 0.9870824072901394,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0563336657101288,
+          "topk_pred": 1.0983898639678955
+        },
+        "equilibrium_residual": {
+          "hf": 0.06674134200827364,
+          "lf": 0.08466886928270763,
+          "topk_pred": 0.06745465099811554
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00043",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 21.165670202315066,
+          "lf": 22.522249610710517,
+          "topk_pred": 21.197587966918945
+        },
+        "base_shear_kN": {
+          "hf": 355.61647778552003,
+          "lf": 343.08051305861744,
+          "topk_pred": 355.2863464355469
+        },
+        "mode_shape_mac": {
+          "hf": 0.999886818188553,
+          "lf": 0.9870681415728031,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0562883127402931,
+          "topk_pred": 1.0984647274017334
+        },
+        "equilibrium_residual": {
+          "hf": 0.06692606410763716,
+          "lf": 0.08487221136968698,
+          "topk_pred": 0.06756417453289032
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00044",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 32.9096697748524,
+          "lf": 35.02486846657145,
+          "topk_pred": 33.001739501953125
+        },
+        "base_shear_kN": {
+          "hf": 1210.9720413229597,
+          "lf": 1168.1640893662498,
+          "topk_pred": 1211.118408203125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9989100677807016,
+          "lf": 0.9860554952116668,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561659075395915,
+          "topk_pred": 1.0988627672195435
+        },
+        "equilibrium_residual": {
+          "hf": 0.06742461901437202,
+          "lf": 0.08542102061102072,
+          "topk_pred": 0.06769079715013504
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00045",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 15.055302295776732,
+          "lf": 16.012205053471032,
+          "topk_pred": 15.098762512207031
+        },
+        "base_shear_kN": {
+          "hf": 613.62027987442,
+          "lf": 592.1696168754756,
+          "topk_pred": 612.9417114257812
+        },
+        "mode_shape_mac": {
+          "hf": 0.9994849407942952,
+          "lf": 0.9867731036103586,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0566526352027765,
+          "topk_pred": 1.0979739427566528
+        },
+        "equilibrium_residual": {
+          "hf": 0.06544218311022981,
+          "lf": 0.08323875516774099,
+          "topk_pred": 0.06658535450696945
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00046",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 9.4749434778028,
+          "lf": 10.072694601550632,
+          "topk_pred": 9.50671672821045
+        },
+        "base_shear_kN": {
+          "hf": 438.51767610336,
+          "lf": 423.30191900058816,
+          "topk_pred": 437.7781677246094
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998325962807146,
+          "lf": 0.9872150830438663,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.810261869661412,
+          "lf": 1.7394547600433063,
+          "topk_pred": 1.8060495853424072
+        },
+        "equilibrium_residual": {
+          "hf": 0.06413212828956015,
+          "lf": 0.08179664682114782,
+          "topk_pred": 0.06579236686229706
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00047",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 26.278011390528217,
+          "lf": 27.96224302264229,
+          "topk_pred": 26.350101470947266
+        },
+        "base_shear_kN": {
+          "hf": 1018.9835944311799,
+          "lf": 983.0633565082032,
+          "topk_pred": 1018.747314453125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9990865932879266,
+          "lf": 0.9862680309767682,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.05628870251895,
+          "topk_pred": 1.0986284017562866
+        },
+        "equilibrium_residual": {
+          "hf": 0.0669244765438661,
+          "lf": 0.08487046377948781,
+          "topk_pred": 0.06742367893457413
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00048",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 32.20605339281295,
+          "lf": 34.279528741454136,
+          "topk_pred": 32.23521041870117
+        },
+        "base_shear_kN": {
+          "hf": 292.62398714695996,
+          "lf": 282.26221636419945,
+          "topk_pred": 292.4037170410156
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999460692639105,
+          "lf": 0.9870697610534552,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560917890023476,
+          "topk_pred": 1.098747968673706
+        },
+        "equilibrium_residual": {
+          "hf": 0.06772650292298989,
+          "lf": 0.08575333441762727,
+          "topk_pred": 0.06807073950767517
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00049",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.3336494440642388,
+          "lf": 1.4056439904507105,
+          "topk_pred": 1.3583728075027466
+        },
+        "base_shear_kN": {
+          "hf": 495.42135505002,
+          "lf": 480.7119426649588,
+          "topk_pred": 490.7889709472656
+        },
+        "mode_shape_mac": {
+          "hf": 0.9997341807830882,
+          "lf": 0.9889375585212333,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 3.51993361674651,
+          "lf": 3.4021230964413784,
+          "topk_pred": 3.4811933040618896
+        },
+        "equilibrium_residual": {
+          "hf": 0.03884197585909515,
+          "lf": 0.05395724702569194,
+          "topk_pred": 0.04753246530890465
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00050",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 27.973119688920416,
+          "lf": 29.771540872133798,
+          "topk_pred": 28.00337791442871
+        },
+        "base_shear_kN": {
+          "hf": 305.43156619079997,
+          "lf": 294.6314826598084,
+          "topk_pred": 305.1825866699219
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999254680788391,
+          "lf": 0.9870672584603696,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056153505201019,
+          "topk_pred": 1.098657250404358
+        },
+        "equilibrium_residual": {
+          "hf": 0.06747513358985463,
+          "lf": 0.08547662705571198,
+          "topk_pred": 0.06791356950998306
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00051",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 28.806843679189953,
+          "lf": 30.65942336181168,
+          "topk_pred": 28.835590362548828
+        },
+        "base_shear_kN": {
+          "hf": 277.9449383984,
+          "lf": 268.1138255793646,
+          "topk_pred": 277.71484375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999326733214204,
+          "lf": 0.9870705930237443,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561403061849244,
+          "topk_pred": 1.098670482635498
+        },
+        "equilibrium_residual": {
+          "hf": 0.06752889302327968,
+          "lf": 0.08553580544002627,
+          "topk_pred": 0.067952461540699
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00052",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 8.101445949125557,
+          "lf": 8.606634256754745,
+          "topk_pred": 8.141250610351562
+        },
+        "base_shear_kN": {
+          "hf": 619.47234334468,
+          "lf": 598.2264320965601,
+          "topk_pred": 618.1651000976562
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996667918041752,
+          "lf": 0.9871952327565284,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.0986963506836327,
+          "lf": 2.017556902755675,
+          "topk_pred": 2.092449426651001
+        },
+        "equilibrium_residual": {
+          "hf": 0.06210498677287102,
+          "lf": 0.07956516943957642,
+          "topk_pred": 0.06445116549730301
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00053",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 6.384585299271521,
+          "lf": 6.77809124932906,
+          "topk_pred": 6.423259258270264
+        },
+        "base_shear_kN": {
+          "hf": 583.20414683146,
+          "lf": 563.4343638125961,
+          "topk_pred": 581.5953369140625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996827458809295,
+          "lf": 0.9873559953838397,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.4592370871529807,
+          "lf": 2.3652624409947536,
+          "topk_pred": 2.450209856033325
+        },
+        "equilibrium_residual": {
+          "hf": 0.060093756904026026,
+          "lf": 0.07735120759995184,
+          "topk_pred": 0.06313670426607132
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00054",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 29.638365015808194,
+          "lf": 31.54499413393229,
+          "topk_pred": 29.667583465576172
+        },
+        "base_shear_kN": {
+          "hf": 289.01367287211997,
+          "lf": 278.7879726296458,
+          "topk_pred": 288.7825012207031
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999395749887088,
+          "lf": 0.9870736215725392,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561270988508618,
+          "topk_pred": 1.0986933708190918
+        },
+        "equilibrium_residual": {
+          "hf": 0.0675826863356889,
+          "lf": 0.08559502111832634,
+          "topk_pred": 0.06798318773508072
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00055",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.180907725148972,
+          "lf": 1.2453305470295835,
+          "topk_pred": 1.2016602754592896
+        },
+        "base_shear_kN": {
+          "hf": 478.08804625778,
+          "lf": 463.74325096576337,
+          "topk_pred": 473.8423156738281
+        },
+        "mode_shape_mac": {
+          "hf": 0.9997411470393355,
+          "lf": 0.9888304178589526,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 3.552009377718716,
+          "lf": 3.431868839382662,
+          "topk_pred": 3.5148544311523438
+        },
+        "equilibrium_residual": {
+          "hf": 0.04042679417198298,
+          "lf": 0.05570181502451886,
+          "topk_pred": 0.048803869634866714
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00056",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 41.56463173066616,
+          "lf": 44.24639902626399,
+          "topk_pred": 41.58848571777344
+        },
+        "base_shear_kN": {
+          "hf": 240.34013863943997,
+          "lf": 231.81137359974062,
+          "topk_pred": 240.17404174804688
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999616412607529,
+          "lf": 0.9870575582270075,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.055997076854928,
+          "topk_pred": 1.0988789796829224
+        },
+        "equilibrium_residual": {
+          "hf": 0.06811226435757528,
+          "lf": 0.08617798060481888,
+          "topk_pred": 0.06831812858581543
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00057",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 8.618091362779845,
+          "lf": 9.160207736122395,
+          "topk_pred": 8.650056838989258
+        },
+        "base_shear_kN": {
+          "hf": 464.6111084342,
+          "lf": 448.53674774527224,
+          "topk_pred": 463.7687683105469
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998272553836047,
+          "lf": 0.9872463636171548,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.9902008138162322,
+          "lf": 1.9125814606166525,
+          "topk_pred": 1.9852367639541626
+        },
+        "equilibrium_residual": {
+          "hf": 0.06362349675624857,
+          "lf": 0.08123674522927843,
+          "topk_pred": 0.06546211987733841
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00058",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 20.333768368814464,
+          "lf": 21.63636512233554,
+          "topk_pred": 20.3654727935791
+        },
+        "base_shear_kN": {
+          "hf": 353.60999404625994,
+          "lf": 341.1511043782714,
+          "topk_pred": 353.27130126953125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998859674891604,
+          "lf": 0.9870738145237627,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0563105583879941,
+          "topk_pred": 1.0984302759170532
+        },
+        "equilibrium_residual": {
+          "hf": 0.06683545785274472,
+          "lf": 0.0847724720043014,
+          "topk_pred": 0.0675085037946701
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00059",
+      "split": "test",
+      "ood_tag": "ood_hazard",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 33.80612736713069,
+          "lf": 35.979805211954435,
+          "topk_pred": 33.89479064941406
+        },
+        "base_shear_kN": {
+          "hf": 1140.0202303394801,
+          "lf": 1099.7044562274168,
+          "topk_pred": 1140.0975341796875
+        },
+        "mode_shape_mac": {
+          "hf": 0.9988321112153414,
+          "lf": 0.985972443373368,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561485326588707,
+          "topk_pred": 1.0988714694976807
+        },
+        "equilibrium_residual": {
+          "hf": 0.067495386694076,
+          "lf": 0.08549892167283886,
+          "topk_pred": 0.06774920970201492
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00060",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 17.779036936216976,
+          "lf": 18.912237368809418,
+          "topk_pred": 17.83197593688965
+        },
+        "base_shear_kN": {
+          "hf": 824.11786858408,
+          "lf": 795.2276704988093,
+          "topk_pred": 823.5125732421875
+        },
+        "mode_shape_mac": {
+          "hf": 0.9993624230332735,
+          "lf": 0.9866148210494557,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0565306772351815,
+          "topk_pred": 1.0982118844985962
+        },
+        "equilibrium_residual": {
+          "hf": 0.06593891644191327,
+          "lf": 0.08378555921925812,
+          "topk_pred": 0.06685277819633484
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00061",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.8049161825253814,
+          "lf": 2.971153199760339,
+          "topk_pred": 2.8326709270477295
+        },
+        "base_shear_kN": {
+          "hf": 526.3352030391,
+          "lf": 509.1785346437151,
+          "topk_pred": 523.7985229492188
+        },
+        "mode_shape_mac": {
+          "hf": 0.9997443340748877,
+          "lf": 0.9878910731275116,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 3.2109676016696698,
+          "lf": 3.09298024735357,
+          "topk_pred": 3.1919119358062744
+        },
+        "equilibrium_residual": {
+          "hf": 0.05351751315800222,
+          "lf": 0.07011207848432885,
+          "topk_pred": 0.058636631816625595
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00062",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 38.8060155410803,
+          "lf": 41.30581052125002,
+          "topk_pred": 38.90235900878906
+        },
+        "base_shear_kN": {
+          "hf": 1172.78201599594,
+          "lf": 1131.2306481075248,
+          "topk_pred": 1173.0191650390625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9984686852519491,
+          "lf": 0.985585141578039,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560671160719666,
+          "topk_pred": 1.099003553390503
+        },
+        "equilibrium_residual": {
+          "hf": 0.06782699547097383,
+          "lf": 0.085863956614448,
+          "topk_pred": 0.06794510781764984
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00063",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 12.809291916757518,
+          "lf": 13.623481978571888,
+          "topk_pred": 12.841901779174805
+        },
+        "base_shear_kN": {
+          "hf": 433.25816965269996,
+          "lf": 418.11174516468475,
+          "topk_pred": 432.6980895996094
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998720869714433,
+          "lf": 0.9871595956470911,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.110048697480921,
+          "lf": 1.0663030957282837,
+          "topk_pred": 1.1079626083374023
+        },
+        "equilibrium_residual": {
+          "hf": 0.06545126839377977,
+          "lf": 0.08324875624787277,
+          "topk_pred": 0.06662826985120773
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00064",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 9.002489368055516,
+          "lf": 9.566114104911762,
+          "topk_pred": 9.042953491210938
+        },
+        "base_shear_kN": {
+          "hf": 619.47234334468,
+          "lf": 598.1413028704239,
+          "topk_pred": 618.2953491210938
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996421476331037,
+          "lf": 0.9871206168917019,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.9094772327083414,
+          "lf": 1.8353575413133123,
+          "topk_pred": 1.9042452573776245
+        },
+        "equilibrium_residual": {
+          "hf": 0.06279903807502381,
+          "lf": 0.0803291811129862,
+          "topk_pred": 0.06490089744329453
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00065",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 12.509747489850772,
+          "lf": 13.301349554343467,
+          "topk_pred": 12.554169654846191
+        },
+        "base_shear_kN": {
+          "hf": 717.5248237578401,
+          "lf": 692.5525553127932,
+          "topk_pred": 716.640625
+        },
+        "mode_shape_mac": {
+          "hf": 0.999589605148682,
+          "lf": 0.9869338410713507,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1729530271313373,
+          "lf": 1.1269347150973232,
+          "topk_pred": 1.1705094575881958
+        },
+        "equilibrium_residual": {
+          "hf": 0.06466338996293498,
+          "lf": 0.08238145967119884,
+          "topk_pred": 0.06607301533222198
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00066",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 16.93803797321648,
+          "lf": 18.02040479437522,
+          "topk_pred": 16.97024917602539
+        },
+        "base_shear_kN": {
+          "hf": 393.64954964062,
+          "lf": 379.8144013901053,
+          "topk_pred": 393.2364196777344
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998793711428301,
+          "lf": 0.9870990618428953,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0564191452872222,
+          "topk_pred": 1.098275065422058
+        },
+        "equilibrium_residual": {
+          "hf": 0.0663931847213169,
+          "lf": 0.08428561774122564,
+          "topk_pred": 0.06722552329301834
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00067",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 3.9060642256429614,
+          "lf": 4.137326527027452,
+          "topk_pred": 3.9455819129943848
+        },
+        "base_shear_kN": {
+          "hf": 592.0302534339199,
+          "lf": 572.7518061160936,
+          "topk_pred": 589.1876220703125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996816547644197,
+          "lf": 0.9878404617872908,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.979726512614978,
+          "lf": 2.8703476109846595,
+          "topk_pred": 2.9619157314300537
+        },
+        "equilibrium_residual": {
+          "hf": 0.053349902460124166,
+          "lf": 0.06992757262810469,
+          "topk_pred": 0.058506496250629425
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00068",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 20.298697060795412,
+          "lf": 21.595514185104555,
+          "topk_pred": 20.352039337158203
+        },
+        "base_shear_kN": {
+          "hf": 770.5212509129799,
+          "lf": 743.446910505345,
+          "topk_pred": 770.0081176757812
+        },
+        "mode_shape_mac": {
+          "hf": 0.9992680620994179,
+          "lf": 0.986490718603674,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0564292586795134,
+          "topk_pred": 1.0983529090881348
+        },
+        "equilibrium_residual": {
+          "hf": 0.06635199299644244,
+          "lf": 0.08424027389048384,
+          "topk_pred": 0.06712121516466141
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00069",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 24.61536529871472,
+          "lf": 26.19161844772634,
+          "topk_pred": 24.67755126953125
+        },
+        "base_shear_kN": {
+          "hf": 850.32283782936,
+          "lf": 820.3749488178872,
+          "topk_pred": 849.9339599609375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9991034701086184,
+          "lf": 0.986296403222685,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056327901918967,
+          "topk_pred": 1.098526954650879
+        },
+        "equilibrium_residual": {
+          "hf": 0.06676481786018672,
+          "lf": 0.08469471150049354,
+          "topk_pred": 0.06736048310995102
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00070",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 3.043664820232102,
+          "lf": 3.218644296162294,
+          "topk_pred": 3.0831031799316406
+        },
+        "base_shear_kN": {
+          "hf": 592.0302534339199,
+          "lf": 573.3106399812033,
+          "topk_pred": 588.325439453125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996974171279341,
+          "lf": 0.9881994706545213,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 3.1608303877512585,
+          "lf": 3.048166906060566,
+          "topk_pred": 3.136756658554077
+        },
+        "equilibrium_residual": {
+          "hf": 0.04858258990851169,
+          "lf": 0.06467971497128967,
+          "topk_pred": 0.05505126342177391
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00071",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 39.65772775792378,
+          "lf": 42.21326613167012,
+          "topk_pred": 39.771183013916016
+        },
+        "base_shear_kN": {
+          "hf": 1395.97342268678,
+          "lf": 1346.4974411151602,
+          "topk_pred": 1396.609130859375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9983429277024278,
+          "lf": 0.9854549559590859,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056052016355204,
+          "topk_pred": 1.0990817546844482
+        },
+        "equilibrium_residual": {
+          "hf": 0.06788849643530427,
+          "lf": 0.08593165687598295,
+          "topk_pred": 0.06793511658906937
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00072",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 21.11495472298932,
+          "lf": 22.46472569469995,
+          "topk_pred": 21.16990852355957
+        },
+        "base_shear_kN": {
+          "hf": 791.46292441804,
+          "lf": 763.6361290486494,
+          "topk_pred": 790.9786376953125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9992050668276405,
+          "lf": 0.986420090592375,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0564032310377447,
+          "topk_pred": 1.0983978509902954
+        },
+        "equilibrium_residual": {
+          "hf": 0.06645800326757664,
+          "lf": 0.08435696999694837,
+          "topk_pred": 0.06718268990516663
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00073",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 37.01098444015496,
+          "lf": 39.39373843004743,
+          "topk_pred": 37.10750198364258
+        },
+        "base_shear_kN": {
+          "hf": 1205.59630253384,
+          "lf": 1162.9075793363018,
+          "topk_pred": 1205.8433837890625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9986629692268622,
+          "lf": 0.9857870404941624,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560930830214939,
+          "topk_pred": 1.0989720821380615
+        },
+        "equilibrium_residual": {
+          "hf": 0.06772123239860753,
+          "lf": 0.08574753262438717,
+          "topk_pred": 0.067873515188694
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00074",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 34.79506255290392,
+          "lf": 37.03665618567171,
+          "topk_pred": 34.822635650634766
+        },
+        "base_shear_kN": {
+          "hf": 269.28237533666004,
+          "lf": 259.7410241354829,
+          "topk_pred": 269.0824279785156
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999514292556365,
+          "lf": 0.9870668791597166,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560636841729132,
+          "topk_pred": 1.0987848043441772
+        },
+        "equilibrium_residual": {
+          "hf": 0.06784097355444349,
+          "lf": 0.0858793436887314,
+          "topk_pred": 0.06814591586589813
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00075",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 5.373699587498693,
+          "lf": 5.705197885535233,
+          "topk_pred": 5.404355525970459
+        },
+        "base_shear_kN": {
+          "hf": 443.05235736188,
+          "lf": 428.0200495433483,
+          "topk_pred": 441.78546142578125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9997917663244992,
+          "lf": 0.9874539609582397,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.6715230866252746,
+          "lf": 2.569344817815095,
+          "topk_pred": 2.6617720127105713
+        },
+        "equilibrium_residual": {
+          "hf": 0.06024729675360481,
+          "lf": 0.07752022426636818,
+          "topk_pred": 0.06326547265052795
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00076",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 13.636558996608258,
+          "lf": 14.504434314365911,
+          "topk_pred": 13.668774604797363
+        },
+        "base_shear_kN": {
+          "hf": 407.77448343758,
+          "lf": 393.5008257493625,
+          "topk_pred": 407.26416015625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998714991408169,
+          "lf": 0.9871428435030785,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056595284275312,
+          "topk_pred": 1.0980103015899658
+        },
+        "equilibrium_residual": {
+          "hf": 0.06567577274636731,
+          "lf": 0.08349589063920113,
+          "topk_pred": 0.06677445769309998
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00077",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 39.858581415458374,
+          "lf": 42.42947467918753,
+          "topk_pred": 39.883235931396484
+        },
+        "base_shear_kN": {
+          "hf": 246.18223463063995,
+          "lf": 237.4488697089036,
+          "topk_pred": 246.00949096679688
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999558344806335,
+          "lf": 0.9870557604065869,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560107474075011,
+          "topk_pred": 1.0988595485687256
+        },
+        "equilibrium_residual": {
+          "hf": 0.0680565843617585,
+          "lf": 0.08611668806542376,
+          "topk_pred": 0.0682828426361084
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00078",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 3.6657092614643005,
+          "lf": 3.8870741377597366,
+          "topk_pred": 3.695145606994629
+        },
+        "base_shear_kN": {
+          "hf": 526.3352030391,
+          "lf": 508.8538193995044,
+          "topk_pred": 524.298095703125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9997540332883348,
+          "lf": 0.9876764319017475,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 3.0302010550924967,
+          "lf": 2.916748617652164,
+          "topk_pred": 3.0154542922973633
+        },
+        "equilibrium_residual": {
+          "hf": 0.05663335259149021,
+          "lf": 0.07354199453271243,
+          "topk_pred": 0.060809943825006485
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00079",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 11.98201391643079,
+          "lf": 12.74253148963586,
+          "topk_pred": 12.014424324035645
+        },
+        "base_shear_kN": {
+          "hf": 436.71880698992,
+          "lf": 421.47322463040973,
+          "topk_pred": 436.1225280761719
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998674081859863,
+          "lf": 0.9871730885414033,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.283777077549534,
+          "lf": 1.2332573801676465,
+          "topk_pred": 1.2812551259994507
+        },
+        "equilibrium_residual": {
+          "hf": 0.06519888395254193,
+          "lf": 0.08297093145495817,
+          "topk_pred": 0.0664687305688858
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00080",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 40.71795397636677,
+          "lf": 43.344689804834104,
+          "topk_pred": 40.7424430847168
+        },
+        "base_shear_kN": {
+          "hf": 246.18223463063995,
+          "lf": 237.44749729520117,
+          "topk_pred": 246.01156616210938
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999582536747987,
+          "lf": 0.9870561524052117,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560038346707084,
+          "topk_pred": 1.098870038986206
+        },
+        "equilibrium_residual": {
+          "hf": 0.06808473985537501,
+          "lf": 0.08614768163279682,
+          "topk_pred": 0.06830006092786789
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00081",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 32.03309394046776,
+          "lf": 34.0911553078593,
+          "topk_pred": 32.124053955078125
+        },
+        "base_shear_kN": {
+          "hf": 1210.9720413229597,
+          "lf": 1168.1806665987947,
+          "topk_pred": 1211.0931396484375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9989743858975039,
+          "lf": 0.9861247912175996,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561828821415264,
+          "topk_pred": 1.098836898803711
+        },
+        "equilibrium_residual": {
+          "hf": 0.06735548166533736,
+          "lf": 0.08534491421720337,
+          "topk_pred": 0.06764838844537735
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00082",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 40.46511607222971,
+          "lf": 43.07361066926853,
+          "topk_pred": 40.58014678955078
+        },
+        "base_shear_kN": {
+          "hf": 1406.96631645206,
+          "lf": 1357.0829745762728,
+          "topk_pred": 1407.6502685546875
+        },
+        "mode_shape_mac": {
+          "hf": 0.9982363170811116,
+          "lf": 0.9853437575126048,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560363718713919,
+          "topk_pred": 1.0991082191467285
+        },
+        "equilibrium_residual": {
+          "hf": 0.06795221622926122,
+          "lf": 0.08600179962517075,
+          "topk_pred": 0.0679716020822525
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00083",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 7.820881974546283,
+          "lf": 8.31113472939179,
+          "topk_pred": 7.852835178375244
+        },
+        "base_shear_kN": {
+          "hf": 469.2394510455399,
+          "lf": 453.0615744494878,
+          "topk_pred": 468.3044128417969
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998257214476071,
+          "lf": 0.9872887018009463,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.1576147853452805,
+          "lf": 2.0737596025885026,
+          "topk_pred": 2.151787519454956
+        },
+        "equilibrium_residual": {
+          "hf": 0.06301416175917673,
+          "lf": 0.08056598926450176,
+          "topk_pred": 0.06506963074207306
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00084",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 25.38851013266316,
+          "lf": 27.01927151737435,
+          "topk_pred": 25.419485092163086
+        },
+        "base_shear_kN": {
+          "hf": 326.56984341505995,
+          "lf": 315.0328679092772,
+          "topk_pred": 326.2947692871094
+        },
+        "mode_shape_mac": {
+          "hf": 0.9999175261869824,
+          "lf": 0.9870710741802287,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.05619359865697,
+          "topk_pred": 1.0986015796661377
+        },
+        "equilibrium_residual": {
+          "hf": 0.06731183342713483,
+          "lf": 0.08529686623659002,
+          "topk_pred": 0.06780853867530823
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00085",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 19.48573553777937,
+          "lf": 20.7297390812642,
+          "topk_pred": 19.53835678100586
+        },
+        "base_shear_kN": {
+          "hf": 768.9425450146999,
+          "lf": 741.9426923848645,
+          "topk_pred": 768.4002075195312
+        },
+        "mode_shape_mac": {
+          "hf": 0.9993167648089523,
+          "lf": 0.9865484139189084,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0564599234649503,
+          "topk_pred": 1.0983058214187622
+        },
+        "equilibrium_residual": {
+          "hf": 0.06622709569505443,
+          "lf": 0.08410278694111592,
+          "topk_pred": 0.06704387068748474
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00086",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 42.085239915276176,
+          "lf": 44.7998859232082,
+          "topk_pred": 42.19245910644531
+        },
+        "base_shear_kN": {
+          "hf": 1285.3440156377799,
+          "lf": 1239.743950048463,
+          "topk_pred": 1285.8482666015625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9981363383886022,
+          "lf": 0.9852356348954202,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560086010882495,
+          "topk_pred": 1.0991202592849731
+        },
+        "equilibrium_residual": {
+          "hf": 0.06806532629419432,
+          "lf": 0.08612631118464911,
+          "topk_pred": 0.06806641072034836
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00087",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 6.2072046747076115,
+          "lf": 6.592661957793406,
+          "topk_pred": 6.238565444946289
+        },
+        "base_shear_kN": {
+          "hf": 460.48822409981994,
+          "lf": 444.76066201977886,
+          "topk_pred": 459.33880615234375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998101923177469,
+          "lf": 0.987390518622874,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.4964870183114014,
+          "lf": 2.400369800443568,
+          "topk_pred": 2.4883530139923096
+        },
+        "equilibrium_residual": {
+          "hf": 0.061384356873236026,
+          "lf": 0.07877190004605822,
+          "topk_pred": 0.0640118345618248
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00088",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 14.1821260467629,
+          "lf": 15.082449907620854,
+          "topk_pred": 14.225964546203613
+        },
+        "base_shear_kN": {
+          "hf": 654.68810587054,
+          "lf": 631.8292462993174,
+          "topk_pred": 653.950439453125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9995352118453316,
+          "lf": 0.9868386125076962,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0567045962586634,
+          "topk_pred": 1.097904920578003
+        },
+        "equilibrium_residual": {
+          "hf": 0.06523054635604661,
+          "lf": 0.0830057854287361,
+          "topk_pred": 0.06644384562969208
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00089",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 22.83815226176511,
+          "lf": 24.29941768882305,
+          "topk_pred": 22.898269653320312
+        },
+        "base_shear_kN": {
+          "hf": 860.4717085330799,
+          "lf": 830.19090256743,
+          "topk_pred": 860.0499877929688
+        },
+        "mode_shape_mac": {
+          "hf": 0.9991093191507828,
+          "lf": 0.9863126146686576,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056363237715953,
+          "topk_pred": 1.098475694656372
+        },
+        "equilibrium_residual": {
+          "hf": 0.06662089558507207,
+          "lf": 0.08453628186004734,
+          "topk_pred": 0.06726926565170288
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00090",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 29.626429927199844,
+          "lf": 31.5280693160646,
+          "topk_pred": 29.689800262451172
+        },
+        "base_shear_kN": {
+          "hf": 779.6433339804199,
+          "lf": 752.1195904094468,
+          "topk_pred": 779.3283081054688
+        },
+        "mode_shape_mac": {
+          "hf": 0.9989906678479404,
+          "lf": 0.9861532156571932,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056224288029552,
+          "topk_pred": 1.0986671447753906
+        },
+        "equilibrium_residual": {
+          "hf": 0.06718683598260036,
+          "lf": 0.08515926904964648,
+          "topk_pred": 0.06763584166765213
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00091",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 4.743601573397624,
+          "lf": 5.029716328324193,
+          "topk_pred": 4.782771587371826
+        },
+        "base_shear_kN": {
+          "hf": 584.1769782794399,
+          "lf": 564.797629547597,
+          "topk_pred": 581.916015625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996757862271721,
+          "lf": 0.9876125996167655,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.8038436695864988,
+          "lf": 2.6989914724073483,
+          "topk_pred": 2.7900431156158447
+        },
+        "equilibrium_residual": {
+          "hf": 0.05643314736675864,
+          "lf": 0.07332160862132792,
+          "topk_pred": 0.06066174432635307
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00092",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 15.269107902796986,
+          "lf": 16.243049063371608,
+          "topk_pred": 15.300771713256836
+        },
+        "base_shear_kN": {
+          "hf": 380.72647964106,
+          "lf": 367.3699132003743,
+          "topk_pred": 380.2845153808594
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998676429436317,
+          "lf": 0.9871106283652461,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.056498580287705,
+          "topk_pred": 1.0981507301330566
+        },
+        "equilibrium_residual": {
+          "hf": 0.06606964692202266,
+          "lf": 0.08392946733176254,
+          "topk_pred": 0.0670265331864357
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00093",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.1806925652977167,
+          "lf": 2.299917083765558,
+          "topk_pred": 2.2189228534698486
+        },
+        "base_shear_kN": {
+          "hf": 561.05926405662,
+          "lf": 544.1881966216894,
+          "topk_pred": 556.182861328125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9997178898487414,
+          "lf": 0.9887833344359234,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 3.3420545612874792,
+          "lf": 3.2287685308289955,
+          "topk_pred": 3.307541608810425
+        },
+        "equilibrium_residual": {
+          "hf": 0.04075771406691723,
+          "lf": 0.05606609164486249,
+          "topk_pred": 0.04905521869659424
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00094",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 4.527049925695148,
+          "lf": 4.803861527574823,
+          "topk_pred": 4.557534217834473
+        },
+        "base_shear_kN": {
+          "hf": 508.8784402913399,
+          "lf": 491.7646681456538,
+          "topk_pred": 507.2254638671875
+        },
+        "mode_shape_mac": {
+          "hf": 0.9997711583221086,
+          "lf": 0.9875419315000885,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.849319515604019,
+          "lf": 2.7413000942053563,
+          "topk_pred": 2.837493896484375
+        },
+        "equilibrium_residual": {
+          "hf": 0.05873926141694535,
+          "lf": 0.07586017896777345,
+          "topk_pred": 0.06224539503455162
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00095",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 9.911368231858948,
+          "lf": 10.533948362346493,
+          "topk_pred": 9.952442169189453
+        },
+        "base_shear_kN": {
+          "hf": 617.70862126484,
+          "lf": 596.3679538848511,
+          "topk_pred": 616.6416015625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9996168936390832,
+          "lf": 0.9870539433798782,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.7186126713096206,
+          "lf": 1.6516810502456634,
+          "topk_pred": 1.7142397165298462
+        },
+        "equilibrium_residual": {
+          "hf": 0.0633743091556258,
+          "lf": 0.08096243951851287,
+          "topk_pred": 0.06527157872915268
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00096",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 21.987864395610902,
+          "lf": 23.397840497934325,
+          "topk_pred": 22.01984405517578
+        },
+        "base_shear_kN": {
+          "hf": 355.61647778552003,
+          "lf": 343.0742909029433,
+          "topk_pred": 355.29583740234375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9998916940263896,
+          "lf": 0.9870666549325076,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0562666166898627,
+          "topk_pred": 1.098497748374939
+        },
+        "equilibrium_residual": {
+          "hf": 0.06701443185947178,
+          "lf": 0.08496948659090654,
+          "topk_pred": 0.06761883199214935
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00097",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 41.22555406696886,
+          "lf": 43.883965834216944,
+          "topk_pred": 41.34123229980469
+        },
+        "base_shear_kN": {
+          "hf": 1406.96631645206,
+          "lf": 1357.066133348734,
+          "topk_pred": 1407.67578125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9981683736630886,
+          "lf": 0.9852714614084729,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0560215292117603,
+          "topk_pred": 1.0991308689117432
+        },
+        "equilibrium_residual": {
+          "hf": 0.06801267020299684,
+          "lf": 0.08606834735945892,
+          "topk_pred": 0.0680084079504013
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00098",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 34.660862690521554,
+          "lf": 36.89033169296611,
+          "topk_pred": 34.74885559082031
+        },
+        "base_shear_kN": {
+          "hf": 1116.63383351996,
+          "lf": 1077.1303365173624,
+          "topk_pred": 1116.70458984375
+        },
+        "mode_shape_mac": {
+          "hf": 0.9987663850432091,
+          "lf": 0.9859019100741299,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.1,
+          "lf": 1.0561321403554396,
+          "topk_pred": 1.098890781402588
+        },
+        "equilibrium_residual": {
+          "hf": 0.06756215234832394,
+          "lf": 0.085572417305035,
+          "topk_pred": 0.06779506802558899
+        }
+      }
+    },
+    {
+      "case_id": "ATWOOD-00099",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 11.67102803739093,
+          "lf": 12.40800864528225,
+          "topk_pred": 11.715071678161621
+        },
+        "base_shear_kN": {
+          "hf": 717.5248237578401,
+          "lf": 692.6049080912156,
+          "topk_pred": 716.5606689453125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9995955294956467,
+          "lf": 0.9869662974257686,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 1.3490841121479047,
+          "lf": 1.2962666335121906,
+          "topk_pred": 1.346104383468628
+        },
+        "equilibrium_residual": {
+          "hf": 0.06429488985941831,
+          "lf": 0.08197581475724768,
+          "topk_pred": 0.06583932042121887
+        }
+      }
+    }
+  ],
+  "history_tail": [
+    {
+      "epoch": 41,
+      "selected_branch_ids": [
+        5,
+        2,
+        7
+      ],
+      "selected_losses": [
+        0.008663131855428219,
+        0.00899394042789936,
+        0.009093928150832653
+      ],
+      "normalized_weights": [
+        0.3335978291829331,
+        0.33325314168593634,
+        0.3331490291311306
+      ],
+      "weighted_loss": 0.008916893973946571,
+      "total_loss": 0.011601990088820457
+    },
+    {
+      "epoch": 42,
+      "selected_branch_ids": [
+        0,
+        8,
+        2
+      ],
+      "selected_losses": [
+        0.00832401867955923,
+        0.010496263392269611,
+        0.010619930922985077
+      ],
+      "normalized_weights": [
+        0.3348865735817415,
+        0.33262097331386914,
+        0.3324924531043893
+      ],
+      "weighted_loss": 0.009809926152229309,
+      "total_loss": 0.012487427331507206
+    },
+    {
+      "epoch": 43,
+      "selected_branch_ids": [
+        3,
+        9,
+        4
+      ],
+      "selected_losses": [
+        0.008279882371425629,
+        0.010958094149827957,
+        0.011115696281194687
+      ],
+      "normalized_weights": [
+        0.33525066015281607,
+        0.3324565182913004,
+        0.33229282155588347
+      ],
+      "weighted_loss": 0.01011259201914072,
+      "total_loss": 0.012765348888933659
+    },
+    {
+      "epoch": 44,
+      "selected_branch_ids": [
+        5,
+        4,
+        9
+      ],
+      "selected_losses": [
+        0.00921704526990652,
+        0.011342295445501804,
+        0.014596480876207352
+      ],
+      "normalized_weights": [
+        0.3359413158358361,
+        0.3337175854197583,
+        0.3303410987444056
+      ],
+      "weighted_loss": 0.011703327298164368,
+      "total_loss": 0.014310403726994991
+    },
+    {
+      "epoch": 45,
+      "selected_branch_ids": [
+        9,
+        0,
+        7
+      ],
+      "selected_losses": [
+        0.007568844594061375,
+        0.011240579187870026,
+        0.012625395320355892
+      ],
+      "normalized_weights": [
+        0.3363703225538507,
+        0.3325328103239258,
+        0.3310968671222235
+      ],
+      "weighted_loss": 0.010464025661349297,
+      "total_loss": 0.013008889742195606
+    },
+    {
+      "epoch": 46,
+      "selected_branch_ids": [
+        1,
+        3,
+        8
+      ],
+      "selected_losses": [
+        0.010786357335746288,
+        0.011134007014334202,
+        0.011465136893093586
+      ],
+      "normalized_weights": [
+        0.3336897978282953,
+        0.3333274723333319,
+        0.33298272983837285
+      ],
+      "weighted_loss": 0.01112825982272625,
+      "total_loss": 0.013601441867649555
+    },
+    {
+      "epoch": 47,
+      "selected_branch_ids": [
+        9,
+        3,
+        7
+      ],
+      "selected_losses": [
+        0.007786530070006847,
+        0.00901541393250227,
+        0.010578243993222713
+      ],
+      "normalized_weights": [
+        0.33473016892417506,
+        0.3334471824316017,
+        0.3318226486442233
+      ],
+      "weighted_loss": 0.009122652001678944,
+      "total_loss": 0.011517137289047241
+    },
+    {
+      "epoch": 48,
+      "selected_branch_ids": [
+        2,
+        4,
+        3
+      ],
+      "selected_losses": [
+        0.008830775506794453,
+        0.008915804326534271,
+        0.009089467115700245
+      ],
+      "normalized_weights": [
+        0.3334526832027717,
+        0.33336409157307123,
+        0.333183225224157
+      ],
+      "weighted_loss": 0.008945312350988388,
+      "total_loss": 0.011271126568317413
+    },
+    {
+      "epoch": 49,
+      "selected_branch_ids": [
+        0,
+        4,
+        2
+      ],
+      "selected_losses": [
+        0.006240725051611662,
+        0.009037886746227741,
+        0.010167533531785011
+      ],
+      "normalized_weights": [
+        0.3356717716091776,
+        0.33275040753010887,
+        0.3315778208607135
+      ],
+      "weighted_loss": 0.008473524823784828,
+      "total_loss": 0.010754181072115898
+    },
+    {
+      "epoch": 50,
+      "selected_branch_ids": [
+        9,
+        5,
+        0
+      ],
+      "selected_losses": [
+        0.008451661095023155,
+        0.00878855586051941,
+        0.009509691968560219
+      ],
+      "normalized_weights": [
+        0.33381771715972897,
+        0.3334664600884019,
+        0.33271582275186906
+      ],
+      "weighted_loss": 0.008916027843952179,
+      "total_loss": 0.01116432435810566
+    },
+    {
+      "epoch": 51,
+      "selected_branch_ids": [
+        5,
+        0,
+        2
+      ],
+      "selected_losses": [
+        0.0081415344029665,
+        0.010063497349619865,
+        0.010692395269870758
+      ],
+      "normalized_weights": [
+        0.334888094397705,
+        0.3328827398007832,
+        0.3322291658015118
+      ],
+      "weighted_loss": 0.009628793224692345,
+      "total_loss": 0.011859146878123283
+    },
+    {
+      "epoch": 52,
+      "selected_branch_ids": [
+        6,
+        4,
+        7
+      ],
+      "selected_losses": [
+        0.00894982274621725,
+        0.00927505362778902,
+        0.011022986844182014
+      ],
+      "normalized_weights": [
+        0.3341657990271007,
+        0.3338263433167312,
+        0.33200785765616814
+      ],
+      "weighted_loss": 0.009746700525283813,
+      "total_loss": 0.011968021281063557
+    },
+    {
+      "epoch": 53,
+      "selected_branch_ids": [
+        2,
+        0,
+        7
+      ],
+      "selected_losses": [
+        0.008018403314054012,
+        0.00929180160164833,
+        0.010302151553332806
+      ],
+      "normalized_weights": [
+        0.33456931824913194,
+        0.3332405887649958,
+        0.33219009298587227
+      ],
+      "weighted_loss": 0.009201389737427235,
+      "total_loss": 0.011437689885497093
+    },
+    {
+      "epoch": 54,
+      "selected_branch_ids": [
+        6,
+        4,
+        2
+      ],
+      "selected_losses": [
+        0.007549085654318333,
+        0.009339770302176476,
+        0.009637007489800453
+      ],
+      "normalized_weights": [
+        0.3346814052042006,
+        0.33281379537740946,
+        0.33250479941839006
+      ],
+      "weighted_loss": 0.00883929431438446,
+      "total_loss": 0.01110944151878357
+    },
+    {
+      "epoch": 55,
+      "selected_branch_ids": [
+        7,
+        1,
+        2
+      ],
+      "selected_losses": [
+        0.010678399354219437,
+        0.014489447697997093,
+        0.014860319904983044
+      ],
+      "normalized_weights": [
+        0.3361143849839659,
+        0.33213516430150675,
+        0.3317504507145273
+      ],
+      "weighted_loss": 0.013331537134945393,
+      "total_loss": 0.015643838793039322
+    },
+    {
+      "epoch": 56,
+      "selected_branch_ids": [
+        4,
+        1,
+        6
+      ],
+      "selected_losses": [
+        0.012797733768820763,
+        0.01309309620410204,
+        0.013626893982291222
+      ],
+      "normalized_weights": [
+        0.33372382952301655,
+        0.3334159420017649,
+        0.33286022847521857
+      ],
+      "weighted_loss": 0.013172206468880177,
+      "total_loss": 0.015523559413850307
+    },
+    {
+      "epoch": 57,
+      "selected_branch_ids": [
+        3,
+        1,
+        5
+      ],
+      "selected_losses": [
+        0.016411518678069115,
+        0.017852887511253357,
+        0.018411267548799515
+      ],
+      "normalized_weights": [
+        0.3345291499355755,
+        0.3330257262384318,
+        0.3324451238259927
+      ],
+      "weighted_loss": 0.017556337639689445,
+      "total_loss": 0.019932081922888756
+    },
+    {
+      "epoch": 58,
+      "selected_branch_ids": [
+        4,
+        0,
+        6
+      ],
+      "selected_losses": [
+        0.015375737100839615,
+        0.01602265238761902,
+        0.016065554693341255
+      ],
+      "normalized_weights": [
+        0.33379763765375875,
+        0.33312351056169837,
+        0.333078851784543
+      ],
+      "weighted_loss": 0.015821002423763275,
+      "total_loss": 0.018195120617747307
+    },
+    {
+      "epoch": 59,
+      "selected_branch_ids": [
+        0,
+        4,
+        5
+      ],
+      "selected_losses": [
+        0.00853545032441616,
+        0.008865470066666603,
+        0.010883425362408161
+      ],
+      "normalized_weights": [
+        0.33426273403029205,
+        0.33391818266410567,
+        0.3318190833056023
+      ],
+      "weighted_loss": 0.009424752555787563,
+      "total_loss": 0.011776368133723736
+    },
+    {
+      "epoch": 60,
+      "selected_branch_ids": [
+        8,
+        3,
+        5
+      ],
+      "selected_losses": [
+        0.007865468971431255,
+        0.009630798362195492,
+        0.009954550303518772
+      ],
+      "normalized_weights": [
+        0.33467298255599126,
+        0.33283179067133156,
+        0.3324952267726771
+      ],
+      "weighted_loss": 0.009147636592388153,
+      "total_loss": 0.011464450508356094
+    }
+  ],
+  "summary": {
+    "baseline_target": {
+      "case_count": 19,
+      "drift_error_pct": 8.348966936214461,
+      "base_shear_error_pct": 4.6972581519918934,
+      "mode_shape_mac": 0.9813628844943459,
+      "buckling_factor_error_pct": 5.666197335761448,
+      "equilibrium_residual_mean": 0.08228961544442612
+    },
+    "topk_target": {
+      "case_count": 19,
+      "drift_error_pct": 2.887218329228592,
+      "base_shear_error_pct": 1.776857183637134,
+      "mode_shape_mac": 0.9994266315510398,
+      "buckling_factor_error_pct": 2.0919701080455,
+      "equilibrium_residual_mean": 0.06579722150375969
+    },
+    "kpi_pass": true
+  }
+}

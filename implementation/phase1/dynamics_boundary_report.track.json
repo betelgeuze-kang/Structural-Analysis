@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.2",
+  "run_id": "phase1-dynamics-boundary-contract-track",
+  "generated_at": "2026-02-26T13:02:54.580051+00:00",
+  "interface_version": "1.1.0",
+  "domain_type": "track",
+  "supports_summary": {
+    "node_count": 3,
+    "support_types": [
+      "elastic_foundation",
+      "fixed",
+      "rail_fastener"
+    ],
+    "fixed_count": 1
+  },
+  "damping_summary": {
+    "damping_model": "track_vti",
+    "alpha_m": 0.01,
+    "beta_k": 0.0005,
+    "time_step_dt": 0.0005,
+    "external_force_profile": "train_passage"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "contract satisfies required boundary/dynamics keys",
+  "payload": {
+    "interface_version": "1.1.0",
+    "domain_type": "track",
+    "nodes": [
+      {
+        "node_id": "R1",
+        "mass": 60.34,
+        "is_fixed_mask": false,
+        "support_type": "elastic_foundation",
+        "dof_lock": {
+          "ux": false,
+          "uy": false,
+          "uz": false,
+          "rx": false,
+          "ry": false,
+          "rz": true
+        },
+        "foundation_stiffness": {
+          "k_vertical": 130000000.0,
+          "k_shear": 5000000.0,
+          "c_vertical": 50000.0
+        }
+      },
+      {
+        "node_id": "R2",
+        "mass": 60.34,
+        "is_fixed_mask": false,
+        "support_type": "rail_fastener",
+        "dof_lock": {
+          "ux": false,
+          "uy": false,
+          "uz": false,
+          "rx": false,
+          "ry": false,
+          "rz": true
+        }
+      },
+      {
+        "node_id": "R3",
+        "mass": 300.0,
+        "is_fixed_mask": true,
+        "support_type": "fixed",
+        "dof_lock": {
+          "ux": true,
+          "uy": true,
+          "uz": true,
+          "rx": true,
+          "ry": true,
+          "rz": true
+        }
+      }
+    ],
+    "dynamics": {
+      "damping_model": "track_vti",
+      "alpha_m": 0.01,
+      "beta_k": 0.0005,
+      "time_step_dt": 0.0005,
+      "external_force_profile": "train_passage"
+    },
+    "vehicle": {
+      "vehicle_schema_ref": "vehicle_model_schema.json"
+    }
+  }
+}

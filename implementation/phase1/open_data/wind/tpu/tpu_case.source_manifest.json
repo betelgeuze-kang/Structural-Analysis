@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-tpu-case-mat",
+  "generated_at": "2026-04-11T12:03:07.813403+00:00",
+  "source_name": "tpu_case",
+  "source_url": "",
+  "case_id": "",
+  "mat_url": "",
+  "mat_source_resolved": "",
+  "real_source": true,
+  "source_origin_class": "official_external_benchmark",
+  "data_path": "implementation/phase1/open_data/wind/tpu/tpu_case.mat",
+  "sha256": "",
+  "size_bytes": 0,
+  "contract_pass": false,
+  "reason_code": "ERR_INPUT_MODE",
+  "reason": "provide one of --case-id, --case-page-url, or --case-page-html."
+}

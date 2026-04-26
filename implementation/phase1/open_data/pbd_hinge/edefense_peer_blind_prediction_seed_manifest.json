@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-15T00:00:00Z",
+  "manifest_family": "blind_prediction_seed_selection",
+  "source_name": "E-Defense / PEER blind prediction seed family",
+  "source_urls": [
+    "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+    "https://peer.berkeley.edu/sites/default/files/news_e-defense_blind_analysis_2009-article.pdf",
+    "https://peer.berkeley.edu/nees-tipse-defense-announce-blind-analysis-contest-seismic-isolation-test"
+  ],
+  "real_source_required": true,
+  "target_gap": "blind_prediction_dynamic_holdout_validation",
+  "integration_targets": [
+    "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.source_manifest.json",
+    "implementation/phase1/open_data/benchmark_diversification_catalog.json",
+    "implementation/phase1/release/benchmark_expansion/measured_benchmark_breadth_report.json"
+  ],
+  "selection_strategy": {
+    "preferred_family": "single official family first",
+    "required_artifact_groups": [
+      "geometry_model",
+      "material_properties",
+      "excitation_history",
+      "measured_response"
+    ],
+    "why": "Start with one normalized family that can be carried all the way into compare/report/viewer before broadening to larger collapse suites."
+  },
+  "seed_cases": [
+    {
+      "seed_id": "edefense_peer_blind_prediction_seed_01",
+      "priority": 1,
+      "holdout_split": "holdout",
+      "expected_local_targets": {
+        "raw_bundle_root": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01",
+        "source_manifest": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.source_manifest.json",
+        "benchmark_case": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.benchmark_case.json",
+        "compare_report": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.compare_report.json",
+        "viewer_entry": "implementation/phase1/release/visualization/edefense_peer_blind_prediction_seed_01.html"
+      },
+      "why": "First normalized blind-prediction family for nonlinear frame/collapse-adjacent compare workflows."
+    }
+  ],
+  "ingestion_rules": {
+    "require_source_manifest": true,
+    "require_sha256": true,
+    "require_real_source": true,
+    "forbid_synthetic_response_substitution": true
+  },
+  "next_action": "Stage one official blind-prediction package locally, hash it into the source manifest, then normalize it into benchmark_case and compare_report artifacts."
+}

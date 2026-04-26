@@ -1,0 +1,303 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-noise-convergence-gate",
+  "generated_at": "2026-03-01T11:32:38.763610+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "target_split": "test",
+    "limit_cases": 4,
+    "seeds": "11,23,47",
+    "stiffness_noise_levels": "10",
+    "max_iter": 80,
+    "tol": 1e-06,
+    "out": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/noise_convergence.json"
+  },
+  "checks": {
+    "has_required_seeds": true,
+    "includes_plus_minus_10": true,
+    "all_converged": true,
+    "scenario_count_nonzero": true
+  },
+  "summary": {
+    "selected_case_count": 3,
+    "seed_count": 3,
+    "noise_level_count": 3,
+    "scenario_count": 27,
+    "fail_count": 0
+  },
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "seed": 11,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.2045829945551625e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-001",
+      "seed": 11,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 7.660767250584671e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-001",
+      "seed": 11,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 5.176332912273916e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-001",
+      "seed": 23,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.2106257642375298e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-001",
+      "seed": 23,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 7.695389433135018e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-001",
+      "seed": 23,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 5.19990203850977e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-001",
+      "seed": 47,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.201500213279402e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-001",
+      "seed": 47,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 7.640162016497162e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-001",
+      "seed": 47,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 5.162364056749015e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-002",
+      "seed": 11,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 9.71422342057369e-10,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-002",
+      "seed": 11,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 6.500012009196637e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-002",
+      "seed": 11,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 4.386751799615947e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-002",
+      "seed": 23,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 9.756895101086488e-10,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-002",
+      "seed": 23,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 6.525605337008681e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-002",
+      "seed": 23,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 4.404130572517996e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-002",
+      "seed": 47,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 9.67680473114633e-10,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-002",
+      "seed": 47,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 6.475442639522712e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-002",
+      "seed": 47,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 4.370085699306195e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-003",
+      "seed": 11,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.374934312835351e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-003",
+      "seed": 11,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 8.584539487728136e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-003",
+      "seed": 11,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 5.806013286395153e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-003",
+      "seed": 23,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.3813851487450897e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-003",
+      "seed": 23,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 8.621642973094279e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-003",
+      "seed": 23,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 5.831287401025007e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-003",
+      "seed": 47,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.3721708457868059e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-003",
+      "seed": 47,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 8.565944186033148e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "C-TST-003",
+      "seed": 47,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 5.793409249920947e-07,
+      "line_search_backtracks": 0
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "noise convergence gate passed"
+}

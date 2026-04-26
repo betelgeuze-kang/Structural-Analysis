@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-nightly-release-snapshot",
+  "generated_at": "2026-03-01T08:43:32.929122+00:00",
+  "snapshot": "phase3_nightly_hardening_20260301T084332Z",
+  "source_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1",
+  "files": [
+    {
+      "file": "phase3_megastructure_pipeline_report.json",
+      "bytes": 6847,
+      "sha256": "b4d89a52684efc532d7037c646e6260888213ba85fe5589ba9f7a7e57074924e"
+    },
+    {
+      "file": "partitioned_scaleout_report.json",
+      "bytes": 8254,
+      "sha256": "794a844d9df847e9f627f7bab20a5e4f6908d7c305622c06aaea763ff8c3fd50"
+    },
+    {
+      "file": "noise_convergence_gate_report.json",
+      "bytes": 12689,
+      "sha256": "68ed32a5fae3215007bda8bf21592f2d710702894be42e23e800b46db761db67"
+    },
+    {
+      "file": "ci_gate_report.json",
+      "bytes": 1400,
+      "sha256": "eecc951c0166b112965501ce1c01129a5bd571b3ad7fbac2317ecd89f89ae884"
+    },
+    {
+      "file": "static_artifact_validation_report.json",
+      "bytes": 5040,
+      "sha256": "973dddf5c64390cf47dd013e813d57319b7725407c05c307aeda04428a394892"
+    },
+    {
+      "file": "ci_artifact_manifest.json",
+      "bytes": 2999,
+      "sha256": "5193c41dc53d220f08be4fa17389bf3453244ec9225d00b9a52515419871a151"
+    },
+    {
+      "file": "scaleout_io_profile_report.json",
+      "bytes": 5844,
+      "sha256": "4f0b401ca708ac9421ffd2618abf97fb68a8346922946e96311648ef6fd14b01"
+    }
+  ]
+}

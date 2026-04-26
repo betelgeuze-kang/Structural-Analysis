@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-prepare-midas-binary-archive-adapter",
+  "source_id": "midas_support_fcm_bridge_archive",
+  "archive_path": "implementation/phase1/open_data/midas/quality_corpus/raw/midas_support_fcm_bridge_archive.zip",
+  "out_dir": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_fcm_bridge_archive",
+  "summary": {
+    "recognized_member_count": 2,
+    "extension_label": ".mmbx=2",
+    "recommended_adapter_family": "midas_binary_mmbx_parser",
+    "recommended_parser_script": "",
+    "recommended_primary_member": "║╕_┐╣┴ª╞─└╧.mmbx",
+    "primary_member_probe_ready": false,
+    "primary_member_magic": "MBDG",
+    "primary_member_structural_token_label": "GUID=1, __DBMS_DATA__=1"
+  },
+  "members": [
+    {
+      "member_name": "║╕_┐╣┴ª╞─└╧.mmbx",
+      "extension": ".mmbx",
+      "size_bytes": 228621,
+      "extracted_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_fcm_bridge_archive/║╕_┐╣┴ª╞─└╧.mmbx"
+    },
+    {
+      "member_name": "║╕_┐╣┴ª╞─└╧_FINAL.mmbx",
+      "extension": ".mmbx",
+      "size_bytes": 291324,
+      "extracted_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_fcm_bridge_archive/║╕_┐╣┴ª╞─└╧_FINAL.mmbx"
+    }
+  ],
+  "primary_member_probe": {
+    "member_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_fcm_bridge_archive/║╕_┐╣┴ª╞─└╧.mmbx",
+    "size_bytes": 228621,
+    "magic_ascii": "MBDG",
+    "magic_hex": "4d424447",
+    "dbms_marker_present": true,
+    "table_token_rows": [
+      "MBDG",
+      "__DBMS_DATA__",
+      "GUID",
+      "UNIT",
+      "FMDB",
+      "LLDB",
+      "STND",
+      "PHDB",
+      "BDIF",
+      "RDRW",
+      "TRLN",
+      "DMPT",
+      "CDLN",
+      "DMLN",
+      "MATL",
+      "FGRP",
+      "DSEC",
+      "SECT",
+      "THIK",
+      "PLAN",
+      "MDUL",
+      "GRND",
+      "STOR",
+      "CTRD",
+      "A333333",
+      "UUUUUU",
+      "MBTP",
+      "PONT",
+      "CURV",
+      "MEMB",
+      "FMAT",
+      "DFLG",
+      "PREG",
+      "TWOP",
+      "STLD",
+      "SPLC",
+      "MCTL",
+      "SPFC",
+      "LDCT",
+      "WIND"
+    ],
+    "structural_token_rows": [
+      "__DBMS_DATA__",
+      "GUID"
+    ],
+    "probe_ready": false,
+    "probe_label": "binary member extracted / table layout still uncertain"
+  },
+  "checks": {
+    "archive_exists": true,
+    "recognized_member_nonzero": true,
+    "primary_member_selected": true,
+    "primary_member_probe_ready": false
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "binary archive adapter manifest prepared"
+}

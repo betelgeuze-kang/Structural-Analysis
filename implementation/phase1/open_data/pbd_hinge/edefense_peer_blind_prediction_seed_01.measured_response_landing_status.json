@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-16T14:46:34.316701+00:00",
+  "source_manifest": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.source_manifest.json",
+  "input_root": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01",
+  "measured_response_present": true,
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "Measured response bundle is landed and the blind-prediction package can proceed to benchmark-case normalization.",
+  "summary_line": "E-Defense/PEER measured-response landing: PASS | matched=1 | patterns=12 | root=edefense_peer_blind_prediction_seed_01",
+  "expected_patterns": [
+    "*response*.csv",
+    "*measurement*.csv",
+    "*sensor*.csv",
+    "*drift*.csv",
+    "*accel*.csv",
+    "*response*.xlsx",
+    "*measurement*.xlsx",
+    "*sensor*.xlsx",
+    "*drift*.xlsx",
+    "*accel*.xlsx",
+    "*experimentalresults*.xlsx",
+    "*results*.xlsx"
+  ],
+  "matched_files": [
+    "Experimentalresults.xlsx"
+  ],
+  "next_action": "Place measured response CSV/measurement/sensor files under the landing root, then rerun prepare_edefense_peer_blind_prediction_source_manifest.py."
+}

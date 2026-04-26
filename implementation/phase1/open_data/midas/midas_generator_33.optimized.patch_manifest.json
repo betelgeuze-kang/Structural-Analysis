@@ -1,0 +1,6733 @@
+{
+  "schema_version": "1.0",
+  "support_mode": "native_authoring_supported_changeset",
+  "supported_action_families": [
+    "beam_section",
+    "wall_thickness",
+    "slab_thickness",
+    "detailing",
+    "connection_detailing",
+    "rebar",
+    "perimeter_frame"
+  ],
+  "direct_patch_supported_action_families": [
+    "beam_section",
+    "wall_thickness",
+    "slab_thickness",
+    "rebar",
+    "perimeter_frame",
+    "connection_detailing",
+    "detailing"
+  ],
+  "special_member_supported_action_families": [
+    "core_beam_connection_detailing",
+    "intermediate_beam_section",
+    "intermediate_wall_rebar",
+    "intermediate_wall_thickness",
+    "perimeter_frame_column",
+    "perimeter_slab_thickness",
+    "perimeter_wall_detailing",
+    "perimeter_wall_rebar",
+    "perimeter_wall_thickness",
+    "transfer_beam_connection_detailing"
+  ],
+  "special_member_direct_patch_supported_action_families": [
+    "core_beam_connection_detailing",
+    "intermediate_beam_section",
+    "intermediate_wall_rebar",
+    "intermediate_wall_thickness",
+    "perimeter_frame_column",
+    "perimeter_slab_thickness",
+    "perimeter_wall_detailing",
+    "perimeter_wall_rebar",
+    "perimeter_wall_thickness",
+    "transfer_beam_connection_detailing"
+  ],
+  "sidecar_supported_action_families": [
+    "connection_detailing",
+    "detailing",
+    "perimeter_frame",
+    "rebar"
+  ],
+  "material_level_rebar_payload_row_count": 5,
+  "material_level_rebar_payload_available_count": 3,
+  "group_local_rebar_payload_row_count": 6,
+  "group_local_rebar_payload_available_count": 6,
+  "group_local_connection_detailing_payload_row_count": 6,
+  "group_local_connection_detailing_payload_available_count": 6,
+  "group_local_detailing_payload_row_count": 5,
+  "group_local_detailing_payload_available_count": 5,
+  "connection_detailing_payload_namespace_mode": "group_local",
+  "connection_detailing_payload_group_local_namespace_present": true,
+  "detailing_payload_namespace_mode": "group_local",
+  "detailing_payload_group_local_namespace_present": true,
+  "connection_detailing_structured_payload_mapped_change_count": 6,
+  "connection_detailing_direct_patch_eligible_change_count": 6,
+  "connection_detailing_zero_touch_verified_change_count": 6,
+  "detailing_direct_patch_eligible_change_count": 5,
+  "detailing_structured_payload_mapped_change_count": 5,
+  "detailing_zero_touch_verified_change_count": 5,
+  "connection_detailing_delivery_mode": "direct_patch_native_authoring_zero_touch_verified",
+  "detailing_delivery_mode": "direct_patch_native_authoring_zero_touch_verified",
+  "mgt_export_delivery_boundary": "direct_patch=beam_section=1, connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5, slab_thickness=2, wall_thickness=5 | sidecar=none | connection_payload=direct_patch_native_authoring_zero_touch_verified | detailing_payload=direct_patch_native_authoring_zero_touch_verified",
+  "rebar_payload_namespace_mode": "group_local",
+  "rebar_payload_material_level_namespace_present": true,
+  "rebar_payload_group_local_namespace_present": true,
+  "rebar_delivery_mode": "direct_patch_eligible",
+  "evidence_model": "direct_patch_plus_zero_touch_verification_manifest",
+  "derived_group_local_rebar_bridge_row_count": 6,
+  "derived_group_local_rebar_mapped_change_count": 6,
+  "derived_group_local_rebar_payload_available_group_count": 6,
+  "rebar_direct_patch_eligible_change_count": 6,
+  "rebar_direct_patch_ineligible_reason_counts": {},
+  "rebar_direct_patch_mapping_source_counts": {
+    "alt_slab_wall_group_id": 5,
+    "direct_group_id": 1
+  },
+  "instruction_sidecar_audit_only_change_count": 0,
+  "instruction_sidecar_audit_only_action_family_counts": {},
+  "instruction_sidecar_zero_touch_verified_change_count": 11,
+  "instruction_sidecar_zero_touch_verified_action_family_counts": {
+    "connection_detailing": 6,
+    "detailing": 5
+  },
+  "special_member_instruction_sidecar_zero_touch_verified_action_family_counts": {
+    "core_beam_connection_detailing": 1,
+    "perimeter_wall_detailing": 5,
+    "transfer_beam_connection_detailing": 5
+  },
+  "instruction_sidecar_manual_input_change_count": 0,
+  "instruction_sidecar_manual_input_action_family_counts": {},
+  "audit_review_manifest_change_count": 0,
+  "audit_review_manifest_action_family_counts": {},
+  "audit_review_packet_count": 0,
+  "audit_review_packet_action_family_counts": {},
+  "audit_review_packet_followup_type_counts": {},
+  "audit_review_packet_review_priority_counts": {},
+  "audit_review_packet_file_count": 0,
+  "audit_review_packet_file_action_family_counts": {},
+  "audit_review_queue_item_count": 0,
+  "audit_review_queue_pending_count": 0,
+  "audit_review_queue_acknowledged_count": 0,
+  "audit_review_queue_status_counts": {},
+  "audit_review_queue_action_family_counts": {},
+  "audit_review_followup_item_count": 0,
+  "audit_review_followup_open_item_count": 0,
+  "audit_review_followup_closed_item_count": 0,
+  "audit_review_followup_action_counts": {},
+  "audit_review_followup_action_label": "",
+  "audit_review_followup_owner_counts": {},
+  "audit_review_followup_owner_label": "",
+  "audit_review_followup_review_owner_counts": {},
+  "audit_review_followup_review_owner_label": "",
+  "audit_review_followup_status_counts": {},
+  "audit_review_followup_status_label": "",
+  "audit_review_followup_sla_state_counts": {},
+  "audit_review_followup_sla_state_label": "",
+  "audit_review_followup_age_bucket_counts": {},
+  "audit_review_followup_age_bucket_label": "",
+  "audit_review_followup_overdue_item_count": 0,
+  "audit_review_followup_oldest_open_age_hours": 0.0,
+  "audit_review_followup_oldest_open_packet_id": "",
+  "audit_review_followup_reference_time_utc": "2026-04-09T14:27:34.239471+00:00",
+  "audit_review_followup_sla_policy_label": "critical=8h, high=24h, low=168h, medium=72h, default=96h",
+  "audit_review_followup_mode": "none",
+  "audit_review_resolution_item_count": 0,
+  "audit_review_resolution_file_count": 0,
+  "audit_review_resolution_open_item_count": 0,
+  "audit_review_resolution_closed_item_count": 0,
+  "audit_review_resolution_pending_item_count": 0,
+  "audit_review_resolution_open_revision_count": 0,
+  "audit_review_resolution_closed_packet_count": 0,
+  "audit_review_resolution_action_counts": {},
+  "audit_review_resolution_action_label": "",
+  "audit_review_resolution_owner_counts": {},
+  "audit_review_resolution_owner_label": "",
+  "audit_review_resolution_status_counts": {},
+  "audit_review_resolution_status_label": "",
+  "audit_review_resolution_mode": "none",
+  "special_member_supported_action_family_counts": {
+    "core_beam_connection_detailing": 2,
+    "intermediate_beam_section": 1,
+    "intermediate_wall_rebar": 4,
+    "intermediate_wall_thickness": 3,
+    "perimeter_frame_column": 1,
+    "perimeter_slab_thickness": 2,
+    "perimeter_wall_detailing": 10,
+    "perimeter_wall_rebar": 1,
+    "perimeter_wall_thickness": 2,
+    "transfer_beam_connection_detailing": 10
+  },
+  "special_member_direct_patch_action_family_counts": {
+    "core_beam_connection_detailing": 1,
+    "intermediate_beam_section": 1,
+    "intermediate_wall_rebar": 4,
+    "intermediate_wall_thickness": 3,
+    "perimeter_frame_column": 1,
+    "perimeter_slab_thickness": 2,
+    "perimeter_wall_detailing": 5,
+    "perimeter_wall_rebar": 1,
+    "perimeter_wall_thickness": 2,
+    "transfer_beam_connection_detailing": 5
+  },
+  "special_member_instruction_sidecar_action_family_counts": {},
+  "supported_changes": [
+    {
+      "group_id": "S03:intermediate:nogroup:slab:SB800X3002.00",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "action_name": "rebar_down",
+      "zone_label": "intermediate",
+      "story_band": 3,
+      "semantic_group": "",
+      "ratio": 0.4,
+      "element_ids": [
+        8567,
+        8568,
+        8569,
+        8570,
+        8571,
+        8572
+      ],
+      "target_material_ids": [
+        8
+      ],
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.004,
+      "payload_source_class": "group_local_rebar_payload",
+      "payload_mapping_source": "direct_group_id",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 8
+        }
+      ],
+      "special_member_family": "intermediate_wall_rebar"
+    },
+    {
+      "group_id": "S04:intermediate:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "action_name": "rebar_down",
+      "zone_label": "intermediate",
+      "story_band": 4,
+      "semantic_group": "",
+      "ratio": 0.39999999999999986,
+      "element_ids": [
+        2960,
+        2961,
+        2962,
+        2963,
+        2964,
+        2965,
+        11831,
+        11832,
+        11839,
+        11840,
+        12199,
+        12203,
+        12207,
+        12208,
+        12244,
+        12251,
+        27979,
+        27980,
+        27987,
+        27988,
+        28346,
+        28350,
+        28355,
+        28356,
+        28391,
+        28392,
+        28398,
+        28403,
+        28404,
+        28411,
+        28412,
+        28420,
+        28421,
+        28422
+      ],
+      "target_material_ids": [
+        9,
+        10
+      ],
+      "before_rebar_ratio": 0.010000000000000004,
+      "after_rebar_ratio": 0.004,
+      "payload_source_class": "group_local_rebar_payload",
+      "payload_mapping_source": "direct_group_id",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 9
+        },
+        {
+          "source_id": 4,
+          "new_id": 10
+        }
+      ],
+      "special_member_family": "intermediate_wall_rebar"
+    },
+    {
+      "group_id": "S06:intermediate:nogroup:slab:SB800X3002.00",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "action_name": "rebar_down",
+      "zone_label": "intermediate",
+      "story_band": 6,
+      "semantic_group": "",
+      "ratio": 0.4,
+      "element_ids": [
+        27674,
+        27676,
+        27681,
+        27682,
+        27683,
+        27684
+      ],
+      "target_material_ids": [
+        11
+      ],
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.004,
+      "payload_source_class": "group_local_rebar_payload",
+      "payload_mapping_source": "direct_group_id",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 11
+        }
+      ],
+      "special_member_family": "intermediate_wall_rebar"
+    },
+    {
+      "group_id": "S03:intermediate:nogroup:slab:SB800X4002.00",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "action_name": "rebar_down",
+      "zone_label": "intermediate",
+      "story_band": 3,
+      "semantic_group": "",
+      "ratio": 0.3999999999999999,
+      "element_ids": [
+        1166,
+        1168,
+        1170,
+        1172,
+        6283,
+        6284,
+        8191,
+        8192,
+        8211,
+        8212,
+        8213,
+        8235,
+        8247,
+        8248,
+        8255,
+        8256,
+        8399,
+        16236,
+        16243,
+        16244
+      ],
+      "target_material_ids": [
+        12,
+        13
+      ],
+      "before_rebar_ratio": 0.010000000000000002,
+      "after_rebar_ratio": 0.004,
+      "payload_source_class": "group_local_rebar_payload",
+      "payload_mapping_source": "direct_group_id",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 12
+        },
+        {
+          "source_id": 4,
+          "new_id": 13
+        }
+      ],
+      "special_member_family": "intermediate_wall_rebar"
+    },
+    {
+      "group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "action_name": "rebar_down",
+      "zone_label": "perimeter",
+      "story_band": 3,
+      "semantic_group": "",
+      "ratio": 0.4000000000000001,
+      "element_ids": [
+        2642,
+        2644,
+        2646,
+        2648,
+        11755,
+        11756,
+        11763,
+        11764,
+        11771,
+        11772,
+        11779,
+        11780,
+        16219,
+        16220
+      ],
+      "target_material_ids": [
+        14,
+        15
+      ],
+      "before_rebar_ratio": 0.009999999999999998,
+      "after_rebar_ratio": 0.004,
+      "payload_source_class": "group_local_rebar_payload",
+      "payload_mapping_source": "direct_group_id",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 14
+        },
+        {
+          "source_id": 4,
+          "new_id": 15
+        }
+      ],
+      "special_member_family": "perimeter_wall_rebar"
+    },
+    {
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "member_type": "column",
+      "action_family": "perimeter_frame",
+      "action_name": "perimeter_frame_down",
+      "zone_label": "perimeter",
+      "story_band": 5,
+      "semantic_group": "2",
+      "ratio": 0.8648648648648649,
+      "element_ids": [
+        31766,
+        31773,
+        32228,
+        32229,
+        32235
+      ],
+      "target_material_ids": [
+        16
+      ],
+      "before_rebar_ratio": 0.074,
+      "after_rebar_ratio": 0.064,
+      "payload_source_class": "group_local_rebar_payload",
+      "payload_mapping_source": "direct_group_id",
+      "clone_rows": [
+        {
+          "source_id": 3,
+          "new_id": 16
+        }
+      ],
+      "special_member_family": "perimeter_frame_column"
+    },
+    {
+      "group_id": "S03:perimeter:nogroup:slab:default",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "zone_label": "perimeter",
+      "story_band": 3,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        1415,
+        1416,
+        1417,
+        1418,
+        1419,
+        1420,
+        8043,
+        8044,
+        8051,
+        8052,
+        8959,
+        8960,
+        8961,
+        8983,
+        8984,
+        8985,
+        8986,
+        8987,
+        8988,
+        8989,
+        8990,
+        8991,
+        8992,
+        9023,
+        9024,
+        9025,
+        9026,
+        9027,
+        9028,
+        9029,
+        9030,
+        9031,
+        9032,
+        9063,
+        9064,
+        9065,
+        11887,
+        11888,
+        11889,
+        12283,
+        12284,
+        12285,
+        12295,
+        12296,
+        12297,
+        12383,
+        12384,
+        12385,
+        12395,
+        12396,
+        12397,
+        12407,
+        12408,
+        12409,
+        12419,
+        12420,
+        12427,
+        12428,
+        12435,
+        12436,
+        12437,
+        12447,
+        12448,
+        12449,
+        12450,
+        12463,
+        12464,
+        12471,
+        12472,
+        12473,
+        12650,
+        12651,
+        12652
+      ],
+      "target_material_ids": [
+        17,
+        18
+      ],
+      "before_rebar_ratio": 0.010000000000000005,
+      "after_rebar_ratio": 0.010000000000000005,
+      "before_detailing_quality": 1.0999999999999996,
+      "after_detailing_quality": 1.0599999999999996,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 17
+        },
+        {
+          "source_id": 4,
+          "new_id": 18
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing"
+    },
+    {
+      "group_id": "S04:perimeter:nogroup:slab:default",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "zone_label": "perimeter",
+      "story_band": 4,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        1409,
+        1410,
+        1411,
+        1412,
+        1413,
+        1414,
+        27471,
+        27472,
+        27479,
+        27480,
+        27811,
+        27812,
+        27813,
+        27839,
+        27840,
+        27841,
+        27842,
+        27843,
+        27844,
+        27845,
+        27846,
+        27847,
+        27848,
+        27879,
+        27880,
+        27881,
+        27882,
+        27883,
+        27884,
+        27885,
+        27886,
+        27887,
+        27888,
+        27913,
+        27914,
+        27915,
+        28036,
+        28037,
+        28038,
+        28432,
+        28433,
+        28434,
+        28444,
+        28445,
+        28446,
+        28456,
+        28457,
+        28458,
+        28468,
+        28469,
+        28470,
+        28480,
+        28481,
+        28482,
+        28491,
+        28492,
+        28499,
+        28500,
+        28508,
+        28509,
+        28510,
+        28521,
+        28522,
+        28523,
+        28524,
+        28535,
+        28536,
+        28544,
+        28545,
+        28546,
+        28726,
+        28727,
+        28728
+      ],
+      "target_material_ids": [
+        19,
+        20
+      ],
+      "before_rebar_ratio": 0.010000000000000005,
+      "after_rebar_ratio": 0.010000000000000005,
+      "before_detailing_quality": 1.0999999999999996,
+      "after_detailing_quality": 1.0599999999999996,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 19
+        },
+        {
+          "source_id": 4,
+          "new_id": 20
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing"
+    },
+    {
+      "group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "zone_label": "perimeter",
+      "story_band": 6,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        26918,
+        26919,
+        26920,
+        26921,
+        27930,
+        27932,
+        27938,
+        27940,
+        27946,
+        27948,
+        27954,
+        27956,
+        27962,
+        27964,
+        28814,
+        28816
+      ],
+      "target_material_ids": [
+        21,
+        22
+      ],
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.01,
+      "before_detailing_quality": 1.0999999999999999,
+      "after_detailing_quality": 1.0599999999999998,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 21
+        },
+        {
+          "source_id": 4,
+          "new_id": 22
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing"
+    },
+    {
+      "group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "zone_label": "perimeter",
+      "story_band": 7,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        26923,
+        26925,
+        26927,
+        26929
+      ],
+      "target_material_ids": [
+        23
+      ],
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.01,
+      "before_detailing_quality": 1.1,
+      "after_detailing_quality": 1.06,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 4,
+          "new_id": 23
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing"
+    },
+    {
+      "group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "zone_label": "perimeter",
+      "story_band": 8,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        26922,
+        26924,
+        26926,
+        26928,
+        27925,
+        27926,
+        27933,
+        27934,
+        27941,
+        27942,
+        27949,
+        27950,
+        27957,
+        27958,
+        28809,
+        28810
+      ],
+      "target_material_ids": [
+        24,
+        25
+      ],
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.01,
+      "before_detailing_quality": 1.0999999999999999,
+      "after_detailing_quality": 1.0599999999999998,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 24
+        },
+        {
+          "source_id": 4,
+          "new_id": 25
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing"
+    },
+    {
+      "group_id": "S00:core:nogroup:beam:SB1200X1200",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "zone_label": "core",
+      "story_band": 0,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        27393,
+        27397,
+        27398,
+        27399,
+        27400,
+        27402,
+        27406,
+        27407,
+        27410
+      ],
+      "target_material_ids": [
+        26
+      ],
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 26
+        }
+      ],
+      "special_member_family": "core_beam_connection_detailing"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        1261,
+        3797,
+        3829,
+        3832,
+        3834,
+        26062,
+        26063,
+        26064,
+        26065
+      ],
+      "target_material_ids": [
+        27
+      ],
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 27
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        3088,
+        3089,
+        3097,
+        3099,
+        22043,
+        22044,
+        22072,
+        22073,
+        22074,
+        22097,
+        22098,
+        22099,
+        22233,
+        22234
+      ],
+      "target_material_ids": [
+        28
+      ],
+      "before_rebar_ratio": 0.017999999999999995,
+      "after_rebar_ratio": 0.017999999999999995,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 28
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        1488,
+        1489,
+        4363,
+        4364,
+        22057,
+        22058,
+        22059,
+        22060,
+        22061,
+        22307,
+        22308,
+        22309,
+        22324,
+        22325,
+        22326,
+        22371,
+        22372
+      ],
+      "target_material_ids": [
+        29
+      ],
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 29
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        2996,
+        2997,
+        2998,
+        2999,
+        21892,
+        21893,
+        21894,
+        21925,
+        21926,
+        22272,
+        22273,
+        22274,
+        22400,
+        22401,
+        22402
+      ],
+      "target_material_ids": [
+        30
+      ],
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 30
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "ratio": 1.0,
+      "element_ids": [
+        1485,
+        22146,
+        22147,
+        22148,
+        22149,
+        22150,
+        22151,
+        22152,
+        22153,
+        22154
+      ],
+      "target_material_ids": [
+        31
+      ],
+      "before_rebar_ratio": 0.017999999999999995,
+      "after_rebar_ratio": 0.017999999999999995,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "payload_source_class": "global_rebar_material_code_fallback",
+      "payload_mapping_source": "direct_group_id",
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 31
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing"
+    },
+    {
+      "group_id": "S04:perimeter:1:slab:default",
+      "member_type": "slab",
+      "action_family": "slab_thickness",
+      "zone_label": "perimeter",
+      "story_band": 4,
+      "semantic_group": "1",
+      "ratio": 0.9375,
+      "element_ids": [
+        18693,
+        18773,
+        18925,
+        18979,
+        19029,
+        19043,
+        19063,
+        19100,
+        21100,
+        21107,
+        21659,
+        21660,
+        21661,
+        21662,
+        25807,
+        25852,
+        25874,
+        25875
+      ],
+      "section_ids": [
+        18
+      ],
+      "before_thickness_scale": 0.9600000000000004,
+      "after_thickness_scale": 0.9000000000000004,
+      "target_property_ids": [
+        20
+      ],
+      "clone_rows": [
+        {
+          "source_id": 18,
+          "new_id": 20
+        }
+      ],
+      "special_member_family": "perimeter_slab_thickness"
+    },
+    {
+      "group_id": "S01:intermediate:nogroup:beam:SB1900X1200",
+      "member_type": "beam",
+      "action_family": "beam_section",
+      "zone_label": "intermediate",
+      "story_band": 1,
+      "semantic_group": "",
+      "ratio": 0.9199999999999999,
+      "element_ids": [],
+      "section_ids": [
+        1086
+      ],
+      "before_thickness_scale": 1.0,
+      "after_thickness_scale": 0.9199999999999999,
+      "target_property_ids": [
+        1086
+      ],
+      "clone_rows": [],
+      "special_member_family": "intermediate_beam_section"
+    },
+    {
+      "group_id": "S02:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "wall_thickness",
+      "zone_label": "perimeter",
+      "story_band": 2,
+      "semantic_group": "",
+      "ratio": 0.9375,
+      "element_ids": [
+        2638,
+        2639,
+        2640,
+        2641,
+        2643,
+        2645,
+        2647,
+        2649,
+        11744,
+        11746,
+        11762
+      ],
+      "section_ids": [
+        7
+      ],
+      "before_thickness_scale": 0.9600000000000002,
+      "after_thickness_scale": 0.9000000000000001,
+      "target_property_ids": [
+        21
+      ],
+      "clone_rows": [
+        {
+          "source_id": 7,
+          "new_id": 21
+        }
+      ],
+      "special_member_family": "perimeter_wall_thickness"
+    },
+    {
+      "group_id": "S09:perimeter:2:slab:default",
+      "member_type": "slab",
+      "action_family": "slab_thickness",
+      "zone_label": "perimeter",
+      "story_band": 9,
+      "semantic_group": "2",
+      "ratio": 0.9791666666666666,
+      "element_ids": [
+        28959,
+        28965,
+        28968,
+        28970,
+        28975,
+        28976,
+        28978,
+        28981,
+        29586,
+        29593,
+        30117,
+        30118,
+        30119,
+        30120,
+        32464,
+        32502,
+        32524,
+        32525
+      ],
+      "section_ids": [
+        18
+      ],
+      "before_thickness_scale": 0.9600000000000004,
+      "after_thickness_scale": 0.9400000000000004,
+      "target_property_ids": [
+        22
+      ],
+      "clone_rows": [
+        {
+          "source_id": 18,
+          "new_id": 22
+        }
+      ],
+      "special_member_family": "perimeter_slab_thickness"
+    },
+    {
+      "group_id": "S04:intermediate:nogroup:slab:SB800X3002.00",
+      "member_type": "wall",
+      "action_family": "wall_thickness",
+      "zone_label": "intermediate",
+      "story_band": 4,
+      "semantic_group": "",
+      "ratio": 0.9791666666666666,
+      "element_ids": [
+        27667,
+        27668,
+        27669,
+        27670,
+        27671,
+        27672
+      ],
+      "section_ids": [
+        4
+      ],
+      "before_thickness_scale": 0.96,
+      "after_thickness_scale": 0.94,
+      "target_property_ids": [
+        4
+      ],
+      "clone_rows": [],
+      "special_member_family": "intermediate_wall_thickness"
+    },
+    {
+      "group_id": "S04:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "wall_thickness",
+      "zone_label": "perimeter",
+      "story_band": 4,
+      "semantic_group": "",
+      "ratio": 0.9791666666666666,
+      "element_ids": [
+        2634,
+        2635,
+        2636,
+        2637,
+        11739,
+        11740,
+        27927,
+        27928,
+        27935,
+        27936,
+        27943,
+        27944,
+        27951,
+        27952,
+        27959,
+        27960,
+        28811,
+        28812
+      ],
+      "section_ids": [
+        7
+      ],
+      "before_thickness_scale": 0.9600000000000004,
+      "after_thickness_scale": 0.9400000000000004,
+      "target_property_ids": [
+        23
+      ],
+      "clone_rows": [
+        {
+          "source_id": 7,
+          "new_id": 23
+        }
+      ],
+      "special_member_family": "perimeter_wall_thickness"
+    },
+    {
+      "group_id": "S07:intermediate:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "wall_thickness",
+      "zone_label": "intermediate",
+      "story_band": 7,
+      "semantic_group": "",
+      "ratio": 0.9791666666666666,
+      "element_ids": [
+        27170,
+        27172,
+        27174,
+        27176,
+        27178,
+        27180
+      ],
+      "section_ids": [
+        7
+      ],
+      "before_thickness_scale": 0.96,
+      "after_thickness_scale": 0.94,
+      "target_property_ids": [
+        24
+      ],
+      "clone_rows": [
+        {
+          "source_id": 7,
+          "new_id": 24
+        }
+      ],
+      "special_member_family": "intermediate_wall_thickness"
+    },
+    {
+      "group_id": "S09:intermediate:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "wall_thickness",
+      "zone_label": "intermediate",
+      "story_band": 9,
+      "semantic_group": "",
+      "ratio": 0.9791666666666666,
+      "element_ids": [
+        27157,
+        27158,
+        27159,
+        27160,
+        27161,
+        27162
+      ],
+      "section_ids": [
+        7
+      ],
+      "before_thickness_scale": 0.96,
+      "after_thickness_scale": 0.94,
+      "target_property_ids": [
+        25
+      ],
+      "clone_rows": [
+        {
+          "source_id": 7,
+          "new_id": 25
+        }
+      ],
+      "special_member_family": "intermediate_wall_thickness"
+    },
+    {
+      "group_id": "S03:perimeter:nogroup:slab:default",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.010000000000000005,
+      "after_rebar_ratio": 0.010000000000000005,
+      "before_detailing_quality": 1.0999999999999996,
+      "after_detailing_quality": 1.0599999999999996,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1415,
+        1416,
+        1417,
+        1418,
+        1419,
+        1420,
+        8043,
+        8044,
+        8051,
+        8052,
+        8959,
+        8960,
+        8961,
+        8983,
+        8984,
+        8985,
+        8986,
+        8987,
+        8988,
+        8989,
+        8990,
+        8991,
+        8992,
+        9023,
+        9024,
+        9025,
+        9026,
+        9027,
+        9028,
+        9029,
+        9030,
+        9031,
+        9032,
+        9063,
+        9064,
+        9065,
+        11887,
+        11888,
+        11889,
+        12283,
+        12284,
+        12285,
+        12295,
+        12296,
+        12297,
+        12383,
+        12384,
+        12385,
+        12395,
+        12396,
+        12397,
+        12407,
+        12408,
+        12409,
+        12419,
+        12420,
+        12427,
+        12428,
+        12435,
+        12436,
+        12437,
+        12447,
+        12448,
+        12449,
+        12450,
+        12463,
+        12464,
+        12471,
+        12472,
+        12473,
+        12650,
+        12651,
+        12652
+      ],
+      "zone_label": "perimeter",
+      "story_band": 3,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S03:perimeter:nogroup:slab:default",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        1,
+        2,
+        5
+      ],
+      "structured_payload_material_ids": [
+        1,
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S03:perimeter:nogroup:slab:default",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 73,
+        "element_ids_head": [
+          1415,
+          1416,
+          1417,
+          1418,
+          1419,
+          1420,
+          8043,
+          8044,
+          8051,
+          8052,
+          8959,
+          8960,
+          8961,
+          8983,
+          8984,
+          8985
+        ],
+        "section_ids": [
+          1,
+          2,
+          5
+        ],
+        "material_ids": [
+          1,
+          4
+        ],
+        "section_signature": "default",
+        "zone_label": "perimeter",
+        "story_band": 3,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.0999999999999996,
+        "target_detailing_quality": 1.0599999999999996,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.010000000000000005,
+        "target_rebar_ratio": 0.010000000000000005,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        17,
+        18
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 17
+        },
+        {
+          "source_id": 4,
+          "new_id": 18
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:perimeter:nogroup:slab:default",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.010000000000000005,
+      "after_rebar_ratio": 0.010000000000000005,
+      "before_detailing_quality": 1.0999999999999996,
+      "after_detailing_quality": 1.0599999999999996,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1409,
+        1410,
+        1411,
+        1412,
+        1413,
+        1414,
+        27471,
+        27472,
+        27479,
+        27480,
+        27811,
+        27812,
+        27813,
+        27839,
+        27840,
+        27841,
+        27842,
+        27843,
+        27844,
+        27845,
+        27846,
+        27847,
+        27848,
+        27879,
+        27880,
+        27881,
+        27882,
+        27883,
+        27884,
+        27885,
+        27886,
+        27887,
+        27888,
+        27913,
+        27914,
+        27915,
+        28036,
+        28037,
+        28038,
+        28432,
+        28433,
+        28434,
+        28444,
+        28445,
+        28446,
+        28456,
+        28457,
+        28458,
+        28468,
+        28469,
+        28470,
+        28480,
+        28481,
+        28482,
+        28491,
+        28492,
+        28499,
+        28500,
+        28508,
+        28509,
+        28510,
+        28521,
+        28522,
+        28523,
+        28524,
+        28535,
+        28536,
+        28544,
+        28545,
+        28546,
+        28726,
+        28727,
+        28728
+      ],
+      "zone_label": "perimeter",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:perimeter:nogroup:slab:default",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        1,
+        2,
+        5
+      ],
+      "structured_payload_material_ids": [
+        1,
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S04:perimeter:nogroup:slab:default",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 73,
+        "element_ids_head": [
+          1409,
+          1410,
+          1411,
+          1412,
+          1413,
+          1414,
+          27471,
+          27472,
+          27479,
+          27480,
+          27811,
+          27812,
+          27813,
+          27839,
+          27840,
+          27841
+        ],
+        "section_ids": [
+          1,
+          2,
+          5
+        ],
+        "material_ids": [
+          1,
+          4
+        ],
+        "section_signature": "default",
+        "zone_label": "perimeter",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.0999999999999996,
+        "target_detailing_quality": 1.0599999999999996,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.010000000000000005,
+        "target_rebar_ratio": 0.010000000000000005,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        19,
+        20
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 19
+        },
+        {
+          "source_id": 4,
+          "new_id": 20
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.01,
+      "before_detailing_quality": 1.0999999999999999,
+      "after_detailing_quality": 1.0599999999999998,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        26918,
+        26919,
+        26920,
+        26921,
+        27930,
+        27932,
+        27938,
+        27940,
+        27946,
+        27948,
+        27954,
+        27956,
+        27962,
+        27964,
+        28814,
+        28816
+      ],
+      "zone_label": "perimeter",
+      "story_band": 6,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        7
+      ],
+      "structured_payload_material_ids": [
+        1,
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 16,
+        "element_ids_head": [
+          26918,
+          26919,
+          26920,
+          26921,
+          27930,
+          27932,
+          27938,
+          27940,
+          27946,
+          27948,
+          27954,
+          27956,
+          27962,
+          27964,
+          28814,
+          28816
+        ],
+        "section_ids": [
+          7
+        ],
+        "material_ids": [
+          1,
+          4
+        ],
+        "section_signature": "SB1500X800",
+        "zone_label": "perimeter",
+        "story_band": 6,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.0999999999999999,
+        "target_detailing_quality": 1.0599999999999998,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.01,
+        "target_rebar_ratio": 0.01,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        21,
+        22
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 21
+        },
+        {
+          "source_id": 4,
+          "new_id": 22
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.01,
+      "before_detailing_quality": 1.1,
+      "after_detailing_quality": 1.06,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        26923,
+        26925,
+        26927,
+        26929
+      ],
+      "zone_label": "perimeter",
+      "story_band": 7,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        7
+      ],
+      "structured_payload_material_ids": [
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 4,
+        "element_ids_head": [
+          26923,
+          26925,
+          26927,
+          26929
+        ],
+        "section_ids": [
+          7
+        ],
+        "material_ids": [
+          4
+        ],
+        "section_signature": "SB1500X800",
+        "zone_label": "perimeter",
+        "story_band": 7,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.1,
+        "target_detailing_quality": 1.06,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.01,
+        "target_rebar_ratio": 0.01,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        23
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 4,
+          "new_id": 23
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.01,
+      "before_detailing_quality": 1.0999999999999999,
+      "after_detailing_quality": 1.0599999999999998,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        26922,
+        26924,
+        26926,
+        26928,
+        27925,
+        27926,
+        27933,
+        27934,
+        27941,
+        27942,
+        27949,
+        27950,
+        27957,
+        27958,
+        28809,
+        28810
+      ],
+      "zone_label": "perimeter",
+      "story_band": 8,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        7
+      ],
+      "structured_payload_material_ids": [
+        1,
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 16,
+        "element_ids_head": [
+          26922,
+          26924,
+          26926,
+          26928,
+          27925,
+          27926,
+          27933,
+          27934,
+          27941,
+          27942,
+          27949,
+          27950,
+          27957,
+          27958,
+          28809,
+          28810
+        ],
+        "section_ids": [
+          7
+        ],
+        "material_ids": [
+          1,
+          4
+        ],
+        "section_signature": "SB1500X800",
+        "zone_label": "perimeter",
+        "story_band": 8,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.0999999999999999,
+        "target_detailing_quality": 1.0599999999999998,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.01,
+        "target_rebar_ratio": 0.01,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        24,
+        25
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 24
+        },
+        {
+          "source_id": 4,
+          "new_id": 25
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S00:core:nogroup:beam:SB1200X1200",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        27393,
+        27397,
+        27398,
+        27399,
+        27400,
+        27402,
+        27406,
+        27407,
+        27410
+      ],
+      "zone_label": "core",
+      "story_band": 0,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S00:core:nogroup:beam:SB1200X1200",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        1053
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S00:core:nogroup:beam:SB1200X1200",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "signature_zone_member_fallback",
+        "element_id_count": 9,
+        "element_ids_head": [
+          27393,
+          27397,
+          27398,
+          27399,
+          27400,
+          27402,
+          27406,
+          27407,
+          27410
+        ],
+        "section_ids": [
+          1053
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB1200X1200",
+        "zone_label": "core",
+        "story_band": 0,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.018,
+        "target_rebar_ratio": 0.018,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        26
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 26
+        }
+      ],
+      "special_member_family": "core_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1261,
+        3797,
+        3829,
+        3832,
+        3834,
+        26062,
+        26063,
+        26064,
+        26065
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        307
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 9,
+        "element_ids_head": [
+          1261,
+          3797,
+          3829,
+          3832,
+          3834,
+          26062,
+          26063,
+          26064,
+          26065
+        ],
+        "section_ids": [
+          307
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X7001.82",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.018,
+        "target_rebar_ratio": 0.018,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        27
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 27
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.017999999999999995,
+      "after_rebar_ratio": 0.017999999999999995,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        3088,
+        3089,
+        3097,
+        3099,
+        22043,
+        22044,
+        22072,
+        22073,
+        22074,
+        22097,
+        22098,
+        22099,
+        22233,
+        22234
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        241
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 14,
+        "element_ids_head": [
+          3088,
+          3089,
+          3097,
+          3099,
+          22043,
+          22044,
+          22072,
+          22073,
+          22074,
+          22097,
+          22098,
+          22099,
+          22233,
+          22234
+        ],
+        "section_ids": [
+          241
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X7001.95",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.017999999999999995,
+        "target_rebar_ratio": 0.017999999999999995,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        28
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 28
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1488,
+        1489,
+        4363,
+        4364,
+        22057,
+        22058,
+        22059,
+        22060,
+        22061,
+        22307,
+        22308,
+        22309,
+        22324,
+        22325,
+        22326,
+        22371,
+        22372
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        48
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 17,
+        "element_ids_head": [
+          1488,
+          1489,
+          4363,
+          4364,
+          22057,
+          22058,
+          22059,
+          22060,
+          22061,
+          22307,
+          22308,
+          22309,
+          22324,
+          22325,
+          22326,
+          22371
+        ],
+        "section_ids": [
+          48
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X7002.00",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.018,
+        "target_rebar_ratio": 0.018,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        29
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 29
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        2996,
+        2997,
+        2998,
+        2999,
+        21892,
+        21893,
+        21894,
+        21925,
+        21926,
+        22272,
+        22273,
+        22274,
+        22400,
+        22401,
+        22402
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        642
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 15,
+        "element_ids_head": [
+          2996,
+          2997,
+          2998,
+          2999,
+          21892,
+          21893,
+          21894,
+          21925,
+          21926,
+          22272,
+          22273,
+          22274,
+          22400,
+          22401,
+          22402
+        ],
+        "section_ids": [
+          642
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X8002.00",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.018,
+        "target_rebar_ratio": 0.018,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        30
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 30
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.017999999999999995,
+      "after_rebar_ratio": 0.017999999999999995,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1485,
+        22146,
+        22147,
+        22148,
+        22149,
+        22150,
+        22151,
+        22152,
+        22153,
+        22154
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        370
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 10,
+        "element_ids_head": [
+          1485,
+          22146,
+          22147,
+          22148,
+          22149,
+          22150,
+          22151,
+          22152,
+          22153,
+          22154
+        ],
+        "section_ids": [
+          370
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X9001.75",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.017999999999999995,
+        "target_rebar_ratio": 0.017999999999999995,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        31
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 31
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    }
+  ],
+  "unsupported_changes": [],
+  "applied_section_scale_rows": [
+    {
+      "section_id": 1086,
+      "ratio": 0.9199999999999999,
+      "old_values": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "new_values": [
+        0.9199999999999999,
+        0.9199999999999999,
+        0.9199999999999999,
+        0.9199999999999999,
+        0.9199999999999999,
+        0.9199999999999999,
+        0.9199999999999999
+      ],
+      "inserted_new_row": true
+    }
+  ],
+  "applied_thickness_rows": [
+    {
+      "thickness_id": 4,
+      "ratio": 0.9791666666666666,
+      "old_thickness_in": 0.4,
+      "new_thickness_in": 0.39166666666666666,
+      "old_thickness_out": 0.0,
+      "new_thickness_out": 0.0
+    },
+    {
+      "thickness_id": 21,
+      "ratio": 0.9375,
+      "old_thickness_in": 0.7,
+      "new_thickness_in": 0.65625,
+      "old_thickness_out": 0.0,
+      "new_thickness_out": 0.0,
+      "source_thickness_id": 7,
+      "cloned_from_thickness_id": 7,
+      "inserted_new_row": true
+    },
+    {
+      "thickness_id": 23,
+      "ratio": 0.9791666666666666,
+      "old_thickness_in": 0.7,
+      "new_thickness_in": 0.6854166666666666,
+      "old_thickness_out": 0.0,
+      "new_thickness_out": 0.0,
+      "source_thickness_id": 7,
+      "cloned_from_thickness_id": 7,
+      "inserted_new_row": true
+    },
+    {
+      "thickness_id": 24,
+      "ratio": 0.9791666666666666,
+      "old_thickness_in": 0.7,
+      "new_thickness_in": 0.6854166666666666,
+      "old_thickness_out": 0.0,
+      "new_thickness_out": 0.0,
+      "source_thickness_id": 7,
+      "cloned_from_thickness_id": 7,
+      "inserted_new_row": true
+    },
+    {
+      "thickness_id": 25,
+      "ratio": 0.9791666666666666,
+      "old_thickness_in": 0.7,
+      "new_thickness_in": 0.6854166666666666,
+      "old_thickness_out": 0.0,
+      "new_thickness_out": 0.0,
+      "source_thickness_id": 7,
+      "cloned_from_thickness_id": 7,
+      "inserted_new_row": true
+    },
+    {
+      "thickness_id": 20,
+      "ratio": 0.9375,
+      "old_thickness_in": 0.15,
+      "new_thickness_in": 0.140625,
+      "old_thickness_out": 0.0,
+      "new_thickness_out": 0.0,
+      "source_thickness_id": 18,
+      "cloned_from_thickness_id": 18,
+      "inserted_new_row": true
+    },
+    {
+      "thickness_id": 22,
+      "ratio": 0.9791666666666666,
+      "old_thickness_in": 0.15,
+      "new_thickness_in": 0.14687499999999998,
+      "old_thickness_out": 0.0,
+      "new_thickness_out": 0.0,
+      "source_thickness_id": 18,
+      "cloned_from_thickness_id": 18,
+      "inserted_new_row": true
+    }
+  ],
+  "applied_material_rows": [
+    {
+      "source_material_id": 1,
+      "material_id": 8,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "D10",
+      "rbsub": "D10",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 9,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "D16",
+      "rbsub": "D13",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 11,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "D10",
+      "rbsub": "D10",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 12,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "D13",
+      "rbsub": "D10",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 14,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "D16",
+      "rbsub": "D13",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 17,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 19,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 21,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 24,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 26,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 27,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 28,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 29,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 30,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 1,
+      "material_id": 31,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 3,
+      "material_id": 16,
+      "source_material_type": "SRC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "D25",
+      "rbsub": "D22",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 4,
+      "material_id": 10,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "D16",
+      "rbsub": "D13",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 4,
+      "material_id": 13,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "D13",
+      "rbsub": "D10",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 4,
+      "material_id": 15,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "D16",
+      "rbsub": "D13",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 4,
+      "material_id": 18,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 4,
+      "material_id": 20,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 4,
+      "material_id": 22,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 4,
+      "material_id": 23,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    },
+    {
+      "source_material_id": 4,
+      "material_id": 25,
+      "source_material_type": "CONC",
+      "payload_source_class": "group_local_rebar_payload",
+      "rbcode": "GB10(RC)",
+      "rbmain": "HRB400",
+      "rbsub": "HRB400",
+      "fy_r": 400.0,
+      "fys": 400.0
+    }
+  ],
+  "retargeted_element_rows": [
+    {
+      "element_id": 1166,
+      "old_material_id": 4,
+      "new_material_id": 13
+    },
+    {
+      "element_id": 1168,
+      "old_material_id": 4,
+      "new_material_id": 13
+    },
+    {
+      "element_id": 1170,
+      "old_material_id": 4,
+      "new_material_id": 13
+    },
+    {
+      "element_id": 1172,
+      "old_material_id": 4,
+      "new_material_id": 13
+    },
+    {
+      "element_id": 1261,
+      "old_material_id": 1,
+      "new_material_id": 27
+    },
+    {
+      "element_id": 1409,
+      "old_material_id": 4,
+      "new_material_id": 20
+    },
+    {
+      "element_id": 1410,
+      "old_material_id": 4,
+      "new_material_id": 20
+    },
+    {
+      "element_id": 1411,
+      "old_material_id": 4,
+      "new_material_id": 20
+    },
+    {
+      "element_id": 1412,
+      "old_material_id": 4,
+      "new_material_id": 20
+    },
+    {
+      "element_id": 1413,
+      "old_material_id": 4,
+      "new_material_id": 20
+    },
+    {
+      "element_id": 1414,
+      "old_material_id": 4,
+      "new_material_id": 20
+    },
+    {
+      "element_id": 1415,
+      "old_material_id": 4,
+      "new_material_id": 18
+    },
+    {
+      "element_id": 1416,
+      "old_material_id": 4,
+      "new_material_id": 18
+    },
+    {
+      "element_id": 1417,
+      "old_material_id": 4,
+      "new_material_id": 18
+    },
+    {
+      "element_id": 1418,
+      "old_material_id": 4,
+      "new_material_id": 18
+    },
+    {
+      "element_id": 1419,
+      "old_material_id": 4,
+      "new_material_id": 18
+    },
+    {
+      "element_id": 1420,
+      "old_material_id": 4,
+      "new_material_id": 18
+    },
+    {
+      "element_id": 1485,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 1488,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 1489,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 2634,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 2635,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 2636,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 2637,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 2638,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 2639,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 2640,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 2641,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 2642,
+      "old_material_id": 4,
+      "new_material_id": 15
+    },
+    {
+      "element_id": 2643,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 2644,
+      "old_material_id": 4,
+      "new_material_id": 15
+    },
+    {
+      "element_id": 2645,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 2646,
+      "old_material_id": 4,
+      "new_material_id": 15
+    },
+    {
+      "element_id": 2647,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 2648,
+      "old_material_id": 4,
+      "new_material_id": 15
+    },
+    {
+      "element_id": 2649,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 2960,
+      "old_material_id": 4,
+      "new_material_id": 10
+    },
+    {
+      "element_id": 2961,
+      "old_material_id": 4,
+      "new_material_id": 10
+    },
+    {
+      "element_id": 2962,
+      "old_material_id": 4,
+      "new_material_id": 10
+    },
+    {
+      "element_id": 2963,
+      "old_material_id": 4,
+      "new_material_id": 10
+    },
+    {
+      "element_id": 2964,
+      "old_material_id": 4,
+      "new_material_id": 10
+    },
+    {
+      "element_id": 2965,
+      "old_material_id": 4,
+      "new_material_id": 10
+    },
+    {
+      "element_id": 2996,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 2997,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 2998,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 2999,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 3088,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 3089,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 3097,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 3099,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 3797,
+      "old_material_id": 1,
+      "new_material_id": 27
+    },
+    {
+      "element_id": 3829,
+      "old_material_id": 1,
+      "new_material_id": 27
+    },
+    {
+      "element_id": 3832,
+      "old_material_id": 1,
+      "new_material_id": 27
+    },
+    {
+      "element_id": 3834,
+      "old_material_id": 1,
+      "new_material_id": 27
+    },
+    {
+      "element_id": 4363,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 4364,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 6283,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 6284,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8043,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8044,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8051,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8052,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8191,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8192,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8211,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8212,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8213,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8235,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8247,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8248,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8255,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8256,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8399,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 8567,
+      "old_material_id": 1,
+      "new_material_id": 8
+    },
+    {
+      "element_id": 8568,
+      "old_material_id": 1,
+      "new_material_id": 8
+    },
+    {
+      "element_id": 8569,
+      "old_material_id": 1,
+      "new_material_id": 8
+    },
+    {
+      "element_id": 8570,
+      "old_material_id": 1,
+      "new_material_id": 8
+    },
+    {
+      "element_id": 8571,
+      "old_material_id": 1,
+      "new_material_id": 8
+    },
+    {
+      "element_id": 8572,
+      "old_material_id": 1,
+      "new_material_id": 8
+    },
+    {
+      "element_id": 8959,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8960,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8961,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8983,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8984,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8985,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8986,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8987,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8988,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8989,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8990,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8991,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 8992,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9023,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9024,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9025,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9026,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9027,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9028,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9029,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9030,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9031,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9032,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9063,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9064,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 9065,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 11739,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 11740,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 11744,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 11746,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 11755,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 11756,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 11762,
+      "old_property_id": 7,
+      "new_property_id": 21
+    },
+    {
+      "element_id": 11763,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 11764,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 11771,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 11772,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 11779,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 11780,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 11831,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 11832,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 11839,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 11840,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 11887,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 11888,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 11889,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12199,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 12203,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 12207,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 12208,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 12244,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 12251,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 12283,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12284,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12285,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12295,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12296,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12297,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12383,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12384,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12385,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12395,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12396,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12397,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12407,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12408,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12409,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12419,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12420,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12427,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12428,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12435,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12436,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12437,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12447,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12448,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12449,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12450,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12463,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12464,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12471,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12472,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12473,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12650,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12651,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 12652,
+      "old_material_id": 1,
+      "new_material_id": 17
+    },
+    {
+      "element_id": 16219,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 16220,
+      "old_material_id": 1,
+      "new_material_id": 14
+    },
+    {
+      "element_id": 16236,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 16243,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 16244,
+      "old_material_id": 1,
+      "new_material_id": 12
+    },
+    {
+      "element_id": 18693,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 18773,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 18925,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 18979,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 19029,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 19043,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 19063,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 19100,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 21100,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 21107,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 21659,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 21660,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 21661,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 21662,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 21892,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 21893,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 21894,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 21925,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 21926,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 22043,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22044,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22057,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22058,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22059,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22060,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22061,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22072,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22073,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22074,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22097,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22098,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22099,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22146,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 22147,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 22148,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 22149,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 22150,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 22151,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 22152,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 22153,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 22154,
+      "old_material_id": 1,
+      "new_material_id": 31
+    },
+    {
+      "element_id": 22233,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22234,
+      "old_material_id": 1,
+      "new_material_id": 28
+    },
+    {
+      "element_id": 22272,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 22273,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 22274,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 22307,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22308,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22309,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22324,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22325,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22326,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22371,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22372,
+      "old_material_id": 1,
+      "new_material_id": 29
+    },
+    {
+      "element_id": 22400,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 22401,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 22402,
+      "old_material_id": 1,
+      "new_material_id": 30
+    },
+    {
+      "element_id": 25807,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 25852,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 25874,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 25875,
+      "old_property_id": 18,
+      "new_property_id": 20
+    },
+    {
+      "element_id": 26062,
+      "old_material_id": 1,
+      "new_material_id": 27
+    },
+    {
+      "element_id": 26063,
+      "old_material_id": 1,
+      "new_material_id": 27
+    },
+    {
+      "element_id": 26064,
+      "old_material_id": 1,
+      "new_material_id": 27
+    },
+    {
+      "element_id": 26065,
+      "old_material_id": 1,
+      "new_material_id": 27
+    },
+    {
+      "element_id": 26918,
+      "old_material_id": 4,
+      "new_material_id": 22
+    },
+    {
+      "element_id": 26919,
+      "old_material_id": 4,
+      "new_material_id": 22
+    },
+    {
+      "element_id": 26920,
+      "old_material_id": 4,
+      "new_material_id": 22
+    },
+    {
+      "element_id": 26921,
+      "old_material_id": 4,
+      "new_material_id": 22
+    },
+    {
+      "element_id": 26922,
+      "old_material_id": 4,
+      "new_material_id": 25
+    },
+    {
+      "element_id": 26923,
+      "old_material_id": 4,
+      "new_material_id": 23
+    },
+    {
+      "element_id": 26924,
+      "old_material_id": 4,
+      "new_material_id": 25
+    },
+    {
+      "element_id": 26925,
+      "old_material_id": 4,
+      "new_material_id": 23
+    },
+    {
+      "element_id": 26926,
+      "old_material_id": 4,
+      "new_material_id": 25
+    },
+    {
+      "element_id": 26927,
+      "old_material_id": 4,
+      "new_material_id": 23
+    },
+    {
+      "element_id": 26928,
+      "old_material_id": 4,
+      "new_material_id": 25
+    },
+    {
+      "element_id": 26929,
+      "old_material_id": 4,
+      "new_material_id": 23
+    },
+    {
+      "element_id": 27157,
+      "old_property_id": 7,
+      "new_property_id": 25
+    },
+    {
+      "element_id": 27158,
+      "old_property_id": 7,
+      "new_property_id": 25
+    },
+    {
+      "element_id": 27159,
+      "old_property_id": 7,
+      "new_property_id": 25
+    },
+    {
+      "element_id": 27160,
+      "old_property_id": 7,
+      "new_property_id": 25
+    },
+    {
+      "element_id": 27161,
+      "old_property_id": 7,
+      "new_property_id": 25
+    },
+    {
+      "element_id": 27162,
+      "old_property_id": 7,
+      "new_property_id": 25
+    },
+    {
+      "element_id": 27170,
+      "old_property_id": 7,
+      "new_property_id": 24
+    },
+    {
+      "element_id": 27172,
+      "old_property_id": 7,
+      "new_property_id": 24
+    },
+    {
+      "element_id": 27174,
+      "old_property_id": 7,
+      "new_property_id": 24
+    },
+    {
+      "element_id": 27176,
+      "old_property_id": 7,
+      "new_property_id": 24
+    },
+    {
+      "element_id": 27178,
+      "old_property_id": 7,
+      "new_property_id": 24
+    },
+    {
+      "element_id": 27180,
+      "old_property_id": 7,
+      "new_property_id": 24
+    },
+    {
+      "element_id": 27393,
+      "old_material_id": 1,
+      "new_material_id": 26
+    },
+    {
+      "element_id": 27397,
+      "old_material_id": 1,
+      "new_material_id": 26
+    },
+    {
+      "element_id": 27398,
+      "old_material_id": 1,
+      "new_material_id": 26
+    },
+    {
+      "element_id": 27399,
+      "old_material_id": 1,
+      "new_material_id": 26
+    },
+    {
+      "element_id": 27400,
+      "old_material_id": 1,
+      "new_material_id": 26
+    },
+    {
+      "element_id": 27402,
+      "old_material_id": 1,
+      "new_material_id": 26
+    },
+    {
+      "element_id": 27406,
+      "old_material_id": 1,
+      "new_material_id": 26
+    },
+    {
+      "element_id": 27407,
+      "old_material_id": 1,
+      "new_material_id": 26
+    },
+    {
+      "element_id": 27410,
+      "old_material_id": 1,
+      "new_material_id": 26
+    },
+    {
+      "element_id": 27471,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27472,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27479,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27480,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27674,
+      "old_material_id": 1,
+      "new_material_id": 11
+    },
+    {
+      "element_id": 27676,
+      "old_material_id": 1,
+      "new_material_id": 11
+    },
+    {
+      "element_id": 27681,
+      "old_material_id": 1,
+      "new_material_id": 11
+    },
+    {
+      "element_id": 27682,
+      "old_material_id": 1,
+      "new_material_id": 11
+    },
+    {
+      "element_id": 27683,
+      "old_material_id": 1,
+      "new_material_id": 11
+    },
+    {
+      "element_id": 27684,
+      "old_material_id": 1,
+      "new_material_id": 11
+    },
+    {
+      "element_id": 27811,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27812,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27813,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27839,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27840,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27841,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27842,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27843,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27844,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27845,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27846,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27847,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27848,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27879,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27880,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27881,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27882,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27883,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27884,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27885,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27886,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27887,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27888,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27913,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27914,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27915,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 27925,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27926,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27927,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27928,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27930,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27932,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27933,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27934,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27935,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27936,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27938,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27940,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27941,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27942,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27943,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27944,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27946,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27948,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27949,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27950,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27951,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27952,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27954,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27956,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27957,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27958,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 27959,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27960,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 27962,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27964,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 27979,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 27980,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 27987,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 27988,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28036,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28037,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28038,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28346,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28350,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28355,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28356,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28391,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28392,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28398,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28403,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28404,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28411,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28412,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28420,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28421,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28422,
+      "old_material_id": 1,
+      "new_material_id": 9
+    },
+    {
+      "element_id": 28432,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28433,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28434,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28444,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28445,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28446,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28456,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28457,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28458,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28468,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28469,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28470,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28480,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28481,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28482,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28491,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28492,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28499,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28500,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28508,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28509,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28510,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28521,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28522,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28523,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28524,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28535,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28536,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28544,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28545,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28546,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28726,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28727,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28728,
+      "old_material_id": 1,
+      "new_material_id": 19
+    },
+    {
+      "element_id": 28809,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 28810,
+      "old_material_id": 1,
+      "new_material_id": 24
+    },
+    {
+      "element_id": 28811,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 28812,
+      "old_property_id": 7,
+      "new_property_id": 23
+    },
+    {
+      "element_id": 28814,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 28816,
+      "old_material_id": 1,
+      "new_material_id": 21
+    },
+    {
+      "element_id": 28959,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 28965,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 28968,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 28970,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 28975,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 28976,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 28978,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 28981,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 29586,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 29593,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 30117,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 30118,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 30119,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 30120,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 31766,
+      "old_material_id": 3,
+      "new_material_id": 16
+    },
+    {
+      "element_id": 31773,
+      "old_material_id": 3,
+      "new_material_id": 16
+    },
+    {
+      "element_id": 32228,
+      "old_material_id": 3,
+      "new_material_id": 16
+    },
+    {
+      "element_id": 32229,
+      "old_material_id": 3,
+      "new_material_id": 16
+    },
+    {
+      "element_id": 32235,
+      "old_material_id": 3,
+      "new_material_id": 16
+    },
+    {
+      "element_id": 32464,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 32502,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 32524,
+      "old_property_id": 18,
+      "new_property_id": 22
+    },
+    {
+      "element_id": 32525,
+      "old_property_id": 18,
+      "new_property_id": 22
+    }
+  ],
+  "instruction_sidecar_rows": [],
+  "audit_review_rows": [],
+  "zero_touch_verified_rows": [
+    {
+      "group_id": "S03:perimeter:nogroup:slab:default",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.010000000000000005,
+      "after_rebar_ratio": 0.010000000000000005,
+      "before_detailing_quality": 1.0999999999999996,
+      "after_detailing_quality": 1.0599999999999996,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1415,
+        1416,
+        1417,
+        1418,
+        1419,
+        1420,
+        8043,
+        8044,
+        8051,
+        8052,
+        8959,
+        8960,
+        8961,
+        8983,
+        8984,
+        8985,
+        8986,
+        8987,
+        8988,
+        8989,
+        8990,
+        8991,
+        8992,
+        9023,
+        9024,
+        9025,
+        9026,
+        9027,
+        9028,
+        9029,
+        9030,
+        9031,
+        9032,
+        9063,
+        9064,
+        9065,
+        11887,
+        11888,
+        11889,
+        12283,
+        12284,
+        12285,
+        12295,
+        12296,
+        12297,
+        12383,
+        12384,
+        12385,
+        12395,
+        12396,
+        12397,
+        12407,
+        12408,
+        12409,
+        12419,
+        12420,
+        12427,
+        12428,
+        12435,
+        12436,
+        12437,
+        12447,
+        12448,
+        12449,
+        12450,
+        12463,
+        12464,
+        12471,
+        12472,
+        12473,
+        12650,
+        12651,
+        12652
+      ],
+      "zone_label": "perimeter",
+      "story_band": 3,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S03:perimeter:nogroup:slab:default",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        1,
+        2,
+        5
+      ],
+      "structured_payload_material_ids": [
+        1,
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S03:perimeter:nogroup:slab:default",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 73,
+        "element_ids_head": [
+          1415,
+          1416,
+          1417,
+          1418,
+          1419,
+          1420,
+          8043,
+          8044,
+          8051,
+          8052,
+          8959,
+          8960,
+          8961,
+          8983,
+          8984,
+          8985
+        ],
+        "section_ids": [
+          1,
+          2,
+          5
+        ],
+        "material_ids": [
+          1,
+          4
+        ],
+        "section_signature": "default",
+        "zone_label": "perimeter",
+        "story_band": 3,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.0999999999999996,
+        "target_detailing_quality": 1.0599999999999996,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.010000000000000005,
+        "target_rebar_ratio": 0.010000000000000005,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        17,
+        18
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 17
+        },
+        {
+          "source_id": 4,
+          "new_id": 18
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:perimeter:nogroup:slab:default",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.010000000000000005,
+      "after_rebar_ratio": 0.010000000000000005,
+      "before_detailing_quality": 1.0999999999999996,
+      "after_detailing_quality": 1.0599999999999996,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1409,
+        1410,
+        1411,
+        1412,
+        1413,
+        1414,
+        27471,
+        27472,
+        27479,
+        27480,
+        27811,
+        27812,
+        27813,
+        27839,
+        27840,
+        27841,
+        27842,
+        27843,
+        27844,
+        27845,
+        27846,
+        27847,
+        27848,
+        27879,
+        27880,
+        27881,
+        27882,
+        27883,
+        27884,
+        27885,
+        27886,
+        27887,
+        27888,
+        27913,
+        27914,
+        27915,
+        28036,
+        28037,
+        28038,
+        28432,
+        28433,
+        28434,
+        28444,
+        28445,
+        28446,
+        28456,
+        28457,
+        28458,
+        28468,
+        28469,
+        28470,
+        28480,
+        28481,
+        28482,
+        28491,
+        28492,
+        28499,
+        28500,
+        28508,
+        28509,
+        28510,
+        28521,
+        28522,
+        28523,
+        28524,
+        28535,
+        28536,
+        28544,
+        28545,
+        28546,
+        28726,
+        28727,
+        28728
+      ],
+      "zone_label": "perimeter",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:perimeter:nogroup:slab:default",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        1,
+        2,
+        5
+      ],
+      "structured_payload_material_ids": [
+        1,
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S04:perimeter:nogroup:slab:default",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 73,
+        "element_ids_head": [
+          1409,
+          1410,
+          1411,
+          1412,
+          1413,
+          1414,
+          27471,
+          27472,
+          27479,
+          27480,
+          27811,
+          27812,
+          27813,
+          27839,
+          27840,
+          27841
+        ],
+        "section_ids": [
+          1,
+          2,
+          5
+        ],
+        "material_ids": [
+          1,
+          4
+        ],
+        "section_signature": "default",
+        "zone_label": "perimeter",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.0999999999999996,
+        "target_detailing_quality": 1.0599999999999996,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.010000000000000005,
+        "target_rebar_ratio": 0.010000000000000005,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        19,
+        20
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 19
+        },
+        {
+          "source_id": 4,
+          "new_id": 20
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.01,
+      "before_detailing_quality": 1.0999999999999999,
+      "after_detailing_quality": 1.0599999999999998,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        26918,
+        26919,
+        26920,
+        26921,
+        27930,
+        27932,
+        27938,
+        27940,
+        27946,
+        27948,
+        27954,
+        27956,
+        27962,
+        27964,
+        28814,
+        28816
+      ],
+      "zone_label": "perimeter",
+      "story_band": 6,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        7
+      ],
+      "structured_payload_material_ids": [
+        1,
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 16,
+        "element_ids_head": [
+          26918,
+          26919,
+          26920,
+          26921,
+          27930,
+          27932,
+          27938,
+          27940,
+          27946,
+          27948,
+          27954,
+          27956,
+          27962,
+          27964,
+          28814,
+          28816
+        ],
+        "section_ids": [
+          7
+        ],
+        "material_ids": [
+          1,
+          4
+        ],
+        "section_signature": "SB1500X800",
+        "zone_label": "perimeter",
+        "story_band": 6,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.0999999999999999,
+        "target_detailing_quality": 1.0599999999999998,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.01,
+        "target_rebar_ratio": 0.01,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        21,
+        22
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 21
+        },
+        {
+          "source_id": 4,
+          "new_id": 22
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.01,
+      "before_detailing_quality": 1.1,
+      "after_detailing_quality": 1.06,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        26923,
+        26925,
+        26927,
+        26929
+      ],
+      "zone_label": "perimeter",
+      "story_band": 7,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        7
+      ],
+      "structured_payload_material_ids": [
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 4,
+        "element_ids_head": [
+          26923,
+          26925,
+          26927,
+          26929
+        ],
+        "section_ids": [
+          7
+        ],
+        "material_ids": [
+          4
+        ],
+        "section_signature": "SB1500X800",
+        "zone_label": "perimeter",
+        "story_band": 7,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.1,
+        "target_detailing_quality": 1.06,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.01,
+        "target_rebar_ratio": 0.01,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        23
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 4,
+          "new_id": 23
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "detailing",
+      "action_name": "detailing_down",
+      "before_rebar_ratio": 0.01,
+      "after_rebar_ratio": 0.01,
+      "before_detailing_quality": 1.0999999999999999,
+      "after_detailing_quality": 1.0599999999999998,
+      "instruction_kind": "detailing_followup",
+      "followup_type": "detailing_zero_touch_verified",
+      "review_priority": "medium",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        26922,
+        26924,
+        26926,
+        26928,
+        27925,
+        27926,
+        27933,
+        27934,
+        27941,
+        27942,
+        27949,
+        27950,
+        27957,
+        27958,
+        28809,
+        28810
+      ],
+      "zone_label": "perimeter",
+      "story_band": 8,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_detailing_projection",
+      "structured_payload_section_ids": [
+        7
+      ],
+      "structured_payload_material_ids": [
+        1,
+        4
+      ],
+      "structured_payload": {
+        "group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+        "member_type": "wall",
+        "action_family": "detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_detailing_projection",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 16,
+        "element_ids_head": [
+          26922,
+          26924,
+          26926,
+          26928,
+          27925,
+          27926,
+          27933,
+          27934,
+          27941,
+          27942,
+          27949,
+          27950,
+          27957,
+          27958,
+          28809,
+          28810
+        ],
+        "section_ids": [
+          7
+        ],
+        "material_ids": [
+          1,
+          4
+        ],
+        "section_signature": "SB1500X800",
+        "zone_label": "perimeter",
+        "story_band": 8,
+        "semantic_group": "",
+        "action_name": "detailing_down",
+        "baseline_detailing_quality": 1.0999999999999999,
+        "target_detailing_quality": 1.0599999999999998,
+        "detailing_quality_delta": -0.040000000000000036,
+        "baseline_rebar_ratio": 0.01,
+        "target_rebar_ratio": 0.01,
+        "review_priority": "medium",
+        "followup_type": "detailing_manual_review",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        24,
+        25
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 24
+        },
+        {
+          "source_id": 4,
+          "new_id": 25
+        }
+      ],
+      "special_member_family": "perimeter_wall_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S00:core:nogroup:beam:SB1200X1200",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        27393,
+        27397,
+        27398,
+        27399,
+        27400,
+        27402,
+        27406,
+        27407,
+        27410
+      ],
+      "zone_label": "core",
+      "story_band": 0,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S00:core:nogroup:beam:SB1200X1200",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        1053
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S00:core:nogroup:beam:SB1200X1200",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "signature_zone_member_fallback",
+        "element_id_count": 9,
+        "element_ids_head": [
+          27393,
+          27397,
+          27398,
+          27399,
+          27400,
+          27402,
+          27406,
+          27407,
+          27410
+        ],
+        "section_ids": [
+          1053
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB1200X1200",
+        "zone_label": "core",
+        "story_band": 0,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.018,
+        "target_rebar_ratio": 0.018,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        26
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 26
+        }
+      ],
+      "special_member_family": "core_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1261,
+        3797,
+        3829,
+        3832,
+        3834,
+        26062,
+        26063,
+        26064,
+        26065
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        307
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 9,
+        "element_ids_head": [
+          1261,
+          3797,
+          3829,
+          3832,
+          3834,
+          26062,
+          26063,
+          26064,
+          26065
+        ],
+        "section_ids": [
+          307
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X7001.82",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.018,
+        "target_rebar_ratio": 0.018,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        27
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 27
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.017999999999999995,
+      "after_rebar_ratio": 0.017999999999999995,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        3088,
+        3089,
+        3097,
+        3099,
+        22043,
+        22044,
+        22072,
+        22073,
+        22074,
+        22097,
+        22098,
+        22099,
+        22233,
+        22234
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        241
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 14,
+        "element_ids_head": [
+          3088,
+          3089,
+          3097,
+          3099,
+          22043,
+          22044,
+          22072,
+          22073,
+          22074,
+          22097,
+          22098,
+          22099,
+          22233,
+          22234
+        ],
+        "section_ids": [
+          241
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X7001.95",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.017999999999999995,
+        "target_rebar_ratio": 0.017999999999999995,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        28
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 28
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1488,
+        1489,
+        4363,
+        4364,
+        22057,
+        22058,
+        22059,
+        22060,
+        22061,
+        22307,
+        22308,
+        22309,
+        22324,
+        22325,
+        22326,
+        22371,
+        22372
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        48
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 17,
+        "element_ids_head": [
+          1488,
+          1489,
+          4363,
+          4364,
+          22057,
+          22058,
+          22059,
+          22060,
+          22061,
+          22307,
+          22308,
+          22309,
+          22324,
+          22325,
+          22326,
+          22371
+        ],
+        "section_ids": [
+          48
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X7002.00",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.018,
+        "target_rebar_ratio": 0.018,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        29
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 29
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.018,
+      "after_rebar_ratio": 0.018,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        2996,
+        2997,
+        2998,
+        2999,
+        21892,
+        21893,
+        21894,
+        21925,
+        21926,
+        22272,
+        22273,
+        22274,
+        22400,
+        22401,
+        22402
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        642
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 15,
+        "element_ids_head": [
+          2996,
+          2997,
+          2998,
+          2999,
+          21892,
+          21893,
+          21894,
+          21925,
+          21926,
+          22272,
+          22273,
+          22274,
+          22400,
+          22401,
+          22402
+        ],
+        "section_ids": [
+          642
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X8002.00",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.018,
+        "target_rebar_ratio": 0.018,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        30
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 30
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "action_name": "connection_detailing_down",
+      "before_rebar_ratio": 0.017999999999999995,
+      "after_rebar_ratio": 0.017999999999999995,
+      "before_detailing_quality": 0.5499999999999999,
+      "after_detailing_quality": 0.6,
+      "instruction_kind": "connection_detailing_followup",
+      "followup_type": "connection_detailing_zero_touch_verified",
+      "review_priority": "high",
+      "review_owner": "none",
+      "review_required": false,
+      "element_ids": [
+        1485,
+        22146,
+        22147,
+        22148,
+        22149,
+        22150,
+        22151,
+        22152,
+        22153,
+        22154
+      ],
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "structured_payload_present": true,
+      "structured_payload_group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "structured_payload_mapping_source": "direct_group_id",
+      "structured_payload_source_class": "internal_group_local_connection_detailing_projection",
+      "structured_payload_section_ids": [
+        370
+      ],
+      "structured_payload_material_ids": [
+        1
+      ],
+      "structured_payload": {
+        "group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+        "member_type": "beam",
+        "action_family": "connection_detailing",
+        "payload_present": true,
+        "payload_basis": "detailing_quality_delta_projection",
+        "payload_source_class": "internal_group_local_connection_detailing_projection",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 10,
+        "element_ids_head": [
+          1485,
+          22146,
+          22147,
+          22148,
+          22149,
+          22150,
+          22151,
+          22152,
+          22153,
+          22154
+        ],
+        "section_ids": [
+          370
+        ],
+        "material_ids": [
+          1
+        ],
+        "section_signature": "SB800X9001.75",
+        "zone_label": "transfer",
+        "story_band": 4,
+        "semantic_group": "",
+        "action_name": "connection_detailing_down",
+        "baseline_detailing_quality": 0.5499999999999999,
+        "target_detailing_quality": 0.6,
+        "detailing_quality_delta": 0.050000000000000044,
+        "baseline_rebar_ratio": 0.017999999999999995,
+        "target_rebar_ratio": 0.017999999999999995,
+        "review_priority": "high",
+        "followup_type": "connection_detailing_manual_update",
+        "review_owner": "licensed_engineer",
+        "validation_boundary": "internal_engine_complete_external_validation_optional"
+      },
+      "direct_patch_applied": true,
+      "direct_patch_kind": "connection_detailing_material_metadata",
+      "direct_patch_target_material_ids": [
+        31
+      ],
+      "direct_patch_clone_rows": [
+        {
+          "source_id": 1,
+          "new_id": 31
+        }
+      ],
+      "special_member_family": "transfer_beam_connection_detailing",
+      "zero_touch_verified": true,
+      "queue_status": "zero_touch_verified",
+      "followup_status": "closed_zero_touch_verified",
+      "audit_status": "closed_zero_touch_verified",
+      "zero_touch_verification_reason": "direct_patch_material_metadata_with_structured_payload_and_complete_internal_mapping"
+    }
+  ],
+  "audit_review_packets": [],
+  "audit_review_packet_files": [],
+  "audit_review_queue_items": [],
+  "audit_review_resolution_files": [],
+  "derived_group_local_rebar_bridge_rows": [
+    {
+      "group_id": "S03:intermediate:nogroup:slab:SB800X3002.00",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 6,
+      "element_ids_head": [
+        8567,
+        8568,
+        8569,
+        8570,
+        8571,
+        8572
+      ],
+      "material_ids": [
+        1
+      ],
+      "material_payload_available_ids": [
+        1
+      ],
+      "direct_patch_eligible": true,
+      "ineligibility_reason": "eligible",
+      "group_local_payload_present": true,
+      "group_local_payload_group_id": "S03:intermediate:nogroup:slab:SB800X3002.00",
+      "group_local_payload_mapping_source": "direct_group_id",
+      "payload_source_class": "group_local_rebar_payload",
+      "group_local_payload": {
+        "group_id": "S03:intermediate:nogroup:slab:SB800X3002.00",
+        "member_type": "wall",
+        "action_family": "rebar",
+        "payload_present": true,
+        "payload_basis": "target_rebar_ratio_projection",
+        "payload_source_class": "internal_ratio_projected_payload",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 6,
+        "material_ids": [
+          1
+        ],
+        "material_types": [
+          "CONC"
+        ],
+        "section_signature": "SB800X3002.00",
+        "section_width_m": 0.8,
+        "section_depth_m": 0.3,
+        "baseline_rebar_ratio": 0.01,
+        "target_rebar_ratio": 0.004,
+        "rbcode": "GB10(RC)",
+        "rbmain": "D10",
+        "rbsub": "D10",
+        "fy_r": 400.0,
+        "fys": 400.0
+      }
+    },
+    {
+      "group_id": "S04:intermediate:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 34,
+      "element_ids_head": [
+        2960,
+        2961,
+        2962,
+        2963,
+        2964,
+        2965,
+        11831,
+        11832,
+        11839,
+        11840,
+        12199,
+        12203,
+        12207,
+        12208,
+        12244,
+        12251
+      ],
+      "material_ids": [
+        1,
+        4
+      ],
+      "material_payload_available_ids": [
+        1,
+        4
+      ],
+      "direct_patch_eligible": true,
+      "ineligibility_reason": "eligible",
+      "group_local_payload_present": true,
+      "group_local_payload_group_id": "S04:intermediate:nogroup:slab:SB1500X800",
+      "group_local_payload_mapping_source": "direct_group_id",
+      "payload_source_class": "group_local_rebar_payload",
+      "group_local_payload": {
+        "group_id": "S04:intermediate:nogroup:slab:SB1500X800",
+        "member_type": "wall",
+        "action_family": "rebar",
+        "payload_present": true,
+        "payload_basis": "target_rebar_ratio_projection",
+        "payload_source_class": "internal_ratio_projected_payload",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 34,
+        "material_ids": [
+          1,
+          4
+        ],
+        "material_types": [
+          "CONC"
+        ],
+        "section_signature": "SB1500X800",
+        "section_width_m": 1.5,
+        "section_depth_m": 0.8,
+        "baseline_rebar_ratio": 0.010000000000000004,
+        "target_rebar_ratio": 0.004,
+        "rbcode": "GB10(RC)",
+        "rbmain": "D16",
+        "rbsub": "D13",
+        "fy_r": 400.0,
+        "fys": 400.0
+      }
+    },
+    {
+      "group_id": "S06:intermediate:nogroup:slab:SB800X3002.00",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 6,
+      "element_ids_head": [
+        27674,
+        27676,
+        27681,
+        27682,
+        27683,
+        27684
+      ],
+      "material_ids": [
+        1
+      ],
+      "material_payload_available_ids": [
+        1
+      ],
+      "direct_patch_eligible": true,
+      "ineligibility_reason": "eligible",
+      "group_local_payload_present": true,
+      "group_local_payload_group_id": "S06:intermediate:nogroup:slab:SB800X3002.00",
+      "group_local_payload_mapping_source": "direct_group_id",
+      "payload_source_class": "group_local_rebar_payload",
+      "group_local_payload": {
+        "group_id": "S06:intermediate:nogroup:slab:SB800X3002.00",
+        "member_type": "wall",
+        "action_family": "rebar",
+        "payload_present": true,
+        "payload_basis": "target_rebar_ratio_projection",
+        "payload_source_class": "internal_ratio_projected_payload",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 6,
+        "material_ids": [
+          1
+        ],
+        "material_types": [
+          "CONC"
+        ],
+        "section_signature": "SB800X3002.00",
+        "section_width_m": 0.8,
+        "section_depth_m": 0.3,
+        "baseline_rebar_ratio": 0.01,
+        "target_rebar_ratio": 0.004,
+        "rbcode": "GB10(RC)",
+        "rbmain": "D10",
+        "rbsub": "D10",
+        "fy_r": 400.0,
+        "fys": 400.0
+      }
+    },
+    {
+      "group_id": "S03:intermediate:nogroup:slab:SB800X4002.00",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 20,
+      "element_ids_head": [
+        1166,
+        1168,
+        1170,
+        1172,
+        6283,
+        6284,
+        8191,
+        8192,
+        8211,
+        8212,
+        8213,
+        8235,
+        8247,
+        8248,
+        8255,
+        8256
+      ],
+      "material_ids": [
+        1,
+        4
+      ],
+      "material_payload_available_ids": [
+        1,
+        4
+      ],
+      "direct_patch_eligible": true,
+      "ineligibility_reason": "eligible",
+      "group_local_payload_present": true,
+      "group_local_payload_group_id": "S03:intermediate:nogroup:slab:SB800X4002.00",
+      "group_local_payload_mapping_source": "direct_group_id",
+      "payload_source_class": "group_local_rebar_payload",
+      "group_local_payload": {
+        "group_id": "S03:intermediate:nogroup:slab:SB800X4002.00",
+        "member_type": "wall",
+        "action_family": "rebar",
+        "payload_present": true,
+        "payload_basis": "target_rebar_ratio_projection",
+        "payload_source_class": "internal_ratio_projected_payload",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 20,
+        "material_ids": [
+          1,
+          4
+        ],
+        "material_types": [
+          "CONC"
+        ],
+        "section_signature": "SB800X4002.00",
+        "section_width_m": 0.8,
+        "section_depth_m": 0.4,
+        "baseline_rebar_ratio": 0.010000000000000002,
+        "target_rebar_ratio": 0.004,
+        "rbcode": "GB10(RC)",
+        "rbmain": "D13",
+        "rbsub": "D10",
+        "fy_r": 400.0,
+        "fys": 400.0
+      }
+    },
+    {
+      "group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+      "member_type": "wall",
+      "action_family": "rebar",
+      "mapping_source": "alt_slab_wall_group_id",
+      "element_id_count": 14,
+      "element_ids_head": [
+        2642,
+        2644,
+        2646,
+        2648,
+        11755,
+        11756,
+        11763,
+        11764,
+        11771,
+        11772,
+        11779,
+        11780,
+        16219,
+        16220
+      ],
+      "material_ids": [
+        1,
+        4
+      ],
+      "material_payload_available_ids": [
+        1,
+        4
+      ],
+      "direct_patch_eligible": true,
+      "ineligibility_reason": "eligible",
+      "group_local_payload_present": true,
+      "group_local_payload_group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+      "group_local_payload_mapping_source": "direct_group_id",
+      "payload_source_class": "group_local_rebar_payload",
+      "group_local_payload": {
+        "group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+        "member_type": "wall",
+        "action_family": "rebar",
+        "payload_present": true,
+        "payload_basis": "target_rebar_ratio_projection",
+        "payload_source_class": "internal_ratio_projected_payload",
+        "mapping_source": "alt_slab_wall_group_id",
+        "element_id_count": 14,
+        "material_ids": [
+          1,
+          4
+        ],
+        "material_types": [
+          "CONC"
+        ],
+        "section_signature": "SB1500X800",
+        "section_width_m": 1.5,
+        "section_depth_m": 0.8,
+        "baseline_rebar_ratio": 0.009999999999999998,
+        "target_rebar_ratio": 0.004,
+        "rbcode": "GB10(RC)",
+        "rbmain": "D16",
+        "rbsub": "D13",
+        "fy_r": 400.0,
+        "fys": 400.0
+      }
+    },
+    {
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "member_type": "column",
+      "action_family": "perimeter_frame",
+      "mapping_source": "direct_group_id",
+      "element_id_count": 5,
+      "element_ids_head": [
+        31766,
+        31773,
+        32228,
+        32229,
+        32235
+      ],
+      "material_ids": [
+        3
+      ],
+      "material_payload_available_ids": [],
+      "direct_patch_eligible": true,
+      "ineligibility_reason": "eligible",
+      "group_local_payload_present": true,
+      "group_local_payload_group_id": "S05:perimeter:2:column:P 50x4",
+      "group_local_payload_mapping_source": "direct_group_id",
+      "payload_source_class": "group_local_rebar_payload",
+      "group_local_payload": {
+        "group_id": "S05:perimeter:2:column:P 50x4",
+        "member_type": "column",
+        "action_family": "perimeter_frame",
+        "payload_present": true,
+        "payload_basis": "target_rebar_ratio_projection",
+        "payload_source_class": "internal_ratio_projected_payload",
+        "mapping_source": "direct_group_id",
+        "element_id_count": 5,
+        "material_ids": [
+          3
+        ],
+        "material_types": [
+          "SRC"
+        ],
+        "section_signature": "P 50x4",
+        "section_width_m": 0.6,
+        "section_depth_m": 0.3,
+        "baseline_rebar_ratio": 0.074,
+        "target_rebar_ratio": 0.064,
+        "rbcode": "GB10(RC)",
+        "rbmain": "D25",
+        "rbsub": "D22",
+        "fy_r": 400.0,
+        "fys": 400.0
+      }
+    }
+  ]
+}

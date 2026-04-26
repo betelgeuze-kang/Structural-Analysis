@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-04-22T14:05:48.335622Z",
+  "summary": {
+    "candidate_total": 8,
+    "pending_candidate_count": 0,
+    "promoted_candidate_count": 8,
+    "public_archive_promoted_candidate_count": 3,
+    "korean_candidate_total": 5,
+    "korean_pending_candidate_count": 0,
+    "state": "closed_until_new_public_archive_exact_topology_candidate"
+  },
+  "pending_candidate_rows": []
+}

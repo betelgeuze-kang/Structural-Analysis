@@ -1,0 +1,35 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_multifamily_building_meb_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_multifamily_building_meb_local/C07_T01_P000_RC_01_\u2524\u2518\u2591\u00ed\u2592\u2555_\u2534\u2553\u253c\u251c.meb",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_multifamily_building_meb_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/midas_multifamily_building_meb_local.json"
+  },
+  "bytes_copied": 1354364,
+  "declared_format": "meb",
+  "family_id": "transfer_podium_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "alternate_authority_candidate_source_id": "peer_transfer_podium_tower_remote",
+    "benchmark_canonical_blocker": "Original MIDAS native binary is useful for roundtrip/native-source coverage, but this track still requires a benchmark-native IFC/TCL/MGT/INP source for canonical authority-grade promotion.",
+    "benchmark_canonical_eligible": false,
+    "native_binary_header": "MBDG",
+    "native_local_scope": "native_roundtrip_only"
+  },
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/C07_T01_P000_RC_01_\u2524\u2518\u2591\u00ed\u2592\u2555_\u2534\u2553\u253c\u251c.meb",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/C07_T01_P000_RC_01_\u2524\u2518\u2591\u00ed\u2592\u2555_\u2534\u2553\u253c\u251c.meb",
+  "sha256": "36b60663aca159c066c51f2c13bd0076ae4d05056e0a86e9e424a90f046ec07a",
+  "source_exists": true,
+  "source_format": "meb",
+  "source_id": "midas_multifamily_building_meb_local",
+  "source_index": 1,
+  "source_urls": [
+    "https://support.midasuser.com/"
+  ],
+  "status": "collected",
+  "title": "MIDAS multifamily building original native MEB"
+}

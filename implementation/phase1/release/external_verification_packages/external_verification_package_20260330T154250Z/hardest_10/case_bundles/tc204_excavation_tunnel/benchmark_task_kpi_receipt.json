@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-30T15:06:22.110570+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "case_id": "tc204_excavation_tunnel",
+  "case_label": "TC204 Excavation and Adjacent Tunnel",
+  "benchmark_family": "excavation_tunnel_ground_interaction",
+  "hazard_family": "excavation_settlement",
+  "topology_family": "deep_excavation_adjacent_tunnel",
+  "load_path_family": "soil_tunnel_surface_sequence",
+  "primary_report": {
+    "path": "implementation/phase1/tunnel_dynamics_dataset_report.json",
+    "reason_code": "PASS",
+    "contract_pass": true,
+    "summary_head": {}
+  },
+  "supporting_reports": [
+    {
+      "role": "ssi_boundary",
+      "path": "implementation/phase1/ssi_boundary_gate_report.json",
+      "reason_code": "PASS",
+      "contract_pass": true
+    },
+    {
+      "role": "foundation_soil_link",
+      "path": "implementation/phase1/foundation_soil_link_gate_report.json",
+      "reason_code": "PASS",
+      "contract_pass": true
+    },
+    {
+      "role": "surface_interaction",
+      "path": "implementation/phase1/surface_interaction_benchmark_gate_report.json",
+      "reason_code": "PASS",
+      "contract_pass": true
+    }
+  ],
+  "kpi_rows": [
+    {
+      "label": "production_seed_success_count",
+      "source": "primary.production_seed_success_count",
+      "value": 96
+    },
+    {
+      "label": "dataset_case_count",
+      "source": "primary.outputs.case_count",
+      "value": 96
+    },
+    {
+      "label": "max_equilibrium_residual",
+      "source": "primary.metrics.max_equilibrium_residual",
+      "value": 0.3860107162910485
+    },
+    {
+      "label": "mean_displacement_m",
+      "source": "primary.metrics.mean_displacement_m",
+      "value": 0.00883114351722574
+    },
+    {
+      "label": "soil_tunnel_interaction_count",
+      "source": "supporting.surface_interaction.summary.interaction_family_group_ready_counts.soil_tunnel",
+      "value": 84
+    },
+    {
+      "label": "foundation_member_type_count",
+      "source": "supporting.foundation_soil_link.summary.foundation_member_type_count",
+      "value": 76
+    }
+  ],
+  "summary": {
+    "kpi_count": 6,
+    "supporting_report_count": 3
+  }
+}

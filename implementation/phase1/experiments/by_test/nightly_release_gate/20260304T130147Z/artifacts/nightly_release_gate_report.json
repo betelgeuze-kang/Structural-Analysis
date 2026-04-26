@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-nightly-release-gate",
+  "generated_at": "2026-03-04T12:41:24.688213+00:00",
+  "inputs": {
+    "candidate_id": "zenodo_atwood_highrise_shm_2025",
+    "input_path": "implementation/phase1/open_data/megastructure",
+    "download_if_missing": false,
+    "gpu_strict": true,
+    "allow_cpu_required": false,
+    "scale_levels_nightly": "1000000,3000000,10000000",
+    "scale_levels_io": "1000000,3000000",
+    "partition_max_projection_ratio": 25000.0,
+    "nightly_10m_repro_runs": 3,
+    "enable_ndtha_long_profile": true,
+    "ndtha_long_profile_runs": 2,
+    "commercial_readiness_model_cases": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json,implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "commercial_readiness_target_split": "all",
+    "ndtha_cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "ndtha_target_split": "test",
+    "ndtha_ground_motion_csv": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "opensees_model": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+    "require_real_topology": true,
+    "require_shell_beam_mix": true,
+    "noise_seeds": "11,23,47",
+    "noise_stiffness_levels_pct": "10",
+    "skip_promotion": false
+  },
+  "reports": {
+    "commercial_csv_gate": "implementation/phase1/commercial_csv_gate_report.json",
+    "commercial_readiness": "implementation/phase1/commercial_readiness_report.json",
+    "real_source_multi": "implementation/phase1/real_source_multi_gate_report.json",
+    "nonlinear_engine": "implementation/phase1/nonlinear_frame_engine_report.json",
+    "pushover_stress": "implementation/phase1/nonlinear_pushover_stress_report.json",
+    "ndtha_stress": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+    "phase3_pipeline": "implementation/phase1/phase3_megastructure_pipeline_report.json",
+    "topology_gate": "implementation/phase1/opensees_topology_report.json",
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "sync_stress": "implementation/phase1/sync_stress_gate_report.json",
+    "noise_convergence": "implementation/phase1/noise_convergence_gate_report.json",
+    "scaleout_io": "implementation/phase1/scaleout_io_profile_report.json",
+    "nightly_10m_repro": "implementation/phase1/nightly_10m_repro_report.json",
+    "ndtha_long_profile": "implementation/phase1/ndtha_long_profile_report.json",
+    "ci_gate": "implementation/phase1/ci_gate_report.json",
+    "static_validation": "implementation/phase1/static_artifact_validation_report.json",
+    "freeze_release": "implementation/phase1/release/freeze_release_report.json",
+    "promotion": "implementation/phase1/release/release_candidate_promotion_report.json"
+  },
+  "steps": [
+    {
+      "step": "commercial_csv_gate",
+      "seconds": 5.50976300239563,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_commercial_csv_gate.py --out implementation/phase1/commercial_csv_gate_report.json",
+      "stdout_tail": "Wrote commercial csv gate report: implementation/phase1/commercial_csv_gate_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "real_source_multi_gate",
+      "seconds": 0.9231948852539062,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_real_source_multi_gate.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json,implementation/phase1/commercial_benchmark_cases.from_csv.json --out implementation/phase1/real_source_multi_gate_report.json --forbid-toy-markers",
+      "stdout_tail": "Wrote real-source multi gate report: implementation/phase1/real_source_multi_gate_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "nonlinear_engine_gate",
+      "seconds": 0.986414909362793,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_nonlinear_frame_engine_validation.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --target-split test --min-case-count 3 --max-case-count 6 --require-top-disp-hf --out implementation/phase1/nonlinear_frame_engine_report.json",
+      "stdout_tail": "Wrote nonlinear frame engine report: implementation/phase1/nonlinear_frame_engine_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "pushover_stress_gate",
+      "seconds": 1.0099058151245117,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_nonlinear_pushover_stress.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --target-split test --min-case-count 3 --max-case-count 6 --load-factors 1.0,1.2,1.4,1.6,1.8,2.0 --yield-drift-scale 0.45 --hardening-ratio 0.2 --pdelta-factor 0.6 --max-iter 300 --tolerance 1e-6 --min-plastic-story-count 1 --min-drift-amplification 1.8 --out implementation/phase1/nonlinear_pushover_stress_report.json",
+      "stdout_tail": "Wrote nonlinear pushover stress report: implementation/phase1/nonlinear_pushover_stress_report.json\n",
+      "stderr_tail": "{\"event\": \"pushover.start\", \"inputs\": {\"accepted_metric_sources\": \"engine_export_direct,commercial_solver_export,open_data_measurement\", \"cases\": \"implementation/phase1/commercial_benchmark_cases.from_csv.json\", \"hardening_ratio\": 0.2, \"load_factors\": \"1.0,1.2,1.4,1.6,1.8,2.0\", \"material_model\": \"rc_composite\", \"max_case_count\": 6, \"max_iter\": 300, \"min_case_count\": 3, \"min_drift_amplification\": 1.8, \"min_plastic_story_count\": 1, \"out\": \"implementation/phase1/nonlinear_pushover_stress_report.json\", \"pdelta_factor\": 0.6, \"rc_bond_slip_ratio_ref\": 0.003, \"rc_cracking_strain\": 0.00022, \"rc_creep_rate_per_hour\": 0.008, \"target_split\": \"test\", \"tolerance\": 1e-06, \"yield_drift_scale\": 0.45}}\n{\"contract_pass\": true, \"event\": \"pushover.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "ndtha_stress_gate",
+      "seconds": 1.1681597232818604,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_nonlinear_ndtha_stress.py --cases implementation/phase1/commercial_benchmark_cases.from_csv.json --target-split test --ground-motion-csv implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv --min-case-count 3 --max-case-count 6 --ag-scale 2.0 --yield-drift-scale 0.45 --hardening-ratio 0.2 --pdelta-factor 1.0 --max-step-iterations 16 --step-tol 1e-4 --adaptive-load-decay 0.82 --damping-force-cap-ratio 0.6 --max-steps 2400 --min-load-reversals 20 --min-plastic-story-count 1 --collapse-drift-threshold-pct 10.0 --rayleigh-alpha 0.03 --rayleigh-beta 1e-6 --out implementation/phase1/nonlinear_ndtha_stress_report.json",
+      "stdout_tail": "Wrote nonlinear ndtha stress report: implementation/phase1/nonlinear_ndtha_stress_report.json\n",
+      "stderr_tail": "{\"event\": \"ndtha.start\", \"inputs\": {\"accepted_metric_sources\": \"engine_export_direct,commercial_solver_export,open_data_measurement\", \"adaptive_load_decay\": 0.82, \"ag_scale\": 2.0, \"cases\": \"implementation/phase1/commercial_benchmark_cases.from_csv.json\", \"collapse_drift_threshold_pct\": 10.0, \"damping_force_cap_ratio\": 0.6, \"dt_scale\": 1.0, \"ground_motion_csv\": \"implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv\", \"hardening_ratio\": 0.2, \"material_model\": \"rc_composite\", \"max_case_count\": 6, \"max_step_iterations\": 16, \"max_steps\": 2400, \"min_case_count\": 3, \"min_load_reversals\": 20, \"min_plastic_story_count\": 1, \"newmark_beta\": 0.25, \"newmark_gamma\": 0.5, \"out\": \"implementation/phase1/nonlinear_ndtha_stress_report.json\", \"pdelta_factor\": 1.0, \"rayleigh_alpha\": 0.03, \"rayleigh_beta\": 1e-06, \"rc_bond_slip_ratio_ref\": 0.003, \"rc_cracking_strain\": 0.00022, \"rc_creep_rate_per_hour\": 0.008, \"step_tol\": 0.0001, \"target_split\": \"test\", \"yield_drift_scale\": 0.45}}\n{\"contract_pass\": true, \"event\": \"ndtha.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "commercial_readiness_gate",
+      "seconds": 0.9551398754119873,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_megastructure_commercial_readiness.py --model-cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json,implementation/phase1/commercial_benchmark_cases.from_csv.json --target-split all --ci-mode nightly --noise-seeds 11,23,47 --convergence-seeds 11,23,47 --noise-stiffness-levels-pct 10 --convergence-stiffness-levels-pct 10 --forbid-toy-cases --min-source-families 2 --out implementation/phase1/commercial_readiness_report.json --require-shell-beam-mix-cases --require-gpu-strict",
+      "stdout_tail": "Wrote commercial readiness report: implementation/phase1/commercial_readiness_report.json\n",
+      "stderr_tail": "{\"ci_mode\": \"nightly\", \"event\": \"commercial_readiness.start\", \"model_count\": 2}\n{\"event\": \"commercial_readiness.completed\", \"grade\": \"Commercial\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "phase3_pipeline_nightly",
+      "seconds": 109.12777590751648,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_phase3_megastructure_pipeline.py --candidate-id zenodo_atwood_highrise_shm_2025 --input-path implementation/phase1/open_data/megastructure --opensees-model implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl --ci-mode nightly --scale-levels-nightly 1000000,3000000,10000000 --partition-max-projection-ratio 25000.0 --noise-seeds 11,23,47 --noise-stiffness-levels-pct 5,10 --noise-min-seed-count 3 --summary-out implementation/phase1/phase3_megastructure_pipeline_report.json --partitioned-scaleout-out implementation/phase1/partitioned_scaleout_report.json --topology-report-out implementation/phase1/opensees_topology_report.json --sync-stress-out implementation/phase1/sync_stress_gate_report.json --noise-convergence-out implementation/phase1/noise_convergence_gate_report.json --require-real-source --gpu-strict --require-real-topology --require-shell-beam-mix",
+      "stdout_tail": "Wrote phase3 megastructure pipeline report: implementation/phase1/phase3_megastructure_pipeline_report.json\n",
+      "stderr_tail": "{\"candidate_id\": \"zenodo_atwood_highrise_shm_2025\", \"ci_mode\": \"nightly\", \"event\": \"phase3.pipeline.start\"}\n{\"contract_pass\": true, \"event\": \"phase3.pipeline.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "scaleout_io_profile",
+      "seconds": 228.0092785358429,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_scaleout_io_profile.py --runtime-hook-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --producer-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --dof-levels 1000000,3000000 --out implementation/phase1/scaleout_io_profile_report.json --gpu-strict",
+      "stdout_tail": "Wrote scale-out IO profile report: implementation/phase1/scaleout_io_profile_report.json\n",
+      "stderr_tail": "{\"allow_cpu_required\": false, \"dof_levels\": [1000000, 3000000], \"event\": \"scaleout_io.start\"}\n{\"contract_pass\": true, \"event\": \"scaleout_io.completed\", \"levels\": 2, \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "nightly_10m_repro_gate",
+      "seconds": 259.78712821006775,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_nightly_10m_repro_gate.py --runs 3 --dof-levels 1000000,3000000,10000000 --edge-list-json implementation/phase1/open_data/megastructure/opensees_edges.json --partition-max-projection-ratio 25000.0 --out implementation/phase1/nightly_10m_repro_report.json --gpu-strict",
+      "stdout_tail": "Wrote nightly 10m reproducibility report: implementation/phase1/nightly_10m_repro_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "ndtha_long_profile_gate",
+      "seconds": 32.356210470199585,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_10m_ndtha_long_profile.py --runs 2 --partitioned-scaleout implementation/phase1/partitioned_scaleout_report.json --topology-report implementation/phase1/opensees_topology_report.json --ground-motion-csv implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv --target-dof 10000000 --partitions 16 --halo-coupling-gain 1.0 --out implementation/phase1/ndtha_long_profile_report.json",
+      "stdout_tail": "Wrote ndtha long profile report: implementation/phase1/ndtha_long_profile_report.json\n",
+      "stderr_tail": "{\"event\": \"ndtha_long_profile.start\", \"inputs\": {\"ground_motion_csv\": \"implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv\", \"halo_coupling_gain\": 1.0, \"max_cov_elapsed\": 0.25, \"max_cov_peak_vram\": 0.25, \"out\": \"implementation/phase1/ndtha_long_profile_report.json\", \"partitioned_scaleout\": \"implementation/phase1/partitioned_scaleout_report.json\", \"partitions\": 16, \"runs\": 2, \"target_dof\": 10000000, \"topology_report\": \"implementation/phase1/opensees_topology_report.json\", \"work_dir\": \"implementation/phase1/stress/ndtha_long_profile\"}}\n{\"contract_pass\": true, \"event\": \"ndtha_long_profile.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "phase1_ci_gate_nightly",
+      "seconds": 0.06746912002563477,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/phase1_ci_gate.py --ci-mode nightly --strict-probe implementation/phase1/zero_copy_real_probe_report_strict.json --rca implementation/phase1/step_outputs/step5_rca_summary.json --phase3-pipeline implementation/phase1/phase3_megastructure_pipeline_report.json --topology-gate implementation/phase1/opensees_topology_report.json --partitioned-scaleout implementation/phase1/partitioned_scaleout_report.json --sync-stress implementation/phase1/sync_stress_gate_report.json --noise-convergence implementation/phase1/noise_convergence_gate_report.json --commercial-csv-gate implementation/phase1/commercial_csv_gate_report.json --scaleout-io implementation/phase1/scaleout_io_profile_report.json --nightly-10m-repro implementation/phase1/nightly_10m_repro_report.json --ndtha-long-profile implementation/phase1/ndtha_long_profile_report.json --commercial-readiness implementation/phase1/commercial_readiness_report.json --real-source-multi implementation/phase1/real_source_multi_gate_report.json --nonlinear-engine-report implementation/phase1/nonlinear_frame_engine_report.json --pushover-stress-report implementation/phase1/nonlinear_pushover_stress_report.json --ndtha-stress-report implementation/phase1/nonlinear_ndtha_stress_report.json --out implementation/phase1/ci_gate_report.json --manifest implementation/phase1/ci_artifact_manifest.json --require-ndtha-long-profile --require-gpu-strict",
+      "stdout_tail": "Wrote CI gate report: implementation/phase1/ci_gate_report.json\nWrote artifact manifest: implementation/phase1/ci_artifact_manifest.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "static_artifact_validation",
+      "seconds": 0.05646991729736328,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/validate_phase1_artifacts.py --ci implementation/phase1/ci_gate_report.json --phase3-pipeline implementation/phase1/phase3_megastructure_pipeline_report.json --topology-gate implementation/phase1/opensees_topology_report.json --partitioned-scaleout implementation/phase1/partitioned_scaleout_report.json --sync-stress implementation/phase1/sync_stress_gate_report.json --noise-convergence implementation/phase1/noise_convergence_gate_report.json --commercial-csv-gate implementation/phase1/commercial_csv_gate_report.json --scaleout-io implementation/phase1/scaleout_io_profile_report.json --nightly-10m-repro implementation/phase1/nightly_10m_repro_report.json --commercial-readiness implementation/phase1/commercial_readiness_report.json --real-source-multi implementation/phase1/real_source_multi_gate_report.json --nonlinear-engine implementation/phase1/nonlinear_frame_engine_report.json --pushover-stress implementation/phase1/nonlinear_pushover_stress_report.json --ndtha-stress implementation/phase1/nonlinear_ndtha_stress_report.json --out implementation/phase1/static_artifact_validation_report.json",
+      "stdout_tail": "Wrote static artifact validation report: implementation/phase1/static_artifact_validation_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "freeze_release_snapshot",
+      "seconds": 0.18983769416809082,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/freeze_release_snapshot.py --out implementation/phase1/release/freeze_release_report.json",
+      "stdout_tail": "Wrote freeze release report: implementation/phase1/release/freeze_release_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "promote_release_candidate",
+      "seconds": 0.04053544998168945,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/promote_release_candidate.py --pr-ci implementation/phase1/ci_gate_report.json --out implementation/phase1/release/release_candidate_promotion_report.json",
+      "stdout_tail": "Wrote release candidate promotion report: implementation/phase1/release/release_candidate_promotion_report.json\n",
+      "stderr_tail": ""
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "nightly gate and release freeze passed",
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/nightly_release_gate/20260304T124124Z/artifact_archive_manifest.json"
+}

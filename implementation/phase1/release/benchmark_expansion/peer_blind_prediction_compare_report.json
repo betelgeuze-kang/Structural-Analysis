@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-16T14:46:52.864969+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "Blind-prediction compare inputs are ready.",
+  "summary_line": "PEER blind compare lane: READY | cases=10 | measured_response=ready | channels=11 | landing_manifest=recorded",
+  "summary": {
+    "case_count": 10,
+    "measured_response_ready": true,
+    "measured_response_landing_manifest_ready": true,
+    "acceleration_channel_count": 11,
+    "drift_channel_count": 11,
+    "build_case_count": 10,
+    "landing_manifest_matched_file_count": 1,
+    "landing_manifest_contract_pass": true
+  },
+  "results_explorer": {
+    "entry_kind": "blind_prediction_compare_family",
+    "entry_label": "PEER Blind Prediction Compare Family",
+    "source_family": "edefense_peer_blind_prediction",
+    "summary_label": "compare-ready blind prediction family"
+  },
+  "evidence": {
+    "cases_path": "implementation/phase1/commercial_benchmark_cases.peer_blind_prediction_open.json",
+    "build_report_path": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_case_build_report.json",
+    "measured_normalized_path": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.measured_response_normalized.json",
+    "measured_landing_manifest_path": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.measured_response_landing_manifest.json",
+    "measured_landing_manifest_summary_line": "E-Defense/PEER measured-response landing manifest: RECORDED | matched=1 | csv=0 | accel_candidates=0 | drift_candidates=0 | sensors=0",
+    "measured_landing_manifest_contract_pass": true
+  }
+}

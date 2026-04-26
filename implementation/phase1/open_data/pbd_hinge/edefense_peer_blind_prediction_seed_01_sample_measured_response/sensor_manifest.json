@@ -1,0 +1,22 @@
+{
+  "sensors": [
+    {
+      "sensor_id": "S01",
+      "story_label": "L1",
+      "component": "x/y/z",
+      "units": "g"
+    },
+    {
+      "sensor_id": "S02",
+      "story_label": "L3",
+      "component": "x/y/z",
+      "units": "g"
+    },
+    {
+      "sensor_id": "S03",
+      "story_label": "L5",
+      "component": "x/y/z",
+      "units": "g"
+    }
+  ]
+}

@@ -1,0 +1,818 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-probe-edefense-peer-blind-prediction-sources",
+  "generated_at": "2026-04-16T14:45:00.296963+00:00",
+  "source_pages": [
+    "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+    "https://peer.berkeley.edu/nees-tipse-defense-announce-blind-analysis-contest-seismic-isolation-test",
+    "https://apps.peer.berkeley.edu/prediction_contest/",
+    "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+    "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768",
+    "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152"
+  ],
+  "page_rows": [
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_count": 42,
+      "links": [
+        "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+        "https://www.berkeley.edu/",
+        "https://peer.berkeley.edu/",
+        "https://peer.berkeley.edu/home",
+        "https://peer.berkeley.edu/news-and-events/news",
+        "https://peer.berkeley.edu/news-and-events/peer-annual-meetings",
+        "https://peer.berkeley.edu/news-and-events/blind-prediction-contests",
+        "https://peer.berkeley.edu/news-and-events/peer-workshops",
+        "https://peer.berkeley.edu/news-and-events/other-peer-events",
+        "https://peer.berkeley.edu/research",
+        "https://peer.berkeley.edu/tools",
+        "https://peer.berkeley.edu/peer-publications",
+        "https://peer.berkeley.edu/laboratories",
+        "https://peer.berkeley.edu/library",
+        "https://peer.berkeley.edu/about",
+        "https://peer.berkeley.edu/about/people",
+        "https://peer.berkeley.edu/about/mission-and-goals",
+        "https://peer.berkeley.edu/about/core-institutions-0",
+        "https://peer.berkeley.edu/about/peers-educational-affiliates",
+        "https://peer.berkeley.edu/about/business-and-industry-partnership-bip",
+        "https://peer.berkeley.edu/about/peer-student-committee",
+        "https://peer.berkeley.edu/about/benefits-california",
+        "https://peer.berkeley.edu/about/faqs",
+        "https://peer.berkeley.edu/node/23",
+        "https://peer.berkeley.edu/sites/default/files/news_e-defense_blind_analysis_2009-article.pdf",
+        "https://www.facebook.com/peerctr",
+        "https://twitter.com/PEER_Center",
+        "https://www.linkedin.com/groups/4931867/profile",
+        "https://www.youtube.com/user/peervideos",
+        "https://give.berkeley.edu/fund/?f=FN3264000",
+        "http://eepurl.com/dd6Guj",
+        "https://apps.peer.berkeley.edu/",
+        "mailto:peer_center@berkeley.edu",
+        "mailto:PEERLab@berkeley.edu",
+        "mailto:nisee@berkeley.edu",
+        "https://peer.berkeley.edu/about/directions",
+        "https://peer.berkeley.edu/directions-richmond-field-station",
+        "https://peer.berkeley.edu/about/hotel-accommodations",
+        "https://open.berkeley.edu/",
+        "https://dap.berkeley.edu/get-help/report-web-accessibility-issue",
+        "https://ophd.berkeley.edu/policies-and-procedures/nondiscrimination-policy-statement",
+        "https://open.berkeley.edu/privacy-statement"
+      ]
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/nees-tipse-defense-announce-blind-analysis-contest-seismic-isolation-test",
+      "link_count": 41,
+      "links": [
+        "https://peer.berkeley.edu/nees-tipse-defense-announce-blind-analysis-contest-seismic-isolation-test",
+        "https://www.berkeley.edu/",
+        "https://peer.berkeley.edu/",
+        "https://peer.berkeley.edu/home",
+        "https://peer.berkeley.edu/news-and-events/news",
+        "https://peer.berkeley.edu/news-and-events/peer-annual-meetings",
+        "https://peer.berkeley.edu/news-and-events/blind-prediction-contests",
+        "https://peer.berkeley.edu/news-and-events/peer-workshops",
+        "https://peer.berkeley.edu/news-and-events/other-peer-events",
+        "https://peer.berkeley.edu/research",
+        "https://peer.berkeley.edu/tools",
+        "https://peer.berkeley.edu/peer-publications",
+        "https://peer.berkeley.edu/laboratories",
+        "https://peer.berkeley.edu/library",
+        "https://peer.berkeley.edu/about",
+        "https://peer.berkeley.edu/about/people",
+        "https://peer.berkeley.edu/about/mission-and-goals",
+        "https://peer.berkeley.edu/about/core-institutions-0",
+        "https://peer.berkeley.edu/about/peers-educational-affiliates",
+        "https://peer.berkeley.edu/about/business-and-industry-partnership-bip",
+        "https://peer.berkeley.edu/about/peer-student-committee",
+        "https://peer.berkeley.edu/about/benefits-california",
+        "https://peer.berkeley.edu/about/faqs",
+        "https://peer.berkeley.edu/node/23",
+        "https://www.facebook.com/peerctr",
+        "https://twitter.com/PEER_Center",
+        "https://www.linkedin.com/groups/4931867/profile",
+        "https://www.youtube.com/user/peervideos",
+        "https://give.berkeley.edu/fund/?f=FN3264000",
+        "http://eepurl.com/dd6Guj",
+        "https://apps.peer.berkeley.edu/",
+        "mailto:peer_center@berkeley.edu",
+        "mailto:PEERLab@berkeley.edu",
+        "mailto:nisee@berkeley.edu",
+        "https://peer.berkeley.edu/about/directions",
+        "https://peer.berkeley.edu/directions-richmond-field-station",
+        "https://peer.berkeley.edu/about/hotel-accommodations",
+        "https://open.berkeley.edu/",
+        "https://dap.berkeley.edu/get-help/report-web-accessibility-issue",
+        "https://ophd.berkeley.edu/policies-and-procedures/nondiscrimination-policy-statement",
+        "https://open.berkeley.edu/privacy-statement"
+      ]
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_count": 12,
+      "links": [
+        "https://apps.peer.berkeley.edu/prediction_contest/",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=19",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=22",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=30",
+        "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/column.png",
+        "https://apps.peer.berkeley.edu/events/annual_meeting/2018AM/home/",
+        "https://peer.berkeley.edu/",
+        "https://apps.peer.berkeley.edu/events/annual_meeting/2018AM/",
+        "https://wordpress.org/"
+      ]
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "link_count": 16,
+      "links": [
+        "https://apps.peer.berkeley.edu/prediction_contest/",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=19",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=22",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=30",
+        "https://apps.peer.berkeley.edu/assets/Materials.zip",
+        "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Construction_Drawings.pdf",
+        "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Posttensiondetails.pdf",
+        "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Columns.pdf",
+        "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Bent-Cap.pdf",
+        "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Foundation.pdf",
+        "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Weight_Blocks.pdf",
+        "https://apps.peer.berkeley.edu/assets/GMs.xlsx",
+        "https://wordpress.org/"
+      ]
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768",
+      "link_count": 9,
+      "links": [
+        "https://apps.peer.berkeley.edu/prediction_contest/",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=19",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=22",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=30",
+        "https://apps.peer.berkeley.edu/assets/Experimentalresults.xlsx",
+        "https://wordpress.org/"
+      ]
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152",
+      "link_count": 10,
+      "links": [
+        "https://apps.peer.berkeley.edu/prediction_contest/",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=19",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=22",
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=30",
+        "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/09/QA_blindprediction-1.pdf",
+        "https://apps.peer.berkeley.edu/publications/peer_reports/reports_2015/webPEER-2015-01-Terzic-5.8.15.pdf",
+        "https://wordpress.org/"
+      ]
+    }
+  ],
+  "link_rows": [
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "anchor_text": "Skip to main content",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://www.berkeley.edu/",
+      "anchor_text": "",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/",
+      "anchor_text": "Pacific Earthquake Engineering Research Center",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/home",
+      "anchor_text": "Home",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/news-and-events/news",
+      "anchor_text": "News and Events",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/news-and-events/peer-annual-meetings",
+      "anchor_text": "PEER Annual Meetings",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/news-and-events/blind-prediction-contests",
+      "anchor_text": "Blind Prediction Contests",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/news-and-events/peer-workshops",
+      "anchor_text": "PEER Workshops",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/news-and-events/other-peer-events",
+      "anchor_text": "Other PEER Events",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/research",
+      "anchor_text": "Research",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/tools",
+      "anchor_text": "Tools",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/peer-publications",
+      "anchor_text": "Publications",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/laboratories",
+      "anchor_text": "Laboratories",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/library",
+      "anchor_text": "Library",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about",
+      "anchor_text": "About",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/people",
+      "anchor_text": "People",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/mission-and-goals",
+      "anchor_text": "Mission and Goals",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/core-institutions-0",
+      "anchor_text": "Core Institutions",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/peers-educational-affiliates",
+      "anchor_text": "Educational Affiliates",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/business-and-industry-partnership-bip",
+      "anchor_text": "Business and Industry Partnership (BIP)",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/peer-student-committee",
+      "anchor_text": "PEER Student Committee",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/benefits-california",
+      "anchor_text": "Benefits to California",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/faqs",
+      "anchor_text": "FAQs",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/node/23",
+      "anchor_text": "Caltech | OSU | Stanford | UC Davis | UCI | UCLA | UCSD | UNR | USC | UW",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/sites/default/files/news_e-defense_blind_analysis_2009-article.pdf",
+      "anchor_text": "2009 E-DEFENSE BLIND ANALYSIS CONTEST",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://www.facebook.com/peerctr",
+      "anchor_text": "Facebook",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://twitter.com/PEER_Center",
+      "anchor_text": "X (formerly Twitter)",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://www.linkedin.com/groups/4931867/profile",
+      "anchor_text": "LinkedIn",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://www.youtube.com/user/peervideos",
+      "anchor_text": "YouTube",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://give.berkeley.edu/fund/?f=FN3264000",
+      "anchor_text": "Give To PEER",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "http://eepurl.com/dd6Guj",
+      "anchor_text": "Subscribe",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://apps.peer.berkeley.edu/",
+      "anchor_text": "PEER Archive",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "mailto:peer_center@berkeley.edu",
+      "anchor_text": "peer_center@berkeley.edu",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "mailto:PEERLab@berkeley.edu",
+      "anchor_text": "PEERLab@berkeley.edu",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "mailto:nisee@berkeley.edu",
+      "anchor_text": "nisee@berkeley.edu",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/directions",
+      "anchor_text": "Directions to PEER Headquarters",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/directions-richmond-field-station",
+      "anchor_text": "Directions to Richmond Field Station",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://peer.berkeley.edu/about/hotel-accommodations",
+      "anchor_text": "Hotel Accommodations",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://open.berkeley.edu/",
+      "anchor_text": "Powered by Open Berkeley",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://dap.berkeley.edu/get-help/report-web-accessibility-issue",
+      "anchor_text": "Accessibility Statement",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://ophd.berkeley.edu/policies-and-procedures/nondiscrimination-policy-statement",
+      "anchor_text": "Nondiscrimination Policy Statement",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense",
+      "link_url": "https://open.berkeley.edu/privacy-statement",
+      "anchor_text": "Privacy Statement",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://peer.berkeley.edu/nees-tipse-defense-announce-blind-analysis-contest-seismic-isolation-test",
+      "link_url": "https://peer.berkeley.edu/nees-tipse-defense-announce-blind-analysis-contest-seismic-isolation-test",
+      "anchor_text": "Skip to main content",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "anchor_text": "Blind Prediction Contest",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768",
+      "anchor_text": "Results",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "anchor_text": "Input Data",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=19",
+      "anchor_text": "Rules",
+      "artifact_class": "rules_submission"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=22",
+      "anchor_text": "Submission",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152",
+      "anchor_text": "Notification, Q & A",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=30",
+      "anchor_text": "Sponsors",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/column.png",
+      "anchor_text": "",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/events/annual_meeting/2018AM/home/",
+      "anchor_text": "PEER Annual Meeting",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://apps.peer.berkeley.edu/events/annual_meeting/2018AM/",
+      "anchor_text": "PEER Annual Meeting",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/",
+      "link_url": "https://wordpress.org/",
+      "anchor_text": "Proudly powered by WordPress.",
+      "artifact_class": "official_reference_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "link_url": "https://apps.peer.berkeley.edu/assets/Materials.zip",
+      "anchor_text": "Materials",
+      "artifact_class": "material_input"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Construction_Drawings.pdf",
+      "anchor_text": "Construction Drawings",
+      "artifact_class": "geometry_input"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Posttensiondetails.pdf",
+      "anchor_text": "Post-tension Details",
+      "artifact_class": "geometry_input"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Columns.pdf",
+      "anchor_text": "Columns",
+      "artifact_class": "geometry_input"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Bent-Cap.pdf",
+      "anchor_text": "Bent-Cap",
+      "artifact_class": "geometry_input"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Foundation.pdf",
+      "anchor_text": "Foundation",
+      "artifact_class": "geometry_input"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Weight_Blocks.pdf",
+      "anchor_text": "Weight Blocks",
+      "artifact_class": "geometry_input"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13",
+      "link_url": "https://apps.peer.berkeley.edu/assets/GMs.xlsx",
+      "anchor_text": "Ground Motion Data",
+      "artifact_class": "excitation_input"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768",
+      "link_url": "https://apps.peer.berkeley.edu/assets/Experimentalresults.xlsx",
+      "anchor_text": "Experimental Results",
+      "artifact_class": "measured_response_dataset"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152",
+      "link_url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/09/QA_blindprediction-1.pdf",
+      "anchor_text": "Questions & Answers",
+      "artifact_class": "measured_response_support_doc"
+    },
+    {
+      "page_url": "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152",
+      "link_url": "https://apps.peer.berkeley.edu/publications/peer_reports/reports_2015/webPEER-2015-01-Terzic-5.8.15.pdf",
+      "anchor_text": "here",
+      "artifact_class": "measured_response_support_doc"
+    }
+  ],
+  "direct_downloads": [
+    "https://peer.berkeley.edu/sites/default/files/news_e-defense_blind_analysis_2009-article.pdf",
+    "https://apps.peer.berkeley.edu/assets/Materials.zip",
+    "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Construction_Drawings.pdf",
+    "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Posttensiondetails.pdf",
+    "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Columns.pdf",
+    "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Bent-Cap.pdf",
+    "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Foundation.pdf",
+    "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Weight_Blocks.pdf",
+    "https://apps.peer.berkeley.edu/assets/GMs.xlsx",
+    "https://apps.peer.berkeley.edu/assets/Experimentalresults.xlsx",
+    "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/09/QA_blindprediction-1.pdf",
+    "https://apps.peer.berkeley.edu/publications/peer_reports/reports_2015/webPEER-2015-01-Terzic-5.8.15.pdf"
+  ],
+  "direct_download_rows": [
+    {
+      "url": "https://peer.berkeley.edu/sites/default/files/news_e-defense_blind_analysis_2009-article.pdf",
+      "artifact_class": "official_reference_doc",
+      "anchor_text": "2009 E-DEFENSE BLIND ANALYSIS CONTEST",
+      "page_sources": [
+        "https://peer.berkeley.edu/2009-blind-analysis-contest-e-defense"
+      ],
+      "reachable": true,
+      "content_type": "application/pdf",
+      "content_length": 79462,
+      "last_modified": "Wed, 07 Jan 2026 18:27:39 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/assets/Materials.zip",
+      "artifact_class": "material_input",
+      "anchor_text": "Materials",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13"
+      ],
+      "reachable": true,
+      "content_type": "application/zip",
+      "content_length": 11302798,
+      "last_modified": "Fri, 20 Oct 2017 14:49:37 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Construction_Drawings.pdf",
+      "artifact_class": "geometry_input",
+      "anchor_text": "Construction Drawings",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13"
+      ],
+      "reachable": true,
+      "content_type": "application/pdf",
+      "content_length": 4821477,
+      "last_modified": "Thu, 24 Apr 2025 20:12:14 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Posttensiondetails.pdf",
+      "artifact_class": "geometry_input",
+      "anchor_text": "Post-tension Details",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13"
+      ],
+      "reachable": true,
+      "content_type": "application/pdf",
+      "content_length": 308645,
+      "last_modified": "Thu, 24 Apr 2025 20:12:14 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Columns.pdf",
+      "artifact_class": "geometry_input",
+      "anchor_text": "Columns",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13"
+      ],
+      "reachable": true,
+      "content_type": "application/pdf",
+      "content_length": 430521,
+      "last_modified": "Thu, 24 Apr 2025 20:12:14 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Bent-Cap.pdf",
+      "artifact_class": "geometry_input",
+      "anchor_text": "Bent-Cap",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13"
+      ],
+      "reachable": true,
+      "content_type": "application/pdf",
+      "content_length": 469999,
+      "last_modified": "Thu, 24 Apr 2025 20:12:14 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Foundation.pdf",
+      "artifact_class": "geometry_input",
+      "anchor_text": "Foundation",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13"
+      ],
+      "reachable": true,
+      "content_type": "application/pdf",
+      "content_length": 445834,
+      "last_modified": "Thu, 24 Apr 2025 20:12:14 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Weight_Blocks.pdf",
+      "artifact_class": "geometry_input",
+      "anchor_text": "Weight Blocks",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13"
+      ],
+      "reachable": true,
+      "content_type": "application/pdf",
+      "content_length": 133415,
+      "last_modified": "Thu, 24 Apr 2025 20:12:14 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/assets/GMs.xlsx",
+      "artifact_class": "excitation_input",
+      "anchor_text": "Ground Motion Data",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=13"
+      ],
+      "reachable": true,
+      "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "content_length": 13017109,
+      "last_modified": "Wed, 01 Nov 2017 17:11:16 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/assets/Experimentalresults.xlsx",
+      "artifact_class": "measured_response_dataset",
+      "anchor_text": "Experimental Results",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768"
+      ],
+      "reachable": true,
+      "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "content_length": 35158,
+      "last_modified": "Thu, 25 Jan 2018 16:02:34 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/09/QA_blindprediction-1.pdf",
+      "artifact_class": "measured_response_support_doc",
+      "anchor_text": "Questions & Answers",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152"
+      ],
+      "reachable": true,
+      "content_type": "application/pdf",
+      "content_length": 99898,
+      "last_modified": "Thu, 24 Apr 2025 20:12:14 GMT"
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/publications/peer_reports/reports_2015/webPEER-2015-01-Terzic-5.8.15.pdf",
+      "artifact_class": "measured_response_support_doc",
+      "anchor_text": "here",
+      "page_sources": [
+        "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152"
+      ],
+      "reachable": true,
+      "content_type": "application/pdf",
+      "content_length": 3260479,
+      "last_modified": "Fri, 05 Jun 2015 16:55:45 GMT"
+    }
+  ],
+  "measured_response_surface": {
+    "dataset_rows": [
+      {
+        "url": "https://apps.peer.berkeley.edu/assets/Experimentalresults.xlsx",
+        "artifact_class": "measured_response_dataset",
+        "anchor_text": "Experimental Results",
+        "page_sources": [
+          "https://apps.peer.berkeley.edu/prediction_contest/?page_id=768"
+        ],
+        "reachable": true,
+        "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "content_length": 35158,
+        "last_modified": "Thu, 25 Jan 2018 16:02:34 GMT"
+      }
+    ],
+    "support_doc_rows": [
+      {
+        "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/09/QA_blindprediction-1.pdf",
+        "artifact_class": "measured_response_support_doc",
+        "anchor_text": "Questions & Answers",
+        "page_sources": [
+          "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152"
+        ],
+        "reachable": true,
+        "content_type": "application/pdf",
+        "content_length": 99898,
+        "last_modified": "Thu, 24 Apr 2025 20:12:14 GMT"
+      },
+      {
+        "url": "https://apps.peer.berkeley.edu/publications/peer_reports/reports_2015/webPEER-2015-01-Terzic-5.8.15.pdf",
+        "artifact_class": "measured_response_support_doc",
+        "anchor_text": "here",
+        "page_sources": [
+          "https://apps.peer.berkeley.edu/prediction_contest/?page_id=152"
+        ],
+        "reachable": true,
+        "content_type": "application/pdf",
+        "content_length": 3260479,
+        "last_modified": "Fri, 05 Jun 2015 16:55:45 GMT"
+      }
+    ],
+    "experimental_results_preview": {
+      "sheet_names": [
+        "Results"
+      ],
+      "metric_label_count": 10,
+      "metric_labels": [
+        "Relative horizontal displacement (mm) at z=158\":",
+        "Lateral Inertia force above the top of columns (at z =158\")",
+        "Overturning moment at the base of the columns (at z=26\")",
+        "Vertical Inertia force above the top of columns (at z =158\")",
+        "Largest Post-tension bar force in Column 1 (kN)",
+        "Largest Post-tension bar force in Column 2 (kN)",
+        "Relative residual displacement (mm) at z=158\":",
+        "Peak Vertical Uplift at x=0\", z=158\" with respect to the base of the columns",
+        "Residual Post-tension bar force in Column 1 (kN)",
+        "Residual Post-tension bar force in Column 2 (kN)"
+      ],
+      "contains_displacement": true,
+      "contains_residual_displacement": true,
+      "contains_acceleration": false,
+      "contains_drift": false,
+      "contains_sensor_manifest": false
+    },
+    "official_findings": [
+      "Official Results page exposes Experimentalresults.xlsx as a direct public measured-response workbook.",
+      "Experimentalresults.xlsx contains a single Results sheet with published response quantities such as relative horizontal displacement, residual displacement, inertia force, overturning moment, uplift, and post-tension bar force.",
+      "No direct public acceleration time-history workbook/CSV was found; the public results workbook is response-summary oriented rather than raw acceleration traces.",
+      "No direct public drift time-history workbook/CSV was found in the official PEER contest pages.",
+      "No standalone public sensor manifest file was linked; instrumentation context is only surfaced via supporting documents such as the Q&A PDF and PEER report.",
+      "Official support documents include the contest Q&A PDF and the PEER report with instrumentation and measured-response discussion."
+    ]
+  },
+  "summary": {
+    "page_count": 6,
+    "unique_link_count": 65,
+    "direct_download_count": 12,
+    "measured_response_dataset_count": 1,
+    "measured_response_support_doc_count": 2,
+    "measured_response_acceleration_public_count": 0,
+    "measured_response_drift_public_count": 0,
+    "measured_response_sensor_public_count": 0
+  },
+  "contract_pass": true,
+  "reason": "Official E-Defense / PEER blind-prediction pages probed for directly accessible public files, with measured-response dataset/support-doc surfacing."
+}

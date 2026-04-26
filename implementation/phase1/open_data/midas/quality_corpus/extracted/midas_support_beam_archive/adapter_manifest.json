@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-prepare-midas-binary-archive-adapter",
+  "source_id": "midas_support_beam_archive",
+  "archive_path": "implementation/phase1/open_data/midas/quality_corpus/raw/midas_support_beam_archive.zip",
+  "out_dir": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive",
+  "summary": {
+    "recognized_member_count": 3,
+    "extension_label": ".3dm=1, .gh=1, .mcb=1",
+    "recommended_adapter_family": "midas_binary_mcb_parser",
+    "recommended_parser_script": "",
+    "recommended_primary_member": "FCM Bridge.mcb",
+    "primary_member_probe_ready": false,
+    "primary_member_magic": "MCVL",
+    "primary_member_structural_token_label": "n/a"
+  },
+  "members": [
+    {
+      "member_name": "FCM Bridge.mcb",
+      "extension": ".mcb",
+      "size_bytes": 2067979,
+      "extracted_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb"
+    },
+    {
+      "member_name": "FCM Bridge_Final(v2.0.5).gh",
+      "extension": ".gh",
+      "size_bytes": 726909,
+      "extracted_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge_Final(v2.0.5).gh"
+    },
+    {
+      "member_name": "FCM Tendon_1.3dm",
+      "extension": ".3dm",
+      "size_bytes": 142420,
+      "extracted_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Tendon_1.3dm"
+    }
+  ],
+  "primary_member_probe": {
+    "member_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb",
+    "size_bytes": 2067979,
+    "magic_ascii": "MCVL",
+    "magic_hex": "4d43564c",
+    "dbms_marker_present": false,
+    "table_token_rows": [
+      "MCVL",
+      "HEAD",
+      "VERS",
+      "PGIF",
+      "UNIT",
+      "PJCF",
+      "STYP",
+      "BNGR",
+      "LDGR",
+      "NODE",
+      "ELEM",
+      "MATL",
+      "MATD",
+      "CO_M",
+      "SECT",
+      "SECD",
+      "CO_S",
+      "GRUP",
+      "GRUE",
+      "MIDASIT",
+      "FSM1",
+      "FSM2",
+      "C4000",
+      "ASTM",
+      "C5000",
+      "LDRM",
+      "xPSE",
+      "GRUE4",
+      "GRUE2",
+      "GRUE0",
+      "GRUE5",
+      "GRUE3",
+      "GRUE1",
+      "CO_G",
+      "CNST",
+      "ELNK",
+      "STLD",
+      "BODF",
+      "CNLD",
+      "BMLD"
+    ],
+    "structural_token_rows": [],
+    "probe_ready": false,
+    "probe_label": "binary member extracted / table layout still uncertain"
+  },
+  "checks": {
+    "archive_exists": true,
+    "recognized_member_nonzero": true,
+    "primary_member_selected": true,
+    "primary_member_probe_ready": false
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "binary archive adapter manifest prepared"
+}

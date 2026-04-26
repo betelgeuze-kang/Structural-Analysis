@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-phasef-resilience-modules",
+  "generated_at": "2026-02-27T12:14:38.418081+00:00",
+  "checks": {
+    "F1_multiscale_l3_streaming": true,
+    "F2_phase_correction_assimilation": true,
+    "F3_heterogeneous_soil_ood_gate": true
+  },
+  "reports": {
+    "F1": "implementation/phase1/multiscale_l3_streaming_report.json",
+    "F2": "implementation/phase1/phase_correction_assimilation_report.json",
+    "F3": "implementation/phase1/heterogeneous_soil_ood_report.json"
+  },
+  "steps": [
+    {
+      "step": "F1_multiscale_l3_streaming",
+      "seconds": 0.025548219680786133,
+      "command": "/usr/bin/python3 implementation/phase1/multiscale_l3_streaming_profile.py --out implementation/phase1/multiscale_l3_streaming_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote multi-scale L3 streaming report: implementation/phase1/multiscale_l3_streaming_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "F2_phase_correction_assimilation",
+      "seconds": 0.07985162734985352,
+      "command": "/usr/bin/python3 implementation/phase1/phase_correction_assimilation.py --out implementation/phase1/phase_correction_assimilation_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote phase correction assimilation report: implementation/phase1/phase_correction_assimilation_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "F3_heterogeneous_soil_ood_gate",
+      "seconds": 0.07755112648010254,
+      "command": "/usr/bin/python3 implementation/phase1/heterogeneous_soil_ood_gate.py --out implementation/phase1/heterogeneous_soil_ood_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote heterogeneous soil OOD report: implementation/phase1/heterogeneous_soil_ood_report.json\n",
+      "stderr_tail": ""
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "phase-f resilience modules passed"
+}

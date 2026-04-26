@@ -1,0 +1,520 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-rust-nonlinear-frame-vnv",
+  "generated_at": "2026-04-02T14:41:22.400823+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "target_split": "test",
+    "min_case_count": 3,
+    "max_case_count": 6,
+    "max_drift_error_pct": 5.0,
+    "max_base_shear_error_pct": 5.0,
+    "max_top_disp_error_pct": 8.0,
+    "hardening_ratio": 1.0,
+    "pdelta_factor": 0.0,
+    "tolerance": 1e-07,
+    "max_iter": 60,
+    "accepted_metric_sources": "engine_export_direct,commercial_solver_export,open_data_measurement",
+    "require_top_disp_hf": true,
+    "case_metrics_npz_out": "implementation/phase1/nonlinear_frame_engine_report.metrics.npz",
+    "out": "implementation/phase1/nonlinear_frame_engine_report.json"
+  },
+  "checks": {
+    "metric_source_pass": true,
+    "rust_backend_used_pass": true,
+    "all_cases_converged": true,
+    "drift_p95_pass": true,
+    "base_shear_p95_pass": true,
+    "top_disp_metric_source_available": true,
+    "top_disp_metric_source_required_pass": true,
+    "top_disp_p95_pass": true
+  },
+  "artifacts": {
+    "report_json": "implementation/phase1/nonlinear_frame_engine_report.json",
+    "case_metrics_npz_out": "implementation/phase1/nonlinear_frame_engine_report.metrics.npz"
+  },
+  "summary": {
+    "case_count": 3,
+    "drift_error_pct_mean": 3.4507445589919654,
+    "drift_error_pct_p95": 4.166666666666645,
+    "base_shear_error_pct_mean": 3.724384528144669e-15,
+    "base_shear_error_pct_p95": 1.1173153584434007e-14,
+    "top_disp_error_pct_mean": 3.1438963097755557,
+    "top_disp_error_pct_p95": 3.4851237030210136,
+    "metric_source_invalid_case_ids": [],
+    "top_disp_missing_case_ids": [],
+    "runtime_backends": [
+      "rocm_torch_hip_mainloop"
+    ],
+    "section_probe_stiffness_scale_mean": 0.971777777777778,
+    "section_probe_yield_scale_mean": 0.971777777777778,
+    "response_storage": "npz_external+inline_summary",
+    "response_binary_consumer": "dlpack_zero_copy_primary",
+    "case_metrics_npz_case_count": 3
+  },
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "engine": {
+        "backend": "rust_ffi_nonlinear_frame",
+        "rust_version": 0,
+        "converged": true,
+        "iterations": 3,
+        "residual_inf": 0.0,
+        "line_search_backtracks": 0,
+        "plastic_story_count": 0,
+        "runtime": {
+          "main_loop_backend": "rocm_torch_hip_mainloop",
+          "runtime_backend": "rocm_torch_hip_mainloop",
+          "solver_path_kind": "production_hip_kernel",
+          "production_kernel_path": true,
+          "force_jacobian_kernel_consistent": true,
+          "surrogate_runtime_used": false,
+          "simplified_runtime_used": false,
+          "surrogate_runtime_markers": [],
+          "cpu_backend": false,
+          "cpu_required": false,
+          "cpu_fallback_used": false,
+          "hip_kernel_invocation_count": 6,
+          "host_copy_bytes": 0,
+          "device_residency_ratio": 1.0,
+          "solver_array_bytes": 1152
+        },
+        "response_device_consumer": "dlpack_zero_copy",
+        "section_probe": {
+          "story_count": 24,
+          "stiffness_scale_mean": 0.9729166666666668,
+          "stiffness_scale_min": 0.97,
+          "yield_scale_mean": 0.9729166666666668,
+          "yield_scale_min": 0.97
+        },
+        "section_family_counts": {
+          "mega_column": 9,
+          "outrigger_beam": 8,
+          "core_column": 7
+        },
+        "section_probe_head": [
+          {
+            "story": 1,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 2,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 3,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 4,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 5,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 6,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 7,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 8,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          }
+        ]
+      },
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.31,
+          "pred": 2.381443298969072,
+          "error_pct": 3.0927835051546357
+        },
+        "base_shear_kN": {
+          "hf": 2035.0,
+          "pred": 2034.9999999999998,
+          "error_pct": 1.1173153584434007e-14
+        },
+        "top_displacement_m": {
+          "hf": 1.107035,
+          "pred": 1.1399499558882118,
+          "error_pct": 2.9732534100739185,
+          "source": "hf_export_direct"
+        }
+      }
+    },
+    {
+      "case_id": "C-TST-002",
+      "split": "test",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "engine": {
+        "backend": "rust_ffi_nonlinear_frame",
+        "rust_version": 0,
+        "converged": true,
+        "iterations": 3,
+        "residual_inf": 0.0,
+        "line_search_backtracks": 0,
+        "plastic_story_count": 0,
+        "runtime": {
+          "main_loop_backend": "rocm_torch_hip_mainloop",
+          "runtime_backend": "rocm_torch_hip_mainloop",
+          "solver_path_kind": "production_hip_kernel",
+          "production_kernel_path": true,
+          "force_jacobian_kernel_consistent": true,
+          "surrogate_runtime_used": false,
+          "simplified_runtime_used": false,
+          "surrogate_runtime_markers": [],
+          "cpu_backend": false,
+          "cpu_required": false,
+          "cpu_fallback_used": false,
+          "hip_kernel_invocation_count": 6,
+          "host_copy_bytes": 0,
+          "device_residency_ratio": 1.0,
+          "solver_array_bytes": 960
+        },
+        "response_device_consumer": "dlpack_zero_copy",
+        "section_probe": {
+          "story_count": 20,
+          "stiffness_scale_mean": 0.9695,
+          "stiffness_scale_min": 0.96,
+          "yield_scale_mean": 0.9695,
+          "yield_scale_min": 0.96
+        },
+        "section_family_counts": {
+          "wall_boundary": 6,
+          "wall_web": 9,
+          "slab_strip": 5
+        },
+        "section_probe_head": [
+          {
+            "story": 1,
+            "family_name": "wall_boundary",
+            "stiffness_scale": 0.96,
+            "yield_scale": 0.96,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1106.2028041795718
+          },
+          {
+            "story": 2,
+            "family_name": "wall_boundary",
+            "stiffness_scale": 0.96,
+            "yield_scale": 0.96,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1106.2028041795718
+          },
+          {
+            "story": 3,
+            "family_name": "wall_boundary",
+            "stiffness_scale": 0.96,
+            "yield_scale": 0.96,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1106.2028041795718
+          },
+          {
+            "story": 4,
+            "family_name": "wall_boundary",
+            "stiffness_scale": 0.96,
+            "yield_scale": 0.96,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1106.2028041795718
+          },
+          {
+            "story": 5,
+            "family_name": "wall_boundary",
+            "stiffness_scale": 0.96,
+            "yield_scale": 0.96,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1106.2028041795718
+          },
+          {
+            "story": 6,
+            "family_name": "wall_boundary",
+            "stiffness_scale": 0.96,
+            "yield_scale": 0.96,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1106.2028041795718
+          },
+          {
+            "story": 7,
+            "family_name": "wall_web",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 525.4349111619426
+          },
+          {
+            "story": 8,
+            "family_name": "wall_web",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 525.4349111619426
+          }
+        ]
+      },
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.88,
+          "pred": 1.9583333333333328,
+          "error_pct": 4.166666666666645
+        },
+        "base_shear_kN": {
+          "hf": 1610.0,
+          "pred": 1610.0,
+          "error_pct": 0.0
+        },
+        "top_displacement_m": {
+          "hf": 0.753844,
+          "pred": 0.7801163959278017,
+          "error_pct": 3.4851237030210136,
+          "source": "hf_export_direct"
+        }
+      }
+    },
+    {
+      "case_id": "C-TST-003",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "engine": {
+        "backend": "rust_ffi_nonlinear_frame",
+        "rust_version": 0,
+        "converged": true,
+        "iterations": 3,
+        "residual_inf": 0.0,
+        "line_search_backtracks": 0,
+        "plastic_story_count": 0,
+        "runtime": {
+          "main_loop_backend": "rocm_torch_hip_mainloop",
+          "runtime_backend": "rocm_torch_hip_mainloop",
+          "solver_path_kind": "production_hip_kernel",
+          "production_kernel_path": true,
+          "force_jacobian_kernel_consistent": true,
+          "surrogate_runtime_used": false,
+          "simplified_runtime_used": false,
+          "surrogate_runtime_markers": [],
+          "cpu_backend": false,
+          "cpu_required": false,
+          "cpu_fallback_used": false,
+          "hip_kernel_invocation_count": 6,
+          "host_copy_bytes": 0,
+          "device_residency_ratio": 1.0,
+          "solver_array_bytes": 1152
+        },
+        "response_device_consumer": "dlpack_zero_copy",
+        "section_probe": {
+          "story_count": 24,
+          "stiffness_scale_mean": 0.9729166666666668,
+          "stiffness_scale_min": 0.97,
+          "yield_scale_mean": 0.9729166666666668,
+          "yield_scale_min": 0.97
+        },
+        "section_family_counts": {
+          "mega_column": 9,
+          "outrigger_beam": 8,
+          "core_column": 7
+        },
+        "section_probe_head": [
+          {
+            "story": 1,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 2,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 3,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 4,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 5,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 6,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 7,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          },
+          {
+            "story": 8,
+            "family_name": "mega_column",
+            "stiffness_scale": 0.97,
+            "yield_scale": 0.97,
+            "cracked_fiber_count": 48,
+            "yielded_fiber_count": 0,
+            "beam_tangent_scale": 0.05,
+            "beam_yielded_end_count": 2,
+            "section_moment_kNm": 1613.4666135795633
+          }
+        ]
+      },
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.58,
+          "pred": 2.659793814432989,
+          "error_pct": 3.0927835051546144
+        },
+        "base_shear_kN": {
+          "hf": 2260.0,
+          "pred": 2260.0,
+          "error_pct": 0.0
+        },
+        "top_displacement_m": {
+          "hf": 1.236428,
+          "pred": 1.2731908598231978,
+          "error_pct": 2.9733118162317345,
+          "source": "hf_export_direct"
+        }
+      }
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "rust nonlinear frame engine passed vnv thresholds",
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/nonlinear_frame_engine_validation/20260402T144122Z/artifact_archive_manifest.json"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "audit_review_queue_items": [],
+  "audit_review_queue_status_directory": "implementation/phase1/open_data/midas/midas_generator_33.optimized.audit_review_queue_status_files",
+  "summary": {
+    "audit_review_queue_item_count": 0,
+    "audit_review_queue_pending_count": 0,
+    "audit_review_queue_acknowledged_count": 0,
+    "audit_review_queue_status_counts": {},
+    "audit_review_queue_action_family_counts": {},
+    "audit_review_queue_status_mode": "none"
+  }
+}

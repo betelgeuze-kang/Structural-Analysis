@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-05T00:00:00Z",
+  "split_manifest_path": "implementation/phase1/open_data/global_authority/global_split_manifest.json",
+  "tracks": {
+    "opensees": {
+      "enabled": true,
+      "models": [
+        {
+          "id": "SCBF16B",
+          "model_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+          "source_class": "opensees_text",
+          "real_source": true,
+          "require_shell_beam_mix": false
+        },
+        {
+          "id": "SCBF16B_shell_beam_mix",
+          "model_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+          "source_class": "opensees_text",
+          "real_source": true,
+          "require_shell_beam_mix": true
+        },
+        {
+          "id": "Luxinzheng_Megatall_Model1",
+          "model_path": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl",
+          "source_class": "opensees_text",
+          "real_source": true,
+          "require_shell_beam_mix": false
+        }
+      ]
+    },
+    "sac": {
+      "enabled": true,
+      "cases": [
+        {
+          "case_id": "SAC20_LA_holdout_01",
+          "real_source": true,
+          "holdout_split": "holdout",
+          "source_url": "https://femap58.atcouncil.org/index.php?option=com_content&view=article&id=5:sac-steel-project&catid=2:uncategorised",
+          "source_file_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+          "source_sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+          "hf_csv_path": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case01_hf.csv",
+          "lf_csv_path": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case01_lf.csv",
+          "reference_metrics_path": "implementation/phase1/open_data/global_authority/sac/sac20_reference_metrics.json",
+          "hf_csv_sha256": "bc545dbb1ca988184e727742340e4b1edcc268e013d999fa12fe2e894ed356fe",
+          "lf_csv_sha256": "728d1b600be51507fe3fbad2d420ff53fdbca193462b4b47b8772588648204e9"
+        },
+        {
+          "case_id": "SAC20_SEA_holdout_02",
+          "real_source": true,
+          "holdout_split": "holdout",
+          "source_url": "https://femap58.atcouncil.org/index.php?option=com_content&view=article&id=5:sac-steel-project&catid=2:uncategorised",
+          "source_file_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+          "source_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+          "hf_csv_path": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case02_hf.csv",
+          "lf_csv_path": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case02_lf.csv",
+          "reference_metrics_path": "implementation/phase1/open_data/global_authority/sac/sac20_reference_metrics_case02.json",
+          "hf_csv_sha256": "d63a98a3b39ecc398110157ca40a5b17596c2e10a1cdf87697b2a708bdec5248",
+          "lf_csv_sha256": "83064dec3cae07b0c17784de600d3f5d11804271e7d55c03d4efff32d8cbc712"
+        },
+        {
+          "case_id": "SAC20_BOS_holdout_03",
+          "real_source": true,
+          "holdout_split": "holdout",
+          "source_url": "https://femap58.atcouncil.org/index.php?option=com_content&view=article&id=5:sac-steel-project&catid=2:uncategorised",
+          "source_file_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+          "source_sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+          "hf_csv_path": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case03_hf.csv",
+          "lf_csv_path": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case03_lf.csv",
+          "reference_metrics_path": "implementation/phase1/open_data/global_authority/sac/sac20_reference_metrics_case03.json",
+          "hf_csv_sha256": "413818176216da279e5567a678bf6876436d0ac714a9f6674b8a7b55af2e051e",
+          "lf_csv_sha256": "0db21d5062307a220b7731d28797435c115b9e28443fa85c44859f6cbe9e7fac"
+        }
+      ]
+    },
+    "nheri": {
+      "enabled": true,
+      "cases": [
+        {
+          "case_id": "NHERI_UCSD_like_holdout_01",
+          "real_source": true,
+          "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+          "source_file_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case01_sensor.csv",
+          "source_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+          "sensor_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case01_sensor.csv",
+          "baseline_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case01_baseline.csv",
+          "waveform_metrics_path": "implementation/phase1/open_data/global_authority/nheri/nheri_case01_waveform_metrics.json",
+          "sensor_csv_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+          "baseline_csv_sha256": "653d2c6d6ae1831a5109881f97cf8adf23e495e1858d31c4eb66853374256bff"
+        },
+        {
+          "case_id": "NHERI_UCSD_like_holdout_02",
+          "real_source": true,
+          "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+          "source_file_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case02_sensor.csv",
+          "source_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+          "sensor_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case02_sensor.csv",
+          "baseline_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case02_baseline.csv",
+          "waveform_metrics_path": "implementation/phase1/open_data/global_authority/nheri/nheri_case02_waveform_metrics.json",
+          "sensor_csv_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+          "baseline_csv_sha256": "d05e399fcf906492ae339f2a7223110497c5dd3d32648d4e054b689d8e50af08"
+        },
+        {
+          "case_id": "NHERI_UCSD_like_holdout_03",
+          "real_source": true,
+          "source_url": "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/",
+          "source_file_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_sensor.csv",
+          "source_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+          "sensor_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_sensor.csv",
+          "baseline_csv_path": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_baseline.csv",
+          "waveform_metrics_path": "implementation/phase1/open_data/global_authority/nheri/nheri_case03_waveform_metrics.json",
+          "sensor_csv_sha256": "0342dbfd730dd9357f08413895aa23d3f30b832ced818cc85e17553431d7f650",
+          "baseline_csv_sha256": "cbefad1fe1ccfbee57c32d7120cbed2779e3deac153fa45833a76da7c9a06f0e"
+        }
+      ]
+    }
+  }
+}

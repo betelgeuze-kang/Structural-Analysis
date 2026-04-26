@@ -1,0 +1,51 @@
+{
+  "api_version": "expert_review_onboarding_api.v1",
+  "request": {
+    "request_id": "REQ-SEOUL-2026-001",
+    "submitted_at": "2026-04-10T09:30:00Z",
+    "submitted_by": "customer.portal@example.com",
+    "submission_channel": "customer_portal",
+    "template_name": "seoul_permit_review",
+    "selection_reason": "Customer requested a permit-facing package for a Seoul authority and committee submission."
+  },
+  "project": {
+    "project_name": "Seoul Mixed-Use Tower Optimization Review",
+    "project_number": "SEOUL-OPT-2026-001",
+    "client_name": "Example Development",
+    "site_name": "Seoul Block A"
+  },
+  "submission": {
+    "authority_name": "Seoul Metropolitan Government",
+    "permit_label": "Building Permit Review",
+    "committee_label": "Seoul Structural Review Committee",
+    "package_purpose_label": "Permit Submission Package",
+    "issue_phase_label": "Issued for permit review",
+    "issue_date": "2026-04-10",
+    "package_id": "PKG-SEOUL-001",
+    "revision_code": "REV-00",
+    "revision_status": "Issued for permit review",
+    "discipline_label": "Structural Optimization Review",
+    "code_basis": "KDS / project criteria to be confirmed by reviewer"
+  },
+  "review_team": {
+    "prepared_by": "AI Structural Optimization Review Tool",
+    "reviewed_by": "Permit reviewer to sign",
+    "company_name": "Example Structural Engineering"
+  },
+  "review_labels": {
+    "checklist_head_label": "Permit checklist",
+    "checklist_title": "Seoul permit issue checklist",
+    "signoff_head_label": "Permit disposition",
+    "signoff_title": "Seoul permit sign-off block",
+    "reviewer_label": "Permit reviewer / office",
+    "disposition_label": "Permit disposition",
+    "comments_label": "Permit comments / conditions",
+    "signature_label": "Permit signature / date"
+  },
+  "reviewer_guidance": {
+    "review_route_note": "Machine-verifiable lines are prefilled; permit-specific remarks and conditions remain open for reviewer sign-off."
+  },
+  "metadata_overrides": {
+    "sheet_size": "A3 landscape"
+  }
+}

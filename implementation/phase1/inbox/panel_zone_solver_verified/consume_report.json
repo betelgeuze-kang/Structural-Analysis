@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-consume-panel-zone-solver-verified-inbox",
+  "generated_at": "2026-04-14T13:57:29.341143+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "panel-zone inbox consumption passed",
+  "inputs": {
+    "inbox_dir": "implementation/phase1/inbox/panel_zone_solver_verified",
+    "handoff_report_out": "implementation/phase1/panel_zone_solver_verified_handoff_report.json",
+    "design_optimization_dataset": "implementation/phase1/release/design_optimization/design_optimization_dataset_report.json",
+    "design_optimization_npz": "",
+    "pbd_review_package": "implementation/phase1/release/pbd_review/pbd_review_package_report.json",
+    "refresh_release_surfaces": true,
+    "refresh_external_validation": true,
+    "inbox_status_report": "implementation/phase1/panel_zone_solver_verified_inbox_status.json",
+    "archive_dir": "implementation/phase1/inbox_archive/panel_zone_solver_verified",
+    "archive_on_success": true,
+    "clean_inbox_on_success": true,
+    "dry_run": false
+  },
+  "checks": {
+    "inbox_has_input": false,
+    "handoff_contract_pass": true,
+    "status_refresh_pass": true,
+    "release_surface_refresh_pass": true,
+    "external_validation_refresh_pass": true
+  },
+  "summary": {
+    "consumed_from_inbox": "implementation/phase1/inbox/panel_zone_solver_verified",
+    "handoff_reason_code": "PASS",
+    "source_origin_class": "trusted_external_solver_source",
+    "panel_zone_constructability_mode": "panel_zone_3d_clash_and_anchorage_verified",
+    "panel_zone_source_contract_mode": "true_3d_clash_and_anchorage_verified"
+  },
+  "artifacts": {
+    "handoff_report": "implementation/phase1/panel_zone_solver_verified_handoff_report.json",
+    "inbox_status_report": "implementation/phase1/panel_zone_solver_verified_inbox_status.json",
+    "archive": {
+      "archive_dir": "implementation/phase1/inbox_archive/panel_zone_solver_verified/20260414T135704Z",
+      "copied_files": [
+        "implementation/phase1/inbox_archive/panel_zone_solver_verified/20260414T135704Z/joint_geometry.json",
+        "implementation/phase1/inbox_archive/panel_zone_solver_verified/20260414T135704Z/rebar_anchorage.json",
+        "implementation/phase1/inbox_archive/panel_zone_solver_verified/20260414T135704Z/clash_verification.json",
+        "implementation/phase1/inbox_archive/panel_zone_solver_verified/20260414T135704Z/member_mapping_sidecar.json",
+        "implementation/phase1/inbox_archive/panel_zone_solver_verified/20260414T135704Z/panel_zone_handoff_manifest.json"
+      ],
+      "deleted_files": [
+        "implementation/phase1/inbox/panel_zone_solver_verified/joint_geometry.json",
+        "implementation/phase1/inbox/panel_zone_solver_verified/rebar_anchorage.json",
+        "implementation/phase1/inbox/panel_zone_solver_verified/clash_verification.json",
+        "implementation/phase1/inbox/panel_zone_solver_verified/member_mapping_sidecar.json",
+        "implementation/phase1/inbox/panel_zone_solver_verified/panel_zone_handoff_manifest.json"
+      ]
+    }
+  },
+  "steps": [
+    {
+      "command": "/usr/bin/python3 implementation/phase1/run_panel_zone_solver_verified_handoff.py --source-drop-dir implementation/phase1/inbox/panel_zone_solver_verified --design-optimization-dataset implementation/phase1/release/design_optimization/design_optimization_dataset_report.json --pbd-review-package implementation/phase1/release/pbd_review/pbd_review_package_report.json --panel-zone-solver-export-bundle implementation/phase1/panel_zone_solver_verified_export_bundle.json --panel-zone-joint-geometry-source-output implementation/phase1/panel_zone_joint_geometry_3d.json --panel-zone-rebar-anchorage-source-output implementation/phase1/panel_zone_rebar_anchorage_3d.json --panel-zone-clash-verification-source-output implementation/phase1/panel_zone_clash_verification_3d.json --panel-zone-joint-geometry-contract implementation/phase1/panel_zone_joint_geometry_3d_contract.json --panel-zone-rebar-anchorage-contract implementation/phase1/panel_zone_rebar_anchorage_3d_contract.json --panel-zone-clash-verification-contract implementation/phase1/panel_zone_clash_verification_3d_contract.json --panel-zone-clash-artifact implementation/phase1/panel_zone_clash_artifact.json --panel-zone-clash-report implementation/phase1/panel_zone_clash_report.json --out implementation/phase1/panel_zone_solver_verified_handoff_report.json --refresh-release-surfaces --refresh-external-validation",
+      "return_code": 0,
+      "ok": true,
+      "stdout_tail": "Wrote panel-zone solver-verified handoff report: implementation/phase1/panel_zone_solver_verified_handoff_report.json\n",
+      "stderr_tail": "",
+      "step": "run_panel_zone_solver_verified_handoff"
+    },
+    {
+      "command": "/usr/bin/python3 implementation/phase1/generate_panel_zone_solver_verified_inbox_status.py --inbox-dir implementation/phase1/inbox/panel_zone_solver_verified --consume-report implementation/phase1/inbox/panel_zone_solver_verified/consume_report.json --stage-report implementation/phase1/inbox/panel_zone_solver_verified/stage_report.json --archive-dir implementation/phase1/inbox_archive/panel_zone_solver_verified --out implementation/phase1/panel_zone_solver_verified_inbox_status.json",
+      "return_code": 0,
+      "ok": true,
+      "stdout_tail": "Wrote panel-zone solver-verified inbox status: implementation/phase1/panel_zone_solver_verified_inbox_status.json\n",
+      "stderr_tail": "",
+      "step": "panel_zone_solver_verified_inbox_status"
+    },
+    {
+      "command": "/usr/bin/python3 implementation/phase1/generate_panel_zone_clash_report.py --design-optimization-dataset implementation/phase1/release/design_optimization/design_optimization_dataset_report.json --pbd-review-package implementation/phase1/release/pbd_review/pbd_review_package_report.json --panel-zone-clash-artifact implementation/phase1/panel_zone_clash_artifact.json --out implementation/phase1/panel_zone_clash_report.json",
+      "return_code": 0,
+      "ok": true,
+      "stdout_tail": "Wrote panel-zone clash report: implementation/phase1/panel_zone_clash_report.json\n",
+      "stderr_tail": "",
+      "step": "post_consume_panel_zone_clash_report"
+    },
+    {
+      "command": "/usr/bin/python3 implementation/phase1/generate_release_gap_report.py --panel-zone-clash-report implementation/phase1/panel_zone_clash_report.json --out-json implementation/phase1/release/release_gap_report.json --out-md implementation/phase1/release/release_gap_report.md",
+      "return_code": 0,
+      "ok": true,
+      "stdout_tail": "Wrote release gap report JSON: implementation/phase1/release/release_gap_report.json\nWrote release gap report Markdown: implementation/phase1/release/release_gap_report.md\nWrote release gap smoke history plot: implementation/phase1/release/release_gap_smoke_history.png\nWrote release gap measured chain category plot: implementation/phase1/release/release_gap_measured_chain_categories.png\n",
+      "stderr_tail": "Warning: Ignoring XDG_SESSION_TYPE=wayland on Gnome. Use QT_QPA_PLATFORM=wayland to run on Wayland anyway.\n",
+      "step": "post_consume_release_gap_report"
+    },
+    {
+      "command": "/usr/bin/python3 implementation/phase1/generate_signed_release_registry.py --gap-report implementation/phase1/release/release_gap_report.json --committee-package implementation/phase1/release/committee_review/committee_review_package_report.json --committee-summary implementation/phase1/release/committee_review/committee_summary.json --private-key-out implementation/phase1/release/signing/release_registry_ed25519.pem --public-key-out implementation/phase1/release/signing/release_registry_ed25519.pub.pem --signature-out implementation/phase1/release/signing/release_registry.signature.b64 --out implementation/phase1/release/release_registry.json",
+      "return_code": 0,
+      "ok": true,
+      "stdout_tail": "Wrote signed release registry: implementation/phase1/release/release_registry.json\n",
+      "stderr_tail": "",
+      "step": "post_consume_release_registry_pass1"
+    },
+    {
+      "command": "/usr/bin/python3 implementation/phase1/generate_committee_review_package.py --gap-report implementation/phase1/release/release_gap_report.json --release-registry implementation/phase1/release/release_registry.json --out-dir implementation/phase1/release/committee_review",
+      "return_code": 0,
+      "ok": true,
+      "stdout_tail": "Wrote committee review package: implementation/phase1/release/committee_review/committee_review_package_report.json\n",
+      "stderr_tail": "Warning: Ignoring XDG_SESSION_TYPE=wayland on Gnome. Use QT_QPA_PLATFORM=wayland to run on Wayland anyway.\n",
+      "step": "post_consume_committee_review_package"
+    },
+    {
+      "command": "/usr/bin/python3 implementation/phase1/generate_signed_release_registry.py --gap-report implementation/phase1/release/release_gap_report.json --committee-package implementation/phase1/release/committee_review/committee_review_package_report.json --committee-summary implementation/phase1/release/committee_review/committee_summary.json --private-key-out implementation/phase1/release/signing/release_registry_ed25519.pem --public-key-out implementation/phase1/release/signing/release_registry_ed25519.pub.pem --signature-out implementation/phase1/release/signing/release_registry.signature.b64 --out implementation/phase1/release/release_registry.json",
+      "return_code": 0,
+      "ok": true,
+      "stdout_tail": "Wrote signed release registry: implementation/phase1/release/release_registry.json\n",
+      "stderr_tail": "",
+      "step": "post_consume_release_registry_pass2"
+    },
+    {
+      "command": "/usr/bin/python3 implementation/phase1/prepare_external_validation_submission.py --release-dir implementation/phase1/release --latest-pointer implementation/phase1/release/external_validation_latest.json --light-latest-pointer implementation/phase1/release/external_validation_light_latest.json --emit-lightweight --prune-old",
+      "return_code": 0,
+      "ok": true,
+      "stdout_tail": "Wrote external validation bundle: implementation/phase1/release/external_validation_submission_20260414T135713Z\nWrote external validation zip: implementation/phase1/release/external_validation_submission_20260414T135713Z.zip\nWrote external validation latest pointer: implementation/phase1/release/external_validation_latest.json\nWrote lightweight external validation latest pointer: implementation/phase1/release/external_validation_light_latest.json\n",
+      "stderr_tail": "Warning: Ignoring XDG_SESSION_TYPE=wayland on Gnome. Use QT_QPA_PLATFORM=wayland to run on Wayland anyway.\n",
+      "step": "post_consume_external_validation_submission"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "report_type": "opensees_text_baseline_bridge",
+  "generated_at": "2026-03-27T10:27:33.353829+00:00",
+  "source_id": "SCBF16B_shell_beam_mix",
+  "inputs": {
+    "opensees_model": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+    "model_json_out": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b_shell_beam_mix/model.json",
+    "npz_out": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b_shell_beam_mix/dataset.npz",
+    "report_out": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b_shell_beam_mix/bridge_report.json"
+  },
+  "source_provenance": {
+    "source_class": "opensees_text",
+    "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl"
+  },
+  "parse_counters": {
+    "ignored": 1103,
+    "node": 452,
+    "element": 219,
+    "constraint": 40
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "summary": {
+    "viewer_ready": true,
+    "accepted_object_count": 189,
+    "node_count": 452,
+    "element_count": 189,
+    "resolved_node_count": 452,
+    "variable_count": 139,
+    "story_band_count": 87,
+    "family_assumption": "opensees_text_orientation_classification",
+    "source_profile_label": "shell-beam mix",
+    "accepted_type_label": "elasticBeamColumn=112, corotTruss=32, ModElasticBeam2d=24, constraint_equalDOF=16, ShellMITC4=5",
+    "element_class_label": "beam=138, column=46, slab=5",
+    "max_radius": 648.319,
+    "bbox_label": "x=0.0..1080.0 | y=0.0..0.0 | z=0.0..2880.0"
+  },
+  "artifacts": {
+    "model_json": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b_shell_beam_mix/model.json",
+    "dataset_npz": "implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b_shell_beam_mix/dataset.npz"
+  }
+}

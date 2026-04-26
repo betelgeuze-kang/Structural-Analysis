@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-open-megastructure-source-manifest",
+  "generated_at": "2026-04-16T13:45:57.243614+00:00",
+  "inputs": {
+    "input_path": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm",
+    "candidate_id": "canton_tower_reduced_shm_benchmark",
+    "catalog": "implementation/phase1/open_data/megastructure/mega_structure_catalog.json",
+    "download_if_missing": false,
+    "max_download_bytes": 600000000,
+    "require_source_manifest": true,
+    "source_manifest_out": "implementation/phase1/open_data/megastructure/canton_tower_conversion_report.source_manifest.json",
+    "forbid_local_sanity_wave": true,
+    "dynamic_out": "implementation/phase1/spatiotemporal_data/canton_tower_dynamic_cases.jsonl",
+    "benchmark_out": "implementation/phase1/commercial_benchmark_cases.canton_tower_open.json",
+    "report_out": "implementation/phase1/open_data/megastructure/canton_tower_conversion_report.json",
+    "window_len": 120,
+    "window_stride": 60,
+    "max_cases": 220,
+    "max_nodes": 12,
+    "seed": 23,
+    "effective_mass_kg": 280000.0,
+    "story_height_m": 3.0,
+    "public_case_count": 3,
+    "metric_source": "open_data_measurement",
+    "min_topology_types": 3,
+    "min_hazard_types": 2,
+    "min_material_types": 2,
+    "allow_synthetic_displacement": false,
+    "case_id_prefix": "canton_tower_reduced_shm"
+  },
+  "source_provenance": [
+    {
+      "source_name": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/normalized_csv/accdata_2010-01-19-18.csv",
+      "sha256": "f926b4817d82898f64415c56be7af9fd8dca588e0f30967f47c36e7204228c83",
+      "bytes": 137688656,
+      "synthetic_flag": false
+    }
+  ],
+  "raw_file_hashes": {
+    "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/normalized_csv/accdata_2010-01-19-18.csv": "f926b4817d82898f64415c56be7af9fd8dca588e0f30967f47c36e7204228c83"
+  },
+  "source_manifest_pass": true,
+  "synthetic_source_detected": false
+}

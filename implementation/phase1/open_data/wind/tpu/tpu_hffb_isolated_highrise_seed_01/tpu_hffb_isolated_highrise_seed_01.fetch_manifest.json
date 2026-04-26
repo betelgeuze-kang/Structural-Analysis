@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-tpu-case-mat",
+  "generated_at": "2026-04-11T12:04:00.128705+00:00",
+  "source_name": "missing",
+  "source_url": "",
+  "case_id": "",
+  "mat_url": "",
+  "mat_source_resolved": "",
+  "real_source": true,
+  "source_origin_class": "official_external_benchmark",
+  "data_path": "implementation/phase1/open_data/wind/tpu/tpu_hffb_isolated_highrise_seed_01/tpu_hffb_isolated_highrise_seed_01.mat",
+  "sha256": "",
+  "size_bytes": 0,
+  "contract_pass": false,
+  "reason_code": "ERR_CASE_PAGE_FETCH",
+  "reason": "failed to fetch or parse the TPU case page."
+}

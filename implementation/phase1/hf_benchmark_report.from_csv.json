@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.2",
+  "run_id": "phase1-hf-benchmark-topk-residual-meta-prod",
+  "generated_at": "2026-04-06T13:53:16.596772+00:00",
+  "algorithm": "topk_weighted_residual_correction_with_meta_learning",
+  "source_cases_path": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+  "source_cases_sha256": "0a0952473d52eccc69e573c8e725adab0024bc4ffed24787bba82b135dcab367",
+  "source_family_order": [
+    "commercial_export"
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "top-k residual/meta benchmark KPI thresholds satisfied",
+  "kpi_pass": true,
+  "metrics": {
+    "drift_error_pct": 1.2752002135807767,
+    "base_shear_error_pct": 0.9328419526579238,
+    "mode_shape_mac": 1.0,
+    "buckling_factor_error_pct": 0.9450985158206192
+  },
+  "checks": {
+    "drift_ok": true,
+    "base_shear_ok": true,
+    "mac_ok": true,
+    "buckling_factor_ok": true,
+    "improves_over_lf": true
+  },
+  "target_split": "test",
+  "comparison": {
+    "baseline_lf": {
+      "train": {
+        "case_count": 7,
+        "drift_error_pct": 10.21519954582205,
+        "base_shear_error_pct": 6.19126080566179,
+        "mode_shape_mac": 0.943,
+        "buckling_factor_error_pct": 9.039164365985954,
+        "equilibrium_residual_mean": 0.026285714285714284
+      },
+      "val": {
+        "case_count": 2,
+        "drift_error_pct": 9.506628628964595,
+        "base_shear_error_pct": 5.376294212699743,
+        "mode_shape_mac": 0.9475,
+        "buckling_factor_error_pct": 8.103087388801681,
+        "equilibrium_residual_mean": 0.0235
+      },
+      "test": {
+        "case_count": 3,
+        "drift_error_pct": 12.430072264312741,
+        "base_shear_error_pct": 7.495167949188726,
+        "mode_shape_mac": 0.9313333333333333,
+        "buckling_factor_error_pct": 11.219466061392133,
+        "equilibrium_residual_mean": 0.03266666666666667
+      },
+      "all": {
+        "case_count": 12,
+        "drift_error_pct": 10.650822572635148,
+        "base_shear_error_pct": 6.3814098260498495,
+        "mode_shape_mac": 0.9408333333333333,
+        "buckling_factor_error_pct": 9.428226960306786,
+        "equilibrium_residual_mean": 0.02741666666666667
+      }
+    },
+    "topk_residual_meta": {
+      "train": {
+        "case_count": 7,
+        "drift_error_pct": 0.41060469801705485,
+        "base_shear_error_pct": 0.34071867080851287,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.3081864470604354,
+        "equilibrium_residual_mean": 0.012031648041946548
+      },
+      "val": {
+        "case_count": 2,
+        "drift_error_pct": 0.1778531482624165,
+        "base_shear_error_pct": 0.2920887738357463,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.8252950783863742,
+        "equilibrium_residual_mean": 0.010749806184321642
+      },
+      "test": {
+        "case_count": 3,
+        "drift_error_pct": 1.2752002135807767,
+        "base_shear_error_pct": 0.9328419526579238,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.9450985158206192,
+        "equilibrium_residual_mean": 0.01476349588483572
+      },
+      "all": {
+        "case_count": 12,
+        "drift_error_pct": 0.5879616519488788,
+        "base_shear_error_pct": 0.4806445084420712,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.5535992361381378,
+        "equilibrium_residual_mean": 0.01250096969306469
+      }
+    },
+    "improvement_pct": {
+      "drift_error_reduction_pct": 89.74100724062619,
+      "base_shear_error_reduction_pct": 87.55408872780637,
+      "buckling_error_reduction_pct": 91.57626119951603,
+      "mode_shape_mac_gain_pct": 7.372942018611309
+    }
+  },
+  "training": {
+    "epochs": 120,
+    "branches": 10,
+    "top_k": 3,
+    "lr": 0.055,
+    "epsilon": 0.11,
+    "temperature": 0.32,
+    "seed": 23,
+    "final_total_loss": 0.04344348981976509,
+    "final_weighted_loss": 0.038228560239076614,
+    "last_selected_branch_ids": [
+      2,
+      5,
+      7
+    ],
+    "last_selected_weights": [
+      0.3341997220140954,
+      0.3334438181819802,
+      0.33235645980392436
+    ],
+    "param_vector": [
+      0.34452685713768005,
+      -0.2573961019515991,
+      0.4103705883026123,
+      -0.7459601759910583,
+      0.40436336398124695,
+      0.6579750180244446,
+      -0.5801189541816711,
+      0.22037373483181,
+      -0.6473000049591064,
+      0.1600884050130844,
+      0.2905276417732239,
+      -0.12809784710407257,
+      0.08962705731391907,
+      -0.02957243099808693,
+      -0.5640566349029541,
+      0.16012530028820038,
+      0.567743718624115,
+      0.36368849873542786,
+      -0.24810510873794556,
+      0.21926163136959076,
+      -0.3637307286262512,
+      2.637721061706543
+    ]
+  },
+  "metric_source_validation": {
+    "enabled": true,
+    "accepted_metric_sources": [
+      "commercial_solver_export",
+      "engine_export_direct"
+    ],
+    "global_metric_source": "commercial_solver_export",
+    "missing_metric_source_case_ids": [],
+    "invalid_metric_source_case_ids": [],
+    "pass": true
+  }
+}

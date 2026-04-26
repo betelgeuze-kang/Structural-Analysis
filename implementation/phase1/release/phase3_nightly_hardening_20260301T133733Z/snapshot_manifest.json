@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-nightly-release-snapshot",
+  "generated_at": "2026-03-01T13:37:33.856064+00:00",
+  "snapshot": "phase3_nightly_hardening_20260301T133733Z",
+  "source_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1",
+  "release_policy": {
+    "commercial_readiness_pass": true,
+    "commercial_readiness_real_source_pass": true,
+    "commercial_readiness_gpu_strict_pass": true,
+    "forbid_toy_cases_enforced": true,
+    "real_source_multi_pass": true,
+    "real_source_multi_all_real_source_pass": true,
+    "real_source_multi_all_toy_free_pass": true,
+    "nonlinear_engine_pass": true,
+    "nonlinear_engine_rust_backend_pass": true,
+    "nonlinear_engine_convergence_pass": true,
+    "nonlinear_engine_drift_p95_pass": true,
+    "nonlinear_engine_base_p95_pass": true,
+    "nonlinear_engine_top_p95_pass": true,
+    "pushover_stress_pass": true,
+    "pushover_convergence_pass": true,
+    "pushover_plasticity_pass": true,
+    "pushover_collapse_path_pass": true,
+    "pushover_min_plastic_pass": true,
+    "phase3_shell_beam_mix_pass": true,
+    "phase3_gpu_strict_pass": true,
+    "phase3_real_source_verified": true,
+    "topology_shell_beam_mix_pass": true,
+    "scaleout_io_gpu_strict_pass": true,
+    "policy_pass": true
+  },
+  "release_policy_sha256": "0e1e372e69a389026c38c6fe7feebc06d4d32a16eff38cb54275d0239aaaccab",
+  "files": [
+    {
+      "file": "phase3_megastructure_pipeline_report.json",
+      "bytes": 9334,
+      "sha256": "997e1d980a5cb000d620cb38a1711a14758424a15fd8978f6ab93dd3fd3a39af"
+    },
+    {
+      "file": "opensees_topology_report.json",
+      "bytes": 2456,
+      "sha256": "f2aeabb33ffb9bb8bcb33ad6f6b0af98cce31c85204c12c36ea62cbf588256c6"
+    },
+    {
+      "file": "partitioned_scaleout_report.json",
+      "bytes": 9059,
+      "sha256": "52f102a022483e9a7d5c3f890c745b03f0131a44bed77e8383050716a769dcd0"
+    },
+    {
+      "file": "sync_stress_gate_report.json",
+      "bytes": 4692,
+      "sha256": "e56b807d6f82442556bc2f855fc15a2683d8951acb79e0029e6db51ba07b4f10"
+    },
+    {
+      "file": "noise_convergence_gate_report.json",
+      "bytes": 12836,
+      "sha256": "fb652264144bbf27c37d90e1e60ef76dcef2011bdc8928e1983442cd9a1099cf"
+    },
+    {
+      "file": "commercial_csv_gate_report.json",
+      "bytes": 3063,
+      "sha256": "11100780bf43cb1525c97ca2dea36348cc1540f136e25fa219f13d08d888ab36"
+    },
+    {
+      "file": "commercial_readiness_report.json",
+      "bytes": 14728,
+      "sha256": "237f97e03ba563d46f6b8b7ab2201a62320aec11e4a3d73165a8f9340027663e"
+    },
+    {
+      "file": "real_source_multi_gate_report.json",
+      "bytes": 1862,
+      "sha256": "7fb2d17d99b83ab49bad0abf1bff3b9ec1c689cbbb377daf6290c04ea02599a2"
+    },
+    {
+      "file": "nonlinear_frame_engine_report.json",
+      "bytes": 4362,
+      "sha256": "ac3445ee73d72b6c287c2b4ad61a785f5d04a05ac58764bae30cb432ac5c2c4c"
+    },
+    {
+      "file": "nonlinear_pushover_stress_report.json",
+      "bytes": 9125,
+      "sha256": "e748f588230b550476a044fb70e0e86d7809b9196adf3c6ce03df700506d16c6"
+    },
+    {
+      "file": "nightly_10m_repro_report.json",
+      "bytes": 4189,
+      "sha256": "873fc4fa7261cbee32a6b97229b49b97ee5572977976f6779e15e7edf5a3acf7"
+    },
+    {
+      "file": "scaleout_io_profile_report.json",
+      "bytes": 4743,
+      "sha256": "e07a52a7ca8f9ca52859376c55e5f6d9d2066f7b4b175eb5174d69a3d9335ba4"
+    },
+    {
+      "file": "ci_gate_report.json",
+      "bytes": 1695,
+      "sha256": "59df6d597043dce5a38dc9f5978b8049914fd591a4375bcf449caa4655c3d869"
+    },
+    {
+      "file": "static_artifact_validation_report.json",
+      "bytes": 5918,
+      "sha256": "15c8f17d92b233e1189f468643649ee7d93e3fd245a6f0d94591b6d39cb62b7c"
+    },
+    {
+      "file": "ci_artifact_manifest.json",
+      "bytes": 3493,
+      "sha256": "10e9dcc6483ace662e05ce0f9cbb4f55447f16b8f8950bfc8d068dbe9d3069a4"
+    }
+  ]
+}

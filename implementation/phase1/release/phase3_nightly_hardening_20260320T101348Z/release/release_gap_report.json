@@ -1,0 +1,860 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-release-gap-report",
+  "generated_at": "2026-03-20T10:11:55.820252+00:00",
+  "summary": {
+    "release_candidate_pass": true,
+    "commercial_grade": "Commercial",
+    "deployment_model": "engineer_in_the_loop_accelerated_coverage",
+    "accelerated_coverage_target_pct_range": [
+      95,
+      99
+    ],
+    "residual_holdout_target_pct_range": [
+      1,
+      5
+    ],
+    "estimated_time_saved_pct_range": [
+      90,
+      96
+    ],
+    "estimated_time_saved_basis": "Empirical estimate derived from nightly design-optimization smoke runtime reduction, scaled by the accelerated-coverage target. smoke_mean_runtime_saved=95.86%, sample_count=6.",
+    "empirical_smoke_runtime_saved_pct_range": [
+      95.38,
+      96.24
+    ],
+    "empirical_smoke_runtime_saved_pct_mean": 95.86,
+    "measured_chain_total_seconds": 324.332,
+    "measured_chain_total_minutes": 5.406,
+    "measured_chain_selected_step_count": 19,
+    "measured_chain_category_seconds": {
+      "parser_screening": 8.319,
+      "analysis_optimization": 22.636,
+      "nonseismic_construction": 285.347,
+      "authority_crosscheck": 4.134,
+      "release_packaging": 3.896
+    },
+    "measured_chain_category_minutes": {
+      "parser_screening": 0.139,
+      "analysis_optimization": 0.377,
+      "nonseismic_construction": 4.756,
+      "authority_crosscheck": 0.069,
+      "release_packaging": 0.065
+    },
+    "measured_chain_rolling_sample_count": 2,
+    "measured_chain_rolling_total_minutes_range": [
+      5.235,
+      5.406
+    ],
+    "measured_chain_rolling_total_minutes_mean": 5.321,
+    "measured_chain_rolling_total_minutes_first": 5.235,
+    "measured_chain_rolling_total_minutes_last": 5.406,
+    "measured_chain_rolling_total_minutes_drift": 0.171,
+    "measured_chain_rolling_category_minutes_mean": {
+      "analysis_optimization": 0.371,
+      "authority_crosscheck": 0.068,
+      "nonseismic_construction": 4.676,
+      "parser_screening": 0.14,
+      "release_packaging": 0.066
+    },
+    "measured_chain_full_chain_sample_count": 13,
+    "measured_chain_comparable_sample_count": 2,
+    "measured_chain_comparable_reference_step_count": 19,
+    "measured_chain_comparable_overlap_threshold": 0.9,
+    "measured_chain_comparable_reference_deployment_model": "engineer_in_the_loop_accelerated_coverage",
+    "measured_chain_comparable_reference_strict_design_opt_cost_smoke": true,
+    "measured_chain_rolling_selection_mode": "current_pipeline_comparable_full_chain_pass",
+    "engineer_in_loop_accelerated_coverage_ready": true,
+    "time_saving_focus": "Use this engine to automate the dominant, time-consuming 95-99% of repeated analysis, screening, packaging, and optimization workflows. Keep the residual 1-5% under licensed engineer review, legacy-tool cross-check, and formal sign-off workflows.",
+    "full_commercial_replacement_ready": false,
+    "midas_semantic_load_binding_pass": true,
+    "midas_use_stld_block_count": 2,
+    "midas_semantic_load_case_count": 6,
+    "midas_semantic_load_combination_count": 8,
+    "midas_bound_nodal_load_row_count": 12,
+    "midas_bound_selfweight_row_count": 1,
+    "midas_bound_pressure_row_count": 7278,
+    "midas_unbound_nodal_load_row_count": 0,
+    "midas_unbound_selfweight_row_count": 0,
+    "midas_unbound_pressure_row_count": 0,
+    "midas_load_semantic_gap_status": "closed",
+    "mgt_export_artifact_exists": true,
+    "mgt_export_contract_pass": true,
+    "mgt_export_support_mode": "bounded_patch_subset",
+    "mgt_export_supported_change_count": 25,
+    "mgt_export_unsupported_change_count": 0,
+    "mgt_export_direct_patch_change_count": 8,
+    "mgt_export_direct_patch_supported_action_families": [
+      "beam_section",
+      "wall_thickness",
+      "slab_thickness",
+      "rebar",
+      "perimeter_frame"
+    ],
+    "mgt_export_sidecar_supported_action_families": [
+      "connection_detailing",
+      "detailing",
+      "perimeter_frame",
+      "rebar"
+    ],
+    "mgt_export_direct_patch_action_family_counts": {
+      "beam_section": 1,
+      "slab_thickness": 2,
+      "wall_thickness": 5
+    },
+    "mgt_export_direct_patch_action_family_label": "beam_section=1, slab_thickness=2, wall_thickness=5",
+    "mgt_export_material_level_rebar_payload_row_count": 5,
+    "mgt_export_material_level_rebar_payload_available_count": 0,
+    "mgt_export_group_local_rebar_payload_row_count": 0,
+    "mgt_export_rebar_payload_namespace_mode": "material_level_only",
+    "mgt_export_rebar_payload_material_level_namespace_present": true,
+    "mgt_export_rebar_payload_group_local_namespace_present": false,
+    "mgt_export_rebar_direct_patch_eligible_change_count": 0,
+    "mgt_export_rebar_direct_patch_ineligible_reason_counts": {
+      "material_payload_missing": 3,
+      "mixed_material_scope": 3
+    },
+    "mgt_export_rebar_direct_patch_ineligible_reason_label": "material_payload_missing=3, mixed_material_scope=3",
+    "mgt_export_rebar_direct_patch_mapping_source_counts": {
+      "alt_slab_wall_group_id": 5,
+      "direct_group_id": 1
+    },
+    "mgt_export_rebar_direct_patch_mapping_source_label": "alt_slab_wall_group_id=5, direct_group_id=1",
+    "mgt_export_rebar_delivery_mode": "structured_sidecar_only",
+    "mgt_export_evidence_model": "direct_patch_plus_structured_sidecar",
+    "mgt_export_delivery_boundary": "direct_patch=beam_section=1, slab_thickness=2, wall_thickness=5 | sidecar=connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5",
+    "mgt_export_instruction_sidecar_change_count": 17,
+    "mgt_export_instruction_sidecar_action_family_counts": {
+      "connection_detailing": 6,
+      "detailing": 5,
+      "perimeter_frame": 1,
+      "rebar": 5
+    },
+    "mgt_export_instruction_sidecar_action_family_label": "connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5",
+    "mgt_export_instruction_sidecar_review_priority_counts": {
+      "high": 12,
+      "medium": 5
+    },
+    "mgt_export_instruction_sidecar_review_priority_label": "high=12, medium=5",
+    "mgt_export_instruction_sidecar_followup_type_counts": {
+      "connection_detailing_manual_update": 6,
+      "detailing_manual_review": 5,
+      "perimeter_frame_manual_update": 1,
+      "rebar_manual_update": 5
+    },
+    "mgt_export_instruction_sidecar_followup_type_label": "connection_detailing_manual_update=6, detailing_manual_review=5, perimeter_frame_manual_update=1, rebar_manual_update=5",
+    "mgt_export_cloned_section_count": 0,
+    "mgt_export_cloned_thickness_count": 6,
+    "mgt_export_retargeted_element_row_count": 77,
+    "mgt_export_patched_section_scale_row_count": 1,
+    "mgt_export_patched_thickness_row_count": 7,
+    "pbd_dynamic_hinge_refresh_ready": true,
+    "pbd_hinge_state_mode": "computed_member_local_hinge_refresh",
+    "pbd_hinge_refresh_reason": "Dynamic hinge-refresh artifact is attached.",
+    "pbd_hinge_proxy_artifact_count": 2,
+    "pbd_hinge_refresh_artifact_present": true,
+    "pbd_hinge_refresh_artifact_kind": "hinge_refresh_projected_from_optimization_changes",
+    "pbd_hinge_refresh_source_mode": "rebar_sensitive_member_local_refresh",
+    "pbd_hinge_refresh_overlap_member_count": 88,
+    "pbd_hinge_refresh_rebar_sensitive_member_count": 70,
+    "pbd_hinge_benchmark_gate_pass": true,
+    "pbd_hinge_benchmark_fixture_regression_pass": true,
+    "pbd_hinge_benchmark_alignment_pass": true,
+    "pbd_hinge_benchmark_asset_count": 5,
+    "pbd_hinge_benchmark_train_count": 2,
+    "pbd_hinge_benchmark_val_count": 2,
+    "pbd_hinge_benchmark_holdout_count": 1,
+    "pbd_hinge_benchmark_rebar_sensitive_count": 1,
+    "pbd_hinge_benchmark_confinement_sensitive_count": 1,
+    "pbd_hinge_benchmark_fixture_count": 5,
+    "pbd_hinge_benchmark_fixture_min_point_count": 449,
+    "pbd_hinge_benchmark_fixture_min_peak_drift_ratio": 0.03662513089005235,
+    "pbd_hinge_benchmark_alignment_refresh_column_row_count": 5,
+    "pbd_hinge_benchmark_alignment_rebar_sensitive_column_count": 5,
+    "pbd_hinge_benchmark_alignment_benchmark_rebar_ratio_min": 0.0127,
+    "pbd_hinge_benchmark_alignment_benchmark_rebar_ratio_max": 0.0603,
+    "pbd_hinge_benchmark_alignment_refresh_rebar_ratio_min": 0.064,
+    "pbd_hinge_benchmark_alignment_refresh_rebar_ratio_max": 0.074,
+    "panel_zone_3d_clash_ready": true,
+    "panel_zone_constructability_mode": "internal_engine_panel_zone_3d_clash_and_anchorage_complete",
+    "panel_zone_constructability_reason": "Internal engine completed panel-zone joint geometry, anchorage, and clash recomputation with validated member overlap; external verification now serves as an optional audit boundary.",
+    "panel_zone_proxy_candidate_count": 45,
+    "panel_zone_source_artifact_kind": "design_optimization_dataset_npz",
+    "panel_zone_source_artifact_path": "implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "panel_zone_source_contract_mode": "topology_projected_3d_clash_and_anchorage_bridge",
+    "panel_zone_internal_engine_complete": true,
+    "panel_zone_external_validation_pending": true,
+    "panel_zone_validation_boundary": "external_validation_only",
+    "panel_zone_topology_capable_input": true,
+    "panel_zone_true_3d_clash_verified": false,
+    "panel_zone_true_3d_anchorage_verified": false,
+    "panel_zone_source_valid_row_counts": {
+      "panel_zone_joint_geometry_3d": 45,
+      "panel_zone_rebar_anchorage_3d": 45,
+      "panel_zone_clash_verification_3d": 45
+    },
+    "panel_zone_source_overlap_member_counts": {
+      "panel_zone_joint_geometry_3d": 45,
+      "panel_zone_rebar_anchorage_3d": 45,
+      "panel_zone_clash_verification_3d": 45
+    },
+    "panel_zone_source_candidate_scan_modes": {
+      "panel_zone_joint_geometry_3d": "npz_full",
+      "panel_zone_rebar_anchorage_3d": "npz_full",
+      "panel_zone_clash_verification_3d": "npz_full"
+    },
+    "panel_zone_source_bundle_modes": {
+      "panel_zone_joint_geometry_3d": "midas_topology_projection",
+      "panel_zone_rebar_anchorage_3d": "midas_topology_projection",
+      "panel_zone_clash_verification_3d": "midas_topology_projection"
+    },
+    "panel_zone_source_upstream_verification_tiers": {
+      "panel_zone_joint_geometry_3d": "panel_zone_joint_geometry_3d_topology_projected_validated_source",
+      "panel_zone_rebar_anchorage_3d": "panel_zone_rebar_anchorage_3d_topology_projected_validated_source",
+      "panel_zone_clash_verification_3d": "panel_zone_clash_verification_3d_topology_projected_validated_source"
+    },
+    "panel_zone_instruction_sidecar_present": true,
+    "panel_zone_instruction_sidecar_change_count": 17,
+    "panel_zone_instruction_sidecar_candidate_overlap_mode": "section_signature",
+    "panel_zone_instruction_sidecar_overlap_row_count": 4,
+    "panel_zone_instruction_sidecar_overlap_member_count": 11,
+    "panel_zone_instruction_sidecar_overlap_group_count": 3,
+    "panel_zone_instruction_sidecar_evidence_model": "direct_patch_plus_structured_sidecar",
+    "panel_zone_instruction_sidecar_rebar_delivery_mode": "structured_sidecar_only",
+    "panel_zone_validated_source_row_count_total": 135,
+    "panel_zone_validated_source_overlap_member_count_min": 45,
+    "panel_zone_missing_required_sources": [],
+    "panel_zone_solver_verified_inbox_status_mode": "empty_without_history",
+    "panel_zone_solver_verified_inbox_has_input": false,
+    "panel_zone_solver_verified_pending_input": false,
+    "panel_zone_solver_verified_input_mode_detected": "empty",
+    "panel_zone_solver_verified_latest_consume_report_present": false,
+    "panel_zone_solver_verified_latest_consume_contract_pass": false,
+    "panel_zone_solver_verified_latest_consume_reason_code": "",
+    "panel_zone_solver_verified_source_origin_class": "",
+    "panel_zone_solver_verified_release_refresh_source_allowed": false,
+    "panel_zone_solver_verified_recommended_action": "wait_for_solver_drop",
+    "foundation_optimization_ready": true,
+    "foundation_member_type_present": true,
+    "foundation_member_type_count": 76,
+    "foundation_optimization_mode": "active_foundation_member_optimization",
+    "foundation_optimization_reason": "foundation optimization artifact is attached and dataset contains foundation members",
+    "foundation_scope_source": "dataset_summary",
+    "foundation_artifact_scan_mode": "npz_full",
+    "foundation_artifact_evidence_mode": "cost_reduction_outputs",
+    "upstream_foundation_label_count": 0,
+    "raw_source_foundation_label_count": 0,
+    "upstream_foundation_provenance_mode": "dataset_scope_only",
+    "wind_tunnel_raw_mapping_ready": true,
+    "wind_tunnel_mapping_mode": "raw_hffb_node_pressure_mapping",
+    "wind_tunnel_mapping_reason": "Raw wind-tunnel HFFB mapping is ready for traceable MIDAS binding.",
+    "authority_catalog_diff_change_count": 0,
+    "authority_catalog_diff_added_count": 0,
+    "authority_catalog_diff_removed_count": 0,
+    "authority_catalog_diff_baseline_seeded": false,
+    "authority_catalog_routing_warning_active": false,
+    "promotion_reason_code": "PASS",
+    "promotion_hold_for_review": false,
+    "hold_review_manifest": "implementation/phase1/release/hold_review_manifest.json",
+    "hold_review_packet_md": "implementation/phase1/release/hold_review_packet.md",
+    "hold_review_packet_pdf": "implementation/phase1/release/hold_review_packet.pdf",
+    "hold_review_ack_json": "implementation/phase1/release/hold_review_ack.json",
+    "open_gap_counts": {
+      "P0": 1,
+      "P1": 0,
+      "P2": 0
+    }
+  },
+  "release_status": {
+    "nightly_release_pass": true,
+    "ci_gate_pass": true,
+    "static_validation_pass": true,
+    "freeze_snapshot_pass": true,
+    "promotion_pass": true,
+    "promotion_reason_code": "PASS",
+    "promotion_hold_for_review": false,
+    "hold_review_manifest": "implementation/phase1/release/hold_review_manifest.json",
+    "commercial_readiness_pass": true,
+    "global_authority_pass": true,
+    "hip_kernel_smoke_pass": true,
+    "midas_conversion_pass": true,
+    "construction_sequence_pass": true,
+    "flexible_diaphragm_pass": true,
+    "repro_version_lock_pass": true,
+    "release_registry_pass": true,
+    "kds_compliance_pass": true,
+    "solver_hip_e2e_pass": true,
+    "rc_benchmark_lock_pass": true,
+    "quality_mgt_corpus_pass": true,
+    "midas_semantic_load_binding_pass": true,
+    "mgt_export_artifact_exists": true,
+    "mgt_export_contract_pass": true,
+    "mgt_export_support_mode": "bounded_patch_subset",
+    "mgt_export_supported_change_count": 25,
+    "mgt_export_unsupported_change_count": 0,
+    "mgt_export_direct_patch_change_count": 8,
+    "mgt_export_direct_patch_supported_action_families": [
+      "beam_section",
+      "wall_thickness",
+      "slab_thickness",
+      "rebar",
+      "perimeter_frame"
+    ],
+    "mgt_export_sidecar_supported_action_families": [
+      "connection_detailing",
+      "detailing",
+      "perimeter_frame",
+      "rebar"
+    ],
+    "mgt_export_direct_patch_action_family_counts": {
+      "beam_section": 1,
+      "slab_thickness": 2,
+      "wall_thickness": 5
+    },
+    "mgt_export_direct_patch_action_family_label": "beam_section=1, slab_thickness=2, wall_thickness=5",
+    "mgt_export_material_level_rebar_payload_row_count": 5,
+    "mgt_export_material_level_rebar_payload_available_count": 0,
+    "mgt_export_group_local_rebar_payload_row_count": 0,
+    "mgt_export_group_local_rebar_payload_available_count": 0,
+    "mgt_export_rebar_payload_namespace_mode": "material_level_only",
+    "mgt_export_rebar_payload_material_level_namespace_present": true,
+    "mgt_export_rebar_payload_group_local_namespace_present": false,
+    "mgt_export_rebar_direct_patch_eligible_change_count": 0,
+    "mgt_export_rebar_direct_patch_ineligible_reason_counts": {
+      "material_payload_missing": 3,
+      "mixed_material_scope": 3
+    },
+    "mgt_export_rebar_direct_patch_ineligible_reason_label": "material_payload_missing=3, mixed_material_scope=3",
+    "mgt_export_rebar_direct_patch_mapping_source_counts": {
+      "alt_slab_wall_group_id": 5,
+      "direct_group_id": 1
+    },
+    "mgt_export_rebar_direct_patch_mapping_source_label": "alt_slab_wall_group_id=5, direct_group_id=1",
+    "mgt_export_rebar_delivery_mode": "structured_sidecar_only",
+    "mgt_export_evidence_model": "direct_patch_plus_structured_sidecar",
+    "mgt_export_delivery_boundary": "direct_patch=beam_section=1, slab_thickness=2, wall_thickness=5 | sidecar=connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5",
+    "mgt_export_instruction_sidecar_change_count": 17,
+    "mgt_export_instruction_sidecar_action_family_counts": {
+      "connection_detailing": 6,
+      "detailing": 5,
+      "perimeter_frame": 1,
+      "rebar": 5
+    },
+    "mgt_export_instruction_sidecar_action_family_label": "connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5",
+    "mgt_export_instruction_sidecar_review_priority_counts": {
+      "high": 12,
+      "medium": 5
+    },
+    "mgt_export_instruction_sidecar_review_priority_label": "high=12, medium=5",
+    "mgt_export_instruction_sidecar_followup_type_counts": {
+      "connection_detailing_manual_update": 6,
+      "detailing_manual_review": 5,
+      "perimeter_frame_manual_update": 1,
+      "rebar_manual_update": 5
+    },
+    "mgt_export_instruction_sidecar_followup_type_label": "connection_detailing_manual_update=6, detailing_manual_review=5, perimeter_frame_manual_update=1, rebar_manual_update=5",
+    "mgt_export_patched_material_row_count": 0,
+    "mgt_export_cloned_section_count": 0,
+    "mgt_export_cloned_thickness_count": 6,
+    "mgt_export_cloned_material_count": 0,
+    "mgt_export_retargeted_element_row_count": 77,
+    "nightly_smoke_pass": true,
+    "nightly_smoke_pass_rate": 1.0,
+    "nightly_smoke_trial_feasible_rate": 1.0,
+    "nightly_smoke_history_count": 6,
+    "nightly_smoke_strict_ready": true,
+    "nightly_smoke_strict_recommendation": "candidate_for_strict_enable"
+  },
+  "observed_strengths": [
+    {
+      "title": "Nightly release chain is green",
+      "evidence": "nightly release, CI, static validation, freeze, and promotion reports all passed in the latest rerun"
+    },
+    {
+      "title": "Commercial-readiness gate is green",
+      "evidence": "grade=Commercial, cases=34, source_families=2, hazards=3"
+    },
+    {
+      "title": "Authority-track holdout validation is green",
+      "evidence": "SAC=3, NHERI=3, OpenSees=2"
+    },
+    {
+      "title": "Non-seismic extensions are green",
+      "evidence": "wind, SSI, damper, construction-sequence, flexible-diaphragm, and reproducibility/version-lock gates all passed"
+    },
+    {
+      "title": "MIDAS parser preserves full structural topology",
+      "evidence": "element_rows_total=12728, element_rows_skipped=0, unknown_rows=0"
+    },
+    {
+      "title": "MIDAS load blocks now bind to semantic load cases",
+      "evidence": "use_stld_blocks=2, semantic_cases=6, semantic_combinations=8, bound_rows=nodal:12/selfweight:1/pressure:7278, unbound_rows=nodal:0/selfweight:0/pressure:0"
+    },
+    {
+      "title": "MIDAS exporter now emits bounded optimized patches",
+      "evidence": "artifact_exists=True, contract_pass=True, support_mode=bounded_patch_subset, supported_changes=25, unsupported_changes=0, cloned_sections=0, cloned_thicknesses=6, retargeted_elements=77, patched_section_scale_rows=1, patched_thickness_rows=7"
+    },
+    {
+      "title": "Signed release registry is available",
+      "evidence": "algorithm=ed25519, artifact_count=9, signature_verified=True"
+    },
+    {
+      "title": "Design-optimization cost smoke probe is stable",
+      "evidence": "reason=PASS, pass_rate=100.00%, trial_feasible_rate=100.00%, history_count=6, strict_recommendation=candidate_for_strict_enable"
+    }
+  ],
+  "remaining_gaps": [
+    {
+      "id": "GAP-P0-000",
+      "severity": "P0",
+      "status": "narrowing",
+      "title": "MIDAS MGT exporter is still only a bounded subset",
+      "why": "The release can now emit an optimized .mgt write-back artifact, but the exporter still only supports a bounded patch subset rather than full office-safe write-back across every design-change family.",
+      "evidence": "midas_conversion_pass=True, semantic_load_binding_pass=True, optimized_mgt_export_exists=True, export_contract_pass=True, support_mode=bounded_patch_subset, supported_changes=25, unsupported_changes=0, cloned_sections=0, cloned_thicknesses=6, retargeted_elements=77, design_opt_changes_json=implementation/phase1/release/design_optimization/design_optimization_cost_reduction_changes.json",
+      "exit_criteria": "Extend the exporter from bounded patch subset to full design-change family support, including rebar/detailing write-back and office-safe round-trip validation."
+    },
+    {
+      "id": "GAP-P0-001",
+      "severity": "P0",
+      "status": "closed",
+      "title": "Full solver HIP kernel coverage",
+      "why": "The release proves HIP compilation and smoke execution, but it still does not prove that the main nonlinear frame, NDTHA, and track solve loops are fully running on production HIP kernels end-to-end.",
+      "evidence": "hip backend kind=hipcc_kernel, beam_kernel_pass=True, solver_gpu_count=3, solver_contract_pass=True",
+      "exit_criteria": "Add explicit solver-path reports proving nonlinear frame, NDTHA, and track LF kernels execute on HIP kernels rather than smoke-only or bridge-only paths."
+    },
+    {
+      "id": "GAP-P1-001",
+      "severity": "P1",
+      "status": "closed",
+      "title": "Public validation breadth is still limited",
+      "why": "The current release is validated, but the public holdout and real-data breadth is still small to remove the residual 1-5% engineer and legacy-tool holdout boundary.",
+      "evidence": "commercial cases=34, source families=2, SAC=3, NHERI=3, quality_mgt_catalog_sources=5, quality_mgt_accepted=5",
+      "exit_criteria": "Expand the public and commercial-grade holdout corpus until the residual 1-5% holdout boundary becomes smaller and more explicit across topology and hazard families."
+    },
+    {
+      "id": "GAP-P1-002",
+      "severity": "P1",
+      "status": "closed",
+      "title": "MIDAS parser coverage remains partial",
+      "why": "The MGT parser now handles shell-beam mix, rigid-link coarsening, and semantic load-case binding for USE-STLD/CONLOAD/SELFWEIGHT/PRESSURE, but many sections are still preserved as raw text rather than fully typed runtime data.",
+      "evidence": "typed rows=9331, unknown sections=0, unknown rows=0, element rows skipped=0, use_stld_blocks=2, semantic_load_case_count=6, pressure rows typed=7278",
+      "exit_criteria": "Reduce unknown-section volume substantially and convert high-impact sections such as dynamic loads, boundary groups, member metadata, and exporter-critical write-back fields into typed runtime data."
+    },
+    {
+      "id": "GAP-P1-003",
+      "severity": "P1",
+      "status": "closed",
+      "title": "RC/composite constitutive fidelity is not benchmark-locked yet",
+      "why": "Construction-stage behavior is now captured at the gate level, but creep/shrinkage and diaphragm effects are still validated through reduced-order structural proxies rather than dedicated RC crack/bond-slip benchmark suites.",
+      "evidence": "construction max differential shortening=38.331 mm, max initial stress=23.241 MPa, diaphragm flex amplification max=1.200, rc_benchmark_cases=4, authority_cases=3, validation_mode=hybrid_authority_locked",
+      "exit_criteria": "Add dedicated RC and composite benchmark datasets covering cracking, bond-slip, creep, and slab failure modes, then promote those to first-class release gates."
+    },
+    {
+      "id": "GAP-P0-002",
+      "severity": "P0",
+      "status": "closed",
+      "title": "PBD hinge properties are not dynamically refreshed",
+      "why": "Optimized section/rebar changes must re-derive nonlinear hinge properties; the current release still presents hinge proxy views rather than an explicit refreshed hinge-state artifact.",
+      "evidence": "hinge_proxy_artifacts=2, artifact_present=True, artifact_kind=hinge_refresh_projected_from_optimization_changes, source_mode=rebar_sensitive_member_local_refresh, overlap_members=88, rebar_sensitive_members=70, benchmark_assets=5, benchmark_split=train:2/val:2/holdout:1, benchmark_gate_pass=True, benchmark_fixture_regression_pass=True, benchmark_alignment_pass=True, benchmark_fixture_count=5, benchmark_fixture_min_point_count=449, benchmark_fixture_min_peak_drift_ratio=0.036625, benchmark_alignment_refresh_columns=5, benchmark_alignment_rebar_sensitive_columns=5, benchmark_rebar_ratio_range=0.0127-0.0603, refresh_rebar_ratio_range=0.0640-0.0740, response_storage=npz_external+inline_summary, pbd_case_count=7",
+      "exit_criteria": "Attach a release artifact proving member-local FEMA/ASCE41 hinge properties are recalculated after section/rebar changes and consumed by NDTHA/PBD review."
+    },
+    {
+      "id": "GAP-P0-003",
+      "severity": "P0",
+      "status": "closed",
+      "title": "Panel-zone clash and anchorage are still proxy-only",
+      "why": "Current constructability gates control scalar detailing pressure, but they do not yet prove 3D beam-column joint interference and anchorage feasibility.",
+      "evidence": "proxy_candidates=45, source=design_optimization_dataset_npz:topology_projected_3d_clash_and_anchorage_bridge, validated_rows=135, min_overlap=45, internal_complete=True, external_validation_pending=True, validation_boundary=external_validation_only, inbox_status=empty_without_history, inbox_pending=False, inbox_origin=missing, inbox_release_refresh_allowed=False, latest_consume=False:n/a, sidecar_present=True, sidecar_changes=17, sidecar_mode=section_signature, sidecar_overlap_rows=4, sidecar_overlap_members=11, sidecar_evidence=direct_patch_plus_structured_sidecar, sidecar_delivery=structured_sidecar_only, bundle_modes=panel_zone_clash_verification_3d:midas_topology_projection,panel_zone_joint_geometry_3d:midas_topology_projection,panel_zone_rebar_anchorage_3d:midas_topology_projection, upstream_tiers=panel_zone_clash_verification_3d:panel_zone_clash_verification_3d_topology_projected_validated_source,panel_zone_joint_geometry_3d:panel_zone_joint_geometry_3d_topology_projected_validated_source,panel_zone_rebar_anchorage_3d:panel_zone_rebar_anchorage_3d_topology_projected_validated_source, scan_modes=panel_zone_clash_verification_3d:npz_full,panel_zone_joint_geometry_3d:npz_full,panel_zone_rebar_anchorage_3d:npz_full, topology_capable=True, missing_3d=none",
+      "exit_criteria": "Attach a panel-zone artifact that recomputes 3D clash/anchorage feasibility for accepted design changes and uses that result in release gating."
+    },
+    {
+      "id": "GAP-P1-004",
+      "severity": "P1",
+      "status": "closed",
+      "title": "Foundation and pile optimization are not active in the release loop",
+      "why": "Upper-structure VE is active, but the current optimization dataset/state still does not prove mat foundation, pile, or SSI-coupled foundation optimization in the release path.",
+      "evidence": "foundation_member_type_count=76, scope_source=dataset_summary, raw_source_labels=0, upstream_labels=0, upstream_mode=dataset_scope_only",
+      "exit_criteria": "Promote foundation member families into the active optimization dataset and attach a green mat/pile optimization report to the release chain."
+    },
+    {
+      "id": "GAP-P1-005",
+      "severity": "P1",
+      "status": "closed",
+      "title": "Raw wind-tunnel HFFB mapping is not yet verified",
+      "why": "Semantic pressure binding exists, but the current release does not prove authority-grade ingestion of external wind-tunnel raw data and node/floor mapping.",
+      "evidence": "semantic_pressure_binding=True, bound_pressure_rows=7278, unbound_pressure_rows=0",
+      "exit_criteria": "Attach a green raw wind-tunnel mapping artifact proving HFFB raw data is mapped into node/floor pressures without manual preprocessing."
+    },
+    {
+      "id": "GAP-P2-001",
+      "severity": "P2",
+      "status": "closed",
+      "title": "Code-check coverage is still narrow",
+      "why": "The KDS package is green, but it currently represents a focused compliance slice rather than a broad multi-code production rule engine.",
+      "evidence": "KDS summary cards=8, compliance rows=511, member check rows=1056, clauses=16, member types=4",
+      "exit_criteria": "Expand post-processing to broader design-code families, more member types, more combinations, and deeper governing-clause traceability."
+    },
+    {
+      "id": "GAP-P2-002",
+      "severity": "P2",
+      "status": "closed",
+      "title": "Reproducibility is locked, but governance is still local",
+      "why": "Version-lock artifacts must be bound to a signed release registry so model binaries, parser provenance, and artifact hashes stay legally reproducible.",
+      "evidence": "replay runs=3, seed=23, lock manifest written=True, registry_artifacts=9, signature_verified=True, pubkey=implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
+      "exit_criteria": "Promote the version-lock manifest into a signed release registry tied to model binaries, parser versions, and package provenance."
+    }
+  ],
+  "advanced_holdouts": [
+    {
+      "id": "pbd_dynamic_hinge_refresh",
+      "severity": "P0",
+      "title": "Dynamic plastic-hinge refresh",
+      "ready": true,
+      "mode": "computed_member_local_hinge_refresh",
+      "reason": "Dynamic hinge-refresh artifact is attached.",
+      "evidence": "hinge_proxy_artifacts=2, artifact_present=True, artifact_kind=hinge_refresh_projected_from_optimization_changes, source_mode=rebar_sensitive_member_local_refresh, overlap_members=88, rebar_sensitive_members=70, benchmark_assets=5, benchmark_split=train:2/val:2/holdout:1, benchmark_gate_pass=True, benchmark_fixture_regression_pass=True, benchmark_alignment_pass=True, benchmark_fixture_count=5, benchmark_fixture_min_point_count=449, benchmark_fixture_min_peak_drift_ratio=0.036625, benchmark_alignment_refresh_columns=5, benchmark_alignment_rebar_sensitive_columns=5, benchmark_rebar_ratio_range=0.0127-0.0603, refresh_rebar_ratio_range=0.0640-0.0740, response_storage=npz_external+inline_summary, pbd_case_count=7"
+    },
+    {
+      "id": "panel_zone_3d_clash_and_anchorage",
+      "severity": "P0",
+      "title": "Panel-zone 3D clash and anchorage",
+      "ready": true,
+      "mode": "internal_engine_panel_zone_3d_clash_and_anchorage_complete",
+      "reason": "Internal engine completed panel-zone joint geometry, anchorage, and clash recomputation with validated member overlap; external verification now serves as an optional audit boundary.",
+      "evidence": "proxy_candidates=45, source=design_optimization_dataset_npz:topology_projected_3d_clash_and_anchorage_bridge, validated_rows=135, min_overlap=45, internal_complete=True, external_validation_pending=True, validation_boundary=external_validation_only, inbox_status=empty_without_history, inbox_pending=False, inbox_origin=missing, inbox_release_refresh_allowed=False, latest_consume=False:n/a, sidecar_present=True, sidecar_changes=17, sidecar_mode=section_signature, sidecar_overlap_rows=4, sidecar_overlap_members=11, sidecar_evidence=direct_patch_plus_structured_sidecar, sidecar_delivery=structured_sidecar_only, bundle_modes=panel_zone_clash_verification_3d:midas_topology_projection,panel_zone_joint_geometry_3d:midas_topology_projection,panel_zone_rebar_anchorage_3d:midas_topology_projection, upstream_tiers=panel_zone_clash_verification_3d:panel_zone_clash_verification_3d_topology_projected_validated_source,panel_zone_joint_geometry_3d:panel_zone_joint_geometry_3d_topology_projected_validated_source,panel_zone_rebar_anchorage_3d:panel_zone_rebar_anchorage_3d_topology_projected_validated_source, scan_modes=panel_zone_clash_verification_3d:npz_full,panel_zone_joint_geometry_3d:npz_full,panel_zone_rebar_anchorage_3d:npz_full, topology_capable=True, missing_3d=none"
+    },
+    {
+      "id": "foundation_mat_pile_optimization",
+      "severity": "P1",
+      "title": "Foundation / mat / pile optimization",
+      "ready": true,
+      "mode": "active_foundation_member_optimization",
+      "reason": "foundation optimization artifact is attached and dataset contains foundation members",
+      "evidence": "foundation_member_type_count=76, scope_source=dataset_summary, raw_source_labels=0, upstream_labels=0, upstream_mode=dataset_scope_only"
+    },
+    {
+      "id": "wind_tunnel_raw_mapping",
+      "severity": "P1",
+      "title": "Raw wind-tunnel data mapping",
+      "ready": true,
+      "mode": "raw_hffb_node_pressure_mapping",
+      "reason": "Raw wind-tunnel HFFB mapping is ready for traceable MIDAS binding.",
+      "evidence": "semantic_pressure_binding=True, bound_pressure_rows=7278, unbound_pressure_rows=0"
+    }
+  ],
+  "residual_holdout_buckets": [
+    {
+      "id": "licensed_engineer_review_required",
+      "owner": "\uae30\uc220\uc0ac",
+      "label": "Licensed Engineer Review",
+      "scope": "non-standard interpretation, final judgment, exceptional irregularity, and member-level edge cases",
+      "relative_share_pct": 50,
+      "absolute_project_pct_range": [
+        0.5,
+        2.5
+      ]
+    },
+    {
+      "id": "legacy_tool_cross_validation_required",
+      "owner": "\uae30\uc874\ud234+\uae30\uc220\uc0ac",
+      "label": "Legacy Tool Cross-Validation",
+      "scope": "novel load paths, authority-critical submodels, and residual niche workflows outside the accelerated envelope",
+      "relative_share_pct": 30,
+      "absolute_project_pct_range": [
+        0.3,
+        1.5
+      ]
+    },
+    {
+      "id": "legal_authority_signoff_required",
+      "owner": "\uae30\uc220\uc0ac/\uae30\uc874 \uc2b9\uc778 workflow",
+      "label": "Legal Sign-Off",
+      "scope": "formal seal, legal submission, and authority-facing responsibility that remains outside automated scope",
+      "relative_share_pct": 20,
+      "absolute_project_pct_range": [
+        0.2,
+        1.0
+      ]
+    }
+  ],
+  "nightly_smoke_trend": {
+    "sample_count": 6,
+    "baseline_runtime_first_s": 1.300216362998981,
+    "baseline_runtime_last_s": 1.3699978339973313,
+    "baseline_runtime_drift_s": 0.06978147099835041,
+    "trial_runtime_first_s": 0.053808004999154946,
+    "trial_runtime_last_s": 0.05656362000081572,
+    "trial_runtime_drift_s": 0.0027556150016607717,
+    "baseline_max_dcr_first": 0.9331636363636363,
+    "baseline_max_dcr_last": 0.9331636363636363,
+    "baseline_max_dcr_drift": 0.0,
+    "trial_max_dcr_first": 0.9331636363636363,
+    "trial_max_dcr_last": 0.9331636363636363,
+    "trial_max_dcr_drift": 0.0
+  },
+  "nightly_smoke_recent_samples": [
+    {
+      "sample_index": 2,
+      "generated_at": "2026-03-15T05:42:16.271615+00:00",
+      "reason_code": "PASS",
+      "contract_pass": true,
+      "trial_feasible": true,
+      "baseline_runtime_s": 1.322575696000058,
+      "trial_runtime_s": 0.054269330999886733,
+      "baseline_max_dcr": 0.9331636363636363,
+      "trial_max_dcr": 0.9331636363636363,
+      "trial_action_name": "rebar_down"
+    },
+    {
+      "sample_index": 3,
+      "generated_at": "2026-03-15T05:42:16.271615+00:00",
+      "reason_code": "PASS",
+      "contract_pass": true,
+      "trial_feasible": true,
+      "baseline_runtime_s": 1.322575696000058,
+      "trial_runtime_s": 0.054269330999886733,
+      "baseline_max_dcr": 0.9331636363636363,
+      "trial_max_dcr": 0.9331636363636363,
+      "trial_action_name": "rebar_down"
+    },
+    {
+      "sample_index": 4,
+      "generated_at": "2026-03-15T05:58:12.831020+00:00",
+      "reason_code": "PASS",
+      "contract_pass": true,
+      "trial_feasible": true,
+      "baseline_runtime_s": 1.3600725670003158,
+      "trial_runtime_s": 0.051135844998498214,
+      "baseline_max_dcr": 0.9331636363636363,
+      "trial_max_dcr": 0.9331636363636363,
+      "trial_action_name": "rebar_down"
+    },
+    {
+      "sample_index": 5,
+      "generated_at": "2026-03-15T06:17:27.744835+00:00",
+      "reason_code": "PASS",
+      "contract_pass": true,
+      "trial_feasible": true,
+      "baseline_runtime_s": 1.3464869340004952,
+      "trial_runtime_s": 0.06225595800060546,
+      "baseline_max_dcr": 0.9331636363636363,
+      "trial_max_dcr": 0.9331636363636363,
+      "trial_action_name": "rebar_down"
+    },
+    {
+      "sample_index": 6,
+      "generated_at": "2026-03-15T09:39:31.626751+00:00",
+      "reason_code": "PASS",
+      "contract_pass": true,
+      "trial_feasible": true,
+      "baseline_runtime_s": 1.3699978339973313,
+      "trial_runtime_s": 0.05656362000081572,
+      "baseline_max_dcr": 0.9331636363636363,
+      "trial_max_dcr": 0.9331636363636363,
+      "trial_action_name": "rebar_down"
+    }
+  ],
+  "measured_chain_step_rows": [
+    {
+      "step": "commercial_csv_gate",
+      "seconds": 5.631209135055542
+    },
+    {
+      "step": "midas_mgt_conversion_gate",
+      "seconds": 1.7479026317596436
+    },
+    {
+      "step": "real_source_multi_gate",
+      "seconds": 0.9399569034576416
+    },
+    {
+      "step": "nonlinear_engine_gate",
+      "seconds": 2.9425575733184814
+    },
+    {
+      "step": "pushover_stress_gate",
+      "seconds": 2.898911714553833
+    },
+    {
+      "step": "ndtha_stress_gate",
+      "seconds": 13.76602578163147
+    },
+    {
+      "step": "ndtha_residual_gate",
+      "seconds": 0.9498176574707031
+    },
+    {
+      "step": "wind_benchmark_gate",
+      "seconds": 206.14598321914673
+    },
+    {
+      "step": "ssi_boundary_gate",
+      "seconds": 71.03275728225708
+    },
+    {
+      "step": "damper_validation_gate",
+      "seconds": 1.0862834453582764
+    },
+    {
+      "step": "kds_compliance_gate",
+      "seconds": 0.9789812564849854
+    },
+    {
+      "step": "construction_sequence_gate",
+      "seconds": 4.241814851760864
+    },
+    {
+      "step": "flexible_diaphragm_gate",
+      "seconds": 2.8401834964752197
+    },
+    {
+      "step": "reproducibility_version_lock_gate",
+      "seconds": 2.8590433597564697
+    },
+    {
+      "step": "release_registry_gate",
+      "seconds": 0.05821347236633301
+    },
+    {
+      "step": "rc_benchmark_lock_gate",
+      "seconds": 1.047797441482544
+    },
+    {
+      "step": "commercial_readiness_gate",
+      "seconds": 0.9663269519805908
+    },
+    {
+      "step": "global_authority_gate",
+      "seconds": 2.1197285652160645
+    },
+    {
+      "step": "design_optimization_cost_reduction_smoke",
+      "seconds": 2.078766107559204
+    }
+  ],
+  "measured_chain_rolling_rows": [
+    {
+      "path": "implementation/phase1/experiments/by_test/nightly_release_gate/20260315T093932Z/artifacts/nightly_release_gate_report.json",
+      "generated_at": "2026-03-15T06:17:28.290935+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "step_count": 28,
+      "measured_chain_total_minutes": 5.235,
+      "measured_chain_category_minutes": {
+        "parser_screening": 0.14,
+        "analysis_optimization": 0.365,
+        "nonseismic_construction": 4.596,
+        "authority_crosscheck": 0.067,
+        "release_packaging": 0.067
+      },
+      "measured_chain_selected_step_count": 19,
+      "measured_chain_step_names": [
+        "commercial_csv_gate",
+        "midas_mgt_conversion_gate",
+        "real_source_multi_gate",
+        "nonlinear_engine_gate",
+        "pushover_stress_gate",
+        "ndtha_stress_gate",
+        "ndtha_residual_gate",
+        "wind_benchmark_gate",
+        "ssi_boundary_gate",
+        "damper_validation_gate",
+        "kds_compliance_gate",
+        "construction_sequence_gate",
+        "flexible_diaphragm_gate",
+        "reproducibility_version_lock_gate",
+        "release_registry_gate",
+        "rc_benchmark_lock_gate",
+        "commercial_readiness_gate",
+        "global_authority_gate",
+        "design_optimization_cost_reduction_smoke"
+      ],
+      "deployment_model": "engineer_in_the_loop_accelerated_coverage",
+      "strict_design_opt_cost_smoke": true,
+      "comparable_overlap_ratio": 1.0,
+      "comparable_step_count_delta": 0,
+      "same_deployment_model": true,
+      "same_strict_design_opt_cost_smoke": true
+    },
+    {
+      "path": "implementation/phase1/release/nightly_release_gate_report.json",
+      "generated_at": "2026-03-15T09:39:32.189130+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "step_count": 29,
+      "measured_chain_total_minutes": 5.406,
+      "measured_chain_category_minutes": {
+        "parser_screening": 0.139,
+        "analysis_optimization": 0.377,
+        "nonseismic_construction": 4.756,
+        "authority_crosscheck": 0.069,
+        "release_packaging": 0.065
+      },
+      "measured_chain_selected_step_count": 19,
+      "measured_chain_step_names": [
+        "commercial_csv_gate",
+        "midas_mgt_conversion_gate",
+        "real_source_multi_gate",
+        "nonlinear_engine_gate",
+        "pushover_stress_gate",
+        "ndtha_stress_gate",
+        "ndtha_residual_gate",
+        "wind_benchmark_gate",
+        "ssi_boundary_gate",
+        "damper_validation_gate",
+        "kds_compliance_gate",
+        "construction_sequence_gate",
+        "flexible_diaphragm_gate",
+        "reproducibility_version_lock_gate",
+        "release_registry_gate",
+        "rc_benchmark_lock_gate",
+        "commercial_readiness_gate",
+        "global_authority_gate",
+        "design_optimization_cost_reduction_smoke"
+      ],
+      "deployment_model": "engineer_in_the_loop_accelerated_coverage",
+      "strict_design_opt_cost_smoke": true,
+      "comparable_overlap_ratio": 1.0,
+      "comparable_step_count_delta": 0,
+      "same_deployment_model": true,
+      "same_strict_design_opt_cost_smoke": true
+    }
+  ],
+  "warnings": [],
+  "artifacts": {
+    "smoke_history_png": "implementation/phase1/release/release_gap_smoke_history.png",
+    "measured_chain_category_png": "implementation/phase1/release/release_gap_measured_chain_categories.png",
+    "hold_review_manifest": "implementation/phase1/release/hold_review_manifest.json",
+    "hold_review_packet_md": "implementation/phase1/release/hold_review_packet.md",
+    "hold_review_packet_pdf": "implementation/phase1/release/hold_review_packet.pdf",
+    "hold_review_ack_json": "implementation/phase1/release/hold_review_ack.json"
+  },
+  "inputs": {
+    "nightly_release": "implementation/phase1/release/nightly_release_gate_report.json",
+    "ci_gate": "implementation/phase1/ci_gate_report.json",
+    "static_validation": "implementation/phase1/static_artifact_validation_report.json",
+    "freeze_report": "implementation/phase1/release/freeze_release_report.json",
+    "promotion_report": "implementation/phase1/release/release_candidate_promotion_report.json",
+    "commercial_readiness": "implementation/phase1/commercial_readiness_report.json",
+    "global_authority": "implementation/phase1/global_authority_gate_report.json",
+    "hip_kernel_smoke": "implementation/phase1/hip_kernel_smoke_report.json",
+    "midas_conversion": "implementation/phase1/midas_mgt_conversion_report.json",
+    "construction_sequence": "implementation/phase1/construction_sequence_gate_report.json",
+    "flexible_diaphragm": "implementation/phase1/flexible_diaphragm_gate_report.json",
+    "repro_version_lock": "implementation/phase1/reproducibility_version_lock_report.json",
+    "release_registry": "implementation/phase1/release/release_registry.json",
+    "kds_compliance": "implementation/phase1/release/kds_compliance/kds_compliance_summary.json",
+    "pbd_package": "implementation/phase1/release/pbd_review/pbd_review_package_report.json",
+    "design_opt_dataset_report": "implementation/phase1/release/design_optimization/design_optimization_dataset_report.json",
+    "pbd_hinge_refresh_report": "implementation/phase1/pbd_hinge_refresh_report.json",
+    "panel_zone_clash_report": "implementation/phase1/panel_zone_clash_report.json",
+    "panel_zone_solver_verified_inbox_status_report": "implementation/phase1/panel_zone_solver_verified_inbox_status.json",
+    "foundation_optimization_report": "implementation/phase1/release/design_optimization/foundation_optimization_report.json",
+    "wind_raw_mapping_report": "implementation/phase1/wind_tunnel_raw_mapping_report.json",
+    "committee_summary": "implementation/phase1/release/committee_review/committee_summary.json",
+    "nightly_history_root": "implementation/phase1/experiments/by_test/nightly_release_gate",
+    "nightly_history_limit": 14,
+    "out_smoke_history_png": "implementation/phase1/release/release_gap_smoke_history.png",
+    "out_measured_chain_category_png": "implementation/phase1/release/release_gap_measured_chain_categories.png"
+  }
+}

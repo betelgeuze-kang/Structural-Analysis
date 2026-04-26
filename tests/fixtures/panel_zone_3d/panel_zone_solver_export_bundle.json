@@ -1,0 +1,41 @@
+{
+  "solver": {
+    "name": "panel_zone_topology_solver",
+    "backend": "upstream_bundle_fixture",
+    "export_version": "1.0"
+  },
+  "panel_zone_3d_results": {
+    "panel_zone_joint_geometry_3d": {
+      "contract_pass": true,
+      "rows": [
+        {
+          "member_id": "B401",
+          "joint_id": "J-401",
+          "panel_zone_id": "PZ-401"
+        }
+      ]
+    },
+    "panel_zone_rebar_anchorage_3d": {
+      "contract_pass": true,
+      "rows": [
+        {
+          "member_id": "B401",
+          "available_anchorage_length_mm": 480.0,
+          "required_anchorage_length_mm": 420.0,
+          "development_length_mm": 520.0
+        }
+      ]
+    },
+    "panel_zone_clash_verification_3d": {
+      "contract_pass": true,
+      "rows": [
+        {
+          "member_id": "B401",
+          "clash_count": 0,
+          "clearance_mm": 28.0,
+          "clash_pass": true
+        }
+      ]
+    }
+  }
+}

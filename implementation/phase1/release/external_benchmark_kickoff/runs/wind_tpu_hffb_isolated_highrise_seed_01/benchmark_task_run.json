@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-21T16:41:56.046674+00:00",
+  "task_id": "wind::tpu_hffb_isolated_highrise_seed_01",
+  "phase": "component_wind",
+  "benchmark_family": "tpu_raw_hffb_mapping",
+  "submission_scope": "limited_external_benchmark",
+  "status": "in_progress",
+  "started_at": "2026-03-21T16:41:56.046674+00:00",
+  "input_path": "implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.source_manifest.json",
+  "source_origin_class": "official_external_benchmark",
+  "holdout_split": "val",
+  "execution_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+  "note": "kickoff started for official TPU isolated benchmark",
+  "task": {
+    "task_id": "wind::tpu_hffb_isolated_highrise_seed_01",
+    "phase": "component_wind",
+    "benchmark_family": "tpu_raw_hffb_mapping",
+    "submission_scope": "limited_external_benchmark",
+    "execution_status": "ready",
+    "input_path": "implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.source_manifest.json",
+    "source_origin_class": "official_external_benchmark",
+    "expected_signal_column_count": 200,
+    "holdout_split": "val"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/tpu_interference_highrise_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/tpu_interference_highrise_local/tpu_hffb_interference_highrise_seed_01.csv",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/tpu_interference_highrise_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/tpu_interference_highrise_local.json"
+  },
+  "bytes_copied": 29958780,
+  "declared_format": "csv_tables",
+  "family_id": "torsionally_eccentric_core_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {},
+  "original_reference": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+  "sha256": "ab57db6f7b6bbc59051159d27b92b2f9a0a16981a3f59bbff746fc1f83719011",
+  "source_exists": true,
+  "source_format": "csv_tables",
+  "source_id": "tpu_interference_highrise_local",
+  "source_index": 9,
+  "source_urls": [
+    "https://db.wind.arch.t-kougei.ac.jp/"
+  ],
+  "status": "collected",
+  "title": "TPU interference highrise response proxy"
+}

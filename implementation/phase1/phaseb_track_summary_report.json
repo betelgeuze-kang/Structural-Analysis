@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-phaseb-track-modules",
+  "generated_at": "2026-03-01T09:17:45.354707+00:00",
+  "checks": {
+    "B1_track_lf_solver": true,
+    "B2_moving_load_integrator": true,
+    "B3_vti_coupled_solver": true,
+    "B4_track_irregularity_generator": true
+  },
+  "reports": {
+    "B1": "implementation/phase1/track_lf_solver_report.json",
+    "B2": "implementation/phase1/moving_load_integrator_report.json",
+    "B3": "implementation/phase1/vti_coupled_solver_report.json",
+    "B4": "implementation/phase1/track_irregularity_report.json",
+    "irregularity_csv": "implementation/phase1/open_data/track/irregularity_profile.csv"
+  },
+  "steps": [
+    {
+      "step": "B4_track_irregularity_generator",
+      "seconds": 0.9977028369903564,
+      "command": "/usr/bin/python3 implementation/phase1/track_irregularity_generator.py --out-csv implementation/phase1/open_data/track/irregularity_profile.csv --out implementation/phase1/track_irregularity_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote track irregularity report: implementation/phase1/track_irregularity_report.json\n",
+      "stderr_tail": "{\"event\": \"track_irregularity.start\", \"inputs\": {\"dx_m\": 0.05, \"high_cut_cpm\": 8.0, \"length_m\": 200.0, \"n0_cpm\": 0.1, \"out\": \"implementation/phase1/track_irregularity_report.json\", \"out_csv\": \"implementation/phase1/open_data/track/irregularity_profile.csv\", \"quality_class\": \"B\", \"seed\": 23}}\n{\"contract_pass\": true, \"event\": \"track_irregularity.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "B1_track_lf_solver",
+      "seconds": 1.0158531665802002,
+      "command": "/usr/bin/python3 implementation/phase1/track_lf_solver.py --out implementation/phase1/track_lf_solver_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote track LF solver report: implementation/phase1/track_lf_solver_report.json\n",
+      "stderr_tail": "{\"event\": \"track_lf.start\", \"inputs\": {\"bending_stiffness\": 6500000.0, \"engine\": \"auto\", \"length_m\": 25.0, \"max_relative_error\": 0.05, \"node_count\": 201, \"out\": \"implementation/phase1/track_lf_solver_report.json\", \"point_force_n\": 100000.0, \"shear_stiffness\": 245000000.0}}\n{\"contract_pass\": true, \"event\": \"track_lf.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "B2_moving_load_integrator",
+      "seconds": 10.741023063659668,
+      "command": "/usr/bin/python3 implementation/phase1/moving_load_integrator.py --out implementation/phase1/moving_load_integrator_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote moving load integrator report: implementation/phase1/moving_load_integrator_report.json\n",
+      "stderr_tail": "{\"event\": \"moving_load.start\", \"inputs\": {\"alpha_m\": 0.02, \"axle_loads_n\": [85000.0, 85000.0, 85000.0, 85000.0], \"axle_offsets_m\": [0.0, 2.5, 5.0, 7.5], \"beta_k\": 3e-05, \"dt_s\": 0.0025, \"ei\": 6500000.0, \"length_m\": 60.0, \"mass_per_m\": 400.0, \"max_disp_m\": 0.08, \"max_energy_balance_error\": 0.45, \"max_residual_ratio\": 0.08, \"node_count\": 161, \"out\": \"implementation/phase1/moving_load_integrator_report.json\", \"pasternak_g\": 1200000.0, \"speed_m_s\": 22.2, \"total_time_s\": 1.2, \"winkler_k\": 6000000.0}}\n{\"contract_pass\": true, \"event\": \"moving_load.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "B3_vti_coupled_solver",
+      "seconds": 3.725877285003662,
+      "command": "/usr/bin/python3 implementation/phase1/vti_coupled_solver.py --out implementation/phase1/vti_coupled_solver_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote VTI coupled solver report: implementation/phase1/vti_coupled_solver_report.json\n",
+      "stderr_tail": "{\"event\": \"vti.start\", \"inputs\": {\"adaptive_newton_conv_ratio_min\": 0.98, \"adaptive_newton_max_iter\": 18, \"adaptive_newton_tol\": 1e-08, \"axle_mass_kg\": 1500.0, \"axle_offsets_m\": [0.0, 2.5, 5.0, 7.5], \"carbody_mass_kg\": 25000.0, \"coupling_max_iter\": 12, \"coupling_tol\": 0.002, \"dt_s\": 0.005, \"hertz_k\": 1050000000.0, \"irregularity_class\": \"B\", \"irregularity_seed\": 23, \"length_m\": 60.0, \"max_disp_limit\": 0.12, \"node_count\": 161, \"out\": \"implementation/phase1/vti_coupled_solver_report.json\", \"relaxation\": 0.55, \"speed_m_s\": 22.2, \"suspension_c\": 15000.0, \"suspension_k\": 750000.0, \"total_time_s\": 0.8, \"use_adaptive_newton\": true}}\n{\"contract_pass\": true, \"event\": \"vti.completed\", \"reason_code\": \"PASS\"}\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "all phase-b track modules passed"
+}

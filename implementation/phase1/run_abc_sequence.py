@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -38,9 +39,9 @@ def main() -> None:
     b_path = out_dir / "bifurcation_detector_report.json"
     c_path = out_dir / "rust_onnx_native_contract_report.json"
 
-    _run(["python", "implementation/phase1/physics_guided_branching.py", "--mode", "train", "--out", str(a_path)])
-    _run(["python", "implementation/phase1/bifurcation_detector_stub.py", "--out", str(b_path)])
-    _run(["python", "implementation/phase1/rust_onnx_native_contract_stub.py", "--out", str(c_path)])
+    _run([sys.executable, "implementation/phase1/physics_guided_branching.py", "--mode", "train", "--out", str(a_path)])
+    _run([sys.executable, "implementation/phase1/bifurcation_detector_stub.py", "--out", str(b_path)])
+    _run([sys.executable, "implementation/phase1/rust_onnx_native_contract_stub.py", "--out", str(c_path)])
 
     a = _load(a_path)
     b = _load(b_path)

@@ -1,0 +1,29 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/reentrant_corner_tower_proxy_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/reentrant_corner_tower_proxy_local/a4.ifc",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/reentrant_corner_tower_proxy_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/reentrant_corner_tower_proxy_local.json"
+  },
+  "bytes_copied": 1315735,
+  "declared_format": "ifc",
+  "family_id": "reentrant_corner_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {},
+  "original_reference": "implementation/phase1/open_data/irregular/collected/artifacts/skewed_column_frame_remote/a4.ifc",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/skewed_column_frame_remote/a4.ifc",
+  "sha256": "824e4a363a042c565bdd52490e8728a92bb415a05ac6b82d11f1c083d7f98ec0",
+  "source_exists": true,
+  "source_format": "ifc",
+  "source_id": "reentrant_corner_tower_proxy_local",
+  "source_index": 13,
+  "source_urls": [
+    "https://zenodo.org/"
+  ],
+  "status": "collected",
+  "title": "Re-entrant corner local proxy from skewed column IFC"
+}

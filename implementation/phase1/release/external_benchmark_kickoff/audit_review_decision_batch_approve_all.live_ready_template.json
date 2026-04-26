@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:18.090443+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS_TEMPLATE_READY",
+  "reason": "ready-to-fill live apply template generated from approve-all preview",
+  "template_mode": "approve_all_live_ready",
+  "attestation": {
+    "reviewer_name": "EXAMPLE_REVIEWER_REPLACE_ME",
+    "reviewer_license_id": "EXAMPLE_LICENSE_REPLACE_ME",
+    "decision_basis": "example_only_approve_all_attested_example_replace_with_actual_review_basis",
+    "review_session_id": "example-session-approve_all_attested_example",
+    "attested_at_utc": "2026-04-01T13:06:17.221813+00:00",
+    "apply_live_acknowledged": false
+  },
+  "updates": [
+    {
+      "packet_id": "connection_detailing|connection_detailing_audit_after_material_patch|high",
+      "status_file": "implementation/phase1/open_data/midas/midas_generator_33.optimized.audit_review_queue_status_files/01.connection_detailing.connection_detailing_audit_after_material_patch.high.review_status.json",
+      "set_status": "approved",
+      "review_owner": "licensed_engineer",
+      "note": "preview approve-all decision"
+    },
+    {
+      "packet_id": "detailing|detailing_audit_after_material_patch|medium",
+      "status_file": "implementation/phase1/open_data/midas/midas_generator_33.optimized.audit_review_queue_status_files/02.detailing.detailing_audit_after_material_patch.medium.review_status.json",
+      "set_status": "approved",
+      "review_owner": "licensed_engineer",
+      "note": "preview approve-all decision"
+    }
+  ]
+}

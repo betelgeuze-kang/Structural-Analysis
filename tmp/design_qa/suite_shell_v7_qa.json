@@ -1,0 +1,170 @@
+[
+  {
+    "name": "index",
+    "viewport": "desktop",
+    "overflow_px": 0,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 6
+    },
+    "screenshot": "tmp/design_qa/suite_shell_index_desktop_v7.png"
+  },
+  {
+    "name": "charts",
+    "viewport": "desktop",
+    "overflow_px": 0,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 13
+    },
+    "screenshot": "tmp/design_qa/suite_shell_charts_desktop_v7.png"
+  },
+  {
+    "name": "history",
+    "viewport": "desktop",
+    "overflow_px": -12,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 13
+    },
+    "screenshot": "tmp/design_qa/suite_shell_history_desktop_v7.png"
+  },
+  {
+    "name": "panel",
+    "viewport": "desktop",
+    "overflow_px": 0,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 3
+    },
+    "screenshot": "tmp/design_qa/suite_shell_panel_desktop_v7.png"
+  },
+  {
+    "name": "release_charts",
+    "viewport": "desktop",
+    "overflow_px": 0,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 13
+    },
+    "screenshot": "tmp/design_qa/suite_shell_release_charts_desktop_v7.png"
+  },
+  {
+    "name": "release_history",
+    "viewport": "desktop",
+    "overflow_px": -12,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 13
+    },
+    "screenshot": "tmp/design_qa/suite_shell_release_history_desktop_v7.png"
+  },
+  {
+    "name": "release_panel",
+    "viewport": "desktop",
+    "overflow_px": 0,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 3
+    },
+    "screenshot": "tmp/design_qa/suite_shell_release_panel_desktop_v7.png"
+  },
+  {
+    "name": "index",
+    "viewport": "mobile",
+    "overflow_px": -12,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 6
+    },
+    "screenshot": "tmp/design_qa/suite_shell_index_mobile_v7.png"
+  },
+  {
+    "name": "charts",
+    "viewport": "mobile",
+    "overflow_px": -12,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 13
+    },
+    "screenshot": "tmp/design_qa/suite_shell_charts_mobile_v7.png"
+  },
+  {
+    "name": "history",
+    "viewport": "mobile",
+    "overflow_px": -12,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 13
+    },
+    "screenshot": "tmp/design_qa/suite_shell_history_mobile_v7.png"
+  },
+  {
+    "name": "panel",
+    "viewport": "mobile",
+    "overflow_px": 0,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 3
+    },
+    "screenshot": "tmp/design_qa/suite_shell_panel_mobile_v7.png"
+  },
+  {
+    "name": "release_charts",
+    "viewport": "mobile",
+    "overflow_px": -12,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 13
+    },
+    "screenshot": "tmp/design_qa/suite_shell_release_charts_mobile_v7.png"
+  },
+  {
+    "name": "release_history",
+    "viewport": "mobile",
+    "overflow_px": -12,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 13
+    },
+    "screenshot": "tmp/design_qa/suite_shell_release_history_mobile_v7.png"
+  },
+  {
+    "name": "release_panel",
+    "viewport": "mobile",
+    "overflow_px": 0,
+    "markers": {
+      "suite": true,
+      "stage": true,
+      "insight": true,
+      "chips": 3
+    },
+    "screenshot": "tmp/design_qa/suite_shell_release_panel_mobile_v7.png"
+  }
+]

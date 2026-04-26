@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 161948,
+  "collector_version": "0.2.0",
+  "family_id": "bridge_skewed_support_span",
+  "original_reference": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt",
+  "schema_version": "1.0",
+  "sha256": "a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610",
+  "source_format": "mgt",
+  "source_id": "gtc_public_bridge_bearing_c04_local",
+  "source_urls": [
+    "https://gtc.midasuser.com/"
+  ],
+  "title": "GTC public bridge bearing C04 raw MIDAS model"
+}

@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Panel Zone 3D Clash Viewer</title>
+<link rel="stylesheet" href="./design-theme.css"/>
+<style>
+@media print {
+  #shortcut-help {
+    display: none;
+  }
+}
+</style>
+</head>
+<body class="structural-surface panel-inspection-shell">
+<header class="panel-command-topbar" aria-label="Panel zone workflow">
+  <div class="app-topbar__identity">
+    <div class="app-brand-lockup">
+      <div class="header-eyebrow">Structural Insight Viewer</div>
+      <h1>3D Clash Review Workspace</h1>
+    </div>
+  </div>
+  <nav class="suite-route-tabs" aria-label="Structural insight suite">
+    <a class="suite-route-tab" href="./index.html">Model Workspace</a>
+    <a class="suite-route-tab" href="./charts.html">Analysis Charts</a>
+    <a class="suite-route-tab" href="./optimization_history.html">Optimization History</a>
+    <a class="suite-route-tab is-active" href="./panel_zone.html">Panel Zone</a>
+  </nav>
+  <nav class="viewer-tabbar" aria-label="Inspection workflow tabs">
+    <a class="viewer-tab is-active" href="#info">Inspect</a>
+    <a class="viewer-tab" href="#provenance-block">Provenance</a>
+    <a class="viewer-tab" href="#section-cut-status">Section Cut</a>
+    <a class="viewer-tab" href="#shortcut-help">Controls</a>
+  </nav>
+  <div class="app-topbar__chips">
+    <span class="context-chip is-accent">3D canvas live</span>
+    <span class="context-chip">Object deep link</span>
+    <span class="context-chip">Clash instrumentation</span>
+  </div>
+</header>
+<main id="panel-stage" class="panel-stage" aria-label="Panel zone 3D review stage">
+  <div class="panel-stage-grid" aria-hidden="true"></div>
+  <div id="panel-viewport" class="panel-viewport" role="application" tabindex="0" aria-label="3D clash viewport" aria-description="Click structural members, clashes, and reinforcement to select them."></div>
+  <div class="panel-viewport-hud" aria-label="Viewport status">
+    <div class="viewport-status-card">
+      <span class="viewport-status-dot"></span>
+      <span id="viewport-render-mode">viewport initializing</span>
+    </div>
+    <div class="viewport-status-card" id="viewport-selection-chip">member --</div>
+  </div>
+  <div id="viewport-pick-status" class="viewport-pick-status" aria-live="polite">Point to a member, clash, or reinforcement element to inspect it.</div>
+  <div class="panel-crosshair" aria-hidden="true"></div>
+  <div class="panel-tool-rail" aria-label="Panel viewport quick tools">
+    <button type="button" title="Toggle section cut" onclick="document.getElementById('chk-section-cut')?.click()">Cut</button>
+    <button type="button" title="Reset section cut" onclick="document.getElementById('reset-section-cut')?.click()">Reset</button>
+    <button type="button" title="Export PNG" onclick="document.getElementById('export-png')?.click()">PNG</button>
+    <button type="button" title="Toggle light mode" onclick="toggleLightMode()">Light</button>
+  </div>
+  <aside class="panel-insight-rail" aria-label="Panel zone insight rail">
+    <div class="section-title">Insight Rail</div>
+    <p class="rail-intro">Object picking, section cut, and solver handoff remain linked to the suite selection model.</p>
+    <div class="shell-meta-grid">
+      <span>Viewport</span><span id="stage-viewport-mode">3D clash</span>
+      <span>Cut</span><span id="stage-cut-mode">Inactive</span>
+      <span>Handoff</span><span id="stage-handoff-mode">Shared selection</span>
+      <span>Clearance</span><span id="stage-clearance-mode">--</span>
+    </div>
+  </aside>
+</main>
+<div id="info">
+  <section class="panel-section">
+    <div class="section-title">Workflow Rail</div>
+    <h2 id="title">Panel Zone 3D Clash Viewer</h2>
+    <p id="subtitle">Loading panel zone artifacts...</p>
+    <div id="status-tag" class="tag clash">Artifact loading...</div>
+  </section>
+  <section class="panel-section">
+    <div id="source-pill">Source: pending</div>
+    <div id="source-badges">
+      <div id="verification-pill" class="source-badge proxy">Verification: pending</div>
+      <div id="fallback-pill" class="source-badge proxy">Fallback: pending</div>
+      <div id="contract-pill" class="source-badge proxy">Contract: pending</div>
+    </div>
+    <a id="review-row-link" class="is-disabled" href="#" target="_blank" rel="noopener">Review row provenance</a>
+  </section>
+  <div id="provenance-block" class="provenance-block">
+    <div class="provenance-title">Provenance</div>
+    <div class="provenance-grid">
+      <div class="provenance-label">Source</div><div id="provenance-source" class="provenance-value">--</div>
+      <div class="provenance-label">Report</div><div id="provenance-report" class="provenance-value">--</div>
+      <div class="provenance-label">Timestamp</div><div id="provenance-timestamp" class="provenance-value">--</div>
+      <div class="provenance-label">Selection</div><div id="provenance-selection" class="provenance-value">--</div>
+      <div class="provenance-label">Mode</div><div id="provenance-mode" class="provenance-value">--</div>
+      <div class="provenance-label">Verification</div><div id="provenance-verification" class="provenance-value">--</div>
+      <div class="provenance-label">Coverage</div><div id="provenance-coverage" class="provenance-value">--</div>
+      <div class="provenance-label">Boundary</div><div id="provenance-boundary" class="provenance-value">--</div>
+      <div class="provenance-label">Fallback</div><div id="provenance-fallback" class="provenance-value">--</div>
+      <div class="provenance-label">Input</div><div id="provenance-input" class="provenance-value">--</div>
+      <div class="provenance-label">Group</div><div id="provenance-group" class="provenance-value">--</div>
+      <div class="provenance-label">Section</div><div id="provenance-section" class="provenance-value">--</div>
+      <div class="provenance-label">Clearance</div><div id="provenance-clearance" class="provenance-value">--</div>
+    </div>
+    <div class="provenance-actions">
+      <button id="copy-deep-link" class="provenance-button" type="button">Copy deep link</button>
+      <button id="export-png" class="provenance-button" type="button">PNG</button>
+      <button id="toggle-light-mode-button" class="provenance-button" type="button">Light</button>
+      <button id="toggle-shortcuts-button" class="provenance-button" type="button">Shortcuts</button>
+      <span id="copy-deep-link-status" class="provenance-status">Deep link pending</span>
+    </div>
+  </div>
+  <section class="panel-section">
+    <div class="section-title">Metrics</div>
+    <div class="metrics">
+      <div class="metric"><div class="label">Beam Length</div><div id="beam-length" class="value">--</div></div>
+      <div class="metric"><div class="label">Section</div><div id="section-size" class="value">--</div></div>
+      <div class="metric"><div class="label">Available / Required</div><div id="anchorage" class="value">--</div></div>
+      <div class="metric"><div class="label">Violation Ratio</div><div id="violation-ratio" class="value">--</div></div>
+      <div class="metric"><div class="label">Clearance</div><div id="clearance" class="value">--</div></div>
+      <div class="metric"><div class="label">Clash / Pass</div><div id="clash-pass" class="value">--</div></div>
+    </div>
+  </section>
+  <section class="panel-section">
+    <div class="section-title">Controls</div>
+    <div class="controls">
+      <label><input type="checkbox" checked id="chk-concrete" onchange="toggle('concrete',this.checked)"> Show Concrete Envelope</label>
+      <label><input type="checkbox" checked id="chk-col-rebar" onchange="toggle('col-rebar',this.checked)"> Column Main Rebars</label>
+      <label><input type="checkbox" checked id="chk-beam-rebar" onchange="toggle('beam-rebar',this.checked)"> Beam Main Rebars</label>
+      <label><input type="checkbox" checked id="chk-hoop" onchange="toggle('hoop',this.checked)"> Transverse Hoops/Ties</label>
+      <label><input type="checkbox" id="chk-section-cut" onchange="toggleSectionCut(this.checked)"> Enable Section Cut</label>
+      <label>Section Axis
+        <select id="section-cut-axis" onchange="updateSectionCutAxis(this.value)">
+          <option value="x">X Cut</option>
+          <option value="y">Y Cut</option>
+          <option value="z">Z Cut</option>
+        </select>
+      </label>
+      <label>Section Offset <span id="section-cut-offset-label">0.00 m</span>
+        <input type="range" id="section-cut-offset" min="-1" max="1" step="0.01" value="0" oninput="updateSectionCutOffset(this.value)">
+      </label>
+      <button type="button" id="reset-section-cut">Reset Section Cut</button>
+      <div id="section-cut-status" class="provenance-status">Section cut inactive</div>
+    </div>
+  </section>
+</div>
+<div id="shortcut-help">
+  <strong>Shortcuts</strong>
+  <div><code>L</code> toggle light mode</div>
+  <div><code>P</code> export PNG</div>
+  <div><code>?</code> toggle shortcuts</div>
+  <div><code>R</code> reset section cut</div>
+</div>
+
+<script src="./panel_zone.data.js"></script>
+<script type="module">
+import * as THREE from './vendor/three.module.js';
+import { OrbitControls } from './vendor/OrbitControls.js';
+
+const SHARED_SELECTION_KEY='structural-viewer-selection-v1';
+const VIEWER_THEME_KEY='panel-zone-viewer-theme-v1';
+const IS_SINGLEFILE_VIEWER=window.__STRUCTURAL_SINGLEFILE__===true;
+const selectionChannel=(()=>{
+  try{return typeof BroadcastChannel==='function'?new BroadcastChannel(SHARED_SELECTION_KEY):null}catch(_err){return null}
+})();
+let currentPanelPayload=null;
+let currentPanelData=null;
+let sectionCutState={enabled:false,axis:'x',offset:0,min:-1,max:1,origin:new THREE.Vector3(),span:1};
+const panelViewport=document.getElementById('panel-viewport');
+const PANEL_FETCH_CANDIDATES=[
+  '../../implementation/phase1/panel_zone_clash_report.json',
+  '../../implementation/phase1/panel_zone_clash_artifact.json',
+  '../../implementation/phase1/panel_zone_clash_verification_3d.json',
+  '../../implementation/phase1/panel_zone_joint_geometry_3d.json',
+  '../../implementation/phase1/panel_zone_rebar_anchorage_3d.json',
+  '../../implementation/phase1/panel_zone_solver_verified_inbox_status.json'
+];
+
+function safeNumber(value,fallback=0){
+  const number=Number(value);
+  return Number.isFinite(number)?number:fallback;
+}
+function finiteNumberOrNull(value){
+  const number=Number(value);
+  return Number.isFinite(number)?number:null;
+}
+function safeStorageGet(key){
+  try{return window.localStorage.getItem(key)}catch(_err){return null}
+}
+function safeStorageSet(key,value){
+  try{window.localStorage.setItem(key,value)}catch(_err){}
+}
+function normalizeSelectionValue(value){
+  const text=String(value??'').trim();
+  return text||'';
+}
+function normalizeSelectionValues(values){
+  const source=Array.isArray(values)
+    ?values
+    :String(values??'').split('|');
+  const unique=[];
+  source.forEach(value=>{
+    const normalized=normalizeSelectionValue(value);
+    if(normalized&&!unique.includes(normalized))unique.push(normalized);
+  });
+  return unique;
+}
+function normalizeObjectKind(value){
+  return normalizeSelectionValue(value).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+}
+function normalizeObjectIdPart(value){
+  return normalizeSelectionValue(value).toLowerCase().replace(/[^a-z0-9.-]+/g,'_').replace(/^_+|_+$/g,'');
+}
+function applySavedThemeMode(){
+  const theme=normalizeSelectionValue(safeStorageGet(VIEWER_THEME_KEY));
+  document.body.classList.toggle('light-mode',theme==='light');
+  updateThemeButtons();
+}
+function updateThemeButtons(){
+  const button=document.getElementById('toggle-light-mode-button');
+  if(button instanceof HTMLButtonElement){
+    button.textContent=document.body.classList.contains('light-mode')?'Dark':'Light';
+  }
+}
+function toggleLightMode(){
+  const nextLight=!document.body.classList.contains('light-mode');
+  document.body.classList.toggle('light-mode',nextLight);
+  safeStorageSet(VIEWER_THEME_KEY,nextLight?'light':'dark');
+  updateThemeButtons();
+}
+function toggleShortcutHelp(forceOpen){
+  const node=document.getElementById('shortcut-help');
+  if(!(node instanceof HTMLElement))return false;
+  const next=typeof forceOpen==='boolean'?forceOpen:!node.classList.contains('is-open');
+  node.classList.toggle('is-open',next);
+  return next;
+}
+function readStoredSelectionState(){
+  const raw=safeStorageGet(SHARED_SELECTION_KEY);
+  if(!raw)return {};
+  try{return JSON.parse(raw)||{}}catch(_err){return {}}
+}
+function readSharedSelection(){
+  const params=new URLSearchParams(window.location.search);
+  const queryMember=normalizeSelectionValue(
+    params.get('member')||params.get('member_id')||params.get('focus_member')||params.get('focus')
+  );
+  const queryMemberIds=normalizeSelectionValues(params.get('member_set')||'');
+  const queryLoadCase=normalizeSelectionValue(params.get('load_case')||params.get('loadcase')||params.get('combination'));
+  const queryObjectId=normalizeSelectionValue(params.get('panel_zone_object_id'));
+  const queryObjectKind=normalizeObjectKind(params.get('panel_zone_object_kind'));
+  const stored=readStoredSelectionState();
+  const storedMemberIds=normalizeSelectionValues(stored.memberIds||stored.memberSet||stored.member_ids||[]);
+  const memberIds=queryMemberIds.length
+    ?queryMemberIds
+    :(storedMemberIds.length
+      ?storedMemberIds
+      :(queryMember?[queryMember]:[]));
+  const memberId=queryMember
+    ||memberIds[0]
+    ||normalizeSelectionValue(stored.memberId)
+    ||normalizeSelectionValue(stored.focusMember);
+  return{
+    memberId,
+    memberIds,
+    selectionSetCount:memberIds.length,
+    loadCase:queryLoadCase||normalizeSelectionValue(stored.loadCase),
+    panelZoneObjectId:queryObjectId||normalizeSelectionValue(stored.panelZoneObjectId||stored.panel_zone_object_id),
+    panelZoneObjectKind:queryObjectKind||normalizeObjectKind(stored.panelZoneObjectKind||stored.panel_zone_object_kind)
+  };
+}
+function publishSharedSelection(selection={}){
+  const previous=readStoredSelectionState();
+  const memberIds=normalizeSelectionValues(selection.memberIds||selection.memberId||previous.memberIds||previous.memberSet||previous.memberId||previous.focusMember);
+  const memberId=normalizeSelectionValue(selection.memberId??memberIds[0]??previous.memberId??previous.focusMember);
+  const loadCase=normalizeSelectionValue(selection.loadCase??previous.loadCase);
+  const panelZoneObjectId=normalizeSelectionValue(selection.panelZoneObjectId??selection.panel_zone_object_id??previous.panelZoneObjectId??previous.panel_zone_object_id);
+  const panelZoneObjectKind=normalizeObjectKind(selection.panelZoneObjectKind??selection.panel_zone_object_kind??previous.panelZoneObjectKind??previous.panel_zone_object_kind);
+  const next={
+    ...previous,
+    memberId,
+    memberIds,
+    memberSet:memberIds,
+    selectionSetCount:memberIds.length,
+    focusMember:memberId,
+    loadCase,
+    panelZoneObjectId,
+    panelZoneObjectKind,
+    panel_zone_object_id:panelZoneObjectId,
+    panel_zone_object_kind:panelZoneObjectKind,
+    source:normalizeSelectionValue(selection.source||previous.source||'panel_zone'),
+    viewerFamily:'panel_zone_viewer',
+    updated_at:new Date().toISOString()
+  };
+  safeStorageSet(SHARED_SELECTION_KEY,JSON.stringify(next));
+  try{selectionChannel?.postMessage(next)}catch(_err){}
+  return next;
+}
+function buildSelectionQueryUrl(selection={}){
+  const url=new URL(window.location.href);
+  const params=url.searchParams;
+  const memberId=normalizeSelectionValue(selection.memberId);
+  const memberIds=normalizeSelectionValues(selection.memberIds||[]);
+  const loadCase=normalizeSelectionValue(selection.loadCase);
+  const panelZoneObjectId=normalizeSelectionValue(selection.panelZoneObjectId||selection.panel_zone_object_id);
+  const panelZoneObjectKind=normalizeObjectKind(selection.panelZoneObjectKind||selection.panel_zone_object_kind);
+  ['member','member_id','focus_member','focus'].forEach(key=>params.delete(key));
+  params.delete('member_set');
+  ['load_case','loadcase','combination'].forEach(key=>params.delete(key));
+  params.delete('panel_zone_object_id');
+  params.delete('panel_zone_object_kind');
+  if(memberId)params.set('member',memberId);
+  if(memberIds.length)params.set('member_set',memberIds.join('|'));
+  if(loadCase)params.set('load_case',loadCase);
+  if(panelZoneObjectId)params.set('panel_zone_object_id',panelZoneObjectId);
+  if(panelZoneObjectKind)params.set('panel_zone_object_kind',panelZoneObjectKind);
+  url.search=params.toString();
+  return url.href;
+}
+function syncSelectionQuery(selection={}){
+  const href=buildSelectionQueryUrl(selection);
+  if(window.history&&typeof window.history.replaceState==='function'){
+    window.history.replaceState(null,'',href);
+  }
+  return href;
+}
+function basenameFromPath(value){
+  const text=normalizeSelectionValue(value);
+  if(!text)return '';
+  const clean=text.split('?')[0].split('#')[0];
+  const parts=clean.split('/').filter(Boolean);
+  return parts.length?parts[parts.length-1]:clean;
+}
+function firstDefinedText(...values){
+  for(const value of values){
+    const text=normalizeSelectionValue(value);
+    if(text)return text;
+  }
+  return '';
+}
+function formatTimestamp(value){
+  const text=normalizeSelectionValue(value);
+  if(!text)return 'n/a';
+  const parsed=new Date(text);
+  if(Number.isNaN(parsed.getTime()))return text;
+  return parsed.toLocaleString();
+}
+function formatMillimeters(value){
+  const number=finiteNumberOrNull(value);
+  return number===null?'n/a':`${number.toFixed(1)} mm`;
+}
+function buildSelectionLabel(memberId='',loadCase='',memberIds=[]){
+  const normalizedMember=normalizeSelectionValue(memberId);
+  const normalizedLoadCase=normalizeSelectionValue(loadCase);
+  const count=normalizeSelectionValues(memberIds).length;
+  return `member ${normalizedMember||'--'} | selected ${count||0} | load case ${normalizedLoadCase||'--'}`;
+}
+function compactPickLabel(pickData={}){
+  const type=firstDefinedText(pickData.elementType,'element');
+  const member=firstDefinedText(pickData.memberId,'--');
+  const joint=firstDefinedText(pickData.jointId,'--');
+  return `${type} | member ${member} | joint ${joint}`;
+}
+function extractPanelReportName(payload){
+  if(!payload||typeof payload!=='object')return 'demo-panel-zone';
+  return firstDefinedText(
+    payload.clash_report?.report_name,
+    payload.clash_artifact?.report_name,
+    payload.joint_geometry?.report_name,
+    payload.anchorage?.report_name,
+    basenameFromPath(payload.clash_report?.source_path),
+    basenameFromPath(payload.clash_artifact?.source_path),
+    basenameFromPath(payload.joint_geometry?.source_path),
+    basenameFromPath(payload.anchorage?.source_path),
+    payload.clash_report?.run_id,
+    payload.clash_artifact?.run_id,
+    payload.joint_geometry?.source_kind,
+    payload.anchorage?.source_kind,
+    'panel-zone-artifact'
+  );
+}
+function extractPanelTimestamp(payload){
+  if(!payload||typeof payload!=='object')return '';
+  return firstDefinedText(
+    payload.clash_report?.generated_at,
+    payload.clash_report?.timestamp,
+    payload.clash_artifact?.generated_at,
+    payload.clash_artifact?.timestamp,
+    payload.joint_geometry?.generated_at,
+    payload.joint_geometry?.timestamp,
+    payload.anchorage?.generated_at,
+    payload.anchorage?.timestamp
+  );
+}
+function extractPanelSourceInputPath(payload){
+  if(!payload||typeof payload!=='object')return '';
+  return firstDefinedText(
+    payload.clash_artifact?.source_provenance?.source_input_paths?.panel_zone_clash_verification_3d,
+    payload.clash_artifact?.source_provenance?.source_input_path,
+    payload.clash_verification?.source_provenance?.source_input_path,
+    payload.joint_geometry?.source_provenance?.source_input_path,
+    payload.anchorage?.source_provenance?.source_input_path,
+    payload.clash_report?.summary?.panel_zone_source_artifact_path,
+    payload.clash_artifact?.source_provenance?.input_design_optimization_npz
+  );
+}
+function determinePanelSourceMode(payload){
+  if(!payload||typeof payload!=='object')return 'heuristic_proxy';
+  const summary=payload.clash_report?.summary||{};
+  const checks=payload.clash_report?.checks||{};
+  const sources=[
+    payload.clash_artifact?.source_provenance,
+    payload.clash_verification?.source_provenance,
+    payload.joint_geometry?.source_provenance,
+    payload.anchorage?.source_provenance,
+    payload.clash_artifact?.summary,
+    payload.clash_verification?.summary,
+    payload.joint_geometry?.summary,
+    payload.anchorage?.summary
+  ];
+  const solverVerified=Boolean(
+    summary.panel_zone_solver_verified_bridge_complete||
+    checks.panel_zone_solver_verified_bridge_complete||
+    sources.some(source=>Boolean(source?.solver_verified))
+  );
+  if(solverVerified)return 'solver_verified';
+  const topologyProjected=Boolean(
+    summary.panel_zone_topology_projected_bridge_complete||
+    checks.panel_zone_topology_projected_bridge_complete||
+    sources.some(source=>Boolean(source?.topology_projected))
+  );
+  if(topologyProjected)return 'topology_projected';
+  const requiredSources=Boolean(
+    summary.panel_zone_required_sources_complete||
+    checks.panel_zone_required_sources_complete
+  );
+  if(requiredSources)return 'artifact_bound_proxy';
+  return 'heuristic_proxy';
+}
+function describePanelSourceMode(mode){
+  switch(mode){
+    case 'solver_verified':
+      return 'solver-verified 3D';
+    case 'topology_projected':
+      return 'topology-projected validated';
+    case 'artifact_bound_proxy':
+      return 'artifact-bound proxy';
+    default:
+      return 'heuristic proxy';
+  }
+}
+function describePanelStatusLabel(mode){
+  switch(mode){
+    case 'solver_verified':
+      return 'solver-verified 3D review';
+    case 'topology_projected':
+      return 'topology-projected validated review';
+    case 'artifact_bound_proxy':
+      return 'artifact-derived proxy review';
+    default:
+      return 'heuristic proxy preview';
+  }
+}
+function buildPanelContractMode(payload){
+  if(!payload||typeof payload!=='object')return 'panel_zone_artifact';
+  return firstDefinedText(
+    payload.clash_report?.summary?.panel_zone_source_contract_mode,
+    payload.clash_artifact?.summary?.source_contract_mode,
+    payload.clash_artifact?.source_provenance?.verification_tier,
+    'panel_zone_artifact'
+  );
+}
+function describePanelFallback(renderGeometryMode,sourceMode){
+  if(renderGeometryMode==='artifact_vector_coords'){
+    return sourceMode==='solver_verified'?'none | solver vectors':'none | artifact vectors';
+  }
+  if(renderGeometryMode==='artifact_world_coords'){
+    return 'world-centroid geometry fallback';
+  }
+  return 'local proxy layout fallback';
+}
+function buildPanelCoverageLabel(payload){
+  if(!payload||typeof payload!=='object')return 'coverage n/a';
+  const summary=payload.clash_report?.summary||{};
+  const provenanceLabel=firstDefinedText(summary.panel_zone_external_validation_provenance_summary_label);
+  if(provenanceLabel)return provenanceLabel;
+  const validated=finiteNumberOrNull(summary.panel_zone_validated_source_row_count_total);
+  const candidates=finiteNumberOrNull(
+    summary.panel_zone_proxy_candidate_count??payload.clash_artifact?.summary?.candidate_member_count
+  );
+  if(validated!==null&&candidates!==null&&candidates>0)return `${Math.round(validated)}/${Math.round(candidates)} validated rows`;
+  if(validated!==null)return `${Math.round(validated)} validated rows`;
+  return 'coverage n/a';
+}
+function buildPanelBoundaryLabel(payload){
+  if(!payload||typeof payload!=='object')return 'status=not_applicable | boundary=open';
+  const summary=payload.clash_report?.summary||{};
+  const inboxSummary=payload.inbox_status?.summary||{};
+  const status=firstDefinedText(summary.panel_zone_external_validation_status_label,'not_applicable');
+  const boundary=firstDefinedText(summary.panel_zone_validation_boundary,'open');
+  const requiredEvidence=firstDefinedText(
+    summary.panel_zone_external_validation_required_evidence,
+    boundary==='solver_verified'
+      ?'none'
+      :boundary==='external_validation_only'||Boolean(summary.panel_zone_external_validation_pending)
+        ?'solver_verified_3d_clash_and_anchorage_artifact'
+        :'internal_panel_zone_3d_completion_first'
+  );
+  const summaryLine=firstDefinedText(
+    summary.panel_zone_external_validation_summary_line,
+    `Panel-zone external validation: ${status} | boundary=${boundary} | required_evidence=${requiredEvidence}`
+  );
+  const localClosureLabel=firstDefinedText(
+    summary.panel_zone_external_validation_local_closure_label,
+    requiredEvidence==='none'
+      ?'Local closeout: closed by attached solver-verified 3D artifact.'
+      :requiredEvidence!=='solver_verified_3d_clash_and_anchorage_artifact'
+        ?'Local closeout: not active until the internal panel-zone 3D boundary is complete.'
+        :Boolean(inboxSummary.panel_zone_solver_verified_inbox_has_input||inboxSummary.panel_zone_solver_verified_pending_input)
+          ?`Local closeout: solver-verified inbox input is staged and still needs consume (${firstDefinedText(inboxSummary.panel_zone_solver_verified_inbox_status_mode,inboxSummary.panel_zone_solver_verified_input_mode_detected,'pending_inbox_input')}).`
+          :Boolean(inboxSummary.panel_zone_solver_verified_latest_consume_report_present)&&Boolean(inboxSummary.panel_zone_solver_verified_latest_consume_contract_pass)
+            ?'Local closeout: latest solver-verified consume passed, but the live panel-zone release surface still needs refresh.'
+            :Boolean(inboxSummary.panel_zone_solver_verified_latest_consume_report_present)
+              ?`Local closeout: latest solver-verified consume failed (${firstDefinedText(inboxSummary.panel_zone_solver_verified_latest_consume_reason_code,'unknown')}); boundary remains open.`
+              :`Local closeout: no solver-verified inbox input is present; boundary remains open (${firstDefinedText(inboxSummary.panel_zone_solver_verified_recommended_action,'wait_for_solver_drop')}).`
+  );
+  const sourceCount=safeNumber(summary.panel_zone_external_validation_source_count,0);
+  const exactSources=safeNumber(summary.panel_zone_external_validation_exact_source_count,0);
+  const fallbackSources=safeNumber(summary.panel_zone_external_validation_fallback_source_count,0);
+  const exactRows=safeNumber(summary.panel_zone_external_validation_exact_validated_row_count,0);
+  const fallbackRows=safeNumber(summary.panel_zone_external_validation_fallback_validated_row_count,0);
+  const unattributedRows=safeNumber(summary.panel_zone_external_validation_unattributed_validated_row_count,0);
+  const totalRows=safeNumber(summary.panel_zone_external_validation_validated_row_count_total,0);
+  const ratioLabel=sourceCount>0||totalRows>0
+    ? ` | exact=${Math.round(exactSources)}/${Math.round(sourceCount)} sources | fallback=${Math.round(fallbackSources)}/${Math.round(sourceCount)} sources | exact_rows=${Math.round(exactRows)}/${Math.round(totalRows)} | fallback_rows=${Math.round(fallbackRows)}/${Math.round(totalRows)}${unattributedRows>0?` | unattributed_rows=${Math.round(unattributedRows)}/${Math.round(totalRows)}`:''}`
+    :'';
+  return `${summaryLine} | ${localClosureLabel}${ratioLabel}`;
+}
+function setSourceBadge(id,text,tone='proxy'){
+  const node=document.getElementById(id);
+  if(!node)return;
+  node.textContent=text;
+  node.className=`source-badge ${tone}`;
+}
+function updateSelectionProvenance(data){
+  const baseSelection=readSharedSelection();
+  const baseMemberIds=normalizeSelectionValues(baseSelection.memberIds||[]);
+  const primaryMember=normalizeSelectionValue(data?.memberId||baseSelection.memberId);
+  const effectiveSelection={
+    memberId:primaryMember,
+    memberIds:baseMemberIds.includes(primaryMember)?baseMemberIds:(primaryMember?[primaryMember]:baseMemberIds),
+    loadCase:normalizeSelectionValue(baseSelection.loadCase),
+    panelZoneObjectId:normalizeSelectionValue(baseSelection.panelZoneObjectId),
+    panelZoneObjectKind:normalizeObjectKind(baseSelection.panelZoneObjectKind)
+  };
+  const deepLinkHref=syncSelectionQuery(effectiveSelection);
+  document.getElementById('provenance-source').textContent=firstDefinedText(data?.sourceLabel,'panel-zone artifact');
+  document.getElementById('provenance-report').textContent=firstDefinedText(data?.reportName,'panel-zone-artifact');
+  document.getElementById('provenance-timestamp').textContent=formatTimestamp(data?.generatedAt);
+  document.getElementById('provenance-selection').textContent=buildSelectionLabel(effectiveSelection.memberId,effectiveSelection.loadCase,effectiveSelection.memberIds);
+  const copyButton=document.getElementById('copy-deep-link');
+  if(copyButton instanceof HTMLButtonElement){
+    copyButton.dataset.deepLink=deepLinkHref;
+  }
+  document.getElementById('copy-deep-link-status').textContent=
+    `Deep link ready | ${buildSelectionLabel(effectiveSelection.memberId,effectiveSelection.loadCase,effectiveSelection.memberIds)}`;
+}
+async function copyTextToClipboard(text){
+  if(!text)return false;
+  if(navigator.clipboard&&typeof navigator.clipboard.writeText==='function'){
+    try{
+      await navigator.clipboard.writeText(text);
+      return true;
+    }catch(_err){}
+  }
+  const textarea=document.createElement('textarea');
+  textarea.value=text;
+  textarea.setAttribute('readonly','readonly');
+  textarea.style.position='fixed';
+  textarea.style.opacity='0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  let ok=false;
+  try{ok=document.execCommand('copy')}catch(_err){ok=false}
+  textarea.remove();
+  return ok;
+}
+function getResultsExplorerBaseUrl(){
+  const path=String(window.location.pathname||'');
+  const relativePath=path.includes('/implementation/phase1/release/visualization/')
+    ? './structural_optimization_viewer.html'
+    : '../../implementation/phase1/release/visualization/structural_optimization_viewer.html';
+  return new URL(relativePath,window.location.href);
+}
+function setSearchParamDefault(url,key,value){
+  if(!(url instanceof URL))return url;
+  const normalizedValue=normalizeSelectionValue(value);
+  if(normalizedValue&&!normalizeSelectionValue(url.searchParams.get(key))){
+    url.searchParams.set(key,normalizedValue);
+  }
+  return url;
+}
+function buildRebasedPanelZoneResultsExplorerUrl(seedUrl=''){
+  const url=getResultsExplorerBaseUrl();
+  const normalizedSeed=normalizeSelectionValue(seedUrl);
+  if(!normalizedSeed)return url;
+  try{
+    const sourceUrl=new URL(normalizedSeed,window.location.href);
+    sourceUrl.searchParams.forEach((value,key)=>{
+      url.searchParams.set(key,value);
+    });
+  }catch(_err){}
+  return url;
+}
+function buildPanelZoneLookupCandidates(memberId='',fallbackValues=[]){
+  const candidates=[];
+  const pushCandidate=(value,sourceLabel='requested_member')=>{
+    const normalized=normalizeSelectionValue(value);
+    if(!normalized||candidates.some(candidate=>candidate.id===normalized))return;
+    candidates.push({id:normalized,source:sourceLabel});
+  };
+  pushCandidate(memberId,'requested_member');
+  normalizeSelectionValues(fallbackValues).forEach(value=>{
+    pushCandidate(value,'fallback_member');
+  });
+  return candidates;
+}
+function scorePanelZoneRowLookupEntry(entry,candidateId='',loadCase=''){
+  const normalizedCandidate=normalizeSelectionValue(candidateId);
+  if(!normalizedCandidate||!entry||typeof entry!=='object')return{score:-1,matchedKey:''};
+  const comparisons=[
+    ['baseline_focus_member_id',normalizeSelectionValue(entry.baseline_focus_member_id)],
+    ['member_id',normalizeSelectionValue(entry.member_id)],
+    ['case_id',normalizeSelectionValue(entry.case_id)],
+    ['viewer_row_ref',normalizeSelectionValue(entry.viewer_row_ref)]
+  ];
+  let score=-1;
+  let matchedKey='';
+  comparisons.forEach(([key,value],index)=>{
+    if(value&&value===normalizedCandidate){
+      const baseScore=400-(index*40);
+      if(baseScore>score){
+        score=baseScore;
+        matchedKey=String(key);
+      }
+    }
+  });
+  if(score<0)return{score:-1,matchedKey:''};
+  const normalizedLoadCase=normalizeSelectionValue(loadCase);
+  if(normalizedLoadCase&&normalizeSelectionValue(entry.combination_name)===normalizedLoadCase)score+=25;
+  if(normalizeSelectionValue(entry.viewer_row_url))score+=10;
+  if(normalizeSelectionValue(entry.viewer_slice_url))score+=5;
+  return{score,matchedKey};
+}
+function buildPanelZoneRowLookup(payload,memberId='',loadCase='',fallbackValues=[]){
+  const lookup=payload?.row_provenance_lookup?.member_lookup;
+  if(!lookup||typeof lookup!=='object')return null;
+  const candidates=buildPanelZoneLookupCandidates(memberId,fallbackValues);
+  if(!candidates.length)return null;
+  let bestEntry=null;
+  let bestScore=-1;
+  let bestMatchedKey='';
+  let bestCandidateSource='';
+  let bestCandidateId='';
+  Object.entries(lookup).forEach(([lookupKey,rawEntry])=>{
+    if(!rawEntry||typeof rawEntry!=='object')return;
+    const entry={
+      ...rawEntry,
+      baseline_focus_member_id:firstDefinedText(rawEntry.baseline_focus_member_id,lookupKey)
+    };
+    candidates.forEach((candidate,candidateIndex)=>{
+      const matched=scorePanelZoneRowLookupEntry(entry,candidate.id,loadCase);
+      if(matched.score<0)return;
+      const candidateScore=matched.score-candidateIndex;
+      if(candidateScore>bestScore){
+        bestEntry=entry;
+        bestScore=candidateScore;
+        bestMatchedKey=matched.matchedKey;
+        bestCandidateSource=candidate.source;
+        bestCandidateId=candidate.id;
+      }
+    });
+  });
+  if(!bestEntry)return null;
+  return{
+    ...bestEntry,
+    lookup_match_key:bestMatchedKey,
+    lookup_match_source:bestCandidateSource,
+    lookup_match_value:bestCandidateId
+  };
+}
+function appendPanelZoneContextParams(url,data=null,linkMode=''){
+  if(!(url instanceof URL)||!data||typeof data!=='object')return url;
+  if(data?.groupId)url.searchParams.set('panel_zone_group_id',normalizeSelectionValue(data.groupId));
+  if(data?.sectionSignature)url.searchParams.set('panel_zone_section_signature',normalizeSelectionValue(data.sectionSignature));
+  if(data?.clearanceMm!==null&&data?.clearanceMm!==undefined)url.searchParams.set('panel_zone_clearance_mm',String(data.clearanceMm));
+  if(data?.clashPass!==null&&data?.clashPass!==undefined)url.searchParams.set('panel_zone_clash_pass',String(Boolean(data.clashPass)));
+  if(data?.sourceModeKey)url.searchParams.set('panel_zone_source_mode',normalizeSelectionValue(data.sourceModeKey));
+  if(data?.verificationTier)url.searchParams.set('panel_zone_verification_tier',normalizeSelectionValue(data.verificationTier));
+  if(data?.contractMode)url.searchParams.set('panel_zone_contract_mode',normalizeSelectionValue(data.contractMode));
+  if(data?.statusLabel)url.searchParams.set('panel_zone_status_label',normalizeSelectionValue(data.statusLabel));
+  if(linkMode)url.searchParams.set('panel_zone_link_mode',normalizeSelectionValue(linkMode));
+  return url;
+}
+function buildPanelZoneResultsExplorerUrlFromLookup(rowLookup,memberId='',loadCase='',data=null){
+  if(!rowLookup||typeof rowLookup!=='object')return '';
+  const sharedSelection=readSharedSelection();
+  const url=buildRebasedPanelZoneResultsExplorerUrl(
+    firstDefinedText(rowLookup.viewer_row_url,rowLookup.viewer_slice_url)
+  );
+  url.searchParams.set('source','panel_zone_row_provenance_exact');
+  setSearchParamDefault(url,'focus','panel-zone');
+  setSearchParamDefault(url,'view','midas');
+  setSearchParamDefault(url,'codecheck_surface','drilldown');
+  setSearchParamDefault(url,'codecheck_detail_block','row-provenance');
+  setSearchParamDefault(url,'results_card','envelope');
+  setSearchParamDefault(url,'results_companion','checks');
+  setSearchParamDefault(url,'results_detail_block','chart');
+  setSearchParamDefault(url,'interactive_detail_more','open');
+  setSearchParamDefault(url,'overlay_detail_more','open');
+  const focusMember=normalizeSelectionValue(rowLookup.baseline_focus_member_id||memberId);
+  const reviewMember=normalizeSelectionValue(rowLookup.member_id);
+  const caseId=normalizeSelectionValue(rowLookup.case_id);
+  const combinationName=normalizeSelectionValue(rowLookup.combination_name||loadCase);
+  const rowRef=normalizeSelectionValue(rowLookup.viewer_row_ref);
+  const clauseLabel=normalizeSelectionValue(rowLookup.clause_label);
+  if(focusMember){
+    setSearchParamDefault(url,'focus_member',focusMember);
+    setSearchParamDefault(url,'baseline_focus_member_id',focusMember);
+  }
+  if(reviewMember)setSearchParamDefault(url,'member_id',reviewMember);
+  if(sharedSelection.memberIds?.length&&!normalizeSelectionValue(url.searchParams.get('member_set'))){
+    url.searchParams.set('member_set',sharedSelection.memberIds.join('|'));
+  }
+  if(caseId)setSearchParamDefault(url,'case_id',caseId);
+  if(combinationName)setSearchParamDefault(url,'combination',combinationName);
+  if(rowRef)setSearchParamDefault(url,'row_ref',rowRef);
+  if(clauseLabel)setSearchParamDefault(url,'clause',clauseLabel);
+  appendPanelZoneContextParams(url,data,'exact_row_ref');
+  return url.href;
+}
+function buildPanelZoneContextFallbackUrl(data,loadCase=''){
+  const url=getResultsExplorerBaseUrl();
+  const normalizedMember=normalizeSelectionValue(data?.memberId);
+  const sharedSelection=readSharedSelection();
+  if(!normalizedMember)return '';
+  url.searchParams.set('source','panel_zone_row_provenance_context');
+  url.searchParams.set('focus','panel-zone');
+  url.searchParams.set('view','midas');
+  url.searchParams.set('codecheck_surface','drilldown');
+  url.searchParams.set('codecheck_detail_block','row-provenance');
+  url.searchParams.set('results_card','envelope');
+  url.searchParams.set('results_companion','checks');
+  url.searchParams.set('results_detail_block','chart');
+  url.searchParams.set('interactive_detail_more','open');
+  url.searchParams.set('overlay_detail_more','open');
+  url.searchParams.set('focus_member',normalizedMember);
+  url.searchParams.set('member_id',normalizedMember);
+  url.searchParams.set('baseline_focus_member_id',normalizedMember);
+  if(sharedSelection.memberIds?.length)url.searchParams.set('member_set',sharedSelection.memberIds.join('|'));
+  const normalizedLoadCase=normalizeSelectionValue(loadCase||data?.resultsExplorerCombination);
+  if(normalizedLoadCase)url.searchParams.set('combination',normalizedLoadCase);
+  if(data?.resultsExplorerCaseId)url.searchParams.set('case_id',normalizeSelectionValue(data.resultsExplorerCaseId));
+  if(data?.resultsExplorerRowRef)url.searchParams.set('row_ref',normalizeSelectionValue(data.resultsExplorerRowRef));
+  appendPanelZoneContextParams(url,data,'context_fallback');
+  return url.href;
+}
+function buildReviewRowProvenanceUrl(memberId,loadCase='',data=null,payload=null){
+  const normalizedMember=normalizeSelectionValue(memberId);
+  const selection=readSharedSelection();
+  const rowLookup=buildPanelZoneRowLookup(
+    payload,
+    normalizedMember,
+    loadCase,
+    [
+      data?.resultsExplorerFocusMemberId,
+      data?.resultsExplorerReviewMemberId,
+      data?.resultsExplorerCaseId,
+      selection.memberId,
+      ...(selection.memberIds||[])
+    ]
+  );
+  if(rowLookup){
+    return buildPanelZoneResultsExplorerUrlFromLookup(rowLookup,normalizedMember,loadCase,data||null);
+  }
+  if(!normalizedMember)return '';
+  return buildPanelZoneContextFallbackUrl(data||{memberId:normalizedMember},loadCase);
+}
+function matchRowByMember(rows,preferredMemberId){
+  if(!Array.isArray(rows)||!rows.length)return null;
+  const normalized=normalizeSelectionValue(preferredMemberId);
+  if(!normalized)return rows[0];
+  return rows.find(row=>normalizeSelectionValue(row?.member_id||row?.case_id)===normalized)||rows[0];
+}
+
+function readPanelPayload(){
+  if(window.__PANEL_ZONE_PAYLOAD__&&typeof window.__PANEL_ZONE_PAYLOAD__==='object')return window.__PANEL_ZONE_PAYLOAD__;
+  for(const id of ['panel-zone-artifact-data','embedded-panel-zone-payload']){
+    const el=document.getElementById(id);
+    if(!el)continue;
+    try{return JSON.parse(el.textContent)}catch(err){console.warn('[panel-zone] parse failed',id,err)}
+  }
+  return null;
+}
+
+function mergePanelPayload(primary,secondary){
+  const left=primary&&typeof primary==='object'?primary:{};
+  const right=secondary&&typeof secondary==='object'?secondary:{};
+  return {
+    ...right,
+    ...left,
+    clash_report:left.clash_report??right.clash_report??null,
+    clash_artifact:left.clash_artifact??right.clash_artifact??null,
+    clash_verification:left.clash_verification??right.clash_verification??null,
+    joint_geometry:left.joint_geometry??right.joint_geometry??null,
+    anchorage:left.anchorage??right.anchorage??null,
+    inbox_status:left.inbox_status??right.inbox_status??null,
+    row_provenance_lookup:left.row_provenance_lookup??right.row_provenance_lookup??null
+  };
+}
+
+async function tryFetchPanelPayload(){
+  const rows=[];
+  for(const candidate of PANEL_FETCH_CANDIDATES){
+    try{
+      const res=await fetch(new URL(candidate,window.location.href),{cache:'no-store'});
+      if(!res.ok)continue;
+      rows.push(await res.json());
+    }catch(_err){}
+  }
+  if(!rows.length)return null;
+  return {
+    clash_report:rows.find(row=>row.run_id==='phase1-panel-zone-clash-readiness')||null,
+    clash_artifact:rows.find(row=>row.run_id==='phase1-panel-zone-clash-artifact')||null,
+    clash_verification:rows.find(row=>row.source_kind==='panel_zone_clash_verification_3d')||null,
+    joint_geometry:rows.find(row=>row.source_kind==='panel_zone_joint_geometry_3d')||null,
+    anchorage:rows.find(row=>row.source_kind==='panel_zone_rebar_anchorage_3d')||null,
+    inbox_status:rows.find(row=>row.run_id==='phase1-panel-zone-solver-verified-inbox-status')||null
+  };
+}
+
+function buildDemoPanelData(){
+  return {
+    title:'Panel Zone Demo',
+    subtitle:'Artifact unavailable, using demo fallback',
+    sourceLabel:'demo fallback',
+    reportName:'demo-panel-zone',
+    generatedAt:'',
+    statusLabel:'Proxy clash preview',
+    statusTone:'clash',
+    beamLengthM:4.6,
+    sectionDepthM:0.8,
+    sectionWidthM:0.4,
+    availableAnchorageM:1.0,
+    requiredAnchorageM:0.58,
+    developmentLengthM:0.76,
+    detailingViolationRatio:0.36,
+    constructabilityScore:0.25,
+    clashCount:4,
+    clashPass:false,
+    clearanceMm:null,
+    clearanceLabel:'n/a',
+    clashMetricLabel:'4 | review',
+    clashEvidenceLabel:'clash count 4 | review',
+    jointCentroidM:null,
+    groupId:'',
+    sectionSignature:'',
+    memberType:'',
+    jointDegreeMax:null,
+    sourceModeKey:'heuristic_proxy',
+    sourceModeLabel:'heuristic proxy',
+    verificationLabel:'open proxy fallback',
+    boundaryLabel:'status=not_applicable | boundary=open',
+    verificationTier:'panel_zone_artifact',
+    fallbackLabel:'local proxy layout fallback',
+    sourceInputPath:'',
+    contractMode:'panel_zone_artifact',
+    coverageLabel:'coverage n/a',
+    resultsExplorerFocusMemberId:'',
+    resultsExplorerReviewMemberId:'',
+    resultsExplorerRowRef:'',
+    resultsExplorerCaseId:'',
+    resultsExplorerCombination:'',
+    resultsExplorerLinkMode:'panel_zone_context',
+    resultsExplorerLinkLabel:'panel-zone context fallback',
+    resultsExplorerSummaryLabel:'',
+    renderGeometryMode:'heuristic_proxy',
+    geometryLayout:null
+  };
+}
+
+function firstRow(rows){
+  return Array.isArray(rows)&&rows.length?rows[0]:null;
+}
+
+function normalizePanelPayload(payload,preferredMemberId=''){
+  if(payload&&payload.sectionDepthM)return payload;
+  if(!payload||typeof payload!=='object')return buildDemoPanelData();
+  const sharedSelection=readSharedSelection();
+
+  const jointRows=payload.joint_geometry?.artifacts?.source_rows_head||[];
+  const anchorageRows=payload.anchorage?.artifacts?.source_rows_head||[];
+  const clashRows=payload.clash_artifact?.artifacts?.interference_rows_head||[];
+  const clashVerificationRows=payload.clash_verification?.artifacts?.source_rows_head||[];
+  const joint=matchRowByMember(jointRows,preferredMemberId)||{};
+  const clash=matchRowByMember(clashRows,preferredMemberId)||{};
+  const memberId=String(joint.member_id||clash.member_id||'--');
+  const anchorage=matchRowByMember(
+    anchorageRows,
+    normalizeSelectionValue(preferredMemberId)||normalizeSelectionValue(memberId)
+  )||{};
+  const clashVerification=matchRowByMember(
+    clashVerificationRows,
+    normalizeSelectionValue(preferredMemberId)||normalizeSelectionValue(memberId)
+  )||{};
+  const clashReport=payload.clash_report||{};
+  const ratio=safeNumber(clash.detailing_violation_ratio, safeNumber(clashReport.summary?.max_detailing_violation_ratio, 0.24));
+  const sourceModeKey=determinePanelSourceMode(payload);
+  const sourceModeLabel=describePanelSourceMode(sourceModeKey);
+  const externalValidationStatusLabel=firstDefinedText(
+    clashReport.summary?.panel_zone_external_validation_status_label
+  );
+  const verificationLabel=firstDefinedText(
+    clashReport.summary?.panel_zone_external_validation_summary_line
+      ?`${sourceModeLabel} | ${clashReport.summary.panel_zone_external_validation_summary_line}`
+      :externalValidationStatusLabel
+        ?`${sourceModeLabel} | ${externalValidationStatusLabel}`
+        :clashReport.summary?.panel_zone_validation_boundary==='external_validation_only'
+          ?`${sourceModeLabel} | boundary open`
+          :'',
+    sourceModeKey==='solver_verified'
+      ?'solver-verified bridge complete'
+      :sourceModeKey==='topology_projected'
+        ?'topology-projected bridge complete'
+        :sourceModeKey==='artifact_bound_proxy'
+          ?'required sources complete | proxy review'
+          :'open proxy fallback'
+  );
+  const geometryLayout=extractPanelGeometryLayout(joint,anchorage,clash);
+  const hasVectorGeometry=Boolean(
+    geometryLayout.beamSegment||
+    geometryLayout.columnSegment||
+    geometryLayout.columnRebarSegments.length||
+    geometryLayout.beamRebarSegments.length||
+    geometryLayout.hoopLoops.length||
+    geometryLayout.clashPoints.length
+  );
+  const renderGeometryMode=hasVectorGeometry
+    ?'artifact_vector_coords'
+    :(joint.joint_centroid_m&&Number.isFinite(Number(joint.joint_centroid_m.x))&&Number.isFinite(Number(joint.joint_centroid_m.y))&&Number.isFinite(Number(joint.joint_centroid_m.z)))
+      ?'artifact_world_coords'
+      :'heuristic_proxy';
+  const clearanceMm=finiteNumberOrNull(clashVerification.clearance_mm);
+  const clashPass=typeof clashVerification.clash_pass==='boolean'
+    ?clashVerification.clash_pass
+    :(clearanceMm!==null?clearanceMm>0:false);
+  const clashCount=finiteNumberOrNull(clashVerification.clash_count);
+  const rowLookup=buildPanelZoneRowLookup(
+    payload,
+    memberId,
+    normalizeSelectionValue(sharedSelection.loadCase),
+    [preferredMemberId,sharedSelection.memberId,...(sharedSelection.memberIds||[])]
+  );
+  const resultsExplorerCombination=normalizeSelectionValue(
+    rowLookup?.combination_name
+      || (Array.isArray(clash.row_provenance_combination_names)?clash.row_provenance_combination_names[0]:'')
+  );
+
+  return {
+    title:joint.panel_zone_id?`Panel Zone ${joint.panel_zone_id}`:'Panel Zone 3D Clash Viewer',
+    subtitle:`Member ${memberId} | Joint ${joint.joint_id||'--'} | Nodes ${(joint.joint_node_ids||[]).join(', ')||'--'}`,
+    memberId,
+    jointId:normalizeSelectionValue(joint.joint_id),
+    panelZoneId:normalizeSelectionValue(joint.panel_zone_id),
+    sourceLabel:sourceModeLabel,
+    reportName:extractPanelReportName(payload),
+    generatedAt:extractPanelTimestamp(payload),
+    statusLabel:describePanelStatusLabel(sourceModeKey),
+    statusTone:ratio>0.2?'clash':'safe',
+    beamLengthM:safeNumber(joint.beam_length_mm,4600)/1000,
+    sectionDepthM:safeNumber(joint.section_depth_mm,800)/1000,
+    sectionWidthM:safeNumber(joint.section_width_mm,400)/1000,
+    availableAnchorageM:safeNumber(anchorage.available_anchorage_length_mm,1000)/1000,
+    requiredAnchorageM:safeNumber(anchorage.required_anchorage_length_mm,580)/1000,
+    developmentLengthM:safeNumber(anchorage.development_length_mm,760)/1000,
+    detailingViolationRatio:ratio,
+    constructabilityScore:safeNumber(clash.constructability_score, safeNumber(clashReport.summary?.max_constructability_score,0.25)),
+    clashCount:clashCount===null?Math.max(1,Math.min(8,Math.round(Math.max(ratio,0.08)*16))):Math.max(0,Math.round(clashCount)),
+    clashPass,
+    clearanceMm,
+    clearanceLabel:formatMillimeters(clearanceMm),
+    clashMetricLabel:`${clashCount===null?Math.max(1,Math.min(8,Math.round(Math.max(ratio,0.08)*16))):Math.max(0,Math.round(clashCount))} | ${clashPass?'pass':'review'}`,
+    clashEvidenceLabel:`${formatMillimeters(clearanceMm)} | ${clashPass?'pass':'review'}`,
+    anchorageComplexity:safeNumber(clash.anchorage_complexity, safeNumber(clashReport.summary?.max_anchorage_complexity,0.22)),
+    verificationTier:payload.clash_artifact?.summary?.verification_tier||'panel_zone_artifact',
+    boundaryLabel:buildPanelBoundaryLabel(payload),
+    upstreamVerificationTier:firstDefinedText(
+      clashReport.summary?.panel_zone_source_upstream_verification_tiers?.panel_zone_clash_verification_3d,
+      payload.clash_verification?.summary?.verification_tier,
+      payload.clash_artifact?.source_provenance?.source_upstream_verification_tiers?.panel_zone_clash_verification_3d
+    ),
+    sourceModeKey,
+    sourceModeLabel,
+    verificationLabel,
+    fallbackLabel:describePanelFallback(renderGeometryMode,sourceModeKey),
+    sourceInputPath:extractPanelSourceInputPath(payload),
+    contractMode:buildPanelContractMode(payload),
+    coverageLabel:buildPanelCoverageLabel(payload),
+    resultsExplorerFocusMemberId:normalizeSelectionValue(rowLookup?.baseline_focus_member_id),
+    resultsExplorerReviewMemberId:firstDefinedText(rowLookup?.member_id,rowLookup?.case_id),
+    resultsExplorerRowRef:normalizeSelectionValue(rowLookup?.viewer_row_ref),
+    resultsExplorerCaseId:normalizeSelectionValue(rowLookup?.case_id),
+    resultsExplorerCombination,
+    resultsExplorerLinkMode:rowLookup?'exact_row_ref':'panel_zone_context',
+    resultsExplorerLinkLabel:rowLookup
+      ?firstDefinedText(rowLookup.bridge_row_provenance_mode_label,'exact row provenance')
+      :'panel-zone context fallback',
+    resultsExplorerSummaryLabel:normalizeSelectionValue(rowLookup?.bridge_row_provenance_summary_label),
+    groupId:normalizeSelectionValue(clash.group_id),
+    sectionSignature:firstDefinedText(clash.section_signature,joint.section_signature,anchorage.section_signature),
+    memberType:normalizeSelectionValue(clash.member_type||joint.member_type),
+    jointDegreeMax:finiteNumberOrNull(anchorage.joint_degree_max??clashVerification.joint_degree_max),
+    jointCentroidM:joint.joint_centroid_m||joint.centroid_m||joint.centroid||null,
+    renderGeometryMode,
+    geometryLayout
+  };
+}
+
+function readSceneVector3(value){
+  if(Array.isArray(value)&&value.length>=3){
+    const x=Number(value[0]), y=Number(value[1]), z=Number(value[2]);
+    if(Number.isFinite(x)&&Number.isFinite(y)&&Number.isFinite(z))return new THREE.Vector3(x,z,y);
+    return null;
+  }
+  if(value&&typeof value==='object'){
+    const x=Number(value.x), y=Number(value.y), z=Number(value.z);
+    if(Number.isFinite(x)&&Number.isFinite(y)&&Number.isFinite(z))return new THREE.Vector3(x,z,y);
+  }
+  return null;
+}
+function readPanelSegment(value){
+  if(Array.isArray(value)&&value.length>=2){
+    const start=readSceneVector3(value[0]);
+    const end=readSceneVector3(value[1]);
+    if(start&&end)return{start,end};
+  }
+  if(value&&typeof value==='object'){
+    const start=readSceneVector3(
+      value.start||value.p0||value.from||value.a||value.start_m||value.start_point_m||value.origin
+    );
+    const end=readSceneVector3(
+      value.end||value.p1||value.to||value.b||value.end_m||value.end_point_m||value.target
+    );
+    if(start&&end)return{start,end};
+  }
+  return null;
+}
+function readPanelPointArray(value){
+  const rows=Array.isArray(value)?value:[];
+  return rows.map(entry=>readSceneVector3(entry?.point||entry?.center||entry)).filter(Boolean);
+}
+function readPanelLoopArray(value){
+  const rows=Array.isArray(value)?value:[];
+  return rows.map(entry=>{
+    const rawPoints=Array.isArray(entry?.points)
+      ?entry.points
+      :(Array.isArray(entry?.points_m)?entry.points_m:[]);
+    const points=rawPoints.map(point=>readSceneVector3(point)).filter(Boolean);
+    return points.length>=2?points:null;
+  }).filter(Boolean);
+}
+function findFirstSegment(candidates,keys){
+  for(const candidate of candidates){
+    if(!candidate||typeof candidate!=='object')continue;
+    for(const key of keys){
+      const segment=readPanelSegment(candidate[key]);
+      if(segment)return segment;
+    }
+  }
+  return null;
+}
+function findAllSegments(candidates,keys){
+  const segments=[];
+  for(const candidate of candidates){
+    if(!candidate||typeof candidate!=='object')continue;
+    for(const key of keys){
+      const value=candidate[key];
+      if(Array.isArray(value)){
+        value.forEach(entry=>{
+          const segment=readPanelSegment(entry);
+          if(segment)segments.push(segment);
+        });
+      }else{
+        const segment=readPanelSegment(value);
+        if(segment)segments.push(segment);
+      }
+    }
+  }
+  return segments;
+}
+function extractPanelGeometryLayout(joint,anchorage,clash){
+  const candidates=[joint,anchorage,clash].filter(candidate=>candidate&&typeof candidate==='object');
+  const beamSegment=findFirstSegment(candidates,[
+    'beam_axis_segment_m','beam_axis_m','beam_segment_m','beam_line_m','beam_world_segment_m'
+  ]);
+  const columnSegment=findFirstSegment(candidates,[
+    'column_axis_segment_m','column_axis_m','column_segment_m','column_line_m','column_world_segment_m'
+  ]);
+  const columnRebarSegments=findAllSegments(candidates,[
+    'column_rebar_segments_m','column_rebar_layout_m','column_bar_segments_m'
+  ]);
+  const beamRebarSegments=findAllSegments(candidates,[
+    'beam_rebar_segments_m','beam_rebar_layout_m','beam_bar_segments_m'
+  ]);
+  const hoopLoops=candidates.flatMap(candidate=>readPanelLoopArray(
+    candidate.hoop_loops_m||candidate.tie_loops_m||candidate.hoop_paths_m||candidate.tie_paths_m
+  ));
+  const clashPoints=candidates.flatMap(candidate=>readPanelPointArray(
+    candidate.clash_points_m||candidate.interference_points_m||candidate.clearance_points_m
+  ));
+  return{
+    beamSegment,
+    columnSegment,
+    columnRebarSegments,
+    beamRebarSegments,
+    hoopLoops,
+    clashPoints
+  };
+}
+function resolvePanelOrigin(data){
+  const centroid=readSceneVector3(data?.jointCentroidM);
+  if(centroid)return centroid;
+  const layout=data?.geometryLayout;
+  if(layout?.beamSegment){
+    return layout.beamSegment.start.clone().add(layout.beamSegment.end).multiplyScalar(0.5);
+  }
+  if(layout?.columnSegment){
+    return layout.columnSegment.start.clone().add(layout.columnSegment.end).multiplyScalar(0.5);
+  }
+  return null;
+}
+function resetGroupTransforms(){
+  Object.values(groups).forEach(group=>{
+    group.position.set(0,0,0);
+    group.rotation.set(0,0,0);
+    group.scale.set(1,1,1);
+  });
+}
+function applyPanelOrigin(origin){
+  Object.values(groups).forEach(group=>group.position.copy(origin));
+}
+function getPanelViewportSize(){
+  const rect=panelViewport?.getBoundingClientRect();
+  const width=Math.max(320,Math.floor(rect?.width||innerWidth));
+  const height=Math.max(320,Math.floor(rect?.height||innerHeight));
+  return{width,height};
+}
+function resizePanelRenderer(){
+  const {width,height}=getPanelViewportSize();
+  cam.aspect=width/height;
+  cam.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  renderer.setSize(width,height,false);
+}
+function fitPanelCamera(origin,span){
+  const focusOrigin=origin||new THREE.Vector3();
+  const framingSpan=Math.max(span,1.2);
+  controls.target.copy(focusOrigin);
+  cam.position.copy(focusOrigin).add(new THREE.Vector3(framingSpan*1.35, framingSpan*1.05, framingSpan*1.2));
+  cam.near=Math.max(0.05,framingSpan/500);
+  cam.far=Math.max(120,framingSpan*120);
+  cam.updateProjectionMatrix();
+  directional.position.copy(focusOrigin).add(new THREE.Vector3(framingSpan*0.9, framingSpan*1.6, framingSpan*0.8));
+  directional.target.position.copy(focusOrigin);
+}
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1a);
+scene.fog = new THREE.FogExp2(0x0a0e1a, 0.05);
+
+const initialViewportSize=getPanelViewportSize();
+const cam = new THREE.PerspectiveCamera(40, initialViewportSize.width/initialViewportSize.height, 0.1, 100);
+cam.position.set(3.2, 2.1, 4.2);
+
+const renderer = new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+renderer.setSize(initialViewportSize.width, initialViewportSize.height, false);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.localClippingEnabled=true;
+if(panelViewport instanceof HTMLElement){
+  panelViewport.appendChild(renderer.domElement);
+  renderer.domElement.setAttribute('aria-hidden','true');
+}else{
+  document.body.appendChild(renderer.domElement);
+}
+
+const controls = new OrbitControls(cam, renderer.domElement);
+controls.enableDamping = true;
+controls.target.set(0, 0, 0);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+const directional = new THREE.DirectionalLight(0xffffff, 1.2);
+directional.position.set(5, 10, 5);
+scene.add(directional);
+scene.add(directional.target);
+
+const groups = {
+  concrete: new THREE.Group(),
+  'col-rebar': new THREE.Group(),
+  'beam-rebar': new THREE.Group(),
+  hoop: new THREE.Group(),
+  clash: new THREE.Group()
+};
+Object.values(groups).forEach(group => scene.add(group));
+const sectionCutGuide = new THREE.Group();
+scene.add(sectionCutGuide);
+const pickableObjects=[];
+const raycaster=new THREE.Raycaster();
+raycaster.params.Line.threshold=0.035;
+const pointerNdc=new THREE.Vector2();
+const selectionMarker=new THREE.BoxHelper(new THREE.Object3D(),0xf4b56b);
+selectionMarker.visible=false;
+selectionMarker.material.transparent=true;
+selectionMarker.material.opacity=0.82;
+selectionMarker.material.depthTest=false;
+scene.add(selectionMarker);
+let hoveredPickObject=null;
+let selectedPickObject=null;
+let activeHover=null;
+let lastPointerEvent=null;
+let pointerInsideViewport=false;
+
+function clearGroups(){
+  clearPickVisualState();
+  pickableObjects.length=0;
+  Object.values(groups).forEach(group=>{
+    while(group.children.length)group.remove(group.children[0]);
+  });
+  while(sectionCutGuide.children.length)sectionCutGuide.remove(sectionCutGuide.children[0]);
+  resetGroupTransforms();
+}
+
+function buildBasePickData(data,overrides={}){
+  const elementType=firstDefinedText(overrides.elementType,'panel element');
+  const elementId=firstDefinedText(overrides.elementId,overrides.elementType,data?.memberId,'panel-element');
+  const objectKind=normalizeObjectKind(overrides.panelZoneObjectKind||overrides.objectKind||elementType);
+  const memberId=normalizeSelectionValue(overrides.memberId||data?.memberId);
+  const jointId=normalizeSelectionValue(overrides.jointId||data?.jointId||data?.panelZoneId);
+  const groupId=normalizeSelectionValue(overrides.groupId||data?.groupId);
+  const loadCase=normalizeSelectionValue(overrides.loadCase||data?.resultsExplorerCombination||readSharedSelection().loadCase);
+  const objectId=firstDefinedText(
+    overrides.panelZoneObjectId,
+    overrides.objectId,
+    [
+      normalizeObjectIdPart(memberId||'member'),
+      normalizeObjectIdPart(groupId||jointId||'panel'),
+      normalizeObjectIdPart(objectKind||'object'),
+      normalizeObjectIdPart(elementId)
+    ].filter(Boolean).join('__')
+  );
+  return {
+    pickable:true,
+    panelZoneObjectId:objectId,
+    panelZoneObjectKind:objectKind,
+    memberId,
+    jointId,
+    sectionSignature:normalizeSelectionValue(overrides.sectionSignature||data?.sectionSignature),
+    clearanceMm:overrides.clearanceMm??data?.clearanceMm??null,
+    clearanceLabel:firstDefinedText(overrides.clearanceLabel,data?.clashEvidenceLabel,data?.clearanceLabel,'clearance n/a'),
+    sourceLabel:firstDefinedText(overrides.sourceLabel,data?.sourceLabel,'panel-zone artifact'),
+    provenance:firstDefinedText(overrides.provenance,data?.resultsExplorerLinkLabel,data?.verificationTier,data?.sourceModeLabel,'artifact provenance'),
+    elementType,
+    elementId,
+    signature:firstDefinedText(overrides.signature,data?.sectionSignature,'section n/a'),
+    groupId,
+    loadCase,
+    sourceModeKey:normalizeSelectionValue(data?.sourceModeKey),
+    verificationTier:normalizeSelectionValue(data?.verificationTier)
+  };
+}
+function registerPickable(object,data,overrides={}){
+  if(!object)return object;
+  object.userData={
+    ...(object.userData||{}),
+    ...buildBasePickData(data,overrides)
+  };
+  pickableObjects.push(object);
+  return object;
+}
+function getPickRoot(object){
+  let node=object;
+  while(node){
+    if(node.userData?.pickable)return node;
+    node=node.parent;
+  }
+  return null;
+}
+function captureMaterialState(object){
+  if(!object||object.userData.pickOriginalMaterial)return;
+  object.userData.pickOriginalMaterial=object.material;
+  object.userData.pickOriginalScale=object.scale?.clone?.()||null;
+}
+function restorePickObject(object){
+  if(!object)return;
+  if(object.userData.pickOriginalMaterial){
+    object.material=object.userData.pickOriginalMaterial;
+    delete object.userData.pickOriginalMaterial;
+  }
+  if(object.userData.pickOriginalScale&&object.scale){
+    object.scale.copy(object.userData.pickOriginalScale);
+    delete object.userData.pickOriginalScale;
+  }
+}
+function cloneMaterialForPick(material,state){
+  const clone=material.clone();
+  clone.clippingPlanes=material.clippingPlanes;
+  clone.clipShadows=material.clipShadows;
+  clone.clipIntersection=material.clipIntersection;
+  if(clone.color){
+    const color=state==='selected'?0xf4b56b:0x7dd3fc;
+    clone.color.lerp(new THREE.Color(color),state==='selected'?0.42:0.28);
+  }
+  if(clone.emissive){
+    clone.emissive.setHex(state==='selected'?0x5a3412:0x12364a);
+    clone.emissiveIntensity=state==='selected'?0.42:0.24;
+  }
+  if('opacity' in clone){
+    clone.transparent=true;
+    clone.opacity=Math.max(state==='selected'?0.62:0.48,clone.opacity||1);
+  }
+  if('linewidth' in clone)clone.linewidth=state==='selected'?2:1;
+  clone.needsUpdate=true;
+  return clone;
+}
+function applyPickObjectVisual(object,state){
+  if(!object||!object.material)return;
+  captureMaterialState(object);
+  const original=object.userData.pickOriginalMaterial;
+  if(Array.isArray(original)){
+    object.material=original.map(material=>cloneMaterialForPick(material,state));
+  }else{
+    object.material=cloneMaterialForPick(original,state);
+  }
+}
+function refreshPickVisuals(){
+  const unique=new Set([hoveredPickObject,selectedPickObject].filter(Boolean));
+  unique.forEach(object=>restorePickObject(object));
+  if(hoveredPickObject&&hoveredPickObject!==selectedPickObject){
+    applyPickObjectVisual(hoveredPickObject,'hover');
+  }
+  if(selectedPickObject){
+    applyPickObjectVisual(selectedPickObject,'selected');
+    selectionMarker.setFromObject(selectedPickObject);
+    selectionMarker.visible=true;
+  }else{
+    selectionMarker.visible=false;
+  }
+}
+function clearPickVisualState(){
+  [hoveredPickObject,selectedPickObject].filter(Boolean).forEach(object=>restorePickObject(object));
+  hoveredPickObject=null;
+  selectedPickObject=null;
+  activeHover=null;
+  selectionMarker.visible=false;
+  if(panelViewport instanceof HTMLElement){
+    panelViewport.classList.remove('is-pick-hover');
+  }
+}
+function updatePickStatus(message,tone=''){
+  const status=document.getElementById('viewport-pick-status');
+  if(status instanceof HTMLElement){
+    status.textContent=message;
+    status.classList.toggle('is-fallback',tone==='fallback');
+    status.classList.toggle('is-selected',tone==='selected');
+  }
+}
+function buildObjectSelection(pickData={},persistSource='panel_zone_pick'){
+  const data=currentPanelData||{};
+  const memberId=normalizeSelectionValue(pickData.memberId||data.memberId);
+  const loadCase=normalizeSelectionValue(pickData.loadCase||readSharedSelection().loadCase||data.resultsExplorerCombination);
+  const memberIds=normalizeSelectionValues([memberId,...(readSharedSelection().memberIds||[])]);
+  return{
+    memberId,
+    memberIds,
+    loadCase,
+    panelZoneObjectId:normalizeSelectionValue(pickData.panelZoneObjectId),
+    panelZoneObjectKind:normalizeObjectKind(pickData.panelZoneObjectKind),
+    source:persistSource
+  };
+}
+function updateSelectionHandoff(pickData={},stateLabel='selected',options={}){
+  const data=currentPanelData||{};
+  const selection=buildObjectSelection(pickData,options.source||'panel_zone_pick');
+  const {memberId,memberIds,loadCase}=selection;
+  if(options.persist&&memberId)publishSharedSelection(selection);
+  const href=options.persist?syncSelectionQuery(selection):buildSelectionQueryUrl(selection);
+  const pickLabel=compactPickLabel(pickData);
+  const selectionHud=document.getElementById('viewport-selection-chip');
+  if(selectionHud)selectionHud.textContent=`${stateLabel}: ${pickLabel}`;
+  const handoffMode=document.getElementById('stage-handoff-mode');
+  if(handoffMode)handoffMode.textContent=`Pick handoff | ${firstDefinedText(pickData.provenance,data.resultsExplorerLinkLabel,'local selection')}`;
+  const clearanceMode=document.getElementById('stage-clearance-mode');
+  if(clearanceMode)clearanceMode.textContent=firstDefinedText(pickData.clearanceLabel,data.clashEvidenceLabel,data.clearanceLabel,'--');
+  const provenanceSelection=document.getElementById('provenance-selection');
+  if(provenanceSelection)provenanceSelection.textContent=`${buildSelectionLabel(memberId,loadCase,memberIds)} | ${pickData.elementType||'element'}${pickData.panelZoneObjectId?` | object ${pickData.panelZoneObjectId}`:''}`;
+  const provenanceGroup=document.getElementById('provenance-group');
+  if(provenanceGroup)provenanceGroup.textContent=
+    `${firstDefinedText(pickData.groupId,data.groupId,'n/a')}${pickData.elementType?` | ${pickData.elementType}`:''}`;
+  const provenanceSection=document.getElementById('provenance-section');
+  if(provenanceSection)provenanceSection.textContent=
+    `${firstDefinedText(pickData.sectionSignature,pickData.signature,data.sectionSignature,'n/a')}${pickData.jointId?` | joint ${pickData.jointId}`:''}`;
+  const provenanceClearance=document.getElementById('provenance-clearance');
+  if(provenanceClearance)provenanceClearance.textContent=firstDefinedText(pickData.clearanceLabel,data.clashEvidenceLabel,data.clearanceLabel,'clearance n/a');
+  const copyButton=document.getElementById('copy-deep-link');
+  if(copyButton instanceof HTMLButtonElement)copyButton.dataset.deepLink=href;
+  const copyStatus=document.getElementById('copy-deep-link-status');
+  if(copyStatus)copyStatus.textContent=`Deep link ready | ${pickLabel}${pickData.panelZoneObjectKind?` | ${pickData.panelZoneObjectKind}`:''}`;
+  const reviewLink=document.getElementById('review-row-link');
+  if(reviewLink instanceof HTMLAnchorElement){
+    const reviewHref=buildReviewRowProvenanceUrl(memberId,loadCase,data,currentPanelPayload);
+    reviewLink.href=reviewHref||'#';
+    reviewLink.classList.toggle('is-disabled',!reviewHref);
+  }
+  updatePickStatus(`${stateLabel}: ${pickLabel} | ${firstDefinedText(pickData.clearanceLabel,'clearance n/a')}`,stateLabel==='selected'?'selected':'');
+}
+function setHoveredPickObject(object){
+  if(hoveredPickObject===object)return;
+  hoveredPickObject=object;
+  activeHover=object;
+  refreshPickVisuals();
+  if(panelViewport instanceof HTMLElement){
+    panelViewport.classList.toggle('is-pick-hover',Boolean(object));
+  }
+  if(object){
+    const pickData=object.userData||{};
+    const selectionHud=document.getElementById('viewport-selection-chip');
+    if(selectionHud)selectionHud.textContent=`hover: ${compactPickLabel(pickData)}`;
+    updatePickStatus(`hover: ${compactPickLabel(pickData)} | click to hand off selection`);
+  }else if(selectedPickObject){
+    updateSelectionHandoff(selectedPickObject.userData||{},'selected',{persist:false});
+  }else{
+    updatePickStatus('Point to a member, clash, or reinforcement element to inspect it.');
+  }
+}
+function setSelectedPickObject(object,options={}){
+  if(selectedPickObject===object){
+    if(object&&options.persist)updateSelectionHandoff(object.userData||{},'selected',{persist:true});
+    return;
+  }
+  selectedPickObject=object;
+  refreshPickVisuals();
+  if(object)updateSelectionHandoff(object.userData||{},'selected',{persist:Boolean(options.persist)});
+}
+function isPickObjectVisible(object){
+  let node=object;
+  while(node){
+    if(node.visible===false)return false;
+    node=node.parent;
+  }
+  return true;
+}
+function resolveSelectedPickObject(selection=readSharedSelection()){
+  const requestedId=normalizeSelectionValue(selection.panelZoneObjectId);
+  const requestedKind=normalizeObjectKind(selection.panelZoneObjectKind);
+  const requestedMember=normalizeSelectionValue(selection.memberId);
+  const visiblePickables=pickableObjects.filter(isPickObjectVisible);
+  if(requestedId){
+    const exact=visiblePickables.find(object=>normalizeSelectionValue(object.userData?.panelZoneObjectId)===requestedId);
+    if(exact)return{object:exact,mode:'exact'};
+  }
+  if(requestedKind||requestedMember){
+    const fallback=visiblePickables.find(object=>{
+      const data=object.userData||{};
+      const sameKind=!requestedKind||normalizeObjectKind(data.panelZoneObjectKind)===requestedKind;
+      const sameMember=!requestedMember||normalizeSelectionValue(data.memberId)===requestedMember;
+      return sameKind&&sameMember;
+    })||visiblePickables.find(object=>{
+      const data=object.userData||{};
+      return requestedMember&&normalizeSelectionValue(data.memberId)===requestedMember;
+    });
+    if(fallback)return{object:fallback,mode:requestedId?'fallback':'member'};
+  }
+  return{object:null,mode:requestedId?'missing':'none'};
+}
+function restoreSelectionFromSharedSelection(){
+  const selection=readSharedSelection();
+  if(!selection.panelZoneObjectId)return;
+  const resolved=resolveSelectedPickObject(selection);
+  if(!resolved.object){
+    updatePickStatus(selection.panelZoneObjectId
+      ?`Selection object ${selection.panelZoneObjectId} is not visible in the current panel.`
+      :'Point to a member, clash, or reinforcement element to inspect it.','fallback');
+    return;
+  }
+  selectedPickObject=resolved.object;
+  refreshPickVisuals();
+  updateSelectionHandoff(resolved.object.userData||{},resolved.mode==='fallback'?'fallback selected':'selected',{persist:false});
+  if(resolved.mode==='fallback'){
+    updatePickStatus(
+      `Fallback selected: requested ${selection.panelZoneObjectKind||'object'} ${selection.panelZoneObjectId||'n/a'} -> ${resolved.object.userData?.panelZoneObjectId||'nearest pickable'}`,
+      'fallback'
+    );
+  }
+}
+function findPickObjectFromPointer(event){
+  if(!(panelViewport instanceof HTMLElement))return null;
+  const rect=panelViewport.getBoundingClientRect();
+  if(rect.width<=0||rect.height<=0)return null;
+  pointerNdc.x=((event.clientX-rect.left)/rect.width)*2-1;
+  pointerNdc.y=-((event.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera(pointerNdc,cam);
+  const visiblePickables=pickableObjects.filter(isPickObjectVisible);
+  const intersections=raycaster.intersectObjects(visiblePickables,false);
+  return intersections.length?getPickRoot(intersections[0].object):null;
+}
+let pointerDownPosition=null;
+function handleViewportPointerMove(event){
+  pointerInsideViewport=true;
+  lastPointerEvent=event;
+  setHoveredPickObject(findPickObjectFromPointer(event));
+}
+function handleViewportPointerDown(event){
+  pointerInsideViewport=true;
+  lastPointerEvent=event;
+  pointerDownPosition={x:event.clientX,y:event.clientY,pointerId:event.pointerId};
+}
+function handleViewportPointerUp(event){
+  lastPointerEvent=event;
+  const start=pointerDownPosition;
+  pointerDownPosition=null;
+  if(!start||start.pointerId!==event.pointerId)return;
+  const dx=event.clientX-start.x;
+  const dy=event.clientY-start.y;
+  if(Math.hypot(dx,dy)>6)return;
+  const picked=findPickObjectFromPointer(event);
+  if(picked){
+    panelViewport?.focus?.({preventScroll:true});
+    setSelectedPickObject(picked,{persist:true});
+  }
+}
+function handleViewportPointerLeave(){
+  pointerInsideViewport=false;
+  lastPointerEvent=null;
+  setHoveredPickObject(null);
+}
+function selectHoveredPickObjectFromKeyboard(event){
+  if(event.defaultPrevented)return;
+  if(event.key!=='Enter'&&event.key!==' ')return;
+  if(!(document.activeElement===panelViewport))return;
+  const target=hoveredPickObject||selectedPickObject;
+  if(!target)return;
+  event.preventDefault();
+  setSelectedPickObject(target,{persist:true});
+}
+
+function eachGroupMaterial(callback){
+  Object.values(groups).forEach(group=>{
+    group.traverse(node=>{
+      if(node?.material){
+        const materials=Array.isArray(node.material)?node.material:[node.material];
+        materials.forEach(material=>{
+          if(material)callback(material,node);
+        });
+      }
+    });
+  });
+}
+function getSectionCutNormal(axis){
+  if(axis==='y')return new THREE.Vector3(0,1,0);
+  if(axis==='z')return new THREE.Vector3(0,0,1);
+  return new THREE.Vector3(1,0,0);
+}
+function updateSectionCutStatus(){
+  const status=document.getElementById('section-cut-status');
+  const offsetLabel=document.getElementById('section-cut-offset-label');
+  if(offsetLabel)offsetLabel.textContent=`${sectionCutState.offset.toFixed(2)} m`;
+  const stageCut=document.getElementById('stage-cut-mode');
+  if(stageCut)stageCut.textContent=sectionCutState.enabled
+    ?`${sectionCutState.axis.toUpperCase()} @ ${sectionCutState.offset.toFixed(2)} m`
+    :'Inactive';
+  if(!(status instanceof HTMLElement))return;
+  if(!sectionCutState.enabled){
+    status.textContent='Section cut inactive';
+    return;
+  }
+  status.textContent=`${sectionCutState.axis.toUpperCase()} cut @ ${sectionCutState.offset.toFixed(2)} m | span ${sectionCutState.span.toFixed(2)} m`;
+}
+function syncSectionCutControls(){
+  const enabled=document.getElementById('chk-section-cut');
+  const axis=document.getElementById('section-cut-axis');
+  const offset=document.getElementById('section-cut-offset');
+  if(enabled instanceof HTMLInputElement)enabled.checked=sectionCutState.enabled;
+  if(axis instanceof HTMLSelectElement)axis.value=sectionCutState.axis;
+  if(offset instanceof HTMLInputElement){
+    offset.min=String(sectionCutState.min);
+    offset.max=String(sectionCutState.max);
+    offset.value=String(sectionCutState.offset);
+  }
+  updateSectionCutStatus();
+}
+function updateSectionCutGuide(){
+  while(sectionCutGuide.children.length)sectionCutGuide.remove(sectionCutGuide.children[0]);
+  if(!sectionCutState.enabled)return;
+  const planeSize=Math.max(sectionCutState.span*1.2,1.0);
+  const plane=new THREE.Mesh(
+    new THREE.PlaneGeometry(planeSize,planeSize),
+    new THREE.MeshBasicMaterial({
+      color:0x38bdf8,
+      transparent:true,
+      opacity:0.12,
+      side:THREE.DoubleSide,
+      depthWrite:false
+    })
+  );
+  const edges=new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.PlaneGeometry(planeSize,planeSize)),
+    new THREE.LineBasicMaterial({color:0x7dd3fc,transparent:true,opacity:0.65})
+  );
+  const position=sectionCutState.origin.clone();
+  const axis=sectionCutState.axis;
+  if(axis==='x'){
+    position.x=sectionCutState.offset;
+    plane.rotation.y=Math.PI/2;
+    edges.rotation.y=Math.PI/2;
+  }else if(axis==='z'){
+    position.z=sectionCutState.offset;
+    plane.rotation.x=Math.PI/2;
+    edges.rotation.x=Math.PI/2;
+  }else{
+    position.y=sectionCutState.offset;
+  }
+  plane.position.copy(position);
+  edges.position.copy(position);
+  sectionCutGuide.add(plane);
+  sectionCutGuide.add(edges);
+}
+function applySectionCut(){
+  const planes=sectionCutState.enabled
+    ?[new THREE.Plane(getSectionCutNormal(sectionCutState.axis),-sectionCutState.offset)]
+    :[];
+  eachGroupMaterial(material=>{
+    material.clippingPlanes=planes.length?planes:null;
+    material.clipShadows=true;
+    material.needsUpdate=true;
+  });
+  updateSectionCutGuide();
+  updateSectionCutStatus();
+}
+function toggleSectionCut(enabled){
+  sectionCutState.enabled=Boolean(enabled);
+  syncSectionCutControls();
+  applySectionCut();
+}
+function updateSectionCutAxis(axis){
+  sectionCutState.axis=['x','y','z'].includes(axis)?axis:'x';
+  configureSectionCutRange(currentPanelData);
+  applySectionCut();
+}
+function updateSectionCutOffset(value){
+  sectionCutState.offset=Math.max(sectionCutState.min,Math.min(sectionCutState.max,safeNumber(value,0)));
+  applySectionCut();
+}
+function resetSectionCut(){
+  sectionCutState.enabled=false;
+  sectionCutState.offset=0;
+  syncSectionCutControls();
+  applySectionCut();
+}
+function configureSectionCutRange(data){
+  const origin=resolvePanelOrigin(data)||new THREE.Vector3();
+  const span=Math.max(data?.beamLengthM||0,data?.developmentLengthM||0,data?.sectionDepthM||0,data?.sectionWidthM||0,1.0);
+  sectionCutState.origin.copy(origin);
+  sectionCutState.span=span;
+  sectionCutState.min=Number(({
+    x:origin.x-span*0.8,
+    y:origin.y-span*0.8,
+    z:origin.z-span*0.8
+  })[sectionCutState.axis] ?? -span);
+  sectionCutState.max=Number(({
+    x:origin.x+span*0.8,
+    y:origin.y+span*0.8,
+    z:origin.z+span*0.8
+  })[sectionCutState.axis] ?? span);
+  sectionCutState.offset=Math.max(sectionCutState.min,Math.min(sectionCutState.max,sectionCutState.offset||origin[sectionCutState.axis]||0));
+  syncSectionCutControls();
+}
+
+function updatePanelStageSignals(data){
+  const geometryModeLabel=
+    data?.renderGeometryMode==='artifact_vector_coords'
+      ?'1:1 vector coords'
+      :data?.renderGeometryMode==='artifact_world_coords'
+        ?'1:1 world coords'
+        :'proxy local coords';
+  const viewportMode=document.getElementById('stage-viewport-mode');
+  const viewportHud=document.getElementById('viewport-render-mode');
+  const selectionHud=document.getElementById('viewport-selection-chip');
+  const handoffMode=document.getElementById('stage-handoff-mode');
+  const clearanceMode=document.getElementById('stage-clearance-mode');
+  if(viewportMode)viewportMode.textContent=geometryModeLabel;
+  if(viewportHud)viewportHud.textContent=`${geometryModeLabel} · ${data?.sourceModeLabel||'artifact'}`;
+  if(selectionHud)selectionHud.textContent=`member ${data?.memberId||'--'}${data?.resultsExplorerCombination?` · ${data.resultsExplorerCombination}`:''}`;
+  if(handoffMode)handoffMode.textContent=data?.resultsExplorerLinkLabel||data?.resultsExplorerSummaryLabel||'Shared selection';
+  if(clearanceMode)clearanceMode.textContent=data?.clashEvidenceLabel||data?.clearanceLabel||'--';
+  updateSectionCutStatus();
+}
+
+function updateInfo(data){
+  document.getElementById('title').textContent=data.title;
+  document.getElementById('subtitle').textContent=data.subtitle;
+  const status=document.getElementById('status-tag');
+  status.textContent=data.statusLabel;
+  status.className=`tag ${data.statusTone}`;
+  const geometryModeLabel=
+    data.renderGeometryMode==='artifact_vector_coords'
+      ?'1:1 vector coords'
+      :data.renderGeometryMode==='artifact_world_coords'
+        ?'1:1 world coords'
+        :'proxy local coords';
+  document.getElementById('source-pill').textContent=`Source: ${data.sourceLabel} | ${geometryModeLabel}`;
+  setSourceBadge(
+    'verification-pill',
+    `Verification: ${data.verificationLabel}`,
+    data.sourceModeKey==='solver_verified'?'ok':(data.sourceModeKey==='topology_projected'?'proxy':'warn')
+  );
+  setSourceBadge(
+    'fallback-pill',
+    `Fallback: ${data.fallbackLabel}`,
+    data.renderGeometryMode==='artifact_vector_coords'?'ok':(data.renderGeometryMode==='artifact_world_coords'?'proxy':'warn')
+  );
+  setSourceBadge(
+    'contract-pill',
+    `Contract: ${data.contractMode}`,
+    data.contractMode&&data.contractMode!=='panel_zone_artifact'?'proxy':'warn'
+  );
+  const selection=readSharedSelection();
+  const reviewLink=document.getElementById('review-row-link');
+  const reviewHref=buildReviewRowProvenanceUrl(
+    data.memberId||selection.memberId,
+    selection.loadCase||data.resultsExplorerCombination,
+    data,
+    currentPanelPayload
+  );
+  if(reviewLink instanceof HTMLAnchorElement){
+    reviewLink.href=reviewHref||'#';
+    reviewLink.classList.toggle('is-disabled',!reviewHref);
+    reviewLink.title=reviewHref
+      ?[
+        data.resultsExplorerSummaryLabel,
+        data.resultsExplorerFocusMemberId?`focus ${data.resultsExplorerFocusMemberId}`:'',
+        data.resultsExplorerRowRef?`row ${data.resultsExplorerRowRef}`:''
+      ].filter(Boolean).join(' | ')
+      :'Review row provenance unavailable';
+    reviewLink.textContent=reviewHref
+      ? `Review row provenance${data.memberId?` · panel ${data.memberId}`:''}${data.resultsExplorerReviewMemberId&&data.resultsExplorerReviewMemberId!==data.memberId?` · review ${data.resultsExplorerReviewMemberId}`:''}${data.resultsExplorerCombination?` · ${data.resultsExplorerCombination}`:''}${data.resultsExplorerLinkLabel?` · ${data.resultsExplorerLinkLabel}`:''}`
+      : 'Review row provenance unavailable';
+  }
+  updateSelectionProvenance(data);
+  document.getElementById('provenance-mode').textContent=`${data.sourceModeLabel} | ${geometryModeLabel}`;
+  document.getElementById('provenance-verification').textContent=
+    `${data.verificationLabel} | ${firstDefinedText(data.verificationTier,'panel_zone_artifact')}${data.upstreamVerificationTier?` | ${data.upstreamVerificationTier}`:''}`;
+  document.getElementById('provenance-coverage').textContent=data.coverageLabel;
+  document.getElementById('provenance-boundary').textContent=data.boundaryLabel;
+  document.getElementById('provenance-fallback').textContent=data.fallbackLabel;
+  document.getElementById('provenance-input').textContent=
+    `${firstDefinedText(basenameFromPath(data.sourceInputPath),'n/a')} | ${data.coverageLabel}`;
+  document.getElementById('provenance-group').textContent=
+    `${firstDefinedText(data.groupId,'n/a')}${data.memberType?` | ${data.memberType}`:''}`;
+  document.getElementById('provenance-section').textContent=
+    `${firstDefinedText(data.sectionSignature,'n/a')}${data.jointDegreeMax!==null?` | degree ${Math.round(data.jointDegreeMax)}`:''}`;
+  document.getElementById('provenance-clearance').textContent=data.clashEvidenceLabel;
+  document.getElementById('beam-length').textContent=`${data.beamLengthM.toFixed(2)} m`;
+  document.getElementById('section-size').textContent=`${(data.sectionDepthM*1000).toFixed(0)}×${(data.sectionWidthM*1000).toFixed(0)} mm`;
+  document.getElementById('anchorage').textContent=`${data.availableAnchorageM.toFixed(2)} / ${data.requiredAnchorageM.toFixed(2)} m`;
+  document.getElementById('violation-ratio').textContent=`${data.detailingViolationRatio.toFixed(3)}`;
+  document.getElementById('clearance').textContent=data.clearanceLabel;
+  document.getElementById('clash-pass').textContent=data.clashMetricLabel;
+  updatePanelStageSignals(data);
+}
+function buildAxisSegment(center,axis,length){
+  const half=Math.max(length,0.001)/2;
+  if(axis==='y'){
+    return{
+      start:center.clone().add(new THREE.Vector3(0,-half,0)),
+      end:center.clone().add(new THREE.Vector3(0,half,0))
+    };
+  }
+  return{
+    start:center.clone().add(new THREE.Vector3(-half,0,0)),
+    end:center.clone().add(new THREE.Vector3(half,0,0))
+  };
+}
+function makeOrientedBoxFromSegment(segment,depth,width,material){
+  const geometry=new THREE.BoxGeometry(1,1,1);
+  const mesh=new THREE.Mesh(geometry,material);
+  const direction=segment.end.clone().sub(segment.start);
+  const length=Math.max(direction.length(),0.001);
+  const midpoint=segment.start.clone().add(segment.end).multiplyScalar(0.5);
+  const quaternion=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1,0,0),direction.normalize());
+  mesh.position.copy(midpoint);
+  mesh.quaternion.copy(quaternion);
+  mesh.scale.set(length,Math.max(depth,0.01),Math.max(width,0.01));
+  return mesh;
+}
+function makeCylinderBetween(segment,radius,material){
+  const geometry=new THREE.CylinderGeometry(radius,radius,1,10);
+  const mesh=new THREE.Mesh(geometry,material);
+  const direction=segment.end.clone().sub(segment.start);
+  const length=Math.max(direction.length(),0.001);
+  const midpoint=segment.start.clone().add(segment.end).multiplyScalar(0.5);
+  const quaternion=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
+  mesh.position.copy(midpoint);
+  mesh.quaternion.copy(quaternion);
+  mesh.scale.set(1,length,1);
+  return mesh;
+}
+function makeLoopLine(points,material){
+  const geometry=new THREE.BufferGeometry().setFromPoints([...points,points[0]]);
+  return new THREE.Line(geometry,material);
+}
+
+function buildPanelScene(data){
+  currentPanelData=data;
+  clearGroups();
+  updateInfo(data);
+
+  const panelOrigin=resolvePanelOrigin(data)||new THREE.Vector3(0,0,0);
+  const usesArtifactWorldCoords=data.renderGeometryMode==='artifact_world_coords';
+  const usesVectorLayout=data.renderGeometryMode==='artifact_vector_coords';
+  applyPanelOrigin(usesVectorLayout?new THREE.Vector3(0,0,0):panelOrigin);
+
+  const beamLength=usesArtifactWorldCoords?Math.max(0.2,data.beamLengthM):Math.max(2.2, Math.min(5.4, data.beamLengthM));
+  const beamDepth=usesArtifactWorldCoords?Math.max(0.12,data.sectionDepthM):Math.max(0.24, data.sectionDepthM*0.35);
+  const beamWidth=usesArtifactWorldCoords?Math.max(0.10,data.sectionWidthM):Math.max(0.18, data.sectionWidthM*0.75);
+  const columnWidth=usesArtifactWorldCoords?Math.max(0.12,data.sectionWidthM):Math.max(0.25, data.sectionWidthM);
+  const columnDepth=usesArtifactWorldCoords?Math.max(0.12,data.sectionWidthM):Math.max(0.25, data.sectionWidthM);
+  const columnHeight=usesArtifactWorldCoords
+    ?Math.max(data.sectionDepthM*2.2, data.developmentLengthM*1.25, 1.2)
+    :Math.max(1.6, data.sectionDepthM*1.9);
+  const panelSpan=Math.max(beamLength,columnHeight,data.developmentLengthM,data.availableAnchorageM,1.2);
+  fitPanelCamera(panelOrigin,panelSpan);
+
+  const concreteMaterial = new THREE.MeshPhysicalMaterial({
+    color:0x94a3b8, transparent:true, opacity:0.15, roughness:0.8, transmission:0.45
+  });
+  const columnRebarMaterial = new THREE.MeshStandardMaterial({color:0x38bdf8, roughness:0.4, metalness:0.6});
+  const beamRebarMaterial = new THREE.MeshStandardMaterial({color:0xf87171, roughness:0.4, metalness:0.6});
+  const hoopMaterial = new THREE.LineBasicMaterial({color:0xa78bfa});
+  const clashMaterial = new THREE.MeshStandardMaterial({color:0xff0000, emissive:0x550000});
+  const geometryLayout=data.geometryLayout&&typeof data.geometryLayout==='object'?data.geometryLayout:{};
+  const beamSegment=geometryLayout.beamSegment||(usesVectorLayout?buildAxisSegment(panelOrigin,'x',beamLength):null);
+  const columnSegment=geometryLayout.columnSegment||(usesVectorLayout?buildAxisSegment(panelOrigin,'y',columnHeight):null);
+
+  if(usesVectorLayout&&beamSegment&&columnSegment){
+    groups.concrete.add(registerPickable(
+      makeOrientedBoxFromSegment(columnSegment,columnWidth,columnDepth,concreteMaterial),
+      data,
+      {elementType:'concrete column',elementId:`${data.memberId||'member'}-column`,signature:data.sectionSignature}
+    ));
+    groups.concrete.add(registerPickable(
+      makeOrientedBoxFromSegment(beamSegment,beamDepth,beamWidth,concreteMaterial),
+      data,
+      {elementType:'concrete beam',elementId:`${data.memberId||'member'}-beam`,signature:data.sectionSignature}
+    ));
+  }else{
+    const columnMesh = new THREE.Mesh(new THREE.BoxGeometry(columnWidth,columnHeight,columnDepth), concreteMaterial);
+    registerPickable(columnMesh,data,{elementType:'concrete column',elementId:`${data.memberId||'member'}-column`});
+    groups.concrete.add(columnMesh);
+    const beamMesh = new THREE.Mesh(new THREE.BoxGeometry(beamLength,beamDepth,beamWidth), concreteMaterial);
+    registerPickable(beamMesh,data,{elementType:'concrete beam',elementId:`${data.memberId||'member'}-beam`});
+    groups.concrete.add(beamMesh);
+  }
+
+  const rebarRadius=Math.max(0.01, data.sectionWidthM*0.025);
+  if(usesVectorLayout&&geometryLayout.columnRebarSegments.length){
+    geometryLayout.columnRebarSegments.forEach((segment,index)=>{
+      groups['col-rebar'].add(registerPickable(
+        makeCylinderBetween(segment,rebarRadius,columnRebarMaterial),
+        data,
+        {elementType:'column reinforcement',elementId:`${data.memberId||'member'}-col-rebar-${index+1}`}
+      ));
+    });
+  }else{
+    const columnRebarGeo = new THREE.CylinderGeometry(rebarRadius, rebarRadius, columnHeight*0.92, 10);
+    const columnOffsets=[-columnWidth*0.35, 0, columnWidth*0.35];
+    columnOffsets.forEach(x=>{
+      columnOffsets.forEach(z=>{
+        if(Math.abs(x)<1e-6&&Math.abs(z)<1e-6)return;
+        const mesh=new THREE.Mesh(columnRebarGeo,columnRebarMaterial);
+        mesh.position.set(x,0,z);
+        registerPickable(mesh,data,{elementType:'column reinforcement',elementId:`${data.memberId||'member'}-col-rebar-${groups['col-rebar'].children.length+1}`});
+        groups['col-rebar'].add(mesh);
+      });
+    });
+  }
+
+  const beamRebarLength=usesArtifactWorldCoords
+    ?Math.max(Math.min(beamLength*0.98, data.availableAnchorageM||beamLength), Math.min(beamLength*0.45, 0.45))
+    :beamLength*0.92;
+  const topBottomOffsets=[beamDepth*0.28,-beamDepth*0.28];
+  if(usesVectorLayout&&geometryLayout.beamRebarSegments.length){
+    geometryLayout.beamRebarSegments.forEach((segment,index)=>{
+      groups['beam-rebar'].add(registerPickable(
+        makeCylinderBetween(segment,rebarRadius,beamRebarMaterial),
+        data,
+        {elementType:'beam reinforcement',elementId:`${data.memberId||'member'}-beam-rebar-${index+1}`}
+      ));
+    });
+  }else{
+    const beamRebarGeo = new THREE.CylinderGeometry(rebarRadius, rebarRadius, beamRebarLength, 10);
+    beamRebarGeo.rotateZ(Math.PI/2);
+    const edgeCount=Math.max(3,Math.min(5,Math.round(2+data.requiredAnchorageM*3)));
+    topBottomOffsets.forEach(y=>{
+      for(let i=0;i<edgeCount;i++){
+        const z=-beamWidth*0.32 + (beamWidth*0.64)*((edgeCount===1)?0:(i/(edgeCount-1)));
+        const mesh=new THREE.Mesh(beamRebarGeo,beamRebarMaterial);
+        mesh.position.set(0,y,z);
+        registerPickable(mesh,data,{elementType:'beam reinforcement',elementId:`${data.memberId||'member'}-beam-rebar-${groups['beam-rebar'].children.length+1}`});
+        groups['beam-rebar'].add(mesh);
+      }
+    });
+  }
+
+  if(usesVectorLayout&&geometryLayout.hoopLoops.length){
+    geometryLayout.hoopLoops.forEach((points,index)=>{
+      groups.hoop.add(registerPickable(
+        makeLoopLine(points,hoopMaterial),
+        data,
+        {elementType:'hoop tie',elementId:`${data.memberId||'member'}-hoop-${index+1}`}
+      ));
+    });
+  }else{
+    const hoopOutline = new THREE.EdgesGeometry(new THREE.BoxGeometry(columnWidth*0.9, 0.01, columnDepth*0.9));
+    const hoopSpacing=Math.max(0.09, Math.min(0.16, data.developmentLengthM/8));
+    for(let y=-columnHeight*0.42; y<=columnHeight*0.42; y+=hoopSpacing){
+      const hoop=new THREE.LineSegments(hoopOutline, hoopMaterial);
+      hoop.position.y=y;
+      registerPickable(hoop,data,{elementType:'hoop tie',elementId:`${data.memberId||'member'}-hoop-${groups.hoop.children.length+1}`});
+      groups.hoop.add(hoop);
+    }
+  }
+
+  const clashGeo = new THREE.SphereGeometry(Math.max(0.024, data.sectionWidthM*0.06), 16, 16);
+  if(usesVectorLayout&&geometryLayout.clashPoints.length){
+    geometryLayout.clashPoints.forEach((point,index)=>{
+      const clash=new THREE.Mesh(clashGeo, clashMaterial);
+      clash.position.copy(point);
+      clash.userData.timeOffset=Math.random()*10;
+      registerPickable(clash,data,{
+        elementType:'clearance clash',
+        elementId:`${data.memberId||'member'}-clash-${index+1}`,
+        clearanceLabel:data.clashEvidenceLabel,
+        provenance:data.resultsExplorerLinkLabel||data.verificationLabel
+      });
+      groups.clash.add(clash);
+    });
+  }else{
+    const clashStart=-Math.min(beamWidth*0.28,0.18);
+    for(let i=0;i<data.clashCount;i++){
+      const clash=new THREE.Mesh(clashGeo, clashMaterial);
+      const t=data.clashCount===1?0.5:(i/(data.clashCount-1));
+      clash.position.set(-columnWidth*0.32 + (columnWidth*0.64)*t, topBottomOffsets[i%2], clashStart + (beamWidth*0.56)*t);
+      clash.userData.timeOffset = Math.random()*10;
+      registerPickable(clash,data,{
+        elementType:'clearance clash',
+        elementId:`${data.memberId||'member'}-clash-${i+1}`,
+        clearanceLabel:data.clashEvidenceLabel,
+        provenance:data.resultsExplorerLinkLabel||data.verificationLabel
+      });
+      groups.clash.add(clash);
+    }
+  }
+  groups.clash.visible=document.getElementById('chk-col-rebar').checked&&document.getElementById('chk-beam-rebar').checked;
+  configureSectionCutRange(data);
+  applySectionCut();
+  restoreSelectionFromSharedSelection();
+}
+
+window.toggle = (name, visible) => {
+  if(groups[name])groups[name].visible=visible;
+  if(name==='col-rebar'||name==='beam-rebar'){
+    groups.clash.visible=document.getElementById('chk-col-rebar').checked&&document.getElementById('chk-beam-rebar').checked;
+  }
+  if(hoveredPickObject&&!isPickObjectVisible(hoveredPickObject))hoveredPickObject=null;
+  if(selectedPickObject&&!isPickObjectVisible(selectedPickObject)){
+    restorePickObject(selectedPickObject);
+    selectedPickObject=null;
+    updatePickStatus('Selection is hidden by the current layer filter. Choose a visible object to hand off.', 'fallback');
+  }
+  refreshPickVisuals();
+};
+window.toggleLightMode = toggleLightMode;
+window.toggleSectionCut = toggleSectionCut;
+window.updateSectionCutAxis = updateSectionCutAxis;
+window.updateSectionCutOffset = updateSectionCutOffset;
+
+const clock = new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+  const elapsed=clock.getElapsedTime();
+  groups.clash.children.forEach(node=>{
+    const scale=1+0.3*Math.sin(elapsed*8 + node.userData.timeOffset);
+    node.scale.set(scale,scale,scale);
+  });
+  if(selectedPickObject&&selectionMarker.visible){
+    selectionMarker.setFromObject(selectedPickObject);
+  }
+  if(pointerInsideViewport&&lastPointerEvent){
+    setHoveredPickObject(findPickObjectFromPointer(lastPointerEvent));
+  }
+  renderer.render(scene, cam);
+}
+function downloadBlob(blob,filename){
+  const href=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=href;
+  link.download=filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(()=>URL.revokeObjectURL(href),1000);
+}
+async function exportPanelZonePng(){
+  const button=document.getElementById('export-png');
+  const restore=()=>{if(button instanceof HTMLButtonElement)button.textContent='PNG';};
+  if(button instanceof HTMLButtonElement)button.textContent='Saving...';
+  try{
+    renderer.render(scene,cam);
+    if(renderer.domElement.toBlob){
+      const blob=await new Promise(resolve=>renderer.domElement.toBlob(resolve,'image/png'));
+      if(!blob)throw new Error('panel-zone blob export failed');
+      downloadBlob(blob,`panel_zone_${normalizeSelectionValue(currentPanelData?.memberId||'snapshot')||'snapshot'}.png`);
+    }else{
+      const href=renderer.domElement.toDataURL('image/png');
+      const link=document.createElement('a');
+      link.href=href;
+      link.download='panel_zone_snapshot.png';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+    if(button instanceof HTMLButtonElement){
+      button.textContent='Saved';
+      window.setTimeout(restore,1200);
+    }
+  }catch(err){
+    console.error('[PanelZone] PNG export failed:',err);
+    if(button instanceof HTMLButtonElement){
+      button.textContent='PNG failed';
+      window.setTimeout(restore,1400);
+    }
+  }
+}
+
+async function bootstrap(){
+  applySavedThemeMode();
+  const direct=readPanelPayload();
+  const fetched=IS_SINGLEFILE_VIEWER?null:await tryFetchPanelPayload();
+  currentPanelPayload=direct?mergePanelPayload(direct,fetched):fetched;
+  const sharedSelection=readSharedSelection();
+  if(sharedSelection.memberId||sharedSelection.loadCase){
+    publishSharedSelection({...sharedSelection,source:'panel_zone'});
+  }
+  buildPanelScene(normalizePanelPayload(currentPanelPayload,sharedSelection.memberId));
+  animate();
+}
+
+let resizeFrame=0;
+function schedulePanelResize(){
+  if(resizeFrame)return;
+  resizeFrame=requestAnimationFrame(()=>{
+    resizeFrame=0;
+    resizePanelRenderer();
+  });
+}
+const panelViewportResizeObserver=typeof ResizeObserver==='function'&&panelViewport instanceof HTMLElement
+  ?new ResizeObserver(schedulePanelResize)
+  :null;
+panelViewportResizeObserver?.observe(panelViewport);
+if(panelViewport instanceof HTMLElement){
+  panelViewport.addEventListener('pointermove',handleViewportPointerMove);
+  panelViewport.addEventListener('pointerdown',handleViewportPointerDown);
+  panelViewport.addEventListener('pointerup',handleViewportPointerUp);
+  panelViewport.addEventListener('pointercancel',handleViewportPointerLeave);
+  panelViewport.addEventListener('pointerleave',handleViewportPointerLeave);
+  panelViewport.addEventListener('keydown',selectHoveredPickObjectFromKeyboard);
+}
+
+addEventListener('resize', () => {
+  schedulePanelResize();
+});
+window.addEventListener('storage',event=>{
+  if(event.key!==SHARED_SELECTION_KEY)return;
+  buildPanelScene(normalizePanelPayload(currentPanelPayload||readPanelPayload(),readSharedSelection().memberId));
+});
+selectionChannel?.addEventListener('message',()=>{
+  buildPanelScene(normalizePanelPayload(currentPanelPayload||readPanelPayload(),readSharedSelection().memberId));
+});
+window.addEventListener('popstate',()=>{
+  buildPanelScene(normalizePanelPayload(currentPanelPayload||readPanelPayload(),readSharedSelection().memberId));
+});
+document.getElementById('copy-deep-link').addEventListener('click',async()=>{
+  const data=currentPanelData||normalizePanelPayload(currentPanelPayload||readPanelPayload(),readSharedSelection().memberId);
+  const selection=readSharedSelection();
+  const copyButton=document.getElementById('copy-deep-link');
+  const fallbackHref=buildSelectionQueryUrl({
+    memberId:normalizeSelectionValue(data?.memberId||selection.memberId),
+    memberIds:normalizeSelectionValues(selection.memberIds||data?.memberId||selection.memberId),
+    loadCase:normalizeSelectionValue(selection.loadCase),
+    panelZoneObjectId:normalizeSelectionValue(selectedPickObject?.userData?.panelZoneObjectId||selection.panelZoneObjectId),
+    panelZoneObjectKind:normalizeObjectKind(selectedPickObject?.userData?.panelZoneObjectKind||selection.panelZoneObjectKind)
+  });
+  const href=copyButton instanceof HTMLButtonElement
+    ?firstDefinedText(copyButton.dataset.deepLink,fallbackHref)
+    :fallbackHref;
+  const ok=await copyTextToClipboard(href);
+  document.getElementById('copy-deep-link-status').textContent=
+    ok?`Deep link copied | ${buildSelectionLabel(data?.memberId||selection.memberId,selection.loadCase,selection.memberIds)}${selectedPickObject?.userData?.panelZoneObjectId?` | object ${selectedPickObject.userData.panelZoneObjectId}`:''}`:'Deep link copy failed';
+});
+document.getElementById('export-png').addEventListener('click',()=>{
+  exportPanelZonePng();
+});
+document.getElementById('toggle-light-mode-button').addEventListener('click',()=>{
+  toggleLightMode();
+});
+document.getElementById('toggle-shortcuts-button').addEventListener('click',()=>{
+  toggleShortcutHelp();
+});
+document.getElementById('reset-section-cut').addEventListener('click',()=>{
+  resetSectionCut();
+});
+window.addEventListener('keydown',event=>{
+  if(event.defaultPrevented)return;
+  const target=event.target;
+  const tagName=target instanceof HTMLElement?target.tagName:'';
+  const editing=target instanceof HTMLInputElement||target instanceof HTMLSelectElement||tagName==='TEXTAREA';
+  if((event.key==='?'||(event.key==='/'&&event.shiftKey))&&!editing){
+    event.preventDefault();
+    toggleShortcutHelp();
+    return;
+  }
+  if(editing)return;
+  if(event.key==='l'||event.key==='L'){
+    event.preventDefault();
+    toggleLightMode();
+    return;
+  }
+  if(event.key==='p'||event.key==='P'){
+    event.preventDefault();
+    exportPanelZonePng();
+    return;
+  }
+  if(event.key==='r'||event.key==='R'){
+    event.preventDefault();
+    resetSectionCut();
+  }
+});
+
+bootstrap();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "source_origin_class": "unclassified_external_source",
+  "inputs": {
+    "joint_geometry_source": "joint_geometry.json",
+    "rebar_anchorage_source": "rebar_anchorage.json",
+    "clash_verification_source": "clash_verification.json"
+  }
+}

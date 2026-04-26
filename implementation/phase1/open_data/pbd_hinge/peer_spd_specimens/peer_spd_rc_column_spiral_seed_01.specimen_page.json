@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-peer-spd-specimen-pages",
+  "generated_at": "2026-03-19T15:55:04.107835+00:00",
+  "seed_id": "peer_spd_rc_column_spiral_seed_01",
+  "holdout_split": "val",
+  "specimen_id": "276",
+  "specimen_display_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=276",
+  "source_origin_class": "official_external_benchmark",
+  "selection_mode": "properties_based_preselection_plus_specimen_page_snapshot",
+  "page_title": "PEER Structural Performance Database",
+  "sections": {
+    "Specimen Information": {
+      "Name": "Ang et al. 1985, No. 10",
+      "Type": "Spiral",
+      "Comments": "Flexible base",
+      "Reference": "Ang Beng Ghee; Priestley, M.J.N.; and Paulay, T., \"Seismic Shear Strength of Circular Reinforced Concrete Columns,\" ACI Structural Journal, January-February 1989, pp. 45-59."
+    },
+    "Material Properties": {
+      "Concrete Strength": "31.2 (MPa)",
+      "Transverse Steel": "Yield Stress: 332 (MPa)",
+      "Longitudinal Steel": "Yield Stress: 448 (MPa) Strength: 693 (MPa)"
+    },
+    "Geometry": {
+      "Diameter": "400 (mm) Cross-Section: Circular",
+      "Length": "L-Inflection: 800 (mm) L-Measured: 800 (mm)Beam Length: 1,905 (mm)",
+      "Test Configuration": "Cantilever with Flexible Base"
+    },
+    "Loading": {
+      "Axial Load": "784 (kN)",
+      "P-D": "Shear provided",
+      "L-Bottom": "0"
+    },
+    "Longitudinal Reinforcement": {
+      "Diameter": "16 (mm)",
+      "Number of Bars": "20",
+      "Reinforcement Ratio": "0.032"
+    },
+    "Transverse Reinforcement": {
+      "Diameter Spiral": "12 (mm)",
+      "Hoop Spacing, Sv": "120 (mm)",
+      "Cover to Center of Hoop Bar": "21 (mm)",
+      "Reinforcement Ratio": "1.02"
+    },
+    "Non-Dimensional Properties": {
+      "Span-to-Depth Ratio": "2",
+      "Axial Load Ratio": "0.2"
+    },
+    "Test Results": {
+      "Failure Type": "Flexure-Shear",
+      "Damage Observation": "Concrete Crushing: 0 (mm)Significant Concrete Spalling: 0 (mm)Long Bar Buckling: 0 (mm)Long Bar Fracture: 0 (mm)Spiral Fracture: 0 (mm)Loss of Axial Load Capacity: 0 (mm)",
+      "Resources": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)"
+    },
+    "Record Information": {
+      "Version": "1 (April 8, 2003)"
+    }
+  },
+  "resource_links": [
+    {
+      "href": "http://depts.washington.edu/columdat/circol/images/ang85u10.jpeg",
+      "text": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    },
+    {
+      "href": "http://depts.washington.edu/columdat/circol/txfiles/ang85u10.txt",
+      "text": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    }
+  ],
+  "hysteresis_link_candidates": [
+    {
+      "href": "http://depts.washington.edu/columdat/circol/images/ang85u10.jpeg",
+      "text": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    },
+    {
+      "href": "http://depts.washington.edu/columdat/circol/txfiles/ang85u10.txt",
+      "text": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS"
+}

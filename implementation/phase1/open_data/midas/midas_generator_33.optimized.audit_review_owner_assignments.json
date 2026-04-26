@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-21T18:45:18.780489+00:00",
+  "assignment_rows": [
+    {
+      "packet_id": "connection_detailing|connection_detailing_audit_after_material_patch|high",
+      "action_family": "connection_detailing",
+      "followup_type": "connection_detailing_audit_after_material_patch",
+      "review_priority": "high",
+      "review_owner_role": "licensed_engineer",
+      "assignee_name": "",
+      "assignee_license_id": "",
+      "assignee_email": "",
+      "assignment_status": "unassigned",
+      "assignment_updated_at_utc": "",
+      "note": ""
+    },
+    {
+      "packet_id": "detailing|detailing_audit_after_material_patch|medium",
+      "action_family": "detailing",
+      "followup_type": "detailing_audit_after_material_patch",
+      "review_priority": "medium",
+      "review_owner_role": "licensed_engineer",
+      "assignee_name": "",
+      "assignee_license_id": "",
+      "assignee_email": "",
+      "assignment_status": "unassigned",
+      "assignment_updated_at_utc": "",
+      "note": ""
+    }
+  ],
+  "summary": {
+    "audit_review_assignment_item_count": 2,
+    "audit_review_assignment_status_counts": {
+      "unassigned": 2
+    },
+    "audit_review_assignment_status_label": "unassigned=2",
+    "audit_review_assignment_owner_role_counts": {
+      "licensed_engineer": 2
+    },
+    "audit_review_assignment_owner_role_label": "licensed_engineer=2",
+    "audit_review_assignment_assignee_counts": {
+      "unassigned": 2
+    },
+    "audit_review_assignment_assignee_label": "unassigned=2",
+    "audit_review_assignment_mode": "merged_existing_assignments"
+  }
+}

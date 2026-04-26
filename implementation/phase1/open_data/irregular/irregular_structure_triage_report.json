@@ -1,0 +1,522 @@
+{
+  "schema_version": "1.0",
+  "catalog_version": "0.4.0",
+  "generated_at": "2026-04-03T14:28:08Z",
+  "purpose": "Triage view over the irregular-structure catalog for native-roundtrip, solver-benchmark, and AI-learning collection tracks.",
+  "summary": {
+    "native_roundtrip_candidate_count": 18,
+    "solver_benchmark_candidate_count": 13,
+    "ai_learning_candidate_count": 32,
+    "quick_start_local_source_count": 15
+  },
+  "native_roundtrip_candidates": [
+    {
+      "source_id": "midas_multifamily_building_meb_local",
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "primary_format": "meb",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_native_binary_model"
+    },
+    {
+      "source_id": "midas_neighborhood_facility_meb_local",
+      "family_id": "soft_story_podium_tower",
+      "priority": 2,
+      "primary_format": "meb",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_native_binary_model"
+    },
+    {
+      "source_id": "setback_tower_proxy_local",
+      "family_id": "setback_tower",
+      "priority": 4,
+      "primary_format": "ifc",
+      "collection_status": "local_ready",
+      "evidence_class": "geometry_exchange_remote"
+    },
+    {
+      "source_id": "peer_reentrant_corner_remote",
+      "family_id": "reentrant_corner_tower",
+      "priority": 5,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_reference_remote"
+    },
+    {
+      "source_id": "reentrant_corner_tower_proxy_local",
+      "family_id": "reentrant_corner_tower",
+      "priority": 5,
+      "primary_format": "ifc",
+      "collection_status": "local_ready",
+      "evidence_class": "geometry_exchange_remote"
+    },
+    {
+      "source_id": "hanging_column_tower_remote",
+      "family_id": "hanging_column_podium_tower",
+      "priority": 8,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "academic_appendix_remote"
+    },
+    {
+      "source_id": "diagrid_exoskeleton_remote",
+      "family_id": "diagrid_exoskeleton_asymmetric_tower",
+      "priority": 9,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "academic_geometry_remote"
+    },
+    {
+      "source_id": "split_core_linked_towers_remote",
+      "family_id": "split_core_linked_towers",
+      "priority": 10,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "concept_geometry_remote"
+    },
+    {
+      "source_id": "cantilevered_upper_volume_remote",
+      "family_id": "cantilevered_upper_volume_tower",
+      "priority": 11,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "concept_geometry_remote"
+    },
+    {
+      "source_id": "atrium_void_ring_remote",
+      "family_id": "atrium_void_ring_tower",
+      "priority": 13,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "bim_geometry_remote"
+    },
+    {
+      "source_id": "twisted_tapered_tower_remote",
+      "family_id": "twisted_tapered_tower",
+      "priority": 14,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "geometry_exchange_remote"
+    },
+    {
+      "source_id": "sloped_site_stepped_podium_remote",
+      "family_id": "sloped_site_stepped_podium_tower",
+      "priority": 15,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "site_geometry_remote"
+    },
+    {
+      "source_id": "skewed_column_frame_remote",
+      "family_id": "skewed_column_frame",
+      "priority": 16,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "geometry_exchange_remote"
+    },
+    {
+      "source_id": "gtc_public_bridge_bearing_c04_local",
+      "family_id": "bridge_skewed_support_span",
+      "priority": 17,
+      "primary_format": "mgt",
+      "collection_status": "local_ready",
+      "evidence_class": "public_native_mgt"
+    },
+    {
+      "source_id": "gtc_public_bridge_section_a3_local",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "primary_format": "mgt",
+      "collection_status": "local_ready",
+      "evidence_class": "public_native_mgt"
+    },
+    {
+      "source_id": "gtc_public_bridge_section_e1_03_local",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "primary_format": "mgt",
+      "collection_status": "local_ready",
+      "evidence_class": "public_native_mgt"
+    },
+    {
+      "source_id": "midas_fcm_bridge_archive_local",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "primary_format": "mcb",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_archive_proxy"
+    },
+    {
+      "source_id": "iass_long_span_roof_remote",
+      "family_id": "long_span_irregular_roof_truss",
+      "priority": 19,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_reference_remote"
+    }
+  ],
+  "solver_benchmark_candidates": [
+    {
+      "source_id": "peer_transfer_podium_tower_remote",
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "primary_format": "report_pdf",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_benchmark_remote"
+    },
+    {
+      "source_id": "transfer_podium_tower_proxy_local",
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "primary_format": "json_graph",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_bridged_graph"
+    },
+    {
+      "source_id": "soft_story_podium_tower_proxy_local",
+      "family_id": "soft_story_podium_tower",
+      "priority": 2,
+      "primary_format": "json_graph",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_bridged_graph"
+    },
+    {
+      "source_id": "offset_core_megatall_torsion_bridged_local",
+      "family_id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "primary_format": "json_graph",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_bridged_graph"
+    },
+    {
+      "source_id": "peer_setback_tower_remote",
+      "family_id": "setback_tower",
+      "priority": 4,
+      "primary_format": "report_pdf",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_benchmark_remote"
+    },
+    {
+      "source_id": "peer_reentrant_corner_remote",
+      "family_id": "reentrant_corner_tower",
+      "priority": 5,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_reference_remote"
+    },
+    {
+      "source_id": "opstool_606m_megatall_model_local",
+      "family_id": "outrigger_megatall_offset_core",
+      "priority": 6,
+      "primary_format": "json_graph",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_bridged_graph"
+    },
+    {
+      "source_id": "vertical_mass_jump_remote",
+      "family_id": "vertical_mass_jump_tower",
+      "priority": 12,
+      "primary_format": "metadata_json",
+      "collection_status": "remote_candidate",
+      "evidence_class": "measured_response_remote"
+    },
+    {
+      "source_id": "gtc_public_bridge_bearing_c04_local",
+      "family_id": "bridge_skewed_support_span",
+      "priority": 17,
+      "primary_format": "mgt",
+      "collection_status": "local_ready",
+      "evidence_class": "public_native_mgt"
+    },
+    {
+      "source_id": "gtc_public_bridge_section_a3_local",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "primary_format": "mgt",
+      "collection_status": "local_ready",
+      "evidence_class": "public_native_mgt"
+    },
+    {
+      "source_id": "gtc_public_bridge_section_e1_03_local",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "primary_format": "mgt",
+      "collection_status": "local_ready",
+      "evidence_class": "public_native_mgt"
+    },
+    {
+      "source_id": "iass_long_span_roof_remote",
+      "family_id": "long_span_irregular_roof_truss",
+      "priority": 19,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_reference_remote"
+    },
+    {
+      "source_id": "iass_freeform_shell_remote",
+      "family_id": "free_form_shell_core_hybrid",
+      "priority": 20,
+      "primary_format": "step",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_reference_remote"
+    }
+  ],
+  "ai_learning_candidates": [
+    {
+      "source_id": "midas_multifamily_building_meb_local",
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "primary_format": "meb",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_native_binary_model"
+    },
+    {
+      "source_id": "peer_transfer_podium_tower_remote",
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "primary_format": "report_pdf",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_benchmark_remote"
+    },
+    {
+      "source_id": "transfer_podium_tower_proxy_local",
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "primary_format": "json_graph",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_bridged_graph"
+    },
+    {
+      "source_id": "midas_neighborhood_facility_meb_local",
+      "family_id": "soft_story_podium_tower",
+      "priority": 2,
+      "primary_format": "meb",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_native_binary_model"
+    },
+    {
+      "source_id": "nheri_soft_story_podium_remote",
+      "family_id": "soft_story_podium_tower",
+      "priority": 2,
+      "primary_format": "tcl",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_benchmark_native_text"
+    },
+    {
+      "source_id": "soft_story_podium_tower_proxy_local",
+      "family_id": "soft_story_podium_tower",
+      "priority": 2,
+      "primary_format": "json_graph",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_bridged_graph"
+    },
+    {
+      "source_id": "luxinzheng_megatall_tcl_model1_local",
+      "family_id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "primary_format": "tcl",
+      "collection_status": "local_ready",
+      "evidence_class": "official_benchmark_native_text"
+    },
+    {
+      "source_id": "offset_core_megatall_torsion_bridged_local",
+      "family_id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "primary_format": "json_graph",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_bridged_graph"
+    },
+    {
+      "source_id": "tpu_interference_highrise_local",
+      "family_id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "primary_format": "csv_tables",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_proxy"
+    },
+    {
+      "source_id": "peer_setback_tower_remote",
+      "family_id": "setback_tower",
+      "priority": 4,
+      "primary_format": "report_pdf",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_benchmark_remote"
+    },
+    {
+      "source_id": "setback_tower_proxy_local",
+      "family_id": "setback_tower",
+      "priority": 4,
+      "primary_format": "ifc",
+      "collection_status": "local_ready",
+      "evidence_class": "geometry_exchange_remote"
+    },
+    {
+      "source_id": "peer_reentrant_corner_remote",
+      "family_id": "reentrant_corner_tower",
+      "priority": 5,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_reference_remote"
+    },
+    {
+      "source_id": "reentrant_corner_tower_proxy_local",
+      "family_id": "reentrant_corner_tower",
+      "priority": 5,
+      "primary_format": "ifc",
+      "collection_status": "local_ready",
+      "evidence_class": "geometry_exchange_remote"
+    },
+    {
+      "source_id": "opstool_606m_megatall_model_local",
+      "family_id": "outrigger_megatall_offset_core",
+      "priority": 6,
+      "primary_format": "json_graph",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_bridged_graph"
+    },
+    {
+      "source_id": "amaelkady_constructbrace_github_remote",
+      "family_id": "discontinuous_braced_frame_tower",
+      "priority": 7,
+      "primary_format": "tcl",
+      "collection_status": "remote_candidate",
+      "evidence_class": "academic_raw_model_remote"
+    },
+    {
+      "source_id": "amaelkady_scbf16cg_github_remote",
+      "family_id": "discontinuous_braced_frame_tower",
+      "priority": 7,
+      "primary_format": "tcl",
+      "collection_status": "remote_candidate",
+      "evidence_class": "academic_raw_model_remote"
+    },
+    {
+      "source_id": "scbf16b_shell_beam_mix_local",
+      "family_id": "discontinuous_braced_frame_tower",
+      "priority": 7,
+      "primary_format": "tcl",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_text_model"
+    },
+    {
+      "source_id": "hanging_column_tower_remote",
+      "family_id": "hanging_column_podium_tower",
+      "priority": 8,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "academic_appendix_remote"
+    },
+    {
+      "source_id": "diagrid_exoskeleton_remote",
+      "family_id": "diagrid_exoskeleton_asymmetric_tower",
+      "priority": 9,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "academic_geometry_remote"
+    },
+    {
+      "source_id": "split_core_linked_towers_remote",
+      "family_id": "split_core_linked_towers",
+      "priority": 10,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "concept_geometry_remote"
+    },
+    {
+      "source_id": "cantilevered_upper_volume_remote",
+      "family_id": "cantilevered_upper_volume_tower",
+      "priority": 11,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "concept_geometry_remote"
+    },
+    {
+      "source_id": "vertical_mass_jump_remote",
+      "family_id": "vertical_mass_jump_tower",
+      "priority": 12,
+      "primary_format": "metadata_json",
+      "collection_status": "remote_candidate",
+      "evidence_class": "measured_response_remote"
+    },
+    {
+      "source_id": "atrium_void_ring_remote",
+      "family_id": "atrium_void_ring_tower",
+      "priority": 13,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "bim_geometry_remote"
+    },
+    {
+      "source_id": "twisted_tapered_tower_remote",
+      "family_id": "twisted_tapered_tower",
+      "priority": 14,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "geometry_exchange_remote"
+    },
+    {
+      "source_id": "sloped_site_stepped_podium_remote",
+      "family_id": "sloped_site_stepped_podium_tower",
+      "priority": 15,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "site_geometry_remote"
+    },
+    {
+      "source_id": "skewed_column_frame_remote",
+      "family_id": "skewed_column_frame",
+      "priority": 16,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "geometry_exchange_remote"
+    },
+    {
+      "source_id": "gtc_public_bridge_bearing_c04_local",
+      "family_id": "bridge_skewed_support_span",
+      "priority": 17,
+      "primary_format": "mgt",
+      "collection_status": "local_ready",
+      "evidence_class": "public_native_mgt"
+    },
+    {
+      "source_id": "gtc_public_bridge_section_a3_local",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "primary_format": "mgt",
+      "collection_status": "local_ready",
+      "evidence_class": "public_native_mgt"
+    },
+    {
+      "source_id": "gtc_public_bridge_section_e1_03_local",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "primary_format": "mgt",
+      "collection_status": "local_ready",
+      "evidence_class": "public_native_mgt"
+    },
+    {
+      "source_id": "midas_fcm_bridge_archive_local",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "primary_format": "mcb",
+      "collection_status": "local_ready",
+      "evidence_class": "repo_local_archive_proxy"
+    },
+    {
+      "source_id": "iass_long_span_roof_remote",
+      "family_id": "long_span_irregular_roof_truss",
+      "priority": 19,
+      "primary_format": "ifc",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_reference_remote"
+    },
+    {
+      "source_id": "iass_freeform_shell_remote",
+      "family_id": "free_form_shell_core_hybrid",
+      "priority": 20,
+      "primary_format": "step",
+      "collection_status": "remote_candidate",
+      "evidence_class": "official_reference_remote"
+    }
+  ]
+}

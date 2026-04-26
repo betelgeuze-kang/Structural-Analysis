@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "no_cost_gain_explain_groups": [
+    {
+      "group_id": "S00:core:nogroup:beam:SB1000X1200",
+      "story_band": 0,
+      "zone_label": "core",
+      "member_type": "foundation",
+      "semantic_group": "",
+      "priority_max": 398.9181179852934,
+      "max_dcr": 0.0,
+      "rebar_ratio_current": 0.08,
+      "thickness_scale_current": 1.0,
+      "detailing_quality_current": 0.55,
+      "rebar_min_clamp_count": 0,
+      "thickness_min_clamp_count": 0,
+      "detailing_min_clamp_count": 1,
+      "zero_projected_cost_delta_count": 0,
+      "action_names": [
+        "rebar_down",
+        "detailing_down"
+      ],
+      "detail_examples": [
+        "trial_cost=147065.5328;current_cost=147096.7988;projected_cost_delta=31.266005;trial_max_dcr=0.9332;trial_drift=1.9872;trial_residual=0.3740",
+        "trial_cost=147102.5710;current_cost=147096.7988;projected_cost_delta=-5.772186"
+      ],
+      "cause_counts": {
+        "rebar_min_clamp": 0,
+        "thickness_min_clamp": 0,
+        "detailing_min_clamp": 1,
+        "zero_projected_cost_delta": 0
+      },
+      "dominant_block_cause": "detailing_min_clamp"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.81",
+      "story_band": 4,
+      "zone_label": "transfer",
+      "member_type": "beam",
+      "semantic_group": "",
+      "priority_max": 338.7432863849766,
+      "max_dcr": 0.0,
+      "rebar_ratio_current": 0.08,
+      "thickness_scale_current": 1.0,
+      "detailing_quality_current": 0.55,
+      "rebar_min_clamp_count": 0,
+      "thickness_min_clamp_count": 0,
+      "detailing_min_clamp_count": 1,
+      "zero_projected_cost_delta_count": 1,
+      "action_names": [
+        "connection_detailing_down",
+        "beam_section_down",
+        "rebar_down",
+        "detailing_down"
+      ],
+      "detail_examples": [
+        "trial_cost=147104.4950;current_cost=147096.7988;projected_cost_delta=-7.696247",
+        "current=0.6920;trial=0.6780;limit=0.6500;required_improvement=0.0000",
+        "current=0.6920;trial=0.6800;limit=0.6500;required_improvement=0.0000"
+      ],
+      "cause_counts": {
+        "rebar_min_clamp": 0,
+        "thickness_min_clamp": 0,
+        "detailing_min_clamp": 1,
+        "zero_projected_cost_delta": 1
+      },
+      "dominant_block_cause": "zero_projected_cost_delta"
+    },
+    {
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "story_band": 5,
+      "zone_label": "perimeter",
+      "member_type": "column",
+      "semantic_group": "2",
+      "priority_max": 293.8160948791812,
+      "max_dcr": 0.0,
+      "rebar_ratio_current": 0.074,
+      "thickness_scale_current": 1.02,
+      "detailing_quality_current": 0.55,
+      "rebar_min_clamp_count": 0,
+      "thickness_min_clamp_count": 0,
+      "detailing_min_clamp_count": 1,
+      "zero_projected_cost_delta_count": 1,
+      "action_names": [
+        "perimeter_frame_down",
+        "connection_detailing_down",
+        "rebar_down",
+        "detailing_down"
+      ],
+      "detail_examples": [
+        "trial_cost=147048.8049;current_cost=147096.7988;projected_cost_delta=47.993856;trial_max_dcr=0.9857;trial_drift=1.9872;trial_residual=0.3740",
+        "trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337"
+      ],
+      "cause_counts": {
+        "rebar_min_clamp": 0,
+        "thickness_min_clamp": 0,
+        "detailing_min_clamp": 1,
+        "zero_projected_cost_delta": 1
+      },
+      "dominant_block_cause": "zero_projected_cost_delta"
+    },
+    {
+      "group_id": "S05:intermediate:2:column:P 50x4",
+      "story_band": 5,
+      "zone_label": "intermediate",
+      "member_type": "column",
+      "semantic_group": "2",
+      "priority_max": 281.7633361090662,
+      "max_dcr": 0.0,
+      "rebar_ratio_current": 0.07399999999999976,
+      "thickness_scale_current": 1.0199999999999891,
+      "detailing_quality_current": 0.5500000000000074,
+      "rebar_min_clamp_count": 0,
+      "thickness_min_clamp_count": 0,
+      "detailing_min_clamp_count": 1,
+      "zero_projected_cost_delta_count": 0,
+      "action_names": [
+        "rebar_down",
+        "detailing_down"
+      ],
+      "detail_examples": [
+        "trial_cost=147048.8049;current_cost=147096.7988;projected_cost_delta=47.993856;trial_max_dcr=0.9862;trial_drift=1.9872;trial_residual=0.3740",
+        "trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337"
+      ],
+      "cause_counts": {
+        "rebar_min_clamp": 0,
+        "thickness_min_clamp": 0,
+        "detailing_min_clamp": 1,
+        "zero_projected_cost_delta": 0
+      },
+      "dominant_block_cause": "detailing_min_clamp"
+    },
+    {
+      "group_id": "S05:core:2:column:P 50x4",
+      "story_band": 5,
+      "zone_label": "core",
+      "member_type": "column",
+      "semantic_group": "2",
+      "priority_max": 257.95458314558863,
+      "max_dcr": 0.0,
+      "rebar_ratio_current": 0.07399999999999993,
+      "thickness_scale_current": 1.019999999999988,
+      "detailing_quality_current": 0.5500000000000079,
+      "rebar_min_clamp_count": 0,
+      "thickness_min_clamp_count": 0,
+      "detailing_min_clamp_count": 1,
+      "zero_projected_cost_delta_count": 1,
+      "action_names": [
+        "connection_detailing_down",
+        "rebar_down",
+        "detailing_down"
+      ],
+      "detail_examples": [
+        "trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337",
+        "current=0.6740;trial=0.6620;limit=0.6500;required_improvement=0.0000"
+      ],
+      "cause_counts": {
+        "rebar_min_clamp": 0,
+        "thickness_min_clamp": 0,
+        "detailing_min_clamp": 1,
+        "zero_projected_cost_delta": 1
+      },
+      "dominant_block_cause": "zero_projected_cost_delta"
+    }
+  ]
+}

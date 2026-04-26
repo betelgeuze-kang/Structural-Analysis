@@ -1,0 +1,19 @@
+{
+  "client_name": "Permit submission package",
+  "site_name": "Seoul project site",
+  "authority_name": "Seoul Metropolitan Government",
+  "permit_label": "Building Permit Review",
+  "committee_label": "Seoul Structural Review Committee",
+  "package_purpose_label": "Permit Submission Package",
+  "issue_phase_label": "Issued for permit review",
+  "revision_status": "Issued for permit review",
+  "checklist_head_label": "Permit checklist",
+  "checklist_title": "Seoul permit issue checklist",
+  "signoff_head_label": "Permit disposition",
+  "signoff_title": "Seoul permit sign-off block",
+  "reviewer_label": "Permit reviewer / office",
+  "disposition_label": "Permit disposition",
+  "comments_label": "Permit comments / conditions",
+  "signature_label": "Permit signature / date",
+  "review_route_note": "Machine-verifiable lines are prefilled; permit-specific remarks and conditions remain open for reviewer sign-off."
+}

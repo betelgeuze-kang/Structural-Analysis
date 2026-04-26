@@ -1,0 +1,218 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Soil Impedance Parameter Table",
+    "description": "Frequency-dependent soil-structure interaction (SSI) parameters for tunnel and track foundations",
+    "type": "object",
+    "required": [
+        "schema_version",
+        "soil_profiles"
+    ],
+    "properties": {
+        "schema_version": {
+            "type": "string",
+            "const": "1.0.0"
+        },
+        "soil_profiles": {
+            "type": "object",
+            "description": "Named soil profiles with impedance parameters",
+            "additionalProperties": {
+                "type": "object",
+                "required": [
+                    "soil_class",
+                    "layers"
+                ],
+                "properties": {
+                    "soil_class": {
+                        "type": "string",
+                        "enum": [
+                            "soft_clay",
+                            "stiff_clay",
+                            "loose_sand",
+                            "dense_sand",
+                            "gravel",
+                            "soft_rock",
+                            "hard_rock",
+                            "weathered_rock",
+                            "custom"
+                        ],
+                        "description": "Geotechnical soil classification"
+                    },
+                    "water_table_depth_m": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "layers": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "layer_id",
+                                "thickness_m",
+                                "density_kg_m3",
+                                "shear_wave_velocity_m_s",
+                                "poisson_ratio"
+                            ],
+                            "properties": {
+                                "layer_id": {
+                                    "type": "string"
+                                },
+                                "thickness_m": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0
+                                },
+                                "density_kg_m3": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0
+                                },
+                                "shear_wave_velocity_m_s": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0,
+                                    "description": "Vs (m/s)"
+                                },
+                                "compression_wave_velocity_m_s": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0,
+                                    "description": "Vp (m/s)"
+                                },
+                                "poisson_ratio": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 0.5
+                                },
+                                "shear_modulus_Pa": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0,
+                                    "description": "G = ρ·Vs²"
+                                },
+                                "damping_ratio": {
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1,
+                                    "description": "Material damping ratio D"
+                                },
+                                "dynamic_amplification": {
+                                    "type": "object",
+                                    "description": "Frequency-dependent impedance correction factors",
+                                    "properties": {
+                                        "reference_frequency_hz": {
+                                            "type": "number",
+                                            "exclusiveMinimum": 0
+                                        },
+                                        "stiffness_multiplier": {
+                                            "type": "number",
+                                            "exclusiveMinimum": 0
+                                        },
+                                        "damping_multiplier": {
+                                            "type": "number",
+                                            "exclusiveMinimum": 0
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "impedance_functions": {
+                        "type": "object",
+                        "description": "Pre-computed impedance springs/dashpots for tunnel/track interface",
+                        "properties": {
+                            "k_radial_N_m2": {
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Radial spring per unit area"
+                            },
+                            "k_tangential_N_m2": {
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Tangential spring per unit area"
+                            },
+                            "c_radial_Ns_m2": {
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Radial dashpot per unit area"
+                            },
+                            "c_tangential_Ns_m2": {
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Tangential dashpot per unit area"
+                            },
+                            "frequency_range_hz": {
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 2,
+                                "maxItems": 2,
+                                "description": "[f_min, f_max] valid range for impedance"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "track_subgrade": {
+            "type": "object",
+            "description": "Track-specific subgrade parameters",
+            "properties": {
+                "ballast": {
+                    "type": "object",
+                    "properties": {
+                        "depth_m": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "density_kg_m3": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "stiffness_N_m": {
+                            "type": "number",
+                            "exclusiveMinimum": 0,
+                            "description": "Per sleeper"
+                        },
+                        "damping_Ns_m": {
+                            "type": "number",
+                            "minimum": 0,
+                            "description": "Per sleeper"
+                        }
+                    }
+                },
+                "sub_ballast": {
+                    "type": "object",
+                    "properties": {
+                        "depth_m": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "stiffness_N_m": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        }
+                    }
+                },
+                "slab_track": {
+                    "type": "object",
+                    "description": "Concrete slab track alternative (when no ballast)",
+                    "properties": {
+                        "slab_thickness_m": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "slab_E_Pa": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "resilient_pad_stiffness_N_m": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "resilient_pad_damping_Ns_m": {
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

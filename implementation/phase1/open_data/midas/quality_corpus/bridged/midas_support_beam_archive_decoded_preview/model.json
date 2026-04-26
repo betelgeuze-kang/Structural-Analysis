@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "source_provenance": {
+    "source_family": "midas_binary_decoded_preview_bridge",
+    "source_id": "midas_support_beam_archive",
+    "path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/meb_decoded_inventory.json"
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": 1,
+        "x": 212.0,
+        "y": 212.9,
+        "z": 0.0
+      },
+      {
+        "id": 2,
+        "x": 217.1,
+        "y": -43.0,
+        "z": 0.0
+      },
+      {
+        "id": 3,
+        "x": -19.0,
+        "y": 173.0,
+        "z": 0.0
+      },
+      {
+        "id": 4,
+        "x": 263.0,
+        "y": 73.0,
+        "z": 0.0
+      },
+      {
+        "id": 5,
+        "x": 284.0,
+        "y": 106.0,
+        "z": 0.0
+      }
+    ],
+    "elements": [
+      {
+        "id": 1,
+        "type": "BEAM",
+        "family": "beam_preview",
+        "node_ids": [
+          1,
+          2
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "NODE/ELEM hinted ranges",
+        "preview_mode": "mcvl_node_hint_preview",
+        "bridge_mode": "segment_preview"
+      },
+      {
+        "id": 2,
+        "type": "BEAM",
+        "family": "beam_preview",
+        "node_ids": [
+          2,
+          3
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "NODE/ELEM hinted ranges",
+        "preview_mode": "mcvl_node_hint_preview",
+        "bridge_mode": "segment_preview"
+      },
+      {
+        "id": 3,
+        "type": "BEAM",
+        "family": "beam_preview",
+        "node_ids": [
+          3,
+          4
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "NODE/ELEM hinted ranges",
+        "preview_mode": "mcvl_node_hint_preview",
+        "bridge_mode": "segment_preview"
+      },
+      {
+        "id": 4,
+        "type": "BEAM",
+        "family": "beam_preview",
+        "node_ids": [
+          4,
+          5
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "NODE/ELEM hinted ranges",
+        "preview_mode": "mcvl_node_hint_preview",
+        "bridge_mode": "segment_preview"
+      }
+    ],
+    "materials": [],
+    "sections": [],
+    "loads": {},
+    "metadata": {
+      "bridge_family": "decoded_preview_baseline",
+      "family_assumption": "beam_preview",
+      "accepted_type_label": "heuristic_segment=4",
+      "selected_member_name": "FCM Bridge.mcb",
+      "preview_state_label": "unverified hint preview",
+      "preview_mode": "mcvl_node_hint_preview",
+      "preview_basis": "mcvl_node_elem_hint",
+      "preview_projection_label": "XY",
+      "preview_anchor_table_names": [],
+      "bridge_mode": "segment_preview",
+      "source_table": "NODE/ELEM hinted ranges",
+      "topology_grounding_label": "record_order_polyline",
+      "topology_node_count": 5,
+      "topology_edge_count": 4,
+      "topology_preview_ready": false,
+      "exact_topology_candidate": false,
+      "exact_topology_promoted": false,
+      "topology_signal_field_sources": {
+        "topology_grounding_label": "geometry_preview",
+        "topology_node_count": "geometry_preview",
+        "topology_edge_count": "geometry_preview",
+        "topology_preview_ready": "geometry_preview",
+        "exact_topology_candidate": "geometry_preview",
+        "exact_topology_promoted": "geometry_preview"
+      },
+      "preview_exactness_tier": "topology-signal",
+      "preview_exactness_label": "topology signal only",
+      "preview_exactness_signal_source": "geometry_preview",
+      "preview_surface_bucket": "hint-preview",
+      "preview_surface_status_label": "hint-guided preview-derived 3d candidate",
+      "preview_surface_status_tone": "warn",
+      "preview_readiness_stage_label": "hint preview candidate"
+    }
+  },
+  "topology_metrics": {
+    "node_count": 5,
+    "element_count": 4,
+    "edge_count_undirected": 4,
+    "beam_element_count": 4,
+    "shell_element_count": 0
+  }
+}

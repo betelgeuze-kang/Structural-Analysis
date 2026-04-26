@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 1896404,
+  "collector_version": "0.2.0",
+  "family_id": "soft_story_podium_tower",
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/C07_T02_P000_RC_02_\u2592\u2518\u2555\u2591\u2557\u00b2\u255a\u2591\u255c\u251c.meb",
+  "schema_version": "1.0",
+  "sha256": "cfd331cda8727c23afd0b1efba9c4b48a4c63247fda38e6cd635594efda3d7d9",
+  "source_format": "meb",
+  "source_id": "midas_neighborhood_facility_meb_local",
+  "source_urls": [
+    "https://support.midasuser.com/"
+  ],
+  "title": "MIDAS neighborhood facility original native MEB"
+}

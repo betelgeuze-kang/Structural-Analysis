@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase0-hip-kernel-smoke",
+  "generated_at": "2026-03-28T15:48:17.989488+00:00",
+  "inputs": {
+    "source": "implementation/phase1/hip_kernels/axpy_kernel.hip.cpp",
+    "binary": "implementation/phase1/hip_kernels/axpy_kernel_smoke",
+    "beam_source": "implementation/phase1/hip_kernels/beam_element_kernel.hip.cpp",
+    "beam_binary": "implementation/phase1/hip_kernels/beam_element_kernel_smoke",
+    "enable_beam_kernel": true,
+    "hipcc": "/opt/rocm/bin/hipcc",
+    "rocm_path": "/opt/rocm",
+    "rocm_device_lib_path": "",
+    "n": 1048576,
+    "reps": 30,
+    "strict": true,
+    "out": "implementation/phase1/hip_kernel_smoke_report.json"
+  },
+  "backend": {
+    "kind": "hipcc_kernel",
+    "compiler_path": "/opt/rocm/bin/hipcc",
+    "rocm_path": "/opt/rocm",
+    "rocm_device_lib_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode",
+    "primary": {
+      "source": "implementation/phase1/hip_kernels/axpy_kernel.hip.cpp",
+      "binary": "implementation/phase1/hip_kernels/axpy_kernel_smoke"
+    },
+    "secondary": {
+      "source": "implementation/phase1/hip_kernels/beam_element_kernel.hip.cpp",
+      "binary": "implementation/phase1/hip_kernels/beam_element_kernel_smoke"
+    }
+  },
+  "build": {
+    "primary": {
+      "command": "/opt/rocm/bin/hipcc --rocm-path=/opt/rocm '--rocm-device-lib-path=/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode' implementation/phase1/hip_kernels/axpy_kernel.hip.cpp -O3 -std=c++17 -o implementation/phase1/hip_kernels/axpy_kernel_smoke",
+      "seconds": 1.2229843139648438,
+      "return_code": 0,
+      "stdout_tail": "",
+      "stderr_tail": "1/hip_kernels/axpy_kernel.hip.cpp:68:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n    hipFree(dx);\n    ^~~~~~~ ~~\nimplementation/phase1/hip_kernels/axpy_kernel.hip.cpp:69:5: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n    hipFree(dy);\n    ^~~~~~~ ~~\nimplementation/phase1/hip_kernels/axpy_kernel.hip.cpp:97:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipEventDestroy(ev_start);\n  ^~~~~~~~~~~~~~~ ~~~~~~~~\nimplementation/phase1/hip_kernels/axpy_kernel.hip.cpp:98:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipEventDestroy(ev_stop);\n  ^~~~~~~~~~~~~~~ ~~~~~~~\nimplementation/phase1/hip_kernels/axpy_kernel.hip.cpp:99:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipFree(dx);\n  ^~~~~~~ ~~\nimplementation/phase1/hip_kernels/axpy_kernel.hip.cpp:100:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipFree(dy);\n  ^~~~~~~ ~~\n16 warnings generated when compiling for host.\n"
+    },
+    "secondary": {
+      "command": "/opt/rocm/bin/hipcc --rocm-path=/opt/rocm '--rocm-device-lib-path=/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode' implementation/phase1/hip_kernels/beam_element_kernel.hip.cpp -O3 -std=c++17 -o implementation/phase1/hip_kernels/beam_element_kernel_smoke",
+      "seconds": 1.224998950958252,
+      "return_code": 0,
+      "stdout_tail": "",
+      "stderr_tail": "ernels/beam_element_kernel.hip.cpp:181:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipFree(d_uj);\n  ^~~~~~~ ~~~~\nimplementation/phase1/hip_kernels/beam_element_kernel.hip.cpp:182:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipFree(d_ei);\n  ^~~~~~~ ~~~~\nimplementation/phase1/hip_kernels/beam_element_kernel.hip.cpp:183:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipFree(d_l);\n  ^~~~~~~ ~~~\nimplementation/phase1/hip_kernels/beam_element_kernel.hip.cpp:184:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipFree(d_m);\n  ^~~~~~~ ~~~\nimplementation/phase1/hip_kernels/beam_element_kernel.hip.cpp:185:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipFree(d_v);\n  ^~~~~~~ ~~~\nimplementation/phase1/hip_kernels/beam_element_kernel.hip.cpp:186:3: warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]\n  hipFree(d_e);\n  ^~~~~~~ ~~~\n17 warnings generated when compiling for host.\n"
+    }
+  },
+  "run": {
+    "primary": {
+      "command": "implementation/phase1/hip_kernels/axpy_kernel_smoke 1048576 30",
+      "seconds": 0.2118396759033203,
+      "return_code": 0,
+      "stdout_tail": "{\"ok\":true,\"n\":1048576,\"reps\":30,\"elapsed_ms\":0.649036,\"bandwidth_gbps\":581.612369,\"checksum\":44040192.000000,\"relative_error\":0.000000}\n",
+      "stderr_tail": "",
+      "metrics": {
+        "ok": true,
+        "n": 1048576,
+        "reps": 30,
+        "elapsed_ms": 0.649036,
+        "bandwidth_gbps": 581.612369,
+        "checksum": 44040192.0,
+        "relative_error": 0.0
+      }
+    },
+    "secondary": {
+      "command": "implementation/phase1/hip_kernels/beam_element_kernel_smoke 1048576 30",
+      "seconds": 0.23819732666015625,
+      "return_code": 0,
+      "stdout_tail": "{\"ok\":true,\"kernel\":\"beam_element\",\"n\":1048576,\"reps\":30,\"elapsed_ms\":1.113114,\"bandwidth_gbps\":791.297064,\"sum_moment\":32180049986.750000,\"sum_shear\":55335132261.000000,\"sum_energy\":17342376.022583,\"max_abs_moment\":44720.722656,\"max_abs_shear\":70964.960938,\"max_abs_energy\":33.535084}\n",
+      "stderr_tail": "",
+      "metrics": {
+        "ok": true,
+        "kernel": "beam_element",
+        "n": 1048576,
+        "reps": 30,
+        "elapsed_ms": 1.113114,
+        "bandwidth_gbps": 791.297064,
+        "sum_moment": 32180049986.75,
+        "sum_shear": 55335132261.0,
+        "sum_energy": 17342376.022583,
+        "max_abs_moment": 44720.722656,
+        "max_abs_shear": 70964.960938,
+        "max_abs_energy": 33.535084
+      }
+    }
+  },
+  "checks": {
+    "hip_compiler_present": true,
+    "build_pass": true,
+    "run_pass": true,
+    "kernel_backend_pass": true,
+    "beam_kernel_enabled": true,
+    "beam_kernel_pass": true
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "hip kernel smoke passed"
+}

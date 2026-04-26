@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 1315735,
+  "collector_version": "0.2.0",
+  "family_id": "reentrant_corner_tower",
+  "original_reference": "implementation/phase1/open_data/irregular/collected/artifacts/skewed_column_frame_remote/a4.ifc",
+  "schema_version": "1.0",
+  "sha256": "824e4a363a042c565bdd52490e8728a92bb415a05ac6b82d11f1c083d7f98ec0",
+  "source_format": "ifc",
+  "source_id": "reentrant_corner_tower_proxy_local",
+  "source_urls": [
+    "https://zenodo.org/"
+  ],
+  "title": "Re-entrant corner local proxy from skewed column IFC"
+}

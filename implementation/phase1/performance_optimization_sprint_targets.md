@@ -1,0 +1,60 @@
+# First Optimization Sprint Targets
+
+- `summary`: `Performance profiling: PASS | ndtha=106.34s(solver=92.93,state=7.81,iface=5.12,halo=0.47) | ssi_contact=160steps/1.01iters/newton=0/zero_gap_skip=1.00/pairs=290:354/sweep=4/4 | moving_load=warm=0.001/0.001s,steady=0.001/0.001s,scale=0.619/1.226/2.464s | gpu_host_ops=2 unavoidable/0 optimizable | sprint=3(ndtha_partitioned_runtime,ssi_contact_convergence_path,moving_load_kernel_warmup_observability)`
+
+## ndtha_partitioned_runtime
+
+- `priority`: `P0`
+- `expected_gain_band_pct`: `15-25`
+- `title`: Full-duration NDTHA wall-clock is the largest measured solver hot path.
+- `source_reports`:
+  - `implementation/phase1/ndtha_long_profile_report.json`
+  - `implementation/phase1/solver_hip_e2e_contract_report.json`
+- `first_actions`:
+  - Use the new solver/state-update/interface split to isolate the dominant portion of step solve time.
+  - Apply Jacobian/stiffness reuse only if solver time dominates the new split.
+  - Promote Jacobian/stiffness reuse counters into the NDTHA report.
+  - Trial a reduced stiffness refresh cadence on the 10M long-profile path.
+- `acceptance_signals`:
+  - elapsed_wall_s_mean reduced by at least 15%
+  - elapsed_wall_s_cov remains <= 0.01
+  - no_cpu_fallback and production-kernel proof remain green
+
+## ssi_contact_convergence_path
+
+- `priority`: `P0`
+- `expected_gain_band_pct`: `10-20`
+- `title`: SSI/contact convergence is stable, but iterative coupling and settle handling still dominate the nonlinear interaction path.
+- `source_reports`:
+  - `implementation/phase1/vti_coupled_solver_report.json`
+  - `implementation/phase1/ssi_boundary_gate_report.json`
+  - `implementation/phase1/contact_readiness_report.json`
+  - `implementation/phase1/foundation_soil_link_gate_report.json`
+- `first_actions`:
+  - Use broadphase pair ratios and pruned-track-solve ratio to target pair pruning and contact warm starts in stable SSI windows.
+  - Cache previous-step contact state as a Newton warm start for stable wheel-rail and SSI cases.
+  - Split residual-settle time from solve time in SSI reports.
+- `acceptance_signals`:
+  - mean_coupling_iters reduced without lowering converged_ratio
+  - adaptive_newton_call_count reduced by at least 10%
+  - residual_settle_case_count unchanged or lower
+
+## moving_load_kernel_warmup_observability
+
+- `priority`: `P1`
+- `expected_gain_band_pct`: `10-15`
+- `title`: Moving-load runtime observability is now coarse-grained, but warm-up skew and missing stage-level timers still block fast optimization loops.
+- `source_reports`:
+  - `implementation/phase1/track_lf_solver_report.json`
+  - `implementation/phase1/moving_load_integrator_report.json`
+  - `implementation/phase1/moving_load_integrator_large_report.json`
+  - `implementation/phase1/moving_load_integrator_xlarge_report.json`
+  - `implementation/phase1/vti_coupled_solver_report.json`
+- `first_actions`:
+  - Use the warm-up versus steady-state split to optimize the steady-state track LF path separately from first-kernel startup.
+  - Batch axle-load interpolation and contact-force accumulation per time step.
+  - Keep moving-load integrator and VTI coarse timers aligned with the track LF split.
+- `acceptance_signals`:
+  - warmup_skew_ratio materially reduced or explicitly isolated
+  - moving-load reports expose elapsed seconds and per-step throughput
+  - equilibrium_residual and energy balance remain green

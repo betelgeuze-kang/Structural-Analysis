@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-16T14:23:57.357795+00:00",
+  "source_family": "edefense_peer_blind_prediction",
+  "seed_id": "edefense_peer_blind_prediction_seed_01",
+  "input_root": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01",
+  "contract_pass": true,
+  "summary_line": "E-Defense/PEER measured-response template: READY | root=edefense_peer_blind_prediction_seed_01 | expected_patterns=5 | gm_cases=10",
+  "accepted_file_patterns": [
+    "*response*.csv",
+    "*measurement*.csv",
+    "*sensor*.csv",
+    "*drift*.csv",
+    "*accel*.csv"
+  ],
+  "preferred_bundle_layout": [
+    {
+      "path": "measured_response_acceleration.csv",
+      "kind": "acceleration_history",
+      "required_columns": [
+        "time_s",
+        "sensor_id",
+        "accel_x_g",
+        "accel_y_g",
+        "accel_z_g"
+      ]
+    },
+    {
+      "path": "measured_response_drift.csv",
+      "kind": "story_drift_history",
+      "required_columns": [
+        "time_s",
+        "story_label",
+        "drift_ratio_x",
+        "drift_ratio_y"
+      ]
+    },
+    {
+      "path": "sensor_manifest.json",
+      "kind": "sensor_layout_manifest",
+      "required_columns": []
+    }
+  ],
+  "channel_groups": [
+    {
+      "group_id": "acceleration",
+      "required": true,
+      "description": "At least one sensor acceleration history aligned to the blind-prediction excitation sequence.",
+      "minimum_channels": 1,
+      "example_headers": [
+        "time_s",
+        "sensor_id",
+        "accel_x_g",
+        "accel_y_g",
+        "accel_z_g"
+      ]
+    },
+    {
+      "group_id": "drift",
+      "required": false,
+      "description": "Story drift or interstory displacement ratios when available.",
+      "minimum_channels": 1,
+      "example_headers": [
+        "time_s",
+        "story_label",
+        "drift_ratio_x",
+        "drift_ratio_y"
+      ]
+    },
+    {
+      "group_id": "displacement",
+      "required": false,
+      "description": "Absolute displacement channels for selected DOFs or roof points.",
+      "minimum_channels": 1,
+      "example_headers": [
+        "time_s",
+        "sensor_id",
+        "disp_x_m",
+        "disp_y_m",
+        "disp_z_m"
+      ]
+    },
+    {
+      "group_id": "metadata",
+      "required": true,
+      "description": "Sensor map or channel legend that ties measured channels back to geometry/story labels.",
+      "minimum_channels": 1,
+      "example_headers": [
+        "sensor_id",
+        "story_label",
+        "component",
+        "units"
+      ]
+    }
+  ],
+  "gm_case_labels": [
+    "Random Noise",
+    "GM1",
+    "GM2",
+    "GM3",
+    "GM4",
+    "GM5",
+    "GM6",
+    "GM7",
+    "GM8",
+    "GM9"
+  ],
+  "csv_header_templates": {
+    "acceleration_history": [
+      "time_s",
+      "sensor_id",
+      "accel_x_g",
+      "accel_y_g",
+      "accel_z_g"
+    ],
+    "story_drift_history": [
+      "time_s",
+      "story_label",
+      "drift_ratio_x",
+      "drift_ratio_y"
+    ],
+    "sensor_manifest": [
+      "sensor_id",
+      "story_label",
+      "component",
+      "units"
+    ]
+  },
+  "next_actions": [
+    "Place measured-response files under implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.",
+    "Rerun prepare_edefense_peer_blind_prediction_source_manifest.py.",
+    "Rerun prepare_edefense_peer_measured_response_landing_status.py.",
+    "Rerun build_peer_blind_prediction_prebenchmark_scaffold.py."
+  ]
+}

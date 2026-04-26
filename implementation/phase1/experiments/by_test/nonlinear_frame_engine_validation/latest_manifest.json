@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-06T13:53:24.236542+00:00",
+  "test_name": "nonlinear_frame_engine_validation",
+  "latest_run_dir": "implementation/phase1/experiments/by_test/nonlinear_frame_engine_validation/20260406T135324Z",
+  "latest_manifest": "implementation/phase1/experiments/by_test/nonlinear_frame_engine_validation/20260406T135324Z/artifact_archive_manifest.json"
+}

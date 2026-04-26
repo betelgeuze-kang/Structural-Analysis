@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-05T00:00:00Z",
+  "train": [],
+  "val": [],
+  "test": [],
+  "holdout": [
+    "SAC20_LA_holdout_01",
+    "SAC20_SEA_holdout_02",
+    "SAC20_BOS_holdout_03",
+    "NHERI_UCSD_like_holdout_01",
+    "NHERI_UCSD_like_holdout_02",
+    "NHERI_UCSD_like_holdout_03"
+  ]
+}

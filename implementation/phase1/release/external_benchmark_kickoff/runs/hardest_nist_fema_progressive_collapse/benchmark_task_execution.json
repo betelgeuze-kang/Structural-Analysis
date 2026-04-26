@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:03.546728+00:00",
+  "task_id": "hardest::nist_fema_progressive_collapse",
+  "phase": "hardest_case",
+  "benchmark_family": "progressive_collapse",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "note": "executed progressive_collapse",
+  "artifact_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/benchmark_task_result.json",
+  "execution_payload": {
+    "executor": "hardest_external_case_receipt_and_bundle",
+    "case_id": "nist_fema_progressive_collapse",
+    "case_label": "NIST / FEMA Progressive Collapse",
+    "artifact": {
+      "schema_version": "1.0",
+      "generated_at": "2026-04-01T13:48:03.528984+00:00",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "case_id": "nist_fema_progressive_collapse",
+      "case_label": "NIST / FEMA Progressive Collapse",
+      "benchmark_family": "progressive_collapse",
+      "hazard_family": "local_damage_sequence",
+      "topology_family": "frame_column_removal",
+      "load_path_family": "path_dependent_collapse",
+      "primary_report": {
+        "path": "implementation/phase1/nonlinear_pushover_stress_report.json",
+        "reason_code": "PASS",
+        "contract_pass": true,
+        "summary_head": {
+          "case_count": 3,
+          "load_factors": [
+            1.0,
+            1.2,
+            1.4,
+            1.6,
+            1.8,
+            2.0
+          ],
+          "first_yield_load_factor_mean": 1.0,
+          "peak_plastic_story_count_min": 19,
+          "peak_plastic_story_count_mean": 21.666666666666668,
+          "drift_amplification_min": 2.08847382239945,
+          "drift_amplification_mean": 2.0895684797416756,
+          "metric_source_invalid_case_ids": []
+        }
+      },
+      "supporting_reports": [
+        {
+          "role": "ndtha",
+          "path": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+          "reason_code": "PASS",
+          "contract_pass": true
+        },
+        {
+          "role": "material_constitutive",
+          "path": "implementation/phase1/material_constitutive_gate_report.json",
+          "reason_code": "PASS",
+          "contract_pass": true
+        }
+      ],
+      "kpi_rows": [
+        {
+          "label": "case_count",
+          "source": "primary.summary.case_count",
+          "value": 3
+        },
+        {
+          "label": "first_yield_load_factor_mean",
+          "source": "primary.summary.first_yield_load_factor_mean",
+          "value": 1.0
+        },
+        {
+          "label": "peak_plastic_story_count_mean",
+          "source": "primary.summary.peak_plastic_story_count_mean",
+          "value": 21.666666666666668
+        },
+        {
+          "label": "drift_amplification_mean",
+          "source": "primary.summary.drift_amplification_mean",
+          "value": 2.0895684797416756
+        },
+        {
+          "label": "ndtha_residual_drift_ratio_pct_max_abs",
+          "source": "supporting.ndtha.summary.residual_drift_ratio_pct_max_abs",
+          "value": 1.9136000000000006
+        },
+        {
+          "label": "material_family_count",
+          "source": "supporting.material_constitutive.summary.calibration_matrix_family_counts",
+          "value": {
+            "concrete_damage": 48,
+            "cyclic_degradation": 46,
+            "bond_interface": 48,
+            "creep_shrinkage": 7,
+            "soil_boundary_nonlinear": 11,
+            "device_dissipation": 10,
+            "foundation_impedance_nonlinear": 19,
+            "contact_link_hysteresis": 15,
+            "panel_zone_joint_response": 12,
+            "wind_dynamic_response": 16,
+            "track_support_viscoelasticity": 11,
+            "vehicle_track_transient_coupling": 19,
+            "tunnel_soil_wave_attenuation": 13,
+            "serviceability_velocity_response": 8,
+            "construction_stage_redistribution": 6,
+            "joint_constraint_transfer": 5,
+            "aeroelastic_serviceability": 7,
+            "heterogeneous_soil_adaptation": 5,
+            "segment_joint_softening": 5,
+            "longitudinal_wave_strain_transfer": 5,
+            "raw_pressure_field_mapping": 5,
+            "phase_assimilation_correction": 5,
+            "multiscale_streaming_refinement": 5,
+            "integrated_vibration_transfer": 5,
+            "resilience_ood_recovery": 5,
+            "boundary_absorption_nonlinear": 6,
+            "attention_load_localization": 6,
+            "residual_energy_stabilization": 7,
+            "phase_latency_projection": 5,
+            "cache_window_adaptation": 5,
+            "whitebox_feedback_stitching": 5,
+            "recovery_residual_relock": 5,
+            "rail_support_contact_modulation": 5,
+            "tunnel_lining_interface_recovery": 5,
+            "panel_feedback_residual_transfer": 5,
+            "wind_pressure_coupled_transfer": 5
+          }
+        }
+      ],
+      "summary": {
+        "kpi_count": 6,
+        "supporting_report_count": 2
+      },
+      "native_midas_roundtrip_appendix": {
+        "summary_line": "MIDAS native write-back diff receipts: PASS | ready=14 | receipts=14/14 | topology=14/14 | load=14/14 | loadcomb=14/14 exact | types=4 | taxonomy=exact:13,canonical:1,lossy:0,unsupported:0,manual:1 | pending_review=2",
+        "public_native_ready_count": 0,
+        "public_preview_ready_count": 0,
+        "public_source_ready_count": 0,
+        "structure_type_count": 0,
+        "appendix_markdown": "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md",
+        "appendix_json": "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.json",
+        "batch_markdowns": [
+          "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md",
+          "implementation/phase1/release/midas_native_roundtrip/bridge.diff_batch.md",
+          "implementation/phase1/release/midas_native_roundtrip/building.diff_batch.md",
+          "implementation/phase1/release/midas_native_roundtrip/foundation.diff_batch.md",
+          "implementation/phase1/release/midas_native_roundtrip/vertical_circulation.diff_batch.md"
+        ]
+      }
+    },
+    "summary": {
+      "kpi_count": 6,
+      "bundle_id": "20260401T134803Z-nist_fema_progressive_collapse",
+      "supporting_report_count": 2
+    },
+    "contract_pass": true,
+    "reason_code": "PASS",
+    "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/benchmark_task_kpi_receipt.json",
+    "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/signed_case_bundle",
+    "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/signed_case_bundle.zip",
+    "bundle_id": "20260401T134803Z-nist_fema_progressive_collapse",
+    "bundle_signature_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/signed_case_bundle/case_bundle_manifest.signature.b64",
+    "bundle_manifest_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/signed_case_bundle/case_bundle_manifest.json",
+    "bundle_public_key_path": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem"
+  }
+}

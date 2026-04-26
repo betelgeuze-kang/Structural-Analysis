@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-probe-canton-tower-reduced-shm-sources",
+  "generated_at": "2026-04-16T13:28:10.638624+00:00",
+  "source_pages": [
+    "https://polyucee.hk/ceyxia/benchmark/benchmark.htm",
+    "https://polyucee.hk/ceyxia/benchmark/tvtower.htm",
+    "https://polyucee.hk/ceyxia/benchmark/task_i.htm"
+  ],
+  "ssl_mode": "insecure_unverified_context",
+  "page_rows": [
+    {
+      "page_url": "https://polyucee.hk/ceyxia/benchmark/benchmark.htm",
+      "link_count": 1,
+      "links": [
+        "mailto:ceyqni@polyu.edu.hk"
+      ]
+    },
+    {
+      "page_url": "https://polyucee.hk/ceyxia/benchmark/tvtower.htm",
+      "link_count": 0,
+      "links": []
+    },
+    {
+      "page_url": "https://polyucee.hk/ceyxia/benchmark/task_i.htm",
+      "link_count": 33,
+      "links": [
+        "http://www.wcscm5.com/",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase_I_measurement%20description.pdf",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase%20I%20data_all.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-18.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-19.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-20.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-21.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-22.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-23.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-00.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-01.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-02.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-03.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-04.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-05.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-06.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-07.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-08.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-09.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-10.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-11.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-12.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-13.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-14.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-15.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-16.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-17.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Wind%20direction%2024%20hours.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Wind%20speed%2024%20hours.zip",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Temperature%2024%20hours.txt",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase_I_FE_model_description.pdf",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/system_matrices.mat",
+        "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/SCHM09-16-01-73.pdf"
+      ]
+    }
+  ],
+  "artifact_groups": {
+    "system_matrices": [
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/system_matrices.mat"
+    ],
+    "benchmark_docs": [
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase_I_measurement%20description.pdf",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase_I_FE_model_description.pdf",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/SCHM09-16-01-73.pdf"
+    ],
+    "measured_response": [
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase%20I%20data_all.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-18.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-19.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-20.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-21.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-22.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-23.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-00.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-01.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-02.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-03.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-04.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-05.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-06.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-07.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-08.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-09.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-10.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-11.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-12.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-13.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-14.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-15.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-16.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-17.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Wind%20direction%2024%20hours.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Wind%20speed%2024%20hours.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Temperature%2024%20hours.txt"
+    ],
+    "other": [
+      "mailto:ceyqni@polyu.edu.hk",
+      "http://www.wcscm5.com/"
+    ]
+  },
+  "recommended_downloads": {
+    "minimum_viable_package": [
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase_I_measurement%20description.pdf",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase%20I%20data_all.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase_I_FE_model_description.pdf",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/system_matrices.mat"
+    ],
+    "hourly_acceleration_archives": [
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-18.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-19.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-20.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-21.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-22.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-19-23.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-00.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-01.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-02.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-03.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-04.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-05.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-06.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-07.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-08.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-09.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-10.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-11.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-12.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-13.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-14.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-15.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-16.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/accdata_2010-01-20-17.zip"
+    ],
+    "auxiliary_environmental_channels": [
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Wind%20direction%2024%20hours.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Wind%20speed%2024%20hours.zip",
+      "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Temperature%2024%20hours.txt"
+    ]
+  },
+  "summary": {
+    "page_count": 3,
+    "unique_link_count": 34,
+    "system_matrices_count": 1,
+    "benchmark_docs_count": 3,
+    "measured_response_count": 28
+  },
+  "contract_pass": true,
+  "reason": "Official Canton Tower benchmark pages probed and grouped into a concrete download plan."
+}

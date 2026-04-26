@@ -1,27 +1,112 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Phase1 Dynamics/Boundary Contract",
+  "title": "Phase1 Dynamics/Boundary Contract (Building + Railway + Tunnel)",
   "type": "object",
-  "required": ["interface_version", "nodes", "dynamics"],
+  "required": [
+    "interface_version",
+    "domain_type",
+    "nodes",
+    "dynamics"
+  ],
   "properties": {
-    "interface_version": {"type": "string"},
+    "interface_version": {
+      "type": "string"
+    },
+    "domain_type": {
+      "type": "string",
+      "enum": [
+        "building",
+        "track",
+        "tunnel",
+        "coupled"
+      ],
+      "description": "Target structural domain for this contract"
+    },
     "nodes": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["node_id", "mass", "is_fixed_mask", "support_type", "dof_lock"],
+        "required": [
+          "node_id",
+          "mass",
+          "is_fixed_mask",
+          "support_type",
+          "dof_lock"
+        ],
         "properties": {
-          "node_id": {"type": "string"},
-          "mass": {"type": "number", "minimum": 0},
-          "is_fixed_mask": {"type": "boolean"},
-          "support_type": {"type": "string", "enum": ["fixed", "hinge", "roller", "free"]},
+          "node_id": {
+            "type": "string"
+          },
+          "mass": {
+            "type": "number",
+            "minimum": 0
+          },
+          "is_fixed_mask": {
+            "type": "boolean"
+          },
+          "support_type": {
+            "type": "string",
+            "enum": [
+              "fixed",
+              "hinge",
+              "roller",
+              "free",
+              "elastic_foundation",
+              "segment_joint",
+              "rail_fastener"
+            ]
+          },
           "dof_lock": {
             "type": "object",
-            "required": ["ux", "uy", "uz", "rx", "ry", "rz"],
+            "required": [
+              "ux",
+              "uy",
+              "uz",
+              "rx",
+              "ry",
+              "rz"
+            ],
             "properties": {
-              "ux": {"type": "boolean"}, "uy": {"type": "boolean"}, "uz": {"type": "boolean"},
-              "rx": {"type": "boolean"}, "ry": {"type": "boolean"}, "rz": {"type": "boolean"}
+              "ux": {
+                "type": "boolean"
+              },
+              "uy": {
+                "type": "boolean"
+              },
+              "uz": {
+                "type": "boolean"
+              },
+              "rx": {
+                "type": "boolean"
+              },
+              "ry": {
+                "type": "boolean"
+              },
+              "rz": {
+                "type": "boolean"
+              }
+            }
+          },
+          "foundation_stiffness": {
+            "type": "object",
+            "description": "Winkler/Pasternak elastic foundation parameters (track/tunnel nodes)",
+            "properties": {
+              "k_vertical": {
+                "type": "number",
+                "minimum": 0,
+                "description": "N/m per unit length"
+              },
+              "k_shear": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Pasternak shear layer (N)"
+              },
+              "c_vertical": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Damping (Ns/m per unit length)"
+              }
             }
           }
         }
@@ -29,13 +114,68 @@
     },
     "dynamics": {
       "type": "object",
-      "required": ["damping_model", "alpha_m", "beta_k", "time_step_dt", "external_force_profile"],
+      "required": [
+        "damping_model",
+        "alpha_m",
+        "beta_k",
+        "time_step_dt",
+        "external_force_profile"
+      ],
       "properties": {
-        "damping_model": {"type": "string", "enum": ["rayleigh", "modal", "none"]},
-        "alpha_m": {"type": "number", "minimum": 0},
-        "beta_k": {"type": "number", "minimum": 0},
-        "time_step_dt": {"type": "number", "exclusiveMinimum": 0},
-        "external_force_profile": {"type": "string", "enum": ["dead", "wind", "seismic", "combined"]}
+        "damping_model": {
+          "type": "string",
+          "enum": [
+            "rayleigh",
+            "modal",
+            "none",
+            "track_vti",
+            "tunnel_ssi"
+          ]
+        },
+        "alpha_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "beta_k": {
+          "type": "number",
+          "minimum": 0
+        },
+        "time_step_dt": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "external_force_profile": {
+          "type": "string",
+          "enum": [
+            "dead",
+            "wind",
+            "seismic",
+            "combined",
+            "train_passage",
+            "track_irregularity",
+            "tunnel_pressure_wave"
+          ]
+        }
+      }
+    },
+    "vehicle": {
+      "type": "object",
+      "description": "Vehicle model parameters (required when domain_type=track or coupled)",
+      "properties": {
+        "vehicle_schema_ref": {
+          "type": "string",
+          "description": "Reference to vehicle_model_schema.json"
+        }
+      }
+    },
+    "tunnel": {
+      "type": "object",
+      "description": "Tunnel lining parameters (required when domain_type=tunnel or coupled)",
+      "properties": {
+        "tunnel_schema_ref": {
+          "type": "string",
+          "description": "Reference to tunnel_lining_schema.json"
+        }
       }
     }
   }

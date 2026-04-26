@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-scaleout-io-profile",
+  "generated_at": "2026-03-02T13:37:23.917324+00:00",
+  "inputs": {
+    "runtime_hook_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "producer_cmd": "/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "dof_levels": [
+      187641
+    ],
+    "branches": 64,
+    "chunk_candidates": "64,32,16,8,4,2,1",
+    "state_components": 5,
+    "cache_mb": 128.0,
+    "cache_headroom": 0.72,
+    "graph_overhead_mb": 24.0,
+    "cache_penalty_gain": 0.85,
+    "repeats": 1,
+    "allow_cpu_required": false,
+    "gpu_strict": true,
+    "disable_1m_gate": true,
+    "max_host_copy_share": 0.05,
+    "max_1m_branch_ms": 500.0
+  },
+  "probe": {
+    "report_path": "implementation/phase1/stress/scaleout/zero_copy_probe.scaleout.json",
+    "probe_pass": true,
+    "strict_pass": true,
+    "gpu_strict_pass": true,
+    "cpu_fallback_used": false,
+    "host_copy_share": 0.0,
+    "host_copy_share_limit": 0.05
+  },
+  "checks": {
+    "probe_pass": true,
+    "gpu_strict_pass": true,
+    "profile_scenarios_present": true,
+    "profiles_all_pass": true,
+    "has_1m_plus": false,
+    "scaleout_1m_microbatch_pass": false,
+    "scaleout_1m_branch_latency_pass": false,
+    "scaleout_1m_fullbatch_miss_expected": false,
+    "saturation_detected_above_1m": false,
+    "monotonic_working_set": true,
+    "disable_1m_gate": true
+  },
+  "level_rows": [
+    {
+      "node_count": 187641,
+      "report_path": "implementation/phase1/stress/scaleout/branch64_profile_n187641.json",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "microbatch_available": true,
+      "full_batch_cache_fit": false,
+      "recommended_chunk_branches": 2,
+      "recommended_avg_branch_ms": 74.91271903125,
+      "recommended_working_set_mb": 45.47380828857422,
+      "full_batch_avg_branch_ms": 371.2718496864603
+    }
+  ],
+  "profile_failures": [],
+  "steps": [
+    {
+      "step": "zero_copy_probe",
+      "ok": true,
+      "seconds": 1.727942705154419,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/zero_copy_real_probe.py --producer-cmd '/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py' --out implementation/phase1/stress/scaleout/zero_copy_probe.scaleout.json --gpu-strict",
+      "stdout_tail": "Wrote zero-copy real probe report: implementation/phase1/stress/scaleout/zero_copy_probe.scaleout.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "branch64_profile",
+      "node_count": 187641,
+      "ok": true,
+      "seconds": 19.417972803115845,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/profile_branch64_microbatch_cache.py --runtime-hook-cmd 'python3 implementation/phase1/rust_hip_md3bead_hook.py' --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --node-count 187641 --state-components 5 --cache-mb 128.0 --cache-headroom 0.72 --graph-overhead-mb 24.0 --cache-penalty-gain 0.85 --repeats 1 --out implementation/phase1/stress/scaleout/branch64_profile_n187641.json",
+      "stdout_tail": "Wrote branch64 microbatch cache profile report: implementation/phase1/stress/scaleout/branch64_profile_n187641.json\n",
+      "stderr_tail": ""
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "scale-out I/O profile completed and 1M+ DOF microbatch gate passed"
+}

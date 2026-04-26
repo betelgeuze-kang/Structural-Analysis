@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-edefense-peer-blind-prediction-seed-package",
+  "generated_at": "2026-04-16T14:45:03.229921+00:00",
+  "probe_json": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.download_probe.json",
+  "out_dir": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01",
+  "download_rows": [
+    {
+      "url": "https://peer.berkeley.edu/sites/default/files/news_e-defense_blind_analysis_2009-article.pdf",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/news_e-defense_blind_analysis_2009-article.pdf",
+      "status": "existing",
+      "bytes": 79462
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/assets/Materials.zip",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/Materials.zip",
+      "status": "existing",
+      "bytes": 11302798
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Construction_Drawings.pdf",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/Construction_Drawings.pdf",
+      "status": "existing",
+      "bytes": 4821477
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Posttensiondetails.pdf",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/Posttensiondetails.pdf",
+      "status": "existing",
+      "bytes": 308645
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Columns.pdf",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/Columns.pdf",
+      "status": "existing",
+      "bytes": 430521
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Bent-Cap.pdf",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/Bent-Cap.pdf",
+      "status": "existing",
+      "bytes": 469999
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Foundation.pdf",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/Foundation.pdf",
+      "status": "existing",
+      "bytes": 445834
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/08/Weight_Blocks.pdf",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/Weight_Blocks.pdf",
+      "status": "existing",
+      "bytes": 133415
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/assets/GMs.xlsx",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/GMs.xlsx",
+      "status": "existing",
+      "bytes": 13017109
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/assets/Experimentalresults.xlsx",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/Experimentalresults.xlsx",
+      "status": 200,
+      "bytes": 35158,
+      "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "downloaded": true
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/prediction_contest/wp-content/uploads/2010/09/QA_blindprediction-1.pdf",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/QA_blindprediction-1.pdf",
+      "status": 200,
+      "bytes": 99898,
+      "content_type": "application/pdf",
+      "downloaded": true
+    },
+    {
+      "url": "https://apps.peer.berkeley.edu/publications/peer_reports/reports_2015/webPEER-2015-01-Terzic-5.8.15.pdf",
+      "target": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/webPEER-2015-01-Terzic-5.8.15.pdf",
+      "status": 200,
+      "bytes": 3260479,
+      "content_type": "application/pdf",
+      "downloaded": true
+    }
+  ],
+  "summary": {
+    "requested_url_count": 12,
+    "downloaded_count": 3,
+    "existing_count": 9
+  },
+  "contract_pass": true
+}

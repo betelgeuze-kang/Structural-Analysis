@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>External Validation One-Page</title>
+  <style>
+    
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+body.signal-desk-light {
+  --bg:#f4efe7;
+  --surface-light:#fffaf2;
+  --surface-light-soft:#f7efe3;
+  --surface-light-strong:#fffdf8;
+  --panel:#fffaf2;
+  --panel-soft:rgba(255,250,242,.82);
+  --panel-strong:rgba(247,239,227,.92);
+  --panel-2:#fff6ea;
+  --ink:#1c2430;
+  --text:#1c2430;
+  --muted:#5c6678;
+  --line:#d8cfbf;
+  --border:#d8cfbf;
+  --accent:#0f6a73;
+  --accent-2:#4fb7ad;
+  --accent-warm:#f4b56b;
+  --accent-warm-ink:#8f4a19;
+  --brand:#0f6a73;
+  --brand-soft:rgba(15,106,115,.08);
+  --ok:#2f7d5a;
+  --success:#2f7d5a;
+  --warn:#96580e;
+  --bad:#a1492e;
+  --danger:#a1492e;
+  --font-display:'Space Grotesk','IBM Plex Sans KR','Pretendard',sans-serif;
+  --font-ui:'IBM Plex Sans KR','Pretendard','Noto Sans KR',sans-serif;
+  --type-h1-size:44px;
+  --type-h1-weight:700;
+  --type-h1-line-height:1.02;
+  --type-h1-tracking:-.04em;
+  --type-h2-size:28px;
+  --type-h2-weight:700;
+  --type-h2-line-height:1.08;
+  --type-h2-tracking:-.03em;
+  --type-h3-size:18px;
+  --type-h3-weight:700;
+  --type-h3-line-height:1.2;
+  --type-h3-tracking:-.02em;
+  --type-body-size:14px;
+  --type-body-line-height:1.6;
+  --type-body-tracking:-.01em;
+  --type-body-sm-size:12px;
+  --type-body-sm-line-height:1.55;
+  --type-label-size:11px;
+  --type-label-line-height:1.1;
+  --type-label-tracking:.12em;
+  --type-metric-size:28px;
+  --type-metric-line-height:1.05;
+  --type-metric-tracking:-.03em;
+  --radius-sm:10px;
+  --radius-md:16px;
+  --radius-lg:24px;
+  --radius-xl:28px;
+  --radius-pill:999px;
+  --space-xs:4px;
+  --space-sm:8px;
+  --space-md:12px;
+  --space-lg:16px;
+  --space-xl:24px;
+  --space-xxl:32px;
+  --shadow-panel:0 16px 32px rgba(28,36,48,.06);
+  --shadow-card:0 14px 28px rgba(28,36,48,.08);
+  --shadow-hero:0 24px 60px rgba(18,56,71,.18);
+  --review-hero-bg:linear-gradient(135deg,#123847 0%,#0f6a73 56%,#2c8f8e 100%);
+  --review-panel-bg:linear-gradient(180deg,#fffdf8 0%,#f7efe3 100%);
+  --review-panel-quiet-bg:linear-gradient(180deg,rgba(255,253,248,.96) 0%,rgba(247,239,227,.94) 100%);
+  --review-meta-bg:#f7efe3;
+  --review-meta-ink:#5c6678;
+  --review-pill-bg:rgba(15,106,115,.08);
+  --review-pill-border:rgba(15,106,115,.12);
+  --review-pill-ink:#0f6a73;
+  --review-pill-warm-bg:rgba(244,181,107,.18);
+  --review-pill-warm-border:rgba(143,74,25,.14);
+  --review-pill-warm-ink:#8f4a19;
+  --review-divider:rgba(216,207,191,.92);
+  color-scheme:light;
+  margin:0;
+  color:var(--ink);
+  font-family:var(--font-ui);
+  background:
+    radial-gradient(circle at top left, rgba(15,106,115,.06), transparent 26%),
+    radial-gradient(circle at 86% 12%, rgba(244,181,107,.12), transparent 20%),
+    linear-gradient(180deg, #f6f1e8 0%, #f2ece2 46%, #ece4d8 100%);
+  position:relative;
+}
+body.signal-desk-light::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.18;
+  background-image:
+    linear-gradient(rgba(15,36,48,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,36,48,.045) 1px, transparent 1px);
+  background-size:28px 28px;
+  mask-image:radial-gradient(circle at center, black 25%, transparent 85%);
+}
+body.signal-desk-light a {
+  color:inherit;
+  text-decoration:none;
+}
+body.signal-desk-light .route-context-banner {
+  border:1px solid rgba(15,106,115,.24);
+  background:linear-gradient(135deg,rgba(255,250,242,.96) 0%,rgba(229,243,244,.96) 100%);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-card);
+  backdrop-filter:blur(14px);
+}
+body.signal-desk-light .route-context-banner__eyebrow,
+body.signal-desk-light .card-label,
+body.signal-desk-light .section-kicker,
+body.signal-desk-light .hero-kicker,
+body.signal-desk-light .expert-eyebrow,
+body.signal-desk-light .sheet-kicker,
+body.signal-desk-light .review-label-caps {
+  font-size:var(--type-label-size);
+  font-weight:700;
+  line-height:var(--type-label-line-height);
+  letter-spacing:var(--type-label-tracking);
+  text-transform:uppercase;
+}
+body.signal-desk-light .route-context-banner__meta span,
+body.signal-desk-light .chip,
+body.signal-desk-light .pill,
+body.signal-desk-light .link-pill,
+body.signal-desk-light .expert-pill,
+body.signal-desk-light .expert-link-pill,
+body.signal-desk-light .expert-nav-link {
+  border:1px solid rgba(15,106,115,.12);
+  background:rgba(15,106,115,.08);
+  color:var(--review-pill-ink);
+  border-radius:var(--radius-pill);
+  min-height:34px;
+  padding:0 12px;
+  font-family:var(--font-ui);
+  font-size:var(--type-body-sm-size);
+  font-weight:700;
+  line-height:var(--type-body-sm-line-height);
+  letter-spacing:var(--type-body-tracking);
+}
+body.signal-desk-light .route-context-banner__return {
+  background:linear-gradient(135deg,#123847 0%,#0f6a73 56%,#2c8f8e 100%);
+  color:#f4fbfc;
+  border-radius:var(--radius-pill);
+  min-height:36px;
+  padding:0 14px;
+  font-weight:700;
+}
+body.signal-desk-light .card,
+body.signal-desk-light .panel,
+body.signal-desk-light .hero-side,
+body.signal-desk-light .summary-card,
+body.signal-desk-light .expert-hero-side,
+body.signal-desk-light .expert-panel {
+  background:var(--review-panel-bg);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-panel);
+}
+body.signal-desk-light .hero-main,
+body.signal-desk-light .expert-hero-main {
+  background:var(--review-hero-bg);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-hero);
+}
+body.signal-desk-light .hero-main h1,
+body.signal-desk-light .expert-hero-main h1,
+body.signal-desk-light .route-context-banner__title,
+body.signal-desk-light .hero-side .big {
+  font-family:var(--font-display);
+  letter-spacing:var(--type-h1-tracking);
+}
+body.signal-desk-light .panel h2,
+body.signal-desk-light .hero-side h2,
+body.signal-desk-light .expert-hero-side h2,
+body.signal-desk-light .sheet-title,
+body.signal-desk-light .card-value,
+body.signal-desk-light .metric-value {
+  font-family:var(--font-display);
+}
+body.signal-desk-light .panel h2,
+body.signal-desk-light .hero-side h2,
+body.signal-desk-light .expert-hero-side h2,
+body.signal-desk-light .sheet-title {
+  font-size:var(--type-h2-size);
+  font-weight:var(--type-h2-weight);
+  line-height:var(--type-h2-line-height);
+  letter-spacing:var(--type-h2-tracking);
+}
+body.signal-desk-light .card-value,
+body.signal-desk-light .metric-value {
+  font-size:var(--type-metric-size);
+  font-weight:700;
+  line-height:var(--type-metric-line-height);
+  letter-spacing:var(--type-metric-tracking);
+}
+body.signal-desk-light .panel p,
+body.signal-desk-light .hero-side p,
+body.signal-desk-light .expert-hero-side p,
+body.signal-desk-light .card-note,
+body.signal-desk-light .sheet-copy,
+body.signal-desk-light .sheet-note-panel p,
+body.signal-desk-light .sheet-note-panel li {
+  font-size:var(--type-body-size);
+  line-height:var(--type-body-line-height);
+  letter-spacing:var(--type-body-tracking);
+}
+
+    * { box-sizing:border-box; }
+    body.signal-desk-light {
+      color:var(--ink);
+      font-family:var(--font-ui);
+    }
+    .wrap {
+      max-width:1320px;
+      margin:0 auto;
+      padding:32px 24px 72px;
+    }
+    .hero {
+      display:grid;
+      grid-template-columns:minmax(0, 1.08fr) minmax(320px, .92fr);
+      gap:20px;
+      align-items:stretch;
+    }
+    .hero-main {
+      padding:30px;
+      border-radius:var(--radius-xl);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,.14), rgba(255,255,255,0) 34%),
+        var(--review-hero-bg);
+      color:#f4fbfc;
+      box-shadow:var(--shadow-hero);
+    }
+    .hero-kicker,
+    .panel-kicker,
+    .signal-label,
+    .detail-row > span:first-child {
+      font-size:var(--type-label-size);
+      font-weight:700;
+      line-height:var(--type-label-line-height);
+      letter-spacing:var(--type-label-tracking);
+      text-transform:uppercase;
+    }
+    .hero-kicker {
+      color:#d5eff0;
+      margin-bottom:12px;
+    }
+    .hero-main h1,
+    .hero-side h2,
+    .panel h2 {
+      margin:0;
+      font-family:var(--font-display);
+      letter-spacing:var(--type-h2-tracking);
+    }
+    .hero-main h1 {
+      font-size:var(--type-h1-size);
+      line-height:var(--type-h1-line-height);
+      letter-spacing:var(--type-h1-tracking);
+    }
+    .hero-main p {
+      margin:12px 0 0;
+      max-width:64ch;
+      font-size:15px;
+      line-height:1.72;
+      color:#e1f1f2;
+    }
+    .hero-pill-row,
+    .status-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .hero-pill-row {
+      margin-top:18px;
+    }
+    .hero-pill {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:var(--radius-pill);
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      color:#f4fbfc;
+      font-size:12px;
+      font-weight:700;
+    }
+    .hero-pill code {
+      background:rgba(255,255,255,.14);
+      color:#f4fbfc;
+    }
+    .hero-side,
+    .signal-card,
+    .panel {
+      border-radius:var(--radius-lg);
+      background:var(--review-panel-bg);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-panel);
+    }
+    .hero-side {
+      padding:24px;
+      display:grid;
+      gap:16px;
+      align-content:start;
+    }
+    .panel-kicker {
+      color:var(--brand);
+    }
+    .panel-lead,
+    .note,
+    .mini-note,
+    .signal-note,
+    .hero-side p {
+      margin:0;
+      color:var(--muted);
+      font-size:var(--type-body-size);
+      line-height:var(--type-body-line-height);
+      letter-spacing:var(--type-body-tracking);
+    }
+    .detail-stack {
+      display:grid;
+      gap:12px;
+    }
+    .detail-row {
+      display:grid;
+      grid-template-columns:minmax(120px, 168px) 1fr;
+      gap:12px;
+      padding:12px 14px;
+      border:1px solid rgba(15,106,115,.10);
+      border-radius:var(--radius-md);
+      background:rgba(255,255,255,.58);
+      align-items:start;
+    }
+    .detail-row > span:first-child {
+      color:var(--muted);
+    }
+    .detail-row strong {
+      color:var(--ink);
+      font-weight:700;
+    }
+    .signal-strip {
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:16px;
+      margin-top:20px;
+    }
+    .signal-card {
+      position:relative;
+      overflow:hidden;
+      padding:18px;
+    }
+    .signal-card::before,
+    .panel::before {
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.56) 0%, rgba(255,255,255,0) 44%);
+      pointer-events:none;
+    }
+    .signal-card > *,
+    .panel > * {
+      position:relative;
+      z-index:1;
+    }
+    .signal-label {
+      color:var(--muted);
+    }
+    .signal-value {
+      margin-top:8px;
+      font-family:var(--font-display);
+      font-size:var(--type-metric-size);
+      line-height:var(--type-metric-line-height);
+      letter-spacing:var(--type-metric-tracking);
+      color:var(--ink);
+    }
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(12, minmax(0, 1fr));
+      gap:18px;
+      margin-top:24px;
+    }
+    .panel {
+      grid-column:span 6;
+      position:relative;
+      overflow:hidden;
+      padding:22px;
+      background:var(--review-panel-quiet-bg);
+    }
+    .panel.panel-wide {
+      grid-column:1 / -1;
+    }
+    .panel h2 {
+      margin-bottom:14px;
+      font-size:var(--type-h2-size);
+      line-height:var(--type-h2-line-height);
+    }
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:var(--type-body-size);
+      line-height:var(--type-body-line-height);
+      letter-spacing:var(--type-body-tracking);
+    }
+    th,
+    td {
+      padding:12px 0;
+      border-bottom:1px solid var(--review-divider);
+      vertical-align:top;
+      text-align:left;
+    }
+    th {
+      color:var(--muted);
+      font-size:var(--type-label-size);
+      font-weight:700;
+      line-height:var(--type-label-line-height);
+      letter-spacing:var(--type-label-tracking);
+      text-transform:uppercase;
+    }
+    td:first-child,
+    th:first-child {
+      width:40%;
+      padding-right:16px;
+      color:var(--muted);
+    }
+    code {
+      display:inline-flex;
+      align-items:center;
+      padding:2px 8px;
+      border-radius:var(--radius-pill);
+      background:var(--review-meta-bg);
+      color:var(--review-meta-ink);
+      font-family:'IBM Plex Mono','SFMono-Regular',monospace;
+      font-size:12px;
+      word-break:break-all;
+    }
+    @media (max-width:1080px) {
+      .hero {
+        grid-template-columns:1fr;
+      }
+      .signal-strip {
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+      }
+      .panel {
+        grid-column:1 / -1;
+      }
+    }
+    @media (max-width:720px) {
+      .wrap {
+        padding:24px 16px 56px;
+      }
+      .signal-strip {
+        grid-template-columns:1fr;
+      }
+      .detail-row {
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body class="signal-desk-light">
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-main">
+        <div class="hero-kicker">External Validation Surface</div>
+        <h1>External Validation One-Page</h1>
+        <p>Authority-facing validation summary that brings benchmark coverage, native roundtrip evidence, release gates, and delivery-boundary signals into one premium review export.</p>
+        <div class="hero-pill-row">
+          <span class="hero-pill">Bundle <code>20260422T140547Z</code></span>
+          <span class="hero-pill">Generated <code>2026-04-22T14:05:48.342988+00:00</code></span>
+        </div>
+      </div>
+      <aside class="hero-side">
+        <div class="panel-kicker">MIDAS Section Library</div>
+        <h2>embedded metadata validated</h2>
+        <div class="status-row">
+          <span class='status-chip is-ok'>embedded metadata validated</span>
+          <span class='status-chip is-ok'>START NOW</span>
+          <span class='status-chip is-ok'>FULL SUBMISSION READY</span>
+        </div>
+        <p class="panel-lead">nightly, release gap, committee dashboard, and this external-validation onepage all consume the same validator line</p>
+        <div class="detail-stack">
+          <div class="detail-row"><span>Summary line</span><div>MIDAS section-library: ok | 182/183 used | 183 templates | source=midas_parser_derived | implementation/phase1/open_data/midas/midas_generator_33.json</div></div>
+          <div class="detail-row"><span>Gate mode</span><div>static + contract gate</div></div>
+          <div class="detail-row"><span>Release gates</span><div>5/5 passed</div></div>
+          <div class="detail-row"><span>Integrity</span><div>6/6 passed</div></div>
+        </div>
+      </aside>
+    </section>
+    <div class="signal-strip">
+      <div class="signal-card">
+        <div class="signal-label">Release Gates</div>
+        <div class="signal-value">5/5</div>
+        <div class="signal-note">Nightly, CI, static validation, freeze, and promotion status aligned for authority packaging.</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-label">Integrity Checks</div>
+        <div class="signal-value">6/6</div>
+        <div class="signal-note">Registry, signature, solver, benchmark lock, residual gate, and committee package integrity.</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-label">Native Write-Back Ready</div>
+        <div class="signal-value">35/77</div>
+        <div class="signal-note">Native roundtrip readiness surfaced alongside public raw and bridge-ready evidence.</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-label">Canonical Queue</div>
+        <div class="signal-value">0</div>
+        <div class="signal-note">Unresolved bridged families still pending canonical promotion or release-boundary closure.</div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <h2>Constitutive / Interaction Coverage</h2>
+        <div class="panel-lead">expanded constitutive/interaction families are surfaced explicitly as shared summary lines across the release, committee, and external reports; the same lines are reused as-is.</div>
+        <table>
+          <tr><td>Material constitutive</td><td>Material constitutive gate: PASS | concrete_damage=yes(matrix=48/48,max=1.000) | cyclic_degradation=yes(matrix=46/46,residual_max=1.914%,lib=rev2/pinch0.22/crush1.00/series=3/3@2400/wall=1/rc=2) | bond_interface=yes(matrix=48/48,bond_max=0.980) | creep_shrinkage=yes(matrix=7/7,mean=1.000/0.617) | soil_boundary_nonlinear=yes(matrix=11/11,profile=dense_sand) | device_dissipation=yes(matrix=10/10,types=3) | foundation_impedance_nonlinear=yes(matrix=19/19,links=6) | contact_link_hysteresis=yes(matrix=15/15,cats=6) | panel_zone_joint_response=yes(matrix=12/12,rows=12) | wind_dynamic_response=yes(matrix=16/16,topo=4) | track_support_viscoelasticity=yes(matrix=11/11,class=B) | vehicle_track_transient_coupling=yes(matrix=19/19,iters=1.01) | tunnel_soil_wave_attenuation=yes(matrix=13/13,dist=24) | serviceability_velocity_response=yes(matrix=8/8,pass_ratio=1.000) | construction_stage_redistribution=yes(matrix=6/6,diff=1) | joint_constraint_transfer=yes(matrix=5/5,rows=135) | aeroelastic_serviceability=yes(matrix=7/7,pass_ratio=1.000) | heterogeneous_soil_adaptation=yes(matrix=5/5,recall=1.000) | segment_joint_softening=yes(matrix=5/5,yield=53.000) | longitudinal_wave_strain_transfer=yes(matrix=5/5,strain=0.000000) | raw_pressure_field_mapping=yes(matrix=5/5,mapped=7278) | phase_assimilation_correction=yes(matrix=5/5,ratio=0.964) | multiscale_streaming_refinement=yes(matrix=5/5,chunk=16) | integrated_vibration_transfer=yes(matrix=5/5,checks=4) | resilience_ood_recovery=yes(matrix=5/5,steps=3) | boundary_absorption_nonlinear=yes(matrix=6/6,supports=2) | attention_load_localization=yes(matrix=6/6,peak=0.350) | residual_energy_stabilization=yes(matrix=7/7,solver=FIRE) | matrix=400/400 | groups=concrete_damage=48/48,cyclic_degradation=46/46,bond_interface=48/48,creep_shrinkage=7/7,soil_boundary_nonlinear=11/11,device_dissipation=10/10,foundation_impedance_nonlinear=19/19,contact_link_hysteresis=15/15,panel_zone_joint_response=12/12,wind_dynamic_response=16/16,track_support_viscoelasticity=11/11,vehicle_track_transient_coupling=19/19,tunnel_soil_wave_attenuation=13/13,serviceability_velocity_response=8/8,construction_stage_redistribution=6/6,joint_constraint_transfer=5/5,aeroelastic_serviceability=7/7,heterogeneous_soil_adaptation=5/5,segment_joint_softening=5/5,longitudinal_wave_strain_transfer=5/5,raw_pressure_field_mapping=5/5,phase_assimilation_correction=5/5,multiscale_streaming_refinement=5/5,integrated_vibration_transfer=5/5,resilience_ood_recovery=5/5,boundary_absorption_nonlinear=6/6,attention_load_localization=6/6,residual_energy_stabilization=7/7,phase_latency_projection=5/5,cache_window_adaptation=5/5,whitebox_feedback_stitching=5/5,recovery_residual_relock=5/5,rail_support_contact_modulation=5/5,tunnel_lining_interface_recovery=5/5,panel_feedback_residual_transfer=5/5,wind_pressure_coupled_transfer=5/5 | coverage=cd[t=2,h=2,s=2,sf=19],cyc[t=2,h=2,store=1,sf=18],bond[t=2,h=2,s=2,sf=18]</td></tr>
+          <tr><td>Surface interaction benchmark</td><td>Surface interaction benchmark: PASS | ready=7/7 | family_matrix=420/420 | source_families=10/10 | shell_surface=yes | interface_transfer=yes | interface_gap=yes | foundation=yes | track_slab=yes | vehicle_track=yes | tunnel_lining_soil=yes | joint_panel=yes | ssi=yes | soil_tunnel=yes | direct_contact=6/6 | general_fe_coupling=yes | groups=modal-transfer=4/4,phase-assimilation-coupling=4/4,streaming-partition-coupling=4/4,integrated-vibration-coupling=4/4,resilience-recovery-coupling=4/4,kinematic-coupling=3/3,constraint-bridge=3/3,wave-radiation=2/2,boundary-absorption-coupling=4/4,attention-guided-transfer=4/4,residual-stabilization-coupling=4/4,solver-feedback-coupling=4/4,multiphysics-coupling=4/4,explicit-shear-transfer=4/4,phase-latency-coupling=4/4,cache-window-coupling=4/4,whitebox-feedback-coupling=4/4,recovery-residual-coupling=4/4,support-contact-modulation-coupling=4/4,lining-recovery-coupling=4/4,panel-feedback-coupling=4/4,pressure-mapping-coupling=4/4,shell-shell=53/53,shell-wall=81/81,footing-soil=62/62,track-slab=8/8,vehicle-track=8/8,tunnel-lining-soil=8/8,joint-panel=8/8,ssi=13/13,soil-tunnel=84/84,direct-contact=11/11</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>MIDAS Native Roundtrip / Write-Back</h2>
+        <table>
+          <tr><td>Roundtrip gate summary</td><td>MIDAS native roundtrip: PASS | corpus=77 | native_text=35 | public_native=9 | public_raw_native=8 | public_bridge_native=1 | public_preview_native=7 | public_structural_preview_native=8 | fixture_native=4 | repo_native=3 | experiment_native=3 | archives=7 | ready=35 | public_ready=25 | public_native_ready=9 | public_raw_ready=8 | public_bridge_ready=1 | public_preview_ready=7 | public_structural_preview_ready=8 | exact_queue=0/8 | korean_reconstruction=5/5 | korean_promotions=0/0 | fixture_ready=4 | repo_ready=3 | experiment_ready=3 | receipts=35/35 | topology=35/35 | load=35/35 | loadcomb=35/35 exact | coverage=ready:100%,receipts:100%,loadcomb:100%,public_source:71%,exact_queue:100%,kr_recon:100% | gaps=ready:0,receipts:0,topology:0,load:0,loadcomb:0,public_source:10,exact_queue:0,korean_reconstruction:0 | types=12 | taxonomy=exact:34,canonical:1,lossy:0,unsupported:0,manual:0 | pending_review=0</td></tr>
+          <tr><td>Write-back diff summary</td><td>MIDAS native write-back diff receipts: PASS | ready=35 | receipts=35/35 | topology=35/35 | load=35/35 | loadcomb=35/35 exact | types=12 | exact_queue=0/8 | korean_promotions=0/0 | taxonomy=exact:34,canonical:1,lossy:0,unsupported:0,manual:0 | pending_review=0</td></tr>
+          <tr><td>Honest counts</td><td>corpus=77 | native_text=35 | ready=35 | public_native_ready=9 | public_raw_ready=8 | public_bridge_ready=1 | public_preview_ready=7 | public_structural_preview_ready=8 | public_source_ready=25 | structure_types=12 | batches=12 | receipts=35/35 | pending_review=0</td></tr>
+          <tr><td>Appendix Markdown</td><td>implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md</td></tr>
+          <tr><td>Appendix JSON</td><td>implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.json</td></tr>
+          <tr><td>Receipts report</td><td>implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>KR Source / Preview</h2>
+        <table>
+          <tr><td>KR ingest</td><td>KR ingest: PASS | src=15 | cls=4 | got=10 | fp=10 | meta=5 | rej=0 | dup=0 | seed=15 | topo=5 | native=5 | p0=11</td></tr>
+          <tr><td>Measured benchmark breadth</td><td>Measured benchmark breadth: PASS | baseline=2/51 | opensees_delta=6/7 | authority_delta=2/6 | external_delta=10/10 | canton_delta=1/220 | measured_families=21 | measured_cases=294 | parser_ready=3</td></tr>
+          <tr><td>OpenSees canonical breadth</td><td>OpenSees canonical breadth: PASS | families=6 | cases=7 | parser_ready=3 | origins=designsafe_publication=1,github_public=2,global_authority=2,public_lab_download=2</td></tr>
+          <tr><td>KR preview queue</td><td>KR preview queue: PASS | cand=8 | pend=0 | state=closed_until_new_public_archive_exact_topology_candidate</td></tr>
+        </table>
+        <div class="mini-note" style="margin-top: 10px;">rows=7 | lanes=public_native_ready=5, public_structural_preview_ready=2</div><h4 style="margin: 12px 0 8px;">Public Structural Preview Lane</h4><table style="margin-top: 8px;"><thead><tr><td>Structure Type</td><td>Representative</td><td>Lane</td><td>System</td><td>Receipt</td><td>Type Batch</td></tr></thead><tbody><tr><td>mixed_use</td><td>buildingSMART Korea BIM Awards 2024 구조 골조 curated IFC<div class='mini-note'><code>ifc_public_award_reference_2024</code></div></td><td>public_structural_preview</td><td>mixed_structure</td><td>implementation/phase1/release/midas_native_roundtrip/21.ifc_public_award_reference_2024_structural_preview_candidate_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/mixed_use.diff_batch.md</td></tr><tr><td>public_facility</td><td>buildingSMART Korea BIM Awards 2020 구조 골조 curated IFC<div class='mini-note'><code>ifc_public_award_reference_2020</code></div></td><td>public_structural_preview</td><td>rc_frame</td><td>implementation/phase1/release/midas_native_roundtrip/22.ifc_public_award_reference_2020_structural_preview_candidate_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/public_facility.diff_batch.md</td></tr></tbody></table><h4 style="margin: 12px 0 8px;">Public Native Lane</h4><table style="margin-top: 8px;"><thead><tr><td>Structure Type</td><td>Representative</td><td>Lane</td><td>System</td><td>Receipt</td><td>Type Batch</td></tr></thead><tbody><tr><td>building</td><td>콘크리트 건축물 구조설계 예제집 (제2판) curated MIDAS baseline<div class='mini-note'><code>kci_concrete_building_design_examples_2e_native_baseline</code></div></td><td>public_native</td><td>rc_frame</td><td>implementation/phase1/release/midas_native_roundtrip/28.kci_concrete_building_design_examples_2e_native_baseline_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/building.diff_batch.md</td></tr><tr><td>housing</td><td>부천역곡지구 A-1블록 공동주택 설계공모 curated MIDAS baseline<div class='mini-note'><code>lh_bucheon_yeokgok_a1_housing_native_baseline</code></div></td><td>public_native</td><td>wall_frame_hybrid</td><td>implementation/phase1/release/midas_native_roundtrip/26.lh_bucheon_yeokgok_a1_housing_native_baseline_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/housing.diff_batch.md</td></tr><tr><td>industrial_facility</td><td>고양창릉 복합발전소 건설사업 설계기술용역<div class='mini-note'><code>koneps_goyang_changneung_powerplant_design_service</code></div></td><td>public_native</td><td>steel_rc_hybrid</td><td>implementation/phase1/release/midas_native_roundtrip/24.koneps_goyang_changneung_powerplant_design_service_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/industrial_facility.diff_batch.md</td></tr><tr><td>mixed_use</td><td>행정중심복합도시 5-1생활권 설계공모 curated MIDAS baseline<div class='mini-note'><code>lh_happy_city_5_1_native_baseline</code></div></td><td>public_native</td><td>rc_core_wall_frame</td><td>implementation/phase1/release/midas_native_roundtrip/27.lh_happy_city_5_1_native_baseline_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/mixed_use.diff_batch.md</td></tr><tr><td>public_facility</td><td>한강공원 매점(광나루2호) 신축 설계용역 curated MIDAS baseline<div class='mini-note'><code>koneps_hangang_park_gwangnaru2_native_baseline</code></div></td><td>public_native</td><td>rc_frame</td><td>implementation/phase1/release/midas_native_roundtrip/25.koneps_hangang_park_gwangnaru2_native_baseline_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/public_facility.diff_batch.md</td></tr></tbody></table>
+      </div>
+      <div class="panel">
+        <h2>Irregular Structure Track</h2>
+        <table>
+          <tr><td>Track summary</td><td>Irregular structure collection gate: PASS | families=20 | sources=32 | local_ready=15 | remote_candidates=17 | collected=21 | top5=5</td></tr>
+          <tr><td>Source catalog summary</td><td>Irregular source catalog: PASS | families=20 | sources=32 | local_ready=15 | remote_candidates=17</td></tr>
+          <tr><td>Triage summary</td><td>Irregular triage: PASS | native_candidates=18 | solver_candidates=13 | ai_candidates=32</td></tr>
+          <tr><td>Collection summary</td><td>Irregular collection: PASS | collected=21 | metadata_only_remote_candidate=-4 | rejected=0</td></tr>
+          <tr><td>Top5 summary</td><td>Irregular top5 manifest: PASS | top5=0 | local_ready=0 | remote_needed=0</td></tr>
+          <tr><td>Benchmark execution summary</td><td>Irregular benchmark execution: CHECK | ready=0 | blocked=0 | task_count=0 | canonical=0 | bridged=0 | proxy=0 | receipts=0</td></tr>
+          <tr><td>Top5 family ids</td><td>n/a</td></tr>
+          <tr><td>Benchmark manifest</td><td>implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json</td></tr>
+          <tr><td>Receipt index</td><td><a href='artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td></tr><tr><td>Receipt links</td><td>n/a</td></tr>
+          <tr><td>Canonical promotion queue</td><td>0</td></tr>
+          <tr><td>Queue scope</td><td>Only unresolved bridged families are shown.</td></tr>
+        </table>
+        
+      </div>
+      <div class="panel">
+        <h2>Gate Status</h2>
+        <table>
+          <tr><td>Nightly release</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>CI gate</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>Static validation</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>Freeze release</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>Promotion</td><td><span class='status-chip is-ok'>PASS</span></td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Integrity</h2>
+        <table>
+          <tr><td>Signed registry</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>Registry signature verified</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>Solver HIP e2e</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>RC benchmark lock</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>NDTHA residual gate</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>Committee package</td><td><span class='status-chip is-ok'>PASS</span></td></tr><tr><td>MIDAS section-library validator</td><td>MIDAS section-library: ok | 182/183 used | 183 templates | source=midas_parser_derived | implementation/phase1/open_data/midas/midas_generator_33.json</td></tr><tr><td>MIDAS section-library status</td><td><span class='status-chip is-ok'>embedded metadata validated</span></td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>MGT Delivery Boundary</h2>
+        <table>
+          <tr><td>Evidence model</td><td>direct_patch_plus_zero_touch_verification_manifest</td></tr>
+          <tr><td>Rebar delivery mode</td><td>direct_patch_eligible</td></tr>
+          <tr><td>Direct patch families</td><td>beam_section=1, connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5, slab_thickness=2, wall_thickness=5</td></tr>
+          <tr><td>Special-member direct patch</td><td>core_beam_connection_detailing=1, intermediate_beam_section=1, intermediate_wall_rebar=4, intermediate_wall_thickness=3, perimeter_frame_column=1, perimeter_slab_thickness=2, perimeter_wall_detailing=5, perimeter_wall_rebar=1, perimeter_wall_thickness=2, transfer_beam_connection_detailing=5</td></tr>
+          <tr><td>Special-member supported</td><td>core_beam_connection_detailing=2, intermediate_beam_section=1, intermediate_wall_rebar=4, intermediate_wall_thickness=3, perimeter_frame_column=1, perimeter_slab_thickness=2, perimeter_wall_detailing=10, perimeter_wall_rebar=1, perimeter_wall_thickness=2, transfer_beam_connection_detailing=10</td></tr>
+          <tr><td>Special-member zero touch</td><td>core_beam_connection_detailing=1, perimeter_wall_detailing=5, transfer_beam_connection_detailing=5</td></tr>
+          <tr><td>Structured sidecar families</td><td>n/a</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Advanced Holdouts</h2>
+        <table>
+          <tr><td>PBD dynamic hinge refresh</td><td>True | computed_member_local_hinge_refresh</td></tr>
+          <tr><td>PBD reason</td><td>Dynamic hinge-refresh artifact is attached.</td></tr>
+          <tr><td>PBD hinge evidence</td><td>artifact=True | rebar_sensitive_member_local_refresh | overlap=88 | rebar-sensitive=70</td></tr>
+          <tr><td>PBD hinge benchmark</td><td>gate=True | assets=5 | train=2 | val=2 | holdout=1 | rebar-sensitive=1 | confinement-sensitive=1 | fixture-regression=True | fixtures=5 | min-point=449 | min-peak-drift=0.036625 | alignment=True | refresh-columns=5 | rebar-columns=5 | benchmark-rebar=0.0127-0.0603 | refresh-rebar=0.0640-0.0740</td></tr>
+          <tr><td>Panel-zone 3D clash</td><td>True | panel_zone_3d_clash_and_anchorage_verified</td></tr>
+          <tr><td>Panel-zone reason</td><td>3D panel-zone clash and anchorage recomputation artifacts are attached</td></tr>
+          <tr><td>Panel-zone evidence source</td><td>design_optimization_dataset_npz | true_3d_clash_and_anchorage_verified</td></tr>
+          <tr><td>Panel-zone source coverage</td><td>validated rows=3 | min overlap=1 | bundles=panel_zone_clash_verification_3d:nested_solver_export, panel_zone_joint_geometry_3d:nested_solver_export, panel_zone_rebar_anchorage_3d:nested_solver_export</td></tr>
+          <tr><td>Panel-zone validation boundary</td><td>internal_complete=False | external_pending=False | boundary=</td></tr>
+          <tr><td>Panel-zone sidecar overlap</td><td>present=False | mode= | changes=0 | overlap members=0 | evidence=direct_solver_export | delivery=solver_verified_layout_rows</td></tr>
+          <tr><td>Panel-zone missing 3D sources</td><td></td></tr>
+          <tr><td>Panel-zone solver inbox</td><td>empty_after_successful_consume | pending=False | origin=trusted_external_solver_source | release refresh=True | latest consume=True:PASS | next=local_closeout_closed</td></tr>
+          <tr><td>Foundation optimization</td><td>True | active_foundation_member_optimization</td></tr>
+          <tr><td>Foundation reason</td><td>foundation optimization artifact is attached and dataset contains foundation members</td></tr>
+          <tr><td>Foundation scope provenance</td><td>dataset_summary | npz_full</td></tr>
+          <tr><td>Foundation upstream labels</td><td>0 | dataset_scope_only</td></tr>
+          <tr><td>Wind-tunnel raw mapping</td><td>True | raw_hffb_node_pressure_mapping</td></tr>
+          <tr><td>Wind reason</td><td>Raw wind-tunnel HFFB mapping is ready for traceable MIDAS binding.</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Nightly Smoke Probe</h2>
+        <table>
+          <tr><td>Smoke reason</td><td>PASS</td></tr>
+          <tr><td>Smoke pass rate</td><td>100.00%</td></tr>
+          <tr><td>Smoke trial feasible rate</td><td>100.00%</td></tr>
+          <tr><td>Smoke avg trial runtime (s)</td><td>0.0563</td></tr>
+          <tr><td>Smoke history count</td><td>10</td></tr>
+          <tr><td>Strict recommendation</td><td>candidate_for_strict_enable</td></tr>
+        </table>
+      </div>
+      <div class="panel panel-wide panel-figure"><div class="panel-kicker">Trend figure</div><h2>Nightly Smoke Trend</h2><div class="media-shell"><img src="artifacts/implementation/phase1/release/release_gap_smoke_history.png" alt="Nightly Smoke Trend"/></div></div>
+      
+      
+      <div class="panel">
+        <h2>Nightly Smoke Recent Samples</h2>
+        <table>
+          <thead>
+            <tr><td>#</td><td>Generated</td><td>Pass</td><td>Trial Feasible</td><td>Baseline Runtime (s)</td><td>Trial Runtime (s)</td><td>Trial Max DCR</td><td>Action</td></tr>
+          </thead>
+          <tbody>
+            
+            <tr>
+              <td>6</td>
+              <td>2026-04-06T12:19:39.039411+00:00</td>
+              <td>True</td>
+              <td>True</td>
+              <td>1.3646</td>
+              <td>0.0554</td>
+              <td>0.9332</td>
+              <td>connection_detailing_down</td>
+            </tr>
+            
+            <tr>
+              <td>7</td>
+              <td>2026-04-06T12:23:56.108705+00:00</td>
+              <td>True</td>
+              <td>True</td>
+              <td>1.3550</td>
+              <td>0.0550</td>
+              <td>0.9332</td>
+              <td>connection_detailing_down</td>
+            </tr>
+            
+            <tr>
+              <td>8</td>
+              <td>2026-04-06T12:23:56.108705+00:00</td>
+              <td>True</td>
+              <td>True</td>
+              <td>1.3550</td>
+              <td>0.0550</td>
+              <td>0.9332</td>
+              <td>connection_detailing_down</td>
+            </tr>
+            
+            <tr>
+              <td>9</td>
+              <td>2026-04-06T12:32:45.009996+00:00</td>
+              <td>True</td>
+              <td>True</td>
+              <td>1.3590</td>
+              <td>0.0590</td>
+              <td>0.9332</td>
+              <td>connection_detailing_down</td>
+            </tr>
+            
+            <tr>
+              <td>10</td>
+              <td>2026-04-06T13:54:47.180033+00:00</td>
+              <td>True</td>
+              <td>True</td>
+              <td>1.4059</td>
+              <td>0.0567</td>
+              <td>0.9332</td>
+              <td>connection_detailing_down</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+      <div class="panel panel-wide panel-figure"><div class="panel-kicker">Trend figure</div><h2>Measured Chain Category Trend</h2><div class="media-shell"><img src="artifacts/implementation/phase1/release/release_gap_measured_chain_categories.png" alt="Measured Chain Category Trend"/></div></div>
+      <div class="panel">
+        <h2>Parser/KDS</h2>
+        <table>
+          <tr><td>MIDAS element rows total</td><td>12728</td></tr>
+          <tr><td>MIDAS element rows skipped</td><td>0</td></tr>
+          <tr><td>MIDAS unknown rows</td><td>0</td></tr>
+          <tr><td>MIDAS semantic load binding</td><td>True</td></tr>
+          <tr><td>MIDAS USE-STLD blocks</td><td>2</td></tr>
+          <tr><td>MIDAS semantic load cases/combinations</td><td>6/8</td></tr>
+          <tr><td>MIDAS bound/unbound rows</td><td>nodal=12/0, selfweight=1/0, pressure=7278/0</td></tr>
+          <tr><td>MGT export artifact exists</td><td>True</td></tr>
+          <tr><td>MGT export contract pass</td><td>True</td></tr>
+          <tr><td>MGT export support mode</td><td>native_authoring_supported_changeset</td></tr>
+          <tr><td>MGT export supported changes</td><td>36</td></tr>
+          <tr><td>MGT export unsupported changes</td><td>0</td></tr>
+          <tr><td>MGT export direct-patch changes</td><td>25</td></tr>
+          <tr><td>MGT export direct-patch families</td><td>beam_section=1, connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5, slab_thickness=2, wall_thickness=5</td></tr>
+          <tr><td>MGT rebar namespace mode</td><td>group_local</td></tr>
+          <tr><td>MGT rebar delivery mode</td><td>direct_patch_eligible</td></tr>
+          <tr><td>MGT evidence model</td><td>direct_patch_plus_zero_touch_verification_manifest</td></tr>
+          <tr><td>MGT delivery boundary</td><td>direct_patch=beam_section=1, connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5, slab_thickness=2, wall_thickness=5 | sidecar=n/a | connection_payload=direct_patch_native_authoring_zero_touch_verified | detailing_payload=direct_patch_native_authoring_zero_touch_verified</td></tr>
+          <tr><td>MGT rebar material namespace present</td><td>True</td></tr>
+          <tr><td>MGT rebar group-local namespace present</td><td>True</td></tr>
+          <tr><td>MGT material rebar payloads</td><td>3/5</td></tr>
+          <tr><td>MGT group-local rebar payloads</td><td>6/6</td></tr>
+          <tr><td>MGT connection namespace mode</td><td>group_local</td></tr>
+          <tr><td>MGT connection group-local namespace present</td><td>True</td></tr>
+          <tr><td>MGT group-local connection payloads</td><td>6/6</td></tr>
+          <tr><td>MGT connection direct-patch eligible</td><td>6</td></tr>
+          <tr><td>MGT detailing namespace mode</td><td>group_local</td></tr>
+          <tr><td>MGT detailing group-local namespace present</td><td>True</td></tr>
+          <tr><td>MGT group-local detailing payloads</td><td>5/5</td></tr>
+          <tr><td>MGT detailing direct-patch eligible</td><td>5</td></tr>
+          <tr><td>MGT connection structured payload mapped</td><td>6</td></tr>
+          <tr><td>MGT detailing structured payload mapped</td><td>5</td></tr>
+          <tr><td>MGT connection delivery mode</td><td>direct_patch_native_authoring_zero_touch_verified</td></tr>
+          <tr><td>MGT detailing delivery mode</td><td>direct_patch_native_authoring_zero_touch_verified</td></tr>
+          <tr><td>MGT rebar direct-patch eligible</td><td>6</td></tr>
+          <tr><td>MGT patched material rows</td><td>24</td></tr>
+          <tr><td>MGT cloned material rows</td><td>24</td></tr>
+          <tr><td>MGT rebar direct-patch blockers</td><td></td></tr>
+          <tr><td>MGT rebar mapping sources</td><td>alt_slab_wall_group_id=5, direct_group_id=1</td></tr>
+          <tr><td>MGT export instruction sidecar changes</td><td>0</td></tr>
+          <tr><td>MGT export instruction sidecar families</td><td>n/a</td></tr>
+          <tr><td>MGT export sidecar audit-only</td><td>n/a (0)</td></tr>
+          <tr><td>MGT export sidecar manual-input</td><td>n/a (0)</td></tr>
+          <tr><td>MGT audit review manifest</td><td>n/a (0)</td></tr>
+          <tr><td>MGT audit review packets</td><td>n/a (0)</td></tr>
+          <tr><td>MGT audit packet followups</td><td>n/a</td></tr>
+          <tr><td>MGT audit packet files</td><td>n/a (0)</td></tr>
+          <tr><td>MGT audit review queue</td><td>n/a (0)</td></tr>
+          <tr><td>MGT audit queue status</td><td>n/a</td></tr>
+          <tr><td>MGT audit follow-up actions</td><td>close_packet=2 (2)</td></tr>
+          <tr><td>MGT audit follow-up owner</td><td>none=2</td></tr>
+          <tr><td>MGT audit follow-up review owner</td><td>licensed_engineer=2</td></tr>
+          <tr><td>MGT audit follow-up status</td><td>approved=2</td></tr>
+          <tr><td>MGT audit follow-up SLA</td><td>closed=2</td></tr>
+          <tr><td>MGT audit follow-up age</td><td>closed=2 (overdue=0)</td></tr>
+          <tr><td>MGT audit resolution actions</td><td>close_packet=2 (2)</td></tr>
+          <tr><td>MGT audit resolution owner</td><td>release_coordinator=2</td></tr>
+          <tr><td>MGT audit resolution status</td><td>closed_packet=2</td></tr>
+          <tr><td>MGT export instruction sidecar priorities</td><td></td></tr>
+          <tr><td>MGT export instruction sidecar followups</td><td></td></tr>
+          <tr><td>MGT export cloned sections</td><td>0</td></tr>
+          <tr><td>MGT export cloned thicknesses</td><td>6</td></tr>
+          <tr><td>MGT export retargeted elements</td><td>418</td></tr>
+          <tr><td>KDS compliance rows</td><td>511</td></tr>
+          <tr><td>KDS member check rows</td><td>1056</td></tr>
+          <tr><td>KDS clause count</td><td>16</td></tr>
+          <tr><td>NDTHA residual top abs (m)</td><td>0.6880580090188355</td></tr>
+          <tr><td>NDTHA residual drift abs (%)</td><td>1.9136000000000006</td></tr>
+          <tr><td>NDTHA residual fallback rate</td><td>0.0</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Readiness</h2>
+        <table>
+          <tr><td>Commercial grade</td><td>Commercial</td></tr>
+          <tr><td>Deployment model</td><td>engineer_in_the_loop_accelerated_coverage</td></tr>
+          <tr><td>Accelerated coverage</td><td>95-99%</td></tr>
+          <tr><td>Residual holdout</td><td>1-5%</td></tr>
+          <tr><td>Estimated time saved</td><td>90-96%</td></tr>
+          <tr><td>Measured chain wall-clock (comparable rolling)</td><td>0.88 min (N=14, range=0.846-0.906 min)</td></tr>
+          <tr><td>Measured chain wall-clock (current)</td><td>0.88 min</td></tr>
+          <tr><td>Comparable run selection mode</td><td>current_pipeline_comparable_full_chain_pass</td></tr>
+          <tr><td>Comparable reference deployment</td><td>engineer_in_the_loop_accelerated_coverage</td></tr>
+          <tr><td>Comparable reference strict smoke</td><td>True</td></tr>
+          <tr><td>Empirical smoke runtime reduction</td><td>95.66-96.04%</td></tr>
+          <tr><td>Engineer-in-loop ready</td><td>True</td></tr>
+          <tr><td>Estimated time basis</td><td>Empirical estimate derived from nightly design-optimization smoke runtime reduction, scaled by the accelerated-coverage target. smoke_mean_runtime_saved=95.92%, sample_count=10.</td></tr>
+          <tr><td>Time-saving focus</td><td>Use this engine to automate the dominant, time-consuming 95-99% of repeated analysis, screening, packaging, and optimization workflows. Keep the residual 1-5% under licensed engineer review, legacy-tool cross-check, and formal sign-off workflows.</td></tr>
+          <tr><td>Full replacement ready</td><td>False</td></tr>
+          <tr><td>External benchmark start now</td><td>True</td></tr>
+          <tr><td>External benchmark full submission ready</td><td>True</td></tr>
+          <tr><td>External benchmark reason</td><td>PASS_START_NOW_FULL</td></tr>
+          <tr><td>External benchmark start mode</td><td>start_now_full_external_submission</td></tr>
+          <tr><td>External benchmark scope</td><td>full_external_submission_package</td></tr>
+          <tr><td>External benchmark blockers</td><td>none</td></tr>
+          <tr><td>External benchmark cautions</td><td>panel_zone_external_validation_only_boundary</td></tr>
+          <tr><td>External benchmark execution mode</td><td>limited</td></tr>
+          <tr><td>External benchmark execution ready tasks</td><td>10</td></tr>
+          <tr><td>External benchmark execution blocked tasks</td><td>0</td></tr>
+          <tr><td>External benchmark execution review-boundary pending</td><td>0</td></tr>
+          <tr><td>External benchmark review-boundary resolution</td><td>approve_all=PASS_NO_OPEN_DECISION_ITEMS/ready_full=yes; reject_one=PASS_NO_OPEN_DECISION_ITEMS/open_revision=0 | owner=none | assignee=none | assignment=none | priority=none | family=none | changes=0 | followup=none | sla=none | age=none | overdue=0 | oldest_open_h=0.000</td></tr>
+          <tr><td>External benchmark execution status</td><td>execution_complete_no_fail</td></tr>
+          <tr><td>External benchmark execution planned tasks</td><td>0</td></tr>
+          <tr><td>External benchmark execution in-progress tasks</td><td>0</td></tr>
+          <tr><td>External benchmark execution completed tasks</td><td>10</td></tr>
+          <tr><td>External benchmark execution failed tasks</td><td>0</td></tr>
+          <tr><td>External benchmark execution finished tasks</td><td>10</td></tr>
+          <tr><td>External benchmark execution completion ratio</td><td>1.000</td></tr>
+          <tr><td>External benchmark case onepages</td><td>10 | dir=external_benchmark_case_onepages</td></tr>
+          <tr><td>External benchmark case attestation workflow</td><td>cases=10 | manifests=10 | templates=0 | receipts=10 | attested=10 | source=manifest=10 | status=MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED=10 | kickoff_index=implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_index.json</td></tr>
+          <tr><td>PBD response source</td><td>resolved_report=implementation/phase1/experiments/by_test/nonlinear_ndtha_stress/20260311T132802Z/artifacts/nonlinear_ndtha_stress_report.pbd7.json | response_npz=implementation/phase1/experiments/by_test/nonlinear_ndtha_stress/20260311T132802Z/artifacts/nonlinear_ndtha_stress_report.pbd7.response.npz | fallback_used=True | coverage=7</td></tr>
+          <tr><td>Audit review decision batch template</td><td>items=0 | status=none | owner=none | priority=none | attested_examples=0 | example_preview=approve_all=PASS_START_NOW_FULL, mixed=PASS_START_NOW_FULL</td></tr>
+          <tr><td>Approve-all readiness preview</td><td>reason=PASS_NO_OPEN_DECISION_ITEMS | ready_full=False | pending=0 | open_revision=0</td></tr>
+          <tr><td>Reject-one readiness preview</td><td>reason=PASS_NO_OPEN_DECISION_ITEMS | ready_full=False | pending=0 | open_revision=0 | blocker=none</td></tr>
+          <tr><td>Audit review decision batch runner</td><td>reason=PASS_ZERO_TOUCH_NO_OPEN_DECISION_ITEMS | apply_live=False | live_applied=False | preview_reason=PASS_NO_OPEN_DECISION_ITEMS | preview_ready_full=False | preview_pending=0 | preview_open_revision=0</td></tr>
+          <tr><td>Structural optimization viewer</td><td>implementation/phase1/release/visualization/structural_optimization_viewer.html | mode=static_release_artifact_viewer | story_zone_cells=12 | max_abs_cost_delta=158.714 | gallery=7</td></tr>
+          <tr><td>Optimized drawing review</td><td>implementation/phase1/release/visualization/optimized_drawing_review.html | projections=3 | changed_groups=20 | changed_members=616 | axis=curated_named_axis_sidecar | x=A B C D E F</td></tr>
+          <tr><td>Open P0 gaps</td><td>0</td></tr>
+          <tr><td>Open P1 gaps</td><td>0</td></tr>
+          <tr><td>Open P2 gaps</td><td>0</td></tr>
+          <tr><td>Registry artifacts</td><td>12</td></tr>
+          <tr><td>Design-opt long feasible</td><td>True</td></tr>
+          <tr><td>Design-opt long final max DCR</td><td>0.9331636363636363</td></tr>
+          <tr><td>Design-opt raw max drift</td><td>9.200000000000003</td></tr>
+          <tr><td>Design-opt repaired compliance max drift</td><td>1.9872000000000005</td></tr>
+          <tr><td>Design-opt compliance basis</td><td>repaired_solver_validated_slice</td></tr>
+          <tr><td>Design-opt repair action count</td><td>1</td></tr>
+          <tr><td>Design-opt constructability signal gain</td><td>0.6812506971740343</td></tr>
+          <tr><td>Design-opt constructability avg</td><td>0.32310580388643245 -> 0.32090464334484636</td></tr>
+          <tr><td>Design-opt detailing complexity avg</td><td>0.4242652309769553 -> 0.4227255791394311</td></tr>
+          <tr><td>Design-opt selected family mix</td><td>connection_detailing=5, detailing=6, perimeter_frame=1, rebar=2, slab_thickness=2, wall_thickness=7</td></tr>
+          <tr><td>Design-opt selected dominant family</td><td>wall_thickness (30.43%)</td></tr>
+          <tr><td>Design-opt selected family mix trend</td><td>connection_detailing=+0, detailing=+0, perimeter_frame=+0, rebar=+0, slab_thickness=+0, wall_thickness=+0</td></tr>
+          <tr><td>Design-opt previous dominant family</td><td>wall_thickness (30.43%)</td></tr>
+          <tr><td>Design-opt preview supply family mix</td><td>beam_section=7, connection_detailing=14, detailing=142, perimeter_frame=1, rebar=254, slab_thickness=42, wall_thickness=175</td></tr>
+          <tr><td>Design-opt preview missing target families</td><td></td></tr>
+          <tr><td>Design-opt cost delta</td><td>411.15925674073515</td></tr>
+          <tr><td>Design-opt changed groups</td><td>20</td></tr>
+          <tr><td>Blocked cost-down rows</td><td>47</td></tr>
+          <tr><td>Blocked illegal-by-mask</td><td>0</td></tr>
+          <tr><td>Illegal-by-mask families</td><td></td></tr>
+          <tr><td>Blocked no-cost-gain</td><td>8</td></tr>
+          <tr><td>Blocked constructability hard-gate</td><td>3</td></tr>
+          <tr><td>Hard-gate reasons</td><td>detailing_ratio_above_hard_limit=3</td></tr>
+          <tr><td>Hard-gate families</td><td>beam_section=1, rebar=2</td></tr>
+          <tr><td>No-cost-gain groups</td><td>5</td></tr>
+          <tr><td>No-cost-gain explain rows</td><td>5</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Binary Metrics</h2>
+        <table>
+          <tr><td>Frame</td><td>cases=3, drift p95=4.167%, top-disp p95=3.485%</td></tr>
+          <tr><td>Wind</td><td>cases=4, max drift=0.000806%, residual drift=0.000113%</td></tr>
+          <tr><td>SSI</td><td>cases=4, nonlinear span=0.282342, residual drift=0.004034%</td></tr>
+          <tr><td>Design Opt</td><td>change rows=13, raw drift=9.2000%, repaired drift=1.9872%, cost delta=411.159</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Residual Holdout Boundary</h2>
+        <table>
+          <tr><td>Category</td><td>Owner</td><td>Relative Share</td><td>Absolute Project %</td><td>Scope</td></tr>
+          <tr><td>Licensed Engineer Review</td><td>기술사</td><td>50%</td><td>0.5-2.5%</td><td>non-standard interpretation, final judgment, exceptional irregularity, and member-level edge cases</td></tr><tr><td>Legacy Tool Cross-Validation</td><td>기존툴+기술사</td><td>30%</td><td>0.3-1.5%</td><td>novel load paths, authority-critical submodels, and residual niche workflows outside the accelerated envelope</td></tr><tr><td>Legal Sign-Off</td><td>기술사/기존 승인 workflow</td><td>20%</td><td>0.2-1.0%</td><td>formal seal, legal submission, and authority-facing responsibility that remains outside automated scope</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Time-Saving Coverage</h2>
+        <table>
+          <tr><td>Coverage target</td><td>95-99%</td></tr>
+          <tr><td>Residual holdout</td><td>1-5%</td></tr>
+          <tr><td>Estimated time saved</td><td>90-96%</td></tr>
+          <tr><td>Measured chain wall-clock (comparable rolling)</td><td>0.88 min (N=14, range=0.846-0.906 min)</td></tr>
+          <tr><td>Measured chain wall-clock (current)</td><td>0.88 min</td></tr>
+          <tr><td>Comparable run selection mode</td><td>current_pipeline_comparable_full_chain_pass</td></tr>
+          <tr><td>Comparable reference deployment</td><td>engineer_in_the_loop_accelerated_coverage</td></tr>
+          <tr><td>Comparable reference strict smoke</td><td>True</td></tr>
+          <tr><td>Empirical smoke runtime reduction</td><td>95.66-96.04%</td></tr>
+          <tr><td>Basis</td><td>Empirical estimate derived from nightly design-optimization smoke runtime reduction, scaled by the accelerated-coverage target. smoke_mean_runtime_saved=95.92%, sample_count=10.</td></tr>
+          <tr><td>Focus</td><td>Use this engine to automate the dominant, time-consuming 95-99% of repeated analysis, screening, packaging, and optimization workflows. Keep the residual 1-5% under licensed engineer review, legacy-tool cross-check, and formal sign-off workflows.</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Residual Holdout Review Table</h2>
+        <table>
+          <tr><td>Category</td><td>Axis</td><td>Detail</td><td>Owner</td><td>Why</td></tr>
+          <tr><td>Licensed Engineer Review</td><td>review_story_zone</td><td>S04/perimeter (2), S02/perimeter (1), S03/intermediate (1), S03/perimeter (1)</td><td>기술사</td><td>Top story-zone review pockets are derived from actual accepted design-change rows so engineer holdout stays tied to the highest-touch parts of the structure.</td></tr><tr><td>Licensed Engineer Review</td><td>story_band</td><td>4, 3, 6</td><td>기술사</td><td>High-touch story bands remain under engineer review because they concentrate accepted design changes and irregular response checks.</td></tr><tr><td>Licensed Engineer Review</td><td>member_family</td><td>wall (26), slab (19), column (9)</td><td>기술사</td><td>Dominant member families in accepted optimization changes still require engineer judgment on local edge cases and detailing intent.</td></tr><tr><td>Licensed Engineer Review</td><td>zone</td><td>perimeter (8), intermediate (4), transfer (1)</td><td>기술사</td><td>Zone concentration is used to focus manual review on the highest-touch portions of the structural layout.</td></tr><tr><td>Legacy Tool Cross-Validation</td><td>submodel_family</td><td>SCBF16B (3), SCBF16B_shell_beam_mix (2), opensees (1), nheri_case01_sensor (1)</td><td>기존툴+기술사</td><td>Authority submodel families are derived from the active catalog paths so cross-validation follows the exact benchmark submodels still outside the accelerated envelope.</td></tr><tr><td>Legacy Tool Cross-Validation</td><td>authority_critical_case</td><td>OpenSees (3), SAC (3), NHERI (3)</td><td>기존툴+기술사</td><td>Authority-critical benchmark tracks remain the primary cross-validation target outside the accelerated envelope.</td></tr><tr><td>Legacy Tool Cross-Validation</td><td>authority_catalog_case_id</td><td>SAC20_LA_holdout_01, SAC20_SEA_holdout_02, SAC20_BOS_holdout_03, NHERI_UCSD_like_holdout_01, NHERI_UCSD_like_holdout_02, NHERI_UCSD_like_holdout_03</td><td>기존툴+기술사</td><td>Authority catalog case ids are read directly so the holdout review list refreshes automatically when the benchmark catalog changes.</td></tr><tr><td>Legal Sign-Off</td><td>authority_catalog_track</td><td>opensees (3), sac (3), nheri (3)</td><td>기술사/기존 승인 workflow</td><td>Formal authority-facing responsibility is anchored to the active authority catalog tracks and remains outside the automated responsibility boundary.</td></tr><tr><td>Legal Sign-Off</td><td>authority_critical_case</td><td>sealed submission pack, authority-facing variants, stamped final issue</td><td>기술사/기존 승인 workflow</td><td>Formal authority-facing deliverables remain outside the automated responsibility boundary.</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Residual Holdout Routing Matrix</h2>
+        <table>
+          <tr><td>Category</td><td>Track</td><td>Submodel</td><td>Review Story/Zone</td><td>Member Family</td><td>Owner</td><td>Why</td></tr>
+          <tr><td>Legacy Tool Cross-Validation</td><td>opensees</td><td>SCBF16B</td><td>S04/perimeter</td><td>wall</td><td>기존툴+기술사</td><td>Routing matrix links active authority submodels to dominant story/zone/member-family review pockets so the remaining manual and legacy-tool work stays explicit.</td></tr><tr><td>Legacy Tool Cross-Validation</td><td>opensees</td><td>SCBF16B_shell_beam_mix</td><td>S02/perimeter</td><td>slab</td><td>기존툴+기술사</td><td>Routing matrix links active authority submodels to dominant story/zone/member-family review pockets so the remaining manual and legacy-tool work stays explicit.</td></tr><tr><td>Legacy Tool Cross-Validation</td><td>opensees</td><td>opensees</td><td>S03/intermediate</td><td>column</td><td>기존툴+기술사</td><td>Routing matrix links active authority submodels to dominant story/zone/member-family review pockets so the remaining manual and legacy-tool work stays explicit.</td></tr><tr><td>Legacy Tool Cross-Validation</td><td>sac</td><td>SCBF16B</td><td>S03/perimeter</td><td>beam</td><td>기존툴+기술사</td><td>Routing matrix links active authority submodels to dominant story/zone/member-family review pockets so the remaining manual and legacy-tool work stays explicit.</td></tr><tr><td>Legacy Tool Cross-Validation</td><td>sac</td><td>SCBF16B_shell_beam_mix</td><td>S04/perimeter</td><td>wall</td><td>기존툴+기술사</td><td>Routing matrix links active authority submodels to dominant story/zone/member-family review pockets so the remaining manual and legacy-tool work stays explicit.</td></tr><tr><td>Legacy Tool Cross-Validation</td><td>nheri</td><td>nheri_case01_sensor</td><td>S02/perimeter</td><td>slab</td><td>기존툴+기술사</td><td>Routing matrix links active authority submodels to dominant story/zone/member-family review pockets so the remaining manual and legacy-tool work stays explicit.</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Authority Catalog Routing Diff</h2>
+        <table>
+          <tr><td>Baseline seeded</td><td>False</td></tr>
+          <tr><td>Changes</td><td>0</td></tr>
+          <tr><td>Added</td><td>0</td></tr>
+          <tr><td>Removed</td><td>0</td></tr>
+          <tr><td>Unchanged</td><td>8</td></tr>
+        </table>
+        <table style="margin-top:12px;">
+          <tr><td>Change</td><td>Track</td><td>Submodel</td><td>Review Story/Zone</td><td>Member Family</td><td>Owner</td><td>Why</td></tr>
+          <tr><td colspan="7">No authority-catalog routing changes detected for this external submission refresh.</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Blocked Cost-Down Actions</h2>
+        <table>
+          <tr><td>Blocked rows</td><td>47</td></tr>
+          <tr><td>Illegal by mask</td><td>0</td></tr>
+          <tr><td>Illegal-by-mask families</td><td></td></tr>
+          <tr><td>No cost gain</td><td>8</td></tr>
+          <tr><td>Constructability hard gate</td><td>3</td></tr>
+          <tr><td>Hard-gate reasons</td><td>detailing_ratio_above_hard_limit=3</td></tr>
+          <tr><td>No-cost-gain groups</td><td>5</td></tr>
+          <tr><td>No-cost-gain explain rows</td><td>5</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Design Optimization Entrypoint Groups</h2>
+        <table>
+          <tr><td>Group</td><td>Reports</td><td>Pass count</td><td>Fail count</td><td>All pass</td><td>Members</td></tr>
+          <tr><td>Ablation</td><td>1/1</td><td>1</td><td>0</td><td>True</td><td>ablation</td></tr><tr><td>Dataset</td><td>1/1</td><td>1</td><td>0</td><td>True</td><td>dataset</td></tr><tr><td>Profile</td><td>1/1</td><td>1</td><td>0</td><td>True</td><td>objective_profile</td></tr><tr><td>Stage A</td><td>2/2</td><td>2</td><td>0</td><td>True</td><td>solver_loop, solver_loop_long</td></tr><tr><td>Stage A/B/C</td><td>1/1</td><td>1</td><td>0</td><td>True</td><td>budgeted</td></tr><tr><td>Stage B</td><td>1/1</td><td>1</td><td>0</td><td>True</td><td>cost_reduction</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Appendix</h2>
+        
+        <div style="margin-top: 18px;">
+          <h3 style="margin-bottom: 8px;">Appendix: MIDAS Native Roundtrip / Write-Back Taxonomy</h3>
+          <div class="note">MIDAS native roundtrip: PASS | corpus=77 | native_text=35 | public_native=9 | public_raw_native=8 | public_bridge_native=1 | public_preview_native=7 | public_structural_preview_native=8 | fixture_native=4 | repo_native=3 | experiment_native=3 | archives=7 | ready=35 | public_ready=25 | public_native_ready=9 | public_raw_ready=8 | public_bridge_ready=1 | public_preview_ready=7 | public_structural_preview_ready=8 | exact_queue=0/8 | korean_reconstruction=5/5 | korean_promotions=0/0 | fixture_ready=4 | repo_ready=3 | experiment_ready=3 | receipts=35/35 | topology=35/35 | load=35/35 | loadcomb=35/35 exact | coverage=ready:100%,receipts:100%,loadcomb:100%,public_source:71%,exact_queue:100%,kr_recon:100% | gaps=ready:0,receipts:0,topology:0,load:0,loadcomb:0,public_source:10,exact_queue:0,korean_reconstruction:0 | types=12 | taxonomy=exact:34,canonical:1,lossy:0,unsupported:0,manual:0 | pending_review=0</div>
+          <div class="note" style="margin-top: 4px;">MIDAS native write-back diff receipts: PASS | ready=35 | receipts=35/35 | topology=35/35 | load=35/35 | loadcomb=35/35 exact | types=12 | exact_queue=0/8 | korean_promotions=0/0 | taxonomy=exact:34,canonical:1,lossy:0,unsupported:0,manual:0 | pending_review=0</div>
+          <div class="note" style="margin-top: 4px;">
+            corpus=77 |
+            native_text=35 |
+            ready=35 |
+            public_native=9 |
+            public_raw_native=8 |
+            public_bridge_native=1 |
+            public_preview_native=7 |
+            public_structural_preview_native=8 |
+            public_source=25 |
+            structure_types=12 |
+            batches=12 |
+            receipts=35/35 |
+            pending_review=0
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            public_native_ready=9 |
+            public_raw_ready=8 |
+            public_bridge_ready=1 |
+            public_archive_preview_ready=7 |
+            public_structural_preview_ready=8 |
+            public_source_ready=25 |
+            fixture_ready=4 |
+            repo_ready=3 |
+            experiment_ready=3
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            kr_preview_promoted: ready=8 |
+            cand=8 |
+            addl_now=0
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            special_member_family: direct_patch=core_beam_connection_detailing=1, intermediate_beam_section=1, intermediate_wall_rebar=4, intermediate_wall_thickness=3, perimeter_frame_column=1, perimeter_slab_thickness=2, perimeter_wall_detailing=5, perimeter_wall_rebar=1, perimeter_wall_thickness=2, transfer_beam_connection_detailing=5 |
+            supported=core_beam_connection_detailing=2, intermediate_beam_section=1, intermediate_wall_rebar=4, intermediate_wall_thickness=3, perimeter_frame_column=1, perimeter_slab_thickness=2, perimeter_wall_detailing=10, perimeter_wall_rebar=1, perimeter_wall_thickness=2, transfer_beam_connection_detailing=10 |
+            zero_touch_verified=core_beam_connection_detailing=1, perimeter_wall_detailing=5, transfer_beam_connection_detailing=5
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            kr_promotion_queue:
+            json=implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.json |
+            markdown=implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.md
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            gate_json=implementation/phase1/midas_native_roundtrip_gate_report.json |
+            receipts_report=implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json |
+            appendix_md=implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md |
+            appendix_json=implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.json
+          </div>
+          <div style="margin-top: 10px;">
+            <strong>KR Preview Promotion Queue</strong>
+            <div class='note' style='margin-top: 6px;'>No additional supported exact-topology archive candidates are pending right now. This queue reopens automatically when a new public archive decoded preview lands with exact_topology_candidate=true.</div>
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            unsupported/lossy appendix: md=implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md | json=implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.json
+          </div>
+          <div style="margin-top: 10px;">
+            <strong>Taxonomy Case Counts</strong>
+            <ul><li>canonical_rewrite: 1</li><li>lossy_rewrite: 0</li><li>manual_review_required: 0</li><li>parser_drop_suspected: 1</li><li>preserved_exact: 34</li><li>unsupported_card: 0</li></ul>
+          </div>
+          <div style="margin-top: 10px;">
+            <strong>Taxonomy Card-Family Histogram</strong>
+            <ul><li>audit_manifest_action_families: {}</li><li>audit_only_action_families: {}</li><li>direct_patch_action_families: {"beam_section": 1, "connection_detailing": 6, "detailing": 5, "perimeter_frame": 1, "rebar": 5, "slab_thickness": 2, "wall_thickness": 5}</li><li>supported_action_families: {"beam_section": 1, "connection_detailing": 12, "detailing": 10, "perimeter_frame": 1, "rebar": 5, "slab_thickness": 2, "wall_thickness": 5}</li><li>unsupported_reason_counts: {}</li></ul>
+          </div>
+          <table style="margin-top: 12px;">
+            <thead>
+              <tr><td>Structure Type</td><td>Ready</td><td>Receipts</td><td>Topology</td><td>Load</td><td>LoadComb</td><td>Pending Review</td><td>Batch Markdown</td></tr>
+            </thead>
+            <tbody>
+              <tr><td>beam</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/beam.diff_batch.md</td></tr><tr><td>bearing</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/bearing.diff_batch.md</td></tr><tr><td>bridge</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/bridge.diff_batch.md</td></tr><tr><td>bridge_section</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/bridge_section.diff_batch.md</td></tr><tr><td>building</td><td>11</td><td>11</td><td>11</td><td>11</td><td>11</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/building.diff_batch.md</td></tr><tr><td>foundation</td><td>4</td><td>4</td><td>4</td><td>4</td><td>4</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/foundation.diff_batch.md</td></tr><tr><td>housing</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/housing.diff_batch.md</td></tr><tr><td>industrial_facility</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/industrial_facility.diff_batch.md</td></tr><tr><td>mixed_use</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/mixed_use.diff_batch.md</td></tr><tr><td>public_facility</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/public_facility.diff_batch.md</td></tr><tr><td>ramp</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/ramp.diff_batch.md</td></tr><tr><td>stair</td><td>2</td><td>2</td><td>2</td><td>2</td><td>2</td><td>0</td><td>implementation/phase1/release/midas_native_roundtrip/stair.diff_batch.md</td></tr>
+            </tbody>
+          </table>
+          <table style="margin-top: 12px;">
+            <thead>
+              <tr><td>Case</td><td>Structure Type</td><td>Mode</td><td>Pass</td><td>Pending Review</td><td>Summary</td><td>Receipt MD</td><td>Receipt JSON</td></tr>
+            </thead>
+            <tbody>
+              <tr><td>gtc_public_bridge_bearing_c04__identity_writeback</td><td>bearing</td><td>public_raw_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=gtc_public_bridge_bearing_c04__identity_writeback | type=bearing | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/01.gtc_public_bridge_bearing_c04_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/01.gtc_public_bridge_bearing_c04_identity_writeback.diff_receipt.json</td></tr><tr><td>gtc_public_bridge_section_a3__identity_writeback</td><td>bridge_section</td><td>public_raw_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=gtc_public_bridge_section_a3__identity_writeback | type=bridge_section | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/02.gtc_public_bridge_section_a3_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/02.gtc_public_bridge_section_a3_identity_writeback.diff_receipt.json</td></tr><tr><td>gtc_public_bridge_section_e1_03__identity_writeback</td><td>bridge_section</td><td>public_raw_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=gtc_public_bridge_section_e1_03__identity_writeback | type=bridge_section | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/03.gtc_public_bridge_section_e1_03_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/03.gtc_public_bridge_section_e1_03_identity_writeback.diff_receipt.json</td></tr><tr><td>fixture_foundation_deep_small__identity_writeback</td><td>foundation</td><td>fixture_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=fixture_foundation_deep_small__identity_writeback | type=foundation | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/04.fixture_foundation_deep_small_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/04.fixture_foundation_deep_small_identity_writeback.diff_receipt.json</td></tr><tr><td>fixture_foundation_generic_sections__identity_writeback</td><td>foundation</td><td>fixture_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=fixture_foundation_generic_sections__identity_writeback | type=foundation | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/05.fixture_foundation_generic_sections_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/05.fixture_foundation_generic_sections_identity_writeback.diff_receipt.json</td></tr><tr><td>fixture_foundation_parser_drop_small__identity_writeback</td><td>foundation</td><td>fixture_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=fixture_foundation_parser_drop_small__identity_writeback | type=foundation | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/06.fixture_foundation_parser_drop_small_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/06.fixture_foundation_parser_drop_small_identity_writeback.diff_receipt.json</td></tr><tr><td>fixture_foundation_small__identity_writeback</td><td>foundation</td><td>fixture_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=fixture_foundation_small__identity_writeback | type=foundation | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/07.fixture_foundation_small_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/07.fixture_foundation_small_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_rc_house_archive__decoded_preview_native__identity_writeback</td><td>building</td><td>public_archive_decoded_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_rc_house_archive__decoded_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/08.midas_support_rc_house_archive_decoded_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/08.midas_support_rc_house_archive_decoded_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_multifamily_building_archive__decoded_preview_native__identity_writeback</td><td>building</td><td>public_archive_decoded_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_multifamily_building_archive__decoded_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/09.midas_support_multifamily_building_archive_decoded_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/09.midas_support_multifamily_building_archive_decoded_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_neighborhood_facility_archive__decoded_preview_native__identity_writeback</td><td>building</td><td>public_archive_decoded_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_neighborhood_facility_archive__decoded_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/10.midas_support_neighborhood_facility_archive_decoded_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/10.midas_support_neighborhood_facility_archive_decoded_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_fcm_bridge_archive__decoded_preview_native__identity_writeback</td><td>bridge</td><td>public_archive_decoded_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_fcm_bridge_archive__decoded_preview_native__identity_writeback | type=bridge | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/11.midas_support_fcm_bridge_archive_decoded_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/11.midas_support_fcm_bridge_archive_decoded_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_ramp_archive__decoded_preview_native__identity_writeback</td><td>ramp</td><td>public_archive_decoded_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_ramp_archive__decoded_preview_native__identity_writeback | type=ramp | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/12.midas_support_ramp_archive_decoded_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/12.midas_support_ramp_archive_decoded_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_beam_archive__decoded_preview_native__identity_writeback</td><td>beam</td><td>public_archive_decoded_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_beam_archive__decoded_preview_native__identity_writeback | type=beam | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/13.midas_support_beam_archive_decoded_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/13.midas_support_beam_archive_decoded_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_stair_archive__decoded_preview_native__identity_writeback</td><td>stair</td><td>public_archive_decoded_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_stair_archive__decoded_preview_native__identity_writeback | type=stair | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/14.midas_support_stair_archive_decoded_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/14.midas_support_stair_archive_decoded_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_fcm_bridge_archive__structural_preview_native__identity_writeback</td><td>bridge</td><td>public_archive_structural_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_fcm_bridge_archive__structural_preview_native__identity_writeback | type=bridge | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/15.midas_support_fcm_bridge_archive_structural_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/15.midas_support_fcm_bridge_archive_structural_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_ramp_archive__structural_preview_native__identity_writeback</td><td>ramp</td><td>public_archive_structural_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_ramp_archive__structural_preview_native__identity_writeback | type=ramp | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/16.midas_support_ramp_archive_structural_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/16.midas_support_ramp_archive_structural_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_stair_archive__structural_preview_native__identity_writeback</td><td>stair</td><td>public_archive_structural_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_stair_archive__structural_preview_native__identity_writeback | type=stair | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/17.midas_support_stair_archive_structural_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/17.midas_support_stair_archive_structural_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>ifc_public_award_structure__structural_preview_candidate__identity_writeback</td><td>public_facility</td><td>public_archive_structural_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=ifc_public_award_structure__structural_preview_candidate__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/18.ifc_public_award_structure_structural_preview_candidate_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/18.ifc_public_award_structure_structural_preview_candidate_identity_writeback.diff_receipt.json</td></tr><tr><td>ifc_public_award_reference_2022__structural_preview_candidate__identity_writeback</td><td>public_facility</td><td>public_archive_structural_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=ifc_public_award_reference_2022__structural_preview_candidate__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/19.ifc_public_award_reference_2022_structural_preview_candidate_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/19.ifc_public_award_reference_2022_structural_preview_candidate_identity_writeback.diff_receipt.json</td></tr><tr><td>ifc_public_award_reference_2021__structural_preview_candidate__identity_writeback</td><td>public_facility</td><td>public_archive_structural_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=ifc_public_award_reference_2021__structural_preview_candidate__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/20.ifc_public_award_reference_2021_structural_preview_candidate_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/20.ifc_public_award_reference_2021_structural_preview_candidate_identity_writeback.diff_receipt.json</td></tr><tr><td>ifc_public_award_reference_2024__structural_preview_candidate__identity_writeback</td><td>mixed_use</td><td>public_archive_structural_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=ifc_public_award_reference_2024__structural_preview_candidate__identity_writeback | type=mixed_use | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/21.ifc_public_award_reference_2024_structural_preview_candidate_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/21.ifc_public_award_reference_2024_structural_preview_candidate_identity_writeback.diff_receipt.json</td></tr><tr><td>ifc_public_award_reference_2020__structural_preview_candidate__identity_writeback</td><td>public_facility</td><td>public_archive_structural_preview_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=ifc_public_award_reference_2020__structural_preview_candidate__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/22.ifc_public_award_reference_2020_structural_preview_candidate_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/22.ifc_public_award_reference_2020_structural_preview_candidate_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_support_beam_archive__bridge_native__identity_writeback</td><td>beam</td><td>public_bridge_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_support_beam_archive__bridge_native__identity_writeback | type=beam | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/23.midas_support_beam_archive_bridge_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/23.midas_support_beam_archive_bridge_native_identity_writeback.diff_receipt.json</td></tr><tr><td>koneps_goyang_changneung_powerplant_design_service__identity_writeback</td><td>industrial_facility</td><td>public_raw_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=koneps_goyang_changneung_powerplant_design_service__identity_writeback | type=industrial_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/24.koneps_goyang_changneung_powerplant_design_service_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/24.koneps_goyang_changneung_powerplant_design_service_identity_writeback.diff_receipt.json</td></tr><tr><td>koneps_hangang_park_gwangnaru2_native_baseline__identity_writeback</td><td>public_facility</td><td>public_raw_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=koneps_hangang_park_gwangnaru2_native_baseline__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/25.koneps_hangang_park_gwangnaru2_native_baseline_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/25.koneps_hangang_park_gwangnaru2_native_baseline_identity_writeback.diff_receipt.json</td></tr><tr><td>lh_bucheon_yeokgok_a1_housing_native_baseline__identity_writeback</td><td>housing</td><td>public_raw_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=lh_bucheon_yeokgok_a1_housing_native_baseline__identity_writeback | type=housing | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/26.lh_bucheon_yeokgok_a1_housing_native_baseline_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/26.lh_bucheon_yeokgok_a1_housing_native_baseline_identity_writeback.diff_receipt.json</td></tr><tr><td>lh_happy_city_5_1_native_baseline__identity_writeback</td><td>mixed_use</td><td>public_raw_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=lh_happy_city_5_1_native_baseline__identity_writeback | type=mixed_use | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/27.lh_happy_city_5_1_native_baseline_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/27.lh_happy_city_5_1_native_baseline_identity_writeback.diff_receipt.json</td></tr><tr><td>kci_concrete_building_design_examples_2e_native_baseline__identity_writeback</td><td>building</td><td>public_raw_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=kci_concrete_building_design_examples_2e_native_baseline__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/28.kci_concrete_building_design_examples_2e_native_baseline_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/28.kci_concrete_building_design_examples_2e_native_baseline_identity_writeback.diff_receipt.json</td></tr><tr><td>repo_midas_generator_33_native__identity_writeback</td><td>building</td><td>repo_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=repo_midas_generator_33_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/29.repo_midas_generator_33_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/29.repo_midas_generator_33_native_identity_writeback.diff_receipt.json</td></tr><tr><td>repo_midas_generator_33_optimized_native__identity_writeback</td><td>building</td><td>repo_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=repo_midas_generator_33_optimized_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/30.repo_midas_generator_33_optimized_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/30.repo_midas_generator_33_optimized_native_identity_writeback.diff_receipt.json</td></tr><tr><td>repo_midas_generator_33_loadcomb_preview_native__identity_writeback</td><td>building</td><td>repo_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=repo_midas_generator_33_loadcomb_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/31.repo_midas_generator_33_loadcomb_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/31.repo_midas_generator_33_loadcomb_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>experiment_midas_generator_33_loadcomb_preview_native__identity_writeback</td><td>building</td><td>experiment_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=experiment_midas_generator_33_loadcomb_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/32.experiment_midas_generator_33_loadcomb_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/32.experiment_midas_generator_33_loadcomb_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>experiment_midas_generator_33_pr_recheck_loadcomb_preview_native__identity_writeback</td><td>building</td><td>experiment_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=experiment_midas_generator_33_pr_recheck_loadcomb_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/33.experiment_midas_generator_33_pr_recheck_loadcomb_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/33.experiment_midas_generator_33_pr_recheck_loadcomb_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>experiment_midas_generator_33_optimized_roundtrip_loadcomb_preview_native__identity_writeback</td><td>building</td><td>experiment_identity_baseline</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=experiment_midas_generator_33_optimized_roundtrip_loadcomb_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/34.experiment_midas_generator_33_optimized_roundtrip_loadcomb_preview_native_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/34.experiment_midas_generator_33_optimized_roundtrip_loadcomb_preview_native_identity_writeback.diff_receipt.json</td></tr><tr><td>midas_generator_33_github__optimized_writeback</td><td>building</td><td>direct_patch_plus_audit_review_manifest</td><td>True</td><td>0</td><td>MIDAS native write-back diff receipt: PASS | case=midas_generator_33_github__optimized_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=25 | pending_review=0</td><td>implementation/phase1/release/midas_native_roundtrip/35.midas_generator_33_github_optimized_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/35.midas_generator_33_github_optimized_writeback.diff_receipt.json</td></tr>
+            </tbody>
+          </table>
+        </div>
+    
+        
+        <div style="margin-top: 18px;">
+          <h3 style="margin-bottom: 8px;">Appendix: Irregular Structure Track</h3>
+          <div class="note">Irregular structure collection gate: PASS | families=20 | sources=32 | local_ready=15 | remote_candidates=17 | collected=21 | top5=5</div>
+          <div class="note" style="margin-top: 4px;">benchmark_manifest=implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json</div>
+          <div class="note" style="margin-top: 4px;">families=20 | sources=32 | local_ready=15 | remote_candidates=17 | collected=21 | native_roundtrip_candidates=18 | solver_candidates=13 | ai_candidates=32 | top5=0</div>
+          <div class="note" style="margin-top: 4px;">top5_split=local_ready=0 | remote_needed=0 | family_ids=n/a</div>
+          <div class="note" style="margin-top: 4px;">benchmark_execution_summary=Irregular benchmark execution: CHECK | ready=0 | blocked=0 | task_count=0 | canonical=0 | bridged=0 | proxy=0 | receipts=0</div>
+          
+          
+        </div>
+    
+        
+        <details>
+          <summary>Ablation (1 rows, pass=1, fail=0, reasons=PASS:1)</summary>
+          <table style="margin-top:12px;">
+            <tr><td>Name</td><td>Group</td><td>Primary report</td><td>Pass</td><td>Reason</td></tr>
+            <tbody>
+              <tr><td>ablation</td><td>Ablation</td><td>/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_ablation_report.json</td><td>True</td><td>PASS</td></tr>
+            </tbody>
+          </table>
+        </details>
+        
+        <details>
+          <summary>Dataset (1 rows, pass=1, fail=0, reasons=PASS:1)</summary>
+          <table style="margin-top:12px;">
+            <tr><td>Name</td><td>Group</td><td>Primary report</td><td>Pass</td><td>Reason</td></tr>
+            <tbody>
+              <tr><td>dataset</td><td>Dataset</td><td>/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_dataset_report.json</td><td>True</td><td>PASS</td></tr>
+            </tbody>
+          </table>
+        </details>
+        
+        <details>
+          <summary>Profile (1 rows, pass=1, fail=0, reasons=PASS:1)</summary>
+          <table style="margin-top:12px;">
+            <tr><td>Name</td><td>Group</td><td>Primary report</td><td>Pass</td><td>Reason</td></tr>
+            <tbody>
+              <tr><td>objective_profile</td><td>Profile</td><td>/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_objective_profile_report.json</td><td>True</td><td>PASS</td></tr>
+            </tbody>
+          </table>
+        </details>
+        
+        <details>
+          <summary>Stage A (2 rows, pass=2, fail=0, reasons=PASS:2)</summary>
+          <table style="margin-top:12px;">
+            <tr><td>Name</td><td>Group</td><td>Primary report</td><td>Pass</td><td>Reason</td></tr>
+            <tbody>
+              <tr><td>solver_loop</td><td>Stage A</td><td>/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_solver_loop_report.json</td><td>True</td><td>PASS</td></tr><tr><td>solver_loop_long</td><td>Stage A</td><td>/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json</td><td>True</td><td>PASS</td></tr>
+            </tbody>
+          </table>
+        </details>
+        
+        <details>
+          <summary>Stage A/B/C (1 rows, pass=1, fail=0, reasons=PASS:1)</summary>
+          <table style="margin-top:12px;">
+            <tr><td>Name</td><td>Group</td><td>Primary report</td><td>Pass</td><td>Reason</td></tr>
+            <tbody>
+              <tr><td>budgeted</td><td>Stage A/B/C</td><td>/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_budgeted_report.json</td><td>True</td><td>PASS</td></tr>
+            </tbody>
+          </table>
+        </details>
+        
+        <details>
+          <summary>Stage B (1 rows, pass=1, fail=0, reasons=PASS:1)</summary>
+          <table style="margin-top:12px;">
+            <tr><td>Name</td><td>Group</td><td>Primary report</td><td>Pass</td><td>Reason</td></tr>
+            <tbody>
+              <tr><td>cost_reduction</td><td>Stage B</td><td>/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_cost_reduction_report.json</td><td>True</td><td>PASS</td></tr>
+            </tbody>
+          </table>
+        </details>
+        
+        
+        <div style="margin-top: 18px;">
+          <h3 style="margin-bottom: 8px;">Appendix: MIDAS KDS Row Provenance Export</h3>
+          <div class="note">MIDAS KDS row provenance export: PASS | combos=6 | rows=144 | members=12 | clauses=6 | exact_rows=144 | clause_filters=6 | member_filters=12 | reverse_jump=viewer_subset_reverse_jump_v11</div>
+          <div class="note" style="margin-top: 4px;">
+            json=implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.json |
+            csv=implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.csv |
+            report=implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            row-provenance sync: the Review surface and row-provenance appendix stay bidirectionally aligned on the same Hazard and Rule Family slices; the appendix exposes explicit viewer_row_url and viewer_slice_url reverse-sync links back to the matching viewer row and slice.
+          </div>
+          <table style="margin-top: 12px;">
+            <thead>
+              <tr><td>Combination</td><td>Member</td><td>Clause</td><td>Baseline Focus</td><td>Mode</td><td>Clause Provenance</td><td>Member Inventory</td></tr>
+            </thead>
+            <tbody>
+              <tr><td>gLCB1</td><td>MF-012</td><td>KDS-MOMENT-Y-001</td><td>27441</td><td>exact row-level provenance</td><td>rows=12 | members=12 | rules=1 | hazards=3</td><td>review=C-TST-003 | case=C-TST-003 | baseline=27441 | member_types=column</td></tr><tr><td>gLCB1</td><td>MF-005</td><td>KDS-MOMENT-Y-001</td><td>27441</td><td>exact row-level provenance</td><td>rows=12 | members=12 | rules=1 | hazards=3</td><td>review=C-TRN-005 | case=C-TRN-005 | baseline=27441 | member_types=column</td></tr><tr><td>gLCB1</td><td>MF-012</td><td>KDS-INT-FRAME-001</td><td>27441</td><td>exact row-level provenance</td><td>rows=12 | members=12 | rules=1 | hazards=3</td><td>review=C-TST-003 | case=C-TST-003 | baseline=27441 | member_types=column</td></tr><tr><td>gLCB1</td><td>MF-010</td><td>KDS-MOMENT-Y-001</td><td>27441</td><td>exact row-level provenance</td><td>rows=12 | members=12 | rules=1 | hazards=3</td><td>review=C-TST-001 | case=C-TST-001 | baseline=27441 | member_types=column</td></tr><tr><td>gLCB1</td><td>MF-012</td><td>KDS-SHEAR-Y-001</td><td>27441</td><td>exact row-level provenance</td><td>rows=12 | members=12 | rules=1 | hazards=3</td><td>review=C-TST-003 | case=C-TST-003 | baseline=27441 | member_types=column</td></tr><tr><td>gLCB1</td><td>MF-005</td><td>KDS-INT-FRAME-001</td><td>27441</td><td>exact row-level provenance</td><td>rows=12 | members=12 | rules=1 | hazards=3</td><td>review=C-TRN-005 | case=C-TRN-005 | baseline=27441 | member_types=column</td></tr><tr><td>gLCB1</td><td>MF-007</td><td>KDS-MOMENT-Y-001</td><td>27425</td><td>exact row-level provenance</td><td>rows=12 | members=12 | rules=1 | hazards=3</td><td>review=C-TRN-007 | case=C-TRN-007 | baseline=27425 | member_types=wall</td></tr><tr><td>gLCB1</td><td>MF-012</td><td>KDS-AXIAL-001</td><td>27441</td><td>exact row-level provenance</td><td>rows=12 | members=12 | rules=1 | hazards=3</td><td>review=C-TST-003 | case=C-TST-003 | baseline=27441 | member_types=column</td></tr>
+            </tbody>
+          </table>
+          <table style="margin-top: 12px;">
+            <thead>
+              <tr><td>Clause</td><td>Rows</td><td>Members</td><td>Combos</td><td>Top Member</td><td>Top D/C</td></tr>
+            </thead>
+            <tbody>
+              <tr><td>KDS-AXIAL-001</td><td>24</td><td>12</td><td>2</td><td>MF-012</td><td>1.065</td></tr><tr><td>KDS-INT-FRAME-001</td><td>24</td><td>12</td><td>2</td><td>MF-012</td><td>1.137</td></tr><tr><td>KDS-MOMENT-Y-001</td><td>24</td><td>12</td><td>2</td><td>MF-012</td><td>1.216</td></tr><tr><td>KDS-MOMENT-Z-001</td><td>24</td><td>12</td><td>2</td><td>MF-012</td><td>0.991</td></tr><tr><td>KDS-SHEAR-Y-001</td><td>24</td><td>12</td><td>2</td><td>MF-012</td><td>1.110</td></tr><tr><td>KDS-SHEAR-Z-001</td><td>24</td><td>12</td><td>2</td><td>MF-012</td><td>0.863</td></tr>
+            </tbody>
+          </table>
+          <table style="margin-top: 12px;">
+            <thead>
+              <tr><td>Member</td><td>Baseline Focus</td><td>Rows</td><td>Clauses</td><td>Combos</td><td>Top Clause</td></tr>
+            </thead>
+            <tbody>
+              <tr><td>MF-001</td><td>26878</td><td>12</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td></tr><tr><td>MF-002</td><td>27287</td><td>12</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td></tr><tr><td>MF-003</td><td>26878</td><td>12</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td></tr><tr><td>MF-004</td><td>27425</td><td>12</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td></tr><tr><td>MF-005</td><td>27441</td><td>12</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td></tr><tr><td>MF-006</td><td>27287</td><td>12</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td></tr><tr><td>MF-007</td><td>27425</td><td>12</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td></tr><tr><td>MF-008</td><td>26878</td><td>12</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td></tr>
+            </tbody>
+          </table>
+          <table style="margin-top: 12px;">
+            <thead>
+              <tr><td>Hazard</td><td>Rows</td><td>Members</td><td>Clauses</td><td>Combos</td><td>Top Clause</td><td>Top D/C</td></tr>
+            </thead>
+            <tbody>
+              <tr><td>combined</td><td>48</td><td>4</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td><td>1.216</td></tr><tr><td>seismic</td><td>48</td><td>4</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td><td>1.112</td></tr><tr><td>wind</td><td>48</td><td>4</td><td>6</td><td>2</td><td>KDS-MOMENT-Y-001</td><td>0.809</td></tr>
+            </tbody>
+          </table>
+          <table style="margin-top: 12px;">
+            <thead>
+              <tr><td>Rule Family</td><td>Rows</td><td>Members</td><td>Hazards</td><td>Combos</td><td>Top Clause</td><td>Top D/C</td></tr>
+            </thead>
+            <tbody>
+              <tr><td>strength</td><td>120</td><td>12</td><td>3</td><td>2</td><td>KDS-MOMENT-Y-001</td><td>1.216</td></tr><tr><td>strength_interaction</td><td>24</td><td>12</td><td>3</td><td>2</td><td>KDS-INT-FRAME-001</td><td>1.137</td></tr>
+            </tbody>
+          </table>
+        </div>
+    
+        
+        <div style="margin-top: 18px;">
+          <h3 style="margin-bottom: 8px;">Appendix: External Benchmark Case Onepages</h3>
+          <div class="note">
+            case_onepage_count=10 |
+            index_md=external_benchmark_case_onepages/index.md |
+            index_html=external_benchmark_case_onepages/index.html |
+            index_pdf=external_benchmark_case_onepages/index.pdf
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            attestation_workflow:
+            cases=10 |
+            manifests=10 |
+            templates=0 |
+            receipts=10 |
+            attested=10 |
+            status=MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED=10 |
+            kickoff_index=implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_index.json
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            cover_sheet=Reviewer / Authority Cover Sheet | Auto-generated from the execution status manifest and KPI receipt.
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            shared native roundtrip appendix:
+            md=implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md |
+            json=implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.json
+          </div>
+          <div class="note" style="margin-top: 4px;">
+            shared row provenance report:
+            json=implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json |
+            csv=implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.csv
+          </div>
+          <div class="note" style="margin-top: 8px;">rows=2 | lane=public_structural_preview</div><h4 style="margin: 12px 0 8px;">KR Public Structural Preview Representatives</h4><table style="margin-top: 8px;"><thead><tr><td>Structure Type</td><td>Representative</td><td>Lane</td><td>Receipt</td><td>Type Batch</td></tr></thead><tbody><tr><td>mixed_use</td><td>buildingSMART Korea BIM Awards 2024 구조 골조 curated IFC<div class='mini-note'><code>ifc_public_award_reference_2024</code></div></td><td>public_structural_preview</td><td>implementation/phase1/release/midas_native_roundtrip/21.ifc_public_award_reference_2024_structural_preview_candidate_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/mixed_use.diff_batch.md</td></tr><tr><td>public_facility</td><td>buildingSMART Korea BIM Awards 2020 구조 골조 curated IFC<div class='mini-note'><code>ifc_public_award_reference_2020</code></div></td><td>public_structural_preview</td><td>implementation/phase1/release/midas_native_roundtrip/22.ifc_public_award_reference_2020_structural_preview_candidate_identity_writeback.diff_receipt.md</td><td>implementation/phase1/release/midas_native_roundtrip/public_facility.diff_batch.md</td></tr></tbody></table>
+          <table style="margin-top: 12px;">
+            <thead>
+              <tr><td>Case</td><td>Family</td><td>Status</td><td>Attestation</td><td>Workflow Receipt</td><td>KPI Receipt</td><td>Irregular Receipts</td><td>Onepage MD</td><td>Onepage HTML</td><td>Onepage PDF</td></tr>
+            </thead>
+            <tbody>
+              <tr><td>PEER TBI Tall Building NDTHA</td><td>highrise_ndtha</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.md</td><td>external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.html</td><td>external_benchmark_case_onepages/01.peer_tbi_tall_building_ndtha.pdf</td></tr><tr><td>NHERI DesignSafe SSI</td><td>soil_structure_interaction</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/02.nheri_designsafe_ssi.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nheri_designsafe_ssi/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/02.nheri_designsafe_ssi.md</td><td>external_benchmark_case_onepages/02.nheri_designsafe_ssi.html</td><td>external_benchmark_case_onepages/02.nheri_designsafe_ssi.pdf</td></tr><tr><td>UIC / ERRI Railway Bridge</td><td>moving_load_track_bridge</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/03.uic_erri_rail_bridge.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/03.uic_erri_rail_bridge.md</td><td>external_benchmark_case_onepages/03.uic_erri_rail_bridge.html</td><td>external_benchmark_case_onepages/03.uic_erri_rail_bridge.pdf</td></tr><tr><td>NIST / FEMA Progressive Collapse</td><td>progressive_collapse</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/04.nist_fema_progressive_collapse.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nist_fema_progressive_collapse/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/04.nist_fema_progressive_collapse.md</td><td>external_benchmark_case_onepages/04.nist_fema_progressive_collapse.html</td><td>external_benchmark_case_onepages/04.nist_fema_progressive_collapse.pdf</td></tr><tr><td>CAARC Wind Standard Tower</td><td>wind_time_history</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/05.caarc_wind_standard_tower.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_caarc_wind_standard_tower/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/05.caarc_wind_standard_tower.md</td><td>external_benchmark_case_onepages/05.caarc_wind_standard_tower.html</td><td>external_benchmark_case_onepages/05.caarc_wind_standard_tower.pdf</td></tr><tr><td>NCEER / MCEER Isolation-Damper</td><td>seismic_isolation_damping</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_nceer_mceer_isolation_damper/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.md</td><td>external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.html</td><td>external_benchmark_case_onepages/06.nceer_mceer_isolation_damper.pdf</td></tr><tr><td>IASS Dome Snap-through</td><td>buckling_snapthrough</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/07.iass_dome_snapthrough.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_iass_dome_snapthrough/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/07.iass_dome_snapthrough.md</td><td>external_benchmark_case_onepages/07.iass_dome_snapthrough.html</td><td>external_benchmark_case_onepages/07.iass_dome_snapthrough.pdf</td></tr><tr><td>ACI / FIB Construction Stage CSA</td><td>construction_stage_time_dependent</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/08.aci_fib_construction_stage_csa.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_aci_fib_construction_stage_csa/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/08.aci_fib_construction_stage_csa.md</td><td>external_benchmark_case_onepages/08.aci_fib_construction_stage_csa.html</td><td>external_benchmark_case_onepages/08.aci_fib_construction_stage_csa.pdf</td></tr><tr><td>OC3 / OC4 Offshore Monopile</td><td>offshore_multiphysics_ssi</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/09.oc3_oc4_offshore_monopile.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_oc3_oc4_offshore_monopile/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/09.oc3_oc4_offshore_monopile.md</td><td>external_benchmark_case_onepages/09.oc3_oc4_offshore_monopile.html</td><td>external_benchmark_case_onepages/09.oc3_oc4_offshore_monopile.pdf</td></tr><tr><td>TC204 Excavation and Adjacent Tunnel</td><td>excavation_tunnel_ground_interaction</td><td>ready/completed</td><td>MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED (manifest)</td><td>external_benchmark_case_onepages/10.tc204_excavation_tunnel.authority_onepage.attestation_receipt.json</td><td>implementation/phase1/release/external_benchmark_kickoff/runs/hardest_tc204_excavation_tunnel/benchmark_task_kpi_receipt.json</td><td><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_execution_manifest.json'>irregular benchmark execution manifest</a><br><a href='../artifacts/implementation/phase1/release/external_benchmark_kickoff/irregular_benchmark_receipts/receipt_index.json'>irregular benchmark receipt index</a></td><td>external_benchmark_case_onepages/10.tc204_excavation_tunnel.md</td><td>external_benchmark_case_onepages/10.tc204_excavation_tunnel.html</td><td>external_benchmark_case_onepages/10.tc204_excavation_tunnel.pdf</td></tr>
+            </tbody>
+          </table>
+        </div>
+    
+      </div>
+    </div>
+  </div>
+</body>
+</html>

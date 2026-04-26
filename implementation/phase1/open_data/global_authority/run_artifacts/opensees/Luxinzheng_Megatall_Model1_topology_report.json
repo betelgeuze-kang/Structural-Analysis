@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-opensees-topology-parser",
+  "generated_at": "2026-04-11T12:26:14.181466+00:00",
+  "inputs": {
+    "model": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl",
+    "edges_out": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/Luxinzheng_Megatall_Model1_edges.json",
+    "csr_out": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/Luxinzheng_Megatall_Model1_csr.npz",
+    "report_out": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/Luxinzheng_Megatall_Model1_topology_report.json",
+    "forbid_synthetic_source": true,
+    "require_real_topology": true,
+    "require_shell_beam_mix": false,
+    "min_nodes": 100,
+    "min_edge_node_ratio": 0.4,
+    "min_degree_entropy": 0.1,
+    "min_element_type_count": 1,
+    "min_largest_component_ratio": 0.02
+  },
+  "source_provenance": {
+    "source_class": "opensees_text",
+    "source_path": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl",
+    "source_sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c"
+  },
+  "parse_counters": {
+    "node": 27220,
+    "ignored": 10465,
+    "element": 1240
+  },
+  "metrics": {
+    "node_count": 1252,
+    "edge_count_undirected": 1240,
+    "edge_node_ratio": 0.9904153354632588,
+    "degree_entropy": 0.13675081967072697,
+    "largest_component_ratio": 0.09664536741214058,
+    "mean_degree": 1.9808306709265175,
+    "max_degree": 2,
+    "element_type_count": 1,
+    "shell_element_count": 0,
+    "beam_element_count": 1240,
+    "element_type_histogram": {
+      "dispBeamColumn": 1240
+    },
+    "element_class_histogram": {
+      "shell": 0,
+      "beam": 1240,
+      "brace": 0,
+      "other": 0
+    }
+  },
+  "artifacts": {
+    "edges_json": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/Luxinzheng_Megatall_Model1_edges.json",
+    "csr_npz": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/Luxinzheng_Megatall_Model1_csr.npz"
+  },
+  "checks": {
+    "source_is_opensees_text": true,
+    "source_manifest_pass": true,
+    "synthetic_source_detected": false,
+    "min_nodes_pass": true,
+    "edge_node_ratio_pass": true,
+    "degree_entropy_pass": true,
+    "element_type_count_pass": true,
+    "largest_component_pass": true,
+    "shell_beam_mix_pass": false,
+    "real_topology_pass": true
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "opensees text parsed and topology gate passed"
+}

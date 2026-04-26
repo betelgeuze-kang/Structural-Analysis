@@ -1,8 +1,43 @@
 {
-  "schema_version": "1.0",
-  "run_id": "winning-ticket-backprop",
-  "generated_at": "2026-02-25T11:19:35.228559+00:00",
-  "algorithm": "winning_ticket_backprop_physics_guided_orthogonal_branching",
+  "schema_version": "1.1",
+  "run_id": "topk-weighted-backprop",
+  "generated_at": "2026-03-30T13:50:41.983298+00:00",
+  "algorithm": "topk_weighted_backprop_physics_guided_orthogonal_branching",
+  "runtime_truthfulness": {
+    "path_role": "top_level_training_eval_branch_selection",
+    "solver_path_kind": "production_seeded_explicit_reduced_order_relaxation_branching",
+    "physical_runtime_class": "production_seeded_explicit_physical",
+    "runtime_backend": "md3bead_soa_relaxation+rocm_torch_hip_mainloop",
+    "execution_backend": "cpu",
+    "cpu_backend": true,
+    "cpu_required": true,
+    "cpu_fallback_used": false,
+    "production_kernel_path": false,
+    "reduced_order_physical_runtime_used": true,
+    "physical_runtime_declared": true,
+    "force_jacobian_kernel_consistent": true,
+    "force_balance_residual_consistent": true,
+    "surrogate_runtime_used": false,
+    "simplified_runtime_used": false,
+    "surrogate_runtime_markers": [],
+    "runtime_policy": "auto",
+    "runtime_policy_satisfied": true,
+    "production_seeded_runtime_used": true,
+    "production_seed_label": "rust_nonlinear_frame_gpu_seed",
+    "production_seed_backend": "rocm_torch_hip_mainloop",
+    "production_seed_solver_path_kind": "production_hip_kernel",
+    "production_seed_device_residency_ratio": 1.0,
+    "production_seed_hip_kernel_invocation_count": 6,
+    "contract_pass": true,
+    "reason": "explicit reduced-order physical relaxation path declared without surrogate runtime markers; production seed applied via rust_nonlinear_frame_gpu_seed",
+    "production_seed_runtime": {
+      "runtime_backend": "rocm_torch_hip_mainloop",
+      "solver_path_kind": "production_hip_kernel",
+      "production_kernel_path": true,
+      "device_residency_ratio": 1.0,
+      "hip_kernel_invocation_count": 6
+    }
+  },
   "scouting": {
     "branches": 6,
     "autograd_enabled": false,
@@ -21,13 +56,17 @@
           -0.0,
           -0.0,
           -0.0,
-          -2.7445280794953444,
-          0.5322251841697678,
-          -0.24345547370232545
+          -2.7418226132480368,
+          0.531700533945747,
+          -0.243215483238484
         ],
-        "equilibrium_norm": 8.793644173194243,
-        "energy_proxy": 3.937484296739285,
-        "loss": 9.187392602868172
+        "equilibrium_norm": 8.796379246230702,
+        "energy_proxy": 3189.8336981618195,
+        "max_unbalanced_force": 296.72360560250877,
+        "system_temperature": 18.05848368700364,
+        "physical_model": "3bead_ca_sc_cb",
+        "production_seed_applied": true,
+        "loss": 9.0745373388753
       },
       {
         "branch_id": 1,
@@ -43,13 +82,17 @@
           -0.0,
           -0.0,
           -0.0,
-          -2.616900220358689,
-          0.5191659882182434,
-          -0.24226576785955445
+          -2.614320565491374,
+          0.5186542113235676,
+          -0.24202695016892156
         ],
-        "equilibrium_norm": 8.91742838156123,
-        "energy_proxy": 3.58819639445628,
-        "loss": 9.276248021006857
+        "equilibrium_norm": 8.920042922837062,
+        "energy_proxy": 3193.4663846969734,
+        "max_unbalanced_force": 296.87671744729545,
+        "system_temperature": 18.081395298576176,
+        "physical_model": "3bead_ca_sc_cb",
+        "production_seed_applied": true,
+        "loss": 9.198280973547774
       },
       {
         "branch_id": 2,
@@ -65,13 +108,17 @@
           -0.0,
           -0.0,
           -0.0,
-          -2.634265740401478,
-          0.5458401098648857,
-          -0.25157436946340767
+          -2.6316689671710116,
+          0.5453020384912681,
+          -0.2513263756569839
         ],
-        "equilibrium_norm": 8.891872842887809,
-        "energy_proxy": 3.6502935399805843,
-        "loss": 9.256902196885868
+        "equilibrium_norm": 8.894513241415561,
+        "energy_proxy": 3188.9680095936515,
+        "max_unbalanced_force": 296.6871351586506,
+        "system_temperature": 18.053023300541984,
+        "physical_model": "3bead_ca_sc_cb",
+        "production_seed_applied": true,
+        "loss": 9.172652273038286
       },
       {
         "branch_id": 3,
@@ -87,13 +134,17 @@
           -0.0,
           -0.0,
           -0.0,
-          -2.6488684519256127,
-          0.5431042112826827,
-          -0.23423575935707028
+          -2.6462572838185032,
+          0.5425688368686354,
+          -0.23400485738685992
         ],
-        "equilibrium_norm": 8.882322804502971,
-        "energy_proxy": 3.6831663254406806,
-        "loss": 9.25063943704704
+        "equilibrium_norm": 8.884971813878634,
+        "energy_proxy": 3192.775069184082,
+        "max_unbalanced_force": 296.8478798012067,
+        "system_temperature": 18.077035277982223,
+        "physical_model": "3bead_ca_sc_cb",
+        "production_seed_applied": true,
+        "loss": 9.163194651535765
       },
       {
         "branch_id": 4,
@@ -109,13 +160,17 @@
           -0.0,
           -0.0,
           -0.0,
-          -2.6543728672981755,
-          0.5397239297576604,
-          -0.22535106245948522
+          -2.65175627311796,
+          0.5391918875148671,
+          -0.2251289187336352
         ],
-        "equilibrium_norm": 8.879855259597965,
-        "energy_proxy": 3.693890170176704,
-        "loss": 9.249244276615636
+        "equilibrium_norm": 8.88250624795804,
+        "energy_proxy": 3190.9581414845957,
+        "max_unbalanced_force": 296.77078829168687,
+        "system_temperature": 18.065575691347437,
+        "physical_model": "3bead_ca_sc_cb",
+        "production_seed_applied": true,
+        "loss": 9.160689094688145
       },
       {
         "branch_id": 5,
@@ -131,27 +186,44 @@
           -0.0,
           -0.0,
           -0.0,
-          -2.657949102776092,
-          0.5590178065555265,
-          -0.24106870377943457
+          -2.6553289832596083,
+          0.558466745038401,
+          -0.24083106611552063
         ],
-        "equilibrium_norm": 8.868035100596488,
-        "energy_proxy": 3.7176542304681406,
-        "loss": 9.239800523643302
+        "equilibrium_norm": 8.870698639377553,
+        "energy_proxy": 3191.0941141322587,
+        "max_unbalanced_force": 296.77658693880676,
+        "system_temperature": 18.066433422952016,
+        "physical_model": "3bead_ca_sc_cb",
+        "production_seed_applied": true,
+        "loss": 9.148884479498825
       }
     ]
   },
   "selection": {
-    "winner_branch_id": 0,
-    "discarded_branches": 5,
-    "winner_loss": 9.187392602868172
+    "strategy": "topk_weighted_backprop",
+    "top_k": 2,
+    "selected_branch_ids": [
+      0,
+      5
+    ],
+    "selected_losses": [
+      9.0745373388753,
+      9.148884479498825
+    ],
+    "normalized_weights": [
+      0.5738040054428721,
+      0.42619599455712776
+    ],
+    "discarded_branches": 4,
+    "weighted_loss_before_backprop": 9.106223792415822
   },
   "targeted_backprop": {
     "autograd_enabled": true,
-    "graph_count": 1,
-    "branch_replayed": 0,
-    "torch_available": false,
-    "backprop_loss": 9.187392602868172,
+    "weighted_aggregation": true,
+    "graph_count": 2,
+    "torch_available": true,
+    "weighted_loss_after_backprop": 9.209729194641113,
     "success": true
   },
   "theta_before": [
@@ -164,14 +236,21 @@
   ],
   "theta_after": [
     1.0,
-    0.8,
-    0.7,
-    1.2047512763406973,
-    0.898704197361628,
-    0.6008638684255814
+    0.800000011920929,
+    0.699999988079071,
+    1.3471451997756958,
+    0.9134385585784912,
+    0.6069963574409485
   ],
+  "production_seed": {
+    "top_displacement_m": 6.9988990932979425,
+    "max_abs_displacement_m": 6.9988990932979425,
+    "base_shear_kn": 85.0,
+    "plastic_story_count": 6,
+    "residual_inf": 9.867400736415019e-07
+  },
   "contract_pass": true,
   "uses_backprop": true,
   "reason_code": "PASS",
-  "reason": "winner-only targeted backprop completed"
+  "reason": "top-k weighted targeted backprop completed"
 }

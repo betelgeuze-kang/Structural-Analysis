@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-materialize-peer-spd-column-seed",
+  "generated_at": "2026-03-20T03:51:34.490230+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "PEER SPD column seeds materialized into raw specimen JSON and hinge fixtures.",
+  "inputs": {
+    "seed_manifest": "implementation/phase1/open_data/pbd_hinge/peer_spd_column_seed_manifest.json",
+    "candidates": "implementation/phase1/open_data/pbd_hinge/peer_spd_column_seed_candidates.json",
+    "specimen_pages_report": "implementation/phase1/open_data/pbd_hinge/peer_spd_specimen_pages_report.json",
+    "seed_ids": [
+      "peer_spd_rc_column_rectangular_seed_01",
+      "peer_spd_rc_column_rectangular_seed_02",
+      "peer_spd_rc_column_spiral_seed_01",
+      "peer_spd_rc_column_rebar_sensitive_seed_01",
+      "peer_spd_rc_column_holdout_seed_01"
+    ],
+    "resource_out_dir": "implementation/phase1/open_data/pbd_hinge/peer_spd_resources",
+    "fetch_report": "implementation/phase1/open_data/pbd_hinge/peer_spd_hysteresis_resources_report.json",
+    "prefer_cache": true
+  },
+  "steps": {
+    "fetch": {
+      "returncode": 0,
+      "stdout": "Wrote PEER SPD hysteresis resource report: implementation/phase1/open_data/pbd_hinge/peer_spd_hysteresis_resources_report.json\n",
+      "stderr": "",
+      "report": "implementation/phase1/open_data/pbd_hinge/peer_spd_hysteresis_resources_report.json"
+    },
+    "normalize": [
+      {
+        "seed_id": "peer_spd_rc_column_rectangular_seed_01",
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.raw.json",
+        "returncode": 0,
+        "stdout": "Wrote PEER SPD hinge fixture: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.hinge_fixture.json\nWrote PEER SPD source manifest: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.source_manifest.json\nWrote PEER SPD normalization report: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.hinge_fixture.normalize_report.json\n",
+        "stderr": ""
+      },
+      {
+        "seed_id": "peer_spd_rc_column_rectangular_seed_02",
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.raw.json",
+        "returncode": 0,
+        "stdout": "Wrote PEER SPD hinge fixture: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.hinge_fixture.json\nWrote PEER SPD source manifest: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.source_manifest.json\nWrote PEER SPD normalization report: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.hinge_fixture.normalize_report.json\n",
+        "stderr": ""
+      },
+      {
+        "seed_id": "peer_spd_rc_column_spiral_seed_01",
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.raw.json",
+        "returncode": 0,
+        "stdout": "Wrote PEER SPD hinge fixture: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.hinge_fixture.json\nWrote PEER SPD source manifest: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.source_manifest.json\nWrote PEER SPD normalization report: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.hinge_fixture.normalize_report.json\n",
+        "stderr": ""
+      },
+      {
+        "seed_id": "peer_spd_rc_column_rebar_sensitive_seed_01",
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.raw.json",
+        "returncode": 0,
+        "stdout": "Wrote PEER SPD hinge fixture: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.hinge_fixture.json\nWrote PEER SPD source manifest: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.source_manifest.json\nWrote PEER SPD normalization report: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.hinge_fixture.normalize_report.json\n",
+        "stderr": ""
+      },
+      {
+        "seed_id": "peer_spd_rc_column_holdout_seed_01",
+        "raw_json": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.raw.json",
+        "returncode": 0,
+        "stdout": "Wrote PEER SPD hinge fixture: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.hinge_fixture.json\nWrote PEER SPD source manifest: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.source_manifest.json\nWrote PEER SPD normalization report: implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.hinge_fixture.normalize_report.json\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "summary": {
+    "selected_seed_count": 5,
+    "normalized_seed_count": 5
+  }
+}

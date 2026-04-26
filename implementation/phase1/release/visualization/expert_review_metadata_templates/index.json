@@ -1,0 +1,78 @@
+{
+  "schema_version": "expert_review_metadata_templates.v2",
+  "template_set_name": "expert_review_metadata_templates",
+  "template_set_label": "External Structural Expert Review Templates",
+  "template_set_description": "Customer-facing template presets and onboarding artifacts for optimized drawing expert review packages.",
+  "web_form_contract": {
+    "form_id": "expert-review-onboarding-form-v1",
+    "submission_mode": "customer_portal_api_payload"
+  },
+  "backend_dto_contract": {
+    "dto_name": "ExpertReviewOnboardingRequestDto",
+    "version": "v1"
+  },
+  "default_template": "default",
+  "field_spec": "field_spec.json",
+  "project_onboarding_schema": "project_onboarding.schema.json",
+  "project_onboarding_example": "project_onboarding.example.json",
+  "project_onboarding_purpose": "Customer portal API payload for expert review title block fields, permit or committee routing labels, and reviewer sign-off wording.",
+  "project_onboarding_sections": [
+    "request",
+    "project",
+    "submission",
+    "review_team",
+    "review_labels",
+    "reviewer_guidance",
+    "metadata_overrides"
+  ],
+  "templates": [
+    {
+      "name": "default",
+      "path": "default.json",
+      "label": "General External Review",
+      "description": "General-purpose expert review issue package",
+      "recommended_for": [
+        "Generic external structural review",
+        "Pilot customer onboarding"
+      ],
+      "onboarding_focus_fields": [
+        "project.project_name",
+        "project.project_number",
+        "submission.package_purpose_label",
+        "review_team.reviewed_by"
+      ]
+    },
+    {
+      "name": "seoul_permit_review",
+      "path": "seoul_permit_review.json",
+      "label": "Seoul Permit Review",
+      "description": "Authority-facing permit review package for Seoul projects",
+      "recommended_for": [
+        "Seoul building permit package",
+        "Authority-facing committee routing"
+      ],
+      "onboarding_focus_fields": [
+        "submission.authority_name",
+        "submission.permit_label",
+        "submission.committee_label",
+        "review_labels.checklist_title"
+      ]
+    },
+    {
+      "name": "structural_peer_committee",
+      "path": "structural_peer_committee.json",
+      "label": "Structural Peer Committee",
+      "description": "Peer committee and independent structural review package",
+      "recommended_for": [
+        "Independent peer review",
+        "External structural committee package"
+      ],
+      "onboarding_focus_fields": [
+        "submission.package_purpose_label",
+        "submission.issue_phase_label",
+        "review_labels.signoff_title",
+        "reviewer_guidance.review_route_note"
+      ]
+    }
+  ]
+}

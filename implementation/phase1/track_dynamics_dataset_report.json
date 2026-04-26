@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-generate-track-dynamics-dataset",
+  "generated_at": "2026-03-30T13:50:46.233278+00:00",
+  "runtime_truthfulness": {
+    "path_role": "top_level_dataset_generation",
+    "solver_path_kind": "production_seeded_explicit_reduced_order_track_dynamics_dataset",
+    "physical_runtime_class": "production_seeded_explicit_physical",
+    "runtime_backend": "numpy_explicit_track_dynamics+rocm_torch_hip_mainloop",
+    "execution_backend": "cpu",
+    "cpu_backend": true,
+    "cpu_required": true,
+    "cpu_fallback_used": false,
+    "production_kernel_path": false,
+    "reduced_order_physical_runtime_used": true,
+    "physical_runtime_declared": true,
+    "force_jacobian_kernel_consistent": true,
+    "force_balance_residual_consistent": true,
+    "surrogate_runtime_used": false,
+    "simplified_runtime_used": false,
+    "surrogate_runtime_markers": [],
+    "runtime_policy": "auto",
+    "runtime_policy_satisfied": true,
+    "production_seeded_runtime_used": true,
+    "production_seed_label": "rust_track_lf_gpu_seed",
+    "production_seed_backend": "rocm_torch_hip_mainloop",
+    "production_seed_solver_path_kind": "production_hip_kernel",
+    "production_seed_device_residency_ratio": 1.0,
+    "production_seed_hip_kernel_invocation_count": 4,
+    "contract_pass": true,
+    "reason": "explicit reduced-order physical track dynamics dataset generation declared without surrogate runtime markers; production seed applied via rust_track_lf_gpu_seed",
+    "production_seed_runtime": {
+      "runtime_backend": "rocm_torch_hip_mainloop",
+      "solver_path_kind": "production_hip_kernel",
+      "production_kernel_path": true,
+      "device_residency_ratio": 1.0,
+      "hip_kernel_invocation_count": 4
+    },
+    "production_seed_case_count": 96,
+    "production_seed_success_count": 96,
+    "production_seed_all_cases": true
+  },
+  "inputs": {
+    "cases": 96,
+    "seq_len": 120,
+    "dt": 0.01,
+    "node_min": 48,
+    "node_max": 112,
+    "coupling_k": 2400.0,
+    "max_eq_residual": 0.45,
+    "seed": 23,
+    "runtime_mode": "auto"
+  },
+  "outputs": {
+    "dataset_path": "implementation/phase1/spatiotemporal_data/track_dynamic_cases.jsonl",
+    "case_count": 96,
+    "split_counts": {
+      "test": 18,
+      "train": 69,
+      "val": 9
+    }
+  },
+  "checks": {
+    "dataset_nonempty": true,
+    "split_has_val_test": true,
+    "finite_response": true,
+    "equilibrium_residual_pass": true
+  },
+  "metrics": {
+    "max_equilibrium_residual": 0.3858065092025274,
+    "mean_equilibrium_residual": 0.21739417788426604,
+    "max_displacement_m": 2.6671066614827463,
+    "mean_displacement_m": 1.4079357601718583
+  },
+  "sample_case_ids": [
+    "TRK-000000",
+    "TRK-000001",
+    "TRK-000002",
+    "TRK-000003",
+    "TRK-000004",
+    "TRK-000005"
+  ],
+  "production_seed_success_count": 96,
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "track dynamics dataset generated"
+}

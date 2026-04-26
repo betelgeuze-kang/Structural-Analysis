@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-batch-job-runner",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "inputs": {
+    "snapshot_root": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/snapshots",
+    "out": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_batch_job_report.json",
+    "materialize_snapshots": true
+  },
+  "summary": {
+    "job_count": 3,
+    "status_counts": {
+      "completed": 3
+    },
+    "snapshot_count": 3,
+    "rerun_requested_count": 0,
+    "completed_count": 3,
+    "failed_count": 0,
+    "planned_count": 0,
+    "blocked_count": 0
+  },
+  "checks": {
+    "queue_rows_present_pass": true,
+    "rerun_requests_tracked_pass": true,
+    "snapshot_manifest_written_pass": true
+  },
+  "queue_rows": [
+    {
+      "job_id": "authoring::native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16::workspace-summary",
+      "phase": "authoring_release",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "workspace_summary",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_workspace_summary.json",
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_workspace_draft.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring bundle: PASS | stories=8 | nodes=54 | members=208 | loads=6 | unsupported=0 | unresolved=0 | score=100.0 | family=steel_braced_frame",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/snapshots/authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16::solver-session",
+      "phase": "authoring_solver",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "solver_session",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_solver_session.json",
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_solver_session.loadcomb_preview.mgt"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring solver session: PASS | meshes=2 | cells=138 | combos=23 | family=KDS-2022 | authoring_family=steel_braced_frame",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/snapshots/authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_solver-session/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16::project-registry",
+      "phase": "authoring_registry",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "signed_project_registry",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_package.zip",
+        "implementation/phase1/release/signing/native_authoring_portfolio/steel_braced_frame/native_authoring_project_registry_ed25519.pub.pem",
+        "implementation/phase1/release/signing/native_authoring_portfolio/steel_braced_frame/native_authoring_project_registry.signature.b64"
+      ],
+      "rerun_count": 0,
+      "note": "Project registry service: PASS | artifacts=4 | audit=4 | approvals=3/3 | package_repro=True | signature_verified=True",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/snapshots/authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_rows": [
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16::workspace-summary",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_workspace-summary__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_workspace_summary.json",
+          "label": "native_authoring_workspace_summary.json",
+          "sha256": "40996b58f404a988dc6df3e03a12c5de53ef01557708c1fdf9233396fb0b069a",
+          "bytes": 14552
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_workspace_draft.json",
+          "label": "native_authoring_workspace_draft.json",
+          "sha256": "535028659d28a4eaa67ab66363e208cd1590efa36dfc92ea402e4e5ef46fd597",
+          "bytes": 1100
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/snapshots/authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16::solver-session",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_solver-session__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_solver_session.json",
+          "label": "native_authoring_solver_session.json",
+          "sha256": "abad37d80e1e015d3e4eb24334bbb29943934db3b6a5d3c71ec2c4b93d827688",
+          "bytes": 79305
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_solver_session.loadcomb_preview.mgt",
+          "label": "native_authoring_solver_session.loadcomb_preview.mgt",
+          "sha256": "dc52f7b14bfa7ea65f5adb0d314bc239749116cd945022a0f0dcfed297c3df14",
+          "bytes": 2998
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/snapshots/authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_solver-session/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16::project-registry",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_project-registry__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "216b319bb9439cfb4fc9909e7153d23710abd16eef13284f83a6cb4a29bb1fdd",
+          "bytes": 10141
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "8a6942a18fb1310784a4ea0161a58965e838b20a0e08a3a88841f0becb286a01",
+          "bytes": 100783
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_portfolio/steel_braced_frame/native_authoring_project_registry_ed25519.pub.pem",
+          "label": "native_authoring_project_registry_ed25519.pub.pem",
+          "sha256": "d02fb599610a0e13bf1af3c7f93b1e86283cb8eca19b648dbd9f5bd1b7741611",
+          "bytes": 113
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_portfolio/steel_braced_frame/native_authoring_project_registry.signature.b64",
+          "label": "native_authoring_project_registry.signature.b64",
+          "sha256": "aade070c0bb2cf22e6c6af2be40fbd618f29b7e79d2cc35eec98ffda5844a7e9",
+          "bytes": 89
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/snapshots/authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_errors": [],
+  "summary_line": "Batch job runner: PASS | jobs=3 | snapshots=3 | reruns=0 | statuses=completed=3",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "batch job queue and snapshots updated"
+}

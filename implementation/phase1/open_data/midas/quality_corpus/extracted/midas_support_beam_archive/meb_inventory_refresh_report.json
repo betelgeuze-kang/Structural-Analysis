@@ -1,0 +1,2264 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-refresh-midas-binary-meb-decoded-inventory",
+  "source_id": "midas_support_beam_archive",
+  "selection_priority_policy": [
+    "verified preview",
+    "payload-exact member-add preview",
+    "topology-grounded preview",
+    "table-local preview",
+    "hint preview",
+    "raw preview",
+    "inventory only"
+  ],
+  "selected_member_name": "FCM Bridge.mcb",
+  "selected_member_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb",
+  "selected_reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+  "selected_contract_pass": true,
+  "selected_score": [
+    1,
+    2,
+    4,
+    5,
+    0,
+    20
+  ],
+  "selected_selection_basis": "hint preview | mode=mcvl_node_hint_preview | points=5 | segments=4 | tables=20 | payload_tables=0 | contract_pass=True",
+  "selected_preview_quality": {
+    "rank": 2,
+    "label": "hint preview",
+    "mode": "mcvl_node_hint_preview",
+    "feature_count": 5,
+    "point_count": 5,
+    "segment_count": 4
+  },
+  "selected_summary": {
+    "table_entry_count": 20,
+    "directory_block_count": 1,
+    "in_file_payload_table_count": 0,
+    "directory_sentinel_count": 0,
+    "unresolved_table_count": 20,
+    "geometry_preview_ready": false,
+    "geometry_preview_segment_count": 4,
+    "geometry_preview_point_count": 5,
+    "geometry_preview_source_table": "NODE/ELEM hinted ranges",
+    "geometry_preview_mode": "mcvl_node_hint_preview",
+    "mcvl_node_elem_probe": {
+      "layout_family": "MCVL_TABLE_CONTAINER",
+      "node": {
+        "table_name": "NODE",
+        "range_start": 951,
+        "range_end": 1111,
+        "record_count_hint": 160,
+        "word3_hint": 7,
+        "directory_position": 180
+      },
+      "elem": {
+        "table_name": "ELEM",
+        "range_start": 224,
+        "range_end": 379,
+        "record_count_hint": 155,
+        "word3_hint": 35,
+        "directory_position": 200
+      },
+      "likely_stride_bytes": 32,
+      "note": "NODE/ELEM token rows are present. Decode the hinted MCVL ranges into actual node coordinates and member connectivity."
+    },
+    "mcvl_node_record_probe": {
+      "record_range": [
+        951,
+        1111
+      ],
+      "stride_bytes": 32,
+      "records_with_0_values": 146,
+      "records_with_1_value": 13,
+      "records_with_2_values": 1,
+      "records_with_3plus_values": 0,
+      "example_multi_value_rows": [
+        {
+          "record_index": 953,
+          "plausible_count": 2,
+          "values": [
+            212.9,
+            -23.0
+          ]
+        }
+      ],
+      "note": "NODE hinted range records mostly expose sparse scalar slots. Record-local exact xyz decode is not justified yet."
+    },
+    "mcvl_node_reassembly_probe": {
+      "records_scanned": 14,
+      "scalar_sample_count": 15,
+      "phase_rows": [
+        {
+          "phase": 0,
+          "candidate_triplet_count": 5,
+          "cross_record_triplet_count": 5,
+          "duplicate_record_triplet_count": 1,
+          "dominant_lane_sequence": [
+            3,
+            2,
+            1
+          ],
+          "dominant_lane_sequence_count": 1,
+          "dominant_record_window": [
+            967,
+            968,
+            970
+          ],
+          "dominant_record_window_count": 1,
+          "first_candidate": {
+            "record_window": [
+              951,
+              953,
+              953
+            ],
+            "lane_sequence": [
+              1,
+              0,
+              2
+            ],
+            "values": [
+              212.0,
+              212.9,
+              -23.0
+            ]
+          }
+        },
+        {
+          "phase": 1,
+          "candidate_triplet_count": 4,
+          "cross_record_triplet_count": 4,
+          "duplicate_record_triplet_count": 1,
+          "dominant_lane_sequence": [
+            2,
+            1,
+            0
+          ],
+          "dominant_lane_sequence_count": 1,
+          "dominant_record_window": [
+            963,
+            965,
+            967
+          ],
+          "dominant_record_window_count": 1,
+          "first_candidate": {
+            "record_window": [
+              953,
+              953,
+              954
+            ],
+            "lane_sequence": [
+              0,
+              2,
+              3
+            ],
+            "values": [
+              212.9,
+              -23.0,
+              217.1
+            ]
+          }
+        },
+        {
+          "phase": 2,
+          "candidate_triplet_count": 4,
+          "cross_record_triplet_count": 4,
+          "duplicate_record_triplet_count": 0,
+          "dominant_lane_sequence": [
+            2,
+            3,
+            1
+          ],
+          "dominant_lane_sequence_count": 1,
+          "dominant_record_window": [
+            965,
+            967,
+            968
+          ],
+          "dominant_record_window_count": 1,
+          "first_candidate": {
+            "record_window": [
+              953,
+              954,
+              955
+            ],
+            "lane_sequence": [
+              2,
+              3,
+              1
+            ],
+            "values": [
+              -23.0,
+              217.1,
+              -43.0
+            ]
+          }
+        }
+      ],
+      "best_phase": 0,
+      "candidate_triplet_count": 5,
+      "cross_record_triplet_count": 5,
+      "cross_record_triplet_ratio": 1.0,
+      "duplicate_record_triplet_count": 1,
+      "best_record_window": [
+        951,
+        953,
+        953
+      ],
+      "best_lane_sequence": [
+        1,
+        0,
+        2
+      ],
+      "first_candidate": {
+        "record_window": [
+          951,
+          953,
+          953
+        ],
+        "lane_sequence": [
+          1,
+          0,
+          2
+        ],
+        "values": [
+          212.0,
+          212.9,
+          -23.0
+        ]
+      },
+      "supports_cross_record_xyz_hypothesis": true,
+      "note": "Cross-record NODE xyz reassembly candidates are visible in the hinted scalar stream, but this is still probe-level evidence rather than exact xyz recovery."
+    },
+    "mcvl_node_scalar_lane_probe": {
+      "table_name": "NODE",
+      "record_range": [
+        951,
+        1111
+      ],
+      "stride_bytes": 32,
+      "records_scanned": 160,
+      "active_scalar_record_count": 14,
+      "single_scalar_record_count": 13,
+      "multi_scalar_record_count": 1,
+      "scalar_lane_counts": [
+        4,
+        4,
+        4,
+        3
+      ],
+      "likely_scalar_lane_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "dominant_scalar_lane_patterns": [
+        {
+          "lanes": [
+            1
+          ],
+          "record_count": 4
+        },
+        {
+          "lanes": [
+            0
+          ],
+          "record_count": 3
+        },
+        {
+          "lanes": [
+            2
+          ],
+          "record_count": 3
+        },
+        {
+          "lanes": [
+            3
+          ],
+          "record_count": 3
+        },
+        {
+          "lanes": [
+            0,
+            2
+          ],
+          "record_count": 1
+        }
+      ],
+      "companion_small_uint_slot_hits": [
+        {
+          "lane": 0,
+          "slot_hits": [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            3,
+            0
+          ]
+        },
+        {
+          "lane": 1,
+          "slot_hits": [
+            0,
+            3,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "lane": 2,
+          "slot_hits": [
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "lane": 3,
+          "slot_hits": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0
+          ]
+        }
+      ],
+      "likely_scalar_anchor_slots": [
+        {
+          "lane": 0,
+          "total_hits": 4,
+          "dominant_slots": [
+            {
+              "slot": 6,
+              "hit_count": 3
+            },
+            {
+              "slot": 2,
+              "hit_count": 1
+            }
+          ],
+          "dominant_slot_confidence": 0.75
+        },
+        {
+          "lane": 1,
+          "total_hits": 5,
+          "dominant_slots": [
+            {
+              "slot": 1,
+              "hit_count": 3
+            },
+            {
+              "slot": 4,
+              "hit_count": 1
+            },
+            {
+              "slot": 5,
+              "hit_count": 1
+            }
+          ],
+          "dominant_slot_confidence": 0.6
+        },
+        {
+          "lane": 2,
+          "total_hits": 4,
+          "dominant_slots": [
+            {
+              "slot": 3,
+              "hit_count": 3
+            },
+            {
+              "slot": 6,
+              "hit_count": 1
+            }
+          ],
+          "dominant_slot_confidence": 0.75
+        },
+        {
+          "lane": 3,
+          "total_hits": 3,
+          "dominant_slots": [
+            {
+              "slot": 5,
+              "hit_count": 3
+            }
+          ],
+          "dominant_slot_confidence": 1.0
+        }
+      ],
+      "sample_scalar_records": [
+        {
+          "record_index": 951,
+          "active_lanes": [
+            1
+          ],
+          "scalar_values": [
+            212.0
+          ],
+          "companion_small_uints": [
+            {
+              "slot": 1,
+              "value_uint32": 11
+            }
+          ]
+        },
+        {
+          "record_index": 953,
+          "active_lanes": [
+            0,
+            2
+          ],
+          "scalar_values": [
+            212.9,
+            -23.0
+          ],
+          "companion_small_uints": [
+            {
+              "slot": 6,
+              "value_uint32": 267
+            }
+          ]
+        },
+        {
+          "record_index": 954,
+          "active_lanes": [
+            3
+          ],
+          "scalar_values": [
+            217.1
+          ],
+          "companion_small_uints": [
+            {
+              "slot": 5,
+              "value_uint32": 148
+            }
+          ]
+        },
+        {
+          "record_index": 955,
+          "active_lanes": [
+            1
+          ],
+          "scalar_values": [
+            -43.0
+          ],
+          "companion_small_uints": [
+            {
+              "slot": 2,
+              "value_uint32": 1
+            },
+            {
+              "slot": 4,
+              "value_uint32": 273
+            },
+            {
+              "slot": 5,
+              "value_uint32": 1
+            }
+          ]
+        },
+        {
+          "record_index": 956,
+          "active_lanes": [
+            2
+          ],
+          "scalar_values": [
+            217.1
+          ],
+          "companion_small_uints": [
+            {
+              "slot": 3,
+              "value_uint32": 154
+            }
+          ]
+        },
+        {
+          "record_index": 957,
+          "active_lanes": [
+            0
+          ],
+          "scalar_values": [
+            -19.0
+          ],
+          "companion_small_uints": [
+            {
+              "slot": 2,
+              "value_uint32": 35
+            }
+          ]
+        },
+        {
+          "record_index": 958,
+          "active_lanes": [
+            1
+          ],
+          "scalar_values": [
+            173.0
+          ],
+          "companion_small_uints": [
+            {
+              "slot": 1,
+              "value_uint32": 279
+            }
+          ]
+        },
+        {
+          "record_index": 960,
+          "active_lanes": [
+            0
+          ],
+          "scalar_values": [
+            155.0
+          ],
+          "companion_small_uints": [
+            {
+              "slot": 6,
+              "value_uint32": 166
+            }
+          ]
+        }
+      ],
+      "note": "MCVL hinted range was scanned as 4x float64 lanes per 32-byte record to expose sparse scalar placement. This is structural evidence only, not a verified NODE xyz decode. Active scalar lanes rotate across the 32-byte record and frequently co-occur with small uint fragments in neighboring slots."
+    },
+    "mcvl_node_uint_layout_probe": {
+      "table_name": "NODE",
+      "record_range": [
+        951,
+        1111
+      ],
+      "stride_bytes": 32,
+      "records_scanned": 160,
+      "active_small_uint_record_count": 98,
+      "zero_record_count": 61,
+      "constant_fill_record_count": 61,
+      "nonzero_constant_fill_record_count": 0,
+      "space_fill_record_count": 0,
+      "nonfill_nonzero_record_count": 99,
+      "small_uint_slot_counts": [
+        26,
+        28,
+        27,
+        26,
+        27,
+        28,
+        27,
+        26
+      ],
+      "nonzero_slot_counts": [
+        33,
+        33,
+        30,
+        31,
+        31,
+        32,
+        32,
+        30
+      ],
+      "small_uint_slot_minmax": [
+        {
+          "slot": 0,
+          "min": 1,
+          "max": 271,
+          "unique_count": 16
+        },
+        {
+          "slot": 1,
+          "min": 1,
+          "max": 310,
+          "unique_count": 18
+        },
+        {
+          "slot": 2,
+          "min": 1,
+          "max": 407,
+          "unique_count": 18
+        },
+        {
+          "slot": 3,
+          "min": 1,
+          "max": 277,
+          "unique_count": 16
+        },
+        {
+          "slot": 4,
+          "min": 1,
+          "max": 316,
+          "unique_count": 20
+        },
+        {
+          "slot": 5,
+          "min": 1,
+          "max": 413,
+          "unique_count": 18
+        },
+        {
+          "slot": 6,
+          "min": 1,
+          "max": 420,
+          "unique_count": 20
+        },
+        {
+          "slot": 7,
+          "min": 1,
+          "max": 401,
+          "unique_count": 18
+        }
+      ],
+      "slot_pattern_probe": [
+        {
+          "slots": [
+            0,
+            1
+          ],
+          "record_count": 8
+        },
+        {
+          "slots": [
+            6,
+            7
+          ],
+          "record_count": 8
+        },
+        {
+          "slots": [
+            0
+          ],
+          "record_count": 7
+        },
+        {
+          "slots": [
+            7
+          ],
+          "record_count": 7
+        },
+        {
+          "slots": [
+            3,
+            4
+          ],
+          "record_count": 5
+        },
+        {
+          "slots": [
+            4,
+            5
+          ],
+          "record_count": 5
+        },
+        {
+          "slots": [
+            1,
+            2
+          ],
+          "record_count": 4
+        },
+        {
+          "slots": [
+            2,
+            3
+          ],
+          "record_count": 4
+        },
+        {
+          "slots": [
+            5,
+            6
+          ],
+          "record_count": 4
+        },
+        {
+          "slots": [
+            0,
+            1,
+            2
+          ],
+          "record_count": 4
+        },
+        {
+          "slots": [
+            5,
+            6,
+            7
+          ],
+          "record_count": 4
+        },
+        {
+          "slots": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "record_count": 4
+        }
+      ],
+      "likely_identifier_slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "likely_counter_slots": [],
+      "adjacent_slot_pair_probe": [
+        {
+          "pair": [
+            0,
+            1
+          ],
+          "cooccurrence_count": 17,
+          "near_equal_step_count": 10,
+          "near_equal_step_ratio": 0.588,
+          "dominant_delta": 1,
+          "dominant_delta_count": 4,
+          "dominant_delta_ratio": 0.235,
+          "common_deltas": [
+            {
+              "delta": 1,
+              "count": 4
+            },
+            {
+              "delta": 0,
+              "count": 4
+            },
+            {
+              "delta": -1,
+              "count": 2
+            },
+            {
+              "delta": -159,
+              "count": 1
+            },
+            {
+              "delta": -4,
+              "count": 1
+            },
+            {
+              "delta": -28,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "pair": [
+            1,
+            2
+          ],
+          "cooccurrence_count": 16,
+          "near_equal_step_count": 10,
+          "near_equal_step_ratio": 0.625,
+          "dominant_delta": 0,
+          "dominant_delta_count": 5,
+          "dominant_delta_ratio": 0.312,
+          "common_deltas": [
+            {
+              "delta": 0,
+              "count": 5
+            },
+            {
+              "delta": 1,
+              "count": 3
+            },
+            {
+              "delta": -1,
+              "count": 2
+            },
+            {
+              "delta": -135,
+              "count": 1
+            },
+            {
+              "delta": -40,
+              "count": 1
+            },
+            {
+              "delta": 199,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "pair": [
+            2,
+            3
+          ],
+          "cooccurrence_count": 15,
+          "near_equal_step_count": 11,
+          "near_equal_step_ratio": 0.733,
+          "dominant_delta": 1,
+          "dominant_delta_count": 5,
+          "dominant_delta_ratio": 0.333,
+          "common_deltas": [
+            {
+              "delta": 1,
+              "count": 5
+            },
+            {
+              "delta": 0,
+              "count": 5
+            },
+            {
+              "delta": -1,
+              "count": 1
+            },
+            {
+              "delta": -22,
+              "count": 1
+            },
+            {
+              "delta": -58,
+              "count": 1
+            },
+            {
+              "delta": 217,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "pair": [
+            3,
+            4
+          ],
+          "cooccurrence_count": 16,
+          "near_equal_step_count": 10,
+          "near_equal_step_ratio": 0.625,
+          "dominant_delta": 1,
+          "dominant_delta_count": 4,
+          "dominant_delta_ratio": 0.25,
+          "common_deltas": [
+            {
+              "delta": 1,
+              "count": 4
+            },
+            {
+              "delta": 0,
+              "count": 4
+            },
+            {
+              "delta": -1,
+              "count": 2
+            },
+            {
+              "delta": -182,
+              "count": 1
+            },
+            {
+              "delta": -129,
+              "count": 1
+            },
+            {
+              "delta": -153,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "pair": [
+            4,
+            5
+          ],
+          "cooccurrence_count": 17,
+          "near_equal_step_count": 9,
+          "near_equal_step_ratio": 0.529,
+          "dominant_delta": 1,
+          "dominant_delta_count": 4,
+          "dominant_delta_ratio": 0.235,
+          "common_deltas": [
+            {
+              "delta": 1,
+              "count": 4
+            },
+            {
+              "delta": 0,
+              "count": 4
+            },
+            {
+              "delta": -272,
+              "count": 1
+            },
+            {
+              "delta": -112,
+              "count": 1
+            },
+            {
+              "delta": -1,
+              "count": 1
+            },
+            {
+              "delta": -16,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "pair": [
+            5,
+            6
+          ],
+          "cooccurrence_count": 16,
+          "near_equal_step_count": 9,
+          "near_equal_step_ratio": 0.562,
+          "dominant_delta": 1,
+          "dominant_delta_count": 4,
+          "dominant_delta_ratio": 0.25,
+          "common_deltas": [
+            {
+              "delta": 1,
+              "count": 4
+            },
+            {
+              "delta": 0,
+              "count": 4
+            },
+            {
+              "delta": -123,
+              "count": 1
+            },
+            {
+              "delta": -147,
+              "count": 1
+            },
+            {
+              "delta": -5,
+              "count": 1
+            },
+            {
+              "delta": 418,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "pair": [
+            6,
+            7
+          ],
+          "cooccurrence_count": 16,
+          "near_equal_step_count": 10,
+          "near_equal_step_ratio": 0.625,
+          "dominant_delta": -1,
+          "dominant_delta_count": 5,
+          "dominant_delta_ratio": 0.312,
+          "common_deltas": [
+            {
+              "delta": -1,
+              "count": 5
+            },
+            {
+              "delta": 0,
+              "count": 3
+            },
+            {
+              "delta": 1,
+              "count": 2
+            },
+            {
+              "delta": -10,
+              "count": 1
+            },
+            {
+              "delta": -34,
+              "count": 1
+            },
+            {
+              "delta": 115,
+              "count": 1
+            }
+          ]
+        }
+      ],
+      "likely_packed_identifier_pairs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          6,
+          7
+        ]
+      ],
+      "reference_slot_hits": {
+        "node_range": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "elem_range": [
+          2,
+          3,
+          1,
+          3,
+          4,
+          3,
+          4,
+          3
+        ]
+      },
+      "slot_progression_probe": [
+        {
+          "slot": 0,
+          "observation_count": 26,
+          "transition_count": 25,
+          "increasing_transition_count": 12,
+          "decreasing_transition_count": 9,
+          "repeated_transition_count": 4,
+          "small_positive_step_count": 2,
+          "nondecreasing_ratio": 0.64,
+          "small_positive_step_ratio": 0.08,
+          "sample_ordered_values": [
+            136,
+            160,
+            202,
+            1,
+            6,
+            133,
+            2,
+            2,
+            97,
+            1,
+            30,
+            177
+          ]
+        },
+        {
+          "slot": 1,
+          "observation_count": 28,
+          "transition_count": 27,
+          "increasing_transition_count": 12,
+          "decreasing_transition_count": 12,
+          "repeated_transition_count": 3,
+          "small_positive_step_count": 2,
+          "nondecreasing_ratio": 0.556,
+          "small_positive_step_ratio": 0.074,
+          "sample_ordered_values": [
+            11,
+            279,
+            1,
+            196,
+            2,
+            134,
+            3,
+            137,
+            100,
+            1,
+            2,
+            178
+          ]
+        },
+        {
+          "slot": 2,
+          "observation_count": 27,
+          "transition_count": 26,
+          "increasing_transition_count": 14,
+          "decreasing_transition_count": 9,
+          "repeated_transition_count": 3,
+          "small_positive_step_count": 4,
+          "nondecreasing_ratio": 0.654,
+          "small_positive_step_ratio": 0.154,
+          "sample_ordered_values": [
+            1,
+            35,
+            190,
+            119,
+            127,
+            2,
+            2,
+            101,
+            1,
+            24,
+            153,
+            2
+          ]
+        },
+        {
+          "slot": 3,
+          "observation_count": 26,
+          "transition_count": 25,
+          "increasing_transition_count": 11,
+          "decreasing_transition_count": 11,
+          "repeated_transition_count": 3,
+          "small_positive_step_count": 1,
+          "nondecreasing_ratio": 0.56,
+          "small_positive_step_ratio": 0.04,
+          "sample_ordered_values": [
+            154,
+            184,
+            238,
+            128,
+            3,
+            131,
+            13,
+            1,
+            2,
+            154,
+            2,
+            155
+          ]
+        },
+        {
+          "slot": 4,
+          "observation_count": 27,
+          "transition_count": 26,
+          "increasing_transition_count": 11,
+          "decreasing_transition_count": 12,
+          "repeated_transition_count": 3,
+          "small_positive_step_count": 0,
+          "nondecreasing_ratio": 0.538,
+          "small_positive_step_ratio": 0.0,
+          "sample_ordered_values": [
+            273,
+            178,
+            2,
+            113,
+            2,
+            14,
+            1,
+            18,
+            147,
+            2,
+            2,
+            186
+          ]
+        },
+        {
+          "slot": 5,
+          "observation_count": 28,
+          "transition_count": 27,
+          "increasing_transition_count": 12,
+          "decreasing_transition_count": 12,
+          "repeated_transition_count": 3,
+          "small_positive_step_count": 2,
+          "nondecreasing_ratio": 0.556,
+          "small_positive_step_ratio": 0.074,
+          "sample_ordered_values": [
+            148,
+            1,
+            172,
+            232,
+            1,
+            125,
+            6,
+            1,
+            2,
+            148,
+            2,
+            149
+          ]
+        },
+        {
+          "slot": 6,
+          "observation_count": 27,
+          "transition_count": 26,
+          "increasing_transition_count": 11,
+          "decreasing_transition_count": 12,
+          "repeated_transition_count": 3,
+          "small_positive_step_count": 1,
+          "nondecreasing_ratio": 0.538,
+          "small_positive_step_ratio": 0.038,
+          "sample_ordered_values": [
+            267,
+            166,
+            107,
+            2,
+            7,
+            1,
+            12,
+            140,
+            2,
+            2,
+            108,
+            420
+          ]
+        },
+        {
+          "slot": 7,
+          "observation_count": 26,
+          "transition_count": 25,
+          "increasing_transition_count": 13,
+          "decreasing_transition_count": 11,
+          "repeated_transition_count": 1,
+          "small_positive_step_count": 4,
+          "nondecreasing_ratio": 0.56,
+          "small_positive_step_ratio": 0.16,
+          "sample_ordered_values": [
+            142,
+            285,
+            101,
+            1,
+            2,
+            141,
+            2,
+            143,
+            107,
+            1,
+            2,
+            192
+          ]
+        }
+      ],
+      "dominant_record_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "dominant_record_count": 61,
+      "dominant_record_ratio": 0.381,
+      "dominant_fill_byte_hex": "0x00",
+      "dominant_fill_byte_ascii": "",
+      "dominant_fill_byte_count": 61,
+      "dominant_nonzero_fill_byte_hex": "",
+      "dominant_nonzero_fill_byte_ascii": "",
+      "dominant_nonzero_fill_byte_count": 0,
+      "layout_state_label": "sparse_identifier_candidate",
+      "sample_small_uint_records": [
+        {
+          "record_index": 951,
+          "values": [
+            {
+              "slot": 1,
+              "value_uint32": 11
+            }
+          ]
+        },
+        {
+          "record_index": 952,
+          "values": [
+            {
+              "slot": 0,
+              "value_uint32": 136
+            },
+            {
+              "slot": 7,
+              "value_uint32": 142
+            }
+          ]
+        },
+        {
+          "record_index": 953,
+          "values": [
+            {
+              "slot": 6,
+              "value_uint32": 267
+            }
+          ]
+        },
+        {
+          "record_index": 954,
+          "values": [
+            {
+              "slot": 5,
+              "value_uint32": 148
+            }
+          ]
+        },
+        {
+          "record_index": 955,
+          "values": [
+            {
+              "slot": 2,
+              "value_uint32": 1
+            },
+            {
+              "slot": 4,
+              "value_uint32": 273
+            },
+            {
+              "slot": 5,
+              "value_uint32": 1
+            }
+          ]
+        },
+        {
+          "record_index": 956,
+          "values": [
+            {
+              "slot": 3,
+              "value_uint32": 154
+            }
+          ]
+        },
+        {
+          "record_index": 957,
+          "values": [
+            {
+              "slot": 2,
+              "value_uint32": 35
+            }
+          ]
+        },
+        {
+          "record_index": 958,
+          "values": [
+            {
+              "slot": 1,
+              "value_uint32": 279
+            }
+          ]
+        }
+      ],
+      "note": "MCVL hinted range was scanned as 8x uint32 fields per 32-byte record to expose field-layout evidence. Sparse small uint32 values are present, which may be useful as the next offset/layout probe."
+    },
+    "mcvl_elem_uint_layout_probe": {
+      "table_name": "ELEM",
+      "record_range": [
+        224,
+        379
+      ],
+      "stride_bytes": 32,
+      "records_scanned": 155,
+      "active_small_uint_record_count": 1,
+      "zero_record_count": 108,
+      "constant_fill_record_count": 154,
+      "nonzero_constant_fill_record_count": 46,
+      "space_fill_record_count": 46,
+      "nonfill_nonzero_record_count": 1,
+      "small_uint_slot_counts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "nonzero_slot_counts": [
+        47,
+        47,
+        47,
+        47,
+        47,
+        46,
+        46,
+        46
+      ],
+      "small_uint_slot_minmax": [
+        {
+          "slot": 0,
+          "min": null,
+          "max": null,
+          "unique_count": 0
+        },
+        {
+          "slot": 1,
+          "min": null,
+          "max": null,
+          "unique_count": 0
+        },
+        {
+          "slot": 2,
+          "min": null,
+          "max": null,
+          "unique_count": 0
+        },
+        {
+          "slot": 3,
+          "min": null,
+          "max": null,
+          "unique_count": 0
+        },
+        {
+          "slot": 4,
+          "min": 1,
+          "max": 1,
+          "unique_count": 1
+        },
+        {
+          "slot": 5,
+          "min": null,
+          "max": null,
+          "unique_count": 0
+        },
+        {
+          "slot": 6,
+          "min": null,
+          "max": null,
+          "unique_count": 0
+        },
+        {
+          "slot": 7,
+          "min": null,
+          "max": null,
+          "unique_count": 0
+        }
+      ],
+      "slot_pattern_probe": [
+        {
+          "slots": [
+            4
+          ],
+          "record_count": 1
+        }
+      ],
+      "likely_identifier_slots": [],
+      "likely_counter_slots": [],
+      "adjacent_slot_pair_probe": [
+        {
+          "pair": [
+            0,
+            1
+          ],
+          "cooccurrence_count": 0,
+          "near_equal_step_count": 0,
+          "near_equal_step_ratio": 0.0,
+          "dominant_delta": 0,
+          "dominant_delta_count": 0,
+          "dominant_delta_ratio": 0.0,
+          "common_deltas": []
+        },
+        {
+          "pair": [
+            1,
+            2
+          ],
+          "cooccurrence_count": 0,
+          "near_equal_step_count": 0,
+          "near_equal_step_ratio": 0.0,
+          "dominant_delta": 0,
+          "dominant_delta_count": 0,
+          "dominant_delta_ratio": 0.0,
+          "common_deltas": []
+        },
+        {
+          "pair": [
+            2,
+            3
+          ],
+          "cooccurrence_count": 0,
+          "near_equal_step_count": 0,
+          "near_equal_step_ratio": 0.0,
+          "dominant_delta": 0,
+          "dominant_delta_count": 0,
+          "dominant_delta_ratio": 0.0,
+          "common_deltas": []
+        },
+        {
+          "pair": [
+            3,
+            4
+          ],
+          "cooccurrence_count": 0,
+          "near_equal_step_count": 0,
+          "near_equal_step_ratio": 0.0,
+          "dominant_delta": 0,
+          "dominant_delta_count": 0,
+          "dominant_delta_ratio": 0.0,
+          "common_deltas": []
+        },
+        {
+          "pair": [
+            4,
+            5
+          ],
+          "cooccurrence_count": 0,
+          "near_equal_step_count": 0,
+          "near_equal_step_ratio": 0.0,
+          "dominant_delta": 0,
+          "dominant_delta_count": 0,
+          "dominant_delta_ratio": 0.0,
+          "common_deltas": []
+        },
+        {
+          "pair": [
+            5,
+            6
+          ],
+          "cooccurrence_count": 0,
+          "near_equal_step_count": 0,
+          "near_equal_step_ratio": 0.0,
+          "dominant_delta": 0,
+          "dominant_delta_count": 0,
+          "dominant_delta_ratio": 0.0,
+          "common_deltas": []
+        },
+        {
+          "pair": [
+            6,
+            7
+          ],
+          "cooccurrence_count": 0,
+          "near_equal_step_count": 0,
+          "near_equal_step_ratio": 0.0,
+          "dominant_delta": 0,
+          "dominant_delta_count": 0,
+          "dominant_delta_ratio": 0.0,
+          "common_deltas": []
+        }
+      ],
+      "likely_packed_identifier_pairs": [],
+      "reference_slot_hits": {
+        "node_range": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "elem_range": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "slot_progression_probe": [
+        {
+          "slot": 0,
+          "observation_count": 0,
+          "transition_count": 0,
+          "increasing_transition_count": 0,
+          "decreasing_transition_count": 0,
+          "repeated_transition_count": 0,
+          "small_positive_step_count": 0,
+          "nondecreasing_ratio": 0.0,
+          "small_positive_step_ratio": 0.0,
+          "sample_ordered_values": []
+        },
+        {
+          "slot": 1,
+          "observation_count": 0,
+          "transition_count": 0,
+          "increasing_transition_count": 0,
+          "decreasing_transition_count": 0,
+          "repeated_transition_count": 0,
+          "small_positive_step_count": 0,
+          "nondecreasing_ratio": 0.0,
+          "small_positive_step_ratio": 0.0,
+          "sample_ordered_values": []
+        },
+        {
+          "slot": 2,
+          "observation_count": 0,
+          "transition_count": 0,
+          "increasing_transition_count": 0,
+          "decreasing_transition_count": 0,
+          "repeated_transition_count": 0,
+          "small_positive_step_count": 0,
+          "nondecreasing_ratio": 0.0,
+          "small_positive_step_ratio": 0.0,
+          "sample_ordered_values": []
+        },
+        {
+          "slot": 3,
+          "observation_count": 0,
+          "transition_count": 0,
+          "increasing_transition_count": 0,
+          "decreasing_transition_count": 0,
+          "repeated_transition_count": 0,
+          "small_positive_step_count": 0,
+          "nondecreasing_ratio": 0.0,
+          "small_positive_step_ratio": 0.0,
+          "sample_ordered_values": []
+        },
+        {
+          "slot": 4,
+          "observation_count": 1,
+          "transition_count": 0,
+          "increasing_transition_count": 0,
+          "decreasing_transition_count": 0,
+          "repeated_transition_count": 0,
+          "small_positive_step_count": 0,
+          "nondecreasing_ratio": 0.0,
+          "small_positive_step_ratio": 0.0,
+          "sample_ordered_values": [
+            1
+          ]
+        },
+        {
+          "slot": 5,
+          "observation_count": 0,
+          "transition_count": 0,
+          "increasing_transition_count": 0,
+          "decreasing_transition_count": 0,
+          "repeated_transition_count": 0,
+          "small_positive_step_count": 0,
+          "nondecreasing_ratio": 0.0,
+          "small_positive_step_ratio": 0.0,
+          "sample_ordered_values": []
+        },
+        {
+          "slot": 6,
+          "observation_count": 0,
+          "transition_count": 0,
+          "increasing_transition_count": 0,
+          "decreasing_transition_count": 0,
+          "repeated_transition_count": 0,
+          "small_positive_step_count": 0,
+          "nondecreasing_ratio": 0.0,
+          "small_positive_step_ratio": 0.0,
+          "sample_ordered_values": []
+        },
+        {
+          "slot": 7,
+          "observation_count": 0,
+          "transition_count": 0,
+          "increasing_transition_count": 0,
+          "decreasing_transition_count": 0,
+          "repeated_transition_count": 0,
+          "small_positive_step_count": 0,
+          "nondecreasing_ratio": 0.0,
+          "small_positive_step_ratio": 0.0,
+          "sample_ordered_values": []
+        }
+      ],
+      "dominant_record_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "dominant_record_count": 108,
+      "dominant_record_ratio": 0.697,
+      "dominant_fill_byte_hex": "0x00",
+      "dominant_fill_byte_ascii": "",
+      "dominant_fill_byte_count": 108,
+      "dominant_nonzero_fill_byte_hex": "0x20",
+      "dominant_nonzero_fill_byte_ascii": " ",
+      "dominant_nonzero_fill_byte_count": 46,
+      "layout_state_label": "constant_fill_dominant",
+      "sample_small_uint_records": [
+        {
+          "record_index": 270,
+          "values": [
+            {
+              "slot": 4,
+              "value_uint32": 1
+            }
+          ]
+        }
+      ],
+      "note": "MCVL hinted range was scanned as 8x uint32 fields per 32-byte record to expose field-layout evidence. Sparse small uint32 values are present, which may be useful as the next offset/layout probe. A subset of records are 0x20-filled, which looks more like padding or text-aligned filler than resolved member references at this stride."
+    },
+    "mcvl_hint_preview_probe": {
+      "candidate_scalar_count": 15,
+      "candidate_point_count": 5,
+      "candidate_segment_count": 4,
+      "projection_label": "XY",
+      "hint_grouping_phase": 0,
+      "source_table": "NODE/ELEM hinted ranges",
+      "topology_grounding_label": "record_order_polyline",
+      "phase_scoreboard": [
+        {
+          "phase": 0,
+          "point_count": 5,
+          "segment_count": 4,
+          "projection_label": "XY",
+          "score": 387688.5
+        },
+        {
+          "phase": 1,
+          "point_count": 4,
+          "segment_count": 3,
+          "projection_label": "XZ",
+          "score": 310150.8
+        },
+        {
+          "phase": 2,
+          "point_count": 4,
+          "segment_count": 3,
+          "projection_label": "XY",
+          "score": 291001.2
+        }
+      ],
+      "selected_phase_record_windows": [
+        [
+          951,
+          953,
+          953
+        ],
+        [
+          954,
+          955,
+          956
+        ],
+        [
+          957,
+          958,
+          960
+        ],
+        [
+          961,
+          963,
+          965
+        ],
+        [
+          967,
+          968,
+          970
+        ]
+      ],
+      "selected_phase_lane_sequences": [
+        [
+          1,
+          0,
+          2
+        ],
+        [
+          3,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          3,
+          2,
+          1
+        ],
+        [
+          0,
+          3,
+          2
+        ]
+      ]
+    },
+    "mcvl_node_xyz_slot_recovery_probe": {
+      "assembler_label": "phase_triplet_plus_lane_anchor_probe",
+      "candidate_xyz_tuple_count": 5,
+      "strong_xyz_tuple_count": 4,
+      "partial_xyz_tuple_count": 1,
+      "three_lane_tuple_count": 4,
+      "repeated_lane_tuple_count": 1,
+      "tight_window_tuple_count": 4,
+      "anchor_supported_tuple_count": 2,
+      "stable_anchor_lane_count": 3,
+      "candidate_record_span_min": 2,
+      "candidate_record_span_max": 4,
+      "candidate_record_span_avg": 2.8,
+      "candidate_unique_lane_count_min": 2,
+      "candidate_unique_lane_count_max": 3,
+      "lane_anchor_support_map": [
+        {
+          "lane": 1,
+          "total_hits": 5,
+          "dominant_slots": [
+            {
+              "slot": 1,
+              "hit_count": 3
+            },
+            {
+              "slot": 4,
+              "hit_count": 1
+            },
+            {
+              "slot": 5,
+              "hit_count": 1
+            }
+          ],
+          "dominant_slot_confidence": 0.6
+        },
+        {
+          "lane": 2,
+          "total_hits": 4,
+          "dominant_slots": [
+            {
+              "slot": 3,
+              "hit_count": 3
+            },
+            {
+              "slot": 6,
+              "hit_count": 1
+            }
+          ],
+          "dominant_slot_confidence": 0.75
+        },
+        {
+          "lane": 3,
+          "total_hits": 3,
+          "dominant_slots": [
+            {
+              "slot": 5,
+              "hit_count": 3
+            }
+          ],
+          "dominant_slot_confidence": 1.0
+        }
+      ],
+      "tuple_samples": [
+        {
+          "tuple_index": 0,
+          "record_window": [
+            951,
+            953,
+            953
+          ],
+          "lane_sequence": [
+            1,
+            0,
+            2
+          ],
+          "unique_lane_count": 3,
+          "record_span": 2,
+          "anchor_supported_lane_count": 2,
+          "quality_label": "strong_candidate",
+          "anchor_slots": [
+            {
+              "lane": 0,
+              "dominant_slots": [],
+              "dominant_slot_confidence": 0.0
+            },
+            {
+              "lane": 1,
+              "dominant_slots": [
+                {
+                  "slot": 1,
+                  "hit_count": 3
+                },
+                {
+                  "slot": 4,
+                  "hit_count": 1
+                }
+              ],
+              "dominant_slot_confidence": 0.6
+            },
+            {
+              "lane": 2,
+              "dominant_slots": [
+                {
+                  "slot": 3,
+                  "hit_count": 3
+                },
+                {
+                  "slot": 6,
+                  "hit_count": 1
+                }
+              ],
+              "dominant_slot_confidence": 0.75
+            }
+          ],
+          "value_triplet": [
+            {
+              "record_index": 951,
+              "lane": 1,
+              "value": 212.0
+            },
+            {
+              "record_index": 953,
+              "lane": 0,
+              "value": 212.9
+            },
+            {
+              "record_index": 953,
+              "lane": 2,
+              "value": -23.0
+            }
+          ]
+        },
+        {
+          "tuple_index": 1,
+          "record_window": [
+            954,
+            955,
+            956
+          ],
+          "lane_sequence": [
+            3,
+            1,
+            2
+          ],
+          "unique_lane_count": 3,
+          "record_span": 2,
+          "anchor_supported_lane_count": 3,
+          "quality_label": "strong_candidate",
+          "anchor_slots": [
+            {
+              "lane": 1,
+              "dominant_slots": [
+                {
+                  "slot": 1,
+                  "hit_count": 3
+                },
+                {
+                  "slot": 4,
+                  "hit_count": 1
+                }
+              ],
+              "dominant_slot_confidence": 0.6
+            },
+            {
+              "lane": 2,
+              "dominant_slots": [
+                {
+                  "slot": 3,
+                  "hit_count": 3
+                },
+                {
+                  "slot": 6,
+                  "hit_count": 1
+                }
+              ],
+              "dominant_slot_confidence": 0.75
+            },
+            {
+              "lane": 3,
+              "dominant_slots": [
+                {
+                  "slot": 5,
+                  "hit_count": 3
+                }
+              ],
+              "dominant_slot_confidence": 1.0
+            }
+          ],
+          "value_triplet": [
+            {
+              "record_index": 954,
+              "lane": 3,
+              "value": 217.1
+            },
+            {
+              "record_index": 955,
+              "lane": 1,
+              "value": -43.0
+            },
+            {
+              "record_index": 956,
+              "lane": 2,
+              "value": 217.1
+            }
+          ]
+        },
+        {
+          "tuple_index": 2,
+          "record_window": [
+            957,
+            958,
+            960
+          ],
+          "lane_sequence": [
+            0,
+            1,
+            0
+          ],
+          "unique_lane_count": 2,
+          "record_span": 3,
+          "anchor_supported_lane_count": 1,
+          "quality_label": "partial_candidate",
+          "anchor_slots": [
+            {
+              "lane": 0,
+              "dominant_slots": [],
+              "dominant_slot_confidence": 0.0
+            },
+            {
+              "lane": 1,
+              "dominant_slots": [
+                {
+                  "slot": 1,
+                  "hit_count": 3
+                },
+                {
+                  "slot": 4,
+                  "hit_count": 1
+                }
+              ],
+              "dominant_slot_confidence": 0.6
+            }
+          ],
+          "value_triplet": [
+            {
+              "record_index": 957,
+              "lane": 0,
+              "value": -19.0
+            },
+            {
+              "record_index": 958,
+              "lane": 1,
+              "value": 173.0
+            },
+            {
+              "record_index": 960,
+              "lane": 0,
+              "value": 155.0
+            }
+          ]
+        },
+        {
+          "tuple_index": 3,
+          "record_window": [
+            961,
+            963,
+            965
+          ],
+          "lane_sequence": [
+            3,
+            2,
+            1
+          ],
+          "unique_lane_count": 3,
+          "record_span": 4,
+          "anchor_supported_lane_count": 3,
+          "quality_label": "strong_candidate",
+          "anchor_slots": [
+            {
+              "lane": 1,
+              "dominant_slots": [
+                {
+                  "slot": 1,
+                  "hit_count": 3
+                },
+                {
+                  "slot": 4,
+                  "hit_count": 1
+                }
+              ],
+              "dominant_slot_confidence": 0.6
+            },
+            {
+              "lane": 2,
+              "dominant_slots": [
+                {
+                  "slot": 3,
+                  "hit_count": 3
+                },
+                {
+                  "slot": 6,
+                  "hit_count": 1
+                }
+              ],
+              "dominant_slot_confidence": 0.75
+            },
+            {
+              "lane": 3,
+              "dominant_slots": [
+                {
+                  "slot": 5,
+                  "hit_count": 3
+                }
+              ],
+              "dominant_slot_confidence": 1.0
+            }
+          ],
+          "value_triplet": [
+            {
+              "record_index": 961,
+              "lane": 3,
+              "value": 263.0
+            },
+            {
+              "record_index": 963,
+              "lane": 2,
+              "value": 73.0
+            },
+            {
+              "record_index": 965,
+              "lane": 1,
+              "value": 37.0
+            }
+          ]
+        },
+        {
+          "tuple_index": 4,
+          "record_window": [
+            967,
+            968,
+            970
+          ],
+          "lane_sequence": [
+            0,
+            3,
+            2
+          ],
+          "unique_lane_count": 3,
+          "record_span": 3,
+          "anchor_supported_lane_count": 2,
+          "quality_label": "strong_candidate",
+          "anchor_slots": [
+            {
+              "lane": 0,
+              "dominant_slots": [],
+              "dominant_slot_confidence": 0.0
+            },
+            {
+              "lane": 2,
+              "dominant_slots": [
+                {
+                  "slot": 3,
+                  "hit_count": 3
+                },
+                {
+                  "slot": 6,
+                  "hit_count": 1
+                }
+              ],
+              "dominant_slot_confidence": 0.75
+            },
+            {
+              "lane": 3,
+              "dominant_slots": [
+                {
+                  "slot": 5,
+                  "hit_count": 3
+                }
+              ],
+              "dominant_slot_confidence": 1.0
+            }
+          ],
+          "value_triplet": [
+            {
+              "record_index": 967,
+              "lane": 0,
+              "value": 284.0
+            },
+            {
+              "record_index": 968,
+              "lane": 3,
+              "value": 106.0
+            },
+            {
+              "record_index": 970,
+              "lane": 2,
+              "value": 124.0
+            }
+          ]
+        }
+      ],
+      "recovery_evidence_label": "partial_repeatable_slot_recovery",
+      "exact_xyz_recovery_ready": false,
+      "note": "NODE hinted range에서 phase-triplet 후보를 다시 읽어보면, 4/5 tuple이 3-lane coverage를 보입니다. 이건 hint-guided preview보다 강한 parser-side evidence지만, record-local exact xyz decode를 정당화할 정도는 아직 아닙니다."
+    },
+    "layout_family": "MCVL_TABLE_CONTAINER",
+    "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+    "source_member_name": "FCM Bridge.mcb",
+    "table_names": [
+      "HEAD",
+      "VERS",
+      "PGIF",
+      "UNIT",
+      "PJCF",
+      "STYP",
+      "BNGR",
+      "LDGR",
+      "NODE",
+      "ELEM",
+      "MATL",
+      "MATD",
+      "CO_M",
+      "SECT",
+      "SECD",
+      "CO_S",
+      "GRUP",
+      "GRUE"
+    ]
+  },
+  "evaluations": [
+    {
+      "member_name": "FCM Bridge.mcb",
+      "member_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb",
+      "score": [
+        1,
+        2,
+        4,
+        5,
+        0,
+        20
+      ],
+      "selection_basis": "hint preview | mode=mcvl_node_hint_preview | points=5 | segments=4 | tables=20 | payload_tables=0 | contract_pass=True",
+      "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+      "contract_pass": true,
+      "preview_quality_rank": 2,
+      "preview_quality_label": "hint preview",
+      "geometry_preview_ready": false,
+      "topology_preview_ready": false,
+      "geometry_preview_point_count": 5,
+      "geometry_preview_segment_count": 4,
+      "geometry_preview_mode": "mcvl_node_hint_preview",
+      "mcvl_node_layout_state_label": "sparse_identifier_candidate",
+      "mcvl_node_likely_identifier_slots": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "mcvl_node_likely_counter_slots": [],
+      "mcvl_node_likely_packed_identifier_pairs": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          6,
+          7
+        ]
+      ],
+      "table_local_topology_grounding_label": "",
+      "table_local_topology_edge_count": 0,
+      "table_local_topology_component_count": 0,
+      "table_local_topology_preview_ready": false,
+      "table_local_topology_readiness_label": "",
+      "table_entry_count": 20,
+      "in_file_payload_table_count": 0
+    }
+  ]
+}

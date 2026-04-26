@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-global-authority-gate",
+  "generated_at": "2026-04-08T11:22:50.078159+00:00",
+  "inputs": {
+    "catalog": "implementation/phase1/open_data/global_authority/authority_source_catalog.json",
+    "workdir_out": "implementation/phase1/open_data/global_authority/run_artifacts",
+    "require_opensees": true,
+    "require_sac": false,
+    "require_nheri": false,
+    "min_sac_cases": 3,
+    "min_nheri_cases": 3,
+    "require_distinct_sac_inputs": true,
+    "require_distinct_nheri_inputs": true,
+    "forbid_sample_authority_inputs": true,
+    "split_manifest": "implementation/phase1/open_data/global_authority/global_split_manifest.json",
+    "auto_generate_metrics": false,
+    "require_shell_beam_mix": true,
+    "case_metrics_npz_out": "implementation/phase1/global_authority_gate_report.metrics.npz"
+  },
+  "summary": {
+    "opensees_case_count": 3,
+    "opensees_contract_pass_count": 3,
+    "sac_case_count": 3,
+    "sac_valid_count": 3,
+    "sac_duplicate_input_pair_count": 0,
+    "nheri_case_count": 3,
+    "nheri_valid_count": 3,
+    "nheri_duplicate_input_pair_count": 0,
+    "device_artifact_consumer": "not_applicable_reference_only",
+    "response_binary_consumer": "npz_external_primary",
+    "response_storage": "npz_external+inline_summary",
+    "case_metrics_npz_case_count": 9,
+    "case_metrics_npz_step_count": 9
+  },
+  "checks": {
+    "opensees_pass": true,
+    "sac_pass": true,
+    "nheri_pass": true,
+    "holdout_manifest_pass": true,
+    "sac_min_case_count_pass": true,
+    "sac_source_diversity_pass": true,
+    "sac_source_integrity_pass": true,
+    "nheri_min_case_count_pass": true,
+    "nheri_source_diversity_pass": true,
+    "nheri_source_integrity_pass": true,
+    "opensees_required": true,
+    "sac_required": true,
+    "nheri_required": true
+  },
+  "steps": [
+    {
+      "step": "opensees_SCBF16B",
+      "seconds": 1.198819875717163,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/parse_opensees_to_csr.py --model implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl --edges-out implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_edges.json --csr-out implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_csr.npz --report-out implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_topology_report.json --require-real-topology --forbid-synthetic-source --no-require-shell-beam-mix",
+      "stdout_tail": "Wrote OpenSees topology report: implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_topology_report.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"opensees_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "opensees_SCBF16B_shell_beam_mix",
+      "seconds": 1.131690263748169,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/parse_opensees_to_csr.py --model implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl --edges-out implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_shell_beam_mix_edges.json --csr-out implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_shell_beam_mix_csr.npz --report-out implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_shell_beam_mix_topology_report.json --require-real-topology --forbid-synthetic-source --require-shell-beam-mix",
+      "stdout_tail": "Wrote OpenSees topology report: implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_shell_beam_mix_topology_report.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"opensees_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "opensees_Luxinzheng_Megatall_Model1",
+      "seconds": 1.2652218341827393,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/parse_opensees_to_csr.py --model implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl --edges-out implementation/phase1/open_data/global_authority/run_artifacts/opensees/Luxinzheng_Megatall_Model1_edges.json --csr-out implementation/phase1/open_data/global_authority/run_artifacts/opensees/Luxinzheng_Megatall_Model1_csr.npz --report-out implementation/phase1/open_data/global_authority/run_artifacts/opensees/Luxinzheng_Megatall_Model1_topology_report.json --require-real-topology --forbid-synthetic-source --no-require-shell-beam-mix",
+      "stdout_tail": "Wrote OpenSees topology report: implementation/phase1/open_data/global_authority/run_artifacts/opensees/Luxinzheng_Megatall_Model1_topology_report.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"opensees_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "sac_SAC20_LA_holdout_01",
+      "return_code": 0,
+      "validation_only": true,
+      "holdout_only": true,
+      "hf_csv": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case01_hf.csv",
+      "lf_csv": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case01_lf.csv",
+      "hf_hash_valid": true,
+      "lf_hash_valid": true
+    },
+    {
+      "step": "sac_SAC20_SEA_holdout_02",
+      "return_code": 0,
+      "validation_only": true,
+      "holdout_only": true,
+      "hf_csv": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case02_hf.csv",
+      "lf_csv": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case02_lf.csv",
+      "hf_hash_valid": true,
+      "lf_hash_valid": true
+    },
+    {
+      "step": "sac_SAC20_BOS_holdout_03",
+      "return_code": 0,
+      "validation_only": true,
+      "holdout_only": true,
+      "hf_csv": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case03_hf.csv",
+      "lf_csv": "implementation/phase1/open_data/global_authority/sac/case_inputs/sac20_case03_lf.csv",
+      "hf_hash_valid": true,
+      "lf_hash_valid": true
+    },
+    {
+      "step": "nheri_NHERI_UCSD_like_holdout_01",
+      "return_code": 0,
+      "validation_only": true,
+      "holdout_only": true,
+      "sensor_csv": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case01_sensor.csv",
+      "baseline_csv": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case01_baseline.csv",
+      "sensor_hash_valid": true,
+      "baseline_hash_valid": true
+    },
+    {
+      "step": "nheri_NHERI_UCSD_like_holdout_02",
+      "return_code": 0,
+      "validation_only": true,
+      "holdout_only": true,
+      "sensor_csv": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case02_sensor.csv",
+      "baseline_csv": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case02_baseline.csv",
+      "sensor_hash_valid": true,
+      "baseline_hash_valid": true
+    },
+    {
+      "step": "nheri_NHERI_UCSD_like_holdout_03",
+      "return_code": 0,
+      "validation_only": true,
+      "holdout_only": true,
+      "sensor_csv": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_sensor.csv",
+      "baseline_csv": "implementation/phase1/open_data/global_authority/nheri/case_inputs/nheri_case03_baseline.csv",
+      "sensor_hash_valid": true,
+      "baseline_hash_valid": true
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "global authority gate passed",
+  "artifacts": {
+    "report_json": "implementation/phase1/global_authority_gate_report.json",
+    "case_metrics_npz_out": "implementation/phase1/global_authority_gate_report.metrics.npz"
+  }
+}

@@ -1,0 +1,40 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 760' role='img' aria-label='PEER Rebar Callout / Bar-Mark Sheet — Baseline'>
+  <rect width='100%' height='100%' fill='#0b1420'/>
+  <text x='56' y='54' fill='#f8fafc' font-size='28' font-weight='700'>PEER Rebar Callout / Bar-Mark Sheet — Baseline</text>
+  <text x='56' y='82' fill='#93c5fd' font-size='14'>Baseline proxy detail · bar-mark / spacing / leader callout focused sheet</text>
+
+  <rect x='46' y='120' width='650' height='590' rx='18' fill='#0f1b2b' stroke='#28425d'/>
+  <text x='74' y='156' fill='#e2e8f0' font-size='20' font-weight='700'>Column + Bent-Cap Rebar Elevation</text>
+  <line x1='150' y1='640' x2='150' y2='288' stroke='#7dd3fc' stroke-width='12'/>
+  <line x1='268' y1='640' x2='268' y2='288' stroke='#7dd3fc' stroke-width='12'/>
+  <line x1='96' y1='288' x2='322' y2='288' stroke='#a78bfa' stroke-width='18' stroke-linecap='round'/>
+  <line x1='112' y1='318' x2='306' y2='318' stroke='#f59e0b' stroke-width='4'/>
+  <line x1='112' y1='330' x2='306' y2='330' stroke='#fbbf24' stroke-width='4'/>
+  <line x1='150' y1='420' x2='70' y2='388' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+  <text x='74' y='384' fill='#cbd5e1' font-size='13'>B1 · column cage bar 4-#8 @ shell core</text>
+  <line x1='268' y1='420' x2='390' y2='384' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+  <text x='398' y='384' fill='#cbd5e1' font-size='13'>B2 · opposite cage bar set</text>
+  <line x1='242' y1='318' x2='458' y2='244' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+  <text x='468' y='240' fill='#cbd5e1' font-size='13'>T1 · cap top bars 2-#6 @ 6" c/c</text>
+  <line x1='242' y1='330' x2='458' y2='278' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+  <text x='468' y='274' fill='#cbd5e1' font-size='13'>T2 · lower cap bars 2-#6 @ 6" c/c</text>
+  <line x1='150' y1='548' x2='362' y2='584' stroke='#94a3b8' stroke-width='1.5' stroke-dasharray='6 5'/>
+  <text x='372' y='588' fill='#cbd5e1' font-size='13'>H1 · hoop / tie ring @ 8" spacing</text>
+  <text x='74' y='676' fill='#93c5fd' font-size='13'>Column OD 16.0" · cap beam 164.0" × 22.0"</text>
+
+  <rect x='728' y='120' width='426' height='270' rx='18' fill='#0f1b2b' stroke='#28425d'/>
+  <text x='756' y='156' fill='#e2e8f0' font-size='20' font-weight='700'>Bar-Mark Legend</text>
+  <text x='756' y='196' fill='#cbd5e1' font-size='13'>B1 · Column principal cage bar</text>
+  <text x='756' y='224' fill='#cbd5e1' font-size='13'>B2 · Opposite cage bar</text>
+  <text x='756' y='252' fill='#cbd5e1' font-size='13'>T1 · Cap top longitudinal bar</text>
+  <text x='756' y='280' fill='#cbd5e1' font-size='13'>T2 · Cap lower longitudinal bar</text>
+  <text x='756' y='308' fill='#cbd5e1' font-size='13'>H1 · Column hoop / tie ring</text>
+  <text x='756' y='336' fill='#93c5fd' font-size='13'>Spacing values are document-derived proxy callouts for review readability.</text>
+
+  <rect x='728' y='430' width='426' height='280' rx='18' fill='#0f1b2b' stroke='#28425d'/>
+  <text x='756' y='466' fill='#e2e8f0' font-size='20' font-weight='700'>Spacing / Leader Notes</text>
+  <text x='756' y='504' fill='#cbd5e1' font-size='13'>- Cap bars are presented with 6" c/c proxy spacing.</text>
+  <text x='756' y='532' fill='#cbd5e1' font-size='13'>- Hoop rings are shown at 8" spacing for confinement zone reading.</text>
+  <text x='756' y='560' fill='#cbd5e1' font-size='13'>- Leader lines are drawn to match benchmark HTML review behavior.</text>
+  <text x='756' y='588' fill='#93c5fd' font-size='13'>This is still a bounded proxy, but it reads more like an actual rebar detail sheet.</text>
+</svg>

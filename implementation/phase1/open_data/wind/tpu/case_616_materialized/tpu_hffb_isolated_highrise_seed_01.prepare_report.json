@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-prepare-tpu-hffb-seed",
+  "generated_at": "2026-03-19T13:28:22.351941+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU HFFB seed manifest prepared from raw CSV input.",
+  "inputs": {
+    "seed_manifest": "implementation/phase1/open_data/wind/tpu_hffb_seed_manifest.json",
+    "seed_id": "tpu_hffb_isolated_highrise_seed_01",
+    "raw_wind": "implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.csv",
+    "source_url": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=616",
+    "source_name": "TPU Aerodynamic Database - High-rise Buildings with Rectangular/Square Plan > T312_4"
+  },
+  "summary": {
+    "holdout_split": "val",
+    "case_role": "baseline_isolated_highrise",
+    "row_count": 32768,
+    "signal_column_count": 200,
+    "dt_s": 0.0009999999999976694,
+    "duration_hours": 0.009101944444444445
+  },
+  "artifacts": {
+    "out_manifest": "implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.source_manifest.json"
+  }
+}

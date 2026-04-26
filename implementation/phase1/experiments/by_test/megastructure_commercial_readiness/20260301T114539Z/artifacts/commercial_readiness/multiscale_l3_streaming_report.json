@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-multiscale-l3-streaming-profile",
+  "generated_at": "2026-03-01T11:32:39.036929+00:00",
+  "inputs": {
+    "total_nodes": 120000,
+    "branches": 64,
+    "freq_max_hz": 500.0,
+    "l3_cache_mb": 128.0,
+    "node_state_bytes": 96,
+    "near_field_ratio": 0.14,
+    "far_field_coarsen": 6.0,
+    "chunk_candidates": [
+      8,
+      12,
+      16,
+      24,
+      32
+    ]
+  },
+  "checks": {
+    "high_frequency_target": true,
+    "windowed_o_n_streaming": true,
+    "near_field_refined": true,
+    "has_cache_safe_chunk": true
+  },
+  "metrics": {
+    "refinement_factor": 6.25,
+    "active_nodes_window": 64870,
+    "active_node_ratio": 0.5405833333333333,
+    "cache_safe_chunk_count": 3,
+    "max_cache_safe_chunk": 16,
+    "recommended_chunk": 16,
+    "recommended_working_set_mb": 95.0244140625
+  },
+  "scenarios": [
+    {
+      "chunk": 8,
+      "active_nodes_window": 64870,
+      "working_set_mb": 47.51220703125,
+      "usable_l3_mb": 104.96,
+      "cache_pressure_ratio": 0.4526696554044398,
+      "cache_safe": true,
+      "branch_reload_count": 8
+    },
+    {
+      "chunk": 12,
+      "active_nodes_window": 64870,
+      "working_set_mb": 71.268310546875,
+      "usable_l3_mb": 104.96,
+      "cache_pressure_ratio": 0.6790044831066597,
+      "cache_safe": true,
+      "branch_reload_count": 6
+    },
+    {
+      "chunk": 16,
+      "active_nodes_window": 64870,
+      "working_set_mb": 95.0244140625,
+      "usable_l3_mb": 104.96,
+      "cache_pressure_ratio": 0.9053393108088796,
+      "cache_safe": true,
+      "branch_reload_count": 4
+    },
+    {
+      "chunk": 24,
+      "active_nodes_window": 64870,
+      "working_set_mb": 142.53662109375,
+      "usable_l3_mb": 104.96,
+      "cache_pressure_ratio": 1.3580089662133195,
+      "cache_safe": false,
+      "branch_reload_count": 3
+    },
+    {
+      "chunk": 32,
+      "active_nodes_window": 64870,
+      "working_set_mb": 190.048828125,
+      "usable_l3_mb": 104.96,
+      "cache_pressure_ratio": 1.8106786216177593,
+      "cache_safe": false,
+      "branch_reload_count": 2
+    }
+  ],
+  "recommended": {
+    "chunk": 16,
+    "active_nodes_window": 64870,
+    "working_set_mb": 95.0244140625,
+    "usable_l3_mb": 104.96,
+    "cache_pressure_ratio": 0.9053393108088796,
+    "cache_safe": true,
+    "branch_reload_count": 4
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "multi-scale L3 streaming profile passed"
+}

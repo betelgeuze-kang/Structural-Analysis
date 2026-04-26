@@ -1,0 +1,1144 @@
+{
+  "catalog_path": "implementation/phase1/open_data/irregular/irregular_structure_source_catalog.json",
+  "collector_version": "0.2.0",
+  "contract_pass": true,
+  "out_dir": "implementation/phase1/open_data/irregular/collected",
+  "reason": "irregular structure source catalog processed",
+  "reason_code": "PASS",
+  "records": [
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_multifamily_building_meb_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_multifamily_building_meb_local/C07_T01_P000_RC_01_\u2524\u2518\u2591\u00ed\u2592\u2555_\u2534\u2553\u253c\u251c.meb",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_multifamily_building_meb_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/midas_multifamily_building_meb_local.json"
+      },
+      "bytes_copied": 1354364,
+      "declared_format": "meb",
+      "family_id": "transfer_podium_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "alternate_authority_candidate_source_id": "peer_transfer_podium_tower_remote",
+        "benchmark_canonical_blocker": "Original MIDAS native binary is useful for roundtrip/native-source coverage, but this track still requires a benchmark-native IFC/TCL/MGT/INP source for canonical authority-grade promotion.",
+        "benchmark_canonical_eligible": false,
+        "native_binary_header": "MBDG",
+        "native_local_scope": "native_roundtrip_only"
+      },
+      "original_reference": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/C07_T01_P000_RC_01_\u2524\u2518\u2591\u00ed\u2592\u2555_\u2534\u2553\u253c\u251c.meb",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/C07_T01_P000_RC_01_\u2524\u2518\u2591\u00ed\u2592\u2555_\u2534\u2553\u253c\u251c.meb",
+      "sha256": "36b60663aca159c066c51f2c13bd0076ae4d05056e0a86e9e424a90f046ec07a",
+      "source_exists": true,
+      "source_format": "meb",
+      "source_id": "midas_multifamily_building_meb_local",
+      "source_index": 1,
+      "source_urls": [
+        "https://support.midasuser.com/"
+      ],
+      "status": "collected",
+      "title": "MIDAS multifamily building original native MEB"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/peer_transfer_podium_tower_remote",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/peer_transfer_podium_tower_remote/final_tbi_report_10.9.2017_0.pdf",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/peer_transfer_podium_tower_remote/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/peer_transfer_podium_tower_remote.json"
+      },
+      "bytes_copied": 2918230,
+      "declared_format": "report_pdf",
+      "family_id": "transfer_podium_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "official_final_report_url": "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+        "official_task12_report_url": "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf",
+        "official_task_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative/tasks"
+      },
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [
+        "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+        "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf"
+      ],
+      "remote_fetch_note": "provider_remote_asset",
+      "resolved_path": "",
+      "sha256": "2d8ba0cc836ab3f6f488d37c534f6dfd6d3a1133761a1ef3ed0572b74849e510",
+      "source_exists": true,
+      "source_format": "report_pdf",
+      "source_id": "peer_transfer_podium_tower_remote",
+      "source_index": 2,
+      "source_urls": [
+        "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
+        "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+        "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf"
+      ],
+      "status": "collected",
+      "title": "PEER transfer podium tower benchmark candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/transfer_podium_tower_proxy_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/transfer_podium_tower_proxy_local/model.json",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/transfer_podium_tower_proxy_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/transfer_podium_tower_proxy_local.json"
+      },
+      "bytes_copied": 11917,
+      "declared_format": "json_graph",
+      "family_id": "transfer_podium_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "bridge_contract_pass": true,
+        "bridge_exactness_tier": "raw-preview",
+        "bridge_mode": "point_scan_chain",
+        "bridge_report_path": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/bridge_report.json",
+        "bridge_source_id": "midas_support_multifamily_building_archive",
+        "canonical_promotion_blocker": "Canonical benchmark model has not been collected yet; current local evidence is a bridged decoded-preview graph.",
+        "canonical_promotion_next_source_id": "peer_transfer_podium_tower_remote",
+        "canonical_promotion_next_source_url": "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf",
+        "canonical_promotion_priority": 1,
+        "canonical_promotion_status": "source_hunt_pending"
+      },
+      "original_reference": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/model.json",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/model.json",
+      "sha256": "09c40b61837fdcd2b5157ebfbc604fe74111ab45b7fffd9727729432f96d4ef5",
+      "source_exists": true,
+      "source_format": "json_graph",
+      "source_id": "transfer_podium_tower_proxy_local",
+      "source_index": 3,
+      "source_urls": [
+        "https://support.midasuser.com/"
+      ],
+      "status": "collected",
+      "title": "Transfer podium tower local bridged graph from MIDAS multifamily building archive"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_neighborhood_facility_meb_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_neighborhood_facility_meb_local/C07_T02_P000_RC_02_\u2592\u2518\u2555\u2591\u2557\u00b2\u255a\u2591\u255c\u251c.meb",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_neighborhood_facility_meb_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/midas_neighborhood_facility_meb_local.json"
+      },
+      "bytes_copied": 1896404,
+      "declared_format": "meb",
+      "family_id": "soft_story_podium_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "alternate_authority_candidate_source_id": "nheri_soft_story_podium_remote",
+        "benchmark_canonical_blocker": "Original MIDAS native binary is useful for roundtrip/native-source coverage, but this track still requires a benchmark-native IFC/TCL/MGT/INP source for canonical authority-grade promotion.",
+        "benchmark_canonical_eligible": false,
+        "native_binary_header": "MBDG",
+        "native_local_scope": "native_roundtrip_only"
+      },
+      "original_reference": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/C07_T02_P000_RC_02_\u2592\u2518\u2555\u2591\u2557\u00b2\u255a\u2591\u255c\u251c.meb",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/C07_T02_P000_RC_02_\u2592\u2518\u2555\u2591\u2557\u00b2\u255a\u2591\u255c\u251c.meb",
+      "sha256": "cfd331cda8727c23afd0b1efba9c4b48a4c63247fda38e6cd635594efda3d7d9",
+      "source_exists": true,
+      "source_format": "meb",
+      "source_id": "midas_neighborhood_facility_meb_local",
+      "source_index": 4,
+      "source_urls": [
+        "https://support.midasuser.com/"
+      ],
+      "status": "collected",
+      "title": "MIDAS neighborhood facility original native MEB"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/main.tcl",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/nheri_soft_story_podium_remote.json"
+      },
+      "bytes_copied": 534400,
+      "declared_format": "tcl",
+      "designsafe_preview_bundle": {
+        "copied_paths": [
+          "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/analysis_steps.tcl",
+          "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/definitions.tcl",
+          "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/elements.tcl",
+          "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/main.tcl",
+          "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/materials.tcl",
+          "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/nodes.tcl",
+          "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/RCJointModel3D.tcl",
+          "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/nheri_soft_story_podium_remote/sections.tcl"
+        ],
+        "entry_count": 8,
+        "listing_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis",
+        "primary_preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl"
+      },
+      "family_id": "soft_story_podium_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "designsafe_listing_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis",
+        "designsafe_model_variant": "G+7 Infilled Frame / Fly Ash Brick Infill / Pilotis",
+        "designsafe_preview_paths": [
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/analysis_steps.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/definitions.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/elements.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/materials.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/nodes.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/RCJointModel3D.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/sections.tcl"
+        ],
+        "designsafe_primary_preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl",
+        "designsafe_project_id": "PRJ-4831",
+        "provider_asset_kind": "official_native_text_preview_bundle"
+      },
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "designsafe_preview_bundle",
+      "resolved_path": "",
+      "sha256": "20a1f433dde813304903fcf488b772dcb18c47f71ae8ef265fe5e158103db545",
+      "source_exists": true,
+      "source_format": "tcl",
+      "source_id": "nheri_soft_story_podium_remote",
+      "source_index": 5,
+      "source_urls": [
+        "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+        "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7%20Infilled%20Frame/Fly%20Ash%20Brick%20Infill/Pilotis"
+      ],
+      "status": "collected",
+      "title": "DesignSafe OpenSees pilotis RC frame package"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/soft_story_podium_tower_proxy_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/soft_story_podium_tower_proxy_local/model.json",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/soft_story_podium_tower_proxy_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/soft_story_podium_tower_proxy_local.json"
+      },
+      "bytes_copied": 11738,
+      "declared_format": "json_graph",
+      "family_id": "soft_story_podium_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "bridge_contract_pass": true,
+        "bridge_exactness_tier": "heuristic-preview",
+        "bridge_mode": "point_scan_chain",
+        "bridge_report_path": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/bridge_report.json",
+        "bridge_source_id": "midas_support_neighborhood_facility_archive",
+        "canonical_promotion_blocker": "Measured or model-text upstream source is not collected locally; current local evidence is a bridged decoded-preview graph.",
+        "canonical_promotion_next_source_id": "nheri_soft_story_podium_remote",
+        "canonical_promotion_next_source_url": "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+        "canonical_promotion_priority": 2,
+        "canonical_promotion_status": "source_hunt_pending"
+      },
+      "original_reference": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/model.json",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/model.json",
+      "sha256": "d650f6899d885a48dd4ac72480ce5caf01b58e2bd2a576b81944aaf61c80206a",
+      "source_exists": true,
+      "source_format": "json_graph",
+      "source_id": "soft_story_podium_tower_proxy_local",
+      "source_index": 6,
+      "source_urls": [
+        "https://support.midasuser.com/"
+      ],
+      "status": "collected",
+      "title": "Soft-story podium tower local bridged graph from MIDAS neighborhood facility archive"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/luxinzheng_megatall_tcl_model1_local.json"
+      },
+      "bytes_copied": 2850355,
+      "declared_format": "tcl",
+      "family_id": "torsionally_eccentric_core_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "benchmark_variant": "Model1",
+        "model_mesh_note": "Model 1 coarse mesh; package also includes Model 2 refined mesh.",
+        "upstream_provider": "Tsinghua University benchmark page referenced by opstool docs"
+      },
+      "original_reference": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl",
+      "sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+      "source_exists": true,
+      "source_format": "tcl",
+      "source_id": "luxinzheng_megatall_tcl_model1_local",
+      "source_index": 7,
+      "source_urls": [
+        "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+        "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip"
+      ],
+      "status": "collected",
+      "title": "OpenSees 606 m mega-tall building Model 1 TCL"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/offset_core_megatall_torsion_bridged_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/offset_core_megatall_torsion_bridged_local/model.json",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/offset_core_megatall_torsion_bridged_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/offset_core_megatall_torsion_bridged_local.json"
+      },
+      "bytes_copied": 165134,
+      "declared_format": "json_graph",
+      "family_id": "torsionally_eccentric_core_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "bridge_contract_pass": true,
+        "bridge_report_path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/bridge_report.json",
+        "canonical_promotion_blocker": "Resolved by harvested public OpenSees TCL source from the published 606 m mega-tall building benchmark package.",
+        "canonical_promotion_priority": 3,
+        "canonical_promotion_promoted_source_id": "luxinzheng_megatall_tcl_model1_local",
+        "canonical_promotion_status": "promoted_to_canonical"
+      },
+      "original_reference": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+      "sha256": "587222ebb76cb5343b44ab13f40af6ce42b1d396498152281cb3edcda84ffcc1",
+      "source_exists": true,
+      "source_format": "json_graph",
+      "source_id": "offset_core_megatall_torsion_bridged_local",
+      "source_index": 8,
+      "source_urls": [
+        "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+        "https://github.com/yexiang92/opstool"
+      ],
+      "status": "collected",
+      "title": "Offset-core megatall torsion bridged graph"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/tpu_interference_highrise_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/tpu_interference_highrise_local/tpu_hffb_interference_highrise_seed_01.csv",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/tpu_interference_highrise_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/tpu_interference_highrise_local.json"
+      },
+      "bytes_copied": 29958780,
+      "declared_format": "csv_tables",
+      "family_id": "torsionally_eccentric_core_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+      "sha256": "ab57db6f7b6bbc59051159d27b92b2f9a0a16981a3f59bbff746fc1f83719011",
+      "source_exists": true,
+      "source_format": "csv_tables",
+      "source_id": "tpu_interference_highrise_local",
+      "source_index": 9,
+      "source_urls": [
+        "https://db.wind.arch.t-kougei.ac.jp/"
+      ],
+      "status": "collected",
+      "title": "TPU interference highrise response proxy"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "report_pdf",
+      "family_id": "setback_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "report_pdf",
+      "source_id": "peer_setback_tower_remote",
+      "source_index": 10,
+      "source_urls": [
+        "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "PEER setback tower candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/setback_tower_proxy_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/setback_tower_proxy_local/DS3_TalTech_V4.ifc",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/setback_tower_proxy_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/setback_tower_proxy_local.json"
+      },
+      "bytes_copied": 38728810,
+      "declared_format": "ifc",
+      "family_id": "setback_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc",
+      "sha256": "05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+      "source_exists": true,
+      "source_format": "ifc",
+      "source_id": "setback_tower_proxy_local",
+      "source_index": 11,
+      "source_urls": [
+        "https://zenodo.org/"
+      ],
+      "status": "collected",
+      "title": "Setback tower local proxy from twisted tapered IFC"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "ifc",
+      "family_id": "reentrant_corner_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "ifc",
+      "source_id": "peer_reentrant_corner_remote",
+      "source_index": 12,
+      "source_urls": [
+        "https://peer.berkeley.edu/"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "PEER re-entrant corner tower candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/reentrant_corner_tower_proxy_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/reentrant_corner_tower_proxy_local/a4.ifc",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/reentrant_corner_tower_proxy_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/reentrant_corner_tower_proxy_local.json"
+      },
+      "bytes_copied": 1315735,
+      "declared_format": "ifc",
+      "family_id": "reentrant_corner_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "implementation/phase1/open_data/irregular/collected/artifacts/skewed_column_frame_remote/a4.ifc",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/skewed_column_frame_remote/a4.ifc",
+      "sha256": "824e4a363a042c565bdd52490e8728a92bb415a05ac6b82d11f1c083d7f98ec0",
+      "source_exists": true,
+      "source_format": "ifc",
+      "source_id": "reentrant_corner_tower_proxy_local",
+      "source_index": 13,
+      "source_urls": [
+        "https://zenodo.org/"
+      ],
+      "status": "collected",
+      "title": "Re-entrant corner local proxy from skewed column IFC"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/opstool_606m_megatall_model_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/opstool_606m_megatall_model_local/model.json",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/opstool_606m_megatall_model_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/opstool_606m_megatall_model_local.json"
+      },
+      "bytes_copied": 165134,
+      "declared_format": "json_graph",
+      "family_id": "outrigger_megatall_offset_core",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "bridge_contract_pass": true,
+        "bridge_report_path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/bridge_report.json"
+      },
+      "original_reference": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+      "sha256": "587222ebb76cb5343b44ab13f40af6ce42b1d396498152281cb3edcda84ffcc1",
+      "source_exists": true,
+      "source_format": "json_graph",
+      "source_id": "opstool_606m_megatall_model_local",
+      "source_index": 14,
+      "source_urls": [
+        "https://github.com/utopiatek/opstool"
+      ],
+      "status": "collected",
+      "title": "Opstool 606m megatall bridged model"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/amaelkady_constructbrace_github_remote",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/amaelkady_constructbrace_github_remote/ConstructBrace.tcl",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/amaelkady_constructbrace_github_remote/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/amaelkady_constructbrace_github_remote.json"
+      },
+      "bytes_copied": 3062,
+      "declared_format": "tcl",
+      "family_id": "discontinuous_braced_frame_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "github_api_url": "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files",
+        "github_download_url": "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/ConstructBrace.tcl"
+      },
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/ConstructBrace.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/ConstructFiberColumn.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/ConstructPanel_Rectangle.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/DisplayModel3D.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/DisplayPlane.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/DynamicAnalysisCollapseSolverX.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/FatigueMat.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/FiberCHSS.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/FiberRHSS.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/FiberWF.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Generate_lognrmrand.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/LibAnalysisStaticParameters.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/MaxDriftTesterOriginal.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF12B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF12CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF16B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF16CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF2B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF2CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF3B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF3CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF6B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF6CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SDRlimitTester.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SolutionAlgorithm.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SolutionAlgorithmSubFile.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Elastic.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Gusset.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_IMK.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_PZ.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Pinching.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Rigid.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Zero.tcl"
+      ],
+      "remote_fetch_note": "provider_remote_asset",
+      "resolved_path": "",
+      "sha256": "a0d8554dbf0c6f7b3e79ab4581c71b07cdfdd8a936bddfaa12dc6c54ce76d416",
+      "source_exists": true,
+      "source_format": "tcl",
+      "source_id": "amaelkady_constructbrace_github_remote",
+      "source_index": 15,
+      "source_urls": [
+        "https://github.com/amaelkady/OpenSEES_Models_CBF"
+      ],
+      "status": "collected",
+      "title": "ConstructBrace OpenSees GitHub raw proxy"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/amaelkady_scbf16cg_github_remote",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/amaelkady_scbf16cg_github_remote/ConstructBrace.tcl",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/amaelkady_scbf16cg_github_remote/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/amaelkady_scbf16cg_github_remote.json"
+      },
+      "bytes_copied": 3062,
+      "declared_format": "tcl",
+      "family_id": "discontinuous_braced_frame_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "github_api_url": "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files",
+        "github_download_url": "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF16CG.tcl",
+        "provider_asset_kind": "opensees_tcl_benchmark"
+      },
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/ConstructBrace.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/ConstructFiberColumn.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/ConstructPanel_Rectangle.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/DisplayModel3D.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/DisplayPlane.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/DynamicAnalysisCollapseSolverX.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/FatigueMat.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/FiberCHSS.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/FiberRHSS.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/FiberWF.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Generate_lognrmrand.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/LibAnalysisStaticParameters.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/MaxDriftTesterOriginal.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF12B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF12CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF16B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF16CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF2B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF2CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF3B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF3CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF6B.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF6CG.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SDRlimitTester.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SolutionAlgorithm.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SolutionAlgorithmSubFile.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Elastic.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Gusset.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_IMK.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_PZ.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Pinching.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Rigid.tcl",
+        "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/Spring_Zero.tcl"
+      ],
+      "remote_fetch_note": "provider_remote_asset",
+      "resolved_path": "",
+      "sha256": "a0d8554dbf0c6f7b3e79ab4581c71b07cdfdd8a936bddfaa12dc6c54ce76d416",
+      "source_exists": true,
+      "source_format": "tcl",
+      "source_id": "amaelkady_scbf16cg_github_remote",
+      "source_index": 16,
+      "source_urls": [
+        "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files"
+      ],
+      "status": "collected",
+      "title": "SCBF16CG OpenSees GitHub raw benchmark candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/scbf16b_shell_beam_mix_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/scbf16b_shell_beam_mix_local/SCBF16B_shell_beam_mix.tcl",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/scbf16b_shell_beam_mix_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/scbf16b_shell_beam_mix_local.json"
+      },
+      "bytes_copied": 118474,
+      "declared_format": "tcl",
+      "family_id": "discontinuous_braced_frame_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+      "sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+      "source_exists": true,
+      "source_format": "tcl",
+      "source_id": "scbf16b_shell_beam_mix_local",
+      "source_index": 17,
+      "source_urls": [
+        "https://opensees.berkeley.edu/"
+      ],
+      "status": "collected",
+      "title": "SCBF16B shell-beam mixed OpenSees model"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "ifc",
+      "family_id": "hanging_column_podium_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "ifc",
+      "source_id": "hanging_column_tower_remote",
+      "source_index": 18,
+      "source_urls": [
+        "https://www.designsafe-ci.org/"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "Hanging-column tower benchmark candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "ifc",
+      "family_id": "diagrid_exoskeleton_asymmetric_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "ifc",
+      "source_id": "diagrid_exoskeleton_remote",
+      "source_index": 19,
+      "source_urls": [
+        "https://www.ctbuh.org/"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "Diagrid exoskeleton asymmetric tower candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "ifc",
+      "family_id": "split_core_linked_towers",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "ifc",
+      "source_id": "split_core_linked_towers_remote",
+      "source_index": 20,
+      "source_urls": [
+        "https://www.ctbuh.org/"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "Split-core linked towers candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "ifc",
+      "family_id": "cantilevered_upper_volume_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "ifc",
+      "source_id": "cantilevered_upper_volume_remote",
+      "source_index": 21,
+      "source_urls": [
+        "https://www.structurae.net/"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "Cantilevered upper-volume tower candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "metadata_json",
+      "family_id": "vertical_mass_jump_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "metadata_json",
+      "source_id": "vertical_mass_jump_remote",
+      "source_index": 22,
+      "source_urls": [
+        "https://www.usgs.gov/programs/earthquake-hazards/nsmp-national-strong-motion-project"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "Vertical mass jump tower candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "ifc",
+      "family_id": "atrium_void_ring_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "ifc",
+      "source_id": "atrium_void_ring_remote",
+      "source_index": 23,
+      "source_urls": [
+        "https://www.buildingsmart.org/"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "Atrium void ring tower candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/twisted_tapered_tower_remote.json"
+      },
+      "bytes_copied": 38728810,
+      "declared_format": "ifc",
+      "family_id": "twisted_tapered_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "provider_asset_kind": "ifc_geometry_proxy",
+        "zenodo_download_url": "https://zenodo.org/records/15782433/files/DS3_TalTech_V4.ifc?download=1"
+      },
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [
+        "https://zenodo.org/records/15782433/files/DS3_TalTech_V4.ifc?download=1"
+      ],
+      "remote_fetch_note": "provider_remote_asset",
+      "resolved_path": "",
+      "sha256": "05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+      "source_exists": true,
+      "source_format": "ifc",
+      "source_id": "twisted_tapered_tower_remote",
+      "source_index": 24,
+      "source_urls": [
+        "https://www.rhino3d.com/inside/revit/"
+      ],
+      "status": "collected",
+      "title": "Twisted tapered tower candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "ifc",
+      "family_id": "sloped_site_stepped_podium_tower",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "ifc",
+      "source_id": "sloped_site_stepped_podium_remote",
+      "source_index": 25,
+      "source_urls": [
+        "https://www.structurae.net/"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "Sloped-site stepped podium tower candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/skewed_column_frame_remote",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/skewed_column_frame_remote/a4.ifc",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/skewed_column_frame_remote/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/skewed_column_frame_remote.json"
+      },
+      "bytes_copied": 1315735,
+      "declared_format": "ifc",
+      "family_id": "skewed_column_frame",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {
+        "provider_asset_kind": "ifc_geometry_proxy",
+        "zenodo_download_url": "https://zenodo.org/records/5047709/files/a4.ifc?download=1"
+      },
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [
+        "https://zenodo.org/records/5047709/files/a4.ifc?download=1"
+      ],
+      "remote_fetch_note": "provider_remote_asset",
+      "resolved_path": "",
+      "sha256": "824e4a363a042c565bdd52490e8728a92bb415a05ac6b82d11f1c083d7f98ec0",
+      "source_exists": true,
+      "source_format": "ifc",
+      "source_id": "skewed_column_frame_remote",
+      "source_index": 26,
+      "source_urls": [
+        "https://www.buildingsmart.org/"
+      ],
+      "status": "collected",
+      "title": "Skewed-column frame candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_bearing_c04_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_bearing_c04_local/gtc_public_bridge_bearing_c04.mgt",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_bearing_c04_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/gtc_public_bridge_bearing_c04_local.json"
+      },
+      "bytes_copied": 161948,
+      "declared_format": "mgt",
+      "family_id": "bridge_skewed_support_span",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt",
+      "sha256": "a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610",
+      "source_exists": true,
+      "source_format": "mgt",
+      "source_id": "gtc_public_bridge_bearing_c04_local",
+      "source_index": 27,
+      "source_urls": [
+        "https://gtc.midasuser.com/"
+      ],
+      "status": "collected",
+      "title": "GTC public bridge bearing C04 raw MIDAS model"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_section_a3_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_section_a3_local/gtc_public_bridge_section_a3.mgt",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_section_a3_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/gtc_public_bridge_section_a3_local.json"
+      },
+      "bytes_copied": 77481,
+      "declared_format": "mgt",
+      "family_id": "curved_plan_bridge_torsion",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt",
+      "sha256": "dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6",
+      "source_exists": true,
+      "source_format": "mgt",
+      "source_id": "gtc_public_bridge_section_a3_local",
+      "source_index": 28,
+      "source_urls": [
+        "https://gtc.midasuser.com/"
+      ],
+      "status": "collected",
+      "title": "GTC public curved bridge section A3 raw MIDAS model"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_section_e1_03_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_section_e1_03_local/gtc_public_bridge_section_e1_03.mgt",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_section_e1_03_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/gtc_public_bridge_section_e1_03_local.json"
+      },
+      "bytes_copied": 143351,
+      "declared_format": "mgt",
+      "family_id": "curved_plan_bridge_torsion",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_e1_03.mgt",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_e1_03.mgt",
+      "sha256": "07b32b0cf376d0eb81174e53873e79a92c36b54a770996d2b4d068b8f585c14e",
+      "source_exists": true,
+      "source_format": "mgt",
+      "source_id": "gtc_public_bridge_section_e1_03_local",
+      "source_index": 29,
+      "source_urls": [
+        "https://gtc.midasuser.com/"
+      ],
+      "status": "collected",
+      "title": "GTC public curved bridge section E1-03 raw MIDAS model"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_fcm_bridge_archive_local",
+        "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_fcm_bridge_archive_local/FCM Bridge.mcb",
+        "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_fcm_bridge_archive_local/source_metadata.json",
+        "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/midas_fcm_bridge_archive_local.json"
+      },
+      "bytes_copied": 2067979,
+      "declared_format": "mcb",
+      "family_id": "curved_plan_bridge_torsion",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb",
+      "reference_scheme": "local_path",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "",
+      "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb",
+      "sha256": "2422df2ffba472564b8f071850b4f9187cee58cc5ccfe1f3edddfa83c192130d",
+      "source_exists": true,
+      "source_format": "mcb",
+      "source_id": "midas_fcm_bridge_archive_local",
+      "source_index": 30,
+      "source_urls": [
+        "https://gtc.midasuser.com/"
+      ],
+      "status": "collected",
+      "title": "MIDAS support FCM bridge archive geometry proxy"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "ifc",
+      "family_id": "long_span_irregular_roof_truss",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "ifc",
+      "source_id": "iass_long_span_roof_remote",
+      "source_index": 31,
+      "source_urls": [
+        "https://iass-structures.org/"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "IASS long-span irregular roof truss candidate"
+    },
+    {
+      "artifacts": {
+        "artifact_dir": "",
+        "source_metadata_path": "",
+        "source_report_path": ""
+      },
+      "bytes_copied": 0,
+      "declared_format": "step",
+      "family_id": "free_form_shell_core_hybrid",
+      "format_detection_mode": "declared_formats_list",
+      "metadata": {},
+      "original_reference": "",
+      "reference_scheme": "",
+      "reject_reason": "",
+      "remote_candidate_urls": [],
+      "remote_fetch_note": "no_direct_asset_candidate",
+      "resolved_path": "",
+      "sha256": "",
+      "source_exists": false,
+      "source_format": "step",
+      "source_id": "iass_freeform_shell_remote",
+      "source_index": 32,
+      "source_urls": [
+        "https://iass-structures.org/"
+      ],
+      "status": "metadata_only_remote_candidate",
+      "title": "IASS free-form shell core hybrid candidate"
+    }
+  ],
+  "schema_version": "1.0",
+  "summary": {
+    "collected_count": 21,
+    "declared_format_count": 32,
+    "file_url_count": 0,
+    "format_counts": {
+      "csv_tables": 1,
+      "dxf": 0,
+      "gh": 0,
+      "ifc": 12,
+      "iges": 0,
+      "inp": 0,
+      "json_graph": 4,
+      "mat": 0,
+      "mcb": 1,
+      "meb": 2,
+      "metadata_json": 1,
+      "mgt": 3,
+      "mmbx": 0,
+      "model_text": 0,
+      "npz": 0,
+      "report_pdf": 2,
+      "rhino_3dm": 0,
+      "sensor_csv": 0,
+      "step": 1,
+      "tcl": 5,
+      "zip_bundle": 0
+    },
+    "inferred_format_count": 0,
+    "local_path_count": 15,
+    "metadata_only_remote_candidate_count": 11,
+    "rejected_count": 0,
+    "remote_reference_count": 17,
+    "source_count": 32,
+    "status_counts": {
+      "collected": 21,
+      "metadata_only_remote_candidate": 11,
+      "rejected": 0
+    },
+    "total_bytes_copied": 122530903
+  }
+}

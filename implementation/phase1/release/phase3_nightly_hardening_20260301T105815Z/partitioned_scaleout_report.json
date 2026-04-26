@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-partitioned-scaleout",
+  "generated_at": "2026-03-01T10:54:20.936262+00:00",
+  "inputs": {
+    "dof_levels": "1000000,3000000,10000000",
+    "partitions": 16,
+    "branches": 64,
+    "chunk_candidates": "64,32,16,8,4,2,1",
+    "halo_depth": 1,
+    "sample_nodes": 20000,
+    "state_components": 5,
+    "edge_cut_ratio_max": 0.12,
+    "halo_node_ratio_max": 0.18,
+    "gpu_strict": true,
+    "allow_cpu_required": false,
+    "graph_jsonl": "",
+    "edge_list_json": "implementation/phase1/open_data/megastructure/opensees_edges.json",
+    "require_real_graph": true,
+    "ci_mode": "nightly",
+    "work_dir": "implementation/phase1/stress/partitioned_scaleout",
+    "out": "implementation/phase1/partitioned_scaleout_report.json"
+  },
+  "checks": {
+    "pr_scale_pass": true,
+    "nightly_scale_pass": true,
+    "gpu_strict_required": true,
+    "gpu_strict_pass": true,
+    "on_scaling_regression_pass": true,
+    "real_graph_required": true,
+    "real_graph_used": true
+  },
+  "complexity_regression": {
+    "memory_loglog_slope": -0.12751736221638033,
+    "latency_loglog_slope": 1.0159855529284154,
+    "memory_slope_limit": 1.35,
+    "latency_slope_limit": 1.6
+  },
+  "level_rows": [
+    {
+      "node_count": 1000000,
+      "profiled_node_count": 62538,
+      "real_graph_used": true,
+      "partition_report": "implementation/phase1/stress/partitioned_scaleout/partition_quality_n1000000.json",
+      "scaleout_report": "implementation/phase1/stress/partitioned_scaleout/scaleout_n1000000.json",
+      "partition_contract_pass": true,
+      "partition_cut_ratio": 0.000662361318099023,
+      "partition_halo_node_ratio": 0.0006,
+      "partition_balance_ratio": 1.0,
+      "partition_estimated_comm_bytes": 320.0,
+      "scaleout_contract_pass": true,
+      "scaleout_gpu_strict_pass": true,
+      "scaleout_1m_microbatch_pass": false,
+      "recommended_working_set_mb": 81.2552490234375,
+      "recommended_avg_branch_ms": 24.5763735,
+      "projected_total_working_set_mb": 1300.083984375,
+      "projected_total_avg_branch_ms": 393.221976
+    },
+    {
+      "node_count": 3000000,
+      "profiled_node_count": 187613,
+      "real_graph_used": true,
+      "partition_report": "implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json",
+      "scaleout_report": "implementation/phase1/stress/partitioned_scaleout/scaleout_n3000000.json",
+      "partition_contract_pass": true,
+      "partition_cut_ratio": 0.000662361318099023,
+      "partition_halo_node_ratio": 0.0006,
+      "partition_balance_ratio": 1.0,
+      "partition_estimated_comm_bytes": 320.0,
+      "scaleout_contract_pass": true,
+      "scaleout_gpu_strict_pass": true,
+      "scaleout_1m_microbatch_pass": false,
+      "recommended_working_set_mb": 45.470603942871094,
+      "recommended_avg_branch_ms": 75.82475787499999,
+      "projected_total_working_set_mb": 727.5296630859375,
+      "projected_total_avg_branch_ms": 1213.1961259999998
+    },
+    {
+      "node_count": 10000000,
+      "profiled_node_count": 625375,
+      "real_graph_used": true,
+      "partition_report": "implementation/phase1/stress/partitioned_scaleout/partition_quality_n10000000.json",
+      "scaleout_report": "implementation/phase1/stress/partitioned_scaleout/scaleout_n10000000.json",
+      "partition_contract_pass": true,
+      "partition_cut_ratio": 0.000662361318099023,
+      "partition_halo_node_ratio": 0.0006,
+      "partition_balance_ratio": 1.0,
+      "partition_estimated_comm_bytes": 320.0,
+      "scaleout_contract_pass": true,
+      "scaleout_gpu_strict_pass": true,
+      "scaleout_1m_microbatch_pass": false,
+      "recommended_working_set_mb": 59.784244537353516,
+      "recommended_avg_branch_ms": 255.05856489062495,
+      "projected_total_working_set_mb": 956.5479125976562,
+      "projected_total_avg_branch_ms": 4080.937038249999
+    }
+  ],
+  "steps": [
+    {
+      "step": "partition_quality",
+      "node_count": 1000000,
+      "real_graph_used": true,
+      "seconds": 0.9968435764312744,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/graph_partition_metis.py --node-count 20000 --k-partitions 16 --halo-depth 1 --state-components 5 --max-cut-ratio 0.12 --max-halo-node-ratio 0.18 --out implementation/phase1/stress/partitioned_scaleout/partition_quality_n1000000.json --edges implementation/phase1/stress/partitioned_scaleout/partition_edges_n1000000.json",
+      "stdout_tail": "Wrote partition quality report: implementation/phase1/stress/partitioned_scaleout/partition_quality_n1000000.json\n",
+      "stderr_tail": "{\"backend\": \"greedy_fallback\", \"contract_pass\": true, \"cut_ratio\": 0.000662361318099023, \"event\": \"partition.completed\"}\n"
+    },
+    {
+      "step": "scaleout_profile",
+      "node_count": 1000000,
+      "seconds": 15.658979892730713,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_scaleout_io_profile.py --dof-levels 62538 --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --state-components 5 --out implementation/phase1/stress/partitioned_scaleout/scaleout_n1000000.json --disable-1m-gate --gpu-strict",
+      "stdout_tail": "Wrote scale-out IO profile report: implementation/phase1/stress/partitioned_scaleout/scaleout_n1000000.json\n",
+      "stderr_tail": "{\"allow_cpu_required\": false, \"dof_levels\": [62538], \"event\": \"scaleout_io.start\"}\n{\"contract_pass\": true, \"event\": \"scaleout_io.completed\", \"levels\": 1, \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "partition_quality",
+      "node_count": 3000000,
+      "real_graph_used": true,
+      "seconds": 0.9634206295013428,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/graph_partition_metis.py --node-count 20000 --k-partitions 16 --halo-depth 1 --state-components 5 --max-cut-ratio 0.12 --max-halo-node-ratio 0.18 --out implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json --edges implementation/phase1/stress/partitioned_scaleout/partition_edges_n3000000.json",
+      "stdout_tail": "Wrote partition quality report: implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json\n",
+      "stderr_tail": "{\"backend\": \"greedy_fallback\", \"contract_pass\": true, \"cut_ratio\": 0.000662361318099023, \"event\": \"partition.completed\"}\n"
+    },
+    {
+      "step": "scaleout_profile",
+      "node_count": 3000000,
+      "seconds": 22.05273962020874,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_scaleout_io_profile.py --dof-levels 187613 --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --state-components 5 --out implementation/phase1/stress/partitioned_scaleout/scaleout_n3000000.json --disable-1m-gate --gpu-strict",
+      "stdout_tail": "Wrote scale-out IO profile report: implementation/phase1/stress/partitioned_scaleout/scaleout_n3000000.json\n",
+      "stderr_tail": "{\"allow_cpu_required\": false, \"dof_levels\": [187613], \"event\": \"scaleout_io.start\"}\n{\"contract_pass\": true, \"event\": \"scaleout_io.completed\", \"levels\": 1, \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "partition_quality",
+      "node_count": 10000000,
+      "real_graph_used": true,
+      "seconds": 0.9938993453979492,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/graph_partition_metis.py --node-count 20000 --k-partitions 16 --halo-depth 1 --state-components 5 --max-cut-ratio 0.12 --max-halo-node-ratio 0.18 --out implementation/phase1/stress/partitioned_scaleout/partition_quality_n10000000.json --edges implementation/phase1/stress/partitioned_scaleout/partition_edges_n10000000.json",
+      "stdout_tail": "Wrote partition quality report: implementation/phase1/stress/partitioned_scaleout/partition_quality_n10000000.json\n",
+      "stderr_tail": "{\"backend\": \"greedy_fallback\", \"contract_pass\": true, \"cut_ratio\": 0.000662361318099023, \"event\": \"partition.completed\"}\n"
+    },
+    {
+      "step": "scaleout_profile",
+      "node_count": 10000000,
+      "seconds": 44.84100914001465,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_scaleout_io_profile.py --dof-levels 625375 --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --state-components 5 --out implementation/phase1/stress/partitioned_scaleout/scaleout_n10000000.json --disable-1m-gate --gpu-strict",
+      "stdout_tail": "Wrote scale-out IO profile report: implementation/phase1/stress/partitioned_scaleout/scaleout_n10000000.json\n",
+      "stderr_tail": "{\"allow_cpu_required\": false, \"dof_levels\": [625375], \"event\": \"scaleout_io.start\"}\n{\"contract_pass\": true, \"event\": \"scaleout_io.completed\", \"levels\": 1, \"reason_code\": \"PASS\"}\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "partitioned scaleout passed"
+}

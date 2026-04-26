@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "job_id": "authoring::native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200::workspace-summary",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "snapshot_id": "authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_workspace-summary__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_workspace_summary.json",
+      "label": "native_authoring_workspace_summary.json",
+      "sha256": "e8360a36ced0f8404d51b1a6cc6f441cbf40289a936f2b4f1a8f49df3f380b49",
+      "bytes": 14585
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_workspace_draft.json",
+      "label": "native_authoring_workspace_draft.json",
+      "sha256": "d0e593cad4f88e5e6466d9293d9303df4971f6a258b25e0eca855e765cd53eea",
+      "bytes": 1100
+    }
+  ],
+  "summary": {
+    "artifact_count": 2
+  }
+}

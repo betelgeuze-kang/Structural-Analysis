@@ -1,0 +1,14 @@
+MIDAS source vs output diff preview
+source_mgt=/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.mgt
+output_mgt=implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt
+source_vs_output_mgt: changed=419 | added=31 | removed=0 | source_lines=37040 | output_lines=37071
+
+Sample delta lines:
+~ 1166, PLATE , 4, 6, 3634, 3625, 3624, 3148, 4, 0 -> 1166, PLATE, 13, 6, 3634, 3625, 3624, 3148, 4, 0
+~ 1168, PLATE , 4, 6, 3628, 3627, 3635, 3149, 4, 0 -> 1168, PLATE, 13, 6, 3628, 3627, 3635, 3149, 4, 0
+~ 1170, PLATE , 4, 6, 3636, 3626, 3625, 3634, 4, 0 -> 1170, PLATE, 13, 6, 3636, 3626, 3625, 3634, 4, 0
+~ 1172, PLATE , 4, 6, 3635, 3627, 3626, 3636, 4, 0 -> 1172, PLATE, 13, 6, 3635, 3627, 3626, 3636, 4, 0
+~ 1261, BEAM , 1, 307, 2288, 2287, 0, 0 -> 1261, BEAM, 27, 307, 2288, 2287, 0, 0
+~ 1409, PLATE , 4, 1, 2329, 3650, 3651, 2567, 4, 0 -> 1409, PLATE, 20, 1, 2329, 3650, 3651, 2567, 4, 0
+~ 1410, PLATE , 4, 1, 3651, 3652, 2568, 2567, 4, 0 -> 1410, PLATE, 20, 1, 3651, 3652, 2568, 2567, 4, 0
+~ 1411, PLATE , 4, 1, 3652, 3653, 2569, 2568, 4, 0 -> 1411, PLATE, 20, 1, 3652, 3653, 2569, 2568, 4, 0

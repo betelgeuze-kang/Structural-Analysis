@@ -1,0 +1,9 @@
+{
+  "source_origin_class": "trusted_external_solver_source",
+  "inputs": {
+    "joint_geometry_source": "../joint_geometry_source.json",
+    "rebar_anchorage_source": "../rebar_anchorage_source.json",
+    "clash_verification_source": "../clash_verification_source.json",
+    "member_mapping_sidecar": "member_mapping_sidecar.json"
+  }
+}

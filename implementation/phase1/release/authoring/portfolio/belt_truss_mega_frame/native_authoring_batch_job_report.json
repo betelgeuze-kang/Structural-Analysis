@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-batch-job-runner",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "inputs": {
+    "snapshot_root": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/snapshots",
+    "out": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_batch_job_report.json",
+    "materialize_snapshots": true
+  },
+  "summary": {
+    "job_count": 3,
+    "status_counts": {
+      "completed": 3
+    },
+    "snapshot_count": 3,
+    "rerun_requested_count": 0,
+    "completed_count": 3,
+    "failed_count": 0,
+    "planned_count": 0,
+    "blocked_count": 0
+  },
+  "checks": {
+    "queue_rows_present_pass": true,
+    "rerun_requests_tracked_pass": true,
+    "snapshot_manifest_written_pass": true
+  },
+  "queue_rows": [
+    {
+      "job_id": "authoring::native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200::workspace-summary",
+      "phase": "authoring_release",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "workspace_summary",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_workspace_summary.json",
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_workspace_draft.json"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring bundle: PASS | stories=12 | nodes=91 | members=270 | loads=6 | unsupported=0 | unresolved=0 | score=100.0 | family=belt_truss_mega_frame",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/snapshots/authoring_native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200::solver-session",
+      "phase": "authoring_solver",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "solver_session",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_solver_session.json",
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_solver_session.loadcomb_preview.mgt"
+      ],
+      "rerun_count": 0,
+      "note": "Native authoring solver session: PASS | meshes=6 | cells=1162 | combos=23 | family=KDS-2022 | authoring_family=belt_truss_mega_frame",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/snapshots/authoring_native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200_solver-session/snapshot_manifest.json"
+    },
+    {
+      "job_id": "authoring::native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200::project-registry",
+      "phase": "authoring_registry",
+      "benchmark_family": "native_authoring_workspace",
+      "submission_scope": "signed_project_registry",
+      "lifecycle_status": "completed",
+      "input_path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_workspace_summary.json",
+      "artifact_paths": [
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+        "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_package.zip",
+        "implementation/phase1/release/signing/native_authoring_portfolio/belt_truss_mega_frame/native_authoring_project_registry_ed25519.pub.pem",
+        "implementation/phase1/release/signing/native_authoring_portfolio/belt_truss_mega_frame/native_authoring_project_registry.signature.b64"
+      ],
+      "rerun_count": 0,
+      "note": "Project registry service: PASS | artifacts=4 | audit=4 | approvals=3/3 | package_repro=True | signature_verified=True",
+      "latest_snapshot": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/snapshots/authoring_native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_rows": [
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200::workspace-summary",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200_workspace-summary__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_workspace_summary.json",
+          "label": "native_authoring_workspace_summary.json",
+          "sha256": "41722bb678f78da0232c157895185901309bd753c33f05ccd2caa425ecbaf3b8",
+          "bytes": 15416
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_workspace_draft.json",
+          "label": "native_authoring_workspace_draft.json",
+          "sha256": "3a95d5893f22bf8182ae38609726de6ee81a85893302bead880b7e27ccd40050",
+          "bytes": 1102
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/snapshots/authoring_native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200_workspace-summary/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200::solver-session",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200_solver-session__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_solver_session.json",
+          "label": "native_authoring_solver_session.json",
+          "sha256": "0b2981e3afd92a292c24dae446a17f1e32e0ec378aa668a83ec0e062b1ba7669",
+          "bytes": 83442
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_solver_session.loadcomb_preview.mgt",
+          "label": "native_authoring_solver_session.loadcomb_preview.mgt",
+          "sha256": "dc52f7b14bfa7ea65f5adb0d314bc239749116cd945022a0f0dcfed297c3df14",
+          "bytes": 2998
+        }
+      ],
+      "summary": {
+        "artifact_count": 2
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/snapshots/authoring_native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200_solver-session/snapshot_manifest.json"
+    },
+    {
+      "schema_version": "1.0",
+      "job_id": "authoring::native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200::project-registry",
+      "generated_at": "2026-04-21T12:42:19.409354+00:00",
+      "snapshot_id": "authoring_native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200_project-registry__snapshot",
+      "artifact_rows": [
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_registry.json",
+          "label": "native_authoring_project_registry.json",
+          "sha256": "40f1a821304d7e1b4c9b1a3c14be6433bbc0ce5be1c3db3ef33abbf6e4542033",
+          "bytes": 10312
+        },
+        {
+          "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/native_authoring_project_package.zip",
+          "label": "native_authoring_project_package.zip",
+          "sha256": "d12332a4f4c2b4487f8c676f52090be8d510424ff4da05a50f9402665fac17cb",
+          "bytes": 105818
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_portfolio/belt_truss_mega_frame/native_authoring_project_registry_ed25519.pub.pem",
+          "label": "native_authoring_project_registry_ed25519.pub.pem",
+          "sha256": "1307950cae6707add1e7fcc7267a45814c0286611cdc179d04981c6004455b82",
+          "bytes": 113
+        },
+        {
+          "path": "implementation/phase1/release/signing/native_authoring_portfolio/belt_truss_mega_frame/native_authoring_project_registry.signature.b64",
+          "label": "native_authoring_project_registry.signature.b64",
+          "sha256": "e57c049f5fc185c4c1717ebae5363206fdcffb2bcb9c030cd760a2170f60d5b2",
+          "bytes": 89
+        }
+      ],
+      "summary": {
+        "artifact_count": 4
+      },
+      "path": "implementation/phase1/release/authoring/portfolio/belt_truss_mega_frame/snapshots/authoring_native-authoring-belt-truss-mega-frame-12s-06b-042h-06lp-steel-h-600x200_project-registry/snapshot_manifest.json"
+    }
+  ],
+  "snapshot_errors": [],
+  "summary_line": "Batch job runner: PASS | jobs=3 | snapshots=3 | reruns=0 | statuses=completed=3",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "batch job queue and snapshots updated"
+}

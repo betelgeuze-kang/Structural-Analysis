@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0",
+  "mode": "public_bridge_identity_baseline",
+  "changes": [],
+  "notes": [
+    "public archive-derived bridge-native identity baseline"
+  ]
+}

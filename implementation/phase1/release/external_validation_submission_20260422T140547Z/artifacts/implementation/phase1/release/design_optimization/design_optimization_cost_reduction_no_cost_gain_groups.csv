@@ -1,0 +1,6 @@
+group_id,story_band,zone_label,member_type,semantic_group,blocked_action_count,action_names,priority_max,max_dcr,detail_examples
+S00:core:nogroup:beam:SB1000X1200,0,core,foundation,,1,detailing_down,398.9181179852934,0.0,trial_cost=147102.5710;current_cost=147096.7988;projected_cost_delta=-5.772186
+S04:transfer:nogroup:beam:SB800X7001.81,4,transfer,beam,,2,connection_detailing_down|detailing_down,338.7432863849766,0.0,trial_cost=147104.4950;current_cost=147096.7988;projected_cost_delta=-7.696247
+S05:perimeter:2:column:P 50x4,5,perimeter,column,2,2,connection_detailing_down|detailing_down,293.8160948791812,0.0,trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337
+S05:intermediate:2:column:P 50x4,5,intermediate,column,2,1,detailing_down,281.7633361090662,0.0,trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337
+S05:core:2:column:P 50x4,5,core,column,2,2,connection_detailing_down|detailing_down,257.95458314558863,0.0,trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337

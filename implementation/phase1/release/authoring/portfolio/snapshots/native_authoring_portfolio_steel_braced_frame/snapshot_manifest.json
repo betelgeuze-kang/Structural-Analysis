@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "job_id": "native_authoring_portfolio::steel_braced_frame",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "snapshot_id": "native_authoring_portfolio_steel_braced_frame__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_ops_bundle.json",
+      "label": "native_authoring_ops_bundle.json",
+      "sha256": "00db8dc167931dc9e50f94973ae23238434af6b2997322732c98253478293532",
+      "bytes": 7335
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_registry.json",
+      "label": "native_authoring_project_registry.json",
+      "sha256": "216b319bb9439cfb4fc9909e7153d23710abd16eef13284f83a6cb4a29bb1fdd",
+      "bytes": 10141
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_project_package.zip",
+      "label": "native_authoring_project_package.zip",
+      "sha256": "8a6942a18fb1310784a4ea0161a58965e838b20a0e08a3a88841f0becb286a01",
+      "bytes": 100783
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_batch_job_report.json",
+      "label": "native_authoring_batch_job_report.json",
+      "sha256": "36746682bbd38c053d1ae326bd7803b31f1e475fd3f7621089c221d9aa8cd57d",
+      "bytes": 9409
+    }
+  ],
+  "summary": {
+    "artifact_count": 4
+  }
+}

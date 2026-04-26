@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-16T14:23:57.386518+00:00",
+  "source_family": "edefense_peer_blind_prediction",
+  "seed_id": "edefense_peer_blind_prediction_seed_01",
+  "benchmark_track": "blind_prediction_dynamic_holdout",
+  "input_contract": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_input_contract.json",
+  "measured_response_status": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.measured_response_landing_status.json",
+  "contract_pass": true,
+  "summary_line": "PEER blind prebenchmark scaffold: PENDING | cases=10 | measured_response=pending",
+  "readiness": {
+    "input_contract_ready": true,
+    "measured_response_ready": false,
+    "benchmark_case_ready": false,
+    "compare_report_ready": false,
+    "viewer_entry_ready": false
+  },
+  "pending_boundary": "measured_response_missing",
+  "pending_reason": "Measured response bundle still needs manual landing before benchmark-case normalization can close.",
+  "candidate_cases": [
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::random_noise",
+      "excitation_label": "Random Noise",
+      "excitation_kind": "random_noise",
+      "priority": 1,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm1",
+      "excitation_label": "GM1",
+      "excitation_kind": "ground_motion",
+      "priority": 2,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm2",
+      "excitation_label": "GM2",
+      "excitation_kind": "ground_motion",
+      "priority": 3,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm3",
+      "excitation_label": "GM3",
+      "excitation_kind": "ground_motion",
+      "priority": 4,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm4",
+      "excitation_label": "GM4",
+      "excitation_kind": "ground_motion",
+      "priority": 5,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm5",
+      "excitation_label": "GM5",
+      "excitation_kind": "ground_motion",
+      "priority": 6,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm6",
+      "excitation_label": "GM6",
+      "excitation_kind": "ground_motion",
+      "priority": 7,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm7",
+      "excitation_label": "GM7",
+      "excitation_kind": "ground_motion",
+      "priority": 8,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm8",
+      "excitation_label": "GM8",
+      "excitation_kind": "ground_motion",
+      "priority": 9,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    },
+    {
+      "case_id": "edefense_peer_blind_prediction_seed_01::gm9",
+      "excitation_label": "GM9",
+      "excitation_kind": "ground_motion",
+      "priority": 10,
+      "benchmark_case_status": "pending_measured_response",
+      "compare_report_status": "pending_measured_response",
+      "viewer_entry_status": "pending_measured_response"
+    }
+  ],
+  "expected_outputs": {
+    "benchmark_cases_out": "implementation/phase1/commercial_benchmark_cases.peer_blind_prediction_open.json",
+    "compare_report_out": "implementation/phase1/release/benchmark_expansion/peer_blind_prediction_compare_report.json",
+    "viewer_entry_out": "implementation/phase1/release/visualization/entries/peer_blind_prediction_family.html"
+  },
+  "next_actions": [
+    "Land measured response bundle and rerun source-manifest/status/template scripts.",
+    "Map each GM / Random Noise label to a benchmark_case row.",
+    "Generate compare_report and viewer_entry once response channels are available."
+  ]
+}

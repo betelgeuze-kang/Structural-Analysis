@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-rust-nonlinear-pushover-stress",
+  "generated_at": "2026-03-03T15:08:28.449845+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "target_split": "test",
+    "min_case_count": 1,
+    "max_case_count": 1,
+    "load_factors": "1.0,1.2,1.5",
+    "yield_drift_scale": 0.45,
+    "min_plastic_story_count": 1,
+    "min_drift_amplification": 1.8,
+    "hardening_ratio": 0.2,
+    "pdelta_factor": 0.0,
+    "tolerance": 1e-07,
+    "max_iter": 120,
+    "material_model": "rc_composite",
+    "rc_cracking_strain": 0.00022,
+    "rc_creep_rate_per_hour": 0.008,
+    "rc_bond_slip_ratio_ref": 0.003,
+    "accepted_metric_sources": "engine_export_direct,commercial_solver_export,open_data_measurement",
+    "out": "implementation/phase1/nonlinear_pushover_stress_report.smoke.json"
+  },
+  "checks": {
+    "metric_source_pass": true,
+    "all_cases_converged": true,
+    "plasticity_triggered_all_cases": true,
+    "collapse_path_pass": false,
+    "min_plastic_story_count_pass": true,
+    "material_model_pass": true
+  },
+  "summary": {
+    "case_count": 1,
+    "load_factors": [
+      1.0,
+      1.2,
+      1.5
+    ],
+    "first_yield_load_factor_mean": 1.0,
+    "peak_plastic_story_count_min": 22,
+    "peak_plastic_story_count_mean": 22.0,
+    "drift_amplification_min": 1.6648203544035103,
+    "drift_amplification_mean": 1.6648203544035103,
+    "metric_source_invalid_case_ids": [],
+    "material_model": "rc_composite"
+  },
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "hf_reference": {
+        "drift_ratio_pct": 2.31,
+        "base_shear_kN": 2035.0
+      },
+      "checks": {
+        "converged_all_load_levels": true,
+        "plasticity_triggered": true,
+        "collapse_path_pass": false
+      },
+      "summary": {
+        "first_yield_load_factor": 1.0,
+        "peak_plastic_story_count": 22,
+        "drift_amplification": 1.6648203544035103,
+        "monotonic_drift_pass": true,
+        "monotonic_plastic_pass": true,
+        "material_model": "rc_composite",
+        "material_indices": {
+          "cracking_index_mean": 1.0,
+          "creep_index_mean": 0.011928287138069482,
+          "bond_slip_index_mean": 0.9107479359406282,
+          "stiffness_scale_min": 0.6990179282154827,
+          "stiffness_scale_mean": 0.7130179282154826,
+          "yield_scale_min": 0.8450522580584704,
+          "yield_scale_mean": 0.8520522580584705
+        }
+      },
+      "runs": [
+        {
+          "load_factor": 1.0,
+          "converged": true,
+          "iterations": 3,
+          "residual_inf": 1.4406396076083183e-08,
+          "line_search_backtracks": 0,
+          "plastic_story_count": 20,
+          "top_displacement_m": 5.101749749618758,
+          "base_shear_kN": 2034.999999999996,
+          "drift_ratio_pct": 12.168450815403272
+        },
+        {
+          "load_factor": 1.2,
+          "converged": true,
+          "iterations": 3,
+          "residual_inf": 4.298635758459568e-08,
+          "line_search_backtracks": 0,
+          "plastic_story_count": 21,
+          "top_displacement_m": 6.653527229275289,
+          "base_shear_kN": 2441.999999999993,
+          "drift_ratio_pct": 15.42779855132896
+        },
+        {
+          "load_factor": 1.5,
+          "converged": true,
+          "iterations": 3,
+          "residual_inf": 4.316098056733608e-08,
+          "line_search_backtracks": 0,
+          "plastic_story_count": 22,
+          "top_displacement_m": 8.966535326569463,
+          "base_shear_kN": 3052.5000000000196,
+          "drift_ratio_pct": 20.25828459904136
+        }
+      ]
+    }
+  ],
+  "material_effect_rows": [
+    {
+      "case_id": "C-TST-001",
+      "use_rc_composite_model": true,
+      "material_model_pass": true,
+      "indices": {
+        "cracking_index_mean": 1.0,
+        "creep_index_mean": 0.011928287138069482,
+        "bond_slip_index_mean": 0.9107479359406282,
+        "stiffness_scale_min": 0.6990179282154827,
+        "stiffness_scale_mean": 0.7130179282154826,
+        "yield_scale_min": 0.8450522580584704,
+        "yield_scale_mean": 0.8520522580584705
+      }
+    }
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_COLLAPSE_PATH_FAIL",
+  "reason": "collapse path monotonicity or severity checks failed"
+}

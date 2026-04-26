@@ -1,0 +1,795 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-vibration-compliance-checker",
+  "generated_at": "2026-02-26T14:13:30.206300+00:00",
+  "inputs": {
+    "attenuation_report": "implementation/phase1/vibration_attenuation_report.json",
+    "standard": "KS_F_2866_RESIDENTIAL_DAY",
+    "min_pass_ratio": 0.95
+  },
+  "checks": {
+    "standard_supported": true,
+    "finite_values": true,
+    "compliance_ratio_pass": true
+  },
+  "metrics": {
+    "sample_count": 96,
+    "pass_ratio": 1.0,
+    "max_velocity_mm_s": 0.03175564978865021,
+    "max_over_limit_ratio": 0.18324556185317403,
+    "max_vibration_db": 90.036420075237
+  },
+  "curve_head": [
+    {
+      "freq_hz": 8.0,
+      "distance_m": 5.0,
+      "velocity_mm_s": 0.03175564978865021,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 90.036420075237
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 10.0,
+      "velocity_mm_s": 0.02097847821549142,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 86.43547962320878
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 15.0,
+      "velocity_mm_s": 0.016002812871765637,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 84.08392653726354
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 20.0,
+      "velocity_mm_s": 0.012947768737622977,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 82.24389867579211
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 25.0,
+      "velocity_mm_s": 0.010819517719765762,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 80.68415805032313
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 30.0,
+      "velocity_mm_s": 0.009227525514731128,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 79.30170509445846
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 35.0,
+      "velocity_mm_s": 0.007981413938801573,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 78.0415967027639
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 40.0,
+      "velocity_mm_s": 0.006975122461568834,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 76.87103673759862
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 45.0,
+      "velocity_mm_s": 0.006143891688955689,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 75.76887101773637
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 50.0,
+      "velocity_mm_s": 0.0054454375381685,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 74.7206556167412
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 55.0,
+      "velocity_mm_s": 0.004850699974662194,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 73.71608826977052
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 60.0,
+      "velocity_mm_s": 0.004338884687822131,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 72.7475621654881
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 65.0,
+      "velocity_mm_s": 0.003894619467562261,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 71.80930060750757
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 70.0,
+      "velocity_mm_s": 0.003506232119961905,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 70.89681327840512
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 75.0,
+      "velocity_mm_s": 0.003164659779078657,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 70.00654054924227
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 80.0,
+      "velocity_mm_s": 0.002862731658923887,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 69.13561281785141
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 85.0,
+      "velocity_mm_s": 0.0025946820462452304,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 68.2816829352395
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 90.0,
+      "velocity_mm_s": 0.0023558103752411128,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 67.44280660260075
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 95.0,
+      "velocity_mm_s": 0.0021422381907874777,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 66.61735514871711
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 100.0,
+      "velocity_mm_s": 0.001950731672430248,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 65.80395070621717
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 105.0,
+      "velocity_mm_s": 0.0017785695839986617,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 65.00141722012935
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 110.0,
+      "velocity_mm_s": 0.0016234433674103673,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 64.20874286385808
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 115.0,
+      "velocity_mm_s": 0.0014833804152774755,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 63.42505081651578
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 120.0,
+      "velocity_mm_s": 0.001356684343669625,
+      "limit_mm_s": 0.2,
+      "pass": true,
+      "vibration_db": 62.64957626418722
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 5.0,
+      "velocity_mm_s": 0.027702174748366438,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 88.85027729041607
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 10.0,
+      "velocity_mm_s": 0.01797419881810432,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 85.09299082490267
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 15.0,
+      "velocity_mm_s": 0.013466495375119842,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 82.58509172547227
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 20.0,
+      "velocity_mm_s": 0.010701284064790427,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 80.58871785051566
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 25.0,
+      "velocity_mm_s": 0.008782771027810353,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 78.87263121156151
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 30.0,
+      "velocity_mm_s": 0.007356845102340197,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 77.33383224221167
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 35.0,
+      "velocity_mm_s": 0.006249839893343694,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 75.91737783703195
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 40.0,
+      "velocity_mm_s": 0.005364430127564952,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 74.59047185838148
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 45.0,
+      "velocity_mm_s": 0.004640855072909248,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 73.33196012503409
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 50.0,
+      "velocity_mm_s": 0.004039893678346596,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 72.12739871055373
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 55.0,
+      "velocity_mm_s": 0.0035344697372272716,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 70.9664853500979
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 60.0,
+      "velocity_mm_s": 0.003105136252262929,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 69.8416132323303
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 65.0,
+      "velocity_mm_s": 0.002737475765045639,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 68.74700566086459
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 70.0,
+      "velocity_mm_s": 0.002420519668282525,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 67.67817231827698
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 75.0,
+      "velocity_mm_s": 0.0021457428733657,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 66.63155357562897
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 80.0,
+      "velocity_mm_s": 0.0019063998340679985,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 65.60427983075293
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 85.0,
+      "velocity_mm_s": 0.0016970717211522272,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 64.59400393465585
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 90.0,
+      "velocity_mm_s": 0.001513348948818968,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 63.59878158853193
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 95.0,
+      "velocity_mm_s": 0.0013516031836186394,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 62.61698412116311
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 100.0,
+      "velocity_mm_s": 0.0012088201292616725,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 61.64723366517799
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 105.0,
+      "velocity_mm_s": 0.0010824745844179274,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 60.68835416560502
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 110.0,
+      "velocity_mm_s": 0.0009704355323860322,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 59.73933379584856
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 115.0,
+      "velocity_mm_s": 0.0008708929737828068,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 58.7992957350211
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 120.0,
+      "velocity_mm_s": 0.0007823007713481525,
+      "limit_mm_s": 0.16,
+      "pass": true,
+      "vibration_db": 57.867475169207374
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 5.0,
+      "velocity_mm_s": 0.021989467422380882,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 86.84429422039261
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 10.0,
+      "velocity_mm_s": 0.013778577003585318,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 82.78408735375169
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 15.0,
+      "velocity_mm_s": 0.009969270789795294,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 79.97326785319378
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 20.0,
+      "velocity_mm_s": 0.007650656067595058,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 77.67397357710965
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 25.0,
+      "velocity_mm_s": 0.006063848284462452,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 75.65496653702799
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 30.0,
+      "velocity_mm_s": 0.004905263687918165,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 73.81324716655062
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 35.0,
+      "velocity_mm_s": 0.004024330294887623,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 72.09387236024338
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 40.0,
+      "velocity_mm_s": 0.003335817625380531,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 70.4640459804654
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 45.0,
+      "velocity_mm_s": 0.0027869597226316814,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 68.90261384599049
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 50.0,
+      "velocity_mm_s": 0.0023429153704200897,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 67.39513203038261
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 55.0,
+      "velocity_mm_s": 0.0019795428788649903,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 65.93129826879925
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 60.0,
+      "velocity_mm_s": 0.0016794817443153006,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 64.50350574990415
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 65.0,
+      "velocity_mm_s": 0.0014298776861608998,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 63.10597777731091
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 70.0,
+      "velocity_mm_s": 0.0012209874546007034,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 61.734224033595794
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 75.0,
+      "velocity_mm_s": 0.001045283859734576,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 60.38468488982025
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 80.0,
+      "velocity_mm_s": 0.0008968597569365419,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 59.0544907438167
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 85.0,
+      "velocity_mm_s": 0.0007710183643452832,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 57.7412944465921
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 90.0,
+      "velocity_mm_s": 0.0006639839551310162,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 56.44315169934067
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 95.0,
+      "velocity_mm_s": 0.0005726927583632227,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 55.15843383084433
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 100.0,
+      "velocity_mm_s": 0.0004946387644630114,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 53.885762973731694
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 105.0,
+      "velocity_mm_s": 0.00042775801291870905,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 52.6239630730312
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 110.0,
+      "velocity_mm_s": 0.00037034042029333543,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 51.37202230214722
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 115.0,
+      "velocity_mm_s": 0.0003209616855050368,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 50.12906384019224
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 120.0,
+      "velocity_mm_s": 0.000278430074542366,
+      "limit_mm_s": 0.12,
+      "pass": true,
+      "vibration_db": 48.894322873251
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 5.0,
+      "velocity_mm_s": 0.015042106908104085,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 83.54617341989754
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 10.0,
+      "velocity_mm_s": 0.0087804688448366,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 78.87035412515876
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 15.0,
+      "velocity_mm_s": 0.005918288198072746,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 75.44392219650297
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 20.0,
+      "velocity_mm_s": 0.004231075496046314,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 72.52901549232101
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 25.0,
+      "velocity_mm_s": 0.003124063128839549,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 69.89439602414147
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 30.0,
+      "velocity_mm_s": 0.002354253426997988,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 67.43706422556625
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 35.0,
+      "velocity_mm_s": 0.001799301116972396,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 65.10207699116114
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 40.0,
+      "velocity_mm_s": 0.001389414763243827,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 62.856638183285305
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 45.0,
+      "velocity_mm_s": 0.001081383356356436,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 60.679593620712524
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 50.0,
+      "velocity_mm_s": 0.0008468860298586177,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 58.5564993770068
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 55.0,
+      "velocity_mm_s": 0.0006665805838211134,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 56.47705318732558
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 60.0,
+      "velocity_mm_s": 0.0005268444532091145,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 54.43364824033261
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 65.0,
+      "velocity_mm_s": 0.00041785479673216055,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 52.42050783964152
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 70.0,
+      "velocity_mm_s": 0.0003323969907560847,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 50.43314166782854
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 75.0,
+      "velocity_mm_s": 0.00026509375983722064,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 48.46799009595514
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 80.0,
+      "velocity_mm_s": 0.00021188937311561996,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 46.52218352185373
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 85.0,
+      "velocity_mm_s": 0.00016969488029598847,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 44.593374796531265
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 90.0,
+      "velocity_mm_s": 0.00013613850623923004,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 42.67961962118197
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 95.0,
+      "velocity_mm_s": 0.00010938668629374206,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 40.77928932458778
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 100.0,
+      "velocity_mm_s": 8.801370472733431e-05,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 38.89100603937728
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 105.0,
+      "velocity_mm_s": 7.090546108909557e-05,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 37.01359371057893
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 110.0,
+      "velocity_mm_s": 5.7187620377107724e-05,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 35.146040511597086
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 115.0,
+      "velocity_mm_s": 4.617144653725989e-05,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 33.287469621544254
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 120.0,
+      "velocity_mm_s": 3.731262568142696e-05,
+      "limit_mm_s": 0.1,
+      "pass": true,
+      "vibration_db": 31.437116226505147
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "vibration compliance checks passed"
+}

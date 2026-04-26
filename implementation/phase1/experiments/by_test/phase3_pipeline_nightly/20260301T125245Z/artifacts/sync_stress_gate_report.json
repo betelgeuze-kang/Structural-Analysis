@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-sync-stress-gate",
+  "generated_at": "2026-03-01T12:52:45.511993+00:00",
+  "inputs": {
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "topology_report": "implementation/phase1/opensees_topology_report.json",
+    "require_topology_gate": true,
+    "ci_mode": "nightly",
+    "steps": 300,
+    "bandwidth_gbps": 32.0,
+    "latency_us": 40.0,
+    "compute_us_per_node": 0.2,
+    "overlap_cap": 0.7,
+    "jitter_pct": 0.12,
+    "max_sync_stall_ratio": 0.36,
+    "max_p99_step_ms": 550.0,
+    "max_straggler_ratio": 2.4,
+    "min_overlap_ratio": 0.35,
+    "work_dir": "implementation/phase1/stress/sync",
+    "out": "implementation/phase1/sync_stress_gate_report.json"
+  },
+  "reports": {
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "topology_report": "implementation/phase1/opensees_topology_report.json"
+  },
+  "checks": {
+    "topology_gate_pass": true,
+    "required_levels_present": true,
+    "required_levels_sync_pass": true,
+    "sync_stall_budget_pass": true
+  },
+  "level_rows": [
+    {
+      "node_count": 1000000,
+      "report": "implementation/phase1/stress/sync/sync_virtual_n1000000.json",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "sync_stall_ratio": 0.0,
+      "p99_step_ms": 0.371522528980796,
+      "straggler_ratio": 1.224896307592113,
+      "comm_overlap_ratio": 1.0
+    },
+    {
+      "node_count": 3000000,
+      "report": "implementation/phase1/stress/sync/sync_virtual_n3000000.json",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "sync_stall_ratio": 0.0,
+      "p99_step_ms": 0.371522528980796,
+      "straggler_ratio": 1.224896307592113,
+      "comm_overlap_ratio": 1.0
+    },
+    {
+      "node_count": 10000000,
+      "report": "implementation/phase1/stress/sync/sync_virtual_n10000000.json",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "sync_stall_ratio": 0.0,
+      "p99_step_ms": 0.371522528980796,
+      "straggler_ratio": 1.224896307592113,
+      "comm_overlap_ratio": 1.0
+    }
+  ],
+  "steps": [
+    {
+      "step": "sync_emulate_n1000000",
+      "seconds": 1.022963285446167,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/virtual_partition_sync_emulator.py --partition-report implementation/phase1/stress/partitioned_scaleout/partition_quality_n1000000.json --steps 300 --bandwidth-gbps 32.0 --latency-us 40.0 --compute-us-per-node 0.2 --overlap-cap 0.7 --jitter-pct 0.12 --max-sync-stall-ratio 0.36 --max-p99-step-ms 550.0 --max-straggler-ratio 2.4 --min-overlap-ratio 0.35 --out implementation/phase1/stress/sync/sync_virtual_n1000000.json",
+      "stdout_tail": "Wrote virtual sync report: implementation/phase1/stress/sync/sync_virtual_n1000000.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"sync_emulator.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "sync_emulate_n3000000",
+      "seconds": 1.0332868099212646,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/virtual_partition_sync_emulator.py --partition-report implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json --steps 300 --bandwidth-gbps 32.0 --latency-us 40.0 --compute-us-per-node 0.2 --overlap-cap 0.7 --jitter-pct 0.12 --max-sync-stall-ratio 0.36 --max-p99-step-ms 550.0 --max-straggler-ratio 2.4 --min-overlap-ratio 0.35 --out implementation/phase1/stress/sync/sync_virtual_n3000000.json",
+      "stdout_tail": "Wrote virtual sync report: implementation/phase1/stress/sync/sync_virtual_n3000000.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"sync_emulator.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "sync_emulate_n10000000",
+      "seconds": 1.0239005088806152,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/virtual_partition_sync_emulator.py --partition-report implementation/phase1/stress/partitioned_scaleout/partition_quality_n10000000.json --steps 300 --bandwidth-gbps 32.0 --latency-us 40.0 --compute-us-per-node 0.2 --overlap-cap 0.7 --jitter-pct 0.12 --max-sync-stall-ratio 0.36 --max-p99-step-ms 550.0 --max-straggler-ratio 2.4 --min-overlap-ratio 0.35 --out implementation/phase1/stress/sync/sync_virtual_n10000000.json",
+      "stdout_tail": "Wrote virtual sync report: implementation/phase1/stress/sync/sync_virtual_n10000000.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"sync_emulator.completed\", \"reason_code\": \"PASS\"}\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "sync stress gate passed"
+}

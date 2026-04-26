@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-panel-zone-solver-verified-export-bundle",
+  "generated_at": "2026-04-14T13:56:39.406497+00:00",
+  "solver": {
+    "name": "panel_zone_external_solver",
+    "backend": "panel_zone_external_solver",
+    "export_version": "1.0"
+  },
+  "summary": {
+    "producer_backend": "panel_zone_external_solver",
+    "source_bundle_mode": "nested_solver_export",
+    "source_origin_class": "trusted_external_solver_source",
+    "topology_projected": false,
+    "solver_verified": true,
+    "verification_tier": "solver_verified_3d_source_bundle",
+    "required_sources_complete": true,
+    "source_row_counts": {
+      "panel_zone_joint_geometry_3d": 1,
+      "panel_zone_rebar_anchorage_3d": 1,
+      "panel_zone_clash_verification_3d": 1
+    },
+    "invalid_source_row_counts": {
+      "panel_zone_joint_geometry_3d": 0,
+      "panel_zone_rebar_anchorage_3d": 0,
+      "panel_zone_clash_verification_3d": 0
+    },
+    "source_input_paths": {
+      "panel_zone_joint_geometry_3d": "/home/betelgeuze/건축구조분석/implementation/phase1/inbox/panel_zone_solver_verified/joint_geometry.json",
+      "panel_zone_rebar_anchorage_3d": "/home/betelgeuze/건축구조분석/implementation/phase1/inbox/panel_zone_solver_verified/rebar_anchorage.json",
+      "panel_zone_clash_verification_3d": "/home/betelgeuze/건축구조분석/implementation/phase1/inbox/panel_zone_solver_verified/clash_verification.json"
+    },
+    "instruction_sidecar_evidence_model": "direct_solver_export",
+    "instruction_sidecar_rebar_delivery_mode": "solver_verified_layout_rows",
+    "member_mapping_sidecar_present": true,
+    "member_mapping_sidecar_path": "/home/betelgeuze/건축구조분석/implementation/phase1/inbox/panel_zone_solver_verified/member_mapping_sidecar.json",
+    "member_mapping_sidecar_mode": "explicit_member_id_map",
+    "member_mapping_sidecar_row_count": 1
+  },
+  "panel_zone_3d_results": {
+    "panel_zone_joint_geometry_3d": {
+      "contract_pass": true,
+      "source_kind": "panel_zone_joint_geometry_3d",
+      "verification_tier": "solver_verified_3d_source",
+      "summary": {
+        "source_kind": "panel_zone_joint_geometry_3d",
+        "producer_backend": "panel_zone_external_solver",
+        "source_bundle_mode": "nested_solver_export",
+        "source_origin_class": "trusted_external_solver_source",
+        "topology_projected": false,
+        "solver_verified": true,
+        "verification_tier": "solver_verified_3d_source",
+        "source_input_path": "/home/betelgeuze/건축구조분석/implementation/phase1/inbox/panel_zone_solver_verified/joint_geometry.json",
+        "source_row_count": 1,
+        "valid_source_row_count": 1,
+        "invalid_source_row_count": 0,
+        "instruction_sidecar_evidence_model": "direct_solver_export",
+        "instruction_sidecar_rebar_delivery_mode": "solver_verified_layout_rows"
+      },
+      "rows": [
+        {
+          "member_id": "B401",
+          "joint_id": "J-401",
+          "panel_zone_id": "PZ-401"
+        }
+      ],
+      "artifacts": {
+        "invalid_member_ids_head": []
+      }
+    },
+    "panel_zone_rebar_anchorage_3d": {
+      "contract_pass": true,
+      "source_kind": "panel_zone_rebar_anchorage_3d",
+      "verification_tier": "solver_verified_3d_source",
+      "summary": {
+        "source_kind": "panel_zone_rebar_anchorage_3d",
+        "producer_backend": "panel_zone_external_solver",
+        "source_bundle_mode": "nested_solver_export",
+        "source_origin_class": "trusted_external_solver_source",
+        "topology_projected": false,
+        "solver_verified": true,
+        "verification_tier": "solver_verified_3d_source",
+        "source_input_path": "/home/betelgeuze/건축구조분석/implementation/phase1/inbox/panel_zone_solver_verified/rebar_anchorage.json",
+        "source_row_count": 1,
+        "valid_source_row_count": 1,
+        "invalid_source_row_count": 0,
+        "instruction_sidecar_evidence_model": "direct_solver_export",
+        "instruction_sidecar_rebar_delivery_mode": "solver_verified_layout_rows"
+      },
+      "rows": [
+        {
+          "member_id": "B401",
+          "available_anchorage_length_mm": 480.0,
+          "required_anchorage_length_mm": 420.0,
+          "development_length_mm": 520.0
+        }
+      ],
+      "artifacts": {
+        "invalid_member_ids_head": []
+      }
+    },
+    "panel_zone_clash_verification_3d": {
+      "contract_pass": true,
+      "source_kind": "panel_zone_clash_verification_3d",
+      "verification_tier": "solver_verified_3d_source",
+      "summary": {
+        "source_kind": "panel_zone_clash_verification_3d",
+        "producer_backend": "panel_zone_external_solver",
+        "source_bundle_mode": "nested_solver_export",
+        "source_origin_class": "trusted_external_solver_source",
+        "topology_projected": false,
+        "solver_verified": true,
+        "verification_tier": "solver_verified_3d_source",
+        "source_input_path": "/home/betelgeuze/건축구조분석/implementation/phase1/inbox/panel_zone_solver_verified/clash_verification.json",
+        "source_row_count": 1,
+        "valid_source_row_count": 1,
+        "invalid_source_row_count": 0,
+        "instruction_sidecar_evidence_model": "direct_solver_export",
+        "instruction_sidecar_rebar_delivery_mode": "solver_verified_layout_rows"
+      },
+      "rows": [
+        {
+          "member_id": "B401",
+          "clash_count": 0,
+          "clearance_mm": 28.0,
+          "clash_pass": true
+        }
+      ],
+      "artifacts": {
+        "invalid_member_ids_head": []
+      }
+    }
+  },
+  "member_mapping_sidecar": {
+    "present": true,
+    "path": "/home/betelgeuze/건축구조분석/implementation/phase1/inbox/panel_zone_solver_verified/member_mapping_sidecar.json",
+    "mapping_mode": "explicit_member_id_map",
+    "row_count": 1,
+    "rows": [
+      {
+        "source_member_id": "B401",
+        "candidate_member_id": "26705"
+      }
+    ],
+    "member_map": {
+      "B401": "26705"
+    }
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "solver-verified panel-zone bundle normalized from external source rows"
+}

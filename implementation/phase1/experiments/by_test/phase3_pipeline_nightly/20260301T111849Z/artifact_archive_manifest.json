@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-01T11:18:49.522633+00:00",
+  "test_name": "phase3_pipeline_nightly",
+  "run_dir": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z",
+  "mode": "copy",
+  "archived_count": 13,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/phase3_megastructure_pipeline_report.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/phase3_megastructure_pipeline_report.json",
+      "kind": "file",
+      "bytes": 9187,
+      "sha256": "5465fd5440248060d60075cebf506574aa528cb716f96fda67c580bf2cf5f303",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/open_data/megastructure/atwood_conversion_report.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/atwood_conversion_report.json",
+      "kind": "file",
+      "bytes": 3111,
+      "sha256": "86bb4a5e03ae38f7dda8c7ff94bc965fbc9f5ad5aa76812a7b08d0f481dd9de5",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/open_data/megastructure/atwood_conversion_report.source_manifest.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/atwood_conversion_report.source_manifest.json",
+      "kind": "file",
+      "bytes": 1675,
+      "sha256": "a9a32dfbda9b997a8b1f7fe5adeb6e8439af296e0979c39cc097170c238fe19e",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/spatiotemporal_data/atwood_dynamic_cases.jsonl",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/atwood_dynamic_cases.jsonl",
+      "kind": "file",
+      "bytes": 445429,
+      "sha256": "8c21187150b6ab079433b11e3c62a2dc18c1094dac8e5f830ef512eb7c66b178",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/opensees_topology_report.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/opensees_topology_report.json",
+      "kind": "file",
+      "bytes": 2456,
+      "sha256": "4c7abca09f43164b061a940104ef05a6a144605b91b94fe513da640b7eac824e",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/open_data/megastructure/opensees_edges.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/opensees_edges.json",
+      "kind": "file",
+      "bytes": 3237,
+      "sha256": "5ce6ca5d9580b6a3261750992734f411526dc9a205fb003e841a42b5e74dbf3e",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/open_data/megastructure/opensees_csr.npz",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/opensees_csr.npz",
+      "kind": "file",
+      "bytes": 2296,
+      "sha256": "bd9abd177d78889f9a1ddd424917d733213dabf69dc8ce5c583e72281d4e7618",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.atwood_open.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/commercial_benchmark_cases.atwood_open.json",
+      "kind": "file",
+      "bytes": 34780,
+      "sha256": "d104567cf1cb3f79b83a335cc834e7646f9998147d26e6fe9f538f9cec4b7645",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.atwood_open.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/hf_benchmark_report.atwood_open.json",
+      "kind": "file",
+      "bytes": 4722,
+      "sha256": "9efe18072efc887f5bc81f24e2b9d20c3037c368ae28b07be62ce4f7521fb64a",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.atwood_open.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/topk_comparison_experiment_report.atwood_open.json",
+      "kind": "file",
+      "bytes": 37840,
+      "sha256": "412ecb6b798e9fb81763d1b1804157253999f2526901a327c5851a0da0e9a5a7",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/noise_convergence_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/noise_convergence_gate_report.json",
+      "kind": "file",
+      "bytes": 12836,
+      "sha256": "7c6f77c18ccc620f1da6c83ff9798a6a8cc2bc150bd01cfd7ba513086de4c193",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/partitioned_scaleout_report.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/partitioned_scaleout_report.json",
+      "kind": "file",
+      "bytes": 9040,
+      "sha256": "3034e031b5af17a3379da841726f17f3edced6814f939551d35ceaab6a337407",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/sync_stress_gate_report.json",
+      "dst": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T111849Z/artifacts/sync_stress_gate_report.json",
+      "kind": "file",
+      "bytes": 4691,
+      "sha256": "eae6dbabd9b4bba17d55100531e83fdcde17c3527a9a60117a71905c2ddd5d6f",
+      "mode": "copy"
+    }
+  ]
+}

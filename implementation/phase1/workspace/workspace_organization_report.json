@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-workspace-organizer",
+  "generated_at": "2026-02-25T14:43:54.340313+00:00",
+  "workspace": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace",
+  "script_groups": [
+    "benchmark_data",
+    "contracts_validation",
+    "core_models",
+    "hooks_runtime",
+    "misc",
+    "pipelines"
+  ],
+  "report_file_count": 141,
+  "input_file_count": 10,
+  "catalog_scripts": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/catalog/scripts/scripts_by_group.json",
+  "catalog_reports": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/catalog/report_catalog.json"
+}

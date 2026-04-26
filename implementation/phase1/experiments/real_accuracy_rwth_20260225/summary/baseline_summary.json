@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "kind": "baseline",
+  "source_benchmark_report": "implementation/phase1/hf_benchmark_report.rwth_zenodo.json",
+  "summary": {
+    "train": {
+      "case_count": 14,
+      "drift_error_pct": 15.914609567094965,
+      "base_shear_error_pct": 9.548765740256977,
+      "mode_shape_mac": 0.9429197008464936,
+      "buckling_factor_error_pct": 11.140226696966467,
+      "equilibrium_residual_mean": 1.2840498075913913
+    },
+    "val": {
+      "case_count": 4,
+      "drift_error_pct": 17.23259432579613,
+      "base_shear_error_pct": 10.339556595477672,
+      "mode_shape_mac": 0.9454547716680861,
+      "buckling_factor_error_pct": 12.062816028057282,
+      "equilibrium_residual_mean": 1.934706364504704
+    },
+    "test": {
+      "case_count": 4,
+      "drift_error_pct": 15.859851979535787,
+      "base_shear_error_pct": 9.515911187721477,
+      "mode_shape_mac": 0.9353458111557905,
+      "buckling_factor_error_pct": 11.101896385675056,
+      "equilibrium_residual_mean": 0.8300395818683258
+    },
+    "all": {
+      "case_count": 22,
+      "drift_error_pct": 16.144287234575327,
+      "base_shear_error_pct": 9.686572340745192,
+      "mode_shape_mac": 0.942003551961201,
+      "buckling_factor_error_pct": 11.301001064202723,
+      "equilibrium_residual_mean": 1.319803685989618
+    }
+  }
+}

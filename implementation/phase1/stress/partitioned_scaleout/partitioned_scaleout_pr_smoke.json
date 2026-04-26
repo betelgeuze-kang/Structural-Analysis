@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-partitioned-scaleout",
+  "generated_at": "2026-03-01T07:28:22.103420+00:00",
+  "inputs": {
+    "dof_levels": "1000000,3000000",
+    "partitions": 16,
+    "branches": 64,
+    "chunk_candidates": "64,32,16,8,4,2,1",
+    "halo_depth": 1,
+    "sample_nodes": 20000,
+    "state_components": 5,
+    "edge_cut_ratio_max": 0.12,
+    "halo_node_ratio_max": 0.18,
+    "gpu_strict": false,
+    "allow_cpu_required": true,
+    "ci_mode": "pr",
+    "work_dir": "implementation/phase1/stress/partitioned_scaleout",
+    "out": "implementation/phase1/stress/partitioned_scaleout/partitioned_scaleout_pr_smoke.json"
+  },
+  "checks": {
+    "pr_scale_pass": false,
+    "nightly_scale_pass": false,
+    "gpu_strict_required": false,
+    "gpu_strict_pass": true,
+    "on_scaling_regression_pass": false
+  },
+  "complexity_regression": {
+    "memory_loglog_slope": null,
+    "latency_loglog_slope": null,
+    "memory_slope_limit": 1.35,
+    "latency_slope_limit": 1.6
+  },
+  "level_rows": [
+    {
+      "node_count": 1000000,
+      "partition_report": "implementation/phase1/stress/partitioned_scaleout/partition_quality_n1000000.json",
+      "scaleout_report": "implementation/phase1/stress/partitioned_scaleout/scaleout_n1000000.json",
+      "partition_contract_pass": true,
+      "partition_cut_ratio": 0.0007500375018750937,
+      "partition_halo_node_ratio": 0.0015,
+      "scaleout_contract_pass": true,
+      "scaleout_gpu_strict_pass": true,
+      "scaleout_1m_microbatch_pass": true
+    },
+    {
+      "node_count": 3000000,
+      "partition_report": "implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json",
+      "scaleout_report": "implementation/phase1/stress/partitioned_scaleout/scaleout_n3000000.json",
+      "partition_contract_pass": true,
+      "partition_cut_ratio": 0.0007500375018750937,
+      "partition_halo_node_ratio": 0.0015,
+      "scaleout_contract_pass": false,
+      "scaleout_gpu_strict_pass": true,
+      "scaleout_1m_microbatch_pass": false
+    }
+  ],
+  "steps": [
+    {
+      "step": "partition_quality",
+      "node_count": 1000000,
+      "seconds": 0.9727993011474609,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/graph_partition_metis.py --node-count 20000 --k-partitions 16 --halo-depth 1 --state-components 5 --max-cut-ratio 0.12 --max-halo-node-ratio 0.18 --out implementation/phase1/stress/partitioned_scaleout/partition_quality_n1000000.json",
+      "stdout_tail": "Wrote partition quality report: implementation/phase1/stress/partitioned_scaleout/partition_quality_n1000000.json\n",
+      "stderr_tail": "{\"backend\": \"greedy_fallback\", \"contract_pass\": true, \"cut_ratio\": 0.0007500375018750937, \"event\": \"partition.completed\"}\n"
+    },
+    {
+      "step": "scaleout_profile",
+      "node_count": 1000000,
+      "seconds": 63.19825077056885,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/run_scaleout_io_profile.py --dof-levels 1000000 --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --state-components 5 --out implementation/phase1/stress/partitioned_scaleout/scaleout_n1000000.json --allow-cpu-required",
+      "stdout_tail": "Wrote scale-out IO profile report: implementation/phase1/stress/partitioned_scaleout/scaleout_n1000000.json\n",
+      "stderr_tail": "{\"allow_cpu_required\": true, \"dof_levels\": [1000000], \"event\": \"scaleout_io.start\"}\n{\"contract_pass\": true, \"event\": \"scaleout_io.completed\", \"levels\": 1, \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "partition_quality",
+      "node_count": 3000000,
+      "seconds": 0.9684491157531738,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/graph_partition_metis.py --node-count 20000 --k-partitions 16 --halo-depth 1 --state-components 5 --max-cut-ratio 0.12 --max-halo-node-ratio 0.18 --out implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json",
+      "stdout_tail": "Wrote partition quality report: implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json\n",
+      "stderr_tail": "{\"backend\": \"greedy_fallback\", \"contract_pass\": true, \"cut_ratio\": 0.0007500375018750937, \"event\": \"partition.completed\"}\n"
+    },
+    {
+      "step": "scaleout_profile",
+      "node_count": 3000000,
+      "seconds": 165.04677176475525,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/run_scaleout_io_profile.py --dof-levels 3000000 --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --state-components 5 --out implementation/phase1/stress/partitioned_scaleout/scaleout_n3000000.json --allow-cpu-required",
+      "stdout_tail": "Wrote scale-out IO profile report: implementation/phase1/stress/partitioned_scaleout/scaleout_n3000000.json\n",
+      "stderr_tail": "{\"allow_cpu_required\": true, \"dof_levels\": [3000000], \"event\": \"scaleout_io.start\"}\n{\"contract_pass\": false, \"event\": \"scaleout_io.completed\", \"levels\": 1, \"reason_code\": \"ERR_1M_GATE_FAIL\"}\n"
+    }
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_PROFILE_FAIL",
+  "reason": "scaleout profile failed"
+}

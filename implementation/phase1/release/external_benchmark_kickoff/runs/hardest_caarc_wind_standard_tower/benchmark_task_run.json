@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:03.609118+00:00",
+  "task_id": "hardest::caarc_wind_standard_tower",
+  "phase": "hardest_case",
+  "benchmark_family": "wind_time_history",
+  "submission_scope": "hardest_external_benchmark_program",
+  "status": "in_progress",
+  "started_at": "2026-04-01T13:48:03.609118+00:00",
+  "input_path": "implementation/phase1/wind_time_history_gate_report.json",
+  "source_origin_class": "official_external_benchmark_fullcase",
+  "holdout_split": "",
+  "execution_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+  "note": "hardest external 10-case kickoff",
+  "task": {
+    "task_id": "hardest::caarc_wind_standard_tower",
+    "case_id": "caarc_wind_standard_tower",
+    "case_label": "CAARC Wind Standard Tower",
+    "phase": "hardest_case",
+    "benchmark_family": "wind_time_history",
+    "hazard_family": "wind_dynamic",
+    "topology_family": "aeroelastic_tall_tower",
+    "load_path_family": "pressure_series_mapping",
+    "submission_scope": "hardest_external_benchmark_program",
+    "execution_status": "ready",
+    "input_path": "implementation/phase1/wind_time_history_gate_report.json",
+    "source_origin_class": "official_external_benchmark_fullcase",
+    "primary_report_path": "implementation/phase1/wind_time_history_gate_report.json",
+    "supporting_report_paths": {
+      "solver_truthfulness": "implementation/phase1/solver_truthfulness_gate_report.json"
+    },
+    "kpi_specs": [
+      {
+        "label": "selected_case_count",
+        "source": "primary.summary.selected_case_count"
+      },
+      {
+        "label": "duration_hours",
+        "source": "primary.summary.duration_hours"
+      },
+      {
+        "label": "load_reversal_count",
+        "source": "primary.summary.load_reversal_count"
+      },
+      {
+        "label": "dominant_frequency_hz",
+        "source": "primary.summary.dominant_frequency_hz"
+      },
+      {
+        "label": "max_drift_ratio_pct_all_cases",
+        "source": "primary.summary.max_drift_ratio_pct_all_cases"
+      },
+      {
+        "label": "residual_drift_pct_max_abs",
+        "source": "primary.summary.residual_drift_pct_max_abs"
+      }
+    ]
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "schema_version": "expert_review_metadata_field_spec.v2",
+  "title": "Expert Review Metadata Onboarding API Field Spec",
+  "description": "Maps customer portal onboarding API payload sections to expert_review_metadata keys used by optimized drawing review surfaces.",
+  "web_form_id": "expert-review-onboarding-form-v1",
+  "backend_dto": "ExpertReviewOnboardingRequestDto",
+  "sections": [
+    {
+      "section": "request",
+      "purpose": "Request metadata captured by the customer portal and used for routing, intake, and template selection.",
+      "fields": [
+        {
+          "name": "template_name",
+          "required": true,
+          "target_key": "expert_review_metadata_template",
+          "example": "seoul_permit_review"
+        },
+        {
+          "name": "selection_reason",
+          "required": false,
+          "target_key": "onboarding_selection_reason",
+          "example": "Permit-facing package for Seoul authority review"
+        },
+        {
+          "name": "request_id",
+          "required": true,
+          "dto_field": "request.requestId",
+          "target_key": "onboarding_request_id",
+          "example": "REQ-SEOUL-2026-001"
+        },
+        {
+          "name": "submitted_at",
+          "required": true,
+          "dto_field": "request.submittedAt",
+          "target_key": "onboarding_submitted_at",
+          "example": "2026-04-10T09:30:00Z"
+        },
+        {
+          "name": "submitted_by",
+          "required": true,
+          "dto_field": "request.submittedBy",
+          "target_key": "onboarding_submitted_by",
+          "example": "customer.portal@example.com"
+        },
+        {
+          "name": "submission_channel",
+          "required": true,
+          "dto_field": "request.submissionChannel",
+          "target_key": "onboarding_submission_channel",
+          "example": "customer_portal"
+        }
+      ]
+    },
+    {
+      "section": "project",
+      "purpose": "Core project title block fields shown on the expert review package cover and sheets.",
+      "fields": [
+        { "name": "project_name", "required": true, "target_key": "project_name" },
+        { "name": "project_number", "required": true, "target_key": "project_number" },
+        { "name": "client_name", "required": true, "target_key": "client_name" },
+        { "name": "site_name", "required": true, "target_key": "site_name" }
+      ]
+    },
+    {
+      "section": "submission",
+      "purpose": "Routing, authority, package, and revision labels for permit or committee issue sets.",
+      "fields": [
+        { "name": "authority_name", "required": false, "target_key": "authority_name" },
+        { "name": "permit_label", "required": false, "target_key": "permit_label" },
+        { "name": "committee_label", "required": false, "target_key": "committee_label" },
+        { "name": "package_purpose_label", "required": false, "target_key": "package_purpose_label" },
+        { "name": "issue_phase_label", "required": false, "target_key": "issue_phase_label" },
+        { "name": "issue_date", "required": false, "target_key": "issue_date" },
+        { "name": "package_id", "required": false, "target_key": "package_id" },
+        { "name": "revision_code", "required": false, "target_key": "revision_code" },
+        { "name": "revision_status", "required": false, "target_key": "revision_status" },
+        { "name": "discipline_label", "required": false, "target_key": "discipline_label" },
+        { "name": "code_basis", "required": false, "target_key": "code_basis" }
+      ]
+    },
+    {
+      "section": "review_team",
+      "purpose": "People and organization shown on the title block and sign-off sheets.",
+      "fields": [
+        { "name": "prepared_by", "required": true, "target_key": "prepared_by" },
+        { "name": "reviewed_by", "required": true, "target_key": "reviewed_by" },
+        { "name": "company_name", "required": false, "target_key": "company_name" }
+      ]
+    },
+    {
+      "section": "review_labels",
+      "purpose": "Human-facing checklist and sign-off wording for reviewer output sheets.",
+      "fields": [
+        { "name": "checklist_head_label", "required": false, "target_key": "checklist_head_label" },
+        { "name": "checklist_title", "required": false, "target_key": "checklist_title" },
+        { "name": "signoff_head_label", "required": false, "target_key": "signoff_head_label" },
+        { "name": "signoff_title", "required": false, "target_key": "signoff_title" },
+        { "name": "reviewer_label", "required": false, "target_key": "reviewer_label" },
+        { "name": "disposition_label", "required": false, "target_key": "disposition_label" },
+        { "name": "comments_label", "required": false, "target_key": "comments_label" },
+        { "name": "signature_label", "required": false, "target_key": "signature_label" }
+      ]
+    },
+    {
+      "section": "reviewer_guidance",
+      "purpose": "Free-text reviewer guidance shown on the expert review package.",
+      "fields": [
+        { "name": "review_route_note", "required": false, "target_key": "review_route_note" }
+      ]
+    },
+    {
+      "section": "metadata_overrides",
+      "purpose": "Optional flat override block for advanced projects that need direct expert_review_metadata values.",
+      "fields": [
+        {
+          "name": "*",
+          "required": false,
+          "target_key": "expert_review_metadata.<field>",
+          "example": "sheet_size: A3 landscape"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-train-simplicial-tgnn",
+  "generated_at": "2026-02-25T15:22:03.139625+00:00",
+  "inputs": {
+    "dataset": "implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl",
+    "baseline_report": "implementation/phase1/spatiotemporal_data/tgnn_baseline_report.json",
+    "max_cases": 180,
+    "epochs": 3,
+    "hidden_dim": 56,
+    "lr": 0.0009,
+    "seed": 23
+  },
+  "split_counts": {
+    "train": 97,
+    "val": 17,
+    "test": 30
+  },
+  "validation_metrics": {
+    "case_count": 17,
+    "mae_pct": 16.93257211330991,
+    "peak_error_pct": 22.351231610906037,
+    "torsion_mae_pct": 16.988603125316164
+  },
+  "validation_rollout_metrics": {
+    "case_count": 17,
+    "mae_pct": 726.7302344058213,
+    "peak_error_pct": 1472.0459105126347,
+    "torsion_mae_pct": 730.9970395033625
+  },
+  "test_metrics": {
+    "case_count": 30,
+    "mae_pct": 14.665235989046323,
+    "peak_error_pct": 13.277586970547391,
+    "torsion_mae_pct": 14.68448790267285
+  },
+  "test_rollout_metrics": {
+    "case_count": 30,
+    "mae_pct": 573.1624280680907,
+    "peak_error_pct": 531.2414136469184,
+    "torsion_mae_pct": 561.5842092551874
+  },
+  "comparison_to_baseline": {
+    "baseline_torsion_mae_pct": 8.014127610036406,
+    "simplicial_torsion_mae_pct": 16.988603125316164,
+    "torsion_improvement_pct_point": -8.974475515279758
+  },
+  "history_tail": [
+    {
+      "epoch": 1,
+      "train_loss": 0.11557348968439253,
+      "val_mae_pct": 13.682191334784081,
+      "val_torsion_mae_pct": 13.015642064815212,
+      "val_rollout_mae_pct": 556.307991588896
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0002713839674789156,
+      "val_mae_pct": 12.057544240270623,
+      "val_torsion_mae_pct": 9.839568328498059,
+      "val_rollout_mae_pct": 311.8546709438928
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.004136876091130015,
+      "val_mae_pct": 16.93257211330991,
+      "val_torsion_mae_pct": 16.988603125316164,
+      "val_rollout_mae_pct": 726.7302344058213
+    }
+  ],
+  "checkpoint": "implementation/phase1/spatiotemporal_data/simplicial_tgnn.pt",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "simplicial temporal gnn trained with higher-order topology"
+}

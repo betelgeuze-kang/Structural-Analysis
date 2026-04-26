@@ -1,0 +1,29 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/setback_tower_proxy_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/setback_tower_proxy_local/DS3_TalTech_V4.ifc",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/setback_tower_proxy_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/setback_tower_proxy_local.json"
+  },
+  "bytes_copied": 38728810,
+  "declared_format": "ifc",
+  "family_id": "setback_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {},
+  "original_reference": "implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc",
+  "sha256": "05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+  "source_exists": true,
+  "source_format": "ifc",
+  "source_id": "setback_tower_proxy_local",
+  "source_index": 11,
+  "source_urls": [
+    "https://zenodo.org/"
+  ],
+  "status": "collected",
+  "title": "Setback tower local proxy from twisted tapered IFC"
+}

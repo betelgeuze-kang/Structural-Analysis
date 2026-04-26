@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-nightly-release-snapshot",
+  "generated_at": "2026-03-02T13:46:21.509515+00:00",
+  "snapshot": "phase3_nightly_hardening_20260302T134621Z",
+  "source_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1",
+  "release_policy": {
+    "commercial_readiness_pass": true,
+    "commercial_readiness_real_source_pass": true,
+    "commercial_readiness_gpu_strict_pass": true,
+    "forbid_toy_cases_enforced": true,
+    "real_source_multi_pass": true,
+    "real_source_multi_all_real_source_pass": true,
+    "real_source_multi_all_toy_free_pass": true,
+    "nonlinear_engine_pass": true,
+    "nonlinear_engine_rust_backend_pass": true,
+    "nonlinear_engine_convergence_pass": true,
+    "nonlinear_engine_drift_p95_pass": true,
+    "nonlinear_engine_base_p95_pass": true,
+    "nonlinear_engine_top_p95_pass": true,
+    "pushover_stress_pass": true,
+    "pushover_convergence_pass": true,
+    "pushover_plasticity_pass": true,
+    "pushover_collapse_path_pass": true,
+    "pushover_min_plastic_pass": true,
+    "ndtha_stress_pass": true,
+    "ndtha_convergence_pass": true,
+    "ndtha_pdelta_pass": true,
+    "ndtha_dynamic_reversal_pass": true,
+    "ndtha_rust_backend_pass": true,
+    "ndtha_plasticity_pass": true,
+    "ndtha_min_plastic_pass": true,
+    "phase3_shell_beam_mix_pass": true,
+    "phase3_gpu_strict_pass": true,
+    "phase3_real_source_verified": true,
+    "topology_shell_beam_mix_pass": true,
+    "scaleout_io_gpu_strict_pass": true,
+    "policy_pass": true
+  },
+  "release_policy_sha256": "fefeb0daf5bd2dbcf39b09e968593ae7a226aec6bd96adec04f4d98093ad423e",
+  "files": [
+    {
+      "file": "phase3_megastructure_pipeline_report.json",
+      "bytes": 9421,
+      "sha256": "73cc677f54ac52d74288e449af4c9392bd9881a5801c04fb14000b64c9bd6ade"
+    },
+    {
+      "file": "opensees_topology_report.json",
+      "bytes": 2456,
+      "sha256": "70e14339acc0e46d0d0cfea77e15ddc42ef8789c93f3400ec7a7ef9c84a5122a"
+    },
+    {
+      "file": "partitioned_scaleout_report.json",
+      "bytes": 9065,
+      "sha256": "2e0da80dc39b4efe3f3b529da7b1cf2c1abc2ff3f835c7725ee0e41ff257d96c"
+    },
+    {
+      "file": "sync_stress_gate_report.json",
+      "bytes": 5696,
+      "sha256": "2eb910c326e4782920ad9c14d500282d0803800fc5234b0c5f323fecb3a6501b"
+    },
+    {
+      "file": "noise_convergence_gate_report.json",
+      "bytes": 12836,
+      "sha256": "e71e39219b1528fed4a066f02254e558ea049d98571dabbc2539e0f3c0e1c6f8"
+    },
+    {
+      "file": "commercial_csv_gate_report.json",
+      "bytes": 3128,
+      "sha256": "46f20f8c61ebd03161b3d49a5231e294d6b0db5a3b2313df348123f380af349b"
+    },
+    {
+      "file": "commercial_readiness_report.json",
+      "bytes": 14728,
+      "sha256": "665cee4b630cc07635bf2dfa5cd7136db7593f44b0432dc19c66c83d69906a3a"
+    },
+    {
+      "file": "real_source_multi_gate_report.json",
+      "bytes": 1862,
+      "sha256": "3beef6e1f85617a940607e1f1c23fd3a03133aabc26d44dbda5be4c0c89b8b46"
+    },
+    {
+      "file": "nonlinear_frame_engine_report.json",
+      "bytes": 4489,
+      "sha256": "a612f4ea7bb3097d1c347f49553ef68e493fa6ef20bb7b1ca264dc11f763fe7d"
+    },
+    {
+      "file": "nonlinear_pushover_stress_report.json",
+      "bytes": 9165,
+      "sha256": "413205af156eaa79140f6fca0008bd836b5fde2c148341ea5beb2758e1703e39"
+    },
+    {
+      "file": "nonlinear_ndtha_stress_report.json",
+      "bytes": 613662,
+      "sha256": "a75d27eb25f831b6c43643d339db808971de6a2bdcc91a2c876e4b8bf1e3c36d"
+    },
+    {
+      "file": "nightly_10m_repro_report.json",
+      "bytes": 4194,
+      "sha256": "9dc6652a3a7279ffe5549a9d6a3a4ec4307b7e6d4ed1f968349561b1068bd3ed"
+    },
+    {
+      "file": "scaleout_io_profile_report.json",
+      "bytes": 4743,
+      "sha256": "95531e42420f9fa6bbe2fc030ec0ae637724f06ab5e73a538e68e5c94b53bbe5"
+    },
+    {
+      "file": "ci_gate_report.json",
+      "bytes": 1724,
+      "sha256": "b9d53e28f2fbf290d639cd60c044be01912fc6319dfe00dc23afcd24d473d53a"
+    },
+    {
+      "file": "static_artifact_validation_report.json",
+      "bytes": 6022,
+      "sha256": "370b70b05af799f69afcfc66d72ac3f112300b47d7b98aee18e907f238ea5aa3"
+    },
+    {
+      "file": "ci_artifact_manifest.json",
+      "bytes": 3557,
+      "sha256": "818e49206dcabe58d3bac52382561aab02323a26e222af421bfe19e6290940f8"
+    }
+  ]
+}

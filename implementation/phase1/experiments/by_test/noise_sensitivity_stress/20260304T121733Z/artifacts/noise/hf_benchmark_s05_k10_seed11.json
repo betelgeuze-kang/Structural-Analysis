@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-hf-benchmark-topk-residual-meta",
+  "generated_at": "2026-03-04T12:17:14.316309+00:00",
+  "algorithm": "topk_weighted_residual_correction_with_meta_learning",
+  "contract_pass": false,
+  "reason_code": "ERR_BENCHMARK_KPI_FAIL",
+  "reason": "benchmark KPI thresholds violated",
+  "kpi_pass": false,
+  "metrics": {
+    "drift_error_pct": 78744.19785335554,
+    "base_shear_error_pct": 35409.23905890813,
+    "mode_shape_mac": 0.9591649469820727,
+    "buckling_factor_error_pct": 28695.57696769968
+  },
+  "checks": {
+    "drift_ok": false,
+    "base_shear_ok": false,
+    "mac_ok": true,
+    "buckling_factor_ok": false,
+    "improves_over_lf": false
+  },
+  "target_split": "all",
+  "comparison": {
+    "baseline_lf": {
+      "train": {
+        "case_count": 70,
+        "drift_error_pct": 6.44135832555682,
+        "base_shear_error_pct": 3.1216759958600244,
+        "mode_shape_mac": 0.9279812181550028,
+        "buckling_factor_error_pct": 4.130407123344361,
+        "equilibrium_residual_mean": 0.07244942156715867
+      },
+      "val": {
+        "case_count": 10,
+        "drift_error_pct": 6.075302476613102,
+        "base_shear_error_pct": 3.3414163621372017,
+        "mode_shape_mac": 0.9878493950467735,
+        "buckling_factor_error_pct": 3.7666875355001226,
+        "equilibrium_residual_mean": 0.0746581379515472
+      },
+      "test": {
+        "case_count": 19,
+        "drift_error_pct": 6.080545256694027,
+        "base_shear_error_pct": 2.990989784666082,
+        "mode_shape_mac": 0.987838909486612,
+        "buckling_factor_error_pct": 3.7699380591502982,
+        "equilibrium_residual_mean": 0.07481845051579965
+      },
+      "all": {
+        "case_count": 99,
+        "drift_error_pct": 6.33513603466965,
+        "base_shear_error_pct": 3.118790800406357,
+        "mode_shape_mac": 0.945516348500642,
+        "buckling_factor_error_pct": 4.024486839524871,
+        "equilibrium_residual_mean": 0.07312718635370477
+      }
+    },
+    "topk_residual_meta": {
+      "train": {
+        "case_count": 70,
+        "drift_error_pct": 78706.49831918669,
+        "base_shear_error_pct": 35370.35820588761,
+        "mode_shape_mac": 0.9425746270754773,
+        "buckling_factor_error_pct": 28633.598908166285,
+        "equilibrium_residual_mean": 0.006571594093527112
+      },
+      "val": {
+        "case_count": 10,
+        "drift_error_pct": 85993.32820712557,
+        "base_shear_error_pct": 38726.252523204486,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 31463.611672141327,
+        "equilibrium_residual_mean": 0.0
+      },
+      "test": {
+        "case_count": 19,
+        "drift_error_pct": 75067.75910883535,
+        "base_shear_error_pct": 33806.68774672252,
+        "mode_shape_mac": 0.998795045049567,
+        "buckling_factor_error_pct": 27467.056816274468,
+        "equilibrium_residual_mean": 0.00793267237512689
+      },
+      "all": {
+        "case_count": 99,
+        "drift_error_pct": 78744.19785335554,
+        "base_shear_error_pct": 35409.23905890813,
+        "mode_shape_mac": 0.9591649469820727,
+        "buckling_factor_error_pct": 28695.57696769968,
+        "equilibrium_residual_mean": 0.006169013754285947
+      }
+    },
+    "improvement_pct": {
+      "drift_error_reduction_pct": -1242875.6428657607,
+      "base_shear_error_reduction_pct": -1135251.529647149,
+      "buckling_error_reduction_pct": -712924.4950953167,
+      "mode_shape_mac_gain_pct": 1.4435074023917167
+    }
+  },
+  "training": {
+    "epochs": 24,
+    "branches": 10,
+    "top_k": 3,
+    "lr": 0.055,
+    "epsilon": 0.11,
+    "temperature": 0.32,
+    "seed": 11,
+    "final_total_loss": 717.0156860351562,
+    "final_weighted_loss": 717.0152587890625,
+    "last_selected_branch_ids": [
+      4,
+      2,
+      0
+    ],
+    "last_selected_weights": [
+      1.0,
+      3.495209621368184e-163,
+      0.0
+    ],
+    "param_vector": [
+      0.0869470089673996,
+      -0.01737346686422825,
+      0.06490458548069,
+      -0.10557374358177185,
+      0.15119729936122894,
+      0.04031908139586449,
+      -0.01992536522448063,
+      0.1963842213153839,
+      -0.01626058667898178,
+      0.2762661278247833,
+      0.0,
+      0.0,
+      -0.6190929412841797,
+      0.0,
+      0.0,
+      -0.6190929412841797,
+      0.0
+    ]
+  },
+  "metric_source_validation": {
+    "enabled": true,
+    "accepted_metric_sources": [
+      "commercial_solver_export",
+      "engine_export_direct",
+      "open_data_measurement"
+    ],
+    "global_metric_source": "open_data_measurement",
+    "missing_metric_source_case_ids": [],
+    "invalid_metric_source_case_ids": [],
+    "pass": true
+  }
+}

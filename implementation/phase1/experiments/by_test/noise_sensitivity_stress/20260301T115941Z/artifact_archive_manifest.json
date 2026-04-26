@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-01T11:59:41.858939+00:00",
+  "test_name": "noise_sensitivity_stress",
+  "run_dir": "implementation/phase1/experiments/by_test/noise_sensitivity_stress/20260301T115941Z",
+  "mode": "copy",
+  "archived_count": 3,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/noise_sensitivity.json",
+      "dst": "implementation/phase1/experiments/by_test/noise_sensitivity_stress/20260301T115941Z/artifacts/noise_sensitivity.json",
+      "kind": "file",
+      "bytes": 304,
+      "sha256": "cec22346439f6ffd6a4b2f91679f5ed364a72a6d4f9acd4db78cc5beace782ea",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/stress/noise",
+      "dst": "implementation/phase1/experiments/by_test/noise_sensitivity_stress/20260301T115941Z/artifacts/noise",
+      "kind": "directory",
+      "file_count": 127,
+      "bytes": 6288964,
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+      "dst": "implementation/phase1/experiments/by_test/noise_sensitivity_stress/20260301T115941Z/artifacts/commercial_benchmark_cases.rwth_zenodo.json",
+      "kind": "file",
+      "bytes": 26816,
+      "sha256": "155ba45ff7f190d72c7293158e7ad30cf72de39a5f8e639682d9dcaf0f3844ca",
+      "mode": "copy"
+    }
+  ]
+}

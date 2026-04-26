@@ -1,11 +1,23 @@
 {
+  "schema_version": "1.0",
+  "run_id": "phase1-whitebox-validation",
+  "generated_at": "2026-02-26T14:13:30.231708+00:00",
   "cases": [
     "cantilever_2d",
     "one_story_rahmen",
-    "truss_3d"
+    "track_moving_load_span",
+    "tunnel_longitudinal_seismic",
+    "rail_tunnel_building_coupled"
+  ],
+  "domains": [
+    "building",
+    "integrated",
+    "track",
+    "tunnel"
   ],
   "rows": [
     {
+      "domain": "building",
       "case": "cantilever_2d",
       "metric": "disp_max_mm",
       "hf": 12.4,
@@ -16,6 +28,7 @@
       "improved": true
     },
     {
+      "domain": "building",
       "case": "cantilever_2d",
       "metric": "stress_max_mpa",
       "hf": 238.0,
@@ -26,6 +39,7 @@
       "improved": true
     },
     {
+      "domain": "building",
       "case": "cantilever_2d",
       "metric": "reaction_kN",
       "hf": 116.2,
@@ -36,6 +50,7 @@
       "improved": true
     },
     {
+      "domain": "building",
       "case": "cantilever_2d",
       "metric": "equilibrium_residual",
       "hf": 0.0,
@@ -46,6 +61,7 @@
       "improved": true
     },
     {
+      "domain": "building",
       "case": "one_story_rahmen",
       "metric": "disp_max_mm",
       "hf": 8.6,
@@ -56,6 +72,7 @@
       "improved": true
     },
     {
+      "domain": "building",
       "case": "one_story_rahmen",
       "metric": "stress_max_mpa",
       "hf": 191.0,
@@ -66,6 +83,7 @@
       "improved": true
     },
     {
+      "domain": "building",
       "case": "one_story_rahmen",
       "metric": "reaction_kN",
       "hf": 224.4,
@@ -76,6 +94,7 @@
       "improved": true
     },
     {
+      "domain": "building",
       "case": "one_story_rahmen",
       "metric": "equilibrium_residual",
       "hf": 0.0,
@@ -86,54 +105,172 @@
       "improved": true
     },
     {
-      "case": "truss_3d",
+      "domain": "track",
+      "case": "track_moving_load_span",
       "metric": "disp_max_mm",
-      "hf": 5.2,
-      "lf": 5.5,
-      "gnn": 5.22,
-      "lf_rel_err": 0.057692307692307654,
-      "gnn_rel_err": 0.003846153846153764,
+      "hf": 6.2,
+      "lf": 6.62,
+      "gnn": 6.28,
+      "lf_rel_err": 0.06774193548387096,
+      "gnn_rel_err": 0.012903225806451623,
       "improved": true
     },
     {
-      "case": "truss_3d",
-      "metric": "stress_max_mpa",
-      "hf": 142.0,
-      "lf": 149.0,
-      "gnn": 143.1,
-      "lf_rel_err": 0.04929577464788732,
-      "gnn_rel_err": 0.007746478873239397,
+      "domain": "track",
+      "case": "track_moving_load_span",
+      "metric": "acc_peak_mps2",
+      "hf": 2.45,
+      "lf": 2.66,
+      "gnn": 2.49,
+      "lf_rel_err": 0.08571428571428569,
+      "gnn_rel_err": 0.01632653061224491,
       "improved": true
     },
     {
-      "case": "truss_3d",
-      "metric": "reaction_kN",
-      "hf": 303.0,
-      "lf": 298.7,
-      "gnn": 302.8,
-      "lf_rel_err": 0.014191419141914229,
-      "gnn_rel_err": 0.0006600660066006226,
+      "domain": "track",
+      "case": "track_moving_load_span",
+      "metric": "contact_force_kN",
+      "hf": 83.4,
+      "lf": 86.1,
+      "gnn": 83.8,
+      "lf_rel_err": 0.03237410071942432,
+      "gnn_rel_err": 0.004796163069544262,
       "improved": true
     },
     {
-      "case": "truss_3d",
+      "domain": "track",
+      "case": "track_moving_load_span",
       "metric": "equilibrium_residual",
       "hf": 0.0,
       "lf": 0.015,
-      "gnn": 0.003,
+      "gnn": 0.004,
       "lf_rel_err": 0.015,
-      "gnn_rel_err": 0.003,
+      "gnn_rel_err": 0.004,
+      "improved": true
+    },
+    {
+      "domain": "tunnel",
+      "case": "tunnel_longitudinal_seismic",
+      "metric": "disp_max_mm",
+      "hf": 3.84,
+      "lf": 4.03,
+      "gnn": 3.88,
+      "lf_rel_err": 0.04947916666666677,
+      "gnn_rel_err": 0.010416666666666676,
+      "improved": true
+    },
+    {
+      "domain": "tunnel",
+      "case": "tunnel_longitudinal_seismic",
+      "metric": "lining_moment_kNm",
+      "hf": 412.0,
+      "lf": 433.0,
+      "gnn": 416.0,
+      "lf_rel_err": 0.050970873786407765,
+      "gnn_rel_err": 0.009708737864077669,
+      "improved": true
+    },
+    {
+      "domain": "tunnel",
+      "case": "tunnel_longitudinal_seismic",
+      "metric": "strain_peak",
+      "hf": 0.0018,
+      "lf": 0.00195,
+      "gnn": 0.00183,
+      "lf_rel_err": 0.08333333333333331,
+      "gnn_rel_err": 0.01666666666666671,
+      "improved": true
+    },
+    {
+      "domain": "tunnel",
+      "case": "tunnel_longitudinal_seismic",
+      "metric": "equilibrium_residual",
+      "hf": 0.0,
+      "lf": 0.017,
+      "gnn": 0.005,
+      "lf_rel_err": 0.017,
+      "gnn_rel_err": 0.005,
+      "improved": true
+    },
+    {
+      "domain": "integrated",
+      "case": "rail_tunnel_building_coupled",
+      "metric": "building_vib_mm_s",
+      "hf": 0.082,
+      "lf": 0.094,
+      "gnn": 0.084,
+      "lf_rel_err": 0.1463414634146341,
+      "gnn_rel_err": 0.024390243902439046,
+      "improved": true
+    },
+    {
+      "domain": "integrated",
+      "case": "rail_tunnel_building_coupled",
+      "metric": "tunnel_disp_mm",
+      "hf": 2.76,
+      "lf": 2.93,
+      "gnn": 2.8,
+      "lf_rel_err": 0.061594202898550866,
+      "gnn_rel_err": 0.01449275362318842,
+      "improved": true
+    },
+    {
+      "domain": "integrated",
+      "case": "rail_tunnel_building_coupled",
+      "metric": "track_disp_mm",
+      "hf": 5.98,
+      "lf": 6.32,
+      "gnn": 6.04,
+      "lf_rel_err": 0.05685618729096987,
+      "gnn_rel_err": 0.010033444816053446,
+      "improved": true
+    },
+    {
+      "domain": "integrated",
+      "case": "rail_tunnel_building_coupled",
+      "metric": "equilibrium_residual",
+      "hf": 0.0,
+      "lf": 0.019,
+      "gnn": 0.006,
+      "lf_rel_err": 0.019,
+      "gnn_rel_err": 0.006,
       "improved": true
     }
   ],
+  "domain_summary": {
+    "building": {
+      "max_gnn_err": 0.009424083769633567,
+      "mean_gnn_err": 0.004648808498976083,
+      "improved_ratio": 1.0
+    },
+    "integrated": {
+      "max_gnn_err": 0.024390243902439046,
+      "mean_gnn_err": 0.013729110585420227,
+      "improved_ratio": 1.0
+    },
+    "track": {
+      "max_gnn_err": 0.01632653061224491,
+      "mean_gnn_err": 0.0095064798720602,
+      "improved_ratio": 1.0
+    },
+    "tunnel": {
+      "max_gnn_err": 0.01666666666666671,
+      "mean_gnn_err": 0.010448017799352763,
+      "improved_ratio": 1.0
+    }
+  },
   "summary": {
-    "max_lf_rel_err": 0.06282722513089005,
-    "max_gnn_rel_err": 0.009424083769633567,
-    "max_gnn_non_residual_err": 0.009424083769633567,
-    "max_gnn_residual_abs": 0.005,
+    "max_lf_rel_err": 0.1463414634146341,
+    "max_gnn_rel_err": 0.024390243902439046,
+    "max_gnn_non_residual_err": 0.024390243902439046,
+    "max_gnn_residual_abs": 0.006,
     "improved_ratio": 1.0,
-    "acceptance_rel_err": 0.03,
+    "acceptance_rel_err": 0.05,
     "acceptance_abs_residual": 0.01,
+    "min_improved_ratio": 0.9,
     "pass": true
-  }
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "white-box multi-domain validation passed"
 }

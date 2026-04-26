@@ -1,0 +1,23 @@
+{
+  "byte_count": 283,
+  "collection_policy": "local_first_manual_attach",
+  "content_kind": "native_text_model",
+  "curated_local_ifc_reference": "",
+  "curated_local_ifc_required": false,
+  "curated_local_ifc_status": "not_applicable",
+  "download_mode": "local_copy",
+  "exact_topology_candidate": false,
+  "format": "mgt",
+  "license_hint": "society_example_check_terms",
+  "native_writeback_candidate": true,
+  "promotion_hint": "native_writeback_candidate",
+  "provenance_url": "https://bookstore.kci.or.kr/kci/Book/bookList",
+  "reference_scheme": "local_path",
+  "resolved_reference": "implementation/phase1/open_data/korea/curated/kci_concrete_building_design_examples_2e_native_baseline.mgt",
+  "retrieved_at_utc": "2026-04-08T10:41:49.841878+00:00",
+  "schema_version": "1.0",
+  "seed_basis": "official KCI publication seed with a committed manual local MIDAS baseline for truthful native writeback validation",
+  "seed_priority": "P1",
+  "sha256": "fbe2257be2c10679cb7bc63a29f4c9d43ad8588168ce65330562b5aec0db6db8",
+  "source_id": "kci_concrete_building_design_examples_2e_native_baseline"
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "report_type": "rhino_3dm_baseline_bridge",
+  "generated_at": "2026-03-22T14:47:28.724512+00:00",
+  "source_id": "midas_support_beam_archive",
+  "inputs": {
+    "rhino_3dm": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Tendon_1.3dm",
+    "model_json_out": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_beam_archive/model.json",
+    "npz_out": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_beam_archive/dataset.npz",
+    "report_out": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_beam_archive/bridge_report.json",
+    "nurbs_sample_count": 25
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "summary": {
+    "object_count": 129,
+    "accepted_object_count": 129,
+    "skipped_object_count": 0,
+    "object_type_label": "NurbsCurve=1, PolylineCurve=128",
+    "accepted_type_label": "NurbsCurve=1, PolylineCurve=128",
+    "family_assumption": "beam",
+    "bbox_min": [
+      0.0,
+      -104.75,
+      -3.6638
+    ],
+    "bbox_max": [
+      300.0,
+      74.0,
+      0.0
+    ],
+    "viewer_ready": true,
+    "node_count": 2129,
+    "edge_count_directed": 4024,
+    "element_count": 2192,
+    "member_id_count": 2192
+  },
+  "artifacts": {
+    "model_json": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_beam_archive/model.json",
+    "dataset_npz": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_beam_archive/dataset.npz",
+    "source_rhino_3dm": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Tendon_1.3dm"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-tpu-case-mat",
+  "generated_at": "2026-03-19T13:05:16.878026+00:00",
+  "contract_pass": false,
+  "reason_code": "ERR_MAT_EMPTY",
+  "reason": "resolved TPU MAT file is empty.",
+  "inputs": {
+    "case_id": "1202",
+    "case_page_url": "",
+    "case_page_html": "",
+    "mat_url": "",
+    "mat_index": 0
+  },
+  "summary": {
+    "case_title": "TPU Aerodynamic Database - Two adjacent high-rise building with corner cut > Isolate",
+    "resolved_case_page": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=1202",
+    "mat_link_count": 22,
+    "candidate_mat_urls_head": [
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/Isolate/time_series_1_0.mat",
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/Isolate/time_series_1_5.mat",
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/Isolate/time_series_1_10.mat",
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/Isolate/time_series_1_20.mat",
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/Isolate/time_series_1_25.mat"
+    ],
+    "resolved_mat_url": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/Isolate/time_series_1_0.mat",
+    "size_bytes": 0
+  },
+  "artifacts": {
+    "out_mat": "",
+    "source_manifest_out": "implementation/phase1/open_data/wind/tpu/case_1202_probe/tpu_hffb_isolated_highrise_seed_01.fetch_manifest.json"
+  }
+}

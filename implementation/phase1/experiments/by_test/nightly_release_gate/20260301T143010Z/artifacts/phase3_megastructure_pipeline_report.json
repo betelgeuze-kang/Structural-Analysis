@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-megastructure-open-pipeline",
+  "generated_at": "2026-03-01T14:21:55.967048+00:00",
+  "inputs": {
+    "catalog": "implementation/phase1/open_data/megastructure/mega_structure_catalog.json",
+    "candidate_id": "zenodo_atwood_highrise_shm_2025",
+    "input_path": "implementation/phase1/open_data/megastructure",
+    "download_if_missing": false,
+    "conversion_report": "implementation/phase1/open_data/megastructure/atwood_conversion_report.json",
+    "source_manifest_report": "implementation/phase1/open_data/megastructure/atwood_conversion_report.source_manifest.json",
+    "dynamic_out": "implementation/phase1/spatiotemporal_data/atwood_dynamic_cases.jsonl",
+    "opensees_model": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+    "topology_report_out": "implementation/phase1/opensees_topology_report.json",
+    "topology_edges_out": "implementation/phase1/open_data/megastructure/opensees_edges.json",
+    "topology_csr_out": "implementation/phase1/open_data/megastructure/opensees_csr.npz",
+    "benchmark_cases_out": "implementation/phase1/commercial_benchmark_cases.atwood_open.json",
+    "benchmark_out": "implementation/phase1/hf_benchmark_report.atwood_open.json",
+    "comparison_out": "implementation/phase1/topk_comparison_experiment_report.atwood_open.json",
+    "noise_convergence_out": "implementation/phase1/noise_convergence_gate_report.json",
+    "partitioned_scaleout_out": "implementation/phase1/partitioned_scaleout_report.json",
+    "sync_stress_out": "implementation/phase1/sync_stress_gate_report.json",
+    "summary_out": "implementation/phase1/phase3_megastructure_pipeline_report.json",
+    "benchmark_epochs": 160,
+    "benchmark_branches": 10,
+    "benchmark_top_k": 3,
+    "benchmark_target_split": "test",
+    "max_drift_error_pct": 5.0,
+    "max_base_shear_error_pct": 5.0,
+    "min_mode_shape_mac": 0.85,
+    "max_buckling_factor_error_pct": 5.0,
+    "require_real_source": true,
+    "require_real_topology": true,
+    "require_shell_beam_mix": true,
+    "allow_sanity_sample": false,
+    "gpu_strict": true,
+    "ci_mode": "nightly",
+    "scale_levels_pr": "1000000,3000000",
+    "scale_levels_nightly": "1000000,3000000,10000000",
+    "noise_seeds": "11,23,47",
+    "noise_stiffness_levels_pct": "10",
+    "noise_limit_cases": 8,
+    "allow_cpu_required": false
+  },
+  "recommended_candidates": {
+    "primary": "zenodo_atwood_highrise_shm_2025",
+    "secondary": "opstool_606m_megatall_model"
+  },
+  "reports": {
+    "conversion": "implementation/phase1/open_data/megastructure/atwood_conversion_report.json",
+    "source_manifest": "implementation/phase1/open_data/megastructure/atwood_conversion_report.source_manifest.json",
+    "topology": "implementation/phase1/opensees_topology_report.json",
+    "benchmark": "implementation/phase1/hf_benchmark_report.atwood_open.json",
+    "comparison": "implementation/phase1/topk_comparison_experiment_report.atwood_open.json",
+    "noise_convergence": "implementation/phase1/noise_convergence_gate_report.json",
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "sync_stress": "implementation/phase1/sync_stress_gate_report.json"
+  },
+  "checks": {
+    "real_source_verified": true,
+    "sample_source_blocked": true,
+    "topology_gate_pass": true,
+    "shell_beam_mix_pass": true,
+    "benchmark_pass": true,
+    "noise_convergence_pass": true,
+    "gpu_strict_pass": true,
+    "pr_scale_pass": true,
+    "nightly_scale_pass": true,
+    "sync_stress_pass": true
+  },
+  "steps": [
+    {
+      "step": "convert_open_megastructure",
+      "seconds": 0.9779396057128906,
+      "command": "/usr/bin/python3 implementation/phase1/build_cases_from_megastructure_open.py --input-path implementation/phase1/open_data/megastructure --candidate-id zenodo_atwood_highrise_shm_2025 --catalog implementation/phase1/open_data/megastructure/mega_structure_catalog.json --dynamic-out implementation/phase1/spatiotemporal_data/atwood_dynamic_cases.jsonl --benchmark-out implementation/phase1/commercial_benchmark_cases.atwood_open.json --report-out implementation/phase1/open_data/megastructure/atwood_conversion_report.json --source-manifest-out implementation/phase1/open_data/megastructure/atwood_conversion_report.source_manifest.json --require-source-manifest --forbid-local-sanity-wave",
+      "return_code": 0,
+      "stdout_tail": "Wrote open megastructure dynamic cases: implementation/phase1/spatiotemporal_data/atwood_dynamic_cases.jsonl\nWrote open megastructure benchmark cases: implementation/phase1/commercial_benchmark_cases.atwood_open.json\nWrote open megastructure source manifest: implementation/phase1/open_data/megastructure/atwood_conversion_report.source_manifest.json\nWrote open megastructure conversion report: implementation/phase1/open_data/megastructure/atwood_conversion_report.json\n",
+      "stderr_tail": "{\"benchmark_case_count\": 29, \"dynamic_case_count\": 29, \"event\": \"open_megastructure.build.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "parse_opensees_topology",
+      "seconds": 1.0181679725646973,
+      "command": "/usr/bin/python3 implementation/phase1/parse_opensees_to_csr.py --model implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl --edges-out implementation/phase1/open_data/megastructure/opensees_edges.json --csr-out implementation/phase1/open_data/megastructure/opensees_csr.npz --report-out implementation/phase1/opensees_topology_report.json --require-real-topology --forbid-synthetic-source --require-shell-beam-mix",
+      "return_code": 0,
+      "stdout_tail": "Wrote OpenSees topology report: implementation/phase1/opensees_topology_report.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"opensees_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "benchmark_topk_open",
+      "seconds": 15.586337327957153,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/commercial_benchmark_cases.atwood_open.json --out implementation/phase1/hf_benchmark_report.atwood_open.json --comparison-out implementation/phase1/topk_comparison_experiment_report.atwood_open.json --target-split test --epochs 160 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 23 --max-drift-error-pct 5.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.85 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "return_code": 0,
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/hf_benchmark_report.atwood_open.json\nWrote Top-k comparison report: implementation/phase1/topk_comparison_experiment_report.atwood_open.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "noise_convergence_gate",
+      "seconds": 1.0341675281524658,
+      "command": "/usr/bin/python3 implementation/phase1/run_noise_convergence_gate.py --cases implementation/phase1/commercial_benchmark_cases.atwood_open.json --target-split test --limit-cases 8 --seeds 11,23,47 --stiffness-noise-levels 10 --out implementation/phase1/noise_convergence_gate_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote noise convergence gate report: implementation/phase1/noise_convergence_gate_report.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"noise_convergence.completed\", \"scenarios\": 45}\n"
+    },
+    {
+      "step": "partitioned_scaleout",
+      "seconds": 86.64860010147095,
+      "command": "/usr/bin/python3 implementation/phase1/run_partitioned_scaleout.py --dof-levels 1000000,3000000,10000000 --branches 64 --chunk-candidates 64,32,16,8,4,2,1 --gpu-strict --ci-mode nightly --out implementation/phase1/partitioned_scaleout_report.json --edge-list-json implementation/phase1/open_data/megastructure/opensees_edges.json --require-real-graph",
+      "return_code": 0,
+      "stdout_tail": "Wrote partitioned scaleout report: implementation/phase1/partitioned_scaleout_report.json\n",
+      "stderr_tail": "{\"ci_mode\": \"nightly\", \"event\": \"partitioned_scaleout.start\", \"levels\": [1000000, 3000000, 10000000]}\n{\"ci_mode\": \"nightly\", \"contract_pass\": true, \"event\": \"partitioned_scaleout.completed\"}\n"
+    },
+    {
+      "step": "sync_stress_gate",
+      "seconds": 4.042365074157715,
+      "command": "/usr/bin/python3 implementation/phase1/run_sync_stress_gate.py --partitioned-scaleout implementation/phase1/partitioned_scaleout_report.json --topology-report implementation/phase1/opensees_topology_report.json --ci-mode nightly --out implementation/phase1/sync_stress_gate_report.json --require-topology-gate",
+      "return_code": 0,
+      "stdout_tail": "Wrote sync stress gate report: implementation/phase1/sync_stress_gate_report.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"sync_stress_gate.completed\", \"reason_code\": \"PASS\"}\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "phase3 megastructure pipeline passed",
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/phase3_pipeline_nightly/20260301T142155Z/artifact_archive_manifest.json"
+}

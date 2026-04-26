@@ -1,0 +1,515 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-vibration-attenuation-model",
+  "generated_at": "2026-02-26T14:13:30.180715+00:00",
+  "inputs": {
+    "substructuring_report": "implementation/phase1/substructuring_interface_report.json",
+    "distance_min_m": 5.0,
+    "distance_max_m": 120.0,
+    "distance_step_m": 5.0,
+    "freq_bands_hz": [
+      8.0,
+      16.0,
+      31.5,
+      63.0
+    ],
+    "base_reference_velocity_mm_s": 0.08694889261026549
+  },
+  "checks": {
+    "substructuring_linked": true,
+    "finite_values": true,
+    "monotonic_distance_decay": true,
+    "high_frequency_decay_stronger": true
+  },
+  "metrics": {
+    "distance_count": 24,
+    "max_velocity_mm_s": 0.03175564978865021,
+    "min_velocity_mm_s": 3.731262568142696e-05,
+    "far_field_ratio_63_to_8": 0.027502805538760753
+  },
+  "curve_head": [
+    {
+      "freq_hz": 8.0,
+      "distance_m": 5.0,
+      "velocity_mm_s": 0.03175564978865021
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 10.0,
+      "velocity_mm_s": 0.02097847821549142
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 15.0,
+      "velocity_mm_s": 0.016002812871765637
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 20.0,
+      "velocity_mm_s": 0.012947768737622977
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 25.0,
+      "velocity_mm_s": 0.010819517719765762
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 30.0,
+      "velocity_mm_s": 0.009227525514731128
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 35.0,
+      "velocity_mm_s": 0.007981413938801573
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 40.0,
+      "velocity_mm_s": 0.006975122461568834
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 45.0,
+      "velocity_mm_s": 0.006143891688955689
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 50.0,
+      "velocity_mm_s": 0.0054454375381685
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 55.0,
+      "velocity_mm_s": 0.004850699974662194
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 60.0,
+      "velocity_mm_s": 0.004338884687822131
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 65.0,
+      "velocity_mm_s": 0.003894619467562261
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 70.0,
+      "velocity_mm_s": 0.003506232119961905
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 75.0,
+      "velocity_mm_s": 0.003164659779078657
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 80.0,
+      "velocity_mm_s": 0.002862731658923887
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 85.0,
+      "velocity_mm_s": 0.0025946820462452304
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 90.0,
+      "velocity_mm_s": 0.0023558103752411128
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 95.0,
+      "velocity_mm_s": 0.0021422381907874777
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 100.0,
+      "velocity_mm_s": 0.001950731672430248
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 105.0,
+      "velocity_mm_s": 0.0017785695839986617
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 110.0,
+      "velocity_mm_s": 0.0016234433674103673
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 115.0,
+      "velocity_mm_s": 0.0014833804152774755
+    },
+    {
+      "freq_hz": 8.0,
+      "distance_m": 120.0,
+      "velocity_mm_s": 0.001356684343669625
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 5.0,
+      "velocity_mm_s": 0.027702174748366438
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 10.0,
+      "velocity_mm_s": 0.01797419881810432
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 15.0,
+      "velocity_mm_s": 0.013466495375119842
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 20.0,
+      "velocity_mm_s": 0.010701284064790427
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 25.0,
+      "velocity_mm_s": 0.008782771027810353
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 30.0,
+      "velocity_mm_s": 0.007356845102340197
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 35.0,
+      "velocity_mm_s": 0.006249839893343694
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 40.0,
+      "velocity_mm_s": 0.005364430127564952
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 45.0,
+      "velocity_mm_s": 0.004640855072909248
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 50.0,
+      "velocity_mm_s": 0.004039893678346596
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 55.0,
+      "velocity_mm_s": 0.0035344697372272716
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 60.0,
+      "velocity_mm_s": 0.003105136252262929
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 65.0,
+      "velocity_mm_s": 0.002737475765045639
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 70.0,
+      "velocity_mm_s": 0.002420519668282525
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 75.0,
+      "velocity_mm_s": 0.0021457428733657
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 80.0,
+      "velocity_mm_s": 0.0019063998340679985
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 85.0,
+      "velocity_mm_s": 0.0016970717211522272
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 90.0,
+      "velocity_mm_s": 0.001513348948818968
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 95.0,
+      "velocity_mm_s": 0.0013516031836186394
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 100.0,
+      "velocity_mm_s": 0.0012088201292616725
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 105.0,
+      "velocity_mm_s": 0.0010824745844179274
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 110.0,
+      "velocity_mm_s": 0.0009704355323860322
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 115.0,
+      "velocity_mm_s": 0.0008708929737828068
+    },
+    {
+      "freq_hz": 16.0,
+      "distance_m": 120.0,
+      "velocity_mm_s": 0.0007823007713481525
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 5.0,
+      "velocity_mm_s": 0.021989467422380882
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 10.0,
+      "velocity_mm_s": 0.013778577003585318
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 15.0,
+      "velocity_mm_s": 0.009969270789795294
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 20.0,
+      "velocity_mm_s": 0.007650656067595058
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 25.0,
+      "velocity_mm_s": 0.006063848284462452
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 30.0,
+      "velocity_mm_s": 0.004905263687918165
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 35.0,
+      "velocity_mm_s": 0.004024330294887623
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 40.0,
+      "velocity_mm_s": 0.003335817625380531
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 45.0,
+      "velocity_mm_s": 0.0027869597226316814
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 50.0,
+      "velocity_mm_s": 0.0023429153704200897
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 55.0,
+      "velocity_mm_s": 0.0019795428788649903
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 60.0,
+      "velocity_mm_s": 0.0016794817443153006
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 65.0,
+      "velocity_mm_s": 0.0014298776861608998
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 70.0,
+      "velocity_mm_s": 0.0012209874546007034
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 75.0,
+      "velocity_mm_s": 0.001045283859734576
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 80.0,
+      "velocity_mm_s": 0.0008968597569365419
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 85.0,
+      "velocity_mm_s": 0.0007710183643452832
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 90.0,
+      "velocity_mm_s": 0.0006639839551310162
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 95.0,
+      "velocity_mm_s": 0.0005726927583632227
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 100.0,
+      "velocity_mm_s": 0.0004946387644630114
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 105.0,
+      "velocity_mm_s": 0.00042775801291870905
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 110.0,
+      "velocity_mm_s": 0.00037034042029333543
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 115.0,
+      "velocity_mm_s": 0.0003209616855050368
+    },
+    {
+      "freq_hz": 31.5,
+      "distance_m": 120.0,
+      "velocity_mm_s": 0.000278430074542366
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 5.0,
+      "velocity_mm_s": 0.015042106908104085
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 10.0,
+      "velocity_mm_s": 0.0087804688448366
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 15.0,
+      "velocity_mm_s": 0.005918288198072746
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 20.0,
+      "velocity_mm_s": 0.004231075496046314
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 25.0,
+      "velocity_mm_s": 0.003124063128839549
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 30.0,
+      "velocity_mm_s": 0.002354253426997988
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 35.0,
+      "velocity_mm_s": 0.001799301116972396
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 40.0,
+      "velocity_mm_s": 0.001389414763243827
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 45.0,
+      "velocity_mm_s": 0.001081383356356436
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 50.0,
+      "velocity_mm_s": 0.0008468860298586177
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 55.0,
+      "velocity_mm_s": 0.0006665805838211134
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 60.0,
+      "velocity_mm_s": 0.0005268444532091145
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 65.0,
+      "velocity_mm_s": 0.00041785479673216055
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 70.0,
+      "velocity_mm_s": 0.0003323969907560847
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 75.0,
+      "velocity_mm_s": 0.00026509375983722064
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 80.0,
+      "velocity_mm_s": 0.00021188937311561996
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 85.0,
+      "velocity_mm_s": 0.00016969488029598847
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 90.0,
+      "velocity_mm_s": 0.00013613850623923004
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 95.0,
+      "velocity_mm_s": 0.00010938668629374206
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 100.0,
+      "velocity_mm_s": 8.801370472733431e-05
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 105.0,
+      "velocity_mm_s": 7.090546108909557e-05
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 110.0,
+      "velocity_mm_s": 5.7187620377107724e-05
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 115.0,
+      "velocity_mm_s": 4.617144653725989e-05
+    },
+    {
+      "freq_hz": 63.0,
+      "distance_m": 120.0,
+      "velocity_mm_s": 3.731262568142696e-05
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "vibration attenuation model passed"
+}

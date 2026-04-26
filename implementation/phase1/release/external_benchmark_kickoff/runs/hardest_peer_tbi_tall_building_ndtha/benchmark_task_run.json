@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:03.028898+00:00",
+  "task_id": "hardest::peer_tbi_tall_building_ndtha",
+  "phase": "hardest_case",
+  "benchmark_family": "highrise_ndtha",
+  "submission_scope": "hardest_external_benchmark_program",
+  "status": "in_progress",
+  "started_at": "2026-04-01T13:48:03.028898+00:00",
+  "input_path": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+  "source_origin_class": "official_external_benchmark_fullcase",
+  "holdout_split": "",
+  "execution_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+  "note": "hardest external 10-case kickoff",
+  "task": {
+    "task_id": "hardest::peer_tbi_tall_building_ndtha",
+    "case_id": "peer_tbi_tall_building_ndtha",
+    "case_label": "PEER TBI Tall Building NDTHA",
+    "phase": "hardest_case",
+    "benchmark_family": "highrise_ndtha",
+    "hazard_family": "seismic",
+    "topology_family": "tall_building_core_outrigger",
+    "load_path_family": "ndtha_multi_record",
+    "submission_scope": "hardest_external_benchmark_program",
+    "execution_status": "ready",
+    "input_path": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+    "source_origin_class": "official_external_benchmark_fullcase",
+    "primary_report_path": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+    "supporting_report_paths": {
+      "solver_truthfulness": "implementation/phase1/solver_truthfulness_gate_report.json",
+      "solver_hip": "implementation/phase1/solver_hip_e2e_contract_report.json"
+    },
+    "kpi_specs": [
+      {
+        "label": "case_count",
+        "source": "primary.summary.case_count"
+      },
+      {
+        "label": "max_drift_ratio_pct_max",
+        "source": "primary.summary.max_drift_ratio_pct_max"
+      },
+      {
+        "label": "peak_plastic_story_count_mean",
+        "source": "primary.summary.peak_plastic_story_count_mean"
+      },
+      {
+        "label": "avg_step_iterations_mean",
+        "source": "primary.summary.avg_step_iterations_mean"
+      },
+      {
+        "label": "residual_drift_ratio_pct_max_abs",
+        "source": "primary.summary.residual_drift_ratio_pct_max_abs"
+      },
+      {
+        "label": "solver_hip_variants",
+        "source": "supporting.solver_hip.summary.solver_count"
+      }
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.2",
+  "run_id": "phase1-dynamics-boundary-contract-coupled",
+  "generated_at": "2026-02-26T13:02:54.580405+00:00",
+  "interface_version": "1.1.0",
+  "domain_type": "coupled",
+  "supports_summary": {
+    "node_count": 3,
+    "support_types": [
+      "elastic_foundation",
+      "hinge",
+      "segment_joint"
+    ],
+    "fixed_count": 0
+  },
+  "damping_summary": {
+    "damping_model": "modal",
+    "alpha_m": 0.01,
+    "beta_k": 0.0008,
+    "time_step_dt": 0.001,
+    "external_force_profile": "train_passage"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "contract satisfies required boundary/dynamics keys",
+  "payload": {
+    "interface_version": "1.1.0",
+    "domain_type": "coupled",
+    "nodes": [
+      {
+        "node_id": "C1_BLD",
+        "mass": 4200.0,
+        "is_fixed_mask": false,
+        "support_type": "hinge",
+        "dof_lock": {
+          "ux": true,
+          "uy": true,
+          "uz": true,
+          "rx": false,
+          "ry": false,
+          "rz": false
+        }
+      },
+      {
+        "node_id": "C2_TRK",
+        "mass": 60.34,
+        "is_fixed_mask": false,
+        "support_type": "elastic_foundation",
+        "dof_lock": {
+          "ux": false,
+          "uy": false,
+          "uz": false,
+          "rx": false,
+          "ry": false,
+          "rz": true
+        },
+        "foundation_stiffness": {
+          "k_vertical": 120000000.0,
+          "k_shear": 4000000.0,
+          "c_vertical": 40000.0
+        }
+      },
+      {
+        "node_id": "C3_TUN",
+        "mass": 8500.0,
+        "is_fixed_mask": false,
+        "support_type": "segment_joint",
+        "dof_lock": {
+          "ux": false,
+          "uy": false,
+          "uz": false,
+          "rx": false,
+          "ry": false,
+          "rz": false
+        }
+      }
+    ],
+    "dynamics": {
+      "damping_model": "modal",
+      "alpha_m": 0.01,
+      "beta_k": 0.0008,
+      "time_step_dt": 0.001,
+      "external_force_profile": "train_passage"
+    },
+    "vehicle": {
+      "vehicle_schema_ref": "vehicle_model_schema.json"
+    },
+    "tunnel": {
+      "tunnel_schema_ref": "tunnel_lining_schema.json"
+    }
+  }
+}

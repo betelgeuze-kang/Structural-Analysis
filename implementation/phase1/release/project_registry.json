@@ -1,0 +1,332 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-project-registry-service",
+  "generated_at": "2026-04-19T10:54:04.688011+00:00",
+  "inputs": {
+    "project_id": "phase1-release",
+    "project_name": "Phase1 Structural AI Release Package",
+    "artifact_paths": [
+      "implementation/phase1/reproducibility_version_lock_report.json",
+      "implementation/phase1/release/version_lock_manifest.json",
+      "implementation/phase1/release/kds_compliance/kds_compliance_summary.json",
+      "implementation/phase1/midas_mgt_conversion_report.json",
+      "implementation/phase1/solver_hip_e2e_contract_report.json",
+      "implementation/phase1/parse_midas_mgt_to_json_npz.py",
+      "implementation/phase1/release/committee_review/committee_review_package_report.json",
+      "implementation/phase1/release/committee_review/committee_summary.json",
+      "implementation/phase1/release/release_gap_report.json",
+      "implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
+      "implementation/phase1/release/signing/release_registry.signature.b64"
+    ],
+    "project_metadata": {},
+    "private_key_out": "implementation/phase1/release/signing/release_registry_ed25519.pem",
+    "public_key_out": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
+    "signature_out": "implementation/phase1/release/signing/project_registry.signature.b64",
+    "package_out": "implementation/phase1/release/project_package.zip",
+    "out": "implementation/phase1/release/project_registry.json"
+  },
+  "checks": {
+    "artifact_hashes_present_pass": true,
+    "package_written_pass": true,
+    "package_reproducible_pass": true,
+    "audit_log_present_pass": true,
+    "audit_trail_complete_pass": true,
+    "approval_workflow_present_pass": true,
+    "approval_complete_pass": true,
+    "signature_generated_pass": true,
+    "signature_verified_pass": true
+  },
+  "summary": {
+    "project_id": "phase1-release",
+    "project_name": "Phase1 Structural AI Release Package",
+    "project_family_id": "",
+    "portfolio_name": "",
+    "draft_label": "",
+    "artifact_count": 11,
+    "audit_event_count": 11,
+    "approval_count": 2,
+    "approved_count": 2,
+    "pending_count": 0,
+    "referenced_artifact_count": 11,
+    "package_sha256": "3b0177b619c53684a6004a3b988cb23f65cd2a06c1c5922520c21b7b750ffdfb",
+    "package_bytes": 3121538,
+    "registry_body_sha256": "e769b23014f05cb21859e9e997cdfb3f9603aec39f74c6d8525db252837d1695",
+    "signing_algorithm": "ed25519",
+    "key_generated_this_run": false
+  },
+  "metadata": {},
+  "registry_body": {
+    "project_id": "phase1-release",
+    "project_name": "Phase1 Structural AI Release Package",
+    "project_metadata": {},
+    "package_manifest": {
+      "schema_version": "1.0",
+      "project_id": "phase1-release",
+      "project_name": "Phase1 Structural AI Release Package",
+      "generated_at": "2026-04-19T10:54:04.688011+00:00",
+      "artifact_rows": [
+        {
+          "label": "reproducibility_version_lock_report.json",
+          "sha256": "d1dd51f4b61e673a1b0bbb918ec45b6cb5ad4f5de8ed96120d1741491f63a3df",
+          "bytes": 2764
+        },
+        {
+          "label": "version_lock_manifest.json",
+          "sha256": "a5328153728eaff1bf239724ed926144747b6456c4d177a914e481c6b76c55d9",
+          "bytes": 1225
+        },
+        {
+          "label": "kds_compliance_summary.json",
+          "sha256": "4175873f6db487fdcb9ffa55091460bf48ff19d1012e0715c9dce47c8dc8bcbd",
+          "bytes": 1355814
+        },
+        {
+          "label": "midas_mgt_conversion_report.json",
+          "sha256": "97679c2fa1c1c4f9bb7b60067c9dc5a4cd55a2deb494f7ac91710d5bd9e92259",
+          "bytes": 7595
+        },
+        {
+          "label": "solver_hip_e2e_contract_report.json",
+          "sha256": "2aa04054c53a7b1c00254505059632bb6e19e1cd8c8e33f1f6994d3efc04a118",
+          "bytes": 23084
+        },
+        {
+          "label": "parse_midas_mgt_to_json_npz.py",
+          "sha256": "a2e332950537729bd4fff771b19e4feba29deeca25ea8cd0123297afd72f74ea",
+          "bytes": 215268
+        },
+        {
+          "label": "committee_review_package_report.json",
+          "sha256": "7022cf917eaca732c178ec68527b9a8cbc9b1f3eeaa884c6c8d84d9983124094",
+          "bytes": 530951
+        },
+        {
+          "label": "committee_summary.json",
+          "sha256": "c87f8690cfbaca873691c162c05cdb5a14db22ccb0e716c96941bf1d341d6358",
+          "bytes": 609860
+        },
+        {
+          "label": "release_gap_report.json",
+          "sha256": "5ea229ba398b15eddd12600d63942fef76b3857c5b666e64a07559c62ce62ab0",
+          "bytes": 371273
+        },
+        {
+          "label": "release_registry_ed25519.pub.pem",
+          "sha256": "ac939e258b3549f4d699aa55803c79d3128b3ee21eeae096cad306f9879c1643",
+          "bytes": 113
+        },
+        {
+          "label": "release_registry.signature.b64",
+          "sha256": "9893242e5b10eae445573d5725b9c1938f3b221cf96180519832578dd9a5677f",
+          "bytes": 89
+        }
+      ]
+    },
+    "package_artifact": {
+      "path": "implementation/phase1/release/project_package.zip",
+      "sha256": "3b0177b619c53684a6004a3b988cb23f65cd2a06c1c5922520c21b7b750ffdfb",
+      "bytes": 3121538
+    },
+    "artifact_rows": [
+      {
+        "label": "reproducibility_version_lock_report.json",
+        "path": "implementation/phase1/reproducibility_version_lock_report.json",
+        "sha256": "d1dd51f4b61e673a1b0bbb918ec45b6cb5ad4f5de8ed96120d1741491f63a3df",
+        "bytes": 2764
+      },
+      {
+        "label": "version_lock_manifest.json",
+        "path": "implementation/phase1/release/version_lock_manifest.json",
+        "sha256": "a5328153728eaff1bf239724ed926144747b6456c4d177a914e481c6b76c55d9",
+        "bytes": 1225
+      },
+      {
+        "label": "kds_compliance_summary.json",
+        "path": "implementation/phase1/release/kds_compliance/kds_compliance_summary.json",
+        "sha256": "4175873f6db487fdcb9ffa55091460bf48ff19d1012e0715c9dce47c8dc8bcbd",
+        "bytes": 1355814
+      },
+      {
+        "label": "midas_mgt_conversion_report.json",
+        "path": "implementation/phase1/midas_mgt_conversion_report.json",
+        "sha256": "97679c2fa1c1c4f9bb7b60067c9dc5a4cd55a2deb494f7ac91710d5bd9e92259",
+        "bytes": 7595
+      },
+      {
+        "label": "solver_hip_e2e_contract_report.json",
+        "path": "implementation/phase1/solver_hip_e2e_contract_report.json",
+        "sha256": "2aa04054c53a7b1c00254505059632bb6e19e1cd8c8e33f1f6994d3efc04a118",
+        "bytes": 23084
+      },
+      {
+        "label": "parse_midas_mgt_to_json_npz.py",
+        "path": "implementation/phase1/parse_midas_mgt_to_json_npz.py",
+        "sha256": "a2e332950537729bd4fff771b19e4feba29deeca25ea8cd0123297afd72f74ea",
+        "bytes": 215268
+      },
+      {
+        "label": "committee_review_package_report.json",
+        "path": "implementation/phase1/release/committee_review/committee_review_package_report.json",
+        "sha256": "7022cf917eaca732c178ec68527b9a8cbc9b1f3eeaa884c6c8d84d9983124094",
+        "bytes": 530951
+      },
+      {
+        "label": "committee_summary.json",
+        "path": "implementation/phase1/release/committee_review/committee_summary.json",
+        "sha256": "c87f8690cfbaca873691c162c05cdb5a14db22ccb0e716c96941bf1d341d6358",
+        "bytes": 609860
+      },
+      {
+        "label": "release_gap_report.json",
+        "path": "implementation/phase1/release/release_gap_report.json",
+        "sha256": "5ea229ba398b15eddd12600d63942fef76b3857c5b666e64a07559c62ce62ab0",
+        "bytes": 371273
+      },
+      {
+        "label": "release_registry_ed25519.pub.pem",
+        "path": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
+        "sha256": "ac939e258b3549f4d699aa55803c79d3128b3ee21eeae096cad306f9879c1643",
+        "bytes": 113
+      },
+      {
+        "label": "release_registry.signature.b64",
+        "path": "implementation/phase1/release/signing/release_registry.signature.b64",
+        "sha256": "9893242e5b10eae445573d5725b9c1938f3b221cf96180519832578dd9a5677f",
+        "bytes": 89
+      }
+    ],
+    "audit_log": [
+      {
+        "event_id": "release-registry-artifact-001",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "reproducibility_version_lock_report.json",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "repro_report"
+      },
+      {
+        "event_id": "release-registry-artifact-002",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "version_lock_manifest.json",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "lock_manifest"
+      },
+      {
+        "event_id": "release-registry-artifact-003",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "kds_compliance_summary.json",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "kds_summary"
+      },
+      {
+        "event_id": "release-registry-artifact-004",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "midas_mgt_conversion_report.json",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "midas_conversion"
+      },
+      {
+        "event_id": "release-registry-artifact-005",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "solver_hip_e2e_contract_report.json",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "solver_hip_e2e"
+      },
+      {
+        "event_id": "release-registry-artifact-006",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "parse_midas_mgt_to_json_npz.py",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "parser_script"
+      },
+      {
+        "event_id": "release-registry-artifact-007",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "committee_review_package_report.json",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "committee_package"
+      },
+      {
+        "event_id": "release-registry-artifact-008",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "committee_summary.json",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "committee_summary"
+      },
+      {
+        "event_id": "release-registry-artifact-009",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "release_gap_report.json",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "release_gap_report"
+      },
+      {
+        "event_id": "release-registry-artifact-010",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "release_registry_ed25519.pub.pem",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "release_registry_public_key"
+      },
+      {
+        "event_id": "release-registry-artifact-011",
+        "actor": "generate_signed_release_registry",
+        "action": "packaged_artifact",
+        "status": "completed",
+        "artifact_label": "release_registry.signature.b64",
+        "timestamp": "2026-04-19T10:54:04.688011+00:00",
+        "note": "release_registry_signature"
+      }
+    ],
+    "approvals": [
+      {
+        "gate_id": "release_registry_source_gate",
+        "approver": "generate_signed_release_registry",
+        "status": "approved",
+        "decided_at": "2026-04-19T10:54:04.688011+00:00",
+        "comment": "all release source gates passed"
+      },
+      {
+        "gate_id": "release_registry_signature_gate",
+        "approver": "generate_signed_release_registry",
+        "status": "approved",
+        "decided_at": "2026-04-19T10:54:04.688011+00:00",
+        "comment": "release registry signature verified"
+      }
+    ]
+  },
+  "signature": {
+    "algorithm": "ed25519",
+    "public_key_path": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
+    "signature_out": "implementation/phase1/release/signing/project_registry.signature.b64",
+    "signature_b64": "CA6fOGxa/OCJjhsiuN0akR8b5b04NaaFe9aIImXmmkbow9Jc+JZq1ggi5nILwipX6Pw1m5XKWmwqQjHZmH+QAg==",
+    "canonical_body_sha256": "e769b23014f05cb21859e9e997cdfb3f9603aec39f74c6d8525db252837d1695"
+  },
+  "artifacts": {
+    "project_package_zip": "implementation/phase1/release/project_package.zip",
+    "project_registry_json": "implementation/phase1/release/project_registry.json",
+    "project_signature_b64": "implementation/phase1/release/signing/project_registry.signature.b64"
+  },
+  "summary_line": "Project registry service: PASS | artifacts=11 | audit=11 | approvals=2/2 | package_repro=True | signature_verified=True",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "signed project registry package generated"
+}

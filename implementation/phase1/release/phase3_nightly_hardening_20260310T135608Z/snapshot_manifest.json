@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-nightly-release-snapshot",
+  "generated_at": "2026-03-10T13:56:08.199613+00:00",
+  "snapshot": "phase3_nightly_hardening_20260310T135608Z",
+  "source_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1",
+  "release_policy": {
+    "commercial_readiness_pass": true,
+    "commercial_readiness_real_source_pass": true,
+    "commercial_readiness_gpu_strict_pass": true,
+    "forbid_toy_cases_enforced": true,
+    "real_source_multi_pass": true,
+    "real_source_multi_all_real_source_pass": true,
+    "real_source_multi_all_toy_free_pass": true,
+    "nonlinear_engine_pass": true,
+    "nonlinear_engine_rust_backend_pass": true,
+    "nonlinear_engine_convergence_pass": true,
+    "nonlinear_engine_drift_p95_pass": true,
+    "nonlinear_engine_base_p95_pass": true,
+    "nonlinear_engine_top_p95_pass": true,
+    "pushover_stress_pass": true,
+    "pushover_convergence_pass": true,
+    "pushover_plasticity_pass": true,
+    "pushover_collapse_path_pass": true,
+    "pushover_min_plastic_pass": true,
+    "ndtha_stress_pass": true,
+    "ndtha_convergence_pass": true,
+    "ndtha_pdelta_pass": true,
+    "ndtha_dynamic_reversal_pass": true,
+    "ndtha_rust_backend_pass": true,
+    "ndtha_plasticity_pass": true,
+    "ndtha_min_plastic_pass": true,
+    "phase3_shell_beam_mix_pass": true,
+    "phase3_gpu_strict_pass": true,
+    "phase3_real_source_verified": true,
+    "topology_shell_beam_mix_pass": true,
+    "scaleout_io_gpu_strict_pass": true,
+    "release_registry_pass": true,
+    "release_registry_signature_pass": true,
+    "policy_pass": true
+  },
+  "release_policy_sha256": "c1c57d406346a01773893dabc63a5df70f54b9450833afc1381e456caa4c0165",
+  "files": [
+    {
+      "file": "phase3_megastructure_pipeline_report.json",
+      "bytes": 12616,
+      "sha256": "ae972fb08787ab04f4913a35d495373964b2c2a90d719498483105d30624277a"
+    },
+    {
+      "file": "opensees_topology_report.json",
+      "bytes": 2456,
+      "sha256": "521307804f80851653d2678877d08e5343ec737802abbb53a296e4448ce79790"
+    },
+    {
+      "file": "partitioned_scaleout_report.json",
+      "bytes": 14972,
+      "sha256": "3262db4a47d09d79178fca831f7d0ae6d42cd2949e24c2c1ac4b5305c276e1d9"
+    },
+    {
+      "file": "sync_stress_gate_report.json",
+      "bytes": 32112,
+      "sha256": "41c632ac581c76c824145154528b371d9ef430dcb1be1f7243a5435b477fedb5"
+    },
+    {
+      "file": "noise_convergence_gate_report.json",
+      "bytes": 134224,
+      "sha256": "dbae5533e480a96e6495389df8f5b5527cc6d88a8203808fc0c1f5a0f0800149"
+    },
+    {
+      "file": "commercial_csv_gate_report.json",
+      "bytes": 4651,
+      "sha256": "fabfc9fb576b6b435d9944c6f9f809f55acc30d24f4dfb430088f629a3f1c246"
+    },
+    {
+      "file": "commercial_readiness_report.json",
+      "bytes": 15887,
+      "sha256": "0b4911ac161b1355ac4c8c0b2b24aa434a248a4c55693ffcc1b7facc0b654288"
+    },
+    {
+      "file": "real_source_multi_gate_report.json",
+      "bytes": 1862,
+      "sha256": "9fdba469fd8cce6c49df6ffaa7fef6e2d76e7e0ad874d076532b2b595542cbcd"
+    },
+    {
+      "file": "nonlinear_frame_engine_report.json",
+      "bytes": 15887,
+      "sha256": "3552a7c29cc4dd9bb4fe795537ef79bc9972ed6313d03eb34edd34bec42d5fe9"
+    },
+    {
+      "file": "nonlinear_pushover_stress_report.json",
+      "bytes": 28847,
+      "sha256": "1ae16572178034b1df1a0aca42b715d13f1c7ea1bd6fd4d0f4ff731a4055dba1"
+    },
+    {
+      "file": "nonlinear_ndtha_stress_report.json",
+      "bytes": 2131097,
+      "sha256": "e6e05b33cc6cc08e63eca342ac5d7a428b63e80d77b207c5d37a5fc332d8a436"
+    },
+    {
+      "file": "nightly_10m_repro_report.json",
+      "bytes": 4335,
+      "sha256": "31ca855ef4c5e3971e4697fe765619604702935f21893ef147bb894ed4fc03d7"
+    },
+    {
+      "file": "scaleout_io_profile_report.json",
+      "bytes": 4807,
+      "sha256": "d9b2cb8c51e97713bf42032c28582ff9c9d4c2887c35ffa3886454bee6eee01b"
+    },
+    {
+      "file": "release/release_registry.json",
+      "bytes": 5926,
+      "sha256": "1dc2b8696d8639ffb1f30565c4ae376cd82fa15a7013e1e6404cbdbf066f9052"
+    },
+    {
+      "file": "release/signing/release_registry_ed25519.pub.pem",
+      "bytes": 113,
+      "sha256": "ac939e258b3549f4d699aa55803c79d3128b3ee21eeae096cad306f9879c1643"
+    },
+    {
+      "file": "ci_gate_report.json",
+      "bytes": 2223,
+      "sha256": "ceeadf4c2137cfe0956bbcc01592aea6cd3e1ed818d8679b90aa92c880ecc835"
+    },
+    {
+      "file": "static_artifact_validation_report.json",
+      "bytes": 7745,
+      "sha256": "f5b7a46fe437a4fb8820b0a7317432d589587bd48ebc558f2a50a9482dd8216d"
+    },
+    {
+      "file": "ci_artifact_manifest.json",
+      "bytes": 4414,
+      "sha256": "6faad1bc943dfd7cafd3eb51a75a3b783af6db09c5a525dfdfe92cbe1c710be9"
+    }
+  ]
+}

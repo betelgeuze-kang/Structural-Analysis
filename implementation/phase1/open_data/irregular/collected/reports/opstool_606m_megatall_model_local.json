@@ -1,0 +1,32 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/opstool_606m_megatall_model_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/opstool_606m_megatall_model_local/model.json",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/opstool_606m_megatall_model_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/opstool_606m_megatall_model_local.json"
+  },
+  "bytes_copied": 165134,
+  "declared_format": "json_graph",
+  "family_id": "outrigger_megatall_offset_core",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "bridge_contract_pass": true,
+    "bridge_report_path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/bridge_report.json"
+  },
+  "original_reference": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+  "sha256": "587222ebb76cb5343b44ab13f40af6ce42b1d396498152281cb3edcda84ffcc1",
+  "source_exists": true,
+  "source_format": "json_graph",
+  "source_id": "opstool_606m_megatall_model_local",
+  "source_index": 14,
+  "source_urls": [
+    "https://github.com/utopiatek/opstool"
+  ],
+  "status": "collected",
+  "title": "Opstool 606m megatall bridged model"
+}

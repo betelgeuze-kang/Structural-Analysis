@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Optimization History Tracker</title>
+<link rel="stylesheet" href="./design-theme.css"/>
+<style>
+@media print {
+  #shortcut-help {
+    display: none;
+  }
+}
+</style>
+</head>
+<body class="structural-surface history-command-shell">
+<header class="companion-topbar">
+  <div class="header-copy">
+    <div class="header-title">
+      <div class="header-eyebrow">Structural Insight Viewer</div>
+      <h1 id="page-title">Optimization Convergence History</h1>
+      <div id="status-line" class="subline">Loading embedded optimization history snapshot...</div>
+    </div>
+    <div id="provenance-block" class="provenance-block">
+      <div class="provenance-title">Provenance</div>
+      <div class="provenance-grid">
+        <div class="provenance-label">Source</div><div id="provenance-source" class="provenance-value">--</div>
+        <div class="provenance-label">Report</div><div id="provenance-report" class="provenance-value">--</div>
+        <div class="provenance-label">Timestamp</div><div id="provenance-timestamp" class="provenance-value">--</div>
+        <div class="provenance-label">Selection</div><div id="provenance-selection" class="provenance-value">--</div>
+      </div>
+      <div class="provenance-actions">
+        <button class="chip chip-button" id="copy-deep-link" type="button">Copy deep link</button>
+        <button class="chip chip-button" id="export-png" type="button">PNG</button>
+        <button class="chip chip-button" id="toggle-light-mode-button" type="button">Light</button>
+        <button class="chip chip-button" id="toggle-shortcuts-button" type="button">Shortcuts</button>
+        <span class="provenance-status" id="copy-deep-link-status">Deep link pending</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div class="chip" id="artifact-source">Source: embedded snapshot</div>
+    <div class="chip" id="solver-backend">Solver: n/a</div>
+    <div class="chip" id="objective-profile">Objective: n/a</div>
+    <a class="chip chip-link is-disabled" id="row-provenance-link" href="#" target="_blank" rel="noopener">Review row provenance</a>
+  </div>
+  <nav class="suite-route-tabs" aria-label="Structural insight suite">
+    <a class="suite-route-tab" href="./index.html">Model Workspace</a>
+    <a class="suite-route-tab" href="./charts.html">Analysis Charts</a>
+    <a class="suite-route-tab is-active" href="./optimization_history.html">Optimization History</a>
+    <a class="suite-route-tab" href="./panel_zone.html">Panel Zone</a>
+  </nav>
+</header>
+
+<div class="companion-workspace history-workspace">
+  <aside class="companion-rail" aria-label="Optimization workflow navigation">
+    <section class="panel-section">
+      <div class="section-title">Workflow Rail</div>
+      <p class="rail-intro">Review convergence as a cockpit lane connected back to model evidence.</p>
+      <nav class="shell-nav-list">
+        <a class="shell-nav-item is-active" href="#cost-chart"><span class="shell-nav-item__icon">01</span><span>Cost Proxy</span></a>
+        <a class="shell-nav-item" href="#dcr-chart"><span class="shell-nav-item__icon">02</span><span>D/C Ratio</span></a>
+        <a class="shell-nav-item" href="#penalty-chart"><span class="shell-nav-item__icon">03</span><span>Penalty</span></a>
+        <a class="shell-nav-item" href="#modified-chart"><span class="shell-nav-item__icon">04</span><span>Modified Groups</span></a>
+      </nav>
+    </section>
+    <section class="panel-section">
+      <div class="section-title">Review Mode</div>
+      <div class="shell-meta-grid">
+        <span>Focus</span><span>Convergence</span>
+        <span>Evidence</span><span>Accepted rows</span>
+        <span>Handoff</span><span>Viewer deep links</span>
+      </div>
+      <div class="suite-chip-row" aria-label="optimization status">
+        <span class="context-chip is-accent">Feasibility tracked</span>
+        <span class="context-chip">Row provenance</span>
+      </div>
+    </section>
+  </aside>
+
+<main class="container companion-canvas" aria-label="Optimization convergence analysis canvas">
+  <section class="stage-strip" aria-label="Optimization stage status">
+    <div>
+      <div class="section-title">Optimization Stage</div>
+      <div class="stage-title">Convergence Cockpit</div>
+    </div>
+    <div class="stage-context-row">
+      <span class="context-chip">Cost proxy</span>
+      <span class="context-chip">D/C guardrail</span>
+      <span class="context-chip">Modified groups</span>
+    </div>
+  </section>
+  <div class="panel">
+    <div class="panel-head">
+      <h3 id="cost-title">Cost Proxy</h3>
+      <div class="panel-note" id="cost-panel-note">Baseline -> final</div>
+    </div>
+    <canvas id="cost-chart"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-head">
+      <h3 id="dcr-title">Max D/C Ratio</h3>
+      <div class="panel-note" id="dcr-panel-note">Constraint threshold shown when available</div>
+    </div>
+    <canvas id="dcr-chart"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-head">
+      <h3 id="penalty-title">Constructability Penalty Proxy</h3>
+      <div class="panel-note" id="penalty-panel-note">Derived from accepted optimization batches</div>
+    </div>
+    <canvas id="penalty-chart"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-head">
+      <h3 id="modified-title">Cumulative Modified Groups</h3>
+      <div class="panel-note" id="modified-panel-note">Unique changed groups when available</div>
+    </div>
+    <canvas id="modified-chart"></canvas>
+  </div>
+</main>
+
+<section class="summary-bar companion-insight" aria-label="Optimization KPI insight rail">
+  <div class="insight-rail-header">
+    <div>
+      <div class="card-label">Live Iteration</div>
+      <div class="insight-rail-title" id="insight-iteration-title">Final state</div>
+    </div>
+    <div class="insight-rail-badge" id="insight-mode-badge">History</div>
+  </div>
+  <div class="insight-event-card">
+    <div class="card-label" id="insight-event-label">Convergence event</div>
+    <div class="insight-event-note" id="insight-event-note">Awaiting optimization history</div>
+    <div class="insight-handoff-row">
+      <span id="insight-handoff-member">member --</span>
+      <span id="insight-handoff-case">case --</span>
+    </div>
+  </div>
+  <div class="card" data-insight-card="iterations">
+    <div class="card-label" id="iterations-label">Iterations</div>
+    <div class="card-value" id="iterations-card">-</div>
+    <div class="card-note" id="iterations-note">Awaiting data</div>
+  </div>
+  <div class="card" data-insight-card="cost">
+    <div class="card-label" id="cost-label">Cost Proxy</div>
+    <div class="card-value" id="cost-card">-</div>
+    <div class="card-note" id="cost-note">Awaiting data</div>
+  </div>
+  <div class="card" data-insight-card="dcr">
+    <div class="card-label" id="dcr-label">Max D/C</div>
+    <div class="card-value" id="dcr-card">-</div>
+    <div class="card-note" id="dcr-note">Awaiting data</div>
+  </div>
+  <div class="card" data-insight-card="modified">
+    <div class="card-label" id="modified-label">Modified Groups</div>
+    <div class="card-value" id="modified-card">-</div>
+    <div class="card-note" id="modified-note">Awaiting data</div>
+  </div>
+</section>
+</div>
+
+<div class="footnote companion-footer" id="footnote">
+  Inline JSON is checked first, then the repo payload is fetched when available, and demo data is only used as a final fallback.
+</div>
+<div id="tooltip" class="tooltip"></div>
+<div id="shortcut-help">
+  <strong>Shortcuts</strong>
+  <div><code>L</code> toggle light mode</div>
+  <div><code>P</code> export PNG</div>
+  <div><code>?</code> toggle shortcuts</div>
+  <div><code>1-4</code> focus chart quadrant</div>
+</div>
+
+<script src="./optimization_history.data.js"></script>
+<script type="application/json" id="optimization-history-data">
+{
+  "schema_version": "0.1.0",
+  "viewer_family": "optimization_history_viewer",
+  "generated_at": "2026-04-12T13:37:20.614218+00:00",
+  "source_mode": "report_plus_accepted_rows",
+  "source_artifacts": {
+    "report": "implementation/phase1/release/design_optimization/design_optimization_cost_reduction_report.json",
+    "accepted_candidate_explain": "implementation/phase1/release/design_optimization/design_optimization_cost_reduction_accepted_candidate_explain.json",
+    "reverse_sync": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_cost_reduction_reverse_sync_table.json"
+  },
+  "summary": {
+    "title": "Optimization Convergence History",
+    "status_label": "Feasible repaired slice",
+    "status_tone": "ok",
+    "source_label": "cost reduction report + accepted candidate explain",
+    "iteration_count": 3,
+    "iteration_budget": 32,
+    "accepted_count": 23,
+    "changed_group_count": 20,
+    "baseline_cost_proxy": 147096.7987682246,
+    "final_cost_proxy": 146685.63951148387,
+    "cost_reduction_proxy": 411.15925674073515,
+    "baseline_max_dcr": 0.9331636363636363,
+    "final_max_dcr": 0.9856927465654954,
+    "baseline_penalty": 0.32310580388643245,
+    "final_penalty": 0.32090464334484636,
+    "modified_total": 20,
+    "objective_profile": "balanced_practice",
+    "budget_mode": "high",
+    "solver_backend_static": "rocm_torch_hip_mainloop",
+    "solver_backend_ndtha": "rocm_torch_hip_mainloop"
+  },
+  "charts": {
+    "cost": {
+      "title": "Cost Proxy",
+      "value_format": "number1"
+    },
+    "dcr": {
+      "title": "Max D/C Ratio",
+      "value_format": "number3",
+      "threshold": 1.0
+    },
+    "penalty": {
+      "title": "Constructability Penalty Proxy",
+      "value_format": "number3"
+    },
+    "modified": {
+      "title": "Cumulative Modified Groups",
+      "value_format": "integer"
+    }
+  },
+  "history": [
+    {
+      "iter": 0,
+      "cost": 147096.7987682246,
+      "dcr": 0.9331636363636363,
+      "penalty": 0.32310580388643245,
+      "modified": 0,
+      "selected_count": 0,
+      "event_label": "baseline repaired input",
+      "event_note": "baseline before accepted final-loop changes",
+      "handoff": {
+        "member_id": "",
+        "load_case": "",
+        "row_ref": "",
+        "viewer_row_url": "",
+        "viewer_slice_url": "",
+        "overlay_row_id": "",
+        "results_card": "envelope",
+        "results_series_index": 0,
+        "results_companion": "checks",
+        "results_detail_block": "chart",
+        "codecheck_companion": "summary",
+        "codecheck_detail_block": "row-provenance",
+        "codecheck_appendix_block": "",
+        "overlay_focus": "",
+        "overlay_member_id": "",
+        "overlay_group_id": "",
+        "overlay_group_index": "",
+        "overlay_action_name": "",
+        "overlay_story_band": "",
+        "overlay_zone_label": "",
+        "overlay_selected_event_index": ""
+      }
+    },
+    {
+      "iter": 1,
+      "cost": 146701.58430628313,
+      "dcr": 0.9856927465654954,
+      "penalty": 0.32107485611080383,
+      "modified": 20,
+      "selected_count": 20,
+      "event_label": "detailing_down x6, connection_detailing_down x5, wall_thickness_down x5, rebar_down x2",
+      "event_note": "event 1: +20 new groups, +20 selected rows, projected cost delta=406.712",
+      "handoff": {
+        "member_id": "2642",
+        "load_case": "KDS_ULS_2",
+        "row_ref": "",
+        "viewer_row_url": "../visualization/structural_optimization_viewer.html?source=cost_reduction_reverse_sync&focus=results&view=core&overlay_focus=member&overlay_row_id=overlay_row%3A%3A1%3A%3A50%3A%3A2642%3A%3Arebar_down&overlay_group_id=S03%3Aperimeter%3Anogroup%3Aslab%3ASB1500X800&overlay_group_index=50&overlay_action_name=rebar_down&overlay_story_band=3&overlay_zone_label=perimeter&overlay_selected_event_index=1&results_card=envelope&results_series_index=1&results_companion=checks&results_detail_block=chart&interactive_detail_more=open&overlay_detail_more=open&focus_member=2642&member_id=2642&baseline_focus_member_id=2642&overlay_member_id=2642&case_id=2642&combination=KDS_ULS_2&combination_name=KDS_ULS_2",
+        "viewer_slice_url": "../visualization/structural_optimization_viewer.html?source=cost_reduction_reverse_sync&focus=results&view=core&overlay_focus=group&overlay_row_id=overlay_row%3A%3A1%3A%3A50%3A%3A2642%3A%3Arebar_down&overlay_group_id=S03%3Aperimeter%3Anogroup%3Aslab%3ASB1500X800&overlay_group_index=50&overlay_action_name=rebar_down&overlay_story_band=3&overlay_zone_label=perimeter&overlay_selected_event_index=1&results_card=envelope&results_series_index=1&results_companion=checks&results_detail_block=chart&interactive_detail_more=open&overlay_detail_more=open&focus_member=2642&member_id=2642&baseline_focus_member_id=2642&overlay_member_id=2642&case_id=2642&combination=KDS_ULS_2&combination_name=KDS_ULS_2",
+        "overlay_row_id": "overlay_row::1::50::2642::rebar_down",
+        "results_card": "envelope",
+        "results_series_index": 1,
+        "results_companion": "checks",
+        "results_detail_block": "chart",
+        "codecheck_companion": "summary",
+        "codecheck_detail_block": "row-provenance",
+        "codecheck_appendix_block": "",
+        "overlay_focus": "member",
+        "overlay_member_id": "2642",
+        "overlay_group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+        "overlay_group_index": "50",
+        "overlay_action_name": "rebar_down",
+        "overlay_story_band": "3",
+        "overlay_zone_label": "perimeter",
+        "overlay_selected_event_index": "1"
+      }
+    },
+    {
+      "iter": 2,
+      "cost": 146689.98327677124,
+      "dcr": 0.9856927465654954,
+      "penalty": 0.3209704073680572,
+      "modified": 20,
+      "selected_count": 22,
+      "event_label": "slab_thickness_down x1, wall_thickness_down x1",
+      "event_note": "event 2: +0 new groups, +2 selected rows, projected cost delta=11.939",
+      "handoff": {
+        "member_id": "18693",
+        "load_case": "",
+        "row_ref": "",
+        "viewer_row_url": "../visualization/structural_optimization_viewer.html?source=cost_reduction_reverse_sync&focus=results&view=core&overlay_focus=member&overlay_row_id=overlay_row%3A%3A2%3A%3A208%3A%3A18693%3A%3Aslab_thickness_down&overlay_group_id=S04%3Aperimeter%3A1%3Aslab%3Adefault&overlay_group_index=208&overlay_action_name=slab_thickness_down&overlay_story_band=4&overlay_zone_label=perimeter&overlay_selected_event_index=2&results_card=envelope&results_series_index=1&results_companion=checks&results_detail_block=chart&interactive_detail_more=open&overlay_detail_more=open&focus_member=18693&member_id=18693&baseline_focus_member_id=18693&overlay_member_id=18693&case_id=18693",
+        "viewer_slice_url": "../visualization/structural_optimization_viewer.html?source=cost_reduction_reverse_sync&focus=results&view=core&overlay_focus=group&overlay_row_id=overlay_row%3A%3A2%3A%3A208%3A%3A18693%3A%3Aslab_thickness_down&overlay_group_id=S04%3Aperimeter%3A1%3Aslab%3Adefault&overlay_group_index=208&overlay_action_name=slab_thickness_down&overlay_story_band=4&overlay_zone_label=perimeter&overlay_selected_event_index=2&results_card=envelope&results_series_index=1&results_companion=checks&results_detail_block=chart&interactive_detail_more=open&overlay_detail_more=open&focus_member=18693&member_id=18693&baseline_focus_member_id=18693&overlay_member_id=18693&case_id=18693",
+        "overlay_row_id": "overlay_row::2::208::18693::slab_thickness_down",
+        "results_card": "envelope",
+        "results_series_index": 1,
+        "results_companion": "checks",
+        "results_detail_block": "chart",
+        "codecheck_companion": "summary",
+        "codecheck_detail_block": "row-provenance",
+        "codecheck_appendix_block": "",
+        "overlay_focus": "member",
+        "overlay_member_id": "18693",
+        "overlay_group_id": "S04:perimeter:1:slab:default",
+        "overlay_group_index": "208",
+        "overlay_action_name": "slab_thickness_down",
+        "overlay_story_band": "4",
+        "overlay_zone_label": "perimeter",
+        "overlay_selected_event_index": "2"
+      }
+    },
+    {
+      "iter": 3,
+      "cost": 146685.63951148387,
+      "dcr": 0.9856927465654954,
+      "penalty": 0.32090464334484636,
+      "modified": 20,
+      "selected_count": 23,
+      "event_label": "wall_thickness_down x1",
+      "event_note": "event 3: +0 new groups, +1 selected rows, projected cost delta=4.470",
+      "handoff": {
+        "member_id": "2638",
+        "load_case": "KDS_ULS_2",
+        "row_ref": "",
+        "viewer_row_url": "../visualization/structural_optimization_viewer.html?source=cost_reduction_reverse_sync&focus=results&view=core&overlay_focus=member&overlay_row_id=overlay_row%3A%3A3%3A%3A41%3A%3A2638%3A%3Awall_thickness_down&overlay_group_id=S02%3Aperimeter%3Anogroup%3Aslab%3ASB1500X800&overlay_group_index=41&overlay_action_name=wall_thickness_down&overlay_story_band=2&overlay_zone_label=perimeter&overlay_selected_event_index=3&results_card=envelope&results_series_index=1&results_companion=checks&results_detail_block=chart&interactive_detail_more=open&overlay_detail_more=open&focus_member=2638&member_id=2638&baseline_focus_member_id=2638&overlay_member_id=2638&case_id=2638&combination=KDS_ULS_2&combination_name=KDS_ULS_2",
+        "viewer_slice_url": "../visualization/structural_optimization_viewer.html?source=cost_reduction_reverse_sync&focus=results&view=core&overlay_focus=group&overlay_row_id=overlay_row%3A%3A3%3A%3A41%3A%3A2638%3A%3Awall_thickness_down&overlay_group_id=S02%3Aperimeter%3Anogroup%3Aslab%3ASB1500X800&overlay_group_index=41&overlay_action_name=wall_thickness_down&overlay_story_band=2&overlay_zone_label=perimeter&overlay_selected_event_index=3&results_card=envelope&results_series_index=1&results_companion=checks&results_detail_block=chart&interactive_detail_more=open&overlay_detail_more=open&focus_member=2638&member_id=2638&baseline_focus_member_id=2638&overlay_member_id=2638&case_id=2638&combination=KDS_ULS_2&combination_name=KDS_ULS_2",
+        "overlay_row_id": "overlay_row::3::41::2638::wall_thickness_down",
+        "results_card": "envelope",
+        "results_series_index": 1,
+        "results_companion": "checks",
+        "results_detail_block": "chart",
+        "codecheck_companion": "summary",
+        "codecheck_detail_block": "row-provenance",
+        "codecheck_appendix_block": "",
+        "overlay_focus": "member",
+        "overlay_member_id": "2638",
+        "overlay_group_id": "S02:perimeter:nogroup:slab:SB1500X800",
+        "overlay_group_index": "41",
+        "overlay_action_name": "wall_thickness_down",
+        "overlay_story_band": "2",
+        "overlay_zone_label": "perimeter",
+        "overlay_selected_event_index": "3"
+      }
+    }
+  ]
+}
+</script>
+
+<script>
+const DEFAULT_ARTIFACT_CANDIDATES = [
+  new URL("../../implementation/phase1/release/visualization/optimization_history_viewer.json", window.location.href).href
+];
+
+const DEMO_PAYLOAD = {
+  schema_version: "0.1.0",
+  viewer_family: "optimization_history_viewer",
+  generated_at: "demo",
+  source_mode: "demo_fallback",
+  source_artifacts: {},
+  summary: {
+    title: "Optimization Convergence History",
+    status_label: "Demo fallback",
+    status_tone: "warning",
+    source_label: "embedded demo series",
+    iteration_count: 4,
+    iteration_budget: 4,
+    accepted_count: 4,
+    changed_group_count: 8,
+    baseline_cost_proxy: 1.0,
+    final_cost_proxy: 0.842,
+    cost_reduction_proxy: 0.158,
+    baseline_max_dcr: 1.16,
+    final_max_dcr: 0.978,
+    baseline_penalty: 0.42,
+    final_penalty: 0.326,
+    modified_total: 8,
+    objective_profile: "demo",
+    budget_mode: "demo",
+    solver_backend_static: "demo",
+    solver_backend_ndtha: "demo"
+  },
+  charts: {
+    cost: { title: "Normalized Cost Proxy", value_format: "number3" },
+    dcr: { title: "Max D/C Ratio", value_format: "number3", threshold: 1.0 },
+    penalty: { title: "Constructability Penalty Proxy", value_format: "number3" },
+    modified: { title: "Cumulative Modified Groups", value_format: "integer" }
+  },
+  history: [
+    { iter: 0, cost: 1.0, dcr: 1.16, penalty: 0.42, modified: 0, selected_count: 0, event_label: "baseline", event_note: "demo baseline" },
+    { iter: 1, cost: 0.948, dcr: 1.08, penalty: 0.388, modified: 3, selected_count: 3, event_label: "beam section down x2", event_note: "demo event 1" },
+    { iter: 2, cost: 0.902, dcr: 1.02, penalty: 0.364, modified: 5, selected_count: 5, event_label: "wall thickness down x2", event_note: "demo event 2" },
+    { iter: 3, cost: 0.861, dcr: 0.991, penalty: 0.339, modified: 7, selected_count: 7, event_label: "rebar down x1, slab thickness down x1", event_note: "demo event 3" },
+    { iter: 4, cost: 0.842, dcr: 0.978, penalty: 0.326, modified: 8, selected_count: 8, event_label: "connection detailing down x1", event_note: "demo event 4" }
+  ]
+};
+
+const tooltip = document.getElementById("tooltip");
+let activePayload = null;
+let activeInsightState = { mode: "history", row: null, valueKey: "" };
+const SHARED_SELECTION_KEY = "structural-viewer-selection-v1";
+const VIEWER_THEME_KEY = "optimization-history-theme-v1";
+const IS_SINGLEFILE_VIEWER = window.__STRUCTURAL_SINGLEFILE__ === true;
+const selectionChannel = (() => {
+  try {
+    return typeof BroadcastChannel === "function" ? new BroadcastChannel(SHARED_SELECTION_KEY) : null;
+  } catch (_error) {
+    return null;
+  }
+})();
+
+function safeNumber(value, fallback = 0) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : fallback;
+}
+function safeStorageGet(key) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch (_error) {
+    return null;
+  }
+}
+function safeStorageSet(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (_error) {}
+}
+function applySavedThemeMode() {
+  const theme = normalizeSelectionValue(safeStorageGet(VIEWER_THEME_KEY));
+  document.body.classList.toggle("light-mode", theme === "light");
+  updateThemeButtons();
+}
+function normalizeSelectionValue(value) {
+  const text = String(value ?? "").trim();
+  return text || "";
+}
+function updateThemeButtons() {
+  const button = document.getElementById("toggle-light-mode-button");
+  if (button instanceof HTMLButtonElement) {
+    button.textContent = document.body.classList.contains("light-mode") ? "Dark" : "Light";
+  }
+}
+function toggleLightMode() {
+  const nextLight = !document.body.classList.contains("light-mode");
+  document.body.classList.toggle("light-mode", nextLight);
+  safeStorageSet(VIEWER_THEME_KEY, nextLight ? "light" : "dark");
+  updateThemeButtons();
+}
+function toggleShortcutHelp(forceOpen) {
+  const node = document.getElementById("shortcut-help");
+  if (!(node instanceof HTMLElement)) return false;
+  const next = typeof forceOpen === "boolean" ? forceOpen : !node.classList.contains("is-open");
+  node.classList.toggle("is-open", next);
+  return next;
+}
+function readStoredSelectionState() {
+  const raw = safeStorageGet(SHARED_SELECTION_KEY);
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) || {};
+  } catch (_error) {
+    return {};
+  }
+}
+function readSharedSelection() {
+  const params = new URLSearchParams(window.location.search);
+  const queryMember = normalizeSelectionValue(
+    params.get("member") || params.get("member_id") || params.get("focus_member") || params.get("focus")
+  );
+  const queryLoadCase = normalizeSelectionValue(params.get("load_case") || params.get("loadcase") || params.get("combination"));
+  const queryRowRef = normalizeSelectionValue(params.get("row_ref"));
+  const queryResultsCard = normalizeSelectionValue(params.get("results_card"));
+  const queryResultsSeriesIndex = normalizeSelectionValue(params.get("results_series_index"));
+  const queryResultsSampleIndex = normalizeSelectionValue(params.get("results_sample_index"));
+  const queryResultsCompanion = normalizeSelectionValue(params.get("results_companion"));
+  const queryResultsDetailBlock = normalizeSelectionValue(params.get("results_detail_block"));
+  const queryCodecheckCompanion = normalizeSelectionValue(params.get("codecheck_companion"));
+  const queryCodecheckDetailBlock = normalizeSelectionValue(params.get("codecheck_detail_block"));
+  const queryCodecheckAppendixBlock = normalizeSelectionValue(params.get("codecheck_appendix_block"));
+  const queryOverlayFocus = normalizeSelectionValue(params.get("overlay_focus"));
+  const queryOverlayMemberId = normalizeSelectionValue(params.get("overlay_member_id"));
+  const queryOverlayGroupId = normalizeSelectionValue(params.get("overlay_group_id"));
+  const queryOverlayGroupIndex = normalizeSelectionValue(params.get("overlay_group_index"));
+  const queryOverlayRowId = normalizeSelectionValue(params.get("overlay_row_id"));
+  const queryOverlayActionName = normalizeSelectionValue(params.get("overlay_action_name"));
+  const queryOverlayStoryBand = normalizeSelectionValue(params.get("overlay_story_band"));
+  const queryOverlayZoneLabel = normalizeSelectionValue(params.get("overlay_zone_label"));
+  const queryOverlaySelectedEventIndex = normalizeSelectionValue(params.get("overlay_selected_event_index"));
+  const stored = readStoredSelectionState();
+  return {
+    memberId: queryMember || normalizeSelectionValue(stored.memberId) || normalizeSelectionValue(stored.focusMember),
+    loadCase: queryLoadCase || normalizeSelectionValue(stored.loadCase),
+    source: normalizeSelectionValue(stored.source),
+    rowRef: queryRowRef || normalizeSelectionValue(stored.rowRef),
+    viewerRowUrl: normalizeSelectionValue(stored.viewerRowUrl),
+    viewerSliceUrl: normalizeSelectionValue(stored.viewerSliceUrl),
+    resultsCard: queryResultsCard || normalizeSelectionValue(stored.resultsCard),
+    resultsSeriesIndex: queryResultsSeriesIndex || normalizeSelectionValue(stored.resultsSeriesIndex),
+    resultsSampleIndex: queryResultsSampleIndex || normalizeSelectionValue(stored.resultsSampleIndex),
+    resultsCompanion: queryResultsCompanion || normalizeSelectionValue(stored.resultsCompanion),
+    resultsDetailBlock: queryResultsDetailBlock || normalizeSelectionValue(stored.resultsDetailBlock),
+    codecheckCompanion: queryCodecheckCompanion || normalizeSelectionValue(stored.codecheckCompanion),
+    codecheckDetailBlock: queryCodecheckDetailBlock || normalizeSelectionValue(stored.codecheckDetailBlock),
+    codecheckAppendixBlock: queryCodecheckAppendixBlock || normalizeSelectionValue(stored.codecheckAppendixBlock),
+    overlayFocus: queryOverlayFocus || normalizeSelectionValue(stored.overlayFocus),
+    overlayMemberId: queryOverlayMemberId || normalizeSelectionValue(stored.overlayMemberId),
+    overlayGroupId: queryOverlayGroupId || normalizeSelectionValue(stored.overlayGroupId),
+    overlayGroupIndex: queryOverlayGroupIndex || normalizeSelectionValue(stored.overlayGroupIndex),
+    overlayRowId: queryOverlayRowId || normalizeSelectionValue(stored.overlayRowId),
+    overlayActionName: queryOverlayActionName || normalizeSelectionValue(stored.overlayActionName),
+    overlayStoryBand: queryOverlayStoryBand || normalizeSelectionValue(stored.overlayStoryBand),
+    overlayZoneLabel: queryOverlayZoneLabel || normalizeSelectionValue(stored.overlayZoneLabel),
+    overlaySelectedEventIndex: queryOverlaySelectedEventIndex || normalizeSelectionValue(stored.overlaySelectedEventIndex),
+  };
+}
+function buildSelectionQueryUrl(selection = {}) {
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+  const memberId = normalizeSelectionValue(selection.memberId);
+  const loadCase = normalizeSelectionValue(selection.loadCase);
+  ["member", "member_id", "focus_member", "focus"].forEach((key) => params.delete(key));
+  ["load_case", "loadcase", "combination"].forEach((key) => params.delete(key));
+  [
+    "row_ref",
+    "results_card",
+    "results_series_index",
+    "results_sample_index",
+    "results_companion",
+    "results_detail_block",
+    "codecheck_companion",
+    "codecheck_detail_block",
+    "codecheck_appendix_block",
+    "overlay_focus",
+    "overlay_member_id",
+    "overlay_group_id",
+    "overlay_group_index",
+    "overlay_row_id",
+    "overlay_action_name",
+    "overlay_story_band",
+    "overlay_zone_label",
+    "overlay_selected_event_index"
+  ].forEach((key) => params.delete(key));
+  if (memberId) params.set("member", memberId);
+  if (loadCase) params.set("load_case", loadCase);
+  if (normalizeSelectionValue(selection.rowRef)) params.set("row_ref", normalizeSelectionValue(selection.rowRef));
+  if (normalizeSelectionValue(selection.resultsCard)) params.set("results_card", normalizeSelectionValue(selection.resultsCard));
+  if (normalizeSelectionValue(selection.resultsSeriesIndex)) params.set("results_series_index", normalizeSelectionValue(selection.resultsSeriesIndex));
+  if (normalizeSelectionValue(selection.resultsSampleIndex)) params.set("results_sample_index", normalizeSelectionValue(selection.resultsSampleIndex));
+  if (normalizeSelectionValue(selection.resultsCompanion)) params.set("results_companion", normalizeSelectionValue(selection.resultsCompanion));
+  if (normalizeSelectionValue(selection.resultsDetailBlock)) params.set("results_detail_block", normalizeSelectionValue(selection.resultsDetailBlock));
+  if (normalizeSelectionValue(selection.codecheckCompanion)) params.set("codecheck_companion", normalizeSelectionValue(selection.codecheckCompanion));
+  if (normalizeSelectionValue(selection.codecheckDetailBlock)) params.set("codecheck_detail_block", normalizeSelectionValue(selection.codecheckDetailBlock));
+  if (normalizeSelectionValue(selection.codecheckAppendixBlock)) params.set("codecheck_appendix_block", normalizeSelectionValue(selection.codecheckAppendixBlock));
+  if (normalizeSelectionValue(selection.overlayFocus)) params.set("overlay_focus", normalizeSelectionValue(selection.overlayFocus));
+  if (normalizeSelectionValue(selection.overlayMemberId)) params.set("overlay_member_id", normalizeSelectionValue(selection.overlayMemberId));
+  if (normalizeSelectionValue(selection.overlayGroupId)) params.set("overlay_group_id", normalizeSelectionValue(selection.overlayGroupId));
+  if (normalizeSelectionValue(selection.overlayGroupIndex)) params.set("overlay_group_index", normalizeSelectionValue(selection.overlayGroupIndex));
+  if (normalizeSelectionValue(selection.overlayRowId)) params.set("overlay_row_id", normalizeSelectionValue(selection.overlayRowId));
+  if (normalizeSelectionValue(selection.overlayActionName)) params.set("overlay_action_name", normalizeSelectionValue(selection.overlayActionName));
+  if (normalizeSelectionValue(selection.overlayStoryBand)) params.set("overlay_story_band", normalizeSelectionValue(selection.overlayStoryBand));
+  if (normalizeSelectionValue(selection.overlayZoneLabel)) params.set("overlay_zone_label", normalizeSelectionValue(selection.overlayZoneLabel));
+  if (normalizeSelectionValue(selection.overlaySelectedEventIndex)) params.set("overlay_selected_event_index", normalizeSelectionValue(selection.overlaySelectedEventIndex));
+  url.search = params.toString();
+  return url.href;
+}
+function syncSelectionQuery(selection = {}) {
+  const href = buildSelectionQueryUrl(selection);
+  if (window.history && typeof window.history.replaceState === "function") {
+    window.history.replaceState(null, "", href);
+  }
+  return href;
+}
+function basenameFromPath(value) {
+  const text = normalizeSelectionValue(value);
+  if (!text) return "";
+  const clean = text.split("?")[0].split("#")[0];
+  const parts = clean.split("/").filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : clean;
+}
+function firstDefinedText(...values) {
+  for (const value of values) {
+    const text = normalizeSelectionValue(value);
+    if (text) return text;
+  }
+  return "";
+}
+function formatTimestamp(value) {
+  const text = normalizeSelectionValue(value);
+  if (!text) return "n/a";
+  const parsed = new Date(text);
+  if (Number.isNaN(parsed.getTime())) return text;
+  return parsed.toLocaleString();
+}
+function buildSelectionLabel(selection = {}) {
+  const memberId = normalizeSelectionValue(selection.memberId);
+  const loadCase = normalizeSelectionValue(selection.loadCase);
+  return `member ${memberId || "--"} | load case ${loadCase || "--"}`;
+}
+function publishSharedSelection(selection = {}) {
+  const previous = readSharedSelection();
+  const next = {
+    memberId: normalizeSelectionValue(selection.memberId ?? previous.memberId),
+    focusMember: normalizeSelectionValue(selection.memberId ?? previous.memberId),
+    loadCase: normalizeSelectionValue(selection.loadCase ?? previous.loadCase),
+    source: normalizeSelectionValue(selection.source || "optimization_history"),
+    viewerFamily: "optimization_history_viewer",
+    focus: normalizeSelectionValue(selection.focus || "results"),
+    rowRef: normalizeSelectionValue(selection.rowRef ?? previous.rowRef),
+    viewerRowUrl: normalizeSelectionValue(selection.viewerRowUrl ?? previous.viewerRowUrl),
+    viewerSliceUrl: normalizeSelectionValue(selection.viewerSliceUrl ?? previous.viewerSliceUrl),
+    resultsCard: normalizeSelectionValue(selection.resultsCard ?? previous.resultsCard),
+    resultsSeriesIndex: normalizeSelectionValue(selection.resultsSeriesIndex ?? previous.resultsSeriesIndex),
+    resultsSampleIndex: normalizeSelectionValue(selection.resultsSampleIndex ?? previous.resultsSampleIndex),
+    resultsCompanion: normalizeSelectionValue(selection.resultsCompanion ?? previous.resultsCompanion),
+    resultsDetailBlock: normalizeSelectionValue(
+      selection.resultsDetailBlock ?? previous.resultsDetailBlock ?? "chart"
+    ),
+    codecheckCompanion: normalizeSelectionValue(selection.codecheckCompanion ?? previous.codecheckCompanion),
+    chartKey: normalizeSelectionValue(selection.chartKey),
+    chartTitle: normalizeSelectionValue(selection.chartTitle),
+    iteration: normalizeSelectionValue(selection.iteration),
+    overlayFocus: normalizeSelectionValue(selection.overlayFocus ?? previous.overlayFocus),
+    overlayMemberId: normalizeSelectionValue(selection.overlayMemberId ?? previous.overlayMemberId),
+    overlayGroupId: normalizeSelectionValue(selection.overlayGroupId ?? previous.overlayGroupId),
+    overlayGroupIndex: normalizeSelectionValue(selection.overlayGroupIndex ?? previous.overlayGroupIndex),
+    overlayRowId: normalizeSelectionValue(selection.overlayRowId ?? previous.overlayRowId),
+    overlayActionName: normalizeSelectionValue(selection.overlayActionName ?? previous.overlayActionName),
+    overlayStoryBand: normalizeSelectionValue(selection.overlayStoryBand ?? previous.overlayStoryBand),
+    overlayZoneLabel: normalizeSelectionValue(selection.overlayZoneLabel ?? previous.overlayZoneLabel),
+    overlaySelectedEventIndex: normalizeSelectionValue(selection.overlaySelectedEventIndex ?? previous.overlaySelectedEventIndex),
+    codecheckDetailBlock: normalizeSelectionValue(
+      selection.codecheckDetailBlock ?? previous.codecheckDetailBlock ?? "row-provenance"
+    ),
+    codecheckAppendixBlock: normalizeSelectionValue(selection.codecheckAppendixBlock ?? previous.codecheckAppendixBlock),
+    updated_at: new Date().toISOString(),
+  };
+  safeStorageSet(SHARED_SELECTION_KEY, JSON.stringify(next));
+  syncSelectionQuery(next);
+  try {
+    selectionChannel?.postMessage(next);
+  } catch (_error) {}
+}
+function getResultsExplorerBaseUrl() {
+  const path = String(window.location.pathname || "");
+  const relativePath = path.includes("/implementation/phase1/release/visualization/")
+    ? "./structural_optimization_viewer.html"
+    : "../../implementation/phase1/release/visualization/structural_optimization_viewer.html";
+  return new URL(relativePath, window.location.href);
+}
+function buildReviewRowProvenanceUrl(selection = {}) {
+  const directUrl = normalizeSelectionValue(selection.viewerRowUrl) || normalizeSelectionValue(selection.viewerSliceUrl);
+  if (directUrl) return directUrl;
+  const normalizedMember = normalizeSelectionValue(selection.memberId);
+  if (!normalizedMember) return "";
+  const url = getResultsExplorerBaseUrl();
+  url.searchParams.set("source", "row_provenance_shared_selection");
+  url.searchParams.set("focus", "results");
+  url.searchParams.set("view", "midas");
+  url.searchParams.set("codecheck_surface", "drilldown");
+  url.searchParams.set("codecheck_detail_block", normalizeSelectionValue(selection.codecheckDetailBlock) || "row-provenance");
+  url.searchParams.set("results_card", normalizeSelectionValue(selection.resultsCard) || "envelope");
+  url.searchParams.set("results_companion", normalizeSelectionValue(selection.resultsCompanion) || "checks");
+  url.searchParams.set("results_detail_block", normalizeSelectionValue(selection.resultsDetailBlock) || "chart");
+  url.searchParams.set("interactive_detail_more", "open");
+  url.searchParams.set("overlay_detail_more", "open");
+  url.searchParams.set("focus_member", normalizedMember);
+  url.searchParams.set("member_id", normalizedMember);
+  url.searchParams.set("baseline_focus_member_id", normalizedMember);
+  const normalizedLoadCase = normalizeSelectionValue(selection.loadCase);
+  if (normalizedLoadCase) url.searchParams.set("combination", normalizedLoadCase);
+  const normalizedRowRef = normalizeSelectionValue(selection.rowRef);
+  if (normalizedRowRef) url.searchParams.set("row_ref", normalizedRowRef);
+  const normalizedResultsSeriesIndex = normalizeSelectionValue(selection.resultsSeriesIndex);
+  if (normalizedResultsSeriesIndex) url.searchParams.set("results_series_index", normalizedResultsSeriesIndex);
+  const normalizedResultsSampleIndex = normalizeSelectionValue(selection.resultsSampleIndex);
+  if (normalizedResultsSampleIndex) url.searchParams.set("results_sample_index", normalizedResultsSampleIndex);
+  const normalizedCodecheckCompanion = normalizeSelectionValue(selection.codecheckCompanion);
+  if (normalizedCodecheckCompanion) url.searchParams.set("codecheck_companion", normalizedCodecheckCompanion);
+  const normalizedCodecheckAppendixBlock = normalizeSelectionValue(selection.codecheckAppendixBlock);
+  if (normalizedCodecheckAppendixBlock) url.searchParams.set("codecheck_appendix_block", normalizedCodecheckAppendixBlock);
+  const normalizedOverlayFocus = normalizeSelectionValue(selection.overlayFocus);
+  if (normalizedOverlayFocus) url.searchParams.set("overlay_focus", normalizedOverlayFocus);
+  const normalizedOverlayMemberId = normalizeSelectionValue(selection.overlayMemberId);
+  if (normalizedOverlayMemberId) url.searchParams.set("overlay_member_id", normalizedOverlayMemberId);
+  const normalizedOverlayGroupId = normalizeSelectionValue(selection.overlayGroupId);
+  if (normalizedOverlayGroupId) url.searchParams.set("overlay_group_id", normalizedOverlayGroupId);
+  const normalizedOverlayGroupIndex = normalizeSelectionValue(selection.overlayGroupIndex);
+  if (normalizedOverlayGroupIndex) url.searchParams.set("overlay_group_index", normalizedOverlayGroupIndex);
+  const normalizedOverlayRowId = normalizeSelectionValue(selection.overlayRowId);
+  if (normalizedOverlayRowId) url.searchParams.set("overlay_row_id", normalizedOverlayRowId);
+  const normalizedOverlayActionName = normalizeSelectionValue(selection.overlayActionName);
+  if (normalizedOverlayActionName) url.searchParams.set("overlay_action_name", normalizedOverlayActionName);
+  const normalizedOverlayStoryBand = normalizeSelectionValue(selection.overlayStoryBand);
+  if (normalizedOverlayStoryBand) url.searchParams.set("overlay_story_band", normalizedOverlayStoryBand);
+  const normalizedOverlayZoneLabel = normalizeSelectionValue(selection.overlayZoneLabel);
+  if (normalizedOverlayZoneLabel) url.searchParams.set("overlay_zone_label", normalizedOverlayZoneLabel);
+  const normalizedOverlaySelectedEventIndex = normalizeSelectionValue(selection.overlaySelectedEventIndex);
+  if (normalizedOverlaySelectedEventIndex) url.searchParams.set("overlay_selected_event_index", normalizedOverlaySelectedEventIndex);
+  return url.href;
+}
+function resolveChartHandoff(row, valueKey) {
+  const stored = readSharedSelection();
+  const handoff = row && typeof row.handoff === "object" ? row.handoff : {};
+  const defaultResultsCard = valueKey === "cost" || valueKey === "dcr" ? "envelope" : (stored.resultsCard || "envelope");
+  return {
+    memberId: normalizeSelectionValue(handoff.member_id ?? handoff.memberId ?? stored.memberId),
+    loadCase: normalizeSelectionValue(handoff.load_case ?? handoff.loadCase ?? stored.loadCase),
+    rowRef: normalizeSelectionValue(handoff.row_ref ?? handoff.rowRef ?? stored.rowRef),
+    viewerRowUrl: normalizeSelectionValue(handoff.viewer_row_url ?? handoff.viewerRowUrl ?? stored.viewerRowUrl),
+    viewerSliceUrl: normalizeSelectionValue(handoff.viewer_slice_url ?? handoff.viewerSliceUrl ?? stored.viewerSliceUrl),
+    resultsCard: normalizeSelectionValue(
+      handoff.results_card ?? handoff.resultsCard ?? stored.resultsCard ?? defaultResultsCard
+    ),
+    resultsSeriesIndex: normalizeSelectionValue(handoff.results_series_index ?? handoff.resultsSeriesIndex ?? stored.resultsSeriesIndex),
+    resultsSampleIndex: normalizeSelectionValue(handoff.results_sample_index ?? handoff.resultsSampleIndex ?? stored.resultsSampleIndex),
+    resultsCompanion: normalizeSelectionValue(
+      handoff.results_companion ?? handoff.resultsCompanion ?? stored.resultsCompanion ?? "checks"
+    ),
+    resultsDetailBlock: normalizeSelectionValue(
+      handoff.results_detail_block ?? handoff.resultsDetailBlock ?? stored.resultsDetailBlock ?? "chart"
+    ),
+    codecheckCompanion: normalizeSelectionValue(
+      handoff.codecheck_companion ?? handoff.codecheckCompanion ?? stored.codecheckCompanion ?? "summary"
+    ),
+    codecheckDetailBlock: normalizeSelectionValue(
+      handoff.codecheck_detail_block ?? handoff.codecheckDetailBlock ?? stored.codecheckDetailBlock ?? "row-provenance"
+    ),
+    codecheckAppendixBlock: normalizeSelectionValue(handoff.codecheck_appendix_block ?? handoff.codecheckAppendixBlock ?? stored.codecheckAppendixBlock),
+    overlayFocus: normalizeSelectionValue(handoff.overlay_focus ?? handoff.overlayFocus ?? stored.overlayFocus),
+    overlayMemberId: normalizeSelectionValue(handoff.overlay_member_id ?? handoff.overlayMemberId ?? stored.overlayMemberId),
+    overlayGroupId: normalizeSelectionValue(handoff.overlay_group_id ?? handoff.overlayGroupId ?? stored.overlayGroupId),
+    overlayGroupIndex: normalizeSelectionValue(handoff.overlay_group_index ?? handoff.overlayGroupIndex ?? stored.overlayGroupIndex),
+    overlayRowId: normalizeSelectionValue(handoff.overlay_row_id ?? handoff.overlayRowId ?? stored.overlayRowId),
+    overlayActionName: normalizeSelectionValue(handoff.overlay_action_name ?? handoff.overlayActionName ?? stored.overlayActionName),
+    overlayStoryBand: normalizeSelectionValue(handoff.overlay_story_band ?? handoff.overlayStoryBand ?? stored.overlayStoryBand),
+    overlayZoneLabel: normalizeSelectionValue(handoff.overlay_zone_label ?? handoff.overlayZoneLabel ?? stored.overlayZoneLabel),
+    overlaySelectedEventIndex: normalizeSelectionValue(
+      handoff.overlay_selected_event_index ?? handoff.overlaySelectedEventIndex ?? stored.overlaySelectedEventIndex
+    ),
+  };
+}
+function updateReviewRowLink() {
+  const link = document.getElementById("row-provenance-link");
+  if (!(link instanceof HTMLAnchorElement)) return;
+  const selection = readSharedSelection();
+  const href = buildReviewRowProvenanceUrl(selection);
+  link.href = href || "#";
+  link.classList.toggle("is-disabled", !href);
+  link.textContent = href
+    ? `Review row provenance${selection.memberId ? ` · ${selection.memberId}` : ""}${selection.loadCase ? ` · ${selection.loadCase}` : ""}`
+    : "Review row provenance unavailable";
+}
+function updateProvenanceBlock(payload, sourceOverride = "") {
+  const summary = payload?.summary || {};
+  const selection = readSharedSelection();
+  const sourceLabel = firstDefinedText(summary.source_label, sourceOverride, payload?.source_mode, "artifact loaded");
+  const reportName = firstDefinedText(
+    basenameFromPath(payload?.source_artifacts?.report),
+    basenameFromPath(payload?.source_artifacts?.accepted_candidate_explain),
+    basenameFromPath(sourceOverride),
+    payload?.report_name,
+    "optimization-history-viewer"
+  );
+  const timestamp = firstDefinedText(payload?.generated_at, summary.generated_at, payload?.timestamp);
+  const currentDeepLink = syncSelectionQuery(selection);
+  document.getElementById("provenance-source").textContent = sourceLabel;
+  document.getElementById("provenance-report").textContent = reportName;
+  document.getElementById("provenance-timestamp").textContent = formatTimestamp(timestamp);
+  document.getElementById("provenance-selection").textContent = buildSelectionLabel(selection);
+  const button = document.getElementById("copy-deep-link");
+  if (button instanceof HTMLButtonElement) {
+    button.dataset.deepLink = currentDeepLink;
+  }
+  document.getElementById("copy-deep-link-status").textContent =
+    `Deep link ready | ${buildSelectionLabel(selection)}`;
+}
+async function copyTextToClipboard(text) {
+  if (!text) return false;
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_error) {}
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "readonly");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  let ok = false;
+  try {
+    ok = document.execCommand("copy");
+  } catch (_error) {
+    ok = false;
+  }
+  textarea.remove();
+  return ok;
+}
+function downloadBlob(blob, filename) {
+  const href = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = href;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(href), 1000);
+}
+async function exportOptimizationHistoryPng() {
+  const button = document.getElementById("export-png");
+  const restore = () => {
+    if (button instanceof HTMLButtonElement) button.textContent = "PNG";
+  };
+  if (button instanceof HTMLButtonElement) button.textContent = "Saving...";
+  try {
+    const chartIds = ["cost-chart", "dcr-chart", "penalty-chart", "modified-chart"];
+    const panels = [
+      {
+        title: document.getElementById("cost-title")?.textContent || "Cost Proxy",
+        note: document.getElementById("cost-panel-note")?.textContent || "",
+        canvas: document.getElementById("cost-chart"),
+      },
+      {
+        title: document.getElementById("dcr-title")?.textContent || "Max D/C Ratio",
+        note: document.getElementById("dcr-panel-note")?.textContent || "",
+        canvas: document.getElementById("dcr-chart"),
+      },
+      {
+        title: document.getElementById("penalty-title")?.textContent || "Constructability Penalty Proxy",
+        note: document.getElementById("penalty-panel-note")?.textContent || "",
+        canvas: document.getElementById("penalty-chart"),
+      },
+      {
+        title: document.getElementById("modified-title")?.textContent || "Cumulative Modified Groups",
+        note: document.getElementById("modified-panel-note")?.textContent || "",
+        canvas: document.getElementById("modified-chart"),
+      },
+    ].filter((panel) => panel.canvas instanceof HTMLCanvasElement);
+    if (panels.length !== chartIds.length) throw new Error("chart panel lookup failed");
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 1800;
+    canvas.height = 1200;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#07111f";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#e7eef7";
+    ctx.font = '700 28px "Space Grotesk", "IBM Plex Sans KR", sans-serif';
+    ctx.fillText("Optimization Convergence History", 28, 40);
+    ctx.font = '13px "IBM Plex Sans KR", "Pretendard", "Noto Sans KR", sans-serif';
+    ctx.fillStyle = "#96A8BB";
+    ctx.fillText(buildSelectionLabel(readSharedSelection()), 28, 66);
+    ctx.fillText(
+      `${document.getElementById("artifact-source")?.textContent || ""} | ${document.getElementById("objective-profile")?.textContent || ""}`,
+      28,
+      88
+    );
+
+    panels.forEach((panel, index) => {
+      const col = index % 2;
+      const row = Math.floor(index / 2);
+      const x = 28 + col * 872;
+      const y = 118 + row * 520;
+      ctx.fillStyle = "#0f1c2e";
+      ctx.fillRect(x, y, 844, 480);
+      ctx.strokeStyle = "#21344f";
+      ctx.strokeRect(x, y, 844, 480);
+      ctx.fillStyle = "#dbeafe";
+      ctx.font = '600 16px "IBM Plex Sans KR", "Pretendard", "Noto Sans KR", sans-serif';
+      ctx.fillText(panel.title, x + 18, y + 28);
+      ctx.font = '12px "IBM Plex Sans KR", "Pretendard", "Noto Sans KR", sans-serif';
+      ctx.fillStyle = "#96A8BB";
+      ctx.fillText(panel.note, x + 18, y + 48);
+      ctx.drawImage(panel.canvas, x + 18, y + 62, 808, 396);
+    });
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    if (!blob) throw new Error("optimization history blob export failed");
+    downloadBlob(blob, "optimization_history.png");
+    if (button instanceof HTMLButtonElement) {
+      button.textContent = "Saved";
+      window.setTimeout(restore, 1200);
+    }
+  } catch (error) {
+    console.error("[optimization-history] PNG export failed:", error);
+    if (button instanceof HTMLButtonElement) {
+      button.textContent = "PNG failed";
+      window.setTimeout(restore, 1400);
+    }
+  }
+}
+
+function formatValue(value, format) {
+  if (format === "integer") return `${Math.round(safeNumber(value))}`;
+  if (format === "number1") return safeNumber(value).toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  if (format === "number3") return safeNumber(value).toLocaleString(undefined, { maximumFractionDigits: 3, minimumFractionDigits: 3 });
+  return safeNumber(value).toLocaleString(undefined, { maximumFractionDigits: 3 });
+}
+
+function getHistoryRows(payload = activePayload) {
+  return Array.isArray(payload?.history) ? payload.history : [];
+}
+
+function findSelectedHistoryRow(payload = activePayload) {
+  const history = getHistoryRows(payload);
+  const selection = readSharedSelection();
+  const selectedIter = safeNumber(selection.iteration, NaN);
+  if (Number.isFinite(selectedIter)) {
+    const row = history.find((item) => safeNumber(item.iter, NaN) === selectedIter);
+    if (row) return row;
+  }
+  const selectedEventIndex = normalizeSelectionValue(selection.overlaySelectedEventIndex);
+  if (selectedEventIndex) {
+    const row = history.find((item) => normalizeSelectionValue(item.handoff?.overlay_selected_event_index ?? item.iter) === selectedEventIndex);
+    if (row) return row;
+  }
+  return history[history.length - 1] || null;
+}
+
+function hasExplicitHistorySelection() {
+  const selection = readSharedSelection();
+  return Number.isFinite(safeNumber(selection.iteration, NaN)) || Boolean(normalizeSelectionValue(selection.overlaySelectedEventIndex));
+}
+
+function describeIterationDelta(history, row, valueKey, format) {
+  const index = history.indexOf(row);
+  if (index <= 0) return "baseline";
+  const previous = history[index - 1] || {};
+  const delta = safeNumber(row?.[valueKey]) - safeNumber(previous?.[valueKey]);
+  const sign = delta > 0 ? "+" : "";
+  return `${sign}${formatValue(delta, format)} from previous`;
+}
+
+function setInsightCardActive(valueKey = "") {
+  document.querySelectorAll("[data-insight-card]").forEach((card) => {
+    card.classList.toggle("is-active", card.getAttribute("data-insight-card") === valueKey);
+  });
+}
+
+function updateInsightRail(payload = activePayload, options = {}) {
+  if (!payload) return;
+  const history = getHistoryRows(payload);
+  const summary = payload.summary || {};
+  const row = options.row || findSelectedHistoryRow(payload) || history[history.length - 1] || {};
+  const mode = options.mode || activeInsightState.mode || "history";
+  const valueKey = options.valueKey || activeInsightState.valueKey || "";
+  const handoff = resolveChartHandoff(row, valueKey || "cost");
+  const costFormat = payload.charts?.cost?.value_format || "number1";
+  const dcrFormat = payload.charts?.dcr?.value_format || "number3";
+  const modifiedFormat = payload.charts?.modified?.value_format || "integer";
+  const penaltyFormat = payload.charts?.penalty?.value_format || "number3";
+  activeInsightState = { mode, row, valueKey };
+
+  document.getElementById("insight-iteration-title").textContent = `Iteration ${row.iter ?? "-"} of ${summary.iteration_budget ?? history.length - 1}`;
+  document.getElementById("insight-mode-badge").textContent =
+    mode === "hover" ? `Hover · ${payload.charts?.[valueKey]?.title || valueKey}` : (mode === "selected" ? "Selected" : "History");
+  document.getElementById("insight-event-label").textContent = row.event_label || "Optimization checkpoint";
+  document.getElementById("insight-event-note").textContent = row.event_note || "No event note available";
+  document.getElementById("insight-handoff-member").textContent = `member ${handoff.memberId || "--"}`;
+  document.getElementById("insight-handoff-case").textContent = `case ${handoff.loadCase || "--"}`;
+
+  document.getElementById("iterations-label").textContent = mode === "history" ? "Iterations" : "Iteration";
+  document.getElementById("iterations-card").textContent = `${row.iter ?? summary.iteration_count ?? "-"}`;
+  document.getElementById("iterations-note").textContent =
+    `selected rows ${row.selected_count ?? "-"} | accepted ${summary.accepted_count ?? "-"} | budget ${summary.iteration_budget ?? "-"}`;
+
+  document.getElementById("cost-label").textContent = mode === "history" ? "Cost Proxy" : "Cost @ Iteration";
+  document.getElementById("cost-card").textContent = formatValue(row.cost ?? summary.final_cost_proxy, costFormat);
+  document.getElementById("cost-note").textContent =
+    mode === "history"
+      ? `${formatValue(summary.baseline_cost_proxy, costFormat)} -> ${formatValue(summary.final_cost_proxy, costFormat)} | delta ${formatValue(summary.cost_reduction_proxy, costFormat)}`
+      : `${describeIterationDelta(history, row, "cost", costFormat)} | penalty ${formatValue(row.penalty, penaltyFormat)}`;
+
+  document.getElementById("dcr-label").textContent = mode === "history" ? "Max D/C" : "D/C @ Iteration";
+  document.getElementById("dcr-card").textContent = formatValue(row.dcr ?? summary.final_max_dcr, dcrFormat);
+  document.getElementById("dcr-note").textContent =
+    mode === "history"
+      ? `${formatValue(summary.baseline_max_dcr, dcrFormat)} -> ${formatValue(summary.final_max_dcr, dcrFormat)}`
+      : `${describeIterationDelta(history, row, "dcr", dcrFormat)} | threshold ${formatValue(payload.charts?.dcr?.threshold ?? 1, dcrFormat)}`;
+
+  document.getElementById("modified-label").textContent = mode === "history" ? "Modified Groups" : "Change Set";
+  document.getElementById("modified-card").textContent = formatValue(row.modified ?? summary.modified_total, modifiedFormat);
+  document.getElementById("modified-note").textContent =
+    mode === "history"
+      ? `changed groups ${summary.changed_group_count ?? "-"} | final selected rows ${row.selected_count ?? "-"}`
+      : `selected rows ${row.selected_count ?? "-"} | action ${handoff.overlayActionName || "n/a"}`;
+  setInsightCardActive(valueKey);
+}
+
+function readInlineJson() {
+  const el = document.getElementById("optimization-history-data");
+  if (!el) return null;
+  const text = String(el.textContent || "").trim();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    console.warn("[optimization-history] Failed to parse inline JSON:", error);
+    return null;
+  }
+}
+
+function readLocalPayloadScript() {
+  const candidates = [
+    window.__OPTIMIZATION_HISTORY_PAYLOAD__,
+    window.__STRUCTURE_VIEWER_DATA__?.optimization_history,
+    window.__STRUCTURE_VIEWER_PAYLOAD__?.optimization_history,
+    window.__STRUCTURE_VIEWER_DATA__,
+    window.__STRUCTURE_VIEWER_PAYLOAD__,
+  ];
+  for (const payload of candidates) {
+    if (payload && typeof payload === "object") {
+      return payload;
+    }
+  }
+  return null;
+}
+
+function normalizePayload(payload) {
+  if (!payload || typeof payload !== "object") return null;
+  if (payload.viewer_family === "optimization_history_viewer" && Array.isArray(payload.history)) {
+    return payload;
+  }
+  if (Array.isArray(payload.history)) {
+    const history = payload.history
+      .map((row, index) => ({
+        iter: safeNumber(row.iter ?? row.iteration ?? index, index),
+        cost: safeNumber(row.cost),
+        dcr: safeNumber(row.dcr),
+        penalty: safeNumber(row.penalty),
+        modified: safeNumber(row.modified),
+        selected_count: safeNumber(row.selected_count, safeNumber(row.modified)),
+        event_label: String(row.event_label || row.label || `iteration ${index}`),
+        event_note: String(row.event_note || "")
+      }))
+      .filter((row) => Number.isFinite(row.iter));
+    if (!history.length) return null;
+    const first = history[0];
+    const last = history[history.length - 1];
+    return {
+      schema_version: "0.1.0",
+      viewer_family: "optimization_history_viewer",
+      generated_at: String(payload.generated_at || ""),
+      source_mode: String(payload.source_mode || "inline_direct_history"),
+      source_artifacts: payload.source_artifacts || {},
+      summary: {
+        title: String(payload.summary?.title || "Optimization Convergence History"),
+        status_label: String(payload.summary?.status_label || "Artifact loaded"),
+        status_tone: String(payload.summary?.status_tone || "ok"),
+        source_label: String(payload.summary?.source_label || "inline direct history"),
+        iteration_count: history.length - 1,
+        iteration_budget: safeNumber(payload.summary?.iteration_budget, history.length - 1),
+        accepted_count: safeNumber(payload.summary?.accepted_count, last.selected_count),
+        changed_group_count: safeNumber(payload.summary?.changed_group_count, last.modified),
+        baseline_cost_proxy: first.cost,
+        final_cost_proxy: last.cost,
+        cost_reduction_proxy: first.cost - last.cost,
+        baseline_max_dcr: first.dcr,
+        final_max_dcr: last.dcr,
+        baseline_penalty: first.penalty,
+        final_penalty: last.penalty,
+        modified_total: last.modified,
+        objective_profile: String(payload.summary?.objective_profile || ""),
+        budget_mode: String(payload.summary?.budget_mode || ""),
+        solver_backend_static: String(payload.summary?.solver_backend_static || ""),
+        solver_backend_ndtha: String(payload.summary?.solver_backend_ndtha || "")
+      },
+      charts: payload.charts || DEMO_PAYLOAD.charts,
+      history
+    };
+  }
+  return null;
+}
+
+function applySummary(payload, sourceOverride = "") {
+  const summary = payload.summary || {};
+  const history = Array.isArray(payload.history) ? payload.history : [];
+  const first = history[0] || {};
+  const last = history[history.length - 1] || {};
+  const sourceLabel = sourceOverride || summary.source_label || "artifact loaded";
+  activePayload = payload;
+
+  document.getElementById("page-title").textContent = summary.title || "Optimization Convergence History";
+  document.getElementById("status-line").textContent =
+    `${summary.status_label || "Artifact loaded"} | iterations ${summary.iteration_count ?? "-"} / ${summary.iteration_budget ?? "-"} | source mode ${payload.source_mode || "unknown"}`;
+  document.getElementById("artifact-source").textContent = `Source: ${sourceLabel}`;
+  document.getElementById("solver-backend").textContent =
+    `Solver: ${summary.solver_backend_static || "n/a"} / ${summary.solver_backend_ndtha || "n/a"}`;
+  document.getElementById("objective-profile").textContent =
+    `Objective: ${summary.objective_profile || "n/a"} | budget ${summary.budget_mode || "n/a"}`;
+
+  document.getElementById("iterations-card").textContent = `${summary.iteration_count ?? "-"}`;
+  document.getElementById("iterations-note").textContent =
+    `budget ${summary.iteration_budget ?? "-"} | accepted ${summary.accepted_count ?? "-"} | selected rows ${last.selected_count ?? "-"}`;
+
+  document.getElementById("cost-card").textContent = formatValue(summary.final_cost_proxy, payload.charts?.cost?.value_format || "number1");
+  document.getElementById("cost-note").textContent =
+    `${formatValue(summary.baseline_cost_proxy, payload.charts?.cost?.value_format || "number1")} -> ${formatValue(summary.final_cost_proxy, payload.charts?.cost?.value_format || "number1")} | delta ${formatValue(summary.cost_reduction_proxy, payload.charts?.cost?.value_format || "number1")}`;
+
+  document.getElementById("dcr-card").textContent = formatValue(summary.final_max_dcr, payload.charts?.dcr?.value_format || "number3");
+  document.getElementById("dcr-note").textContent =
+    `${formatValue(summary.baseline_max_dcr, payload.charts?.dcr?.value_format || "number3")} -> ${formatValue(summary.final_max_dcr, payload.charts?.dcr?.value_format || "number3")}`;
+
+  document.getElementById("modified-card").textContent = formatValue(summary.modified_total, payload.charts?.modified?.value_format || "integer");
+  document.getElementById("modified-note").textContent =
+    `changed groups ${summary.changed_group_count ?? "-"} | final selected rows ${last.selected_count ?? "-"}`;
+
+  document.getElementById("cost-title").textContent = payload.charts?.cost?.title || "Cost Proxy";
+  document.getElementById("dcr-title").textContent = payload.charts?.dcr?.title || "Max D/C Ratio";
+  document.getElementById("penalty-title").textContent = payload.charts?.penalty?.title || "Constructability Penalty Proxy";
+  document.getElementById("modified-title").textContent = payload.charts?.modified?.title || "Cumulative Modified Groups";
+
+  document.getElementById("cost-panel-note").textContent = last.event_label || "final accepted batch";
+  document.getElementById("dcr-panel-note").textContent = last.event_note || "final D/C envelope";
+  document.getElementById("penalty-panel-note").textContent = `baseline ${formatValue(first.penalty, payload.charts?.penalty?.value_format || "number3")} -> final ${formatValue(last.penalty, payload.charts?.penalty?.value_format || "number3")}`;
+  document.getElementById("modified-panel-note").textContent = `unique modified groups ${summary.modified_total ?? last.modified ?? "-"}`;
+  updateProvenanceBlock(payload, sourceOverride);
+  updateInsightRail(payload, { mode: "history", row: last });
+}
+
+function hideTooltip() {
+  tooltip.style.display = "none";
+}
+
+function drawLineChart(canvasId, valueKey, color, chartConfig) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  const history = Array.isArray(activePayload?.history) ? activePayload.history : [];
+  const valueFormat = chartConfig?.value_format || "number3";
+  const threshold = Number.isFinite(chartConfig?.threshold) ? chartConfig.threshold : null;
+
+  let cachedPoints = [];
+  function resolveNearestPoint(clientX) {
+    if (!cachedPoints.length) return null;
+    return cachedPoints.reduce((best, point) => {
+      if (!best) return point;
+      return Math.abs(point.x - clientX) < Math.abs(best.x - clientX) ? point : best;
+    }, null);
+  }
+
+  function render() {
+    const bounds = canvas.getBoundingClientRect();
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = Math.max(320, Math.floor(bounds.width * ratio));
+    canvas.height = Math.max(220, Math.floor(bounds.height * ratio));
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(ratio, ratio);
+
+    const width = bounds.width;
+    const height = bounds.height;
+    ctx.clearRect(0, 0, width, height);
+
+    const pad = { left: 50, right: 14, top: 16, bottom: 28 };
+    const plotWidth = width - pad.left - pad.right;
+    const plotHeight = height - pad.top - pad.bottom;
+
+    const values = history.map((row) => safeNumber(row[valueKey]));
+    let min = Math.min(...values);
+    let max = Math.max(...values);
+    if (threshold !== null) {
+      min = Math.min(min, threshold);
+      max = Math.max(max, threshold);
+    }
+    if (!Number.isFinite(min) || !Number.isFinite(max)) {
+      min = 0;
+      max = 1;
+    }
+    if (Math.abs(max - min) < 1.0e-9) {
+      const padRange = Math.max(Math.abs(max) * 0.1, 1.0);
+      min -= padRange;
+      max += padRange;
+    } else {
+      const padRange = (max - min) * 0.12;
+      min -= padRange;
+      max += padRange;
+    }
+
+    ctx.strokeStyle = "rgba(110,140,176,0.2)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i += 1) {
+      const y = pad.top + (plotHeight * i) / 4;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, y);
+      ctx.lineTo(pad.left + plotWidth, y);
+      ctx.stroke();
+      const tickValue = max - ((max - min) * i) / 4;
+      ctx.fillStyle = "#96A8BB";
+      ctx.font = '11px "IBM Plex Sans KR", "Pretendard", "Noto Sans KR", sans-serif';
+      ctx.textAlign = "right";
+      ctx.fillText(formatValue(tickValue, valueFormat), pad.left - 6, y + 4);
+    }
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#96A8BB";
+    ctx.font = '11px "IBM Plex Sans KR", "Pretendard", "Noto Sans KR", sans-serif';
+    history.forEach((row, index) => {
+      const x = pad.left + (plotWidth * index) / Math.max(history.length - 1, 1);
+      ctx.fillText(`${row.iter}`, x, height - 8);
+    });
+
+    if (threshold !== null) {
+      const yt = pad.top + plotHeight * (1 - (threshold - min) / (max - min));
+      ctx.save();
+      ctx.setLineDash([6, 5]);
+      ctx.strokeStyle = "rgba(251,113,133,0.8)";
+      ctx.beginPath();
+      ctx.moveTo(pad.left, yt);
+      ctx.lineTo(pad.left + plotWidth, yt);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    cachedPoints = history.map((row, index) => {
+      const x = pad.left + (plotWidth * index) / Math.max(history.length - 1, 1);
+      const y = pad.top + plotHeight * (1 - (safeNumber(row[valueKey]) - min) / (max - min));
+      return { x, y, row };
+    });
+
+    ctx.beginPath();
+    cachedPoints.forEach((point, index) => {
+      if (index === 0) ctx.moveTo(point.x, point.y);
+      else ctx.lineTo(point.x, point.y);
+    });
+    ctx.lineTo(cachedPoints[cachedPoints.length - 1].x, pad.top + plotHeight);
+    ctx.lineTo(cachedPoints[0].x, pad.top + plotHeight);
+    ctx.closePath();
+    ctx.fillStyle = `${color}22`;
+    ctx.fill();
+
+    ctx.beginPath();
+    cachedPoints.forEach((point, index) => {
+      if (index === 0) ctx.moveTo(point.x, point.y);
+      else ctx.lineTo(point.x, point.y);
+    });
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    cachedPoints.forEach((point) => {
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(7,17,31,0.95)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+  }
+
+  canvas.onmousemove = (event) => {
+    const bounds = canvas.getBoundingClientRect();
+    const x = event.clientX - bounds.left;
+    const nearest = resolveNearestPoint(x);
+    if (!nearest) {
+      hideTooltip();
+      return;
+    }
+    tooltip.style.display = "block";
+    tooltip.style.left = `${event.clientX + 16}px`;
+    tooltip.style.top = `${event.clientY + 16}px`;
+    tooltip.innerHTML =
+      `<strong>Iteration ${nearest.row.iter}</strong>` +
+      `<div>${chartConfig?.title || valueKey}: ${formatValue(nearest.row[valueKey], valueFormat)}</div>` +
+      `<div>Modified groups: ${formatValue(nearest.row.modified, "integer")}</div>` +
+      `<div>Selected rows: ${formatValue(nearest.row.selected_count, "integer")}</div>` +
+      `<div>${nearest.row.event_label || ""}</div>` +
+      `<div style="color:#9fb4ca">${nearest.row.event_note || ""}</div>`;
+    updateInsightRail(activePayload, { mode: "hover", row: nearest.row, valueKey });
+  };
+  canvas.onclick = (event) => {
+    const bounds = canvas.getBoundingClientRect();
+    const nearest = resolveNearestPoint(event.clientX - bounds.left);
+    if (!nearest) return;
+    const handoff = resolveChartHandoff(nearest.row, valueKey);
+    publishSharedSelection({
+      memberId: handoff.memberId,
+      loadCase: handoff.loadCase,
+      source: "optimization_history",
+      focus: "results",
+      rowRef: handoff.rowRef,
+      viewerRowUrl: handoff.viewerRowUrl,
+      viewerSliceUrl: handoff.viewerSliceUrl,
+      resultsCard: handoff.resultsCard,
+      resultsSeriesIndex: handoff.resultsSeriesIndex,
+      resultsSampleIndex: handoff.resultsSampleIndex,
+      resultsCompanion: handoff.resultsCompanion,
+      resultsDetailBlock: handoff.resultsDetailBlock,
+      codecheckCompanion: handoff.codecheckCompanion,
+      codecheckDetailBlock: handoff.codecheckDetailBlock,
+      codecheckAppendixBlock: handoff.codecheckAppendixBlock,
+      overlayFocus: handoff.overlayFocus,
+      overlayMemberId: handoff.overlayMemberId,
+      overlayGroupId: handoff.overlayGroupId,
+      overlayGroupIndex: handoff.overlayGroupIndex,
+      overlayRowId: handoff.overlayRowId,
+      overlayActionName: handoff.overlayActionName,
+      overlayStoryBand: handoff.overlayStoryBand,
+      overlayZoneLabel: handoff.overlayZoneLabel,
+      overlaySelectedEventIndex: handoff.overlaySelectedEventIndex,
+      chartKey: valueKey,
+      chartTitle: chartConfig?.title || valueKey,
+      iteration: nearest.row.iter,
+    });
+    updateReviewRowLink();
+    updateInsightRail(activePayload, { mode: "selected", row: nearest.row, valueKey });
+  };
+  canvas.onmouseleave = () => {
+    hideTooltip();
+    updateInsightRail(activePayload, {
+      mode: hasExplicitHistorySelection() ? "selected" : "history",
+      row: findSelectedHistoryRow(activePayload),
+      valueKey: hasExplicitHistorySelection() ? activeInsightState.valueKey : ""
+    });
+  };
+  if (!canvas.__resizeBound) {
+    window.addEventListener("resize", render);
+    canvas.__resizeBound = true;
+  }
+  render();
+}
+
+function render(payload, sourceOverride = "") {
+  applySummary(payload, sourceOverride);
+  updateReviewRowLink();
+  drawLineChart("cost-chart", "cost", "#4FB7AD", payload.charts?.cost || {});
+  drawLineChart("dcr-chart", "dcr", "#EF7D73", payload.charts?.dcr || {});
+  drawLineChart("penalty-chart", "penalty", "#F4B56B", payload.charts?.penalty || {});
+  drawLineChart("modified-chart", "modified", "#7BA7C6", payload.charts?.modified || {});
+}
+
+async function fetchRepoPayload() {
+  const queryArtifact = new URLSearchParams(window.location.search).get("artifact");
+  const candidates = queryArtifact ? [new URL(queryArtifact, window.location.href).href, ...DEFAULT_ARTIFACT_CANDIDATES] : DEFAULT_ARTIFACT_CANDIDATES;
+  for (const href of candidates) {
+    try {
+      const response = await fetch(href, { cache: "no-store" });
+      if (!response.ok) continue;
+      const payload = normalizePayload(await response.json());
+      if (payload) {
+        return { payload, href };
+      }
+    } catch (error) {
+      console.debug("[optimization-history] repo payload fetch skipped:", href, error);
+    }
+  }
+  return null;
+}
+
+(async function main() {
+  applySavedThemeMode();
+  const inlinePayload = normalizePayload(readInlineJson());
+  const localPayload = inlinePayload ? null : normalizePayload(readLocalPayloadScript());
+  updateReviewRowLink();
+  syncSelectionQuery(readSharedSelection());
+  render(inlinePayload || localPayload || DEMO_PAYLOAD, inlinePayload ? "embedded inline payload" : localPayload ? "local payload script" : "demo fallback");
+  if (IS_SINGLEFILE_VIEWER) {
+    return;
+  }
+  const fetched = await fetchRepoPayload();
+  if (fetched && fetched.payload) {
+    render(fetched.payload, fetched.href);
+  }
+})();
+window.addEventListener("storage", (event) => {
+  if (event.key !== SHARED_SELECTION_KEY) return;
+  syncSelectionQuery(readSharedSelection());
+  if (activePayload) updateProvenanceBlock(activePayload);
+  if (activePayload) updateInsightRail(activePayload, { mode: hasExplicitHistorySelection() ? "selected" : "history", row: findSelectedHistoryRow(activePayload) });
+  updateReviewRowLink();
+});
+selectionChannel?.addEventListener("message", () => {
+  syncSelectionQuery(readSharedSelection());
+  if (activePayload) updateProvenanceBlock(activePayload);
+  if (activePayload) updateInsightRail(activePayload, { mode: hasExplicitHistorySelection() ? "selected" : "history", row: findSelectedHistoryRow(activePayload) });
+  updateReviewRowLink();
+});
+window.addEventListener("popstate", () => {
+  syncSelectionQuery(readSharedSelection());
+  if (activePayload) updateProvenanceBlock(activePayload);
+  if (activePayload) updateInsightRail(activePayload, { mode: hasExplicitHistorySelection() ? "selected" : "history", row: findSelectedHistoryRow(activePayload) });
+  updateReviewRowLink();
+});
+document.getElementById("copy-deep-link").addEventListener("click", async () => {
+  const href = buildSelectionQueryUrl(readSharedSelection());
+  const ok = await copyTextToClipboard(href);
+  document.getElementById("copy-deep-link-status").textContent =
+    ok ? `Deep link copied | ${buildSelectionLabel(readSharedSelection())}` : "Deep link copy failed";
+});
+document.getElementById("export-png").addEventListener("click", async () => {
+  await exportOptimizationHistoryPng();
+});
+document.getElementById("toggle-light-mode-button").addEventListener("click", () => {
+  toggleLightMode();
+});
+document.getElementById("toggle-shortcuts-button").addEventListener("click", () => {
+  toggleShortcutHelp();
+});
+window.addEventListener("keydown", (event) => {
+  if (event.defaultPrevented) return;
+  const target = event.target;
+  const tagName = target instanceof HTMLElement ? target.tagName : "";
+  const editing = target instanceof HTMLInputElement || tagName === "TEXTAREA" || tagName === "SELECT";
+  if ((event.key === "?" || (event.key === "/" && event.shiftKey)) && !editing) {
+    event.preventDefault();
+    toggleShortcutHelp();
+    return;
+  }
+  if (editing) return;
+  if (event.key === "l" || event.key === "L") {
+    event.preventDefault();
+    toggleLightMode();
+    return;
+  }
+  if (event.key === "p" || event.key === "P") {
+    event.preventDefault();
+    exportOptimizationHistoryPng();
+    return;
+  }
+  if (/^[1-4]$/.test(event.key)) {
+    event.preventDefault();
+    const chartIds = ["cost-chart", "dcr-chart", "penalty-chart", "modified-chart"];
+    const targetCanvas = document.getElementById(chartIds[Number(event.key) - 1]);
+    targetCanvas?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+});
+window.toggleLightMode = toggleLightMode;
+window.toggleShortcutHelp = toggleShortcutHelp;
+</script>
+</body>
+</html>

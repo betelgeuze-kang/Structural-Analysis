@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:03.886033+00:00",
+  "task_id": "hardest::iass_dome_snapthrough",
+  "phase": "hardest_case",
+  "benchmark_family": "buckling_snapthrough",
+  "submission_scope": "hardest_external_benchmark_program",
+  "status": "in_progress",
+  "started_at": "2026-04-01T13:48:03.886033+00:00",
+  "input_path": "implementation/phase1/buckling_contract_report.json",
+  "source_origin_class": "official_external_benchmark_fullcase",
+  "holdout_split": "",
+  "execution_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+  "note": "hardest external 10-case kickoff",
+  "task": {
+    "task_id": "hardest::iass_dome_snapthrough",
+    "case_id": "iass_dome_snapthrough",
+    "case_label": "IASS Dome Snap-through",
+    "phase": "hardest_case",
+    "benchmark_family": "buckling_snapthrough",
+    "hazard_family": "buckling_instability",
+    "topology_family": "shell_dome_large_deformation",
+    "load_path_family": "limit_point_snapthrough",
+    "submission_scope": "hardest_external_benchmark_program",
+    "execution_status": "ready",
+    "input_path": "implementation/phase1/buckling_contract_report.json",
+    "source_origin_class": "official_external_benchmark_fullcase",
+    "primary_report_path": "implementation/phase1/buckling_contract_report.json",
+    "supporting_report_paths": {
+      "nonlinear_generalization": "implementation/phase1/nonlinear_generalization_gate_report.json"
+    },
+    "kpi_specs": [
+      {
+        "label": "critical_load_factor",
+        "source": "primary.critical_load_factor"
+      },
+      {
+        "label": "mode_count",
+        "source": "primary.mode_count"
+      },
+      {
+        "label": "selected_mode",
+        "source": "primary.selected_mode"
+      },
+      {
+        "label": "layered_family_count",
+        "source": "supporting.nonlinear_generalization.summary.layered_family_count"
+      }
+    ]
+  }
+}

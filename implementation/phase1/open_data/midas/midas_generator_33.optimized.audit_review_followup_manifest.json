@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "audit_review_followup_rows": [
+    {
+      "packet_id": "connection|high",
+      "action_family": "connection_detailing",
+      "followup_type": "connection_detailing_audit_after_material_patch",
+      "review_priority": "high",
+      "queue_status": "approved",
+      "followup_action": "close_packet",
+      "followup_owner": "none",
+      "review_owner": "licensed_engineer",
+      "assigned_reviewer_name": "",
+      "assigned_reviewer_license_id": "",
+      "assignment_status": "unassigned",
+      "assignment_note": "",
+      "assignment_updated_at_utc": "",
+      "status_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/queue_status/01.connection.review_status.json",
+      "packet_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/packet_01.json",
+      "change_count": 6,
+      "row_count": 6,
+      "age_started_at_utc": "2026-04-11T12:05:41.965712+00:00",
+      "reference_time_utc": "2026-04-11T12:05:41.966004+00:00",
+      "sla_hours": 24.0,
+      "due_at_utc": "2026-04-12T12:05:41.965712+00:00",
+      "age_hours": 0.0,
+      "overdue": false,
+      "overdue_hours": 0.0,
+      "sla_state": "closed",
+      "age_bucket": "closed"
+    },
+    {
+      "packet_id": "detail|medium",
+      "action_family": "detailing",
+      "followup_type": "detailing_audit_after_material_patch",
+      "review_priority": "medium",
+      "queue_status": "approved",
+      "followup_action": "close_packet",
+      "followup_owner": "none",
+      "review_owner": "licensed_engineer",
+      "assigned_reviewer_name": "",
+      "assigned_reviewer_license_id": "",
+      "assignment_status": "unassigned",
+      "assignment_note": "",
+      "assignment_updated_at_utc": "",
+      "status_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/queue_status/02.detailing.review_status.json",
+      "packet_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/packet_02.json",
+      "change_count": 5,
+      "row_count": 5,
+      "age_started_at_utc": "2026-04-11T12:05:41.965870+00:00",
+      "reference_time_utc": "2026-04-11T12:05:41.966004+00:00",
+      "sla_hours": 72.0,
+      "due_at_utc": "2026-04-14T12:05:41.965870+00:00",
+      "age_hours": 0.0,
+      "overdue": false,
+      "overdue_hours": 0.0,
+      "sla_state": "closed",
+      "age_bucket": "closed"
+    }
+  ],
+  "summary": {
+    "audit_review_followup_item_count": 2,
+    "audit_review_followup_open_item_count": 0,
+    "audit_review_followup_closed_item_count": 2,
+    "audit_review_followup_action_counts": {
+      "close_packet": 2
+    },
+    "audit_review_followup_action_label": "close_packet=2",
+    "audit_review_followup_owner_counts": {
+      "none": 2
+    },
+    "audit_review_followup_owner_label": "none=2",
+    "audit_review_followup_review_owner_counts": {
+      "licensed_engineer": 2
+    },
+    "audit_review_followup_review_owner_label": "licensed_engineer=2",
+    "audit_review_followup_assignee_counts": {
+      "unassigned": 2
+    },
+    "audit_review_followup_assignee_label": "unassigned=2",
+    "audit_review_followup_assignment_status_counts": {
+      "unassigned": 2
+    },
+    "audit_review_followup_assignment_status_label": "unassigned=2",
+    "audit_review_followup_status_counts": {
+      "approved": 2
+    },
+    "audit_review_followup_status_label": "approved=2",
+    "audit_review_followup_sla_state_counts": {
+      "closed": 2
+    },
+    "audit_review_followup_sla_state_label": "closed=2",
+    "audit_review_followup_age_bucket_counts": {
+      "closed": 2
+    },
+    "audit_review_followup_age_bucket_label": "closed=2",
+    "audit_review_followup_overdue_item_count": 0,
+    "audit_review_followup_oldest_open_age_hours": 0.0,
+    "audit_review_followup_oldest_open_packet_id": "",
+    "audit_review_followup_reference_time_utc": "2026-04-11T12:05:41.966004+00:00",
+    "audit_review_followup_sla_policy_label": "critical=8h, high=24h, low=168h, medium=72h, default=96h",
+    "audit_review_followup_mode": "queue_status_projected_followup_actions"
+  }
+}

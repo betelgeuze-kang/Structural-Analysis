@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-topk-precision-suite",
+  "generated_at": "2026-02-25T14:17:22.754433+00:00",
+  "target_split": "test",
+  "config": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+    "seeds": [
+      11,
+      17,
+      23,
+      31,
+      47
+    ],
+    "epochs": 220,
+    "branches": 10,
+    "top_k": 3,
+    "lr": 0.055,
+    "epsilon": 0.11,
+    "temperature": 0.32,
+    "require_direct_metrics": true,
+    "accepted_metric_sources": [
+      "engine_export_direct",
+      "commercial_solver_export",
+      "open_data_surrogate"
+    ]
+  },
+  "thresholds": {
+    "max_drift_error_pct": 5.0,
+    "max_base_shear_error_pct": 5.0,
+    "min_mode_shape_mac": 0.95,
+    "max_buckling_factor_error_pct": 5.0,
+    "max_drift_std_pct": 0.6,
+    "max_base_shear_std_pct": 0.6,
+    "max_buckling_std_pct": 0.6,
+    "max_mac_std": 0.01
+  },
+  "summary_metrics": {
+    "drift_error_pct_mean": 0.8073888938713925,
+    "drift_error_pct_std": 0.2531398478791356,
+    "base_shear_error_pct_mean": 0.6274771021590321,
+    "base_shear_error_pct_std": 0.058877339188053095,
+    "mode_shape_mac_mean": 0.9761034458875656,
+    "mode_shape_mac_std": 0.004503865943371785,
+    "buckling_factor_error_pct_mean": 0.7495347139000723,
+    "buckling_factor_error_pct_std": 0.036478384293528975
+  },
+  "checks": {
+    "quality_pass": true,
+    "stability_pass": true,
+    "suite_pass": true
+  },
+  "per_seed": [
+    {
+      "seed": 11,
+      "hf_report": "implementation/phase1/hf_benchmark_report.seed_11.json",
+      "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_11.json",
+      "metrics": {
+        "drift_error_pct": 0.5490420395782949,
+        "base_shear_error_pct": 0.7148478643846365,
+        "mode_shape_mac": 0.9748997390270233,
+        "buckling_factor_error_pct": 0.7393743995347102
+      },
+      "improvement_pct": {
+        "drift_error_reduction_pct": 96.53816416264961,
+        "base_shear_error_reduction_pct": 92.4878674224386,
+        "buckling_error_reduction_pct": 93.34010718665382,
+        "mode_shape_mac_gain_pct": 4.228802588248799
+      }
+    },
+    {
+      "seed": 17,
+      "hf_report": "implementation/phase1/hf_benchmark_report.seed_17.json",
+      "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_17.json",
+      "metrics": {
+        "drift_error_pct": 1.1365608106368648,
+        "base_shear_error_pct": 0.5920202764147351,
+        "mode_shape_mac": 0.9811934679746628,
+        "buckling_factor_error_pct": 0.7594636545499625
+      },
+      "improvement_pct": {
+        "drift_error_reduction_pct": 92.83372371883806,
+        "base_shear_error_reduction_pct": 93.77862755614379,
+        "buckling_error_reduction_pct": 93.15915382231535,
+        "mode_shape_mac_gain_pct": 4.901679814251706
+      }
+    },
+    {
+      "seed": 23,
+      "hf_report": "implementation/phase1/hf_benchmark_report.seed_23.json",
+      "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_23.json",
+      "metrics": {
+        "drift_error_pct": 0.5638592829057187,
+        "base_shear_error_pct": 0.5450564932006583,
+        "mode_shape_mac": 0.9760836511850357,
+        "buckling_factor_error_pct": 0.7116799442754556
+      },
+      "improvement_pct": {
+        "drift_error_reduction_pct": 96.44473804904815,
+        "base_shear_error_reduction_pct": 94.27215657598872,
+        "buckling_error_reduction_pct": 93.58956416496783,
+        "mode_shape_mac_gain_pct": 4.355377395543809
+      }
+    },
+    {
+      "seed": 31,
+      "hf_report": "implementation/phase1/hf_benchmark_report.seed_31.json",
+      "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_31.json",
+      "metrics": {
+        "drift_error_pct": 1.082263796811438,
+        "base_shear_error_pct": 0.667055152699074,
+        "mode_shape_mac": 0.9799404293298721,
+        "buckling_factor_error_pct": 0.7222459066296607
+      },
+      "improvement_pct": {
+        "drift_error_reduction_pct": 93.17607882968959,
+        "base_shear_error_reduction_pct": 92.99010741546448,
+        "buckling_error_reduction_pct": 93.49439157474406,
+        "mode_shape_mac_gain_pct": 4.7677145331924695
+      }
+    },
+    {
+      "seed": 47,
+      "hf_report": "implementation/phase1/hf_benchmark_report.seed_47.json",
+      "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_47.json",
+      "metrics": {
+        "drift_error_pct": 0.7052185394246457,
+        "base_shear_error_pct": 0.6184057240960567,
+        "mode_shape_mac": 0.9683999419212341,
+        "buckling_factor_error_pct": 0.814909664510573
+      },
+      "improvement_pct": {
+        "drift_error_reduction_pct": 95.5534355532788,
+        "base_shear_error_reduction_pct": 93.50135040253427,
+        "buckling_error_reduction_pct": 92.65972554416862,
+        "mode_shape_mac_gain_pct": 3.5338941353251156
+      }
+    }
+  ],
+  "command_example": "/usr/bin/python3 implementation/phase1/run_topk_precision_experiments.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --seeds 11,17,23,31,47 --top-k 3"
+}

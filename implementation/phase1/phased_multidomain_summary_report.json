@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-phased-multidomain-modules",
+  "generated_at": "2026-03-01T13:04:22.209169+00:00",
+  "checks": {
+    "D1_generate_track_dynamics_dataset": true,
+    "D2_generate_tunnel_dynamics_dataset": true,
+    "D3_train_tgnn_multidomain": true,
+    "D4_moving_load_attention": true
+  },
+  "reports": {
+    "D1": "implementation/phase1/track_dynamics_dataset_report.json",
+    "D2": "implementation/phase1/tunnel_dynamics_dataset_report.json",
+    "D3": "implementation/phase1/tgnn_multidomain_report.json",
+    "D4": "implementation/phase1/moving_load_attention_report.json",
+    "track_dataset": "implementation/phase1/spatiotemporal_data/track_dynamic_cases.jsonl",
+    "tunnel_dataset": "implementation/phase1/spatiotemporal_data/tunnel_dynamic_cases.jsonl",
+    "building_dataset": "implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl",
+    "ckpt": "implementation/phase1/spatiotemporal_data/tgnn_multidomain.pt"
+  },
+  "steps": [
+    {
+      "step": "D1_generate_track_dynamics_dataset",
+      "seconds": 2.7836837768554688,
+      "command": "/usr/bin/python3 implementation/phase1/generate_track_dynamics_dataset.py --out-dataset implementation/phase1/spatiotemporal_data/track_dynamic_cases.jsonl --out implementation/phase1/track_dynamics_dataset_report.json --cases 96 --seed 23",
+      "return_code": 0,
+      "stdout_tail": "Wrote track dynamics dataset: implementation/phase1/spatiotemporal_data/track_dynamic_cases.jsonl\nWrote track dataset report: implementation/phase1/track_dynamics_dataset_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "D2_generate_tunnel_dynamics_dataset",
+      "seconds": 3.0091493129730225,
+      "command": "/usr/bin/python3 implementation/phase1/generate_tunnel_dynamics_dataset.py --out-dataset implementation/phase1/spatiotemporal_data/tunnel_dynamic_cases.jsonl --out implementation/phase1/tunnel_dynamics_dataset_report.json --cases 96 --seed 34",
+      "return_code": 0,
+      "stdout_tail": "Wrote tunnel dynamics dataset: implementation/phase1/spatiotemporal_data/tunnel_dynamic_cases.jsonl\nWrote tunnel dataset report: implementation/phase1/tunnel_dynamics_dataset_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "D4_moving_load_attention",
+      "seconds": 0.025012731552124023,
+      "command": "/usr/bin/python3 implementation/phase1/moving_load_attention.py --out implementation/phase1/moving_load_attention_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote moving-load attention report: implementation/phase1/moving_load_attention_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "D3_train_tgnn_multidomain",
+      "seconds": 82.33062219619751,
+      "command": "/usr/bin/python3 implementation/phase1/train_tgnn_baseline.py --dataset implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl --track-dataset implementation/phase1/spatiotemporal_data/track_dynamic_cases.jsonl --tunnel-dataset implementation/phase1/spatiotemporal_data/tunnel_dynamic_cases.jsonl --max-cases 96 --epochs 1 --hidden-dim 64 --lr 0.0008 --max-val-mae-pct 5.0 --max-val-mae-pct-track 5.0 --max-val-mae-pct-tunnel 5.0 --max-val-rollout-mae-pct 5.0 --enable-p95-gate --max-val-mae-p95-pct 12.0 --max-val-mae-p95-pct-track 15.0 --max-val-mae-p95-pct-tunnel 15.0 --enable-noise-augmentation --train-sensor-noise-pct 1.0 --train-stiffness-noise-pct 5.0 --robust-tail-q 0.95 --robust-tail-weight 0.25 --use-moving-load-attention --attention-gain 0.4 --seed 23 --device cuda --out implementation/phase1/tgnn_multidomain_report.json --ckpt implementation/phase1/spatiotemporal_data/tgnn_multidomain.pt",
+      "return_code": 0,
+      "stdout_tail": "Wrote tgnn baseline report: implementation/phase1/tgnn_multidomain_report.json\nSaved checkpoint: implementation/phase1/spatiotemporal_data/tgnn_multidomain.pt\n",
+      "stderr_tail": "/home/betelgeuze/.local/lib/python3.10/site-packages/torch/nn/modules/linear.py:125: UserWarning: Attempting to use hipBLASLt on an unsupported architecture! Overriding blas backend to hipblas (Triggered internally at /pytorch/aten/src/ATen/Context.cpp:310.)\n  return F.linear(input, self.weight, self.bias)\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "all phase-d modules passed"
+}

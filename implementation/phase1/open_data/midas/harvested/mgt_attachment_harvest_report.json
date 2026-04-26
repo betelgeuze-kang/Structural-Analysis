@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-mgt-attachment-harvest",
+  "zip_count": 7,
+  "zip_with_mgt_count": 0,
+  "records": [
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/51948310654745",
+      "zip_file": "implementation/phase1/open_data/midas/harvested/raw_zips/C07_T03_P000_RC_03_단독주택.zip",
+      "sha256": "872556284de8cccd439ef67a158593163e68a9f410e389fd0e62ee61a2d89f21",
+      "size_bytes": 169720,
+      "content_disposition": "attachment; filename=\"C07_T03_P000_RC_03_____.zip\"; filename*=utf-8''C07_T03_P000_RC_03_%EB%8B%A8%EB%8F%85%EC%A3%BC%ED%83%9D.zip",
+      "mgt_files_in_zip": [],
+      "entry_count": 1,
+      "entries_head": [
+        "C07_T03_P000_RC_03_┤▄╡╢┴╓┼├.meb"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/51947938880409",
+      "zip_file": "implementation/phase1/open_data/midas/harvested/raw_zips/C07_T02_P000_RC_02_근린생활시설.zip",
+      "sha256": "2989658f47baa7f79daad39f0b75592b757bb44fb6b44b2abb93a64ad9dbd994",
+      "size_bytes": 291389,
+      "content_disposition": "attachment; filename=\"C07_T02_P000_RC_02_______.zip\"; filename*=utf-8''C07_T02_P000_RC_02_%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4.zip",
+      "mgt_files_in_zip": [],
+      "entry_count": 1,
+      "entries_head": [
+        "C07_T02_P000_RC_02_▒┘╕░╗²╚░╜├.meb"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/51945266735897",
+      "zip_file": "implementation/phase1/open_data/midas/harvested/raw_zips/C07_T01_P000_RC_01_다가구_주택.zip",
+      "sha256": "eed5b5f99fca712ad210353e24c37d7ab01a895017e3a7235a488b671ad81263",
+      "size_bytes": 207921,
+      "content_disposition": "attachment; filename=\"C07_T01_P000_RC_01_______.zip\"; filename*=utf-8''C07_T01_P000_RC_01_%EB%8B%A4%EA%B0%80%EA%B5%AC_%EC%A3%BC%ED%83%9D.zip",
+      "mgt_files_in_zip": [],
+      "entry_count": 1,
+      "entries_head": [
+        "C07_T01_P000_RC_01_┤┘░í▒╕_┴╓┼├.meb"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/46332206620953",
+      "zip_file": "implementation/phase1/open_data/midas/harvested/raw_zips/경사로_예제파일.zip",
+      "sha256": "e3fa7f78925a4c6685b0b9b1b29006564649574798de1f1bd99c3f103802a075",
+      "size_bytes": 84969,
+      "content_disposition": "attachment; filename=\"________.zip\"; filename*=utf-8''%EA%B2%BD%EC%82%AC%EB%A1%9C_%EC%98%88%EC%A0%9C%ED%8C%8C%EC%9D%BC.zip",
+      "mgt_files_in_zip": [],
+      "entry_count": 2,
+      "entries_head": [
+        "░µ╗τ╖╬_┐╣┴ª╞─└╧.mmbx",
+        "░µ╗τ╖╬_┐╣┴ª╞─└╧_FINAL.mmbx"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/46324296262553",
+      "zip_file": "implementation/phase1/open_data/midas/harvested/raw_zips/보_예제파일.zip",
+      "sha256": "e8a692cc70339c6658f9af3842827168782378c3ebeec9ff5bebead537a2f093",
+      "size_bytes": 68187,
+      "content_disposition": "attachment; filename=\"______.zip\"; filename*=utf-8''%EB%B3%B4_%EC%98%88%EC%A0%9C%ED%8C%8C%EC%9D%BC.zip",
+      "mgt_files_in_zip": [],
+      "entry_count": 2,
+      "entries_head": [
+        "║╕_┐╣┴ª╞─└╧.mmbx",
+        "║╕_┐╣┴ª╞─└╧_FINAL.mmbx"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/46324244898713",
+      "zip_file": "implementation/phase1/open_data/midas/harvested/raw_zips/보_예제파일.zip",
+      "sha256": "e8a692cc70339c6658f9af3842827168782378c3ebeec9ff5bebead537a2f093",
+      "size_bytes": 68187,
+      "content_disposition": "attachment; filename=\"______.zip\"; filename*=utf-8''%EB%B3%B4_%EC%98%88%EC%A0%9C%ED%8C%8C%EC%9D%BC.zip",
+      "mgt_files_in_zip": [],
+      "entry_count": 2,
+      "entries_head": [
+        "║╕_┐╣┴ª╞─└╧.mmbx",
+        "║╕_┐╣┴ª╞─└╧_FINAL.mmbx"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/43508439849369",
+      "zip_file": "implementation/phase1/open_data/midas/harvested/raw_zips/M02_P01_T03000_BEAM_A_FILE_0001.zip",
+      "sha256": "13fe31819d22cb610f02ed9b0f65b24ca9df57a9f29dc09b995cc153f576343c",
+      "size_bytes": 66820,
+      "content_disposition": "attachment; filename=\"M02_P01_T03000_BEAM_A_FILE_0001.zip\"",
+      "mgt_files_in_zip": [],
+      "entry_count": 2,
+      "entries_head": [
+        "║╕_┐╣┴ª╞─└╧.meb",
+        "║╕_┐╣┴ª╞─└╧_FINAL.meb"
+      ]
+    }
+  ]
+}

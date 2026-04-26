@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "audit_review_packets": [],
+  "audit_review_packet_files": [],
+  "audit_review_packet_directory": "implementation/phase1/open_data/midas/midas_generator_33.optimized.audit_review_packet_files",
+  "summary": {
+    "audit_review_packet_count": 0,
+    "audit_review_packet_action_family_counts": {},
+    "audit_review_packet_followup_type_counts": {},
+    "audit_review_packet_review_priority_counts": {},
+    "audit_review_packet_file_count": 0,
+    "audit_review_packet_file_action_family_counts": {},
+    "audit_review_manifest_change_count": 0,
+    "audit_packet_delivery_mode": "none"
+  }
+}

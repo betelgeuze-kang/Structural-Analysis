@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "source_family": "peer_spd_column",
+  "seed_id": "peer_spd_rc_column_holdout_seed_01",
+  "holdout_split": "holdout",
+  "specimen_id": "299",
+  "source_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=299",
+  "source_file_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.raw.json",
+  "source_sha256": "a815d4f83d19c6af351c82275e145d8b03177913db4867cba7a52b28e1dba0f7",
+  "source_origin_class": "official_external_benchmark"
+}

@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 11917,
+  "collector_version": "0.2.0",
+  "family_id": "transfer_podium_tower",
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/model.json",
+  "schema_version": "1.0",
+  "sha256": "09c40b61837fdcd2b5157ebfbc604fe74111ab45b7fffd9727729432f96d4ef5",
+  "source_format": "json_graph",
+  "source_id": "transfer_podium_tower_proxy_local",
+  "source_urls": [
+    "https://support.midasuser.com/"
+  ],
+  "title": "Transfer podium tower local bridged graph from MIDAS multifamily building archive"
+}

@@ -1,0 +1,14 @@
+{
+  "bundle_id": "20260422T140547Z",
+  "generated_at": "2026-04-22T14:05:48.342988+00:00",
+  "dir": "implementation/phase1/release/external_validation_submission_20260422T140547Z",
+  "zip": "implementation/phase1/release/external_validation_submission_20260422T140547Z.zip",
+  "summary_json": "implementation/phase1/release/external_validation_submission_20260422T140547Z/external_validation_onepage.json",
+  "summary_md": "implementation/phase1/release/external_validation_submission_20260422T140547Z/external_validation_onepage.md",
+  "summary_html": "implementation/phase1/release/external_validation_submission_20260422T140547Z/external_validation_onepage.html",
+  "summary_pdf": "implementation/phase1/release/external_validation_submission_20260422T140547Z/external_validation_onepage.pdf",
+  "pruned_previous": [
+    "implementation/phase1/release/external_validation_submission_20260414T135713Z",
+    "implementation/phase1/release/external_validation_submission_20260414T135713Z.zip"
+  ]
+}

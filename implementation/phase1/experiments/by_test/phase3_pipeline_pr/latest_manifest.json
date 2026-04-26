@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-05T13:41:06.242002+00:00",
+  "test_name": "phase3_pipeline_pr",
+  "latest_run_dir": "implementation/phase1/experiments/by_test/phase3_pipeline_pr/20260305T134106Z",
+  "latest_manifest": "implementation/phase1/experiments/by_test/phase3_pipeline_pr/20260305T134106Z/artifact_archive_manifest.json"
+}

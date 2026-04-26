@@ -1,0 +1,68 @@
+{
+  "soil_profile": {
+    "profile_id": "seoul_layered_dense_transition",
+    "groundwater_depth_m": 2.0,
+    "layers": [
+      {
+        "layer_id": "fill",
+        "thickness_m": 4.0,
+        "density_kg_m3": 1850.0,
+        "shear_wave_velocity_m_s": 170.0,
+        "damping_ratio": 0.08,
+        "poisson_ratio": 0.34
+      },
+      {
+        "layer_id": "dense_sand",
+        "thickness_m": 10.0,
+        "density_kg_m3": 1950.0,
+        "shear_wave_velocity_m_s": 310.0,
+        "damping_ratio": 0.05,
+        "poisson_ratio": 0.3
+      },
+      {
+        "layer_id": "weathered_rock",
+        "thickness_m": 20.0,
+        "density_kg_m3": 2200.0,
+        "shear_wave_velocity_m_s": 760.0,
+        "damping_ratio": 0.03,
+        "poisson_ratio": 0.25
+      }
+    ]
+  },
+  "foundation_groups": [
+    {
+      "group_id": "MAT_CORE",
+      "foundation_type": "raft",
+      "count": 1,
+      "length_m": 18.0,
+      "width_m": 12.0,
+      "embedment_m": 2.5,
+      "mass_tonnes": 2400.0,
+      "structure_period_s": 1.6,
+      "structural_damping_ratio": 0.05,
+      "base_shear_share": 0.58
+    },
+    {
+      "group_id": "PILE_PERIM",
+      "foundation_type": "pilecap",
+      "count": 6,
+      "length_m": 5.5,
+      "width_m": 5.5,
+      "embedment_m": 6.0,
+      "mass_tonnes": 420.0,
+      "structure_period_s": 1.05,
+      "structural_damping_ratio": 0.06,
+      "base_shear_share": 0.42
+    }
+  ],
+  "hazard": {
+    "dominant_frequency_hz": 2.4,
+    "pga_g": 0.32
+  },
+  "frequency_grid": {
+    "f_min_hz": 0.4,
+    "f_max_hz": 10.0,
+    "f_count": 56,
+    "reference_frequency_hz": 3.0
+  }
+}

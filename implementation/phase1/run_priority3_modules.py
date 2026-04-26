@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -40,9 +41,10 @@ def main() -> None:
     parser.add_argument("--out-dir", default="implementation/phase1")
     parser.add_argument("--alpha", type=float, default=0.35)
     parser.add_argument("--m", type=int, default=4)
-    parser.add_argument("--bridge-producer-cmd", default="python implementation/phase1/engine_hook_stub.py")
+    py = sys.executable
+    parser.add_argument("--bridge-producer-cmd", default=f"{py} implementation/phase1/engine_hook_stub.py")
     parser.add_argument("--operator-source", choices=["matrix", "hook"], default="hook")
-    parser.add_argument("--operator-cmd", default="python implementation/phase1/engine_hook_stub.py")
+    parser.add_argument("--operator-cmd", default=f"{py} implementation/phase1/engine_hook_stub.py")
     parser.add_argument("--material-input", default="implementation/phase1/material_input_sample.csv")
     parser.add_argument("--reduction-threshold", type=float, default=0.98)
     parser.add_argument("--orthogonality-threshold", type=float, default=1e-6)
@@ -56,7 +58,7 @@ def main() -> None:
     mm = out_dir / "material_map_report.json"
 
     run_cmd([
-        "python",
+        sys.executable,
         "implementation/phase1/zero_copy_bridge_stub.py",
         "--out",
         str(zc),
@@ -64,7 +66,7 @@ def main() -> None:
         args.bridge_producer_cmd,
     ])
     run_cmd([
-        "python",
+        sys.executable,
         "implementation/phase1/orthogonal_krylov_projection.py",
         "--out",
         str(kp),
@@ -82,7 +84,7 @@ def main() -> None:
         str(args.orthogonality_threshold),
     ])
     run_cmd([
-        "python",
+        sys.executable,
         "implementation/phase1/kbc_md_material_parser.py",
         "--input",
         args.material_input,

@@ -1,0 +1,1773 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-panel-zone-solver-export-bundle",
+  "generated_at": "2026-04-06T13:54:57.310367+00:00",
+  "solver": {
+    "name": "panel_zone_topology_bridge",
+    "backend": "midas_topology_projection",
+    "export_version": "1.0"
+  },
+  "summary": {
+    "producer_backend": "midas_topology_projection",
+    "verification_tier": "topology_projected_3d_source_bundle",
+    "topology_projected": true,
+    "solver_verified": false,
+    "candidate_scan_mode": "npz_full",
+    "candidate_member_count": 45,
+    "matched_candidate_member_count": 45,
+    "unmatched_candidate_member_count": 0,
+    "unmatched_candidate_member_ids_head": [],
+    "midas_json_path": "implementation/phase1/open_data/midas/midas_generator_33.json",
+    "design_optimization_dataset": "implementation/phase1/release/design_optimization/design_optimization_dataset_report.json",
+    "design_optimization_npz": "implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "instruction_sidecar_present": true,
+    "instruction_sidecar_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.instruction_sidecar.json",
+    "instruction_sidecar_change_count": 0,
+    "instruction_sidecar_action_family_counts": {},
+    "instruction_sidecar_followup_type_counts": {},
+    "instruction_sidecar_review_priority_counts": {},
+    "instruction_sidecar_candidate_overlap_mode": "none",
+    "instruction_sidecar_overlap_row_count": 0,
+    "instruction_sidecar_overlap_member_count": 0,
+    "instruction_sidecar_overlap_group_count": 0,
+    "instruction_sidecar_direct_group_overlap_member_count": 0,
+    "instruction_sidecar_canonical_scope_overlap_member_count": 0,
+    "instruction_sidecar_section_signature_overlap_member_count": 0,
+    "instruction_sidecar_export_report_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.export_report.json",
+    "instruction_sidecar_evidence_model": "direct_patch_plus_zero_touch_verification_manifest",
+    "instruction_sidecar_rebar_delivery_mode": "direct_patch_eligible"
+  },
+  "panel_zone_3d_results": {
+    "panel_zone_joint_geometry_3d": {
+      "contract_pass": true,
+      "source_kind": "panel_zone_joint_geometry_3d",
+      "verification_tier": "topology_projected_3d_source",
+      "summary": {
+        "source_kind": "panel_zone_joint_geometry_3d",
+        "producer_backend": "midas_topology_projection",
+        "source_bundle_mode": "midas_topology_projection",
+        "topology_projected": true,
+        "solver_verified": false,
+        "candidate_scan_mode": "npz_full",
+        "candidate_member_count": 45,
+        "matched_candidate_member_count": 45,
+        "unmatched_candidate_member_count": 0,
+        "unmatched_candidate_member_ids_head": [],
+        "source_input_path": "implementation/phase1/open_data/midas/midas_generator_33.json",
+        "instruction_sidecar_present": true,
+        "instruction_sidecar_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.instruction_sidecar.json",
+        "instruction_sidecar_change_count": 0,
+        "instruction_sidecar_action_family_counts": {},
+        "instruction_sidecar_followup_type_counts": {},
+        "instruction_sidecar_review_priority_counts": {},
+        "instruction_sidecar_candidate_overlap_mode": "none",
+        "instruction_sidecar_overlap_row_count": 0,
+        "instruction_sidecar_overlap_member_count": 0,
+        "instruction_sidecar_overlap_group_count": 0,
+        "instruction_sidecar_direct_group_overlap_member_count": 0,
+        "instruction_sidecar_canonical_scope_overlap_member_count": 0,
+        "instruction_sidecar_section_signature_overlap_member_count": 0,
+        "instruction_sidecar_export_report_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.export_report.json",
+        "instruction_sidecar_evidence_model": "direct_patch_plus_zero_touch_verification_manifest",
+        "instruction_sidecar_rebar_delivery_mode": "direct_patch_eligible"
+      },
+      "rows": [
+        {
+          "member_id": "26705",
+          "joint_id": "J-7605-7606",
+          "panel_zone_id": "PZ-26705",
+          "joint_node_ids": [
+            7605,
+            7606
+          ],
+          "joint_centroid_m": {
+            "x": 155.644,
+            "y": 152.2995,
+            "z": 3.7
+          },
+          "beam_length_mm": 4669.77,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26708",
+          "joint_id": "J-7610-7611",
+          "panel_zone_id": "PZ-26708",
+          "joint_node_ids": [
+            7610,
+            7611
+          ],
+          "joint_centroid_m": {
+            "x": 163.5325,
+            "y": 154.47050000000002,
+            "z": 3.7
+          },
+          "beam_length_mm": 8868.752,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26713",
+          "joint_id": "J-7617-7615",
+          "panel_zone_id": "PZ-26713",
+          "joint_node_ids": [
+            7617,
+            7615
+          ],
+          "joint_centroid_m": {
+            "x": 109.01599999999999,
+            "y": 156.27800000000002,
+            "z": 3.7
+          },
+          "beam_length_mm": 1999.585,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26715",
+          "joint_id": "J-7619-7620",
+          "panel_zone_id": "PZ-26715",
+          "joint_node_ids": [
+            7619,
+            7620
+          ],
+          "joint_centroid_m": {
+            "x": 166.983,
+            "y": 156.7435,
+            "z": 3.7
+          },
+          "beam_length_mm": 2393.144,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26716",
+          "joint_id": "J-7621-7619",
+          "panel_zone_id": "PZ-26716",
+          "joint_node_ids": [
+            7621,
+            7619
+          ],
+          "joint_centroid_m": {
+            "x": 164.34300000000002,
+            "y": 156.97500000000002,
+            "z": 3.7
+          },
+          "beam_length_mm": 2907.117,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26721",
+          "joint_id": "J-7627-7628",
+          "panel_zone_id": "PZ-26721",
+          "joint_node_ids": [
+            7627,
+            7628
+          ],
+          "joint_centroid_m": {
+            "x": 164.489,
+            "y": 158.643,
+            "z": 3.7
+          },
+          "beam_length_mm": 2906.943,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 200.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26727",
+          "joint_id": "J-7635-7636",
+          "panel_zone_id": "PZ-26727",
+          "joint_node_ids": [
+            7635,
+            7636
+          ],
+          "joint_centroid_m": {
+            "x": 167.228,
+            "y": 159.55599999999998,
+            "z": 3.7
+          },
+          "beam_length_mm": 2397.216,
+          "section_depth_mm": 1000.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26868",
+          "joint_id": "J-7851-7852",
+          "panel_zone_id": "PZ-26868",
+          "joint_node_ids": [
+            7851,
+            7852
+          ],
+          "joint_centroid_m": {
+            "x": 98.443,
+            "y": 199.876,
+            "z": 3.7
+          },
+          "beam_length_mm": 894.0,
+          "section_depth_mm": 400.0,
+          "section_width_mm": 200.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26882",
+          "joint_id": "J-7874-7875",
+          "panel_zone_id": "PZ-26882",
+          "joint_node_ids": [
+            7874,
+            7875
+          ],
+          "joint_centroid_m": {
+            "x": 99.06049999999999,
+            "y": 213.979,
+            "z": 3.7
+          },
+          "beam_length_mm": 8627.0,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26900",
+          "joint_id": "J-7903-7904",
+          "panel_zone_id": "PZ-26900",
+          "joint_node_ids": [
+            7903,
+            7904
+          ],
+          "joint_centroid_m": {
+            "x": 98.78200000000001,
+            "y": 216.56,
+            "z": 3.7
+          },
+          "beam_length_mm": 9260.0,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26910",
+          "joint_id": "J-7784-7794",
+          "panel_zone_id": "PZ-26910",
+          "joint_node_ids": [
+            7784,
+            7794
+          ],
+          "joint_centroid_m": {
+            "x": 169.6815,
+            "y": 172.9935,
+            "z": 3.7
+          },
+          "beam_length_mm": 1768.799,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "26911",
+          "joint_id": "J-7756-7784",
+          "panel_zone_id": "PZ-26911",
+          "joint_node_ids": [
+            7756,
+            7784
+          ],
+          "joint_centroid_m": {
+            "x": 169.5105,
+            "y": 171.8925,
+            "z": 3.7
+          },
+          "beam_length_mm": 460.828,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "26937",
+          "joint_id": "J-7628-7635",
+          "panel_zone_id": "PZ-26937",
+          "joint_node_ids": [
+            7628,
+            7635
+          ],
+          "joint_centroid_m": {
+            "x": 165.9855,
+            "y": 159.089,
+            "z": 3.7
+          },
+          "beam_length_mm": 1148.105,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26938",
+          "joint_id": "J-7619-7628",
+          "panel_zone_id": "PZ-26938",
+          "joint_node_ids": [
+            7619,
+            7628
+          ],
+          "joint_centroid_m": {
+            "x": 165.864,
+            "y": 157.6825,
+            "z": 3.7
+          },
+          "beam_length_mm": 1675.374,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "26943",
+          "joint_id": "J-7742-7753",
+          "panel_zone_id": "PZ-26943",
+          "joint_node_ids": [
+            7742,
+            7753
+          ],
+          "joint_centroid_m": {
+            "x": 161.3065,
+            "y": 171.0755,
+            "z": 3.7
+          },
+          "beam_length_mm": 1634.751,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 600.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "26944",
+          "joint_id": "J-7737-7742",
+          "panel_zone_id": "PZ-26944",
+          "joint_node_ids": [
+            7737,
+            7742
+          ],
+          "joint_centroid_m": {
+            "x": 161.364,
+            "y": 170.0155,
+            "z": 3.7
+          },
+          "beam_length_mm": 494.96,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 600.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "26945",
+          "joint_id": "J-7946-7737",
+          "panel_zone_id": "PZ-26945",
+          "joint_node_ids": [
+            7946,
+            7737
+          ],
+          "joint_centroid_m": {
+            "x": 161.3245,
+            "y": 169.558,
+            "z": 3.7
+          },
+          "beam_length_mm": 423.449,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 600.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "26954",
+          "joint_id": "J-7962-7741",
+          "panel_zone_id": "PZ-26954",
+          "joint_node_ids": [
+            7962,
+            7741
+          ],
+          "joint_centroid_m": {
+            "x": 160.54899999999998,
+            "y": 169.87349999999998,
+            "z": 3.7
+          },
+          "beam_length_mm": 918.491,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 200.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "26972",
+          "joint_id": "J-7987-7743",
+          "panel_zone_id": "PZ-26972",
+          "joint_node_ids": [
+            7987,
+            7743
+          ],
+          "joint_centroid_m": {
+            "x": 159.80200000000002,
+            "y": 169.9395,
+            "z": 3.7
+          },
+          "beam_length_mm": 918.491,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 200.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "27151",
+          "joint_id": "J-7905-8196",
+          "panel_zone_id": "PZ-27151",
+          "joint_node_ids": [
+            7905,
+            8196
+          ],
+          "joint_centroid_m": {
+            "x": 113.672,
+            "y": 218.33350000000002,
+            "z": 3.7
+          },
+          "beam_length_mm": 2965.0,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27204",
+          "joint_id": "J-8262-8259",
+          "panel_zone_id": "PZ-27204",
+          "joint_node_ids": [
+            8262,
+            8259
+          ],
+          "joint_centroid_m": {
+            "x": 104.116,
+            "y": 210.0435,
+            "z": 3.7
+          },
+          "beam_length_mm": 2152.865,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27206",
+          "joint_id": "J-8265-8262",
+          "panel_zone_id": "PZ-27206",
+          "joint_node_ids": [
+            8265,
+            8262
+          ],
+          "joint_centroid_m": {
+            "x": 103.73,
+            "y": 212.08499999999998,
+            "z": 3.7
+          },
+          "beam_length_mm": 2002.479,
+          "section_depth_mm": 1200.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27207",
+          "joint_id": "J-7875-8265",
+          "panel_zone_id": "PZ-27207",
+          "joint_node_ids": [
+            7875,
+            8265
+          ],
+          "joint_centroid_m": {
+            "x": 103.45949999999999,
+            "y": 213.524,
+            "z": 3.7
+          },
+          "beam_length_mm": 925.927,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.22677127846983341
+        },
+        {
+          "member_id": "27236",
+          "joint_id": "J-8301-8302",
+          "panel_zone_id": "PZ-27236",
+          "joint_node_ids": [
+            8301,
+            8302
+          ],
+          "joint_centroid_m": {
+            "x": 176.55149999999998,
+            "y": 197.2995,
+            "z": 3.7
+          },
+          "beam_length_mm": 2176.361,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27237",
+          "joint_id": "J-8303-8301",
+          "panel_zone_id": "PZ-27237",
+          "joint_node_ids": [
+            8303,
+            8301
+          ],
+          "joint_centroid_m": {
+            "x": 174.87,
+            "y": 195.16,
+            "z": 3.7
+          },
+          "beam_length_mm": 3266.029,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27263",
+          "joint_id": "J-8320-8300",
+          "panel_zone_id": "PZ-27263",
+          "joint_node_ids": [
+            8320,
+            8300
+          ],
+          "joint_centroid_m": {
+            "x": 175.0915,
+            "y": 184.183,
+            "z": 3.7
+          },
+          "beam_length_mm": 1700.994,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27264",
+          "joint_id": "J-8300-8322",
+          "panel_zone_id": "PZ-27264",
+          "joint_node_ids": [
+            8300,
+            8322
+          ],
+          "joint_centroid_m": {
+            "x": 175.89350000000002,
+            "y": 185.858,
+            "z": 3.7
+          },
+          "beam_length_mm": 2013.211,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27265",
+          "joint_id": "J-8322-8323",
+          "panel_zone_id": "PZ-27265",
+          "joint_node_ids": [
+            8322,
+            8323
+          ],
+          "joint_centroid_m": {
+            "x": 176.70850000000002,
+            "y": 187.5605,
+            "z": 3.7
+          },
+          "beam_length_mm": 1761.829,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27266",
+          "joint_id": "J-8323-8324",
+          "panel_zone_id": "PZ-27266",
+          "joint_node_ids": [
+            8323,
+            8324
+          ],
+          "joint_centroid_m": {
+            "x": 177.6575,
+            "y": 189.543,
+            "z": 3.7
+          },
+          "beam_length_mm": 2634.036,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27280",
+          "joint_id": "J-8309-8302",
+          "panel_zone_id": "PZ-27280",
+          "joint_node_ids": [
+            8309,
+            8302
+          ],
+          "joint_centroid_m": {
+            "x": 173.264,
+            "y": 201.517,
+            "z": 3.7
+          },
+          "beam_length_mm": 10389.349,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 500.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27285",
+          "joint_id": "J-8304-8323",
+          "panel_zone_id": "PZ-27285",
+          "joint_node_ids": [
+            8304,
+            8323
+          ],
+          "joint_centroid_m": {
+            "x": 174.6735,
+            "y": 190.09550000000002,
+            "z": 3.7
+          },
+          "beam_length_mm": 5954.488,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 500.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27288",
+          "joint_id": "J-8303-8324",
+          "panel_zone_id": "PZ-27288",
+          "joint_node_ids": [
+            8303,
+            8324
+          ],
+          "joint_centroid_m": {
+            "x": 176.0435,
+            "y": 192.30349999999999,
+            "z": 3.7
+          },
+          "beam_length_mm": 5379.986,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 500.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27303",
+          "joint_id": "J-8354-8355",
+          "panel_zone_id": "PZ-27303",
+          "joint_node_ids": [
+            8354,
+            8355
+          ],
+          "joint_centroid_m": {
+            "x": 168.8475,
+            "y": 164.042,
+            "z": 3.7
+          },
+          "beam_length_mm": 3006.131,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27324",
+          "joint_id": "J-8383-8384",
+          "panel_zone_id": "PZ-27324",
+          "joint_node_ids": [
+            8383,
+            8384
+          ],
+          "joint_centroid_m": {
+            "x": 98.27289999999999,
+            "y": 200.80329999999998,
+            "z": 3.7
+          },
+          "beam_length_mm": 956.193,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27326",
+          "joint_id": "J-8387-8258",
+          "panel_zone_id": "PZ-27326",
+          "joint_node_ids": [
+            8387,
+            8258
+          ],
+          "joint_centroid_m": {
+            "x": 101.0775,
+            "y": 204.85250000000002,
+            "z": 3.7
+          },
+          "beam_length_mm": 8240.205,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 310.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27328",
+          "joint_id": "J-8388-8259",
+          "panel_zone_id": "PZ-27328",
+          "joint_node_ids": [
+            8388,
+            8259
+          ],
+          "joint_centroid_m": {
+            "x": 100.31899999999999,
+            "y": 208.06599999999997,
+            "z": 3.7
+          },
+          "beam_length_mm": 8204.975,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27331",
+          "joint_id": "J-8389-8262",
+          "panel_zone_id": "PZ-27331",
+          "joint_node_ids": [
+            8389,
+            8262
+          ],
+          "joint_centroid_m": {
+            "x": 99.87700000000001,
+            "y": 210.171,
+            "z": 3.7
+          },
+          "beam_length_mm": 8287.423,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27332",
+          "joint_id": "J-8390-8265",
+          "panel_zone_id": "PZ-27332",
+          "joint_node_ids": [
+            8390,
+            8265
+          ],
+          "joint_centroid_m": {
+            "x": 99.4675,
+            "y": 212.1295,
+            "z": 3.7
+          },
+          "beam_length_mm": 8368.672,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27382",
+          "joint_id": "J-8447-8448",
+          "panel_zone_id": "PZ-27382",
+          "joint_node_ids": [
+            8447,
+            8448
+          ],
+          "joint_centroid_m": {
+            "x": 168.37349999999998,
+            "y": 158.9,
+            "z": 3.7
+          },
+          "beam_length_mm": 369.477,
+          "section_depth_mm": 1500.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "27383",
+          "joint_id": "J-8448-7636",
+          "panel_zone_id": "PZ-27383",
+          "joint_node_ids": [
+            8448,
+            7636
+          ],
+          "joint_centroid_m": {
+            "x": 168.406,
+            "y": 159.26749999999998,
+            "z": 3.7
+          },
+          "beam_length_mm": 368.392,
+          "section_depth_mm": 1500.0,
+          "section_width_mm": 700.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "28945",
+          "joint_id": "J-7603-7676",
+          "panel_zone_id": "PZ-28945",
+          "joint_node_ids": [
+            7603,
+            7676
+          ],
+          "joint_centroid_m": {
+            "x": 133.296,
+            "y": 164.7695,
+            "z": 3.7
+          },
+          "beam_length_mm": 1051.145,
+          "section_depth_mm": 100.0,
+          "section_width_mm": 100.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "28946",
+          "joint_id": "J-7756-7750",
+          "panel_zone_id": "PZ-28946",
+          "joint_node_ids": [
+            7756,
+            7750
+          ],
+          "joint_centroid_m": {
+            "x": 169.4835,
+            "y": 171.3135,
+            "z": 3.7
+          },
+          "beam_length_mm": 699.121,
+          "section_depth_mm": 100.0,
+          "section_width_mm": 100.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "28947",
+          "joint_id": "J-8130-7804",
+          "panel_zone_id": "PZ-28947",
+          "joint_node_ids": [
+            8130,
+            7804
+          ],
+          "joint_centroid_m": {
+            "x": 119.7855,
+            "y": 175.512,
+            "z": 3.7
+          },
+          "beam_length_mm": 402.275,
+          "section_depth_mm": 100.0,
+          "section_width_mm": 100.0,
+          "constructability_score": 0.24710774305301428
+        },
+        {
+          "member_id": "30678",
+          "joint_id": "J-7852-10494",
+          "panel_zone_id": "PZ-30678",
+          "joint_node_ids": [
+            7852,
+            10494
+          ],
+          "joint_centroid_m": {
+            "x": 99.337,
+            "y": 199.876,
+            "z": 3.7
+          },
+          "beam_length_mm": 894.0,
+          "section_depth_mm": 400.0,
+          "section_width_mm": 200.0,
+          "constructability_score": 0.24959484239332508
+        },
+        {
+          "member_id": "30812",
+          "joint_id": "J-8384-10933",
+          "panel_zone_id": "PZ-30812",
+          "joint_node_ids": [
+            8384,
+            10933
+          ],
+          "joint_centroid_m": {
+            "x": 99.2047,
+            "y": 201.0179,
+            "z": 3.7
+          },
+          "beam_length_mm": 956.193,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0,
+          "constructability_score": 0.24959484239332508
+        }
+      ]
+    },
+    "panel_zone_rebar_anchorage_3d": {
+      "contract_pass": true,
+      "source_kind": "panel_zone_rebar_anchorage_3d",
+      "verification_tier": "topology_projected_3d_source",
+      "summary": {
+        "source_kind": "panel_zone_rebar_anchorage_3d",
+        "producer_backend": "midas_topology_projection",
+        "source_bundle_mode": "midas_topology_projection",
+        "topology_projected": true,
+        "solver_verified": false,
+        "candidate_scan_mode": "npz_full",
+        "candidate_member_count": 45,
+        "matched_candidate_member_count": 45,
+        "unmatched_candidate_member_count": 0,
+        "unmatched_candidate_member_ids_head": [],
+        "source_input_path": "implementation/phase1/open_data/midas/midas_generator_33.json",
+        "instruction_sidecar_present": true,
+        "instruction_sidecar_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.instruction_sidecar.json",
+        "instruction_sidecar_change_count": 0,
+        "instruction_sidecar_action_family_counts": {},
+        "instruction_sidecar_followup_type_counts": {},
+        "instruction_sidecar_review_priority_counts": {},
+        "instruction_sidecar_candidate_overlap_mode": "none",
+        "instruction_sidecar_overlap_row_count": 0,
+        "instruction_sidecar_overlap_member_count": 0,
+        "instruction_sidecar_overlap_group_count": 0,
+        "instruction_sidecar_direct_group_overlap_member_count": 0,
+        "instruction_sidecar_canonical_scope_overlap_member_count": 0,
+        "instruction_sidecar_section_signature_overlap_member_count": 0,
+        "instruction_sidecar_export_report_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.export_report.json",
+        "instruction_sidecar_evidence_model": "direct_patch_plus_zero_touch_verification_manifest",
+        "instruction_sidecar_rebar_delivery_mode": "direct_patch_eligible"
+      },
+      "rows": [
+        {
+          "member_id": "26705",
+          "available_anchorage_length_mm": 1000.0,
+          "required_anchorage_length_mm": 580.0,
+          "development_length_mm": 760.0,
+          "joint_degree_max": 1,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26708",
+          "available_anchorage_length_mm": 1000.0,
+          "required_anchorage_length_mm": 580.0,
+          "development_length_mm": 760.0,
+          "joint_degree_max": 2,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26713",
+          "available_anchorage_length_mm": 620.0,
+          "required_anchorage_length_mm": 580.0,
+          "development_length_mm": 760.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26715",
+          "available_anchorage_length_mm": 620.0,
+          "required_anchorage_length_mm": 580.0,
+          "development_length_mm": 760.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26716",
+          "available_anchorage_length_mm": 726.779,
+          "required_anchorage_length_mm": 580.0,
+          "development_length_mm": 760.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26721",
+          "available_anchorage_length_mm": 690.0,
+          "required_anchorage_length_mm": 400.0,
+          "development_length_mm": 520.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "26727",
+          "available_anchorage_length_mm": 695.0,
+          "required_anchorage_length_mm": 655.0,
+          "development_length_mm": 850.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 1000.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "26868",
+          "available_anchorage_length_mm": 330.0,
+          "required_anchorage_length_mm": 290.0,
+          "development_length_mm": 380.0,
+          "joint_degree_max": 2,
+          "section_depth_mm": 400.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "26882",
+          "available_anchorage_length_mm": 940.0,
+          "required_anchorage_length_mm": 545.0,
+          "development_length_mm": 710.0,
+          "joint_degree_max": 2,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "26900",
+          "available_anchorage_length_mm": 940.0,
+          "required_anchorage_length_mm": 545.0,
+          "development_length_mm": 710.0,
+          "joint_degree_max": 1,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "26910",
+          "available_anchorage_length_mm": 725.0,
+          "required_anchorage_length_mm": 685.0,
+          "development_length_mm": 910.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "26911",
+          "available_anchorage_length_mm": 725.0,
+          "required_anchorage_length_mm": 685.0,
+          "development_length_mm": 910.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "26937",
+          "available_anchorage_length_mm": 620.0,
+          "required_anchorage_length_mm": 580.0,
+          "development_length_mm": 760.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26938",
+          "available_anchorage_length_mm": 620.0,
+          "required_anchorage_length_mm": 580.0,
+          "development_length_mm": 760.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26943",
+          "available_anchorage_length_mm": 690.0,
+          "required_anchorage_length_mm": 650.0,
+          "development_length_mm": 860.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 600.0
+        },
+        {
+          "member_id": "26944",
+          "available_anchorage_length_mm": 690.0,
+          "required_anchorage_length_mm": 650.0,
+          "development_length_mm": 860.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 600.0
+        },
+        {
+          "member_id": "26945",
+          "available_anchorage_length_mm": 690.0,
+          "required_anchorage_length_mm": 650.0,
+          "development_length_mm": 860.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 600.0
+        },
+        {
+          "member_id": "26954",
+          "available_anchorage_length_mm": 440.0,
+          "required_anchorage_length_mm": 400.0,
+          "development_length_mm": 520.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "26972",
+          "available_anchorage_length_mm": 440.0,
+          "required_anchorage_length_mm": 400.0,
+          "development_length_mm": 520.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "27151",
+          "available_anchorage_length_mm": 741.25,
+          "required_anchorage_length_mm": 545.0,
+          "development_length_mm": 710.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27204",
+          "available_anchorage_length_mm": 538.216,
+          "required_anchorage_length_mm": 435.0,
+          "development_length_mm": 570.0,
+          "joint_degree_max": 5,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27206",
+          "available_anchorage_length_mm": 805.0,
+          "required_anchorage_length_mm": 765.0,
+          "development_length_mm": 990.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 1200.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27207",
+          "available_anchorage_length_mm": 475.0,
+          "required_anchorage_length_mm": 435.0,
+          "development_length_mm": 570.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27236",
+          "available_anchorage_length_mm": 725.0,
+          "required_anchorage_length_mm": 685.0,
+          "development_length_mm": 910.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27237",
+          "available_anchorage_length_mm": 816.507,
+          "required_anchorage_length_mm": 685.0,
+          "development_length_mm": 910.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27263",
+          "available_anchorage_length_mm": 725.0,
+          "required_anchorage_length_mm": 685.0,
+          "development_length_mm": 910.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27264",
+          "available_anchorage_length_mm": 725.0,
+          "required_anchorage_length_mm": 685.0,
+          "development_length_mm": 910.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27265",
+          "available_anchorage_length_mm": 725.0,
+          "required_anchorage_length_mm": 685.0,
+          "development_length_mm": 910.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27266",
+          "available_anchorage_length_mm": 725.0,
+          "required_anchorage_length_mm": 685.0,
+          "development_length_mm": 910.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27280",
+          "available_anchorage_length_mm": 1060.0,
+          "required_anchorage_length_mm": 615.0,
+          "development_length_mm": 810.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 500.0
+        },
+        {
+          "member_id": "27285",
+          "available_anchorage_length_mm": 1060.0,
+          "required_anchorage_length_mm": 615.0,
+          "development_length_mm": 810.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 500.0
+        },
+        {
+          "member_id": "27288",
+          "available_anchorage_length_mm": 1060.0,
+          "required_anchorage_length_mm": 615.0,
+          "development_length_mm": 810.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 500.0
+        },
+        {
+          "member_id": "27303",
+          "available_anchorage_length_mm": 751.533,
+          "required_anchorage_length_mm": 580.0,
+          "development_length_mm": 760.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "27324",
+          "available_anchorage_length_mm": 585.0,
+          "required_anchorage_length_mm": 545.0,
+          "development_length_mm": 710.0,
+          "joint_degree_max": 2,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27326",
+          "available_anchorage_length_mm": 946.0,
+          "required_anchorage_length_mm": 548.5,
+          "development_length_mm": 715.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 310.0
+        },
+        {
+          "member_id": "27328",
+          "available_anchorage_length_mm": 1000.0,
+          "required_anchorage_length_mm": 580.0,
+          "development_length_mm": 760.0,
+          "joint_degree_max": 5,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "27331",
+          "available_anchorage_length_mm": 940.0,
+          "required_anchorage_length_mm": 545.0,
+          "development_length_mm": 710.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27332",
+          "available_anchorage_length_mm": 940.0,
+          "required_anchorage_length_mm": 545.0,
+          "development_length_mm": 710.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27382",
+          "available_anchorage_length_mm": 1110.0,
+          "required_anchorage_length_mm": 1070.0,
+          "development_length_mm": 1400.0,
+          "joint_degree_max": 2,
+          "section_depth_mm": 1500.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27383",
+          "available_anchorage_length_mm": 1110.0,
+          "required_anchorage_length_mm": 1070.0,
+          "development_length_mm": 1400.0,
+          "joint_degree_max": 2,
+          "section_depth_mm": 1500.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "28945",
+          "available_anchorage_length_mm": 290.0,
+          "required_anchorage_length_mm": 250.0,
+          "development_length_mm": 250.0,
+          "joint_degree_max": 3,
+          "section_depth_mm": 100.0,
+          "section_width_mm": 100.0
+        },
+        {
+          "member_id": "28946",
+          "available_anchorage_length_mm": 290.0,
+          "required_anchorage_length_mm": 250.0,
+          "development_length_mm": 250.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 100.0,
+          "section_width_mm": 100.0
+        },
+        {
+          "member_id": "28947",
+          "available_anchorage_length_mm": 290.0,
+          "required_anchorage_length_mm": 250.0,
+          "development_length_mm": 250.0,
+          "joint_degree_max": 4,
+          "section_depth_mm": 100.0,
+          "section_width_mm": 100.0
+        },
+        {
+          "member_id": "30678",
+          "available_anchorage_length_mm": 330.0,
+          "required_anchorage_length_mm": 290.0,
+          "development_length_mm": 380.0,
+          "joint_degree_max": 2,
+          "section_depth_mm": 400.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "30812",
+          "available_anchorage_length_mm": 585.0,
+          "required_anchorage_length_mm": 545.0,
+          "development_length_mm": 710.0,
+          "joint_degree_max": 2,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        }
+      ]
+    },
+    "panel_zone_clash_verification_3d": {
+      "contract_pass": true,
+      "source_kind": "panel_zone_clash_verification_3d",
+      "verification_tier": "topology_projected_3d_source",
+      "summary": {
+        "source_kind": "panel_zone_clash_verification_3d",
+        "producer_backend": "midas_topology_projection",
+        "source_bundle_mode": "midas_topology_projection",
+        "topology_projected": true,
+        "solver_verified": false,
+        "candidate_scan_mode": "npz_full",
+        "candidate_member_count": 45,
+        "matched_candidate_member_count": 45,
+        "unmatched_candidate_member_count": 0,
+        "unmatched_candidate_member_ids_head": [],
+        "source_input_path": "implementation/phase1/open_data/midas/midas_generator_33.json",
+        "instruction_sidecar_present": true,
+        "instruction_sidecar_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.instruction_sidecar.json",
+        "instruction_sidecar_change_count": 0,
+        "instruction_sidecar_action_family_counts": {},
+        "instruction_sidecar_followup_type_counts": {},
+        "instruction_sidecar_review_priority_counts": {},
+        "instruction_sidecar_candidate_overlap_mode": "none",
+        "instruction_sidecar_overlap_row_count": 0,
+        "instruction_sidecar_overlap_member_count": 0,
+        "instruction_sidecar_overlap_group_count": 0,
+        "instruction_sidecar_direct_group_overlap_member_count": 0,
+        "instruction_sidecar_canonical_scope_overlap_member_count": 0,
+        "instruction_sidecar_section_signature_overlap_member_count": 0,
+        "instruction_sidecar_export_report_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.export_report.json",
+        "instruction_sidecar_evidence_model": "direct_patch_plus_zero_touch_verification_manifest",
+        "instruction_sidecar_rebar_delivery_mode": "direct_patch_eligible"
+      },
+      "rows": [
+        {
+          "member_id": "26705",
+          "clash_count": 0,
+          "clearance_mm": 56.0,
+          "clash_pass": true,
+          "joint_degree_max": 1,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26708",
+          "clash_count": 0,
+          "clearance_mm": 56.0,
+          "clash_pass": true,
+          "joint_degree_max": 2,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26713",
+          "clash_count": 0,
+          "clearance_mm": 56.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26715",
+          "clash_count": 0,
+          "clearance_mm": 56.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26716",
+          "clash_count": 0,
+          "clearance_mm": 56.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26721",
+          "clash_count": 0,
+          "clearance_mm": 28.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "26727",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 4,
+          "section_depth_mm": 1000.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "26868",
+          "clash_count": 0,
+          "clearance_mm": 28.0,
+          "clash_pass": true,
+          "joint_degree_max": 2,
+          "section_depth_mm": 400.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "26882",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 2,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "26900",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 1,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "26910",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "26911",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "26937",
+          "clash_count": 0,
+          "clearance_mm": 56.0,
+          "clash_pass": true,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26938",
+          "clash_count": 0,
+          "clearance_mm": 56.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "26943",
+          "clash_count": 0,
+          "clearance_mm": 84.0,
+          "clash_pass": true,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 600.0
+        },
+        {
+          "member_id": "26944",
+          "clash_count": 0,
+          "clearance_mm": 84.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 600.0
+        },
+        {
+          "member_id": "26945",
+          "clash_count": 0,
+          "clearance_mm": 84.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 600.0
+        },
+        {
+          "member_id": "26954",
+          "clash_count": 0,
+          "clearance_mm": 28.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "26972",
+          "clash_count": 0,
+          "clearance_mm": 28.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "27151",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27204",
+          "clash_count": 1,
+          "clearance_mm": 38.0,
+          "clash_pass": true,
+          "joint_degree_max": 5,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27206",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 1200.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27207",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 600.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27236",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27237",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27263",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27264",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27265",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27266",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27280",
+          "clash_count": 0,
+          "clearance_mm": 70.0,
+          "clash_pass": true,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 500.0
+        },
+        {
+          "member_id": "27285",
+          "clash_count": 0,
+          "clearance_mm": 70.0,
+          "clash_pass": true,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 500.0
+        },
+        {
+          "member_id": "27288",
+          "clash_count": 0,
+          "clearance_mm": 70.0,
+          "clash_pass": true,
+          "joint_degree_max": 4,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 500.0
+        },
+        {
+          "member_id": "27303",
+          "clash_count": 0,
+          "clearance_mm": 56.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "27324",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 2,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27326",
+          "clash_count": 0,
+          "clearance_mm": 43.4,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 310.0
+        },
+        {
+          "member_id": "27328",
+          "clash_count": 1,
+          "clearance_mm": 52.0,
+          "clash_pass": true,
+          "joint_degree_max": 5,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 400.0
+        },
+        {
+          "member_id": "27331",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27332",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 3,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        },
+        {
+          "member_id": "27382",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 2,
+          "section_depth_mm": 1500.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "27383",
+          "clash_count": 0,
+          "clearance_mm": 98.0,
+          "clash_pass": true,
+          "joint_degree_max": 2,
+          "section_depth_mm": 1500.0,
+          "section_width_mm": 700.0
+        },
+        {
+          "member_id": "28945",
+          "clash_count": 0,
+          "clearance_mm": 20.0,
+          "clash_pass": false,
+          "joint_degree_max": 3,
+          "section_depth_mm": 100.0,
+          "section_width_mm": 100.0
+        },
+        {
+          "member_id": "28946",
+          "clash_count": 0,
+          "clearance_mm": 20.0,
+          "clash_pass": false,
+          "joint_degree_max": 4,
+          "section_depth_mm": 100.0,
+          "section_width_mm": 100.0
+        },
+        {
+          "member_id": "28947",
+          "clash_count": 0,
+          "clearance_mm": 20.0,
+          "clash_pass": false,
+          "joint_degree_max": 4,
+          "section_depth_mm": 100.0,
+          "section_width_mm": 100.0
+        },
+        {
+          "member_id": "30678",
+          "clash_count": 0,
+          "clearance_mm": 28.0,
+          "clash_pass": true,
+          "joint_degree_max": 2,
+          "section_depth_mm": 400.0,
+          "section_width_mm": 200.0
+        },
+        {
+          "member_id": "30812",
+          "clash_count": 0,
+          "clearance_mm": 42.0,
+          "clash_pass": true,
+          "joint_degree_max": 2,
+          "section_depth_mm": 800.0,
+          "section_width_mm": 300.0
+        }
+      ]
+    }
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "MIDAS-topology-derived panel-zone bundle generated from active candidate members"
+}

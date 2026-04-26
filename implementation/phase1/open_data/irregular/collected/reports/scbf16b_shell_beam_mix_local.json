@@ -1,0 +1,29 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/scbf16b_shell_beam_mix_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/scbf16b_shell_beam_mix_local/SCBF16B_shell_beam_mix.tcl",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/scbf16b_shell_beam_mix_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/scbf16b_shell_beam_mix_local.json"
+  },
+  "bytes_copied": 118474,
+  "declared_format": "tcl",
+  "family_id": "discontinuous_braced_frame_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {},
+  "original_reference": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+  "sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+  "source_exists": true,
+  "source_format": "tcl",
+  "source_id": "scbf16b_shell_beam_mix_local",
+  "source_index": 17,
+  "source_urls": [
+    "https://opensees.berkeley.edu/"
+  ],
+  "status": "collected",
+  "title": "SCBF16B shell-beam mixed OpenSees model"
+}

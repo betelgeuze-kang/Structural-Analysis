@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 11738,
+  "collector_version": "0.2.0",
+  "family_id": "soft_story_podium_tower",
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/model.json",
+  "schema_version": "1.0",
+  "sha256": "d650f6899d885a48dd4ac72480ce5caf01b58e2bd2a576b81944aaf61c80206a",
+  "source_format": "json_graph",
+  "source_id": "soft_story_podium_tower_proxy_local",
+  "source_urls": [
+    "https://support.midasuser.com/"
+  ],
+  "title": "Soft-story podium tower local bridged graph from MIDAS neighborhood facility archive"
+}

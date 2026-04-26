@@ -1,0 +1,161 @@
+type,section,item,value,status,note_or_evidence
+card,summary,Nightly,PASS,PASS,latest release chain
+card,summary,Nightly Smoke,PASS,PASS,profile=balanced_practice
+card,summary,Smoke Pass Rate,100.00%,PASS,count=10
+card,summary,Smoke Trial Feasible,100.00%,PASS,avg_trial_runtime_s=0.0563
+card,summary,Smoke Strict,candidate_for_strict_enable,PASS,history count and pass/feasible rates satisfy strict-ready threshold
+card,summary,CI Gate,PASS,PASS,"static + contract gate | MIDAS section-library: ok | 182/183 used | 183 templates | source=midas_parser_derived | implementation/phase1/open_data/midas/midas_generator_33.json | MIDAS loadcomb-roundtrip: ok | entry_row_coverage=midas_generator_33.json=1.00, midas_generator_33.pr_recheck.json=1.00, midas_generator_33.optimized.roundtrip.json=1.00 | artifacts=3"
+card,summary,PBD Drift Max,9.2000%,PASS,7-GM envelope
+card,summary,PBD Binary Cases,7,PASS,npz_external+inline_summary
+card,summary,Speedup,"18,818x",PASS,vs 336h estimate
+card,summary,Wind Duration,10.0h,PASS,across-wind benchmark
+card,summary,SSI Ratio Span,0.2823,PASS,nonlinear boundary
+card,summary,Damper Corr Min,0.9625,PASS,NHERI damped frame
+card,summary,Diff. Shortening,38.331 mm,PASS,construction sequence
+card,summary,Flex Ampl. Max,1.200,PASS,shell-beam mix
+card,summary,Replay Runs,3,PASS,version lock
+card,summary,Signed Registry,ed25519,PASS,release traceability | project_pkg=3121538B | approvals=2
+card,summary,KDS PASS,496,PASS,code check rows
+card,summary,NDTHA Residual,1.914%,PASS,hard-threshold gate
+card,summary,SAC Holdout,3,PASS,global benchmark
+card,summary,NHERI Holdout,3,PASS,sensor waveform
+card,summary,OpenSees Holdout,3,PASS,topology authority
+card,summary,OpenSees Canonical Breadth,7,PASS,"families=6, parser_ready=3"
+card,summary,Measured Breadth,294,PASS,"families=21, baseline=2/51, opensees_delta=6/7"
+card,summary,PEER Blind Compare,10,PASS,measured_response_ready=True | channels=11/11 | lane=PEER Blind Prediction Compare Family | summary=PEER blind compare lane: READY | cases=10 | measured_response=ready | channels=11 | landing_manifest=recorded
+card,summary,PEER Landing Manifest,1,PASS,state=recorded | csv=0 | accel=0 | drift=0 | sensors=0 | next=Rerun measured-response normalize/build/compare steps.
+card,summary,Authority Binary Cases,9,PASS,npz_external+inline_summary
+card,summary,Open P0/P1,0/0,INFO,remaining commercialization gaps
+card,summary,Advanced Holdout Closure,4/4 closed,PASS,"closed=4/4 | open=0 | severities=P0:2, P1:2"
+card,summary,Coverage Model,engineer_in_the_loop_accelerated_coverage,INFO,95-99%
+card,summary,Residual Holdout,1-5%,INFO,buckets=3
+card,summary,Estimated Time Saved,90-96%,INFO,repeated analysis workload
+card,summary,Engineer-in-Loop Ready,True,PASS,accelerated coverage framing
+card,summary,Time-Saving Focus,95-99%,INFO,"Use this engine to automate the dominant, time-consuming 95-99% of repeated analysis, screening, packaging, and optimization workflows. Keep the residual 1-5% under licensed engineer review, legacy-tool cross-check, and formal sign-off workflows."
+card,summary,MIDAS Load Semantics,6/8,PASS,"use_stld=2, bound rows=nodal:12/selfweight:1/pressure:7278"
+card,summary,MGT Exporter,True,PASS,"mode=native_authoring_supported_changeset, supported=36, unsupported=0, direct_patch=25, direct_patch_families=beam_section=1, connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5, slab_thickness=2, wall_thickness=5, material_rebar_payloads=3/5, group_local_rebar_payloads=6/6, group_local_connection_payloads=6/6, group_local_detailing_payloads=5/5, connection_delivery_mode=direct_patch_native_authoring_zero_touch_verified, detailing_delivery_mode=direct_patch_native_authoring_zero_touch_verified, rebar_direct_patch_eligible=6, patched_material_rows=24, cloned_materials=24, sidecar=0, sidecar_families=n/a, sidecar_audit=n/a (0), sidecar_manual=n/a (0), audit_manifest=n/a (0), audit_packets=n/a (0), audit_packet_files=n/a (0), audit_queue=n/a (0), audit_queue_status=n/a, audit_followup=close_packet=2 (2), audit_followup_owner=none=2, audit_followup_status=approved=2, sidecar_priorities=n/a, sidecar_followups=n/a, clones=6, retargeted=418"
+card,summary,MGT Delivery Boundary,direct_patch_plus_zero_touch_verification_manifest,INFO,"direct_patch=beam_section=1, connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5, slab_thickness=2, wall_thickness=5 | sidecar=n/a | connection_payload=direct_patch_native_authoring_zero_touch_verified | detailing_payload=direct_patch_native_authoring_zero_touch_verified"
+card,summary,Design Opt Feasible,True,PASS,max_dcr=0.933
+card,summary,Design Opt Raw Drift,9.200%,INFO,raw_dcr=1.916
+card,summary,Design Opt Repaired Drift,1.987%,PASS,repaired_dcr=0.986
+card,summary,Constructability Signal,0.68%,INFO,repair_actions=1
+card,summary,Selected Family Mix,wall_thickness,INFO,"connection_detailing=5, detailing=6, perimeter_frame=1, rebar=2, slab_thickness=2, wall_thickness=7"
+card,summary,Family Mix Trend,"connection_detailing=+0, detailing=+0, perimeter_frame=+0, rebar=+0, slab_thickness=+0, wall_thickness=+0",INFO,prev=wall_thickness (30.43%) -> current=wall_thickness (30.43%)
+card,summary,Preview Supply,all target families present,INFO,"beam_section=7, connection_detailing=14, detailing=142, perimeter_frame=1, rebar=254, slab_thickness=42, wall_thickness=175"
+card,summary,Cost Reduction,411.16,PASS,changed_groups=20
+card,summary,Blocked Actions,47,INFO,"illegal=0, no_gain=8, hard_gate=3"
+card,summary,Design Opt Entrypoints,7/7,PASS,registry-driven primary report inventory
+card,summary,Design Opt Ablation,1/1,PASS,members=ablation
+card,summary,Design Opt Dataset,1/1,PASS,members=dataset
+card,summary,Design Opt Profile,1/1,PASS,members=objective_profile
+card,summary,Design Opt Stage A,2/2,PASS,"members=solver_loop, solver_loop_long"
+card,summary,Design Opt Stage A/B/C,1/1,PASS,members=budgeted
+card,summary,Design Opt Stage B,1/1,PASS,members=cost_reduction
+card,summary,External Benchmark Start,start_now_full_external_submission,PASS,full_external_submission_package
+card,summary,External Benchmark Execution,limited,PASS,ready=10 | blocked=0 | review_boundary_pending=0 | status=execution_complete_no_fail | planned=0 | in_progress=0 | completed=10 | failed=0 | batch_jobs=0 | batch_done=0 | batch_failed=0
+validation,PBD,7-GM Drift Envelope,"max=9.2000%, p95=9.2000%",PASS,pbd_review drift envelope
+validation,PBD,Energy Balance,8.427672e-05,PASS,killshot metrics
+validation,PBD,Binary artifact trace,"storage=npz_external+inline_summary, cases=7",PASS,pbd_review_package_report
+validation,Optimization,Long-Budget Feasible Repair,"feasible=True, max_dcr=0.9332",PASS,design_optimization_solver_loop_long_report
+validation,Optimization,Cost Reduction Evidence,"changed=20, accepted=23, cost_delta=411.159",PASS,design_optimization_cost_reduction_report
+validation,Optimization,Blocked Action Explain,"blocked=47, illegal=0, no_gain=8",PASS,design_optimization_cost_reduction_blocked_actions
+validation,NDTHA,Residual Hard Gate,"top=0.688 m, drift=1.914%, fallback_rate=0.000",PASS,ndtha_residual_gate_report
+validation,NDTHA,Residual Trace,"cases=3, changed=3, pre_top_max=3.308 m, pre_drift_max=9.200%",PASS,nonlinear_ndtha_stress_report
+validation,Wind,Across-wind long series,"duration=10.0h, chunks=72, post_drift=0.000%, pre_drift=0.001%",PASS,wind_time_history_gate_report
+validation,SSI,Nonlinear boundary response,"ratio span=0.2823, fixed_post_drift=0.033%, ssi_post_drift=0.004%",PASS,ssi_boundary_gate_report
+validation,Damper,Damped frame agreement,"corr_min=0.9625, phase_max=30.000 ms",PASS,damper_validation_gate_report
+validation,Construction,Construction preload,"diff=38.331 mm, stress=23.241 MPa",PASS,construction_sequence_gate_report
+validation,Diaphragm,Flexible diaphragm,"amp=1.200, drift=3.087%",PASS,flexible_diaphragm_gate_report
+validation,Reproducibility,Version lock replay,"runs=3, seed=23",PASS,reproducibility_version_lock_report
+validation,Reproducibility,Signed release registry,"artifacts=12, project_pkg=3121538B, approvals=2, pubkey=implementation/phase1/release/signing/release_registry_ed25519.pub.pem",PASS,release_registry
+validation,Code Check,KDS compliance,"rows=511, pass_cards=8",PASS,kds_compliance_summary
+validation,Authority,SAC holdout,"cases=3, valid=3",PASS,global_authority_gate_report
+validation,Authority,NHERI holdout,"cases=3, valid=3",PASS,global_authority_gate_report
+validation,Authority,OpenSees holdout,"cases=3, pass=3",PASS,global_authority_gate_report
+validation,Authority,OpenSees canonical breadth,"families=6, cases=7, parser_ready=3",PASS,opensees_canonical_breadth_report
+validation,Authority,Measured benchmark breadth,"baseline=2/51, delta=6/7, measured=21/294",PASS,measured_benchmark_breadth_report
+validation,PEER,Blind compare lane,"cases=10, measured_response_ready=True, channels=11/11, lane=PEER Blind Prediction Compare Family",PASS,peer_blind_prediction_compare_report
+validation,PEER,Measured-response landing,"state=recorded, matched=1, csv=0, accel=0, drift=0, sensors=0",PASS,edefense_peer_blind_prediction_seed_01.measured_response_landing_manifest
+validation,Authority,Binary artifact trace,"storage=npz_external+inline_summary, cases=9, steps=9",PASS,global_authority_gate_report
+metric,advanced_holdout_provenance,pbd_hinge_refresh_ready,True,PASS,mode=computed_member_local_hinge_refresh | artifact_present=True | overlap=88 | rebar_sensitive=70
+metric,advanced_holdout_provenance,pbd_hinge_benchmark_gate,True,PASS,assets=5 | split=train:2/val:2/holdout:1 | rebar_sensitive=1 | confinement_sensitive=1
+metric,advanced_holdout_provenance,pbd_hinge_benchmark_fixture_regression,True,PASS,fixtures=5 | min_point_count=449 | min_peak_drift_ratio=0.036625
+metric,advanced_holdout_provenance,pbd_hinge_benchmark_alignment,True,PASS,refresh_columns=5 | rebar_sensitive_columns=5 | benchmark_rebar_range=0.0127-0.0603 | refresh_rebar_range=0.0640-0.0740
+metric,advanced_holdout_provenance,panel_zone_3d_clash_ready,True,PASS,3D panel-zone clash and anchorage recomputation artifacts are attached
+metric,advanced_holdout_provenance,panel_zone_constructability_mode,panel_zone_3d_clash_and_anchorage_verified,INFO,source_contract=true_3d_clash_and_anchorage_verified | proxy_candidates=45 | validated_rows=3 | min_overlap=1 | internal_complete=False | external_validation_pending=False | validation_boundary=solver_verified | advisory_only=False | release_blocking=False | status=verified | sidecar=none | sidecar_overlap=0 | evidence=direct_solver_export | mapping_present=True | mapping_mode=explicit_member_id_map | mapping_rows=1 | mapping_applied=1
+metric,advanced_holdout_provenance,panel_zone_external_validation_status_label,verified,INFO,artifact_closed=True | closure_mode=closed_exact_validated | advisory_only=False | release_blocking=False | boundary=solver_verified | pending=False | required_evidence=none
+metric,advanced_holdout_provenance,panel_zone_external_validation_artifact_closed,True,INFO,closure_mode=closed_exact_validated | status=verified | boundary=solver_verified
+metric,advanced_holdout_provenance,panel_zone_external_validation_provenance_summary_label,validated_sources=3/3 | exact_sources=3/3 | fallback_sources=0/3 | missing_sources=0/3 | validated_members=1/45 | exact_members=1/45 | fallback_members=0/45 | exact_rows=3/3 | fallback_rows=0/3,INFO,validated_source_ratio=1.000 | exact_source_ratio=1.000 | fallback_source_ratio=0.000 | validated_member_ratio=0.022 | exact_member_ratio=0.022 | fallback_member_ratio=0.000
+metric,advanced_holdout_provenance,panel_zone_external_validation_closing_summary_label,Panel-zone external validation: verified | boundary=solver_verified | artifact_closed=True | closure_mode=closed_exact_validated | required_evidence=none | validated_sources=3/3 | exact_sources=3/3 | fallback_sources=0/3 | missing_sources=0/3 | validated_members=1/45 | exact_members=1/45 | fallback_members=0/45 | exact_rows=3/3 | fallback_rows=0/3 | local_closure_state=closed_with_solver_verified_artifact | local_closure_label=Local closeout: closed by attached solver-verified 3D artifact. | inbox=empty_after_successful_consume | pending_input=False | latest_consume_present=True | latest_consume_pass=True | latest_consume_reason=PASS | next=local_closeout_closed,INFO,source_count=3 | validated_sources=3 | exact_rows=3 | fallback_rows=0
+metric,advanced_holdout_provenance,panel_zone_external_validation_local_closure_state,closed_with_solver_verified_artifact,INFO,label=Local closeout: closed by attached solver-verified 3D artifact. | summary=Panel-zone external validation: verified | boundary=solver_verified | artifact_closed=True | closure_mode=closed_exact_validated | required_evidence=none | validated_sources=3/3 | exact_sources=3/3 | fallback_sources=0/3 | missing_sources=0/3 | validated_members=1/45 | exact_members=1/45 | fallback_members=0/45 | exact_rows=3/3 | fallback_rows=0/3
+metric,advanced_holdout_provenance,panel_zone_status_label,release_ready,INFO,advisory_only=False | release_blocking=False | boundary=solver_verified | external_validation=verified
+metric,advanced_holdout_provenance,panel_zone_source_contract_mode,true_3d_clash_and_anchorage_verified,INFO,source_kind=design_optimization_dataset_npz | missing=
+metric,advanced_holdout_provenance,panel_zone_instruction_sidecar_candidate_overlap_mode,,INFO,present=False | changes=0 | overlap_rows=0 | overlap_members=0 | overlap_groups=0 | evidence=direct_solver_export | delivery=solver_verified_layout_rows | mapping_present=True | mapping_mode=explicit_member_id_map | mapping_rows=1 | mapping_applied=1 | mapping_unmapped=0
+metric,advanced_holdout_provenance,panel_zone_source_bundle_modes,"panel_zone_clash_verification_3d:nested_solver_export, panel_zone_joint_geometry_3d:nested_solver_export, panel_zone_rebar_anchorage_3d:nested_solver_export",INFO,"upstream=panel_zone_clash_verification_3d:panel_zone_clash_verification_3d_solver_verified_validated_source, panel_zone_joint_geometry_3d:panel_zone_joint_geometry_3d_solver_verified_validated_source, panel_zone_rebar_anchorage_3d:panel_zone_rebar_anchorage_3d_solver_verified_validated_source"
+metric,advanced_holdout_provenance,panel_zone_solver_verified_inbox_status_mode,empty_after_successful_consume,INFO,pending=False | input_mode=empty | latest_consume_present=True | latest_consume_pass=True | latest_consume_reason=PASS | origin=trusted_external_solver_source | release_refresh_allowed=True | next=local_closeout_closed
+metric,advanced_holdout_provenance,foundation_optimization_ready,True,PASS,foundation optimization artifact is attached and dataset contains foundation members
+metric,advanced_holdout_provenance,foundation_scope_source,dataset_summary,INFO,scan=npz_full | upstream_labels=0 | raw_source_labels=0 | dataset_scope_only
+metric,advanced_holdout_provenance,wind_tunnel_raw_mapping_ready,True,PASS,Raw wind-tunnel HFFB mapping is ready for traceable MIDAS binding.
+metric,advanced_holdout_provenance,wind_tunnel_mapping_mode,raw_hffb_node_pressure_mapping,INFO,
+metric,advanced_holdout_provenance,external_benchmark_submission_start,start_now_full_external_submission,PASS,full_external_submission_package
+metric,advanced_holdout_provenance,external_benchmark_submission_gate,PASS_START_NOW_FULL,PASS,full_ready=True | blockers=none | cautions=panel_zone_external_validation_only_boundary
+metric,advanced_holdout_provenance,external_benchmark_execution_mode,limited,PASS,ready=10 | blocked=0 | review_boundary_pending=0
+metric,advanced_holdout_provenance,external_benchmark_execution_review_boundary,approve_all=PASS_NO_OPEN_DECISION_ITEMS/ready_full=yes; reject_one=PASS_NO_OPEN_DECISION_ITEMS/open_revision=0,PASS,approve_all=PASS_NO_OPEN_DECISION_ITEMS (ready_full=True) | reject_one=PASS_NO_OPEN_DECISION_ITEMS (open_revision=0) | owner=none | assignee=none | assignment=none | priority=none | family=none | changes=0 | followup=none | sla=none | age=none | overdue=0 | oldest_open_h=0.000
+metric,advanced_holdout_provenance,external_benchmark_execution_status_mode,execution_complete_no_fail,PASS,planned=0 | in_progress=0 | completed=10 | failed=0 | finished=10 | completion_ratio=1.000
+metric,advanced_holdout_provenance,audit_review_decision_batch_template,0,INFO,"status=none | owner=none | priority=none | attested_examples=0 | example_preview=approve_all=PASS_START_NOW_FULL, mixed=PASS_START_NOW_FULL"
+metric,advanced_holdout_provenance,external_benchmark_submission_preview_approve_all,PASS_NO_OPEN_DECISION_ITEMS,FAIL,ready_full=False | pending=0 | open_revision=0
+metric,advanced_holdout_provenance,external_benchmark_submission_preview_reject_one,PASS_NO_OPEN_DECISION_ITEMS,FAIL,ready_full=False | pending=0 | open_revision=0 | blocker=none
+metric,advanced_holdout_provenance,audit_review_decision_batch_runner,PASS_ZERO_TOUCH_NO_OPEN_DECISION_ITEMS,FAIL,apply_live=False | live_applied=False | preview_reason=PASS_NO_OPEN_DECISION_ITEMS | preview_ready_full=False | preview_pending=0 | preview_open_revision=0
+metric,advanced_holdout_closure,pbd_dynamic_hinge_refresh,closed,PASS,"Dynamic plastic-hinge refresh | severity=P0 | mode=computed_member_local_hinge_refresh | reason=Dynamic hinge-refresh artifact is attached. | evidence=hinge_proxy_artifacts=2, artifact_present=True, artifact_kind=hinge_refresh_projected_from_optimization_changes, source_mode=rebar_sensitive_member_local_refresh, overlap_members=88, rebar_sensitive_members=70, benchmark_assets=5, benchmark_split=train:2/va..."
+metric,advanced_holdout_closure,panel_zone_3d_clash_and_anchorage,closed,PASS,"Panel-zone 3D clash and anchorage coverage | severity=P0 | mode=panel_zone_3d_clash_and_anchorage_verified | reason=3D panel-zone clash and anchorage recomputation artifacts are attached | evidence=proxy_candidates=45, source=design_optimization_dataset_npz:true_3d_clash_and_anchorage_verified, status_label=release_ready, advisory_only=False, release_blocking=False, artifact_closed=True, closure_mode=closed_exact_validated, coverage=validated_sources=..."
+metric,advanced_holdout_closure,foundation_mat_pile_optimization,closed,PASS,"Foundation / mat / pile optimization | severity=P1 | mode=active_foundation_member_optimization | reason=foundation optimization artifact is attached and dataset contains foundation members | evidence=foundation_member_type_count=76, scope_source=dataset_summary, raw_source_labels=0, upstream_labels=0, upstream_mode=dataset_scope_only"
+metric,advanced_holdout_closure,wind_tunnel_raw_mapping,closed,PASS,"Raw wind-tunnel data mapping | severity=P1 | mode=raw_hffb_node_pressure_mapping | reason=Raw wind-tunnel HFFB mapping is ready for traceable MIDAS binding. | evidence=semantic_pressure_binding=True, bound_pressure_rows=7278, unbound_pressure_rows=0"
+authority,OpenSees,SCBF16B,nodes=420 | shell_beam_mix=False,PASS,implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl
+authority,OpenSees,SCBF16B_shell_beam_mix,nodes=426 | shell_beam_mix=True,PASS,implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl
+authority,OpenSees,Luxinzheng_Megatall_Model1,nodes=1252 | shell_beam_mix=False,PASS,implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl
+authority,SAC,SAC20_LA_holdout_01,drift=3.200% | MAC=0.9710,PASS,https://femap58.atcouncil.org/index.php?option=com_content&view=article&id=5:sac-steel-project&catid=2:uncategorised
+authority,SAC,SAC20_SEA_holdout_02,drift=3.600% | MAC=0.9680,PASS,https://femap58.atcouncil.org/index.php?option=com_content&view=article&id=5:sac-steel-project&catid=2:uncategorised
+authority,SAC,SAC20_BOS_holdout_03,drift=2.900% | MAC=0.9740,PASS,https://femap58.atcouncil.org/index.php?option=com_content&view=article&id=5:sac-steel-project&catid=2:uncategorised
+authority,NHERI,NHERI_UCSD_like_holdout_01,corr=1.0000 | phase=0.000 ms,PASS,https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/
+authority,NHERI,NHERI_UCSD_like_holdout_02,corr=1.0000 | phase=0.000 ms,PASS,https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/
+authority,NHERI,NHERI_UCSD_like_holdout_03,corr=1.0000 | phase=0.000 ms,PASS,https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/
+ndtha_residual_case,C-TST-001,test,pre_top=3.307971 m -> post_top=0.688058 m | pre_drift=9.200000% -> post_drift=1.913600%,PASS,source=solver_raw | settle_steps=48
+ndtha_residual_case,C-TST-002,test,pre_top=2.767687 m -> post_top=0.575679 m | pre_drift=9.200000% -> post_drift=1.913600%,PASS,source=solver_raw | settle_steps=48
+ndtha_residual_case,C-TST-003,test,pre_top=3.291808 m -> post_top=0.684696 m | pre_drift=9.200000% -> post_drift=1.913600%,PASS,source=solver_raw | settle_steps=48
+design_change,S02/perimeter,wall,changed=1 | cost_delta=-13.203 | dcr=0.000->0.976,PASS,semantic_groups=0
+design_change,S03/intermediate,wall,changed=1 | cost_delta=-4.339 | dcr=0.000->0.487,PASS,semantic_groups=0
+design_change,S03/perimeter,wall,changed=2 | cost_delta=-157.316 | dcr=0.000->0.550,PASS,semantic_groups=0
+design_change,S04/intermediate,wall,changed=2 | cost_delta=-158.714 | dcr=0.000->0.412,PASS,semantic_groups=0
+design_change,S04/perimeter,slab,changed=1 | cost_delta=-14.871 | dcr=0.000->0.419,PASS,semantic_groups=1
+design_change,S04/perimeter,wall,changed=2 | cost_delta=-5.881 | dcr=0.000->0.507,PASS,semantic_groups=0
+design_change,S04/transfer,beam,changed=5 | cost_delta=8.658 | dcr=0.498->0.352,PASS,semantic_groups=0
+design_change,S05/perimeter,column,changed=1 | cost_delta=-47.994 | dcr=0.000->0.239,PASS,semantic_groups=1
+design_change,S06/intermediate,wall,changed=1 | cost_delta=-4.339 | dcr=0.000->0.455,PASS,semantic_groups=0
+design_change,S06/perimeter,wall,changed=1 | cost_delta=-2.940 | dcr=0.000->0.550,PASS,semantic_groups=0
+design_change,S07/intermediate,wall,changed=1 | cost_delta=-4.339 | dcr=0.000->0.455,PASS,semantic_groups=0
+design_change,S07/perimeter,wall,changed=1 | cost_delta=-2.940 | dcr=0.000->0.550,PASS,semantic_groups=0
+design_change,S08/perimeter,wall,changed=1 | cost_delta=-2.940 | dcr=0.000->0.504,PASS,semantic_groups=0
+design_change_story,S02,all,changed=1 | cost_delta=-13.203 | dcr=0.000->0.976,PASS,semantic_groups=0
+design_change_story,S03,all,changed=3 | cost_delta=-161.655 | dcr=0.000->0.550,PASS,semantic_groups=0
+design_change_story,S04,all,changed=10 | cost_delta=-170.808 | dcr=0.498->0.507,PASS,semantic_groups=1
+design_change_story,S05,all,changed=1 | cost_delta=-47.994 | dcr=0.000->0.239,PASS,semantic_groups=1
+design_change_story,S06,all,changed=2 | cost_delta=-7.280 | dcr=0.000->0.550,PASS,semantic_groups=0
+design_change_story,S07,all,changed=2 | cost_delta=-7.280 | dcr=0.000->0.550,PASS,semantic_groups=0
+design_change_story,S08,all,changed=1 | cost_delta=-2.940 | dcr=0.000->0.504,PASS,semantic_groups=0
+design_change_zone,intermediate,all,changed=5 | cost_delta=-171.732 | dcr=0.000->0.487,PASS,semantic_groups=0
+design_change_zone,perimeter,all,changed=10 | cost_delta=-248.085 | dcr=0.000->0.976,PASS,semantic_groups=2
+design_change_zone,transfer,all,changed=5 | cost_delta=8.658 | dcr=0.498->0.352,PASS,semantic_groups=0
+design_opt_entrypoint,dataset,implementation/phase1/generate_design_optimization_dataset.py,/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_dataset_report.json,PASS,exists=True reason=PASS
+design_opt_entrypoint,solver_loop,implementation/phase1/run_design_optimization_solver_loop.py,/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_solver_loop_report.json,PASS,exists=True reason=PASS
+design_opt_entrypoint,solver_loop_long,implementation/phase1/run_design_optimization_solver_loop_long.py,/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json,PASS,exists=True reason=PASS
+design_opt_entrypoint,budgeted,implementation/phase1/run_design_optimization_budgeted.py,/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_budgeted_report.json,PASS,exists=True reason=PASS
+design_opt_entrypoint,cost_reduction,implementation/phase1/run_design_optimization_cost_reduction.py,/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_cost_reduction_report.json,PASS,exists=True reason=PASS
+design_opt_entrypoint,ablation,implementation/phase1/run_design_optimization_ablation.py,/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_ablation_report.json,PASS,exists=True reason=PASS
+design_opt_entrypoint,objective_profile,implementation/phase1/generate_design_objective_calibration.py,/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_objective_profile_report.json,PASS,exists=True reason=PASS
+design_opt_entrypoint_group,Ablation,ablation,1/1,PASS,pass_count=1
+design_opt_entrypoint_group,Dataset,dataset,1/1,PASS,pass_count=1
+design_opt_entrypoint_group,Profile,objective_profile,1/1,PASS,pass_count=1
+design_opt_entrypoint_group,Stage A,"solver_loop,solver_loop_long",2/2,PASS,pass_count=2
+design_opt_entrypoint_group,Stage A/B/C,budgeted,1/1,PASS,pass_count=1
+design_opt_entrypoint_group,Stage B,cost_reduction,1/1,PASS,pass_count=1
+metric,advanced_holdout_provenance,irregular_structure_track,Irregular structure collection gate: PASS | families=20 | sources=32 | local_ready=15 | remote_candidates=17 | collected=21 | top5=5,PASS,"families=20 | sources=32 | local_ready=15 | remote_candidates=17 | top5=5 | top5_family_ids=transfer_podium_tower,soft_story_podium_tower,torsionally_eccentric_core_tower,setback_tower,reentrant_corner_tower | gate=implementation/phase1/irregular_structure_collection_gate_report.json | manifest=implementation/phase1/open_data/irregular/irregular_top5_execution_manifest.json"

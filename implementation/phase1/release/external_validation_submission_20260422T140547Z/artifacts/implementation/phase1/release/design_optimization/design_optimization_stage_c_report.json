@@ -1,0 +1,37 @@
+{
+  "schema_version": "2.0",
+  "report_family": "design_optimization",
+  "summary_schema_version": "2.0",
+  "run_id": "phase1-design-optimization-stage-c",
+  "generated_at": "2026-03-15T11:14:07.790827+00:00",
+  "inputs": {
+    "dataset_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "budget": "low",
+    "objective_profile": "cost_first",
+    "profile_path": "implementation/phase1/design_objective_profiles.json",
+    "objective_calibration_report": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
+    "disable_action_families": [],
+    "zone_lock": "none",
+    "state_out": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_budgeted_state.npz"
+  },
+  "summary": {
+    "stage": "stage_c",
+    "budget_mode": "low",
+    "objective_profile": "cost_first",
+    "accepted_count": 0,
+    "solver_feasible_final": true,
+    "constructability_before": 0.0,
+    "constructability_after": 0.0,
+    "constructability_gain": 0.0,
+    "skipped": true,
+    "skip_reason": "cached_low_budget_mode"
+  },
+  "artifacts": {
+    "report_out": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_stage_c_report.json",
+    "state_out": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_budgeted_state.npz"
+  },
+  "contract_pass": false,
+  "reason_code": "ERR_STAGE_C_SKIPPED",
+  "reason": "cached_low_budget_mode",
+  "accepted_head": []
+}

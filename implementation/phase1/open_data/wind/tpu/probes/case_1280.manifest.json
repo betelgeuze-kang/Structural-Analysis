@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-tpu-case-mat",
+  "generated_at": "2026-03-19T13:20:39.090205+00:00",
+  "source_name": "TPU Aerodynamic Database - Two Adjacent High-rise Buildings with Rectangular plan > bdebae40-cf54-11ec-ac5e-0242ac150002",
+  "source_url": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=1280",
+  "case_id": "1280",
+  "mat_url": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/bdebae40-cf54-11ec-ac5e-0242ac150002/time_series_1_0.mat",
+  "mat_source_resolved": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/bdebae40-cf54-11ec-ac5e-0242ac150002/time_series_1_0.mat",
+  "real_source": true,
+  "source_origin_class": "official_external_benchmark",
+  "data_path": "implementation/phase1/open_data/wind/tpu/probes/case_1280.mat",
+  "sha256": "c123743bbb81c35390f8f039c8e4850b2a5522221cc30de894de07cc1fefb446",
+  "size_bytes": 11382443,
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU case page resolved and MAT file fetched successfully."
+}

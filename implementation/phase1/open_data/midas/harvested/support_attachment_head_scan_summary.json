@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-support-attachment-head-scan",
+  "summary": {
+    "attachment_count_scanned": 6940,
+    "http_200_count": 6937,
+    "zip_hit_count": 10,
+    "mgt_hit_count": 0
+  },
+  "zip_hits": [
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/51948310654745",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"C07_T03_P000_RC_03_____.zip\"; filename*=utf-8''C07_T03_P000_RC_03_%EB%8B%A8%EB%8F%85%EC%A3%BC%ED%83%9D.zip",
+      "filename_hint": "utf-8''C07_T03_P000_RC_03_%EB%8B%A8%EB%8F%85%EC%A3%BC%ED%83%9D.zip",
+      "target": "zip",
+      "content_length": "169720"
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/51947938880409",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"C07_T02_P000_RC_02_______.zip\"; filename*=utf-8''C07_T02_P000_RC_02_%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4.zip",
+      "filename_hint": "utf-8''C07_T02_P000_RC_02_%EA%B7%BC%EB%A6%B0%EC%83%9D%ED%99%9C%EC%8B%9C%EC%84%A4.zip",
+      "target": "zip",
+      "content_length": "291389"
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/51945266735897",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"C07_T01_P000_RC_01_______.zip\"; filename*=utf-8''C07_T01_P000_RC_01_%EB%8B%A4%EA%B0%80%EA%B5%AC_%EC%A3%BC%ED%83%9D.zip",
+      "filename_hint": "utf-8''C07_T01_P000_RC_01_%EB%8B%A4%EA%B0%80%EA%B5%AC_%EC%A3%BC%ED%83%9D.zip",
+      "target": "zip",
+      "content_length": "207921"
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/46332206620953",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"________.zip\"; filename*=utf-8''%EA%B2%BD%EC%82%AC%EB%A1%9C_%EC%98%88%EC%A0%9C%ED%8C%8C%EC%9D%BC.zip",
+      "filename_hint": "utf-8''%EA%B2%BD%EC%82%AC%EB%A1%9C_%EC%98%88%EC%A0%9C%ED%8C%8C%EC%9D%BC.zip",
+      "target": "zip",
+      "content_length": "84969"
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/46324296262553",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"______.zip\"; filename*=utf-8''%EB%B3%B4_%EC%98%88%EC%A0%9C%ED%8C%8C%EC%9D%BC.zip",
+      "filename_hint": "utf-8''%EB%B3%B4_%EC%98%88%EC%A0%9C%ED%8C%8C%EC%9D%BC.zip",
+      "target": "zip",
+      "content_length": "68187"
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/46324244898713",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"______.zip\"; filename*=utf-8''%EB%B3%B4_%EC%98%88%EC%A0%9C%ED%8C%8C%EC%9D%BC.zip",
+      "filename_hint": "utf-8''%EB%B3%B4_%EC%98%88%EC%A0%9C%ED%8C%8C%EC%9D%BC.zip",
+      "target": "zip",
+      "content_length": "68187"
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/43508439849369",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"M02_P01_T03000_BEAM_A_FILE_0001.zip\"",
+      "filename_hint": "\"M02_P01_T03000_BEAM_A_FILE_0001.zip\"",
+      "target": "zip",
+      "content_length": "66820"
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/42143050548889",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"FCM Bridge.zip\"",
+      "filename_hint": "\"FCM Bridge.zip\"",
+      "target": "zip",
+      "content_length": "944065"
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/42120558247065",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"M02_P01_T05000_STAIR_A_FILE_0001.zip\"",
+      "filename_hint": "\"M02_P01_T05000_STAIR_A_FILE_0001.zip\"",
+      "target": "zip",
+      "content_length": "90832"
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/42094846499737",
+      "status": 200,
+      "content_type": "application/x-zip-compressed",
+      "content_disposition": "attachment; filename=\"M02_P01_T03000_BEAM_A_FILE_0001.zip\"",
+      "filename_hint": "\"M02_P01_T03000_BEAM_A_FILE_0001.zip\"",
+      "target": "zip",
+      "content_length": "66820"
+    }
+  ],
+  "mgt_hits": []
+}

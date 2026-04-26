@@ -1,0 +1,804 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-sync-stress-gate",
+  "generated_at": "2026-03-05T14:54:16.949852+00:00",
+  "inputs": {
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "topology_report": "implementation/phase1/opensees_topology_report.json",
+    "require_topology_gate": true,
+    "sync_backend": "feti_lite",
+    "feti_execution_mode": "boundary_sync",
+    "require_feti_backend": true,
+    "allow_virtual_sync": false,
+    "ci_mode": "nightly",
+    "steps": 300,
+    "bandwidth_gbps": 768.0,
+    "latency_us": 0.5,
+    "strict_feti_profile": true,
+    "min_bandwidth_gbps": 256.0,
+    "max_latency_us": 1.5,
+    "compute_us_per_node": 0.2,
+    "overlap_cap": 0.7,
+    "jitter_pct": 0.12,
+    "max_sync_stall_ratio": 0.36,
+    "max_p99_step_ms": 550.0,
+    "max_straggler_ratio": 2.4,
+    "min_overlap_ratio": 0.35,
+    "max_feti_iters": 12,
+    "feti_gap_tol": 0.0008,
+    "feti_force_tol": 0.001,
+    "feti_rho": 0.6,
+    "feti_relax": 0.45,
+    "feti_min_converged_step_ratio": 1.0,
+    "require_inline_native_smoke": true,
+    "inline_native_ground_motion_csv": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "inline_native_target_dof": 0,
+    "inline_native_max_steps": 800,
+    "inline_native_min_load_reversals": 10,
+    "inline_native_report": "implementation/phase1/stress/sync/sync_inline_native_smoke.json",
+    "work_dir": "implementation/phase1/stress/sync",
+    "out": "implementation/phase1/sync_stress_gate_report.json"
+  },
+  "reports": {
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "topology_report": "implementation/phase1/opensees_topology_report.json",
+    "inline_native_smoke_report": "implementation/phase1/stress/sync/sync_inline_native_smoke.json"
+  },
+  "checks": {
+    "topology_gate_pass": true,
+    "virtual_sync_blocked_pass": true,
+    "feti_profile_pass": true,
+    "required_levels_present": true,
+    "required_levels_sync_pass": true,
+    "sync_stall_budget_pass": true,
+    "backend_policy_pass": true,
+    "inline_native_smoke_required": true,
+    "inline_native_smoke_pass": true
+  },
+  "level_rows": [
+    {
+      "node_count": 1000000,
+      "report": "implementation/phase1/stress/sync/sync_virtual_n1000000.json",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "backend": "feti_lite_boundary_sync",
+      "converged_step_ratio": 1.0,
+      "p95_feti_iterations": 1.0,
+      "sync_stall_ratio": 0.0,
+      "p99_step_ms": 0.3448439327740451,
+      "straggler_ratio": 1.0875590899780758,
+      "comm_overlap_ratio": 1.0
+    },
+    {
+      "node_count": 3000000,
+      "report": "implementation/phase1/stress/sync/sync_virtual_n3000000.json",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "backend": "feti_lite_boundary_sync",
+      "converged_step_ratio": 1.0,
+      "p95_feti_iterations": 1.0,
+      "sync_stall_ratio": 0.0,
+      "p99_step_ms": 0.3448439327740451,
+      "straggler_ratio": 1.0875590899780758,
+      "comm_overlap_ratio": 1.0
+    },
+    {
+      "node_count": 10000000,
+      "report": "implementation/phase1/stress/sync/sync_virtual_n10000000.json",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "backend": "feti_lite_boundary_sync",
+      "converged_step_ratio": 1.0,
+      "p95_feti_iterations": 1.0,
+      "sync_stall_ratio": 0.0,
+      "p99_step_ms": 0.3448439327740451,
+      "straggler_ratio": 1.0875590899780758,
+      "comm_overlap_ratio": 1.0
+    }
+  ],
+  "inline_native_smoke_result": {
+    "schema_version": "1.0",
+    "run_id": "phase3-mega-ndtha-partitioned-stress",
+    "generated_at": "2026-03-05T14:54:16.876320+00:00",
+    "inputs": {
+      "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+      "topology_report": "implementation/phase1/opensees_topology_report.json",
+      "ground_motion_csv": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+      "target_dof": 3000000,
+      "require_shell_beam_mix": true,
+      "require_real_topology": true,
+      "require_full_duration": false,
+      "max_steps": 800,
+      "min_load_reversals": 10,
+      "partitions": 16,
+      "ag_scale": 0.6,
+      "pdelta_factor": 1.0,
+      "hardening_ratio": 0.2,
+      "yield_drift_scale": 0.45,
+      "max_step_iterations": 16,
+      "adaptive_load_decay": 0.7,
+      "damping_force_cap_ratio": 0.6,
+      "halo_coupling_gain": 1.0,
+      "min_halo_coupling_gain": 1.0,
+      "enforce_halo_coupling_floor": true,
+      "halo_coupling_gain_floor": 0.95,
+      "halo_coupling_k_divisor": 1.0,
+      "calibration_profile": "implementation/phase1/mega_ndtha_calibration_profile.json",
+      "stiffness_scale": 1.0,
+      "mass_scale": 1.0,
+      "yield_scale": 1.0,
+      "axial_scale": 1.0,
+      "base_shear_scale": 1.0,
+      "feti_step_max_iter": 8,
+      "feti_step_gap_tol": 0.005,
+      "feti_step_top_tol_m": 0.002,
+      "feti_step_relax": 0.55,
+      "feti_step_relax_min": 0.05,
+      "feti_step_update_cap_m": 1.0,
+      "feti_step_gap_reduction_target": 0.25,
+      "feti_step_top_reduction_target": 0.25,
+      "interface_force_cap_ratio": 10.0,
+      "allow_feti_soft_accept": false,
+      "feti_soft_gap_factor": 2.0,
+      "feti_soft_top_factor": 2.0,
+      "step_guard_max_retries": 3,
+      "step_guard_retry_load_decay": 0.5,
+      "step_guard_max_top_jump_m": 10.0,
+      "step_guard_max_drift_increment_pct": 5.0,
+      "step_guard_max_energy_jump_ratio": 25.0,
+      "state_update_max_backtracks": 6,
+      "state_update_shrink": 0.5,
+      "state_update_min_alpha": 0.03125,
+      "debug_feti_trace": true,
+      "debug_feti_trace_max_steps": 8,
+      "collapse_drift_threshold_pct": 10.0,
+      "rayleigh_alpha": 0.03,
+      "rayleigh_beta": 1e-06,
+      "min_plastic_story_count": 1,
+      "sync_steps_cap": 6000,
+      "sync_bandwidth_gbps": 32.0,
+      "sync_latency_us": 40.0,
+      "sync_compute_us_per_node": 0.25,
+      "sync_overlap_cap": 0.7,
+      "sync_jitter_pct": 0.12,
+      "sync_max_feti_iters": 12,
+      "sync_feti_gap_tol": 0.0008,
+      "sync_feti_force_tol": 0.001,
+      "sync_feti_rho": 0.6,
+      "sync_feti_relax": 0.45,
+      "sync_feti_min_converged_step_ratio": 1.0,
+      "sync_max_stall_ratio": 0.36,
+      "sync_max_p99_step_ms": 550.0,
+      "sync_max_straggler_ratio": 2.4,
+      "sync_min_overlap_ratio": 0.35,
+      "sync_backend": "inline_native",
+      "allow_feti_sync": false,
+      "allow_virtual_sync": false,
+      "sync_seed": 23,
+      "out": "implementation/phase1/stress/sync/sync_inline_native_smoke.json"
+    },
+    "calibration_profile": {
+      "source": "implementation/phase1/mega_ndtha_calibration_profile.json",
+      "run_id": "phase3-mega-ndtha-calibration",
+      "generated_at": "2026-03-02T15:02:34.283585+00:00"
+    },
+    "checks": {
+      "topology_gate_pass": true,
+      "shell_beam_mix_pass": true,
+      "real_topology_pass": true,
+      "scale_target_10m_pass": false,
+      "pdelta_enabled_pass": true,
+      "dynamic_reversal_pass": true,
+      "rayleigh_damping_pass": true,
+      "collapse_cutoff_guard_pass": true,
+      "halo_coupling_strength_pass": true,
+      "halo_coupling_floor_pass": true,
+      "interface_force_balance_pass": true,
+      "feti_step_convergence_pass": false,
+      "step_guard_pass": true,
+      "full_duration_pass": false,
+      "all_steps_converged": false,
+      "rust_backend_used_pass": true,
+      "no_collapse_detected": true,
+      "plasticity_triggered_all_partitions": true,
+      "sync_backend_policy_pass": true,
+      "sync_budget_pass": false,
+      "scaled_partition_projection_pass": true
+    },
+    "summary": {
+      "target_dof": 3000000,
+      "partition_count": 16,
+      "halo_coupling_gain": 1.0,
+      "min_halo_coupling_gain": 1.0,
+      "enforce_halo_coupling_floor": true,
+      "halo_coupling_gain_floor": 0.95,
+      "halo_coupling_k_divisor": 1.0,
+      "calibration_profile_source": "implementation/phase1/mega_ndtha_calibration_profile.json",
+      "effective_scales": {
+        "stiffness_scale": 3.0,
+        "mass_scale": 0.6,
+        "yield_scale": 1.8,
+        "axial_scale": 0.7,
+        "base_shear_scale": 0.1105
+      },
+      "partition_nodes_projected_min": 182100,
+      "partition_nodes_projected_max": 193050,
+      "ground_motion_step_count_full": 6001,
+      "ground_motion_step_count_used": 800,
+      "duration_s_full": 60.0,
+      "duration_s_used": 7.99,
+      "reversal_count": 39,
+      "completed_steps": 0,
+      "collapsed": false,
+      "collapse_step": -1,
+      "collapse_time_s": 0.0,
+      "collapse_partition": -1,
+      "collapse_drift_ratio_pct": 0.0,
+      "collapse_top_displacement_m": 0.0,
+      "elapsed_wall_s": 0.11841017899860162,
+      "solver_calls_total": 2924,
+      "solver_iteration_tries_total": 2924,
+      "step_guard_reject_count": 0,
+      "state_update_backtracks_total": 420,
+      "feti_soft_accept_count": 0,
+      "feti_step_converged_ratio": 0.0,
+      "feti_step_p95_iterations": Infinity,
+      "max_plastic_story_count_min": 16,
+      "max_plastic_story_count_mean": 21.875,
+      "max_drift_ratio_pct_max": 9.99275153907097,
+      "mean_drift_ratio_pct": 8.938170298251247,
+      "interface_gap_abs_max_m": 0.0,
+      "interface_gap_abs_mean_m": 0.0,
+      "interface_force_abs_max_n": 0.0,
+      "interface_force_balance_residual_max": 0.0,
+      "interface_force_clip_count": 226,
+      "wall_step_ms_mean": Infinity,
+      "wall_step_ms_p99": Infinity,
+      "sync_step_ms_p99": Infinity,
+      "sync_stall_ratio": Infinity,
+      "sync_backend_policy_pass": true,
+      "sync_backend": "inline_native_single_gpu",
+      "sync_converged_step_ratio": 0.0,
+      "sync_p95_feti_iterations": 1.0,
+      "sync_max_gap_norm": 0.0,
+      "sync_max_force_imbalance": 0.0
+    },
+    "sync_result": {
+      "backend": "inline_native_single_gpu",
+      "backend_policy_forced": true,
+      "partition_count": 16,
+      "node_count": 20000,
+      "estimated_comm_bytes_per_step": 26040.0,
+      "avg_step_ms": Infinity,
+      "p95_step_ms": Infinity,
+      "p99_step_ms": Infinity,
+      "straggler_ratio": Infinity,
+      "sync_stall_ratio": Infinity,
+      "comm_overlap_ratio": 0.0,
+      "p95_partition_lag_ms": Infinity,
+      "p99_partition_lag_ms": Infinity,
+      "mean_feti_iterations": 1.0,
+      "p95_feti_iterations": 1.0,
+      "max_gap_norm": 0.0,
+      "max_force_imbalance": 0.0,
+      "converged_step_ratio": 0.0,
+      "simulated_comm_gbps": 0.0,
+      "simulated_steps": 0,
+      "dt_s": 0.01
+    },
+    "sync_checks": {
+      "sync_backend_policy_pass": true,
+      "inline_gap_span_pass": true,
+      "inline_force_imbalance_pass": true,
+      "sync_stall_budget_pass": false,
+      "p99_step_budget_pass": false,
+      "straggler_budget_pass": false,
+      "overlap_ratio_pass": false
+    },
+    "partition_projection": {
+      "source_partition_report": "implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json",
+      "sample_node_count": 20000,
+      "partition_sizes_sample": [
+        1218,
+        1245,
+        1268,
+        1224,
+        1287,
+        1217,
+        1284,
+        1284,
+        1287,
+        1214,
+        1236,
+        1286,
+        1231,
+        1232,
+        1267,
+        1220
+      ],
+      "partition_sizes_projected": [
+        182700,
+        186750,
+        190200,
+        183600,
+        193050,
+        182550,
+        192600,
+        192600,
+        193050,
+        182100,
+        185400,
+        192900,
+        184650,
+        184800,
+        190050,
+        183000
+      ]
+    },
+    "rows": {
+      "partitions": [
+        {
+          "pid": 0,
+          "nodes_projected": 182700,
+          "max_plastic_story_count": 26,
+          "max_drift_ratio_pct": 9.335183961921405,
+          "solver_try_calls": 119,
+          "adaptive_backtracks": 95
+        },
+        {
+          "pid": 1,
+          "nodes_projected": 186750,
+          "max_plastic_story_count": 23,
+          "max_drift_ratio_pct": 9.018396045049156,
+          "solver_try_calls": 167,
+          "adaptive_backtracks": 143
+        },
+        {
+          "pid": 2,
+          "nodes_projected": 190200,
+          "max_plastic_story_count": 21,
+          "max_drift_ratio_pct": 9.99275153907097,
+          "solver_try_calls": 202,
+          "adaptive_backtracks": 178
+        },
+        {
+          "pid": 3,
+          "nodes_projected": 183600,
+          "max_plastic_story_count": 24,
+          "max_drift_ratio_pct": 7.767542340328615,
+          "solver_try_calls": 168,
+          "adaptive_backtracks": 144
+        },
+        {
+          "pid": 4,
+          "nodes_projected": 193050,
+          "max_plastic_story_count": 17,
+          "max_drift_ratio_pct": 9.418455388027686,
+          "solver_try_calls": 231,
+          "adaptive_backtracks": 207
+        },
+        {
+          "pid": 5,
+          "nodes_projected": 182550,
+          "max_plastic_story_count": 25,
+          "max_drift_ratio_pct": 8.37475253527308,
+          "solver_try_calls": 132,
+          "adaptive_backtracks": 108
+        },
+        {
+          "pid": 6,
+          "nodes_projected": 192600,
+          "max_plastic_story_count": 19,
+          "max_drift_ratio_pct": 9.475425464452544,
+          "solver_try_calls": 219,
+          "adaptive_backtracks": 195
+        },
+        {
+          "pid": 7,
+          "nodes_projected": 192600,
+          "max_plastic_story_count": 16,
+          "max_drift_ratio_pct": 8.102758043929954,
+          "solver_try_calls": 224,
+          "adaptive_backtracks": 200
+        },
+        {
+          "pid": 8,
+          "nodes_projected": 193050,
+          "max_plastic_story_count": 17,
+          "max_drift_ratio_pct": 9.670872601912937,
+          "solver_try_calls": 223,
+          "adaptive_backtracks": 199
+        },
+        {
+          "pid": 9,
+          "nodes_projected": 182100,
+          "max_plastic_story_count": 26,
+          "max_drift_ratio_pct": 8.85297874612483,
+          "solver_try_calls": 148,
+          "adaptive_backtracks": 124
+        },
+        {
+          "pid": 10,
+          "nodes_projected": 185400,
+          "max_plastic_story_count": 24,
+          "max_drift_ratio_pct": 9.520770275759755,
+          "solver_try_calls": 172,
+          "adaptive_backtracks": 148
+        },
+        {
+          "pid": 11,
+          "nodes_projected": 192900,
+          "max_plastic_story_count": 17,
+          "max_drift_ratio_pct": 9.317365532030685,
+          "solver_try_calls": 228,
+          "adaptive_backtracks": 204
+        },
+        {
+          "pid": 12,
+          "nodes_projected": 184650,
+          "max_plastic_story_count": 24,
+          "max_drift_ratio_pct": 9.186810199457739,
+          "solver_try_calls": 171,
+          "adaptive_backtracks": 147
+        },
+        {
+          "pid": 13,
+          "nodes_projected": 184800,
+          "max_plastic_story_count": 24,
+          "max_drift_ratio_pct": 7.64278604242775,
+          "solver_try_calls": 170,
+          "adaptive_backtracks": 146
+        },
+        {
+          "pid": 14,
+          "nodes_projected": 190050,
+          "max_plastic_story_count": 21,
+          "max_drift_ratio_pct": 8.065086265245514,
+          "solver_try_calls": 206,
+          "adaptive_backtracks": 182
+        },
+        {
+          "pid": 15,
+          "nodes_projected": 183000,
+          "max_plastic_story_count": 26,
+          "max_drift_ratio_pct": 9.26878979100734,
+          "solver_try_calls": 144,
+          "adaptive_backtracks": 120
+        }
+      ],
+      "steps_head": [
+        {
+          "step": 0,
+          "time_s": 0.0,
+          "ag_g": 0.05645022,
+          "status": "FETI_DIVERGED",
+          "converged": false
+        }
+      ],
+      "feti_debug_trace": [
+        {
+          "step": 0,
+          "time_s": 0.0,
+          "ag_base_g": 0.05645022,
+          "retries": [
+            {
+              "retry_idx": 0,
+              "load_scale": 1.0,
+              "decision": "FETI_DIVERGED",
+              "abort_reason": "",
+              "feti_converged": false,
+              "iter_count": 8,
+              "iter_samples": [
+                {
+                  "feti_it": 1,
+                  "max_gap_abs_m": 0.00344839402240444,
+                  "top_update_norm_raw_m": 0.059757313669775595,
+                  "top_update_norm_applied_m": 0.03286652251837658,
+                  "relax_eff": 0.55,
+                  "max_drift_ratio_pct": 0.14799288435640076,
+                  "max_plastic_story_count": 0
+                },
+                {
+                  "feti_it": 2,
+                  "max_gap_abs_m": 6.026049852119198,
+                  "top_update_norm_raw_m": 3.0973862236040084,
+                  "top_update_norm_applied_m": 0.38890872965260115,
+                  "relax_eff": 0.38890872965260115,
+                  "max_drift_ratio_pct": 9.418455388027686,
+                  "max_plastic_story_count": 21
+                },
+                {
+                  "feti_it": 3,
+                  "max_gap_abs_m": 5.5893712047056425,
+                  "top_update_norm_raw_m": 3.3321939660662676,
+                  "top_update_norm_applied_m": 0.3175426480542942,
+                  "relax_eff": 0.3175426480542942,
+                  "max_drift_ratio_pct": 8.109224844760291,
+                  "max_plastic_story_count": 26
+                },
+                {
+                  "feti_it": 4,
+                  "max_gap_abs_m": 5.3325431264246115,
+                  "top_update_norm_raw_m": 3.9400318087507253,
+                  "top_update_norm_applied_m": 0.275,
+                  "relax_eff": 0.275,
+                  "max_drift_ratio_pct": 9.335183961921405,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 5,
+                  "max_gap_abs_m": 6.323314601266647,
+                  "top_update_norm_raw_m": 3.68587315649892,
+                  "top_update_norm_applied_m": 0.24596747752497689,
+                  "relax_eff": 0.24596747752497689,
+                  "max_drift_ratio_pct": 9.99275153907097,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 6,
+                  "max_gap_abs_m": 5.3325431264246115,
+                  "top_update_norm_raw_m": 3.083144615173075,
+                  "top_update_norm_applied_m": 0.2245365597551247,
+                  "relax_eff": 0.2245365597551247,
+                  "max_drift_ratio_pct": 8.102758043929954,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 7,
+                  "max_gap_abs_m": 5.7353618484580124,
+                  "top_update_norm_raw_m": 3.2388116826749638,
+                  "top_update_norm_applied_m": 0.20788046015507497,
+                  "relax_eff": 0.20788046015507497,
+                  "max_drift_ratio_pct": 8.109224844760291,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 8,
+                  "max_gap_abs_m": 6.243240210995247,
+                  "top_update_norm_raw_m": 3.7181250497633984,
+                  "top_update_norm_applied_m": 0.19445436482630055,
+                  "relax_eff": 0.19445436482630057,
+                  "max_drift_ratio_pct": 9.317365532030685,
+                  "max_plastic_story_count": 26
+                }
+              ],
+              "last_iface": {
+                "max_gap_abs_m": 6.243240210995247,
+                "mean_gap_abs_m": 4.031793912196667,
+                "max_edge_force_abs_n": 56487311.89419569,
+                "force_balance_residual": 3.820358480387052e-17,
+                "edge_count": 16
+              },
+              "last_top_update_norm_applied_m": 0.19445436482630055,
+              "last_top_update_norm_raw_m": 3.7181250497633984
+            },
+            {
+              "retry_idx": 1,
+              "load_scale": 0.5,
+              "decision": "FETI_DIVERGED",
+              "abort_reason": "",
+              "feti_converged": false,
+              "iter_count": 8,
+              "iter_samples": [
+                {
+                  "feti_it": 1,
+                  "max_gap_abs_m": 0.0017241969126601288,
+                  "top_update_norm_raw_m": 0.029878656736269306,
+                  "top_update_norm_applied_m": 0.01643326120494812,
+                  "relax_eff": 0.55,
+                  "max_drift_ratio_pct": 0.07399644125326256,
+                  "max_plastic_story_count": 0
+                },
+                {
+                  "feti_it": 2,
+                  "max_gap_abs_m": 2.1564063178798962,
+                  "top_update_norm_raw_m": 1.85015937752307,
+                  "top_update_norm_applied_m": 0.3889087296526011,
+                  "relax_eff": 0.38890872965260115,
+                  "max_drift_ratio_pct": 6.289026678810031,
+                  "max_plastic_story_count": 14
+                },
+                {
+                  "feti_it": 3,
+                  "max_gap_abs_m": 5.58880515860955,
+                  "top_update_norm_raw_m": 3.300653687933656,
+                  "top_update_norm_applied_m": 0.3175426480542942,
+                  "relax_eff": 0.3175426480542942,
+                  "max_drift_ratio_pct": 8.350146935483743,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 4,
+                  "max_gap_abs_m": 5.587673066543609,
+                  "top_update_norm_raw_m": 3.1142491278504476,
+                  "top_update_norm_applied_m": 0.27499999999999997,
+                  "relax_eff": 0.275,
+                  "max_drift_ratio_pct": 8.09546948428628,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 5,
+                  "max_gap_abs_m": 5.946401474737238,
+                  "top_update_norm_raw_m": 3.4660404332098103,
+                  "top_update_norm_applied_m": 0.24596747752497689,
+                  "relax_eff": 0.24596747752497689,
+                  "max_drift_ratio_pct": 8.16014645595293,
+                  "max_plastic_story_count": 26
+                },
+                {
+                  "feti_it": 6,
+                  "max_gap_abs_m": 6.049669928444791,
+                  "top_update_norm_raw_m": 3.591033288805006,
+                  "top_update_norm_applied_m": 0.22453655975512468,
+                  "relax_eff": 0.2245365597551247,
+                  "max_drift_ratio_pct": 9.520770275759755,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 7,
+                  "max_gap_abs_m": 5.839510467210771,
+                  "top_update_norm_raw_m": 3.3546122356290815,
+                  "top_update_norm_applied_m": 0.20788046015507494,
+                  "relax_eff": 0.20788046015507497,
+                  "max_drift_ratio_pct": 9.670872601912937,
+                  "max_plastic_story_count": 26
+                },
+                {
+                  "feti_it": 8,
+                  "max_gap_abs_m": 5.587673066543609,
+                  "top_update_norm_raw_m": 3.077943875505649,
+                  "top_update_norm_applied_m": 0.19445436482630057,
+                  "relax_eff": 0.19445436482630057,
+                  "max_drift_ratio_pct": 8.09546948428628,
+                  "max_plastic_story_count": 26
+                }
+              ],
+              "last_iface": {
+                "max_gap_abs_m": 5.587673066543609,
+                "mean_gap_abs_m": 3.6112466806371772,
+                "max_edge_force_abs_n": 50622853.12298547,
+                "force_balance_residual": 1.4218395950476508e-17,
+                "edge_count": 16
+              },
+              "last_top_update_norm_applied_m": 0.19445436482630057,
+              "last_top_update_norm_raw_m": 3.077943875505649
+            },
+            {
+              "retry_idx": 2,
+              "load_scale": 0.25,
+              "decision": "FETI_DIVERGED",
+              "abort_reason": "",
+              "feti_converged": false,
+              "iter_count": 8,
+              "iter_samples": [
+                {
+                  "feti_it": 1,
+                  "max_gap_abs_m": 0.0008620983521530172,
+                  "top_update_norm_raw_m": 0.014939328368134653,
+                  "top_update_norm_applied_m": 0.00821663060247406,
+                  "relax_eff": 0.55,
+                  "max_drift_ratio_pct": 0.03699822062663128,
+                  "max_plastic_story_count": 0
+                },
+                {
+                  "feti_it": 2,
+                  "max_gap_abs_m": 0.6525059243098336,
+                  "top_update_norm_raw_m": 0.3480537998898967,
+                  "top_update_norm_applied_m": 0.13536116116594038,
+                  "relax_eff": 0.38890872965260115,
+                  "max_drift_ratio_pct": 0.8061805579013118,
+                  "max_plastic_story_count": 0
+                },
+                {
+                  "feti_it": 3,
+                  "max_gap_abs_m": 5.588522135582611,
+                  "top_update_norm_raw_m": 3.190817164693199,
+                  "top_update_norm_applied_m": 0.3175426480542942,
+                  "relax_eff": 0.3175426480542942,
+                  "max_drift_ratio_pct": 8.098251207404896,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 4,
+                  "max_gap_abs_m": 5.587956089528734,
+                  "top_update_norm_raw_m": 3.2240856510909044,
+                  "top_update_norm_applied_m": 0.275,
+                  "relax_eff": 0.275,
+                  "max_drift_ratio_pct": 8.091825204464447,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 5,
+                  "max_gap_abs_m": 5.588522135582611,
+                  "top_update_norm_raw_m": 3.5065930070984526,
+                  "top_update_norm_applied_m": 0.24596747752497689,
+                  "relax_eff": 0.24596747752497689,
+                  "max_drift_ratio_pct": 8.307148907636543,
+                  "max_plastic_story_count": 26
+                },
+                {
+                  "feti_it": 6,
+                  "max_gap_abs_m": 5.587956089528734,
+                  "top_update_norm_raw_m": 3.1699191324348357,
+                  "top_update_norm_applied_m": 0.2245365597551247,
+                  "relax_eff": 0.2245365597551247,
+                  "max_drift_ratio_pct": 8.091825204464447,
+                  "max_plastic_story_count": 25
+                },
+                {
+                  "feti_it": 7,
+                  "max_gap_abs_m": 5.588522135582611,
+                  "top_update_norm_raw_m": 3.151977595050098,
+                  "top_update_norm_applied_m": 0.20788046015507497,
+                  "relax_eff": 0.20788046015507497,
+                  "max_drift_ratio_pct": 8.098251207404896,
+                  "max_plastic_story_count": 26
+                },
+                {
+                  "feti_it": 8,
+                  "max_gap_abs_m": 5.587956089528734,
+                  "top_update_norm_raw_m": 3.1532630328347864,
+                  "top_update_norm_applied_m": 0.19445436482630057,
+                  "relax_eff": 0.19445436482630057,
+                  "max_drift_ratio_pct": 8.091825204464447,
+                  "max_plastic_story_count": 25
+                }
+              ],
+              "last_iface": {
+                "max_gap_abs_m": 5.587956089528734,
+                "mean_gap_abs_m": 4.143464667501792,
+                "max_edge_force_abs_n": 50625417.23703362,
+                "force_balance_residual": 2.4784253558776727e-17,
+                "edge_count": 16
+              },
+              "last_top_update_norm_applied_m": 0.19445436482630057,
+              "last_top_update_norm_raw_m": 3.1532630328347864
+            }
+          ],
+          "final_status": "FETI_DIVERGED"
+        }
+      ]
+    },
+    "contract_pass": false,
+    "reason_code": "ERR_PARTITION_FAIL",
+    "reason": "partitioned scaleout report missing target dof level",
+    "artifact_archive_manifest": "implementation/phase1/experiments/by_test/mega_ndtha_partitioned_stress/20260305T145416Z/artifact_archive_manifest.json"
+  },
+  "steps": [
+    {
+      "step": "sync_emulate_n1000000",
+      "seconds": 1.0070745944976807,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/feti_lite_single_gpu.py --partition-report implementation/phase1/stress/partitioned_scaleout/partition_quality_n1000000.json --execution-mode boundary_sync --steps 300 --bandwidth-gbps 768.0 --latency-us 0.5 --compute-us-per-node 0.2 --overlap-cap 0.7 --jitter-pct 0.12 --max-feti-iters 12 --gap-tol 0.0008 --force-tol 0.001 --rho 0.6 --relax 0.45 --min-converged-step-ratio 1.0 --max-sync-stall-ratio 0.36 --max-p99-step-ms 550.0 --max-straggler-ratio 2.4 --min-overlap-ratio 0.35 --out implementation/phase1/stress/sync/sync_virtual_n1000000.json",
+      "stdout_tail": "Wrote feti-lite sync report: implementation/phase1/stress/sync/sync_virtual_n1000000.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"converged_step_ratio\": 1.0, \"event\": \"feti_lite_sync.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "sync_emulate_n3000000",
+      "seconds": 1.0346026420593262,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/feti_lite_single_gpu.py --partition-report implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json --execution-mode boundary_sync --steps 300 --bandwidth-gbps 768.0 --latency-us 0.5 --compute-us-per-node 0.2 --overlap-cap 0.7 --jitter-pct 0.12 --max-feti-iters 12 --gap-tol 0.0008 --force-tol 0.001 --rho 0.6 --relax 0.45 --min-converged-step-ratio 1.0 --max-sync-stall-ratio 0.36 --max-p99-step-ms 550.0 --max-straggler-ratio 2.4 --min-overlap-ratio 0.35 --out implementation/phase1/stress/sync/sync_virtual_n3000000.json",
+      "stdout_tail": "Wrote feti-lite sync report: implementation/phase1/stress/sync/sync_virtual_n3000000.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"converged_step_ratio\": 1.0, \"event\": \"feti_lite_sync.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "sync_emulate_n10000000",
+      "seconds": 1.038771390914917,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/feti_lite_single_gpu.py --partition-report implementation/phase1/stress/partitioned_scaleout/partition_quality_n10000000.json --execution-mode boundary_sync --steps 300 --bandwidth-gbps 768.0 --latency-us 0.5 --compute-us-per-node 0.2 --overlap-cap 0.7 --jitter-pct 0.12 --max-feti-iters 12 --gap-tol 0.0008 --force-tol 0.001 --rho 0.6 --relax 0.45 --min-converged-step-ratio 1.0 --max-sync-stall-ratio 0.36 --max-p99-step-ms 550.0 --max-straggler-ratio 2.4 --min-overlap-ratio 0.35 --out implementation/phase1/stress/sync/sync_virtual_n10000000.json",
+      "stdout_tail": "Wrote feti-lite sync report: implementation/phase1/stress/sync/sync_virtual_n10000000.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"converged_step_ratio\": 1.0, \"event\": \"feti_lite_sync.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "inline_native_sync_smoke",
+      "seconds": 1.1283397674560547,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/run_mega_ndtha_partitioned_stress.py --partitioned-scaleout implementation/phase1/partitioned_scaleout_report.json --topology-report implementation/phase1/opensees_topology_report.json --ground-motion-csv implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv --target-dof 3000000 --sync-backend inline_native --no-allow-feti-sync --no-allow-virtual-sync --require-shell-beam-mix --require-real-topology --no-require-full-duration --max-steps 800 --min-load-reversals 10 --out implementation/phase1/stress/sync/sync_inline_native_smoke.json",
+      "stdout_tail": "Wrote mega NDTHA partitioned stress report: implementation/phase1/stress/sync/sync_inline_native_smoke.json\n",
+      "stderr_tail": ""
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "sync stress gate passed"
+}

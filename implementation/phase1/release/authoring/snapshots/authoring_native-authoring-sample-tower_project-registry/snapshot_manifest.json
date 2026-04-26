@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "job_id": "authoring::native-authoring-sample-tower::project-registry",
+  "generated_at": "2026-04-19T10:34:24.153789+00:00",
+  "snapshot_id": "authoring_native-authoring-sample-tower_project-registry__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/native_authoring_project_registry.json",
+      "label": "native_authoring_project_registry.json",
+      "sha256": "6d281116abca673d9fa03f927f8dae1cf52b3f428ae9f4c4d5423525deb5ce2f",
+      "bytes": 9417
+    },
+    {
+      "path": "implementation/phase1/release/authoring/native_authoring_project_package.zip",
+      "label": "native_authoring_project_package.zip",
+      "sha256": "9545290143f28cbbd3d1da8c47e8a8f916e0a6e907d31ac864210397a58cced1",
+      "bytes": 60645
+    },
+    {
+      "path": "implementation/phase1/release/signing/native_authoring_project_registry_ed25519.pub.pem",
+      "label": "native_authoring_project_registry_ed25519.pub.pem",
+      "sha256": "bcf1fc86ef0313db7cd7dd24e40602c3edac048aa6c7649a5ed4d30d448b8987",
+      "bytes": 113
+    },
+    {
+      "path": "implementation/phase1/release/signing/native_authoring_project_registry.signature.b64",
+      "label": "native_authoring_project_registry.signature.b64",
+      "sha256": "34b7cb9c3aefc363751b5c49efeee5683df539f2735e11c5c2eeb0b54f56c604",
+      "bytes": 89
+    }
+  ],
+  "summary": {
+    "artifact_count": 4
+  }
+}

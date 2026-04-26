@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.2",
+  "run_id": "phase1-dynamics-boundary-contract-tunnel",
+  "generated_at": "2026-02-26T13:02:54.580241+00:00",
+  "interface_version": "1.1.0",
+  "domain_type": "tunnel",
+  "supports_summary": {
+    "node_count": 2,
+    "support_types": [
+      "elastic_foundation",
+      "segment_joint"
+    ],
+    "fixed_count": 0
+  },
+  "damping_summary": {
+    "damping_model": "tunnel_ssi",
+    "alpha_m": 0.015,
+    "beta_k": 0.001,
+    "time_step_dt": 0.002,
+    "external_force_profile": "train_passage"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "contract satisfies required boundary/dynamics keys",
+  "payload": {
+    "interface_version": "1.1.0",
+    "domain_type": "tunnel",
+    "nodes": [
+      {
+        "node_id": "T1",
+        "mass": 8500.0,
+        "is_fixed_mask": false,
+        "support_type": "segment_joint",
+        "dof_lock": {
+          "ux": false,
+          "uy": false,
+          "uz": false,
+          "rx": false,
+          "ry": false,
+          "rz": false
+        }
+      },
+      {
+        "node_id": "T2",
+        "mass": 8500.0,
+        "is_fixed_mask": false,
+        "support_type": "elastic_foundation",
+        "dof_lock": {
+          "ux": false,
+          "uy": false,
+          "uz": false,
+          "rx": false,
+          "ry": false,
+          "rz": false
+        },
+        "foundation_stiffness": {
+          "k_vertical": 50000000.0,
+          "k_shear": 20000000.0,
+          "c_vertical": 100000.0
+        }
+      }
+    ],
+    "dynamics": {
+      "damping_model": "tunnel_ssi",
+      "alpha_m": 0.015,
+      "beta_k": 0.001,
+      "time_step_dt": 0.002,
+      "external_force_profile": "train_passage"
+    },
+    "tunnel": {
+      "tunnel_schema_ref": "tunnel_lining_schema.json"
+    }
+  }
+}

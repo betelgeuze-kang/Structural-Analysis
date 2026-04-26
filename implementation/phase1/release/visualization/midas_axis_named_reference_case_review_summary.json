@@ -1,0 +1,279 @@
+{
+  "schema_version": "optimized_drawing_review.v1",
+  "generated_at": "2026-04-08T13:57:55.712376+00:00",
+  "source_viewer_json": "implementation/phase1/release/visualization/midas_axis_named_reference_case_viewer.json",
+  "case_id": "midas_axis_named_reference_case",
+  "case_title": "MIDAS Axis Named Reference Case",
+  "case_note": "작은 MIDAS 원본에 explicit GRID-X / GRID-Y / LEVEL을 넣어서 axis-name 전환을 검증하는 3D review fixture입니다.",
+  "status_label": "baseline + ai compare",
+  "changed_group_count": 2,
+  "changed_member_count": 2,
+  "total_element_count": 10,
+  "signed_cost_proxy_delta_total": -4.3,
+  "constructability_delta_total": -0.11,
+  "max_dcr_after_max": 0.82,
+  "interactive_3d_payload": {
+    "mode": "interactive_canvas_xyz_structure",
+    "comparison_availability": "baseline_vs_changed",
+    "baseline_segment_count": 7,
+    "after_segment_count": 2,
+    "baseline_segments": [
+      {
+        "member_id": "1",
+        "member_type": "column",
+        "story_band_label": "L1",
+        "section_name": "C-500x500",
+        "section_id": 1,
+        "color": "#d1a2ad",
+        "p0": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "p1": [
+          0.0,
+          0.0,
+          3.6
+        ]
+      },
+      {
+        "member_id": "2",
+        "member_type": "column",
+        "story_band_label": "L1",
+        "section_name": "C-500x500",
+        "section_id": 1,
+        "color": "#d1a2ad",
+        "p0": [
+          8.0,
+          0.0,
+          0.0
+        ],
+        "p1": [
+          8.0,
+          0.0,
+          3.6
+        ]
+      },
+      {
+        "member_id": "3",
+        "member_type": "column",
+        "story_band_label": "L1",
+        "section_name": "C-500x500",
+        "section_id": 1,
+        "color": "#d1a2ad",
+        "p0": [
+          16.0,
+          0.0,
+          0.0
+        ],
+        "p1": [
+          16.0,
+          0.0,
+          3.6
+        ]
+      },
+      {
+        "member_id": "7",
+        "member_type": "beam",
+        "story_band_label": "L2",
+        "section_name": "H-500x250",
+        "section_id": 2,
+        "color": "#8aa4d6",
+        "p0": [
+          0.0,
+          0.0,
+          3.6
+        ],
+        "p1": [
+          8.0,
+          0.0,
+          3.6
+        ]
+      },
+      {
+        "member_id": "8",
+        "member_type": "beam",
+        "story_band_label": "L2",
+        "section_name": "H-500x250",
+        "section_id": 2,
+        "color": "#8aa4d6",
+        "p0": [
+          8.0,
+          0.0,
+          3.6
+        ],
+        "p1": [
+          16.0,
+          0.0,
+          3.6
+        ]
+      },
+      {
+        "member_id": "9",
+        "member_type": "beam",
+        "story_band_label": "L2",
+        "section_name": "H-500x250",
+        "section_id": 2,
+        "color": "#8aa4d6",
+        "p0": [
+          0.0,
+          6.0,
+          3.6
+        ],
+        "p1": [
+          8.0,
+          6.0,
+          3.6
+        ]
+      },
+      {
+        "member_id": "10",
+        "member_type": "beam",
+        "story_band_label": "L2",
+        "section_name": "H-500x250",
+        "section_id": 2,
+        "color": "#8aa4d6",
+        "p0": [
+          8.0,
+          6.0,
+          3.6
+        ],
+        "p1": [
+          16.0,
+          6.0,
+          3.6
+        ]
+      }
+    ],
+    "after_segments": [
+      {
+        "member_id": "7",
+        "group_id": "L2:grid-A1-B1:beam",
+        "member_type": "beam",
+        "story_band_label": "L2",
+        "zone_label": "grid-A1-B1",
+        "action_name": "beam_section_down",
+        "before_section": "H-500x250",
+        "after_section": "H-450x225",
+        "before_thickness_scale": 1.0,
+        "after_thickness_scale": 0.92,
+        "before_rebar_ratio": 0.02,
+        "after_rebar_ratio": 0.018,
+        "before_after_snapshot_note": "H-500x250 -> H-450x225",
+        "optimization_meaning_label": "",
+        "color": "#2463eb",
+        "p0": [
+          0.0,
+          0.0,
+          3.6
+        ],
+        "p1": [
+          8.0,
+          0.0,
+          3.6
+        ]
+      },
+      {
+        "member_id": "10",
+        "group_id": "L2:grid-B2-C2:beam",
+        "member_type": "beam",
+        "story_band_label": "L2",
+        "zone_label": "grid-B2-C2",
+        "action_name": "connection_detailing",
+        "before_section": "H-500x250",
+        "after_section": "H-500x250",
+        "before_thickness_scale": 1.0,
+        "after_thickness_scale": 1.0,
+        "before_rebar_ratio": 0.02,
+        "after_rebar_ratio": 0.019,
+        "before_after_snapshot_note": "detail D1 -> D2",
+        "optimization_meaning_label": "",
+        "color": "#0f6a73",
+        "p0": [
+          8.0,
+          6.0,
+          3.6
+        ],
+        "p1": [
+          16.0,
+          6.0,
+          3.6
+        ]
+      }
+    ],
+    "extent": {
+      "min_x": 0.0,
+      "max_x": 16.0,
+      "min_y": 0.0,
+      "max_y": 6.0,
+      "min_z": 0.0,
+      "max_z": 3.6
+    },
+    "axis_refs": {
+      "x": [
+        {
+          "label": "A",
+          "value": 0.0,
+          "count": 1
+        },
+        {
+          "label": "B",
+          "value": 8.0,
+          "count": 1
+        },
+        {
+          "label": "C",
+          "value": 16.0,
+          "count": 1
+        }
+      ],
+      "y": [
+        {
+          "label": "1",
+          "value": 0.0,
+          "count": 1
+        },
+        {
+          "label": "2",
+          "value": 6.0,
+          "count": 1
+        }
+      ],
+      "z": [
+        {
+          "label": "L1",
+          "value": 0.0,
+          "count": 1
+        },
+        {
+          "label": "L2",
+          "value": 3.6,
+          "count": 1
+        }
+      ]
+    },
+    "axis_ref_source_mode": "upstream_named_axis_refs",
+    "axis_ref_source_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/curated/midas_axis_named_reference_case.json",
+    "axis_ref_note": "Named axis/grid references were loaded from the upstream geometry/model payload and are rendered directly in the 3D workspace.",
+    "baseline_category_label": "",
+    "after_family_label": "",
+    "story_slice_label": ""
+  },
+  "precision_mode": "interactive_canvas_xyz_structure",
+  "viewer_html_href": "structural_optimization_viewer.html",
+  "viewer_core_href": "structural_optimization_viewer.html?view=core",
+  "committee_dashboard_href": "",
+  "analysis_gallery_href": "",
+  "projection_count": 3,
+  "projection_keys": [
+    "plan_xy",
+    "elevation_xz",
+    "isometric_xyz"
+  ],
+  "top_member_count": 2,
+  "member_type_count": 1,
+  "story_band_priority_count": 1,
+  "zone_priority_count": 1,
+  "output_html": "implementation/phase1/release/visualization/midas_axis_named_reference_case_review.html",
+  "output_assets_dir": "implementation/phase1/release/visualization/optimized_drawing_review_assets"
+}

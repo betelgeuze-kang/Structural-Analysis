@@ -1,0 +1,239 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-legacy-cleanup",
+  "generated_at": "2026-03-01T11:14:04.535135+00:00",
+  "phase1_root": "implementation/phase1",
+  "archive_dir": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root",
+  "dry_run": false,
+  "candidate_count": 27,
+  "moved_count": 27,
+  "skipped_count": 0,
+  "patterns": [
+    "*.seed_*.json",
+    "*.sample*.json",
+    "*.sample*.jsonl",
+    "*.sample*.csv",
+    "ci_gate_report.pass.sample.json",
+    "ci_gate_report.fail.sample.json",
+    "priority3_summary.pass.sample.json",
+    "priority3_summary.fail.sample.json"
+  ],
+  "moved": [
+    {
+      "src": "implementation/phase1/ci_gate_report.fail.sample.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/ci_gate_report.fail.sample.json",
+      "kind": "file",
+      "bytes": 235,
+      "sha256": "92245fb9696034fb7e8852e8cb2e6aea77cb37f4c72220f1aca2fce6688bee22",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/ci_gate_report.pass.sample.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/ci_gate_report.pass.sample.json",
+      "kind": "file",
+      "bytes": 206,
+      "sha256": "7dbbc43c77f53e2191937a00a2049f794d2f1538985ff1d50568db5572ef3965",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.atwood_open.sample.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/commercial_benchmark_cases.atwood_open.sample.json",
+      "kind": "file",
+      "bytes": 28908,
+      "sha256": "a91e5076422d8f496eb19ce8f4c5daa9ab5e62bdfbe9ee43eda90f079e8ee3ce",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.atwood_open.sample_pipeline.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/commercial_benchmark_cases.atwood_open.sample_pipeline.json",
+      "kind": "file",
+      "bytes": 111501,
+      "sha256": "4731dc784e7a0b576b7ab0d415790298afc5082571efbf8497c32cee1d8e1143",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.atwood_open.sample_scaleout.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/commercial_benchmark_cases.atwood_open.sample_scaleout.json",
+      "kind": "file",
+      "bytes": 111501,
+      "sha256": "2a2a91833aff28f3ff1a85448a365ffd23f34625e9d1a3209be55236b665a145",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.atwood_open.sample.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/hf_benchmark_report.atwood_open.sample.json",
+      "kind": "file",
+      "bytes": 4645,
+      "sha256": "1e7c523c566b5c90465e01798a5d5d61b471b80daf3b996cd3c24d6c3f0877a3",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.atwood_open.sample_pipeline.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/hf_benchmark_report.atwood_open.sample_pipeline.json",
+      "kind": "file",
+      "bytes": 4650,
+      "sha256": "204066cfed30908414d680c7d55face105e3fae2f93105a00ec8d4c202e66ee4",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.atwood_open.sample_scaleout.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/hf_benchmark_report.atwood_open.sample_scaleout.json",
+      "kind": "file",
+      "bytes": 4642,
+      "sha256": "8f73ec545a8543568699624f9bcb60e89d5f4ce26959dda466954a6464e75313",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_11.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/hf_benchmark_report.seed_11.json",
+      "kind": "file",
+      "bytes": 4770,
+      "sha256": "b44a5922e2936a885355c8e84ad57d50fa9ecd3ff5f93eaaad695910f9843e05",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_17.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/hf_benchmark_report.seed_17.json",
+      "kind": "file",
+      "bytes": 4770,
+      "sha256": "f29a2941f685c9419423d7ea42a0337e4b04be8dc3c4ab1f32ce663f3cdd52b1",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_23.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/hf_benchmark_report.seed_23.json",
+      "kind": "file",
+      "bytes": 4770,
+      "sha256": "54293e2ea5188c80e47c171361260e8b2125cef8cc92b84d884154e67bbea825",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_31.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/hf_benchmark_report.seed_31.json",
+      "kind": "file",
+      "bytes": 4769,
+      "sha256": "c4bc5b2cac4c3c62880342b6d7071312e3328c1dc92e45f08197df070ce3391b",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/hf_benchmark_report.seed_47.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/hf_benchmark_report.seed_47.json",
+      "kind": "file",
+      "bytes": 4769,
+      "sha256": "a239bb1c493d618783f4844c4e9b468ff22e873d9508b59dc6cb51cd0cb2b89e",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/noise_sensitivity_stress_report.atwood_open.sample_pipeline.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/noise_sensitivity_stress_report.atwood_open.sample_pipeline.json",
+      "kind": "file",
+      "bytes": 12208,
+      "sha256": "f6ff7aedc6e910cfefbde29cd781675aa558070a849ae0e65e1e398b5d792c29",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/phase3_megastructure_pipeline_report.sample_pipeline.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/phase3_megastructure_pipeline_report.sample_pipeline.json",
+      "kind": "file",
+      "bytes": 5927,
+      "sha256": "ad81e08319251a7c39c41bc69a28c29984e51481c33749d66711a3f35574077a",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/phase3_megastructure_pipeline_report.sample_scaleout.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/phase3_megastructure_pipeline_report.sample_scaleout.json",
+      "kind": "file",
+      "bytes": 5595,
+      "sha256": "40c42cb18142b951e376014c25b836b375ad3d8cc34fa54a340fb8259eaa4d73",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/priority3_summary.fail.sample.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/priority3_summary.fail.sample.json",
+      "kind": "file",
+      "bytes": 834,
+      "sha256": "98a463e794e3081a0a8ba4067b8a4e099aaf1f2bd6efb5f85165bfd6351cc97f",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/priority3_summary.pass.sample.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/priority3_summary.pass.sample.json",
+      "kind": "file",
+      "bytes": 826,
+      "sha256": "e01d590ce3b46c013b468f9ec9336ce6df1e66b40ed795c198bed0167e8cd8fa",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/scaleout_io_profile_report.phase3_open.sample_scaleout.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/scaleout_io_profile_report.phase3_open.sample_scaleout.json",
+      "kind": "file",
+      "bytes": 5695,
+      "sha256": "4579387e4fd348513ec3fe1b930cec574c7902dd403c109cabf192564e39ba71",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.atwood_open.sample.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/topk_comparison_experiment_report.atwood_open.sample.json",
+      "kind": "file",
+      "bytes": 32180,
+      "sha256": "3c5cac579caf9a78d0b01a7a9f832564abb0dba68fdcfff0776d7e7e6cbfe374",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.atwood_open.sample_pipeline.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/topk_comparison_experiment_report.atwood_open.sample_pipeline.json",
+      "kind": "file",
+      "bytes": 102837,
+      "sha256": "35f1c0ee4cadcb22d05420ae9b5d4e7e655996ade33e0d8f0b786512fd1d9720",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.atwood_open.sample_scaleout.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/topk_comparison_experiment_report.atwood_open.sample_scaleout.json",
+      "kind": "file",
+      "bytes": 102827,
+      "sha256": "52f678c227d1f11dbfcc43e05515ae6ad2fcebd1e2d447cd8d0425cc73f3e83a",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_11.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/topk_comparison_experiment_report.seed_11.json",
+      "kind": "file",
+      "bytes": 30656,
+      "sha256": "1a175be2f3d13a8971d823c3fef088038e92aa8039fa51bf531dce114c578286",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_17.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/topk_comparison_experiment_report.seed_17.json",
+      "kind": "file",
+      "bytes": 30675,
+      "sha256": "1779d8841ffb648f41ccc852840050511a8af551589ae31488cc271bdd0cf0a3",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_23.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/topk_comparison_experiment_report.seed_23.json",
+      "kind": "file",
+      "bytes": 30656,
+      "sha256": "460fefb21212d10469ecd01347df4a9408fe7b3efcbcb94701d5bace46796030",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_31.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/topk_comparison_experiment_report.seed_31.json",
+      "kind": "file",
+      "bytes": 30667,
+      "sha256": "de0bf33b5df0df686e3a75c0be670d24db68967aaf4025cb626ac65e9a848309",
+      "mode": "move"
+    },
+    {
+      "src": "implementation/phase1/topk_comparison_experiment_report.seed_47.json",
+      "dst": "implementation/phase1/experiments/legacy_cleanup/20260301T111404Z/phase1_root/topk_comparison_experiment_report.seed_47.json",
+      "kind": "file",
+      "bytes": 30581,
+      "sha256": "9fb3ce21a50831c811bfb90e70c4873e5a0d5be3dc8bf1110a7c635e357681c6",
+      "mode": "move"
+    }
+  ]
+}

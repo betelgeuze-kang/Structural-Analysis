@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:04.188296+00:00",
+  "task_id": "hardest::oc3_oc4_offshore_monopile",
+  "phase": "hardest_case",
+  "benchmark_family": "offshore_multiphysics_ssi",
+  "submission_scope": "hardest_external_benchmark_program",
+  "status": "in_progress",
+  "started_at": "2026-04-01T13:48:04.188296+00:00",
+  "input_path": "implementation/phase1/foundation_soil_link_gate_report.json",
+  "source_origin_class": "official_external_benchmark_fullcase",
+  "holdout_split": "",
+  "execution_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+  "note": "hardest external 10-case kickoff",
+  "task": {
+    "task_id": "hardest::oc3_oc4_offshore_monopile",
+    "case_id": "oc3_oc4_offshore_monopile",
+    "case_label": "OC3 / OC4 Offshore Monopile",
+    "phase": "hardest_case",
+    "benchmark_family": "offshore_multiphysics_ssi",
+    "hazard_family": "wave_wind_soil_sequence",
+    "topology_family": "offshore_monopile_foundation",
+    "load_path_family": "multiphysics_ssi_fatigue",
+    "submission_scope": "hardest_external_benchmark_program",
+    "execution_status": "ready",
+    "input_path": "implementation/phase1/foundation_soil_link_gate_report.json",
+    "source_origin_class": "official_external_benchmark_fullcase",
+    "primary_report_path": "implementation/phase1/foundation_soil_link_gate_report.json",
+    "supporting_report_paths": {
+      "ssi_boundary": "implementation/phase1/ssi_boundary_gate_report.json",
+      "surface_interaction": "implementation/phase1/surface_interaction_benchmark_gate_report.json"
+    },
+    "kpi_specs": [
+      {
+        "label": "foundation_member_type_count",
+        "source": "primary.summary.foundation_member_type_count"
+      },
+      {
+        "label": "optimized_foundation_group_count",
+        "source": "primary.summary.optimized_foundation_group_count"
+      },
+      {
+        "label": "foundation_link_model_types",
+        "source": "primary.summary.foundation_link_model_types"
+      },
+      {
+        "label": "soil_profile",
+        "source": "supporting.ssi_boundary.summary.soil_profile"
+      },
+      {
+        "label": "dominant_frequency_hz",
+        "source": "supporting.ssi_boundary.summary.dominant_frequency_hz"
+      },
+      {
+        "label": "footing_soil_interaction_count",
+        "source": "supporting.surface_interaction.summary.interaction_family_group_ready_counts.footing_soil"
+      }
+    ]
+  }
+}

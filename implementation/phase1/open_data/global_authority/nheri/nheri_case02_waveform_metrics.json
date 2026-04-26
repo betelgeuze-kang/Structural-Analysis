@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "run_id": "global-authority-metrics-nheri",
+  "generated_at": "2026-03-05T13:06:24.434672+00:00",
+  "metric_source": "direct_reference",
+  "inputs": {
+    "sensor_csv": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+    "baseline_csv": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+    "sample_count": 1800,
+    "sensor_disp_col": "disp_top_mm",
+    "baseline_disp_col": "disp_top_mm",
+    "time_col": "time_s",
+    "dt_s": 0.009999999999999787
+  },
+  "checks": {
+    "waveform_corr_pass": true,
+    "phase_error_pass": true,
+    "residual_drift_pass": true
+  },
+  "metrics": {
+    "waveform_corr": 1.0,
+    "phase_error_ms": 0.0,
+    "residual_drift_mm": 0.0
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "authority metrics computed"
+}

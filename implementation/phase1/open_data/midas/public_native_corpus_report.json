@@ -1,0 +1,241 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-collect-mgt-quality-corpus",
+  "generated_at": "2026-04-06T13:54:17.483771+00:00",
+  "inputs": {
+    "catalog": "implementation/phase1/open_data/midas/public_native_mgt_source_catalog.json",
+    "out_dir": "implementation/phase1/open_data/midas/public_native_corpus",
+    "min_node_count": 8,
+    "min_element_count": 4,
+    "min_accepted_count": 1,
+    "require_shell_beam_mix": false,
+    "download_timeout_sec": 60
+  },
+  "catalog_meta": {
+    "schema_version": "1.0",
+    "source_count": 3
+  },
+  "summary": {
+    "accepted_count": 3,
+    "rejected_count": 0,
+    "fetch_fail_count": 0,
+    "parse_fail_count": 0,
+    "accepted_node_total": 532,
+    "accepted_element_total": 531,
+    "shell_beam_mix_accepted_count": 0,
+    "accepted_parseable_count": 3,
+    "accepted_archive_count": 0,
+    "recognized_archive_member_total": 0,
+    "typed_row_total": 3022,
+    "unknown_row_total": 2856
+  },
+  "checks": {
+    "catalog_loaded": true,
+    "accepted_nonzero": true,
+    "accepted_min_count_pass": true,
+    "fetch_fail_zero": true,
+    "parse_fail_zero": true,
+    "shell_beam_mix_accepted_pass": true
+  },
+  "accepted": [
+    {
+      "source_id": "gtc_public_bridge_bearing_c04",
+      "url": "https://gtc.midasuser.com/helpdesk/File/Get/10390266",
+      "source_class": "mgt_text",
+      "sha256": "a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610",
+      "artifacts": {
+        "mgt": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt",
+        "json": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04.json",
+        "npz": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04.npz",
+        "edge_list": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04_edges.json",
+        "conversion_report": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04_conversion_report.json"
+      },
+      "metrics": {
+        "node_count": 16,
+        "element_count": 15,
+        "beam_element_count": 15,
+        "shell_element_count": 0,
+        "typed_row_total": 211,
+        "unknown_row_total": 2154
+      }
+    },
+    {
+      "source_id": "gtc_public_bridge_section_a3",
+      "url": "https://gtc.midasuser.com/helpdesk/File/Get/10427297",
+      "source_class": "mgt_text",
+      "sha256": "dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6",
+      "artifacts": {
+        "mgt": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt",
+        "json": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.json",
+        "npz": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.npz",
+        "edge_list": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_edges.json",
+        "conversion_report": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_conversion_report.json"
+      },
+      "metrics": {
+        "node_count": 150,
+        "element_count": 147,
+        "beam_element_count": 147,
+        "shell_element_count": 0,
+        "typed_row_total": 700,
+        "unknown_row_total": 273
+      }
+    },
+    {
+      "source_id": "gtc_public_bridge_section_e1_03",
+      "url": "https://gtc.midasuser.com/helpdesk/File/Get/10429383",
+      "source_class": "mgt_text",
+      "sha256": "07b32b0cf376d0eb81174e53873e79a92c36b54a770996d2b4d068b8f585c14e",
+      "artifacts": {
+        "mgt": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_e1_03.mgt",
+        "json": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03.json",
+        "npz": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03.npz",
+        "edge_list": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03_edges.json",
+        "conversion_report": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03_conversion_report.json"
+      },
+      "metrics": {
+        "node_count": 366,
+        "element_count": 369,
+        "beam_element_count": 369,
+        "shell_element_count": 0,
+        "typed_row_total": 2111,
+        "unknown_row_total": 429
+      }
+    }
+  ],
+  "records": [
+    {
+      "source_id": "gtc_public_bridge_bearing_c04",
+      "url": "https://gtc.midasuser.com/helpdesk/File/Get/10390266",
+      "expected_sha256": "a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610",
+      "source_class": "mgt_text",
+      "http_status": 200,
+      "download_ok": true,
+      "sha256": "a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610",
+      "bytes": 161948,
+      "is_mgt_candidate": true,
+      "parse_ok": true,
+      "quality_pass": true,
+      "reject_reason": "",
+      "artifacts": {
+        "mgt": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt",
+        "json": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04.json",
+        "npz": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04.npz",
+        "edge_list": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04_edges.json",
+        "conversion_report": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04_conversion_report.json"
+      },
+      "metrics": {
+        "node_count": 16,
+        "element_count": 15,
+        "beam_element_count": 15,
+        "shell_element_count": 0,
+        "typed_row_total": 211,
+        "unknown_row_total": 2154
+      },
+      "checks": {
+        "has_nodes": true,
+        "has_elements": true,
+        "synthetic_source_blocked": true,
+        "shell_beam_mix_pass": false
+      }
+    },
+    {
+      "source_id": "gtc_public_bridge_section_a3",
+      "url": "https://gtc.midasuser.com/helpdesk/File/Get/10427297",
+      "expected_sha256": "dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6",
+      "source_class": "mgt_text",
+      "http_status": 200,
+      "download_ok": true,
+      "sha256": "dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6",
+      "bytes": 77481,
+      "is_mgt_candidate": true,
+      "parse_ok": true,
+      "quality_pass": true,
+      "reject_reason": "",
+      "artifacts": {
+        "mgt": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt",
+        "json": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.json",
+        "npz": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.npz",
+        "edge_list": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_edges.json",
+        "conversion_report": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_conversion_report.json"
+      },
+      "metrics": {
+        "node_count": 150,
+        "element_count": 147,
+        "beam_element_count": 147,
+        "shell_element_count": 0,
+        "typed_row_total": 700,
+        "unknown_row_total": 273
+      },
+      "checks": {
+        "has_nodes": true,
+        "has_elements": true,
+        "synthetic_source_blocked": true,
+        "shell_beam_mix_pass": false
+      }
+    },
+    {
+      "source_id": "gtc_public_bridge_section_e1_03",
+      "url": "https://gtc.midasuser.com/helpdesk/File/Get/10429383",
+      "expected_sha256": "07b32b0cf376d0eb81174e53873e79a92c36b54a770996d2b4d068b8f585c14e",
+      "source_class": "mgt_text",
+      "http_status": 200,
+      "download_ok": true,
+      "sha256": "07b32b0cf376d0eb81174e53873e79a92c36b54a770996d2b4d068b8f585c14e",
+      "bytes": 143351,
+      "is_mgt_candidate": true,
+      "parse_ok": true,
+      "quality_pass": true,
+      "reject_reason": "",
+      "artifacts": {
+        "mgt": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_e1_03.mgt",
+        "json": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03.json",
+        "npz": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03.npz",
+        "edge_list": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03_edges.json",
+        "conversion_report": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03_conversion_report.json"
+      },
+      "metrics": {
+        "node_count": 366,
+        "element_count": 369,
+        "beam_element_count": 369,
+        "shell_element_count": 0,
+        "typed_row_total": 2111,
+        "unknown_row_total": 429
+      },
+      "checks": {
+        "has_nodes": true,
+        "has_elements": true,
+        "synthetic_source_blocked": true,
+        "shell_beam_mix_pass": false
+      }
+    }
+  ],
+  "steps": [
+    {
+      "step": "parse_gtc_public_bridge_bearing_c04",
+      "seconds": 1.0824968814849854,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/parse_midas_mgt_to_json_npz.py --mgt implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt --json-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04.json --npz-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04.npz --edge-list-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04_edges.json --report-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04_conversion_report.json --forbid-synthetic-source",
+      "stdout_tail": "Wrote MIDAS MGT conversion report: implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_bearing_c04_conversion_report.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "parse_gtc_public_bridge_section_a3",
+      "seconds": 1.080096960067749,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/parse_midas_mgt_to_json_npz.py --mgt implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt --json-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.json --npz-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.npz --edge-list-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_edges.json --report-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_conversion_report.json --forbid-synthetic-source",
+      "stdout_tail": "Wrote MIDAS MGT conversion report: implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_conversion_report.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "parse_gtc_public_bridge_section_e1_03",
+      "seconds": 1.1121160984039307,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/parse_midas_mgt_to_json_npz.py --mgt implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_e1_03.mgt --json-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03.json --npz-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03.npz --edge-list-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03_edges.json --report-out implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03_conversion_report.json --forbid-synthetic-source",
+      "stdout_tail": "Wrote MIDAS MGT conversion report: implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_e1_03_conversion_report.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "quality mgt corpus collected"
+}

@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-peer-spd-specimen-pages",
+  "generated_at": "2026-03-19T15:55:04.110849+00:00",
+  "seed_id": "peer_spd_rc_column_holdout_seed_01",
+  "holdout_split": "holdout",
+  "specimen_id": "299",
+  "specimen_display_url": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=299",
+  "source_origin_class": "official_external_benchmark",
+  "selection_mode": "properties_based_preselection_plus_specimen_page_snapshot",
+  "page_title": "PEER Structural Performance Database",
+  "sections": {
+    "Specimen Information": {
+      "Name": "Petrovski and Ristic 1984, M1E1",
+      "Type": "Spiral",
+      "Reference": "Petrovski, Jakim; and Ristic, Danilo, Reversed Cyclic Loading Test of Bridge Column Models, Report IZIIZ 84-164, Institute of Earthquake Engineering and Engineering Seismology, September 1984, 62 pages."
+    },
+    "Material Properties": {
+      "Concrete Strength": "38.8 (MPa)",
+      "Transverse Steel": "Yield Stress: 240 (MPa)",
+      "Longitudinal Steel": "Yield Stress: 240 (MPa) Strength: 0 (MPa)"
+    },
+    "Geometry": {
+      "Diameter": "307 (mm) Cross-Section: Circular",
+      "Length": "L-Inflection: 1,910 (mm) L-Measured: 1,910 (mm)",
+      "Test Configuration": "Cantilever"
+    },
+    "Loading": {
+      "Axial Load": "145 (kN)",
+      "P-D": "Not defined in report",
+      "L-Bottom": "0"
+    },
+    "Longitudinal Reinforcement": {
+      "Diameter": "12 (mm)",
+      "Number of Bars": "12",
+      "Reinforcement Ratio": "0.0183"
+    },
+    "Transverse Reinforcement": {
+      "Diameter Spiral": "6 (mm)",
+      "Hoop Spacing, Sv": "75 (mm)",
+      "Cover to Center of Hoop Bar": "36 (mm)",
+      "Reinforcement Ratio": "0.63"
+    },
+    "Non-Dimensional Properties": {
+      "Span-to-Depth Ratio": "6.22",
+      "Axial Load Ratio": "0.05"
+    },
+    "Test Results": {
+      "Failure Type": "Flexure",
+      "Damage Observation": "Concrete Crushing: 0 (mm)Significant Concrete Spalling: 0 (mm)Long Bar Buckling: 0 (mm)Long Bar Fracture: 0 (mm)Spiral Fracture: 0 (mm)Loss of Axial Load Capacity: 0 (mm)",
+      "Resources": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)"
+    },
+    "Record Information": {
+      "Version": "1 (April 8, 2003)"
+    }
+  },
+  "resource_links": [
+    {
+      "href": "http://depts.washington.edu/columdat/circol/images/petm1e1.jpeg",
+      "text": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    },
+    {
+      "href": "http://depts.washington.edu/columdat/circol/txfiles/petm1e1.txt",
+      "text": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    }
+  ],
+  "hysteresis_link_candidates": [
+    {
+      "href": "http://depts.washington.edu/columdat/circol/images/petm1e1.jpeg",
+      "text": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    },
+    {
+      "href": "http://depts.washington.edu/columdat/circol/txfiles/petm1e1.txt",
+      "text": "Force-Displacement Hysteresis (graph) Force Displacement Data (data)",
+      "section": "Test Results",
+      "row_key": "Resources"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS"
+}

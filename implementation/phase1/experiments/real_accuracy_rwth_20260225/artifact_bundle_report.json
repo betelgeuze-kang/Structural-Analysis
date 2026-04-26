@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-artifact-organizer",
+  "generated_at": "2026-02-25T14:17:46.832070+00:00",
+  "bundle_label": "real_accuracy_rwth_20260225",
+  "bundle_dir": "implementation/phase1/experiments/real_accuracy_rwth_20260225",
+  "baseline_summary": "implementation/phase1/experiments/real_accuracy_rwth_20260225/summary/baseline_summary.json",
+  "topk_summary": "implementation/phase1/experiments/real_accuracy_rwth_20260225/summary/topk_summary.json",
+  "manifest": "implementation/phase1/experiments/real_accuracy_rwth_20260225/artifact_manifest.json",
+  "copied_count": 16
+}

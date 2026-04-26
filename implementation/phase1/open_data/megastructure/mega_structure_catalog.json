@@ -1,0 +1,111 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-01T00:00:00Z",
+  "purpose": "Open-source alternatives for mega-structure stress testing (phase3 replacement)",
+  "candidates": [
+    {
+      "id": "zenodo_atwood_highrise_shm_2025",
+      "priority": 1,
+      "domain": "building",
+      "scale": "20-story high-rise (instrumented)",
+      "data_type": "measured seismic structural response",
+      "source": "Zenodo",
+      "url": "https://zenodo.org/records/16739185",
+      "doi": "10.5281/zenodo.16739185",
+      "license": "CC-BY-4.0",
+      "pipeline_fit": [
+        "dynamic_time_history",
+        "phase_correction_assimilation",
+        "noise_sensitivity_stress"
+      ],
+      "integration_hint": "Convert acceleration/displacement channels to dynamic_cases.jsonl and map sensor metadata into boundary contract."
+    },
+    {
+      "id": "canton_tower_reduced_shm_benchmark",
+      "priority": 2,
+      "domain": "building",
+      "scale": "600m-class diagrid megatall (reduced-order SHM benchmark)",
+      "data_type": "official reduced-order system matrices + measured response",
+      "source": "PolyU SHM benchmark",
+      "url": "https://polyucee.hk/ceyxia/benchmark/benchmark.htm",
+      "license": "Public benchmark portal terms",
+      "pipeline_fit": [
+        "measured_benchmark_breadth",
+        "viewer_results_provenance",
+        "megatall_response_onboarding"
+      ],
+      "source_manifest_stub": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm.source_manifest.json",
+      "prepare_manifest_script": "implementation/phase1/prepare_canton_tower_reduced_shm_source_manifest.py",
+      "integration_hint": "Ingest as an official reduced-order SHM benchmark; stage local matrices/docs/response zips into a source manifest before converting measured channels into dynamic_cases.jsonl."
+    },
+    {
+      "id": "opstool_606m_megatall_model",
+      "priority": 3,
+      "domain": "building",
+      "scale": "~606m megatall numerical model",
+      "data_type": "OpenSees model package",
+      "source": "opstool docs",
+      "url": "https://opstool.readthedocs.io/en/stable/src/posts/megatall-building/",
+      "license": "Open documentation / model link in page",
+      "pipeline_fit": [
+        "scaleout_io_profile",
+        "branch64_microbatch_profile",
+        "topk_weighted_branching"
+      ],
+      "integration_hint": "Use as synthetic mega-DOF generator for 1M+ node streaming and cache-thrashing profiling."
+    },
+    {
+      "id": "zenodo_kw51_railway_bridge_monitoring_2025",
+      "priority": 4,
+      "domain": "railway",
+      "scale": "full-scale railway bridge monitoring (45 GB)",
+      "data_type": "measured acceleration and metadata",
+      "source": "Zenodo",
+      "url": "https://zenodo.org/records/16879917",
+      "doi": "10.5281/zenodo.16879917",
+      "license": "CC-BY-4.0",
+      "pipeline_fit": [
+        "track_dynamics_dataset",
+        "vti_coupled_solver",
+        "integrated_railway_dynamics"
+      ],
+      "integration_hint": "Downsample/segment train passages into fixed windows and align with train speed + axle metadata."
+    },
+    {
+      "id": "sf_tall_building_inventory_2024",
+      "priority": 5,
+      "domain": "building",
+      "scale": "city-scale tall-building inventory",
+      "data_type": "inventory metadata",
+      "source": "Data.gov",
+      "url": "https://catalog.data.gov/dataset/san-francisco-tall-building-inventory",
+      "license": "Public dataset portal terms",
+      "pipeline_fit": [
+        "active_learning_seed_pool",
+        "topology_generation"
+      ],
+      "integration_hint": "Use geometry/material metadata as topology priors for synthetic case generation."
+    },
+    {
+      "id": "usgs_nsmp_structural_arrays",
+      "priority": 6,
+      "domain": "building_and_infrastructure",
+      "scale": "instrumented structures (regional)",
+      "data_type": "strong-motion time histories",
+      "source": "USGS NSMP",
+      "url": "https://www.usgs.gov/programs/earthquake-hazards/national-strong-motion-project",
+      "license": "USGS public data terms",
+      "pipeline_fit": [
+        "dynamic_time_history",
+        "phase_error_gate",
+        "robustness_validation"
+      ],
+      "integration_hint": "Pair structural records with ground-motion channels for transfer-function and phase-delay validation."
+    }
+  ],
+  "recommended_phase3_substitute": {
+    "primary": "zenodo_atwood_highrise_shm_2025",
+    "secondary": "canton_tower_reduced_shm_benchmark",
+    "why": "Atwood stays the easiest real measured dynamic source; Canton Tower is now the best immediate next megatall SHM onboarding target, while opstool remains the synthetic mega-DOF stress path."
+  }
+}

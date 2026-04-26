@@ -1,0 +1,1034 @@
+{
+  "schema_version": "1.0",
+  "source_provenance": {
+    "source_family": "midas_binary_decoded_preview_bridge",
+    "source_id": "midas_support_ramp_archive",
+    "path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_ramp_archive/meb_decoded_inventory.json"
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": 1,
+        "x": 13.5,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 2,
+        "x": 22.5,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 3,
+        "x": 22.5,
+        "y": -7.2,
+        "z": 0.0
+      },
+      {
+        "id": 4,
+        "x": 22.5,
+        "y": -13.2,
+        "z": 0.0
+      },
+      {
+        "id": 5,
+        "x": 13.5,
+        "y": -7.2,
+        "z": 0.0
+      },
+      {
+        "id": 6,
+        "x": 13.5,
+        "y": -20.4,
+        "z": 0.0
+      },
+      {
+        "id": 7,
+        "x": 53.5,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 8,
+        "x": 62.5,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 9,
+        "x": 62.5,
+        "y": -7.2,
+        "z": 0.0
+      },
+      {
+        "id": 10,
+        "x": 62.5,
+        "y": -13.2,
+        "z": 0.0
+      },
+      {
+        "id": 11,
+        "x": 53.5,
+        "y": -20.4,
+        "z": 0.0
+      },
+      {
+        "id": 12,
+        "x": 4.5,
+        "y": -7.2,
+        "z": 0.0
+      },
+      {
+        "id": 13,
+        "x": 13.5,
+        "y": -13.2,
+        "z": 0.0
+      },
+      {
+        "id": 14,
+        "x": 4.5,
+        "y": -13.2,
+        "z": 0.0
+      },
+      {
+        "id": 15,
+        "x": 4.5,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 16,
+        "x": 13.42106,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 17,
+        "x": 22.5,
+        "y": -3.6,
+        "z": 0.0
+      },
+      {
+        "id": 18,
+        "x": 13.5,
+        "y": -3.6,
+        "z": 0.0
+      },
+      {
+        "id": 19,
+        "x": 22.5,
+        "y": -10.2,
+        "z": 0.0
+      },
+      {
+        "id": 20,
+        "x": 13.5,
+        "y": -10.2,
+        "z": 0.0
+      },
+      {
+        "id": 21,
+        "x": 4.5,
+        "y": -10.2,
+        "z": 0.0
+      },
+      {
+        "id": 22,
+        "x": 4.5,
+        "y": -3.6,
+        "z": 0.0
+      },
+      {
+        "id": 23,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 24,
+        "x": 0.0,
+        "y": -7.2,
+        "z": 0.0
+      },
+      {
+        "id": 25,
+        "x": 0.0,
+        "y": -13.2,
+        "z": 0.0
+      },
+      {
+        "id": 26,
+        "x": 44.5,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 27,
+        "x": 53.5,
+        "y": -7.2,
+        "z": 0.0
+      },
+      {
+        "id": 28,
+        "x": 53.5,
+        "y": -13.2,
+        "z": 0.0
+      },
+      {
+        "id": 29,
+        "x": 44.5,
+        "y": -7.2,
+        "z": 0.0
+      },
+      {
+        "id": 30,
+        "x": 44.5,
+        "y": -13.2,
+        "z": 0.0
+      },
+      {
+        "id": 31,
+        "x": 40.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 32,
+        "x": 40.0,
+        "y": -7.2,
+        "z": 0.0
+      },
+      {
+        "id": 33,
+        "x": 40.0,
+        "y": -13.2,
+        "z": 0.0
+      },
+      {
+        "id": 34,
+        "x": 44.5,
+        "y": -4.8,
+        "z": 0.0
+      },
+      {
+        "id": 35,
+        "x": 53.5,
+        "y": -4.8,
+        "z": 0.0
+      },
+      {
+        "id": 36,
+        "x": 62.5,
+        "y": -4.8,
+        "z": 0.0
+      },
+      {
+        "id": 37,
+        "x": 44.5,
+        "y": -2.4,
+        "z": 0.0
+      },
+      {
+        "id": 38,
+        "x": 53.5,
+        "y": -2.4,
+        "z": 0.0
+      },
+      {
+        "id": 39,
+        "x": 62.5,
+        "y": -2.4,
+        "z": 0.0
+      }
+    ],
+    "elements": [
+      {
+        "id": 1,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          1,
+          2
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 2,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          2,
+          3
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 3,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          3,
+          4
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 4,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          1,
+          5
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 5,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          5,
+          3
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 6,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          6,
+          4
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 7,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          7,
+          8
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 8,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          8,
+          9
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 9,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          9,
+          10
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 10,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          11,
+          10
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 11,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          12,
+          5
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 12,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          13,
+          4
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 13,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          14,
+          13
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 14,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          5,
+          13
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 15,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          15,
+          16
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 16,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          16,
+          1
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 17,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          14,
+          12
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 18,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          12,
+          15
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 19,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          6,
+          13
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 20,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          14,
+          6
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 21,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          17,
+          18
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 22,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          19,
+          20
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 23,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          21,
+          20
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 24,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          22,
+          18
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 25,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          23,
+          15
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 26,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          24,
+          12
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 27,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          25,
+          14
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 28,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          25,
+          24
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 29,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          24,
+          23
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 30,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          26,
+          7
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 31,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          7,
+          27
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 32,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          27,
+          28
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 33,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          28,
+          11
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 34,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          29,
+          27
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 35,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          27,
+          9
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 36,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          30,
+          28
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 37,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          28,
+          10
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 38,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          30,
+          11
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 39,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          30,
+          29
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 40,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          29,
+          26
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 41,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          31,
+          26
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 42,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          31,
+          32
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 43,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          32,
+          33
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 44,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          33,
+          30
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 45,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          32,
+          29
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 46,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          34,
+          35
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 47,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          35,
+          36
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 48,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          37,
+          38
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      },
+      {
+        "id": 49,
+        "type": "BEAM",
+        "family": "table_local_preview",
+        "node_ids": [
+          38,
+          39
+        ],
+        "section_id": -1,
+        "material_id": -1,
+        "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+        "preview_mode": "table_local_ascii_preview",
+        "bridge_mode": "table_local_segment_preview"
+      }
+    ],
+    "materials": [],
+    "sections": [],
+    "loads": {},
+    "metadata": {
+      "bridge_family": "decoded_preview_baseline",
+      "family_assumption": "table_local_preview",
+      "accepted_type_label": "table_segment=49",
+      "selected_member_name": "║╕_┐╣┴ª╞─└╧_FINAL.meb",
+      "preview_state_label": "unverified table-local preview",
+      "preview_mode": "table_local_ascii_preview",
+      "preview_basis": "table_local_payload",
+      "preview_projection_label": "XY",
+      "preview_anchor_table_names": [
+        "PONT",
+        "CURV",
+        "MEMB",
+        "*POINT",
+        "*MEMBER_ADD"
+      ],
+      "bridge_mode": "table_local_segment_preview",
+      "source_table": "ASCII:PONT/CURV/MEMB:*POINT/*MEMBER_ADD",
+      "topology_grounding_label": "explicit_member_add_paths",
+      "topology_node_count": 72,
+      "topology_edge_count": 90,
+      "topology_component_count": 8,
+      "dangling_point_count": 26,
+      "junction_point_count": 36,
+      "isolated_preview_point_count": 0,
+      "member_path_count": 96,
+      "resolved_member_path_count": 96,
+      "member_path_resolution_rate": 1.0,
+      "member_reference_count": 232,
+      "resolved_member_reference_count": 232,
+      "member_reference_resolution_rate": 1.0,
+      "missing_member_path_count": 0,
+      "missing_member_reference_count": 0,
+      "payload_exact_topology_ready": true,
+      "topology_preview_ready": true,
+      "topology_readiness_label": "payload-exact member-add topology preview",
+      "exact_topology_candidate": true,
+      "exact_topology_promoted": false,
+      "resolved_member_path_samples": [
+        [
+          46,
+          1
+        ],
+        [
+          47,
+          2
+        ],
+        [
+          48,
+          3
+        ],
+        [
+          49,
+          4
+        ],
+        [
+          50,
+          5
+        ]
+      ],
+      "topology_signal_field_sources": {
+        "topology_grounding_label": "geometry_preview",
+        "topology_node_count": "geometry_preview",
+        "topology_edge_count": "geometry_preview",
+        "topology_component_count": "geometry_preview",
+        "dangling_point_count": "geometry_preview",
+        "junction_point_count": "geometry_preview",
+        "isolated_preview_point_count": "geometry_preview",
+        "member_path_count": "geometry_preview",
+        "resolved_member_path_count": "geometry_preview",
+        "member_path_resolution_rate": "geometry_preview",
+        "member_reference_count": "geometry_preview",
+        "resolved_member_reference_count": "geometry_preview",
+        "member_reference_resolution_rate": "geometry_preview",
+        "missing_member_path_count": "geometry_preview",
+        "missing_member_reference_count": "geometry_preview",
+        "payload_exact_topology_ready": "geometry_preview",
+        "topology_preview_ready": "geometry_preview",
+        "topology_readiness_label": "geometry_preview",
+        "exact_topology_candidate": "geometry_preview",
+        "exact_topology_promoted": "geometry_preview"
+      },
+      "preview_exactness_tier": "exact-topology-candidate",
+      "preview_exactness_label": "exact topology candidate",
+      "preview_exactness_signal_source": "geometry_preview",
+      "preview_surface_bucket": "table-local-preview",
+      "preview_surface_status_label": "exact recovered topology-derived 3d candidate",
+      "preview_surface_status_tone": "warn",
+      "preview_readiness_stage_label": "exact recovered topology candidate"
+    }
+  },
+  "topology_metrics": {
+    "node_count": 39,
+    "element_count": 49,
+    "edge_count_undirected": 49,
+    "beam_element_count": 49,
+    "shell_element_count": 0
+  }
+}

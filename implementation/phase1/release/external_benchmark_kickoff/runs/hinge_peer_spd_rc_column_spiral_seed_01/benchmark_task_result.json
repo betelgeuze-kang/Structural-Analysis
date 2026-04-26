@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-21T16:52:53.965945+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "summary": {
+    "seed_id": "peer_spd_rc_column_spiral_seed_01",
+    "holdout_split": "val",
+    "specimen_id": "276",
+    "point_count": 960,
+    "peak_abs_drift_ratio": 0.05208,
+    "rebar_sensitive_expected": false,
+    "confinement_sensitive_expected": true,
+    "axial_load_sensitive_expected": false
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-26T11:30:17.159221+00:00",
+  "batch_id": "opstool_606m_megatall_model_direct_batch_v1",
+  "noise_contract_pass": true,
+  "noise_reason_code": "PASS",
+  "noise_reason": "noise convergence gate passed",
+  "gate_interpretation": {
+    "all_converged": true,
+    "has_required_seeds": true,
+    "includes_plus_minus_10": true,
+    "coverage_gate_fail": false
+  },
+  "summary": {
+    "case_count": 5,
+    "scenario_count": 135,
+    "failed_case_count": 0,
+    "failed_scenario_count": 0
+  },
+  "cases": [
+    {
+      "case_id": "opstool_606m_megatall_model-00008",
+      "scenario_count": 27,
+      "failed_count": 0,
+      "max_iterations": 4,
+      "max_residual_norm": 8.351608667615294e-07,
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "split": "val"
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00009",
+      "scenario_count": 27,
+      "failed_count": 0,
+      "max_iterations": 4,
+      "max_residual_norm": 8.351188094368563e-07,
+      "topology_type": "rahmen",
+      "hazard_type": "wind",
+      "split": "test"
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00019",
+      "scenario_count": 27,
+      "failed_count": 0,
+      "max_iterations": 4,
+      "max_residual_norm": 8.354584854959225e-07,
+      "topology_type": "wall-frame",
+      "hazard_type": "wind",
+      "split": "test"
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00020",
+      "scenario_count": 27,
+      "failed_count": 0,
+      "max_iterations": 4,
+      "max_residual_norm": 8.352119596857772e-07,
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "split": "test"
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00027",
+      "scenario_count": 27,
+      "failed_count": 0,
+      "max_iterations": 4,
+      "max_residual_norm": 8.355348839173352e-07,
+      "topology_type": "truss",
+      "hazard_type": "seismic",
+      "split": "train"
+    }
+  ]
+}

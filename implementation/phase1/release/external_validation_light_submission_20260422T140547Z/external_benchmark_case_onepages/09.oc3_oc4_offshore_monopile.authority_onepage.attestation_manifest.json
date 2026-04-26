@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T15:24:49.235684+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS_CASE_ATTESTATION_MANIFEST_READY",
+  "reason": "real values supplied for case-level reviewer/authority workflow input",
+  "manifest_mode": "friend_demo_review",
+  "case": {
+    "task_id": "hardest::oc3_oc4_offshore_monopile",
+    "case_id": "oc3_oc4_offshore_monopile",
+    "case_label": "OC3 / OC4 Offshore Monopile",
+    "benchmark_family": "offshore_multiphysics_ssi",
+    "hazard_family": "wave_wind_soil_sequence",
+    "topology_family": "offshore_monopile_foundation",
+    "load_path_family": "multiphysics_ssi_fatigue",
+    "submission_scope": "hardest_external_benchmark_program",
+    "source_origin_class": "official_external_benchmark_fullcase"
+  },
+  "attestation": {
+    "reviewer_name": "Friend Demo Reviewer",
+    "reviewer_role": "informal external reviewer",
+    "reviewer_license_id": "demo-review-no-license",
+    "reviewer_signature_name": "Friend Demo Reviewer",
+    "decision_basis": "friend review of hardest external benchmark bundle for external walkthrough | case_id=oc3_oc4_offshore_monopile",
+    "review_session_id": "friend-demo-review-20260401T152449Z",
+    "attested_at_utc": "2026-04-01T15:24:49.235684+00:00",
+    "authority_name": "informal demo receipt authority",
+    "authority_receipt_id": "DEMO-RECEIPT-07-OC3_OC4_OFFSHORE_MONOPILE",
+    "authority_receipt_issued_at_utc": "2026-04-01T15:24:49.235684+00:00",
+    "authority_receipt_note": "non-regulatory demo receipt for friend walkthrough | case_id=oc3_oc4_offshore_monopile",
+    "approval_signature_name": "Friend Demo Reviewer"
+  }
+}

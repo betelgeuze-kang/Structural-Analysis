@@ -1,0 +1,606 @@
+{
+  "case_rows": [
+    {
+      "case_id": "simple_beam_uniform_load",
+      "contract_pass": true,
+      "description": "Simply supported Euler-Bernoulli beam under a full-span uniform load.",
+      "max_abs_error": 0.0,
+      "max_normalized_error": 0.0,
+      "metric_count": 4,
+      "metric_rows": [
+        {
+          "abs_error": 0.0,
+          "actual": 36.0,
+          "allowed_error": 3.6e-09,
+          "contract_pass": true,
+          "expected": 36.0,
+          "metric": "left_support_reaction",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.010125,
+          "allowed_error": 1e-12,
+          "contract_pass": true,
+          "expected": 0.010125,
+          "metric": "max_deflection",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 54.0,
+          "allowed_error": 5.4e-09,
+          "contract_pass": true,
+          "expected": 54.0,
+          "metric": "midspan_bending_moment",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 36.0,
+          "allowed_error": 3.6e-09,
+          "contract_pass": true,
+          "expected": 36.0,
+          "metric": "right_support_reaction",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        }
+      ],
+      "missing_metric_ids": [],
+      "parameters": {
+        "flexural_rigidity": 20000.0,
+        "span": 6.0,
+        "uniform_load": 12.0
+      },
+      "passing_metric_count": 4,
+      "reference_class": "simple_beam",
+      "tags": [
+        "beam",
+        "closed_form",
+        "static"
+      ],
+      "unexpected_metric_ids": []
+    },
+    {
+      "case_id": "two_bar_truss_apex_load",
+      "contract_pass": true,
+      "description": "Symmetric two-bar truss with a vertical apex load.",
+      "max_abs_error": 0.0,
+      "max_normalized_error": 0.0,
+      "metric_count": 4,
+      "metric_rows": [
+        {
+          "abs_error": 0.0,
+          "actual": 0.010416037018,
+          "allowed_error": 1e-12,
+          "contract_pass": true,
+          "expected": 0.010416037018,
+          "metric": "apex_vertical_displacement",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 60.0,
+          "allowed_error": 6e-09,
+          "contract_pass": true,
+          "expected": 60.0,
+          "metric": "left_support_vertical_reaction",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 72.11102550928,
+          "allowed_error": 7.211e-09,
+          "contract_pass": true,
+          "expected": 72.11102550928,
+          "metric": "member_axial_force_abs",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 60.0,
+          "allowed_error": 6e-09,
+          "contract_pass": true,
+          "expected": 60.0,
+          "metric": "right_support_vertical_reaction",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        }
+      ],
+      "missing_metric_ids": [],
+      "parameters": {
+        "apex_load": 120.0,
+        "axial_rigidity": 30000.0,
+        "rise": 3.0,
+        "span": 4.0
+      },
+      "passing_metric_count": 4,
+      "reference_class": "truss",
+      "tags": [
+        "closed_form",
+        "static",
+        "truss"
+      ],
+      "unexpected_metric_ids": []
+    },
+    {
+      "case_id": "portal_frame_lateral_sway",
+      "contract_pass": true,
+      "description": "One-story fixed-base portal frame with a rigid beam under lateral sway.",
+      "max_abs_error": 0.0,
+      "max_normalized_error": 0.0,
+      "metric_count": 5,
+      "metric_rows": [
+        {
+          "abs_error": 0.0,
+          "actual": 52.5,
+          "allowed_error": 5.25e-09,
+          "contract_pass": true,
+          "expected": 52.5,
+          "metric": "left_column_base_moment",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 30.0,
+          "allowed_error": 3e-09,
+          "contract_pass": true,
+          "expected": 30.0,
+          "metric": "left_column_shear",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 52.5,
+          "allowed_error": 5.25e-09,
+          "contract_pass": true,
+          "expected": 52.5,
+          "metric": "right_column_base_moment",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 30.0,
+          "allowed_error": 3e-09,
+          "contract_pass": true,
+          "expected": 30.0,
+          "metric": "right_column_shear",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.025520833333,
+          "allowed_error": 3e-12,
+          "contract_pass": true,
+          "expected": 0.025520833333,
+          "metric": "roof_drift",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        }
+      ],
+      "missing_metric_ids": [],
+      "parameters": {
+        "column_flexural_rigidity": 4200.0,
+        "lateral_load": 60.0,
+        "story_height": 3.5
+      },
+      "passing_metric_count": 5,
+      "reference_class": "portal_frame",
+      "tags": [
+        "closed_form",
+        "portal_frame",
+        "static"
+      ],
+      "unexpected_metric_ids": []
+    },
+    {
+      "case_id": "three_story_shear_building_static",
+      "contract_pass": true,
+      "description": "Three-story shear building under deterministic lateral floor forces.",
+      "max_abs_error": 0.0,
+      "max_normalized_error": 0.0,
+      "metric_count": 5,
+      "metric_rows": [
+        {
+          "abs_error": 0.0,
+          "actual": 60.0,
+          "allowed_error": 6e-09,
+          "contract_pass": true,
+          "expected": 60.0,
+          "metric": "base_shear",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.0045,
+          "allowed_error": 1e-12,
+          "contract_pass": true,
+          "expected": 0.0045,
+          "metric": "roof_displacement",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.002,
+          "allowed_error": 1e-12,
+          "contract_pass": true,
+          "expected": 0.002,
+          "metric": "story1_drift",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.0015,
+          "allowed_error": 1e-12,
+          "contract_pass": true,
+          "expected": 0.0015,
+          "metric": "story2_drift",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.001,
+          "allowed_error": 1e-12,
+          "contract_pass": true,
+          "expected": 0.001,
+          "metric": "story3_drift",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        }
+      ],
+      "missing_metric_ids": [],
+      "parameters": {
+        "floor_forces": [
+          30.0,
+          20.0,
+          10.0
+        ],
+        "story_stiffness": [
+          30000.0,
+          20000.0,
+          10000.0
+        ]
+      },
+      "passing_metric_count": 5,
+      "reference_class": "shear_building",
+      "tags": [
+        "matrix_reduced",
+        "shear_building",
+        "static"
+      ],
+      "unexpected_metric_ids": []
+    },
+    {
+      "case_id": "shell_patch_constant_strain",
+      "contract_pass": true,
+      "description": "Plane-stress shell patch with a constant membrane strain field.",
+      "max_abs_error": 0.0,
+      "max_normalized_error": 0.0,
+      "metric_count": 7,
+      "metric_rows": [
+        {
+          "abs_error": 0.0,
+          "actual": 12.96875,
+          "allowed_error": 1.297e-09,
+          "contract_pass": true,
+          "expected": 12.96875,
+          "metric": "membrane_resultant_x",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 1.25,
+          "allowed_error": 1.25e-10,
+          "contract_pass": true,
+          "expected": 1.25,
+          "metric": "membrane_resultant_xy",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 8.59375,
+          "allowed_error": 8.59e-10,
+          "contract_pass": true,
+          "expected": 8.59375,
+          "metric": "membrane_resultant_y",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 5.0,
+          "allowed_error": 5e-10,
+          "contract_pass": true,
+          "expected": 5.0,
+          "metric": "membrane_shear_stress",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 51.875,
+          "allowed_error": 5.188e-09,
+          "contract_pass": true,
+          "expected": 51.875,
+          "metric": "membrane_stress_x",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 34.375,
+          "allowed_error": 3.438e-09,
+          "contract_pass": true,
+          "expected": 34.375,
+          "metric": "membrane_stress_y",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.0134140625,
+          "allowed_error": 1e-12,
+          "contract_pass": true,
+          "expected": 0.0134140625,
+          "metric": "strain_energy",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        }
+      ],
+      "missing_metric_ids": [],
+      "parameters": {
+        "area": 1.0,
+        "gamma_xy": 0.0004,
+        "poissons_ratio": 0.2,
+        "strain_x": 0.0015,
+        "strain_y": 0.0008,
+        "thickness": 0.25,
+        "youngs_modulus": 30000.0
+      },
+      "passing_metric_count": 7,
+      "reference_class": "shell_patch",
+      "tags": [
+        "closed_form",
+        "membrane",
+        "shell_patch"
+      ],
+      "unexpected_metric_ids": []
+    },
+    {
+      "case_id": "euler_column_buckling",
+      "contract_pass": true,
+      "description": "Pinned-pinned Euler column critical load reference.",
+      "max_abs_error": 0.0,
+      "max_normalized_error": 0.0,
+      "metric_count": 2,
+      "metric_rows": [
+        {
+          "abs_error": 0.0,
+          "actual": 31.582734083486,
+          "allowed_error": 3.158e-09,
+          "contract_pass": true,
+          "expected": 31.582734083486,
+          "metric": "critical_load",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 1.579136704174,
+          "allowed_error": 1.58e-10,
+          "contract_pass": true,
+          "expected": 1.579136704174,
+          "metric": "normalized_critical_load",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        }
+      ],
+      "missing_metric_ids": [],
+      "parameters": {
+        "effective_length_factor": 1.0,
+        "length": 2.5,
+        "second_moment": 0.0001,
+        "youngs_modulus": 200000.0
+      },
+      "passing_metric_count": 2,
+      "reference_class": "buckling",
+      "tags": [
+        "buckling",
+        "closed_form",
+        "eigenvalue"
+      ],
+      "unexpected_metric_ids": []
+    },
+    {
+      "case_id": "two_dof_modal_frequency",
+      "contract_pass": true,
+      "description": "Closed-form modal frequencies for a 2-DOF unit mass-spring chain.",
+      "max_abs_error": 0.0,
+      "max_normalized_error": 0.0,
+      "metric_count": 3,
+      "metric_rows": [
+        {
+          "abs_error": 0.0,
+          "actual": 2.61803398875,
+          "allowed_error": 2.62e-10,
+          "contract_pass": true,
+          "expected": 2.61803398875,
+          "metric": "frequency_ratio",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.098363164308,
+          "allowed_error": 1e-11,
+          "contract_pass": true,
+          "expected": 0.098363164308,
+          "metric": "fundamental_frequency_hz",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.2575181074,
+          "allowed_error": 2.6e-11,
+          "contract_pass": true,
+          "expected": 0.2575181074,
+          "metric": "second_frequency_hz",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        }
+      ],
+      "missing_metric_ids": [],
+      "parameters": {
+        "mass_matrix": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "stiffness_matrix": [
+          [
+            2.0,
+            -1.0
+          ],
+          [
+            -1.0,
+            1.0
+          ]
+        ]
+      },
+      "passing_metric_count": 3,
+      "reference_class": "modal_frequency",
+      "tags": [
+        "closed_form",
+        "eigenvalue",
+        "modal_frequency"
+      ],
+      "unexpected_metric_ids": []
+    },
+    {
+      "case_id": "beam_reaction_balance_mixed_load",
+      "contract_pass": true,
+      "description": "Static reaction balance for a simply supported beam with point and distributed loads.",
+      "max_abs_error": 0.0,
+      "max_normalized_error": 0.0,
+      "metric_count": 4,
+      "metric_rows": [
+        {
+          "abs_error": 0.0,
+          "actual": 16.0,
+          "allowed_error": 1.6e-09,
+          "contract_pass": true,
+          "expected": 16.0,
+          "metric": "left_support_reaction",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.0,
+          "allowed_error": 1e-12,
+          "contract_pass": true,
+          "expected": 0.0,
+          "metric": "moment_balance_error",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 14.0,
+          "allowed_error": 1.4e-09,
+          "contract_pass": true,
+          "expected": 14.0,
+          "metric": "right_support_reaction",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        },
+        {
+          "abs_error": 0.0,
+          "actual": 0.0,
+          "allowed_error": 1e-12,
+          "contract_pass": true,
+          "expected": 0.0,
+          "metric": "vertical_balance_error",
+          "normalized_error": 0.0,
+          "rel_error": 0.0
+        }
+      ],
+      "missing_metric_ids": [],
+      "parameters": {
+        "point_load": 10.0,
+        "point_load_location": 2.0,
+        "span": 5.0,
+        "uniform_load": 4.0
+      },
+      "passing_metric_count": 4,
+      "reference_class": "reaction_balance",
+      "tags": [
+        "closed_form",
+        "equilibrium",
+        "reaction_balance"
+      ],
+      "unexpected_metric_ids": []
+    }
+  ],
+  "checks": {
+    "all_case_ids_present": true,
+    "all_metric_ids_present": true,
+    "all_metrics_within_tolerance": true,
+    "baseline_loaded_pass": true,
+    "reference_class_coverage_pass": true
+  },
+  "contract_pass": true,
+  "generated_at": "2026-04-21T00:00:00+00:00",
+  "inputs": {
+    "reference_baseline": "implementation/phase1/reference_regression_baseline.json",
+    "reference_baseline_sha256": "e05cc93cdf86bcdd9fd65ef07bb264e370639dd42f10e1c75335ecd57e7f2abf"
+  },
+  "missing_case_ids": [],
+  "reason": "all deterministic local reference cases match the committed baseline within tolerance",
+  "reason_code": "PASS",
+  "reference_classes": [
+    "buckling",
+    "modal_frequency",
+    "portal_frame",
+    "reaction_balance",
+    "shear_building",
+    "shell_patch",
+    "simple_beam",
+    "truss"
+  ],
+  "run_id": "phase1-reference-regression",
+  "schema_version": "1.0",
+  "summary": {
+    "case_count": 8,
+    "max_abs_error": 0.0,
+    "max_normalized_error": 0.0,
+    "metric_count": 34,
+    "passing_case_count": 8,
+    "passing_metric_count": 34,
+    "reference_class_count": 8
+  },
+  "summary_line": "Reference regression: PASS | cases=8/8 | metrics=34/34 | classes=8 | max_norm_err=0.0",
+  "unexpected_case_ids": []
+}

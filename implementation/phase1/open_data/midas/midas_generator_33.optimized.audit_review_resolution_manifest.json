@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "audit_review_resolution_rows": [
+    {
+      "packet_id": "connection|high",
+      "action_family": "connection_detailing",
+      "followup_type": "connection_detailing_audit_after_material_patch",
+      "review_priority": "high",
+      "queue_status": "approved",
+      "review_owner": "licensed_engineer",
+      "followup_action": "close_packet",
+      "resolution_action": "close_packet",
+      "resolution_owner": "release_coordinator",
+      "resolution_status": "closed_packet",
+      "resolution_required": false,
+      "resolution_note": "approved",
+      "status_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/queue_status/01.connection.review_status.json",
+      "packet_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/packet_01.json",
+      "change_count": 6,
+      "row_count": 6
+    },
+    {
+      "packet_id": "detail|medium",
+      "action_family": "detailing",
+      "followup_type": "detailing_audit_after_material_patch",
+      "review_priority": "medium",
+      "queue_status": "approved",
+      "review_owner": "licensed_engineer",
+      "followup_action": "close_packet",
+      "resolution_action": "close_packet",
+      "resolution_owner": "release_coordinator",
+      "resolution_status": "closed_packet",
+      "resolution_required": false,
+      "resolution_note": "approved",
+      "status_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/queue_status/02.detailing.review_status.json",
+      "packet_file_path": "/tmp/pytest-of-betelgeuze/pytest-1/test_run_audit_review_decision1/packet_02.json",
+      "change_count": 5,
+      "row_count": 5
+    }
+  ],
+  "summary": {
+    "audit_review_resolution_item_count": 2,
+    "audit_review_resolution_open_item_count": 0,
+    "audit_review_resolution_closed_item_count": 2,
+    "audit_review_resolution_pending_item_count": 0,
+    "audit_review_resolution_open_revision_count": 0,
+    "audit_review_resolution_closed_packet_count": 2,
+    "audit_review_resolution_action_counts": {
+      "close_packet": 2
+    },
+    "audit_review_resolution_action_label": "close_packet=2",
+    "audit_review_resolution_owner_counts": {
+      "release_coordinator": 2
+    },
+    "audit_review_resolution_owner_label": "release_coordinator=2",
+    "audit_review_resolution_status_counts": {
+      "closed_packet": 2
+    },
+    "audit_review_resolution_status_label": "closed_packet=2",
+    "audit_review_resolution_mode": "queue_followup_projected_resolution_actions",
+    "audit_review_resolution_file_count": 2
+  },
+  "audit_review_resolution_files": [
+    {
+      "packet_id": "connection|high",
+      "resolution_action": "close_packet",
+      "resolution_status": "closed_packet",
+      "resolution_owner": "release_coordinator",
+      "path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.audit_review_resolution_files/01.connection_detailing.close_packet.high.resolution.json"
+    },
+    {
+      "packet_id": "detail|medium",
+      "resolution_action": "close_packet",
+      "resolution_status": "closed_packet",
+      "resolution_owner": "release_coordinator",
+      "path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.audit_review_resolution_files/02.detailing.close_packet.medium.resolution.json"
+    }
+  ],
+  "audit_review_resolution_directory": "implementation/phase1/open_data/midas/midas_generator_33.optimized.audit_review_resolution_files"
+}

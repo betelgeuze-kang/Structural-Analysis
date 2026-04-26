@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "job_id": "authoring::native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200::workspace-summary",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "snapshot_id": "authoring_native-authoring-outrigger-transfer-tower-10s-05b-041h-06lp-steel-h-600x200_workspace-summary__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_workspace_summary.json",
+      "label": "native_authoring_workspace_summary.json",
+      "sha256": "165aff74c53ea4b573926d41b4c0ff4d4d3873d56c2d517b5fdbd4d3d287bf53",
+      "bytes": 14999
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/outrigger_transfer_tower/native_authoring_workspace_draft.json",
+      "label": "native_authoring_workspace_draft.json",
+      "sha256": "71e7b232936113a6f71430c7e713e96f1c3de56f32d4d3b78c3d6dd17a3757d9",
+      "bytes": 1111
+    }
+  ],
+  "summary": {
+    "artifact_count": 2
+  }
+}

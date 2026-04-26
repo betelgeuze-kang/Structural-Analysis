@@ -1,0 +1,40 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/transfer_podium_tower_proxy_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/transfer_podium_tower_proxy_local/model.json",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/transfer_podium_tower_proxy_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/transfer_podium_tower_proxy_local.json"
+  },
+  "bytes_copied": 11917,
+  "declared_format": "json_graph",
+  "family_id": "transfer_podium_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "bridge_contract_pass": true,
+    "bridge_exactness_tier": "raw-preview",
+    "bridge_mode": "point_scan_chain",
+    "bridge_report_path": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/bridge_report.json",
+    "bridge_source_id": "midas_support_multifamily_building_archive",
+    "canonical_promotion_blocker": "Canonical benchmark model has not been collected yet; current local evidence is a bridged decoded-preview graph.",
+    "canonical_promotion_next_source_id": "peer_transfer_podium_tower_remote",
+    "canonical_promotion_next_source_url": "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf",
+    "canonical_promotion_priority": 1,
+    "canonical_promotion_status": "source_hunt_pending"
+  },
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/model.json",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/model.json",
+  "sha256": "09c40b61837fdcd2b5157ebfbc604fe74111ab45b7fffd9727729432f96d4ef5",
+  "source_exists": true,
+  "source_format": "json_graph",
+  "source_id": "transfer_podium_tower_proxy_local",
+  "source_index": 3,
+  "source_urls": [
+    "https://support.midasuser.com/"
+  ],
+  "status": "collected",
+  "title": "Transfer podium tower local bridged graph from MIDAS multifamily building archive"
+}

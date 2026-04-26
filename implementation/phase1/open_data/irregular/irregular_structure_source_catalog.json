@@ -1,0 +1,2259 @@
+{
+  "schema_version": "1.0",
+  "catalog_version": "0.4.0",
+  "generated_at": "2026-04-03T14:28:08Z",
+  "purpose": "Curated irregular-structure source catalog for authority-grade benchmark discovery, native-roundtrip candidate scouting, and AI-learning oriented irregular-topology intake.",
+  "summary": {
+    "family_count": 20,
+    "source_record_count": 32,
+    "local_ready_count": 15,
+    "remote_candidate_count": 17,
+    "authority_high_like_count": 31,
+    "ai_high_like_count": 32
+  },
+  "structure_families": [
+    {
+      "id": "transfer_podium_tower",
+      "priority": 1,
+      "why_it_matters": "Visible transfer podiums expose sharp load-path jumps and are common in real high-rises.",
+      "irregularity_tags": [
+        "load_transfer",
+        "podium",
+        "transfer_story",
+        "vertical_irregularity"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "transfer-story demand ratio; column discontinuity penalty; load-path continuity",
+      "source_record_count": 3,
+      "local_ready_source_count": 2,
+      "source_formats": [
+        "json_graph",
+        "npz",
+        "meb",
+        "report_pdf",
+        "model_text",
+        "zip_bundle"
+      ],
+      "evidence_classes": [
+        "official_benchmark_remote",
+        "repo_local_bridged_graph",
+        "repo_local_native_binary_model"
+      ]
+    },
+    {
+      "id": "soft_story_podium_tower",
+      "priority": 2,
+      "why_it_matters": "Canonical soft-story risk with clear drift concentration and strong regression value.",
+      "irregularity_tags": [
+        "drift_concentration",
+        "soft_story",
+        "stiffness_drop",
+        "vertical_irregularity"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "story stiffness ratio; interstory drift concentration; P-Delta amplification",
+      "source_record_count": 3,
+      "local_ready_source_count": 2,
+      "source_formats": [
+        "tcl",
+        "json_graph",
+        "npz",
+        "meb",
+        "model_text",
+        "zip_bundle"
+      ],
+      "evidence_classes": [
+        "official_benchmark_native_text",
+        "repo_local_bridged_graph",
+        "repo_local_native_binary_model"
+      ]
+    },
+    {
+      "id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "why_it_matters": "Offset core or mass eccentricity makes torsion and modal coupling easy to see and hard to fake.",
+      "irregularity_tags": [
+        "core_offset",
+        "mass_eccentricity",
+        "plan_asymmetry",
+        "torsion"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "torsional irregularity index; corner drift spread; center-of-rigidity offset",
+      "source_record_count": 3,
+      "local_ready_source_count": 3,
+      "source_formats": [
+        "tcl",
+        "json_graph",
+        "npz",
+        "csv_tables",
+        "pdf",
+        "zip"
+      ],
+      "evidence_classes": [
+        "official_benchmark_native_text",
+        "repo_local_bridged_graph",
+        "repo_local_proxy"
+      ]
+    },
+    {
+      "id": "setback_tower",
+      "priority": 4,
+      "why_it_matters": "Setbacks are a classic vertical irregularity that break stiffness and mass continuity.",
+      "irregularity_tags": [
+        "load_path_step",
+        "massing",
+        "setback",
+        "vertical_irregularity"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "setback-level demand jump; story shear redistribution; mode-shape discontinuity",
+      "source_record_count": 2,
+      "local_ready_source_count": 1,
+      "source_formats": [
+        "ifc",
+        "report_pdf",
+        "model_text"
+      ],
+      "evidence_classes": [
+        "geometry_exchange_remote",
+        "official_benchmark_remote"
+      ]
+    },
+    {
+      "id": "reentrant_corner_tower",
+      "priority": 5,
+      "why_it_matters": "L/U/T-plan corners concentrate diaphragm shear and edge drift, making them useful for torsion-aware learning.",
+      "irregularity_tags": [
+        "corner_hotspot",
+        "diaphragm_torsion",
+        "plan_irregularity",
+        "reentrant_corner"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "corner drift amplification; diaphragm shear concentration; torsion/drift ratio",
+      "source_record_count": 2,
+      "local_ready_source_count": 1,
+      "source_formats": [
+        "ifc",
+        "report_pdf"
+      ],
+      "evidence_classes": [
+        "geometry_exchange_remote",
+        "official_reference_remote"
+      ]
+    },
+    {
+      "id": "outrigger_megatall_offset_core",
+      "priority": 6,
+      "why_it_matters": "Megatall outriggers are a showpiece and stress coupled core-perimeter load sharing.",
+      "irregularity_tags": [
+        "megatall",
+        "offset_core",
+        "outrigger",
+        "tall_building"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "core drift reduction; outrigger force share; top-out drift limit",
+      "source_record_count": 1,
+      "local_ready_source_count": 1,
+      "source_formats": [
+        "json_graph",
+        "npz"
+      ],
+      "evidence_classes": [
+        "repo_local_bridged_graph"
+      ]
+    },
+    {
+      "id": "discontinuous_braced_frame_tower",
+      "priority": 7,
+      "why_it_matters": "Brace discontinuities create real weak-story behavior and expose load-path breaks beyond simple soft stories.",
+      "irregularity_tags": [
+        "brace_discontinuity",
+        "braced_frame",
+        "load_path_break",
+        "vertical_irregularity"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "brace force redistribution; weak-story check; drift concentration",
+      "source_record_count": 3,
+      "local_ready_source_count": 1,
+      "source_formats": [
+        "tcl"
+      ],
+      "evidence_classes": [
+        "academic_raw_model_remote",
+        "repo_local_text_model"
+      ]
+    },
+    {
+      "id": "hanging_column_podium_tower",
+      "priority": 8,
+      "why_it_matters": "Suspended floors and hanging columns are excellent demonstrations of reverse load flow and transfer demand.",
+      "irregularity_tags": [
+        "hanging_column",
+        "suspended_floor",
+        "transfer",
+        "vertical_discontinuity"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "tcl"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "hanging-member force path completeness; transfer deflection; secondary-force amplification",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "ifc",
+        "report_pdf"
+      ],
+      "evidence_classes": [
+        "academic_appendix_remote"
+      ]
+    },
+    {
+      "id": "diagrid_exoskeleton_asymmetric_tower",
+      "priority": 9,
+      "why_it_matters": "Diagrid exoskeletons are visually strong and test perimeter stiffness reasoning under asymmetry.",
+      "irregularity_tags": [
+        "asymmetry",
+        "diagrid",
+        "exoskeleton",
+        "perimeter_stiffness"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "perimeter-to-core stiffness share; lateral efficiency; node stress concentration",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "ifc",
+        "json_graph"
+      ],
+      "evidence_classes": [
+        "academic_geometry_remote"
+      ]
+    },
+    {
+      "id": "split_core_linked_towers",
+      "priority": 10,
+      "why_it_matters": "Linked towers and split cores are a good coupled-system benchmark with clear visual wow.",
+      "irregularity_tags": [
+        "coupled_system",
+        "linked_towers",
+        "skybridge",
+        "split_core"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "inter-tower drift differential; link force demand; coupling mode separation",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "ifc",
+        "dxf"
+      ],
+      "evidence_classes": [
+        "concept_geometry_remote"
+      ]
+    },
+    {
+      "id": "cantilevered_upper_volume_tower",
+      "priority": 11,
+      "why_it_matters": "Large overhangs make load reversal and support demand obvious.",
+      "irregularity_tags": [
+        "cantilever",
+        "load_reversal",
+        "mass_offset",
+        "overhang"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "tcl"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "tip deflection; support moment ratio; gravity-lateral interaction",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "ifc",
+        "dxf"
+      ],
+      "evidence_classes": [
+        "concept_geometry_remote"
+      ]
+    },
+    {
+      "id": "vertical_mass_jump_tower",
+      "priority": 12,
+      "why_it_matters": "Abrupt mass changes shift modes and acceleration demands in a way learning systems should notice.",
+      "irregularity_tags": [
+        "dynamic_shift",
+        "mass_irregularity",
+        "stiffness_mismatch",
+        "vertical_jump"
+      ],
+      "likely_formats": [
+        "csv",
+        "json",
+        "mgt"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "mode-shape jump; story acceleration ratio; mass-stiffness mismatch index",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "metadata_json",
+        "sensor_csv"
+      ],
+      "evidence_classes": [
+        "measured_response_remote"
+      ]
+    },
+    {
+      "id": "atrium_void_ring_tower",
+      "priority": 13,
+      "why_it_matters": "A large internal void creates tricky diaphragm flow and strong perimeter demand.",
+      "irregularity_tags": [
+        "atrium_void",
+        "diaphragm_discontinuity",
+        "plan_void",
+        "torsion"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "diaphragm shear flow around void; torsion amplification; perimeter concentration",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "ifc",
+        "json_graph"
+      ],
+      "evidence_classes": [
+        "bim_geometry_remote"
+      ]
+    },
+    {
+      "id": "twisted_tapered_tower",
+      "priority": 14,
+      "why_it_matters": "Twist plus taper is a compact geometry stress test for shape-aware models.",
+      "irregularity_tags": [
+        "geometry_irregularity",
+        "mode_coupling",
+        "taper",
+        "twist"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "twist angle vs drift; stiffness-gradient sensitivity; coupled-mode ratio",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "ifc",
+        "step",
+        "iges"
+      ],
+      "evidence_classes": [
+        "geometry_exchange_remote"
+      ]
+    },
+    {
+      "id": "sloped_site_stepped_podium_tower",
+      "priority": 15,
+      "why_it_matters": "Grade changes create practical irregularity that is easy to miss in high-level summaries.",
+      "irregularity_tags": [
+        "level_change",
+        "podium_step",
+        "sloping_site",
+        "stepped_foundation"
+      ],
+      "likely_formats": [
+        "csv",
+        "json",
+        "mgt"
+      ],
+      "authority_fit": "medium",
+      "ai_learning_fit": "medium-high",
+      "recommended_kpi_or_validation_angle": "base reaction imbalance; story-to-story discontinuity; foundation demand skew",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "ifc",
+        "dxf"
+      ],
+      "evidence_classes": [
+        "site_geometry_remote"
+      ]
+    },
+    {
+      "id": "skewed_column_frame",
+      "priority": 16,
+      "why_it_matters": "Nonorthogonal grids are a low-noise way to test geometry-aware load transfer.",
+      "irregularity_tags": [
+        "frame_irregularity",
+        "lateral_offset",
+        "nonorthogonal_grid",
+        "skew"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "skew-induced secondary forces; connection demand; plan response coupling",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "ifc",
+        "step"
+      ],
+      "evidence_classes": [
+        "geometry_exchange_remote"
+      ]
+    },
+    {
+      "id": "bridge_skewed_support_span",
+      "priority": 17,
+      "why_it_matters": "Bridge skew broadens the track beyond towers and tests support asymmetry cleanly.",
+      "irregularity_tags": [
+        "bridge",
+        "global_torsion",
+        "skew_support",
+        "support_irregularity"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "support reaction spread; torsional twist under asymmetric load; span continuity",
+      "source_record_count": 1,
+      "local_ready_source_count": 1,
+      "source_formats": [
+        "mgt"
+      ],
+      "evidence_classes": [
+        "public_native_mgt"
+      ]
+    },
+    {
+      "id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "why_it_matters": "Curved bridges are a standard torsion problem and give the corpus a civil-structure edge case.",
+      "irregularity_tags": [
+        "alignment_irregularity",
+        "bridge",
+        "curved_plan",
+        "torsion"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "medium",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "curvature-induced torsion; lane-load asymmetry; lateral-torsional coupling",
+      "source_record_count": 3,
+      "local_ready_source_count": 3,
+      "source_formats": [
+        "mgt",
+        "mcb",
+        "gh",
+        "rhino_3dm"
+      ],
+      "evidence_classes": [
+        "public_native_mgt",
+        "repo_local_archive_proxy"
+      ]
+    },
+    {
+      "id": "long_span_irregular_roof_truss",
+      "priority": 19,
+      "why_it_matters": "Irregular roof trusses are useful for big-span demos and partial-load response learning.",
+      "irregularity_tags": [
+        "gravity_lateral_coupling",
+        "long_span",
+        "roof_truss",
+        "support_irregularity"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "tcl"
+      ],
+      "authority_fit": "medium",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "deflection under partial loading; support reaction imbalance; member utilization spread",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "ifc",
+        "step",
+        "report_pdf"
+      ],
+      "evidence_classes": [
+        "official_reference_remote"
+      ]
+    },
+    {
+      "id": "free_form_shell_core_hybrid",
+      "priority": 20,
+      "why_it_matters": "A shell-plus-core hybrid is the most visually distinctive capstone and the hardest geometry bucket.",
+      "irregularity_tags": [
+        "free_form",
+        "geometry_irregularity",
+        "hybrid_system",
+        "shell"
+      ],
+      "likely_formats": [
+        "json",
+        "mgt",
+        "npz"
+      ],
+      "authority_fit": "medium",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "geometry-to-response consistency; shell membrane action; local instability sensitivity",
+      "source_record_count": 1,
+      "local_ready_source_count": 0,
+      "source_formats": [
+        "step",
+        "iges",
+        "report_pdf"
+      ],
+      "evidence_classes": [
+        "official_reference_remote"
+      ]
+    }
+  ],
+  "source_records": [
+    {
+      "source_id": "midas_multifamily_building_meb_local",
+      "title": "MIDAS multifamily building original native MEB",
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "source_kind": "repo_local_native_binary_support",
+      "formats": [
+        "meb",
+        "zip_bundle"
+      ],
+      "primary_format": "meb",
+      "source_urls": [
+        "https://support.midasuser.com/"
+      ],
+      "local_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/C07_T01_P000_RC_01_\u2524\u2518\u2591\u00ed\u2592\u2555_\u2534\u2553\u253c\u251c.meb",
+      "local_path_exists": true,
+      "companion_paths": [
+        "implementation/phase1/open_data/midas/quality_corpus/raw/midas_support_multifamily_building_archive.zip",
+        "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/adapter_manifest.json",
+        "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/meb_decoded_inventory_report.json"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "repo_local_native_binary_model",
+      "irregularity_tags": [
+        "load_transfer",
+        "podium",
+        "transfer_story",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Visible transfer podiums expose sharp load-path jumps and are common in real high-rises.",
+      "recommended_kpi_or_validation_angle": "transfer-story demand ratio; column discontinuity penalty; load-path continuity",
+      "collection_status": "local_ready",
+      "notes": "Original MIDAS native binary model harvested from the public multifamily building support archive. Keep this for native roundtrip coverage, but do not treat it as canonical for the authority-grade irregular benchmark track until an original benchmark-native IFC/TCL/MGT/INP source is harvested.",
+      "metadata": {
+        "native_binary_header": "MBDG",
+        "alternate_authority_candidate_source_id": "peer_transfer_podium_tower_remote",
+        "benchmark_canonical_eligible": false,
+        "native_local_scope": "native_roundtrip_only",
+        "benchmark_canonical_blocker": "Original MIDAS native binary is useful for roundtrip/native-source coverage, but this track still requires a benchmark-native IFC/TCL/MGT/INP source for canonical authority-grade promotion."
+      }
+    },
+    {
+      "source_id": "peer_transfer_podium_tower_remote",
+      "title": "PEER transfer podium tower benchmark candidate",
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "source_kind": "official_remote_candidate",
+      "formats": [
+        "report_pdf",
+        "model_text"
+      ],
+      "primary_format": "report_pdf",
+      "source_urls": [
+        "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
+        "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+        "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "evidence_class": "official_benchmark_remote",
+      "irregularity_tags": [
+        "load_transfer",
+        "podium",
+        "transfer_story",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Visible transfer podiums expose sharp load-path jumps and are common in real high-rises.",
+      "recommended_kpi_or_validation_angle": "transfer-story demand ratio; column discontinuity penalty; load-path continuity",
+      "collection_status": "remote_candidate",
+      "notes": "High-value authority benchmark candidate for transfer-story load-path discontinuity.",
+      "metadata": {
+        "official_task_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative/tasks",
+        "official_task12_report_url": "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf",
+        "official_final_report_url": "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf"
+      }
+    },
+    {
+      "source_id": "transfer_podium_tower_proxy_local",
+      "title": "Transfer podium tower local bridged graph from MIDAS multifamily building archive",
+      "family_id": "transfer_podium_tower",
+      "priority": 1,
+      "source_kind": "repo_local_bridged",
+      "formats": [
+        "json_graph",
+        "npz"
+      ],
+      "primary_format": "json_graph",
+      "source_urls": [
+        "https://support.midasuser.com/"
+      ],
+      "local_path": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/model.json",
+      "local_path_exists": true,
+      "companion_paths": [
+        "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/dataset.npz",
+        "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/bridge_report.json"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "repo_local_bridged_graph",
+      "irregularity_tags": [
+        "load_transfer",
+        "podium",
+        "transfer_story",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Visible transfer podiums expose sharp load-path jumps and are common in real high-rises.",
+      "recommended_kpi_or_validation_angle": "transfer-story demand ratio; column discontinuity penalty; load-path continuity",
+      "collection_status": "local_ready",
+      "notes": "Execution-ready bridged local graph derived from a decoded MIDAS support archive preview. Stronger than a proxy, but still not a canonical PEER replacement.",
+      "metadata": {
+        "canonical_promotion_priority": 1,
+        "canonical_promotion_status": "source_hunt_pending",
+        "canonical_promotion_next_source_id": "peer_transfer_podium_tower_remote",
+        "canonical_promotion_next_source_url": "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf",
+        "canonical_promotion_blocker": "Canonical benchmark model has not been collected yet; current local evidence is a bridged decoded-preview graph with native MEB support, while official PEER documentation is collected separately as reference-only evidence.",
+        "bridge_report_path": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_multifamily_building_archive_decoded_preview/bridge_report.json",
+        "bridge_contract_pass": true,
+        "bridge_source_id": "midas_support_multifamily_building_archive",
+        "bridge_mode": "point_scan_chain",
+        "bridge_exactness_tier": "raw-preview"
+      }
+    },
+    {
+      "source_id": "midas_neighborhood_facility_meb_local",
+      "title": "MIDAS neighborhood facility original native MEB",
+      "family_id": "soft_story_podium_tower",
+      "priority": 2,
+      "source_kind": "repo_local_native_binary_support",
+      "formats": [
+        "meb",
+        "zip_bundle"
+      ],
+      "primary_format": "meb",
+      "source_urls": [
+        "https://support.midasuser.com/"
+      ],
+      "local_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/C07_T02_P000_RC_02_\u2592\u2518\u2555\u2591\u2557\u00b2\u255a\u2591\u255c\u251c.meb",
+      "local_path_exists": true,
+      "companion_paths": [
+        "implementation/phase1/open_data/midas/quality_corpus/raw/midas_support_neighborhood_facility_archive.zip",
+        "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/adapter_manifest.json",
+        "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_neighborhood_facility_archive/meb_decoded_inventory_report.json"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "repo_local_native_binary_model",
+      "irregularity_tags": [
+        "drift_concentration",
+        "soft_story",
+        "stiffness_drop",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Canonical soft-story risk with clear drift concentration and strong regression value.",
+      "recommended_kpi_or_validation_angle": "story stiffness ratio; interstory drift concentration; P-Delta amplification",
+      "collection_status": "local_ready",
+      "notes": "Original MIDAS native binary model harvested from the public neighborhood facility support archive. Keep this for native roundtrip coverage, but do not treat it as canonical for the authority-grade irregular benchmark track until an original benchmark-native IFC/TCL/MGT/INP source is harvested.",
+      "metadata": {
+        "native_binary_header": "MBDG",
+        "alternate_authority_candidate_source_id": "nheri_soft_story_podium_remote",
+        "benchmark_canonical_eligible": false,
+        "native_local_scope": "native_roundtrip_only",
+        "benchmark_canonical_blocker": "Original MIDAS native binary is useful for roundtrip/native-source coverage, but this track still requires a benchmark-native IFC/TCL/MGT/INP source for canonical authority-grade promotion."
+      }
+    },
+    {
+      "source_id": "nheri_soft_story_podium_remote",
+      "title": "DesignSafe OpenSees pilotis RC frame package",
+      "family_id": "soft_story_podium_tower",
+      "priority": 2,
+      "source_kind": "public_native_source",
+      "formats": [
+        "tcl",
+        "model_text"
+      ],
+      "primary_format": "tcl",
+      "source_urls": [
+        "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+        "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7%20Infilled%20Frame/Fly%20Ash%20Brick%20Infill/Pilotis"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "official_benchmark_native_text",
+      "irregularity_tags": [
+        "drift_concentration",
+        "soft_story",
+        "stiffness_drop",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Canonical soft-story risk with clear drift concentration and strong regression value.",
+      "recommended_kpi_or_validation_angle": "story stiffness ratio; interstory drift concentration; P-Delta amplification",
+      "collection_status": "remote_candidate",
+      "notes": "Published DesignSafe OpenSees package for a G+7 pilotis soft-story RC frame. This is benchmark-native TCL text and is eligible for canonical promotion once harvested locally.",
+      "metadata": {
+        "designsafe_project_id": "PRJ-4831",
+        "designsafe_listing_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis",
+        "designsafe_primary_preview_path": "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl",
+        "designsafe_preview_paths": [
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/analysis_steps.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/definitions.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/elements.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/main.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/materials.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/nodes.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/RCJointModel3D.tcl",
+          "/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7 Infilled Frame/Fly Ash Brick Infill/Pilotis/sections.tcl"
+        ],
+        "provider_asset_kind": "official_native_text_preview_bundle",
+        "designsafe_model_variant": "G+7 Infilled Frame / Fly Ash Brick Infill / Pilotis"
+      }
+    },
+    {
+      "source_id": "soft_story_podium_tower_proxy_local",
+      "title": "Soft-story podium tower local bridged graph from MIDAS neighborhood facility archive",
+      "family_id": "soft_story_podium_tower",
+      "priority": 2,
+      "source_kind": "repo_local_bridged",
+      "formats": [
+        "json_graph",
+        "npz"
+      ],
+      "primary_format": "json_graph",
+      "source_urls": [
+        "https://support.midasuser.com/"
+      ],
+      "local_path": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/model.json",
+      "local_path_exists": true,
+      "companion_paths": [
+        "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/dataset.npz",
+        "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/bridge_report.json"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "repo_local_bridged_graph",
+      "irregularity_tags": [
+        "drift_concentration",
+        "soft_story",
+        "stiffness_drop",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Canonical soft-story risk with clear drift concentration and strong regression value.",
+      "recommended_kpi_or_validation_angle": "story stiffness ratio; interstory drift concentration; P-Delta amplification",
+      "collection_status": "local_ready",
+      "notes": "Execution-ready bridged local graph derived from a decoded MIDAS support archive preview. Stronger than a proxy, but still not the measured NHERI source.",
+      "metadata": {
+        "canonical_promotion_priority": 2,
+        "canonical_promotion_status": "source_hunt_pending",
+        "canonical_promotion_next_source_id": "nheri_soft_story_podium_remote",
+        "canonical_promotion_next_source_url": "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+        "canonical_promotion_blocker": "Measured or model-text upstream source is not collected locally; current local evidence is a bridged decoded-preview graph.",
+        "bridge_report_path": "implementation/phase1/open_data/midas/quality_corpus/bridged/midas_support_neighborhood_facility_archive_decoded_preview/bridge_report.json",
+        "bridge_contract_pass": true,
+        "bridge_source_id": "midas_support_neighborhood_facility_archive",
+        "bridge_mode": "point_scan_chain",
+        "bridge_exactness_tier": "heuristic-preview"
+      }
+    },
+    {
+      "source_id": "luxinzheng_megatall_tcl_model1_local",
+      "title": "OpenSees 606 m mega-tall building Model 1 TCL",
+      "family_id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "source_kind": "public_native_source",
+      "formats": [
+        "tcl",
+        "pdf",
+        "zip"
+      ],
+      "primary_format": "tcl",
+      "source_urls": [
+        "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+        "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip"
+      ],
+      "local_path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/opensees.tcl",
+      "local_path_exists": true,
+      "companion_paths": [
+        "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/OpenSees-Mega-tall-Building.zip",
+        "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/opensees.tcl",
+        "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/Introduction of the benchmark model-v0.1b.pdf"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "official_benchmark_native_text",
+      "irregularity_tags": [
+        "core_offset",
+        "mass_eccentricity",
+        "plan_asymmetry",
+        "torsion"
+      ],
+      "why_it_matters": "Offset core or mass eccentricity makes torsion and modal coupling easy to see and hard to fake.",
+      "recommended_kpi_or_validation_angle": "torsional irregularity index; corner drift spread; center-of-rigidity offset",
+      "collection_status": "local_ready",
+      "notes": "Harvested public OpenSees TCL package for the 606 m mega-tall building benchmark. This is benchmark-native model text and qualifies as canonical evidence for the torsionally eccentric core tower family.",
+      "metadata": {
+        "benchmark_variant": "Model1",
+        "upstream_provider": "Tsinghua University benchmark page referenced by opstool docs",
+        "model_mesh_note": "Model 1 coarse mesh; package also includes Model 2 refined mesh."
+      }
+    },
+    {
+      "source_id": "offset_core_megatall_torsion_bridged_local",
+      "title": "Offset-core megatall torsion bridged graph",
+      "family_id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "source_kind": "repo_local_bridged",
+      "formats": [
+        "json_graph",
+        "npz"
+      ],
+      "primary_format": "json_graph",
+      "source_urls": [
+        "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+        "https://github.com/yexiang92/opstool"
+      ],
+      "local_path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+      "local_path_exists": true,
+      "companion_paths": [
+        "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/dataset.npz",
+        "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/bridge_report.json"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "repo_local_bridged_graph",
+      "irregularity_tags": [
+        "core_offset",
+        "mass_eccentricity",
+        "plan_asymmetry",
+        "torsion"
+      ],
+      "why_it_matters": "Offset core or mass eccentricity makes torsion and modal coupling easy to see and hard to fake.",
+      "recommended_kpi_or_validation_angle": "torsional irregularity index; corner drift spread; center-of-rigidity offset",
+      "collection_status": "local_ready",
+      "notes": "Execution-ready bridged graph for offset-core torsion and modal-coupling rehearsal. This remains useful for bridge-evidence runs, but canonical promotion is now backed by a harvested public TCL source.",
+      "metadata": {
+        "canonical_promotion_priority": 3,
+        "canonical_promotion_status": "promoted_to_canonical",
+        "canonical_promotion_promoted_source_id": "luxinzheng_megatall_tcl_model1_local",
+        "canonical_promotion_blocker": "Resolved by harvested public OpenSees TCL source from the published 606 m mega-tall building benchmark package.",
+        "bridge_report_path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/bridge_report.json",
+        "bridge_contract_pass": true
+      }
+    },
+    {
+      "source_id": "tpu_interference_highrise_local",
+      "title": "TPU interference highrise response proxy",
+      "family_id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "source_kind": "repo_local_proxy",
+      "formats": [
+        "csv_tables"
+      ],
+      "primary_format": "csv_tables",
+      "source_urls": [
+        "https://db.wind.arch.t-kougei.ac.jp/"
+      ],
+      "local_path": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+      "local_path_exists": true,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "repo_local_proxy",
+      "irregularity_tags": [
+        "core_offset",
+        "mass_eccentricity",
+        "plan_asymmetry",
+        "torsion"
+      ],
+      "why_it_matters": "Offset core or mass eccentricity makes torsion and modal coupling easy to see and hard to fake.",
+      "recommended_kpi_or_validation_angle": "torsional irregularity index; corner drift spread; center-of-rigidity offset",
+      "collection_status": "local_ready",
+      "notes": "Wind-response proxy for asymmetric tall-building response patterns; useful for learning, not a direct structural benchmark replacement.",
+      "metadata": {}
+    },
+    {
+      "source_id": "peer_setback_tower_remote",
+      "title": "PEER setback tower candidate",
+      "family_id": "setback_tower",
+      "priority": 4,
+      "source_kind": "official_remote_candidate",
+      "formats": [
+        "report_pdf",
+        "model_text"
+      ],
+      "primary_format": "report_pdf",
+      "source_urls": [
+        "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "evidence_class": "official_benchmark_remote",
+      "irregularity_tags": [
+        "load_path_step",
+        "massing",
+        "setback",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Setbacks are a classic vertical irregularity that break stiffness and mass continuity.",
+      "recommended_kpi_or_validation_angle": "setback-level demand jump; story shear redistribution; mode-shape discontinuity",
+      "collection_status": "remote_candidate",
+      "notes": "Strong candidate for mode-shape discontinuity and mass/stiffness redistribution across setbacks.",
+      "metadata": {}
+    },
+    {
+      "source_id": "setback_tower_proxy_local",
+      "title": "Setback tower local proxy from twisted tapered IFC",
+      "family_id": "setback_tower",
+      "priority": 4,
+      "source_kind": "collected_remote_proxy",
+      "formats": [
+        "ifc"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://zenodo.org/"
+      ],
+      "local_path": "implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc",
+      "local_path_exists": true,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "evidence_class": "geometry_exchange_remote",
+      "irregularity_tags": [
+        "load_path_step",
+        "massing",
+        "setback",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Setbacks are a classic vertical irregularity that break stiffness and mass continuity.",
+      "recommended_kpi_or_validation_angle": "setback-level demand jump; story shear redistribution; mode-shape discontinuity",
+      "collection_status": "local_ready",
+      "notes": "Execution-ready local geometry proxy for stiffness/mass redistribution across tapered setback-like towers. Geometry-only proxy, not a canonical PEER setback model.",
+      "metadata": {}
+    },
+    {
+      "source_id": "peer_reentrant_corner_remote",
+      "title": "PEER re-entrant corner tower candidate",
+      "family_id": "reentrant_corner_tower",
+      "priority": 5,
+      "source_kind": "official_remote_candidate",
+      "formats": [
+        "ifc",
+        "report_pdf"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://peer.berkeley.edu/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "official_reference_remote",
+      "irregularity_tags": [
+        "corner_hotspot",
+        "diaphragm_torsion",
+        "plan_irregularity",
+        "reentrant_corner"
+      ],
+      "why_it_matters": "L/U/T-plan corners concentrate diaphragm shear and edge drift, making them useful for torsion-aware learning.",
+      "recommended_kpi_or_validation_angle": "corner drift amplification; diaphragm shear concentration; torsion/drift ratio",
+      "collection_status": "remote_candidate",
+      "notes": "Good plan-irregularity family for diaphragm discontinuity and corner demand concentration.",
+      "metadata": {}
+    },
+    {
+      "source_id": "reentrant_corner_tower_proxy_local",
+      "title": "Re-entrant corner local proxy from skewed column IFC",
+      "family_id": "reentrant_corner_tower",
+      "priority": 5,
+      "source_kind": "collected_remote_proxy",
+      "formats": [
+        "ifc"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://zenodo.org/"
+      ],
+      "local_path": "implementation/phase1/open_data/irregular/collected/artifacts/skewed_column_frame_remote/a4.ifc",
+      "local_path_exists": true,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "evidence_class": "geometry_exchange_remote",
+      "irregularity_tags": [
+        "corner_hotspot",
+        "diaphragm_torsion",
+        "plan_irregularity",
+        "reentrant_corner"
+      ],
+      "why_it_matters": "L/U/T-plan corners concentrate diaphragm shear and edge drift, making them useful for torsion-aware learning.",
+      "recommended_kpi_or_validation_angle": "corner drift amplification; diaphragm shear concentration; torsion/drift ratio",
+      "collection_status": "local_ready",
+      "notes": "Execution-ready plan-irregularity proxy for corner concentration and diaphragm discontinuity rehearsal. Geometry proxy only; not the canonical PEER re-entrant case.",
+      "metadata": {}
+    },
+    {
+      "source_id": "opstool_606m_megatall_model_local",
+      "title": "Opstool 606m megatall bridged model",
+      "family_id": "outrigger_megatall_offset_core",
+      "priority": 6,
+      "source_kind": "repo_local_bridged",
+      "formats": [
+        "json_graph",
+        "npz"
+      ],
+      "primary_format": "json_graph",
+      "source_urls": [
+        "https://github.com/utopiatek/opstool"
+      ],
+      "local_path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+      "local_path_exists": true,
+      "companion_paths": [
+        "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/dataset.npz",
+        "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/bridge_report.json"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "evidence_class": "repo_local_bridged_graph",
+      "irregularity_tags": [
+        "megatall",
+        "offset_core",
+        "outrigger",
+        "tall_building"
+      ],
+      "why_it_matters": "Megatall outriggers are a showpiece and stress coupled core-perimeter load sharing.",
+      "recommended_kpi_or_validation_angle": "core drift reduction; outrigger force share; top-out drift limit",
+      "collection_status": "local_ready",
+      "notes": "Best local megatall graph proxy for outrigger and offset-core style learning and benchmark rehearsal.",
+      "metadata": {
+        "bridge_report_path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/bridge_report.json",
+        "bridge_contract_pass": true
+      }
+    },
+    {
+      "source_id": "amaelkady_constructbrace_github_remote",
+      "title": "ConstructBrace OpenSees GitHub raw proxy",
+      "family_id": "discontinuous_braced_frame_tower",
+      "priority": 7,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "tcl"
+      ],
+      "primary_format": "tcl",
+      "source_urls": [
+        "https://github.com/amaelkady/OpenSEES_Models_CBF"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "evidence_class": "academic_raw_model_remote",
+      "irregularity_tags": [
+        "brace_discontinuity",
+        "braced_frame",
+        "load_path_break",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Brace discontinuities create real weak-story behavior and expose load-path breaks beyond simple soft stories.",
+      "recommended_kpi_or_validation_angle": "brace force redistribution; weak-story check; drift concentration",
+      "collection_status": "remote_candidate",
+      "notes": "Direct GitHub raw Tcl proxy for brace-driven irregularity workflows; useful for collector and parser coverage.",
+      "metadata": {
+        "github_download_url": "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/ConstructBrace.tcl",
+        "github_api_url": "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files"
+      }
+    },
+    {
+      "source_id": "amaelkady_scbf16cg_github_remote",
+      "title": "SCBF16CG OpenSees GitHub raw benchmark candidate",
+      "family_id": "discontinuous_braced_frame_tower",
+      "priority": 7,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "tcl"
+      ],
+      "primary_format": "tcl",
+      "source_urls": [
+        "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "evidence_class": "academic_raw_model_remote",
+      "irregularity_tags": [
+        "brace_discontinuity",
+        "braced_frame",
+        "load_path_break",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Brace discontinuities create real weak-story behavior and expose load-path breaks beyond simple soft stories.",
+      "recommended_kpi_or_validation_angle": "brace force redistribution; weak-story check; drift concentration",
+      "collection_status": "remote_candidate",
+      "notes": "Direct GitHub raw Tcl benchmark to widen irregular braced-frame collection beyond helper-only brace construction scripts.",
+      "metadata": {
+        "github_download_url": "https://raw.githubusercontent.com/amaelkady/OpenSEES_Models_CBF/main/Models%20and%20Tcl%20Files/SCBF16CG.tcl",
+        "github_api_url": "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files",
+        "provider_asset_kind": "opensees_tcl_benchmark"
+      }
+    },
+    {
+      "source_id": "scbf16b_shell_beam_mix_local",
+      "title": "SCBF16B shell-beam mixed OpenSees model",
+      "family_id": "discontinuous_braced_frame_tower",
+      "priority": 7,
+      "source_kind": "repo_local_source",
+      "formats": [
+        "tcl"
+      ],
+      "primary_format": "tcl",
+      "source_urls": [
+        "https://opensees.berkeley.edu/"
+      ],
+      "local_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+      "local_path_exists": true,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "evidence_class": "repo_local_text_model",
+      "irregularity_tags": [
+        "brace_discontinuity",
+        "braced_frame",
+        "load_path_break",
+        "vertical_irregularity"
+      ],
+      "why_it_matters": "Brace discontinuities create real weak-story behavior and expose load-path breaks beyond simple soft stories.",
+      "recommended_kpi_or_validation_angle": "brace force redistribution; weak-story check; drift concentration",
+      "collection_status": "local_ready",
+      "notes": "Useful local text model for shell-beam mixed lateral systems and brace discontinuity proxy tasks.",
+      "metadata": {}
+    },
+    {
+      "source_id": "hanging_column_tower_remote",
+      "title": "Hanging-column tower benchmark candidate",
+      "family_id": "hanging_column_podium_tower",
+      "priority": 8,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "ifc",
+        "report_pdf"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://www.designsafe-ci.org/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "academic_appendix_remote",
+      "irregularity_tags": [
+        "hanging_column",
+        "suspended_floor",
+        "transfer",
+        "vertical_discontinuity"
+      ],
+      "why_it_matters": "Suspended floors and hanging columns are excellent demonstrations of reverse load flow and transfer demand.",
+      "recommended_kpi_or_validation_angle": "hanging-member force path completeness; transfer deflection; secondary-force amplification",
+      "collection_status": "remote_candidate",
+      "notes": "Suspended floor and hanging-column systems are visually strong and provide reverse load-path examples.",
+      "metadata": {}
+    },
+    {
+      "source_id": "diagrid_exoskeleton_remote",
+      "title": "Diagrid exoskeleton asymmetric tower candidate",
+      "family_id": "diagrid_exoskeleton_asymmetric_tower",
+      "priority": 9,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "ifc",
+        "json_graph"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://www.ctbuh.org/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "evidence_class": "academic_geometry_remote",
+      "irregularity_tags": [
+        "asymmetry",
+        "diagrid",
+        "exoskeleton",
+        "perimeter_stiffness"
+      ],
+      "why_it_matters": "Diagrid exoskeletons are visually strong and test perimeter stiffness reasoning under asymmetry.",
+      "recommended_kpi_or_validation_angle": "perimeter-to-core stiffness share; lateral efficiency; node stress concentration",
+      "collection_status": "remote_candidate",
+      "notes": "Good for perimeter-stiffness reasoning and non-orthogonal member graph learning.",
+      "metadata": {}
+    },
+    {
+      "source_id": "split_core_linked_towers_remote",
+      "title": "Split-core linked towers candidate",
+      "family_id": "split_core_linked_towers",
+      "priority": 10,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "ifc",
+        "dxf"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://www.ctbuh.org/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "concept_geometry_remote",
+      "irregularity_tags": [
+        "coupled_system",
+        "linked_towers",
+        "skybridge",
+        "split_core"
+      ],
+      "why_it_matters": "Linked towers and split cores are a good coupled-system benchmark with clear visual wow.",
+      "recommended_kpi_or_validation_angle": "inter-tower drift differential; link force demand; coupling mode separation",
+      "collection_status": "remote_candidate",
+      "notes": "Linked towers and skybridges are strong coupled-system learning cases even when benchmark maturity is limited.",
+      "metadata": {}
+    },
+    {
+      "source_id": "cantilevered_upper_volume_remote",
+      "title": "Cantilevered upper-volume tower candidate",
+      "family_id": "cantilevered_upper_volume_tower",
+      "priority": 11,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "ifc",
+        "dxf"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://www.structurae.net/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "evidence_class": "concept_geometry_remote",
+      "irregularity_tags": [
+        "cantilever",
+        "load_reversal",
+        "mass_offset",
+        "overhang"
+      ],
+      "why_it_matters": "Large overhangs make load reversal and support demand obvious.",
+      "recommended_kpi_or_validation_angle": "tip deflection; support moment ratio; gravity-lateral interaction",
+      "collection_status": "remote_candidate",
+      "notes": "Good overhang and load-reversal family; needs benchmark-quality response data later.",
+      "metadata": {}
+    },
+    {
+      "source_id": "vertical_mass_jump_remote",
+      "title": "Vertical mass jump tower candidate",
+      "family_id": "vertical_mass_jump_tower",
+      "priority": 12,
+      "source_kind": "official_remote_candidate",
+      "formats": [
+        "metadata_json",
+        "sensor_csv"
+      ],
+      "primary_format": "metadata_json",
+      "source_urls": [
+        "https://www.usgs.gov/programs/earthquake-hazards/nsmp-national-strong-motion-project"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "measured_response_remote",
+      "irregularity_tags": [
+        "dynamic_shift",
+        "mass_irregularity",
+        "stiffness_mismatch",
+        "vertical_jump"
+      ],
+      "why_it_matters": "Abrupt mass changes shift modes and acceleration demands in a way learning systems should notice.",
+      "recommended_kpi_or_validation_angle": "mode-shape jump; story acceleration ratio; mass-stiffness mismatch index",
+      "collection_status": "remote_candidate",
+      "notes": "Measured building-response track for mass discontinuity and mode-shape shift.",
+      "metadata": {}
+    },
+    {
+      "source_id": "atrium_void_ring_remote",
+      "title": "Atrium void ring tower candidate",
+      "family_id": "atrium_void_ring_tower",
+      "priority": 13,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "ifc",
+        "json_graph"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://www.buildingsmart.org/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "bim_geometry_remote",
+      "irregularity_tags": [
+        "atrium_void",
+        "diaphragm_discontinuity",
+        "plan_void",
+        "torsion"
+      ],
+      "why_it_matters": "A large internal void creates tricky diaphragm flow and strong perimeter demand.",
+      "recommended_kpi_or_validation_angle": "diaphragm shear flow around void; torsion amplification; perimeter concentration",
+      "collection_status": "remote_candidate",
+      "notes": "Large diaphragm voids are excellent for graph learning and diaphragm force-flow tracing.",
+      "metadata": {}
+    },
+    {
+      "source_id": "twisted_tapered_tower_remote",
+      "title": "Twisted tapered tower candidate",
+      "family_id": "twisted_tapered_tower",
+      "priority": 14,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "ifc",
+        "step",
+        "iges"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://www.rhino3d.com/inside/revit/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "geometry_exchange_remote",
+      "irregularity_tags": [
+        "geometry_irregularity",
+        "mode_coupling",
+        "taper",
+        "twist"
+      ],
+      "why_it_matters": "Twist plus taper is a compact geometry stress test for shape-aware models.",
+      "recommended_kpi_or_validation_angle": "twist angle vs drift; stiffness-gradient sensitivity; coupled-mode ratio",
+      "collection_status": "remote_candidate",
+      "notes": "Strong geometry-irregularity family for shape-aware AI models and meshing workflows.",
+      "metadata": {
+        "zenodo_download_url": "https://zenodo.org/records/15782433/files/DS3_TalTech_V4.ifc?download=1",
+        "provider_asset_kind": "ifc_geometry_proxy"
+      }
+    },
+    {
+      "source_id": "sloped_site_stepped_podium_remote",
+      "title": "Sloped-site stepped podium tower candidate",
+      "family_id": "sloped_site_stepped_podium_tower",
+      "priority": 15,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "ifc",
+        "dxf"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://www.structurae.net/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium",
+      "ai_learning_fit": "high",
+      "evidence_class": "site_geometry_remote",
+      "irregularity_tags": [
+        "level_change",
+        "podium_step",
+        "sloping_site",
+        "stepped_foundation"
+      ],
+      "why_it_matters": "Grade changes create practical irregularity that is easy to miss in high-level summaries.",
+      "recommended_kpi_or_validation_angle": "base reaction imbalance; story-to-story discontinuity; foundation demand skew",
+      "collection_status": "remote_candidate",
+      "notes": "Useful family for terrain-driven podium stepping and nonuniform support conditions.",
+      "metadata": {}
+    },
+    {
+      "source_id": "skewed_column_frame_remote",
+      "title": "Skewed-column frame candidate",
+      "family_id": "skewed_column_frame",
+      "priority": 16,
+      "source_kind": "academic_remote_candidate",
+      "formats": [
+        "ifc",
+        "step"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://www.buildingsmart.org/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "evidence_class": "geometry_exchange_remote",
+      "irregularity_tags": [
+        "frame_irregularity",
+        "lateral_offset",
+        "nonorthogonal_grid",
+        "skew"
+      ],
+      "why_it_matters": "Nonorthogonal grids are a low-noise way to test geometry-aware load transfer.",
+      "recommended_kpi_or_validation_angle": "skew-induced secondary forces; connection demand; plan response coupling",
+      "collection_status": "remote_candidate",
+      "notes": "Good non-orthogonal frame family for local-coordinate and support-skew learning.",
+      "metadata": {
+        "zenodo_download_url": "https://zenodo.org/records/5047709/files/a4.ifc?download=1",
+        "provider_asset_kind": "ifc_geometry_proxy"
+      }
+    },
+    {
+      "source_id": "gtc_public_bridge_bearing_c04_local",
+      "title": "GTC public bridge bearing C04 raw MIDAS model",
+      "family_id": "bridge_skewed_support_span",
+      "priority": 17,
+      "source_kind": "public_native_source",
+      "formats": [
+        "mgt"
+      ],
+      "primary_format": "mgt",
+      "source_urls": [
+        "https://gtc.midasuser.com/"
+      ],
+      "local_path": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt",
+      "local_path_exists": true,
+      "companion_paths": [],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "evidence_class": "public_native_mgt",
+      "irregularity_tags": [
+        "bridge",
+        "global_torsion",
+        "skew_support",
+        "support_irregularity"
+      ],
+      "why_it_matters": "Bridge skew broadens the track beyond towers and tests support asymmetry cleanly.",
+      "recommended_kpi_or_validation_angle": "support reaction spread; torsional twist under asymmetric load; span continuity",
+      "collection_status": "local_ready",
+      "notes": "Current best native MIDAS skew-support bridge source for real roundtrip and authority-facing bridge write-back validation.",
+      "metadata": {}
+    },
+    {
+      "source_id": "gtc_public_bridge_section_a3_local",
+      "title": "GTC public curved bridge section A3 raw MIDAS model",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "source_kind": "public_native_source",
+      "formats": [
+        "mgt"
+      ],
+      "primary_format": "mgt",
+      "source_urls": [
+        "https://gtc.midasuser.com/"
+      ],
+      "local_path": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt",
+      "local_path_exists": true,
+      "companion_paths": [],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "evidence_class": "public_native_mgt",
+      "irregularity_tags": [
+        "alignment_irregularity",
+        "bridge",
+        "curved_plan",
+        "torsion"
+      ],
+      "why_it_matters": "Curved bridges are a standard torsion problem and give the corpus a civil-structure edge case.",
+      "recommended_kpi_or_validation_angle": "curvature-induced torsion; lane-load asymmetry; lateral-torsional coupling",
+      "collection_status": "local_ready",
+      "notes": "Public raw MIDAS bridge section with curved-plan potential and direct native write-back value.",
+      "metadata": {}
+    },
+    {
+      "source_id": "gtc_public_bridge_section_e1_03_local",
+      "title": "GTC public curved bridge section E1-03 raw MIDAS model",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "source_kind": "public_native_source",
+      "formats": [
+        "mgt"
+      ],
+      "primary_format": "mgt",
+      "source_urls": [
+        "https://gtc.midasuser.com/"
+      ],
+      "local_path": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_e1_03.mgt",
+      "local_path_exists": true,
+      "companion_paths": [],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "evidence_class": "public_native_mgt",
+      "irregularity_tags": [
+        "alignment_irregularity",
+        "bridge",
+        "curved_plan",
+        "torsion"
+      ],
+      "why_it_matters": "Curved bridges are a standard torsion problem and give the corpus a civil-structure edge case.",
+      "recommended_kpi_or_validation_angle": "curvature-induced torsion; lane-load asymmetry; lateral-torsional coupling",
+      "collection_status": "local_ready",
+      "notes": "Second public raw MIDAS bridge section for curved-plan bridge torsion breadth.",
+      "metadata": {}
+    },
+    {
+      "source_id": "midas_fcm_bridge_archive_local",
+      "title": "MIDAS support FCM bridge archive geometry proxy",
+      "family_id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "source_kind": "repo_local_proxy",
+      "formats": [
+        "mcb",
+        "gh",
+        "rhino_3dm"
+      ],
+      "primary_format": "mcb",
+      "source_urls": [
+        "https://gtc.midasuser.com/"
+      ],
+      "local_path": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb",
+      "local_path_exists": true,
+      "companion_paths": [
+        "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge_Final(v2.0.5).gh",
+        "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Tendon_1.3dm"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "repo_local_archive_proxy",
+      "irregularity_tags": [
+        "alignment_irregularity",
+        "bridge",
+        "curved_plan",
+        "torsion"
+      ],
+      "why_it_matters": "Curved bridges are a standard torsion problem and give the corpus a civil-structure edge case.",
+      "recommended_kpi_or_validation_angle": "curvature-induced torsion; lane-load asymmetry; lateral-torsional coupling",
+      "collection_status": "local_ready",
+      "notes": "Great AI-learning geometry proxy for segmental/FCM bridge authoring despite not being raw native MIDAS text.",
+      "metadata": {}
+    },
+    {
+      "source_id": "iass_long_span_roof_remote",
+      "title": "IASS long-span irregular roof truss candidate",
+      "family_id": "long_span_irregular_roof_truss",
+      "priority": 19,
+      "source_kind": "official_remote_candidate",
+      "formats": [
+        "ifc",
+        "step",
+        "report_pdf"
+      ],
+      "primary_format": "ifc",
+      "source_urls": [
+        "https://iass-structures.org/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "evidence_class": "official_reference_remote",
+      "irregularity_tags": [
+        "gravity_lateral_coupling",
+        "long_span",
+        "roof_truss",
+        "support_irregularity"
+      ],
+      "why_it_matters": "Irregular roof trusses are useful for big-span demos and partial-load response learning.",
+      "recommended_kpi_or_validation_angle": "deflection under partial loading; support reaction imbalance; member utilization spread",
+      "collection_status": "remote_candidate",
+      "notes": "Good route for long-span roof irregularity and snapping/bifurcation-aware shell-truss learning.",
+      "metadata": {}
+    },
+    {
+      "source_id": "iass_freeform_shell_remote",
+      "title": "IASS free-form shell core hybrid candidate",
+      "family_id": "free_form_shell_core_hybrid",
+      "priority": 20,
+      "source_kind": "official_remote_candidate",
+      "formats": [
+        "step",
+        "iges",
+        "report_pdf"
+      ],
+      "primary_format": "step",
+      "source_urls": [
+        "https://iass-structures.org/"
+      ],
+      "local_path": "",
+      "local_path_exists": false,
+      "companion_paths": [],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "evidence_class": "official_reference_remote",
+      "irregularity_tags": [
+        "free_form",
+        "geometry_irregularity",
+        "hybrid_system",
+        "shell"
+      ],
+      "why_it_matters": "A shell-plus-core hybrid is the most visually distinctive capstone and the hardest geometry bucket.",
+      "recommended_kpi_or_validation_angle": "geometry-to-response consistency; shell membrane action; local instability sensitivity",
+      "collection_status": "remote_candidate",
+      "notes": "Best shell-heavy family for AI shape generalization beyond orthogonal frame systems.",
+      "metadata": {}
+    }
+  ],
+  "irregularity_tags": [
+    {
+      "tag": "vertical_irregularity",
+      "family_count": 4
+    },
+    {
+      "tag": "torsion",
+      "family_count": 3
+    },
+    {
+      "tag": "bridge",
+      "family_count": 2
+    },
+    {
+      "tag": "geometry_irregularity",
+      "family_count": 2
+    },
+    {
+      "tag": "support_irregularity",
+      "family_count": 2
+    },
+    {
+      "tag": "alignment_irregularity",
+      "family_count": 1
+    },
+    {
+      "tag": "asymmetry",
+      "family_count": 1
+    },
+    {
+      "tag": "atrium_void",
+      "family_count": 1
+    },
+    {
+      "tag": "brace_discontinuity",
+      "family_count": 1
+    },
+    {
+      "tag": "braced_frame",
+      "family_count": 1
+    },
+    {
+      "tag": "cantilever",
+      "family_count": 1
+    },
+    {
+      "tag": "core_offset",
+      "family_count": 1
+    },
+    {
+      "tag": "corner_hotspot",
+      "family_count": 1
+    },
+    {
+      "tag": "coupled_system",
+      "family_count": 1
+    },
+    {
+      "tag": "curved_plan",
+      "family_count": 1
+    },
+    {
+      "tag": "diagrid",
+      "family_count": 1
+    },
+    {
+      "tag": "diaphragm_discontinuity",
+      "family_count": 1
+    },
+    {
+      "tag": "diaphragm_torsion",
+      "family_count": 1
+    },
+    {
+      "tag": "drift_concentration",
+      "family_count": 1
+    },
+    {
+      "tag": "dynamic_shift",
+      "family_count": 1
+    },
+    {
+      "tag": "exoskeleton",
+      "family_count": 1
+    },
+    {
+      "tag": "frame_irregularity",
+      "family_count": 1
+    },
+    {
+      "tag": "free_form",
+      "family_count": 1
+    },
+    {
+      "tag": "global_torsion",
+      "family_count": 1
+    },
+    {
+      "tag": "gravity_lateral_coupling",
+      "family_count": 1
+    },
+    {
+      "tag": "hanging_column",
+      "family_count": 1
+    },
+    {
+      "tag": "hybrid_system",
+      "family_count": 1
+    },
+    {
+      "tag": "lateral_offset",
+      "family_count": 1
+    },
+    {
+      "tag": "level_change",
+      "family_count": 1
+    },
+    {
+      "tag": "linked_towers",
+      "family_count": 1
+    },
+    {
+      "tag": "load_path_break",
+      "family_count": 1
+    },
+    {
+      "tag": "load_path_step",
+      "family_count": 1
+    },
+    {
+      "tag": "load_reversal",
+      "family_count": 1
+    },
+    {
+      "tag": "load_transfer",
+      "family_count": 1
+    },
+    {
+      "tag": "long_span",
+      "family_count": 1
+    },
+    {
+      "tag": "mass_eccentricity",
+      "family_count": 1
+    },
+    {
+      "tag": "mass_irregularity",
+      "family_count": 1
+    },
+    {
+      "tag": "mass_offset",
+      "family_count": 1
+    },
+    {
+      "tag": "massing",
+      "family_count": 1
+    },
+    {
+      "tag": "megatall",
+      "family_count": 1
+    },
+    {
+      "tag": "mode_coupling",
+      "family_count": 1
+    },
+    {
+      "tag": "nonorthogonal_grid",
+      "family_count": 1
+    },
+    {
+      "tag": "offset_core",
+      "family_count": 1
+    },
+    {
+      "tag": "outrigger",
+      "family_count": 1
+    },
+    {
+      "tag": "overhang",
+      "family_count": 1
+    },
+    {
+      "tag": "perimeter_stiffness",
+      "family_count": 1
+    },
+    {
+      "tag": "plan_asymmetry",
+      "family_count": 1
+    },
+    {
+      "tag": "plan_irregularity",
+      "family_count": 1
+    },
+    {
+      "tag": "plan_void",
+      "family_count": 1
+    },
+    {
+      "tag": "podium",
+      "family_count": 1
+    },
+    {
+      "tag": "podium_step",
+      "family_count": 1
+    },
+    {
+      "tag": "reentrant_corner",
+      "family_count": 1
+    },
+    {
+      "tag": "roof_truss",
+      "family_count": 1
+    },
+    {
+      "tag": "setback",
+      "family_count": 1
+    },
+    {
+      "tag": "shell",
+      "family_count": 1
+    },
+    {
+      "tag": "skew",
+      "family_count": 1
+    },
+    {
+      "tag": "skew_support",
+      "family_count": 1
+    },
+    {
+      "tag": "skybridge",
+      "family_count": 1
+    },
+    {
+      "tag": "sloping_site",
+      "family_count": 1
+    },
+    {
+      "tag": "soft_story",
+      "family_count": 1
+    },
+    {
+      "tag": "split_core",
+      "family_count": 1
+    },
+    {
+      "tag": "stepped_foundation",
+      "family_count": 1
+    },
+    {
+      "tag": "stiffness_drop",
+      "family_count": 1
+    },
+    {
+      "tag": "stiffness_mismatch",
+      "family_count": 1
+    },
+    {
+      "tag": "suspended_floor",
+      "family_count": 1
+    },
+    {
+      "tag": "tall_building",
+      "family_count": 1
+    },
+    {
+      "tag": "taper",
+      "family_count": 1
+    },
+    {
+      "tag": "transfer",
+      "family_count": 1
+    },
+    {
+      "tag": "transfer_story",
+      "family_count": 1
+    },
+    {
+      "tag": "twist",
+      "family_count": 1
+    },
+    {
+      "tag": "vertical_discontinuity",
+      "family_count": 1
+    },
+    {
+      "tag": "vertical_jump",
+      "family_count": 1
+    }
+  ],
+  "authority_suitability": [
+    {
+      "level": "medium-high",
+      "record_count": 17,
+      "source_ids": [
+        "amaelkady_constructbrace_github_remote",
+        "atrium_void_ring_remote",
+        "cantilevered_upper_volume_remote",
+        "diagrid_exoskeleton_remote",
+        "hanging_column_tower_remote",
+        "iass_freeform_shell_remote",
+        "iass_long_span_roof_remote",
+        "midas_fcm_bridge_archive_local",
+        "reentrant_corner_tower_proxy_local",
+        "scbf16b_shell_beam_mix_local",
+        "setback_tower_proxy_local",
+        "skewed_column_frame_remote",
+        "soft_story_podium_tower_proxy_local",
+        "split_core_linked_towers_remote",
+        "tpu_interference_highrise_local",
+        "transfer_podium_tower_proxy_local",
+        "twisted_tapered_tower_remote"
+      ]
+    },
+    {
+      "level": "high",
+      "record_count": 14,
+      "source_ids": [
+        "amaelkady_scbf16cg_github_remote",
+        "gtc_public_bridge_bearing_c04_local",
+        "gtc_public_bridge_section_a3_local",
+        "gtc_public_bridge_section_e1_03_local",
+        "luxinzheng_megatall_tcl_model1_local",
+        "midas_multifamily_building_meb_local",
+        "midas_neighborhood_facility_meb_local",
+        "nheri_soft_story_podium_remote",
+        "offset_core_megatall_torsion_bridged_local",
+        "opstool_606m_megatall_model_local",
+        "peer_reentrant_corner_remote",
+        "peer_setback_tower_remote",
+        "peer_transfer_podium_tower_remote",
+        "vertical_mass_jump_remote"
+      ]
+    },
+    {
+      "level": "medium",
+      "record_count": 1,
+      "source_ids": [
+        "sloped_site_stepped_podium_remote"
+      ]
+    }
+  ],
+  "ai_learning_suitability": [
+    {
+      "level": "high",
+      "record_count": 16,
+      "source_ids": [
+        "amaelkady_constructbrace_github_remote",
+        "amaelkady_scbf16cg_github_remote",
+        "cantilevered_upper_volume_remote",
+        "diagrid_exoskeleton_remote",
+        "gtc_public_bridge_bearing_c04_local",
+        "gtc_public_bridge_section_a3_local",
+        "gtc_public_bridge_section_e1_03_local",
+        "iass_long_span_roof_remote",
+        "opstool_606m_megatall_model_local",
+        "peer_setback_tower_remote",
+        "peer_transfer_podium_tower_remote",
+        "reentrant_corner_tower_proxy_local",
+        "scbf16b_shell_beam_mix_local",
+        "setback_tower_proxy_local",
+        "skewed_column_frame_remote",
+        "sloped_site_stepped_podium_remote"
+      ]
+    },
+    {
+      "level": "very-high",
+      "record_count": 16,
+      "source_ids": [
+        "atrium_void_ring_remote",
+        "hanging_column_tower_remote",
+        "iass_freeform_shell_remote",
+        "luxinzheng_megatall_tcl_model1_local",
+        "midas_fcm_bridge_archive_local",
+        "midas_multifamily_building_meb_local",
+        "midas_neighborhood_facility_meb_local",
+        "nheri_soft_story_podium_remote",
+        "offset_core_megatall_torsion_bridged_local",
+        "peer_reentrant_corner_remote",
+        "soft_story_podium_tower_proxy_local",
+        "split_core_linked_towers_remote",
+        "tpu_interference_highrise_local",
+        "transfer_podium_tower_proxy_local",
+        "twisted_tapered_tower_remote",
+        "vertical_mass_jump_remote"
+      ]
+    }
+  ],
+  "per_format_summary": [
+    {
+      "primary_format": "ifc",
+      "record_count": 12
+    },
+    {
+      "primary_format": "tcl",
+      "record_count": 5
+    },
+    {
+      "primary_format": "json_graph",
+      "record_count": 4
+    },
+    {
+      "primary_format": "mgt",
+      "record_count": 3
+    },
+    {
+      "primary_format": "meb",
+      "record_count": 2
+    },
+    {
+      "primary_format": "report_pdf",
+      "record_count": 2
+    },
+    {
+      "primary_format": "csv_tables",
+      "record_count": 1
+    },
+    {
+      "primary_format": "mcb",
+      "record_count": 1
+    },
+    {
+      "primary_format": "metadata_json",
+      "record_count": 1
+    },
+    {
+      "primary_format": "step",
+      "record_count": 1
+    }
+  ],
+  "per_priority_summary": [
+    {
+      "priority": "1",
+      "record_count": 3
+    },
+    {
+      "priority": "18",
+      "record_count": 3
+    },
+    {
+      "priority": "2",
+      "record_count": 3
+    },
+    {
+      "priority": "3",
+      "record_count": 3
+    },
+    {
+      "priority": "7",
+      "record_count": 3
+    },
+    {
+      "priority": "4",
+      "record_count": 2
+    },
+    {
+      "priority": "5",
+      "record_count": 2
+    },
+    {
+      "priority": "10",
+      "record_count": 1
+    },
+    {
+      "priority": "11",
+      "record_count": 1
+    },
+    {
+      "priority": "12",
+      "record_count": 1
+    },
+    {
+      "priority": "13",
+      "record_count": 1
+    },
+    {
+      "priority": "14",
+      "record_count": 1
+    },
+    {
+      "priority": "15",
+      "record_count": 1
+    },
+    {
+      "priority": "16",
+      "record_count": 1
+    },
+    {
+      "priority": "17",
+      "record_count": 1
+    },
+    {
+      "priority": "19",
+      "record_count": 1
+    },
+    {
+      "priority": "20",
+      "record_count": 1
+    },
+    {
+      "priority": "6",
+      "record_count": 1
+    },
+    {
+      "priority": "8",
+      "record_count": 1
+    },
+    {
+      "priority": "9",
+      "record_count": 1
+    }
+  ],
+  "per_collection_status_summary": [
+    {
+      "collection_status": "remote_candidate",
+      "record_count": 17
+    },
+    {
+      "collection_status": "local_ready",
+      "record_count": 15
+    }
+  ]
+}

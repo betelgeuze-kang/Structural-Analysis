@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-convert-tpu-mat-to-csv",
+  "generated_at": "2026-03-19T13:28:20.918866+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU MAT file converted into flat CSV successfully.",
+  "inputs": {
+    "input_mat": "implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.mat",
+    "source_manifest": "",
+    "source_manifest_data_path": "",
+    "dataset_key": "",
+    "time_key": "",
+    "sample_axis": null,
+    "column_prefix": "signal",
+    "dt_s": null,
+    "summary_only": false
+  },
+  "summary": {
+    "source_name": "",
+    "source_origin_class": "",
+    "loader_backend": "scipy.io.loadmat",
+    "candidate_numeric_dataset_count": 8,
+    "dataset_name": "Wind_pressure_coefficients",
+    "time_name": "",
+    "row_count": 32768,
+    "signal_column_count": 200,
+    "has_time_column": true,
+    "dt_s": 0.001,
+    "duration_hours": 0.009101944444444445,
+    "selected_sample_axis": 0,
+    "time_source_mode": "scalar_sample_frequency"
+  },
+  "candidates": [
+    {
+      "path": "Wind_pressure_coefficients",
+      "shape": [
+        32768,
+        200
+      ],
+      "ndim": 2,
+      "size": 6553600,
+      "dtype": "float32",
+      "time_like": false,
+      "signal_like": true
+    },
+    {
+      "path": "Location_of_measured_points",
+      "shape": [
+        4,
+        200
+      ],
+      "ndim": 2,
+      "size": 800,
+      "dtype": "float64",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Building_breadth",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "float64",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Building_depth",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "float64",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Building_height",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "float64",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Sample_frequency",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "int64",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Sample_period",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "float64",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Wind_direction_angle",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "int64",
+      "time_like": false,
+      "signal_like": false
+    }
+  ],
+  "artifacts": {
+    "out_csv": "implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.csv"
+  }
+}

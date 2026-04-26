@@ -1,0 +1,227 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-rust-md3bead-parity",
+  "generated_at": "2026-02-25T14:43:54.044383+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "rust hook and python reference are numerically equivalent within tolerance",
+  "config": {
+    "rust_hook_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "node_count": 96,
+    "forces": [
+      120.0,
+      180.0,
+      260.0
+    ],
+    "decays": [
+      0.965,
+      0.958,
+      0.952
+    ],
+    "max_steps": 400,
+    "tol": 0.01,
+    "profile_sizes": [
+      2000,
+      4000,
+      8000
+    ],
+    "atol": 0.0001,
+    "rtol": 0.0005
+  },
+  "step1_parity": {
+    "pass": true,
+    "rows": [
+      {
+        "case_id": "C1",
+        "force0": 120.0,
+        "decay": 0.965,
+        "steps_equal": true,
+        "converged_equal": true,
+        "model_equal": true,
+        "fields": {
+          "final_force_norm": {
+            "python": 0.009664788658257938,
+            "rust": 0.00966478892859904,
+            "abs_diff": 2.7034110193502325e-10,
+            "pass": true
+          },
+          "max_unbalanced_force": {
+            "python": 75.15339660661373,
+            "rust": 75.15339660729623,
+            "abs_diff": 6.825047194070066e-10,
+            "pass": true
+          },
+          "kinetic_energy": {
+            "python": 591.166922986691,
+            "rust": 591.1668870372739,
+            "abs_diff": 3.594941711071442e-05,
+            "pass": true
+          },
+          "system_temperature": {
+            "python": 1.3828466034776399,
+            "rust": 1.382846519385436,
+            "abs_diff": 8.409220386695893e-08,
+            "pass": true
+          },
+          "potential_energy": {
+            "python": 43.165817008554235,
+            "rust": 43.16582228821711,
+            "abs_diff": 5.279662872226254e-06,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      {
+        "case_id": "C2",
+        "force0": 180.0,
+        "decay": 0.958,
+        "steps_equal": true,
+        "converged_equal": true,
+        "model_equal": true,
+        "fields": {
+          "final_force_norm": {
+            "python": 0.009831633260401117,
+            "rust": 0.009831633504804215,
+            "abs_diff": 2.444030984538603e-10,
+            "pass": true
+          },
+          "max_unbalanced_force": {
+            "python": 114.67617034931861,
+            "rust": 114.67617034967874,
+            "abs_diff": 3.601314801926492e-10,
+            "pass": true
+          },
+          "kinetic_energy": {
+            "python": 1013.1167812868821,
+            "rust": 1013.1168265271267,
+            "abs_diff": 4.524024461716181e-05,
+            "pass": true
+          },
+          "system_temperature": {
+            "python": 2.3698638158757475,
+            "rust": 2.369863921700881,
+            "abs_diff": 1.0582513354506773e-07,
+            "pass": true
+          },
+          "potential_energy": {
+            "python": 76.2714664839448,
+            "rust": 76.2714861974791,
+            "abs_diff": 1.9713534300080937e-05,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      {
+        "case_id": "C3",
+        "force0": 260.0,
+        "decay": 0.952,
+        "steps_equal": true,
+        "converged_equal": true,
+        "model_equal": true,
+        "fields": {
+          "final_force_norm": {
+            "python": 0.00986114277347532,
+            "rust": 0.009861142135739204,
+            "abs_diff": 6.377361156523209e-10,
+            "pass": true
+          },
+          "max_unbalanced_force": {
+            "python": 166.14053344751218,
+            "rust": 166.14051818886148,
+            "abs_diff": 1.5258650705618493e-05,
+            "pass": true
+          },
+          "kinetic_energy": {
+            "python": 1675.7394631757602,
+            "rust": 1675.7395597115526,
+            "abs_diff": 9.653579240875843e-05,
+            "pass": true
+          },
+          "system_temperature": {
+            "python": 3.919858393393591,
+            "rust": 3.91985861920831,
+            "abs_diff": 2.2581471892380023e-07,
+            "pass": true
+          },
+          "potential_energy": {
+            "python": 133.9601932039855,
+            "rust": 133.96022964379577,
+            "abs_diff": 3.643981025902576e-05,
+            "pass": true
+          }
+        },
+        "pass": true
+      }
+    ]
+  },
+  "step5_parity": {
+    "pass": true,
+    "rows": [
+      {
+        "n": 2000,
+        "bead_equal": true,
+        "bond_equal": true,
+        "model_equal": true,
+        "fields": {
+          "work_scalar": {
+            "python": 57.93891650905874,
+            "rust": 57.938916335314374,
+            "abs_diff": 1.7374436822592543e-07,
+            "pass": true
+          },
+          "max_unbalanced_force": {
+            "python": 140.0,
+            "rust": 140.0,
+            "abs_diff": 0.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      {
+        "n": 4000,
+        "bead_equal": true,
+        "bond_equal": true,
+        "model_equal": true,
+        "fields": {
+          "work_scalar": {
+            "python": 113.08075556430785,
+            "rust": 113.08075515795291,
+            "abs_diff": 4.0635494258367544e-07,
+            "pass": true
+          },
+          "max_unbalanced_force": {
+            "python": 140.0,
+            "rust": 140.0,
+            "abs_diff": 0.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      {
+        "n": 8000,
+        "bead_equal": true,
+        "bond_equal": true,
+        "model_equal": true,
+        "fields": {
+          "work_scalar": {
+            "python": 223.36443528629607,
+            "rust": 223.36443450689765,
+            "abs_diff": 7.793984195814119e-07,
+            "pass": true
+          },
+          "max_unbalanced_force": {
+            "python": 140.0,
+            "rust": 140.0,
+            "abs_diff": 0.0,
+            "pass": true
+          }
+        },
+        "pass": true
+      }
+    ]
+  }
+}

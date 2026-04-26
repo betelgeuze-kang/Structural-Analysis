@@ -1,0 +1,34 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+RELEASE_VIEWERS = [
+    ROOT / "implementation" / "phase1" / "release" / "visualization" / "charts_viewer_singlefile.html",
+    ROOT / "implementation" / "phase1" / "release" / "visualization" / "optimization_history_viewer_singlefile.html",
+    ROOT / "implementation" / "phase1" / "release" / "visualization" / "panel_zone_viewer_singlefile.html",
+]
+
+
+def test_release_singlefile_viewers_do_not_depend_on_remote_or_sidecar_assets() -> None:
+    forbidden_fragments = [
+        "@import url(",
+        "fonts.googleapis",
+        "https://fonts",
+        "./design-theme.css",
+        "./charts.data.js",
+        "./optimization_history.data.js",
+        "./panel_zone.data.js",
+        "./vendor/three.module.js",
+        "./vendor/OrbitControls.js",
+        "cdn.jsdelivr.net",
+        "unpkg.com",
+    ]
+
+    for viewer_path in RELEASE_VIEWERS:
+        text = viewer_path.read_text(encoding="utf-8")
+        assert "window.__STRUCTURAL_SINGLEFILE__=true;" in text, viewer_path.name
+        assert "inlined from src/structure-viewer/design-theme.css" in text, viewer_path.name
+        for fragment in forbidden_fragments:
+            assert fragment not in text, f"{viewer_path.name} keeps forbidden fragment {fragment!r}"

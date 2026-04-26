@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T00:00:00+00:00",
+  "description": "Public raw native MIDAS .mgt sources collected outside the support-attachment corpus for native roundtrip/write-back validation.",
+  "sources": [
+    {
+      "source_id": "gtc_public_bridge_bearing_c04",
+      "url": "https://gtc.midasuser.com/helpdesk/File/Get/10390266",
+      "expected_sha256": "a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610",
+      "source_class": "mgt_text",
+      "source_family": "gtc_public_bridge_bearing",
+      "structure_type": "bearing",
+      "provenance": "gtc_helpdesk_public_raw_mgt",
+      "notes": "Public raw native MIDAS bridge-bearing sample harvested from GTC helpdesk attachment 10390266."
+    },
+    {
+      "source_id": "gtc_public_bridge_section_a3",
+      "url": "https://gtc.midasuser.com/helpdesk/File/Get/10427297",
+      "expected_sha256": "dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6",
+      "source_class": "mgt_text",
+      "source_family": "gtc_public_bridge_section",
+      "structure_type": "bridge_section",
+      "provenance": "gtc_helpdesk_public_raw_mgt",
+      "notes": "Public raw native MIDAS bridge-section sample harvested from GTC helpdesk attachment 10427297."
+    },
+    {
+      "source_id": "gtc_public_bridge_section_e1_03",
+      "url": "https://gtc.midasuser.com/helpdesk/File/Get/10429383",
+      "expected_sha256": "07b32b0cf376d0eb81174e53873e79a92c36b54a770996d2b4d068b8f585c14e",
+      "source_class": "mgt_text",
+      "source_family": "gtc_public_bridge_section",
+      "structure_type": "bridge_section",
+      "provenance": "gtc_helpdesk_public_raw_mgt",
+      "notes": "Public raw native MIDAS bridge-section sample harvested from GTC helpdesk attachment 10429383."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "contract_pass": true,
+  "source_kind": "panel_zone_clash_verification_3d",
+  "rows": [
+    {
+      "member_id": "B401",
+      "clash_count": 0,
+      "clearance_mm": 28.0,
+      "clash_pass": true
+    }
+  ]
+}

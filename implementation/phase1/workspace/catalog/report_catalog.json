@@ -1,0 +1,1069 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-workspace-report-catalog",
+  "generated_at": "2026-02-25T14:43:54.339531+00:00",
+  "workspace": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace",
+  "report_file_count": 141,
+  "input_file_count": 10,
+  "reports": [
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/hf_benchmark_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.json",
+      "bytes": 4714,
+      "sha256": "0179c483cd36f859e74c4c71000e1630ad9581e741b017039045b1cdef5aa1c4",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/topk_comparison_experiment_report.seed_47.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_47.json",
+      "bytes": 19549,
+      "sha256": "205953fb7238b2a753ddccc3648578f38294ccb9c534ec8010d4c18ead83914f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/hf_benchmark_report.seed_47.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_47.json",
+      "bytes": 4727,
+      "sha256": "f4e33470a9705022c32ad2945dded004a53417f3f5242b83af79d2ac24471602",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/subgraph_projection_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/subgraph_projection_report.json",
+      "bytes": 1081,
+      "sha256": "f77ad415726848c291cdc02c6ebcc2386d94b537b376e8fff28980a863f39846",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/buckling_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/buckling_contract_report.json",
+      "bytes": 873,
+      "sha256": "fad5535f188f66571bef5357895d88dc05c32263f2cdcbad75e2a84cecbd8c53",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/pg_gat_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/pg_gat_contract_report.json",
+      "bytes": 877,
+      "sha256": "dc058e837677a15fd941b0491c17b6f62ed62f9ebbaae3f4e12d34924e6cb12d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/commercial_benchmark_cases.from_csv.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/commercial_benchmark_cases.from_csv.json",
+      "bytes": 9221,
+      "sha256": "9e6d41957861d1be1cd8986832c37418a947cc184080e69fc5b1e7e50aa30156",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/hf_benchmark_report.seed_31.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_31.json",
+      "bytes": 4729,
+      "sha256": "3eda5d79e6ed40d0760e414397d99d50856ae67c8ef9c5de689dc34f41c908e8",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/real_accuracy_validation_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/real_accuracy_validation_report.json",
+      "bytes": 3649,
+      "sha256": "b754dde4360a8a96d305fc1d93f2f3bba3e27d96ed5aa9725302b60d5e6d5564",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/dynamics_boundary_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/dynamics_boundary_report.json",
+      "bytes": 1420,
+      "sha256": "4c111f463ad5b4d89b69e99cc182ca8ed7ff10761bbdfce1c688a1ca2b418f9b",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/topk_comparison_experiment_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.json",
+      "bytes": 19520,
+      "sha256": "09f57eed7b834526a2a854efc6efb821771b7936ec649ed0356573f5fd32296d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/soa_dlpack_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/soa_dlpack_contract_report.json",
+      "bytes": 762,
+      "sha256": "f93120f2062f7724112416a90595f00c0ecbaaa679d63a0145175082c4763aa6",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/krylov_projection_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/krylov_projection_report.json",
+      "bytes": 1501,
+      "sha256": "8c522c22d071d5a0f01be10a8a879e1f2fdb0300cf795925379c5d5f17f9e93b",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/topk_precision_suite_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/topk_precision_suite_report.json",
+      "bytes": 5130,
+      "sha256": "cbff7208b0e28ff8516c7137621cc7542f05cd293736897a426a6bdbab49f640",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/topk_comparison_experiment_report.rwth_zenodo.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.rwth_zenodo.json",
+      "bytes": 30649,
+      "sha256": "eba40f42d7d53604bac734280b7a76c9d81964c55f0422ace1a6ffaef41efbc4",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/hf_benchmark_report.seed_11.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_11.json",
+      "bytes": 4726,
+      "sha256": "244bf69d821ebba9e4634b97398c0e49a8c222a5275f064121b2045b2cf6b6da",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/rust_onnx_native_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/rust_onnx_native_contract_report.json",
+      "bytes": 738,
+      "sha256": "92f87616c598342a587a72001246a58cdc329edc70df41e1d7d1520fa62dce0d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/dynamic_time_history_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/dynamic_time_history_report.json",
+      "bytes": 89042,
+      "sha256": "e5d933e049274e1371c440408e3de2dfe1ff1da6d0ee06f0457757942b49e1f3",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/topk_comparison_experiment_report.seed_11.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_11.json",
+      "bytes": 19549,
+      "sha256": "2f474166a36993f3a2c987653dca63d36f4335e8407e7f6fa2d64cead493c212",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/material_map_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/material_map_report.json",
+      "bytes": 2692,
+      "sha256": "8270ff148d4cf471d4bca878446da08a4dba873d06de555d4cdc5b3b334fc2a8",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/topk_comparison_experiment_report.seed_31.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_31.json",
+      "bytes": 19543,
+      "sha256": "b72c0887315d1bdaf46dc2a0bcf90e6fd3c4ee1bafd97656ad3cb0ce52f528d9",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/priority3_summary.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/priority3_summary.json",
+      "bytes": 833,
+      "sha256": "59dcb13cd8aa656656b8c4b31d5223de5b1396e1ae49eae6c98a3556bb2914cc",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/topk_comparison_experiment_report.seed_17.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_17.json",
+      "bytes": 19536,
+      "sha256": "e40e3b49f150b04310cf4e3c8d583bd2167f955e1a3450b7240a70775afdde6d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/hf_benchmark_report.seed_17.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_17.json",
+      "bytes": 4725,
+      "sha256": "e31f48ae1af453125db5d41d0d6b99b60859c3603177ab39e98f4f6cd160461b",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/ci_gate_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/ci_gate_report.json",
+      "bytes": 922,
+      "sha256": "e180cb8e32efb4aed2d560f1ffb97d7e91abc9ccd91aaf44ed23ee39d803fee6",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/bifurcation_detector_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/bifurcation_detector_report.json",
+      "bytes": 409,
+      "sha256": "b8a552afba3c6f0148545a523bb6eb7c8d02447559a14ffe665ac70b73f7f57a",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/zero_copy_real_probe_report_strict.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/runtime/zero_copy_real_probe_report_strict.json",
+      "bytes": 579,
+      "sha256": "426bbd2620914cacb0ba85750f80f7667b7935150a7c4da5b7e03861425baf85",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/meta_learning_task_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/meta_learning_task_report.json",
+      "bytes": 5078,
+      "sha256": "091d267f381d24da3c2eb1e70f5458707fca48c0d89aa79ef07f04c6534e779d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/zero_copy_bridge_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/zero_copy_bridge_report.json",
+      "bytes": 803,
+      "sha256": "dac685ca737db1090f41ad7e469517414a686b9689af875194d65746099445af",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/hf_benchmark_report.seed_23.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_23.json",
+      "bytes": 4714,
+      "sha256": "8210c5698d58a0cea5eb3ef40252226d4ac4170b87e71a76d604093fea637f1a",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/lf_to_gnn_e2e_smoke_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/runtime/lf_to_gnn_e2e_smoke_report.json",
+      "bytes": 1124,
+      "sha256": "ccf296a1705c89cd3eaaeb5a482fe92b5090ef760bc4d1d012ea1895bb298d59",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/nonlinear_lj_mapping_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/nonlinear_lj_mapping_report.json",
+      "bytes": 74552,
+      "sha256": "bc6134ae5d2f2d29702c2bb6266f5b2762d24eb47b3706632860cadf77955329",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/physics_branching_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/physics_branching_report.json",
+      "bytes": 2754,
+      "sha256": "0f4e6305e5aa686d3646dc60570f31542f2cb00e72a0490cc4c733249ba98a39",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/static_artifact_validation_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/static_artifact_validation_report.json",
+      "bytes": 2073,
+      "sha256": "9d1043ca39de04b57cbe1616d6f1205a1125788f7273052b6934b89c7c9390ca",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/ci_artifact_manifest.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/ci_artifact_manifest.json",
+      "bytes": 1354,
+      "sha256": "113ea15c79b2e74c40373b7953c711d22a7d50e9d8a8e6bd9e3f0f4d9e350a92",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/topk_precision_suite_report.rwth_zenodo.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/topk_precision_suite_report.rwth_zenodo.json",
+      "bytes": 5155,
+      "sha256": "92e80d61e3c9aa4ce40937b01f1b037ff28c7644d8354ba41d494af0eb9d351f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/winning_ticket_backprop_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/winning_ticket_backprop_report.json",
+      "bytes": 4495,
+      "sha256": "069c95255d6ad4efb61350f9a5f1615cec62a09cbf92e9fe559c9e6916dc6c94",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/topk_comparison_experiment_report.seed_23.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_23.json",
+      "bytes": 19520,
+      "sha256": "49208226a51e90a657b0a8d3d2034aff79bdd05b8fa325a4a358f53ec2455dfd",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/physics_residual_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/physics_residual_contract_report.json",
+      "bytes": 1180,
+      "sha256": "d5d29ed7bb8d93a83402d7d944b8a312071796a94bf584488a696250d3032c32",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/branch64_microbatch_profile_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/branch64_microbatch_profile_report.json",
+      "bytes": 4238,
+      "sha256": "2320959c8417043ceb3c4a684cf57bc207a71a8b5d1e36d38d417059877771e5",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/commercial_benchmark_cases.rwth_zenodo.json",
+      "bytes": 20387,
+      "sha256": "81534d4005fb6f62f584169ba8208f4f4ea4b6ac94bd783de65f75467437b5b5",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/hf_benchmark_report.rwth_zenodo.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.rwth_zenodo.json",
+      "bytes": 4768,
+      "sha256": "fd07d9cfabd15f33fe1bbd3f294be596f0b0c9a9c7dfd8aeeae0ed95d4161479",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/rust_md3bead_parity_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/parity_cache/rust_md3bead_parity_report.json",
+      "bytes": 6045,
+      "sha256": "6b853e4f8ce11652e7c3fa0150d4399d3eae61e72a5777694714d3d907df8d06",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/artifact_bundle_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/artifact_bundle_report.json",
+      "bytes": 639,
+      "sha256": "8e6c245c341474043ecd0d08642a202ddfe6dbb9d07b293c751b265252254458",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/artifact_manifest.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/artifact_manifest.json",
+      "bytes": 10250,
+      "sha256": "488676f672c8c16bdf001ed05c48f1aca9896bd480df65e7bdd3c6f182961583",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/summary/topk_summary.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_summary.json",
+      "bytes": 1574,
+      "sha256": "4d137df3579c5dc5a588daf8b9dd310fd255831a9aad7ea2dc8ec84f13038613",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/summary/baseline_summary.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/baseline_summary.json",
+      "bytes": 1275,
+      "sha256": "ce5669e9208190569048026eca3cbe28c7e381178df71edb408b56f22f173a02",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/subgraph_projection_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/subgraph_projection_report.json",
+      "bytes": 1081,
+      "sha256": "f77ad415726848c291cdc02c6ebcc2386d94b537b376e8fff28980a863f39846",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/buckling_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/buckling_contract_report.json",
+      "bytes": 873,
+      "sha256": "fad5535f188f66571bef5357895d88dc05c32263f2cdcbad75e2a84cecbd8c53",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/pg_gat_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/pg_gat_contract_report.json",
+      "bytes": 877,
+      "sha256": "dc058e837677a15fd941b0491c17b6f62ed62f9ebbaae3f4e12d34924e6cb12d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/dynamics_boundary_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/dynamics_boundary_report.json",
+      "bytes": 1420,
+      "sha256": "4c111f463ad5b4d89b69e99cc182ca8ed7ff10761bbdfce1c688a1ca2b418f9b",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/soa_dlpack_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/soa_dlpack_contract_report.json",
+      "bytes": 762,
+      "sha256": "f93120f2062f7724112416a90595f00c0ecbaaa679d63a0145175082c4763aa6",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/rust_onnx_native_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/rust_onnx_native_contract_report.json",
+      "bytes": 738,
+      "sha256": "92f87616c598342a587a72001246a58cdc329edc70df41e1d7d1520fa62dce0d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/dynamic_time_history_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/dynamic_time_history_report.json",
+      "bytes": 89042,
+      "sha256": "e5d933e049274e1371c440408e3de2dfe1ff1da6d0ee06f0457757942b49e1f3",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/ci_gate_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/ci_gate_report.json",
+      "bytes": 922,
+      "sha256": "e180cb8e32efb4aed2d560f1ffb97d7e91abc9ccd91aaf44ed23ee39d803fee6",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/bifurcation_detector_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/bifurcation_detector_report.json",
+      "bytes": 409,
+      "sha256": "b8a552afba3c6f0148545a523bb6eb7c8d02447559a14ffe665ac70b73f7f57a",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/meta_learning_task_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/meta_learning_task_report.json",
+      "bytes": 5078,
+      "sha256": "091d267f381d24da3c2eb1e70f5458707fca48c0d89aa79ef07f04c6534e779d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/physics_branching_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/physics_branching_report.json",
+      "bytes": 2754,
+      "sha256": "0f4e6305e5aa686d3646dc60570f31542f2cb00e72a0490cc4c733249ba98a39",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/static_artifact_validation_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/static_artifact_validation_report.json",
+      "bytes": 2073,
+      "sha256": "9d1043ca39de04b57cbe1616d6f1205a1125788f7273052b6934b89c7c9390ca",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/winning_ticket_backprop_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/winning_ticket_backprop_report.json",
+      "bytes": 4495,
+      "sha256": "069c95255d6ad4efb61350f9a5f1615cec62a09cbf92e9fe559c9e6916dc6c94",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/physics_residual_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/physics_residual_contract_report.json",
+      "bytes": 1180,
+      "sha256": "d5d29ed7bb8d93a83402d7d944b8a312071796a94bf584488a696250d3032c32",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/contracts/branch64_microbatch_profile_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/branch64_microbatch_profile_report.json",
+      "bytes": 4238,
+      "sha256": "2320959c8417043ceb3c4a684cf57bc207a71a8b5d1e36d38d417059877771e5",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/inputs/commercial_benchmark_cases.from_csv.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/commercial_benchmark_cases.from_csv.json",
+      "bytes": 9221,
+      "sha256": "9e6d41957861d1be1cd8986832c37418a947cc184080e69fc5b1e7e50aa30156",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/hf_benchmark_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.json",
+      "bytes": 4714,
+      "sha256": "0179c483cd36f859e74c4c71000e1630ad9581e741b017039045b1cdef5aa1c4",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/topk_comparison_experiment_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.json",
+      "bytes": 19520,
+      "sha256": "09f57eed7b834526a2a854efc6efb821771b7936ec649ed0356573f5fd32296d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/topk_precision_suite_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/topk_precision_suite_report.json",
+      "bytes": 5130,
+      "sha256": "cbff7208b0e28ff8516c7137621cc7542f05cd293736897a426a6bdbab49f640",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_47.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_47.json",
+      "bytes": 19549,
+      "sha256": "205953fb7238b2a753ddccc3648578f38294ccb9c534ec8010d4c18ead83914f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_47.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_47.json",
+      "bytes": 4727,
+      "sha256": "f4e33470a9705022c32ad2945dded004a53417f3f5242b83af79d2ac24471602",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_31.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_31.json",
+      "bytes": 4729,
+      "sha256": "3eda5d79e6ed40d0760e414397d99d50856ae67c8ef9c5de689dc34f41c908e8",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_11.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_11.json",
+      "bytes": 4726,
+      "sha256": "244bf69d821ebba9e4634b97398c0e49a8c222a5275f064121b2045b2cf6b6da",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_11.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_11.json",
+      "bytes": 19549,
+      "sha256": "2f474166a36993f3a2c987653dca63d36f4335e8407e7f6fa2d64cead493c212",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_31.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_31.json",
+      "bytes": 19543,
+      "sha256": "b72c0887315d1bdaf46dc2a0bcf90e6fd3c4ee1bafd97656ad3cb0ce52f528d9",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_17.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_17.json",
+      "bytes": 19536,
+      "sha256": "e40e3b49f150b04310cf4e3c8d583bd2167f955e1a3450b7240a70775afdde6d",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_17.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_17.json",
+      "bytes": 4725,
+      "sha256": "e31f48ae1af453125db5d41d0d6b99b60859c3603177ab39e98f4f6cd160461b",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/hf_benchmark_report.seed_23.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_23.json",
+      "bytes": 4714,
+      "sha256": "8210c5698d58a0cea5eb3ef40252226d4ac4170b87e71a76d604093fea637f1a",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_b64_dyn_20260225/benchmark/runs/topk_comparison_experiment_report.seed_23.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_23.json",
+      "bytes": 19520,
+      "sha256": "49208226a51e90a657b0a8d3d2034aff79bdd05b8fa325a4a358f53ec2455dfd",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/artifact_bundle_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/artifact_bundle_report.json",
+      "bytes": 604,
+      "sha256": "42a5787c6e03bee50e6143be3645ea55a395278af13172df80b7d229fdfcd240",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/artifact_manifest.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/artifact_manifest.json",
+      "bytes": 5502,
+      "sha256": "094d0ee7181ef5e16c33eaa0e03b1aae7636e500db327063016a5d5bf6fe2bef",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/summary/topk_summary.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_summary.json",
+      "bytes": 1579,
+      "sha256": "a7643072e46e8b738bbf84f933a6a650eb931fa24483ce3a6bcdd216ff824d57",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/summary/baseline_summary.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/baseline_summary.json",
+      "bytes": 1323,
+      "sha256": "e15e10f67b66265bac4816af5947dd8d5a5f89a9f854448358dce01d174b7549",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/inputs/commercial_benchmark_cases.rwth_zenodo.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/commercial_benchmark_cases.rwth_zenodo.json",
+      "bytes": 20387,
+      "sha256": "81534d4005fb6f62f584169ba8208f4f4ea4b6ac94bd783de65f75467437b5b5",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/topk_comparison_experiment_report.rwth_zenodo.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.rwth_zenodo.json",
+      "bytes": 30649,
+      "sha256": "eba40f42d7d53604bac734280b7a76c9d81964c55f0422ace1a6ffaef41efbc4",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/topk_precision_suite_report.rwth_zenodo.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/topk_precision_suite_report.rwth_zenodo.json",
+      "bytes": 5155,
+      "sha256": "92e80d61e3c9aa4ce40937b01f1b037ff28c7644d8354ba41d494af0eb9d351f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/hf_benchmark_report.rwth_zenodo.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.rwth_zenodo.json",
+      "bytes": 4768,
+      "sha256": "fd07d9cfabd15f33fe1bbd3f294be596f0b0c9a9c7dfd8aeeae0ed95d4161479",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_47.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_47.json",
+      "bytes": 30656,
+      "sha256": "05f4fe4bc6e258f41f7d5481bf52a644f3965e2e32f9c7b8b0e99c6bb85d402a",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_47.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_47.json",
+      "bytes": 4764,
+      "sha256": "d6e6cd49b43c3b2594224004ed68c7bd7b68e5881dfb4f373ff1c71cc41d3c00",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_31.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_31.json",
+      "bytes": 4761,
+      "sha256": "3e4027ca26cc0ba36a55c6bc52442519d7160a438155593b2090ba87a89893d5",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_11.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_11.json",
+      "bytes": 4769,
+      "sha256": "20d1b71212f7c0937e958dd071358b8d2a7a1eba51d48b91376294f4bab9de9a",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_11.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_11.json",
+      "bytes": 30649,
+      "sha256": "f8227657cf6fa15decf8b4f528892ac997eb87fc75537dd86fbb606092b3e7e7",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_31.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_31.json",
+      "bytes": 30613,
+      "sha256": "9e6727eb736928218092d170cf52df64adbc7b4d489bd26d61150ea6d90ba9f6",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_17.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_17.json",
+      "bytes": 30648,
+      "sha256": "b3f5f78917cc22a9f7cf98833870790b381582afc135d316dd9774f1cbaa6e56",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_17.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_17.json",
+      "bytes": 4770,
+      "sha256": "5e5fdec2bdd52da2f28e1ba4d01070b1ece66116d70380df56925b90c8cf3755",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/hf_benchmark_report.seed_23.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_23.json",
+      "bytes": 4768,
+      "sha256": "e2e689e804c0b9371ccb600f321e7e3a319c643096025407ab93012599004767",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/real_accuracy_rwth_20260225/benchmark/runs/topk_comparison_experiment_report.seed_23.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_23.json",
+      "bytes": 30649,
+      "sha256": "9a623ab4e71558d4be873bed47381e2614f5f649214910c2220994c5e3bd3b48",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/artifact_bundle_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/artifact_bundle_report.json",
+      "bytes": 599,
+      "sha256": "7e1cfb2303f309c582ddfe8c5be505c54a4b715f3a57f807d900ade641a8c9ae",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/artifact_manifest.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/artifact_manifest.json",
+      "bytes": 9355,
+      "sha256": "fe0b05e08d32656691742d5dc58f0b4801e2c6e06cf7c344ea280bd1dd7e8fa4",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/summary/topk_summary.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_summary.json",
+      "bytes": 1574,
+      "sha256": "4d137df3579c5dc5a588daf8b9dd310fd255831a9aad7ea2dc8ec84f13038613",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/summary/baseline_summary.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/baseline_summary.json",
+      "bytes": 1275,
+      "sha256": "ce5669e9208190569048026eca3cbe28c7e381178df71edb408b56f22f173a02",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/subgraph_projection_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/subgraph_projection_report.json",
+      "bytes": 1081,
+      "sha256": "d30cba722db24cf550999b9de6f06775290ee67d83dfca0edc9b5a7e8d6bbfea",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/buckling_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/buckling_contract_report.json",
+      "bytes": 873,
+      "sha256": "e565519190faa1207e79879ec7f38732446512f9d39a31e980228d9732fe0607",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/pg_gat_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/pg_gat_contract_report.json",
+      "bytes": 877,
+      "sha256": "0a2b6190698bcb2914726e4837c3dedc2fa1af3494ceb86ffb0dd3f012e4edf6",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/dynamics_boundary_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/dynamics_boundary_report.json",
+      "bytes": 1420,
+      "sha256": "f8a33f46b09122b5791e5d2a5ebd15a16ec828c0bb8bd9bb75fb7dc2cdf9dd43",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/soa_dlpack_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/soa_dlpack_contract_report.json",
+      "bytes": 762,
+      "sha256": "596ffa18fc9b71d126ddd9b60c069d680200424c564083336560f3d33acead87",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/rust_onnx_native_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/rust_onnx_native_contract_report.json",
+      "bytes": 738,
+      "sha256": "fe69beecceceaab62b60f95e60f47261438cace776c6c894c269aeb0abf6756f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/ci_gate_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/ci_gate_report.json",
+      "bytes": 855,
+      "sha256": "cfaa7fc21fa3fddae85585766ebf1f91c1118a66367d4a1acc7aed02ad2e5f5a",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/bifurcation_detector_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/bifurcation_detector_report.json",
+      "bytes": 409,
+      "sha256": "aafd825b5c8175d2854274673043e82c89ca558ec4baacc504c51b039dbc8290",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/meta_learning_task_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/meta_learning_task_report.json",
+      "bytes": 5078,
+      "sha256": "3e7e2c691688e80ad571f1d122e845da07d7bc88d41df2c5c0bdced9a6ba1321",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/physics_branching_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/physics_branching_report.json",
+      "bytes": 2754,
+      "sha256": "b944a341982c8346fb31eb638c08c64ee30c237fdc1b5c045f3884013572e17a",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/static_artifact_validation_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/static_artifact_validation_report.json",
+      "bytes": 1844,
+      "sha256": "e2a0fe2dc62745d8ab9bdbab20e54ed603b779d19f5b0ab6591462059de06d17",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/winning_ticket_backprop_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/misc/winning_ticket_backprop_report.json",
+      "bytes": 4495,
+      "sha256": "46dd897123eb90b7286ddac83a1542fe584bb2c04954358e7235c0c5e97a44c3",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/contracts/physics_residual_contract_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/contracts/physics_residual_contract_report.json",
+      "bytes": 1180,
+      "sha256": "b4a159c3ca935f6230fd8d44d0793f42ab39fc7fb680f998f11f87268d63379f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/inputs/commercial_benchmark_cases.from_csv.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/commercial_benchmark_cases.from_csv.json",
+      "bytes": 9185,
+      "sha256": "a1a6767edbab3d4a90ef3f591575bde04287c2590da8bc6e4b1156451e145b9e",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/hf_benchmark_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.json",
+      "bytes": 4714,
+      "sha256": "2bb34f9db2ae00eceb38fa5348a109d91dd4ba864ce4842b23bfd6ec3625a15f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/topk_comparison_experiment_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.json",
+      "bytes": 19520,
+      "sha256": "4fb4ee7e01dea462c221bc84cd1d68dc6d08f06fb91ab50a9ada04910ae6cba6",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/topk_precision_suite_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/topk_precision_suite_report.json",
+      "bytes": 5130,
+      "sha256": "e98913b2bb8d7a3f1baf59098cb3622d8ff1009529f1e7e517dd3b82110bdcb8",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/topk_comparison_experiment_report.seed_47.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_47.json",
+      "bytes": 19549,
+      "sha256": "f41b483fcc4596c00a0b5542ae49689637027a56324e42e0e51b5325f65d3221",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/hf_benchmark_report.seed_47.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_47.json",
+      "bytes": 4727,
+      "sha256": "e4f2d3d4379b415748f21fc976a072e1b12a0f54f144a44808e64ddba54ddfc6",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/hf_benchmark_report.seed_31.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_31.json",
+      "bytes": 4729,
+      "sha256": "bc8daf00c821d4f5b8d8bccddf37b932d5dc34c5c49788d6d6d144b559f9ceca",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/hf_benchmark_report.seed_11.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_11.json",
+      "bytes": 4726,
+      "sha256": "618379aaf8ede180fd7f8dbb811a130a76971656ed98195d1e9ef7f64f0248c2",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/topk_comparison_experiment_report.seed_11.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_11.json",
+      "bytes": 19549,
+      "sha256": "59a53744b697d2a4da00a8f1f90ead38282c32b65bf42fb451dd3e2814196b4f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/topk_comparison_experiment_report.seed_31.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_31.json",
+      "bytes": 19543,
+      "sha256": "29c6bd7281eff417fb459b8cedfc1047eeca009a965b88e0f459125484f82b4f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/topk_comparison_experiment_report.seed_17.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_17.json",
+      "bytes": 19536,
+      "sha256": "bb6a19de06d8ecd96da84fdb0163072ca83587a46b21517156ac1ed985e12c61",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/hf_benchmark_report.seed_17.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_17.json",
+      "bytes": 4725,
+      "sha256": "12c1209166ff61d7344a23aca1627b7ecc64b682e0179ad0ccf3a54a7b88c5ae",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/hf_benchmark_report.seed_23.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/hf_benchmark_report.seed_23.json",
+      "bytes": 4714,
+      "sha256": "bad48099a2329c270c67f73e465ffce04e4ca8c6855b76f7886a7f330da7ebe9",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/experiments/commercial_direct_20260225/benchmark/runs/topk_comparison_experiment_report.seed_23.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/benchmark/topk_comparison_experiment_report.seed_23.json",
+      "bytes": 19520,
+      "sha256": "0be71230d47b18391875892ed124cdb995bcf3f157302f38f886c2d48fdfc790",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/deployment_report.commercial_direct_20260225.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/deployment_report.commercial_direct_20260225.json",
+      "bytes": 3760,
+      "sha256": "272bf91ebbb47a533728672361d5e40a8d1662bd64ba463b98feb97e6adc4ea0",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/pipeline_config.commercial_direct_20260225.lock.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/pipeline_config.commercial_direct_20260225.lock.json",
+      "bytes": 2161,
+      "sha256": "2fbe7260aeec9b2be30f00613b4ce9c5f0cc627b566a1260fd0ce2287f1dda81",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/pipeline_manifest.commercial_direct_20260225.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/pipeline_manifest.commercial_direct_20260225.json",
+      "bytes": 9339,
+      "sha256": "83b2206a1e31e4b5e2328153da33563f1ecfc099598f5b79a10eddb1db237073",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/pipeline_config.commercial_direct_b64_dyn_20260225.lock.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/ci/pipeline_config.commercial_direct_b64_dyn_20260225.lock.json",
+      "bytes": 2691,
+      "sha256": "9aa096e874729eca07c38907ee7d33ab2397150ee88b81d8158a17ddd6760dbb",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/ulf_edges.csv",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/artifacts/ulf_edges.csv",
+      "bytes": 118,
+      "sha256": "cf1009b6414f91ef4a1a2331bd618a8b7c9fb03409bc6cecbb966dd9cb63d7ec",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/step6_gate_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/runtime/step6_gate_report.json",
+      "bytes": 354,
+      "sha256": "ab2ff87984c5e5096e4d7a9ef0cb25e79e9c4dc3aa5ce2e0550bc132eda9c731",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/ulf_nodes.csv",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/artifacts/ulf_nodes.csv",
+      "bytes": 109,
+      "sha256": "ff896c44ebcc19e6e1a08a10989a365847ff73d1218b27811cfe81af17b45cea",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/ulf_meta.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/artifacts/ulf_meta.json",
+      "bytes": 119,
+      "sha256": "225b339e97bb98f377c7181517c2ab4de0e1a0703b8f394cebcaaf0b2476354e",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/step1_fire_loop.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/runtime/step1_fire_loop.json",
+      "bytes": 3258,
+      "sha256": "97c726e6666315d9ea66ed469434e708f2bde2a099b3effbfceceb54ed49e525",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/step3_nonlinear_hinge.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/runtime/step3_nonlinear_hinge.json",
+      "bytes": 8884,
+      "sha256": "de6195c99592aaefe1edb9b79be0a37890f16922f46ab321005b8c7101e497bb",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/step5_rca_summary.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/runtime/step5_rca_summary.json",
+      "bytes": 284,
+      "sha256": "2da95a21f69ec61d64df31edc6d2b334e1d5bee63ab00c91c77b103ff625f682",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/step2_forcefield_mapper.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/runtime/step2_forcefield_mapper.json",
+      "bytes": 347,
+      "sha256": "151d525199e4f48f0fb784ce15c3477d21559030118fbc52270d4b75d771f605",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/step5_runtime_hook_profile.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/runtime/step5_runtime_hook_profile.json",
+      "bytes": 2834,
+      "sha256": "32447cd3d7ddb540c69c2ac4b80962e433b387b0e76816398f19b91603d6fd67",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/step4_export_report.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/runtime/step4_export_report.json",
+      "bytes": 318,
+      "sha256": "31034584de59da0bd5634a10900f0008d60cfeb7286dc2823f64b19148267be2",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/ulf_edges.parquet",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/artifacts/ulf_edges.parquet",
+      "bytes": 5006,
+      "sha256": "102f7ddbb317ffd16165b75f77c00a6f4b49e6e0478b36b9383b38b2af69d8e8",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/step_outputs/ulf_nodes.parquet",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/reports/artifacts/ulf_nodes.parquet",
+      "bytes": 3807,
+      "sha256": "09b82939ba6045e0303867296fec2327f16200690699d757cb94b32285afbf2a",
+      "mode": "copy"
+    }
+  ],
+  "inputs": [
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/commercial_hf_export_sample.csv",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/commercial_hf_export_sample.csv",
+      "bytes": 1172,
+      "sha256": "104196626910fdf30472b86294f34a8de85d390e44879aeb1b3d56320d4d8c39",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/commercial_lf_export_sample.csv",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/commercial_lf_export_sample.csv",
+      "bytes": 1189,
+      "sha256": "493b0e8af6ba5aeb7c2741766d1f18fafd531ca200733c54e0a730d5f4303276",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/lf_output_sample.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/lf_output_sample.json",
+      "bytes": 863,
+      "sha256": "2a3da16c82824fd9d71b1c569719e0526b69b4db6dc325449c29f8aac60c962b",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/ci_gate_report.fail.sample.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/ci_gate_report.fail.sample.json",
+      "bytes": 235,
+      "sha256": "92245fb9696034fb7e8852e8cb2e6aea77cb37f4c72220f1aca2fce6688bee22",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/material_input_sample.csv",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/material_input_sample.csv",
+      "bytes": 416,
+      "sha256": "8a2a314c090a4d27a8d6320ef44aab98f43f41965f318717ac693fa8acaa9df8",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/priority3_summary.pass.sample.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/priority3_summary.pass.sample.json",
+      "bytes": 826,
+      "sha256": "e01d590ce3b46c013b468f9ec9336ce6df1e66b40ed795c198bed0167e8cd8fa",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/ci_gate_report.pass.sample.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/ci_gate_report.pass.sample.json",
+      "bytes": 206,
+      "sha256": "7dbbc43c77f53e2191937a00a2049f794d2f1538985ff1d50568db5572ef3965",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/priority3_summary.fail.sample.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/priority3_summary.fail.sample.json",
+      "bytes": 834,
+      "sha256": "98a463e794e3081a0a8ba4067b8a4e099aaf1f2bd6efb5f85165bfd6351cc97f",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/material_input_sample.json",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/material_input_sample.json",
+      "bytes": 362,
+      "sha256": "fafe17264686f2dfc0a25db238d0a07daa093ec0a1d67361b0c7966adf0369ff",
+      "mode": "copy"
+    },
+    {
+      "src": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip",
+      "dst": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/workspace/inputs/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip",
+      "bytes": 79297382,
+      "sha256": "ec982c1c9ef30f8f56e903327c65c76899d8d5c9a53c18602f3b08404ac57060",
+      "mode": "copy"
+    }
+  ]
+}

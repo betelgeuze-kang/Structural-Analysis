@@ -1,0 +1,50 @@
+{
+  "schema_version": "2.0",
+  "report_family": "design_optimization",
+  "summary_schema_version": "2.0",
+  "run_id": "phase1-design-optimization-stage-a",
+  "generated_at": "2026-03-15T11:14:07.790547+00:00",
+  "inputs": {
+    "dataset_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "budget": "low",
+    "objective_profile": "cost_first",
+    "profile_path": "implementation/phase1/design_objective_profiles.json",
+    "objective_calibration_report": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_objective_calibration_report.json",
+    "disable_action_families": [],
+    "zone_lock": "none",
+    "state_out": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_budgeted_state.npz"
+  },
+  "summary": {
+    "stage": "stage_a",
+    "budget_mode": "low",
+    "objective_profile": "cost_first",
+    "accepted_count": 14,
+    "solver_feasible_final": true,
+    "final_max_dcr": 0.9331636363636363,
+    "final_max_drift_pct": 1.9872000000000003,
+    "final_residual_drift_pct": 0.37399104000000005,
+    "raw_max_drift_pct": 9.200000000000003,
+    "raw_residual_drift_pct": 1.9136000000000006,
+    "raw_max_dcr": 1.9158888949200001,
+    "repaired_max_drift_pct": 1.9872000000000003,
+    "repaired_residual_drift_pct": 0.37399104000000005,
+    "repaired_max_dcr": 0.9331636363636363,
+    "compliance_basis": "repaired_solver_validated_slice",
+    "repair_actions_applied": [],
+    "repair_action_count": 0,
+    "solver_backend_static": "rocm_torch_hip_mainloop",
+    "solver_backend_ndtha": "rocm_torch_hip_mainloop",
+    "gpu_strict_solver_backends": false
+  },
+  "artifacts": {
+    "report_out": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_stage_a_report.json",
+    "state_out": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_budgeted_state.npz"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "stage a feasibility recovery completed",
+  "stage1_accepted_head": [],
+  "stage1_extra_accepted_head": [],
+  "stage1_dcr_accepted_head": [],
+  "stage1_dcr_final_accepted_head": []
+}

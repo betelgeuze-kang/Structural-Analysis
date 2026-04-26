@@ -1,0 +1,36 @@
+{
+  "schema_version": "midas_named_axis_refs.curated.v1",
+  "source_model_json": "implementation/phase1/open_data/midas/midas_generator_33.json",
+  "source_mode": "curated_named_axis_sidecar",
+  "note": "Curated X/Y grid labels and story-axis references were attached to the MIDAS 33 release-compare model so the review UI can show stable axis names instead of geometry-derived placeholders.",
+  "axis_refs": {
+    "x": [
+      {"label": "A", "value": 102.747, "count": 1378},
+      {"label": "B", "value": 110.448, "count": 1593},
+      {"label": "C", "value": 118.714, "count": 2241},
+      {"label": "D", "value": 126.755, "count": 1958},
+      {"label": "E", "value": 152.297, "count": 1618},
+      {"label": "F", "value": 160.189, "count": 1403}
+    ],
+    "y": [
+      {"label": "1", "value": 158.034, "count": 1459},
+      {"label": "2", "value": 160.388, "count": 1706},
+      {"label": "3", "value": 163.138, "count": 1939},
+      {"label": "4", "value": 165.901, "count": 1576},
+      {"label": "5", "value": 169.022, "count": 1450},
+      {"label": "6", "value": 219.751, "count": 1564}
+    ],
+    "z": [
+      {"label": "S00", "value": -3.17, "count": 1444},
+      {"label": "S01", "value": -1.633, "count": 494},
+      {"label": "S02", "value": -1.166, "count": 354},
+      {"label": "S03", "value": -0.48, "count": 914},
+      {"label": "S04", "value": 0.1, "count": 5095},
+      {"label": "S05", "value": 1.626, "count": 1083},
+      {"label": "S06", "value": 2.37, "count": 671},
+      {"label": "S07", "value": 2.738, "count": 119},
+      {"label": "S08", "value": 3.253, "count": 649},
+      {"label": "S09", "value": 3.693, "count": 2939}
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-99_9-roadmap-pipeline",
+  "generated_at": "2026-02-25T15:22:06.365071+00:00",
+  "steps": [
+    {
+      "step": "step1_bigdata_active_learning",
+      "seconds": 1.0477933883666992,
+      "command": "/usr/bin/python3 implementation/phase1/generate_spatiotemporal_bigdata.py --dataset-out implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl --report-out implementation/phase1/spatiotemporal_data/bigdata_generation_report.json --base-cases 120 --active-rounds 1 --hard-topk 24 --seq-len 90"
+    },
+    {
+      "step": "step2_tgnn_baseline",
+      "seconds": 20.92372417449951,
+      "command": "/usr/bin/python3 implementation/phase1/train_tgnn_baseline.py --dataset implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl --max-cases 180 --epochs 3 --out implementation/phase1/spatiotemporal_data/tgnn_baseline_report.json --ckpt implementation/phase1/spatiotemporal_data/tgnn_baseline.pt"
+    },
+    {
+      "step": "step3_simplicial_tgnn",
+      "seconds": 28.792709589004517,
+      "command": "/usr/bin/python3 implementation/phase1/train_simplicial_tgnn.py --dataset implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl --max-cases 180 --epochs 3 --baseline-report implementation/phase1/spatiotemporal_data/tgnn_baseline_report.json --out implementation/phase1/spatiotemporal_data/simplicial_tgnn_report.json --ckpt implementation/phase1/spatiotemporal_data/simplicial_tgnn.pt"
+    },
+    {
+      "step": "step4_neural_operator",
+      "seconds": 2.561305522918701,
+      "command": "/usr/bin/python3 implementation/phase1/train_neural_operator_surrogate.py --dataset implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl --max-cases 180 --epochs 3 --out implementation/phase1/spatiotemporal_data/neural_operator_report.json --ckpt implementation/phase1/spatiotemporal_data/neural_operator.pt"
+    },
+    {
+      "step": "step5_productization_gate",
+      "seconds": 0.17393994331359863,
+      "command": "/usr/bin/python3 implementation/phase1/run_productization_gate.py --dataset implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl --simplicial-report implementation/phase1/spatiotemporal_data/simplicial_tgnn_report.json --dynamic-report implementation/phase1/dynamic_time_history_report.json --cache-report implementation/phase1/branch64_microbatch_profile_report.json --max-cases 180 --out implementation/phase1/spatiotemporal_data/productization_gate_report.json"
+    }
+  ],
+  "reports": {
+    "step1": "implementation/phase1/spatiotemporal_data/bigdata_generation_report.json",
+    "step2": "implementation/phase1/spatiotemporal_data/tgnn_baseline_report.json",
+    "step3": "implementation/phase1/spatiotemporal_data/simplicial_tgnn_report.json",
+    "step4": "implementation/phase1/spatiotemporal_data/neural_operator_report.json",
+    "step5": "implementation/phase1/spatiotemporal_data/productization_gate_report.json"
+  },
+  "summary": {
+    "dataset_case_count": 144,
+    "step2_val_mae_pct": 8.564530296784628,
+    "step3_val_mae_pct": 16.93257211330991,
+    "step3_torsion_improvement_pct_point": -8.974475515279758,
+    "step4_val_mae_pct": 63.789002842452255,
+    "step5_code_pass_ratio": 0.9375,
+    "step5_fallback_trigger_ratio": 0.0
+  },
+  "all_pass": true
+}

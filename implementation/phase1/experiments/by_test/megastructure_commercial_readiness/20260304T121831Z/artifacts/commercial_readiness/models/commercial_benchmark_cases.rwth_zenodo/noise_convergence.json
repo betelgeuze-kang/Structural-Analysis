@@ -1,0 +1,394 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-noise-convergence-gate",
+  "generated_at": "2026-03-01T12:07:06.268384+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+    "target_split": "all",
+    "limit_cases": 4,
+    "seeds": "11,23,47",
+    "stiffness_noise_levels": "10",
+    "max_iter": 80,
+    "tol": 1e-06,
+    "out": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/noise_convergence.json"
+  },
+  "checks": {
+    "has_required_seeds": true,
+    "includes_plus_minus_10": true,
+    "all_converged": true,
+    "scenario_count_nonzero": true
+  },
+  "summary": {
+    "selected_case_count": 4,
+    "seed_count": 3,
+    "noise_level_count": 3,
+    "scenario_count": 36,
+    "fail_count": 0
+  },
+  "rows": [
+    {
+      "case_id": "RWTH-01",
+      "seed": 11,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 2.7351920826821833e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-01",
+      "seed": 11,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.4412169709177898e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-01",
+      "seed": 11,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 8.073966886972386e-10,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-01",
+      "seed": 23,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 2.7425540875790727e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-01",
+      "seed": 23,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.4451250668108659e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-01",
+      "seed": 23,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 8.096019826717697e-10,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-01",
+      "seed": 47,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 2.7320857924482928e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-01",
+      "seed": 47,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.4395742322672452e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-01",
+      "seed": 47,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 8.064731250875031e-10,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-02",
+      "seed": 11,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 3.319470140440636e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-02",
+      "seed": 11,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.7509251040171856e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-02",
+      "seed": 11,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 9.81770950092935e-10,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-02",
+      "seed": 23,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 3.3272130257854186e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-02",
+      "seed": 23,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.7550350802561594e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-02",
+      "seed": 23,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 9.840869087496838e-10,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-02",
+      "seed": 47,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 3.3165745956135395e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-02",
+      "seed": 47,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.7493919216642917e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-02",
+      "seed": 47,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 9.809100792563388e-10,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-03",
+      "seed": 11,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 4.507216859414727e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-03",
+      "seed": 11,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 2.3803209097603373e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-03",
+      "seed": 11,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.3360450438201965e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-03",
+      "seed": 23,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 4.515329336692215e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-03",
+      "seed": 23,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 2.3846230848594347e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-03",
+      "seed": 23,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.3384695389426891e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-03",
+      "seed": 47,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 4.504598720556016e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-03",
+      "seed": 47,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 2.3789351311386717e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-03",
+      "seed": 47,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.3352665138810806e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-04",
+      "seed": 11,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.1639931996982081e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-04",
+      "seed": 11,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 7.66977370882897e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-04",
+      "seed": 11,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 5.185454484236444e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-04",
+      "seed": 23,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.1634212992304812e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-04",
+      "seed": 23,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 7.667670448334712e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-04",
+      "seed": 23,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 5.183981087749481e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-04",
+      "seed": 47,
+      "stiffness_noise_pct": -10.0,
+      "stiffness_scale": 0.9,
+      "converged": true,
+      "iterations": 4,
+      "residual_norm_final": 1.1601274214359962e-09,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-04",
+      "seed": 47,
+      "stiffness_noise_pct": 0.0,
+      "stiffness_scale": 1.0,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 7.643983863502337e-07,
+      "line_search_backtracks": 0
+    },
+    {
+      "case_id": "RWTH-04",
+      "seed": 47,
+      "stiffness_noise_pct": 10.0,
+      "stiffness_scale": 1.1,
+      "converged": true,
+      "iterations": 3,
+      "residual_norm_final": 5.167953821991955e-07,
+      "line_search_backtracks": 0
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "noise convergence gate passed",
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/noise_convergence_gate/20260301T120706Z/artifact_archive_manifest.json"
+}

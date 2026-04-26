@@ -1,0 +1,12 @@
+{
+  "contract_pass": true,
+  "source_kind": "panel_zone_rebar_anchorage_3d",
+  "rows": [
+    {
+      "member_id": "B401",
+      "available_anchorage_length_mm": 480.0,
+      "required_anchorage_length_mm": 420.0,
+      "development_length_mm": 520.0
+    }
+  ]
+}

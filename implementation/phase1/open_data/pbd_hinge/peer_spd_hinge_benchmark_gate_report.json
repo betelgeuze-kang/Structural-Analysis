@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-run-peer-spd-hinge-benchmark-gate",
+  "generated_at": "2026-03-28T15:37:40.075295+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "PEER SPD hinge benchmark pool satisfies the current diversification contract.",
+  "inputs": {
+    "asset_registry": "implementation/phase1/open_data/pbd_hinge/pbd_hinge_benchmark_asset_registry.json",
+    "out": "implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_benchmark_gate_report.json"
+  },
+  "contract": {
+    "min_train_count": 2,
+    "min_val_count": 2,
+    "min_holdout_count": 1,
+    "min_rebar_sensitive_count": 1,
+    "min_confinement_sensitive_count": 1
+  },
+  "observed": {
+    "train_count": 2,
+    "val_count": 2,
+    "holdout_count": 1,
+    "rebar_sensitive_count": 1,
+    "confinement_sensitive_count": 1,
+    "benchmark_ready_asset_count": 5
+  },
+  "rows_head": [
+    {
+      "seed_id": "peer_spd_rc_column_rectangular_seed_01",
+      "holdout_split": "train",
+      "benchmark_ready": true,
+      "source_origin_class": "official_external_benchmark",
+      "raw_json_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.raw.json",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.hinge_fixture.json",
+      "source_manifest_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.source_manifest.json",
+      "specimen_id": "121",
+      "point_count": 1169,
+      "peak_abs_drift_ratio": 0.04344736842105263,
+      "peak_abs_lateral_force_kN": 175.2929,
+      "rebar_sensitive_expected": false,
+      "axial_load_sensitive_expected": false,
+      "confinement_sensitive_expected": false
+    },
+    {
+      "seed_id": "peer_spd_rc_column_rectangular_seed_02",
+      "holdout_split": "train",
+      "benchmark_ready": true,
+      "source_origin_class": "official_external_benchmark",
+      "raw_json_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.raw.json",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.hinge_fixture.json",
+      "source_manifest_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_02.source_manifest.json",
+      "specimen_id": "29",
+      "point_count": 721,
+      "peak_abs_drift_ratio": 0.04056666666666667,
+      "peak_abs_lateral_force_kN": 112.64,
+      "rebar_sensitive_expected": false,
+      "axial_load_sensitive_expected": true,
+      "confinement_sensitive_expected": false
+    },
+    {
+      "seed_id": "peer_spd_rc_column_spiral_seed_01",
+      "holdout_split": "val",
+      "benchmark_ready": true,
+      "source_origin_class": "official_external_benchmark",
+      "raw_json_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.raw.json",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.hinge_fixture.json",
+      "source_manifest_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_spiral_seed_01.source_manifest.json",
+      "specimen_id": "276",
+      "point_count": 960,
+      "peak_abs_drift_ratio": 0.05208,
+      "peak_abs_lateral_force_kN": 451.01,
+      "rebar_sensitive_expected": false,
+      "axial_load_sensitive_expected": false,
+      "confinement_sensitive_expected": true
+    },
+    {
+      "seed_id": "peer_spd_rc_column_rebar_sensitive_seed_01",
+      "holdout_split": "val",
+      "benchmark_ready": true,
+      "source_origin_class": "official_external_benchmark",
+      "raw_json_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.raw.json",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.hinge_fixture.json",
+      "source_manifest_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rebar_sensitive_seed_01.source_manifest.json",
+      "specimen_id": "121",
+      "point_count": 1169,
+      "peak_abs_drift_ratio": 0.04344736842105263,
+      "peak_abs_lateral_force_kN": 175.2929,
+      "rebar_sensitive_expected": true,
+      "axial_load_sensitive_expected": false,
+      "confinement_sensitive_expected": false
+    },
+    {
+      "seed_id": "peer_spd_rc_column_holdout_seed_01",
+      "holdout_split": "holdout",
+      "benchmark_ready": true,
+      "source_origin_class": "official_external_benchmark",
+      "raw_json_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.raw.json",
+      "fixture_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.hinge_fixture.json",
+      "source_manifest_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_holdout_seed_01.source_manifest.json",
+      "specimen_id": "299",
+      "point_count": 449,
+      "peak_abs_drift_ratio": 0.03662513089005235,
+      "peak_abs_lateral_force_kN": 33.601,
+      "rebar_sensitive_expected": false,
+      "axial_load_sensitive_expected": false,
+      "confinement_sensitive_expected": false
+    }
+  ]
+}

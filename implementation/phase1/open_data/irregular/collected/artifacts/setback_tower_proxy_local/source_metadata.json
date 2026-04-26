@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 38728810,
+  "collector_version": "0.2.0",
+  "family_id": "setback_tower",
+  "original_reference": "implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc",
+  "schema_version": "1.0",
+  "sha256": "05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+  "source_format": "ifc",
+  "source_id": "setback_tower_proxy_local",
+  "source_urls": [
+    "https://zenodo.org/"
+  ],
+  "title": "Setback tower local proxy from twisted tapered IFC"
+}

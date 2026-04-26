@@ -1,0 +1,273 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-pbd-review-case-subset",
+  "generated_at": "2026-03-03T14:08:12.072228+00:00",
+  "source": "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json",
+  "selected_topology_type": "outrigger",
+  "split_counts": {
+    "train": 5,
+    "val": 1,
+    "test": 1
+  },
+  "cases": [
+    {
+      "case_id": "opstool_606m_megatall_model-00001",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 1.089491,
+      "residual_norm": 0.04625177187987007,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.007529600000000002,
+          "lf": 0.007956156642956803
+        },
+        "base_shear_kN": {
+          "hf": 245.72993624199998,
+          "lf": 238.07351954356224
+        },
+        "mode_shape_mac": {
+          "hf": 1.0,
+          "lf": 0.9886698724246493
+        },
+        "buckling_factor": {
+          "hf": 3.798418784,
+          "lf": 3.665005418837282
+        },
+        "equilibrium_residual": {
+          "hf": 0.04625177187987007,
+          "lf": 0.062113950485360975
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+      "hf_source": {
+        "provider": "open_data_measurement",
+        "generator": "build_cases_from_megastructure_open.py"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00005",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 1.085568,
+      "residual_norm": 0.03823142087497292,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.008257966666666668,
+          "lf": 0.008701942301047073
+        },
+        "base_shear_kN": {
+          "hf": 234.957919616,
+          "lf": 228.01025591212402
+        },
+        "mode_shape_mac": {
+          "hf": 1.0,
+          "lf": 0.9892473376970019
+        },
+        "buckling_factor": {
+          "hf": 3.798265827,
+          "lf": 3.671657270698279
+        },
+        "equilibrium_residual": {
+          "hf": 0.03823142087497292,
+          "lf": 0.0532851480991702
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+      "hf_source": {
+        "provider": "open_data_measurement",
+        "generator": "build_cases_from_megastructure_open.py"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00008",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 1.089491,
+      "residual_norm": 0.039780107908532106,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.007529600000000002,
+          "lf": 0.007938614188182912
+        },
+        "base_shear_kN": {
+          "hf": 245.72993624199998,
+          "lf": 238.3883952954234
+        },
+        "mode_shape_mac": {
+          "hf": 1.0,
+          "lf": 0.9891358322305857
+        },
+        "buckling_factor": {
+          "hf": 3.798418784,
+          "lf": 3.6704921413236007
+        },
+        "equilibrium_residual": {
+          "hf": 0.039780107908532106,
+          "lf": 0.05498994278571215
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+      "hf_source": {
+        "provider": "open_data_measurement",
+        "generator": "build_cases_from_megastructure_open.py"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00015",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 1.070184,
+      "residual_norm": 0.03963454084949065,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.006704766666666669,
+          "lf": 0.007068623858734405
+        },
+        "base_shear_kN": {
+          "hf": 192.715578608,
+          "lf": 186.96347357103494
+        },
+        "mode_shape_mac": {
+          "hf": 1.0,
+          "lf": 0.9891463130588367
+        },
+        "buckling_factor": {
+          "hf": 3.7985919989999997,
+          "lf": 3.6707829410395028
+        },
+        "equilibrium_residual": {
+          "hf": 0.03963454084949065,
+          "lf": 0.054829702567119304
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+      "hf_source": {
+        "provider": "open_data_measurement",
+        "generator": "build_cases_from_megastructure_open.py"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00017",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 1.07846,
+      "residual_norm": 0.04545552364143242,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.007934033333333335,
+          "lf": 0.008381227096978557
+        },
+        "base_shear_kN": {
+          "hf": 215.44033251999997,
+          "lf": 208.76164048518015
+        },
+        "mode_shape_mac": {
+          "hf": 1.0,
+          "lf": 0.9887272022978169
+        },
+        "buckling_factor": {
+          "hf": 3.798333853,
+          "lf": 3.665598520696309
+        },
+        "equilibrium_residual": {
+          "hf": 0.04545552364143242,
+          "lf": 0.06123744042448881
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+      "hf_source": {
+        "provider": "open_data_measurement",
+        "generator": "build_cases_from_megastructure_open.py"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00020",
+      "split": "test",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 1.089491,
+      "residual_norm": 0.039190706038799115,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.006644766666666668,
+          "lf": 0.007004306048300043
+        },
+        "base_shear_kN": {
+          "hf": 245.72993624199998,
+          "lf": 238.41707236482975
+        },
+        "mode_shape_mac": {
+          "hf": 1.0,
+          "lf": 0.9891782691652065
+        },
+        "buckling_factor": {
+          "hf": 3.798604599,
+          "lf": 3.6711714217936207
+        },
+        "equilibrium_residual": {
+          "hf": 0.039190706038799115,
+          "lf": 0.05434112920751007
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+      "hf_source": {
+        "provider": "open_data_measurement",
+        "generator": "build_cases_from_megastructure_open.py"
+      }
+    },
+    {
+      "case_id": "opstool_606m_megatall_model-00023",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 1.07846,
+      "residual_norm": 0.04317998292301568,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 0.007934033333333335,
+          "lf": 0.008374727579250498
+        },
+        "base_shear_kN": {
+          "hf": 215.44033251999997,
+          "lf": 208.85870864848977
+        },
+        "mode_shape_mac": {
+          "hf": 1.0,
+          "lf": 0.9888910412295429
+        },
+        "buckling_factor": {
+          "hf": 3.798333853,
+          "lf": 3.667527697074833
+        },
+        "equilibrium_residual": {
+          "hf": 0.04317998292301568,
+          "lf": 0.058732525201655665
+        }
+      },
+      "metric_source": "open_data_measurement",
+      "source_member": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+      "hf_source": {
+        "provider": "open_data_measurement",
+        "generator": "build_cases_from_megastructure_open.py"
+      }
+    }
+  ]
+}

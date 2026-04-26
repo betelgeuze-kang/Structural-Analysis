@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 1354364,
+  "collector_version": "0.2.0",
+  "family_id": "transfer_podium_tower",
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_multifamily_building_archive/C07_T01_P000_RC_01_\u2524\u2518\u2591\u00ed\u2592\u2555_\u2534\u2553\u253c\u251c.meb",
+  "schema_version": "1.0",
+  "sha256": "36b60663aca159c066c51f2c13bd0076ae4d05056e0a86e9e424a90f046ec07a",
+  "source_format": "meb",
+  "source_id": "midas_multifamily_building_meb_local",
+  "source_urls": [
+    "https://support.midasuser.com/"
+  ],
+  "title": "MIDAS multifamily building original native MEB"
+}

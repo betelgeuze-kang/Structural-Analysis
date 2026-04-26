@@ -1,0 +1,29 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_fcm_bridge_archive_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_fcm_bridge_archive_local/FCM Bridge.mcb",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/midas_fcm_bridge_archive_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/midas_fcm_bridge_archive_local.json"
+  },
+  "bytes_copied": 2067979,
+  "declared_format": "mcb",
+  "family_id": "curved_plan_bridge_torsion",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {},
+  "original_reference": "implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/quality_corpus/extracted/midas_support_beam_archive/FCM Bridge.mcb",
+  "sha256": "2422df2ffba472564b8f071850b4f9187cee58cc5ccfe1f3edddfa83c192130d",
+  "source_exists": true,
+  "source_format": "mcb",
+  "source_id": "midas_fcm_bridge_archive_local",
+  "source_index": 30,
+  "source_urls": [
+    "https://gtc.midasuser.com/"
+  ],
+  "status": "collected",
+  "title": "MIDAS support FCM bridge archive geometry proxy"
+}

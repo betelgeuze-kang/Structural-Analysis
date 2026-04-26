@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-rust-nonlinear-frame-vnv",
+  "generated_at": "2026-03-01T12:49:27.712006+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "target_split": "test",
+    "min_case_count": 3,
+    "max_case_count": 6,
+    "max_drift_error_pct": 5.0,
+    "max_base_shear_error_pct": 5.0,
+    "max_top_disp_error_pct": 8.0,
+    "hardening_ratio": 1.0,
+    "pdelta_factor": 0.0,
+    "tolerance": 1e-07,
+    "max_iter": 60,
+    "accepted_metric_sources": "engine_export_direct,commercial_solver_export,open_data_measurement",
+    "out": "implementation/phase1/nonlinear_frame_engine_report.json"
+  },
+  "checks": {
+    "metric_source_pass": true,
+    "rust_backend_used_pass": true,
+    "all_cases_converged": true,
+    "drift_p95_pass": false,
+    "base_shear_p95_pass": true,
+    "top_disp_metric_source_available": false,
+    "top_disp_p95_pass": true
+  },
+  "summary": {
+    "case_count": 3,
+    "drift_error_pct_mean": 36.164485153557145,
+    "drift_error_pct_p95": 36.16772747292183,
+    "base_shear_error_pct_mean": 4.879434024891279e-13,
+    "base_shear_error_pct_p95": 9.385449010924567e-13,
+    "top_disp_error_pct_mean": null,
+    "top_disp_error_pct_p95": null,
+    "metric_source_invalid_case_ids": []
+  },
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "engine": {
+        "backend": "rust_ffi_nonlinear_frame",
+        "rust_version": 2,
+        "converged": true,
+        "iterations": 2,
+        "residual_inf": 1.021544449031353e-08,
+        "line_search_backtracks": 0,
+        "plastic_story_count": 9
+      },
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.31,
+          "pred": 1.4746378417414954,
+          "error_pct": 36.16286399387466
+        },
+        "base_shear_kN": {
+          "hf": 2035.0,
+          "pred": 2035.000000000019,
+          "error_pct": 9.385449010924567e-13
+        },
+        "top_displacement_m": {
+          "hf": 1.0112256,
+          "pred": 0.706699231356422,
+          "error_pct": 30.114582605857485,
+          "source": "inferred_from_drift_ratio"
+        }
+      }
+    },
+    {
+      "case_id": "C-TST-002",
+      "split": "test",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "engine": {
+        "backend": "rust_ffi_nonlinear_frame",
+        "rust_version": 2,
+        "converged": true,
+        "iterations": 2,
+        "residual_inf": 5.515175871551037e-09,
+        "line_search_backtracks": 0,
+        "plastic_story_count": 7
+      },
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.88,
+          "pred": 1.2000467235090695,
+          "error_pct": 36.16772747292183
+        },
+        "base_shear_kN": {
+          "hf": 1610.0,
+          "pred": 1610.0000000000007,
+          "error_pct": 4.2367765610540133e-14
+        },
+        "top_displacement_m": {
+          "hf": 0.685824,
+          "pred": 0.4811955651476519,
+          "error_pct": 29.836872849644823,
+          "source": "inferred_from_drift_ratio"
+        }
+      }
+    },
+    {
+      "case_id": "C-TST-003",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "engine": {
+        "backend": "rust_ffi_nonlinear_frame",
+        "rust_version": 2,
+        "converged": true,
+        "iterations": 2,
+        "residual_inf": 1.1801603250205517e-08,
+        "line_search_backtracks": 0,
+        "plastic_story_count": 9
+      },
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.58,
+          "pred": 1.6469981089580266,
+          "error_pct": 36.16286399387494
+        },
+        "base_shear_kN": {
+          "hf": 2260.0,
+          "pred": 2260.000000000011,
+          "error_pct": 4.829175407643867e-13
+        },
+        "top_displacement_m": {
+          "hf": 1.1294208000000001,
+          "pred": 0.7893004402162545,
+          "error_pct": 30.1145826058583,
+          "source": "inferred_from_drift_ratio"
+        }
+      }
+    }
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_VNV_FAIL",
+  "reason": "vnv thresholds violated"
+}

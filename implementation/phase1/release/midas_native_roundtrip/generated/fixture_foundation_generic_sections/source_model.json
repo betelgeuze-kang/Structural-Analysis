@@ -1,0 +1,530 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-midas-mgt-model",
+  "generated_at": "2026-03-30T16:46:33.491265+00:00",
+  "source": {
+    "path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tests/fixtures/foundation_realish/foundation_generic_sections.mgt",
+    "sha256": "1cc6504f713ae871f6360617946f1a84da5df309d1510a1da0cff2e702c1fd13",
+    "size_bytes": 452,
+    "format": "midas_mgt",
+    "source_family": "midas_mgt"
+  },
+  "parser": {
+    "line_count": 33,
+    "section_counts": {
+      "VERSION": 1,
+      "UNIT": 1,
+      "NODE": 8,
+      "MATERIAL": 2,
+      "SECTION": 3,
+      "ELEMENT": 3,
+      "GROUP": 2
+    },
+    "strict_element_slot_parse": true,
+    "coarsening": {
+      "applied": true,
+      "elastic_link_count": 0,
+      "rigid_like_link_count": 0,
+      "merge_pair_count": 0,
+      "merged_link_ids_head": [],
+      "merged_node_count": 0,
+      "dropped_degenerate_elements": 0,
+      "node_count_pre": 8,
+      "node_count_post": 8,
+      "element_count_pre": 3,
+      "element_count_post": 3,
+      "dummy_node_removed_count": 0,
+      "support_node_count": 0,
+      "support_node_count_mapped": 0
+    },
+    "constraint_summary": {
+      "constraint_row_count": 0,
+      "support_node_count": 0,
+      "support_nodes": []
+    },
+    "diagnostics": {
+      "known_section_count": 7,
+      "unknown_section_count": 0,
+      "unknown_sections": [],
+      "unknown_section_row_count": {},
+      "unknown_row_total": 0,
+      "typed_section_count": 2,
+      "typed_section_row_count": {
+        "GROUP": 2,
+        "VERSION": 1
+      },
+      "typed_row_total": 3,
+      "row_parse": {
+        "node_rows": 8,
+        "node_rows_parsed": 8,
+        "node_rows_skipped": 0,
+        "element_rows": 3,
+        "element_rows_parsed": 3,
+        "element_rows_skipped": 0,
+        "element_skip_ratio": 0.0,
+        "material_rows": 2,
+        "material_rows_parsed": 2,
+        "section_rows": 3,
+        "section_rows_parsed": 3,
+        "constraint_rows": 0,
+        "elastic_link_rows": 0
+      },
+      "element_skip_reason_count": {},
+      "unsupported_element_type_count": {},
+      "unresolved_elements_head": [],
+      "warnings_head": []
+    }
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": 1,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 2,
+        "x": 4.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 3,
+        "x": 4.0,
+        "y": 4.0,
+        "z": 0.0
+      },
+      {
+        "id": 4,
+        "x": 0.0,
+        "y": 4.0,
+        "z": 0.0
+      },
+      {
+        "id": 5,
+        "x": 0.0,
+        "y": 0.0,
+        "z": -2.0
+      },
+      {
+        "id": 6,
+        "x": 4.0,
+        "y": 0.0,
+        "z": -2.0
+      },
+      {
+        "id": 7,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 3.0
+      },
+      {
+        "id": 8,
+        "x": 4.0,
+        "y": 0.0,
+        "z": 3.0
+      }
+    ],
+    "elements": [
+      {
+        "id": 101,
+        "type": "PLATE",
+        "family": "shell",
+        "node_ids": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "section_id": 21,
+        "material_id": 21
+      },
+      {
+        "id": 102,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          5,
+          6
+        ],
+        "section_id": 22,
+        "material_id": 21
+      },
+      {
+        "id": 103,
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          7,
+          8
+        ],
+        "section_id": 23,
+        "material_id": 20
+      }
+    ],
+    "materials": [
+      {
+        "id": 20,
+        "name": "STEEL",
+        "raw_tokens": []
+      },
+      {
+        "id": 21,
+        "name": "CONC",
+        "raw_tokens": []
+      }
+    ],
+    "sections": [
+      {
+        "id": 21,
+        "name": "DBUSER",
+        "raw_tokens": []
+      },
+      {
+        "id": 22,
+        "name": "DBUSER",
+        "raw_tokens": []
+      },
+      {
+        "id": 23,
+        "name": "B-SEC-450",
+        "raw_tokens": []
+      }
+    ],
+    "loads": {
+      "static_load_cases": [],
+      "active_static_case_sequence": [],
+      "load_cases": [],
+      "load_combinations": [],
+      "load_combination_graph": {
+        "node_count": 0,
+        "edge_count": 0,
+        "combo_node_count": 0,
+        "case_node_count": 0,
+        "nodes": [],
+        "edges": [],
+        "combo_summaries": []
+      },
+      "semantic_load_summary": {
+        "case_count": 0,
+        "combination_count": 0,
+        "bound_nodal_load_row_count": 0,
+        "bound_selfweight_row_count": 0,
+        "bound_pressure_row_count": 0,
+        "unbound_nodal_load_row_count": 0,
+        "unbound_selfweight_row_count": 0,
+        "unbound_pressure_row_count": 0,
+        "body_load_pending_case_count": 0,
+        "surface_load_pending_case_count": 0,
+        "case_force_summaries": [],
+        "combination_force_summaries": []
+      },
+      "selfweight": [],
+      "nodal_loads": [],
+      "nodal_masses": [],
+      "beam_offsets": [],
+      "pressure_loads": []
+    },
+    "metadata": {
+      "members": [],
+      "groups": [
+        {
+          "name": "PILE_FOUNDATION_ZONE",
+          "node_expr": "1 2 3 4 5 6",
+          "element_expr": "101 102",
+          "plane_type": "SUBSTRUCTURE",
+          "node_count": 6,
+          "element_count": 2,
+          "node_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "element_ids": [
+            101,
+            102
+          ],
+          "node_ids_head": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "element_ids_head": [
+            101,
+            102
+          ],
+          "physical_line_span": 1
+        },
+        {
+          "name": "PERIM_FRAME",
+          "node_expr": "7 8",
+          "element_expr": "103",
+          "plane_type": "FRAME",
+          "node_count": 2,
+          "element_count": 1,
+          "node_ids": [
+            7,
+            8
+          ],
+          "element_ids": [
+            103
+          ],
+          "node_ids_head": [
+            7,
+            8
+          ],
+          "element_ids_head": [
+            103
+          ],
+          "physical_line_span": 1
+        }
+      ],
+      "thickness": [],
+      "design_sections": [],
+      "section_colors": [],
+      "section_scales": [],
+      "section_library": {
+        "contract_version": "0.1.0",
+        "provenance": "parser_additive_metadata",
+        "limitations": [
+          "Exact MIDAS section semantics are not fully decoded yet.",
+          "Derived catalog entries are placeholders for future UI/mesher/productization work.",
+          "Unusable or ambiguous rows remain in usage_summary even if no template was emitted."
+        ],
+        "usage_summary": [
+          {
+            "section_id": 21,
+            "name": "DBUSER",
+            "usage_count": 1,
+            "element_family_counts": {
+              "shell": 1
+            },
+            "inferred_family": "rc",
+            "inferred_shape": "slab_strip",
+            "dimensions_m": {
+              "slab_width_m": 3.0,
+              "thickness_m": 0.2
+            },
+            "has_design_section_row": false,
+            "has_section_color_row": false,
+            "has_section_scale_row": false,
+            "source_provenance": "derived_from_midas_section_row_name_raw_tokens_and_element_usage",
+            "limitations": "Nominal productization metadata only. Dimensions and family/shape may be heuristic placeholders until a dedicated MIDAS section decoder is added.",
+            "derivation_confidence": "name_token+usage"
+          },
+          {
+            "section_id": 22,
+            "name": "DBUSER",
+            "usage_count": 1,
+            "element_family_counts": {
+              "beam": 1
+            },
+            "inferred_family": "steel",
+            "inferred_shape": "h_beam",
+            "dimensions_m": {
+              "depth_m": 0.6,
+              "flange_width_m": 0.6
+            },
+            "has_design_section_row": false,
+            "has_section_color_row": false,
+            "has_section_scale_row": false,
+            "source_provenance": "derived_from_midas_section_row_name_raw_tokens_and_element_usage",
+            "limitations": "Nominal productization metadata only. Dimensions and family/shape may be heuristic placeholders until a dedicated MIDAS section decoder is added.",
+            "derivation_confidence": "name_token+usage"
+          },
+          {
+            "section_id": 23,
+            "name": "B-SEC-450",
+            "usage_count": 1,
+            "element_family_counts": {
+              "beam": 1
+            },
+            "inferred_family": "steel",
+            "inferred_shape": "h_beam",
+            "dimensions_m": {
+              "depth_m": 0.6,
+              "flange_width_m": 0.6
+            },
+            "has_design_section_row": false,
+            "has_section_color_row": false,
+            "has_section_scale_row": false,
+            "source_provenance": "derived_from_midas_section_row_name_raw_tokens_and_element_usage",
+            "limitations": "Nominal productization metadata only. Dimensions and family/shape may be heuristic placeholders until a dedicated MIDAS section decoder is added.",
+            "derivation_confidence": "name_token+usage"
+          }
+        ],
+        "derived_catalog": {
+          "version": "0.1.0",
+          "source_label": "midas_parser_derived",
+          "template_count": 3,
+          "family_counts": {
+            "rc": 1,
+            "steel": 2
+          },
+          "templates": [
+            {
+              "section_id": "midas:21",
+              "family": "rc",
+              "shape": "slab_strip",
+              "material_grade": "MIDAS_IMPORTED_PLACEHOLDER",
+              "dimensions_m": {
+                "slab_width_m": 3.0,
+                "thickness_m": 0.2
+              },
+              "default_mesh_size_m": 0.1,
+              "placeholder_analysis_kind": "layered_shell_wall",
+              "tags": [
+                "shell"
+              ],
+              "notes": "MIDAS section 21 imported from parser heuristics. Use as UI/productization seed only until exact section decoder is available."
+            },
+            {
+              "section_id": "midas:22",
+              "family": "steel",
+              "shape": "h_beam",
+              "material_grade": "MIDAS_IMPORTED_PLACEHOLDER",
+              "dimensions_m": {
+                "depth_m": 0.6,
+                "flange_width_m": 0.6
+              },
+              "default_mesh_size_m": 0.15,
+              "placeholder_analysis_kind": "frame_fiber_ready",
+              "tags": [
+                "beam"
+              ],
+              "notes": "MIDAS section 22 imported from parser heuristics. Use as UI/productization seed only until exact section decoder is available."
+            },
+            {
+              "section_id": "midas:23",
+              "family": "steel",
+              "shape": "h_beam",
+              "material_grade": "MIDAS_IMPORTED_PLACEHOLDER",
+              "dimensions_m": {
+                "depth_m": 0.6,
+                "flange_width_m": 0.6
+              },
+              "default_mesh_size_m": 0.15,
+              "placeholder_analysis_kind": "frame_fiber_ready",
+              "tags": [
+                "beam"
+              ],
+              "notes": "MIDAS section 23 imported from parser heuristics. Use as UI/productization seed only until exact section decoder is available."
+            }
+          ]
+        },
+        "summary": {
+          "section_row_count": 3,
+          "used_section_count": 3,
+          "unused_section_count": 0,
+          "derived_template_count": 3,
+          "family_counts": {
+            "rc": 1,
+            "steel": 2
+          },
+          "shape_counts": {
+            "h_beam": 2,
+            "slab_strip": 1
+          }
+        }
+      },
+      "load_pattern_library": {
+        "contract_version": "0.1.0",
+        "provenance": "parser_additive_metadata",
+        "limitations": [
+          "Load primitives are aggregated authoring seeds, not exact solver load cards.",
+          "Body/surface load assembly is still represented as productization metadata, not a native commercial editor.",
+          "Combination expansion is summary-grade and should not replace final code-check load assembly."
+        ],
+        "pattern_summary": {
+          "pattern_count": 0,
+          "primitive_count": 0,
+          "primitive_kind_counts": {},
+          "case_counts": {},
+          "patterns": []
+        },
+        "case_semantic_rows": [],
+        "combination_summary": {
+          "combination_count": 0,
+          "limit_state_counts": {},
+          "expansion_mode_counts": {},
+          "max_expansion_depth": 0,
+          "nested_combination_count": 0,
+          "referenced_case_union": [],
+          "referenced_leaf_case_union": [],
+          "combination_names": []
+        },
+        "summary": {
+          "pattern_count": 0,
+          "primitive_count": 0,
+          "design_situation_counts": {},
+          "semantic_status_counts": {},
+          "load_color_row_count": 0
+        }
+      },
+      "load_combination_editor_seed": {
+        "contract_version": "0.1.0",
+        "provenance": "parser_additive_metadata",
+        "seed_kind": "midas_load_combination_editor_seed",
+        "limitations": [
+          "Editor seed rows are deterministic authoring contracts, not final solver-ready code-check assemblies.",
+          "Graph layout/order is suitable for browser/editor preview and may differ from final commercial UI presentation.",
+          "Expanded factor maps should be treated as normalized references until round-trip export is fully wired."
+        ],
+        "summary": {
+          "combination_count": 0,
+          "case_count": 0,
+          "graph_edge_count": 0,
+          "stage_count": 0,
+          "max_expansion_depth": 0,
+          "nested_combination_count": 0,
+          "limit_state_counts": {},
+          "expansion_mode_counts": {}
+        },
+        "case_nodes": [],
+        "combination_nodes": [],
+        "graph_edges": []
+      },
+      "design_materials": [],
+      "design_material_rebar_payloads": [],
+      "group_local_rebar_payloads": [],
+      "material_colors": [],
+      "boundary_groups": [],
+      "domain_elements": [],
+      "eigen_controls": [],
+      "load_colors": [],
+      "length_units": [],
+      "main_domains": [],
+      "rebar_material_codes": [],
+      "story_eccentricity": [],
+      "structure_type": [],
+      "thickness_colors": [],
+      "version": [
+        {
+          "tokens": [
+            "2024"
+          ],
+          "raw": "2024",
+          "id": 2024
+        }
+      ]
+    },
+    "load_cases_raw": [],
+    "load_combinations_raw": []
+  },
+  "topology_metrics": {
+    "node_count": 8,
+    "element_count": 3,
+    "edge_count_undirected": 6,
+    "beam_element_count": 2,
+    "shell_element_count": 1,
+    "node_count_pre_coarsening": 8,
+    "element_count_pre_coarsening": 3
+  }
+}

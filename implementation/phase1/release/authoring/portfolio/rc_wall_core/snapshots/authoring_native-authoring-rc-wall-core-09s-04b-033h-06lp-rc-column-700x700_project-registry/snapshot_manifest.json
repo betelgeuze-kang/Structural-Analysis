@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "job_id": "authoring::native-authoring-rc-wall-core-09s-04b-033h-06lp-rc-column-700x700::project-registry",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "snapshot_id": "authoring_native-authoring-rc-wall-core-09s-04b-033h-06lp-rc-column-700x700_project-registry__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_registry.json",
+      "label": "native_authoring_project_registry.json",
+      "sha256": "6fa93a2c2e2cd21bdcefb5b568b3483e7c29773940b7259f609902e63217c9e9",
+      "bytes": 9990
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/rc_wall_core/native_authoring_project_package.zip",
+      "label": "native_authoring_project_package.zip",
+      "sha256": "99b66b050292a993fd78dd106b1941cc7672a60bd06cf75188e97a05fc20e1d8",
+      "bytes": 86301
+    },
+    {
+      "path": "implementation/phase1/release/signing/native_authoring_portfolio/rc_wall_core/native_authoring_project_registry_ed25519.pub.pem",
+      "label": "native_authoring_project_registry_ed25519.pub.pem",
+      "sha256": "5c7bbbe8aec229c82c638bd024d9183582ad09bebf88c3abd76a762d1235d560",
+      "bytes": 113
+    },
+    {
+      "path": "implementation/phase1/release/signing/native_authoring_portfolio/rc_wall_core/native_authoring_project_registry.signature.b64",
+      "label": "native_authoring_project_registry.signature.b64",
+      "sha256": "46e18115bc9591c92e27661dff77bc5243d12e4542499140fed5e9d6c60fed23",
+      "bytes": 89
+    }
+  ],
+  "summary": {
+    "artifact_count": 4
+  }
+}

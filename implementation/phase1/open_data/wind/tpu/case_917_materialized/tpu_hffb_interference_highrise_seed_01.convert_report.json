@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-convert-tpu-mat-to-csv",
+  "generated_at": "2026-03-19T13:28:17.261859+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU MAT file converted into flat CSV successfully.",
+  "inputs": {
+    "input_mat": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.mat",
+    "source_manifest": "",
+    "source_manifest_data_path": "",
+    "dataset_key": "",
+    "time_key": "",
+    "sample_axis": null,
+    "column_prefix": "signal",
+    "dt_s": null,
+    "summary_only": false
+  },
+  "summary": {
+    "source_name": "",
+    "source_origin_class": "",
+    "loader_backend": "scipy.io.loadmat",
+    "candidate_numeric_dataset_count": 7,
+    "dataset_name": "Pressure_coefficients",
+    "time_name": "",
+    "row_count": 5858,
+    "signal_column_count": 252,
+    "has_time_column": true,
+    "dt_s": 0.0012804097311139564,
+    "duration_hours": 0.0020831554986484565,
+    "selected_sample_axis": 0,
+    "time_source_mode": "scalar_sample_frequency"
+  },
+  "candidates": [
+    {
+      "path": "Pressure_coefficients",
+      "shape": [
+        5858,
+        252
+      ],
+      "ndim": 2,
+      "size": 1476216,
+      "dtype": "float64",
+      "time_like": false,
+      "signal_like": true
+    },
+    {
+      "path": "Interfering_building_BDH",
+      "shape": [
+        3
+      ],
+      "ndim": 1,
+      "size": 3,
+      "dtype": "uint16",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Principal_building_BDH",
+      "shape": [
+        3
+      ],
+      "ndim": 1,
+      "size": 3,
+      "dtype": "uint16",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Mean_wind_speed_top",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "float64",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Sample_frequecny",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "int64",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Sample_period",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "float64",
+      "time_like": false,
+      "signal_like": false
+    },
+    {
+      "path": "Turbulence_intensity_top",
+      "shape": [],
+      "ndim": 0,
+      "size": 1,
+      "dtype": "int64",
+      "time_like": false,
+      "signal_like": false
+    }
+  ],
+  "artifacts": {
+    "out_csv": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv"
+  }
+}

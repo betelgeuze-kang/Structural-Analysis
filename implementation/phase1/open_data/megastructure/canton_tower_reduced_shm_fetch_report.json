@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-canton-tower-reduced-shm-package",
+  "generated_at": "2026-04-16T13:33:36.884285+00:00",
+  "probe_json": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm.download_probe.json",
+  "out_dir": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm",
+  "include_hourly": false,
+  "include_aux": false,
+  "download_rows": [
+    {
+      "url": "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase_I_measurement%20description.pdf",
+      "target": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/Phase_I_measurement_description.pdf",
+      "status": 200,
+      "bytes": 686288,
+      "content_type": "application/pdf",
+      "content_length_header": "686288",
+      "downloaded": true
+    },
+    {
+      "url": "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase%20I%20data_all.zip",
+      "target": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/Phase_I_data_all.zip",
+      "downloaded": false,
+      "bytes": 440559785,
+      "status": "existing"
+    },
+    {
+      "url": "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/Phase_I_FE_model_description.pdf",
+      "target": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/Phase_I_FE_model_description.pdf",
+      "status": 200,
+      "bytes": 535325,
+      "content_type": "application/pdf",
+      "content_length_header": "535325",
+      "downloaded": true
+    },
+    {
+      "url": "https://polyucee.hk/ceyxia/benchmark/Phase%20I%20data/system_matrices.mat",
+      "target": "implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/system_matrices.mat",
+      "status": 200,
+      "bytes": 610608,
+      "content_type": null,
+      "content_length_header": "610608",
+      "downloaded": true
+    }
+  ],
+  "summary": {
+    "requested_url_count": 4,
+    "downloaded_count": 3,
+    "existing_count": 1
+  },
+  "contract_pass": true
+}

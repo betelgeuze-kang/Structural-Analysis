@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-22T14:06:22.784753+00:00",
+  "contract_pass": false,
+  "reason_code": "TEMPLATE_PENDING_REAL_REVIEW",
+  "reason": "no real case-level attestation manifest exists; template placeholders remain active",
+  "case": {
+    "task_id": "hardest::peer_tbi_tall_building_ndtha",
+    "case_id": "peer_tbi_tall_building_ndtha",
+    "case_label": "PEER TBI Tall Building NDTHA",
+    "benchmark_family": "highrise_ndtha"
+  },
+  "attestation_source_kind": "template",
+  "attestation_source_json": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_templates/00.peer_tbi_tall_building_ndtha.authority_onepage.reviewer_attestation.template.json",
+  "manifest_json": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_manifests/00.peer_tbi_tall_building_ndtha.authority_onepage.reviewer_attestation.manifest.json",
+  "template_json": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_templates/00.peer_tbi_tall_building_ndtha.authority_onepage.reviewer_attestation.template.json",
+  "manifest_error": "",
+  "reviewer_missing_fields": [
+    "reviewer_name",
+    "reviewer_license_id",
+    "reviewer_signature_name",
+    "decision_basis",
+    "review_session_id",
+    "attested_at_utc"
+  ],
+  "authority_missing_fields": [
+    "authority_name",
+    "authority_receipt_id",
+    "authority_receipt_issued_at_utc",
+    "approval_signature_name"
+  ],
+  "missing_fields": [
+    "reviewer_name",
+    "reviewer_license_id",
+    "reviewer_signature_name",
+    "decision_basis",
+    "review_session_id",
+    "attested_at_utc",
+    "authority_name",
+    "authority_receipt_id",
+    "authority_receipt_issued_at_utc",
+    "approval_signature_name"
+  ],
+  "summary": {
+    "required_field_count": 10,
+    "completed_field_count": 0,
+    "review_boundary_pending_count": 2,
+    "review_boundary_resolution_label": "approve_all=PASS_START_NOW_FULL/ready_full=yes; reject_one=ERR_ARCHITECTURE_BLOCKERS/open_revision=1",
+    "submission_ready_to_start_now": true,
+    "submission_reason_code": "PASS_START_NOW_LIMITED"
+  },
+  "workflow_connection": {
+    "audit_review_decision_batch_template_json": "",
+    "audit_review_decision_batch_run_report_json": "",
+    "audit_review_decision_batch_live_preview_json": "",
+    "audit_review_decision_batch_approve_all_live_ready_template_json": "",
+    "execution_status_manifest_json": ""
+  },
+  "evidence": {
+    "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json",
+    "primary_report_path": "",
+    "case_bundle_dir": "",
+    "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/signed_case_bundle.zip"
+  },
+  "attestation": {
+    "reviewer_name": "PENDING_REAL_REVIEWER_NAME_FILL_CASE_ATTESTATION_MANIFEST",
+    "reviewer_role": "PENDING_REAL_REVIEWER_ROLE_FILL_CASE_ATTESTATION_MANIFEST",
+    "reviewer_license_id": "PENDING_REAL_REVIEWER_LICENSE_ID_FILL_CASE_ATTESTATION_MANIFEST",
+    "reviewer_signature_name": "PENDING_REAL_REVIEWER_SIGNATURE_FILL_CASE_ATTESTATION_MANIFEST",
+    "decision_basis": "PENDING_REAL_DECISION_BASIS_FILL_CASE_ATTESTATION_MANIFEST",
+    "review_session_id": "PENDING_REAL_REVIEW_SESSION_ID_FILL_CASE_ATTESTATION_MANIFEST",
+    "attested_at_utc": "PENDING_REAL_ATTESTED_AT_UTC_FILL_CASE_ATTESTATION_MANIFEST",
+    "authority_name": "PENDING_REAL_AUTHORITY_NAME_FILL_CASE_ATTESTATION_MANIFEST",
+    "authority_receipt_id": "PENDING_REAL_AUTHORITY_RECEIPT_ID_FILL_CASE_ATTESTATION_MANIFEST",
+    "authority_receipt_issued_at_utc": "PENDING_REAL_AUTHORITY_RECEIPT_ISSUED_AT_FILL_CASE_ATTESTATION_MANIFEST",
+    "authority_receipt_note": "PENDING_REAL_AUTHORITY_RECEIPT_NOTE_FILL_CASE_ATTESTATION_MANIFEST",
+    "approval_signature_name": "PENDING_REAL_APPROVAL_SIGNATURE_FILL_CASE_ATTESTATION_MANIFEST"
+  },
+  "cover_sheet_slots": {
+    "reviewer_name_slot": "PENDING_REAL_REVIEWER_NAME_FILL_CASE_ATTESTATION_MANIFEST",
+    "reviewer_role_or_license_slot": "PENDING_REAL_REVIEWER_ROLE_OR_LICENSE_FILL_CASE_ATTESTATION_MANIFEST",
+    "reviewer_signature_slot": "PENDING_REAL_REVIEWER_SIGNATURE_FILL_CASE_ATTESTATION_MANIFEST",
+    "receipt_id_slot": "PENDING_REAL_AUTHORITY_RECEIPT_ID_FILL_CASE_ATTESTATION_MANIFEST",
+    "receipt_issued_at_slot": "PENDING_REAL_AUTHORITY_RECEIPT_ISSUED_AT_FILL_CASE_ATTESTATION_MANIFEST",
+    "authority_receipt_slot": "PENDING_REAL_AUTHORITY_RECEIPT_FILL_CASE_ATTESTATION_MANIFEST",
+    "approval_signature_slot": "PENDING_REAL_APPROVAL_SIGNATURE_FILL_CASE_ATTESTATION_MANIFEST"
+  }
+}

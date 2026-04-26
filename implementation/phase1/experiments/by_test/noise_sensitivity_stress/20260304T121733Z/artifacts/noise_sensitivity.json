@@ -1,0 +1,441 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-noise-sensitivity-stress",
+  "generated_at": "2026-03-04T12:17:33.665400+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.kw51_railway_bridge.json",
+    "target_split": "all",
+    "required_case_count": 4,
+    "target_case_ids": [
+      "ATWOOD-00001",
+      "ATWOOD-00002",
+      "ATWOOD-00003",
+      "ATWOOD-00004"
+    ],
+    "sensor_noise_levels_pct": [
+      0.5,
+      1.0,
+      2.0,
+      5.0
+    ],
+    "stiffness_noise_levels_pct": [
+      10.0
+    ],
+    "seeds": [
+      11,
+      23,
+      47
+    ],
+    "epochs": 24,
+    "branches": 10,
+    "top_k": 3,
+    "lr": 0.055,
+    "epsilon": 0.11,
+    "temperature": 0.32,
+    "accepted_metric_sources": "engine_export_direct,commercial_solver_export,open_data_measurement",
+    "max_high_noise_drift_p95_pct": 15.0,
+    "max_high_noise_base_p95_pct": 10.0
+  },
+  "checks": {
+    "has_required_case_count": true,
+    "noise_sweep_complete": true,
+    "finite_metrics": true,
+    "high_noise_available": true,
+    "high_noise_degradation_detected": false,
+    "robustness_budget_pass": false
+  },
+  "summary": {
+    "scenario_count_expected": 4,
+    "scenario_count_actual": 4,
+    "selected_case_count": 4,
+    "high_noise_drift_error_pct_p95": 78744.19785335554,
+    "high_noise_base_shear_error_pct_p95": 67265.9416312393,
+    "baseline_row": null,
+    "high_noise_row": {
+      "sensor_noise_pct": 5.0,
+      "stiffness_noise_pct": 10.0,
+      "seed_count": 3,
+      "drift_error_pct_mean": 37792.823466577924,
+      "drift_error_pct_p95": 78744.19785335554,
+      "drift_error_pct_worst": 78744.19785335554,
+      "base_shear_error_pct_mean": 43985.85194548316,
+      "base_shear_error_pct_p95": 67265.9416312393,
+      "base_shear_error_pct_worst": 67265.9416312393,
+      "buckling_factor_error_pct_mean": 61110.41669807769,
+      "mode_shape_mac_mean": 0.9501316814349418,
+      "per_seed": [
+        {
+          "seed": 11,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 78744.19785335554,
+          "base_shear_error_pct": 35409.23905890813,
+          "buckling_factor_error_pct": 28695.57696769968,
+          "mode_shape_mac": 0.9591649469820727
+        },
+        {
+          "seed": 23,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 2027.868980923846,
+          "base_shear_error_pct": 67265.9416312393,
+          "buckling_factor_error_pct": 153522.60694977365,
+          "mode_shape_mac": 0.94554541869597
+        },
+        {
+          "seed": 47,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 32606.4035654544,
+          "base_shear_error_pct": 29282.375146302074,
+          "buckling_factor_error_pct": 1113.0661767597423,
+          "mode_shape_mac": 0.945684678626783
+        }
+      ]
+    }
+  },
+  "scenario_rows": [
+    {
+      "sensor_noise_pct": 0.5,
+      "stiffness_noise_pct": 10.0,
+      "seed_count": 3,
+      "drift_error_pct_mean": 37503.165001859285,
+      "drift_error_pct_p95": 78288.25855442208,
+      "drift_error_pct_worst": 78288.25855442208,
+      "base_shear_error_pct_mean": 43957.393660625436,
+      "base_shear_error_pct_p95": 67222.39879235435,
+      "base_shear_error_pct_worst": 67222.39879235435,
+      "buckling_factor_error_pct_mean": 61093.78362858534,
+      "mode_shape_mac_mean": 0.9506058871608088,
+      "per_seed": [
+        {
+          "seed": 11,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 78288.25855442208,
+          "base_shear_error_pct": 35550.974997056415,
+          "buckling_factor_error_pct": 28673.097370099345,
+          "mode_shape_mac": 0.9591653660278429
+        },
+        {
+          "seed": 23,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 2018.676760268716,
+          "base_shear_error_pct": 67222.39879235435,
+          "buckling_factor_error_pct": 153500.2441928181,
+          "mode_shape_mac": 0.9453732901149325
+        },
+        {
+          "seed": 47,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 32202.55969088705,
+          "base_shear_error_pct": 29098.80719246555,
+          "buckling_factor_error_pct": 1108.0093228385947,
+          "mode_shape_mac": 0.9472790053396514
+        }
+      ]
+    },
+    {
+      "sensor_noise_pct": 1.0,
+      "stiffness_noise_pct": 10.0,
+      "seed_count": 3,
+      "drift_error_pct_mean": 37601.151382285505,
+      "drift_error_pct_p95": 78627.92807947329,
+      "drift_error_pct_worst": 78627.92807947329,
+      "base_shear_error_pct_mean": 43968.13351298543,
+      "base_shear_error_pct_p95": 67381.93191079424,
+      "base_shear_error_pct_worst": 67381.93191079424,
+      "buckling_factor_error_pct_mean": 60944.34833152487,
+      "mode_shape_mac_mean": 0.9502336521615723,
+      "per_seed": [
+        {
+          "seed": 11,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 78627.92807947329,
+          "base_shear_error_pct": 35349.50467755291,
+          "buckling_factor_error_pct": 28647.51044945986,
+          "mode_shape_mac": 0.9591649699311778
+        },
+        {
+          "seed": 23,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 2013.9782475935754,
+          "base_shear_error_pct": 67381.93191079424,
+          "buckling_factor_error_pct": 153079.58159851423,
+          "mode_shape_mac": 0.9444021769244262
+        },
+        {
+          "seed": 47,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 32161.54781978965,
+          "base_shear_error_pct": 29172.963950609115,
+          "buckling_factor_error_pct": 1105.9529466004956,
+          "mode_shape_mac": 0.9471338096291128
+        }
+      ]
+    },
+    {
+      "sensor_noise_pct": 2.0,
+      "stiffness_noise_pct": 10.0,
+      "seed_count": 3,
+      "drift_error_pct_mean": 37645.54180612924,
+      "drift_error_pct_p95": 78658.69695489526,
+      "drift_error_pct_worst": 78658.69695489526,
+      "base_shear_error_pct_mean": 43920.10810425123,
+      "base_shear_error_pct_p95": 67197.72235099047,
+      "base_shear_error_pct_worst": 67197.72235099047,
+      "buckling_factor_error_pct_mean": 61131.36465142481,
+      "mode_shape_mac_mean": 0.9500884006461536,
+      "per_seed": [
+        {
+          "seed": 11,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 78658.69695489526,
+          "base_shear_error_pct": 35486.27566297176,
+          "buckling_factor_error_pct": 28684.99848911841,
+          "mode_shape_mac": 0.9591651216121109
+        },
+        {
+          "seed": 23,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 2014.1978836969563,
+          "base_shear_error_pct": 67197.72235099047,
+          "buckling_factor_error_pct": 153604.40690246056,
+          "mode_shape_mac": 0.944438241346918
+        },
+        {
+          "seed": 47,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 32263.730579795505,
+          "base_shear_error_pct": 29076.326298791446,
+          "buckling_factor_error_pct": 1104.6885626954656,
+          "mode_shape_mac": 0.9466618389794321
+        }
+      ]
+    },
+    {
+      "sensor_noise_pct": 5.0,
+      "stiffness_noise_pct": 10.0,
+      "seed_count": 3,
+      "drift_error_pct_mean": 37792.823466577924,
+      "drift_error_pct_p95": 78744.19785335554,
+      "drift_error_pct_worst": 78744.19785335554,
+      "base_shear_error_pct_mean": 43985.85194548316,
+      "base_shear_error_pct_p95": 67265.9416312393,
+      "base_shear_error_pct_worst": 67265.9416312393,
+      "buckling_factor_error_pct_mean": 61110.41669807769,
+      "mode_shape_mac_mean": 0.9501316814349418,
+      "per_seed": [
+        {
+          "seed": 11,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 78744.19785335554,
+          "base_shear_error_pct": 35409.23905890813,
+          "buckling_factor_error_pct": 28695.57696769968,
+          "mode_shape_mac": 0.9591649469820727
+        },
+        {
+          "seed": 23,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 2027.868980923846,
+          "base_shear_error_pct": 67265.9416312393,
+          "buckling_factor_error_pct": 153522.60694977365,
+          "mode_shape_mac": 0.94554541869597
+        },
+        {
+          "seed": 47,
+          "benchmark_reason_code": "ERR_BENCHMARK_KPI_FAIL",
+          "benchmark_contract_pass": false,
+          "drift_error_pct": 32606.4035654544,
+          "base_shear_error_pct": 29282.375146302074,
+          "buckling_factor_error_pct": 1113.0661767597423,
+          "mode_shape_mac": 0.945684678626783
+        }
+      ]
+    }
+  ],
+  "failures": [],
+  "steps": [
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 0.5,
+        "stiffness_noise_pct": 10.0,
+        "seed": 11
+      },
+      "seconds": 9.274031162261963,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s00_k10_seed11.json --out implementation/phase1/stress/noise/hf_benchmark_s00_k10_seed11.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s00_k10_seed11.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 11 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s00_k10_seed11.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s00_k10_seed11.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 0.5,
+        "stiffness_noise_pct": 10.0,
+        "seed": 23
+      },
+      "seconds": 8.990867614746094,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s00_k10_seed23.json --out implementation/phase1/stress/noise/hf_benchmark_s00_k10_seed23.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s00_k10_seed23.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 23 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s00_k10_seed23.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s00_k10_seed23.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 0.5,
+        "stiffness_noise_pct": 10.0,
+        "seed": 47
+      },
+      "seconds": 9.084778785705566,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s00_k10_seed47.json --out implementation/phase1/stress/noise/hf_benchmark_s00_k10_seed47.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s00_k10_seed47.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 47 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s00_k10_seed47.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s00_k10_seed47.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 1.0,
+        "stiffness_noise_pct": 10.0,
+        "seed": 11
+      },
+      "seconds": 9.242878198623657,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s01_k10_seed11.json --out implementation/phase1/stress/noise/hf_benchmark_s01_k10_seed11.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s01_k10_seed11.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 11 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s01_k10_seed11.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s01_k10_seed11.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 1.0,
+        "stiffness_noise_pct": 10.0,
+        "seed": 23
+      },
+      "seconds": 9.1555814743042,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s01_k10_seed23.json --out implementation/phase1/stress/noise/hf_benchmark_s01_k10_seed23.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s01_k10_seed23.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 23 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s01_k10_seed23.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s01_k10_seed23.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 1.0,
+        "stiffness_noise_pct": 10.0,
+        "seed": 47
+      },
+      "seconds": 9.067433834075928,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s01_k10_seed47.json --out implementation/phase1/stress/noise/hf_benchmark_s01_k10_seed47.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s01_k10_seed47.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 47 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s01_k10_seed47.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s01_k10_seed47.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 2.0,
+        "stiffness_noise_pct": 10.0,
+        "seed": 11
+      },
+      "seconds": 9.283923149108887,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s02_k10_seed11.json --out implementation/phase1/stress/noise/hf_benchmark_s02_k10_seed11.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s02_k10_seed11.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 11 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s02_k10_seed11.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s02_k10_seed11.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 2.0,
+        "stiffness_noise_pct": 10.0,
+        "seed": 23
+      },
+      "seconds": 9.45858383178711,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s02_k10_seed23.json --out implementation/phase1/stress/noise/hf_benchmark_s02_k10_seed23.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s02_k10_seed23.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 23 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s02_k10_seed23.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s02_k10_seed23.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 2.0,
+        "stiffness_noise_pct": 10.0,
+        "seed": 47
+      },
+      "seconds": 9.669384717941284,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s02_k10_seed47.json --out implementation/phase1/stress/noise/hf_benchmark_s02_k10_seed47.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s02_k10_seed47.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 47 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s02_k10_seed47.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s02_k10_seed47.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 5.0,
+        "stiffness_noise_pct": 10.0,
+        "seed": 11
+      },
+      "seconds": 9.349635601043701,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s05_k10_seed11.json --out implementation/phase1/stress/noise/hf_benchmark_s05_k10_seed11.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s05_k10_seed11.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 11 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s05_k10_seed11.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s05_k10_seed11.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 5.0,
+        "stiffness_noise_pct": 10.0,
+        "seed": 23
+      },
+      "seconds": 9.443005800247192,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s05_k10_seed23.json --out implementation/phase1/stress/noise/hf_benchmark_s05_k10_seed23.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s05_k10_seed23.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 23 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s05_k10_seed23.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s05_k10_seed23.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "benchmark_noisy_scenario",
+      "scenario": {
+        "sensor_noise_pct": 5.0,
+        "stiffness_noise_pct": 10.0,
+        "seed": 47
+      },
+      "seconds": 9.38547682762146,
+      "ok": false,
+      "return_code": 1,
+      "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract_stub.py --cases implementation/phase1/stress/noise/noisy_cases_s05_k10_seed47.json --out implementation/phase1/stress/noise/hf_benchmark_s05_k10_seed47.json --comparison-out implementation/phase1/stress/noise/topk_comparison_s05_k10_seed47.json --target-split all --epochs 24 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 47 --max-drift-error-pct 100.0 --max-base-shear-error-pct 100.0 --max-buckling-factor-error-pct 100.0 --min-mode-shape-mac 0.0 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
+      "stdout_tail": "Wrote HF benchmark contract report: implementation/phase1/stress/noise/hf_benchmark_s05_k10_seed47.json\nWrote Top-k comparison report: implementation/phase1/stress/noise/topk_comparison_s05_k10_seed47.json\n",
+      "stderr_tail": ""
+    }
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_ROBUSTNESS_FAIL",
+  "reason": "high-noise scenario exceeded configured error envelope"
+}

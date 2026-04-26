@@ -1,0 +1,7 @@
+{
+  "metrics": {
+    "drift_envelope_max_pct": 0.92,
+    "wind_residual_drift_pct_max_abs": 0.03,
+    "ssi_residual_drift_pct_max_abs": 0.02
+  }
+}

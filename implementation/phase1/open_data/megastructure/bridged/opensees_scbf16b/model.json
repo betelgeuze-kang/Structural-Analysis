@@ -1,0 +1,1577 @@
+{
+  "schema_version": "1.0",
+  "model_kind": "opensees_text_baseline",
+  "topology_metrics": {
+    "node_count": 134,
+    "element_count": 50,
+    "story_band_count": 17,
+    "element_type_histogram": {
+      "elasticBeamColumn": 34,
+      "constraint_equalDOF": 16
+    },
+    "element_class_histogram": {
+      "column": 18,
+      "beam": 32
+    }
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": 110,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 113,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 120,
+        "x": 360.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 123,
+        "x": 360.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 130,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 133,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 140,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 143,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": 230,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 180.0
+      },
+      {
+        "id": 231,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 180.0
+      },
+      {
+        "id": 233,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 180.0
+      },
+      {
+        "id": 234,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 180.0
+      },
+      {
+        "id": 240,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 180.0
+      },
+      {
+        "id": 241,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 180.0
+      },
+      {
+        "id": 242,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 180.0
+      },
+      {
+        "id": 243,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 180.0
+      },
+      {
+        "id": 330,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 360.0
+      },
+      {
+        "id": 331,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 360.0
+      },
+      {
+        "id": 333,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 360.0
+      },
+      {
+        "id": 334,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 360.0
+      },
+      {
+        "id": 340,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 360.0
+      },
+      {
+        "id": 341,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 360.0
+      },
+      {
+        "id": 342,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 360.0
+      },
+      {
+        "id": 343,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 360.0
+      },
+      {
+        "id": 430,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 540.0
+      },
+      {
+        "id": 431,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 540.0
+      },
+      {
+        "id": 433,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 540.0
+      },
+      {
+        "id": 434,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 540.0
+      },
+      {
+        "id": 440,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 540.0
+      },
+      {
+        "id": 441,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 540.0
+      },
+      {
+        "id": 442,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 540.0
+      },
+      {
+        "id": 443,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 540.0
+      },
+      {
+        "id": 530,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 720.0
+      },
+      {
+        "id": 531,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 720.0
+      },
+      {
+        "id": 533,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 720.0
+      },
+      {
+        "id": 534,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 720.0
+      },
+      {
+        "id": 540,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 720.0
+      },
+      {
+        "id": 541,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 720.0
+      },
+      {
+        "id": 542,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 720.0
+      },
+      {
+        "id": 543,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 720.0
+      },
+      {
+        "id": 630,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 900.0
+      },
+      {
+        "id": 631,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 900.0
+      },
+      {
+        "id": 633,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 900.0
+      },
+      {
+        "id": 634,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 900.0
+      },
+      {
+        "id": 640,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 900.0
+      },
+      {
+        "id": 641,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 900.0
+      },
+      {
+        "id": 642,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 900.0
+      },
+      {
+        "id": 643,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 900.0
+      },
+      {
+        "id": 730,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1080.0
+      },
+      {
+        "id": 731,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1080.0
+      },
+      {
+        "id": 733,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1080.0
+      },
+      {
+        "id": 734,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1080.0
+      },
+      {
+        "id": 740,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1080.0
+      },
+      {
+        "id": 741,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1080.0
+      },
+      {
+        "id": 742,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1080.0
+      },
+      {
+        "id": 743,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1080.0
+      },
+      {
+        "id": 830,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1260.0
+      },
+      {
+        "id": 831,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1260.0
+      },
+      {
+        "id": 833,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1260.0
+      },
+      {
+        "id": 834,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1260.0
+      },
+      {
+        "id": 840,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1260.0
+      },
+      {
+        "id": 841,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1260.0
+      },
+      {
+        "id": 842,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1260.0
+      },
+      {
+        "id": 843,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1260.0
+      },
+      {
+        "id": 930,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1440.0
+      },
+      {
+        "id": 931,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1440.0
+      },
+      {
+        "id": 933,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1440.0
+      },
+      {
+        "id": 934,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1440.0
+      },
+      {
+        "id": 940,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1440.0
+      },
+      {
+        "id": 941,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1440.0
+      },
+      {
+        "id": 942,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1440.0
+      },
+      {
+        "id": 943,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1440.0
+      },
+      {
+        "id": 1030,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1620.0
+      },
+      {
+        "id": 1031,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1620.0
+      },
+      {
+        "id": 1033,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1620.0
+      },
+      {
+        "id": 1034,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1620.0
+      },
+      {
+        "id": 1040,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1620.0
+      },
+      {
+        "id": 1041,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1620.0
+      },
+      {
+        "id": 1042,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1620.0
+      },
+      {
+        "id": 1043,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1620.0
+      },
+      {
+        "id": 1130,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1800.0
+      },
+      {
+        "id": 1131,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1800.0
+      },
+      {
+        "id": 1133,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1800.0
+      },
+      {
+        "id": 1134,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1800.0
+      },
+      {
+        "id": 1140,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1800.0
+      },
+      {
+        "id": 1141,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1800.0
+      },
+      {
+        "id": 1142,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1800.0
+      },
+      {
+        "id": 1143,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1800.0
+      },
+      {
+        "id": 1230,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1980.0
+      },
+      {
+        "id": 1231,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1980.0
+      },
+      {
+        "id": 1233,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1980.0
+      },
+      {
+        "id": 1234,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 1980.0
+      },
+      {
+        "id": 1240,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1980.0
+      },
+      {
+        "id": 1241,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1980.0
+      },
+      {
+        "id": 1242,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1980.0
+      },
+      {
+        "id": 1243,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 1980.0
+      },
+      {
+        "id": 1330,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2160.0
+      },
+      {
+        "id": 1331,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2160.0
+      },
+      {
+        "id": 1333,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2160.0
+      },
+      {
+        "id": 1334,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2160.0
+      },
+      {
+        "id": 1340,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2160.0
+      },
+      {
+        "id": 1341,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2160.0
+      },
+      {
+        "id": 1342,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2160.0
+      },
+      {
+        "id": 1343,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2160.0
+      },
+      {
+        "id": 1430,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2340.0
+      },
+      {
+        "id": 1431,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2340.0
+      },
+      {
+        "id": 1433,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2340.0
+      },
+      {
+        "id": 1434,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2340.0
+      },
+      {
+        "id": 1440,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2340.0
+      },
+      {
+        "id": 1441,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2340.0
+      },
+      {
+        "id": 1442,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2340.0
+      },
+      {
+        "id": 1443,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2340.0
+      },
+      {
+        "id": 1530,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2520.0
+      },
+      {
+        "id": 1531,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2520.0
+      },
+      {
+        "id": 1533,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2520.0
+      },
+      {
+        "id": 1534,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2520.0
+      },
+      {
+        "id": 1540,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2520.0
+      },
+      {
+        "id": 1541,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2520.0
+      },
+      {
+        "id": 1542,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2520.0
+      },
+      {
+        "id": 1543,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2520.0
+      },
+      {
+        "id": 1630,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2700.0
+      },
+      {
+        "id": 1631,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2700.0
+      },
+      {
+        "id": 1633,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2700.0
+      },
+      {
+        "id": 1634,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2700.0
+      },
+      {
+        "id": 1640,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2700.0
+      },
+      {
+        "id": 1641,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2700.0
+      },
+      {
+        "id": 1642,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2700.0
+      },
+      {
+        "id": 1643,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2700.0
+      },
+      {
+        "id": 1730,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2880.0
+      },
+      {
+        "id": 1731,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2880.0
+      },
+      {
+        "id": 1734,
+        "x": 720.0,
+        "y": 0.0,
+        "z": 2880.0
+      },
+      {
+        "id": 1740,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2880.0
+      },
+      {
+        "id": 1741,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2880.0
+      },
+      {
+        "id": 1742,
+        "x": 1080.0,
+        "y": 0.0,
+        "z": 2880.0
+      }
+    ],
+    "elements": [
+      {
+        "id": "502200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          234,
+          242
+        ],
+        "element_id": 502200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 2,
+        "zone_label": "core",
+        "group_id": "S02:core:beam",
+        "group_index": 24
+      },
+      {
+        "id": "503200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          334,
+          342
+        ],
+        "element_id": 503200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 3,
+        "zone_label": "core",
+        "group_id": "S03:core:beam",
+        "group_index": 23
+      },
+      {
+        "id": "504200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          434,
+          442
+        ],
+        "element_id": 504200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 4,
+        "zone_label": "core",
+        "group_id": "S04:core:beam",
+        "group_index": 22
+      },
+      {
+        "id": "505200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          534,
+          542
+        ],
+        "element_id": 505200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 5,
+        "zone_label": "core",
+        "group_id": "S05:core:beam",
+        "group_index": 21
+      },
+      {
+        "id": "506200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          634,
+          642
+        ],
+        "element_id": 506200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 6,
+        "zone_label": "core",
+        "group_id": "S06:core:beam",
+        "group_index": 20
+      },
+      {
+        "id": "507200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          734,
+          742
+        ],
+        "element_id": 507200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 7,
+        "zone_label": "core",
+        "group_id": "S07:core:beam",
+        "group_index": 19
+      },
+      {
+        "id": "508200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          834,
+          842
+        ],
+        "element_id": 508200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 8,
+        "zone_label": "core",
+        "group_id": "S08:core:beam",
+        "group_index": 18
+      },
+      {
+        "id": "509200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          934,
+          942
+        ],
+        "element_id": 509200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 9,
+        "zone_label": "core",
+        "group_id": "S09:core:beam",
+        "group_index": 17
+      },
+      {
+        "id": "510200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1034,
+          1042
+        ],
+        "element_id": 510200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 10,
+        "zone_label": "core",
+        "group_id": "S10:core:beam",
+        "group_index": 16
+      },
+      {
+        "id": "511200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1134,
+          1142
+        ],
+        "element_id": 511200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 11,
+        "zone_label": "core",
+        "group_id": "S11:core:beam",
+        "group_index": 15
+      },
+      {
+        "id": "512200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1234,
+          1242
+        ],
+        "element_id": 512200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 12,
+        "zone_label": "core",
+        "group_id": "S12:core:beam",
+        "group_index": 14
+      },
+      {
+        "id": "513200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1334,
+          1342
+        ],
+        "element_id": 513200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 13,
+        "zone_label": "core",
+        "group_id": "S13:core:beam",
+        "group_index": 13
+      },
+      {
+        "id": "514200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1434,
+          1442
+        ],
+        "element_id": 514200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 14,
+        "zone_label": "core",
+        "group_id": "S14:core:beam",
+        "group_index": 12
+      },
+      {
+        "id": "515200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1534,
+          1542
+        ],
+        "element_id": 515200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 15,
+        "zone_label": "core",
+        "group_id": "S15:core:beam",
+        "group_index": 11
+      },
+      {
+        "id": "516200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1634,
+          1642
+        ],
+        "element_id": 516200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 16,
+        "zone_label": "core",
+        "group_id": "S16:core:beam",
+        "group_index": 10
+      },
+      {
+        "id": "517200",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1734,
+          1742
+        ],
+        "element_id": 517200,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 17,
+        "zone_label": "core",
+        "group_id": "S17:core:beam",
+        "group_index": 9
+      },
+      {
+        "id": "601300",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          133,
+          231
+        ],
+        "element_id": 601300,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 1,
+        "zone_label": "core",
+        "group_id": "S01:core:column",
+        "group_index": 8
+      },
+      {
+        "id": "601400",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          143,
+          241
+        ],
+        "element_id": 601400,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 1,
+        "zone_label": "core",
+        "group_id": "S01:core:column",
+        "group_index": 8
+      },
+      {
+        "id": "602300",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          233,
+          331
+        ],
+        "element_id": 602300,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 2,
+        "zone_label": "core",
+        "group_id": "S02:core:column",
+        "group_index": 7
+      },
+      {
+        "id": "602400",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          243,
+          341
+        ],
+        "element_id": 602400,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 2,
+        "zone_label": "core",
+        "group_id": "S02:core:column",
+        "group_index": 7
+      },
+      {
+        "id": "604300",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          433,
+          531
+        ],
+        "element_id": 604300,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 4,
+        "zone_label": "core",
+        "group_id": "S04:core:column",
+        "group_index": 6
+      },
+      {
+        "id": "604400",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          443,
+          541
+        ],
+        "element_id": 604400,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 4,
+        "zone_label": "core",
+        "group_id": "S04:core:column",
+        "group_index": 6
+      },
+      {
+        "id": "606300",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          633,
+          731
+        ],
+        "element_id": 606300,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 6,
+        "zone_label": "core",
+        "group_id": "S06:core:column",
+        "group_index": 5
+      },
+      {
+        "id": "606400",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          643,
+          741
+        ],
+        "element_id": 606400,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 6,
+        "zone_label": "core",
+        "group_id": "S06:core:column",
+        "group_index": 5
+      },
+      {
+        "id": "608300",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          833,
+          931
+        ],
+        "element_id": 608300,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 8,
+        "zone_label": "core",
+        "group_id": "S08:core:column",
+        "group_index": 4
+      },
+      {
+        "id": "608400",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          843,
+          941
+        ],
+        "element_id": 608400,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 8,
+        "zone_label": "core",
+        "group_id": "S08:core:column",
+        "group_index": 4
+      },
+      {
+        "id": "610300",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          1033,
+          1131
+        ],
+        "element_id": 610300,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 10,
+        "zone_label": "core",
+        "group_id": "S10:core:column",
+        "group_index": 3
+      },
+      {
+        "id": "610400",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          1043,
+          1141
+        ],
+        "element_id": 610400,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 10,
+        "zone_label": "core",
+        "group_id": "S10:core:column",
+        "group_index": 3
+      },
+      {
+        "id": "612300",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          1233,
+          1331
+        ],
+        "element_id": 612300,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 12,
+        "zone_label": "core",
+        "group_id": "S12:core:column",
+        "group_index": 2
+      },
+      {
+        "id": "612400",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          1243,
+          1341
+        ],
+        "element_id": 612400,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 12,
+        "zone_label": "core",
+        "group_id": "S12:core:column",
+        "group_index": 2
+      },
+      {
+        "id": "614300",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          1433,
+          1531
+        ],
+        "element_id": 614300,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 14,
+        "zone_label": "core",
+        "group_id": "S14:core:column",
+        "group_index": 1
+      },
+      {
+        "id": "614400",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          1443,
+          1541
+        ],
+        "element_id": 614400,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 14,
+        "zone_label": "core",
+        "group_id": "S14:core:column",
+        "group_index": 1
+      },
+      {
+        "id": "616300",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          1633,
+          1731
+        ],
+        "element_id": 616300,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 16,
+        "zone_label": "core",
+        "group_id": "S16:core:column",
+        "group_index": 0
+      },
+      {
+        "id": "616400",
+        "type": "COLUMN",
+        "family": "column",
+        "node_ids": [
+          1643,
+          1741
+        ],
+        "element_id": 616400,
+        "source_element_type": "elasticBeamColumn",
+        "story_band": 16,
+        "zone_label": "core",
+        "group_id": "S16:core:column",
+        "group_index": 0
+      },
+      {
+        "id": "10000000025",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1730,
+          1740
+        ],
+        "element_id": 10000000025,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 17,
+        "zone_label": "core",
+        "group_id": "S17:core:beam",
+        "group_index": 9
+      },
+      {
+        "id": "10000000026",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1630,
+          1640
+        ],
+        "element_id": 10000000026,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 16,
+        "zone_label": "core",
+        "group_id": "S16:core:beam",
+        "group_index": 10
+      },
+      {
+        "id": "10000000027",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1530,
+          1540
+        ],
+        "element_id": 10000000027,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 15,
+        "zone_label": "core",
+        "group_id": "S15:core:beam",
+        "group_index": 11
+      },
+      {
+        "id": "10000000028",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1430,
+          1440
+        ],
+        "element_id": 10000000028,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 14,
+        "zone_label": "core",
+        "group_id": "S14:core:beam",
+        "group_index": 12
+      },
+      {
+        "id": "10000000029",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1330,
+          1340
+        ],
+        "element_id": 10000000029,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 13,
+        "zone_label": "core",
+        "group_id": "S13:core:beam",
+        "group_index": 13
+      },
+      {
+        "id": "10000000030",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1230,
+          1240
+        ],
+        "element_id": 10000000030,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 12,
+        "zone_label": "core",
+        "group_id": "S12:core:beam",
+        "group_index": 14
+      },
+      {
+        "id": "10000000031",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1130,
+          1140
+        ],
+        "element_id": 10000000031,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 11,
+        "zone_label": "core",
+        "group_id": "S11:core:beam",
+        "group_index": 15
+      },
+      {
+        "id": "10000000032",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          1030,
+          1040
+        ],
+        "element_id": 10000000032,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 10,
+        "zone_label": "core",
+        "group_id": "S10:core:beam",
+        "group_index": 16
+      },
+      {
+        "id": "10000000033",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          930,
+          940
+        ],
+        "element_id": 10000000033,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 9,
+        "zone_label": "core",
+        "group_id": "S09:core:beam",
+        "group_index": 17
+      },
+      {
+        "id": "10000000034",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          830,
+          840
+        ],
+        "element_id": 10000000034,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 8,
+        "zone_label": "core",
+        "group_id": "S08:core:beam",
+        "group_index": 18
+      },
+      {
+        "id": "10000000035",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          730,
+          740
+        ],
+        "element_id": 10000000035,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 7,
+        "zone_label": "core",
+        "group_id": "S07:core:beam",
+        "group_index": 19
+      },
+      {
+        "id": "10000000036",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          630,
+          640
+        ],
+        "element_id": 10000000036,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 6,
+        "zone_label": "core",
+        "group_id": "S06:core:beam",
+        "group_index": 20
+      },
+      {
+        "id": "10000000037",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          530,
+          540
+        ],
+        "element_id": 10000000037,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 5,
+        "zone_label": "core",
+        "group_id": "S05:core:beam",
+        "group_index": 21
+      },
+      {
+        "id": "10000000038",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          430,
+          440
+        ],
+        "element_id": 10000000038,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 4,
+        "zone_label": "core",
+        "group_id": "S04:core:beam",
+        "group_index": 22
+      },
+      {
+        "id": "10000000039",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          330,
+          340
+        ],
+        "element_id": 10000000039,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 3,
+        "zone_label": "core",
+        "group_id": "S03:core:beam",
+        "group_index": 23
+      },
+      {
+        "id": "10000000040",
+        "type": "BEAM",
+        "family": "beam",
+        "node_ids": [
+          230,
+          240
+        ],
+        "element_id": 10000000040,
+        "source_element_type": "constraint_equalDOF",
+        "story_band": 2,
+        "zone_label": "core",
+        "group_id": "S02:core:beam",
+        "group_index": 24
+      }
+    ]
+  }
+}

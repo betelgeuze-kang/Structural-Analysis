@@ -1,0 +1,29 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_bearing_c04_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_bearing_c04_local/gtc_public_bridge_bearing_c04.mgt",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/gtc_public_bridge_bearing_c04_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/gtc_public_bridge_bearing_c04_local.json"
+  },
+  "bytes_copied": 161948,
+  "declared_format": "mgt",
+  "family_id": "bridge_skewed_support_span",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {},
+  "original_reference": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt",
+  "sha256": "a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610",
+  "source_exists": true,
+  "source_format": "mgt",
+  "source_id": "gtc_public_bridge_bearing_c04_local",
+  "source_index": 27,
+  "source_urls": [
+    "https://gtc.midasuser.com/"
+  ],
+  "status": "collected",
+  "title": "GTC public bridge bearing C04 raw MIDAS model"
+}

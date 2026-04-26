@@ -1,0 +1,218 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-rust-nonlinear-ndtha-stress",
+  "generated_at": "2026-03-01T14:17:07.923641+00:00",
+  "inputs": {
+    "cases": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+    "target_split": "test",
+    "ground_motion_csv": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "min_case_count": 3,
+    "max_case_count": 6,
+    "ag_scale": 2.0,
+    "yield_drift_scale": 0.45,
+    "hardening_ratio": 0.2,
+    "pdelta_factor": 1.0,
+    "dt_scale": 1.0,
+    "newmark_beta": 0.25,
+    "newmark_gamma": 0.5,
+    "max_step_iterations": 16,
+    "step_tol": 0.0001,
+    "adaptive_load_decay": 0.82,
+    "max_steps": 2400,
+    "min_load_reversals": 20,
+    "min_plastic_story_count": 1,
+    "collapse_drift_threshold_pct": 10.0,
+    "rayleigh_alpha": 0.4,
+    "rayleigh_beta": 5e-05,
+    "accepted_metric_sources": "engine_export_direct,commercial_solver_export,open_data_measurement",
+    "out": "implementation/phase1/nonlinear_ndtha_stress_report.json"
+  },
+  "ground_motion": {
+    "path": "implementation/phase1/open_data/seismic/el_centro_like_60s_dt0p01.csv",
+    "step_count": 2400,
+    "dt_s": 0.01,
+    "max_abs_accel_g": 1.02479026,
+    "reversal_count": 129,
+    "source": "el_centro_like_synthetic"
+  },
+  "checks": {
+    "metric_source_pass": true,
+    "pdelta_enabled_pass": true,
+    "dynamic_reversal_pass": true,
+    "rayleigh_damping_pass": true,
+    "collapse_cutoff_guard_pass": true,
+    "no_collapse_detected": false,
+    "all_cases_converged": false,
+    "rust_backend_used_pass": true,
+    "plasticity_triggered_all_cases": true,
+    "min_plastic_story_count_pass": true
+  },
+  "summary": {
+    "case_count": 3,
+    "peak_plastic_story_count_min": 20,
+    "peak_plastic_story_count_mean": 22.666666666666668,
+    "max_drift_ratio_pct_max": 231.1882266574387,
+    "avg_step_iterations_mean": 1.0,
+    "metric_source_invalid_case_ids": [],
+    "collapsed_case_ids": [
+      "C-TST-001",
+      "C-TST-002",
+      "C-TST-003"
+    ]
+  },
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "checks": {
+        "converged_all_steps": false,
+        "rust_backend_all_steps": true,
+        "plasticity_triggered": true,
+        "collapsed": true
+      },
+      "summary": {
+        "step_count_completed": 2,
+        "max_plastic_story_count": 24,
+        "max_drift_ratio_pct": 192.79693530399834,
+        "avg_step_iterations": 1.0,
+        "collapse_step": 1,
+        "collapse_time_s": 0.01,
+        "collapse_drift_ratio_pct": 192.79693530399834,
+        "collapse_top_displacement_m": -83.03777732627091
+      },
+      "steps_head": [
+        {
+          "step": 0,
+          "time_s": 0.0,
+          "ag_g": 0.1881674,
+          "status": "OK",
+          "converged": true,
+          "rust_backend_ok": true,
+          "iterations": 1,
+          "plastic_story_count": 0,
+          "top_displacement_m": 0.2147955920688845,
+          "drift_ratio_pct": 0.474716708425696,
+          "residual_inf": 8.720148798602168e-07
+        },
+        {
+          "step": 1,
+          "time_s": 0.01,
+          "ag_g": 0.40736252,
+          "status": "COLLAPSED",
+          "converged": false,
+          "rust_backend_ok": true,
+          "iterations": 1,
+          "plastic_story_count": 24,
+          "top_displacement_m": -83.03777732627091,
+          "drift_ratio_pct": 192.79693530399834,
+          "residual_inf": 8.96674464456737e-06
+        }
+      ]
+    },
+    {
+      "case_id": "C-TST-002",
+      "split": "test",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "checks": {
+        "converged_all_steps": false,
+        "rust_backend_all_steps": true,
+        "plasticity_triggered": true,
+        "collapsed": true
+      },
+      "summary": {
+        "step_count_completed": 2,
+        "max_plastic_story_count": 20,
+        "max_drift_ratio_pct": 105.79936998298322,
+        "avg_step_iterations": 1.0,
+        "collapse_step": 1,
+        "collapse_time_s": 0.01,
+        "collapse_drift_ratio_pct": 105.79936998298322,
+        "collapse_top_displacement_m": -37.80558484304504
+      },
+      "steps_head": [
+        {
+          "step": 0,
+          "time_s": 0.0,
+          "ag_g": 0.1881674,
+          "status": "OK",
+          "converged": true,
+          "rust_backend_ok": true,
+          "iterations": 1,
+          "plastic_story_count": 0,
+          "top_displacement_m": 0.1468902261619503,
+          "drift_ratio_pct": 0.3875290498690319,
+          "residual_inf": 7.68562313169241e-06
+        },
+        {
+          "step": 1,
+          "time_s": 0.01,
+          "ag_g": 0.40736252,
+          "status": "COLLAPSED",
+          "converged": false,
+          "rust_backend_ok": true,
+          "iterations": 1,
+          "plastic_story_count": 20,
+          "top_displacement_m": -37.80558484304504,
+          "drift_ratio_pct": 105.79936998298322,
+          "residual_inf": 9.094830602407455e-06
+        }
+      ]
+    },
+    {
+      "case_id": "C-TST-003",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "checks": {
+        "converged_all_steps": false,
+        "rust_backend_all_steps": true,
+        "plasticity_triggered": true,
+        "collapsed": true
+      },
+      "summary": {
+        "step_count_completed": 2,
+        "max_plastic_story_count": 24,
+        "max_drift_ratio_pct": 231.1882266574387,
+        "avg_step_iterations": 1.0,
+        "collapse_step": 1,
+        "collapse_time_s": 0.01,
+        "collapse_drift_ratio_pct": 231.1882266574387,
+        "collapse_top_displacement_m": -99.68446328500053
+      },
+      "steps_head": [
+        {
+          "step": 0,
+          "time_s": 0.0,
+          "ag_g": 0.1881674,
+          "status": "OK",
+          "converged": true,
+          "rust_backend_ok": true,
+          "iterations": 1,
+          "plastic_story_count": 0,
+          "top_displacement_m": 0.23990157036201204,
+          "drift_ratio_pct": 0.5302030769378032,
+          "residual_inf": 2.0560196389851626e-06
+        },
+        {
+          "step": 1,
+          "time_s": 0.01,
+          "ag_g": 0.40736252,
+          "status": "COLLAPSED",
+          "converged": false,
+          "rust_backend_ok": true,
+          "iterations": 1,
+          "plastic_story_count": 24,
+          "top_displacement_m": -99.68446328500053,
+          "drift_ratio_pct": 231.1882266574387,
+          "residual_inf": 6.554822903126478e-06
+        }
+      ]
+    }
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_COLLAPSE_CUTOFF",
+  "reason": "collapse drift threshold exceeded; run marked as COLLAPSED"
+}

@@ -1,0 +1,212 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-midas-mgt-converter",
+  "generated_at": "2026-04-03T13:48:54.882461+00:00",
+  "inputs": {
+    "mgt": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt",
+    "json_out": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.json",
+    "npz_out": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.npz",
+    "report_out": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_conversion_report.json",
+    "edge_list_out": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_edges.json",
+    "forbid_synthetic_source": true,
+    "require_shell_beam_mix": false,
+    "min_nodes": 8,
+    "min_elements": 4,
+    "resolve_rigid_links": true,
+    "rigid_stiffness_threshold": 100000.0,
+    "drop_unreferenced_nodes": true,
+    "strict_unknown_sections": false,
+    "max_element_skip_count": 0,
+    "max_element_skip_ratio": 0.0
+  },
+  "source_provenance": {
+    "source_family": "midas_mgt",
+    "path": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt",
+    "sha256": "dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6",
+    "size_bytes": 77481
+  },
+  "metrics": {
+    "line_count": 1644,
+    "section_count": 13,
+    "node_count": 150,
+    "element_count": 147,
+    "edge_count_undirected": 147,
+    "element_rows_total": 147,
+    "element_rows_skipped": 0,
+    "element_skip_ratio": 0.0,
+    "beam_element_count": 147,
+    "shell_element_count": 0,
+    "node_count_pre_coarsening": 150,
+    "element_count_pre_coarsening": 147,
+    "rigid_like_link_count": 0,
+    "merged_node_count": 0,
+    "dummy_node_removed_count": 0,
+    "typed_section_count": 6,
+    "typed_row_total": 700,
+    "unknown_section_count": 2,
+    "unknown_row_total": 273,
+    "static_load_case_count": 14,
+    "load_case_row_count": 0,
+    "load_combination_row_count": 2,
+    "load_combination_graph_node_count": 16,
+    "load_combination_graph_edge_count": 14,
+    "use_stld_block_count": 14,
+    "active_static_case_sequence_count": 14,
+    "nodal_load_row_count": 664,
+    "nodal_mass_row_count": 0,
+    "selfweight_row_count": 0,
+    "offset_row_count": 0,
+    "pressure_load_row_count": 0,
+    "semantic_load_case_count": 14,
+    "semantic_load_combination_count": 2,
+    "load_pattern_count": 14,
+    "load_pattern_primitive_count": 14,
+    "load_pattern_combination_count": 2,
+    "load_combination_editor_combo_count": 2,
+    "load_combination_editor_case_count": 14,
+    "load_combination_editor_edge_count": 14,
+    "bound_nodal_load_row_count": 664,
+    "bound_selfweight_row_count": 0,
+    "bound_pressure_row_count": 0,
+    "unbound_nodal_load_row_count": 0,
+    "unbound_selfweight_row_count": 0,
+    "unbound_pressure_row_count": 0,
+    "body_load_pending_case_count": 0,
+    "surface_load_pending_case_count": 0,
+    "member_row_count": 0,
+    "group_row_count": 0,
+    "thickness_row_count": 0,
+    "design_section_row_count": 0,
+    "section_color_row_count": 5,
+    "section_scale_row_count": 0,
+    "section_usage_summary_count": 5,
+    "used_section_count": 3,
+    "unused_section_count": 2,
+    "derived_section_template_count": 5,
+    "derived_load_pattern_count": 14,
+    "derived_load_pattern_primitive_count": 14,
+    "design_material_row_count": 0,
+    "design_material_rebar_payload_row_count": 0,
+    "design_material_rebar_payload_available_count": 0,
+    "group_local_rebar_payload_row_count": 0
+  },
+  "coarsening": {
+    "applied": true,
+    "elastic_link_count": 0,
+    "rigid_like_link_count": 0,
+    "merge_pair_count": 0,
+    "merged_link_ids_head": [],
+    "merged_node_count": 0,
+    "dropped_degenerate_elements": 0,
+    "node_count_pre": 150,
+    "node_count_post": 150,
+    "element_count_pre": 147,
+    "element_count_post": 147,
+    "dummy_node_removed_count": 0,
+    "support_node_count": 6,
+    "support_node_count_mapped": 6
+  },
+  "parser_diagnostics": {
+    "known_section_count": 11,
+    "unknown_section_count": 2,
+    "unknown_sections": [
+      "BEAMLOAD",
+      "SPRING"
+    ],
+    "unknown_section_row_count": {
+      "BEAMLOAD": 266,
+      "SPRING": 7
+    },
+    "unknown_row_total": 273,
+    "typed_section_count": 6,
+    "typed_section_row_count": {
+      "STLDCASE": 14,
+      "LOADCOMB": 2,
+      "USE-STLD": 14,
+      "CONLOAD": 664,
+      "SECT-COLOR": 5,
+      "MATL-COLOR": 1
+    },
+    "typed_row_total": 700,
+    "row_parse": {
+      "node_rows": 150,
+      "node_rows_parsed": 150,
+      "node_rows_skipped": 0,
+      "element_rows": 147,
+      "element_rows_parsed": 147,
+      "element_rows_skipped": 0,
+      "element_skip_ratio": 0.0,
+      "material_rows": 1,
+      "material_rows_parsed": 1,
+      "section_rows": 5,
+      "section_rows_parsed": 5,
+      "constraint_rows": 2,
+      "elastic_link_rows": 0
+    },
+    "element_skip_reason_count": {},
+    "unsupported_element_type_count": {},
+    "unresolved_elements_head": [],
+    "warnings_head": [
+      "unknown sections preserved as raw text: BEAMLOAD,SPRING"
+    ]
+  },
+  "section_productization": {
+    "section_row_count": 5,
+    "used_section_count": 3,
+    "unused_section_count": 2,
+    "derived_template_count": 5,
+    "family_counts": {
+      "steel": 5
+    },
+    "shape_counts": {
+      "h_beam": 5
+    }
+  },
+  "load_pattern_productization": {
+    "pattern_count": 14,
+    "primitive_count": 14,
+    "combination_count": 2,
+    "primitive_kind_counts": {
+      "point_load": 14
+    }
+  },
+  "load_combination_editor_seed": {
+    "combination_count": 2,
+    "case_count": 14,
+    "graph_edge_count": 14,
+    "stage_count": 2
+  },
+  "checks": {
+    "has_nodes": true,
+    "has_elements": true,
+    "shell_beam_mix_pass": false,
+    "synthetic_source_blocked": true,
+    "strict_element_slot_parse": true,
+    "rigid_link_resolution_applied": true,
+    "dummy_node_removed": false,
+    "unknown_section_policy_pass": true,
+    "element_skip_budget_pass": true
+  },
+  "artifacts": {
+    "json_out": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.json",
+    "npz_out": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3.npz",
+    "edge_list_out": "implementation/phase1/open_data/midas/public_native_corpus/parsed/gtc_public_bridge_section_a3_edges.json",
+    "edge_list_summary": {
+      "node_count": 150,
+      "edge_count_undirected": 147
+    },
+    "npz_summary": {
+      "node_count": 150,
+      "edge_count_directed": 294,
+      "element_count": 147,
+      "elem_conn_index_count": 294
+    }
+  },
+  "contract_pass": true,
+  "reason_code": "PASS_PUBLIC_RAW_IDENTITY_BASELINE",
+  "reason": "public raw native identity baseline copied from source conversion metrics",
+  "notes": [
+    "public raw native identity baseline",
+    "writeback report mirrors source conversion metrics because the writeback text is a direct copy of the public raw source"
+  ]
+}

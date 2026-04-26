@@ -1,0 +1,837 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-topk-comparison-experiment",
+  "generated_at": "2026-03-01T12:07:41.420092+00:00",
+  "target_split": "all",
+  "rows": [
+    {
+      "case_id": "C-TRN-001",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "wind",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.5520340581658374,
+          "lf": 1.5574824462717831,
+          "topk_pred": 1.4550901651382446
+        },
+        "base_shear_kN": {
+          "hf": 1267.2322569094786,
+          "lf": 1046.0744676819645,
+          "topk_pred": 1110.6890869140625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9802387070767116,
+          "lf": 0.9222036554001598,
+          "topk_pred": 0.9788542985916138
+        },
+        "buckling_factor": {
+          "hf": 2.9045734781317556,
+          "lf": 2.311716546583357,
+          "topk_pred": 2.473933458328247
+        },
+        "equilibrium_residual": {
+          "hf": 1e-12,
+          "lf": 0.0227419593202888,
+          "topk_pred": 0.02166292443871498
+        }
+      }
+    },
+    {
+      "case_id": "C-TRN-002",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "wind",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.1330142331737765,
+          "lf": 1.4242831799510185,
+          "topk_pred": 1.3600237369537354
+        },
+        "base_shear_kN": {
+          "hf": 907.9112376770588,
+          "lf": 864.4089308189552,
+          "topk_pred": 901.6306762695312
+        },
+        "mode_shape_mac": {
+          "hf": 0.9872437790439524,
+          "lf": 0.9096162469456,
+          "topk_pred": 0.9551401734352112
+        },
+        "buckling_factor": {
+          "hf": 3.206936103838035,
+          "lf": 2.8513138542339083,
+          "topk_pred": 2.987255096435547
+        },
+        "equilibrium_residual": {
+          "hf": 1e-12,
+          "lf": 0.015267428427751854,
+          "topk_pred": 0.014676662161946297
+        }
+      }
+    },
+    {
+      "case_id": "C-TRN-003",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.0636667376798754,
+          "lf": 2.005165181500314,
+          "topk_pred": 1.7884726524353027
+        },
+        "base_shear_kN": {
+          "hf": 1726.2564768000823,
+          "lf": 1488.5951822685413,
+          "topk_pred": 1637.9693603515625
+        },
+        "mode_shape_mac": {
+          "hf": 0.9752768241008436,
+          "lf": 0.8894059741841904,
+          "topk_pred": 0.9707332849502563
+        },
+        "buckling_factor": {
+          "hf": 2.49919039307688,
+          "lf": 1.9838860252570638,
+          "topk_pred": 2.21441388130188
+        },
+        "equilibrium_residual": {
+          "hf": 1e-12,
+          "lf": 0.029193432851514402,
+          "topk_pred": 0.02723430097103119
+        }
+      }
+    },
+    {
+      "case_id": "C-TRN-004",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "wall-frame",
+      "hazard_type": "wind",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.4232716246118382,
+          "lf": 1.629556654988086,
+          "topk_pred": 1.4990184307098389
+        },
+        "base_shear_kN": {
+          "hf": 1315.6825373318845,
+          "lf": 1230.9084592963554,
+          "topk_pred": 1322.77001953125
+        },
+        "mode_shape_mac": {
+          "hf": 0.9825108400912245,
+          "lf": 0.9197971474977277,
+          "topk_pred": 0.9825232028961182
+        },
+        "buckling_factor": {
+          "hf": 2.9832565946017224,
+          "lf": 2.421318800194096,
+          "topk_pred": 2.629452705383301
+        },
+        "equilibrium_residual": {
+          "hf": 1e-12,
+          "lf": 0.01980395397562643,
+          "topk_pred": 0.01877419278025627
+        }
+      }
+    },
+    {
+      "case_id": "C-TRN-005",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.44,
+          "lf": 2.75,
+          "topk_pred": 2.395512342453003
+        },
+        "base_shear_kN": {
+          "hf": 2140.0,
+          "lf": 1978.0,
+          "topk_pred": 2214.789306640625
+        },
+        "mode_shape_mac": {
+          "hf": 0.971,
+          "lf": 0.928,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.18,
+          "lf": 1.94,
+          "topk_pred": 2.208871603012085
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.035,
+          "topk_pred": 0.032192789018154144
+        }
+      }
+    },
+    {
+      "case_id": "C-TRN-006",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.72,
+          "lf": 1.9,
+          "topk_pred": 1.7331494092941284
+        },
+        "base_shear_kN": {
+          "hf": 1450.0,
+          "lf": 1352.0,
+          "topk_pred": 1462.6658935546875
+        },
+        "mode_shape_mac": {
+          "hf": 0.979,
+          "lf": 0.943,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.73,
+          "lf": 2.49,
+          "topk_pred": 2.724562406539917
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.027,
+          "topk_pred": 0.025450553745031357
+        }
+      }
+    },
+    {
+      "case_id": "C-TRN-007",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "wall-frame",
+      "hazard_type": "combined",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.16,
+          "lf": 2.41,
+          "topk_pred": 2.128602981567383
+        },
+        "base_shear_kN": {
+          "hf": 1895.0,
+          "lf": 1766.0,
+          "topk_pred": 1957.534423828125
+        },
+        "mode_shape_mac": {
+          "hf": 0.974,
+          "lf": 0.933,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.36,
+          "lf": 2.1,
+          "topk_pred": 2.363598585128784
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.032,
+          "topk_pred": 0.029668893665075302
+        }
+      }
+    },
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "ood_tag": "ood_topology",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.31,
+          "lf": 2.6,
+          "topk_pred": 2.2955901622772217
+        },
+        "base_shear_kN": {
+          "hf": 2035.0,
+          "lf": 1878.0,
+          "topk_pred": 2082.57763671875
+        },
+        "mode_shape_mac": {
+          "hf": 0.972,
+          "lf": 0.93,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.24,
+          "lf": 1.99,
+          "topk_pred": 2.240213632583618
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.033,
+          "topk_pred": 0.030534693971276283
+        }
+      }
+    },
+    {
+      "case_id": "C-TST-002",
+      "split": "test",
+      "ood_tag": "ood_hazard",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.88,
+          "lf": 2.09,
+          "topk_pred": 1.8895459175109863
+        },
+        "base_shear_kN": {
+          "hf": 1610.0,
+          "lf": 1499.0,
+          "topk_pred": 1632.9461669921875
+        },
+        "mode_shape_mac": {
+          "hf": 0.978,
+          "lf": 0.941,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.57,
+          "lf": 2.31,
+          "topk_pred": 2.547734260559082
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.028,
+          "topk_pred": 0.02625579945743084
+        }
+      }
+    },
+    {
+      "case_id": "C-TST-003",
+      "split": "test",
+      "ood_tag": "ood_combined",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.58,
+          "lf": 2.93,
+          "topk_pred": 2.5285913944244385
+        },
+        "base_shear_kN": {
+          "hf": 2260.0,
+          "lf": 2082.0,
+          "topk_pred": 2346.861328125
+        },
+        "mode_shape_mac": {
+          "hf": 0.969,
+          "lf": 0.923,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.1,
+          "lf": 1.84,
+          "topk_pred": 2.1110451221466064
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.037,
+          "topk_pred": 0.03385085612535477
+        }
+      }
+    },
+    {
+      "case_id": "C-VAL-001",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "combined",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.02,
+          "lf": 2.25,
+          "topk_pred": 2.015986442565918
+        },
+        "base_shear_kN": {
+          "hf": 1705.0,
+          "lf": 1593.0,
+          "topk_pred": 1747.2984619140625
+        },
+        "mode_shape_mac": {
+          "hf": 0.975,
+          "lf": 0.937,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 2.45,
+          "lf": 2.21,
+          "topk_pred": 2.456700086593628
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.029,
+          "topk_pred": 0.027051232755184174
+        }
+      }
+    },
+    {
+      "case_id": "C-VAL-002",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "wind",
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.18,
+          "lf": 1.27,
+          "topk_pred": 1.2047069072723389
+        },
+        "base_shear_kN": {
+          "hf": 980.0,
+          "lf": 939.0,
+          "topk_pred": 984.7308349609375
+        },
+        "mode_shape_mac": {
+          "hf": 0.987,
+          "lf": 0.958,
+          "topk_pred": 1.0
+        },
+        "buckling_factor": {
+          "hf": 3.12,
+          "lf": 2.92,
+          "topk_pred": 3.079406261444092
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.018,
+          "topk_pred": 0.01726669631898403
+        }
+      }
+    }
+  ],
+  "history_tail": [
+    {
+      "epoch": 5,
+      "selected_branch_ids": [
+        4,
+        0,
+        7
+      ],
+      "selected_losses": [
+        0.3823140263557434,
+        0.38330942392349243,
+        0.38402676582336426
+      ],
+      "normalized_weights": [
+        0.334274181129624,
+        0.33323599757871886,
+        0.3324898212916572
+      ],
+      "weighted_loss": 0.38321518898010254,
+      "total_loss": 0.3836049437522888
+    },
+    {
+      "epoch": 6,
+      "selected_branch_ids": [
+        3,
+        8,
+        6
+      ],
+      "selected_losses": [
+        0.3730728030204773,
+        0.37407591938972473,
+        0.3741418421268463
+      ],
+      "normalized_weights": [
+        0.3340532184211208,
+        0.3330076884726144,
+        0.33293909310626485
+      ],
+      "weighted_loss": 0.37376275658607483,
+      "total_loss": 0.3743665814399719
+    },
+    {
+      "epoch": 7,
+      "selected_branch_ids": [
+        0,
+        1,
+        3
+      ],
+      "selected_losses": [
+        0.3597588837146759,
+        0.36113643646240234,
+        0.3611915409564972
+      ],
+      "normalized_weights": [
+        0.33430981291026723,
+        0.3328737517643139,
+        0.3328164353254188
+      ],
+      "weighted_loss": 0.3606942296028137,
+      "total_loss": 0.3615574538707733
+    },
+    {
+      "epoch": 8,
+      "selected_branch_ids": [
+        0,
+        6,
+        1
+      ],
+      "selected_losses": [
+        0.3478584885597229,
+        0.3486526310443878,
+        0.34905892610549927
+      ],
+      "normalized_weights": [
+        0.33402621037575075,
+        0.3331982868630655,
+        0.33277550276118373
+      ],
+      "weighted_loss": 0.3485225737094879,
+      "total_loss": 0.3496907353401184
+    },
+    {
+      "epoch": 9,
+      "selected_branch_ids": [
+        7,
+        2,
+        5
+      ],
+      "selected_losses": [
+        0.33354923129081726,
+        0.3342178761959076,
+        0.3344171941280365
+      ],
+      "normalized_weights": [
+        0.33386708023402,
+        0.33317018818908234,
+        0.3329627315768977
+      ],
+      "weighted_loss": 0.33406099677085876,
+      "total_loss": 0.335580974817276
+    },
+    {
+      "epoch": 10,
+      "selected_branch_ids": [
+        0,
+        7,
+        4
+      ],
+      "selected_losses": [
+        0.3184766471385956,
+        0.3185414671897888,
+        0.3193008601665497
+      ],
+      "normalized_weights": [
+        0.3336419403035092,
+        0.3335743637490752,
+        0.33278369594741564
+      ],
+      "weighted_loss": 0.318772554397583,
+      "total_loss": 0.32069289684295654
+    },
+    {
+      "epoch": 11,
+      "selected_branch_ids": [
+        5,
+        4,
+        2
+      ],
+      "selected_losses": [
+        0.302324503660202,
+        0.30460190773010254,
+        0.30463606119155884
+      ],
+      "normalized_weights": [
+        0.3349286220637726,
+        0.3325534346631531,
+        0.3325179432730742
+      ],
+      "weighted_loss": 0.3038505017757416,
+      "total_loss": 0.3062216639518738
+    },
+    {
+      "epoch": 12,
+      "selected_branch_ids": [
+        3,
+        4,
+        5
+      ],
+      "selected_losses": [
+        0.29070010781288147,
+        0.29143446683883667,
+        0.291848361492157
+      ],
+      "normalized_weights": [
+        0.3339872919478566,
+        0.33322171266706874,
+        0.33279099538507473
+      ],
+      "weighted_loss": 0.29132694005966187,
+      "total_loss": 0.29419752955436707
+    },
+    {
+      "epoch": 13,
+      "selected_branch_ids": [
+        9,
+        2,
+        4
+      ],
+      "selected_losses": [
+        0.27481865882873535,
+        0.27561745047569275,
+        0.2759964168071747
+      ],
+      "normalized_weights": [
+        0.3340199491820117,
+        0.3331872003989952,
+        0.3327928504189931
+      ],
+      "weighted_loss": 0.27547675371170044,
+      "total_loss": 0.27889135479927063
+    },
+    {
+      "epoch": 14,
+      "selected_branch_ids": [
+        2,
+        8,
+        1
+      ],
+      "selected_losses": [
+        0.26170799136161804,
+        0.26282796263694763,
+        0.26428937911987305
+      ],
+      "normalized_weights": [
+        0.33461918337232327,
+        0.3334500933159874,
+        0.3319307233116893
+      ],
+      "weighted_loss": 0.2629382908344269,
+      "total_loss": 0.26693782210350037
+    },
+    {
+      "epoch": 15,
+      "selected_branch_ids": [
+        7,
+        5,
+        1
+      ],
+      "selected_losses": [
+        0.25040191411972046,
+        0.25223320722579956,
+        0.2522929310798645
+      ],
+      "normalized_weights": [
+        0.33462705155870975,
+        0.33271752003061084,
+        0.33265542841067935
+      ],
+      "weighted_loss": 0.251640260219574,
+      "total_loss": 0.2562589943408966
+    },
+    {
+      "epoch": 16,
+      "selected_branch_ids": [
+        1,
+        5,
+        6
+      ],
+      "selected_losses": [
+        0.24554450809955597,
+        0.24598251283168793,
+        0.24630431830883026
+      ],
+      "normalized_weights": [
+        0.33374934284305646,
+        0.33329283099452933,
+        0.3329578261624142
+      ],
+      "weighted_loss": 0.24594348669052124,
+      "total_loss": 0.25118058919906616
+    },
+    {
+      "epoch": 17,
+      "selected_branch_ids": [
+        1,
+        4,
+        2
+      ],
+      "selected_losses": [
+        0.23866350948810577,
+        0.23899950087070465,
+        0.23962192237377167
+      ],
+      "normalized_weights": [
+        0.33378282549677973,
+        0.33343254644253945,
+        0.33278462806068093
+      ],
+      "weighted_loss": 0.23909449577331543,
+      "total_loss": 0.24493925273418427
+    },
+    {
+      "epoch": 18,
+      "selected_branch_ids": [
+        3,
+        1,
+        8
+      ],
+      "selected_losses": [
+        0.23181571066379547,
+        0.23301319777965546,
+        0.23335067927837372
+      ],
+      "normalized_weights": [
+        0.33428274590459567,
+        0.3330341483256795,
+        0.3326831057697248
+      ],
+      "weighted_loss": 0.23272517323493958,
+      "total_loss": 0.23916728794574738
+    },
+    {
+      "epoch": 19,
+      "selected_branch_ids": [
+        5,
+        7,
+        6
+      ],
+      "selected_losses": [
+        0.22431489825248718,
+        0.22524119913578033,
+        0.22536320984363556
+      ],
+      "normalized_weights": [
+        0.3340193108249628,
+        0.3330538264424559,
+        0.33292686273258126
+      ],
+      "weighted_loss": 0.2249724268913269,
+      "total_loss": 0.2320012003183365
+    },
+    {
+      "epoch": 20,
+      "selected_branch_ids": [
+        9,
+        4,
+        5
+      ],
+      "selected_losses": [
+        0.21608756482601166,
+        0.21677379310131073,
+        0.21790511906147003
+      ],
+      "normalized_weights": [
+        0.33420292072574825,
+        0.3334870027116775,
+        0.3323100765625741
+      ],
+      "weighted_loss": 0.216920405626297,
+      "total_loss": 0.22452504932880402
+    },
+    {
+      "epoch": 21,
+      "selected_branch_ids": [
+        0,
+        3,
+        1
+      ],
+      "selected_losses": [
+        0.20983578264713287,
+        0.2103002518415451,
+        0.21045848727226257
+      ],
+      "normalized_weights": [
+        0.33371092426092025,
+        0.33322690547636297,
+        0.3330621702627167
+      ],
+      "weighted_loss": 0.21019797027111053,
+      "total_loss": 0.21836549043655396
+    },
+    {
+      "epoch": 22,
+      "selected_branch_ids": [
+        8,
+        6,
+        5
+      ],
+      "selected_losses": [
+        0.20726346969604492,
+        0.20736220479011536,
+        0.2076999843120575
+      ],
+      "normalized_weights": [
+        0.3335191788663468,
+        0.33341628834201664,
+        0.33306453279163656
+      ],
+      "weighted_loss": 0.2074417769908905,
+      "total_loss": 0.21613338589668274
+    },
+    {
+      "epoch": 23,
+      "selected_branch_ids": [
+        4,
+        3,
+        0
+      ],
+      "selected_losses": [
+        0.20472131669521332,
+        0.205827996134758,
+        0.20591723918914795
+      ],
+      "normalized_weights": [
+        0.33413332457235745,
+        0.332979762694717,
+        0.33288691273292564
+      ],
+      "weighted_loss": 0.2054879367351532,
+      "total_loss": 0.2146577090024948
+    },
+    {
+      "epoch": 24,
+      "selected_branch_ids": [
+        4,
+        2,
+        6
+      ],
+      "selected_losses": [
+        0.20259235799312592,
+        0.2031102329492569,
+        0.2035699188709259
+      ],
+      "normalized_weights": [
+        0.33385272657702036,
+        0.3333128698917177,
+        0.33283440353126187
+      ],
+      "weighted_loss": 0.2030903398990631,
+      "total_loss": 0.21268223226070404
+    }
+  ],
+  "summary": {
+    "baseline_target": {
+      "case_count": 12,
+      "drift_error_pct": 11.202885608839933,
+      "base_shear_error_pct": 8.069040857423618,
+      "mode_shape_mac": 0.9278352520023064,
+      "buckling_factor_error_pct": 12.636454787611292,
+      "equilibrium_residual_mean": 0.02716723121459846
+    },
+    "topk_target": {
+      "case_count": 12,
+      "drift_error_pct": 4.5331110773620695,
+      "base_shear_error_pct": 3.0780404851907153,
+      "mode_shape_mac": 0.9906042466560999,
+      "buckling_factor_error_pct": 4.131944103484249,
+      "equilibrium_residual_mean": 0.025384966284036636
+    },
+    "kpi_pass": true
+  }
+}

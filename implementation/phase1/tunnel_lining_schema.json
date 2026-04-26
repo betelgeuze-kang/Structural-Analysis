@@ -1,0 +1,228 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Tunnel Lining/Section Input Schema",
+    "description": "Tunnel cross-section, segment ring, joint, and soil interaction parameters",
+    "type": "object",
+    "required": [
+        "schema_version",
+        "tunnel_id",
+        "cross_section",
+        "lining",
+        "alignment"
+    ],
+    "properties": {
+        "schema_version": {
+            "type": "string",
+            "const": "1.0.0"
+        },
+        "tunnel_id": {
+            "type": "string"
+        },
+        "tunnel_type": {
+            "type": "string",
+            "enum": [
+                "shield_tbm",
+                "natm",
+                "cut_and_cover",
+                "immersed",
+                "custom"
+            ],
+            "default": "shield_tbm"
+        },
+        "cross_section": {
+            "type": "object",
+            "required": [
+                "shape",
+                "outer_diameter_m"
+            ],
+            "properties": {
+                "shape": {
+                    "type": "string",
+                    "enum": [
+                        "circular",
+                        "horseshoe",
+                        "rectangular",
+                        "double_track_circular",
+                        "custom"
+                    ]
+                },
+                "outer_diameter_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "inner_diameter_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "lining_thickness_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "overburden_depth_m": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Cover depth from ground surface"
+                }
+            }
+        },
+        "lining": {
+            "type": "object",
+            "required": [
+                "material",
+                "segments_per_ring"
+            ],
+            "properties": {
+                "material": {
+                    "type": "object",
+                    "required": [
+                        "type",
+                        "E_Pa",
+                        "density_kg_m3",
+                        "poisson_ratio"
+                    ],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "reinforced_concrete",
+                                "steel",
+                                "composite",
+                                "custom"
+                            ]
+                        },
+                        "E_Pa": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "density_kg_m3": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "poisson_ratio": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 0.5
+                        },
+                        "fc_Pa": {
+                            "type": "number",
+                            "exclusiveMinimum": 0,
+                            "description": "Compressive strength"
+                        },
+                        "ft_Pa": {
+                            "type": "number",
+                            "exclusiveMinimum": 0,
+                            "description": "Tensile strength"
+                        }
+                    }
+                },
+                "segments_per_ring": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Number of segments per ring (typ. 5~8 for shield)"
+                },
+                "ring_width_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Longitudinal width of one ring"
+                },
+                "segment_joints": {
+                    "type": "object",
+                    "description": "Circumferential joint between segments within a ring",
+                    "properties": {
+                        "joint_type": {
+                            "type": "string",
+                            "enum": [
+                                "bolted",
+                                "pin",
+                                "tongue_groove",
+                                "custom"
+                            ]
+                        },
+                        "rotational_stiffness_Nm_rad": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "axial_stiffness_N_m": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "yield_rotation_rad": {
+                            "type": "number",
+                            "exclusiveMinimum": 0,
+                            "description": "Onset of nonlinear behavior"
+                        },
+                        "max_rotation_rad": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        }
+                    }
+                },
+                "ring_joints": {
+                    "type": "object",
+                    "description": "Longitudinal joint between adjacent rings",
+                    "properties": {
+                        "joint_type": {
+                            "type": "string",
+                            "enum": [
+                                "bolted",
+                                "shear_key",
+                                "custom"
+                            ]
+                        },
+                        "shear_stiffness_N_m": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "bolt_pretension_N": {
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    }
+                }
+            }
+        },
+        "alignment": {
+            "type": "object",
+            "required": [
+                "total_length_m"
+            ],
+            "properties": {
+                "total_length_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "curve_radius_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Inf for straight"
+                },
+                "gradient_percent": {
+                    "type": "number",
+                    "default": 0
+                },
+                "ring_count": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "soil_interface": {
+            "type": "object",
+            "description": "Reference to soil_impedance_table.json for SSI parameters",
+            "properties": {
+                "soil_impedance_ref": {
+                    "type": "string"
+                },
+                "interface_condition": {
+                    "type": "string",
+                    "enum": [
+                        "full_bond",
+                        "slip",
+                        "partial_bond"
+                    ],
+                    "default": "full_bond"
+                }
+            }
+        }
+    }
+}

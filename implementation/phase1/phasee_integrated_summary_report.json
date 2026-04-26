@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-phasee-integrated-modules",
+  "generated_at": "2026-02-26T14:13:30.235708+00:00",
+  "checks": {
+    "E1_substructuring_interface": true,
+    "E2_vibration_attenuation_model": true,
+    "E3_vibration_compliance_checker": true,
+    "E5_whitebox_validation_extension": true
+  },
+  "reports": {
+    "E1": "implementation/phase1/substructuring_interface_report.json",
+    "E2": "implementation/phase1/vibration_attenuation_report.json",
+    "E3": "implementation/phase1/vibration_compliance_report.json",
+    "E5_json": "implementation/phase1/whitebox_validation_report.json",
+    "E5_md": "implementation/phase1/whitebox_validation_report.md"
+  },
+  "steps": [
+    {
+      "step": "E1_substructuring_interface",
+      "seconds": 0.08329916000366211,
+      "command": "/usr/bin/python3 implementation/phase1/substructuring_interface.py --out implementation/phase1/substructuring_interface_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote substructuring interface report: implementation/phase1/substructuring_interface_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "E2_vibration_attenuation_model",
+      "seconds": 0.02538442611694336,
+      "command": "/usr/bin/python3 implementation/phase1/vibration_attenuation_model.py --substructuring implementation/phase1/substructuring_interface_report.json --out implementation/phase1/vibration_attenuation_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote vibration attenuation report: implementation/phase1/vibration_attenuation_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "E3_vibration_compliance_checker",
+      "seconds": 0.026079893112182617,
+      "command": "/usr/bin/python3 implementation/phase1/vibration_compliance_checker.py --attenuation implementation/phase1/vibration_attenuation_report.json --out implementation/phase1/vibration_compliance_report.json",
+      "return_code": 0,
+      "stdout_tail": "Wrote vibration compliance report: implementation/phase1/vibration_compliance_report.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "E5_whitebox_validation_extension",
+      "seconds": 0.024820804595947266,
+      "command": "/usr/bin/python3 implementation/phase1/whitebox_validation_report.py --out-json implementation/phase1/whitebox_validation_report.json --out-md implementation/phase1/whitebox_validation_report.md --acceptance-rel-err 0.05 --acceptance-abs-residual 0.01",
+      "return_code": 0,
+      "stdout_tail": "Wrote white-box report JSON: implementation/phase1/whitebox_validation_report.json\nWrote white-box report MD: implementation/phase1/whitebox_validation_report.md\n",
+      "stderr_tail": ""
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "all phase-e integrated modules passed"
+}

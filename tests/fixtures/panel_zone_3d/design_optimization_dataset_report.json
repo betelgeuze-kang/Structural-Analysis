@@ -1,0 +1,29 @@
+{
+  "contract_pass": true,
+  "summary": {
+    "member_count": 4,
+    "group_count": 2,
+    "constructability_score": 0.18,
+    "detailing_complexity_score": 0.54
+  },
+  "rows_head": [
+    {
+      "member_id": "B401",
+      "member_type": "beam",
+      "group_id": "G1",
+      "constructability_score": 0.12,
+      "anchorage_complexity": 0.74,
+      "detailing_violation_ratio": 0.63,
+      "section_signature": "SB-401"
+    },
+    {
+      "member_id": "C402",
+      "member_type": "column",
+      "group_id": "G2",
+      "constructability_score": 0.41,
+      "anchorage_complexity": 0.21,
+      "detailing_violation_ratio": 0.14,
+      "section_signature": "SC-402"
+    }
+  ]
+}

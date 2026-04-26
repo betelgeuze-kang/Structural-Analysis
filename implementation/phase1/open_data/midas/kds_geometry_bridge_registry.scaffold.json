@@ -1,0 +1,23 @@
+{
+  "contract_version": "0.1.0",
+  "registry_kind": "kds_geometry_bridge_registry",
+  "source": "manual_external_registry_scaffold",
+  "instructions": [
+    "Populate `mappings` with externally verified review-member to baseline-geometry links.",
+    "Each row should point to a real MIDAS baseline member or element id via `baseline_focus_member_id`.",
+    "Keep `review_member_id`, `review_case_id`, or `review_keys` aligned with the semantic ids that appear in KDS/code-check artifacts such as C-TST-003.",
+    "Do not guess mappings. Leave rows empty until there is a trustworthy external registry or reviewer-approved bridge source."
+  ],
+  "mappings": [],
+  "mapping_schema_example": {
+    "review_member_id": "C-TST-003",
+    "review_case_id": "C-TST-003",
+    "review_keys": [
+      "C-TST-003"
+    ],
+    "baseline_focus_member_id": "12345",
+    "match_strategy": "external_registry_manual",
+    "match_confidence": "manual_verified",
+    "note": "Replace this example with a reviewer-approved exact bridge."
+  }
+}

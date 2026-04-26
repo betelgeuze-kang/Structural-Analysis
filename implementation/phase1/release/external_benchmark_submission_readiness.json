@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-11T14:01:47.939203+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS_START_NOW_FULL",
+  "reason": "Current release is ready for a full external benchmark submission package.",
+  "checks": {
+    "core_holdouts_closed": true,
+    "diversified_benchmark_gates_pass": true,
+    "commercial_readiness_pass": true,
+    "commercial_readiness_real_source_pass": true,
+    "commercial_readiness_gpu_strict_pass": true,
+    "commercial_ready": true,
+    "mgt_export_audit_only_boundary_ready": true,
+    "audit_review_queue_clean": true,
+    "audit_review_queue_closed": true,
+    "audit_review_resolution_clear": true,
+    "panel_zone_external_validation_boundary_only": true,
+    "panel_zone_validation_advisory_only": true
+  },
+  "summary": {
+    "recommended_start_mode": "start_now_full_external_submission",
+    "recommended_submission_scope": "full_external_submission_package",
+    "ready_to_start_now": true,
+    "ready_to_start_full_submission_now": true,
+    "core_holdouts_closed": true,
+    "diversified_benchmark_gates_pass": true,
+    "commercial_readiness_pass": true,
+    "commercial_readiness_real_source_pass": true,
+    "commercial_readiness_gpu_strict_pass": true,
+    "mgt_export_audit_only_boundary_ready": true,
+    "mgt_export_evidence_model": "direct_patch_plus_zero_touch_verification_manifest",
+    "audit_review_queue_pending_count": 0,
+    "audit_review_queue_overdue_item_count": 0,
+    "audit_review_resolution_open_revision_count": 0,
+    "panel_zone_validation_boundary": "external_validation_only",
+    "external_validation_boundary_only": true,
+    "panel_zone_validation_advisory_only": true,
+    "panel_zone_validation_advisory_label": "panel_zone_external_validation_only_boundary",
+    "blocker_count": 0,
+    "blockers": [],
+    "blocker_label": "none",
+    "caution_count": 1,
+    "cautions": [
+      "panel_zone_external_validation_only_boundary"
+    ],
+    "caution_label": "panel_zone_external_validation_only_boundary",
+    "next_actions": [],
+    "evidence": "core_holdouts_closed=True, diversified_benchmarks=True, commercial_ready=True, audit_boundary=True:direct_patch_plus_zero_touch_verification_manifest, pending_review=0, overdue_review=0, open_revision=0, panel_validation_boundary=external_validation_only"
+  }
+}

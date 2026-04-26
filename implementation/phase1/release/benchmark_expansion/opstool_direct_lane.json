@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-25T14:41:07.846309+00:00",
+  "lane_id": "opstool_direct_green_lane",
+  "lane_label": "Direct Model Green Lane",
+  "lane_status": "green",
+  "why_now": "지금 저장소에서 가장 빨리 direct numerical model 해석·최적화 확장을 걸 수 있는 메가스트럭처 축입니다.",
+  "case_count": 5,
+  "selected_case_ids": [
+    "opstool_606m_megatall_model-00020",
+    "opstool_606m_megatall_model-00009",
+    "opstool_606m_megatall_model-00019",
+    "opstool_606m_megatall_model-00027",
+    "opstool_606m_megatall_model-00008"
+  ],
+  "topology_coverage": "4/4",
+  "hazard_coverage": "2/2",
+  "bridge_ready_count": 2,
+  "optimization_ready_count": 1,
+  "recommended_first_case": "opstool_606m_megatall_model-00020",
+  "strongest_local_evidence": [
+    "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json",
+    "implementation/phase1/topk_comparison_experiment_report.opstool_nightly.json",
+    "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/opstool_606m_megatall_model-00020/synthetic_change_summary.json"
+  ],
+  "exact_next_commands": [
+    "jq --argfile batch implementation/phase1/release/benchmark_expansion/opstool_direct_batch.json '($batch.batch_cases | map(.case_id)) as $ids | .cases |= [ .cases[] | select(.case_id as $id | $ids | index($id)) ] | .public_benchmark_cases |= [ (.public_benchmark_cases // [])[] | select(.case_id as $id | $ids | index($id)) ] | .split_counts = (reduce .cases[] as $c ({}; .[$c.split] = ((.[ $c.split ] // 0) + 1)))' implementation/phase1/commercial_benchmark_cases.opstool_nightly.json > implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json",
+    "python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.benchmark_report.json --comparison-out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.topk_comparison.json --target-split all --epochs 250 --branches 64 --top-k 8 --seed 23 --max-drift-error-pct 6.0 --max-base-shear-error-pct 5.0 --min-mode-shape-mac 0.97 --max-buckling-factor-error-pct 5.0 --require-direct-metrics --accepted-metric-sources open_data_measurement",
+    "python3 implementation/phase1/run_noise_convergence_gate.py --cases implementation/phase1/release/benchmark_expansion/opstool_direct_batch.materialized_cases.json --target-split all --limit-cases 5 --seeds 11,17,23 --stiffness-noise-levels 0,1,2,3,5 --out implementation/phase1/release/benchmark_expansion/opstool_direct_batch.noise_convergence.json"
+  ]
+}

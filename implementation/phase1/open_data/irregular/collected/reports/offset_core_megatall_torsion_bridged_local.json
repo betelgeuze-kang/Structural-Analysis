@@ -1,0 +1,37 @@
+{
+  "artifacts": {
+    "artifact_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/offset_core_megatall_torsion_bridged_local",
+    "copied_source_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/offset_core_megatall_torsion_bridged_local/model.json",
+    "source_metadata_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/artifacts/offset_core_megatall_torsion_bridged_local/source_metadata.json",
+    "source_report_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/irregular/collected/reports/offset_core_megatall_torsion_bridged_local.json"
+  },
+  "bytes_copied": 165134,
+  "declared_format": "json_graph",
+  "family_id": "torsionally_eccentric_core_tower",
+  "format_detection_mode": "declared_formats_list",
+  "metadata": {
+    "bridge_contract_pass": true,
+    "bridge_report_path": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/bridge_report.json",
+    "canonical_promotion_blocker": "Resolved by harvested public OpenSees TCL source from the published 606 m mega-tall building benchmark package.",
+    "canonical_promotion_priority": 3,
+    "canonical_promotion_promoted_source_id": "luxinzheng_megatall_tcl_model1_local",
+    "canonical_promotion_status": "promoted_to_canonical"
+  },
+  "original_reference": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+  "reference_scheme": "local_path",
+  "reject_reason": "",
+  "remote_candidate_urls": [],
+  "remote_fetch_note": "",
+  "resolved_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+  "sha256": "587222ebb76cb5343b44ab13f40af6ce42b1d396498152281cb3edcda84ffcc1",
+  "source_exists": true,
+  "source_format": "json_graph",
+  "source_id": "offset_core_megatall_torsion_bridged_local",
+  "source_index": 8,
+  "source_urls": [
+    "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+    "https://github.com/yexiang92/opstool"
+  ],
+  "status": "collected",
+  "title": "Offset-core megatall torsion bridged graph"
+}

@@ -1,0 +1,14 @@
+{
+  "bytes_copied": 165134,
+  "collector_version": "0.2.0",
+  "family_id": "outrigger_megatall_offset_core",
+  "original_reference": "implementation/phase1/open_data/megastructure/bridged/opstool_606m_megatall_model/model.json",
+  "schema_version": "1.0",
+  "sha256": "587222ebb76cb5343b44ab13f40af6ce42b1d396498152281cb3edcda84ffcc1",
+  "source_format": "json_graph",
+  "source_id": "opstool_606m_megatall_model_local",
+  "source_urls": [
+    "https://github.com/utopiatek/opstool"
+  ],
+  "title": "Opstool 606m megatall bridged model"
+}

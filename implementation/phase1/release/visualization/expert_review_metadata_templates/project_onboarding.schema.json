@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "expert-review-project-onboarding-api.schema.json",
+  "title": "Expert Review Project Onboarding API Payload",
+  "description": "Customer portal API payload for expert review title block data, permit or committee routing labels, and reviewer wording.",
+  "x-web-form-id": "expert-review-onboarding-form-v1",
+  "x-backend-dto": "ExpertReviewOnboardingRequestDto",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "api_version",
+    "request",
+    "project",
+    "submission",
+    "review_team"
+  ],
+  "properties": {
+    "api_version": {
+      "type": "string",
+      "const": "expert_review_onboarding_api.v1"
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_id",
+        "submitted_at",
+        "submitted_by",
+        "submission_channel",
+        "template_name"
+      ],
+      "properties": {
+        "request_id": { "type": "string" },
+        "submitted_at": {
+          "type": "string",
+          "description": "ISO-8601 UTC timestamp",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        },
+        "submitted_by": { "type": "string" },
+        "submission_channel": {
+          "type": "string",
+          "enum": [
+            "customer_portal",
+            "sales_ops",
+            "api_import"
+          ]
+        },
+        "template_name": {
+          "type": "string",
+          "enum": [
+            "default",
+            "seoul_permit_review",
+            "structural_peer_committee"
+          ],
+          "description": "Template name from expert_review_metadata_templates/index.json templates[].name"
+        },
+        "selection_reason": { "type": "string" }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project_name",
+        "project_number",
+        "client_name",
+        "site_name"
+      ],
+      "properties": {
+        "project_name": { "type": "string" },
+        "project_number": { "type": "string" },
+        "client_name": { "type": "string" },
+        "site_name": { "type": "string" }
+      }
+    },
+    "submission": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authority_name": { "type": "string" },
+        "permit_label": { "type": "string" },
+        "committee_label": { "type": "string" },
+        "package_purpose_label": { "type": "string" },
+        "issue_phase_label": { "type": "string" },
+        "issue_date": {
+          "type": "string",
+          "description": "YYYY-MM-DD",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "package_id": { "type": "string" },
+        "revision_code": { "type": "string" },
+        "revision_status": { "type": "string" },
+        "discipline_label": { "type": "string" },
+        "code_basis": { "type": "string" }
+      }
+    },
+    "review_team": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prepared_by",
+        "reviewed_by"
+      ],
+      "properties": {
+        "prepared_by": { "type": "string" },
+        "reviewed_by": { "type": "string" },
+        "company_name": { "type": "string" }
+      }
+    },
+    "review_labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "checklist_head_label": { "type": "string" },
+        "checklist_title": { "type": "string" },
+        "signoff_head_label": { "type": "string" },
+        "signoff_title": { "type": "string" },
+        "reviewer_label": { "type": "string" },
+        "disposition_label": { "type": "string" },
+        "comments_label": { "type": "string" },
+        "signature_label": { "type": "string" }
+      }
+    },
+    "reviewer_guidance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "review_route_note": { "type": "string" }
+      }
+    },
+    "metadata_overrides": {
+      "type": "object",
+      "description": "Optional flat override block merged into expert_review_metadata after template selection.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-nightly-release-snapshot",
+  "generated_at": "2026-03-17T13:26:27.582819+00:00",
+  "snapshot": "phase3_nightly_hardening_20260317T132627Z",
+  "source_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1",
+  "release_policy": {
+    "commercial_readiness_pass": true,
+    "commercial_readiness_real_source_pass": true,
+    "commercial_readiness_gpu_strict_pass": true,
+    "forbid_toy_cases_enforced": true,
+    "real_source_multi_pass": true,
+    "real_source_multi_all_real_source_pass": true,
+    "real_source_multi_all_toy_free_pass": true,
+    "nonlinear_engine_pass": true,
+    "nonlinear_engine_rust_backend_pass": true,
+    "nonlinear_engine_convergence_pass": true,
+    "nonlinear_engine_drift_p95_pass": true,
+    "nonlinear_engine_base_p95_pass": true,
+    "nonlinear_engine_top_p95_pass": true,
+    "pushover_stress_pass": true,
+    "pushover_convergence_pass": true,
+    "pushover_plasticity_pass": true,
+    "pushover_collapse_path_pass": true,
+    "pushover_min_plastic_pass": true,
+    "ndtha_stress_pass": true,
+    "ndtha_convergence_pass": true,
+    "ndtha_pdelta_pass": true,
+    "ndtha_dynamic_reversal_pass": true,
+    "ndtha_rust_backend_pass": true,
+    "ndtha_plasticity_pass": true,
+    "ndtha_min_plastic_pass": true,
+    "phase3_shell_beam_mix_pass": true,
+    "phase3_gpu_strict_pass": true,
+    "phase3_real_source_verified": true,
+    "topology_shell_beam_mix_pass": true,
+    "scaleout_io_gpu_strict_pass": true,
+    "release_registry_pass": true,
+    "release_registry_signature_pass": true,
+    "policy_pass": true
+  },
+  "accelerated_coverage": {
+    "deployment_model": "engineer_in_the_loop_accelerated_coverage",
+    "measured_chain_rolling_selection_mode": "current_pipeline_comparable_full_chain_pass",
+    "measured_chain_comparable_reference_deployment_model": "engineer_in_the_loop_accelerated_coverage",
+    "measured_chain_comparable_reference_strict_design_opt_cost_smoke": true,
+    "authority_catalog_diff_change_count": 0,
+    "authority_catalog_routing_warning_active": false,
+    "mgt_export_support_mode": "bounded_patch_subset",
+    "mgt_export_direct_patch_change_count": 8,
+    "mgt_export_instruction_sidecar_change_count": 17,
+    "mgt_export_instruction_sidecar_action_family_label": "connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5",
+    "mgt_export_rebar_payload_namespace_mode": "material_level_only",
+    "mgt_export_rebar_payload_material_level_namespace_present": true,
+    "mgt_export_rebar_payload_group_local_namespace_present": false,
+    "mgt_export_group_local_rebar_payload_row_count": 0,
+    "mgt_export_rebar_direct_patch_eligible_change_count": 0,
+    "mgt_export_rebar_direct_patch_ineligible_reason_label": "material_payload_missing=3, mixed_material_scope=3",
+    "mgt_export_rebar_direct_patch_mapping_source_label": "alt_slab_wall_group_id=5, direct_group_id=1",
+    "mgt_export_rebar_delivery_mode": "structured_sidecar_only",
+    "mgt_export_evidence_model": "direct_patch_plus_structured_sidecar"
+  },
+  "release_policy_sha256": "c1c57d406346a01773893dabc63a5df70f54b9450833afc1381e456caa4c0165",
+  "files": [
+    {
+      "file": "phase3_megastructure_pipeline_report.json",
+      "bytes": 12615,
+      "sha256": "3441c3bb7117632fc22d106a257d9372bf6fbb414188a2081ee125d636bf4bda"
+    },
+    {
+      "file": "opensees_topology_report.json",
+      "bytes": 2456,
+      "sha256": "dd4a3bdf654003d43502866e3cb44342842e8bfa89c9802735f42a7d1b0fa6e1"
+    },
+    {
+      "file": "partitioned_scaleout_report.json",
+      "bytes": 14987,
+      "sha256": "3a86860c2ecf63139f1e268b3a574300a765e98afa1677c5beddedebb8f82d90"
+    },
+    {
+      "file": "sync_stress_gate_report.json",
+      "bytes": 32111,
+      "sha256": "946ccce892194772837f83420987c69cae5d475dbe2a7568a9e90789a0a921d2"
+    },
+    {
+      "file": "noise_convergence_gate_report.json",
+      "bytes": 134224,
+      "sha256": "4de15fdeb8f8d928db52a663a960995a794cb63dd7ea4e70250159b848921229"
+    },
+    {
+      "file": "commercial_csv_gate_report.json",
+      "bytes": 4653,
+      "sha256": "6045d2615f99333b97b396db6098b508898fecef498ea70850c3aa31e4ab3fc3"
+    },
+    {
+      "file": "commercial_readiness_report.json",
+      "bytes": 17370,
+      "sha256": "22c1382c0851cd733a83df07714d8d35ec63d7983577521e17c7191797061428"
+    },
+    {
+      "file": "real_source_multi_gate_report.json",
+      "bytes": 1862,
+      "sha256": "1099da0cd58906d1592cab875b58da23472916278d8f448746f275245b15c628"
+    },
+    {
+      "file": "nonlinear_frame_engine_report.json",
+      "bytes": 16498,
+      "sha256": "08f02284064cba74ae1e4093dd0a732230e33fede1d2b25f1d4fc94db66b9d41"
+    },
+    {
+      "file": "nonlinear_pushover_stress_report.json",
+      "bytes": 28847,
+      "sha256": "13b886935b70da9e6ce7faa9b09a4c6c574e325f500ff3f2a24007e59435b0be"
+    },
+    {
+      "file": "nonlinear_ndtha_stress_report.json",
+      "bytes": 32318,
+      "sha256": "dd925a0d560541f8bad4787780c43aaee49a25e6421c3c46c31f50512fba5d51"
+    },
+    {
+      "file": "nightly_10m_repro_report.json",
+      "bytes": 4334,
+      "sha256": "cd0257f41d6c5578d398b91927d67ad1f1d778b4ca8cee7fa1e4eb3bbc27941e"
+    },
+    {
+      "file": "scaleout_io_profile_report.json",
+      "bytes": 4809,
+      "sha256": "22aeafe0fdfee8c7b03a0b0c46ed7fd7503e726a95c24bc3a8f341099a381ea6"
+    },
+    {
+      "file": "release/release_registry.json",
+      "bytes": 9999,
+      "sha256": "90b5d31c853f8b046f4f79fb1d7fb5104e0ee8c19d8d329713ced8611789d37a"
+    },
+    {
+      "file": "release/committee_review/committee_summary.json",
+      "bytes": 220830,
+      "sha256": "2634a8d8db702e4368111c0abb59b29cd9f60197c270035f8186545f9a9c4a6b"
+    },
+    {
+      "file": "release/committee_review/authority_catalog_routing_diff.json",
+      "bytes": 136,
+      "sha256": "19adbca2ab60a43250ae42250d7340fc01bee1b2b009903a8f1fa43a48c36f9c"
+    },
+    {
+      "file": "release/signing/release_registry_ed25519.pub.pem",
+      "bytes": 113,
+      "sha256": "ac939e258b3549f4d699aa55803c79d3128b3ee21eeae096cad306f9879c1643"
+    },
+    {
+      "file": "ci_gate_report.json",
+      "bytes": 2259,
+      "sha256": "a2be55639a2368ccc40d3e9e80557b69ca7384e285a87bc31e9efa9a4ad9ecab"
+    },
+    {
+      "file": "static_artifact_validation_report.json",
+      "bytes": 7860,
+      "sha256": "d6cc17e0fb551dda8280f0cabd299b290f93348dfe438ecba519af91a18425b8"
+    },
+    {
+      "file": "ci_artifact_manifest.json",
+      "bytes": 4536,
+      "sha256": "1ffeba57cb44a1efc59efa8d77fae9ee155a8e75924ef5b803a8a8875b0ebe50"
+    }
+  ]
+}

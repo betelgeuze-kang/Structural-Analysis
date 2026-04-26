@@ -1,0 +1,85 @@
+{
+  "schema_version": "2.0",
+  "report_family": "design_optimization",
+  "summary_schema_version": "2.0",
+  "run_id": "phase1-design-objective-profile",
+  "generated_at": "2026-03-15T11:14:07.790340+00:00",
+  "inputs": {
+    "budget": "low",
+    "objective_profile": "cost_first",
+    "profile_path": "implementation/phase1/design_objective_profiles.json",
+    "objective_calibration_report": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_objective_calibration_report.json"
+  },
+  "summary": {
+    "profile_name": "cost_first",
+    "project_type": "generic",
+    "why_selected": "budget=low; zone_lock=none",
+    "base_weights": {
+      "cost_weight": 1.0,
+      "constructability_weight": 1.0,
+      "congestion_weight": 1.0,
+      "detailing_complexity_weight": 1.0,
+      "robustness_weight": 1.0,
+      "multi_hazard_weight": 1.0
+    },
+    "profile_multipliers": {
+      "cost_weight": 1.4,
+      "constructability_weight": 0.65,
+      "congestion_weight": 0.7,
+      "detailing_complexity_weight": 0.75,
+      "robustness_weight": 1.1,
+      "multi_hazard_weight": 1.0
+    },
+    "final_weights": {
+      "cost_weight": 1.4,
+      "constructability_weight": 0.65,
+      "congestion_weight": 0.7,
+      "detailing_complexity_weight": 0.75,
+      "robustness_weight": 1.1,
+      "multi_hazard_weight": 1.0,
+      "drift_weight_multiplier": 1.0,
+      "residual_weight_multiplier": 1.0,
+      "connection_weight_multiplier": 1.0,
+      "ssi_weight_multiplier": 1.0
+    },
+    "budget_mode": "low",
+    "objective_profile": "cost_first"
+  },
+  "artifacts": {
+    "report_out": "/home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_objective_profile_report.json"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "objective profile overlay generated",
+  "profile_name": "cost_first",
+  "project_type": "generic",
+  "why_selected": "budget=low; zone_lock=none",
+  "base_weights": {
+    "cost_weight": 1.0,
+    "constructability_weight": 1.0,
+    "congestion_weight": 1.0,
+    "detailing_complexity_weight": 1.0,
+    "robustness_weight": 1.0,
+    "multi_hazard_weight": 1.0
+  },
+  "profile_multipliers": {
+    "cost_weight": 1.4,
+    "constructability_weight": 0.65,
+    "congestion_weight": 0.7,
+    "detailing_complexity_weight": 0.75,
+    "robustness_weight": 1.1,
+    "multi_hazard_weight": 1.0
+  },
+  "final_weights": {
+    "cost_weight": 1.4,
+    "constructability_weight": 0.65,
+    "congestion_weight": 0.7,
+    "detailing_complexity_weight": 0.75,
+    "robustness_weight": 1.1,
+    "multi_hazard_weight": 1.0,
+    "drift_weight_multiplier": 1.0,
+    "residual_weight_multiplier": 1.0,
+    "connection_weight_multiplier": 1.0,
+    "ssi_weight_multiplier": 1.0
+  }
+}

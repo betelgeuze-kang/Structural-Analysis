@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "job_id": "authoring::native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16::workspace-summary",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "snapshot_id": "authoring_native-authoring-steel-braced-frame-08s-05b-036h-06lp-steel-box-400x400x16_workspace-summary__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_workspace_summary.json",
+      "label": "native_authoring_workspace_summary.json",
+      "sha256": "40996b58f404a988dc6df3e03a12c5de53ef01557708c1fdf9233396fb0b069a",
+      "bytes": 14552
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/steel_braced_frame/native_authoring_workspace_draft.json",
+      "label": "native_authoring_workspace_draft.json",
+      "sha256": "535028659d28a4eaa67ab66363e208cd1590efa36dfc92ea402e4e5ef46fd597",
+      "bytes": 1100
+    }
+  ],
+  "summary": {
+    "artifact_count": 2
+  }
+}

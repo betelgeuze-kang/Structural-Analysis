@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-sync-stress-gate",
+  "generated_at": "2026-03-03T14:36:11.900021+00:00",
+  "inputs": {
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "topology_report": "implementation/phase1/opensees_topology_report.json",
+    "require_topology_gate": true,
+    "sync_backend": "feti_lite",
+    "feti_execution_mode": "boundary_sync",
+    "require_feti_backend": true,
+    "allow_virtual_sync": false,
+    "ci_mode": "pr",
+    "steps": 300,
+    "bandwidth_gbps": 768.0,
+    "latency_us": 0.5,
+    "strict_feti_profile": true,
+    "min_bandwidth_gbps": 256.0,
+    "max_latency_us": 1.5,
+    "compute_us_per_node": 0.2,
+    "overlap_cap": 0.7,
+    "jitter_pct": 0.12,
+    "max_sync_stall_ratio": 0.36,
+    "max_p99_step_ms": 550.0,
+    "max_straggler_ratio": 2.4,
+    "min_overlap_ratio": 0.35,
+    "max_feti_iters": 12,
+    "feti_gap_tol": 0.0008,
+    "feti_force_tol": 0.001,
+    "feti_rho": 0.6,
+    "feti_relax": 0.45,
+    "feti_min_converged_step_ratio": 1.0,
+    "work_dir": "implementation/phase1/stress/sync",
+    "out": "implementation/phase1/sync_stress_gate_report.json"
+  },
+  "reports": {
+    "partitioned_scaleout": "implementation/phase1/partitioned_scaleout_report.json",
+    "topology_report": "implementation/phase1/opensees_topology_report.json"
+  },
+  "checks": {
+    "topology_gate_pass": true,
+    "virtual_sync_blocked_pass": true,
+    "feti_profile_pass": true,
+    "required_levels_present": true,
+    "required_levels_sync_pass": true,
+    "sync_stall_budget_pass": true,
+    "backend_policy_pass": true
+  },
+  "level_rows": [
+    {
+      "node_count": 1000000,
+      "report": "implementation/phase1/stress/sync/sync_virtual_n1000000.json",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "backend": "feti_lite_boundary_sync",
+      "converged_step_ratio": 1.0,
+      "p95_feti_iterations": 1.0,
+      "sync_stall_ratio": 0.0,
+      "p99_step_ms": 0.33726062614004076,
+      "straggler_ratio": 1.0910362038562815,
+      "comm_overlap_ratio": 1.0
+    },
+    {
+      "node_count": 3000000,
+      "report": "implementation/phase1/stress/sync/sync_virtual_n3000000.json",
+      "contract_pass": true,
+      "reason_code": "PASS",
+      "backend": "feti_lite_boundary_sync",
+      "converged_step_ratio": 1.0,
+      "p95_feti_iterations": 1.0,
+      "sync_stall_ratio": 0.0,
+      "p99_step_ms": 0.33726062614004076,
+      "straggler_ratio": 1.0910362038562815,
+      "comm_overlap_ratio": 1.0
+    }
+  ],
+  "steps": [
+    {
+      "step": "sync_emulate_n1000000",
+      "seconds": 1.0483205318450928,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/feti_lite_single_gpu.py --partition-report implementation/phase1/stress/partitioned_scaleout/partition_quality_n1000000.json --execution-mode boundary_sync --steps 300 --bandwidth-gbps 768.0 --latency-us 0.5 --compute-us-per-node 0.2 --overlap-cap 0.7 --jitter-pct 0.12 --max-feti-iters 12 --gap-tol 0.0008 --force-tol 0.001 --rho 0.6 --relax 0.45 --min-converged-step-ratio 1.0 --max-sync-stall-ratio 0.36 --max-p99-step-ms 550.0 --max-straggler-ratio 2.4 --min-overlap-ratio 0.35 --out implementation/phase1/stress/sync/sync_virtual_n1000000.json",
+      "stdout_tail": "Wrote feti-lite sync report: implementation/phase1/stress/sync/sync_virtual_n1000000.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"converged_step_ratio\": 1.0, \"event\": \"feti_lite_sync.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "sync_emulate_n3000000",
+      "seconds": 1.0513122081756592,
+      "return_code": 0,
+      "command": "/usr/bin/python3 implementation/phase1/feti_lite_single_gpu.py --partition-report implementation/phase1/stress/partitioned_scaleout/partition_quality_n3000000.json --execution-mode boundary_sync --steps 300 --bandwidth-gbps 768.0 --latency-us 0.5 --compute-us-per-node 0.2 --overlap-cap 0.7 --jitter-pct 0.12 --max-feti-iters 12 --gap-tol 0.0008 --force-tol 0.001 --rho 0.6 --relax 0.45 --min-converged-step-ratio 1.0 --max-sync-stall-ratio 0.36 --max-p99-step-ms 550.0 --max-straggler-ratio 2.4 --min-overlap-ratio 0.35 --out implementation/phase1/stress/sync/sync_virtual_n3000000.json",
+      "stdout_tail": "Wrote feti-lite sync report: implementation/phase1/stress/sync/sync_virtual_n3000000.json\n",
+      "stderr_tail": "{\"contract_pass\": true, \"converged_step_ratio\": 1.0, \"event\": \"feti_lite_sync.completed\", \"reason_code\": \"PASS\"}\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "sync stress gate passed"
+}

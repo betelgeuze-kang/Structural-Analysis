@@ -1,0 +1,294 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-06T13:54:52Z",
+  "inputs": {
+    "parsed_model_json": "implementation/phase1/open_data/midas/midas_generator_33.json",
+    "dataset_npz": "implementation/phase1/release/design_optimization/design_optimization_dataset.npz",
+    "changes_json": "implementation/phase1/release/design_optimization/design_optimization_cost_reduction_changes.json"
+  },
+  "source_kind": "internal_group_local_connection_detailing_payload_projection",
+  "summary": {
+    "group_local_connection_detailing_payload_row_count": 6,
+    "group_local_connection_detailing_payload_available_count": 6,
+    "blocked_group_local_connection_detailing_payload_row_count": 0,
+    "blocked_reason_counts": {},
+    "projected_member_type_counts": {
+      "beam": 6
+    },
+    "projected_zone_label_counts": {
+      "core": 1,
+      "transfer": 5
+    }
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "projected internal group-local connection-detailing payloads were generated",
+  "group_local_connection_detailing_payloads": [
+    {
+      "group_id": "S00:core:nogroup:beam:SB1200X1200",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_connection_detailing_projection",
+      "mapping_source": "signature_zone_member_fallback",
+      "element_id_count": 9,
+      "element_ids_head": [
+        27393,
+        27397,
+        27398,
+        27399,
+        27400,
+        27402,
+        27406,
+        27407,
+        27410
+      ],
+      "section_ids": [
+        1053
+      ],
+      "material_ids": [
+        1
+      ],
+      "section_signature": "SB1200X1200",
+      "zone_label": "core",
+      "story_band": 0,
+      "semantic_group": "",
+      "action_name": "connection_detailing_down",
+      "baseline_detailing_quality": 0.5499999999999999,
+      "target_detailing_quality": 0.6,
+      "detailing_quality_delta": 0.050000000000000044,
+      "baseline_rebar_ratio": 0.018,
+      "target_rebar_ratio": 0.018,
+      "review_priority": "high",
+      "followup_type": "connection_detailing_manual_update",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_connection_detailing_projection",
+      "mapping_source": "direct_group_id",
+      "element_id_count": 9,
+      "element_ids_head": [
+        1261,
+        3797,
+        3829,
+        3832,
+        3834,
+        26062,
+        26063,
+        26064,
+        26065
+      ],
+      "section_ids": [
+        307
+      ],
+      "material_ids": [
+        1
+      ],
+      "section_signature": "SB800X7001.82",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "action_name": "connection_detailing_down",
+      "baseline_detailing_quality": 0.5499999999999999,
+      "target_detailing_quality": 0.6,
+      "detailing_quality_delta": 0.050000000000000044,
+      "baseline_rebar_ratio": 0.018,
+      "target_rebar_ratio": 0.018,
+      "review_priority": "high",
+      "followup_type": "connection_detailing_manual_update",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_connection_detailing_projection",
+      "mapping_source": "direct_group_id",
+      "element_id_count": 14,
+      "element_ids_head": [
+        3088,
+        3089,
+        3097,
+        3099,
+        22043,
+        22044,
+        22072,
+        22073,
+        22074,
+        22097,
+        22098,
+        22099,
+        22233,
+        22234
+      ],
+      "section_ids": [
+        241
+      ],
+      "material_ids": [
+        1
+      ],
+      "section_signature": "SB800X7001.95",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "action_name": "connection_detailing_down",
+      "baseline_detailing_quality": 0.5499999999999999,
+      "target_detailing_quality": 0.6,
+      "detailing_quality_delta": 0.050000000000000044,
+      "baseline_rebar_ratio": 0.017999999999999995,
+      "target_rebar_ratio": 0.017999999999999995,
+      "review_priority": "high",
+      "followup_type": "connection_detailing_manual_update",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_connection_detailing_projection",
+      "mapping_source": "direct_group_id",
+      "element_id_count": 17,
+      "element_ids_head": [
+        1488,
+        1489,
+        4363,
+        4364,
+        22057,
+        22058,
+        22059,
+        22060,
+        22061,
+        22307,
+        22308,
+        22309,
+        22324,
+        22325,
+        22326,
+        22371
+      ],
+      "section_ids": [
+        48
+      ],
+      "material_ids": [
+        1
+      ],
+      "section_signature": "SB800X7002.00",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "action_name": "connection_detailing_down",
+      "baseline_detailing_quality": 0.5499999999999999,
+      "target_detailing_quality": 0.6,
+      "detailing_quality_delta": 0.050000000000000044,
+      "baseline_rebar_ratio": 0.018,
+      "target_rebar_ratio": 0.018,
+      "review_priority": "high",
+      "followup_type": "connection_detailing_manual_update",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_connection_detailing_projection",
+      "mapping_source": "direct_group_id",
+      "element_id_count": 15,
+      "element_ids_head": [
+        2996,
+        2997,
+        2998,
+        2999,
+        21892,
+        21893,
+        21894,
+        21925,
+        21926,
+        22272,
+        22273,
+        22274,
+        22400,
+        22401,
+        22402
+      ],
+      "section_ids": [
+        642
+      ],
+      "material_ids": [
+        1
+      ],
+      "section_signature": "SB800X8002.00",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "action_name": "connection_detailing_down",
+      "baseline_detailing_quality": 0.5499999999999999,
+      "target_detailing_quality": 0.6,
+      "detailing_quality_delta": 0.050000000000000044,
+      "baseline_rebar_ratio": 0.018,
+      "target_rebar_ratio": 0.018,
+      "review_priority": "high",
+      "followup_type": "connection_detailing_manual_update",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "member_type": "beam",
+      "action_family": "connection_detailing",
+      "payload_present": true,
+      "payload_basis": "detailing_quality_delta_projection",
+      "payload_source_class": "internal_group_local_connection_detailing_projection",
+      "mapping_source": "direct_group_id",
+      "element_id_count": 10,
+      "element_ids_head": [
+        1485,
+        22146,
+        22147,
+        22148,
+        22149,
+        22150,
+        22151,
+        22152,
+        22153,
+        22154
+      ],
+      "section_ids": [
+        370
+      ],
+      "material_ids": [
+        1
+      ],
+      "section_signature": "SB800X9001.75",
+      "zone_label": "transfer",
+      "story_band": 4,
+      "semantic_group": "",
+      "action_name": "connection_detailing_down",
+      "baseline_detailing_quality": 0.5499999999999999,
+      "target_detailing_quality": 0.6,
+      "detailing_quality_delta": 0.050000000000000044,
+      "baseline_rebar_ratio": 0.017999999999999995,
+      "target_rebar_ratio": 0.017999999999999995,
+      "review_priority": "high",
+      "followup_type": "connection_detailing_manual_update",
+      "review_owner": "licensed_engineer",
+      "validation_boundary": "internal_engine_complete_external_validation_optional"
+    }
+  ],
+  "blocked_group_local_connection_detailing_payload_rows": []
+}

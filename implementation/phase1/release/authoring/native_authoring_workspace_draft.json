@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "report_family": "native_authoring_workspace_draft",
+  "generated_at": "2026-04-19T10:34:24.153789+00:00",
+  "authoring_controls": {
+    "family_id": "sample_tower",
+    "story_count": 5,
+    "bay_count": 3,
+    "floor_height_m": 3.9,
+    "load_pattern_count": 4,
+    "section_id": "steel_h_600x200",
+    "section_palette": [
+      "steel_h_600x200",
+      "steel_box_400x400x16",
+      "rc_column_700x700",
+      "rc_wall_300x3000",
+      "cft_box_700x700",
+      "deck_beam_500x250"
+    ]
+  },
+  "baseline_summary": {
+    "model_id": "native-authoring-sample-tower",
+    "story_count": 5,
+    "node_count": 24,
+    "member_count": 35,
+    "load_pattern_count": 4,
+    "solver_ready_score": 100.0,
+    "native_authoring_ready": true
+  },
+  "summary_line": "Native authoring bundle: PASS | stories=5 | nodes=24 | members=35 | loads=4 | unsupported=0 | unresolved=0 | score=100.0 | family=sample_tower",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "native authoring draft seed exported"
+}

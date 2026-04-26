@@ -1,0 +1,456 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-commercial-benchmark-cases",
+  "generated_at": "2026-03-01T11:58:58.902512+00:00",
+  "source": {
+    "mode": "paired_csv",
+    "hf_csv": "implementation/phase1/commercial_hf_export_sample.csv",
+    "lf_csv": "implementation/phase1/commercial_lf_export_sample.csv",
+    "merged_csv": null,
+    "hf_prefix": null,
+    "lf_prefix": null,
+    "metric_source": "commercial_solver_export",
+    "public_case_count": 4
+  },
+  "split_counts": {
+    "train": 7,
+    "val": 2,
+    "test": 3
+  },
+  "public_benchmark_cases": [
+    {
+      "case_id": "C-TRN-001",
+      "hazard_type": "wind",
+      "topology_type": "rahmen",
+      "hf_metrics": {
+        "drift_ratio_pct": 1.5212765523223182,
+        "base_shear_kN": 1268.5165299806742,
+        "mode_shape_mac": 0.9806821712270499,
+        "buckling_factor": 2.8830663340018097,
+        "equilibrium_residual": 1e-12
+      }
+    },
+    {
+      "case_id": "C-TRN-002",
+      "hazard_type": "wind",
+      "topology_type": "truss",
+      "hf_metrics": {
+        "drift_ratio_pct": 1.1183786206835327,
+        "base_shear_kN": 909.4440513919499,
+        "mode_shape_mac": 0.9876608618617564,
+        "buckling_factor": 3.18522521190788,
+        "equilibrium_residual": 1e-12
+      }
+    },
+    {
+      "case_id": "C-TRN-003",
+      "hazard_type": "seismic",
+      "topology_type": "rahmen",
+      "hf_metrics": {
+        "drift_ratio_pct": 2.082370848870518,
+        "base_shear_kN": 1735.9955686900848,
+        "mode_shape_mac": 0.9752448127853294,
+        "buckling_factor": 2.4718521801398636,
+        "equilibrium_residual": 1e-12
+      }
+    },
+    {
+      "case_id": "C-TRN-004",
+      "hazard_type": "wind",
+      "topology_type": "wall-frame",
+      "hf_metrics": {
+        "drift_ratio_pct": 1.419706761331761,
+        "base_shear_kN": 1330.615518933232,
+        "mode_shape_mac": 0.9829335491413521,
+        "buckling_factor": 2.934960240664893,
+        "equilibrium_residual": 1e-12
+      }
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "C-TRN-001",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "wind",
+      "load_scale": 1.0,
+      "residual_norm": 0.020019735974226332,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.5212765523223182,
+          "lf": 1.6618784006177327
+        },
+        "base_shear_kN": {
+          "hf": 1268.5165299806742,
+          "lf": 1198.6347333310378
+        },
+        "mode_shape_mac": {
+          "hf": 0.9806821712270499,
+          "lf": 0.9454176412197806
+        },
+        "buckling_factor": {
+          "hf": 2.8830663340018097,
+          "lf": 2.624226139516416
+        },
+        "equilibrium_residual": {
+          "hf": 1e-12,
+          "lf": 0.021081353329072905
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-TRN-002",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "wind",
+      "load_scale": 0.92,
+      "residual_norm": 0.01702786309906776,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.1183786206835327,
+          "lf": 1.2036231873226086
+        },
+        "base_shear_kN": {
+          "hf": 909.4440513919499,
+          "lf": 867.7613697513139
+        },
+        "mode_shape_mac": {
+          "hf": 0.9876608618617564,
+          "lf": 0.9572445026267703
+        },
+        "buckling_factor": {
+          "hf": 3.18522521190788,
+          "lf": 2.995369198487454
+        },
+        "equilibrium_residual": {
+          "hf": 1e-12,
+          "lf": 0.01699232455519099
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-TRN-003",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "load_scale": 1.2,
+      "residual_norm": 0.02701681144498328,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.082370848870518,
+          "lf": 2.3110532040174805
+        },
+        "base_shear_kN": {
+          "hf": 1735.9955686900848,
+          "lf": 1614.4167616942989
+        },
+        "mode_shape_mac": {
+          "hf": 0.9752448127853294,
+          "lf": 0.9318641038808017
+        },
+        "buckling_factor": {
+          "hf": 2.4718521801398636,
+          "lf": 2.2367348500813895
+        },
+        "equilibrium_residual": {
+          "hf": 1e-12,
+          "lf": 0.030032605084219937
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-TRN-004",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "wall-frame",
+      "hazard_type": "wind",
+      "load_scale": 1.08,
+      "residual_norm": 0.021034359356983754,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.419706761331761,
+          "lf": 1.549871966215276
+        },
+        "base_shear_kN": {
+          "hf": 1330.615518933232,
+          "lf": 1252.5164207825023
+        },
+        "mode_shape_mac": {
+          "hf": 0.9829335491413521,
+          "lf": 0.950460086773486
+        },
+        "buckling_factor": {
+          "hf": 2.934960240664893,
+          "lf": 2.71906747310262
+        },
+        "equilibrium_residual": {
+          "hf": 1e-12,
+          "lf": 0.0220037035695439
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-TRN-005",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "load_scale": 1.28,
+      "residual_norm": 0.033,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.44,
+          "lf": 2.75
+        },
+        "base_shear_kN": {
+          "hf": 2140.0,
+          "lf": 1978.0
+        },
+        "mode_shape_mac": {
+          "hf": 0.971,
+          "lf": 0.928
+        },
+        "buckling_factor": {
+          "hf": 2.18,
+          "lf": 1.94
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.035
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-TRN-006",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "seismic",
+      "load_scale": 1.14,
+      "residual_norm": 0.024,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.72,
+          "lf": 1.9
+        },
+        "base_shear_kN": {
+          "hf": 1450.0,
+          "lf": 1352.0
+        },
+        "mode_shape_mac": {
+          "hf": 0.979,
+          "lf": 0.943
+        },
+        "buckling_factor": {
+          "hf": 2.73,
+          "lf": 2.49
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.027
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-TRN-007",
+      "split": "train",
+      "ood_tag": "in_distribution",
+      "topology_type": "wall-frame",
+      "hazard_type": "combined",
+      "load_scale": 1.25,
+      "residual_norm": 0.03,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.16,
+          "lf": 2.41
+        },
+        "base_shear_kN": {
+          "hf": 1895.0,
+          "lf": 1766.0
+        },
+        "mode_shape_mac": {
+          "hf": 0.974,
+          "lf": 0.933
+        },
+        "buckling_factor": {
+          "hf": 2.36,
+          "lf": 2.1
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.032
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "ood_tag": "ood_topology",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "load_scale": 1.22,
+      "residual_norm": 0.031,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.31,
+          "lf": 2.6
+        },
+        "base_shear_kN": {
+          "hf": 2035.0,
+          "lf": 1878.0
+        },
+        "mode_shape_mac": {
+          "hf": 0.972,
+          "lf": 0.93
+        },
+        "buckling_factor": {
+          "hf": 2.24,
+          "lf": 1.99
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.033
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-TST-002",
+      "split": "test",
+      "ood_tag": "ood_hazard",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "load_scale": 1.16,
+      "residual_norm": 0.026,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.88,
+          "lf": 2.09
+        },
+        "base_shear_kN": {
+          "hf": 1610.0,
+          "lf": 1499.0
+        },
+        "mode_shape_mac": {
+          "hf": 0.978,
+          "lf": 0.941
+        },
+        "buckling_factor": {
+          "hf": 2.57,
+          "lf": 2.31
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.028
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-TST-003",
+      "split": "test",
+      "ood_tag": "ood_combined",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "load_scale": 1.3,
+      "residual_norm": 0.035,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.58,
+          "lf": 2.93
+        },
+        "base_shear_kN": {
+          "hf": 2260.0,
+          "lf": 2082.0
+        },
+        "mode_shape_mac": {
+          "hf": 0.969,
+          "lf": 0.923
+        },
+        "buckling_factor": {
+          "hf": 2.1,
+          "lf": 1.84
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.037
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-VAL-001",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "rahmen",
+      "hazard_type": "combined",
+      "load_scale": 1.18,
+      "residual_norm": 0.028,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 2.02,
+          "lf": 2.25
+        },
+        "base_shear_kN": {
+          "hf": 1705.0,
+          "lf": 1593.0
+        },
+        "mode_shape_mac": {
+          "hf": 0.975,
+          "lf": 0.937
+        },
+        "buckling_factor": {
+          "hf": 2.45,
+          "lf": 2.21
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.029
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    },
+    {
+      "case_id": "C-VAL-002",
+      "split": "val",
+      "ood_tag": "in_distribution",
+      "topology_type": "truss",
+      "hazard_type": "wind",
+      "load_scale": 0.95,
+      "residual_norm": 0.018,
+      "metrics": {
+        "drift_ratio_pct": {
+          "hf": 1.18,
+          "lf": 1.27
+        },
+        "base_shear_kN": {
+          "hf": 980.0,
+          "lf": 939.0
+        },
+        "mode_shape_mac": {
+          "hf": 0.987,
+          "lf": 0.958
+        },
+        "buckling_factor": {
+          "hf": 3.12,
+          "lf": 2.92
+        },
+        "equilibrium_residual": {
+          "hf": 0.0,
+          "lf": 0.018
+        }
+      },
+      "metric_source": "commercial_solver_export"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-22T14:05:56.436029+00:00",
+  "contract_pass": true,
+  "reason_code": "MANIFEST_ATTESTED_AND_AUTHORITY_RECEIPTED",
+  "reason": "reviewer and authority attestation manifest is complete",
+  "case": {
+    "task_id": "hardest::uic_erri_rail_bridge",
+    "case_id": "uic_erri_rail_bridge",
+    "case_label": "UIC / ERRI Railway Bridge",
+    "benchmark_family": "moving_load_track_bridge"
+  },
+  "attestation_source_kind": "manifest",
+  "attestation_source_json": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_manifests/03.uic_erri_rail_bridge.authority_onepage.reviewer_attestation.manifest.json",
+  "manifest_json": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_manifests/03.uic_erri_rail_bridge.authority_onepage.reviewer_attestation.manifest.json",
+  "template_json": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_templates/03.uic_erri_rail_bridge.authority_onepage.reviewer_attestation.template.json",
+  "manifest_error": "",
+  "reviewer_missing_fields": [],
+  "authority_missing_fields": [],
+  "missing_fields": [],
+  "summary": {
+    "required_field_count": 10,
+    "completed_field_count": 10,
+    "review_boundary_pending_count": 0,
+    "review_boundary_resolution_label": "approve_all=PASS_NO_OPEN_DECISION_ITEMS/ready_full=yes; reject_one=PASS_NO_OPEN_DECISION_ITEMS/open_revision=0",
+    "submission_ready_to_start_now": true,
+    "submission_reason_code": "PASS_START_NOW_FULL"
+  },
+  "workflow_connection": {
+    "audit_review_decision_batch_template_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_template.json",
+    "audit_review_decision_batch_run_report_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_run_report.json",
+    "audit_review_decision_batch_live_preview_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch.live_preview.json",
+    "audit_review_decision_batch_approve_all_live_ready_template_json": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_approve_all.live_ready_template.json",
+    "execution_status_manifest_json": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json"
+  },
+  "evidence": {
+    "kpi_receipt_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/benchmark_task_kpi_receipt.json",
+    "primary_report_path": "implementation/phase1/vti_coupled_solver_report.json",
+    "case_bundle_dir": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/signed_case_bundle",
+    "case_bundle_zip_path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_uic_erri_rail_bridge/signed_case_bundle.zip"
+  },
+  "attestation": {
+    "reviewer_name": "Friend Demo Reviewer",
+    "reviewer_role": "informal external reviewer",
+    "reviewer_license_id": "demo-review-no-license",
+    "reviewer_signature_name": "Friend Demo Reviewer",
+    "decision_basis": "friend review of hardest external benchmark bundle for external walkthrough | case_id=uic_erri_rail_bridge",
+    "review_session_id": "friend-demo-review-20260401T152449Z",
+    "attested_at_utc": "2026-04-01T15:24:49.235684+00:00",
+    "authority_name": "informal demo receipt authority",
+    "authority_receipt_id": "DEMO-RECEIPT-10-UIC_ERRI_RAIL_BRIDGE",
+    "authority_receipt_issued_at_utc": "2026-04-01T15:24:49.235684+00:00",
+    "authority_receipt_note": "non-regulatory demo receipt for friend walkthrough | case_id=uic_erri_rail_bridge",
+    "approval_signature_name": "Friend Demo Reviewer"
+  },
+  "cover_sheet_slots": {
+    "reviewer_name_slot": "Friend Demo Reviewer",
+    "reviewer_role_or_license_slot": "reviewer_role=informal external reviewer; reviewer_license_id=demo-review-no-license",
+    "reviewer_signature_slot": "Friend Demo Reviewer",
+    "receipt_id_slot": "DEMO-RECEIPT-10-UIC_ERRI_RAIL_BRIDGE",
+    "receipt_issued_at_slot": "2026-04-01T15:24:49.235684+00:00",
+    "authority_receipt_slot": "authority_name=informal demo receipt authority; authority_note=non-regulatory demo receipt for friend walkthrough | case_id=uic_erri_rail_bridge",
+    "approval_signature_slot": "Friend Demo Reviewer"
+  }
+}

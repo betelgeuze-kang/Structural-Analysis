@@ -1,0 +1,387 @@
+{
+  "schema_version": "1.0",
+  "track_name": "irregular_structure_corpus_track",
+  "purpose": "Prioritized irregular structural families for expert-wow demos and AI generalization.",
+  "families": [
+    {
+      "id": "transfer_podium_tower",
+      "priority": 1,
+      "why_it_matters": "Visible transfer podiums expose sharp load-path jumps and are common in real high-rises.",
+      "irregularity_tags": [
+        "transfer_story",
+        "podium",
+        "load_transfer",
+        "vertical_irregularity"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "transfer-story demand ratio; column discontinuity penalty; load-path continuity"
+    },
+    {
+      "id": "soft_story_podium_tower",
+      "priority": 2,
+      "why_it_matters": "Canonical soft-story risk with clear drift concentration and strong regression value.",
+      "irregularity_tags": [
+        "soft_story",
+        "vertical_irregularity",
+        "stiffness_drop",
+        "drift_concentration"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "story stiffness ratio; interstory drift concentration; P-Delta amplification"
+    },
+    {
+      "id": "torsionally_eccentric_core_tower",
+      "priority": 3,
+      "why_it_matters": "Offset core or mass eccentricity makes torsion and modal coupling easy to see and hard to fake.",
+      "irregularity_tags": [
+        "torsion",
+        "core_offset",
+        "plan_asymmetry",
+        "mass_eccentricity"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "torsional irregularity index; corner drift spread; center-of-rigidity offset"
+    },
+    {
+      "id": "setback_tower",
+      "priority": 4,
+      "why_it_matters": "Setbacks are a classic vertical irregularity that break stiffness and mass continuity.",
+      "irregularity_tags": [
+        "setback",
+        "vertical_irregularity",
+        "massing",
+        "load_path_step"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "setback-level demand jump; story shear redistribution; mode-shape discontinuity"
+    },
+    {
+      "id": "reentrant_corner_tower",
+      "priority": 5,
+      "why_it_matters": "L/U/T-plan corners concentrate diaphragm shear and edge drift, making them useful for torsion-aware learning.",
+      "irregularity_tags": [
+        "reentrant_corner",
+        "plan_irregularity",
+        "diaphragm_torsion",
+        "corner_hotspot"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "corner drift amplification; diaphragm shear concentration; torsion/drift ratio"
+    },
+    {
+      "id": "outrigger_megatall_offset_core",
+      "priority": 6,
+      "why_it_matters": "Megatall outriggers are a showpiece and stress coupled core-perimeter load sharing.",
+      "irregularity_tags": [
+        "outrigger",
+        "megatall",
+        "offset_core",
+        "tall_building"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "core drift reduction; outrigger force share; top-out drift limit"
+    },
+    {
+      "id": "discontinuous_braced_frame_tower",
+      "priority": 7,
+      "why_it_matters": "Brace discontinuities create real weak-story behavior and expose load-path breaks beyond simple soft stories.",
+      "irregularity_tags": [
+        "braced_frame",
+        "brace_discontinuity",
+        "vertical_irregularity",
+        "load_path_break"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "brace force redistribution; weak-story check; drift concentration"
+    },
+    {
+      "id": "hanging_column_podium_tower",
+      "priority": 8,
+      "why_it_matters": "Suspended floors and hanging columns are excellent demonstrations of reverse load flow and transfer demand.",
+      "irregularity_tags": [
+        "hanging_column",
+        "suspended_floor",
+        "transfer",
+        "vertical_discontinuity"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "hanging-member force path completeness; transfer deflection; secondary-force amplification"
+    },
+    {
+      "id": "diagrid_exoskeleton_asymmetric_tower",
+      "priority": 9,
+      "why_it_matters": "Diagrid exoskeletons are visually strong and test perimeter stiffness reasoning under asymmetry.",
+      "irregularity_tags": [
+        "diagrid",
+        "exoskeleton",
+        "asymmetry",
+        "perimeter_stiffness"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "perimeter-to-core stiffness share; lateral efficiency; node stress concentration"
+    },
+    {
+      "id": "split_core_linked_towers",
+      "priority": 10,
+      "why_it_matters": "Linked towers and split cores are a good coupled-system benchmark with clear visual wow.",
+      "irregularity_tags": [
+        "split_core",
+        "linked_towers",
+        "coupled_system",
+        "skybridge"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "inter-tower drift differential; link force demand; coupling mode separation"
+    },
+    {
+      "id": "cantilevered_upper_volume_tower",
+      "priority": 11,
+      "why_it_matters": "Large overhangs make load reversal and support demand obvious.",
+      "irregularity_tags": [
+        "cantilever",
+        "overhang",
+        "load_reversal",
+        "mass_offset"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "tip deflection; support moment ratio; gravity-lateral interaction"
+    },
+    {
+      "id": "vertical_mass_jump_tower",
+      "priority": 12,
+      "why_it_matters": "Abrupt mass changes shift modes and acceleration demands in a way learning systems should notice.",
+      "irregularity_tags": [
+        "mass_irregularity",
+        "vertical_jump",
+        "dynamic_shift",
+        "stiffness_mismatch"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "csv"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "mode-shape jump; story acceleration ratio; mass-stiffness mismatch index"
+    },
+    {
+      "id": "atrium_void_ring_tower",
+      "priority": 13,
+      "why_it_matters": "A large internal void creates tricky diaphragm flow and strong perimeter demand.",
+      "irregularity_tags": [
+        "atrium_void",
+        "diaphragm_discontinuity",
+        "plan_void",
+        "torsion"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "very-high",
+      "recommended_kpi_or_validation_angle": "diaphragm shear flow around void; torsion amplification; perimeter concentration"
+    },
+    {
+      "id": "twisted_tapered_tower",
+      "priority": 14,
+      "why_it_matters": "Twist plus taper is a compact geometry stress test for shape-aware models.",
+      "irregularity_tags": [
+        "twist",
+        "taper",
+        "geometry_irregularity",
+        "mode_coupling"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "twist angle vs drift; stiffness-gradient sensitivity; coupled-mode ratio"
+    },
+    {
+      "id": "sloped_site_stepped_podium_tower",
+      "priority": 15,
+      "why_it_matters": "Grade changes create practical irregularity that is easy to miss in high-level summaries.",
+      "irregularity_tags": [
+        "sloping_site",
+        "stepped_foundation",
+        "podium_step",
+        "level_change"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "csv"
+      ],
+      "authority_fit": "medium",
+      "ai_learning_fit": "medium-high",
+      "recommended_kpi_or_validation_angle": "base reaction imbalance; story-to-story discontinuity; foundation demand skew"
+    },
+    {
+      "id": "skewed_column_frame",
+      "priority": 16,
+      "why_it_matters": "Nonorthogonal grids are a low-noise way to test geometry-aware load transfer.",
+      "irregularity_tags": [
+        "skew",
+        "nonorthogonal_grid",
+        "frame_irregularity",
+        "lateral_offset"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "authority_fit": "high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "skew-induced secondary forces; connection demand; plan response coupling"
+    },
+    {
+      "id": "bridge_skewed_support_span",
+      "priority": 17,
+      "why_it_matters": "Bridge skew broadens the track beyond towers and tests support asymmetry cleanly.",
+      "irregularity_tags": [
+        "bridge",
+        "skew_support",
+        "support_irregularity",
+        "global_torsion"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "medium-high",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "support reaction spread; torsional twist under asymmetric load; span continuity"
+    },
+    {
+      "id": "curved_plan_bridge_torsion",
+      "priority": 18,
+      "why_it_matters": "Curved bridges are a standard torsion problem and give the corpus a civil-structure edge case.",
+      "irregularity_tags": [
+        "bridge",
+        "curved_plan",
+        "torsion",
+        "alignment_irregularity"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "medium",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "curvature-induced torsion; lane-load asymmetry; lateral-torsional coupling"
+    },
+    {
+      "id": "long_span_irregular_roof_truss",
+      "priority": 19,
+      "why_it_matters": "Irregular roof trusses are useful for big-span demos and partial-load response learning.",
+      "irregularity_tags": [
+        "roof_truss",
+        "long_span",
+        "support_irregularity",
+        "gravity_lateral_coupling"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "tcl"
+      ],
+      "authority_fit": "medium",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "deflection under partial loading; support reaction imbalance; member utilization spread"
+    },
+    {
+      "id": "free_form_shell_core_hybrid",
+      "priority": 20,
+      "why_it_matters": "A shell-plus-core hybrid is the most visually distinctive capstone and the hardest geometry bucket.",
+      "irregularity_tags": [
+        "free_form",
+        "shell",
+        "hybrid_system",
+        "geometry_irregularity"
+      ],
+      "likely_formats": [
+        "mgt",
+        "json",
+        "npz"
+      ],
+      "authority_fit": "medium",
+      "ai_learning_fit": "high",
+      "recommended_kpi_or_validation_angle": "geometry-to-response consistency; shell membrane action; local instability sensitivity"
+    }
+  ]
+}

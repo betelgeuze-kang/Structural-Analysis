@@ -1,0 +1,27 @@
+{
+  "producer_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
+  "contract_pass": true,
+  "missing_fields": [],
+  "runtime_kind": "rust_hip",
+  "rust_hip_ready": true,
+  "strict_rust_hip_pass": true,
+  "next_action": "ready for strict rust-hip validation",
+  "pass": true,
+  "probe": {
+    "byte_offset": 0,
+    "device": "hip:0",
+    "dtype": "float32",
+    "host_copy_bytes": 0,
+    "producer_kind": "rust_hip",
+    "roundtrip_success": true,
+    "shape": [
+      4096,
+      128
+    ],
+    "shared_storage": true,
+    "strides": [
+      128,
+      1
+    ]
+  }
+}

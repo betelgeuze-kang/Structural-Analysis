@@ -70,5 +70,112 @@
         0.01
       ]
     }
+  },
+  "railway_krs_2024": {
+    "rail_steel_UIC60": {
+      "rule_id": "KRS-RAIL-UIC60-2024",
+      "E_Pa": 2.1e+11,
+      "density_kg_m3": 7850,
+      "I_m4": 3.055e-05,
+      "A_m2": 7.67e-03,
+      "yield_stress_Pa": 9.0e+08,
+      "hinge_softening": 0.12,
+      "yield_strain_range": [
+        0.0004,
+        0.015
+      ],
+      "fatigue_endurance_limit_MPa": 200
+    },
+    "ballast_granite": {
+      "rule_id": "KRS-BALLAST-GRANITE-2024",
+      "density_kg_m3": 1800,
+      "stiffness_per_sleeper_N_m": 1.3e+08,
+      "damping_per_sleeper_Ns_m": 5.0e+04,
+      "depth_m": 0.30,
+      "hinge_softening": 0.0,
+      "yield_strain_range": [
+        0.005,
+        0.05
+      ]
+    },
+    "slab_track_concrete": {
+      "rule_id": "KRS-SLAB-CONCRETE-2024",
+      "E_Pa": 3.5e+10,
+      "density_kg_m3": 2500,
+      "poisson_ratio": 0.2,
+      "fc_Pa": 5.0e+07,
+      "hinge_softening": 0.08,
+      "yield_strain_range": [
+        0.0002,
+        0.008
+      ]
+    },
+    "rail_fastener_pandrol": {
+      "rule_id": "KRS-FASTENER-PANDROL-2024",
+      "k_vertical_N_m": 6.0e+07,
+      "k_lateral_N_m": 2.0e+07,
+      "c_vertical_Ns_m": 3.0e+04,
+      "clip_preload_N": 18000,
+      "toe_load_range_N": [
+        14000,
+        22000
+      ],
+      "hinge_softening": 0.0,
+      "yield_strain_range": [
+        0.001,
+        0.03
+      ]
+    },
+    "resilient_pad_eva": {
+      "rule_id": "KRS-PAD-EVA-2024",
+      "k_static_N_m": 1.5e+08,
+      "k_dynamic_N_m": 2.5e+08,
+      "c_Ns_m": 2.0e+04,
+      "frequency_dependent": true,
+      "hinge_softening": 0.0,
+      "yield_strain_range": [
+        0.01,
+        0.1
+      ]
+    }
+  },
+  "tunnel_kds_2024": {
+    "segment_concrete_C50": {
+      "rule_id": "KDS-TUNNEL-SEG-C50-2024",
+      "E_Pa": 3.45e+10,
+      "density_kg_m3": 2400,
+      "poisson_ratio": 0.2,
+      "fc_Pa": 5.0e+07,
+      "ft_Pa": 3.5e+06,
+      "hinge_softening": 0.10,
+      "yield_strain_range": [
+        0.0002,
+        0.008
+      ]
+    },
+    "segment_bolt_M30": {
+      "rule_id": "KDS-TUNNEL-BOLT-M30-2024",
+      "pretension_N": 300000,
+      "yield_force_N": 550000,
+      "ultimate_force_N": 740000,
+      "rotational_stiffness_Nm_rad": 2.5e+07,
+      "hinge_softening": 0.15,
+      "yield_strain_range": [
+        0.0005,
+        0.02
+      ]
+    },
+    "grout_backfill": {
+      "rule_id": "KDS-TUNNEL-GROUT-2024",
+      "E_Pa": 1.0e+09,
+      "density_kg_m3": 2100,
+      "poisson_ratio": 0.3,
+      "compressive_strength_Pa": 5.0e+06,
+      "hinge_softening": 0.05,
+      "yield_strain_range": [
+        0.001,
+        0.02
+      ]
+    }
   }
 }

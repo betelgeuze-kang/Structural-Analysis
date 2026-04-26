@@ -1,0 +1,54 @@
+{
+  "contract_pass": true,
+  "solver": {
+    "name": "panel_zone_external_solver",
+    "backend": "panel_zone_external_solver",
+    "export_version": "2.0"
+  },
+  "summary": {
+    "producer_backend": "panel_zone_external_solver",
+    "source_bundle_mode": "nested_solver_export",
+    "topology_projected": false,
+    "solver_verified": true,
+    "verification_tier": "solver_verified_3d_source_bundle",
+    "instruction_sidecar_evidence_model": "direct_solver_export",
+    "instruction_sidecar_rebar_delivery_mode": "solver_verified_layout_rows"
+  },
+  "panel_zone_3d_results": {
+    "panel_zone_joint_geometry_3d": {
+      "contract_pass": true,
+      "source_kind": "panel_zone_joint_geometry_3d",
+      "rows": [
+        {
+          "member_id": "B401",
+          "joint_id": "J-401",
+          "panel_zone_id": "PZ-401"
+        }
+      ]
+    },
+    "panel_zone_rebar_anchorage_3d": {
+      "contract_pass": true,
+      "source_kind": "panel_zone_rebar_anchorage_3d",
+      "rows": [
+        {
+          "member_id": "B401",
+          "available_anchorage_length_mm": 485.0,
+          "required_anchorage_length_mm": 418.0,
+          "development_length_mm": 530.0
+        }
+      ]
+    },
+    "panel_zone_clash_verification_3d": {
+      "contract_pass": true,
+      "source_kind": "panel_zone_clash_verification_3d",
+      "rows": [
+        {
+          "member_id": "B401",
+          "clash_count": 0,
+          "clearance_mm": 31.0,
+          "clash_pass": true
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-stage-panel-zone-solver-verified-drop",
+  "generated_at": "2026-04-14T13:56:39.258607+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "panel-zone solver-verified inputs staged",
+  "inputs": {
+    "source_drop_dir": "tests/fixtures/panel_zone_3d/trusted_drop_package",
+    "solver_verified_bundle": "",
+    "joint_geometry_source": "",
+    "rebar_anchorage_source": "",
+    "clash_verification_source": "",
+    "member_mapping_sidecar": "",
+    "source_origin_class": "trusted_external_solver_source",
+    "discovered_inputs": {
+      "joint": "/home/betelgeuze/건축구조분석/tests/fixtures/panel_zone_3d/joint_geometry_source.json",
+      "anchorage": "/home/betelgeuze/건축구조분석/tests/fixtures/panel_zone_3d/rebar_anchorage_source.json",
+      "clash": "/home/betelgeuze/건축구조분석/tests/fixtures/panel_zone_3d/clash_verification_source.json",
+      "member_mapping_sidecar": "/home/betelgeuze/건축구조분석/tests/fixtures/panel_zone_3d/trusted_drop_package/member_mapping_sidecar.json"
+    },
+    "inbox_dir": "implementation/phase1/inbox/panel_zone_solver_verified",
+    "clean": true
+  },
+  "summary": {
+    "source_origin_class": "trusted_external_solver_source"
+  },
+  "artifacts": {
+    "joint": "implementation/phase1/inbox/panel_zone_solver_verified/joint_geometry.json",
+    "anchorage": "implementation/phase1/inbox/panel_zone_solver_verified/rebar_anchorage.json",
+    "clash": "implementation/phase1/inbox/panel_zone_solver_verified/clash_verification.json",
+    "member_mapping_sidecar": "implementation/phase1/inbox/panel_zone_solver_verified/member_mapping_sidecar.json",
+    "manifest": "implementation/phase1/inbox/panel_zone_solver_verified/panel_zone_handoff_manifest.json"
+  }
+}

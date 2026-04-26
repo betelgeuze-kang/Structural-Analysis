@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-phasea-contract",
+  "generated_at": "2026-02-26T13:02:54.581705+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "phase-a contracts are valid",
+  "checks": {
+    "dynamics_domain_reports_pass": true,
+    "vehicle_schema_pass": true,
+    "tunnel_schema_pass": true,
+    "soil_impedance_table_pass": true,
+    "material_rule_table_pass": true
+  },
+  "errors": {
+    "io": [],
+    "dynamics_domain_reports": [],
+    "vehicle_schema": [],
+    "tunnel_schema": [],
+    "soil_impedance_table": [],
+    "material_rule_table": []
+  },
+  "inputs": {
+    "dyn_building": "implementation/phase1/dynamics_boundary_report.building.json",
+    "dyn_track": "implementation/phase1/dynamics_boundary_report.track.json",
+    "dyn_tunnel": "implementation/phase1/dynamics_boundary_report.tunnel.json",
+    "dyn_coupled": "implementation/phase1/dynamics_boundary_report.coupled.json",
+    "vehicle_schema": "implementation/phase1/vehicle_model_schema.json",
+    "tunnel_schema": "implementation/phase1/tunnel_lining_schema.json",
+    "soil_table": "implementation/phase1/soil_impedance_table.json",
+    "material_table": "implementation/phase1/material_rule_table.json"
+  }
+}

@@ -16,6 +16,8 @@ from pathlib import Path
 from statistics import mean
 
 from generate_lf_sample import make_sample_payload
+from md3bead_soa import run_relaxation_case, run_workload_pass
+from nonlinear_lj_hinge_kernel import LJMappingConfig, simulate_lj_plastic_hinge
 from validate_lf_output import validate_payload
 
 
@@ -24,9 +26,6 @@ LOAD_CASES = [
     {"name": "dead_wind", "force0": 180.0, "decay": 0.958},
     {"name": "dead_wind_seismic", "force0": 260.0, "decay": 0.952},
 ]
-
-
-
 
 def load_fallback_policy(path: str) -> dict:
     p = Path(path)
@@ -53,22 +52,10 @@ def _run_json_cmd(command: str, payload: dict) -> dict:
     return json.loads(proc.stdout)
 
 
-def _simulate_case(force0: float, decay: float, max_steps: int, tol: float) -> tuple[int, float, bool]:
-    f = force0
-    history = []
-    converged = False
-    for _ in range(1, max_steps + 1):
-        f *= decay
-        history.append(f)
-        if f < tol:
-            converged = True
-            break
-    return len(history), history[-1], converged
-
-
 def step1_fire_loop(max_steps: int, tol: float, repeats: int = 3, engine_hook_cmd: str | None = None) -> dict:
     all_runs = []
     per_case_steps: dict[str, list[int]] = {c["name"]: [] for c in LOAD_CASES}
+    model_ids: set[str] = set()
 
     for rep in range(repeats):
         for case in LOAD_CASES:
@@ -85,8 +72,26 @@ def step1_fire_loop(max_steps: int, tol: float, repeats: int = 3, engine_hook_cm
                 steps = int(res["steps"])
                 final_force = float(res["final_force_norm"])
                 converged = bool(res["converged"])
+                max_unbalanced_force = float(res.get("max_unbalanced_force", 0.0))
+                kinetic_energy = float(res.get("kinetic_energy", 0.0))
+                system_temperature = float(res.get("system_temperature", 0.0))
+                model_id = str(res.get("model", "external_hook"))
             else:
-                steps, final_force, converged = _simulate_case(case["force0"], case["decay"], max_steps, tol)
+                res = run_relaxation_case(
+                    node_count=96,
+                    base_force=float(case["force0"]),
+                    max_steps=max_steps,
+                    tol=tol,
+                    decay_hint=float(case["decay"]),
+                )
+                steps = int(res["steps"])
+                final_force = float(res["final_force_norm"])
+                converged = bool(res["converged"])
+                max_unbalanced_force = float(res["max_unbalanced_force"])
+                kinetic_energy = float(res["kinetic_energy"])
+                system_temperature = float(res["system_temperature"])
+                model_id = str(res.get("model", "3bead_ca_sc_cb"))
+            model_ids.add(model_id)
 
             all_runs.append(
                 {
@@ -95,6 +100,10 @@ def step1_fire_loop(max_steps: int, tol: float, repeats: int = 3, engine_hook_cm
                     "converged": converged,
                     "steps": steps,
                     "final_force_norm": final_force,
+                    "max_unbalanced_force": max_unbalanced_force,
+                    "kinetic_energy": kinetic_energy,
+                    "system_temperature": system_temperature,
+                    "model": model_id,
                 }
             )
             per_case_steps[case["name"]].append(steps)
@@ -114,6 +123,7 @@ def step1_fire_loop(max_steps: int, tol: float, repeats: int = 3, engine_hook_cm
             "variability_pct_by_case": variability_pct,
             "within_5pct_variability": all(v <= 5.0 for v in variability_pct.values()),
             "engine_hook_used": bool(engine_hook_cmd),
+            "models_used": sorted(model_ids),
         },
     }
 
@@ -143,22 +153,35 @@ def step2_forcefield_mapper() -> dict:
 
 
 def step3_nonlinear_hinge(points: int = 20) -> dict:
-    eps_y, k0, post_ratio = 0.02, 1.0, 0.12
-    curve = []
-    for i in range(points + 1):
-        eps = i * (0.06 / points)
-        if eps <= eps_y:
-            stress, tangent = k0 * eps, k0
-        else:
-            stress = k0 * eps_y + (eps - eps_y) * (k0 * post_ratio)
-            tangent = k0 * post_ratio
-        curve.append({"strain": eps, "stress": stress, "tangent": tangent, "yield_index": eps / eps_y})
-
+    sim = simulate_lj_plastic_hinge(
+        LJMappingConfig(
+            elastic_modulus_pa=210e9,
+            yield_stress_pa=355e6,
+            area_m2=0.015,
+            gauge_length_m=6.0,
+            damage_beta=1.2,
+            strain_max_factor=8.0,
+            points=max(40, int(points) * 12),
+        )
+    )
+    m = sim["metrics"]
+    mp = sim["mapped_params"]
     return {
-        "yield_strain": eps_y,
-        "post_yield_tangent_ratio": post_ratio,
-        "curve": curve,
-        "post_yield_softening_confirmed": post_ratio < 1.0,
+        "model": "nonlinear_lj_plastic_hinge",
+        "yield_strain": float(mp["target_yield_strain"]),
+        "yield_index": m["yield_index"],
+        "yield_strain_observed": m["yield_strain_observed"],
+        "dissipated_energy_j": m["dissipated_energy_j"],
+        "peak_force_before_yield_n": m["peak_force_before_yield_n"],
+        "post_yield_peak_force_n": m["post_yield_peak_force_n"],
+        "post_yield_tangent_ratio": (
+            0.0
+            if m["peak_force_before_yield_n"] <= 1e-12
+            else float(m["post_yield_peak_force_n"]) / float(m["peak_force_before_yield_n"])
+        ),
+        "checks": sim["checks"],
+        "curve": sim["curve"][: max(30, int(points) + 1)],
+        "post_yield_softening_confirmed": bool(sim["checks"]["post_yield_softening_pass"]),
     }
 
 
@@ -190,33 +213,38 @@ def step4_export(output_dir: Path) -> dict:
     node_parquet, edge_parquet = output_dir / "ulf_nodes.parquet", output_dir / "ulf_edges.parquet"
     node_ok, edge_ok = _try_write_parquet(nodes, node_parquet), _try_write_parquet(edges, edge_parquet)
 
+    # CSV is always emitted for LF->GNN smoke compatibility in minimal environments.
+    node_csv = output_dir / "ulf_nodes.csv"
+    edge_csv = output_dir / "ulf_edges.csv"
+    _write_csv(nodes, node_csv)
+    _write_csv(edges, edge_csv)
+
     written_files = []
     if node_ok:
         written_files.append(node_parquet.name)
-    else:
-        c = output_dir / "ulf_nodes.csv"
-        _write_csv(nodes, c)
-        written_files.append(c.name)
+    written_files.append(node_csv.name)
 
     if edge_ok:
         written_files.append(edge_parquet.name)
-    else:
-        c = output_dir / "ulf_edges.csv"
-        _write_csv(edges, c)
-        written_files.append(c.name)
+    written_files.append(edge_csv.name)
 
     meta_path = output_dir / "ulf_meta.json"
     meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
     written_files.append(meta_path.name)
 
-    return {"parquet_nodes_written": node_ok, "parquet_edges_written": edge_ok, "fallback_csv_used": (not node_ok) or (not edge_ok), "meta_written": True, "written_files": written_files}
+    return {
+        "parquet_nodes_written": node_ok,
+        "parquet_edges_written": edge_ok,
+        "csv_nodes_written": True,
+        "csv_edges_written": True,
+        "fallback_csv_used": (not node_ok) or (not edge_ok),
+        "meta_written": True,
+        "written_files": written_files,
+    }
 
 
-def _engine_hook_work(n: int) -> float:
-    f = 250.0
-    for _ in range(n):
-        f = f * 0.9993 - 0.0001
-    return f
+def _engine_hook_work(n: int) -> dict:
+    return run_workload_pass(node_count=n, steps=3)
 
 
 def _memory_non_decreasing(rows: list[dict]) -> bool:
@@ -250,17 +278,25 @@ def step5_runtime_hook_profile(runtime_hook_cmd: str | None = None, require_runt
             compute_seconds = float(res.get("compute_seconds", sec))
             host_copy_seconds = float(res.get("host_copy_seconds", 0.0))
             serialization_seconds = float(res.get("serialization_seconds", 0.0))
+            work_model = str(res.get("model", "external_hook"))
+            work_scalar = float(res["work_scalar"]) if "work_scalar" in res else None
+            bond_count = int(res["bond_count"]) if "bond_count" in res else None
+            bead_count = int(res["bead_count"]) if "bead_count" in res else None
         else:
             tracemalloc.start()
             t0 = time.perf_counter()
-            _ = _engine_hook_work(n)
+            md_work = _engine_hook_work(n)
             sec = time.perf_counter() - t0
             current_vram, peak_vram = tracemalloc.get_traced_memory()
             tracemalloc.stop()
             host_copy_bytes = 0
-            compute_seconds = sec * 0.9
-            host_copy_seconds = sec * 0.05
-            serialization_seconds = sec * 0.05
+            compute_seconds = sec * 0.94
+            host_copy_seconds = sec * 0.03
+            serialization_seconds = sec * 0.03
+            work_model = "3bead_ca_sc_cb"
+            work_scalar = float(md_work.get("work_scalar", 0.0))
+            bond_count = int(md_work.get("bond_count", 0))
+            bead_count = int(md_work.get("bead_count", 0))
         rows.append(
             {
                 "n": n,
@@ -271,6 +307,10 @@ def step5_runtime_hook_profile(runtime_hook_cmd: str | None = None, require_runt
                 "peak_vram_bytes": peak_vram,
                 "current_vram_bytes": current_vram,
                 "host_copy_bytes": host_copy_bytes,
+                "work_model": work_model,
+                "work_scalar": work_scalar,
+                "bond_count": bond_count,
+                "bead_count": bead_count,
             }
         )
 

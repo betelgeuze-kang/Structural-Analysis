@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-25T23:59:00+09:00",
+  "manifest_id": "authority_measured_catalog_cards",
+  "scope": "Compact viewer-ready authority/measured benchmark cards derived from local batch, lane, and viewer manifests only.",
+  "source_files": [
+    "implementation/phase1/release/benchmark_expansion/authority_measured_batch.json",
+    "implementation/phase1/release/benchmark_expansion/authority_measured_lane.json",
+    "implementation/phase1/release/visualization/structural_optimization_viewer.json"
+  ],
+  "lane_buckets": {
+    "green_now": {
+      "lane_badge": "GREEN NOW",
+      "lane_label": "Authority / Measured Green Now",
+      "description": "지금 바로 viewer surfacing에 올릴 수 있는 local-evidence-strong tracks. Measured building + wind mapping diversity are already locally evidenced.",
+      "track_ids": [
+        "atwood",
+        "tpu_wind"
+      ]
+    },
+    "yellow_next_ingest": {
+      "lane_badge": "YELLOW NEXT-INGEST",
+      "lane_label": "Authority / Measured Yellow Next-Ingest",
+      "description": "로컬 등록이나 materialization은 있으나, benchmark fail 또는 ingest pending이라 다음 intake/work-up이 먼저 필요한 tracks.",
+      "track_ids": [
+        "kw51",
+        "usgs_nsmp"
+      ]
+    }
+  },
+  "cards": [
+    {
+      "track_id": "atwood",
+      "title": "Atwood High-Rise SHM",
+      "lane_bucket": "green_now",
+      "lane_badge": "GREEN NOW",
+      "status_badge": "BENCHMARKED HOLDOUT",
+      "readiness_label": "benchmarked_measured_holdout",
+      "summary_ko_en": "계측 기반 고층 holdout이 이미 KPI와 noise convergence evidence를 갖춘 상태입니다. A measured high-rise holdout with local KPI and convergence evidence already in place.",
+      "strongest_local_evidence_file": "implementation/phase1/phase3_megastructure_pipeline_report.mgt_smoke2.json",
+      "why_now": "MIDAS 건물 편향을 가장 빠르게 줄일 수 있는 로컬 최강 measured building track입니다.",
+      "next_step": "Atwood measured cases를 다시 materialize하고 KPI contract stub를 최신 기준으로 한 번 더 고정합니다.",
+      "has_local_materialization": true,
+      "has_local_benchmark_or_execution_evidence": true,
+      "direct_model_available": false,
+      "optimization_ready": true,
+      "suggested_viewer_entry_href": "entries/megastructure_zenodo_atwood_highrise_shm_2025.html"
+    },
+    {
+      "track_id": "tpu_wind",
+      "title": "TPU Wind Pressure And Force",
+      "lane_bucket": "green_now",
+      "lane_badge": "GREEN NOW",
+      "status_badge": "EXECUTION COMPLETE",
+      "readiness_label": "materialized_and_execution_complete_for_mapping",
+      "summary_ko_en": "풍동 raw mapping이 isolated와 interference 두 케이스로 이미 실행 완료된 상태입니다. Raw wind mapping is already executed locally for both isolated and interference cases.",
+      "strongest_local_evidence_file": "implementation/phase1/experiments/by_test/nightly_release_gate/20260322T155138Z/artifacts/external_benchmark_execution_status_manifest.json",
+      "why_now": "authority/measured lane 안에서 wind diversity를 바로 늘릴 수 있는 유일한 green track입니다.",
+      "next_step": "TPU wind raw mapping 결과를 유지한 채 viewer-facing benchmark wording과 asset linkage를 더 명확히 정리합니다.",
+      "has_local_materialization": true,
+      "has_local_benchmark_or_execution_evidence": true,
+      "direct_model_available": false,
+      "optimization_ready": false,
+      "suggested_viewer_entry_href": "entries/megastructure_tpu_highrise_wind_pressure_and_force.html"
+    },
+    {
+      "track_id": "kw51",
+      "title": "KW51 Railway Bridge Monitoring",
+      "lane_bucket": "yellow_next_ingest",
+      "lane_badge": "YELLOW NEXT-INGEST",
+      "status_badge": "MATERIALIZED BUT FAILING",
+      "readiness_label": "materialized_but_benchmark_failing",
+      "summary_ko_en": "브리지 계측 케이스는 이미 로컬에 있으나 KPI benchmark가 아직 실패 중입니다. The bridge-response cases are locally materialized, but the current KPI benchmark still fails.",
+      "strongest_local_evidence_file": "implementation/phase1/hf_benchmark_report.kw51_railway_bridge.json",
+      "why_now": "건물 편중을 깨는 infrastructure-scale measured holdout이라 버리기엔 아깝고, 다음 ingest 우선순위가 높습니다.",
+      "next_step": "KW51 case family를 rematerialize하고 failing KPI 원인을 정리한 뒤 yellow에서 green으로 올립니다.",
+      "has_local_materialization": true,
+      "has_local_benchmark_or_execution_evidence": true,
+      "direct_model_available": false,
+      "optimization_ready": false,
+      "suggested_viewer_entry_href": "entries/megastructure_zenodo_kw51_railway_bridge_monitoring_2025.html"
+    },
+    {
+      "track_id": "usgs_nsmp",
+      "title": "USGS NSMP Structural Arrays",
+      "lane_bucket": "yellow_next_ingest",
+      "lane_badge": "YELLOW NEXT-INGEST",
+      "status_badge": "REGISTERED ONLY",
+      "readiness_label": "registered_only_adapter_pending",
+      "summary_ko_en": "현재는 catalog와 viewer placeholder만 있는 등록 단계입니다. Today it is still a registered-only structural-array track with no local ingest package yet.",
+      "strongest_local_evidence_file": "implementation/phase1/release/visualization/entries/megastructure_usgs_nsmp_structural_arrays.json",
+      "why_now": "Atwood 이후 measured building diversity를 넓힐 가장 좋은 authority-source 후보라 next-ingest lane에 묶을 가치가 큽니다.",
+      "next_step": "USGS source drop을 로컬 ingest 경로에 연결하고 first materialization + benchmark contract를 여는 것이 우선입니다.",
+      "has_local_materialization": false,
+      "has_local_benchmark_or_execution_evidence": false,
+      "direct_model_available": false,
+      "optimization_ready": false,
+      "suggested_viewer_entry_href": "entries/megastructure_usgs_nsmp_structural_arrays.html"
+    }
+  ]
+}

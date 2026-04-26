@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-03T13:46:34.978921+00:00",
+  "report_family": "opstool_direct_case_execution",
+  "contract_pass": true,
+  "reason_code": "DIRECT_BATCH_CASE_EXECUTED",
+  "summary": {
+    "case_id": "opstool_606m_megatall_model-00027",
+    "topology_type": "truss",
+    "hazard_type": "seismic",
+    "split": "train",
+    "load_scale": 1.07846,
+    "residual_norm": 0.04931904514427633,
+    "metric_source": "open_data_measurement",
+    "drift_hf": 0.007934033333333335,
+    "base_shear_hf_kN": 215.44033251999997,
+    "mode_shape_mac_lf": 0.9884490287496119,
+    "buckling_factor_hf": 3.798333853
+  },
+  "metrics": {
+    "drift_ratio_pct": {
+      "hf": 0.007934033333333335,
+      "lf": 0.008392262287998097
+    },
+    "base_shear_kN": {
+      "hf": 215.44033251999997,
+      "lf": 208.59683353044053
+    },
+    "mode_shape_mac": {
+      "hf": 0.9999999999999998,
+      "lf": 0.9884490287496119
+    },
+    "buckling_factor": {
+      "hf": 3.798333853,
+      "lf": 3.662323073080328
+    },
+    "equilibrium_residual": {
+      "hf": 0.04931904514427633,
+      "lf": 0.06549040489481939
+    }
+  },
+  "source_row": {
+    "case_id": "opstool_606m_megatall_model-00027",
+    "split": "train",
+    "ood_tag": "in_distribution",
+    "topology_type": "truss",
+    "hazard_type": "seismic",
+    "load_scale": 1.07846,
+    "residual_norm": 0.04931904514427633,
+    "metrics": {
+      "drift_ratio_pct": {
+        "hf": 0.007934033333333335,
+        "lf": 0.008392262287998097
+      },
+      "base_shear_kN": {
+        "hf": 215.44033251999997,
+        "lf": 208.59683353044053
+      },
+      "mode_shape_mac": {
+        "hf": 0.9999999999999998,
+        "lf": 0.9884490287496119
+      },
+      "buckling_factor": {
+        "hf": 3.798333853,
+        "lf": 3.662323073080328
+      },
+      "equilibrium_residual": {
+        "hf": 0.04931904514427633,
+        "lf": 0.06549040489481939
+      }
+    },
+    "metric_source": "open_data_measurement",
+    "source_member": "implementation/phase1/open_data/megastructure/field_sensor_record.csv",
+    "hf_source": {
+      "provider": "open_data_measurement",
+      "generator": "build_cases_from_megastructure_open.py"
+    }
+  }
+}

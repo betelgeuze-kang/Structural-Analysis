@@ -1,0 +1,23 @@
+{
+  "byte_count": 1993,
+  "collection_policy": "local_first_manual_attach",
+  "content_kind": "ifc_structural_subset",
+  "curated_local_ifc_reference": "implementation/phase1/open_data/korea/curated/ifc_public_award_reference_2022.ifc",
+  "curated_local_ifc_required": true,
+  "curated_local_ifc_status": "attached",
+  "download_mode": "local_copy",
+  "exact_topology_candidate": true,
+  "format": "ifc",
+  "license_hint": "bim_award_archive_check_terms",
+  "native_writeback_candidate": false,
+  "promotion_hint": "exact_topology_candidate",
+  "provenance_url": "https://event.buildingsmart.or.kr/Awards/2022",
+  "reference_scheme": "local_path",
+  "resolved_reference": "implementation/phase1/open_data/korea/curated/ifc_public_award_reference_2022.ifc",
+  "retrieved_at_utc": "2026-04-08T10:41:49.841878+00:00",
+  "schema_version": "1.0",
+  "seed_basis": "official buildingSMART Korea awards seed with manually attached local curated IFC for exact-topology reconstruction",
+  "seed_priority": "P0",
+  "sha256": "8f78fdacb7c685a0c040f6c14799f9acbb974099c0752885fa5d49bf2ccc8486",
+  "source_id": "ifc_public_award_reference_2022"
+}

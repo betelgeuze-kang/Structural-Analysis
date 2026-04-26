@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "job_id": "native-authoring-workspace-export",
+  "generated_at": "2026-04-19T09:21:59.188852+00:00",
+  "snapshot_id": "native-authoring-workspace-export__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/native_authoring_workspace_summary.json",
+      "label": "native_authoring_workspace_summary.json",
+      "sha256": "997e6e0e4a130b4078dd6a64ce8af7d34263df8f212193b9f5f92fe9b5975b58",
+      "bytes": 6722
+    },
+    {
+      "path": "implementation/phase1/release/authoring/native_authoring_workspace_draft.json",
+      "label": "native_authoring_workspace_draft.json",
+      "sha256": "0078f2e1bb2b486c0c94a8083f8d4a38f4b5173b9436e7fcdf53602974e7ce6a",
+      "bytes": 981
+    }
+  ],
+  "summary": {
+    "artifact_count": 2
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "job_id": "authoring::native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200::project-registry",
+  "generated_at": "2026-04-21T12:42:19.409354+00:00",
+  "snapshot_id": "authoring_native-authoring-deep-transfer-basement-06s-04b-044h-06lp-steel-h-600x200_project-registry__snapshot",
+  "artifact_rows": [
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_registry.json",
+      "label": "native_authoring_project_registry.json",
+      "sha256": "786a0313720f0b0c574298f9fa9f81176930177888c831f45ab8b1f5c0d1348f",
+      "bytes": 10348
+    },
+    {
+      "path": "implementation/phase1/release/authoring/portfolio/deep_transfer_basement/native_authoring_project_package.zip",
+      "label": "native_authoring_project_package.zip",
+      "sha256": "b91e4ea9c8877706eac8d6f79517a56053203133aabace43476b9c95cb1f4a30",
+      "bytes": 104985
+    },
+    {
+      "path": "implementation/phase1/release/signing/native_authoring_portfolio/deep_transfer_basement/native_authoring_project_registry_ed25519.pub.pem",
+      "label": "native_authoring_project_registry_ed25519.pub.pem",
+      "sha256": "4a7f2df72ee4a5e5c0b9660dd174b2d9bcf89b49f552fb464de8f8f25a49cf44",
+      "bytes": 113
+    },
+    {
+      "path": "implementation/phase1/release/signing/native_authoring_portfolio/deep_transfer_basement/native_authoring_project_registry.signature.b64",
+      "label": "native_authoring_project_registry.signature.b64",
+      "sha256": "acb02e34a54d7bdd287a68a3fceb5b221eb901429aa41eb26eb3b17812dc9123",
+      "bytes": 89
+    }
+  ],
+  "summary": {
+    "artifact_count": 4
+  }
+}

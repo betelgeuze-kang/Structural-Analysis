@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-materialize-tpu-hffb-seed",
+  "generated_at": "2026-03-19T13:05:16.888207+00:00",
+  "contract_pass": false,
+  "reason_code": "ERR_FETCH_STEP",
+  "reason": "TPU MAT fetch step failed.",
+  "inputs": {
+    "seed_id": "tpu_hffb_isolated_highrise_seed_01",
+    "out_dir": "implementation/phase1/open_data/wind/tpu/case_1202_probe",
+    "case_id": "1202",
+    "case_page_url": "",
+    "case_page_html": "",
+    "mat_url": "",
+    "mat_index": 0,
+    "dataset_key": "pressure",
+    "time_key": "time"
+  },
+  "steps": {
+    "fetch": {
+      "returncode": 1,
+      "stdout": "Wrote TPU fetch manifest: implementation/phase1/open_data/wind/tpu/case_1202_probe/tpu_hffb_isolated_highrise_seed_01.fetch_manifest.json\nWrote TPU fetch report: implementation/phase1/open_data/wind/tpu/case_1202_probe/tpu_hffb_isolated_highrise_seed_01.fetch_report.json\n",
+      "stderr": "",
+      "report": "implementation/phase1/open_data/wind/tpu/case_1202_probe/tpu_hffb_isolated_highrise_seed_01.fetch_report.json"
+    },
+    "convert": {
+      "returncode": null,
+      "stdout": "",
+      "stderr": "",
+      "report": "implementation/phase1/open_data/wind/tpu/case_1202_probe/tpu_hffb_isolated_highrise_seed_01.convert_report.json"
+    },
+    "prepare": {
+      "returncode": null,
+      "stdout": "",
+      "stderr": "",
+      "report": "implementation/phase1/open_data/wind/tpu/case_1202_probe/tpu_hffb_isolated_highrise_seed_01.prepare_report.json"
+    }
+  },
+  "artifacts": {
+    "fetched_mat": "",
+    "out_csv": "",
+    "out_manifest": ""
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-track-lf-solver",
+  "generated_at": "2026-03-14T14:33:18.001363+00:00",
+  "inputs": {
+    "node_count": 201,
+    "length_m": 25.0,
+    "bending_stiffness_n_m2": 6500000.0,
+    "shear_stiffness_n": 245000000.0,
+    "point_force_n": 100000.0,
+    "max_relative_error": 0.05,
+    "engine_requested": "rust",
+    "rust_bridge_available": true,
+    "rust_bridge_import_error": null
+  },
+  "benchmarks": {
+    "euler": {
+      "theory": "euler",
+      "backend": "rust_ffi_kernel",
+      "converged": true,
+      "iterations": 2,
+      "residual_inf": 0.0,
+      "w_mid_m": 5.00801282051282,
+      "analytic_w_mid_m": 5.00801282051282,
+      "relative_error": 0.0,
+      "elapsed_seconds": 1.3035900909999327,
+      "iterations_per_second": 1.534224610794547,
+      "node_updates_per_second": 154.18957338485197,
+      "response_storage": "dlpack_external+inline_summary",
+      "response_binary_consumer": "dlpack_zero_copy_primary",
+      "response_device_consumer": "dlpack_zero_copy",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "runtime_backend": "rocm_torch_hip_mainloop",
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "hip_kernel_invocation_count": 4,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "solver_array_bytes": 3216
+      }
+    },
+    "timoshenko": {
+      "theory": "timoshenko",
+      "backend": "rust_ffi_kernel",
+      "converged": true,
+      "iterations": 2,
+      "residual_inf": 0.0,
+      "w_mid_m": 5.010563840920984,
+      "analytic_w_mid_m": 5.010563840920984,
+      "relative_error": 0.0,
+      "elapsed_seconds": 0.0007204519999959302,
+      "iterations_per_second": 2776.0350446820853,
+      "node_updates_per_second": 278991.5219905496,
+      "response_storage": "dlpack_external+inline_summary",
+      "response_binary_consumer": "dlpack_zero_copy_primary",
+      "response_device_consumer": "dlpack_zero_copy",
+      "runtime": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "runtime_backend": "rocm_torch_hip_mainloop",
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "hip_kernel_invocation_count": 4,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "solver_array_bytes": 3216
+      }
+    }
+  },
+  "checks": {
+    "all_converged": true,
+    "accuracy_pass": true,
+    "rust_kernel_used": true,
+    "o_n_operator": true,
+    "matrix_free_euler": true
+  },
+  "performance_profile": {
+    "euler_elapsed_seconds": 1.3035900909999327,
+    "timoshenko_elapsed_seconds": 0.0007204519999959302,
+    "euler_node_updates_per_second": 154.18957338485197,
+    "timoshenko_node_updates_per_second": 278991.5219905496
+  },
+  "summary": {
+    "response_binary_consumer": "dlpack_zero_copy_primary",
+    "response_storage": "dlpack_external+inline_summary"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "track LF solver converged and benchmark accuracy is within threshold"
+}

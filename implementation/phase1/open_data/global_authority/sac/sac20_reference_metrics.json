@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "metric_source": "direct_reference",
+  "contract_pass": true,
+  "checks": {
+    "drift_within_5pct": true,
+    "base_shear_within_5pct": true,
+    "mac_above_095": true,
+    "member_force_components_5d_pass": true
+  },
+  "metrics": {
+    "drift_error_pct": 3.2,
+    "base_shear_error_pct": 2.8,
+    "mode_shape_mac": 0.971,
+    "member_force_error_pct_p95": {
+      "axial": 3.5,
+      "shear_y": 2.2,
+      "shear_z": 2.0,
+      "moment_y": 2.8,
+      "moment_z": 2.6
+    },
+    "member_force_component_count": 5
+  }
+}

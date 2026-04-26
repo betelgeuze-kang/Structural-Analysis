@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase3-opensees-topology-parser",
+  "generated_at": "2026-04-11T12:26:15.387800+00:00",
+  "inputs": {
+    "model": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+    "edges_out": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_edges.json",
+    "csr_out": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_csr.npz",
+    "report_out": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_topology_report.json",
+    "forbid_synthetic_source": true,
+    "require_real_topology": true,
+    "require_shell_beam_mix": false,
+    "min_nodes": 100,
+    "min_edge_node_ratio": 0.4,
+    "min_degree_entropy": 0.1,
+    "min_element_type_count": 1,
+    "min_largest_component_ratio": 0.02
+  },
+  "source_provenance": {
+    "source_class": "opensees_text",
+    "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+    "source_sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80"
+  },
+  "parse_counters": {
+    "ignored": 1103,
+    "node": 452,
+    "element": 214,
+    "constraint": 40
+  },
+  "metrics": {
+    "node_count": 420,
+    "edge_count_undirected": 254,
+    "edge_node_ratio": 0.6047619047619047,
+    "degree_entropy": 0.370354136784691,
+    "largest_component_ratio": 0.02619047619047619,
+    "mean_degree": 1.2095238095238094,
+    "max_degree": 7,
+    "element_type_count": 5,
+    "shell_element_count": 0,
+    "beam_element_count": 166,
+    "element_type_histogram": {
+      "elasticBeamColumn": 142,
+      "corotTruss": 32,
+      "ModElasticBeam2d": 24,
+      "truss": 16,
+      "constraint_equalDOF": 40
+    },
+    "element_class_histogram": {
+      "shell": 0,
+      "beam": 166,
+      "brace": 48,
+      "other": 40
+    }
+  },
+  "artifacts": {
+    "edges_json": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_edges.json",
+    "csr_npz": "implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_csr.npz"
+  },
+  "checks": {
+    "source_is_opensees_text": true,
+    "source_manifest_pass": true,
+    "synthetic_source_detected": false,
+    "min_nodes_pass": true,
+    "edge_node_ratio_pass": true,
+    "degree_entropy_pass": true,
+    "element_type_count_pass": true,
+    "largest_component_pass": true,
+    "shell_beam_mix_pass": false,
+    "real_topology_pass": true
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "opensees text parsed and topology gate passed"
+}

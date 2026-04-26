@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-tpu-case-mat",
+  "generated_at": "2026-03-19T13:20:12.487321+00:00",
+  "source_name": "TPU Aerodynamic Database - High-rise Buildings with Rectangular/Square Plan > T312_4",
+  "source_url": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=616",
+  "case_id": "616",
+  "mat_url": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/T312_4/time_series_of_point_wind_pressure_0.mat",
+  "mat_source_resolved": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/T312_4/time_series_of_point_wind_pressure_0.mat",
+  "real_source": true,
+  "source_origin_class": "official_external_benchmark",
+  "data_path": "implementation/phase1/open_data/wind/tpu/probes/case_616.mat",
+  "sha256": "1e9f9f19994d302d46c7c4f4cc13f9f428949e4c48d892e85568d6713bf9870b",
+  "size_bytes": 23190532,
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU case page resolved and MAT file fetched successfully."
+}

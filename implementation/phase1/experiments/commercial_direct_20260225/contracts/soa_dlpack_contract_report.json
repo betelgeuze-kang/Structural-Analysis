@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-soa-dlpack-contract",
+  "generated_at": "2026-02-25T14:30:19.955376+00:00",
+  "interface_version": "1.0.0",
+  "layout": "SoA",
+  "device": "cpu",
+  "dlpack_capsule_name": "dltensor",
+  "zero_copy_expected": true,
+  "layout_pass": true,
+  "reason_code": "PASS",
+  "tensor_fields": [
+    {
+      "name": "x",
+      "dtype": "float32",
+      "contiguous": true
+    },
+    {
+      "name": "y",
+      "dtype": "float32",
+      "contiguous": true
+    },
+    {
+      "name": "z",
+      "dtype": "float32",
+      "contiguous": true
+    },
+    {
+      "name": "mass",
+      "dtype": "float32",
+      "contiguous": true
+    },
+    {
+      "name": "support_mask",
+      "dtype": "uint8",
+      "contiguous": true
+    }
+  ]
+}

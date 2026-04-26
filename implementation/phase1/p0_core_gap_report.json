@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-p0-core-gap-pipeline",
+  "generated_at": "2026-02-27T13:46:09.939646+00:00",
+  "inputs": {
+    "probe_out": "implementation/phase1/zero_copy_real_probe_report_strict.json",
+    "track_out": "implementation/phase1/track_lf_solver_report.json",
+    "perf_out": "implementation/phase1/p0_engine_perf_report.json",
+    "accuracy_out": "implementation/phase1/real_accuracy_validation_report.json",
+    "producer_cmd": "/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "require_rust_hip": false,
+    "allow_cpu_required": true,
+    "profile_require_rust_faster": false,
+    "epochs": 120,
+    "branches": 10,
+    "top_k": 3,
+    "target_split": "test",
+    "min_public_hf_cases": 3
+  },
+  "checks": {
+    "p0_1_rust_engine_pass": true,
+    "p0_1_engine_profile_pass": true,
+    "p0_1_profile_reason_code": "PASS",
+    "p0_2_public_benchmark_pass": true,
+    "p0_2_reason_code": "PASS"
+  },
+  "artifacts": {
+    "probe": "implementation/phase1/zero_copy_real_probe_report_strict.json",
+    "track": "implementation/phase1/track_lf_solver_report.json",
+    "perf": "implementation/phase1/p0_engine_perf_report.json",
+    "accuracy": "implementation/phase1/real_accuracy_validation_report.json"
+  },
+  "steps": [
+    {
+      "step": "p0_1_zero_copy_probe",
+      "command": "/usr/bin/python3 implementation/phase1/zero_copy_real_probe.py --producer-cmd '/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py' --out implementation/phase1/zero_copy_real_probe_report_strict.json --allow-cpu-required",
+      "seconds": 0.10526680946350098,
+      "ok": true,
+      "stdout_tail": "Wrote zero-copy real probe report: implementation/phase1/zero_copy_real_probe_report_strict.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "step": "p0_1_track_rust_kernel",
+      "command": "/usr/bin/python3 implementation/phase1/track_lf_solver.py --engine rust --out implementation/phase1/track_lf_solver_report.json",
+      "seconds": 1.0382983684539795,
+      "ok": true,
+      "stdout_tail": "Wrote track LF solver report: implementation/phase1/track_lf_solver_report.json\n",
+      "stderr_tail": "{\"event\": \"track_lf.start\", \"inputs\": {\"bending_stiffness\": 6500000.0, \"engine\": \"rust\", \"length_m\": 25.0, \"max_relative_error\": 0.05, \"node_count\": 201, \"out\": \"implementation/phase1/track_lf_solver_report.json\", \"point_force_n\": 100000.0, \"shear_stiffness\": 245000000.0}}\n{\"contract_pass\": true, \"event\": \"track_lf.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "p0_1_engine_perf_profile",
+      "command": "/usr/bin/python3 implementation/phase1/profile_p0_engine_path.py --producer-cmd '/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py' --probe-out implementation/phase1/zero_copy_real_probe_report_strict.json --track-rust-out implementation/phase1/track_lf_solver_report.json --out implementation/phase1/p0_engine_perf_report.json --allow-cpu-required",
+      "seconds": 4.229142904281616,
+      "ok": true,
+      "stdout_tail": "Wrote P0 engine perf report: implementation/phase1/p0_engine_perf_report.json\n",
+      "stderr_tail": "{\"event\": \"p0_profile.start\", \"inputs\": {\"allow_cpu_required\": true, \"bending_stiffness\": 6500000.0, \"length_m\": 25.0, \"max_relative_error\": 0.05, \"node_count\": 201, \"out\": \"implementation/phase1/p0_engine_perf_report.json\", \"point_force_n\": 100000.0, \"producer_cmd\": \"/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py\", \"require_rust_faster\": false, \"require_rust_hip\": false, \"shear_stiffness\": 245000000.0}}\n{\"contract_pass\": true, \"event\": \"p0_profile.completed\", \"reason_code\": \"PASS\"}\n"
+    },
+    {
+      "step": "p0_2_real_accuracy_public_hf",
+      "command": "/usr/bin/python3 implementation/phase1/run_real_accuracy_validation.py --summary-out implementation/phase1/real_accuracy_validation_report.json --epochs 120 --branches 10 --top-k 3 --target-split test --min-public-hf-cases 3",
+      "seconds": 59.77821087837219,
+      "ok": true,
+      "stdout_tail": "Wrote real accuracy validation report: implementation/phase1/real_accuracy_validation_report.json\n",
+      "stderr_tail": "{\"event\": \"real_accuracy.start\", \"inputs\": {\"accepted_metric_sources\": \"engine_export_direct,commercial_solver_export,open_data_measurement\", \"benchmark_out\": \"implementation/phase1/hf_benchmark_report.rwth_zenodo.json\", \"branches\": 10, \"cases_out\": \"implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json\", \"comparison_out\": \"implementation/phase1/topk_comparison_experiment_report.rwth_zenodo.json\", \"effective_mass_kg\": 250000.0, \"epochs\": 120, \"epsilon\": 0.11, \"lr\": 0.055, \"metric_source\": \"open_data_measurement\", \"min_public_hf_cases\": 3, \"seed\": 23, \"seeds\": \"11,17,23,31,47\", \"story_height_mm\": 3000.0, \"suite_out\": \"implementation/phase1/topk_precision_suite_report.rwth_zenodo.json\", \"summary_out\": \"implementation/phase1/real_accuracy_validation_report.json\", \"target_split\": \"test\", \"temperature\": 0.32, \"top_k\": 3, \"zip\": \"implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip\"}}\n{\"event\": \"real_accuracy.completed\", \"overall_pass\": true, \"reason_code\": \"PASS\"}\n"
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "p0 core gaps passed (rust engine + public hf benchmark)"
+}

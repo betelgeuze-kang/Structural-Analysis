@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-01T11:32:38.764524+00:00",
+  "test_name": "noise_convergence_gate",
+  "run_dir": "implementation/phase1/experiments/by_test/noise_convergence_gate/20260301T113238Z",
+  "mode": "copy",
+  "archived_count": 2,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/noise_convergence.json",
+      "dst": "implementation/phase1/experiments/by_test/noise_convergence_gate/20260301T113238Z/artifacts/noise_convergence.json",
+      "kind": "file",
+      "bytes": 7930,
+      "sha256": "850f4fb742a5d247f0590ff9d97392f3e7b6a435ac6c2c0fa7679ca0a5fa5f9d",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+      "dst": "implementation/phase1/experiments/by_test/noise_convergence_gate/20260301T113238Z/artifacts/commercial_benchmark_cases.from_csv.json",
+      "kind": "file",
+      "bytes": 9185,
+      "sha256": "603107c0175687ed8ea7f4bda004754ee2096214b699c799c508c9dcb14fb1ff",
+      "mode": "copy"
+    }
+  ]
+}

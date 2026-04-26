@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-experiment-artifact-archive",
+  "generated_at": "2026-03-01T12:46:18.934200+00:00",
+  "test_name": "nonlinear_frame_engine_validation",
+  "run_dir": "implementation/phase1/experiments/by_test/nonlinear_frame_engine_validation/20260301T124618Z",
+  "mode": "copy",
+  "archived_count": 2,
+  "artifacts": [
+    {
+      "src": "implementation/phase1/nonlinear_frame_engine_report.json",
+      "dst": "implementation/phase1/experiments/by_test/nonlinear_frame_engine_validation/20260301T124618Z/artifacts/nonlinear_frame_engine_report.json",
+      "kind": "file",
+      "bytes": 3992,
+      "sha256": "16170180dd83eb3574b1f29a330e7dfacb8467347ce42f2f659883a49f16d74a",
+      "mode": "copy"
+    },
+    {
+      "src": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+      "dst": "implementation/phase1/experiments/by_test/nonlinear_frame_engine_validation/20260301T124618Z/artifacts/commercial_benchmark_cases.from_csv.json",
+      "kind": "file",
+      "bytes": 10464,
+      "sha256": "a977ada423f8e83a462b302969c28ac1398101e81915f2684709dd995f16325d",
+      "mode": "copy"
+    }
+  ]
+}

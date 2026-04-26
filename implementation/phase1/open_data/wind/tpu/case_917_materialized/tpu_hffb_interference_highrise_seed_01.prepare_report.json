@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-prepare-tpu-hffb-seed",
+  "generated_at": "2026-03-19T13:28:17.623899+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU HFFB seed manifest prepared from raw CSV input.",
+  "inputs": {
+    "seed_manifest": "implementation/phase1/open_data/wind/tpu_hffb_seed_manifest.json",
+    "seed_id": "tpu_hffb_interference_highrise_seed_01",
+    "raw_wind": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+    "source_url": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=917",
+    "source_name": "TPU Aerodynamic Database - Two Adjacent High-rise Buildings with Square Plan > P114_A114_case01"
+  },
+  "summary": {
+    "holdout_split": "holdout",
+    "case_role": "neighbor_interference_highrise",
+    "row_count": 5858,
+    "signal_column_count": 252,
+    "dt_s": 0.00128040973111343,
+    "duration_hours": 0.0020831554986484565
+  },
+  "artifacts": {
+    "out_manifest": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.source_manifest.json"
+  }
+}

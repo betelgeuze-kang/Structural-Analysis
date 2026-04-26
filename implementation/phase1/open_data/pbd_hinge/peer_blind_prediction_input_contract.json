@@ -1,0 +1,250 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-16T14:46:34.346452+00:00",
+  "source_family": "edefense_peer_blind_prediction",
+  "seed_id": "edefense_peer_blind_prediction_seed_01",
+  "benchmark_track": "blind_prediction_dynamic_holdout",
+  "source_manifest": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.source_manifest.json",
+  "bundle_report": "implementation/phase1/open_data/pbd_hinge/peer_blind_prediction_public_input_bundle_report.json",
+  "measured_response_status": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.measured_response_landing_status.json",
+  "measured_response_landing_manifest": {
+    "present": true,
+    "contract_pass": true,
+    "landing_state": "recorded",
+    "reason_code": "PASS",
+    "summary_line": "E-Defense/PEER measured-response landing manifest: RECORDED | matched=1 | csv=0 | accel_candidates=0 | drift_candidates=0 | sensors=0",
+    "matched_file_count": 1,
+    "csv_file_count": 0
+  },
+  "input_root": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01",
+  "contract_pass": true,
+  "reason_code": "PASS_INPUT_CONTRACT_READY",
+  "reason": "Public blind-prediction input contract is complete and ready for benchmark-case normalization.",
+  "summary_line": "PEER blind input contract: PASS | gm_cases=10 | groups=4/4 | measured_response=ready | landing_manifest=recorded",
+  "summary": {
+    "geometry_doc_count": 6,
+    "material_sheet_count": 5,
+    "gm_name_count": 10,
+    "gm_sequence_step_count": 12,
+    "required_group_pass_count": 4,
+    "required_group_count": 4,
+    "landing_manifest_contract_pass": true,
+    "landing_manifest_matched_file_count": 1,
+    "landing_manifest_csv_file_count": 0
+  },
+  "readiness": {
+    "public_input_ready": true,
+    "measured_response_ready": true,
+    "measured_response_landing_manifest_ready": true,
+    "normalization_ready": true,
+    "benchmark_case_ready": true,
+    "compare_report_ready": true,
+    "viewer_entry_ready": true
+  },
+  "geometry_package": {
+    "doc_count": 6,
+    "docs": [
+      "Bent-Cap.pdf",
+      "Columns.pdf",
+      "Construction_Drawings.pdf",
+      "Foundation.pdf",
+      "Posttensiondetails.pdf",
+      "Weight_Blocks.pdf"
+    ],
+    "present": true
+  },
+  "material_package": {
+    "bundle_present": true,
+    "bundle_files": [
+      "Grout_datasheet.pdf",
+      "Materials.xlsx"
+    ],
+    "sheet_names": [
+      "Concrete",
+      "A706_Column-Steel",
+      "A722_PT-Steel",
+      "A53B_Shell-Steel",
+      "Grout"
+    ]
+  },
+  "excitation_package": {
+    "gm_workbook_present": true,
+    "gm_name_count": 10,
+    "gm_case_labels": [
+      "Random Noise",
+      "GM1",
+      "GM2",
+      "GM3",
+      "GM4",
+      "GM5",
+      "GM6",
+      "GM7",
+      "GM8",
+      "GM9"
+    ],
+    "sequence_labels": [
+      "Random Noise",
+      "GM1",
+      "Random Noise",
+      "GM2",
+      "Random Noise",
+      "GM3",
+      "Random Noise",
+      "GM4",
+      "Random Noise",
+      "GM5",
+      "Random Noise",
+      "GM6"
+    ]
+  },
+  "measured_response_package": {
+    "present": true,
+    "expected_patterns": [
+      "*response*.csv",
+      "*measurement*.csv",
+      "*sensor*.csv",
+      "*drift*.csv",
+      "*accel*.csv",
+      "*response*.xlsx",
+      "*measurement*.xlsx",
+      "*sensor*.xlsx",
+      "*drift*.xlsx",
+      "*accel*.xlsx",
+      "*experimentalresults*.xlsx",
+      "*results*.xlsx"
+    ],
+    "matched_files": [
+      "Experimentalresults.xlsx"
+    ],
+    "landing_manifest_summary_line": "E-Defense/PEER measured-response landing manifest: RECORDED | matched=1 | csv=0 | accel_candidates=0 | drift_candidates=0 | sensors=0",
+    "landing_manifest_matched_file_count": 1,
+    "landing_manifest_present": true,
+    "landing_manifest_contract_pass": true
+  },
+  "expected_groups": {
+    "geometry_model": {
+      "required": true,
+      "description": "Specimen or frame geometry / model definition files.",
+      "patterns": [
+        "*geometry*.json",
+        "*geometry*.csv",
+        "*.tcl",
+        "*.inp",
+        "*.dat",
+        "*.mgt",
+        "*construction*drawings*.pdf",
+        "*columns*.pdf",
+        "*bent-cap*.pdf",
+        "*foundation*.pdf",
+        "*weight_blocks*.pdf"
+      ],
+      "matched_file_count": 5,
+      "matched_files": [
+        "Bent-Cap.pdf",
+        "Columns.pdf",
+        "Construction_Drawings.pdf",
+        "Foundation.pdf",
+        "Weight_Blocks.pdf"
+      ],
+      "present": true
+    },
+    "material_properties": {
+      "required": true,
+      "description": "Member, section, and constitutive property tables.",
+      "patterns": [
+        "*material*.json",
+        "*material*.csv",
+        "*section*.json",
+        "*section*.csv",
+        "*property*.csv",
+        "*materials.zip",
+        "*posttensiondetails*.pdf"
+      ],
+      "matched_file_count": 2,
+      "matched_files": [
+        "Materials.zip",
+        "Posttensiondetails.pdf"
+      ],
+      "present": true
+    },
+    "excitation_history": {
+      "required": true,
+      "description": "Input excitation or ground-motion histories used in the blind prediction task.",
+      "patterns": [
+        "*ground*motion*.csv",
+        "*excitation*.csv",
+        "*input*.csv",
+        "*accel*.csv",
+        "*.at2",
+        "*gms*.xlsx"
+      ],
+      "matched_file_count": 1,
+      "matched_files": [
+        "GMs.xlsx"
+      ],
+      "present": true
+    },
+    "measured_response": {
+      "required": true,
+      "description": "Measured response channels for compare/report/viewer validation.",
+      "patterns": [
+        "*response*.csv",
+        "*measurement*.csv",
+        "*sensor*.csv",
+        "*drift*.csv",
+        "*accel*.csv",
+        "*response*.xlsx",
+        "*measurement*.xlsx",
+        "*sensor*.xlsx",
+        "*drift*.xlsx",
+        "*accel*.xlsx",
+        "*experimentalresults*.xlsx",
+        "*results*.xlsx"
+      ],
+      "matched_file_count": 1,
+      "matched_files": [
+        "Experimentalresults.xlsx"
+      ],
+      "present": true
+    },
+    "reference_docs": {
+      "required": false,
+      "description": "Contest notes, benchmark instructions, or reference PDFs.",
+      "patterns": [
+        "*.pdf",
+        "*readme*.txt",
+        "*readme*.md"
+      ],
+      "matched_file_count": 9,
+      "matched_files": [
+        "Bent-Cap.pdf",
+        "Columns.pdf",
+        "Construction_Drawings.pdf",
+        "Foundation.pdf",
+        "Posttensiondetails.pdf",
+        "QA_blindprediction-1.pdf",
+        "Weight_Blocks.pdf",
+        "news_e-defense_blind_analysis_2009-article.pdf",
+        "webPEER-2015-01-Terzic-5.8.15.pdf"
+      ],
+      "present": true
+    }
+  },
+  "proposed_case_ids": [
+    "edefense_peer_blind_prediction_seed_01::random_noise",
+    "edefense_peer_blind_prediction_seed_01::gm1",
+    "edefense_peer_blind_prediction_seed_01::gm2",
+    "edefense_peer_blind_prediction_seed_01::gm3",
+    "edefense_peer_blind_prediction_seed_01::gm4",
+    "edefense_peer_blind_prediction_seed_01::gm5",
+    "edefense_peer_blind_prediction_seed_01::gm6",
+    "edefense_peer_blind_prediction_seed_01::gm7",
+    "edefense_peer_blind_prediction_seed_01::gm8",
+    "edefense_peer_blind_prediction_seed_01::gm9"
+  ],
+  "next_actions": [
+    "Measured response is present; proceed to benchmark-case normalization.",
+    "Normalize the public input family into blind-prediction benchmark_case scaffolds.",
+    "Build compare_report and viewer_entry artifacts once measured response is available."
+  ]
+}

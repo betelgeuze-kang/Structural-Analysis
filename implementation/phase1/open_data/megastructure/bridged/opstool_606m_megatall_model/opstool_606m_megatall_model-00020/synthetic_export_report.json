@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "summary": {
+    "direct_patch_change_count": 24,
+    "instruction_sidecar_change_count": 0,
+    "instruction_sidecar_audit_only_change_count": 0,
+    "audit_review_packet_count": 0,
+    "audit_review_queue_pending_count": 0,
+    "evidence_model": "synthetic_ndtha_story_family_overlay",
+    "mgt_export_delivery_boundary": "synthetic benchmark overlay / no release patch delivery",
+    "support_mode": "synthetic benchmark overlay",
+    "direct_patch_action_family_counts": {
+      "perimeter_frame": 9,
+      "beam_section": 8,
+      "connection_detailing": 7
+    },
+    "instruction_sidecar_audit_only_action_family_counts": {}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "contract_pass": true,
+  "source_kind": "panel_zone_joint_geometry_3d",
+  "rows": [
+    {
+      "member_id": "B401",
+      "joint_id": "J-401",
+      "panel_zone_id": "PZ-401"
+    }
+  ]
+}

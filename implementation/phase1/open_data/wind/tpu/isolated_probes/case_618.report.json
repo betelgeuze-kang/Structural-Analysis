@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-fetch-tpu-case-mat",
+  "generated_at": "2026-03-19T13:19:19.739501+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "TPU case page resolved and MAT file fetched successfully.",
+  "inputs": {
+    "case_id": "618",
+    "case_page_url": "",
+    "case_page_html": "",
+    "mat_url": "",
+    "mat_index": 0
+  },
+  "summary": {
+    "case_title": "TPU Aerodynamic Database - High-rise Buildings with Rectangular/Square Plan > T313_4",
+    "resolved_case_page": "https://db.wind.arch.t-kougei.ac.jp/aerodynamic/case-redirect/?case=618",
+    "mat_link_count": 21,
+    "candidate_mat_urls_head": [
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/T313_4/time_series_of_point_wind_pressure_0.mat",
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/T313_4/time_series_of_point_wind_pressure_5.mat",
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/T313_4/time_series_of_point_wind_pressure_10.mat",
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/T313_4/time_series_of_point_wind_pressure_15.mat",
+      "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/T313_4/time_series_of_point_wind_pressure_20.mat"
+    ],
+    "resolved_mat_url": "https://minio.wind.arch.t-kougei.ac.jp/web/media/case/T313_4/time_series_of_point_wind_pressure_0.mat",
+    "size_bytes": 36994413
+  },
+  "artifacts": {
+    "out_mat": "implementation/phase1/open_data/wind/tpu/isolated_probes/case_618.mat",
+    "source_manifest_out": "implementation/phase1/open_data/wind/tpu/isolated_probes/case_618.manifest.json"
+  }
+}

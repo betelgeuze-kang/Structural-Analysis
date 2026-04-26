@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "summary": {
+    "commercial_grade": "Synthetic Benchmark",
+    "deployment_model": "benchmark-derived response-conditioned 3d viewer",
+    "measured_chain_total_minutes": 0.0,
+    "measured_chain_selected_step_count": 24,
+    "mgt_export_delivery_boundary": "synthetic benchmark overlay / no release patch delivery",
+    "pbd_dynamic_hinge_refresh_ready": false,
+    "panel_zone_3d_clash_ready": false,
+    "foundation_optimization_ready": false,
+    "wind_tunnel_raw_mapping_ready": false,
+    "panel_zone_constructability_mode": "synthetic benchmark only",
+    "panel_zone_validation_boundary": "synthetic_geometry_only",
+    "panel_zone_internal_engine_complete": false,
+    "panel_zone_external_validation_pending": false,
+    "synthetic_source_case_id": "opstool_606m_megatall_model-00001",
+    "synthetic_total_height_m": 606.0,
+    "synthetic_story_count": 24
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-03-21T16:47:43.931522+00:00",
+  "task_id": "hinge::peer_spd_rc_column_rectangular_seed_01",
+  "phase": "component_hinge",
+  "benchmark_family": "peer_spd_column_hinge",
+  "submission_scope": "limited_external_benchmark",
+  "status": "in_progress",
+  "started_at": "2026-03-21T16:47:43.931522+00:00",
+  "input_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.hinge_fixture.json",
+  "source_origin_class": "",
+  "holdout_split": "train",
+  "execution_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+  "note": "kickoff started for first PEER SPD hinge benchmark",
+  "task": {
+    "task_id": "hinge::peer_spd_rc_column_rectangular_seed_01",
+    "phase": "component_hinge",
+    "benchmark_family": "peer_spd_column_hinge",
+    "submission_scope": "limited_external_benchmark",
+    "execution_status": "ready",
+    "input_path": "implementation/phase1/open_data/pbd_hinge/peer_spd_rc_column_rectangular_seed_01.hinge_fixture.json",
+    "specimen_id": "121",
+    "point_count": 1169,
+    "holdout_split": "train"
+  }
+}

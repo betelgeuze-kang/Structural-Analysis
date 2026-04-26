@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-04-01T13:48:03.457152+00:00",
+  "task_id": "hardest::nist_fema_progressive_collapse",
+  "phase": "hardest_case",
+  "benchmark_family": "progressive_collapse",
+  "submission_scope": "hardest_external_benchmark_program",
+  "status": "in_progress",
+  "started_at": "2026-04-01T13:48:03.457152+00:00",
+  "input_path": "implementation/phase1/nonlinear_pushover_stress_report.json",
+  "source_origin_class": "official_external_benchmark_fullcase",
+  "holdout_split": "",
+  "execution_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+  "note": "hardest external 10-case kickoff",
+  "task": {
+    "task_id": "hardest::nist_fema_progressive_collapse",
+    "case_id": "nist_fema_progressive_collapse",
+    "case_label": "NIST / FEMA Progressive Collapse",
+    "phase": "hardest_case",
+    "benchmark_family": "progressive_collapse",
+    "hazard_family": "local_damage_sequence",
+    "topology_family": "frame_column_removal",
+    "load_path_family": "path_dependent_collapse",
+    "submission_scope": "hardest_external_benchmark_program",
+    "execution_status": "ready",
+    "input_path": "implementation/phase1/nonlinear_pushover_stress_report.json",
+    "source_origin_class": "official_external_benchmark_fullcase",
+    "primary_report_path": "implementation/phase1/nonlinear_pushover_stress_report.json",
+    "supporting_report_paths": {
+      "ndtha": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+      "material_constitutive": "implementation/phase1/material_constitutive_gate_report.json"
+    },
+    "kpi_specs": [
+      {
+        "label": "case_count",
+        "source": "primary.summary.case_count"
+      },
+      {
+        "label": "first_yield_load_factor_mean",
+        "source": "primary.summary.first_yield_load_factor_mean"
+      },
+      {
+        "label": "peak_plastic_story_count_mean",
+        "source": "primary.summary.peak_plastic_story_count_mean"
+      },
+      {
+        "label": "drift_amplification_mean",
+        "source": "primary.summary.drift_amplification_mean"
+      },
+      {
+        "label": "ndtha_residual_drift_ratio_pct_max_abs",
+        "source": "supporting.ndtha.summary.residual_drift_ratio_pct_max_abs"
+      },
+      {
+        "label": "material_family_count",
+        "source": "supporting.material_constitutive.summary.calibration_matrix_family_counts"
+      }
+    ]
+  }
+}

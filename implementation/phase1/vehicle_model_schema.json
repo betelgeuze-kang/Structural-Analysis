@@ -1,0 +1,232 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Railway Vehicle Model Input Schema",
+    "description": "Multi-DOF vehicle model for Vehicle-Track Interaction (VTI) analysis",
+    "type": "object",
+    "required": [
+        "schema_version",
+        "vehicle_id",
+        "car_body",
+        "bogies",
+        "wheelsets",
+        "speed_m_s"
+    ],
+    "properties": {
+        "schema_version": {
+            "type": "string",
+            "const": "1.0.0"
+        },
+        "vehicle_id": {
+            "type": "string"
+        },
+        "vehicle_type": {
+            "type": "string",
+            "enum": [
+                "passenger",
+                "freight",
+                "high_speed",
+                "metro",
+                "custom"
+            ],
+            "default": "passenger"
+        },
+        "car_body": {
+            "type": "object",
+            "required": [
+                "mass_kg",
+                "moment_of_inertia_pitch_kg_m2",
+                "moment_of_inertia_roll_kg_m2"
+            ],
+            "properties": {
+                "mass_kg": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "moment_of_inertia_pitch_kg_m2": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "moment_of_inertia_roll_kg_m2": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "length_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "cog_height_m": {
+                    "type": "number",
+                    "minimum": 0
+                }
+            }
+        },
+        "bogies": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "required": [
+                    "bogie_id",
+                    "mass_kg",
+                    "position_from_cog_m",
+                    "secondary_suspension"
+                ],
+                "properties": {
+                    "bogie_id": {
+                        "type": "string"
+                    },
+                    "mass_kg": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "moment_of_inertia_pitch_kg_m2": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "position_from_cog_m": {
+                        "type": "number",
+                        "description": "Distance from car body CoG (+ = forward)"
+                    },
+                    "secondary_suspension": {
+                        "type": "object",
+                        "required": [
+                            "k_vertical_N_m",
+                            "c_vertical_Ns_m"
+                        ],
+                        "properties": {
+                            "k_vertical_N_m": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                            },
+                            "k_lateral_N_m": {
+                                "type": "number",
+                                "minimum": 0
+                            },
+                            "c_vertical_Ns_m": {
+                                "type": "number",
+                                "minimum": 0
+                            },
+                            "c_lateral_Ns_m": {
+                                "type": "number",
+                                "minimum": 0
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "wheelsets": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+                "type": "object",
+                "required": [
+                    "wheelset_id",
+                    "bogie_ref",
+                    "mass_kg",
+                    "position_from_bogie_m",
+                    "primary_suspension",
+                    "wheel_radius_m"
+                ],
+                "properties": {
+                    "wheelset_id": {
+                        "type": "string"
+                    },
+                    "bogie_ref": {
+                        "type": "string",
+                        "description": "Reference to parent bogie_id"
+                    },
+                    "mass_kg": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "position_from_bogie_m": {
+                        "type": "number"
+                    },
+                    "wheel_radius_m": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "primary_suspension": {
+                        "type": "object",
+                        "required": [
+                            "k_vertical_N_m",
+                            "c_vertical_Ns_m"
+                        ],
+                        "properties": {
+                            "k_vertical_N_m": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                            },
+                            "k_lateral_N_m": {
+                                "type": "number",
+                                "minimum": 0
+                            },
+                            "c_vertical_Ns_m": {
+                                "type": "number",
+                                "minimum": 0
+                            },
+                            "c_lateral_Ns_m": {
+                                "type": "number",
+                                "minimum": 0
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "speed_m_s": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Operating speed in m/s"
+        },
+        "consist": {
+            "type": "object",
+            "description": "Train consist (formation) for multi-car configurations",
+            "properties": {
+                "car_count": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "car_spacing_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "total_length_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                }
+            }
+        },
+        "contact_model": {
+            "type": "string",
+            "enum": [
+                "hertzian",
+                "linearized_hertz",
+                "custom"
+            ],
+            "default": "hertzian",
+            "description": "Wheel-rail contact force model"
+        },
+        "hertz_contact": {
+            "type": "object",
+            "description": "Hertzian contact parameters (when contact_model=hertzian)",
+            "properties": {
+                "contact_stiffness_N_m_3_2": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "G_H in N/m^(3/2)"
+                },
+                "wheel_profile": {
+                    "type": "string",
+                    "enum": [
+                        "S1002",
+                        "UIC_ORE_S1002",
+                        "custom"
+                    ],
+                    "default": "S1002"
+                }
+            }
+        }
+    }
+}

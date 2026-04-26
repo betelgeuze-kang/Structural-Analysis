@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-mgt-attachment-harvest-full",
+  "zip_count": 10,
+  "zip_with_mgt_count": 0,
+  "records": [
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/51948310654745",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/C07_T03_P000_RC_03_단독주택.zip",
+      "size": 169720,
+      "sha256": "872556284de8cccd439ef67a158593163e68a9f410e389fd0e62ee61a2d89f21",
+      "mgt_files": [],
+      "entries_head": [
+        "C07_T03_P000_RC_03_┤▄╡╢┴╓┼├.meb"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/51947938880409",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/C07_T02_P000_RC_02_근린생활시설.zip",
+      "size": 291389,
+      "sha256": "2989658f47baa7f79daad39f0b75592b757bb44fb6b44b2abb93a64ad9dbd994",
+      "mgt_files": [],
+      "entries_head": [
+        "C07_T02_P000_RC_02_▒┘╕░╗²╚░╜├.meb"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/51945266735897",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/C07_T01_P000_RC_01_다가구_주택.zip",
+      "size": 207921,
+      "sha256": "eed5b5f99fca712ad210353e24c37d7ab01a895017e3a7235a488b671ad81263",
+      "mgt_files": [],
+      "entries_head": [
+        "C07_T01_P000_RC_01_┤┘░í▒╕_┴╓┼├.meb"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/46332206620953",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/경사로_예제파일.zip",
+      "size": 84969,
+      "sha256": "e3fa7f78925a4c6685b0b9b1b29006564649574798de1f1bd99c3f103802a075",
+      "mgt_files": [],
+      "entries_head": [
+        "░µ╗τ╖╬_┐╣┴ª╞─└╧.mmbx",
+        "░µ╗τ╖╬_┐╣┴ª╞─└╧_FINAL.mmbx"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/46324296262553",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/보_예제파일.zip",
+      "size": 68187,
+      "sha256": "e8a692cc70339c6658f9af3842827168782378c3ebeec9ff5bebead537a2f093",
+      "mgt_files": [],
+      "entries_head": [
+        "║╕_┐╣┴ª╞─└╧.mmbx",
+        "║╕_┐╣┴ª╞─└╧_FINAL.mmbx"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/46324244898713",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/보_예제파일.zip",
+      "size": 68187,
+      "sha256": "e8a692cc70339c6658f9af3842827168782378c3ebeec9ff5bebead537a2f093",
+      "mgt_files": [],
+      "entries_head": [
+        "║╕_┐╣┴ª╞─└╧.mmbx",
+        "║╕_┐╣┴ª╞─└╧_FINAL.mmbx"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/43508439849369",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/M02_P01_T03000_BEAM_A_FILE_0001.zip",
+      "size": 66820,
+      "sha256": "13fe31819d22cb610f02ed9b0f65b24ca9df57a9f29dc09b995cc153f576343c",
+      "mgt_files": [],
+      "entries_head": [
+        "║╕_┐╣┴ª╞─└╧.meb",
+        "║╕_┐╣┴ª╞─└╧_FINAL.meb"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/42143050548889",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/FCM Bridge.zip",
+      "size": 944065,
+      "sha256": "2b4040808120e46208515305ed7a66c951b0f3cbb07dbfaa66911a2025f0a5b7",
+      "mgt_files": [],
+      "entries_head": [
+        "FCM Bridge.mcb",
+        "FCM Bridge_Final(v2.0.5).gh",
+        "FCM Tendon_1.3dm"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/42120558247065",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/M02_P01_T05000_STAIR_A_FILE_0001.zip",
+      "size": 90832,
+      "sha256": "ba3fa8bba97d1f6f6038974eeb3e42529ecc1b53ddb87d6e51e7fb09d3a9ee29",
+      "mgt_files": [],
+      "entries_head": [
+        "░µ╗τ╖╬_┐╣┴ª╞─└╧.meb",
+        "░µ╗τ╖╬_┐╣┴ª╞─└╧_FINAL.meb"
+      ]
+    },
+    {
+      "url": "https://support.midasuser.com/hc/article_attachments/42094846499737",
+      "zip": "implementation/phase1/open_data/midas/harvested/raw_zips_full/M02_P01_T03000_BEAM_A_FILE_0001.zip",
+      "size": 66820,
+      "sha256": "13fe31819d22cb610f02ed9b0f65b24ca9df57a9f29dc09b995cc153f576343c",
+      "mgt_files": [],
+      "entries_head": [
+        "║╕_┐╣┴ª╞─└╧.meb",
+        "║╕_┐╣┴ª╞─└╧_FINAL.meb"
+      ]
+    }
+  ]
+}

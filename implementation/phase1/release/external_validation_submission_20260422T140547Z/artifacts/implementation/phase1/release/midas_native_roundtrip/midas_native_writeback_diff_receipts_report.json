@@ -1,0 +1,1763 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-midas-native-writeback-diff-receipts",
+  "generated_at": "2026-04-08T10:41:53.932772+00:00",
+  "inputs": {
+    "corpus_manifest": "implementation/phase1/open_data/midas/midas_native_corpus_manifest.json",
+    "korean_source_catalog": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_source_catalog.json",
+    "out_dir": "implementation/phase1/release/midas_native_roundtrip",
+    "out": "implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json"
+  },
+  "summary": {
+    "ready_case_count": 35,
+    "receipt_count": 35,
+    "receipt_pass_count": 35,
+    "topology_stable_case_count": 35,
+    "load_contract_stable_case_count": 35,
+    "loadcomb_exact_case_count": 35,
+    "unknown_rows_zero_case_count": 35,
+    "pending_review_total": 0,
+    "structure_type_batch_count": 12,
+    "exact_topology_structural_preview_candidate_total": 8,
+    "exact_topology_structural_preview_pending_candidate_count": 0,
+    "exact_topology_structural_preview_public_archive_promoted_candidate_count": 8,
+    "exact_topology_structural_preview_korean_candidate_total": 5,
+    "exact_topology_structural_preview_korean_pending_candidate_count": 0,
+    "korean_structural_preview_promotion_receipt_count": 0,
+    "taxonomy_case_counts": {
+      "preserved_exact": 34,
+      "canonical_rewrite": 1,
+      "lossy_rewrite": 0,
+      "unsupported_card": 0,
+      "manual_review_required": 0,
+      "parser_drop_suspected": 1
+    },
+    "taxonomy_card_family_histogram": {
+      "supported_action_families": {
+        "beam_section": 1,
+        "connection_detailing": 12,
+        "detailing": 10,
+        "perimeter_frame": 1,
+        "rebar": 5,
+        "slab_thickness": 2,
+        "wall_thickness": 5
+      },
+      "direct_patch_action_families": {
+        "beam_section": 1,
+        "connection_detailing": 6,
+        "detailing": 5,
+        "perimeter_frame": 1,
+        "rebar": 5,
+        "slab_thickness": 2,
+        "wall_thickness": 5
+      },
+      "audit_only_action_families": {},
+      "audit_manifest_action_families": {},
+      "unsupported_reason_counts": {}
+    }
+  },
+  "receipt_rows": [
+    {
+      "case_id": "gtc_public_bridge_bearing_c04__identity_writeback",
+      "structure_type": "bearing",
+      "writeback_mode": "public_raw_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=gtc_public_bridge_bearing_c04__identity_writeback | type=bearing | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/01.gtc_public_bridge_bearing_c04_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/01.gtc_public_bridge_bearing_c04_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_raw_native",
+          "unknown_rows_preserved_public_raw"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "gtc_public_bridge_section_a3__identity_writeback",
+      "structure_type": "bridge_section",
+      "writeback_mode": "public_raw_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=gtc_public_bridge_section_a3__identity_writeback | type=bridge_section | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/02.gtc_public_bridge_section_a3_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/02.gtc_public_bridge_section_a3_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_raw_native",
+          "unknown_rows_preserved_public_raw"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "gtc_public_bridge_section_e1_03__identity_writeback",
+      "structure_type": "bridge_section",
+      "writeback_mode": "public_raw_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=gtc_public_bridge_section_e1_03__identity_writeback | type=bridge_section | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/03.gtc_public_bridge_section_e1_03_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/03.gtc_public_bridge_section_e1_03_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_raw_native",
+          "unknown_rows_preserved_public_raw"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "fixture_foundation_deep_small__identity_writeback",
+      "structure_type": "foundation",
+      "writeback_mode": "fixture_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=fixture_foundation_deep_small__identity_writeback | type=foundation | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/04.fixture_foundation_deep_small_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/04.fixture_foundation_deep_small_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "fixture_foundation_generic_sections__identity_writeback",
+      "structure_type": "foundation",
+      "writeback_mode": "fixture_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=fixture_foundation_generic_sections__identity_writeback | type=foundation | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/05.fixture_foundation_generic_sections_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/05.fixture_foundation_generic_sections_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "fixture_foundation_parser_drop_small__identity_writeback",
+      "structure_type": "foundation",
+      "writeback_mode": "fixture_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=fixture_foundation_parser_drop_small__identity_writeback | type=foundation | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/06.fixture_foundation_parser_drop_small_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/06.fixture_foundation_parser_drop_small_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "parser_drop_suspected"
+        ],
+        "risk_level": "medium",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 1
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "fixture_foundation_small__identity_writeback",
+      "structure_type": "foundation",
+      "writeback_mode": "fixture_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=fixture_foundation_small__identity_writeback | type=foundation | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/07.fixture_foundation_small_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/07.fixture_foundation_small_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_rc_house_archive__decoded_preview_native__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "public_archive_decoded_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_rc_house_archive__decoded_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/08.midas_support_rc_house_archive_decoded_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/08.midas_support_rc_house_archive_decoded_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_multifamily_building_archive__decoded_preview_native__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "public_archive_decoded_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_multifamily_building_archive__decoded_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/09.midas_support_multifamily_building_archive_decoded_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/09.midas_support_multifamily_building_archive_decoded_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_neighborhood_facility_archive__decoded_preview_native__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "public_archive_decoded_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_neighborhood_facility_archive__decoded_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/10.midas_support_neighborhood_facility_archive_decoded_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/10.midas_support_neighborhood_facility_archive_decoded_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_fcm_bridge_archive__decoded_preview_native__identity_writeback",
+      "structure_type": "bridge",
+      "writeback_mode": "public_archive_decoded_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_fcm_bridge_archive__decoded_preview_native__identity_writeback | type=bridge | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/11.midas_support_fcm_bridge_archive_decoded_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/11.midas_support_fcm_bridge_archive_decoded_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_ramp_archive__decoded_preview_native__identity_writeback",
+      "structure_type": "ramp",
+      "writeback_mode": "public_archive_decoded_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_ramp_archive__decoded_preview_native__identity_writeback | type=ramp | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/12.midas_support_ramp_archive_decoded_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/12.midas_support_ramp_archive_decoded_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_beam_archive__decoded_preview_native__identity_writeback",
+      "structure_type": "beam",
+      "writeback_mode": "public_archive_decoded_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_beam_archive__decoded_preview_native__identity_writeback | type=beam | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/13.midas_support_beam_archive_decoded_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/13.midas_support_beam_archive_decoded_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_stair_archive__decoded_preview_native__identity_writeback",
+      "structure_type": "stair",
+      "writeback_mode": "public_archive_decoded_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_stair_archive__decoded_preview_native__identity_writeback | type=stair | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/14.midas_support_stair_archive_decoded_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/14.midas_support_stair_archive_decoded_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_fcm_bridge_archive__structural_preview_native__identity_writeback",
+      "structure_type": "bridge",
+      "writeback_mode": "public_archive_structural_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_fcm_bridge_archive__structural_preview_native__identity_writeback | type=bridge | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/15.midas_support_fcm_bridge_archive_structural_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/15.midas_support_fcm_bridge_archive_structural_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_structural_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_ramp_archive__structural_preview_native__identity_writeback",
+      "structure_type": "ramp",
+      "writeback_mode": "public_archive_structural_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_ramp_archive__structural_preview_native__identity_writeback | type=ramp | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/16.midas_support_ramp_archive_structural_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/16.midas_support_ramp_archive_structural_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_structural_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_stair_archive__structural_preview_native__identity_writeback",
+      "structure_type": "stair",
+      "writeback_mode": "public_archive_structural_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_stair_archive__structural_preview_native__identity_writeback | type=stair | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/17.midas_support_stair_archive_structural_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/17.midas_support_stair_archive_structural_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_structural_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "ifc_public_award_structure__structural_preview_candidate__identity_writeback",
+      "structure_type": "public_facility",
+      "writeback_mode": "public_archive_structural_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=ifc_public_award_structure__structural_preview_candidate__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/18.ifc_public_award_structure_structural_preview_candidate_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/18.ifc_public_award_structure_structural_preview_candidate_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_structural_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "ifc_public_award_reference_2022__structural_preview_candidate__identity_writeback",
+      "structure_type": "public_facility",
+      "writeback_mode": "public_archive_structural_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=ifc_public_award_reference_2022__structural_preview_candidate__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/19.ifc_public_award_reference_2022_structural_preview_candidate_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/19.ifc_public_award_reference_2022_structural_preview_candidate_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_structural_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "ifc_public_award_reference_2021__structural_preview_candidate__identity_writeback",
+      "structure_type": "public_facility",
+      "writeback_mode": "public_archive_structural_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=ifc_public_award_reference_2021__structural_preview_candidate__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/20.ifc_public_award_reference_2021_structural_preview_candidate_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/20.ifc_public_award_reference_2021_structural_preview_candidate_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_structural_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "ifc_public_award_reference_2024__structural_preview_candidate__identity_writeback",
+      "structure_type": "mixed_use",
+      "writeback_mode": "public_archive_structural_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=ifc_public_award_reference_2024__structural_preview_candidate__identity_writeback | type=mixed_use | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/21.ifc_public_award_reference_2024_structural_preview_candidate_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/21.ifc_public_award_reference_2024_structural_preview_candidate_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_structural_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "ifc_public_award_reference_2020__structural_preview_candidate__identity_writeback",
+      "structure_type": "public_facility",
+      "writeback_mode": "public_archive_structural_preview_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=ifc_public_award_reference_2020__structural_preview_candidate__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/22.ifc_public_award_reference_2020_structural_preview_candidate_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/22.ifc_public_award_reference_2020_structural_preview_candidate_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_archive_structural_preview"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_support_beam_archive__bridge_native__identity_writeback",
+      "structure_type": "beam",
+      "writeback_mode": "public_bridge_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_support_beam_archive__bridge_native__identity_writeback | type=beam | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/23.midas_support_beam_archive_bridge_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/23.midas_support_beam_archive_bridge_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_bridge_baseline"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "koneps_goyang_changneung_powerplant_design_service__identity_writeback",
+      "structure_type": "industrial_facility",
+      "writeback_mode": "public_raw_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=koneps_goyang_changneung_powerplant_design_service__identity_writeback | type=industrial_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/24.koneps_goyang_changneung_powerplant_design_service_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/24.koneps_goyang_changneung_powerplant_design_service_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_raw_native"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "koneps_hangang_park_gwangnaru2_native_baseline__identity_writeback",
+      "structure_type": "public_facility",
+      "writeback_mode": "public_raw_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=koneps_hangang_park_gwangnaru2_native_baseline__identity_writeback | type=public_facility | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/25.koneps_hangang_park_gwangnaru2_native_baseline_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/25.koneps_hangang_park_gwangnaru2_native_baseline_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_raw_native"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "lh_bucheon_yeokgok_a1_housing_native_baseline__identity_writeback",
+      "structure_type": "housing",
+      "writeback_mode": "public_raw_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=lh_bucheon_yeokgok_a1_housing_native_baseline__identity_writeback | type=housing | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/26.lh_bucheon_yeokgok_a1_housing_native_baseline_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/26.lh_bucheon_yeokgok_a1_housing_native_baseline_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_raw_native"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "lh_happy_city_5_1_native_baseline__identity_writeback",
+      "structure_type": "mixed_use",
+      "writeback_mode": "public_raw_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=lh_happy_city_5_1_native_baseline__identity_writeback | type=mixed_use | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/27.lh_happy_city_5_1_native_baseline_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/27.lh_happy_city_5_1_native_baseline_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_raw_native"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "kci_concrete_building_design_examples_2e_native_baseline__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "public_raw_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=kci_concrete_building_design_examples_2e_native_baseline__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/28.kci_concrete_building_design_examples_2e_native_baseline_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/28.kci_concrete_building_design_examples_2e_native_baseline_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact",
+          "public_raw_native"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "repo_midas_generator_33_native__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "repo_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=repo_midas_generator_33_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/29.repo_midas_generator_33_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/29.repo_midas_generator_33_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "repo_midas_generator_33_optimized_native__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "repo_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=repo_midas_generator_33_optimized_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/30.repo_midas_generator_33_optimized_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/30.repo_midas_generator_33_optimized_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "repo_midas_generator_33_loadcomb_preview_native__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "repo_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=repo_midas_generator_33_loadcomb_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/31.repo_midas_generator_33_loadcomb_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/31.repo_midas_generator_33_loadcomb_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "experiment_midas_generator_33_loadcomb_preview_native__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "experiment_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=experiment_midas_generator_33_loadcomb_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/32.experiment_midas_generator_33_loadcomb_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/32.experiment_midas_generator_33_loadcomb_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "experiment_midas_generator_33_pr_recheck_loadcomb_preview_native__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "experiment_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=experiment_midas_generator_33_pr_recheck_loadcomb_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/33.experiment_midas_generator_33_pr_recheck_loadcomb_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/33.experiment_midas_generator_33_pr_recheck_loadcomb_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "experiment_midas_generator_33_optimized_roundtrip_loadcomb_preview_native__identity_writeback",
+      "structure_type": "building",
+      "writeback_mode": "experiment_identity_baseline",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=experiment_midas_generator_33_optimized_roundtrip_loadcomb_preview_native__identity_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=0 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/34.experiment_midas_generator_33_optimized_roundtrip_loadcomb_preview_native_identity_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/34.experiment_midas_generator_33_optimized_roundtrip_loadcomb_preview_native_identity_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "preserved_exact"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 1,
+          "canonical_rewrite": 0,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {},
+          "direct_patch_action_families": {},
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    },
+    {
+      "case_id": "midas_generator_33_github__optimized_writeback",
+      "structure_type": "building",
+      "writeback_mode": "direct_patch_plus_audit_review_manifest",
+      "contract_pass": true,
+      "summary_line": "MIDAS native write-back diff receipt: PASS | case=midas_generator_33_github__optimized_writeback | type=building | topology=8/8 stable | load=5/5 stable | loadcomb=exact | direct_patch=25 | pending_review=0",
+      "receipt_json": "implementation/phase1/release/midas_native_roundtrip/35.midas_generator_33_github_optimized_writeback.diff_receipt.json",
+      "receipt_md": "implementation/phase1/release/midas_native_roundtrip/35.midas_generator_33_github_optimized_writeback.diff_receipt.md",
+      "topology_stability_pass": true,
+      "load_contract_stability_pass": true,
+      "loadcomb_exact_roundtrip_pass": true,
+      "unknown_rows_zero_pass": true,
+      "review_pending_count": 0,
+      "taxonomy": {
+        "labels": [
+          "canonical_rewrite"
+        ],
+        "risk_level": "low",
+        "counts": {
+          "preserved_exact": 0,
+          "canonical_rewrite": 1,
+          "lossy_rewrite": 0,
+          "unsupported_card": 0,
+          "manual_review_required": 0,
+          "parser_drop_suspected": 0
+        },
+        "card_family_histogram": {
+          "supported_action_families": {
+            "beam_section": 1,
+            "connection_detailing": 12,
+            "detailing": 10,
+            "perimeter_frame": 1,
+            "rebar": 5,
+            "slab_thickness": 2,
+            "wall_thickness": 5
+          },
+          "direct_patch_action_families": {
+            "beam_section": 1,
+            "connection_detailing": 6,
+            "detailing": 5,
+            "perimeter_frame": 1,
+            "rebar": 5,
+            "slab_thickness": 2,
+            "wall_thickness": 5
+          },
+          "audit_only_action_families": {},
+          "audit_manifest_action_families": {},
+          "unsupported_reason_counts": {}
+        }
+      }
+    }
+  ],
+  "structure_type_batches": [
+    {
+      "structure_type": "beam",
+      "ready_case_count": 2,
+      "receipt_pass_count": 2,
+      "topology_stable_case_count": 2,
+      "load_contract_stable_case_count": 2,
+      "loadcomb_exact_case_count": 2,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 2,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_archive_decoded_preview_identity_baseline",
+        "public_bridge_identity_baseline"
+      ],
+      "case_ids": [
+        "midas_support_beam_archive__decoded_preview_native__identity_writeback",
+        "midas_support_beam_archive__bridge_native__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/beam.diff_batch.md"
+    },
+    {
+      "structure_type": "bearing",
+      "ready_case_count": 1,
+      "receipt_pass_count": 1,
+      "topology_stable_case_count": 1,
+      "load_contract_stable_case_count": 1,
+      "loadcomb_exact_case_count": 1,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 1,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_raw_identity_baseline"
+      ],
+      "case_ids": [
+        "gtc_public_bridge_bearing_c04__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/bearing.diff_batch.md"
+    },
+    {
+      "structure_type": "bridge",
+      "ready_case_count": 2,
+      "receipt_pass_count": 2,
+      "topology_stable_case_count": 2,
+      "load_contract_stable_case_count": 2,
+      "loadcomb_exact_case_count": 2,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 2,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_archive_decoded_preview_identity_baseline",
+        "public_archive_structural_preview_identity_baseline"
+      ],
+      "case_ids": [
+        "midas_support_fcm_bridge_archive__decoded_preview_native__identity_writeback",
+        "midas_support_fcm_bridge_archive__structural_preview_native__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/bridge.diff_batch.md"
+    },
+    {
+      "structure_type": "bridge_section",
+      "ready_case_count": 2,
+      "receipt_pass_count": 2,
+      "topology_stable_case_count": 2,
+      "load_contract_stable_case_count": 2,
+      "loadcomb_exact_case_count": 2,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 2,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_raw_identity_baseline"
+      ],
+      "case_ids": [
+        "gtc_public_bridge_section_a3__identity_writeback",
+        "gtc_public_bridge_section_e1_03__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/bridge_section.diff_batch.md"
+    },
+    {
+      "structure_type": "building",
+      "ready_case_count": 11,
+      "receipt_pass_count": 11,
+      "topology_stable_case_count": 11,
+      "load_contract_stable_case_count": 11,
+      "loadcomb_exact_case_count": 11,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 10,
+        "canonical_rewrite": 1,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {
+          "beam_section": 1,
+          "connection_detailing": 12,
+          "detailing": 10,
+          "perimeter_frame": 1,
+          "rebar": 5,
+          "slab_thickness": 2,
+          "wall_thickness": 5
+        },
+        "direct_patch_action_families": {
+          "beam_section": 1,
+          "connection_detailing": 6,
+          "detailing": 5,
+          "perimeter_frame": 1,
+          "rebar": 5,
+          "slab_thickness": 2,
+          "wall_thickness": 5
+        },
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "direct_patch_plus_audit_review_manifest",
+        "experiment_identity_baseline",
+        "public_archive_decoded_preview_identity_baseline",
+        "public_raw_identity_baseline",
+        "repo_identity_baseline"
+      ],
+      "case_ids": [
+        "midas_support_rc_house_archive__decoded_preview_native__identity_writeback",
+        "midas_support_multifamily_building_archive__decoded_preview_native__identity_writeback",
+        "midas_support_neighborhood_facility_archive__decoded_preview_native__identity_writeback",
+        "kci_concrete_building_design_examples_2e_native_baseline__identity_writeback",
+        "repo_midas_generator_33_native__identity_writeback",
+        "repo_midas_generator_33_optimized_native__identity_writeback",
+        "repo_midas_generator_33_loadcomb_preview_native__identity_writeback",
+        "experiment_midas_generator_33_loadcomb_preview_native__identity_writeback",
+        "experiment_midas_generator_33_pr_recheck_loadcomb_preview_native__identity_writeback",
+        "experiment_midas_generator_33_optimized_roundtrip_loadcomb_preview_native__identity_writeback",
+        "midas_generator_33_github__optimized_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/building.diff_batch.md"
+    },
+    {
+      "structure_type": "foundation",
+      "ready_case_count": 4,
+      "receipt_pass_count": 4,
+      "topology_stable_case_count": 4,
+      "load_contract_stable_case_count": 4,
+      "loadcomb_exact_case_count": 4,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 4,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 1
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "fixture_identity_baseline"
+      ],
+      "case_ids": [
+        "fixture_foundation_deep_small__identity_writeback",
+        "fixture_foundation_generic_sections__identity_writeback",
+        "fixture_foundation_parser_drop_small__identity_writeback",
+        "fixture_foundation_small__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/foundation.diff_batch.md"
+    },
+    {
+      "structure_type": "housing",
+      "ready_case_count": 1,
+      "receipt_pass_count": 1,
+      "topology_stable_case_count": 1,
+      "load_contract_stable_case_count": 1,
+      "loadcomb_exact_case_count": 1,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 1,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_raw_identity_baseline"
+      ],
+      "case_ids": [
+        "lh_bucheon_yeokgok_a1_housing_native_baseline__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/housing.diff_batch.md"
+    },
+    {
+      "structure_type": "industrial_facility",
+      "ready_case_count": 1,
+      "receipt_pass_count": 1,
+      "topology_stable_case_count": 1,
+      "load_contract_stable_case_count": 1,
+      "loadcomb_exact_case_count": 1,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 1,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_raw_identity_baseline"
+      ],
+      "case_ids": [
+        "koneps_goyang_changneung_powerplant_design_service__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/industrial_facility.diff_batch.md"
+    },
+    {
+      "structure_type": "mixed_use",
+      "ready_case_count": 2,
+      "receipt_pass_count": 2,
+      "topology_stable_case_count": 2,
+      "load_contract_stable_case_count": 2,
+      "loadcomb_exact_case_count": 2,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 2,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_archive_structural_preview_identity_baseline",
+        "public_raw_identity_baseline"
+      ],
+      "case_ids": [
+        "ifc_public_award_reference_2024__structural_preview_candidate__identity_writeback",
+        "lh_happy_city_5_1_native_baseline__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/mixed_use.diff_batch.md"
+    },
+    {
+      "structure_type": "public_facility",
+      "ready_case_count": 5,
+      "receipt_pass_count": 5,
+      "topology_stable_case_count": 5,
+      "load_contract_stable_case_count": 5,
+      "loadcomb_exact_case_count": 5,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 5,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_archive_structural_preview_identity_baseline",
+        "public_raw_identity_baseline"
+      ],
+      "case_ids": [
+        "ifc_public_award_structure__structural_preview_candidate__identity_writeback",
+        "ifc_public_award_reference_2022__structural_preview_candidate__identity_writeback",
+        "ifc_public_award_reference_2021__structural_preview_candidate__identity_writeback",
+        "ifc_public_award_reference_2020__structural_preview_candidate__identity_writeback",
+        "koneps_hangang_park_gwangnaru2_native_baseline__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/public_facility.diff_batch.md"
+    },
+    {
+      "structure_type": "ramp",
+      "ready_case_count": 2,
+      "receipt_pass_count": 2,
+      "topology_stable_case_count": 2,
+      "load_contract_stable_case_count": 2,
+      "loadcomb_exact_case_count": 2,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 2,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_archive_decoded_preview_identity_baseline",
+        "public_archive_structural_preview_identity_baseline"
+      ],
+      "case_ids": [
+        "midas_support_ramp_archive__decoded_preview_native__identity_writeback",
+        "midas_support_ramp_archive__structural_preview_native__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/ramp.diff_batch.md"
+    },
+    {
+      "structure_type": "stair",
+      "ready_case_count": 2,
+      "receipt_pass_count": 2,
+      "topology_stable_case_count": 2,
+      "load_contract_stable_case_count": 2,
+      "loadcomb_exact_case_count": 2,
+      "pending_review_total": 0,
+      "taxonomy_case_counts": {
+        "preserved_exact": 2,
+        "canonical_rewrite": 0,
+        "lossy_rewrite": 0,
+        "unsupported_card": 0,
+        "manual_review_required": 0,
+        "parser_drop_suspected": 0
+      },
+      "taxonomy_card_family_histogram": {
+        "supported_action_families": {},
+        "direct_patch_action_families": {},
+        "audit_only_action_families": {},
+        "audit_manifest_action_families": {},
+        "unsupported_reason_counts": {}
+      },
+      "writeback_modes": [
+        "public_archive_decoded_preview_identity_baseline",
+        "public_archive_structural_preview_identity_baseline"
+      ],
+      "case_ids": [
+        "midas_support_stair_archive__decoded_preview_native__identity_writeback",
+        "midas_support_stair_archive__structural_preview_native__identity_writeback"
+      ],
+      "batch_markdown": "implementation/phase1/release/midas_native_roundtrip/stair.diff_batch.md"
+    }
+  ],
+  "unsupported_lossy_card_family_appendix_markdown": "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.md",
+  "unsupported_lossy_card_family_appendix_json": "implementation/phase1/release/midas_native_roundtrip/unsupported_lossy_card_family_appendix.json",
+  "exact_topology_structural_preview_promotion_queue_json": "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.json",
+  "exact_topology_structural_preview_promotion_queue_markdown": "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.md",
+  "exact_topology_structural_preview_pending_candidate_rows": [],
+  "korean_structural_preview_promotion_receipt_rows": [],
+  "summary_line": "MIDAS native write-back diff receipts: PASS | ready=35 | receipts=35/35 | topology=35/35 | load=35/35 | loadcomb=35/35 exact | types=12 | exact_queue=0/8 | korean_promotions=0/0 | taxonomy=exact:34,canonical:1,lossy:0,unsupported:0,manual:0 | pending_review=0",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "native MIDAS write-back diff receipts generated for all ready cases"
+}
