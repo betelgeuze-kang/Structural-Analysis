@@ -33,9 +33,10 @@ DEFAULT_VIEWER_JSON = Path("implementation/phase1/release/visualization/structur
 DEFAULT_OUT_HTML = Path("implementation/phase1/release/visualization/optimized_drawing_review.html")
 DEFAULT_OUT_EXPERT_HTML = Path("implementation/phase1/release/visualization/optimized_drawing_expert_review.html")
 DEFAULT_EXPERT_METADATA_JSON = Path("implementation/phase1/release/visualization/expert_review_issue_metadata.json")
-DEFAULT_EXPERT_METADATA_TEMPLATE_DIR = Path(
+LEGACY_EXPERT_METADATA_TEMPLATE_DIR = Path(
     "implementation/phase1/release/visualization/expert_review_metadata_templates"
 )
+DEFAULT_EXPERT_METADATA_TEMPLATE_DIR = Path("implementation/phase1/review_metadata_templates")
 DEFAULT_EXPERT_METADATA_TEMPLATE_NAME = "default"
 DEFAULT_EXPERT_METADATA_TEMPLATE_INDEX = DEFAULT_EXPERT_METADATA_TEMPLATE_DIR / "index.json"
 DEFAULT_EXPERT_METADATA_ONBOARDING_SCHEMA = DEFAULT_EXPERT_METADATA_TEMPLATE_DIR / "project_onboarding.schema.json"
@@ -45,6 +46,15 @@ DEFAULT_OUT_EXPERT_METADATA_JSON = Path(
     "implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json"
 )
 DEFAULT_OUT_SUMMARY = Path("implementation/phase1/release/visualization/optimized_drawing_review_summary.json")
+
+
+def _effective_expert_metadata_template_dir(template_dir: Path) -> Path:
+    """Prefer source-controlled templates, but keep old release-template checkouts usable."""
+    if template_dir.exists():
+        return template_dir
+    if template_dir == DEFAULT_EXPERT_METADATA_TEMPLATE_DIR and LEGACY_EXPERT_METADATA_TEMPLATE_DIR.exists():
+        return LEGACY_EXPERT_METADATA_TEMPLATE_DIR
+    return template_dir
 
 PROJECTIONS: tuple[tuple[str, str, str], ...] = (
     ("plan_xy", "Plan", "평면 기준으로 baseline과 최적화 overlay를 비교합니다."),
@@ -498,6 +508,7 @@ def _resolve_merged_expert_review_metadata(
     expert_metadata_template: str = DEFAULT_EXPERT_METADATA_TEMPLATE_NAME,
     expert_metadata_template_dir: Path = DEFAULT_EXPERT_METADATA_TEMPLATE_DIR,
 ) -> tuple[dict[str, Any], str, str, str]:
+    expert_metadata_template_dir = _effective_expert_metadata_template_dir(expert_metadata_template_dir)
     merged = dict(_default_expert_issue_metadata(payload))
     source_parts: list[str] = []
     index_payload = _load_expert_metadata_template_index(template_dir=expert_metadata_template_dir)
@@ -11661,6 +11672,7 @@ def prepare_review_payload(
     expert_metadata_template: str = DEFAULT_EXPERT_METADATA_TEMPLATE_NAME,
     expert_metadata_template_dir: Path = DEFAULT_EXPERT_METADATA_TEMPLATE_DIR,
 ) -> dict[str, Any]:
+    expert_metadata_template_dir = _effective_expert_metadata_template_dir(expert_metadata_template_dir)
     viewer_payload = _load_json(viewer_json_path)
     payload = build_review_payload(viewer_payload, viewer_json_path=viewer_json_path, out_html_path=out_html_path)
     expert_review_metadata, expert_review_metadata_source_mode, expert_review_metadata_template, expert_review_metadata_template_path = _resolve_merged_expert_review_metadata(

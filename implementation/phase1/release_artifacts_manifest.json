@@ -1,0 +1,108 @@
+{
+  "schema_version": "structural_analysis_release_artifacts_manifest.v1",
+  "generated_at": "2026-04-26T00:00:00+09:00",
+  "release_tag": "structural-analysis-artifacts-2026-04-26",
+  "artifact_policy": {
+    "storage": "github_releases",
+    "source_repo_boundary": "Source, tests, templates, and small fixtures stay in Git. Generated release bundles, repeated experiment outputs, temporary QA screenshots, and private keys stay out of Git.",
+    "private_key_policy": "Private .pem files are never committed. Public .pub.pem files may be uploaded as release assets when needed for verification."
+  },
+  "artifacts": [
+    {
+      "asset_name": "project_package.zip",
+      "local_path": "implementation/phase1/release/project_package.zip",
+      "sha256": "3f65fcef372faccf6b104583da689bc0a471edfea458237026870734ce47d27e",
+      "bytes": 38360168,
+      "required": true,
+      "description": "Regenerated project package with package_sha256 aligned to project_registry.json."
+    },
+    {
+      "asset_name": "project_registry.json",
+      "local_path": "implementation/phase1/release/project_registry.json",
+      "sha256": "7c4b536ee8d2dfcd2e7f3a40387abfb6792b35cbf092b5cc88e79992c9e2e94f",
+      "bytes": 15985,
+      "required": true,
+      "description": "Signed project registry metadata."
+    },
+    {
+      "asset_name": "project_registry.signature.b64",
+      "local_path": "implementation/phase1/release/signing/project_registry.signature.b64",
+      "sha256": "cdd3adf03a2ea577c82fd63e1f01d00fec3e2375f6998bd519b6a58447446983",
+      "bytes": 89,
+      "required": true,
+      "description": "Base64 Ed25519 signature for the project registry body."
+    },
+    {
+      "asset_name": "project_registry_ed25519.pub.pem",
+      "local_path": "implementation/phase1/release/signing/project_registry_ed25519.pub.pem",
+      "sha256": "869e49811d0b90236c5757eaeb043ef1382b627b1362b38b076189c28b9f4c01",
+      "bytes": 113,
+      "required": true,
+      "description": "Public verification key for project registry signatures."
+    },
+    {
+      "asset_name": "release_registry.json",
+      "local_path": "implementation/phase1/release/release_registry.json",
+      "sha256": "5d26b5d7654eab244f31ab0d6f067512868bb5f2a1e0f5cc8d8615e70dc0edb6",
+      "bytes": 59871,
+      "required": true,
+      "description": "Signed release registry used as project registry input."
+    },
+    {
+      "asset_name": "release_registry.signature.b64",
+      "local_path": "implementation/phase1/release/signing/release_registry.signature.b64",
+      "sha256": "9893242e5b10eae445573d5725b9c1938f3b221cf96180519832578dd9a5677f",
+      "bytes": 89,
+      "required": true,
+      "description": "Base64 Ed25519 signature for the release registry body."
+    },
+    {
+      "asset_name": "release_registry_ed25519.pub.pem",
+      "local_path": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
+      "sha256": "ac939e258b3549f4d699aa55803c79d3128b3ee21eeae096cad306f9879c1643",
+      "bytes": 113,
+      "required": true,
+      "description": "Public verification key for release registry signatures."
+    },
+    {
+      "asset_name": "optimized_drawing_review.html",
+      "local_path": "implementation/phase1/release/visualization/optimized_drawing_review.html",
+      "sha256": "95a3ae434195dac528df238a836828783adc7ed331fd1646addfe362423e2d21",
+      "bytes": 10263054,
+      "required": true,
+      "description": "Generated single-file internal optimized drawing review viewer."
+    },
+    {
+      "asset_name": "optimized_drawing_expert_review.html",
+      "local_path": "implementation/phase1/release/visualization/optimized_drawing_expert_review.html",
+      "sha256": "4adc939de1b6352f9033f43d025525902f99bc6e355d7cd82fce299d9df07a3c",
+      "bytes": 5371408,
+      "required": true,
+      "description": "Generated single-file expert review viewer."
+    },
+    {
+      "asset_name": "optimized_drawing_review_summary.json",
+      "local_path": "implementation/phase1/release/visualization/optimized_drawing_review_summary.json",
+      "sha256": "451269203a739fb1c64fc6f62b678661087c88d31d6647f97b188fea52233a84",
+      "bytes": 15430566,
+      "required": true,
+      "description": "Generated optimized drawing review summary payload."
+    },
+    {
+      "asset_name": "optimized_drawing_expert_review.metadata.json",
+      "local_path": "implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json",
+      "sha256": "7427fc72b26a605e0a9434c784131ddeccd6efba7fead0fac17ea11bb59fbe14",
+      "bytes": 971910,
+      "required": true,
+      "description": "Generated expert-review metadata sidecar."
+    },
+    {
+      "asset_name": "optimized_drawing_expert_review.pdf",
+      "local_path": "implementation/phase1/release/visualization/optimized_drawing_expert_review.pdf",
+      "sha256": "76fc124511540cc0a96ea2056d78abaaff9c5fe1e4c91b299710256896249af4",
+      "bytes": 143745,
+      "required": false,
+      "description": "Optional generated PDF export for the expert review surface."
+    }
+  ]
+}

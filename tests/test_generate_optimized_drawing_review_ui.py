@@ -36,6 +36,161 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _write_delivery_contract_fixture(tmp_path: Path, module) -> tuple[Path, Path]:
+    release_dir = tmp_path / "release"
+    visualization_dir = release_dir / "visualization"
+    signing_dir = release_dir / "signing"
+    visualization_dir.mkdir(parents=True, exist_ok=True)
+    signing_dir.mkdir(parents=True, exist_ok=True)
+
+    project_registry = release_dir / "project_registry.json"
+    project_signature = signing_dir / "project_registry.signature.b64"
+    project_package = release_dir / "project_package.zip"
+    _write_json(project_registry, {"contract_pass": True, "summary": {"package_sha256": "fixture"}})
+    project_signature.write_text("U0lHTkFUVVJF\n", encoding="utf-8")
+    with zipfile.ZipFile(project_package, "w") as archive:
+        archive.writestr("package_manifest.json", "{}")
+
+    source_mgt = visualization_dir / "midas_generator_33.mgt"
+    optimized_mgt = visualization_dir / "midas_generator_33.optimized.mgt"
+    loadcomb_report = visualization_dir / "midas_generator_33.optimized.loadcomb_roundtrip_report.json"
+    diff_json = visualization_dir / "midas_generator_33.optimized.source_output_diff.json"
+    diff_txt = visualization_dir / "midas_generator_33.optimized.source_output_diff.txt"
+    diff_window_json = visualization_dir / "midas_generator_33.optimized.source_output_diff_window.json"
+    diff_window_txt = visualization_dir / "midas_generator_33.optimized.source_output_diff_window.txt"
+    midas_gate = visualization_dir / "midas_native_roundtrip_gate_report.json"
+    export_report = visualization_dir / "midas_generator_33.optimized.export_report.json"
+
+    source_mgt.write_text("*SOURCE\n", encoding="utf-8")
+    optimized_mgt.write_text("*SOURCE\n*OPTIMIZED\n", encoding="utf-8")
+    _write_json(loadcomb_report, {"contract_pass": True, "summary": {"combo_count": 1}})
+    _write_json(diff_json, {"changed_line_count": 1, "sample_lines": ["+*OPTIMIZED"]})
+    diff_txt.write_text("source_output_mgt preview\n", encoding="utf-8")
+    _write_json(
+        diff_window_json,
+        {
+            "summary_line": "source_output_mgt window: changed=1",
+            "window_rows": [{"member_id": "B-101", "line": "+*OPTIMIZED"}],
+            "member_row_indices": {"B-101": [0]},
+        },
+    )
+    diff_window_txt.write_text("MIDAS source vs output diff window\n", encoding="utf-8")
+    _write_json(
+        midas_gate,
+        {
+            "contract_pass": True,
+            "summary": {
+                "summary_line": "roundtrip gate: PASS",
+                "ready_count": 1,
+                "corpus_case_count": 1,
+                "public_native_ready_count": 1,
+            },
+        },
+    )
+    _write_json(
+        export_report,
+        {
+            "contract_pass": True,
+            "reason_code": "PASS",
+            "summary": {
+                "support_mode": "fixture_supported_changeset",
+                "mgt_export_delivery_boundary": "fixture delivery boundary",
+                "output_mgt_exists": True,
+                "loadcomb_roundtrip_pass": True,
+                "loadcomb_combo_count": 1,
+                "unsupported_change_count": 0,
+                "total_change_count": 1,
+                "source_vs_output_diff_summary_line": "source_output_mgt: changed=1",
+                "source_vs_output_diff_changed_line_count": 1,
+                "source_output_mgt_diff_window_member_row_indices": {"B-101": [0]},
+            },
+            "artifacts": {
+                "source_mgt": str(source_mgt),
+                "output_mgt": str(optimized_mgt),
+                "loadcomb_roundtrip_report_json": str(loadcomb_report),
+                "source_output_mgt_diff_json": str(diff_json),
+                "source_output_mgt_diff_preview_txt": str(diff_txt),
+                "source_output_mgt_diff_window_json": str(diff_window_json),
+                "source_output_mgt_diff_window_preview_txt": str(diff_window_txt),
+            },
+        },
+    )
+
+    viewer_json = visualization_dir / "structural_optimization_viewer.json"
+    out_html = visualization_dir / "optimized_drawing_review.html"
+    out_summary = visualization_dir / "optimized_drawing_review_summary.json"
+    _write_json(
+        viewer_json,
+        {
+            "case_context": {
+                "case_id": "delivery_contract_fixture",
+                "case_title": "Delivery Contract Fixture",
+                "mgt_export_report_path": str(export_report),
+                "midas_native_roundtrip_gate_report_path": str(midas_gate),
+            },
+            "baseline_structure": {
+                "total_element_count": 2,
+                "plan_xy_svg": "<svg xmlns='http://www.w3.org/2000/svg'></svg>",
+                "elevation_xz_svg": "<svg xmlns='http://www.w3.org/2000/svg'></svg>",
+                "isometric_xyz_svg": "<svg xmlns='http://www.w3.org/2000/svg'></svg>",
+            },
+            "member_overlay": {
+                "changed_member_count": 1,
+                "plan_xy_svg": "<svg xmlns='http://www.w3.org/2000/svg'></svg>",
+                "elevation_xz_svg": "<svg xmlns='http://www.w3.org/2000/svg'></svg>",
+                "isometric_xyz_svg": "<svg xmlns='http://www.w3.org/2000/svg'></svg>",
+                "member_locator_rows": [{"member_id": "B-101", "story": "S01"}],
+            },
+            "interactive_3d": {
+                "mode": "interactive_canvas_xyz_structure",
+                "comparison_availability": "baseline_vs_changed",
+                "baseline_segments": [
+                    {"member_id": "B-101", "story_band_label": "S01", "p0": [0, 0, 0], "p1": [1, 0, 0]}
+                ],
+                "after_segments": [
+                    {"member_id": "B-101", "story_band_label": "S01", "p0": [0, 0, 0], "p1": [1, 0, 0]}
+                ],
+            },
+            "change_overview": {
+                "member_type_rows": [
+                    {
+                        "member_type": "beam",
+                        "changed_group_count": 1,
+                        "cost_proxy_delta_sum": -1.0,
+                        "constructability_delta_sum": 0.0,
+                        "max_dcr_after_max": 0.8,
+                    }
+                ],
+                "story_band_rows": [
+                    {
+                        "story_band": "S01",
+                        "zone_label": "perimeter",
+                        "member_type": "beam",
+                        "changed_group_count": 1,
+                        "cost_proxy_delta_sum": -1.0,
+                        "constructability_delta_sum": 0.0,
+                        "max_dcr_after_max": 0.8,
+                    }
+                ],
+                "zone_rows": [],
+            },
+            "artifact_links": {
+                "project_registry_report": str(project_registry),
+                "project_package_zip": str(project_package),
+                "project_registry_signature": str(project_signature),
+            },
+        },
+    )
+
+    module.write_review_artifacts(
+        viewer_json_path=viewer_json,
+        out_html=out_html,
+        out_summary=out_summary,
+        expert_metadata_json_path=tmp_path / "missing_expert_review_issue_metadata.json",
+    )
+    return out_summary, out_summary.with_name("optimized_drawing_expert_review.metadata.json")
+
+
 def _assert_delivery_contract_core(payload: dict) -> None:
     archive_contract = payload["export_handoff_contracts"]["archive_handoff_contract"]
     assert archive_contract["pass"] is True
@@ -2528,10 +2683,9 @@ def test_all_invalid_geometry_is_traceable_in_summary_and_export_handoff_metadat
     assert expert_bundle["export_handoff_contracts"]["interactive_3d_geometry_contract"] == expected_contract
 
 
-def test_current_release_summary_and_expert_metadata_keep_delivery_contract_freshness() -> None:
+def test_generated_release_summary_and_expert_metadata_keep_delivery_contract_freshness(tmp_path: Path) -> None:
     module = _load_module()
-    release_summary_path = Path(module.DEFAULT_OUT_SUMMARY)
-    release_metadata_path = release_summary_path.with_name("optimized_drawing_expert_review.metadata.json")
+    release_summary_path, release_metadata_path = _write_delivery_contract_fixture(tmp_path, module)
 
     release_summary = json.loads(release_summary_path.read_text(encoding="utf-8"))
     release_metadata = json.loads(release_metadata_path.read_text(encoding="utf-8"))
@@ -2551,10 +2705,9 @@ def test_current_release_summary_and_expert_metadata_keep_delivery_contract_fres
     )
 
 
-def test_current_release_summary_and_metadata_expose_project_package_membership_freshness_contract() -> None:
+def test_generated_release_summary_and_metadata_expose_project_package_membership_freshness_contract(tmp_path: Path) -> None:
     module = _load_module()
-    release_summary_path = Path(module.DEFAULT_OUT_SUMMARY)
-    release_metadata_path = release_summary_path.with_name("optimized_drawing_expert_review.metadata.json")
+    release_summary_path, release_metadata_path = _write_delivery_contract_fixture(tmp_path, module)
 
     release_summary = json.loads(release_summary_path.read_text(encoding="utf-8"))
     release_metadata = json.loads(release_metadata_path.read_text(encoding="utf-8"))

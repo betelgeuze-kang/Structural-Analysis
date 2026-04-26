@@ -1,7 +1,0 @@
-{
-  "schema_version": "1.0",
-  "generated_at": "2026-04-06T13:54:38.034936+00:00",
-  "test_name": "scaleout_io_profile",
-  "latest_run_dir": "implementation/phase1/experiments/by_test/scaleout_io_profile/20260406T135438Z",
-  "latest_manifest": "implementation/phase1/experiments/by_test/scaleout_io_profile/20260406T135438Z/artifact_archive_manifest.json"
-}

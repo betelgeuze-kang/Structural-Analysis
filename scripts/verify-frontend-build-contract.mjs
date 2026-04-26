@@ -37,6 +37,10 @@ if (existsSync(path.join(rootDir, 'pakage.json'))) {
   fail('Stale typo manifest pakage.json must be removed.')
 }
 
+if (existsSync(path.join(rootDir, 'src/app.tsx'))) {
+  fail('Stale lowercase src/app.tsx must be removed; src/main.tsx imports src/App.tsx.')
+}
+
 if (packageJson.name !== 'structural-optimization-workbench') {
   fail(`Unexpected package name: ${packageJson.name}`)
 }

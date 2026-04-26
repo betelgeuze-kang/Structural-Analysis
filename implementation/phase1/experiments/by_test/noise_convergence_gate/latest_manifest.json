@@ -1,7 +1,0 @@
-{
-  "schema_version": "1.0",
-  "generated_at": "2026-04-11T15:19:42.895053+00:00",
-  "test_name": "noise_convergence_gate",
-  "latest_run_dir": "implementation/phase1/experiments/by_test/noise_convergence_gate/20260411T151942Z",
-  "latest_manifest": "implementation/phase1/experiments/by_test/noise_convergence_gate/20260411T151942Z/artifact_archive_manifest.json"
-}

@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "codex/**"]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: "npm"
+
+      - name: Install Python package
+        run: python -m pip install -e .[dev]
+
+      - name: Repository hygiene
+        run: python scripts/check_repo_hygiene.py --show-ok
+
+      - name: Release artifact manifest
+        run: python scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json
+
+      - name: Python tests
+        run: |
+          python -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
+          python -m pytest -q tests/test_generate_release_project_registry_bootstrap.py tests/test_release_registry.py
+
+      - name: Frontend contract
+        run: npm run verify:frontend-contract
+
+      - name: Frontend smoke
+        run: npm run verify:frontend-smoke

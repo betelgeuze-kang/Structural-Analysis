@@ -1,6 +1,0 @@
-member_id,case_id,member_type,governing_component,governing_clause,current_max_dcr,direction,action_name,action_family,required_capacity_scale,estimated_max_dcr_after,priority_score,design_optimization_aligned,related_change_row_count,rationale
-B1,CASE-B1,beam,flexure,KDS-RC-BEAM-FLEX-001,1.24,strengthen,beam_section_up,beam_section,1.305263157894737,0.95,39.0,False,0,increase section or reinforcement so the governing clause returns below the target DCR
-S1,CASE-S1,slab,punching,KDS-RC-SLAB-PUNCH-001,1.18,strengthen,slab_thickness_up,slab_thickness,1.2421052631578948,0.9499999999999998,33.0,False,0,increase slab punching perimeter or thickness to recover punching margin
-W1,CASE-W1,wall,boundary_element,KDS-RC-WALL-BE-001,1.12,strengthen,core_wall_up,core_wall,1.1789473684210527,0.95,27.000000000000014,False,0,increase wall boundary capacity to reduce governing compression demand
-N1,CASE-N1,connection,slip,KDS-RC-CONN-SLIP-001,1.08,strengthen,connection_detailing_up,connection_detailing,1.136842105263158,0.9499999999999998,23.00000000000001,True,0,tighten connection detailing to reduce slip and rotational demand
-C1,CASE-C1,column,axial_flexure,KDS-RC-COL-INT-001,0.52,reduce,perimeter_frame_down,perimeter_frame,0.8,0.65,9.0,True,0,harvest overstrength while preserving a practical DCR buffer and simplifying the package

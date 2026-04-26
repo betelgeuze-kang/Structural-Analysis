@@ -1,7 +1,0 @@
-{
-  "schema_version": "1.0",
-  "generated_at": "2026-04-06T13:53:21.675736+00:00",
-  "test_name": "real_source_multi_gate",
-  "latest_run_dir": "implementation/phase1/experiments/by_test/real_source_multi_gate/20260406T135321Z",
-  "latest_manifest": "implementation/phase1/experiments/by_test/real_source_multi_gate/20260406T135321Z/artifact_archive_manifest.json"
-}

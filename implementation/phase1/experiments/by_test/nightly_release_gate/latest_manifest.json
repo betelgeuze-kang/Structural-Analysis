@@ -1,7 +1,0 @@
-{
-  "schema_version": "1.0",
-  "generated_at": "2026-04-11T12:04:20.153245+00:00",
-  "test_name": "nightly_release_gate",
-  "latest_run_dir": "implementation/phase1/experiments/by_test/nightly_release_gate/20260411T120420Z",
-  "latest_manifest": "implementation/phase1/experiments/by_test/nightly_release_gate/20260411T120420Z/artifact_archive_manifest.json"
-}

@@ -1,7 +1,0 @@
-{
-  "schema_version": "1.0",
-  "generated_at": "2026-03-06T11:53:45.449438+00:00",
-  "test_name": "partitioned_scaleout_pr",
-  "latest_run_dir": "implementation/phase1/experiments/by_test/partitioned_scaleout_pr/20260306T115345Z",
-  "latest_manifest": "implementation/phase1/experiments/by_test/partitioned_scaleout_pr/20260306T115345Z/artifact_archive_manifest.json"
-}

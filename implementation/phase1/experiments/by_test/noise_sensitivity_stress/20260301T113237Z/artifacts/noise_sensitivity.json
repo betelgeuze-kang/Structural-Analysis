@@ -1,8 +1,0 @@
-{
-  "schema_version": "1.0",
-  "run_id": "phase1-noise-sensitivity-stress",
-  "generated_at": "2026-03-01T11:32:37.694742+00:00",
-  "contract_pass": false,
-  "reason_code": "ERR_INVALID_INPUT",
-  "reason": "invalid input parameter range: target case selection failed: required=4, selected=3, split=test"
-}

@@ -1,7 +1,0 @@
-{
-  "schema_version": "1.0",
-  "generated_at": "2026-03-28T15:33:49.607632+00:00",
-  "test_name": "nightly_10m_repro_gate",
-  "latest_run_dir": "implementation/phase1/experiments/by_test/nightly_10m_repro_gate/20260328T153349Z",
-  "latest_manifest": "implementation/phase1/experiments/by_test/nightly_10m_repro_gate/20260328T153349Z/artifact_archive_manifest.json"
-}

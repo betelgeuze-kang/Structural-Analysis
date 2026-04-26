@@ -1,7 +1,0 @@
-{
-  "schema_version": "1.0",
-  "generated_at": "2026-04-22T11:54:09.839563+00:00",
-  "test_name": "nonlinear_ndtha_stress",
-  "latest_run_dir": "implementation/phase1/experiments/by_test/nonlinear_ndtha_stress/20260422T115409Z",
-  "latest_manifest": "implementation/phase1/experiments/by_test/nonlinear_ndtha_stress/20260422T115409Z/artifact_archive_manifest.json"
-}

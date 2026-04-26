@@ -3,6 +3,7 @@
 ## Documents
 
 - [Frontend build reproducibility](docs/frontend-build-reproducibility.md)
+- [Viewer source/export contract](docs/viewer-contract.md)
 - [차세대 하이브리드 건축구조 분석 AI 아키텍처 명세서 (ADD)](docs/architecture-definition-document.md)
 - [Phase 1 실행 산출물: LF 출력 스키마/검증](implementation/phase1/README.md)
 - [Phase 1 다음 구현 계획](implementation/phase1/next-implementation-plan.md)
@@ -12,6 +13,34 @@
 - [Phase 1 Krylov projection report](implementation/phase1/krylov_projection_report.json)
 - [Phase 1 material mapping report](implementation/phase1/material_map_report.json)
 - [Phase 1 priority 1/2/3 summary](implementation/phase1/priority3_summary.json)
+
+## Clean Clone Quickstart
+
+From a source checkout, run:
+
+```bash
+npm ci
+python3 -m pip install -e .[dev]
+npm run build
+python3 -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
+python3 scripts/check_repo_hygiene.py --show-ok
+python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json
+```
+
+If you want the clean-clone smoke path instead of the manual build step, run `npm run verify:frontend-smoke`; it already performs the frontend contract check, a clean `npm ci`, and `npm run build`.
+
+## Source vs Release Viewers
+
+- Source viewers live in `src/structure-viewer/` and are for local development, QA, and deterministic rebuilds from the source repo.
+- They may depend on repo-local vendor files and committed sidecars during development.
+- Generated single-file delivery viewers are release artifacts listed in `implementation/phase1/release_artifacts_manifest.json`.
+- Download the GitHub Release whose tag matches the manifest `release_tag`, unpack the assets into a local directory, and validate them with `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <downloaded-release-root>`.
+- If you restore the release bundle locally, regenerate the release registries with `implementation/phase1/generate_release_project_registry_bootstrap.py` instead of hand-editing the packaged outputs.
+
+## Repository Hygiene
+
+- The source repo intentionally excludes private signing keys, large raw datasets, generated release folders, repeated experiment archives, and temporary QA scratch space.
+- `python3 scripts/check_repo_hygiene.py --show-ok` enforces that `implementation/phase1/release/`, `implementation/phase1/experiments/`, `tmp/`, `node_modules/`, `dist/`, private `.pem` keys, and oversized raw artifacts stay out of Git.
 
 ## Railway/Tunnel Structural Dynamics Extension
 

@@ -1,9 +1,0 @@
-optimized_drawing_expert_review_pdf_batch
-source_metadata_json=implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json
-output_dir=implementation/phase1/release/visualization/optimized_drawing_expert_review_batch
-manifest_json=implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/optimized_drawing_expert_review.batch_manifest.json
-template_order=default,seoul_permit_review,structural_peer_committee
-template_count=3
-default | label=Default expert review package | pdf=optimized_drawing_expert_review.default.pdf | issue=PKG-OPT-2026-0410 | authority=Authority of Record | package=Permit / Committee Submission
-seoul_permit_review | label=Seoul permit review package | pdf=optimized_drawing_expert_review.seoul_permit_review.pdf | issue=PKG-OPT-2026-0410 | authority=Seoul Metropolitan Permit Review Office | package=Seoul Permit Review Package
-structural_peer_committee | label=Structural peer committee review package | pdf=optimized_drawing_expert_review.structural_peer_committee.pdf | issue=PKG-OPT-2026-0410 | authority=Structural Peer Committee | package=Structural Peer Committee Review Package

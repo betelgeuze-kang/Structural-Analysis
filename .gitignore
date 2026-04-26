@@ -43,6 +43,7 @@ implementation/phase1/__pycache__/
 implementation/phase1/rust_hip_md3bead_hook/target/
 
 # Generated experiment outputs
+implementation/phase1/experiments/
 implementation/phase1/experiments/by_test/
 implementation/phase1/experiments/latest/
 implementation/phase1/experiments/legacy_cleanup/
@@ -51,10 +52,12 @@ implementation/phase1/experiments/commercial_direct_*/
 implementation/phase1/experiments/real_accuracy_*/
 
 # Working/output trees
+tmp/
 implementation/phase1/workspace/
 implementation/phase1/stress/
 
 # Generated release bundles
+implementation/phase1/release/
 implementation/phase1/release/*.tar.gz
 
 # Generated reports/manifests (phase1 root)
@@ -82,3 +85,5 @@ implementation/phase1/release/signing/**/*.pem
 implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/Phase_I_data_all.zip
 implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/normalized_csv/accdata_2010-01-19-18.csv
 implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.csv
+implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip
+implementation/phase1/workspace/inputs/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip
