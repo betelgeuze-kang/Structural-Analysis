@@ -1,0 +1,126 @@
+{
+  "contract_pass": true,
+  "generated_at": "2026-04-27T00:00:00+09:00",
+  "p1_gate_rows": [
+    {
+      "coverage_status": "planned",
+      "gate_id": "P1_KONEPS_PARSER_COVERAGE",
+      "required_targets": [
+        ".mgt",
+        ".ifc",
+        ".dwg",
+        ".dxf",
+        ".pdf",
+        ".xlsx",
+        ".zip"
+      ],
+      "source_id": "koneps_turnkey_design_docs"
+    },
+    {
+      "coverage_status": "planned",
+      "gate_id": "P1_PEER_TBI_BENCHMARK_METRICS",
+      "required_targets": [
+        "period",
+        "base_shear",
+        "story_drift",
+        "nonlinear_response",
+        "citation"
+      ],
+      "source_id": "peer_tbi_tall_buildings"
+    },
+    {
+      "coverage_status": "planned",
+      "gate_id": "P1_RAW_REDISTRIBUTION_SAFETY",
+      "raw_redistribution_auto_allowed_after_p0": false,
+      "safety_flag": "P0_CLOSEOUT_DOES_NOT_GRANT_RAW_REDISTRIBUTION"
+    }
+  ],
+  "reason_code": "PASS",
+  "run_id": "phase1-real-project-parser-coverage-matrix",
+  "schema_version": "real_project_parser_coverage_matrix.v1",
+  "source_manifest_schema_version": "real_project_corpus_manifest.v1",
+  "source_rows": [
+    {
+      "benchmark_metric_targets": [],
+      "jurisdiction": "KR",
+      "manual_review_required": true,
+      "p0_provenance_required": true,
+      "parser_coverage_targets": [
+        {
+          "coverage_status": "planned",
+          "file_type": ".mgt"
+        },
+        {
+          "coverage_status": "planned",
+          "file_type": ".ifc"
+        },
+        {
+          "coverage_status": "planned",
+          "file_type": ".dwg"
+        },
+        {
+          "coverage_status": "planned",
+          "file_type": ".dxf"
+        },
+        {
+          "coverage_status": "planned",
+          "file_type": ".pdf"
+        },
+        {
+          "coverage_status": "planned",
+          "file_type": ".xlsx"
+        },
+        {
+          "coverage_status": "planned",
+          "file_type": ".zip"
+        }
+      ],
+      "priority_phase": "P0",
+      "redistribution_allowed": false,
+      "source_id": "koneps_turnkey_design_docs",
+      "source_kind": "public_procurement_design_documents",
+      "source_label": "KONEPS turnkey and technical-proposal design-document candidates"
+    },
+    {
+      "benchmark_metric_targets": [
+        {
+          "coverage_status": "planned",
+          "metric": "period"
+        },
+        {
+          "coverage_status": "planned",
+          "metric": "base_shear"
+        },
+        {
+          "coverage_status": "planned",
+          "metric": "story_drift"
+        },
+        {
+          "coverage_status": "planned",
+          "metric": "nonlinear_response"
+        },
+        {
+          "coverage_status": "planned",
+          "metric": "citation"
+        }
+      ],
+      "jurisdiction": "US",
+      "manual_review_required": true,
+      "p0_provenance_required": true,
+      "parser_coverage_targets": [],
+      "priority_phase": "P0",
+      "redistribution_allowed": false,
+      "source_id": "peer_tbi_tall_buildings",
+      "source_kind": "public_research_tall_building_benchmarks",
+      "source_label": "PEER Tall Buildings Initiative benchmark candidates"
+    }
+  ],
+  "summary": {
+    "koneps_parser_target_count": 7,
+    "manual_review_required_count": 2,
+    "p0_provenance_required_count": 2,
+    "peer_tbi_benchmark_metric_target_count": 5,
+    "raw_redistribution_auto_allowed_after_p0": false,
+    "source_family_count": 2
+  }
+}

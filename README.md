@@ -4,6 +4,7 @@
 
 - [Frontend build reproducibility](docs/frontend-build-reproducibility.md)
 - [Viewer source/export contract](docs/viewer-contract.md)
+- [Real Project Corpus closeout guide](docs/real-project-corpus.md)
 - [차세대 하이브리드 건축구조 분석 AI 아키텍처 명세서 (ADD)](docs/architecture-definition-document.md)
 - [Phase 1 실행 산출물: LF 출력 스키마/검증](implementation/phase1/README.md)
 - [Phase 1 다음 구현 계획](implementation/phase1/next-implementation-plan.md)
@@ -27,6 +28,7 @@ python3 -m pytest -q tests/test_real_project_corpus_manifest.py
 python3 scripts/check_repo_hygiene.py --show-ok
 python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json
 python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
+python3 implementation/phase1/generate_real_project_parser_coverage_matrix.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --out implementation/phase1/real_project_parser_coverage_matrix.json
 ```
 
 If you want the clean-clone smoke path instead of the manual build step, run `npm run verify:frontend-smoke`; it already performs the frontend contract check, a clean `npm ci`, and `npm run build`.
@@ -46,8 +48,9 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 
 ## Real Project Corpus P0/P1/P2
 
-- P0 starts with [real_project_corpus_seed_manifest.json](implementation/phase1/real_project_corpus_seed_manifest.json): KONEPS and PEER TBI are registered as source families, but no attachment is treated as redistributable until provenance, security, copyright, checksum, and manual-review gates pass.
-- P1 expands parser and benchmark coverage after P0 is clean: MGT/IFC/DWG/DXF/PDF/XLSX extraction for KONEPS candidates and period/base-shear/drift/nonlinear metrics for PEER TBI candidates.
+- Quick check: `python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary`
+- P0 starts with [real_project_corpus_seed_manifest.json](implementation/phase1/real_project_corpus_seed_manifest.json): KONEPS and PEER TBI are registered as source families, but KONEPS public metadata/announcement/attachment access stays separate from redistributable artifacts, and PEER TBI starts from citation plus benchmark metric records while raw model redistribution stays subject to document-level review.
+- P1 begins with [real_project_parser_coverage_matrix.json](implementation/phase1/real_project_parser_coverage_matrix.json): KONEPS coverage targets `.mgt/.ifc/.dwg/.dxf/.pdf/.xlsx/.zip`, PEER TBI benchmark targets period/base shear/story drift/nonlinear response/citation, and raw redistribution remains disabled after P0 unless artifact-level review explicitly allows it.
 - P2 automates refresh, redaction, release packaging, and viewer/report surfacing only after P0/P1 gates are green.
 
 ## Railway/Tunnel Structural Dynamics Extension
