@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/real_project_corpus_manifest.v1.json",
+  "title": "Real Project Corpus Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "phase_closeout_order",
+    "source_families",
+    "artifact_rows"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "real_project_corpus_manifest.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 10
+    },
+    "phase_closeout_order": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["phase_id", "title", "exit_gates"],
+        "properties": {
+          "phase_id": {
+            "enum": ["P0", "P1", "P2"]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "exit_gates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "source_families": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "source_label",
+          "priority_phase",
+          "official_entrypoint_url",
+          "source_kind",
+          "jurisdiction",
+          "access_policy",
+          "target_file_types",
+          "p0_exit_gates"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_\\-]+$"
+          },
+          "source_label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "priority_phase": {
+            "enum": ["P0", "P1", "P2"]
+          },
+          "official_entrypoint_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "source_kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "jurisdiction": {
+            "type": "string",
+            "minLength": 2
+          },
+          "access_policy": {
+            "$ref": "#/$defs/access_policy"
+          },
+          "target_file_types": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^\\."
+            }
+          },
+          "p0_exit_gates": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "artifact_rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "artifact_id",
+          "source_id",
+          "retrieval_status",
+          "source_url",
+          "access_policy",
+          "file_inventory"
+        ],
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_\\-]+$"
+          },
+          "source_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_\\-]+$"
+          },
+          "retrieval_status": {
+            "enum": ["candidate", "downloaded", "excluded", "redacted"]
+          },
+          "source_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "access_policy": {
+            "$ref": "#/$defs/access_policy"
+          },
+          "file_inventory": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["path", "role"],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "access_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classification",
+        "redistribution_allowed",
+        "requires_manual_review",
+        "license_basis"
+      ],
+      "properties": {
+        "classification": {
+          "enum": ["public", "restricted", "unknown", "redacted"]
+        },
+        "redistribution_allowed": {
+          "type": "boolean"
+        },
+        "requires_manual_review": {
+          "type": "boolean"
+        },
+        "license_basis": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

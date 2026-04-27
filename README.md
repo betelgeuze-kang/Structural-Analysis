@@ -23,8 +23,10 @@ npm ci
 python3 -m pip install -e .[dev]
 npm run build
 python3 -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
+python3 -m pytest -q tests/test_real_project_corpus_manifest.py
 python3 scripts/check_repo_hygiene.py --show-ok
 python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json
+python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
 ```
 
 If you want the clean-clone smoke path instead of the manual build step, run `npm run verify:frontend-smoke`; it already performs the frontend contract check, a clean `npm ci`, and `npm run build`.
@@ -41,6 +43,12 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 
 - The source repo intentionally excludes private signing keys, large raw datasets, generated release folders, repeated experiment archives, and temporary QA scratch space.
 - `python3 scripts/check_repo_hygiene.py --show-ok` enforces that `implementation/phase1/release/`, `implementation/phase1/experiments/`, `tmp/`, `node_modules/`, `dist/`, private `.pem` keys, and oversized raw artifacts stay out of Git.
+
+## Real Project Corpus P0/P1/P2
+
+- P0 starts with [real_project_corpus_seed_manifest.json](implementation/phase1/real_project_corpus_seed_manifest.json): KONEPS and PEER TBI are registered as source families, but no attachment is treated as redistributable until provenance, security, copyright, checksum, and manual-review gates pass.
+- P1 expands parser and benchmark coverage after P0 is clean: MGT/IFC/DWG/DXF/PDF/XLSX extraction for KONEPS candidates and period/base-shear/drift/nonlinear metrics for PEER TBI candidates.
+- P2 automates refresh, redaction, release packaging, and viewer/report surfacing only after P0/P1 gates are green.
 
 ## Railway/Tunnel Structural Dynamics Extension
 

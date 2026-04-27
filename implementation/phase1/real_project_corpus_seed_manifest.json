@@ -1,0 +1,83 @@
+{
+  "schema_version": "real_project_corpus_manifest.v1",
+  "generated_at": "2026-04-27T00:00:00+09:00",
+  "phase_closeout_order": [
+    {
+      "phase_id": "P0",
+      "title": "Legal provenance and real-project ingest gate",
+      "exit_gates": [
+        "Every source family records official URL, jurisdiction, access policy, and target file types",
+        "Restricted or unknown material is never marked redistribution_allowed",
+        "Downloaded artifacts require sha256, bytes, file inventory, and manual review status",
+        "KONEPS and PEER TBI source families are present before crawler automation starts"
+      ]
+    },
+    {
+      "phase_id": "P1",
+      "title": "Parser coverage and commercial benchmark breadth",
+      "exit_gates": [
+        "KONEPS candidates report MGT/IFC/DWG/DXF/PDF/XLSX extraction coverage",
+        "PEER TBI candidates report period, base shear, story drift, and nonlinear benchmark metrics",
+        "Parser coverage gaps are classified as typed entity, raw-preserved, excluded, or blocked"
+      ]
+    },
+    {
+      "phase_id": "P2",
+      "title": "Automated refresh, redaction, and delivery packaging",
+      "exit_gates": [
+        "Crawler refresh is rate-limited and provenance-preserving",
+        "Redaction and redistribution policy are enforced before release packaging",
+        "Release viewer and report surfaces show corpus source, checksum, and benchmark status"
+      ]
+    }
+  ],
+  "source_families": [
+    {
+      "source_id": "koneps_turnkey_design_docs",
+      "source_label": "KONEPS turnkey and technical-proposal design-document candidates",
+      "priority_phase": "P0",
+      "official_entrypoint_url": "https://www.data.go.kr/data/15058815/openapi.do",
+      "source_kind": "public_procurement_design_documents",
+      "jurisdiction": "KR",
+      "access_policy": {
+        "classification": "unknown",
+        "redistribution_allowed": false,
+        "requires_manual_review": true,
+        "license_basis": "Public procurement metadata is open; each attached design document must be reviewed for access, security, copyright, and redistribution constraints before download promotion."
+      },
+      "target_file_types": [".zip", ".mgt", ".ifc", ".dwg", ".dxf", ".pdf", ".xlsx"],
+      "p0_exit_gates": [
+        "notice_id captured",
+        "issuer captured",
+        "original_url captured",
+        "download checksum captured before parse",
+        "security and redistribution review completed"
+      ],
+      "notes": "Use as a metadata/provenance entrypoint first. Do not treat all procurement attachments as redistributable training assets."
+    },
+    {
+      "source_id": "peer_tbi_tall_buildings",
+      "source_label": "PEER Tall Buildings Initiative benchmark candidates",
+      "priority_phase": "P0",
+      "official_entrypoint_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
+      "source_kind": "public_research_tall_building_benchmarks",
+      "jurisdiction": "US",
+      "access_policy": {
+        "classification": "public",
+        "redistribution_allowed": false,
+        "requires_manual_review": true,
+        "license_basis": "PEER public reports and benchmark materials can be referenced; redistribution and derived packaging require per-document review."
+      },
+      "target_file_types": [".pdf", ".zip", ".tcl", ".json", ".csv"],
+      "p0_exit_gates": [
+        "PEER report or dataset URL captured",
+        "citation captured",
+        "download checksum captured before parse",
+        "benchmark target metrics recorded",
+        "redistribution review completed"
+      ],
+      "notes": "Prioritize TBI reports and case-study materials for PBD/high-rise benchmark metrics before raw model redistribution."
+    }
+  ],
+  "artifact_rows": []
+}
