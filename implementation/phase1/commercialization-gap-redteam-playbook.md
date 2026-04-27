@@ -295,7 +295,7 @@ python3 implementation/phase1/phase1_ci_gate.py \
 
 ## 7) Real Project Corpus P0/P1/P2 Closeout Track (2026-04-27)
 
-나라장터(KONEPS) 턴키/기술제안 설계도서와 PEER TBI 초고층 benchmark는 상용툴 대체성 검증을 위한 real-project corpus track으로 관리한다. 이 track은 무작정 다운로드/크롤링하지 않고 `provenance -> parser/benchmark coverage -> automation/release` 순서로 닫는다. 세부 운영 기준은 [Real Project Corpus closeout guide](../../docs/real-project-corpus.md)에 맞춘다. 아직 파일명이 확정되지 않은 구현은 파일명보다 역할 기준으로 적는다: manifest, validator, parser matrix, benchmark record, crawler, redaction, release viewer, report surface.
+나라장터(KONEPS) 턴키/기술제안 설계도서와 PEER TBI 초고층 benchmark는 상용툴 대체성 검증을 위한 real-project corpus track으로 관리한다. 이 track은 무작정 다운로드/크롤링하지 않고 `provenance -> parser/benchmark coverage -> automation/release` 순서로 닫는다. 세부 운영 기준은 [Real Project Corpus closeout guide](../../docs/real-project-corpus.md)에 맞춘다. 아직 파일명이 확정되지 않은 구현은 파일명보다 역할 기준으로 적는다: manifest, validator, parser matrix, benchmark record, crawler, redaction, release viewer, report surface. PEER TBI는 citation-first benchmark family이며, raw model/input deck redistribution은 document-level review가 끝나기 전에는 금지다.
 
 ### P0-RP. Provenance / license / security / checksum / manual-review gate
 - 상태: `In Progress`
@@ -306,21 +306,24 @@ python3 implementation/phase1/phase1_ci_gate.py \
   - targeted test
 - Exit Gate:
   - KONEPS source family는 public metadata, announcement/notice, attachment access, retrieved file, redistributable artifact를 구분한다.
-  - PEER TBI source family는 citation과 benchmark metric record를 먼저 고정하고, raw model redistribution은 문서별 검토가 끝나야 한다.
+  - PEER TBI source family는 citation-first benchmark family로 취급하고, citation과 benchmark metric record를 먼저 고정한다. raw model/input deck redistribution은 document-level review가 끝나기 전에는 금지다.
   - 각 source family가 official entrypoint, jurisdiction, access policy, target file type, P0 exit gate를 가진다.
   - `restricted`, `unknown`, `redacted` source/artifact는 `redistribution_allowed=true`가 될 수 없다.
   - `downloaded` artifact는 `sha256`, `bytes`, `file_inventory`, manual-review 결과 없이는 통과하지 않는다.
   - CI에서 seed manifest validation과 targeted test가 통과한다.
 
 ### P1-RP. Parser coverage / benchmark metric gate
-- 상태: `In Progress` (P1 parser/benchmark coverage matrix seed 구현)
+- 상태: `In Progress` (P1 parser/benchmark coverage matrix seed 및 PEER TBI metric record seed 구현)
+- PEER TBI metric record는 P1의 active gate다. citation-linked benchmark record가 고정되어야 P2 crawler/redaction/report surface로 넘어갈 수 있다.
 - 반영 범위:
   - parser/benchmark coverage matrix generator
   - deterministic coverage matrix JSON
+  - PEER TBI benchmark metric record generator
+  - deterministic PEER TBI benchmark metric record JSON
   - targeted test
 - Exit Gate:
   - KONEPS 후보는 `.mgt/.ifc/.dwg/.dxf/.pdf/.xlsx` 추출 coverage와 `typed/raw-preserved/excluded/blocked` classification을 낸다.
-  - PEER TBI 후보는 period, base shear, story drift, nonlinear/PBD target metric을 citation-linked benchmark record로 고정한다.
+  - PEER TBI 후보는 `citation`, `period`, `base_shear`, `story_drift`, `nonlinear_response`를 citation-linked benchmark record로 고정한다. raw model/input deck redistribution은 document-level review가 끝나기 전에는 금지다.
   - parser/benchmark report surface가 real-project corpus row provenance를 release/report surface로 올린다.
 
 ### P2-RP. Automation / redaction / delivery surface gate

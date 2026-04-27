@@ -41,6 +41,10 @@ jobs:
           python implementation/phase1/generate_real_project_parser_coverage_matrix.py \
             --manifest implementation/phase1/real_project_corpus_seed_manifest.json \
             --out implementation/phase1/real_project_parser_coverage_matrix.json
+          python implementation/phase1/build_peer_tbi_benchmark_metric_records.py \
+            --manifest implementation/phase1/real_project_corpus_seed_manifest.json \
+            --coverage-matrix implementation/phase1/real_project_parser_coverage_matrix.json \
+            --out implementation/phase1/peer_tbi_benchmark_metric_records.json
 
       - name: Python tests
         run: |
@@ -48,6 +52,7 @@ jobs:
           python -m pytest -q tests/test_generate_release_project_registry_bootstrap.py tests/test_release_registry.py
           python -m pytest -q tests/test_real_project_corpus_manifest.py
           python -m pytest -q tests/test_real_project_parser_coverage_matrix.py
+          python -m pytest -q tests/test_build_peer_tbi_benchmark_metric_records.py
 
       - name: Frontend contract
         run: npm run verify:frontend-contract
