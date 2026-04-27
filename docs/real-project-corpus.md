@@ -1,6 +1,6 @@
 # Real Project Corpus Closeout Guide
 
-This guide defines how we close the real-project corpus track for KONEPS and PEER TBI. The goal is not to mass-download or indiscriminately redistribute source material. The goal is to keep provenance, coverage, and release eligibility explicit as the corpus moves through P0, P1, and P2.
+This guide defines how we close the real-project corpus track for KONEPS and PEER TBI. The goal is not to mass-download or indiscriminately redistribute source material. The goal is to keep provenance, row-level provenance, coverage, and release eligibility explicit as the corpus moves through P0, P1, P1-3, and P2.
 
 ## Corpus Families
 
@@ -43,6 +43,7 @@ Benchmark metric groups are kept as machine-readable records:
 | --- | --- | --- | --- |
 | P0 | provenance, license, security, checksum, manual-review | official entrypoint, jurisdiction, access policy, file inventory, checksums, reviewer signoff | accept/reject decision and redistributability flag |
 | P1 | parser coverage matrix and benchmark metric record | file-type coverage, typed/raw-preserved/excluded/blocked status, metric rows, citation linkage | corpus coverage report and benchmark table |
+| P1-3 | row provenance gate | source family, access policy, checksum-or-withheld reason, file inventory status, parser contract, row pointer, release-surface eligibility | row-level eligibility for P2 |
 | P2 | crawler automation, redaction, release viewer, report surfacing | refresh schedule, robots and rate-limit handling, redaction policy, release manifest | repeatable refresh and surfaced reports/releases |
 
 ## P0: Provenance / License / Security / Checksum / Manual-Review
@@ -67,6 +68,24 @@ P1 proves that the corpus can support repeatable extraction and comparison.
 - Generate the current PEER TBI seed records with `implementation/phase1/build_peer_tbi_benchmark_metric_records.py`; the deterministic output is `implementation/phase1/peer_tbi_benchmark_metric_records.json`.
 - Keep raw model/input deck redistribution blocked until the relevant document-level review is complete.
 - Keep the benchmark record machine-readable so report generation and regression checks can reuse it.
+
+## P1-3: Real-Project Row Provenance
+
+P1-3 closes the handoff from parsed rows to P2 release/report surfaces.
+
+| Required signal | What it means |
+| --- | --- |
+| source family | The row is tied back to a concrete KONEPS or PEER TBI source family entry. |
+| access policy | The row keeps public, restricted, and redistributable access rules explicit. |
+| checksum or withheld reason | The row carries a checksum when allowed, or an explicit reason when it is withheld. |
+| file inventory status | The row records whether the source file is retrieved, referenced, excluded, blocked, or missing. |
+| parser contract | The parser identity, parser version, and row classification remain auditable. |
+| row pointer | The row keeps a stable page/table/entity/cell/member locator back to source. |
+| release-surface eligibility | The row states clearly whether it may move to P2. |
+
+- KONEPS public metadata/announcement/attachment access is tracked separately from redistributable artifacts.
+- PEER TBI allows citation-first benchmark records, but raw model/input deck release stays blocked until document-level review is complete.
+- Generate the current seed report with `implementation/phase1/build_real_project_row_provenance_report.py`; `implementation/phase1/real_project_row_provenance_report.json` is a generated local/CI report and remains outside Git by default.
 
 ## P2: Crawler Automation / Redaction / Release Viewer / Report Surfacing
 

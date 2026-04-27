@@ -295,7 +295,7 @@ python3 implementation/phase1/phase1_ci_gate.py \
 
 ## 7) Real Project Corpus P0/P1/P2 Closeout Track (2026-04-27)
 
-나라장터(KONEPS) 턴키/기술제안 설계도서와 PEER TBI 초고층 benchmark는 상용툴 대체성 검증을 위한 real-project corpus track으로 관리한다. 이 track은 무작정 다운로드/크롤링하지 않고 `provenance -> parser/benchmark coverage -> automation/release` 순서로 닫는다. 세부 운영 기준은 [Real Project Corpus closeout guide](../../docs/real-project-corpus.md)에 맞춘다. 아직 파일명이 확정되지 않은 구현은 파일명보다 역할 기준으로 적는다: manifest, validator, parser matrix, benchmark record, crawler, redaction, release viewer, report surface. PEER TBI는 citation-first benchmark family이며, raw model/input deck redistribution은 document-level review가 끝나기 전에는 금지다.
+나라장터(KONEPS) 턴키/기술제안 설계도서와 PEER TBI 초고층 benchmark는 상용툴 대체성 검증을 위한 real-project corpus track으로 관리한다. 이 track은 무작정 다운로드/크롤링하지 않고 `provenance -> P1-3 row provenance -> parser/benchmark coverage -> automation/release` 순서로 닫는다. P1-3 gate는 parser/benchmark row가 source family, access policy, checksum-or-withheld reason, file inventory status, parser contract, row pointer, release-surface eligibility를 갖춰야 P2로 올라간다는 뜻이다. CLI는 `implementation/phase1/build_real_project_row_provenance_report.py`, generated output은 `implementation/phase1/real_project_row_provenance_report.json`이다. 세부 운영 기준은 [Real Project Corpus closeout guide](../../docs/real-project-corpus.md)에 맞춘다. 아직 파일명이 확정되지 않은 구현은 파일명보다 역할 기준으로 적는다: manifest, validator, parser matrix, benchmark record, crawler, redaction, release viewer, report surface. PEER TBI는 citation-first benchmark family이며, raw model/input deck redistribution은 document-level review가 끝나기 전에는 금지다.
 
 ### P0-RP. Provenance / license / security / checksum / manual-review gate
 - 상태: `In Progress`
@@ -312,6 +312,14 @@ python3 implementation/phase1/phase1_ci_gate.py \
   - `downloaded` artifact는 `sha256`, `bytes`, `file_inventory`, manual-review 결과 없이는 통과하지 않는다.
   - CI에서 seed manifest validation과 targeted test가 통과한다.
 
+### P1-3. Real-Project Row Provenance
+- 상태: `In Progress` (seed report generator/test 구현, generated JSON은 local/CI 산출물)
+- P1-3 gate:
+  - parser/benchmark row가 source family, access policy, checksum-or-withheld reason, file inventory status, parser contract, row pointer, release-surface eligibility를 모두 갖춘 경우에만 P2로 승격한다.
+  - KONEPS는 public metadata, announcement/notice, attachment access와 redistributable artifact를 구분한다.
+  - PEER TBI는 citation-first benchmark record는 허용하되 raw model/input deck redistribution은 document-level review 전 금지다.
+  - CLI는 `implementation/phase1/build_real_project_row_provenance_report.py`, generated output은 `implementation/phase1/real_project_row_provenance_report.json`이다.
+
 ### P1-RP. Parser coverage / benchmark metric gate
 - 상태: `In Progress` (P1 parser/benchmark coverage matrix seed 및 PEER TBI metric record seed 구현)
 - PEER TBI metric record는 P1의 active gate다. citation-linked benchmark record가 고정되어야 P2 crawler/redaction/report surface로 넘어갈 수 있다.
@@ -324,7 +332,7 @@ python3 implementation/phase1/phase1_ci_gate.py \
 - Exit Gate:
   - KONEPS 후보는 `.mgt/.ifc/.dwg/.dxf/.pdf/.xlsx` 추출 coverage와 `typed/raw-preserved/excluded/blocked` classification을 낸다.
   - PEER TBI 후보는 `citation`, `period`, `base_shear`, `story_drift`, `nonlinear_response`를 citation-linked benchmark record로 고정한다. raw model/input deck redistribution은 document-level review가 끝나기 전에는 금지다.
-  - parser/benchmark report surface가 real-project corpus row provenance를 release/report surface로 올린다.
+  - P1-3 row provenance gate를 통과한 parser/benchmark row만 release/report surface로 올린다.
 
 ### P2-RP. Automation / redaction / delivery surface gate
 - 상태: `Pending after P1-RP`

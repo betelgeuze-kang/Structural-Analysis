@@ -392,8 +392,8 @@ Expected: tests PASS, output contains five metric groups, and every metric row h
 
 **Implementation File Candidates:**
 
-- Create `implementation/phase1/build_real_project_row_provenance.py`.
-- Output `implementation/phase1/real_project_corpus_row_provenance_report.json`.
+- Create `implementation/phase1/build_real_project_row_provenance_report.py`.
+- Output `implementation/phase1/real_project_row_provenance_report.json`.
 - Extend `implementation/phase1/generate_midas_native_corpus_manifest.py` only when real-project rows are ready to carry the same required fields at source emission time.
 - Surface row provenance later in `implementation/phase1/generate_structure_viewer_payloads.py` and `implementation/phase1/generate_release_gap_report.py` as metadata labels only; do not expose restricted raw payloads.
 
@@ -417,7 +417,7 @@ Minimum output shape:
 
 ```json
 {
-  "schema_version": "real_project_corpus_row_provenance_report.v1",
+  "schema_version": "real_project_row_provenance_report.v1",
   "source_manifest_schema_version": "real_project_corpus_manifest.v1",
   "contract_pass": true,
   "reason_code": "PASS",
@@ -453,9 +453,9 @@ Minimum output shape:
 
 **Files:**
 
-- Create: `tests/test_build_real_project_row_provenance.py`
-- Future implementation target: `implementation/phase1/build_real_project_row_provenance.py`
-- Future output target: `implementation/phase1/real_project_corpus_row_provenance_report.json`
+- Create: `tests/test_build_real_project_row_provenance_report.py`
+- Future implementation target: `implementation/phase1/build_real_project_row_provenance_report.py`
+- Future output target: `implementation/phase1/real_project_row_provenance_report.json`
 
 - [ ] **Step 1: Add tests for complete row provenance and fail-closed checksum handling.**
 
@@ -469,7 +469,7 @@ import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-BUILDER = REPO_ROOT / "implementation/phase1/build_real_project_row_provenance.py"
+BUILDER = REPO_ROOT / "implementation/phase1/build_real_project_row_provenance_report.py"
 SEED_MANIFEST = REPO_ROOT / "implementation/phase1/real_project_corpus_seed_manifest.json"
 
 REQUIRED_FIELDS = {
@@ -492,7 +492,7 @@ def _write_json(path: Path, payload: dict) -> None:
 
 def test_row_provenance_report_requires_artifact_parser_and_row_pointer(tmp_path: Path) -> None:
     rows = tmp_path / "parsed_rows.json"
-    out = tmp_path / "real_project_corpus_row_provenance_report.json"
+    out = tmp_path / "real_project_row_provenance_report.json"
     _write_json(
         rows,
         {
@@ -599,19 +599,19 @@ def test_row_provenance_builder_rejects_promoted_row_without_checksum_or_withhel
 Run:
 
 ```bash
-python3 -m pytest -q tests/test_build_real_project_row_provenance.py
+python3 -m pytest -q tests/test_build_real_project_row_provenance_report.py
 ```
 
-Expected before the builder exists: FAIL because `implementation/phase1/build_real_project_row_provenance.py` is missing.
+Expected before the builder exists: FAIL because `implementation/phase1/build_real_project_row_provenance_report.py` is missing.
 
 ### Task 4: Implement The Row Provenance Builder
 
 **Files:**
 
-- Create: `implementation/phase1/build_real_project_row_provenance.py`
+- Create: `implementation/phase1/build_real_project_row_provenance_report.py`
 - Read: `implementation/phase1/real_project_corpus_seed_manifest.json`
 - Read: parsed row JSON supplied by `--parsed-rows`
-- Write: `implementation/phase1/real_project_corpus_row_provenance_report.json`
+- Write: `implementation/phase1/real_project_row_provenance_report.json`
 
 - [ ] **Step 1: Build a CLI that validates promoted rows only.**
 
@@ -708,7 +708,7 @@ def build_report(manifest: dict[str, Any], parsed_rows: dict[str, Any]) -> dict[
     promoted_count = len(promoted)
     coverage = 1.0 if promoted_count == complete_count else 0.0
     return {
-        "schema_version": "real_project_corpus_row_provenance_report.v1",
+        "schema_version": "real_project_row_provenance_report.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_manifest_schema_version": str(manifest.get("schema_version", "") or ""),
         "contract_pass": coverage == 1.0,
@@ -753,11 +753,11 @@ if __name__ == "__main__":
 Run:
 
 ```bash
-python3 -m pytest -q tests/test_build_real_project_row_provenance.py
-python3 implementation/phase1/build_real_project_row_provenance.py \
+python3 -m pytest -q tests/test_build_real_project_row_provenance_report.py
+python3 implementation/phase1/build_real_project_row_provenance_report.py \
   --manifest implementation/phase1/real_project_corpus_seed_manifest.json \
   --parsed-rows implementation/phase1/real_project_promoted_rows.json \
-  --out implementation/phase1/real_project_corpus_row_provenance_report.json
+  --out implementation/phase1/real_project_row_provenance_report.json
 ```
 
 Expected: tests PASS. The report command PASSes only when `real_project_promoted_rows.json` exists and every promoted row carries complete provenance.
@@ -802,7 +802,7 @@ Expected: PASS with all five required metric groups and zero redistributable PEE
 Run:
 
 ```bash
-python3 -m pytest -q tests/test_build_real_project_row_provenance.py
+python3 -m pytest -q tests/test_build_real_project_row_provenance_report.py
 ```
 
 Expected: PASS with `row_provenance_coverage=1.0` for promoted rows.
@@ -815,7 +815,7 @@ Run:
 python3 -m pytest -q \
   tests/test_real_project_corpus_manifest.py \
   tests/test_build_peer_tbi_benchmark_metric_records.py \
-  tests/test_build_real_project_row_provenance.py
+  tests/test_build_real_project_row_provenance_report.py
 ```
 
 Expected: PASS. If this fails because a row or metric lacks provenance, citation, locator, or non-redistribution evidence, fix the data contract instead of relaxing the P0 hard gate.
@@ -832,6 +832,6 @@ Expected: PASS. If this fails because a row or metric lacks provenance, citation
 
 - [ ] `implementation/phase1/peer_tbi_benchmark_metric_records.json` exists and has the five required metric groups.
 - [ ] Every PEER metric record has the required fields and `redistribution_allowed=false`.
-- [ ] `implementation/phase1/real_project_corpus_row_provenance_report.json` exists once promoted rows are available.
+- [ ] `implementation/phase1/real_project_row_provenance_report.json` exists once promoted rows are available.
 - [ ] Every promoted row has the required provenance fields and checksum or explicit checksum-withheld reason.
 - [ ] P0 remains the upstream hard gate in tests, output summaries, and downstream integration notes.
