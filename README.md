@@ -51,9 +51,9 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - Source viewers live in `src/structure-viewer/` and are for local development, QA, and deterministic rebuilds from the source repo.
 - They may depend on repo-local vendor files and committed sidecars during development.
 - Generated single-file delivery viewers are release artifacts listed in `implementation/phase1/release_artifacts_manifest.json`.
-- Download the GitHub Release whose tag matches the manifest `release_tag` and unpack the assets into a local directory.
-- In source repo/CI, run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only` to validate manifest structure only.
-- For a fresh GitHub Release asset root, run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <downloaded-release-root> --require-artifacts` to verify SHA/bytes integrity.
+- Source repo/CI only runs `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`, so no large artifact download is required there.
+- Before downloading large files, save GitHub Release metadata to an assets JSON file and run `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`; this compares manifest asset names/bytes without downloading artifacts.
+- For full integrity, download the GitHub Release whose tag matches the manifest `release_tag`, unpack it into a local directory, and run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <downloaded-release-root> --require-artifacts` to verify SHA/bytes integrity.
 - When you validate the repo-local `implementation/phase1/release/` tree without `--artifact-root`, the check compares actual SHA/bytes and stale files can fail; treat that as separate `release-artifact-refresh` work, not a P0-1 failure.
 - P0-1 closes only after the fresh asset root integrity check passes.
 - If you restore the release bundle locally, regenerate the release registries with `implementation/phase1/generate_release_project_registry_bootstrap.py` instead of hand-editing the packaged outputs.

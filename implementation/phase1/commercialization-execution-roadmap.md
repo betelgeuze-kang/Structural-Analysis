@@ -67,11 +67,12 @@ python3 scripts/check_repo_hygiene.py --show-ok
 
 ### 1. P0-1 Release / Review Chain Stabilization
 
-목표: source repo/CI의 manifest 구조 검증과 fresh GitHub Release asset root의 SHA/bytes 무결성을 분리하고, 정식 P0-1 close 기준을 후자로 고정한다.
+목표: source repo/CI의 manifest 구조 검증, release asset listing preflight, fresh GitHub Release asset root의 SHA/bytes 무결성을 분리하고, 정식 P0-1 close 기준을 후자로 고정한다.
 
 개선 내용:
 
-- source repo/CI에서는 `--structure-only`로 `release_artifacts_manifest.json`의 구조를 검증한다.
+- source repo/CI에서는 `--structure-only`로 `release_artifacts_manifest.json`의 구조만 검증하고, 큰 artifact 다운로드는 요구하지 않는다.
+- release asset listing preflight는 `scripts/check_release_asset_listing.py --assets-json <release-assets.json> --require-all`로 manifest asset names/bytes를 GitHub Release metadata와 비교해 큰 파일 없이 일치 여부를 확인한다.
 - fresh GitHub Release asset root에서는 `--artifact-root <fresh-release-asset-root>`와 `--require-artifacts`로 SHA/bytes 무결성을 검증한다.
 - stale local `implementation/phase1/release/` 검증 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
 - `project_package.zip`, `project_registry.json`, `release_registry.json`, signature 재생성 절차를 문서화하고 CI/수동 검증 기준을 고정한다.

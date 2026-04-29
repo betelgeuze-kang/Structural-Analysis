@@ -17,9 +17,11 @@ Generated viewers are delivery artifacts produced by the phase1 generators and l
 
 - They are treated as GitHub Release assets, not source-controlled files.
 - They should be self-contained single-file viewers or packaged with an explicit registry/package manifest.
-- Their integrity is represented by manifest `sha256` and `bytes` fields. `scripts/verify_release_artifacts_manifest.py` compares the manifest against the actual files under `--artifact-root`; when you validate the repo-local `implementation/phase1/release/` tree without `--artifact-root`, stale files can fail even when the manifest is current. Use a clean clone/CI workspace or a freshly downloaded GitHub Release asset root for verification, and keep any stale local bundle refresh in a separate release-artifact-refresh task.
-- In source repo/CI, use `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only` to validate manifest structure only.
+- Their integrity is represented by manifest `sha256` and `bytes` fields.
+- In source repo/CI, use `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only` to validate manifest structure only, with no large artifact download.
+- Before downloading large files, save GitHub Release metadata to an assets JSON file and run `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`; this compares manifest asset names/bytes without downloading artifacts.
 - For a fresh GitHub Release asset root, use `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --require-artifacts` to verify SHA/bytes integrity.
+- When you validate the repo-local `implementation/phase1/release/` tree without `--artifact-root`, stale files can fail; keep any refresh in a separate `release-artifact-refresh` task.
 - P0-1 closes only after the fresh asset root integrity check passes.
 
 ## Repository Exclusions
