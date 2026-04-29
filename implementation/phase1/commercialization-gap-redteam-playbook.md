@@ -14,11 +14,11 @@
 
 ### 0-2) Snapshot / release hygiene
 
-- 전체 `pytest` 직후에는 `git status --short`로 추적된 변경을 확인한다. `generated/open_data/panel_zone/stress`가 dirty면 feature/test 커밋과 섞지 말고 먼저 분류한다.
-- generated 변경은 `legitimate artifact refresh`, `test side-effect bug`, `stale local bundle/state`의 3가지로 분류한다.
+- 전체 `pytest` 직후에는 `python3 scripts/check_generated_worktree_clean.py --show-ok`로 `generated worktree clean`을 확인한다. `implementation/phase1/open_data/`, `implementation/phase1/stress/`, `implementation/phase1/panel_zone_solver_verified_*.json`가 dirty면 feature/test 커밋과 섞지 말고 `test side-effect bug`, `legitimate artifact refresh`, `stale local state`로 분류한다.
+- generated 변경은 `legitimate artifact refresh`, `test side-effect bug`, `stale local state`의 3가지로 분류한다.
 - `test side-effect bug`는 테스트 isolation으로 고치고 generated 파일을 무작정 커밋하지 않는다.
 - `legitimate artifact refresh`는 검증 결과와 함께 별도 커밋으로 관리한다.
-- `stale local bundle/state`는 release artifact refresh 작업과 분리한다.
+- `stale local state`는 release artifact refresh 작업과 분리한다.
 - snapshot drift cleanup은 테스트 기대값을 현재 deterministic product state에 맞추고, assert는 제거하지 않으며, enum/status는 명시적으로 검증한다.
 - `scripts/verify_release_artifacts_manifest.py`는 `--artifact-root` 없이 로컬 `implementation/phase1/release/` 트리를 검증하면 실제 SHA/bytes를 비교하므로 stale local release bundle로는 실패할 수 있다. 이 검증은 clean clone/CI 또는 fresh GitHub Release asset root에서만 하고, 로컬 번들 refresh는 별도 release artifact refresh 작업으로 분리한다.
 
