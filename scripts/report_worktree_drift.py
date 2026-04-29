@@ -18,6 +18,12 @@ CATEGORIES = (
     "source_changes",
     "other_changes",
 )
+CATEGORY_PATHSPEC_FILENAMES = {
+    "generated_drift": "generated_drift.txt",
+    "asset_deletions": "asset_deletions.txt",
+    "source_changes": "source_changes.txt",
+    "other_changes": "other_changes.txt",
+}
 ASSET_SUFFIXES = (".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp")
 SOURCE_SUFFIXES = (
     ".py",
@@ -54,6 +60,29 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         "--fail-on-generated",
         action="store_true",
         help="Exit 1 when generated artifact drift is present.",
+    )
+    parser.add_argument(
+        "--fail-on-assets",
+        action="store_true",
+        help="Exit 1 when asset deletions are present.",
+    )
+    parser.add_argument(
+        "--fail-on-source",
+        action="store_true",
+        help="Exit 1 when source changes are present.",
+    )
+    parser.add_argument(
+        "--fail-on-other",
+        action="store_true",
+        help="Exit 1 when uncategorized changes are present.",
+    )
+    parser.add_argument(
+        "--write-pathspec-dir",
+        type=Path,
+        help=(
+            "Write newline-delimited pathspec files by category into this "
+            "directory, creating empty files for empty categories."
+        ),
     )
     return parser.parse_args(argv)
 
@@ -150,17 +179,42 @@ def _print_text_report(report: dict[str, list[str]]) -> None:
             print(f"  - {path}")
 
 
+def _write_pathspec_files(report: dict[str, list[str]], output_dir: Path) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for category in CATEGORIES:
+        contents = "\n".join(report[category])
+        if contents:
+            contents += "\n"
+        (output_dir / CATEGORY_PATHSPEC_FILENAMES[category]).write_text(
+            contents,
+            encoding="utf-8",
+        )
+
+
+def _should_fail(args: argparse.Namespace, report: dict[str, list[str]]) -> bool:
+    fail_categories = (
+        (args.fail_on_generated, "generated_drift"),
+        (args.fail_on_assets, "asset_deletions"),
+        (args.fail_on_source, "source_changes"),
+        (args.fail_on_other, "other_changes"),
+    )
+    return any(enabled and report[category] for enabled, category in fail_categories)
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(sys.argv[1:] if argv is None else argv)
     lines = _read_status_file(args.status_file) if args.status_file else _git_status_porcelain()
     report = classify_status(lines)
+
+    if args.write_pathspec_dir:
+        _write_pathspec_files(report, args.write_pathspec_dir)
 
     if args.json:
         print(json.dumps(_with_counts(report), indent=2, ensure_ascii=False))
     else:
         _print_text_report(report)
 
-    if args.fail_on_generated and report["generated_drift"]:
+    if _should_fail(args, report):
         return 1
     return 0
 

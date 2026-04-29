@@ -100,3 +100,69 @@ def test_source_only_status_reports_source_changes_without_failure(tmp_path: Pat
     assert "generated_drift: 0" in proc.stdout
     assert "asset_deletions: 0" in proc.stdout
     assert proc.stderr == ""
+
+
+def test_write_pathspec_dir_writes_all_categories_in_input_order(tmp_path: Path) -> None:
+    status_fixture = _write_status_fixture(
+        tmp_path,
+        [
+            " M notes/local.bin",
+            " M implementation/phase1/open_data/generated_case.json",
+            " D Code_Generated_Image.png",
+            "?? scripts/new_cleanup_helper.py",
+            " M implementation/phase1/stress/report.json",
+        ],
+    )
+    pathspec_dir = tmp_path / "pathspecs"
+
+    proc = _run_report(status_fixture, "--write-pathspec-dir", str(pathspec_dir))
+
+    assert proc.returncode == 0
+    assert (pathspec_dir / "generated_drift.txt").read_text(encoding="utf-8") == (
+        "implementation/phase1/open_data/generated_case.json\n"
+        "implementation/phase1/stress/report.json\n"
+    )
+    assert (pathspec_dir / "asset_deletions.txt").read_text(encoding="utf-8") == (
+        "Code_Generated_Image.png\n"
+    )
+    assert (pathspec_dir / "source_changes.txt").read_text(encoding="utf-8") == (
+        "scripts/new_cleanup_helper.py\n"
+    )
+    assert (pathspec_dir / "other_changes.txt").read_text(encoding="utf-8") == (
+        "notes/local.bin\n"
+    )
+    assert "generated_drift: 2" in proc.stdout
+    assert proc.stderr == ""
+
+
+def test_write_pathspec_dir_creates_empty_files_for_empty_categories(tmp_path: Path) -> None:
+    status_fixture = _write_status_fixture(tmp_path, [])
+    pathspec_dir = tmp_path / "empty_pathspecs"
+
+    proc = _run_report(status_fixture, "--write-pathspec-dir", str(pathspec_dir))
+
+    assert proc.returncode == 0
+    for filename in (
+        "generated_drift.txt",
+        "asset_deletions.txt",
+        "source_changes.txt",
+        "other_changes.txt",
+    ):
+        assert (pathspec_dir / filename).read_text(encoding="utf-8") == ""
+    assert proc.stderr == ""
+
+
+def test_fail_on_category_options_return_failure_for_matching_categories(tmp_path: Path) -> None:
+    status_fixture = _write_status_fixture(
+        tmp_path,
+        [
+            " D diagram.png",
+            " M scripts/report_worktree_drift.py",
+            " M local/cache.bin",
+        ],
+    )
+
+    assert _run_report(status_fixture, "--fail-on-assets").returncode == 1
+    assert _run_report(status_fixture, "--fail-on-source").returncode == 1
+    assert _run_report(status_fixture, "--fail-on-other").returncode == 1
+    assert _run_report(status_fixture, "--fail-on-generated").returncode == 0
