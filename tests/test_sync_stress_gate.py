@@ -95,6 +95,8 @@ def test_sync_stress_gate_passes_for_pr_required_levels(tmp_path: Path) -> None:
         "pr",
         "--steps",
         "40",
+        "--work-dir",
+        str(tmp_path / "sync_work"),
         "--out",
         str(out),
     ]

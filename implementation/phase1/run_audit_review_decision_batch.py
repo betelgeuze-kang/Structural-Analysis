@@ -85,6 +85,10 @@ def main() -> None:
     p.add_argument("--peer-spd-hinge-alignment-report", default=str(DEFAULT_PEER_SPD_HINGE_ALIGNMENT_REPORT))
     p.add_argument("--preview-out", default=str(DEFAULT_PREVIEW_OUT))
     p.add_argument("--out", default=str(DEFAULT_OUT))
+    p.add_argument("--mgt-export-report", default="")
+    p.add_argument("--audit-review-followup-manifest", default="")
+    p.add_argument("--audit-review-resolution-manifest", default="")
+    p.add_argument("--audit-review-resolution-dir", default="")
     p.add_argument("--apply-live", action=argparse.BooleanOptionalAction, default=False)
     p.add_argument("--refresh-release-surfaces", action=argparse.BooleanOptionalAction, default=False)
     p.add_argument("--dry-run", action=argparse.BooleanOptionalAction, default=False)
@@ -186,6 +190,14 @@ def main() -> None:
             "--out",
             str(out.with_name(out.stem + ".queue_update.json")),
         ]
+        if args.mgt_export_report:
+            apply_cmd.extend(["--mgt-export-report", str(args.mgt_export_report)])
+        if args.audit_review_followup_manifest:
+            apply_cmd.extend(["--audit-review-followup-manifest", str(args.audit_review_followup_manifest)])
+        if args.audit_review_resolution_manifest:
+            apply_cmd.extend(["--audit-review-resolution-manifest", str(args.audit_review_resolution_manifest)])
+        if args.audit_review_resolution_dir:
+            apply_cmd.extend(["--audit-review-resolution-dir", str(args.audit_review_resolution_dir)])
         if args.refresh_release_surfaces:
             apply_cmd.append("--refresh-release-surfaces")
         if args.dry_run:

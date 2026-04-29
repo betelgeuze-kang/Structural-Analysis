@@ -102,6 +102,8 @@ def test_panel_zone_solver_verified_inbox_status_marks_empty_after_successful_co
             str(tmp_path / "panel_zone_clash_artifact.json"),
             "--panel-zone-clash-report",
             str(tmp_path / "panel_zone_clash_report.json"),
+            "--inbox-status-report",
+            str(tmp_path / "panel_zone_solver_verified_inbox_status.consume.json"),
             "--archive-dir",
             str(archive_dir),
             "--archive-on-success",

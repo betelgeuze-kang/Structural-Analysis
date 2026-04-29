@@ -67,6 +67,7 @@ def test_materialize_tpu_hffb_seed_runs_fetch_convert_prepare_chain(tmp_path: Pa
 
 
 def test_materialize_tpu_hffb_seed_reports_fetch_failure(tmp_path: Path) -> None:
+    out_dir = tmp_path / "materialized"
     out_report = tmp_path / "materialize.report.json"
     proc = subprocess.run(
         [
@@ -74,6 +75,8 @@ def test_materialize_tpu_hffb_seed_reports_fetch_failure(tmp_path: Path) -> None
             "implementation/phase1/materialize_tpu_hffb_seed.py",
             "--seed-id",
             "tpu_hffb_isolated_highrise_seed_01",
+            "--out-dir",
+            str(out_dir),
             "--case-page-html",
             str(tmp_path / "missing.html"),
             "--out-report",

@@ -63,11 +63,14 @@ def test_fetch_tpu_case_mat_succeeds_with_local_html_and_local_mat(tmp_path: Pat
 
 
 def test_fetch_tpu_case_mat_fails_without_input_mode(tmp_path: Path) -> None:
+    out_manifest = tmp_path / "manifest.json"
     out_report = tmp_path / "report.json"
     proc = subprocess.run(
         [
             sys.executable,
             "implementation/phase1/fetch_tpu_case_mat.py",
+            "--source-manifest-out",
+            str(out_manifest),
             "--out-report",
             str(out_report),
         ],
@@ -90,6 +93,7 @@ def test_fetch_tpu_case_mat_fails_for_empty_mat(tmp_path: Path) -> None:
     empty_mat = tmp_path / "empty.mat"
     empty_mat.write_bytes(b"")
     out_manifest = tmp_path / "empty.manifest.json"
+    out_mat = tmp_path / "empty.out.mat"
     out_report = tmp_path / "empty.report.json"
 
     proc = subprocess.run(
@@ -100,6 +104,8 @@ def test_fetch_tpu_case_mat_fails_for_empty_mat(tmp_path: Path) -> None:
             str(case_html),
             "--mat-url",
             str(empty_mat),
+            "--out-mat",
+            str(out_mat),
             "--source-manifest-out",
             str(out_manifest),
             "--out-report",

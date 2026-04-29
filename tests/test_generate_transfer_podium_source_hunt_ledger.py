@@ -1,5 +1,5 @@
 import json
-import subprocess
+import importlib.util
 from pathlib import Path
 
 
@@ -8,9 +8,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def test_generate_transfer_podium_source_hunt_ledger_outputs_expected_fields(tmp_path):
     script = REPO_ROOT / "implementation/phase1/generate_transfer_podium_source_hunt_ledger.py"
-    subprocess.run(["python3", str(script)], check=True, cwd=REPO_ROOT)
+    spec = importlib.util.spec_from_file_location("generate_transfer_podium_source_hunt_ledger", script)
+    assert spec is not None
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
 
-    payload_path = REPO_ROOT / "implementation/phase1/open_data/irregular/transfer_podium_source_hunt_ledger.json"
+    payload_path = tmp_path / "transfer_podium_source_hunt_ledger.json"
+    module.OUT_DIR = tmp_path
+    module.OUT_JSON = payload_path
+    module.OUT_MD = tmp_path / "transfer_podium_source_hunt_ledger.md"
+    module.main()
     assert payload_path.exists()
 
     payload = json.loads(payload_path.read_text(encoding="utf-8"))

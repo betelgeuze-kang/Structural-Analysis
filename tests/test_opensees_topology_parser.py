@@ -101,11 +101,17 @@ def test_parse_opensees_to_csr_fails_without_shell_beam_mix_under_strict_mode(tm
     )
 
     report_out = tmp_path / "report.json"
+    edges_out = tmp_path / "edges.json"
+    csr_out = tmp_path / "csr.npz"
     cmd = [
         sys.executable,
         str(SCRIPT),
         "--model",
         str(model),
+        "--edges-out",
+        str(edges_out),
+        "--csr-out",
+        str(csr_out),
         "--report-out",
         str(report_out),
         "--require-real-topology",
@@ -158,12 +164,18 @@ def test_parse_opensees_synthetic_marker_checks_filename_only(tmp_path: Path) ->
         encoding="utf-8",
     )
     report_out = tmp_path / "report.json"
+    edges_out = tmp_path / "edges.json"
+    csr_out = tmp_path / "csr.npz"
 
     cmd = [
         sys.executable,
         str(SCRIPT),
         "--model",
         str(model),
+        "--edges-out",
+        str(edges_out),
+        "--csr-out",
+        str(csr_out),
         "--report-out",
         str(report_out),
         "--require-real-topology",

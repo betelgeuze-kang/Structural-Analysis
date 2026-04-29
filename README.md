@@ -37,7 +37,12 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 
 ## Snapshot Hygiene
 
+- After a full `python3 -m pytest -q`, run `git status --short` and inspect any tracked dirty files before you commit.
 - A full `python3 -m pytest -q` run may regenerate `generated/open_data/panel_zone/stress` JSON outputs. Keep those refreshes separate from feature changes and expectation patches.
+- Classify tracked generated drift into one of three buckets: legitimate artifact refresh, test side-effect bug, or stale local bundle/state.
+- Legitimate artifact refreshes belong in a separate commit with the verification result that justified them.
+- Test side-effect bugs should be fixed with test isolation, not by blindly committing the generated diff.
+- Stale local bundle/state should be handled in a separate release-artifact-refresh task, not folded into feature or test work.
 - When cleaning up snapshot drift, align the expected values to the current deterministic product state, keep asserts in place, and add explicit enum/status checks instead of removing coverage.
 
 ## Source vs Release Viewers
