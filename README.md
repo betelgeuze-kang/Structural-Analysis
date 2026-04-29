@@ -9,6 +9,7 @@
 - [Phase 1 실행 산출물: LF 출력 스키마/검증](implementation/phase1/README.md)
 - [Phase 1 다음 구현 계획](implementation/phase1/next-implementation-plan.md)
 - [Phase 1 상용화 갭 분석/실행 플레이북 (Red Team)](implementation/phase1/commercialization-gap-redteam-playbook.md)
+- [Phase 1 상용화 실행 로드맵](implementation/phase1/commercialization-execution-roadmap.md)
 - [Phase 1 직교사영 잔차 보정 리포트](implementation/phase1/projection_update_report.json)
 - [Phase 1 Zero-copy bridge report](implementation/phase1/zero_copy_bridge_report.json)
 - [Phase 1 Krylov projection report](implementation/phase1/krylov_projection_report.json)
