@@ -14,7 +14,7 @@
 
 ### 0-2) Snapshot / release hygiene
 
-- 전체 `pytest` 직후에는 `python3 scripts/check_generated_worktree_clean.py --show-ok`로 `generated worktree clean`을 확인한다. 이 체크는 `HEAD` 대비 추적된 생성물 경로의 dirty/drift만 보고, clean clone/CI에서는 반드시 통과해야 한다. 사용자 변경이나 의도한 삭제는 별도 커밋 경로로 다루고, `implementation/phase1/open_data/`, `implementation/phase1/stress/`, `implementation/phase1/panel_zone_solver_verified_*.json`의 generated drift는 feature/test 커밋과 섞지 말고 `test side-effect bug`, `legitimate artifact refresh`, `stale local state`로 분류한다. 사용자 asset 삭제나 복구가 포함되면 먼저 별도 확인한다.
+- 전체 `pytest` 직후에는 `python3 scripts/check_generated_worktree_clean.py --show-ok`로 `generated worktree clean`을 확인한다. 이 체크가 실패하면 `python3 scripts/report_worktree_drift.py`로 generated drift, user-owned asset 변경, source 수정을 먼저 분리해 본 뒤 커밋에 넣을 변경을 판단한다. 이 체크는 `HEAD` 대비 추적된 생성물 경로의 dirty/drift만 보고, clean clone/CI에서는 반드시 통과해야 한다. 사용자 변경이나 의도한 삭제는 별도 커밋 경로로 다루고, `implementation/phase1/open_data/`, `implementation/phase1/stress/`, `implementation/phase1/panel_zone_solver_verified_*.json`의 generated drift는 feature/test 커밋과 섞지 말고 `test side-effect bug`, `legitimate artifact refresh`, `stale local state`로 분류한다. 사용자 asset 삭제나 복구가 포함되면 먼저 별도 확인한다.
 - generated 변경은 `legitimate artifact refresh`, `test side-effect bug`, `stale local state`의 3가지로 분류한다.
 - `test side-effect bug`는 테스트 isolation으로 고치고 generated 파일을 무작정 커밋하지 않는다.
 - `legitimate artifact refresh`는 검증 결과와 함께 별도 커밋으로 관리한다.
