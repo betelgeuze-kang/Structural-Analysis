@@ -51,11 +51,12 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - Source viewers live in `src/structure-viewer/` and are for local development, QA, and deterministic rebuilds from the source repo.
 - They may depend on repo-local vendor files and committed sidecars during development.
 - Generated single-file delivery viewers are release artifacts listed in `implementation/phase1/release_artifacts_manifest.json`.
-- Source repo/CI only runs `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`, so no large artifact download is required there.
-- Before downloading large files, save GitHub Release metadata to an assets JSON file and run `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`; this compares manifest asset names/bytes without downloading artifacts.
-- For full integrity, download the GitHub Release whose tag matches the manifest `release_tag`, unpack it into a local directory, and run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <downloaded-release-root> --require-artifacts` to verify SHA/bytes integrity.
-- When you validate the repo-local `implementation/phase1/release/` tree without `--artifact-root`, the check compares actual SHA/bytes and stale files can fail; treat that as separate `release-artifact-refresh` work, not a P0-1 failure.
-- P0-1 closes only after the fresh asset root integrity check passes.
+- Release verification runbook:
+  1. Source CI: run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only` so source CI only checks manifest structure.
+  2. Metadata preflight: run `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>` to export release asset metadata, then run `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`.
+  3. Full integrity: download a fresh GitHub Release asset root for the manifest `release_tag`, then run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --require-artifacts`.
+  4. Current blocker: the tag/release may not exist yet, so P0-1 cannot close until the tag, release, and required assets are published.
+- Do not wildcard-upload `implementation/phase1/release/`; publish only the 12 manifest-listed assets from a freshly regenerated asset root.
 - If you restore the release bundle locally, regenerate the release registries with `implementation/phase1/generate_release_project_registry_bootstrap.py` instead of hand-editing the packaged outputs.
 
 ## Repository Hygiene

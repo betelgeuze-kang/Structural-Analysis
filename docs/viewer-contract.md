@@ -18,11 +18,12 @@ Generated viewers are delivery artifacts produced by the phase1 generators and l
 - They are treated as GitHub Release assets, not source-controlled files.
 - They should be self-contained single-file viewers or packaged with an explicit registry/package manifest.
 - Their integrity is represented by manifest `sha256` and `bytes` fields.
-- In source repo/CI, use `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only` to validate manifest structure only, with no large artifact download.
-- Before downloading large files, save GitHub Release metadata to an assets JSON file and run `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`; this compares manifest asset names/bytes without downloading artifacts.
-- For a fresh GitHub Release asset root, use `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --require-artifacts` to verify SHA/bytes integrity.
-- When you validate the repo-local `implementation/phase1/release/` tree without `--artifact-root`, stale files can fail; keep any refresh in a separate `release-artifact-refresh` task.
-- P0-1 closes only after the fresh asset root integrity check passes.
+- Release verification runbook:
+  1. Source CI: run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only` to validate manifest structure only.
+  2. Metadata preflight: run `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>` to export release asset metadata, then run `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`.
+  3. Full integrity: download a fresh GitHub Release asset root for the manifest `release_tag`, then run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --require-artifacts` to verify SHA/bytes integrity.
+  4. Current blocker: the tag/release may not exist yet, so P0-1 cannot close until the tag, release, and required assets are published.
+- Do not wildcard-upload the repo-local `implementation/phase1/release/` tree; publish only manifest-listed assets from a freshly regenerated asset root.
 
 ## Repository Exclusions
 
