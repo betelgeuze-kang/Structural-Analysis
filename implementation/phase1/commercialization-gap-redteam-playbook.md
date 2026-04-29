@@ -12,6 +12,12 @@
 - 완료 정의: 각 워크스트림의 `Exit Gate`를 만족하고 CI/정적검증 리포트에 반영
 - 증빙 원칙: 모든 결과는 `implementation/phase1/*_report.json` 산출물로 남김
 
+### 0-2) Snapshot / release hygiene
+
+- 전체 `pytest`는 `generated/open_data/panel_zone/stress` 산출물을 재생성할 수 있다. 이 재생성은 feature 변경이나 test expectation patch와 섞지 않고 별도 커밋/PR로 정리한다.
+- snapshot drift cleanup은 테스트 기대값을 현재 deterministic product state에 맞추고, assert는 제거하지 않으며, enum/status는 명시적으로 검증한다.
+- `scripts/verify_release_artifacts_manifest.py`는 `--artifact-root` 없이 로컬 `implementation/phase1/release/` 트리를 검증하면 실제 SHA/bytes를 비교하므로 stale local release bundle로는 실패할 수 있다. clean clone/CI 또는 fresh GitHub Release asset root에서만 검증한다.
+
 ## 0-1) 실행 맵 (12개 백로그)
 
 1. `[P0] 릴리즈/심의 체인 안정화`
@@ -295,7 +301,7 @@ python3 implementation/phase1/phase1_ci_gate.py \
 
 ## 7) Real Project Corpus P0/P1/P2 Closeout Track (2026-04-27)
 
-나라장터(KONEPS) 턴키/기술제안 설계도서와 PEER TBI 초고층 benchmark는 상용툴 대체성 검증을 위한 real-project corpus track으로 관리한다. 이 track은 무작정 다운로드/크롤링하지 않고 `provenance -> P1-3 row provenance -> parser/benchmark coverage -> automation/release` 순서로 닫는다. P1-3 gate는 parser/benchmark row가 source family, access policy, checksum-or-withheld reason, file inventory status, parser contract, row pointer, release-surface eligibility를 갖춰야 P2로 올라간다는 뜻이다. CLI는 `implementation/phase1/build_real_project_row_provenance_report.py`, generated output은 `implementation/phase1/real_project_row_provenance_report.json`이다. 세부 운영 기준은 [Real Project Corpus closeout guide](../../docs/real-project-corpus.md)에 맞춘다. 아직 파일명이 확정되지 않은 구현은 파일명보다 역할 기준으로 적는다: manifest, validator, parser matrix, benchmark record, crawler, redaction, release viewer, report surface. PEER TBI는 citation-first benchmark family이며, raw model/input deck redistribution은 document-level review가 끝나기 전에는 금지다.
+나라장터(KONEPS) 턴키/기술제안 설계도서와 PEER TBI 초고층 benchmark는 상용툴 대체성 검증을 위한 real-project corpus track으로 관리한다. 이 track은 무작정 다운로드/크롤링하지 않고 `provenance -> parser/benchmark coverage -> P1-3 row provenance -> automation/release` 순서로 닫는다. P1-3 gate는 parser/benchmark row가 source family, access policy, checksum-or-withheld reason, file inventory status, parser contract, row pointer, release-surface eligibility를 갖춰야 P2로 올라간다는 뜻이다. CLI는 `implementation/phase1/build_real_project_row_provenance_report.py`, generated output은 `implementation/phase1/real_project_row_provenance_report.json`이다. 세부 운영 기준은 [Real Project Corpus closeout guide](../../docs/real-project-corpus.md)에 맞춘다. 아직 파일명이 확정되지 않은 구현은 파일명보다 역할 기준으로 적는다: manifest, validator, parser matrix, benchmark record, crawler, redaction, release viewer, report surface. PEER TBI는 citation-first benchmark family이며, raw model/input deck redistribution은 document-level review가 끝나기 전에는 금지다.
 
 ### P0-RP. Provenance / license / security / checksum / manual-review gate
 - 상태: `In Progress`

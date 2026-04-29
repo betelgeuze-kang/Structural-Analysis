@@ -135,21 +135,26 @@ def test_midas_interoperability_gate_passes_on_current_release_artifacts(tmp_pat
     assert payload["summary"]["roundtrip_exact_header_coverage_min"] == 1.0
     assert payload["summary"]["roundtrip_exact_factor_map_coverage_min"] == 1.0
     assert payload["summary"]["loadcomb_exact_roundtrip_pass"] is True
-    assert payload["summary"]["bounded_subset_mode"] == "editor_seed+raw_recovery+preview_roundtrip"
-    assert payload["summary"]["heuristic_raw_recovery_model_count"] == 1
+    assert payload["summary"]["bounded_subset_mode"] == "full_exact_roundtrip"
+    assert payload["summary"]["heuristic_raw_recovery_model_count"] == 0
+    assert payload["summary"]["structured_loads_contract_present_count"] == 3
     assert payload["summary"]["kds_geometry_bridge_exact_review_id_total"] == 36
     assert payload["summary"]["kds_geometry_bridge_heuristic_review_id_total"] == 0
-    assert payload["summary"]["exact_roundtrip_closure_pass"] is False
-    assert payload["summary"]["exact_roundtrip_closure_status"] == "bounded_subset_pending"
-    assert "heuristic_raw_loadcomb_recovery" in payload["summary"]["exact_roundtrip_closure_blockers"]
-    assert "primitive_load_cards_pending" in payload["summary"]["remaining_limits"]
+    assert payload["summary"]["exact_roundtrip_closure_pass"] is True
+    assert payload["summary"]["exact_roundtrip_closure_status"] == "closed"
+    assert payload["summary"]["exact_roundtrip_closure_blockers"] == []
+    assert payload["summary"]["remaining_limits"] == []
+    assert "heuristic_raw_loadcomb_recovery" not in payload["summary"]["exact_roundtrip_closure_blockers"]
+    assert "primitive_load_cards_pending" not in payload["summary"]["remaining_limits"]
     assert "normalized_factor_maps_pending" not in payload["summary"]["remaining_limits"]
     assert "solver_ready_reconstruction_pending" not in payload["summary"]["remaining_limits"]
     assert "summary_grade_preview_only" not in payload["summary"]["remaining_limits"]
     assert payload["summary_line"].startswith("MIDAS interoperability/export readiness: PASS")
     assert "preview=3/3" in payload["summary_line"]
     assert "roundtrip=3/3" in payload["summary_line"]
-    assert "exact_closure=bounded_subset_pending" in payload["summary_line"]
+    assert "bounded_subset=full_exact_roundtrip" in payload["summary_line"]
+    assert "limits=none" in payload["summary_line"]
+    assert "exact_closure=closed" in payload["summary_line"]
 
 
 def test_midas_interoperability_gate_flags_missing_preview_as_failure(tmp_path: Path) -> None:

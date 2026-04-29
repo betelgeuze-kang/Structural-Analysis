@@ -199,21 +199,23 @@ def test_export_expert_review_pdf_batch_builds_submission_zips(tmp_path: Path) -
     manifest = json.loads(out_manifest.read_text(encoding="utf-8"))
     receipt_text = out_receipt.read_text(encoding="utf-8")
 
-    assert result["template_count"] == 3
-    assert result["zip_bundle_count"] == 3
+    assert result["template_count"] == 4
+    assert result["zip_bundle_count"] == 4
     assert manifest["template_order"] == [
         "default",
         "seoul_permit_review",
         "structural_peer_committee",
+        "international_english",
     ]
-    assert manifest["zip_bundle_count"] == 3
-    assert "zip_bundle_count=3" in receipt_text
+    assert manifest["zip_bundle_count"] == 4
+    assert "zip_bundle_count=4" in receipt_text
 
     template_rows = {row["template_name"]: row for row in manifest["templates"]}
     assert set(template_rows) == {
         "default",
         "seoul_permit_review",
         "structural_peer_committee",
+        "international_english",
     }
 
     for template_name, row in template_rows.items():
@@ -252,14 +254,18 @@ def test_export_expert_review_pdf_batch_builds_submission_zips(tmp_path: Path) -
     default_metadata = json.loads(Path(template_rows["default"]["output_metadata_json"]).read_text(encoding="utf-8"))
     seoul_metadata = json.loads(Path(template_rows["seoul_permit_review"]["output_metadata_json"]).read_text(encoding="utf-8"))
     peer_metadata = json.loads(Path(template_rows["structural_peer_committee"]["output_metadata_json"]).read_text(encoding="utf-8"))
+    international_metadata = json.loads(Path(template_rows["international_english"]["output_metadata_json"]).read_text(encoding="utf-8"))
 
     assert default_metadata["issue_fields"]["authority_name"] == "서울 구조 심의위원회"
     assert seoul_metadata["issue_fields"]["authority_name"] == "Seoul Metropolitan Permit Review Office"
     assert seoul_metadata["issue_fields"]["package_purpose_label"] == "Seoul Permit Review Package"
     assert peer_metadata["issue_fields"]["authority_name"] == "Structural Peer Committee"
     assert peer_metadata["issue_fields"]["package_purpose_label"] == "Structural Peer Committee Review Package"
+    assert international_metadata["issue_fields"]["authority_name"] == "International Peer Review Board"
+    assert international_metadata["issue_fields"]["package_purpose_label"] == "Design Optimization Independent Review"
     assert "zip=optimized_drawing_expert_review.seoul_permit_review.submission.zip" in receipt_text
     assert "zip=optimized_drawing_expert_review.structural_peer_committee.submission.zip" in receipt_text
+    assert "zip=optimized_drawing_expert_review.international_english.submission.zip" in receipt_text
 
     manifest_bytes_before = out_manifest.read_bytes()
     receipt_bytes_before = out_receipt.read_bytes()
@@ -304,21 +310,34 @@ def test_export_rendered_expert_review_pdf_batch_from_onboarding_renders_templat
     assert out_manifest.exists()
     assert out_receipt.exists()
     manifest = json.loads(out_manifest.read_text(encoding="utf-8"))
-    assert result["template_count"] == 3
+    assert result["template_count"] == 4
     assert manifest["schema_version"] == "optimized_drawing_expert_review_pdf.rendered_batch_manifest.v1"
     assert manifest["source_project_onboarding_json"] == str(onboarding_json)
     assert manifest["onboarding_selected_template"] == "seoul_permit_review"
     assert manifest["onboarding_selection_reason"] == "Seoul permit package requested by customer."
 
     template_rows = {row["template_name"]: row for row in manifest["templates"]}
+    assert set(template_rows) == {
+        "default",
+        "seoul_permit_review",
+        "structural_peer_committee",
+        "international_english",
+    }
     default_expert_html = Path(template_rows["default"]["output_expert_html"]).read_text(encoding="utf-8")
     seoul_expert_html = Path(template_rows["seoul_permit_review"]["output_expert_html"]).read_text(encoding="utf-8")
     peer_expert_html = Path(template_rows["structural_peer_committee"]["output_expert_html"]).read_text(encoding="utf-8")
+    international_expert_html = Path(template_rows["international_english"]["output_expert_html"]).read_text(encoding="utf-8")
 
     assert "Permit / committee checklist" in default_expert_html
     assert "Permit / committee sign-off block" in default_expert_html
     assert "Permit checklist" in seoul_expert_html
     assert "Peer review checklist" in peer_expert_html
+    assert "Jurisdiction checklist" in international_expert_html
+    assert "Authority disposition" in international_expert_html
+    assert template_rows["international_english"]["template_label"] == "International English expert review package"
+    assert template_rows["international_english"]["template_selection_receipt"].startswith(
+        "template=international_english"
+    )
 
     with zipfile.ZipFile(template_rows["seoul_permit_review"]["submission_zip"]) as archive:
         assert archive.namelist() == [

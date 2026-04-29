@@ -35,12 +35,17 @@ python3 implementation/phase1/build_real_project_row_provenance_report.py --mani
 
 If you want the clean-clone smoke path instead of the manual build step, run `npm run verify:frontend-smoke`; it already performs the frontend contract check, a clean `npm ci`, and `npm run build`.
 
+## Snapshot Hygiene
+
+- A full `python3 -m pytest -q` run may regenerate `generated/open_data/panel_zone/stress` JSON outputs. Keep those refreshes separate from feature changes and expectation patches.
+- When cleaning up snapshot drift, align the expected values to the current deterministic product state, keep asserts in place, and add explicit enum/status checks instead of removing coverage.
+
 ## Source vs Release Viewers
 
 - Source viewers live in `src/structure-viewer/` and are for local development, QA, and deterministic rebuilds from the source repo.
 - They may depend on repo-local vendor files and committed sidecars during development.
 - Generated single-file delivery viewers are release artifacts listed in `implementation/phase1/release_artifacts_manifest.json`.
-- Download the GitHub Release whose tag matches the manifest `release_tag`, unpack the assets into a local directory, and validate them with `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <downloaded-release-root>`.
+- Download the GitHub Release whose tag matches the manifest `release_tag`, unpack the assets into a local directory, and validate them with `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <downloaded-release-root>`. When you validate the repo-local `implementation/phase1/release/` tree without `--artifact-root`, the check compares actual SHA/bytes and stale files can fail; use a clean clone/CI workspace or a freshly downloaded GitHub Release asset root.
 - If you restore the release bundle locally, regenerate the release registries with `implementation/phase1/generate_release_project_registry_bootstrap.py` instead of hand-editing the packaged outputs.
 
 ## Repository Hygiene

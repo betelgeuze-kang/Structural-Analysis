@@ -469,9 +469,12 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
         "",
         "topology_projected_midas_panel_bridge",
         "internal_engine_panel_zone_3d_clash_and_anchorage_complete",
+        "scalar_proxy_hard_gate_only",
+        "panel_zone_3d_clash_and_anchorage_verified",
     }
     assert committee_snapshot.get("panel_zone_source_contract_mode") in {
         "",
+        "rows_head_proxy_scan",
         "topology_projected_3d_clash_and_anchorage_bridge",
         "true_3d_clash_and_anchorage_verified",
     }

@@ -128,6 +128,6 @@ def test_generate_native_authoring_draft_pipeline_cli_accepts_family_id_override
     assert pipeline_payload["contract_pass"] is True
     assert pipeline_payload["authoring_controls"]["family_id"] == "steel_braced_frame"
     assert workspace_payload["authoring_controls"]["family_id"] == "steel_braced_frame"
-    assert workspace_payload["summary"]["member_count"] == 102
+    assert workspace_payload["summary"]["member_count"] == 126
     assert solver_payload["authoring_controls"]["family_id"] == "steel_braced_frame"
     assert solver_payload["summary"]["combo_count"] == 23

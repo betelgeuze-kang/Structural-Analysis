@@ -25,7 +25,8 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     assert ".review-board-row__field" in index_css
     assert ".review-board-row__footer" in index_css
 
-    assert "Structural Analysis Workbench" in app_tsx
+    assert "Structural Signal Desk" in app_tsx
+    assert "Structural Optimization Workbench" in app_tsx
     assert "./implementation/phase1/release/visualization/structural_optimization_viewer.html" in app_tsx
     assert "./implementation/phase1/release/visualization/optimized_drawing_review.html" in app_tsx
     assert "./implementation/phase1/release/visualization/benchmark_optimization_review.html" in app_tsx
@@ -305,9 +306,9 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     assert "Import failed:" in app_tsx
     assert "Browser storage is unavailable; draft stays in memory." in app_tsx
     assert "Registry Portfolio Index" in app_tsx
-    assert "Route Advisor" in app_tsx
+    assert "panel panel--route" in app_tsx
     assert "Recommended route" in app_tsx
-    assert "finish gate:" in app_tsx
+    assert "Finish gate" in app_tsx
     assert "Drawing-first review route" in app_tsx
     assert "Benchmark validation route" in app_tsx
     assert "Submission and authority route" in app_tsx

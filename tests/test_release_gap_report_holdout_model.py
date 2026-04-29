@@ -1003,25 +1003,26 @@ def test_release_gap_report_emits_advanced_holdout_readiness(tmp_path: Path) -> 
     assert summary["pbd_hinge_refresh_overlap_member_count"] > 0
     assert summary["pbd_hinge_refresh_rebar_sensitive_member_count"] > 0
     assert summary["panel_zone_3d_clash_ready"] is True
-    assert summary["panel_zone_constructability_mode"] == "internal_engine_panel_zone_3d_clash_and_anchorage_complete"
-    assert summary["panel_zone_internal_engine_complete"] is True
-    assert summary["panel_zone_external_validation_pending"] is True
-    assert summary["panel_zone_validation_boundary"] == "external_validation_only"
-    assert summary["panel_zone_external_validation_status_label"] == "validated_fallback_only_gap_no_solver_input"
-    assert summary["panel_zone_external_validation_advisory_only"] is True
+    assert summary["panel_zone_constructability_mode"] == "panel_zone_3d_clash_and_anchorage_verified"
+    assert summary["panel_zone_internal_engine_complete"] is False
+    assert summary["panel_zone_external_validation_pending"] is False
+    assert summary["panel_zone_validation_boundary"] == "solver_verified"
+    assert summary["panel_zone_external_validation_status_label"] == "verified"
+    assert summary["panel_zone_external_validation_advisory_only"] is False
     assert summary["panel_zone_external_validation_release_blocking"] is False
-    assert summary["panel_zone_status_label"] == "validated_fallback_only_gap_no_solver_input"
-    assert summary["panel_zone_advisory_only"] is True
+    assert summary["panel_zone_status_label"] == "release_ready"
+    assert summary["panel_zone_advisory_only"] is False
     assert summary["panel_zone_release_blocking"] is False
     assert summary["panel_zone_external_validation_provenance_summary_label"].startswith(
-        "validated_sources=3/3 | exact_sources=0/3 | fallback_sources=3/3"
+        "validated_sources=3/3 | exact_sources=3/3 | fallback_sources=0/3"
     )
-    assert "inbox=empty_without_history" in summary["panel_zone_external_validation_closing_summary_label"]
-    assert release_status["panel_zone_external_validation_status_label"] == "validated_fallback_only_gap_no_solver_input"
-    assert release_status["panel_zone_external_validation_advisory_only"] is True
+    assert "closure_mode=closed_exact_validated" in summary["panel_zone_external_validation_closing_summary_label"]
+    assert "inbox=empty_after_successful_consume" in summary["panel_zone_external_validation_closing_summary_label"]
+    assert release_status["panel_zone_external_validation_status_label"] == "verified"
+    assert release_status["panel_zone_external_validation_advisory_only"] is False
     assert release_status["panel_zone_external_validation_release_blocking"] is False
-    assert release_status["panel_zone_status_label"] == "validated_fallback_only_gap_no_solver_input"
-    assert release_status["panel_zone_advisory_only"] is True
+    assert release_status["panel_zone_status_label"] == "release_ready"
+    assert release_status["panel_zone_advisory_only"] is False
     assert release_status["panel_zone_release_blocking"] is False
     assert summary["foundation_optimization_ready"] is True
     assert summary["foundation_member_type_present"] is True
@@ -1039,15 +1040,17 @@ def test_release_gap_report_emits_advanced_holdout_readiness(tmp_path: Path) -> 
     advanced = {str(row.get("id")): row for row in payload["advanced_holdouts"]}
     remaining = {str(row.get("id")): row for row in payload["remaining_gaps"]}
     assert advanced["wind_tunnel_raw_mapping"]["ready"] is True
-    assert advanced["panel_zone_3d_clash_and_anchorage"]["status_label"] == "validated_fallback_only_gap_no_solver_input"
-    assert advanced["panel_zone_3d_clash_and_anchorage"]["advisory_only"] is True
+    assert advanced["panel_zone_3d_clash_and_anchorage"]["status"] == "closed"
+    assert advanced["panel_zone_3d_clash_and_anchorage"]["status_label"] == "release_ready"
+    assert advanced["panel_zone_3d_clash_and_anchorage"]["advisory_only"] is False
     assert advanced["panel_zone_3d_clash_and_anchorage"]["release_blocking"] is False
-    assert "status_label=validated_fallback_only_gap_no_solver_input" in advanced["panel_zone_3d_clash_and_anchorage"]["evidence"]
-    assert "advisory_only=True" in advanced["panel_zone_3d_clash_and_anchorage"]["evidence"]
+    assert "status_label=release_ready" in advanced["panel_zone_3d_clash_and_anchorage"]["evidence"]
+    assert "advisory_only=False" in advanced["panel_zone_3d_clash_and_anchorage"]["evidence"]
     assert "release_blocking=False" in advanced["panel_zone_3d_clash_and_anchorage"]["evidence"]
-    assert remaining["GAP-P0-003"]["status"] == "open"
-    assert remaining["GAP-P0-003"]["status_label"] == "validated_fallback_only_gap_no_solver_input"
-    assert remaining["GAP-P0-003"]["advisory_only"] is True
+    assert "closure_mode=closed_exact_validated" in advanced["panel_zone_3d_clash_and_anchorage"]["evidence"]
+    assert remaining["GAP-P0-003"]["status"] == "closed"
+    assert remaining["GAP-P0-003"]["status_label"] == "release_ready"
+    assert remaining["GAP-P0-003"]["advisory_only"] is False
     assert remaining["GAP-P0-003"]["release_blocking"] is False
     assert "artifact_present=True" in advanced["pbd_dynamic_hinge_refresh"]["evidence"]
     assert "artifact_kind=hinge_refresh_projected_from_optimization_changes" in advanced["pbd_dynamic_hinge_refresh"]["evidence"]
@@ -1269,13 +1272,15 @@ def test_release_gap_report_emits_advanced_holdout_readiness_positive_path(tmp_p
     assert summary["panel_zone_3d_clash_ready"] is True
     assert summary["panel_zone_constructability_mode"] == "panel_zone_3d_clash_and_anchorage_verified"
     assert "panel-zone 3D clash artifact" in summary["panel_zone_constructability_reason"]
-    assert summary["panel_zone_external_validation_status_label"] == "verified"
+    assert summary["panel_zone_external_validation_status_label"] == "not_applicable"
     assert summary["panel_zone_external_validation_advisory_only"] is False
     assert summary["panel_zone_external_validation_release_blocking"] is False
     assert summary["panel_zone_status_label"] == "release_ready"
     assert summary["panel_zone_advisory_only"] is False
     assert summary["panel_zone_release_blocking"] is False
-    assert release_status["panel_zone_external_validation_status_label"] == "verified"
+    assert summary["panel_zone_external_validation_required_evidence"] == "solver_verified_3d_clash_and_anchorage_artifact"
+    assert summary["panel_zone_external_validation_local_closure_state"] == "awaiting_release_refresh_after_successful_consume"
+    assert release_status["panel_zone_external_validation_status_label"] == "not_applicable"
     assert release_status["panel_zone_external_validation_advisory_only"] is False
     assert release_status["panel_zone_external_validation_release_blocking"] is False
     assert release_status["panel_zone_status_label"] == "release_ready"

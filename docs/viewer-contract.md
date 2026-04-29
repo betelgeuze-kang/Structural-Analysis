@@ -17,7 +17,7 @@ Generated viewers are delivery artifacts produced by the phase1 generators and l
 
 - They are treated as GitHub Release assets, not source-controlled files.
 - They should be self-contained single-file viewers or packaged with an explicit registry/package manifest.
-- Their integrity is represented by manifest `sha256` and `bytes` fields, and the manifest can be checked against a download with `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <downloaded-release-root>`.
+- Their integrity is represented by manifest `sha256` and `bytes` fields. `scripts/verify_release_artifacts_manifest.py` compares the manifest against the actual files under `--artifact-root`; when you validate the repo-local `implementation/phase1/release/` tree without `--artifact-root`, stale files can fail even when the manifest is current. Use a clean clone/CI workspace or a freshly downloaded GitHub Release asset root for verification.
 
 ## Repository Exclusions
 

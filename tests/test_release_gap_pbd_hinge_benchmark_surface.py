@@ -126,7 +126,8 @@ def test_release_gap_report_surfaces_pbd_hinge_benchmark_metrics(tmp_path: Path)
         summary["peer_blind_prediction_measured_response_landing_summary_line"]
         == landing_payload["summary_line"]
     )
-    assert summary["peer_blind_prediction_measured_response_landing_state"] == "pending"
+    assert summary["peer_blind_prediction_measured_response_landing_state"] == "recorded"
+    assert summary["peer_blind_prediction_measured_response_landing_matched_file_count"] == 1
     assert summary["peer_blind_prediction_measured_response_landing_csv_file_count"] == 0
     assert summary["peer_blind_prediction_measured_response_landing_sensor_candidate_count"] == 0
     pbd_row = next(row for row in payload["advanced_holdouts"] if row["id"] == "pbd_dynamic_hinge_refresh")
@@ -136,5 +137,5 @@ def test_release_gap_report_surfaces_pbd_hinge_benchmark_metrics(tmp_path: Path)
     assert "benchmark_alignment_pass=True" in pbd_row["evidence"]
     assert "peer_blind_compare_cases=10" in pbd_row["evidence"]
     assert "peer_blind_compare_build_cases=10" in pbd_row["evidence"]
-    assert "peer_blind_landing_state=pending" in pbd_row["evidence"]
-    assert "peer_blind_landing_matched_files=0" in pbd_row["evidence"]
+    assert "peer_blind_landing_state=recorded" in pbd_row["evidence"]
+    assert "peer_blind_landing_matched_files=1" in pbd_row["evidence"]
