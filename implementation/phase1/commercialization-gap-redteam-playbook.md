@@ -21,7 +21,7 @@
 - `legitimate artifact refresh`는 검증 결과와 함께 별도 커밋으로 관리한다.
 - `stale local state`는 로컬 release bundle이나 작업공간이 오래된 상태를 뜻하며, generated worktree drift와 구분해 승인 후 별도 release artifact refresh 또는 workspace cleanup 작업으로 처리한다.
 - snapshot drift cleanup은 테스트 기대값을 현재 deterministic product state에 맞추고, assert는 제거하지 않으며, enum/status는 명시적으로 검증한다.
-- `scripts/verify_release_artifacts_manifest.py`는 `--artifact-root` 없이 로컬 `implementation/phase1/release/` 트리를 검증하면 실제 SHA/bytes를 비교하므로 stale local release bundle로는 실패할 수 있다. 이 검증은 clean clone/CI 또는 fresh GitHub Release asset root에서만 하고, 로컬 번들 refresh는 승인된 별도 release artifact refresh 작업으로 분리한다.
+- `scripts/verify_release_artifacts_manifest.py`는 source repo/CI에서는 `--structure-only`로 manifest 구조만 검증하고, fresh GitHub Release asset root에서는 `--artifact-root <root>`와 `--require-artifacts`로 SHA/bytes 무결성을 검증한다. 로컬 `implementation/phase1/release/`는 stale local state일 수 있으므로 별도 `release-artifact-refresh` 작업으로 분리하고, P0-1 close는 fresh asset root integrity 검증 통과를 기준으로 한다.
 
 ## 0-1) 실행 맵 (12개 백로그)
 

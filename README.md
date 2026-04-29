@@ -27,7 +27,7 @@ npm run build
 python3 -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
 python3 -m pytest -q tests/test_real_project_corpus_manifest.py
 python3 scripts/check_repo_hygiene.py --show-ok
-python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json
+python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
 python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
 python3 implementation/phase1/generate_real_project_parser_coverage_matrix.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --out implementation/phase1/real_project_parser_coverage_matrix.json
 python3 implementation/phase1/build_peer_tbi_benchmark_metric_records.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --coverage-matrix implementation/phase1/real_project_parser_coverage_matrix.json --out implementation/phase1/peer_tbi_benchmark_metric_records.json
@@ -51,7 +51,11 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - Source viewers live in `src/structure-viewer/` and are for local development, QA, and deterministic rebuilds from the source repo.
 - They may depend on repo-local vendor files and committed sidecars during development.
 - Generated single-file delivery viewers are release artifacts listed in `implementation/phase1/release_artifacts_manifest.json`.
-- Download the GitHub Release whose tag matches the manifest `release_tag`, unpack the assets into a local directory, and validate them with `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <downloaded-release-root>`. When you validate the repo-local `implementation/phase1/release/` tree without `--artifact-root`, the check compares actual SHA/bytes and stale files can fail; use a clean clone/CI workspace or a freshly downloaded GitHub Release asset root.
+- Download the GitHub Release whose tag matches the manifest `release_tag` and unpack the assets into a local directory.
+- In source repo/CI, run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only` to validate manifest structure only.
+- For a fresh GitHub Release asset root, run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <downloaded-release-root> --require-artifacts` to verify SHA/bytes integrity.
+- When you validate the repo-local `implementation/phase1/release/` tree without `--artifact-root`, the check compares actual SHA/bytes and stale files can fail; treat that as separate `release-artifact-refresh` work, not a P0-1 failure.
+- P0-1 closes only after the fresh asset root integrity check passes.
 - If you restore the release bundle locally, regenerate the release registries with `implementation/phase1/generate_release_project_registry_bootstrap.py` instead of hand-editing the packaged outputs.
 
 ## Repository Hygiene

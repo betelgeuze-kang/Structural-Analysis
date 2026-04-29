@@ -43,10 +43,25 @@ def _is_clean_relative_path(value: str) -> bool:
     return bool(value) and not path.is_absolute() and ".." not in path.parts
 
 
-def validate_manifest(manifest: Any, *, artifact_root: Path | None = None) -> list[str]:
+def _validate_artifact_integrity(row: dict[str, Any], candidate: Path, errors: list[str]) -> None:
+    asset_name = str(row.get("asset_name", "") or "").strip()
+    bytes_value = row.get("bytes")
+    sha256 = str(row.get("sha256", "") or "").strip()
+    if not candidate.is_file():
+        errors.append(f"artifact file missing: {candidate}")
+        return
+    actual_bytes = candidate.stat().st_size
+    if actual_bytes != bytes_value:
+        errors.append(f"bytes mismatch for {asset_name}: manifest={bytes_value} actual={actual_bytes}")
+    actual_sha = _sha256(candidate)
+    if actual_sha != sha256:
+        errors.append(f"sha256 mismatch for {asset_name}: manifest={sha256} actual={actual_sha}")
+
+
+def validate_manifest_structure(manifest: Any) -> tuple[list[str], list[dict[str, Any]]]:
     errors: list[str] = []
     if not isinstance(manifest, dict):
-        return ["manifest root must be an object"]
+        return ["manifest root must be an object"], []
 
     if manifest.get("schema_version") != SCHEMA_VERSION:
         errors.append(f"schema_version must be {SCHEMA_VERSION}")
@@ -56,14 +71,16 @@ def validate_manifest(manifest: Any, *, artifact_root: Path | None = None) -> li
     artifacts = manifest.get("artifacts")
     if not isinstance(artifacts, list) or not artifacts:
         errors.append("artifacts must be a non-empty list")
-        return errors
+        return errors, []
 
+    valid_rows: list[dict[str, Any]] = []
     seen_assets: set[str] = set()
     seen_local_paths: set[str] = set()
     for index, row in enumerate(artifacts):
         if not isinstance(row, dict):
             errors.append(f"artifacts[{index}] must be an object")
             continue
+        row_error_count = len(errors)
         asset_name = str(row.get("asset_name", "") or "").strip()
         local_path = str(row.get("local_path", "") or "").strip()
         sha256 = str(row.get("sha256", "") or "").strip()
@@ -90,19 +107,27 @@ def validate_manifest(manifest: Any, *, artifact_root: Path | None = None) -> li
             errors.append(f"artifacts[{index}].bytes must be a positive integer")
         if not isinstance(row.get("required"), bool):
             errors.append(f"artifacts[{index}].required must be boolean")
+        if len(errors) == row_error_count:
+            valid_rows.append(row)
+    return errors, valid_rows
 
+
+def validate_manifest(
+    manifest: Any,
+    *,
+    artifact_root: Path | None = None,
+    structure_only: bool = False,
+    require_artifacts: bool = False,
+) -> list[str]:
+    errors, valid_rows = validate_manifest_structure(manifest)
+    if errors or structure_only:
+        return errors
+
+    for row in valid_rows:
         candidate = _artifact_path(row, artifact_root)
-        should_check_local = artifact_root is not None or candidate.exists()
+        should_check_local = artifact_root is not None or require_artifacts or candidate.exists()
         if should_check_local:
-            if not candidate.is_file():
-                errors.append(f"artifact file missing: {candidate}")
-                continue
-            actual_bytes = candidate.stat().st_size
-            if actual_bytes != bytes_value:
-                errors.append(f"bytes mismatch for {asset_name}: manifest={bytes_value} actual={actual_bytes}")
-            actual_sha = _sha256(candidate)
-            if actual_sha != sha256:
-                errors.append(f"sha256 mismatch for {asset_name}: manifest={sha256} actual={actual_sha}")
+            _validate_artifact_integrity(row, candidate, errors)
     return errors
 
 
@@ -110,16 +135,40 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", required=True)
     parser.add_argument("--artifact-root", default="")
+    parser.add_argument(
+        "--structure-only",
+        action="store_true",
+        help="Validate manifest schema, paths, and digest/size fields without reading artifact files.",
+    )
+    parser.add_argument(
+        "--require-artifacts",
+        action="store_true",
+        help="Require local_path artifacts to exist and match sha256/bytes when --artifact-root is not used.",
+    )
     args = parser.parse_args()
 
     artifact_root = Path(args.artifact_root) if str(args.artifact_root).strip() else None
-    errors = validate_manifest(_load_json(Path(args.manifest)), artifact_root=artifact_root)
+    if args.structure_only and (artifact_root is not None or args.require_artifacts):
+        parser.error("--structure-only cannot be combined with --artifact-root or --require-artifacts")
+    errors = validate_manifest(
+        _load_json(Path(args.manifest)),
+        artifact_root=artifact_root,
+        structure_only=args.structure_only,
+        require_artifacts=args.require_artifacts,
+    )
     if errors:
         print("Release artifact manifest check failed:", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print("Release artifact manifest OK")
+    if args.structure_only:
+        print("Release artifact manifest OK (source-repo structure only; artifact bytes/sha not checked)")
+    elif artifact_root is not None:
+        print("Release artifact manifest OK (artifact-root asset integrity checked)")
+    elif args.require_artifacts:
+        print("Release artifact manifest OK (local artifact integrity required and checked)")
+    else:
+        print("Release artifact manifest OK (structure checked; existing local artifacts checked when present)")
     return 0
 
 

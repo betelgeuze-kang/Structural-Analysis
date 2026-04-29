@@ -67,12 +67,13 @@ python3 scripts/check_repo_hygiene.py --show-ok
 
 ### 1. P0-1 Release / Review Chain Stabilization
 
-목표: 납품 산출물의 SHA, registry, signature, manifest가 서로 맞게 한다.
+목표: source repo/CI의 manifest 구조 검증과 fresh GitHub Release asset root의 SHA/bytes 무결성을 분리하고, 정식 P0-1 close 기준을 후자로 고정한다.
 
 개선 내용:
 
-- GitHub Release asset root 기준으로 `release_artifacts_manifest.json` 검증을 닫는다.
-- stale local `implementation/phase1/release/` 검증 실패를 fresh release asset 검증으로 대체한다.
+- source repo/CI에서는 `--structure-only`로 `release_artifacts_manifest.json`의 구조를 검증한다.
+- fresh GitHub Release asset root에서는 `--artifact-root <fresh-release-asset-root>`와 `--require-artifacts`로 SHA/bytes 무결성을 검증한다.
+- stale local `implementation/phase1/release/` 검증 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
 - `project_package.zip`, `project_registry.json`, `release_registry.json`, signature 재생성 절차를 문서화하고 CI/수동 검증 기준을 고정한다.
 
 Exit gate:
@@ -80,7 +81,8 @@ Exit gate:
 ```bash
 python3 scripts/verify_release_artifacts_manifest.py \
   --manifest implementation/phase1/release_artifacts_manifest.json \
-  --artifact-root <fresh-release-asset-root>
+  --artifact-root <fresh-release-asset-root> \
+  --require-artifacts
 ```
 
 ### 2. P0-2 MIDAS Exact Roundtrip

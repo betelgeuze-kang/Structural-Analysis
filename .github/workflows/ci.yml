@@ -30,7 +30,7 @@ jobs:
         run: python scripts/check_repo_hygiene.py --show-ok
 
       - name: Release artifact manifest
-        run: python scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json
+        run: python scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
 
       - name: Real project corpus provenance
         run: |
