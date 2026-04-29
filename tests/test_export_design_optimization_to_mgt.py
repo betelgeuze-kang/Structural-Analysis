@@ -1904,6 +1904,8 @@ def test_export_design_optimization_to_mgt_clones_shared_thickness_and_retargets
         str(report),
         "--patch-manifest-out",
         str(manifest),
+        "--instruction-sidecar-out",
+        str(tmp_path / "instruction_sidecar.json"),
     ]
     proc = subprocess.run(export_cmd, check=False, capture_output=True, text=True)
     assert proc.returncode == 0, proc.stderr
