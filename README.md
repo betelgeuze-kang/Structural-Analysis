@@ -37,13 +37,12 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 
 ## Snapshot Hygiene
 
-- After a full `python3 -m pytest -q`, run `python3 scripts/check_generated_worktree_clean.py --show-ok` as the `generated worktree clean` check, then inspect any tracked dirty files before you commit.
-- If it fails, do not mix generated files into the feature/test commit; classify the drift as `test side-effect bug`, `legitimate artifact refresh`, or `stale local state`.
+- After a full `python3 -m pytest -q`, run `python3 scripts/check_generated_worktree_clean.py --show-ok` as the `generated worktree clean` check before you commit. This guard only reports tracked generated paths that are dirty relative to `HEAD`; it does not decide whether source edits or intentional user deletions outside those paths are valid.
+- If it fails, keep the generated drift out of the feature/test commit and classify the paths as `test side-effect bug`, `legitimate artifact refresh`, or `stale local state`.
 - A full `python3 -m pytest -q` run may regenerate tracked outputs under `implementation/phase1/open_data/`, `implementation/phase1/stress/`, and `implementation/phase1/panel_zone_solver_verified_*.json`. Keep those refreshes separate from feature changes and expectation patches.
-- Classify tracked generated drift into one of three buckets: `legitimate artifact refresh`, `test side-effect bug`, or `stale local state`.
 - Legitimate artifact refreshes belong in a separate commit with the verification result that justified them.
 - Test side-effect bugs should be fixed with test isolation, not by blindly committing the generated diff.
-- Stale local bundle/state should be handled in a separate release-artifact-refresh task, not folded into feature or test work.
+- `stale local state` means the local release bundle or workspace state is out of date; handle it in a separate release-artifact-refresh task, not folded into feature or test work.
 - When cleaning up snapshot drift, align the expected values to the current deterministic product state, keep asserts in place, and add explicit enum/status checks instead of removing coverage.
 
 ## Source vs Release Viewers

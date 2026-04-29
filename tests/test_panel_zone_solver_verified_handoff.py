@@ -347,6 +347,8 @@ def test_panel_zone_solver_verified_handoff_reads_trusted_origin_from_drop_dir_m
             str(pbd),
             "--source-drop-dir",
             str(FIXTURE_DIR / "trusted_drop_package"),
+            "--panel-zone-solver-export-bundle",
+            str(tmp_path / "panel_zone_solver_verified_export_bundle.json"),
             "--panel-zone-joint-geometry-source-output",
             str(tmp_path / "panel_zone_joint_geometry_3d.json"),
             "--panel-zone-rebar-anchorage-source-output",

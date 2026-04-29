@@ -23,7 +23,7 @@ Generated viewers are delivery artifacts produced by the phase1 generators and l
 
 `scripts/check_repo_hygiene.py` defines the source-repo boundary for generated and unsafe files.
 
-- After a full `pytest`, run `python3 scripts/check_generated_worktree_clean.py --show-ok` as the `generated worktree clean` check before committing. If it fails, do not mix tracked generated drift under `implementation/phase1/open_data/`, `implementation/phase1/stress/`, or `implementation/phase1/panel_zone_solver_verified_*.json` into the feature/test commit; classify it as `test side-effect bug`, `legitimate artifact refresh`, or `stale local state`.
+- After a full `pytest`, run `python3 scripts/check_generated_worktree_clean.py --show-ok` as the `generated worktree clean` check before committing. It only checks tracked generated paths under `implementation/phase1/open_data/`, `implementation/phase1/stress/`, and `implementation/phase1/panel_zone_solver_verified_*.json`, so keep user source edits or intentional deletions elsewhere in the normal commit path. If it fails, do not mix the generated drift into the feature/test commit; classify it as `test side-effect bug`, `legitimate artifact refresh`, or `stale local state`.
 - Private signing keys (`*.pem` except public keys) stay out of Git.
 - Large raw datasets and workspace inputs are externalized instead of being tracked in the repo.
 - Generated release folders under `implementation/phase1/release/`, repeat experiment archives under `implementation/phase1/experiments/`, and scratch data under `tmp/` stay out of Git.

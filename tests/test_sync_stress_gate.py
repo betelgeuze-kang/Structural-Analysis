@@ -137,6 +137,8 @@ def test_sync_stress_gate_blocks_virtual_backend_by_default(tmp_path: Path) -> N
         "pr",
         "--steps",
         "40",
+        "--work-dir",
+        str(tmp_path / "sync_work"),
         "--out",
         str(out),
     ]
@@ -175,6 +177,8 @@ def test_sync_stress_gate_fails_feti_profile(tmp_path: Path) -> None:
         "10.0",
         "--steps",
         "40",
+        "--work-dir",
+        str(tmp_path / "sync_work"),
         "--out",
         str(out),
     ]
