@@ -1,0 +1,153 @@
+name: Publish Release Assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      replace_existing:
+        description: "Delete and replace same-named release assets if the release already has them"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      promote_manifest:
+        description: "Commit the verified candidate manifest back to implementation/phase1/release_artifacts_manifest.json"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_ROOT: ${{ runner.temp }}/structural-release-upload-root
+      RELEASE_WORK: ${{ runner.temp }}/structural-release-private-work
+      CANDIDATE_MANIFEST: ${{ runner.temp }}/structural-release-candidate-manifest.json
+      RELEASE_ASSETS_JSON: ${{ runner.temp }}/structural-release-assets.json
+      RELEASE_UPLOAD_PLAN: ${{ runner.temp }}/structural-release-upload-plan.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          python -m pip install -e .[dev]
+
+      - name: Source boundary preflight
+        run: |
+          python scripts/check_repo_hygiene.py --show-ok --strict-source-boundary
+          python scripts/check_git_remote_safety.py --show-ok
+          python scripts/verify_release_artifacts_manifest.py \
+            --manifest implementation/phase1/release_artifacts_manifest.json \
+            --structure-only
+
+      - name: Regenerate release viewer artifacts
+        run: |
+          python implementation/phase1/run_nightly_release_gate.py \
+            --skip-promotion \
+            --skip-archive \
+            --no-reuse-existing-if-present
+          python implementation/phase1/export_optimized_drawing_expert_review_pdf.py \
+            --expert-review-metadata-json implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json \
+            --out-pdf implementation/phase1/release/visualization/optimized_drawing_expert_review.pdf
+
+      - name: Build fresh publication candidate
+        run: |
+          python scripts/build_release_publication_candidate.py \
+            --manifest implementation/phase1/release_artifacts_manifest.json \
+            --artifact-root "$RELEASE_ROOT" \
+            --work-dir "$RELEASE_WORK" \
+            --manifest-out "$CANDIDATE_MANIFEST" \
+            --write
+          python scripts/verify_release_artifacts_manifest.py \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --artifact-root "$RELEASE_ROOT" \
+            --require-artifacts
+          python scripts/prepare_release_upload_plan.py \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --artifact-root "$RELEASE_ROOT" \
+            --out "$RELEASE_UPLOAD_PLAN"
+
+      - name: Publish manifest-listed release assets
+        run: |
+          replace_flag=""
+          if [ "${{ inputs.replace_existing }}" = "true" ]; then
+            replace_flag="--replace-existing"
+          fi
+          python scripts/publish_github_release_assets.py \
+            --repo "${{ github.repository }}" \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --artifact-root "$RELEASE_ROOT" \
+            --assets-out "$RELEASE_ASSETS_JSON" \
+            $replace_flag
+
+      - name: Verify published release closure
+        run: |
+          release_tag="$(python -c 'import json, sys; print(json.load(open(sys.argv[1]))["release_tag"])' "$CANDIDATE_MANIFEST")"
+          python scripts/fetch_github_release_assets.py \
+            --repo "${{ github.repository }}" \
+            --tag "$release_tag" \
+            --out "$RELEASE_ASSETS_JSON"
+          python scripts/check_release_asset_listing.py \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --assets-json "$RELEASE_ASSETS_JSON" \
+            --require-all
+          python scripts/check_release_p0_closure.py \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --assets-json "$RELEASE_ASSETS_JSON" \
+            --artifact-root "$RELEASE_ROOT" \
+            --tag-ref-present true \
+            --require-all \
+            --fail-unclosed
+
+      - name: Upload publication evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-publication-evidence
+          path: |
+            ${{ runner.temp }}/structural-release-candidate-manifest.json
+            ${{ runner.temp }}/structural-release-assets.json
+            ${{ runner.temp }}/structural-release-upload-plan.json
+          if-no-files-found: ignore
+
+      - name: Promote verified manifest
+        if: ${{ inputs.promote_manifest == 'true' }}
+        run: |
+          cp "$CANDIDATE_MANIFEST" implementation/phase1/release_artifacts_manifest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add implementation/phase1/release_artifacts_manifest.json
+          if git diff --cached --quiet; then
+            echo "Candidate manifest already matches source manifest."
+          else
+            git commit -m "Promote verified release artifact manifest"
+            git push origin HEAD:${{ github.ref_name }}
+          fi

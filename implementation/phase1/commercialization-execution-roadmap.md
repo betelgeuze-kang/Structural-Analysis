@@ -81,7 +81,7 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 8. stale local `implementation/phase1/release/` 검증 실패와 `prepare_release_upload_plan.py`의 mismatched/missing asset 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
 9. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets 정확히 12개만 업로드한다.
 10. close path는 private work dir에서 signed registry/package 재생성 -> flat artifact root materialization -> candidate manifest 검증 -> GitHub Release 생성/asset 업로드 -> metadata preflight -> SHA/bytes verification -> source manifest promotion 순서로 고정한다.
-11. 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다. 외부 의존 단계는 fresh release output 재생성과 token-backed GitHub Release publication이다.
+11. 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다. 외부 의존 단계는 fresh release output 재생성과 token-backed GitHub Release publication이다. 로컬 토큰이 없으면 `Publish Release Assets` GitHub Actions workflow를 `replace_existing=false`, `promote_manifest=true`로 실행해 release publish와 source manifest promotion을 한 번에 닫는다.
 
 Exit gate:
 
