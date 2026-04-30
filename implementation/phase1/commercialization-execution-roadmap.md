@@ -7,11 +7,11 @@
 
 현재 단계는 `상용 데모 / 파일럿 직전`이다.
 
-- Source repo hygiene: `Green`
+- Source repo hygiene: `Green` (`--strict-source-boundary` pass, 25 MiB threshold cleanup 0 candidates)
 - Generated drift gate: `Green`
 - Frontend contract: `Green`
 - Targeted pytest smoke: `Green`
-- Release artifact integrity: `Yellow`
+- Release artifact integrity: `Yellow` (`structural-analysis-artifacts-2026-04-26` tag/release not found, local release stale, upload plan fails on mismatched/missing assets)
 - Structural analysis commercial trust: `Red`
 - Viewer product polish: `Yellow`
 
@@ -30,10 +30,13 @@ PoC, 기술제안 데모, 내부 파일럿은 가능하지만, 책임 해석 결
 
 현재 worktree는 clean이다. PNG asset 삭제는 이미 별도 커밋으로 종료되었다.
 
-다음 P0는 source-boundary inventory와 release artifact refresh다.
+source-boundary cleanup은 닫혔다. `scripts/check_repo_hygiene.py --strict-source-boundary`는 통과했고, `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25`는 0 candidates를 보고했으며, `implementation/phase1/open_data_external_artifacts_manifest.json`는 8개의 externalized open-data assets를 기록한다.
+
+다음 P0는 release artifact refresh와 P0-1 close path다.
 
 ```bash
-python3 scripts/report_worktree_drift.py --json --fail-on-source --fail-on-other
+python3 scripts/check_repo_hygiene.py --strict-source-boundary
+python3 scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25
 python3 scripts/check_generated_worktree_clean.py --show-ok
 python3 scripts/check_repo_hygiene.py --show-ok
 python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-large-files-mb 25
@@ -47,7 +50,7 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 
 개선 내용:
 
-- P0 source-boundary item은 tracked stress/workspace/output/rust target 경로를 Git 추적에서 제거하고, 25MiB+ open-data artifact는 checksum manifest 기반 externalized asset으로 관리한다.
+- P0 source-boundary item은 tracked stress/workspace/output/rust target 경로를 Git 추적에서 제거했고, 25MiB+ open-data artifact는 checksum manifest 기반 externalized asset으로 관리한다.
 - generated drift와 source changes가 동시에 생기지 않도록 현재 guard를 유지한다.
 - stale local release bundle 검증 실패를 release artifact refresh 작업으로 분리한다.
 
@@ -64,16 +67,18 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 
 목표: source repo/CI의 manifest 구조 검증, release asset listing preflight, fresh GitHub Release asset root의 12 manifest assets SHA/bytes 무결성을 분리하고, 정식 P0-1 close 기준을 후자로 고정한다.
 
+현재 `structural-analysis-artifacts-2026-04-26`는 GitHub API와 `git ls-remote`에서 모두 보이지 않고, 로컬 `implementation/phase1/release/`는 stale state이며, `python3 scripts/prepare_release_upload_plan.py`는 mismatched/missing asset에서 실패한다.
+
 개선 내용:
 
 1. source repo/CI에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`로 manifest 구조만 검증하고, 큰 artifact 다운로드는 요구하지 않는다.
 2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`을 실행한다.
 3. full integrity는 fresh GitHub Release asset root를 내려받아 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
 4. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`(12 manifest assets)만 업로드한다.
-5. current blocker는 tag/release가 아직 없을 수 있다는 점이다. P0-1은 tag, release, required assets가 모두 published 되기 전에는 close되지 않는다.
-6. stale local `implementation/phase1/release/` 검증 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
-7. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets만 업로드한다.
-8. `project_package.zip`, `project_registry.json`, `release_registry.json`, signature 재생성 절차를 문서화하고 CI/수동 검증 기준을 고정한다.
+5. current blocker는 `structural-analysis-artifacts-2026-04-26` tag/release가 GitHub API와 `git ls-remote`에서 모두 보이지 않는다는 점이다. P0-1은 tag, release, required assets가 published 되기 전에는 close되지 않는다.
+6. stale local `implementation/phase1/release/` 검증 실패와 `prepare_release_upload_plan.py`의 mismatched/missing asset 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
+7. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets 정확히 12개만 업로드한다.
+8. close path는 fresh artifact root 재생성 -> manifest 갱신(필요 시) -> tag/release 생성 -> metadata preflight -> SHA/bytes verification 순서로 고정한다.
 
 Exit gate:
 
@@ -211,8 +216,8 @@ python3 -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
 
 ## Next Action Queue
 
-1. tracked stress/workspace/output/rust target와 25MiB+ data externalization manifest를 닫고 release artifact 검증으로 넘어간다.
-2. fresh GitHub Release asset root, 12 manifest assets, metadata preflight, SHA/bytes verification, upload plan으로 `P0-1 Release / Review Chain Stabilization`을 닫는다.
+1. fresh GitHub Release asset root를 다시 만들고, manifest를 갱신(필요 시)한 뒤 tag/release를 생성한다.
+2. manifest asset 정확히 12개를 업로드하고 metadata preflight와 SHA/bytes verification을 통과시켜 `P0-1 Release / Review Chain Stabilization`을 닫는다.
 3. `P0-2 MIDAS Exact Roundtrip` 테스트와 report를 확장한다.
 4. `P0-3 KDS Load Combination Engine`을 닫는다.
 5. `P0-4 MIDAS-KDS Exact Geometry Bridge`를 닫는다.

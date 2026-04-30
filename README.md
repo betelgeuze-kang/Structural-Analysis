@@ -67,7 +67,8 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
   2. Metadata preflight: run `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>` to export release asset metadata, then run `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`.
   3. Full integrity: download a fresh GitHub Release asset root for the manifest `release_tag`, then run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --require-artifacts`.
   4. Upload plan: run `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>` and upload only the `upload_assets` entries.
-  5. Current blocker: the tag/release may not exist yet, so P0-1 cannot close until the tag, release, and required assets are published.
+  5. Closure gate: run `python3 scripts/check_release_p0_closure.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --artifact-root <fresh-release-asset-root> --tag-ref-present true --require-all --fail-unclosed`.
+  6. Current blocker: `structural-analysis-artifacts-2026-04-26` is not visible through the GitHub API or `git ls-remote`, repo-local `implementation/phase1/release/` is stale, and upload-plan validation fails on mismatched/missing assets.
 - Do not wildcard-upload `implementation/phase1/release/`; publish only the 12 manifest-listed assets from a freshly regenerated asset root.
 - If you restore the release bundle locally, regenerate the release registries with `implementation/phase1/generate_release_project_registry_bootstrap.py` instead of hand-editing the packaged outputs.
 

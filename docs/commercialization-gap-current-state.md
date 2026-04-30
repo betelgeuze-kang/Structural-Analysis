@@ -5,19 +5,21 @@
 
 ## 한 줄 요약
 
-뷰어와 일부 브리지/리포트는 이미 있으나, release 체인, source boundary, 핵심 해석 fidelity, 그리고 P2 viewer/report polish가 아직 완전히 닫히지 않았다.
+source boundary는 닫혔고, release P0-1만 아직 열려 있다. 상용 납품 기준은 fresh release root와 12개 manifest asset의 검증까지다.
 
 ## 현재 상태
 
-- P0는 아직 열려 있다. source 경계 정리는 generated/build 산출물과 25 MiB+ open-data artifact 기준으로 닫혔고, 상용 납품 가능 상태로 보기에는 release 검증이 남았다.
+- `scripts/check_repo_hygiene.py --strict-source-boundary`는 통과했고, tracked stress/workspace/output/rust target 정리는 끝났다.
+- `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25`는 0 candidates를 보고했다.
+- `implementation/phase1/open_data_external_artifacts_manifest.json`는 SHA/bytes가 붙은 8개 externalized open-data assets를 기록한다.
+- P0는 source boundary 관점에서는 닫혔지만, release P0-1은 아직 열려 있다.
 - P1은 MIDAS/KDS/geometry/constitutive/element 수준의 core fidelity를 순차적으로 닫아야 한다.
 - P2는 viewer/report 제품화 단계로, shared selection과 provenance를 전 surface에 통일해야 한다.
 
 ## P0 blockers
 
-- release는 fresh artifact root, 12 manifest assets, metadata preflight, SHA/bytes verification pass가 모두 끝나기 전에는 close할 수 없다.
-- source repo boundary는 `implementation/phase1/stress/`, `implementation/phase1/workspace/`, `implementation/phase1/output/`, `implementation/phase1/rust_hip_md3bead_hook/target/` tracked cleanup을 완료했다.
-- 25 MiB를 넘는 open-data artifacts 8개는 `implementation/phase1/open_data_external_artifacts_manifest.json`에 checksum/bytes를 남기고 Git 추적에서 제외한다.
+- release P0-1은 아직 열려 있다. GitHub API fetch와 `git ls-remote` 모두 `structural-analysis-artifacts-2026-04-26` tag/release를 찾지 못했고, 로컬 `implementation/phase1/release/`는 stale 상태다.
+- `scripts/prepare_release_upload_plan.py`는 stale local release와 mismatched/missing assets 때문에 실패한다. close path는 fresh artifact root 재생성 -> manifest update(필요 시) -> tag/release 생성 -> manifest asset 정확히 12개 업로드 -> metadata preflight -> SHA/bytes verification 순서로 고정한다.
 - remote safety는 `origin`과 `structural`을 모두 `betelgeuze-kang/Structural-Analysis`로 맞추고, `scripts/check_git_remote_safety.py`로 예전 Monet-wedding target 재유입을 막는다.
 
 ## P1/P2 작업 순서
@@ -39,9 +41,9 @@
 
 ## 다음 5개 작업
 
-1. 이 보고서를 커밋하고 `README.md`의 문서 목록에 현재상태 링크를 추가한다.
-2. fresh artifact root를 다시 받아 12 manifest assets, metadata preflight, SHA/bytes verification으로 release P0-1을 닫는다.
-3. fresh artifact root를 GitHub Release로 올린 뒤 manifest metadata preflight와 SHA/bytes verification을 통과시킨다.
+1. fresh artifact root를 다시 생성하고, 필요하면 manifest를 갱신한 뒤 tag/release를 만든다.
+2. manifest asset 정확히 12개를 업로드하고 metadata preflight와 SHA/bytes verification을 통과시켜 release P0-1을 닫는다.
+3. `scripts/check_repo_hygiene.py --strict-source-boundary`와 `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25`를 반복 가능한 gate로 유지한다.
 4. externalized open-data artifacts를 GitHub Releases 또는 source-family artifact cache에서 복원하는 heavy-validation runbook을 추가한다.
 5. `scripts/check_git_remote_safety.py --show-ok`를 CI/local gate로 유지한 뒤 MIDAS exact roundtrip -> KDS load combinations -> geometry identity 작업 묶음을 시작한다.
 
