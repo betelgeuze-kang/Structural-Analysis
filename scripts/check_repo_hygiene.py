@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -15,6 +16,12 @@ FORBIDDEN_PREFIXES = (
     "tmp/",
     "node_modules/",
     "dist/",
+)
+STRICT_SOURCE_BOUNDARY_PREFIXES = (
+    "implementation/phase1/stress/",
+    "implementation/phase1/workspace/",
+    "implementation/phase1/output/",
+    "implementation/phase1/rust_hip_md3bead_hook/target/",
 )
 FORBIDDEN_PATH_PARTS = {
     ".cache",
@@ -37,6 +44,13 @@ MAX_GIT_BLOB_BYTES = 100 * 1024 * 1024
 MAX_RAW_DATA_BYTES = 50 * 1024 * 1024
 
 
+def _path_size(path: str) -> int | None:
+    file_path = Path(path)
+    if not file_path.is_file():
+        return None
+    return file_path.stat().st_size
+
+
 def _git_files() -> list[str]:
     raw = subprocess.check_output(["git", "ls-files", "-z"])
     return [item for item in raw.decode("utf-8", "replace").split("\0") if item]
@@ -54,7 +68,7 @@ def _is_raw_data_path(path: str) -> bool:
     )
 
 
-def check_tracked_files(files: list[str]) -> list[str]:
+def check_tracked_files(files: list[str], *, strict_source_boundary: bool = False) -> list[str]:
     errors: list[str] = []
     for path in files:
         if path in ALLOWED_PATHS:
@@ -62,6 +76,8 @@ def check_tracked_files(files: list[str]) -> list[str]:
         path_parts = set(Path(path).parts)
         if any(path.startswith(prefix) for prefix in FORBIDDEN_PREFIXES):
             errors.append(f"generated path is tracked: {path}")
+        if strict_source_boundary and any(path.startswith(prefix) for prefix in STRICT_SOURCE_BOUNDARY_PREFIXES):
+            errors.append(f"source-boundary candidate is tracked: {path}")
         if path_parts & FORBIDDEN_PATH_PARTS:
             errors.append(f"cache path is tracked: {path}")
         if path.endswith(FORBIDDEN_SUFFIXES):
@@ -69,10 +85,9 @@ def check_tracked_files(files: list[str]) -> list[str]:
         if _is_private_pem(path):
             errors.append(f"private signing key is tracked: {path}")
 
-        file_path = Path(path)
-        if not file_path.is_file():
+        size = _path_size(path)
+        if size is None:
             continue
-        size = file_path.stat().st_size
         if size > MAX_GIT_BLOB_BYTES:
             errors.append(f"file exceeds GitHub hard limit ({size} bytes): {path}")
         if size > MAX_RAW_DATA_BYTES and _is_raw_data_path(path) and path.endswith(RAW_DATA_SUFFIXES):
@@ -80,12 +95,70 @@ def check_tracked_files(files: list[str]) -> list[str]:
     return errors
 
 
-def main() -> int:
+def build_inventory(files: list[str], *, warn_large_files_mb: float | None = None) -> dict[str, object]:
+    risky_prefix_counts = {
+        prefix: sum(1 for path in files if path.startswith(prefix))
+        for prefix in STRICT_SOURCE_BOUNDARY_PREFIXES
+    }
+    inventory: dict[str, object] = {
+        "total_files": len(files),
+        "risky_prefix_counts": {
+            prefix: count
+            for prefix, count in risky_prefix_counts.items()
+            if count
+        },
+        "large_files": [],
+    }
+    if warn_large_files_mb is None:
+        return inventory
+
+    threshold_bytes = int(warn_large_files_mb * 1024 * 1024)
+    large_files: list[dict[str, int | str]] = []
+    for path in files:
+        size = _path_size(path)
+        if size is not None and size > threshold_bytes:
+            large_files.append({"path": path, "size_bytes": size})
+    inventory["large_files"] = sorted(large_files, key=lambda item: (-int(item["size_bytes"]), str(item["path"])))
+    return inventory
+
+
+def _print_inventory(inventory: dict[str, object]) -> None:
+    risky_prefix_counts = inventory["risky_prefix_counts"]
+    large_files = inventory["large_files"]
+    if risky_prefix_counts:
+        print("Tracked risky prefix counts:")
+        for prefix, count in risky_prefix_counts.items():
+            print(f"- {prefix}: {count}")
+    if large_files:
+        print("Tracked files above advisory threshold:")
+        for item in large_files:
+            print(f"- {item['size_bytes']} bytes: {item['path']}")
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--show-ok", action="store_true", help="print a short success line")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--strict-source-boundary",
+        action="store_true",
+        help="fail on tracked generated/workspace/build-output source-boundary candidates",
+    )
+    parser.add_argument("--json", action="store_true", help="print deterministic JSON diagnostics")
+    parser.add_argument(
+        "--warn-large-files-mb",
+        type=float,
+        help="include tracked files above this advisory size threshold in inventory output",
+    )
+    args = parser.parse_args(argv)
 
-    errors = check_tracked_files(_git_files())
+    files = _git_files()
+    errors = check_tracked_files(files, strict_source_boundary=args.strict_source_boundary)
+    inventory = build_inventory(files, warn_large_files_mb=args.warn_large_files_mb)
+    if args.json:
+        print(json.dumps({"errors": errors, "inventory": inventory, "ok": not errors}, indent=2, sort_keys=True))
+        return 1 if errors else 0
+    if args.warn_large_files_mb is not None:
+        _print_inventory(inventory)
     if errors:
         print("Repository hygiene check failed:", file=sys.stderr)
         for error in errors:

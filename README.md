@@ -16,6 +16,14 @@
 - [Phase 1 material mapping report](implementation/phase1/material_map_report.json)
 - [Phase 1 priority 1/2/3 summary](implementation/phase1/priority3_summary.json)
 
+## Commercial Priority Snapshot
+
+- Current state: source tree is clean; PNG asset deletion is already committed; release artifact integrity is still open.
+- P0 source-boundary item: track stress/workspace/output/rust target paths and the 25MB+ data need inventory first, decide allowlist vs externalization, then remove/externalize in a separate commit.
+- Next order: P0-1 release blocker -> MIDAS exact roundtrip -> KDS load combination -> geometry identity -> constitutive libraries -> element/solver.
+- P0-1 is not closed until a fresh artifact root, 12 manifest assets, metadata preflight, SHA/bytes verification, and upload plan are all in hand.
+- Viewer provenance/performance/report polish stays in P2.
+
 ## Clean Clone Quickstart
 
 From a source checkout, run:

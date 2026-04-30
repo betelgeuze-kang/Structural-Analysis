@@ -19,12 +19,13 @@
 - generated 변경은 `legitimate artifact refresh`, `test side-effect bug`, `stale local state`의 3가지로 분류한다.
 - `test side-effect bug`는 테스트 isolation으로 고치고 generated 파일을 무작정 커밋하지 않는다.
 - `legitimate artifact refresh`는 검증 결과와 함께 별도 커밋으로 관리한다.
+- P0 source-boundary item은 tracked stress/workspace/output/rust target 경로와 25MB+ data need inventory를 먼저 정리하고, allowlist/externalization 결정을 한 뒤, removal/externalization은 별도 커밋으로 분리한다.
 - `stale local state`는 로컬 release bundle이나 작업공간이 오래된 상태를 뜻하며, generated worktree drift와 구분해 승인 후 별도 release artifact refresh 또는 workspace cleanup 작업으로 처리한다.
 - snapshot drift cleanup은 테스트 기대값을 현재 deterministic product state에 맞추고, assert는 제거하지 않으며, enum/status는 명시적으로 검증한다.
 
 1. source repo/CI에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`로 manifest 구조만 검증하고 큰 artifact 다운로드는 요구하지 않는다.
 2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`로 manifest asset names/bytes를 비교한다.
-3. fresh GitHub Release asset root에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
+3. fresh GitHub Release asset root의 12 manifest assets에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
 4. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`만 업로드한다.
 5. current blocker는 tag/release가 아직 없을 수 있다는 점이다. P0-1은 tag, release, required assets가 published 되기 전에는 close되지 않는다.
 6. 로컬 `implementation/phase1/release/`는 stale local state일 수 있으므로 별도 `release-artifact-refresh` 작업으로 분리한다.
@@ -43,7 +44,7 @@
 9. `[P1] Foundation / contact / device library`
 10. `[P1] Nonlinear solver control`
 11. `[P1] Benchmark / validation breadth`
-12. `[P2] Design report / results explorer / batch ops`
+12. `[P2] Viewer provenance / performance / report polish`
 
 - 이 12개 항목이 실제 실행 순서이며, 앞 항목이 닫혀야 다음 항목을 시작한다.
 - `P0` 범위가 닫히기 전에는 `P1`/`P2`를 승격하지 않는다.
