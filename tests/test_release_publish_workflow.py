@@ -32,3 +32,11 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "structural-p0-closure-status.json" in text
     assert "structural-p0-closure-status.md" in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text
+
+
+def test_release_publish_workflow_does_not_use_runner_context_in_job_env() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    job_env = text.split("    env:", 1)[1].split("    steps:", 1)[0]
+
+    assert "runner.temp" not in job_env
+    assert "RUNNER_TEMP" in text

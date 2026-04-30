@@ -32,19 +32,24 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      RELEASE_ROOT: ${{ runner.temp }}/structural-release-upload-root
-      RELEASE_WORK: ${{ runner.temp }}/structural-release-private-work
-      CANDIDATE_MANIFEST: ${{ runner.temp }}/structural-release-candidate-manifest.json
-      RELEASE_ASSETS_JSON: ${{ runner.temp }}/structural-release-assets.json
-      RELEASE_UPLOAD_PLAN: ${{ runner.temp }}/structural-release-upload-plan.json
-      P0_STATUS_JSON: ${{ runner.temp }}/structural-p0-closure-status.json
-      P0_STATUS_MD: ${{ runner.temp }}/structural-p0-closure-status.md
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: true
+
+      - name: Prepare release workspace paths
+        run: |
+          {
+            echo "RELEASE_ROOT=$RUNNER_TEMP/structural-release-upload-root"
+            echo "RELEASE_WORK=$RUNNER_TEMP/structural-release-private-work"
+            echo "CANDIDATE_MANIFEST=$RUNNER_TEMP/structural-release-candidate-manifest.json"
+            echo "RELEASE_ASSETS_JSON=$RUNNER_TEMP/structural-release-assets.json"
+            echo "RELEASE_UPLOAD_PLAN=$RUNNER_TEMP/structural-release-upload-plan.json"
+            echo "P0_STATUS_JSON=$RUNNER_TEMP/structural-p0-closure-status.json"
+            echo "P0_STATUS_MD=$RUNNER_TEMP/structural-p0-closure-status.md"
+          } >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v5
