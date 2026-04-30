@@ -88,3 +88,11 @@ implementation/phase1/open_data/megastructure/canton_tower_reduced_shm/normalize
 implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.csv
 implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip
 implementation/phase1/workspace/inputs/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip
+implementation/phase1/open_data/irregular/collected/artifacts/setback_tower_proxy_local/DS3_TalTech_V4.ifc
+implementation/phase1/open_data/irregular/collected/artifacts/tpu_interference_highrise_local/tpu_hffb_interference_highrise_seed_01.csv
+implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc
+implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/layershell.tcl
+implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv
+implementation/phase1/open_data/wind/tpu/case_917_probe.csv
+implementation/phase1/open_data/wind/tpu/isolated_probes/case_618.mat
+implementation/phase1/open_data/wind/tpu/probes/case_618.mat

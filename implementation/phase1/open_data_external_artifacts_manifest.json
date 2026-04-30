@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-30",
+  "policy": {
+    "repository_disposition": "externalized",
+    "reason": "Open-data artifacts above the 25 MiB source-repo hygiene threshold are tracked by checksum but not stored in Git.",
+    "restore_target": "original_path",
+    "storage": "GitHub Releases or source-family artifact cache"
+  },
+  "artifacts": [
+    {
+      "path": "implementation/phase1/open_data/irregular/collected/artifacts/setback_tower_proxy_local/DS3_TalTech_V4.ifc",
+      "bytes": 38728810,
+      "sha256": "05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+      "source_family": "irregular_structure_zenodo",
+      "disposition": "externalize"
+    },
+    {
+      "path": "implementation/phase1/open_data/irregular/collected/artifacts/tpu_interference_highrise_local/tpu_hffb_interference_highrise_seed_01.csv",
+      "bytes": 29958780,
+      "sha256": "ab57db6f7b6bbc59051159d27b92b2f9a0a16981a3f59bbff746fc1f83719011",
+      "source_family": "tpu_wind_seed",
+      "disposition": "externalize"
+    },
+    {
+      "path": "implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc",
+      "bytes": 38728810,
+      "sha256": "05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+      "source_family": "irregular_structure_zenodo",
+      "disposition": "externalize"
+    },
+    {
+      "path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/layershell.tcl",
+      "bytes": 51931875,
+      "sha256": "56a94cd2dfe5867557478b92c1e085bfcadd05fdb9c6d82f2b3b6c3861e8575b",
+      "source_family": "opensees_megatall_archive",
+      "disposition": "externalize"
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv",
+      "bytes": 29958780,
+      "sha256": "ab57db6f7b6bbc59051159d27b92b2f9a0a16981a3f59bbff746fc1f83719011",
+      "source_family": "tpu_wind_seed",
+      "disposition": "externalize"
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/case_917_probe.csv",
+      "bytes": 29851007,
+      "sha256": "feeeb183b40798dcb74f3d42b4296fab89dfc2f8eb37d40f03810b9c46035efe",
+      "source_family": "tpu_wind_probe",
+      "disposition": "externalize"
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/isolated_probes/case_618.mat",
+      "bytes": 36994413,
+      "sha256": "c9b39de149e779cc0d3afdd5c2deedf5e519962f0a12bba1a23b8dd81f3ba1a5",
+      "source_family": "tpu_wind_probe",
+      "disposition": "externalize"
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/probes/case_618.mat",
+      "bytes": 36994413,
+      "sha256": "c9b39de149e779cc0d3afdd5c2deedf5e519962f0a12bba1a23b8dd81f3ba1a5",
+      "source_family": "tpu_wind_probe",
+      "disposition": "externalize"
+    }
+  ]
+}

@@ -35,6 +35,9 @@ jobs:
       - name: Release artifact manifest
         run: python scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
 
+      - name: Open-data external artifact manifest
+        run: python scripts/verify_open_data_external_artifacts_manifest.py --manifest implementation/phase1/open_data_external_artifacts_manifest.json --structure-only
+
       - name: Real project corpus provenance
         run: |
           python implementation/phase1/validate_real_project_corpus_manifest.py \
@@ -61,6 +64,7 @@ jobs:
           python -m pytest -q tests/test_check_repo_hygiene.py
           python -m pytest -q tests/test_check_git_remote_safety.py
           python -m pytest -q tests/test_plan_source_boundary_cleanup.py
+          python -m pytest -q tests/test_verify_open_data_external_artifacts_manifest.py
           python -m pytest -q tests/test_verify_release_artifacts_manifest.py tests/test_check_release_asset_listing.py tests/test_fetch_github_release_assets.py tests/test_prepare_release_upload_plan.py
           python -m pytest -q tests/test_real_project_corpus_manifest.py
           python -m pytest -q tests/test_real_project_parser_coverage_matrix.py

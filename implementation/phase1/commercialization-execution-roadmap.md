@@ -47,7 +47,7 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 
 개선 내용:
 
-- P0 source-boundary item은 tracked stress/workspace/output/rust target 경로와 25MB+ data need inventory를 먼저 정리하고, allowlist/externalization 결정을 한 뒤, removal/externalization은 별도 커밋으로 분리한다.
+- P0 source-boundary item은 tracked stress/workspace/output/rust target 경로를 Git 추적에서 제거하고, 25MiB+ open-data artifact는 checksum manifest 기반 externalized asset으로 관리한다.
 - generated drift와 source changes가 동시에 생기지 않도록 현재 guard를 유지한다.
 - stale local release bundle 검증 실패를 release artifact refresh 작업으로 분리한다.
 
@@ -211,7 +211,7 @@ python3 -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
 
 ## Next Action Queue
 
-1. tracked stress/workspace/output/rust target와 25MB+ data need inventory를 닫고 allowlist/externalization 결정을 확정한다.
+1. tracked stress/workspace/output/rust target와 25MiB+ data externalization manifest를 닫고 release artifact 검증으로 넘어간다.
 2. fresh GitHub Release asset root, 12 manifest assets, metadata preflight, SHA/bytes verification, upload plan으로 `P0-1 Release / Review Chain Stabilization`을 닫는다.
 3. `P0-2 MIDAS Exact Roundtrip` 테스트와 report를 확장한다.
 4. `P0-3 KDS Load Combination Engine`을 닫는다.

@@ -19,7 +19,7 @@
 - generated 변경은 `legitimate artifact refresh`, `test side-effect bug`, `stale local state`의 3가지로 분류한다.
 - `test side-effect bug`는 테스트 isolation으로 고치고 generated 파일을 무작정 커밋하지 않는다.
 - `legitimate artifact refresh`는 검증 결과와 함께 별도 커밋으로 관리한다.
-- P0 source-boundary item은 tracked stress/workspace/output/rust target 경로와 25MB+ data need inventory를 먼저 정리하고, allowlist/externalization 결정을 한 뒤, removal/externalization은 별도 커밋으로 분리한다.
+- P0 source-boundary item은 tracked stress/workspace/output/rust target 경로를 Git 추적에서 제거하고, 25MiB+ open-data artifact는 checksum manifest 기반 externalized asset으로 관리한다.
 - `stale local state`는 로컬 release bundle이나 작업공간이 오래된 상태를 뜻하며, generated worktree drift와 구분해 승인 후 별도 release artifact refresh 또는 workspace cleanup 작업으로 처리한다.
 - snapshot drift cleanup은 테스트 기대값을 현재 deterministic product state에 맞추고, assert는 제거하지 않으며, enum/status는 명시적으로 검증한다.
 

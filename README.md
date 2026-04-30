@@ -20,7 +20,7 @@
 ## Commercial Priority Snapshot
 
 - Current state: source tree is clean; PNG asset deletion is already committed; release artifact integrity is still open.
-- P0 source-boundary item: tracked stress/workspace/output/rust target artifacts are removed from Git tracking; the remaining hygiene decision is the 25MB+ data allowlist vs externalization slice.
+- P0 source-boundary item: tracked stress/workspace/output/rust target artifacts are removed from Git tracking; 25MiB+ open-data artifacts are externalized in `implementation/phase1/open_data_external_artifacts_manifest.json`.
 - Next order: P0-1 release blocker -> MIDAS exact roundtrip -> KDS load combination -> geometry identity -> constitutive libraries -> element/solver.
 - P0-1 is not closed until a fresh artifact root, 12 manifest assets, metadata preflight, SHA/bytes verification, and upload plan are all in hand.
 - Viewer provenance/performance/report polish stays in P2.
@@ -38,6 +38,7 @@ python3 -m pytest -q tests/test_real_project_corpus_manifest.py
 python3 scripts/check_repo_hygiene.py --show-ok
 python3 scripts/check_git_remote_safety.py --show-ok
 python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
+python3 scripts/verify_open_data_external_artifacts_manifest.py --manifest implementation/phase1/open_data_external_artifacts_manifest.json --structure-only
 python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
 python3 implementation/phase1/generate_real_project_parser_coverage_matrix.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --out implementation/phase1/real_project_parser_coverage_matrix.json
 python3 implementation/phase1/build_peer_tbi_benchmark_metric_records.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --coverage-matrix implementation/phase1/real_project_parser_coverage_matrix.json --out implementation/phase1/peer_tbi_benchmark_metric_records.json
@@ -76,6 +77,7 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - `python3 scripts/check_repo_hygiene.py --show-ok` enforces that `implementation/phase1/release/`, `implementation/phase1/experiments/`, `tmp/`, `node_modules/`, `dist/`, private `.pem` keys, and oversized raw artifacts stay out of Git.
 - `python3 scripts/check_git_remote_safety.py --show-ok` prevents accidental publish to the old Monet-wedding remote; both `origin` and `structural` should resolve to `betelgeuze-kang/Structural-Analysis`.
 - `python3 scripts/plan_source_boundary_cleanup.py --write-pathspec <path>` creates a non-mutating cleanup plan for tracked stress/workspace/output/rust target artifacts and 25MiB+ files before any `git rm --cached` operation.
+- `implementation/phase1/open_data_external_artifacts_manifest.json` records SHA-256 and byte counts for externalized open-data assets that should be restored from GitHub Releases or the source-family artifact cache when running heavy validation.
 
 ## Real Project Corpus P0/P1/P2
 
