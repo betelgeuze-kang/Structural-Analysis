@@ -5,6 +5,7 @@
 - [Frontend build reproducibility](docs/frontend-build-reproducibility.md)
 - [Viewer source/export contract](docs/viewer-contract.md)
 - [Release publication runbook](docs/release-publication-runbook.md)
+- [Open-data artifact restore runbook](docs/open-data-artifact-restore-runbook.md)
 - [상용화 갭 현재상태 보고서](docs/commercialization-gap-current-state.md)
 - [Real Project Corpus closeout guide](docs/real-project-corpus.md)
 - [차세대 하이브리드 건축구조 분석 AI 아키텍처 명세서 (ADD)](docs/architecture-definition-document.md)
@@ -42,6 +43,7 @@ python3 scripts/check_git_remote_safety.py --show-ok
 python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
 python3 scripts/check_p0_closure_status.py --json
 python3 scripts/verify_open_data_external_artifacts_manifest.py --manifest implementation/phase1/open_data_external_artifacts_manifest.json --structure-only
+python3 scripts/plan_open_data_artifact_restore.py --json --out /tmp/open-data-restore-plan.json
 python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
 python3 implementation/phase1/generate_real_project_parser_coverage_matrix.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --out implementation/phase1/real_project_parser_coverage_matrix.json
 python3 implementation/phase1/build_peer_tbi_benchmark_metric_records.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --coverage-matrix implementation/phase1/real_project_parser_coverage_matrix.json --out implementation/phase1/peer_tbi_benchmark_metric_records.json
@@ -86,6 +88,7 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - `python3 scripts/check_git_remote_safety.py --show-ok` prevents accidental publish to the old Monet-wedding remote; both `origin` and `structural` should resolve to `betelgeuze-kang/Structural-Analysis`.
 - `python3 scripts/plan_source_boundary_cleanup.py --write-pathspec <path>` creates a non-mutating cleanup plan for tracked stress/workspace/output/rust target artifacts and 25MiB+ files before any `git rm --cached` operation.
 - `implementation/phase1/open_data_external_artifacts_manifest.json` records SHA-256 and byte counts for externalized open-data assets that should be restored from GitHub Releases or the source-family artifact cache when running heavy validation.
+- Use [Open-data artifact restore runbook](docs/open-data-artifact-restore-runbook.md) and `python3 scripts/plan_open_data_artifact_restore.py --cache-root <cache-root> --fail-unready` before P1 heavy validation.
 
 ## Real Project Corpus P0/P1/P2
 
