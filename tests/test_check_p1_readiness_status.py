@@ -138,6 +138,18 @@ def test_p1_readiness_blocks_on_missing_open_data_artifact(tmp_path: Path) -> No
     assert status["gates"][1]["status"] == "blocked"
 
 
+def test_p1_readiness_treats_missing_generated_report_as_blocked(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    missing_row_provenance = tmp_path / "missing" / "real_project_row_provenance_report.json"
+    paths["row_provenance"] = missing_row_provenance
+
+    status = check_p1_readiness.build_status(**paths)
+
+    assert status["p1_inputs_ready"] is False
+    assert status["gates"][4]["label"] == "Real-project row provenance"
+    assert status["gates"][4]["status"] == "blocked"
+
+
 def test_cli_writes_markdown_and_fails_when_execution_blocked(tmp_path: Path, capsys) -> None:
     paths = _paths(tmp_path)
     out_md = tmp_path / "p1.md"

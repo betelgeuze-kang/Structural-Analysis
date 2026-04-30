@@ -17,6 +17,7 @@ source boundary와 P0-2~P0-6 core evidence는 닫혔고, release P0-1만 아직 
 - `python3 scripts/check_p0_closure_status.py --json`는 P0-2 MIDAS exact roundtrip, P0-3 KDS load combination, P0-4 MIDAS-KDS geometry identity, P0-5 constitutive libraries, P0-6 element/solver evidence를 closed로 묶어 보고한다.
 - P0는 core evidence 관점에서는 닫혔지만, release P0-1 publication이 open이므로 overall P0는 아직 open이다.
 - P1은 quality/fallback/benchmark breadth를 순차적으로 닫아야 하며, heavy validation 전에 [open-data artifact restore runbook](open-data-artifact-restore-runbook.md)과 `scripts/check_p1_readiness_status.py`로 externalized artifact와 real-project seed 준비 상태를 확인한다.
+- `scripts/check_p1_benchmark_breadth_status.py`는 tracked commercial readiness, HF benchmark, TPU wind, PEER hinge, irregular top5, Korean public structure collection evidence를 하나로 묶어 P1 benchmark breadth inputs ready와 P0 release blocker를 분리해서 보고한다.
 - P2는 viewer/report 제품화 단계로, shared selection과 provenance를 전 surface에 통일하고 wall/slab batching/LOD, solver-verified panel-zone, SVG sheet/revision/callout을 정리해야 한다.
 
 ## P0-1 Release closure
@@ -53,7 +54,7 @@ P0-1이 닫힌 뒤에는 core fidelity를 재작업하지 말고, 이미 닫힌 
 2. `scripts/publish_github_release_assets.py`로 manifest asset 정확히 12개를 업로드하고 metadata preflight와 SHA/bytes verification을 통과시켜 release P0-1을 닫는다.
 3. `scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --fail-open`로 candidate manifest 기준 overall P0 closure를 판정한다.
 4. `scripts/check_repo_hygiene.py --strict-source-boundary`와 `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25`를 반복 가능한 gate로 유지한다.
-5. `scripts/check_p1_readiness_status.py --json`로 P1 inputs ready와 P0 release blocker를 분리해서 확인한 뒤 P1 breadth로 넘어간다.
+5. `scripts/check_p1_readiness_status.py --json`와 `scripts/check_p1_benchmark_breadth_status.py --json`로 P1 inputs/benchmark breadth ready와 P0 release blocker를 분리해서 확인한 뒤 P1 breadth로 넘어간다.
 
 ## 참고 문서
 

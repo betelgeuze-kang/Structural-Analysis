@@ -44,11 +44,12 @@ python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/p
 python3 scripts/check_p0_closure_status.py --json
 python3 scripts/verify_open_data_external_artifacts_manifest.py --manifest implementation/phase1/open_data_external_artifacts_manifest.json --structure-only
 python3 scripts/plan_open_data_artifact_restore.py --json --out /tmp/open-data-restore-plan.json
-python3 scripts/check_p1_readiness_status.py --json --out /tmp/p1-readiness-status.json
 python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
 python3 implementation/phase1/generate_real_project_parser_coverage_matrix.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --out implementation/phase1/real_project_parser_coverage_matrix.json
 python3 implementation/phase1/build_peer_tbi_benchmark_metric_records.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --coverage-matrix implementation/phase1/real_project_parser_coverage_matrix.json --out implementation/phase1/peer_tbi_benchmark_metric_records.json
 python3 implementation/phase1/build_real_project_row_provenance_report.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --coverage-matrix implementation/phase1/real_project_parser_coverage_matrix.json --peer-metric-records implementation/phase1/peer_tbi_benchmark_metric_records.json --out implementation/phase1/real_project_row_provenance_report.json
+python3 scripts/check_p1_readiness_status.py --json --out /tmp/p1-readiness-status.json
+python3 scripts/check_p1_benchmark_breadth_status.py --json --out /tmp/p1-benchmark-breadth-status.json
 ```
 
 If you want the clean-clone smoke path instead of the manual build step, run `npm run verify:frontend-smoke`; it already performs the frontend contract check, a clean `npm ci`, and `npm run build`.
@@ -91,6 +92,7 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - `implementation/phase1/open_data_external_artifacts_manifest.json` records SHA-256 and byte counts for externalized open-data assets that should be restored from GitHub Releases or the source-family artifact cache when running heavy validation.
 - Use [Open-data artifact restore runbook](docs/open-data-artifact-restore-runbook.md) and `python3 scripts/plan_open_data_artifact_restore.py --cache-root <cache-root> --fail-unready` before P1 heavy validation.
 - `python3 scripts/check_p1_readiness_status.py --json` separates P1 input readiness from the P0-1 release-publication blocker, so P1 work does not accidentally start before release closure.
+- `python3 scripts/check_p1_benchmark_breadth_status.py --json` summarizes the tracked P1 commercial/benchmark breadth evidence and keeps execution blocked until `check_p1_readiness_status.py` reports P0-1 closed.
 
 ## Real Project Corpus P0/P1/P2
 

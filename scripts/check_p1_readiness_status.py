@@ -23,6 +23,8 @@ DEFAULT_ROW_PROVENANCE = Path("implementation/phase1/real_project_row_provenance
 
 
 def _load_json(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
 
