@@ -74,10 +74,11 @@ python3 scripts/check_repo_hygiene.py --show-ok
 1. source repo/CI에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`로 manifest 구조만 검증하고, 큰 artifact 다운로드는 요구하지 않는다.
 2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`을 실행한다.
 3. full integrity는 fresh GitHub Release asset root를 내려받아 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
-4. current blocker는 tag/release가 아직 없을 수 있다는 점이다. P0-1은 tag, release, required assets가 모두 published 되기 전에는 close되지 않는다.
-5. stale local `implementation/phase1/release/` 검증 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
-6. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets만 업로드한다.
-7. `project_package.zip`, `project_registry.json`, `release_registry.json`, signature 재생성 절차를 문서화하고 CI/수동 검증 기준을 고정한다.
+4. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`만 업로드한다.
+5. current blocker는 tag/release가 아직 없을 수 있다는 점이다. P0-1은 tag, release, required assets가 모두 published 되기 전에는 close되지 않는다.
+6. stale local `implementation/phase1/release/` 검증 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
+7. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets만 업로드한다.
+8. `project_package.zip`, `project_registry.json`, `release_registry.json`, signature 재생성 절차를 문서화하고 CI/수동 검증 기준을 고정한다.
 
 Exit gate:
 

@@ -25,9 +25,10 @@
 1. source repo/CI에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`로 manifest 구조만 검증하고 큰 artifact 다운로드는 요구하지 않는다.
 2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`로 manifest asset names/bytes를 비교한다.
 3. fresh GitHub Release asset root에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
-4. current blocker는 tag/release가 아직 없을 수 있다는 점이다. P0-1은 tag, release, required assets가 published 되기 전에는 close되지 않는다.
-5. 로컬 `implementation/phase1/release/`는 stale local state일 수 있으므로 별도 `release-artifact-refresh` 작업으로 분리한다.
-6. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets만 업로드한다.
+4. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`만 업로드한다.
+5. current blocker는 tag/release가 아직 없을 수 있다는 점이다. P0-1은 tag, release, required assets가 published 되기 전에는 close되지 않는다.
+6. 로컬 `implementation/phase1/release/`는 stale local state일 수 있으므로 별도 `release-artifact-refresh` 작업으로 분리한다.
+7. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets만 업로드한다.
 
 ## 0-1) 실행 맵 (12개 백로그)
 

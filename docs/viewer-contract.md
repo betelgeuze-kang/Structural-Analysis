@@ -22,7 +22,8 @@ Generated viewers are delivery artifacts produced by the phase1 generators and l
   1. Source CI: run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only` to validate manifest structure only.
   2. Metadata preflight: run `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>` to export release asset metadata, then run `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`.
   3. Full integrity: download a fresh GitHub Release asset root for the manifest `release_tag`, then run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --require-artifacts` to verify SHA/bytes integrity.
-  4. Current blocker: the tag/release may not exist yet, so P0-1 cannot close until the tag, release, and required assets are published.
+  4. Upload plan: run `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --out <release-upload-plan.json>` and upload only the `upload_assets` entries.
+  5. Current blocker: the tag/release may not exist yet, so P0-1 cannot close until the tag, release, and required assets are published.
 - Do not wildcard-upload the repo-local `implementation/phase1/release/` tree; publish only manifest-listed assets from a freshly regenerated asset root.
 
 ## Repository Exclusions
