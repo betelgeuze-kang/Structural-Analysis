@@ -4,6 +4,7 @@
 
 - [Frontend build reproducibility](docs/frontend-build-reproducibility.md)
 - [Viewer source/export contract](docs/viewer-contract.md)
+- [상용화 갭 현재상태 보고서](docs/commercialization-gap-current-state.md)
 - [Real Project Corpus closeout guide](docs/real-project-corpus.md)
 - [차세대 하이브리드 건축구조 분석 AI 아키텍처 명세서 (ADD)](docs/architecture-definition-document.md)
 - [Phase 1 실행 산출물: LF 출력 스키마/검증](implementation/phase1/README.md)
@@ -35,6 +36,7 @@ npm run build
 python3 -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
 python3 -m pytest -q tests/test_real_project_corpus_manifest.py
 python3 scripts/check_repo_hygiene.py --show-ok
+python3 scripts/check_git_remote_safety.py --show-ok
 python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
 python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
 python3 implementation/phase1/generate_real_project_parser_coverage_matrix.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --out implementation/phase1/real_project_parser_coverage_matrix.json
@@ -72,6 +74,8 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 
 - The source repo intentionally excludes private signing keys, large raw datasets, generated release folders, repeated experiment archives, and temporary QA scratch space.
 - `python3 scripts/check_repo_hygiene.py --show-ok` enforces that `implementation/phase1/release/`, `implementation/phase1/experiments/`, `tmp/`, `node_modules/`, `dist/`, private `.pem` keys, and oversized raw artifacts stay out of Git.
+- `python3 scripts/check_git_remote_safety.py --show-ok` prevents accidental publish to the old Monet-wedding remote; both `origin` and `structural` should resolve to `betelgeuze-kang/Structural-Analysis`.
+- `python3 scripts/plan_source_boundary_cleanup.py --write-pathspec <path>` creates a non-mutating cleanup plan for tracked stress/workspace/output/rust target artifacts before any `git rm --cached` operation.
 
 ## Real Project Corpus P0/P1/P2
 

@@ -29,6 +29,9 @@ jobs:
       - name: Repository hygiene
         run: python scripts/check_repo_hygiene.py --show-ok
 
+      - name: Git remote safety
+        run: python scripts/check_git_remote_safety.py --show-ok
+
       - name: Release artifact manifest
         run: python scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
 
@@ -56,6 +59,8 @@ jobs:
           python -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
           python -m pytest -q tests/test_generate_release_project_registry_bootstrap.py tests/test_release_registry.py
           python -m pytest -q tests/test_check_repo_hygiene.py
+          python -m pytest -q tests/test_check_git_remote_safety.py
+          python -m pytest -q tests/test_plan_source_boundary_cleanup.py
           python -m pytest -q tests/test_verify_release_artifacts_manifest.py tests/test_check_release_asset_listing.py tests/test_fetch_github_release_assets.py tests/test_prepare_release_upload_plan.py
           python -m pytest -q tests/test_real_project_corpus_manifest.py
           python -m pytest -q tests/test_real_project_parser_coverage_matrix.py
