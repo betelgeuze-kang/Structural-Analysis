@@ -20,8 +20,9 @@
 ## Commercial Priority Snapshot
 
 - Current state: source tree is clean; source-boundary cleanup is closed; release artifact integrity is still open because P0-1 publication is incomplete.
+- P0 closure status is now scriptable: `python3 scripts/check_p0_closure_status.py --json` reports P0-2 through P0-6 core evidence as closed and keeps overall P0 open until the GitHub Release asset listing closes P0-1.
 - P0 source-boundary item: tracked stress/workspace/output/rust target artifacts are removed from Git tracking; 25MiB+ open-data artifacts are externalized in `implementation/phase1/open_data_external_artifacts_manifest.json`.
-- Next order: P0-1 release closure -> P0-2 MIDAS exact roundtrip -> P0-3 KDS load combination -> P0-4 MIDAS-KDS geometry identity -> P0-5 constitutive libraries -> P0-6 element/solver -> P1 quality/fallback/benchmark breadth -> P2 viewer shared selection/provenance and report polish.
+- Next order: P0-1 release closure -> P1 quality/fallback/benchmark breadth -> real-project row provenance/parser breadth -> P2 viewer shared selection/provenance and report polish.
 - P0-1 is not closed until a fresh artifact root is regenerated, the manifest is updated if needed, the tag/release is published, metadata preflight passes, exactly 12 manifest assets are uploaded, and SHA/bytes verification passes.
 - Viewer provenance/performance/report polish stays in P2, including shared selection/provenance, wall/slab batching/LOD, solver-verified panel-zone, and SVG sheet/revision/callout.
 
@@ -38,6 +39,7 @@ python3 -m pytest -q tests/test_real_project_corpus_manifest.py
 python3 scripts/check_repo_hygiene.py --show-ok
 python3 scripts/check_git_remote_safety.py --show-ok
 python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
+python3 scripts/check_p0_closure_status.py --json
 python3 scripts/verify_open_data_external_artifacts_manifest.py --manifest implementation/phase1/open_data_external_artifacts_manifest.json --structure-only
 python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
 python3 implementation/phase1/generate_real_project_parser_coverage_matrix.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --out implementation/phase1/real_project_parser_coverage_matrix.json
@@ -69,8 +71,9 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
   4. Full integrity: run `python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --require-artifacts`.
   5. Upload plan: run `python3 scripts/prepare_release_upload_plan.py --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>` and upload only the `upload_assets` entries. With `GITHUB_TOKEN` or `GH_TOKEN` set, run `python3 scripts/publish_github_release_assets.py --repo betelgeuze-kang/Structural-Analysis --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --assets-out <release-assets.json>` to create/update the GitHub Release and upload those manifest-listed files. Without a local token, run the `Publish Release Assets` GitHub Actions workflow; it uses the Actions `GITHUB_TOKEN` to regenerate the candidate, publish the release assets, verify closure, and optionally promote the source manifest.
   6. Closure gate: run `python3 scripts/check_release_p0_closure.py --manifest <candidate-manifest.json> --assets-json <release-assets.json> --artifact-root <fresh-release-asset-root> --tag-ref-present true --require-all --fail-unclosed`.
-  7. Promote manifest: after the GitHub Release asset listing and SHA/bytes checks pass, promote `<candidate-manifest.json>` into `implementation/phase1/release_artifacts_manifest.json` in a separate source commit.
-  8. Current blocker: `structural-analysis-artifacts-2026-04-26` is pushed as a Git tag, but the GitHub Release object and its 12 manifest-listed assets are not published yet. Repo-local `implementation/phase1/release/` is stale and must not be wildcard-uploaded. This is a release-publication gap, not a source-boundary gap.
+  7. Overall P0 status: run `python3 scripts/check_p0_closure_status.py --release-assets-json <release-assets.json> --artifact-root <fresh-release-asset-root> --tag-ref-present --fail-open` to combine P0-1 publication evidence with P0-2..P0-6 core evidence.
+  8. Promote manifest: after the GitHub Release asset listing and SHA/bytes checks pass, promote `<candidate-manifest.json>` into `implementation/phase1/release_artifacts_manifest.json` in a separate source commit.
+  9. Current blocker: `structural-analysis-artifacts-2026-04-26` is pushed as a Git tag, but the GitHub Release object and its 12 manifest-listed assets are not published yet. Repo-local `implementation/phase1/release/` is stale and must not be wildcard-uploaded. This is a release-publication gap, not a source-boundary gap.
 - Do not wildcard-upload `implementation/phase1/release/`; publish only the 12 manifest-listed assets from a freshly regenerated asset root.
 - If you restore the release bundle locally, regenerate the release registries with `implementation/phase1/generate_release_project_registry_bootstrap.py` instead of hand-editing the packaged outputs.
 
