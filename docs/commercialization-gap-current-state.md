@@ -22,7 +22,7 @@ source boundary는 닫혔고, release P0-1만 아직 열려 있다. 이 갭은 s
 
 - 미완 이유: GitHub API fetch와 `git ls-remote` 모두 `structural-analysis-artifacts-2026-04-26` tag/release를 찾지 못했고, 로컬 `implementation/phase1/release/`는 stale 상태다.
 - `scripts/prepare_release_upload_plan.py`는 stale local release와 mismatched/missing assets 때문에 실패한다.
-- 닫힘 기준: fresh local release output 재생성 -> `scripts/materialize_release_asset_root.py`로 flat artifact root 생성 -> manifest update(필요 시) -> tag/release 생성 -> metadata preflight -> upload plan 생성 -> manifest asset 정확히 12개 업로드 -> SHA/bytes verification 통과 순서로 고정한다.
+- 닫힘 기준: `scripts/build_release_publication_candidate.py`로 private work dir과 flat artifact root 생성 -> candidate manifest 검증 -> tag/release 생성 -> metadata preflight -> upload plan 생성 -> manifest asset 정확히 12개 업로드 -> SHA/bytes verification 통과 순서로 고정한다.
 - 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다.
 - 수작업/외부 의존 단계는 fresh release output 재생성, GitHub tag/release publication, 그리고 실제 자산 업로드 과정이다.
 - remote safety는 `origin`과 `structural`을 모두 `betelgeuze-kang/Structural-Analysis`로 맞추고, `scripts/check_git_remote_safety.py`로 예전 Monet-wedding target 재유입을 막는다.

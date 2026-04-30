@@ -753,6 +753,11 @@ def main() -> None:
     p.add_argument("--project-package-out", default="")
     p.add_argument("--project-registry-out", default="")
     p.add_argument("--out", default="implementation/phase1/release/release_registry.json")
+    p.add_argument(
+        "--generated-at",
+        default="",
+        help="Optional fixed ISO timestamp for reproducible release registry/package generation.",
+    )
     args = p.parse_args()
 
     out = Path(args.out)
@@ -835,7 +840,7 @@ def main() -> None:
             committee_summary
         )
 
-        generated_at = datetime.now(timezone.utc).isoformat()
+        generated_at = str(args.generated_at).strip() or datetime.now(timezone.utc).isoformat()
 
         registry_body = {
             "schema_version": "1.0",

@@ -486,12 +486,17 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
         str(sig),
         "--out",
         str(out),
+        "--generated-at",
+        "2026-03-07T00:00:00+00:00",
     ]
     proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
     assert proc.returncode == 0, proc.stderr
 
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["contract_pass"] is True
+    assert report["generated_at"] == "2026-03-07T00:00:00+00:00"
+    assert report["registry_body"]["generated_at"] == "2026-03-07T00:00:00+00:00"
+    assert report["project_registry_report"]["generated_at"] == "2026-03-07T00:00:00+00:00"
     assert report["reason_code"] == "PASS"
     assert report["checks"]["signature_verified_pass"] is True
     assert report["summary"]["signing_algorithm"] == "ed25519"

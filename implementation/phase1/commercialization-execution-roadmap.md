@@ -73,22 +73,27 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 
 1. source repo/CI에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`로 manifest 구조만 검증하고, 큰 artifact 다운로드는 요구하지 않는다.
 2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`을 실행한다.
-3. flat asset root는 release outputs를 재생성한 뒤 `python3 scripts/materialize_release_asset_root.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --write`로 만든다. 이 단계는 local_path의 nested outputs를 upload-safe flat root로 복사하기 전에 SHA/bytes를 검증한다.
-4. full integrity는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
-5. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`(12 manifest assets)만 업로드한다.
-6. current blocker는 `structural-analysis-artifacts-2026-04-26` tag/release가 GitHub API와 `git ls-remote`에서 모두 보이지 않는다는 점이다. P0-1은 tag, release, manifest-listed assets가 published 되기 전에는 close되지 않는다.
-7. stale local `implementation/phase1/release/` 검증 실패와 `prepare_release_upload_plan.py`의 mismatched/missing asset 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
-8. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets 정확히 12개만 업로드한다.
-9. close path는 fresh local release output 재생성 -> flat artifact root materialization -> manifest 갱신(필요 시) -> tag/release 생성 -> metadata preflight -> SHA/bytes verification 순서로 고정한다.
-10. 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다. 수작업/외부 의존 단계는 fresh release output 재생성, GitHub tag/release publication, 그리고 실제 자산 업로드 과정이다.
+3. fresh candidate root는 `python3 scripts/build_release_publication_candidate.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --work-dir <private-release-work-dir> --manifest-out <candidate-manifest.json> --write`로 만든다. 이 단계는 private signing key가 work dir에만 남고 flat artifact root에는 upload-safe manifest assets만 남도록 분리한다.
+4. full integrity는 `python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
+5. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`(12 manifest assets)만 업로드한다.
+6. closure gate는 publication 전에는 `<candidate-manifest.json>`을 기준으로 실행하고, GitHub Release asset listing과 SHA/bytes checks가 통과한 뒤에만 candidate manifest를 `implementation/phase1/release_artifacts_manifest.json`으로 승격한다.
+7. current blocker는 `structural-analysis-artifacts-2026-04-26` tag/release가 GitHub API와 `git ls-remote`에서 모두 보이지 않는다는 점이다. P0-1은 tag, release, manifest-listed assets가 published 되기 전에는 close되지 않는다.
+8. stale local `implementation/phase1/release/` 검증 실패와 `prepare_release_upload_plan.py`의 mismatched/missing asset 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
+9. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets 정확히 12개만 업로드한다.
+10. close path는 private work dir에서 signed registry/package 재생성 -> flat artifact root materialization -> candidate manifest 검증 -> tag/release 생성 -> metadata preflight -> SHA/bytes verification -> source manifest promotion 순서로 고정한다.
+11. 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다. 수작업/외부 의존 단계는 fresh release output 재생성, GitHub tag/release publication, 그리고 실제 자산 업로드 과정이다.
 
 Exit gate:
 
 ```bash
 python3 scripts/verify_release_artifacts_manifest.py \
-  --manifest implementation/phase1/release_artifacts_manifest.json \
+  --manifest <candidate-manifest.json> \
   --artifact-root <fresh-release-asset-root> \
   --require-artifacts
+python3 scripts/prepare_release_upload_plan.py \
+  --manifest <candidate-manifest.json> \
+  --artifact-root <fresh-release-asset-root> \
+  --out <release-upload-plan.json>
 ```
 
 ### 2. P0-2 MIDAS Exact Roundtrip
