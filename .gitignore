@@ -55,6 +55,7 @@ implementation/phase1/experiments/real_accuracy_*/
 tmp/
 implementation/phase1/workspace/
 implementation/phase1/stress/
+implementation/phase1/output/
 
 # Generated release bundles
 implementation/phase1/release/

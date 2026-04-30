@@ -20,7 +20,7 @@
 ## Commercial Priority Snapshot
 
 - Current state: source tree is clean; PNG asset deletion is already committed; release artifact integrity is still open.
-- P0 source-boundary item: track stress/workspace/output/rust target paths and the 25MB+ data need inventory first, decide allowlist vs externalization, then remove/externalize in a separate commit.
+- P0 source-boundary item: tracked stress/workspace/output/rust target artifacts are removed from Git tracking; the remaining hygiene decision is the 25MB+ data allowlist vs externalization slice.
 - Next order: P0-1 release blocker -> MIDAS exact roundtrip -> KDS load combination -> geometry identity -> constitutive libraries -> element/solver.
 - P0-1 is not closed until a fresh artifact root, 12 manifest assets, metadata preflight, SHA/bytes verification, and upload plan are all in hand.
 - Viewer provenance/performance/report polish stays in P2.
@@ -75,7 +75,7 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - The source repo intentionally excludes private signing keys, large raw datasets, generated release folders, repeated experiment archives, and temporary QA scratch space.
 - `python3 scripts/check_repo_hygiene.py --show-ok` enforces that `implementation/phase1/release/`, `implementation/phase1/experiments/`, `tmp/`, `node_modules/`, `dist/`, private `.pem` keys, and oversized raw artifacts stay out of Git.
 - `python3 scripts/check_git_remote_safety.py --show-ok` prevents accidental publish to the old Monet-wedding remote; both `origin` and `structural` should resolve to `betelgeuze-kang/Structural-Analysis`.
-- `python3 scripts/plan_source_boundary_cleanup.py --write-pathspec <path>` creates a non-mutating cleanup plan for tracked stress/workspace/output/rust target artifacts before any `git rm --cached` operation.
+- `python3 scripts/plan_source_boundary_cleanup.py --write-pathspec <path>` creates a non-mutating cleanup plan for tracked stress/workspace/output/rust target artifacts and 25MiB+ files before any `git rm --cached` operation.
 
 ## Real Project Corpus P0/P1/P2
 

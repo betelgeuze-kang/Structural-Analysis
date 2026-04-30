@@ -1,9 +1,0 @@
-{
-  "strict_rust_hip_pass": false,
-  "host_copy_share": 0.31,
-  "host_copy_share_limit": 0.2,
-  "host_copy_share_pass": false,
-  "all_pass": false,
-  "reason_code": "ERR_STRICT_FAIL",
-  "reason": "strict rust/hip pass flag is false"
-}
