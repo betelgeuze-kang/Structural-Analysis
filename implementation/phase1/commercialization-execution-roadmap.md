@@ -11,7 +11,7 @@
 - Generated drift gate: `Green`
 - Frontend contract: `Green`
 - Targeted pytest smoke: `Green`
-- Release artifact integrity: `Yellow` (`structural-analysis-artifacts-2026-04-26` tag/release not found, local release stale, upload plan fails on mismatched/missing assets)
+- Release artifact integrity: `Yellow` (source-side manifest checks are green, but P0-1 publication is still open because `structural-analysis-artifacts-2026-04-26` tag/release is not found, local release is stale, and upload plan fails on mismatched/missing assets)
 - Structural analysis commercial trust: `Red`
 - Viewer product polish: `Yellow`
 
@@ -28,7 +28,7 @@ PoC, 기술제안 데모, 내부 파일럿은 가능하지만, 책임 해석 결
 
 ## Immediate Cleanup State
 
-현재 worktree는 clean이다. PNG asset 삭제는 이미 별도 커밋으로 종료되었다.
+현재 worktree는 clean이다. source-boundary cleanup은 닫혔고 release P0-1만 아직 열려 있다.
 
 source-boundary cleanup은 닫혔다. `scripts/check_repo_hygiene.py --strict-source-boundary`는 통과했고, `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25`는 0 candidates를 보고했으며, `implementation/phase1/open_data_external_artifacts_manifest.json`는 8개의 externalized open-data assets를 기록한다.
 
@@ -65,7 +65,7 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 
 ### 1. P0-1 Release / Review Chain Stabilization
 
-목표: source repo/CI의 manifest 구조 검증, release asset listing preflight, fresh GitHub Release asset root의 12 manifest assets SHA/bytes 무결성을 분리하고, 정식 P0-1 close 기준을 후자로 고정한다.
+목표: source repo/CI의 manifest 구조 검증, release asset listing preflight, fresh GitHub Release asset root의 12 manifest assets SHA/bytes 무결성을 분리하고, 정식 P0-1 close 기준을 후자로 고정한다. 이 항목은 source-boundary 갭이 아니라 release-publication 갭이다.
 
 현재 `structural-analysis-artifacts-2026-04-26`는 GitHub API와 `git ls-remote`에서 모두 보이지 않고, 로컬 `implementation/phase1/release/`는 stale state이며, `python3 scripts/prepare_release_upload_plan.py`는 mismatched/missing asset에서 실패한다.
 
@@ -73,12 +73,14 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 
 1. source repo/CI에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`로 manifest 구조만 검증하고, 큰 artifact 다운로드는 요구하지 않는다.
 2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`을 실행한다.
-3. full integrity는 fresh GitHub Release asset root를 내려받아 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
-4. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`(12 manifest assets)만 업로드한다.
-5. current blocker는 `structural-analysis-artifacts-2026-04-26` tag/release가 GitHub API와 `git ls-remote`에서 모두 보이지 않는다는 점이다. P0-1은 tag, release, required assets가 published 되기 전에는 close되지 않는다.
-6. stale local `implementation/phase1/release/` 검증 실패와 `prepare_release_upload_plan.py`의 mismatched/missing asset 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
-7. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets 정확히 12개만 업로드한다.
-8. close path는 fresh artifact root 재생성 -> manifest 갱신(필요 시) -> tag/release 생성 -> metadata preflight -> SHA/bytes verification 순서로 고정한다.
+3. flat asset root는 release outputs를 재생성한 뒤 `python3 scripts/materialize_release_asset_root.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --write`로 만든다. 이 단계는 local_path의 nested outputs를 upload-safe flat root로 복사하기 전에 SHA/bytes를 검증한다.
+4. full integrity는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
+5. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`(12 manifest assets)만 업로드한다.
+6. current blocker는 `structural-analysis-artifacts-2026-04-26` tag/release가 GitHub API와 `git ls-remote`에서 모두 보이지 않는다는 점이다. P0-1은 tag, release, manifest-listed assets가 published 되기 전에는 close되지 않는다.
+7. stale local `implementation/phase1/release/` 검증 실패와 `prepare_release_upload_plan.py`의 mismatched/missing asset 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
+8. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets 정확히 12개만 업로드한다.
+9. close path는 fresh local release output 재생성 -> flat artifact root materialization -> manifest 갱신(필요 시) -> tag/release 생성 -> metadata preflight -> SHA/bytes verification 순서로 고정한다.
+10. 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다. 수작업/외부 의존 단계는 fresh release output 재생성, GitHub tag/release publication, 그리고 실제 자산 업로드 과정이다.
 
 Exit gate:
 
@@ -204,6 +206,7 @@ python3 implementation/phase1/run_productization_gate.py \
 - 3D viewer를 상용 구조해석 UI 수준으로 정리한다.
 - panel-zone, optimization-history, charts, drawings를 같은 provenance key로 연결한다.
 - report export, revision lifecycle, sheet set, annotation/callout collision을 정리한다.
+- shared selection/provenance, wall/slab batching/LOD, solver-verified panel-zone, SVG sheet/revision/callout는 아직 남은 viewer gaps로 취급한다.
 - source viewer와 generated single-file delivery viewer의 역할을 계속 분리한다.
 
 Exit gate:
@@ -222,7 +225,8 @@ python3 -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
 4. `P0-3 KDS Load Combination Engine`을 닫는다.
 5. `P0-4 MIDAS-KDS Exact Geometry Bridge`를 닫는다.
 6. `P0-5 Structural Constitutive Libraries`와 `P0-6 Element / Solver Engine`을 순서대로 진행한다.
-7. viewer provenance/performance/report polish는 P2로 둔다.
+7. `P1 Quality / Fallback / Benchmark Breadth`를 닫아 KONEPS/PEER TBI/open benchmark row provenance를 넓힌다.
+8. viewer provenance/performance/report polish는 P2로 둔다. 여기에는 shared selection/provenance, wall/slab batching/LOD, solver-verified panel-zone, SVG sheet/revision/callout이 포함된다.
 
 ## Reference Commands
 

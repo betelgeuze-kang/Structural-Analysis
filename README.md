@@ -19,11 +19,11 @@
 
 ## Commercial Priority Snapshot
 
-- Current state: source tree is clean; PNG asset deletion is already committed; release artifact integrity is still open.
+- Current state: source tree is clean; source-boundary cleanup is closed; release artifact integrity is still open because P0-1 publication is incomplete.
 - P0 source-boundary item: tracked stress/workspace/output/rust target artifacts are removed from Git tracking; 25MiB+ open-data artifacts are externalized in `implementation/phase1/open_data_external_artifacts_manifest.json`.
-- Next order: P0-1 release blocker -> MIDAS exact roundtrip -> KDS load combination -> geometry identity -> constitutive libraries -> element/solver.
-- P0-1 is not closed until a fresh artifact root, 12 manifest assets, metadata preflight, SHA/bytes verification, and upload plan are all in hand.
-- Viewer provenance/performance/report polish stays in P2.
+- Next order: P0-1 release closure -> P0-2 MIDAS exact roundtrip -> P0-3 KDS load combination -> P0-4 MIDAS-KDS geometry identity -> P0-5 constitutive libraries -> P0-6 element/solver -> P1 quality/fallback/benchmark breadth -> P2 viewer shared selection/provenance and report polish.
+- P0-1 is not closed until a fresh artifact root is regenerated, the manifest is updated if needed, the tag/release is published, metadata preflight passes, exactly 12 manifest assets are uploaded, and SHA/bytes verification passes.
+- Viewer provenance/performance/report polish stays in P2, including shared selection/provenance, wall/slab batching/LOD, solver-verified panel-zone, and SVG sheet/revision/callout.
 
 ## Clean Clone Quickstart
 
@@ -65,10 +65,11 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - Release verification runbook:
   1. Source CI: run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only` so source CI only checks manifest structure.
   2. Metadata preflight: run `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>` to export release asset metadata, then run `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`.
-  3. Full integrity: download a fresh GitHub Release asset root for the manifest `release_tag`, then run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --require-artifacts`.
-  4. Upload plan: run `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>` and upload only the `upload_assets` entries.
-  5. Closure gate: run `python3 scripts/check_release_p0_closure.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --artifact-root <fresh-release-asset-root> --tag-ref-present true --require-all --fail-unclosed`.
-  6. Current blocker: `structural-analysis-artifacts-2026-04-26` is not visible through the GitHub API or `git ls-remote`, repo-local `implementation/phase1/release/` is stale, and upload-plan validation fails on mismatched/missing assets.
+  3. Flat asset root: after regenerating local release outputs, run `python3 scripts/materialize_release_asset_root.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --write` to copy the 12 manifest-listed assets into a flat upload root.
+  4. Full integrity: run `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --require-artifacts`.
+  5. Upload plan: run `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>` and upload only the `upload_assets` entries.
+  6. Closure gate: run `python3 scripts/check_release_p0_closure.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --artifact-root <fresh-release-asset-root> --tag-ref-present true --require-all --fail-unclosed`.
+  7. Current blocker: `structural-analysis-artifacts-2026-04-26` is not visible through the GitHub API or `git ls-remote`, repo-local `implementation/phase1/release/` is stale, and upload-plan validation fails on mismatched/missing assets. This is a release-publication gap, not a source-boundary gap.
 - Do not wildcard-upload `implementation/phase1/release/`; publish only the 12 manifest-listed assets from a freshly regenerated asset root.
 - If you restore the release bundle locally, regenerate the release registries with `implementation/phase1/generate_release_project_registry_bootstrap.py` instead of hand-editing the packaged outputs.
 
@@ -87,7 +88,7 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - P1 begins with [real_project_parser_coverage_matrix.json](implementation/phase1/real_project_parser_coverage_matrix.json): KONEPS coverage targets `.mgt/.ifc/.dwg/.dxf/.pdf/.xlsx/.zip`, PEER TBI benchmark metric groups are `citation`, `period`, `base_shear`, `story_drift`, and `nonlinear_response`, and raw redistribution remains disabled after P0 unless document-level review explicitly allows it.
 - P1-3 is the row provenance gate: each promoted parser/benchmark row must keep source family, access policy, checksum-or-withheld reason, file inventory status, parser contract, row pointer, and release-surface eligibility before it can move to P2. Generate it with `implementation/phase1/build_real_project_row_provenance_report.py`; `implementation/phase1/real_project_row_provenance_report.json` is a generated local/CI report and remains outside Git by default.
 - PEER TBI metric records are generated by `python3 implementation/phase1/build_peer_tbi_benchmark_metric_records.py --manifest implementation/phase1/real_project_corpus_seed_manifest.json --coverage-matrix implementation/phase1/real_project_parser_coverage_matrix.json --out implementation/phase1/peer_tbi_benchmark_metric_records.json`; the output is citation-first and keeps raw model/input deck redistribution blocked by default.
-- P2 automates refresh, redaction, release packaging, and viewer/report surfacing only after P0/P1 gates are green.
+- P2 automates refresh, redaction, release packaging, and viewer/report surfacing only after P0/P1 gates are green; shared selection/provenance, wall/slab batching/LOD, solver-verified panel-zone, and SVG sheet/revision/callout remain the main viewer gaps.
 
 ## Railway/Tunnel Structural Dynamics Extension
 
