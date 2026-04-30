@@ -37,6 +37,8 @@ jobs:
       CANDIDATE_MANIFEST: ${{ runner.temp }}/structural-release-candidate-manifest.json
       RELEASE_ASSETS_JSON: ${{ runner.temp }}/structural-release-assets.json
       RELEASE_UPLOAD_PLAN: ${{ runner.temp }}/structural-release-upload-plan.json
+      P0_STATUS_JSON: ${{ runner.temp }}/structural-p0-closure-status.json
+      P0_STATUS_MD: ${{ runner.temp }}/structural-p0-closure-status.md
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -126,6 +128,14 @@ jobs:
             --tag-ref-present true \
             --require-all \
             --fail-unclosed
+          python scripts/check_p0_closure_status.py \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --release-assets-json "$RELEASE_ASSETS_JSON" \
+            --artifact-root "$RELEASE_ROOT" \
+            --tag-ref-present \
+            --out "$P0_STATUS_JSON" \
+            --out-md "$P0_STATUS_MD" \
+            --fail-open
 
       - name: Upload publication evidence
         if: always()
@@ -136,6 +146,8 @@ jobs:
             ${{ runner.temp }}/structural-release-candidate-manifest.json
             ${{ runner.temp }}/structural-release-assets.json
             ${{ runner.temp }}/structural-release-upload-plan.json
+            ${{ runner.temp }}/structural-p0-closure-status.json
+            ${{ runner.temp }}/structural-p0-closure-status.md
           if-no-files-found: ignore
 
       - name: Promote verified manifest

@@ -25,4 +25,10 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "scripts/publish_github_release_assets.py" in text
     assert "--replace-existing" in text
     assert "scripts/check_release_p0_closure.py" in text
+    assert "scripts/check_p0_closure_status.py" in text
+    assert '--manifest "$CANDIDATE_MANIFEST"' in text
+    assert '--release-assets-json "$RELEASE_ASSETS_JSON"' in text
+    assert '--artifact-root "$RELEASE_ROOT"' in text
+    assert "structural-p0-closure-status.json" in text
+    assert "structural-p0-closure-status.md" in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text

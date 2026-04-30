@@ -26,8 +26,9 @@ source boundary와 P0-2~P0-6 core evidence는 닫혔고, release P0-1만 아직 
 - 닫힘 기준: `scripts/build_release_publication_candidate.py`로 private work dir과 flat artifact root 생성 -> candidate manifest 검증 -> GitHub Release 생성 -> `scripts/publish_github_release_assets.py`로 manifest asset 정확히 12개 업로드 -> metadata preflight -> SHA/bytes verification 통과 순서로 고정한다.
 - 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다.
 - 전체 P0 판정은 `scripts/check_p0_closure_status.py`로 고정한다. release asset listing 없이 실행하면 P0-1 open, P0-2~P0-6 closed 상태를 명시적으로 보고한다.
-- 수작업/외부 의존 단계는 fresh release output 재생성과 GitHub Release publication이다. 로컬 토큰이 없을 때는 `Publish Release Assets` GitHub Actions workflow가 Actions `GITHUB_TOKEN`으로 release 생성, 12개 asset 업로드, closure 검증, 선택적 manifest promotion을 수행한다.
+- 수작업/외부 의존 단계는 fresh release output 재생성과 GitHub Release publication이다. 로컬 토큰이 없을 때는 `Publish Release Assets` GitHub Actions workflow가 Actions `GITHUB_TOKEN`으로 release 생성, 12개 asset 업로드, release closure 검증, 선택적 manifest promotion을 수행한다.
 - remote safety는 `origin`과 `structural`을 모두 `betelgeuze-kang/Structural-Analysis`로 맞추고, `scripts/check_git_remote_safety.py`로 예전 Monet-wedding target 재유입을 막는다.
+- 운영 절차는 [release publication runbook](release-publication-runbook.md)에서 그대로 따른다.
 
 ## P1/P2 작업 순서
 
@@ -50,7 +51,7 @@ P0-1이 닫힌 뒤에는 core fidelity를 재작업하지 말고, 이미 닫힌 
 
 1. fresh artifact root를 다시 생성하고, 필요하면 manifest를 갱신한 뒤 GitHub Release object를 만든다.
 2. `scripts/publish_github_release_assets.py`로 manifest asset 정확히 12개를 업로드하고 metadata preflight와 SHA/bytes verification을 통과시켜 release P0-1을 닫는다.
-3. `scripts/check_p0_closure_status.py --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --fail-open`로 overall P0 closure를 판정한다.
+3. `scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --fail-open`로 candidate manifest 기준 overall P0 closure를 판정한다.
 4. `scripts/check_repo_hygiene.py --strict-source-boundary`와 `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25`를 반복 가능한 gate로 유지한다.
 5. externalized open-data artifacts를 GitHub Releases 또는 source-family artifact cache에서 복원하는 heavy-validation runbook을 추가하고 P1 breadth로 넘어간다.
 

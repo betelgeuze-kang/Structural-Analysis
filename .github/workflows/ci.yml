@@ -65,7 +65,7 @@ jobs:
           python -m pytest -q tests/test_check_git_remote_safety.py
           python -m pytest -q tests/test_plan_source_boundary_cleanup.py
           python -m pytest -q tests/test_verify_open_data_external_artifacts_manifest.py
-          python -m pytest -q tests/test_verify_release_artifacts_manifest.py tests/test_check_release_asset_listing.py tests/test_fetch_github_release_assets.py tests/test_prepare_release_upload_plan.py tests/test_materialize_release_asset_root.py tests/test_build_release_publication_candidate.py tests/test_publish_github_release_assets.py tests/test_release_publish_workflow.py tests/test_check_release_p0_closure.py tests/test_check_p0_closure_status.py
+          python -m pytest -q tests/test_verify_release_artifacts_manifest.py tests/test_check_release_asset_listing.py tests/test_fetch_github_release_assets.py tests/test_prepare_release_upload_plan.py tests/test_materialize_release_asset_root.py tests/test_build_release_publication_candidate.py tests/test_publish_github_release_assets.py tests/test_dispatch_release_publish_workflow.py tests/test_release_publish_workflow.py tests/test_check_release_p0_closure.py tests/test_check_p0_closure_status.py
           python -m pytest -q tests/test_real_project_corpus_manifest.py
           python -m pytest -q tests/test_real_project_parser_coverage_matrix.py
           python -m pytest -q tests/test_build_peer_tbi_benchmark_metric_records.py
