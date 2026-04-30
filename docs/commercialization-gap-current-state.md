@@ -20,9 +20,9 @@ source boundary는 닫혔고, release P0-1만 아직 열려 있다. 이 갭은 s
 
 ## P0-1 Release closure
 
-- 미완 이유: GitHub API fetch와 `git ls-remote` 모두 `structural-analysis-artifacts-2026-04-26` tag/release를 찾지 못했고, 로컬 `implementation/phase1/release/`는 stale 상태다.
-- `scripts/prepare_release_upload_plan.py`는 stale local release와 mismatched/missing assets 때문에 실패한다.
-- 닫힘 기준: `scripts/build_release_publication_candidate.py`로 private work dir과 flat artifact root 생성 -> candidate manifest 검증 -> tag/release 생성 -> metadata preflight -> upload plan 생성 -> manifest asset 정확히 12개 업로드 -> SHA/bytes verification 통과 순서로 고정한다.
+- 미완 이유: `structural-analysis-artifacts-2026-04-26` Git tag는 푸시됐지만, GitHub Release object와 12개 manifest asset 업로드가 아직 완료되지 않았다. 로컬 `implementation/phase1/release/`는 stale 상태이므로 업로드 소스로 쓰지 않는다.
+- `scripts/prepare_release_upload_plan.py`는 fresh candidate root에서는 통과하지만, stale local release에 대해서는 mismatched/missing assets를 정확히 실패시킨다.
+- 닫힘 기준: `scripts/build_release_publication_candidate.py`로 private work dir과 flat artifact root 생성 -> candidate manifest 검증 -> GitHub Release 생성 -> `scripts/publish_github_release_assets.py`로 manifest asset 정확히 12개 업로드 -> metadata preflight -> SHA/bytes verification 통과 순서로 고정한다.
 - 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다.
 - 수작업/외부 의존 단계는 fresh release output 재생성, GitHub tag/release publication, 그리고 실제 자산 업로드 과정이다.
 - remote safety는 `origin`과 `structural`을 모두 `betelgeuze-kang/Structural-Analysis`로 맞추고, `scripts/check_git_remote_safety.py`로 예전 Monet-wedding target 재유입을 막는다.
@@ -50,8 +50,8 @@ P0-1이 닫힌 뒤의 다음 순서다.
 
 ## 다음 5개 작업
 
-1. fresh artifact root를 다시 생성하고, 필요하면 manifest를 갱신한 뒤 tag/release를 만든다.
-2. manifest asset 정확히 12개를 업로드하고 metadata preflight와 SHA/bytes verification을 통과시켜 release P0-1을 닫는다.
+1. fresh artifact root를 다시 생성하고, 필요하면 manifest를 갱신한 뒤 GitHub Release object를 만든다.
+2. `scripts/publish_github_release_assets.py`로 manifest asset 정확히 12개를 업로드하고 metadata preflight와 SHA/bytes verification을 통과시켜 release P0-1을 닫는다.
 3. `scripts/check_repo_hygiene.py --strict-source-boundary`와 `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25`를 반복 가능한 gate로 유지한다.
 4. externalized open-data artifacts를 GitHub Releases 또는 source-family artifact cache에서 복원하는 heavy-validation runbook을 추가한다.
 5. `scripts/check_git_remote_safety.py --show-ok`를 CI/local gate로 유지한 뒤 MIDAS exact roundtrip -> KDS load combinations -> geometry identity 작업 묶음을 시작한다.
