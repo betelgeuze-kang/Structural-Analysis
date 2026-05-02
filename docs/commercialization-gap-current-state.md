@@ -30,6 +30,7 @@ source boundary와 P0-2~P0-6 core evidence는 닫혔고, release P0-1만 아직 
 - 전체 P0 판정은 `scripts/check_p0_closure_status.py`로 고정한다. release asset listing 없이 실행하면 P0-1 open, P0-2~P0-6 closed 상태를 명시적으로 보고한다.
 - 수작업/외부 의존 단계는 fresh release output 재생성과 GitHub Release publication이다. 로컬 토큰이 없을 때는 `Publish Release Assets` GitHub Actions workflow가 Actions `GITHUB_TOKEN`으로 release 생성, 12개 asset 업로드, release-side hydration/SHA 검증, release closure 검증, 선택적 manifest promotion을 수행한다.
 - `Regenerate release viewer artifacts`는 clean checkout 기준으로 동작해야 하므로 KDS/frontend compliance 이전에 PBD review package와 PBD compliance slice를 다시 materialize한다. 이때 release tree를 소스로 쓰지 않고 tracked NDTHA evidence와 `implementation/phase1/release_evidence/kds/`의 작은 source evidence만 사용한다.
+- `commercial_csv_gate`는 clean checkout에서 필수 sidecar인 `member_force_soft_accept_report.json`가 없으면 재사용이 막히므로, CPU-required release runner에서는 `implementation/phase1/release_evidence/commercial/`의 checked-in commercial evidence와 member-force sidecar를 먼저 materialize한다.
 - CPU-required GitHub runner에서는 GPU-only solver HIP e2e proof를 재생성하지 않는다. 대신 `implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json`를 materialize하고, GPU evidence refresh는 별도 GPU-capable validation으로 분리한다.
 - remote safety는 `origin`과 `structural`을 모두 `betelgeuze-kang/Structural-Analysis`로 맞추고, `scripts/check_git_remote_safety.py`로 예전 Monet-wedding target 재유입을 막는다.
 - 운영 절차는 [release publication runbook](release-publication-runbook.md)에서 그대로 따른다.

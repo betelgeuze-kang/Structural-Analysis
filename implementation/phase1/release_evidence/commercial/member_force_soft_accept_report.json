@@ -1,0 +1,7248 @@
+{
+  "schema_version": "1.1",
+  "run_id": "phase1-member-force-soft-accept-gate",
+  "generated_at": "2026-05-02T13:38:04.071454+00:00",
+  "inputs": {
+    "hf_csv": "implementation/phase1/commercial_hf_export_sample.csv",
+    "lf_csv": "implementation/phase1/commercial_lf_export_sample.csv",
+    "case_id_col": "case_id",
+    "member_id_col": "member_id",
+    "components_requested": [
+      "axial",
+      "shear_y",
+      "shear_z",
+      "moment_y",
+      "moment_z"
+    ],
+    "require_all_components": true,
+    "max_hard_error_pct": 5.0,
+    "max_soft_accept_error_pct": 10.0,
+    "max_soft_accept_case_ratio": 0.25
+  },
+  "resolved_columns": {
+    "axial": {
+      "label": "axial_force_kN",
+      "hf_col_requested": "axial_force_kN",
+      "lf_col_requested": "axial_force_kN",
+      "hf_col": "axial_force_kN",
+      "lf_col": "axial_force_kN",
+      "available": true
+    },
+    "shear_y": {
+      "label": "shear_force_y_kN",
+      "hf_col_requested": "shear_force_y_kN",
+      "lf_col_requested": "shear_force_y_kN",
+      "hf_col": "shear_force_y_kN",
+      "lf_col": "shear_force_y_kN",
+      "available": true
+    },
+    "shear_z": {
+      "label": "shear_force_z_kN",
+      "hf_col_requested": "shear_force_z_kN",
+      "lf_col_requested": "shear_force_z_kN",
+      "hf_col": "shear_force_z_kN",
+      "lf_col": "shear_force_z_kN",
+      "available": true
+    },
+    "moment_y": {
+      "label": "bending_moment_y_kNm",
+      "hf_col_requested": "bending_moment_y_kNm",
+      "lf_col_requested": "bending_moment_y_kNm",
+      "hf_col": "bending_moment_y_kNm",
+      "lf_col": "bending_moment_y_kNm",
+      "available": true
+    },
+    "moment_z": {
+      "label": "bending_moment_z_kNm",
+      "hf_col_requested": "bending_moment_z_kNm",
+      "lf_col_requested": "bending_moment_z_kNm",
+      "hf_col": "bending_moment_z_kNm",
+      "lf_col": "bending_moment_z_kNm",
+      "available": true
+    }
+  },
+  "summary": {
+    "case_count": 12,
+    "member_count": 12,
+    "component_count_required": 5,
+    "component_count_available": 5,
+    "error_pct_max": 3.907203907203907,
+    "error_pct_p95": 3.907203907203907,
+    "soft_accept_case_ratio": 0.0,
+    "fail_count": 0,
+    "distribution_chart_case_count": 12,
+    "distribution_chart_source_mode": "authoritative_raw_station_profile",
+    "authoritative_raw_station_source_available": true,
+    "authoritative_raw_station_source_used": true,
+    "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+    "soft_accept_used": false
+  },
+  "component_summary": {
+    "axial": {
+      "label": "axial_force_kN",
+      "available": true,
+      "case_count": 12,
+      "hard_pass_count": 12,
+      "soft_accept_count": 0,
+      "fail_count": 0,
+      "soft_accept_case_ratio": 0.0,
+      "error_pct_mean": 3.2008872216409103,
+      "error_pct_p95": 3.907203907203907,
+      "error_pct_max": 3.907203907203907,
+      "hard_gate_pass": true,
+      "soft_accept_gate_pass": true
+    },
+    "shear_y": {
+      "label": "shear_force_y_kN",
+      "available": true,
+      "case_count": 12,
+      "hard_pass_count": 12,
+      "soft_accept_count": 0,
+      "fail_count": 0,
+      "soft_accept_case_ratio": 0.0,
+      "error_pct_mean": 0.9075341722711135,
+      "error_pct_p95": 1.5981549314882806,
+      "error_pct_max": 1.5981549314882806,
+      "hard_gate_pass": true,
+      "soft_accept_gate_pass": true
+    },
+    "shear_z": {
+      "label": "shear_force_z_kN",
+      "available": true,
+      "case_count": 12,
+      "hard_pass_count": 12,
+      "soft_accept_count": 0,
+      "fail_count": 0,
+      "soft_accept_case_ratio": 0.0,
+      "error_pct_mean": 0.38253158980733204,
+      "error_pct_p95": 0.9384266527123738,
+      "error_pct_max": 0.9384266527123738,
+      "hard_gate_pass": true,
+      "soft_accept_gate_pass": true
+    },
+    "moment_y": {
+      "label": "bending_moment_y_kNm",
+      "available": true,
+      "case_count": 12,
+      "hard_pass_count": 12,
+      "soft_accept_count": 0,
+      "fail_count": 0,
+      "soft_accept_case_ratio": 0.0,
+      "error_pct_mean": 1.6719851887277137,
+      "error_pct_p95": 2.3678379233934637,
+      "error_pct_max": 2.3678379233934637,
+      "hard_gate_pass": true,
+      "soft_accept_gate_pass": true
+    },
+    "moment_z": {
+      "label": "bending_moment_z_kNm",
+      "available": true,
+      "case_count": 12,
+      "hard_pass_count": 12,
+      "soft_accept_count": 0,
+      "fail_count": 0,
+      "soft_accept_case_ratio": 0.0,
+      "error_pct_mean": 1.3245074539747141,
+      "error_pct_p95": 2.017982017982025,
+      "error_pct_max": 2.017982017982025,
+      "hard_gate_pass": true,
+      "soft_accept_gate_pass": true
+    }
+  },
+  "station_source": {
+    "authoritative_raw_station_source_available": true,
+    "authoritative_raw_station_source_used": true,
+    "distribution_source_mode": "authoritative_raw_station_profile",
+    "inspected_inputs": [
+      "implementation/phase1/commercial_hf_export_sample.csv",
+      "implementation/phase1/commercial_lf_export_sample.csv"
+    ],
+    "hf_header_count": 109,
+    "lf_header_count": 109,
+    "candidate_station_header_count": 45,
+    "candidate_station_headers": [
+      "axial_force_kN_station_0.0",
+      "axial_force_kN_station_0.125",
+      "axial_force_kN_station_0.25",
+      "axial_force_kN_station_0.375",
+      "axial_force_kN_station_0.5",
+      "axial_force_kN_station_0.625",
+      "axial_force_kN_station_0.75",
+      "axial_force_kN_station_0.875",
+      "axial_force_kN_station_1.0",
+      "bending_moment_y_kNm_station_0.0",
+      "bending_moment_y_kNm_station_0.125",
+      "bending_moment_y_kNm_station_0.25",
+      "bending_moment_y_kNm_station_0.375",
+      "bending_moment_y_kNm_station_0.5",
+      "bending_moment_y_kNm_station_0.625",
+      "bending_moment_y_kNm_station_0.75",
+      "bending_moment_y_kNm_station_0.875",
+      "bending_moment_y_kNm_station_1.0",
+      "bending_moment_z_kNm_station_0.0",
+      "bending_moment_z_kNm_station_0.125",
+      "bending_moment_z_kNm_station_0.25",
+      "bending_moment_z_kNm_station_0.375",
+      "bending_moment_z_kNm_station_0.5",
+      "bending_moment_z_kNm_station_0.625",
+      "bending_moment_z_kNm_station_0.75",
+      "bending_moment_z_kNm_station_0.875",
+      "bending_moment_z_kNm_station_1.0",
+      "shear_force_y_kN_station_0.0",
+      "shear_force_y_kN_station_0.125",
+      "shear_force_y_kN_station_0.25",
+      "shear_force_y_kN_station_0.375",
+      "shear_force_y_kN_station_0.5",
+      "shear_force_y_kN_station_0.625",
+      "shear_force_y_kN_station_0.75",
+      "shear_force_y_kN_station_0.875",
+      "shear_force_y_kN_station_1.0",
+      "shear_force_z_kN_station_0.0",
+      "shear_force_z_kN_station_0.125",
+      "shear_force_z_kN_station_0.25",
+      "shear_force_z_kN_station_0.375",
+      "shear_force_z_kN_station_0.5",
+      "shear_force_z_kN_station_0.625",
+      "shear_force_z_kN_station_0.75",
+      "shear_force_z_kN_station_0.875",
+      "shear_force_z_kN_station_1.0"
+    ],
+    "available_station_components": [
+      "axial",
+      "moment_y",
+      "moment_z",
+      "shear_y",
+      "shear_z"
+    ],
+    "component_station_profiles": {
+      "axial": {
+        "available": true,
+        "shared_station_count": 9,
+        "shared_stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "hf_columns": {
+          "0.0": "axial_force_kN_station_0.0",
+          "0.125": "axial_force_kN_station_0.125",
+          "0.25": "axial_force_kN_station_0.25",
+          "0.375": "axial_force_kN_station_0.375",
+          "0.5": "axial_force_kN_station_0.5",
+          "0.625": "axial_force_kN_station_0.625",
+          "0.75": "axial_force_kN_station_0.75",
+          "0.875": "axial_force_kN_station_0.875",
+          "1.0": "axial_force_kN_station_1.0"
+        },
+        "lf_columns": {
+          "0.0": "axial_force_kN_station_0.0",
+          "0.125": "axial_force_kN_station_0.125",
+          "0.25": "axial_force_kN_station_0.25",
+          "0.375": "axial_force_kN_station_0.375",
+          "0.5": "axial_force_kN_station_0.5",
+          "0.625": "axial_force_kN_station_0.625",
+          "0.75": "axial_force_kN_station_0.75",
+          "0.875": "axial_force_kN_station_0.875",
+          "1.0": "axial_force_kN_station_1.0"
+        }
+      },
+      "shear_y": {
+        "available": true,
+        "shared_station_count": 9,
+        "shared_stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "hf_columns": {
+          "0.0": "shear_force_y_kN_station_0.0",
+          "0.125": "shear_force_y_kN_station_0.125",
+          "0.25": "shear_force_y_kN_station_0.25",
+          "0.375": "shear_force_y_kN_station_0.375",
+          "0.5": "shear_force_y_kN_station_0.5",
+          "0.625": "shear_force_y_kN_station_0.625",
+          "0.75": "shear_force_y_kN_station_0.75",
+          "0.875": "shear_force_y_kN_station_0.875",
+          "1.0": "shear_force_y_kN_station_1.0"
+        },
+        "lf_columns": {
+          "0.0": "shear_force_y_kN_station_0.0",
+          "0.125": "shear_force_y_kN_station_0.125",
+          "0.25": "shear_force_y_kN_station_0.25",
+          "0.375": "shear_force_y_kN_station_0.375",
+          "0.5": "shear_force_y_kN_station_0.5",
+          "0.625": "shear_force_y_kN_station_0.625",
+          "0.75": "shear_force_y_kN_station_0.75",
+          "0.875": "shear_force_y_kN_station_0.875",
+          "1.0": "shear_force_y_kN_station_1.0"
+        }
+      },
+      "shear_z": {
+        "available": true,
+        "shared_station_count": 9,
+        "shared_stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "hf_columns": {
+          "0.0": "shear_force_z_kN_station_0.0",
+          "0.125": "shear_force_z_kN_station_0.125",
+          "0.25": "shear_force_z_kN_station_0.25",
+          "0.375": "shear_force_z_kN_station_0.375",
+          "0.5": "shear_force_z_kN_station_0.5",
+          "0.625": "shear_force_z_kN_station_0.625",
+          "0.75": "shear_force_z_kN_station_0.75",
+          "0.875": "shear_force_z_kN_station_0.875",
+          "1.0": "shear_force_z_kN_station_1.0"
+        },
+        "lf_columns": {
+          "0.0": "shear_force_z_kN_station_0.0",
+          "0.125": "shear_force_z_kN_station_0.125",
+          "0.25": "shear_force_z_kN_station_0.25",
+          "0.375": "shear_force_z_kN_station_0.375",
+          "0.5": "shear_force_z_kN_station_0.5",
+          "0.625": "shear_force_z_kN_station_0.625",
+          "0.75": "shear_force_z_kN_station_0.75",
+          "0.875": "shear_force_z_kN_station_0.875",
+          "1.0": "shear_force_z_kN_station_1.0"
+        }
+      },
+      "moment_y": {
+        "available": true,
+        "shared_station_count": 9,
+        "shared_stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "hf_columns": {
+          "0.0": "bending_moment_y_kNm_station_0.0",
+          "0.125": "bending_moment_y_kNm_station_0.125",
+          "0.25": "bending_moment_y_kNm_station_0.25",
+          "0.375": "bending_moment_y_kNm_station_0.375",
+          "0.5": "bending_moment_y_kNm_station_0.5",
+          "0.625": "bending_moment_y_kNm_station_0.625",
+          "0.75": "bending_moment_y_kNm_station_0.75",
+          "0.875": "bending_moment_y_kNm_station_0.875",
+          "1.0": "bending_moment_y_kNm_station_1.0"
+        },
+        "lf_columns": {
+          "0.0": "bending_moment_y_kNm_station_0.0",
+          "0.125": "bending_moment_y_kNm_station_0.125",
+          "0.25": "bending_moment_y_kNm_station_0.25",
+          "0.375": "bending_moment_y_kNm_station_0.375",
+          "0.5": "bending_moment_y_kNm_station_0.5",
+          "0.625": "bending_moment_y_kNm_station_0.625",
+          "0.75": "bending_moment_y_kNm_station_0.75",
+          "0.875": "bending_moment_y_kNm_station_0.875",
+          "1.0": "bending_moment_y_kNm_station_1.0"
+        }
+      },
+      "moment_z": {
+        "available": true,
+        "shared_station_count": 9,
+        "shared_stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "hf_columns": {
+          "0.0": "bending_moment_z_kNm_station_0.0",
+          "0.125": "bending_moment_z_kNm_station_0.125",
+          "0.25": "bending_moment_z_kNm_station_0.25",
+          "0.375": "bending_moment_z_kNm_station_0.375",
+          "0.5": "bending_moment_z_kNm_station_0.5",
+          "0.625": "bending_moment_z_kNm_station_0.625",
+          "0.75": "bending_moment_z_kNm_station_0.75",
+          "0.875": "bending_moment_z_kNm_station_0.875",
+          "1.0": "bending_moment_z_kNm_station_1.0"
+        },
+        "lf_columns": {
+          "0.0": "bending_moment_z_kNm_station_0.0",
+          "0.125": "bending_moment_z_kNm_station_0.125",
+          "0.25": "bending_moment_z_kNm_station_0.25",
+          "0.375": "bending_moment_z_kNm_station_0.375",
+          "0.5": "bending_moment_z_kNm_station_0.5",
+          "0.625": "bending_moment_z_kNm_station_0.625",
+          "0.75": "bending_moment_z_kNm_station_0.75",
+          "0.875": "bending_moment_z_kNm_station_0.875",
+          "1.0": "bending_moment_z_kNm_station_1.0"
+        }
+      }
+    },
+    "reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite"
+  },
+  "checks": {
+    "member_force_metric_present": true,
+    "component_coverage_pass": true,
+    "member_force_components_5d_pass": true,
+    "case_alignment_pass": true,
+    "finite_metric_pass": true,
+    "hard_gate_pass": true,
+    "soft_accept_gate_pass": true
+  },
+  "rows": [
+    {
+      "case_id": "C-TRN-001",
+      "member_id": "MF-001",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 928.0,
+          "lf": 958.0,
+          "error_pct": 3.2327586206896552,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 167.04,
+          "lf": 168.608,
+          "error_pct": 0.9386973180076702,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 129.92,
+          "lf": 130.288,
+          "error_pct": 0.2832512315271117,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 1252.8,
+          "lf": 1274.14,
+          "error_pct": 1.7033844189016718,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1020.8,
+          "lf": 1034.64,
+          "error_pct": 1.3557993730407667,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-001 \u00b7 C-TRN-001",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TRN-001",
+        "member_id": "MF-001",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                872.32
+              ],
+              [
+                0.125,
+                895.52
+              ],
+              [
+                0.25,
+                914.08
+              ],
+              [
+                0.375,
+                928.0
+              ],
+              [
+                0.5,
+                941.92
+              ],
+              [
+                0.625,
+                951.2
+              ],
+              [
+                0.75,
+                941.92
+              ],
+              [
+                0.875,
+                918.72
+              ],
+              [
+                1.0,
+                890.88
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                900.52
+              ],
+              [
+                0.125,
+                924.47
+              ],
+              [
+                0.25,
+                943.63
+              ],
+              [
+                0.375,
+                958.0
+              ],
+              [
+                0.5,
+                972.37
+              ],
+              [
+                0.625,
+                981.95
+              ],
+              [
+                0.75,
+                972.37
+              ],
+              [
+                0.875,
+                948.42
+              ],
+              [
+                1.0,
+                919.68
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                167.04
+              ],
+              [
+                0.125,
+                155.347
+              ],
+              [
+                0.25,
+                140.314
+              ],
+              [
+                0.375,
+                120.269
+              ],
+              [
+                0.5,
+                96.883
+              ],
+              [
+                0.625,
+                73.498
+              ],
+              [
+                0.75,
+                50.112
+              ],
+              [
+                0.875,
+                26.726
+              ],
+              [
+                1.0,
+                3.341
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                168.608
+              ],
+              [
+                0.125,
+                156.805
+              ],
+              [
+                0.25,
+                141.631
+              ],
+              [
+                0.375,
+                121.398
+              ],
+              [
+                0.5,
+                97.793
+              ],
+              [
+                0.625,
+                74.188
+              ],
+              [
+                0.75,
+                50.582
+              ],
+              [
+                0.875,
+                26.977
+              ],
+              [
+                1.0,
+                3.372
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                3.898
+              ],
+              [
+                0.125,
+                20.787
+              ],
+              [
+                0.25,
+                40.275
+              ],
+              [
+                0.375,
+                61.062
+              ],
+              [
+                0.5,
+                81.85
+              ],
+              [
+                0.625,
+                101.338
+              ],
+              [
+                0.75,
+                116.928
+              ],
+              [
+                0.875,
+                126.022
+              ],
+              [
+                1.0,
+                129.92
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                3.909
+              ],
+              [
+                0.125,
+                20.846
+              ],
+              [
+                0.25,
+                40.389
+              ],
+              [
+                0.375,
+                61.235
+              ],
+              [
+                0.5,
+                82.081
+              ],
+              [
+                0.625,
+                101.625
+              ],
+              [
+                0.75,
+                117.259
+              ],
+              [
+                0.875,
+                126.379
+              ],
+              [
+                1.0,
+                130.288
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                476.064
+              ],
+              [
+                0.25,
+                851.904
+              ],
+              [
+                0.375,
+                1127.52
+              ],
+              [
+                0.5,
+                1252.8
+              ],
+              [
+                0.625,
+                1127.52
+              ],
+              [
+                0.75,
+                851.904
+              ],
+              [
+                0.875,
+                476.064
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                484.173
+              ],
+              [
+                0.25,
+                866.415
+              ],
+              [
+                0.375,
+                1146.726
+              ],
+              [
+                0.5,
+                1274.14
+              ],
+              [
+                0.625,
+                1146.726
+              ],
+              [
+                0.75,
+                866.415
+              ],
+              [
+                0.875,
+                484.173
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                122.496
+              ],
+              [
+                0.125,
+                428.736
+              ],
+              [
+                0.25,
+                714.56
+              ],
+              [
+                0.375,
+                918.72
+              ],
+              [
+                0.5,
+                1020.8
+              ],
+              [
+                0.625,
+                837.056
+              ],
+              [
+                0.75,
+                592.064
+              ],
+              [
+                0.875,
+                285.824
+              ],
+              [
+                1.0,
+                61.248
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                124.157
+              ],
+              [
+                0.125,
+                434.549
+              ],
+              [
+                0.25,
+                724.248
+              ],
+              [
+                0.375,
+                931.176
+              ],
+              [
+                0.5,
+                1034.64
+              ],
+              [
+                0.625,
+                848.405
+              ],
+              [
+                0.75,
+                600.091
+              ],
+              [
+                0.875,
+                289.699
+              ],
+              [
+                1.0,
+                62.078
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-TRN-002",
+      "member_id": "MF-002",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 742.0,
+          "lf": 760.0,
+          "error_pct": 2.4258760107816713,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 133.56,
+          "lf": 133.76,
+          "error_pct": 0.14974543276429217,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 103.88,
+          "lf": 103.36,
+          "error_pct": 0.5005775895263728,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 1001.7,
+          "lf": 1010.8,
+          "error_pct": 0.9084556254367484,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 816.2,
+          "lf": 820.8,
+          "error_pct": 0.5635873560401751,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-002 \u00b7 C-TRN-002",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TRN-002",
+        "member_id": "MF-002",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                697.48
+              ],
+              [
+                0.125,
+                716.03
+              ],
+              [
+                0.25,
+                730.87
+              ],
+              [
+                0.375,
+                742.0
+              ],
+              [
+                0.5,
+                753.13
+              ],
+              [
+                0.625,
+                760.55
+              ],
+              [
+                0.75,
+                753.13
+              ],
+              [
+                0.875,
+                734.58
+              ],
+              [
+                1.0,
+                712.32
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                714.4
+              ],
+              [
+                0.125,
+                733.4
+              ],
+              [
+                0.25,
+                748.6
+              ],
+              [
+                0.375,
+                760.0
+              ],
+              [
+                0.5,
+                771.4
+              ],
+              [
+                0.625,
+                779.0
+              ],
+              [
+                0.75,
+                771.4
+              ],
+              [
+                0.875,
+                752.4
+              ],
+              [
+                1.0,
+                729.6
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                133.56
+              ],
+              [
+                0.125,
+                124.211
+              ],
+              [
+                0.25,
+                112.19
+              ],
+              [
+                0.375,
+                96.163
+              ],
+              [
+                0.5,
+                77.465
+              ],
+              [
+                0.625,
+                58.766
+              ],
+              [
+                0.75,
+                40.068
+              ],
+              [
+                0.875,
+                21.37
+              ],
+              [
+                1.0,
+                2.671
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                133.76
+              ],
+              [
+                0.125,
+                124.397
+              ],
+              [
+                0.25,
+                112.358
+              ],
+              [
+                0.375,
+                96.307
+              ],
+              [
+                0.5,
+                77.581
+              ],
+              [
+                0.625,
+                58.854
+              ],
+              [
+                0.75,
+                40.128
+              ],
+              [
+                0.875,
+                21.402
+              ],
+              [
+                1.0,
+                2.675
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                3.116
+              ],
+              [
+                0.125,
+                16.621
+              ],
+              [
+                0.25,
+                32.203
+              ],
+              [
+                0.375,
+                48.824
+              ],
+              [
+                0.5,
+                65.444
+              ],
+              [
+                0.625,
+                81.026
+              ],
+              [
+                0.75,
+                93.492
+              ],
+              [
+                0.875,
+                100.764
+              ],
+              [
+                1.0,
+                103.88
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                3.101
+              ],
+              [
+                0.125,
+                16.538
+              ],
+              [
+                0.25,
+                32.042
+              ],
+              [
+                0.375,
+                48.579
+              ],
+              [
+                0.5,
+                65.117
+              ],
+              [
+                0.625,
+                80.621
+              ],
+              [
+                0.75,
+                93.024
+              ],
+              [
+                0.875,
+                100.259
+              ],
+              [
+                1.0,
+                103.36
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                380.646
+              ],
+              [
+                0.25,
+                681.156
+              ],
+              [
+                0.375,
+                901.53
+              ],
+              [
+                0.5,
+                1001.7
+              ],
+              [
+                0.625,
+                901.53
+              ],
+              [
+                0.75,
+                681.156
+              ],
+              [
+                0.875,
+                380.646
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                384.104
+              ],
+              [
+                0.25,
+                687.344
+              ],
+              [
+                0.375,
+                909.72
+              ],
+              [
+                0.5,
+                1010.8
+              ],
+              [
+                0.625,
+                909.72
+              ],
+              [
+                0.75,
+                687.344
+              ],
+              [
+                0.875,
+                384.104
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                97.944
+              ],
+              [
+                0.125,
+                342.804
+              ],
+              [
+                0.25,
+                571.34
+              ],
+              [
+                0.375,
+                734.58
+              ],
+              [
+                0.5,
+                816.2
+              ],
+              [
+                0.625,
+                669.284
+              ],
+              [
+                0.75,
+                473.396
+              ],
+              [
+                0.875,
+                228.536
+              ],
+              [
+                1.0,
+                48.972
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                98.496
+              ],
+              [
+                0.125,
+                344.736
+              ],
+              [
+                0.25,
+                574.56
+              ],
+              [
+                0.375,
+                738.72
+              ],
+              [
+                0.5,
+                820.8
+              ],
+              [
+                0.625,
+                673.056
+              ],
+              [
+                0.75,
+                476.064
+              ],
+              [
+                0.875,
+                229.824
+              ],
+              [
+                1.0,
+                49.248
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-TRN-003",
+      "member_id": "MF-003",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 1184.0,
+          "lf": 1217.0,
+          "error_pct": 2.7871621621621623,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 213.12,
+          "lf": 214.192,
+          "error_pct": 0.5030030030030043,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 165.76,
+          "lf": 165.512,
+          "error_pct": 0.14961389961389387,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 1598.4,
+          "lf": 1618.61,
+          "error_pct": 1.2643893893893774,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1302.4,
+          "lf": 1314.36,
+          "error_pct": 0.9183046683046536,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-003 \u00b7 C-TRN-003",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TRN-003",
+        "member_id": "MF-003",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1112.96
+              ],
+              [
+                0.125,
+                1142.56
+              ],
+              [
+                0.25,
+                1166.24
+              ],
+              [
+                0.375,
+                1184.0
+              ],
+              [
+                0.5,
+                1201.76
+              ],
+              [
+                0.625,
+                1213.6
+              ],
+              [
+                0.75,
+                1201.76
+              ],
+              [
+                0.875,
+                1172.16
+              ],
+              [
+                1.0,
+                1136.64
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1143.98
+              ],
+              [
+                0.125,
+                1174.405
+              ],
+              [
+                0.25,
+                1198.745
+              ],
+              [
+                0.375,
+                1217.0
+              ],
+              [
+                0.5,
+                1235.255
+              ],
+              [
+                0.625,
+                1247.425
+              ],
+              [
+                0.75,
+                1235.255
+              ],
+              [
+                0.875,
+                1204.83
+              ],
+              [
+                1.0,
+                1168.32
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                213.12
+              ],
+              [
+                0.125,
+                198.202
+              ],
+              [
+                0.25,
+                179.021
+              ],
+              [
+                0.375,
+                153.446
+              ],
+              [
+                0.5,
+                123.61
+              ],
+              [
+                0.625,
+                93.773
+              ],
+              [
+                0.75,
+                63.936
+              ],
+              [
+                0.875,
+                34.099
+              ],
+              [
+                1.0,
+                4.262
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                214.192
+              ],
+              [
+                0.125,
+                199.199
+              ],
+              [
+                0.25,
+                179.921
+              ],
+              [
+                0.375,
+                154.218
+              ],
+              [
+                0.5,
+                124.231
+              ],
+              [
+                0.625,
+                94.244
+              ],
+              [
+                0.75,
+                64.258
+              ],
+              [
+                0.875,
+                34.271
+              ],
+              [
+                1.0,
+                4.284
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                4.973
+              ],
+              [
+                0.125,
+                26.522
+              ],
+              [
+                0.25,
+                51.386
+              ],
+              [
+                0.375,
+                77.907
+              ],
+              [
+                0.5,
+                104.429
+              ],
+              [
+                0.625,
+                129.293
+              ],
+              [
+                0.75,
+                149.184
+              ],
+              [
+                0.875,
+                160.787
+              ],
+              [
+                1.0,
+                165.76
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                4.965
+              ],
+              [
+                0.125,
+                26.482
+              ],
+              [
+                0.25,
+                51.309
+              ],
+              [
+                0.375,
+                77.791
+              ],
+              [
+                0.5,
+                104.273
+              ],
+              [
+                0.625,
+                129.099
+              ],
+              [
+                0.75,
+                148.961
+              ],
+              [
+                0.875,
+                160.547
+              ],
+              [
+                1.0,
+                165.512
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                607.392
+              ],
+              [
+                0.25,
+                1086.912
+              ],
+              [
+                0.375,
+                1438.56
+              ],
+              [
+                0.5,
+                1598.4
+              ],
+              [
+                0.625,
+                1438.56
+              ],
+              [
+                0.75,
+                1086.912
+              ],
+              [
+                0.875,
+                607.392
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                615.072
+              ],
+              [
+                0.25,
+                1100.655
+              ],
+              [
+                0.375,
+                1456.749
+              ],
+              [
+                0.5,
+                1618.61
+              ],
+              [
+                0.625,
+                1456.749
+              ],
+              [
+                0.75,
+                1100.655
+              ],
+              [
+                0.875,
+                615.072
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                156.288
+              ],
+              [
+                0.125,
+                547.008
+              ],
+              [
+                0.25,
+                911.68
+              ],
+              [
+                0.375,
+                1172.16
+              ],
+              [
+                0.5,
+                1302.4
+              ],
+              [
+                0.625,
+                1067.968
+              ],
+              [
+                0.75,
+                755.392
+              ],
+              [
+                0.875,
+                364.672
+              ],
+              [
+                1.0,
+                78.144
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                157.723
+              ],
+              [
+                0.125,
+                552.031
+              ],
+              [
+                0.25,
+                920.052
+              ],
+              [
+                0.375,
+                1182.924
+              ],
+              [
+                0.5,
+                1314.36
+              ],
+              [
+                0.625,
+                1077.775
+              ],
+              [
+                0.75,
+                762.329
+              ],
+              [
+                0.875,
+                368.021
+              ],
+              [
+                1.0,
+                78.862
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-TRN-004",
+      "member_id": "MF-004",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 1002.0,
+          "lf": 1036.0,
+          "error_pct": 3.3932135728542914,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 180.36,
+          "lf": 182.336,
+          "error_pct": 1.09558660456864,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 140.28,
+          "lf": 140.896,
+          "error_pct": 0.4391217564870156,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 1352.7,
+          "lf": 1377.88,
+          "error_pct": 1.8614622606638622,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1102.2,
+          "lf": 1118.88,
+          "error_pct": 1.5133369624387647,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-004 \u00b7 C-TRN-004",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TRN-004",
+        "member_id": "MF-004",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                941.88
+              ],
+              [
+                0.125,
+                966.93
+              ],
+              [
+                0.25,
+                986.97
+              ],
+              [
+                0.375,
+                1002.0
+              ],
+              [
+                0.5,
+                1017.03
+              ],
+              [
+                0.625,
+                1027.05
+              ],
+              [
+                0.75,
+                1017.03
+              ],
+              [
+                0.875,
+                991.98
+              ],
+              [
+                1.0,
+                961.92
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                973.84
+              ],
+              [
+                0.125,
+                999.74
+              ],
+              [
+                0.25,
+                1020.46
+              ],
+              [
+                0.375,
+                1036.0
+              ],
+              [
+                0.5,
+                1051.54
+              ],
+              [
+                0.625,
+                1061.9
+              ],
+              [
+                0.75,
+                1051.54
+              ],
+              [
+                0.875,
+                1025.64
+              ],
+              [
+                1.0,
+                994.56
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                180.36
+              ],
+              [
+                0.125,
+                167.735
+              ],
+              [
+                0.25,
+                151.502
+              ],
+              [
+                0.375,
+                129.859
+              ],
+              [
+                0.5,
+                104.609
+              ],
+              [
+                0.625,
+                79.358
+              ],
+              [
+                0.75,
+                54.108
+              ],
+              [
+                0.875,
+                28.858
+              ],
+              [
+                1.0,
+                3.607
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                182.336
+              ],
+              [
+                0.125,
+                169.572
+              ],
+              [
+                0.25,
+                153.162
+              ],
+              [
+                0.375,
+                131.282
+              ],
+              [
+                0.5,
+                105.755
+              ],
+              [
+                0.625,
+                80.228
+              ],
+              [
+                0.75,
+                54.701
+              ],
+              [
+                0.875,
+                29.174
+              ],
+              [
+                1.0,
+                3.647
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                4.208
+              ],
+              [
+                0.125,
+                22.445
+              ],
+              [
+                0.25,
+                43.487
+              ],
+              [
+                0.375,
+                65.932
+              ],
+              [
+                0.5,
+                88.376
+              ],
+              [
+                0.625,
+                109.418
+              ],
+              [
+                0.75,
+                126.252
+              ],
+              [
+                0.875,
+                136.072
+              ],
+              [
+                1.0,
+                140.28
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                4.227
+              ],
+              [
+                0.125,
+                22.543
+              ],
+              [
+                0.25,
+                43.678
+              ],
+              [
+                0.375,
+                66.221
+              ],
+              [
+                0.5,
+                88.764
+              ],
+              [
+                0.625,
+                109.899
+              ],
+              [
+                0.75,
+                126.806
+              ],
+              [
+                0.875,
+                136.669
+              ],
+              [
+                1.0,
+                140.896
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                514.026
+              ],
+              [
+                0.25,
+                919.836
+              ],
+              [
+                0.375,
+                1217.43
+              ],
+              [
+                0.5,
+                1352.7
+              ],
+              [
+                0.625,
+                1217.43
+              ],
+              [
+                0.75,
+                919.836
+              ],
+              [
+                0.875,
+                514.026
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                523.594
+              ],
+              [
+                0.25,
+                936.958
+              ],
+              [
+                0.375,
+                1240.092
+              ],
+              [
+                0.5,
+                1377.88
+              ],
+              [
+                0.625,
+                1240.092
+              ],
+              [
+                0.75,
+                936.958
+              ],
+              [
+                0.875,
+                523.594
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                132.264
+              ],
+              [
+                0.125,
+                462.924
+              ],
+              [
+                0.25,
+                771.54
+              ],
+              [
+                0.375,
+                991.98
+              ],
+              [
+                0.5,
+                1102.2
+              ],
+              [
+                0.625,
+                903.804
+              ],
+              [
+                0.75,
+                639.276
+              ],
+              [
+                0.875,
+                308.616
+              ],
+              [
+                1.0,
+                66.132
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                134.266
+              ],
+              [
+                0.125,
+                469.93
+              ],
+              [
+                0.25,
+                783.216
+              ],
+              [
+                0.375,
+                1006.992
+              ],
+              [
+                0.5,
+                1118.88
+              ],
+              [
+                0.625,
+                917.482
+              ],
+              [
+                0.75,
+                648.95
+              ],
+              [
+                0.875,
+                313.286
+              ],
+              [
+                1.0,
+                67.133
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-TRN-005",
+      "member_id": "MF-005",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 1561.0,
+          "lf": 1612.0,
+          "error_pct": 3.267136450992953,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 280.98,
+          "lf": 283.712,
+          "error_pct": 0.9723111965264328,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 218.54,
+          "lf": 219.232,
+          "error_pct": 0.31664683810744365,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 2107.35,
+          "lf": 2143.96,
+          "error_pct": 1.737252948015286,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1717.1,
+          "lf": 1740.96,
+          "error_pct": 1.389552151883998,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-005 \u00b7 C-TRN-005",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TRN-005",
+        "member_id": "MF-005",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1467.34
+              ],
+              [
+                0.125,
+                1506.365
+              ],
+              [
+                0.25,
+                1537.585
+              ],
+              [
+                0.375,
+                1561.0
+              ],
+              [
+                0.5,
+                1584.415
+              ],
+              [
+                0.625,
+                1600.025
+              ],
+              [
+                0.75,
+                1584.415
+              ],
+              [
+                0.875,
+                1545.39
+              ],
+              [
+                1.0,
+                1498.56
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1515.28
+              ],
+              [
+                0.125,
+                1555.58
+              ],
+              [
+                0.25,
+                1587.82
+              ],
+              [
+                0.375,
+                1612.0
+              ],
+              [
+                0.5,
+                1636.18
+              ],
+              [
+                0.625,
+                1652.3
+              ],
+              [
+                0.75,
+                1636.18
+              ],
+              [
+                0.875,
+                1595.88
+              ],
+              [
+                1.0,
+                1547.52
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                280.98
+              ],
+              [
+                0.125,
+                261.311
+              ],
+              [
+                0.25,
+                236.023
+              ],
+              [
+                0.375,
+                202.306
+              ],
+              [
+                0.5,
+                162.968
+              ],
+              [
+                0.625,
+                123.631
+              ],
+              [
+                0.75,
+                84.294
+              ],
+              [
+                0.875,
+                44.957
+              ],
+              [
+                1.0,
+                5.62
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                283.712
+              ],
+              [
+                0.125,
+                263.852
+              ],
+              [
+                0.25,
+                238.318
+              ],
+              [
+                0.375,
+                204.273
+              ],
+              [
+                0.5,
+                164.553
+              ],
+              [
+                0.625,
+                124.833
+              ],
+              [
+                0.75,
+                85.114
+              ],
+              [
+                0.875,
+                45.394
+              ],
+              [
+                1.0,
+                5.674
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                6.556
+              ],
+              [
+                0.125,
+                34.966
+              ],
+              [
+                0.25,
+                67.747
+              ],
+              [
+                0.375,
+                102.714
+              ],
+              [
+                0.5,
+                137.68
+              ],
+              [
+                0.625,
+                170.461
+              ],
+              [
+                0.75,
+                196.686
+              ],
+              [
+                0.875,
+                211.984
+              ],
+              [
+                1.0,
+                218.54
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                6.577
+              ],
+              [
+                0.125,
+                35.077
+              ],
+              [
+                0.25,
+                67.962
+              ],
+              [
+                0.375,
+                103.039
+              ],
+              [
+                0.5,
+                138.116
+              ],
+              [
+                0.625,
+                171.001
+              ],
+              [
+                0.75,
+                197.309
+              ],
+              [
+                0.875,
+                212.655
+              ],
+              [
+                1.0,
+                219.232
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                800.793
+              ],
+              [
+                0.25,
+                1432.998
+              ],
+              [
+                0.375,
+                1896.615
+              ],
+              [
+                0.5,
+                2107.35
+              ],
+              [
+                0.625,
+                1896.615
+              ],
+              [
+                0.75,
+                1432.998
+              ],
+              [
+                0.875,
+                800.793
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                814.705
+              ],
+              [
+                0.25,
+                1457.893
+              ],
+              [
+                0.375,
+                1929.564
+              ],
+              [
+                0.5,
+                2143.96
+              ],
+              [
+                0.625,
+                1929.564
+              ],
+              [
+                0.75,
+                1457.893
+              ],
+              [
+                0.875,
+                814.705
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                206.052
+              ],
+              [
+                0.125,
+                721.182
+              ],
+              [
+                0.25,
+                1201.97
+              ],
+              [
+                0.375,
+                1545.39
+              ],
+              [
+                0.5,
+                1717.1
+              ],
+              [
+                0.625,
+                1408.022
+              ],
+              [
+                0.75,
+                995.918
+              ],
+              [
+                0.875,
+                480.788
+              ],
+              [
+                1.0,
+                103.026
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                208.915
+              ],
+              [
+                0.125,
+                731.203
+              ],
+              [
+                0.25,
+                1218.672
+              ],
+              [
+                0.375,
+                1566.864
+              ],
+              [
+                0.5,
+                1740.96
+              ],
+              [
+                0.625,
+                1427.587
+              ],
+              [
+                0.75,
+                1009.757
+              ],
+              [
+                0.875,
+                487.469
+              ],
+              [
+                1.0,
+                104.458
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-TRN-006",
+      "member_id": "MF-006",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 1097.0,
+          "lf": 1128.0,
+          "error_pct": 2.8258887876025525,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 197.46,
+          "lf": 198.528,
+          "error_pct": 0.5408690367669319,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 153.58,
+          "lf": 153.408,
+          "error_pct": 0.11199374918610852,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 1480.95,
+          "lf": 1500.24,
+          "error_pct": 1.302542287045475,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1206.7,
+          "lf": 1218.24,
+          "error_pct": 0.9563271732825029,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-006 \u00b7 C-TRN-006",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TRN-006",
+        "member_id": "MF-006",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1031.18
+              ],
+              [
+                0.125,
+                1058.605
+              ],
+              [
+                0.25,
+                1080.545
+              ],
+              [
+                0.375,
+                1097.0
+              ],
+              [
+                0.5,
+                1113.455
+              ],
+              [
+                0.625,
+                1124.425
+              ],
+              [
+                0.75,
+                1113.455
+              ],
+              [
+                0.875,
+                1086.03
+              ],
+              [
+                1.0,
+                1053.12
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1060.32
+              ],
+              [
+                0.125,
+                1088.52
+              ],
+              [
+                0.25,
+                1111.08
+              ],
+              [
+                0.375,
+                1128.0
+              ],
+              [
+                0.5,
+                1144.92
+              ],
+              [
+                0.625,
+                1156.2
+              ],
+              [
+                0.75,
+                1144.92
+              ],
+              [
+                0.875,
+                1116.72
+              ],
+              [
+                1.0,
+                1082.88
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                197.46
+              ],
+              [
+                0.125,
+                183.638
+              ],
+              [
+                0.25,
+                165.866
+              ],
+              [
+                0.375,
+                142.171
+              ],
+              [
+                0.5,
+                114.527
+              ],
+              [
+                0.625,
+                86.882
+              ],
+              [
+                0.75,
+                59.238
+              ],
+              [
+                0.875,
+                31.594
+              ],
+              [
+                1.0,
+                3.949
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                198.528
+              ],
+              [
+                0.125,
+                184.631
+              ],
+              [
+                0.25,
+                166.764
+              ],
+              [
+                0.375,
+                142.94
+              ],
+              [
+                0.5,
+                115.146
+              ],
+              [
+                0.625,
+                87.352
+              ],
+              [
+                0.75,
+                59.558
+              ],
+              [
+                0.875,
+                31.764
+              ],
+              [
+                1.0,
+                3.971
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                4.607
+              ],
+              [
+                0.125,
+                24.573
+              ],
+              [
+                0.25,
+                47.61
+              ],
+              [
+                0.375,
+                72.183
+              ],
+              [
+                0.5,
+                96.755
+              ],
+              [
+                0.625,
+                119.792
+              ],
+              [
+                0.75,
+                138.222
+              ],
+              [
+                0.875,
+                148.973
+              ],
+              [
+                1.0,
+                153.58
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                4.602
+              ],
+              [
+                0.125,
+                24.545
+              ],
+              [
+                0.25,
+                47.556
+              ],
+              [
+                0.375,
+                72.102
+              ],
+              [
+                0.5,
+                96.647
+              ],
+              [
+                0.625,
+                119.658
+              ],
+              [
+                0.75,
+                138.067
+              ],
+              [
+                0.875,
+                148.806
+              ],
+              [
+                1.0,
+                153.408
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                562.761
+              ],
+              [
+                0.25,
+                1007.046
+              ],
+              [
+                0.375,
+                1332.855
+              ],
+              [
+                0.5,
+                1480.95
+              ],
+              [
+                0.625,
+                1332.855
+              ],
+              [
+                0.75,
+                1007.046
+              ],
+              [
+                0.875,
+                562.761
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                570.091
+              ],
+              [
+                0.25,
+                1020.163
+              ],
+              [
+                0.375,
+                1350.216
+              ],
+              [
+                0.5,
+                1500.24
+              ],
+              [
+                0.625,
+                1350.216
+              ],
+              [
+                0.75,
+                1020.163
+              ],
+              [
+                0.875,
+                570.091
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                144.804
+              ],
+              [
+                0.125,
+                506.814
+              ],
+              [
+                0.25,
+                844.69
+              ],
+              [
+                0.375,
+                1086.03
+              ],
+              [
+                0.5,
+                1206.7
+              ],
+              [
+                0.625,
+                989.494
+              ],
+              [
+                0.75,
+                699.886
+              ],
+              [
+                0.875,
+                337.876
+              ],
+              [
+                1.0,
+                72.402
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                146.189
+              ],
+              [
+                0.125,
+                511.661
+              ],
+              [
+                0.25,
+                852.768
+              ],
+              [
+                0.375,
+                1096.416
+              ],
+              [
+                0.5,
+                1218.24
+              ],
+              [
+                0.625,
+                998.957
+              ],
+              [
+                0.75,
+                706.579
+              ],
+              [
+                0.875,
+                341.107
+              ],
+              [
+                1.0,
+                73.094
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-TRN-007",
+      "member_id": "MF-007",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 1335.0,
+          "lf": 1374.0,
+          "error_pct": 2.9213483146067416,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 240.3,
+          "lf": 241.824,
+          "error_pct": 0.6342072409488144,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 186.9,
+          "lf": 186.864,
+          "error_pct": 0.01926163723916606,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 1802.25,
+          "lf": 1827.42,
+          "error_pct": 1.396587598834794,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1468.5,
+          "lf": 1483.92,
+          "error_pct": 1.0500510725229875,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-007 \u00b7 C-TRN-007",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TRN-007",
+        "member_id": "MF-007",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1254.9
+              ],
+              [
+                0.125,
+                1288.275
+              ],
+              [
+                0.25,
+                1314.975
+              ],
+              [
+                0.375,
+                1335.0
+              ],
+              [
+                0.5,
+                1355.025
+              ],
+              [
+                0.625,
+                1368.375
+              ],
+              [
+                0.75,
+                1355.025
+              ],
+              [
+                0.875,
+                1321.65
+              ],
+              [
+                1.0,
+                1281.6
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1291.56
+              ],
+              [
+                0.125,
+                1325.91
+              ],
+              [
+                0.25,
+                1353.39
+              ],
+              [
+                0.375,
+                1374.0
+              ],
+              [
+                0.5,
+                1394.61
+              ],
+              [
+                0.625,
+                1408.35
+              ],
+              [
+                0.75,
+                1394.61
+              ],
+              [
+                0.875,
+                1360.26
+              ],
+              [
+                1.0,
+                1319.04
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                240.3
+              ],
+              [
+                0.125,
+                223.479
+              ],
+              [
+                0.25,
+                201.852
+              ],
+              [
+                0.375,
+                173.016
+              ],
+              [
+                0.5,
+                139.374
+              ],
+              [
+                0.625,
+                105.732
+              ],
+              [
+                0.75,
+                72.09
+              ],
+              [
+                0.875,
+                38.448
+              ],
+              [
+                1.0,
+                4.806
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                241.824
+              ],
+              [
+                0.125,
+                224.896
+              ],
+              [
+                0.25,
+                203.132
+              ],
+              [
+                0.375,
+                174.113
+              ],
+              [
+                0.5,
+                140.258
+              ],
+              [
+                0.625,
+                106.403
+              ],
+              [
+                0.75,
+                72.547
+              ],
+              [
+                0.875,
+                38.692
+              ],
+              [
+                1.0,
+                4.836
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                5.607
+              ],
+              [
+                0.125,
+                29.904
+              ],
+              [
+                0.25,
+                57.939
+              ],
+              [
+                0.375,
+                87.843
+              ],
+              [
+                0.5,
+                117.747
+              ],
+              [
+                0.625,
+                145.782
+              ],
+              [
+                0.75,
+                168.21
+              ],
+              [
+                0.875,
+                181.293
+              ],
+              [
+                1.0,
+                186.9
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                5.606
+              ],
+              [
+                0.125,
+                29.898
+              ],
+              [
+                0.25,
+                57.928
+              ],
+              [
+                0.375,
+                87.826
+              ],
+              [
+                0.5,
+                117.724
+              ],
+              [
+                0.625,
+                145.754
+              ],
+              [
+                0.75,
+                168.178
+              ],
+              [
+                0.875,
+                181.258
+              ],
+              [
+                1.0,
+                186.864
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                684.855
+              ],
+              [
+                0.25,
+                1225.53
+              ],
+              [
+                0.375,
+                1622.025
+              ],
+              [
+                0.5,
+                1802.25
+              ],
+              [
+                0.625,
+                1622.025
+              ],
+              [
+                0.75,
+                1225.53
+              ],
+              [
+                0.875,
+                684.855
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                694.42
+              ],
+              [
+                0.25,
+                1242.646
+              ],
+              [
+                0.375,
+                1644.678
+              ],
+              [
+                0.5,
+                1827.42
+              ],
+              [
+                0.625,
+                1644.678
+              ],
+              [
+                0.75,
+                1242.646
+              ],
+              [
+                0.875,
+                694.42
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                176.22
+              ],
+              [
+                0.125,
+                616.77
+              ],
+              [
+                0.25,
+                1027.95
+              ],
+              [
+                0.375,
+                1321.65
+              ],
+              [
+                0.5,
+                1468.5
+              ],
+              [
+                0.625,
+                1204.17
+              ],
+              [
+                0.75,
+                851.73
+              ],
+              [
+                0.875,
+                411.18
+              ],
+              [
+                1.0,
+                88.11
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                178.07
+              ],
+              [
+                0.125,
+                623.246
+              ],
+              [
+                0.25,
+                1038.744
+              ],
+              [
+                0.375,
+                1335.528
+              ],
+              [
+                0.5,
+                1483.92
+              ],
+              [
+                0.625,
+                1216.814
+              ],
+              [
+                0.75,
+                860.674
+              ],
+              [
+                0.875,
+                415.498
+              ],
+              [
+                1.0,
+                89.035
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-TST-001",
+      "member_id": "MF-010",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 1498.0,
+          "lf": 1548.0,
+          "error_pct": 3.337783711615487,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 269.64,
+          "lf": 272.448,
+          "error_pct": 1.0413885180240294,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 209.72,
+          "lf": 210.528,
+          "error_pct": 0.3852756055693271,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 2022.3,
+          "lf": 2058.84,
+          "error_pct": 1.8068535825545267,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1647.8,
+          "lf": 1671.84,
+          "error_pct": 1.45891491685884,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-010 \u00b7 C-TST-001",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TST-001",
+        "member_id": "MF-010",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1408.12
+              ],
+              [
+                0.125,
+                1445.57
+              ],
+              [
+                0.25,
+                1475.53
+              ],
+              [
+                0.375,
+                1498.0
+              ],
+              [
+                0.5,
+                1520.47
+              ],
+              [
+                0.625,
+                1535.45
+              ],
+              [
+                0.75,
+                1520.47
+              ],
+              [
+                0.875,
+                1483.02
+              ],
+              [
+                1.0,
+                1438.08
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1455.12
+              ],
+              [
+                0.125,
+                1493.82
+              ],
+              [
+                0.25,
+                1524.78
+              ],
+              [
+                0.375,
+                1548.0
+              ],
+              [
+                0.5,
+                1571.22
+              ],
+              [
+                0.625,
+                1586.7
+              ],
+              [
+                0.75,
+                1571.22
+              ],
+              [
+                0.875,
+                1532.52
+              ],
+              [
+                1.0,
+                1486.08
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                269.64
+              ],
+              [
+                0.125,
+                250.765
+              ],
+              [
+                0.25,
+                226.498
+              ],
+              [
+                0.375,
+                194.141
+              ],
+              [
+                0.5,
+                156.391
+              ],
+              [
+                0.625,
+                118.642
+              ],
+              [
+                0.75,
+                80.892
+              ],
+              [
+                0.875,
+                43.142
+              ],
+              [
+                1.0,
+                5.393
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                272.448
+              ],
+              [
+                0.125,
+                253.377
+              ],
+              [
+                0.25,
+                228.856
+              ],
+              [
+                0.375,
+                196.163
+              ],
+              [
+                0.5,
+                158.02
+              ],
+              [
+                0.625,
+                119.877
+              ],
+              [
+                0.75,
+                81.734
+              ],
+              [
+                0.875,
+                43.592
+              ],
+              [
+                1.0,
+                5.449
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                6.292
+              ],
+              [
+                0.125,
+                33.555
+              ],
+              [
+                0.25,
+                65.013
+              ],
+              [
+                0.375,
+                98.568
+              ],
+              [
+                0.5,
+                132.124
+              ],
+              [
+                0.625,
+                163.582
+              ],
+              [
+                0.75,
+                188.748
+              ],
+              [
+                0.875,
+                203.428
+              ],
+              [
+                1.0,
+                209.72
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                6.316
+              ],
+              [
+                0.125,
+                33.684
+              ],
+              [
+                0.25,
+                65.264
+              ],
+              [
+                0.375,
+                98.948
+              ],
+              [
+                0.5,
+                132.633
+              ],
+              [
+                0.625,
+                164.212
+              ],
+              [
+                0.75,
+                189.475
+              ],
+              [
+                0.875,
+                204.212
+              ],
+              [
+                1.0,
+                210.528
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                768.474
+              ],
+              [
+                0.25,
+                1375.164
+              ],
+              [
+                0.375,
+                1820.07
+              ],
+              [
+                0.5,
+                2022.3
+              ],
+              [
+                0.625,
+                1820.07
+              ],
+              [
+                0.75,
+                1375.164
+              ],
+              [
+                0.875,
+                768.474
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                782.359
+              ],
+              [
+                0.25,
+                1400.011
+              ],
+              [
+                0.375,
+                1852.956
+              ],
+              [
+                0.5,
+                2058.84
+              ],
+              [
+                0.625,
+                1852.956
+              ],
+              [
+                0.75,
+                1400.011
+              ],
+              [
+                0.875,
+                782.359
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                197.736
+              ],
+              [
+                0.125,
+                692.076
+              ],
+              [
+                0.25,
+                1153.46
+              ],
+              [
+                0.375,
+                1483.02
+              ],
+              [
+                0.5,
+                1647.8
+              ],
+              [
+                0.625,
+                1351.196
+              ],
+              [
+                0.75,
+                955.724
+              ],
+              [
+                0.875,
+                461.384
+              ],
+              [
+                1.0,
+                98.868
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                200.621
+              ],
+              [
+                0.125,
+                702.173
+              ],
+              [
+                0.25,
+                1170.288
+              ],
+              [
+                0.375,
+                1504.656
+              ],
+              [
+                0.5,
+                1671.84
+              ],
+              [
+                0.625,
+                1370.909
+              ],
+              [
+                0.75,
+                969.667
+              ],
+              [
+                0.875,
+                468.115
+              ],
+              [
+                1.0,
+                100.31
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-TST-002",
+      "member_id": "MF-011",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 1216.0,
+          "lf": 1259.0,
+          "error_pct": 3.5361842105263155,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 218.88,
+          "lf": 221.584,
+          "error_pct": 1.235380116959068,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 170.24,
+          "lf": 171.224,
+          "error_pct": 0.578007518796981,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 1641.6,
+          "lf": 1674.47,
+          "error_pct": 2.002314814814822,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1337.6,
+          "lf": 1359.72,
+          "error_pct": 1.653708133971301,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-011 \u00b7 C-TST-002",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TST-002",
+        "member_id": "MF-011",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1143.04
+              ],
+              [
+                0.125,
+                1173.44
+              ],
+              [
+                0.25,
+                1197.76
+              ],
+              [
+                0.375,
+                1216.0
+              ],
+              [
+                0.5,
+                1234.24
+              ],
+              [
+                0.625,
+                1246.4
+              ],
+              [
+                0.75,
+                1234.24
+              ],
+              [
+                0.875,
+                1203.84
+              ],
+              [
+                1.0,
+                1167.36
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1183.46
+              ],
+              [
+                0.125,
+                1214.935
+              ],
+              [
+                0.25,
+                1240.115
+              ],
+              [
+                0.375,
+                1259.0
+              ],
+              [
+                0.5,
+                1277.885
+              ],
+              [
+                0.625,
+                1290.475
+              ],
+              [
+                0.75,
+                1277.885
+              ],
+              [
+                0.875,
+                1246.41
+              ],
+              [
+                1.0,
+                1208.64
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                218.88
+              ],
+              [
+                0.125,
+                203.558
+              ],
+              [
+                0.25,
+                183.859
+              ],
+              [
+                0.375,
+                157.594
+              ],
+              [
+                0.5,
+                126.95
+              ],
+              [
+                0.625,
+                96.307
+              ],
+              [
+                0.75,
+                65.664
+              ],
+              [
+                0.875,
+                35.021
+              ],
+              [
+                1.0,
+                4.378
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                221.584
+              ],
+              [
+                0.125,
+                206.073
+              ],
+              [
+                0.25,
+                186.131
+              ],
+              [
+                0.375,
+                159.54
+              ],
+              [
+                0.5,
+                128.519
+              ],
+              [
+                0.625,
+                97.497
+              ],
+              [
+                0.75,
+                66.475
+              ],
+              [
+                0.875,
+                35.453
+              ],
+              [
+                1.0,
+                4.432
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                5.107
+              ],
+              [
+                0.125,
+                27.238
+              ],
+              [
+                0.25,
+                52.774
+              ],
+              [
+                0.375,
+                80.013
+              ],
+              [
+                0.5,
+                107.251
+              ],
+              [
+                0.625,
+                132.787
+              ],
+              [
+                0.75,
+                153.216
+              ],
+              [
+                0.875,
+                165.133
+              ],
+              [
+                1.0,
+                170.24
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                5.137
+              ],
+              [
+                0.125,
+                27.396
+              ],
+              [
+                0.25,
+                53.079
+              ],
+              [
+                0.375,
+                80.475
+              ],
+              [
+                0.5,
+                107.871
+              ],
+              [
+                0.625,
+                133.555
+              ],
+              [
+                0.75,
+                154.102
+              ],
+              [
+                0.875,
+                166.087
+              ],
+              [
+                1.0,
+                171.224
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                623.808
+              ],
+              [
+                0.25,
+                1116.288
+              ],
+              [
+                0.375,
+                1477.44
+              ],
+              [
+                0.5,
+                1641.6
+              ],
+              [
+                0.625,
+                1477.44
+              ],
+              [
+                0.75,
+                1116.288
+              ],
+              [
+                0.875,
+                623.808
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                636.299
+              ],
+              [
+                0.25,
+                1138.64
+              ],
+              [
+                0.375,
+                1507.023
+              ],
+              [
+                0.5,
+                1674.47
+              ],
+              [
+                0.625,
+                1507.023
+              ],
+              [
+                0.75,
+                1138.64
+              ],
+              [
+                0.875,
+                636.299
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                160.512
+              ],
+              [
+                0.125,
+                561.792
+              ],
+              [
+                0.25,
+                936.32
+              ],
+              [
+                0.375,
+                1203.84
+              ],
+              [
+                0.5,
+                1337.6
+              ],
+              [
+                0.625,
+                1096.832
+              ],
+              [
+                0.75,
+                775.808
+              ],
+              [
+                0.875,
+                374.528
+              ],
+              [
+                1.0,
+                80.256
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                163.166
+              ],
+              [
+                0.125,
+                571.082
+              ],
+              [
+                0.25,
+                951.804
+              ],
+              [
+                0.375,
+                1223.748
+              ],
+              [
+                0.5,
+                1359.72
+              ],
+              [
+                0.625,
+                1114.97
+              ],
+              [
+                0.75,
+                788.638
+              ],
+              [
+                0.875,
+                380.722
+              ],
+              [
+                1.0,
+                81.583
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-TST-003",
+      "member_id": "MF-012",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 1638.0,
+          "lf": 1702.0,
+          "error_pct": 3.907203907203907,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 294.84,
+          "lf": 299.552,
+          "error_pct": 1.5981549314882806,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 229.32,
+          "lf": 231.472,
+          "error_pct": 0.9384266527123738,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 2211.3,
+          "lf": 2263.66,
+          "error_pct": 2.3678379233934637,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1801.8,
+          "lf": 1838.16,
+          "error_pct": 2.017982017982025,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-012 \u00b7 C-TST-003",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-TST-003",
+        "member_id": "MF-012",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1539.72
+              ],
+              [
+                0.125,
+                1580.67
+              ],
+              [
+                0.25,
+                1613.43
+              ],
+              [
+                0.375,
+                1638.0
+              ],
+              [
+                0.5,
+                1662.57
+              ],
+              [
+                0.625,
+                1678.95
+              ],
+              [
+                0.75,
+                1662.57
+              ],
+              [
+                0.875,
+                1621.62
+              ],
+              [
+                1.0,
+                1572.48
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1599.88
+              ],
+              [
+                0.125,
+                1642.43
+              ],
+              [
+                0.25,
+                1676.47
+              ],
+              [
+                0.375,
+                1702.0
+              ],
+              [
+                0.5,
+                1727.53
+              ],
+              [
+                0.625,
+                1744.55
+              ],
+              [
+                0.75,
+                1727.53
+              ],
+              [
+                0.875,
+                1684.98
+              ],
+              [
+                1.0,
+                1633.92
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                294.84
+              ],
+              [
+                0.125,
+                274.201
+              ],
+              [
+                0.25,
+                247.666
+              ],
+              [
+                0.375,
+                212.285
+              ],
+              [
+                0.5,
+                171.007
+              ],
+              [
+                0.625,
+                129.73
+              ],
+              [
+                0.75,
+                88.452
+              ],
+              [
+                0.875,
+                47.174
+              ],
+              [
+                1.0,
+                5.897
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                299.552
+              ],
+              [
+                0.125,
+                278.583
+              ],
+              [
+                0.25,
+                251.624
+              ],
+              [
+                0.375,
+                215.677
+              ],
+              [
+                0.5,
+                173.74
+              ],
+              [
+                0.625,
+                131.803
+              ],
+              [
+                0.75,
+                89.866
+              ],
+              [
+                0.875,
+                47.928
+              ],
+              [
+                1.0,
+                5.991
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                6.88
+              ],
+              [
+                0.125,
+                36.691
+              ],
+              [
+                0.25,
+                71.089
+              ],
+              [
+                0.375,
+                107.78
+              ],
+              [
+                0.5,
+                144.472
+              ],
+              [
+                0.625,
+                178.87
+              ],
+              [
+                0.75,
+                206.388
+              ],
+              [
+                0.875,
+                222.44
+              ],
+              [
+                1.0,
+                229.32
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                6.944
+              ],
+              [
+                0.125,
+                37.036
+              ],
+              [
+                0.25,
+                71.756
+              ],
+              [
+                0.375,
+                108.792
+              ],
+              [
+                0.5,
+                145.827
+              ],
+              [
+                0.625,
+                180.548
+              ],
+              [
+                0.75,
+                208.325
+              ],
+              [
+                0.875,
+                224.528
+              ],
+              [
+                1.0,
+                231.472
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                840.294
+              ],
+              [
+                0.25,
+                1503.684
+              ],
+              [
+                0.375,
+                1990.17
+              ],
+              [
+                0.5,
+                2211.3
+              ],
+              [
+                0.625,
+                1990.17
+              ],
+              [
+                0.75,
+                1503.684
+              ],
+              [
+                0.875,
+                840.294
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                860.191
+              ],
+              [
+                0.25,
+                1539.289
+              ],
+              [
+                0.375,
+                2037.294
+              ],
+              [
+                0.5,
+                2263.66
+              ],
+              [
+                0.625,
+                2037.294
+              ],
+              [
+                0.75,
+                1539.289
+              ],
+              [
+                0.875,
+                860.191
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                216.216
+              ],
+              [
+                0.125,
+                756.756
+              ],
+              [
+                0.25,
+                1261.26
+              ],
+              [
+                0.375,
+                1621.62
+              ],
+              [
+                0.5,
+                1801.8
+              ],
+              [
+                0.625,
+                1477.476
+              ],
+              [
+                0.75,
+                1045.044
+              ],
+              [
+                0.875,
+                504.504
+              ],
+              [
+                1.0,
+                108.108
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                220.579
+              ],
+              [
+                0.125,
+                772.027
+              ],
+              [
+                0.25,
+                1286.712
+              ],
+              [
+                0.375,
+                1654.344
+              ],
+              [
+                0.5,
+                1838.16
+              ],
+              [
+                0.625,
+                1507.291
+              ],
+              [
+                0.75,
+                1066.133
+              ],
+              [
+                0.875,
+                514.685
+              ],
+              [
+                1.0,
+                110.29
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-VAL-001",
+      "member_id": "MF-008",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 1249.0,
+          "lf": 1291.0,
+          "error_pct": 3.362690152121697,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 224.82,
+          "lf": 227.216,
+          "error_pct": 1.0657414820745552,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 174.86,
+          "lf": 175.576,
+          "error_pct": 0.4094704334896372,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 1686.15,
+          "lf": 1717.03,
+          "error_pct": 1.8313910387569243,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 1373.9,
+          "lf": 1394.28,
+          "error_pct": 1.4833685129922032,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-008 \u00b7 C-VAL-001",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-VAL-001",
+        "member_id": "MF-008",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1174.06
+              ],
+              [
+                0.125,
+                1205.285
+              ],
+              [
+                0.25,
+                1230.265
+              ],
+              [
+                0.375,
+                1249.0
+              ],
+              [
+                0.5,
+                1267.735
+              ],
+              [
+                0.625,
+                1280.225
+              ],
+              [
+                0.75,
+                1267.735
+              ],
+              [
+                0.875,
+                1236.51
+              ],
+              [
+                1.0,
+                1199.04
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                1213.54
+              ],
+              [
+                0.125,
+                1245.815
+              ],
+              [
+                0.25,
+                1271.635
+              ],
+              [
+                0.375,
+                1291.0
+              ],
+              [
+                0.5,
+                1310.365
+              ],
+              [
+                0.625,
+                1323.275
+              ],
+              [
+                0.75,
+                1310.365
+              ],
+              [
+                0.875,
+                1278.09
+              ],
+              [
+                1.0,
+                1239.36
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                224.82
+              ],
+              [
+                0.125,
+                209.083
+              ],
+              [
+                0.25,
+                188.849
+              ],
+              [
+                0.375,
+                161.87
+              ],
+              [
+                0.5,
+                130.396
+              ],
+              [
+                0.625,
+                98.921
+              ],
+              [
+                0.75,
+                67.446
+              ],
+              [
+                0.875,
+                35.971
+              ],
+              [
+                1.0,
+                4.496
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                227.216
+              ],
+              [
+                0.125,
+                211.311
+              ],
+              [
+                0.25,
+                190.861
+              ],
+              [
+                0.375,
+                163.596
+              ],
+              [
+                0.5,
+                131.785
+              ],
+              [
+                0.625,
+                99.975
+              ],
+              [
+                0.75,
+                68.165
+              ],
+              [
+                0.875,
+                36.355
+              ],
+              [
+                1.0,
+                4.544
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                5.246
+              ],
+              [
+                0.125,
+                27.978
+              ],
+              [
+                0.25,
+                54.207
+              ],
+              [
+                0.375,
+                82.184
+              ],
+              [
+                0.5,
+                110.162
+              ],
+              [
+                0.625,
+                136.391
+              ],
+              [
+                0.75,
+                157.374
+              ],
+              [
+                0.875,
+                169.614
+              ],
+              [
+                1.0,
+                174.86
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                5.267
+              ],
+              [
+                0.125,
+                28.092
+              ],
+              [
+                0.25,
+                54.429
+              ],
+              [
+                0.375,
+                82.521
+              ],
+              [
+                0.5,
+                110.613
+              ],
+              [
+                0.625,
+                136.949
+              ],
+              [
+                0.75,
+                158.018
+              ],
+              [
+                0.875,
+                170.309
+              ],
+              [
+                1.0,
+                175.576
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                640.737
+              ],
+              [
+                0.25,
+                1146.582
+              ],
+              [
+                0.375,
+                1517.535
+              ],
+              [
+                0.5,
+                1686.15
+              ],
+              [
+                0.625,
+                1517.535
+              ],
+              [
+                0.75,
+                1146.582
+              ],
+              [
+                0.875,
+                640.737
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                652.471
+              ],
+              [
+                0.25,
+                1167.58
+              ],
+              [
+                0.375,
+                1545.327
+              ],
+              [
+                0.5,
+                1717.03
+              ],
+              [
+                0.625,
+                1545.327
+              ],
+              [
+                0.75,
+                1167.58
+              ],
+              [
+                0.875,
+                652.471
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                164.868
+              ],
+              [
+                0.125,
+                577.038
+              ],
+              [
+                0.25,
+                961.73
+              ],
+              [
+                0.375,
+                1236.51
+              ],
+              [
+                0.5,
+                1373.9
+              ],
+              [
+                0.625,
+                1126.598
+              ],
+              [
+                0.75,
+                796.862
+              ],
+              [
+                0.875,
+                384.692
+              ],
+              [
+                1.0,
+                82.434
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                167.314
+              ],
+              [
+                0.125,
+                585.598
+              ],
+              [
+                0.25,
+                975.996
+              ],
+              [
+                0.375,
+                1254.852
+              ],
+              [
+                0.5,
+                1394.28
+              ],
+              [
+                0.625,
+                1143.31
+              ],
+              [
+                0.75,
+                808.682
+              ],
+              [
+                0.875,
+                390.398
+              ],
+              [
+                1.0,
+                83.657
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "C-VAL-002",
+      "member_id": "MF-009",
+      "components": {
+        "axial": {
+          "label": "axial_force_kN",
+          "hf": 791.0,
+          "lf": 818.0,
+          "error_pct": 3.4134007585335016,
+          "band": "hard_pass"
+        },
+        "shear_y": {
+          "label": "shear_force_y_kN",
+          "hf": 142.38,
+          "lf": 143.968,
+          "error_pct": 1.115325186121642,
+          "band": "hard_pass"
+        },
+        "shear_z": {
+          "label": "shear_force_z_kN",
+          "hf": 110.74,
+          "lf": 111.248,
+          "error_pct": 0.4587321654325536,
+          "band": "hard_pass"
+        },
+        "moment_y": {
+          "label": "bending_moment_y_kNm",
+          "hf": 1067.85,
+          "lf": 1087.94,
+          "error_pct": 1.881350376925612,
+          "band": "hard_pass"
+        },
+        "moment_z": {
+          "label": "bending_moment_z_kNm",
+          "hf": 870.1,
+          "lf": 883.44,
+          "error_pct": 1.533157108378351,
+          "band": "hard_pass"
+        }
+      },
+      "distribution_chart": {
+        "title": "Member Force Distribution \u2014 MF-009 \u00b7 C-VAL-002",
+        "info": "authoritative raw station profile \u00b7 hf=commercial_hf_export_sample.csv \u00b7 lf=commercial_lf_export_sample.csv",
+        "xLabel": "Normalized Member Length",
+        "case_id": "C-VAL-002",
+        "member_id": "MF-009",
+        "source_mode": "authoritative_raw_station_profile",
+        "authoritative_raw_station_source_available": true,
+        "authoritative_raw_station_source_used": true,
+        "authoritative_raw_station_source_reason": "station-wise member-force columns were detected and matching hf/lf station grids are available; raw station profiles will be used when row values are finite",
+        "candidate_station_headers": [
+          "axial_force_kN_station_0.0",
+          "axial_force_kN_station_0.125",
+          "axial_force_kN_station_0.25",
+          "axial_force_kN_station_0.375",
+          "axial_force_kN_station_0.5",
+          "axial_force_kN_station_0.625",
+          "axial_force_kN_station_0.75",
+          "axial_force_kN_station_0.875",
+          "axial_force_kN_station_1.0",
+          "bending_moment_y_kNm_station_0.0",
+          "bending_moment_y_kNm_station_0.125",
+          "bending_moment_y_kNm_station_0.25",
+          "bending_moment_y_kNm_station_0.375",
+          "bending_moment_y_kNm_station_0.5",
+          "bending_moment_y_kNm_station_0.625",
+          "bending_moment_y_kNm_station_0.75",
+          "bending_moment_y_kNm_station_0.875",
+          "bending_moment_y_kNm_station_1.0",
+          "bending_moment_z_kNm_station_0.0",
+          "bending_moment_z_kNm_station_0.125",
+          "bending_moment_z_kNm_station_0.25",
+          "bending_moment_z_kNm_station_0.375",
+          "bending_moment_z_kNm_station_0.5",
+          "bending_moment_z_kNm_station_0.625",
+          "bending_moment_z_kNm_station_0.75",
+          "bending_moment_z_kNm_station_0.875",
+          "bending_moment_z_kNm_station_1.0",
+          "shear_force_y_kN_station_0.0",
+          "shear_force_y_kN_station_0.125",
+          "shear_force_y_kN_station_0.25",
+          "shear_force_y_kN_station_0.375",
+          "shear_force_y_kN_station_0.5",
+          "shear_force_y_kN_station_0.625",
+          "shear_force_y_kN_station_0.75",
+          "shear_force_y_kN_station_0.875",
+          "shear_force_y_kN_station_1.0",
+          "shear_force_z_kN_station_0.0",
+          "shear_force_z_kN_station_0.125",
+          "shear_force_z_kN_station_0.25",
+          "shear_force_z_kN_station_0.375",
+          "shear_force_z_kN_station_0.5",
+          "shear_force_z_kN_station_0.625",
+          "shear_force_z_kN_station_0.75",
+          "shear_force_z_kN_station_0.875",
+          "shear_force_z_kN_station_1.0"
+        ],
+        "stations": [
+          0.0,
+          0.125,
+          0.25,
+          0.375,
+          0.5,
+          0.625,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "derived_from_components": [
+          "axial",
+          "shear_y",
+          "shear_z",
+          "moment_y",
+          "moment_z"
+        ],
+        "series": [
+          {
+            "label": "HF axial",
+            "color": "#fb923c",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                743.54
+              ],
+              [
+                0.125,
+                763.315
+              ],
+              [
+                0.25,
+                779.135
+              ],
+              [
+                0.375,
+                791.0
+              ],
+              [
+                0.5,
+                802.865
+              ],
+              [
+                0.625,
+                810.775
+              ],
+              [
+                0.75,
+                802.865
+              ],
+              [
+                0.875,
+                783.09
+              ],
+              [
+                1.0,
+                759.36
+              ]
+            ]
+          },
+          {
+            "label": "LF axial",
+            "color": "#fdba74",
+            "valueLabel": "kN",
+            "component": "axial_force_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                768.92
+              ],
+              [
+                0.125,
+                789.37
+              ],
+              [
+                0.25,
+                805.73
+              ],
+              [
+                0.375,
+                818.0
+              ],
+              [
+                0.5,
+                830.27
+              ],
+              [
+                0.625,
+                838.45
+              ],
+              [
+                0.75,
+                830.27
+              ],
+              [
+                0.875,
+                809.82
+              ],
+              [
+                1.0,
+                785.28
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Y",
+            "color": "#22d3ee",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                142.38
+              ],
+              [
+                0.125,
+                132.413
+              ],
+              [
+                0.25,
+                119.599
+              ],
+              [
+                0.375,
+                102.514
+              ],
+              [
+                0.5,
+                82.58
+              ],
+              [
+                0.625,
+                62.647
+              ],
+              [
+                0.75,
+                42.714
+              ],
+              [
+                0.875,
+                22.781
+              ],
+              [
+                1.0,
+                2.848
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Y",
+            "color": "#67e8f9",
+            "valueLabel": "kN",
+            "component": "shear_force_y_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                143.968
+              ],
+              [
+                0.125,
+                133.89
+              ],
+              [
+                0.25,
+                120.933
+              ],
+              [
+                0.375,
+                103.657
+              ],
+              [
+                0.5,
+                83.501
+              ],
+              [
+                0.625,
+                63.346
+              ],
+              [
+                0.75,
+                43.19
+              ],
+              [
+                0.875,
+                23.035
+              ],
+              [
+                1.0,
+                2.879
+              ]
+            ]
+          },
+          {
+            "label": "HF shear Z",
+            "color": "#34d399",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                3.322
+              ],
+              [
+                0.125,
+                17.718
+              ],
+              [
+                0.25,
+                34.329
+              ],
+              [
+                0.375,
+                52.048
+              ],
+              [
+                0.5,
+                69.766
+              ],
+              [
+                0.625,
+                86.377
+              ],
+              [
+                0.75,
+                99.666
+              ],
+              [
+                0.875,
+                107.418
+              ],
+              [
+                1.0,
+                110.74
+              ]
+            ]
+          },
+          {
+            "label": "LF shear Z",
+            "color": "#86efac",
+            "valueLabel": "kN",
+            "component": "shear_force_z_kN",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                3.337
+              ],
+              [
+                0.125,
+                17.8
+              ],
+              [
+                0.25,
+                34.487
+              ],
+              [
+                0.375,
+                52.287
+              ],
+              [
+                0.5,
+                70.086
+              ],
+              [
+                0.625,
+                86.773
+              ],
+              [
+                0.75,
+                100.123
+              ],
+              [
+                0.875,
+                107.911
+              ],
+              [
+                1.0,
+                111.248
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Y",
+            "color": "#a78bfa",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                405.783
+              ],
+              [
+                0.25,
+                726.138
+              ],
+              [
+                0.375,
+                961.065
+              ],
+              [
+                0.5,
+                1067.85
+              ],
+              [
+                0.625,
+                961.065
+              ],
+              [
+                0.75,
+                726.138
+              ],
+              [
+                0.875,
+                405.783
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Y",
+            "color": "#c4b5fd",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_y_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.125,
+                413.417
+              ],
+              [
+                0.25,
+                739.799
+              ],
+              [
+                0.375,
+                979.146
+              ],
+              [
+                0.5,
+                1087.94
+              ],
+              [
+                0.625,
+                979.146
+              ],
+              [
+                0.75,
+                739.799
+              ],
+              [
+                0.875,
+                413.417
+              ],
+              [
+                1.0,
+                0.0
+              ]
+            ]
+          },
+          {
+            "label": "HF moment Z",
+            "color": "#38bdf8",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                104.412
+              ],
+              [
+                0.125,
+                365.442
+              ],
+              [
+                0.25,
+                609.07
+              ],
+              [
+                0.375,
+                783.09
+              ],
+              [
+                0.5,
+                870.1
+              ],
+              [
+                0.625,
+                713.482
+              ],
+              [
+                0.75,
+                504.658
+              ],
+              [
+                0.875,
+                243.628
+              ],
+              [
+                1.0,
+                52.206
+              ]
+            ]
+          },
+          {
+            "label": "LF moment Z",
+            "color": "#7dd3fc",
+            "valueLabel": "kN\u00b7m",
+            "component": "bending_moment_z_kNm",
+            "profile_kind": "stationwise_raw",
+            "points": [
+              [
+                0.0,
+                106.013
+              ],
+              [
+                0.125,
+                371.045
+              ],
+              [
+                0.25,
+                618.408
+              ],
+              [
+                0.375,
+                795.096
+              ],
+              [
+                0.5,
+                883.44
+              ],
+              [
+                0.625,
+                724.421
+              ],
+              [
+                0.75,
+                512.395
+              ],
+              [
+                0.875,
+                247.363
+              ],
+              [
+                1.0,
+                53.006
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "member force soft-accept gate passed"
+}

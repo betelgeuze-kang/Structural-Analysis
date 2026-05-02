@@ -1510,6 +1510,8 @@ def _build_payload(
             "damper_catalog": str(args.damper_catalog),
             "rc_benchmark_cases": str(args.rc_benchmark_cases),
             "version_lock_manifest": str(args.version_lock_manifest),
+            "commercial_csv_source_evidence": str(args.commercial_csv_source_evidence),
+            "member_force_soft_accept_source_evidence": str(args.member_force_soft_accept_source_evidence),
             "solver_hip_e2e_source_evidence": str(args.solver_hip_e2e_source_evidence),
             "skip_promotion": bool(args.skip_promotion),
             "skip_archive": bool(args.skip_archive),
@@ -1818,6 +1820,14 @@ def main() -> None:
     p.add_argument("--mgt-require-shell-beam-mix", action=argparse.BooleanOptionalAction, default=True)
 
     p.add_argument("--commercial-csv-gate", default="implementation/phase1/commercial_csv_gate_report.json")
+    p.add_argument(
+        "--commercial-csv-source-evidence",
+        default="implementation/phase1/release_evidence/commercial/commercial_csv_gate_report.json",
+    )
+    p.add_argument(
+        "--member-force-soft-accept-source-evidence",
+        default="implementation/phase1/release_evidence/commercial/member_force_soft_accept_report.json",
+    )
     p.add_argument("--mgt-conversion-report", default="implementation/phase1/midas_mgt_conversion_report.json")
     p.add_argument("--hip-kernel-smoke-report", default="implementation/phase1/hip_kernel_smoke_report.json")
     p.add_argument("--phase3-report", default="implementation/phase1/phase3_megastructure_pipeline_report.json")
@@ -2291,6 +2301,31 @@ def main() -> None:
     if bool(args.enable_hip_kernel_smoke):
         if reason_code == "PASS" and not _run_reusable("hip_kernel_smoke_gate", cmd_hip_smoke, args.hip_kernel_smoke_report, steps):
             reason_code = "ERR_HIP_KERNEL_SMOKE"
+
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "commercial_csv_gate_evidence",
+            source=args.commercial_csv_source_evidence,
+            destination=args.commercial_csv_gate,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in commercial CSV evidence "
+                "instead of regenerating this benchmark slice during publication."
+            ),
+        ):
+            reason_code = "ERR_COMMERCIAL_CSV_GATE"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "member_force_soft_accept_evidence",
+            source=args.member_force_soft_accept_source_evidence,
+            destination="implementation/phase1/member_force_soft_accept_report.json",
+            steps=steps,
+            reason=(
+                "Materialize the required member-force sidecar so commercial CSV evidence "
+                "reuse remains valid in a clean checkout."
+            ),
+        ):
+            reason_code = "ERR_COMMERCIAL_CSV_GATE"
 
     cmd_csv = [
         sys.executable,
