@@ -131,10 +131,96 @@ def validate_manifest(
     return errors
 
 
-def main() -> int:
+def build_hydration_preflight(manifest: Any, *, artifact_root: Path | None = None) -> dict[str, Any]:
+    """Describe whether manifest artifacts are already present or need hydration.
+
+    This is intentionally a preflight, not an integrity gate. It lets clean CI
+    validate the evidence manifest contract without requiring generated release
+    reports to be present in the source checkout.
+    """
+
+    errors, valid_rows = validate_manifest_structure(manifest)
+    rows: list[dict[str, Any]] = []
+    for row in valid_rows:
+        candidate = _artifact_path(row, artifact_root)
+        exists = candidate.is_file()
+        rows.append(
+            {
+                "asset_name": str(row.get("asset_name", "") or ""),
+                "expected_bytes": row.get("bytes"),
+                "expected_sha256": str(row.get("sha256", "") or ""),
+                "required": bool(row.get("required")),
+                "hydrate_target": str(candidate),
+                "present": exists,
+                "actual_bytes": candidate.stat().st_size if exists else None,
+                "status": "present" if exists else "hydrate_required",
+            }
+        )
+
+    required_missing = [row for row in rows if row["required"] and not row["present"]]
+    optional_missing = [row for row in rows if not row["required"] and not row["present"]]
+    present = [row for row in rows if row["present"]]
+    return {
+        "ok": not errors,
+        "mode": "artifact_root" if artifact_root is not None else "source_checkout",
+        "contract": (
+            "Missing generated release artifacts are expected in a clean source checkout. "
+            "Validate structure in CI, then hydrate/reuse release assets and run full integrity "
+            "with --artifact-root or --require-artifacts."
+        ),
+        "errors": errors,
+        "totals": {
+            "manifest_assets": len(rows),
+            "present": len(present),
+            "required_missing": len(required_missing),
+            "optional_missing": len(optional_missing),
+        },
+        "present": present,
+        "required_missing": required_missing,
+        "optional_missing": optional_missing,
+    }
+
+
+def _print_hydration_preflight(summary: dict[str, Any]) -> None:
+    print("Release artifact hydration preflight")
+    print(f"Mode: {summary['mode']}")
+    print(f"Contract: {summary['contract']}")
+    totals = summary["totals"]
+    print(
+        "Totals: "
+        f"manifest={totals['manifest_assets']} present={totals['present']} "
+        f"required_missing={totals['required_missing']} optional_missing={totals['optional_missing']}"
+    )
+    for label, key in (
+        ("Hydrate required", "required_missing"),
+        ("Hydrate optional", "optional_missing"),
+        ("Already present", "present"),
+    ):
+        for row in summary[key]:
+            print(
+                f"{label}: {row['asset_name']} "
+                f"target={row['hydrate_target']} expected_bytes={row['expected_bytes']}"
+            )
+    if summary["errors"]:
+        print("Release artifact hydration preflight failed:", file=sys.stderr)
+        for error in summary["errors"]:
+            print(f"- {error}", file=sys.stderr)
+    else:
+        print("Release artifact hydration preflight OK (no local artifact bytes required)")
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", required=True)
     parser.add_argument("--artifact-root", default="")
+    parser.add_argument(
+        "--hydrate-preflight",
+        action="store_true",
+        help=(
+            "Validate manifest structure and report which generated artifacts need hydration "
+            "without failing merely because clean CI lacks local release files."
+        ),
+    )
     parser.add_argument(
         "--structure-only",
         action="store_true",
@@ -145,13 +231,20 @@ def main() -> int:
         action="store_true",
         help="Require local_path artifacts to exist and match sha256/bytes when --artifact-root is not used.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     artifact_root = Path(args.artifact_root) if str(args.artifact_root).strip() else None
+    if args.hydrate_preflight and (args.structure_only or args.require_artifacts):
+        parser.error("--hydrate-preflight cannot be combined with --structure-only or --require-artifacts")
     if args.structure_only and (artifact_root is not None or args.require_artifacts):
         parser.error("--structure-only cannot be combined with --artifact-root or --require-artifacts")
+    manifest = _load_json(Path(args.manifest))
+    if args.hydrate_preflight:
+        summary = build_hydration_preflight(manifest, artifact_root=artifact_root)
+        _print_hydration_preflight(summary)
+        return 0 if summary["ok"] else 1
     errors = validate_manifest(
-        _load_json(Path(args.manifest)),
+        manifest,
         artifact_root=artifact_root,
         structure_only=args.structure_only,
         require_artifacts=args.require_artifacts,

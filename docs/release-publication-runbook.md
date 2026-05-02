@@ -21,6 +21,21 @@ This is a release-publication gap, not a source-boundary gap. P0-2 through P0-6 
 - Do not promote `implementation/phase1/release_artifacts_manifest.json` until the release asset listing and SHA/bytes checks pass.
 - P0-1 must close before P1 breadth work starts.
 
+## P0 Nightly Heavy Report Contract
+
+- `implementation/phase1/release/nightly_release_gate_report.json` is the canonical nightly heavy report for P0 publication runs.
+- `Nightly release gate summary:` is the triage contract for `Regenerate release viewer artifacts`; treat its `reason_code`, `reason`, first failed step, and captured tails as authoritative.
+- The `release-publication-evidence` artifact must include the nightly heavy report together with the candidate manifest, release asset listing, upload plan, and closure status.
+
+## GitHub Release Asset Hydrate Flow
+
+"Hydrate" here means materializing a fresh flat artifact root from release-side metadata and a private work dir, not copying the stale repo-local `implementation/phase1/release/` tree.
+
+1. Fetch release asset metadata with `fetch_github_release_assets.py` so the hydrate run starts from the published release state.
+2. Build a fresh candidate manifest and flat root with `build_release_publication_candidate.py`.
+3. Verify the hydrated root with `verify_release_artifacts_manifest.py --require-artifacts` and the upload plan with `prepare_release_upload_plan.py`.
+4. Publish only manifest-listed files, then re-fetch the release assets and close P0 with `check_release_asset_listing.py`, `check_release_p0_closure.py`, and `check_p0_closure_status.py`.
+
 ## Retry Checklist
 
 When a publication run fails, rerun the same publication path instead of changing code:
@@ -66,7 +81,7 @@ GITHUB_TOKEN=<token> python3 scripts/dispatch_release_publish_workflow.py --stat
 5. Use `--replace-existing` only if a previous partial run created same-named assets and replacement is intended.
 6. If the dispatch command reports missing token, either set `GITHUB_TOKEN` or `GH_TOKEN`, or run the workflow manually in the GitHub Actions UI.
 
-## Path B: Token-Backed CLI
+## Path B: Token-Backed Hydrate Flow
 
 1. Check the source manifest structure:
 

@@ -19,6 +19,19 @@ The restore target is always the original path under
 This layout avoids filename collisions and lets duplicate artifacts share the
 same checksum record.
 
+## GitHub Release Hydrate Flow
+
+When the approved cache source is a GitHub Release, hydrate the cache first and
+only then copy files back to their original paths.
+
+1. Fetch or identify the approved release asset set for the source family.
+2. Place each file under `<cache-root>/<source_family>/<sha256>/<basename>`.
+3. Rerun `plan_open_data_artifact_restore.py --cache-root <cache-root> --fail-unready`.
+4. Copy only cache-ready files to `implementation/phase1/open_data/` for local
+   heavy validation.
+5. Re-verify with
+   `verify_open_data_external_artifacts_manifest.py --require-artifacts`.
+
 ## Plan A Restore
 
 1. Validate the manifest structure:

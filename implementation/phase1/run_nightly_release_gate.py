@@ -2446,6 +2446,8 @@ def main() -> None:
         "--out",
         str(args.ssi_boundary_report),
     ]
+    if bool(args.allow_cpu_required):
+        cmd_ssi.append("--allow-cpu-required")
     if reason_code == "PASS" and not _run_reusable(
         "ssi_boundary_gate",
         cmd_ssi,

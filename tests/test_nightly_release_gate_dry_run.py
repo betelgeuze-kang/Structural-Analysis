@@ -114,6 +114,8 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     )
     wind_step = next(step for step in steps if step.get("step") == "wind_benchmark_gate")
     assert "--allow-cpu-required" in str(wind_step.get("command", ""))
+    ssi_step = next(step for step in steps if step.get("step") == "ssi_boundary_gate")
+    assert "--allow-cpu-required" in str(ssi_step.get("command", ""))
     assert "surface_interaction_benchmark_gate" in step_names
     assert "solver_breadth_gate" in step_names
     assert "contact_readiness_gate" in step_names

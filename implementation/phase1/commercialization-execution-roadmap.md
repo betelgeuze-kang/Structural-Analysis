@@ -26,6 +26,17 @@ PoC, 기술제안 데모, 내부 파일럿은 가능하지만, 책임 해석 결
 - 모든 게이트는 재현 가능한 명령과 report/json 증빙을 남긴다.
 - source repo는 실행 소스, 테스트, 문서, 작은 fixture만 유지한다.
 
+## Core Commercialization Order
+
+상용화 핵심 순서는 다음으로 고정한다.
+
+1. `MIDAS exact roundtrip`
+2. `KDS load combination`
+3. `geometry identity`
+4. `row provenance`
+
+row provenance는 geometry bridge보다 먼저 닫지 않고, load-combination correctness는 viewer-only concern으로 취급하지 않는다.
+
 ## Immediate Cleanup State
 
 현재 worktree는 clean이다. source-boundary cleanup은 닫혔고 release P0-1만 아직 열려 있다.

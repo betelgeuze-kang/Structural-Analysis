@@ -95,6 +95,7 @@ INPUT_SCHEMA = {
         "min_shear_delta_ratio",
         "max_shear_delta_ratio",
         "min_nonlinear_ratio_span",
+        "allow_cpu_required",
         "out",
     ],
     "properties": {
@@ -118,6 +119,7 @@ INPUT_SCHEMA = {
         "min_shear_delta_ratio": {"type": "number", "minimum": 0.0},
         "max_shear_delta_ratio": {"type": "number", "minimum": 0.0},
         "min_nonlinear_ratio_span": {"type": "number", "minimum": 0.0},
+        "allow_cpu_required": {"type": "boolean"},
         "case_metrics_npz_out": {"type": "string", "minLength": 1},
         "out": {"type": "string", "minLength": 1},
     },
@@ -283,6 +285,40 @@ def _extract_tail_scalar(result: dict, *, key: str, default: float) -> tuple[flo
     return float(default), "fallback_default"
 
 
+def _response_backend_contract(rows: list[dict], *, allow_cpu_required: bool) -> dict[str, object]:
+    backend_rows: list[str] = []
+    for row in rows:
+        for side in ("fixed", "ssi"):
+            payload = row.get(side)
+            if isinstance(payload, dict):
+                backend_rows.append(str(payload.get("response_backend", "") or "missing"))
+            else:
+                backend_rows.append("missing")
+    backend_set = sorted(set(backend_rows))
+    has_backends = bool(backend_rows)
+    dlpack_all = bool(has_backends and all(item == "dlpack_zero_copy" for item in backend_rows))
+    host_response_all = bool(
+        has_backends
+        and all(item in {"dlpack_zero_copy", "host_response"} for item in backend_rows)
+        and any(item == "host_response" for item in backend_rows)
+    )
+    cpu_required_allowed = bool(allow_cpu_required and host_response_all)
+    return {
+        "response_backends": backend_set,
+        "device_artifacts_consumed": dlpack_all,
+        "host_response_consumed": host_response_all,
+        "cpu_required_allowed": cpu_required_allowed,
+        "response_artifacts_consumed_pass": bool(dlpack_all or cpu_required_allowed),
+        "consumer_label": (
+            "dlpack_zero_copy"
+            if dlpack_all
+            else "host_response_cpu_allowed"
+            if cpu_required_allowed
+            else ",".join(backend_set) or "none"
+        ),
+    }
+
+
 def _write_case_metrics_npz(path: Path, rows: list[dict]) -> dict[str, object]:
     payload = {
         "case_ids": np.asarray([str(row.get("case_id", "")) for row in rows], dtype="<U128"),
@@ -344,6 +380,7 @@ def main() -> None:
     p.add_argument("--min-shear-delta-ratio", type=float, default=0.05)
     p.add_argument("--max-shear-delta-ratio", type=float, default=1.50)
     p.add_argument("--min-nonlinear-ratio-span", type=float, default=0.05)
+    p.add_argument("--allow-cpu-required", action="store_true")
     p.add_argument("--case-metrics-npz-out", default="")
     p.add_argument("--out", default="implementation/phase1/ssi_boundary_gate_report.json")
     args = p.parse_args()
@@ -370,6 +407,7 @@ def main() -> None:
         "min_shear_delta_ratio": float(args.min_shear_delta_ratio),
         "max_shear_delta_ratio": float(args.max_shear_delta_ratio),
         "min_nonlinear_ratio_span": float(args.min_nonlinear_ratio_span),
+        "allow_cpu_required": bool(args.allow_cpu_required),
         "case_metrics_npz_out": str(case_metrics_npz_out),
         "out": str(args.out),
     }
@@ -637,6 +675,7 @@ def main() -> None:
         section_demand_summary = _section_family_beam_demand_summary(
             [row.get("section_profile", {}) for row in out_rows]
         )
+        response_contract = _response_backend_contract(out_rows, allow_cpu_required=bool(args.allow_cpu_required))
         checks = {
             "case_count_pass": bool(len(rows) >= int(args.min_case_count)),
             "ssi_nonlinear_boundary_active": bool(ratio_span >= float(args.min_nonlinear_ratio_span)),
@@ -652,12 +691,12 @@ def main() -> None:
                 and max(shear_delta_ratios) <= float(args.max_shear_delta_ratio)
             ),
             "residual_trace_pass": bool(all(bool(row.get("residual_trace_pass", False)) for row in out_rows)),
-            "device_artifacts_consumed_pass": bool(
-                all(
-                    str((row.get("fixed") or {}).get("response_backend", "")) == "dlpack_zero_copy"
-                    and str((row.get("ssi") or {}).get("response_backend", "")) == "dlpack_zero_copy"
-                    for row in out_rows
-                )
+            "response_artifacts_consumed_pass": bool(response_contract["response_artifacts_consumed_pass"]),
+            "device_artifacts_consumed_pass": bool(response_contract["response_artifacts_consumed_pass"]),
+            "cpu_required_allowed_pass": bool(
+                (not bool(args.allow_cpu_required))
+                or bool(response_contract["device_artifacts_consumed"])
+                or bool(response_contract["cpu_required_allowed"])
             ),
         }
         contract_pass = bool(all(checks.values()))
@@ -669,7 +708,12 @@ def main() -> None:
             reason_code = "ERR_ENGINE_FAIL"
         elif not checks["section_family_pass"] or not checks["material_model_pass"]:
             reason_code = "ERR_ENGINE_FAIL"
-        elif not checks["shear_delta_pass"] or not checks["rust_backend_used_pass"] or not checks["device_artifacts_consumed_pass"]:
+        elif (
+            not checks["shear_delta_pass"]
+            or not checks["rust_backend_used_pass"]
+            or not checks["response_artifacts_consumed_pass"]
+            or not checks["cpu_required_allowed_pass"]
+        ):
             reason_code = "ERR_VNV_FAIL"
         else:
             reason_code = "PASS"
@@ -727,7 +771,10 @@ def main() -> None:
                         or bool((row.get("ssi") or {}).get("residual_settle_applied", False))
                     )
                 ),
-                "device_artifact_consumer": "dlpack_zero_copy",
+                "device_artifact_consumer": str(response_contract["consumer_label"]),
+                "response_artifact_consumer": str(response_contract["consumer_label"]),
+                "response_backends": list(response_contract["response_backends"]),
+                "cpu_required_allowed": bool(response_contract["cpu_required_allowed"]),
                 "device_artifact_case_count": int(
                     sum(
                         1

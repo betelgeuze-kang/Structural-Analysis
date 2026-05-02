@@ -18,6 +18,7 @@ source boundary와 P0-2~P0-6 core evidence는 닫혔고, release P0-1만 아직 
 - P0는 core evidence 관점에서는 닫혔지만, release P0-1 publication이 open이므로 overall P0는 아직 open이다.
 - P1은 quality/fallback/benchmark breadth를 순차적으로 닫아야 하며, heavy validation 전에 [open-data artifact restore runbook](open-data-artifact-restore-runbook.md)과 `scripts/check_p1_readiness_status.py`로 externalized artifact와 real-project seed 준비 상태를 확인한다.
 - `scripts/check_p1_benchmark_breadth_status.py`는 tracked commercial readiness, HF benchmark, TPU wind, PEER hinge, irregular top5, Korean public structure collection evidence를 하나로 묶어 P1 benchmark breadth inputs ready와 P0 release blocker를 분리해서 보고한다.
+- wind/SSI gate outputs는 `response_artifacts_consumed`를 canonical contract name으로 쓴다. 현재 machine-readable evidence는 rename transition 동안 `_pass` suffix가 붙은 필드를 계속 노출할 수 있다.
 - P2는 viewer/report 제품화 단계로, shared selection과 provenance를 전 surface에 통일하고 wall/slab batching/LOD, solver-verified panel-zone, SVG sheet/revision/callout을 정리해야 한다.
 
 ## P0-1 Release closure
@@ -43,6 +44,8 @@ source boundary와 P0-2~P0-6 core evidence는 닫혔고, release P0-1만 아직 
 ## P1/P2 작업 순서
 
 P0-1이 닫힌 뒤에는 core fidelity를 재작업하지 말고, 이미 닫힌 evidence를 유지하면서 P1/P2 breadth로 넘어간다.
+
+P1 상용화 코어 순서는 `MIDAS exact roundtrip -> KDS load combination -> geometry identity -> row provenance`로 고정한다.
 
 1. P1 quality/fallback/benchmark breadth
 2. real-project row provenance and parser breadth hardening

@@ -730,6 +730,7 @@ def main() -> None:
             "section_family_pass": bool(section_family_all),
             "material_model_pass": bool(material_model_all),
             "residual_trace_pass": bool(all(bool(row.get("residual_trace_pass", False)) for row in out_rows)),
+            "response_artifacts_consumed_pass": bool(response_contract["response_artifacts_consumed_pass"]),
             "device_artifacts_consumed_pass": bool(response_contract["response_artifacts_consumed_pass"]),
             "cpu_required_allowed_pass": bool(
                 (not bool(args.allow_cpu_required))
@@ -753,7 +754,7 @@ def main() -> None:
         elif (
             not checks["long_series_chunked_pass"]
             or not checks["drift_guard_pass"]
-            or not checks["device_artifacts_consumed_pass"]
+            or not checks["response_artifacts_consumed_pass"]
             or not checks["cpu_required_allowed_pass"]
         ):
             reason_code = "ERR_VNV_FAIL"
@@ -806,6 +807,7 @@ def main() -> None:
                 ),
                 "material_model_types": sorted({str(row.get("material_model", "")) for row in out_rows}),
                 "device_artifact_consumer": str(response_contract["consumer_label"]),
+                "response_artifact_consumer": str(response_contract["consumer_label"]),
                 "response_backends": list(response_contract["response_backends"]),
                 "cpu_required_allowed": bool(response_contract["cpu_required_allowed"]),
                 "device_artifact_case_count": int(
