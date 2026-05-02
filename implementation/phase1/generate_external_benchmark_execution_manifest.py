@@ -4,10 +4,15 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
-from implementation.phase1.generate_audit_review_followup_manifest import build_followup_manifest
-from implementation.phase1.hardest_external_10case_catalog import catalog_rows
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from implementation.phase1.generate_audit_review_followup_manifest import build_followup_manifest  # noqa: E402
+from implementation.phase1.hardest_external_10case_catalog import catalog_rows  # noqa: E402
 
 
 DEFAULT_KICKOFF_PACKAGE = Path(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -97,6 +98,7 @@ def test_generate_korean_source_catalog_cli_writes_output(tmp_path: Path) -> Non
     proc = subprocess.run(
         [sys.executable, str(SCRIPT), "--out", str(out_path)],
         cwd=Path(__file__).resolve().parents[1],
+        env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
         capture_output=True,
         text=True,
         check=False,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -84,6 +85,7 @@ def test_generate_external_benchmark_execution_manifest_prefers_hardest_10case_c
             str(decision_runner),
         ],
         cwd=Path(__file__).resolve().parents[1],
+        env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
         capture_output=True,
         text=True,
         check=False,

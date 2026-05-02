@@ -738,13 +738,20 @@ def main() -> None:
             and soil_tunnel.get("contract_pass", False)
             and _bool(soil_tunnel_checks.get("finite_response", False))
         )
+        panel_zone_topology_projected_bridge_ready = bool(
+            _bool(panel_zone_checks.get("panel_zone_topology_projected_bridge_complete", False))
+            and _bool(panel_zone_checks.get("panel_zone_internal_engine_complete", False))
+        )
+        panel_zone_solver_verified_bridge_ready = bool(
+            _bool(panel_zone_checks.get("panel_zone_true_3d_bridge_complete", False))
+            and _bool(panel_zone_checks.get("panel_zone_solver_verified_bridge_complete", False))
+        )
         joint_panel_ready = bool(
             panel_zone.get("contract_pass", False)
             and _bool(panel_zone_checks.get("panel_zone_clash_artifact_contract_pass", False))
             and _bool(panel_zone_checks.get("panel_zone_topology_capable_input", False))
             and _bool(panel_zone_checks.get("panel_zone_required_sources_complete", False))
-            and _bool(panel_zone_checks.get("panel_zone_topology_projected_bridge_complete", False))
-            and _bool(panel_zone_checks.get("panel_zone_internal_engine_complete", False))
+            and (panel_zone_topology_projected_bridge_ready or panel_zone_solver_verified_bridge_ready)
             and int(panel_zone_summary.get("panel_zone_clash_row_count", 0) or 0) > 0
         )
         ssi_ready = bool(
@@ -2948,15 +2955,22 @@ def main() -> None:
                     "joint_panel_topology_projected_bridge",
                     ready=joint_panel_ready,
                     source="panel_zone_clash_report",
-                    contract="topology-projected bridge + joint-panel interaction",
-                    note=f"panel_zone_rows={int(panel_zone_summary.get('panel_zone_clash_row_count', 0) or 0)}",
+                    contract="topology-projected or solver-verified bridge + joint-panel interaction",
+                    note=(
+                        f"panel_zone_rows={int(panel_zone_summary.get('panel_zone_clash_row_count', 0) or 0)} | "
+                        f"topology_projected={'yes' if panel_zone_topology_projected_bridge_ready else 'no'} | "
+                        f"solver_verified={'yes' if panel_zone_solver_verified_bridge_ready else 'no'}"
+                    ),
                 ),
                 _row(
                     "joint_panel_internal_engine_complete",
                     ready=joint_panel_ready,
                     source="panel_zone_clash_report",
-                    contract="internal engine complete + joint-panel interaction",
-                    note="joint-panel interaction uses the validated internal engine boundary",
+                    contract="internal engine or solver-verified boundary + joint-panel interaction",
+                    note=(
+                        "joint-panel interaction uses the validated internal engine boundary "
+                        "or attached solver-verified 3D source boundary"
+                    ),
                 ),
             ]
         )

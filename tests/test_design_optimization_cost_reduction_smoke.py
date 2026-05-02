@@ -1,9 +1,18 @@
 from __future__ import annotations
 
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
 import numpy as np
 
 from implementation.phase1.design_optimization_env import DesignOptimizationConfig
 from implementation.phase1.run_design_optimization_cost_reduction_smoke import run_cost_reduction_smoke
+
+
+SCRIPT = Path("implementation/phase1/run_design_optimization_cost_reduction_smoke.py")
 
 
 def _smoke_state() -> dict[str, np.ndarray]:
@@ -96,3 +105,20 @@ def test_cost_reduction_smoke_reports_no_action_when_mask_blocks(monkeypatch) ->
     assert result["contract_pass"] is False
     assert result["reason_code"] == "ERR_NO_SMOKE_ACTION"
     assert result["summary"]["trial_action_available"] is False
+
+
+def test_cost_reduction_smoke_cli_runs_without_pythonpath(tmp_path: Path) -> None:
+    out = tmp_path / "design_optimization_cost_reduction_smoke_report.json"
+
+    proc = subprocess.run(
+        [sys.executable, str(SCRIPT), "--ndtha-step-count", "1", "--out", str(out)],
+        check=False,
+        capture_output=True,
+        text=True,
+        env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
+    )
+
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["run_id"] == "phase1-design-optimization-cost-reduction-smoke"
+    assert payload["reason_code"] in {"PASS", "ERR_CPU_BACKEND", "ERR_NO_SMOKE_ACTION"}

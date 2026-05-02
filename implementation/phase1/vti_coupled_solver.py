@@ -97,7 +97,7 @@ class VTICoupledConfig:
     speed_m_s: float = 22.2
     dt_s: float = 0.005
     total_time_s: float = 0.8
-    axle_offsets_m: tuple[float, ...] = (6.0, 8.5, 11.0, 13.5)
+    axle_offsets_m: tuple[float, ...] = (0.0, 2.5, 5.0, 7.5)
     axle_mass_kg: float = 1500.0
     carbody_mass_kg: float = 25000.0
     suspension_k_n_m: float = 7.5e5
@@ -615,7 +615,7 @@ def main() -> None:
     p.add_argument("--speed-m-s", type=float, default=22.2)
     p.add_argument("--dt-s", type=float, default=0.005)
     p.add_argument("--total-time-s", type=float, default=0.8)
-    p.add_argument("--axle-offsets-m", default="6.0,8.5,11.0,13.5")
+    p.add_argument("--axle-offsets-m", default="0.0,2.5,5.0,7.5")
     p.add_argument("--axle-mass-kg", type=float, default=1500.0)
     p.add_argument("--carbody-mass-kg", type=float, default=25000.0)
     p.add_argument("--suspension-k", type=float, default=7.5e5)

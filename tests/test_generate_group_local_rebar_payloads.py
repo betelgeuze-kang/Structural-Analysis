@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 
 import numpy as np
+
+
+def _no_pythonpath_env() -> dict[str, str]:
+    return {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
 
 
 def _write_projection_fixture_mgt(path: Path) -> None:
@@ -130,6 +135,7 @@ def test_generate_group_local_rebar_payloads_projects_payload_rows(tmp_path: Pat
         check=False,
         capture_output=True,
         text=True,
+        env=_no_pythonpath_env(),
     )
     assert proc.returncode == 0, proc.stderr
 
@@ -242,6 +248,7 @@ def test_generate_group_local_rebar_payloads_projects_src_perimeter_frame_rows(t
         check=False,
         capture_output=True,
         text=True,
+        env=_no_pythonpath_env(),
     )
     assert proc.returncode == 0, proc.stderr
 
@@ -291,6 +298,7 @@ def test_export_design_optimization_to_mgt_consumes_projected_rebar_payloads(tmp
         check=False,
         capture_output=True,
         text=True,
+        env=_no_pythonpath_env(),
     )
     assert proc.returncode == 0, proc.stderr
 
@@ -320,6 +328,7 @@ def test_export_design_optimization_to_mgt_consumes_projected_rebar_payloads(tmp
         check=False,
         capture_output=True,
         text=True,
+        env=_no_pythonpath_env(),
     )
     assert proc.returncode == 0, proc.stderr
 

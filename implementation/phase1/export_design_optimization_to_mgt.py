@@ -10,20 +10,22 @@ import json
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
+import sys
 from typing import Any
 
 import numpy as np
-from implementation.phase1.compare_midas_loadcomb_roundtrip import build_roundtrip_report
-from implementation.phase1.generate_audit_review_followup_manifest import build_followup_manifest
-from implementation.phase1.generate_audit_review_resolution_manifest import (
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from implementation.phase1.compare_midas_loadcomb_roundtrip import build_roundtrip_report  # noqa: E402
+from implementation.phase1.generate_audit_review_followup_manifest import build_followup_manifest  # noqa: E402
+from implementation.phase1.generate_audit_review_resolution_manifest import (  # noqa: E402
     build_resolution_manifest,
     write_resolution_files,
 )
-from implementation.phase1.load_combination_engine import export_midas_loadcomb_from_model_payload
-from implementation.phase1.semantic_mgt_diff import SemanticMgtDiff
-
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
+from implementation.phase1.load_combination_engine import export_midas_loadcomb_from_model_payload  # noqa: E402
+from implementation.phase1.semantic_mgt_diff import SemanticMgtDiff  # noqa: E402
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -706,7 +708,7 @@ def _write_source_output_mgt_diff_artifacts(
             "",
             diff_text
         ]
-    except Exception as e:
+    except Exception:
         preview_lines = [
             "MIDAS source vs output diff preview (Semantic Failed Fallback)",
             f"source_mgt={source_mgt_path}",
@@ -4230,19 +4232,11 @@ def main() -> int:
         for k, v in sorted(Counter(str(row.get("queue_status", "") or "") for row in audit_review_queue_items).items())
         if str(k)
     }
-    audit_review_queue_status_label = ", ".join(
-        f"{status}={count}"
-        for status, count in sorted(audit_review_queue_status_counts.items())
-    )
     audit_review_queue_action_family_counts = {
         str(k): int(v)
         for k, v in sorted(Counter(str(row.get("action_family", "") or "") for row in audit_review_queue_items).items())
         if str(k)
     }
-    audit_review_queue_action_family_label = ", ".join(
-        f"{family}={count}"
-        for family, count in sorted(audit_review_queue_action_family_counts.items())
-    )
     audit_review_queue_pending_count = int(
         sum(1 for row in audit_review_queue_items if str(row.get("queue_status", "")) == "pending_review")
     )
@@ -4983,9 +4977,6 @@ def main() -> int:
             "patched_supported_change_count": patched_supported_change_count,
             "direct_patch_change_count": direct_patch_change_count,
             "instruction_sidecar_change_count": instruction_sidecar_change_count,
-            "instruction_sidecar_audit_only_change_count": instruction_sidecar_audit_only_change_count,
-            "instruction_sidecar_zero_touch_verified_change_count": instruction_sidecar_zero_touch_verified_change_count,
-            "instruction_sidecar_manual_input_change_count": instruction_sidecar_manual_input_change_count,
             "supported_change_ratio": supported_change_ratio,
             "direct_patch_change_ratio": direct_patch_change_ratio,
             "instruction_sidecar_change_ratio": instruction_sidecar_change_ratio,
@@ -5087,17 +5078,6 @@ def main() -> int:
                 mgt_diff_summary.get("source_vs_output_output_line_count", 0)
             ),
             "audit_review_queue_status_line": audit_review_queue_status_line,
-            "audit_review_manifest_change_count": instruction_sidecar_audit_only_change_count,
-            "audit_review_packet_count": audit_review_packet_count,
-            "audit_review_packet_file_count": audit_review_packet_file_count,
-            "audit_review_queue_item_count": audit_review_queue_item_count,
-            "audit_review_followup_item_count": audit_review_followup_item_count,
-            "audit_review_followup_open_item_count": audit_review_followup_open_item_count,
-            "audit_review_followup_closed_item_count": audit_review_followup_closed_item_count,
-            "audit_review_resolution_item_count": audit_review_resolution_item_count,
-            "audit_review_resolution_file_count": audit_review_resolution_file_count,
-            "audit_review_resolution_open_item_count": audit_review_resolution_open_item_count,
-            "audit_review_resolution_closed_item_count": audit_review_resolution_closed_item_count,
             "unsupported_change_count": unsupported_change_count,
             "material_level_rebar_payload_row_count": int(rebar_payload_summary.get("material_level_rebar_payload_row_count", 0)),
             "material_level_rebar_payload_available_count": int(

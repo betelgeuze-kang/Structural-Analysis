@@ -9,11 +9,16 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
-from implementation.phase1.generate_audit_review_followup_manifest import build_followup_manifest
-from implementation.phase1.generate_audit_review_resolution_manifest import build_resolution_manifest
-from implementation.phase1.generate_external_benchmark_submission_readiness import (
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from implementation.phase1.generate_audit_review_followup_manifest import build_followup_manifest  # noqa: E402
+from implementation.phase1.generate_audit_review_resolution_manifest import build_resolution_manifest  # noqa: E402
+from implementation.phase1.generate_external_benchmark_submission_readiness import (  # noqa: E402
     DEFAULT_COMMERCIAL_READINESS_REPORT,
     DEFAULT_PEER_SPD_HINGE_ALIGNMENT_REPORT,
     DEFAULT_PEER_SPD_HINGE_BENCHMARK_REPORT,

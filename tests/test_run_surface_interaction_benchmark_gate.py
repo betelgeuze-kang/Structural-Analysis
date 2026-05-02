@@ -576,6 +576,78 @@ def test_surface_interaction_benchmark_gate_passes_with_complete_evidence(tmp_pa
     assert payload["summary_line"].startswith("Surface interaction benchmark: PASS")
 
 
+def test_surface_interaction_benchmark_accepts_solver_verified_true_3d_panel_zone_bridge(
+    tmp_path: Path,
+) -> None:
+    paths = _base_inputs(tmp_path)
+    panel_zone = json.loads(paths["panel_zone"].read_text(encoding="utf-8"))
+    panel_zone["checks"].update(
+        {
+            "panel_zone_true_3d_bridge_complete": True,
+            "panel_zone_solver_verified_bridge_complete": True,
+            "panel_zone_topology_projected_bridge_complete": False,
+            "panel_zone_internal_engine_complete": False,
+        }
+    )
+    panel_zone["summary"].update(
+        {
+            "panel_zone_true_3d_bridge_complete": True,
+            "panel_zone_solver_verified_bridge_complete": True,
+            "panel_zone_topology_projected_bridge_complete": False,
+            "panel_zone_internal_engine_complete": False,
+            "panel_zone_external_validation_closure_mode": "closed_exact_validated",
+        }
+    )
+    _write(paths["panel_zone"], panel_zone)
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--flexible-diaphragm-report",
+            str(paths["diaphragm"]),
+            "--substructuring-interface-report",
+            str(paths["substructuring"]),
+            "--sync-stress-report",
+            str(paths["sync"]),
+            "--foundation-soil-link-gate-report",
+            str(paths["foundation"]),
+            "--moving-load-integrator-report",
+            str(paths["moving_load"]),
+            "--vti-coupled-solver-report",
+            str(paths["vti"]),
+            "--track-dynamics-dataset-report",
+            str(paths["track_dataset"]),
+            "--tunnel-dynamics-dataset-report",
+            str(paths["tunnel_dataset"]),
+            "--panel-zone-clash-report",
+            str(paths["panel_zone"]),
+            "--ssi-boundary-report",
+            str(paths["ssi"]),
+            "--soil-tunnel-ssi-report",
+            str(paths["soil_tunnel"]),
+            "--structural-contact-gate-report",
+            str(paths["structural_contact"]),
+            "--benchmark-cases",
+            f"{paths['cases_a']},{paths['cases_b']},{paths['cases_c']},{paths['cases_d']},{paths['cases_e']},"
+            f"{paths['cases_f']},{paths['cases_g']},{paths['cases_h']},{paths['cases_i']},{paths['cases_j']}",
+            "--out",
+            str(paths["out"]),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(paths["out"].read_text(encoding="utf-8"))
+    assert payload["contract_pass"] is True
+    assert payload["reason_code"] == "PASS"
+    assert payload["checks"]["joint_panel_interaction_pass"] is True
+    assert payload["summary"]["interaction_family_group_ready_counts"]["joint_panel"] == 8
+    assert payload["summary"]["interaction_family_group_ready_counts"]["panel_feedback_coupling"] == 4
+
+
 def test_surface_interaction_benchmark_gate_fails_with_gap_semantics_when_direct_contact_is_incomplete(
     tmp_path: Path,
 ) -> None:

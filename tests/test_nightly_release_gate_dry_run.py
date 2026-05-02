@@ -102,6 +102,7 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert "global_authority_gate" in step_names
     assert "hardest_external_10case_kickoff_gate" in step_names
     assert "midas_kds_geometry_bridge_backfill" in step_names
+    assert "midas_kds_geometry_bridge_backfill_after_phase3_pipeline" in step_names
     assert "surface_interaction_benchmark_gate" in step_names
     assert "solver_breadth_gate" in step_names
     assert "contact_readiness_gate" in step_names
@@ -162,6 +163,12 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert step_names.index("hardest_external_10case_kickoff_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("midas_mgt_conversion_gate") < step_names.index("midas_kds_geometry_bridge_backfill")
     assert step_names.index("midas_kds_geometry_bridge_backfill") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("phase3_pipeline_nightly") < step_names.index(
+        "midas_kds_geometry_bridge_backfill_after_phase3_pipeline"
+    )
+    assert step_names.index("midas_kds_geometry_bridge_backfill_after_phase3_pipeline") < step_names.index(
+        "phase1_ci_gate_nightly"
+    )
     assert step_names.index("solver_breadth_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("contact_readiness_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("midas_interoperability_gate") < step_names.index("phase1_ci_gate_nightly")

@@ -104,9 +104,77 @@ def test_foundation_optimization_artifact_produces_foundation_candidates(tmp_pat
     assert payload["summary"]["optimized_foundation_member_count"] == 1
     assert payload["summary"]["optimized_foundation_group_count"] == 1
     assert payload["summary"]["blocked_foundation_group_count"] == 1
+    assert payload["summary"]["accepted_foundation_candidate_group_count"] == 0
     assert payload["artifacts"]["optimized_foundation_member_count"] == 1
     assert payload["artifacts"]["optimized_foundation_rows_head"][0]["group_id"] == "G2"
     assert payload["artifacts"]["foundation_candidate_rows_head"][0]["member_id"] == "F01"
+
+
+def test_foundation_optimization_artifact_counts_accepted_candidate_evidence(tmp_path: Path) -> None:
+    dataset = tmp_path / "design_optimization_dataset_report.json"
+    _write_json(
+        dataset,
+        {
+            "contract_pass": True,
+            "summary": {
+                "member_count": 4,
+                "group_count": 2,
+                "member_type_counts": {"foundation": 2},
+            },
+            "rows_head": [
+                {
+                    "member_id": "F01",
+                    "member_type": "foundation",
+                    "group_id": "FG1",
+                    "semantic_group": "foundation",
+                    "section_signature": "MAT-900",
+                }
+            ],
+        },
+    )
+    changes = tmp_path / "design_optimization_cost_reduction_changes.json"
+    _write_json(changes, {"changes": []})
+    blocked = tmp_path / "design_optimization_cost_reduction_blocked_actions.json"
+    _write_json(
+        blocked,
+        {
+            "blocked_rows": [
+                {
+                    "group_id": "FG1",
+                    "member_type": "foundation",
+                    "semantic_group": "foundation",
+                    "action_name": "foundation_mat_thickness_up",
+                    "block_reason": "accepted_candidate",
+                }
+            ]
+        },
+    )
+    out = tmp_path / "foundation_optimization_artifact.json"
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "implementation/phase1/generate_foundation_optimization_artifact.py",
+            "--design-optimization-dataset",
+            str(dataset),
+            "--cost-reduction-changes",
+            str(changes),
+            "--cost-reduction-blocked-actions",
+            str(blocked),
+            "--out",
+            str(out),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["contract_pass"] is True
+    assert payload["summary"]["optimized_foundation_group_count"] == 0
+    assert payload["summary"]["accepted_foundation_candidate_group_count"] == 1
+    assert payload["artifacts"]["accepted_foundation_candidate_group_ids_head"] == ["FG1"]
 
 
 def test_foundation_optimization_artifact_scans_full_dataset_npz_when_summary_is_empty(tmp_path: Path) -> None:

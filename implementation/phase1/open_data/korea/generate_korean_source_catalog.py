@@ -8,15 +8,19 @@ import json
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+import sys
 from typing import Any
 
-from implementation.phase1.open_data.korea.korean_source_schema import (
+REPO_ROOT = Path(__file__).resolve().parents[4]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from implementation.phase1.open_data.korea.korean_source_schema import (  # noqa: E402
     SCHEMA_VERSION,
     normalize_korean_source_record,
 )
 
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
 KOREA_OPEN_DATA_DIR = REPO_ROOT / "implementation/phase1/open_data/korea"
 DEFAULT_OUT_PATH = KOREA_OPEN_DATA_DIR / "korean_source_catalog.json"
 DEFAULT_SEED_PATH = KOREA_OPEN_DATA_DIR / "korean_source_seed.json"

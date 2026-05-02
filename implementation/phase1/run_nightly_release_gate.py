@@ -54,6 +54,7 @@ REASONS = {
     "ERR_RC_BENCHMARK_LOCK_GATE": "rc benchmark-lock gate failed",
     "ERR_HARDEST_EXTERNAL_10CASE_KICKOFF_GATE": "hardest external 10-case kickoff gate failed",
     "ERR_MIDAS_MGT_CONVERSION": "midas mgt conversion gate failed",
+    "ERR_VTI_COUPLED_SOLVER": "vehicle-track interaction coupled solver failed",
     "ERR_SOLVER_BREADTH_GATE": "solver breadth gate failed",
     "ERR_CONTACT_READINESS": "contact-readiness gate failed",
     "ERR_SURFACE_INTERACTION_BENCHMARK": "surface interaction benchmark gate failed",
@@ -1397,7 +1398,6 @@ def _build_payload(
             "skip_promotion": bool(args.skip_promotion),
             "skip_archive": bool(args.skip_archive),
             "dry_run": bool(args.dry_run),
-            "reuse_existing_if_present": bool(args.reuse_existing_if_present),
             "enable_design_opt_cost_smoke": bool(args.enable_design_opt_cost_smoke),
             "strict_design_opt_cost_smoke": bool(args.strict_design_opt_cost_smoke),
             "design_opt_cost_smoke_history": str(args.design_opt_cost_smoke_history),
@@ -2520,6 +2520,33 @@ def main() -> None:
     ]
     _run_reusable("solver_truthfulness_gate", cmd_solver_truthfulness, args.solver_truthfulness_report, steps)
 
+    cmd_vti_coupled_solver = [
+        sys.executable,
+        "implementation/phase1/vti_coupled_solver.py",
+        "--axle-offsets-m",
+        "0.0,2.5,5.0,7.5",
+        "--out",
+        "implementation/phase1/vti_coupled_solver_report.json",
+    ]
+    if reason_code == "PASS" and not _run_reusable(
+        "vti_coupled_solver_contact_evidence",
+        cmd_vti_coupled_solver,
+        "implementation/phase1/vti_coupled_solver_report.json",
+        steps,
+    ):
+        reason_code = "ERR_VTI_COUPLED_SOLVER"
+
+    cmd_contact_readiness = [
+        sys.executable,
+        "implementation/phase1/run_contact_readiness_gate.py",
+        "--out",
+        str(args.contact_readiness_report),
+    ]
+    if reason_code == "PASS" and not _run_reusable(
+        "contact_readiness_gate", cmd_contact_readiness, args.contact_readiness_report, steps
+    ):
+        reason_code = "ERR_CONTACT_READINESS"
+
     cmd_performance_profiling = [
         sys.executable,
         "implementation/phase1/run_performance_profiling_gate.py",
@@ -2721,17 +2748,6 @@ def main() -> None:
     ]
     if reason_code == "PASS" and not _run_reusable("solver_breadth_gate", cmd_solver_breadth, args.solver_breadth_report, steps):
         reason_code = "ERR_SOLVER_BREADTH_GATE"
-
-    cmd_contact_readiness = [
-        sys.executable,
-        "implementation/phase1/run_contact_readiness_gate.py",
-        "--out",
-        str(args.contact_readiness_report),
-    ]
-    if reason_code == "PASS" and not _run_reusable(
-        "contact_readiness_gate", cmd_contact_readiness, args.contact_readiness_report, steps
-    ):
-        reason_code = "ERR_CONTACT_READINESS"
 
     cmd_midas_interoperability = [
         sys.executable,
@@ -3101,6 +3117,13 @@ def main() -> None:
         reuse_note="reused heavy phase3 pipeline artifact with matching command inputs",
     ):
         reason_code = "ERR_PHASE3_PIPELINE"
+
+    if reason_code == "PASS" and not _run(
+        "midas_kds_geometry_bridge_backfill_after_phase3_pipeline",
+        cmd_midas_kds_bridge_backfill,
+        steps,
+    ):
+        reason_code = "ERR_MIDAS_KDS_GEOMETRY_BRIDGE_BACKFILL"
 
     cmd_scaleout = [
         sys.executable,

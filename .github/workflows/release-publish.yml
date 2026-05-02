@@ -85,7 +85,8 @@ jobs:
           set +e
           python implementation/phase1/run_nightly_release_gate.py \
             --skip-promotion \
-            --skip-archive
+            --skip-archive \
+            --allow-cpu-required
           nightly_status=$?
           if [ -f implementation/phase1/release/nightly_release_gate_report.json ]; then
             echo "Nightly release gate summary:"

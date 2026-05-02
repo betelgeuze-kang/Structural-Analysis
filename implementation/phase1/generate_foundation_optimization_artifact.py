@@ -424,8 +424,14 @@ def main() -> None:
         for row in _load_json_rows(cost_reduction_blocked_path, "blocked_rows")
         if _action_row_matches_foundation(row, foundation_group_ids, foundation_group_scopes, foundation_member_ids)
     ]
+    accepted_candidate_rows = [
+        row for row in blocked_rows if str(row.get("block_reason", "") or "") == "accepted_candidate"
+    ]
     optimized_group_ids = sorted({_normalize_group_id(row) for row in optimized_rows if _normalize_group_id(row)})
     blocked_group_ids = sorted({_normalize_group_id(row) for row in blocked_rows if _normalize_group_id(row)})
+    accepted_candidate_group_ids = sorted(
+        {_normalize_group_id(row) for row in accepted_candidate_rows if _normalize_group_id(row)}
+    )
     dataset_inputs = dataset.get("inputs", {}) if isinstance(dataset.get("inputs"), dict) else {}
     upstream_midas_path = Path(args.midas_model) if str(args.midas_model).strip() else Path(str(dataset_inputs.get("midas_model", "") or ""))
     upstream_provenance = _upstream_foundation_provenance(upstream_midas_path) if str(upstream_midas_path).strip() else {
@@ -486,6 +492,7 @@ def main() -> None:
             "optimized_foundation_member_count": int(len(optimized_group_ids)),
             "optimized_foundation_group_count": int(len(optimized_group_ids)),
             "blocked_foundation_group_count": int(len(blocked_group_ids)),
+            "accepted_foundation_candidate_group_count": int(len(accepted_candidate_group_ids)),
             "rows_head_foundation_row_count": int(sum(1 for row in rows if isinstance(row, dict) and _member_is_foundation(row))),
             "npz_foundation_member_row_count": int(len(npz_rows)),
             "npz_foundation_group_row_count": int(len(npz_group_rows)),
@@ -517,6 +524,8 @@ def main() -> None:
             "optimized_foundation_rows_head": optimized_rows[:16],
             "blocked_foundation_group_ids_head": blocked_group_ids[:16],
             "blocked_foundation_rows_head": blocked_rows[:16],
+            "accepted_foundation_candidate_group_ids_head": accepted_candidate_group_ids[:16],
+            "accepted_foundation_candidate_rows_head": accepted_candidate_rows[:16],
             "foundation_candidate_rows_head": foundation_rows[:16],
             "upstream_foundation_section_hits_head": list(upstream_provenance.get("section_hits_head", [])),
             "upstream_foundation_section_signature_hits_head": list(

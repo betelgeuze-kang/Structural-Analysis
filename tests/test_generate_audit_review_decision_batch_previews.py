@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -149,6 +150,7 @@ def test_generate_audit_review_decision_batch_previews_builds_preview_chain(tmp_
         check=False,
         capture_output=True,
         text=True,
+        env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
     )
     assert proc.returncode == 0, proc.stderr
 
@@ -225,6 +227,7 @@ def test_generate_audit_review_decision_batch_previews_accepts_zero_touch_no_ope
         check=False,
         capture_output=True,
         text=True,
+        env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
     )
     assert proc.returncode == 0, proc.stderr
 

@@ -5,26 +5,31 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import sys
 from time import perf_counter
 
 import numpy as np
 
-from design_optimization.artifacts import (
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from design_optimization.artifacts import (  # noqa: E402
     COST_REDUCTION_SMOKE_REPORT_JSON,
     DATASET_NPZ,
     OBJECTIVE_CALIBRATION_REPORT_JSON,
     SOLVER_LOOP_LONG_STATE_NPZ,
 )
-from design_optimization.artifact_writers import write_design_optimization_report
-from design_optimization.io import load_json as _load_json, load_npz as _load_npz
-from design_objective_calibration import apply_objective_calibration, apply_objective_profile
-from design_optimization_env import ACTION_INDEX_V2, DesignOptimizationConfig, apply_group_action
-from run_design_optimization_cost_reduction import (
+from design_optimization.artifact_writers import write_design_optimization_report  # noqa: E402
+from design_optimization.io import load_json as _load_json, load_npz as _load_npz  # noqa: E402
+from design_objective_calibration import apply_objective_calibration, apply_objective_profile  # noqa: E402
+from design_optimization_env import ACTION_INDEX_V2, DesignOptimizationConfig, apply_group_action  # noqa: E402
+from run_design_optimization_cost_reduction import (  # noqa: E402
     _cost_down_actions_for_group,
     _overlay_action_masks_from_dataset,
     _refine_action_masks_for_current_state,
 )
-from run_design_optimization_solver_loop import _solver_stage_state, solver_backends_gpu_strict
+from run_design_optimization_solver_loop import _solver_stage_state, solver_backends_gpu_strict  # noqa: E402
 
 
 def _select_smoke_candidate(

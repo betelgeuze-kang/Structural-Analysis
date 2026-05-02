@@ -124,6 +124,10 @@ def main() -> None:
     foundation_artifact_rows = _safe_int(artifact_summary.get("optimized_foundation_member_count", 0))
     foundation_artifact_group_rows = _safe_int(artifact_summary.get("optimized_foundation_group_count", foundation_artifact_rows))
     blocked_foundation_group_count = _safe_int(artifact_summary.get("blocked_foundation_group_count", 0))
+    accepted_foundation_candidate_group_count = _safe_int(
+        artifact_summary.get("accepted_foundation_candidate_group_count", 0)
+    )
+    foundation_evidence_group_count = max(foundation_artifact_group_rows, accepted_foundation_candidate_group_count)
     artifact_foundation_count = _safe_int(artifact_summary.get("foundation_member_type_count", 0))
     upstream_foundation_label_count = _safe_int(artifact_summary.get("upstream_foundation_label_count", 0))
     raw_source_foundation_label_count = _safe_int(artifact_summary.get("raw_source_foundation_label_count", 0))
@@ -180,7 +184,7 @@ def main() -> None:
         )
         mode = "foundation_members_present_but_no_active_optimization"
         contract_pass = False
-    elif foundation_artifact_group_rows <= 0:
+    elif foundation_evidence_group_count <= 0:
         reason_code = "ERR_FOUNDATION_SCOPE_ONLY"
         reason = (
             "Foundation scope was detected, but no foundation-specific cost-reduction action or "
@@ -190,8 +194,14 @@ def main() -> None:
         contract_pass = False
     elif artifact_contract:
         reason_code = "PASS"
-        reason = "foundation optimization artifact is attached and dataset contains foundation members"
-        mode = "active_foundation_member_optimization"
+        if foundation_artifact_group_rows > 0:
+            reason = "foundation optimization artifact is attached and dataset contains foundation members"
+            mode = "active_foundation_member_optimization"
+        else:
+            reason = (
+                "foundation hard-gate candidate evidence is attached and dataset contains foundation members"
+            )
+            mode = "foundation_candidate_optimization_evidence"
         contract_pass = True
     else:
         reason_code = "ERR_FOUNDATION_SCOPE_ONLY"
@@ -222,6 +232,8 @@ def main() -> None:
             "foundation_artifact_optimized_count": int(foundation_artifact_rows),
             "foundation_artifact_optimized_group_count": int(foundation_artifact_group_rows),
             "foundation_artifact_blocked_group_count": int(blocked_foundation_group_count),
+            "accepted_foundation_candidate_group_count": int(accepted_foundation_candidate_group_count),
+            "foundation_evidence_group_count": int(foundation_evidence_group_count),
             "foundation_scope_source": scope_source,
             "foundation_artifact_scan_mode": artifact_scan_mode,
             "foundation_artifact_evidence_mode": artifact_evidence_mode,

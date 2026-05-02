@@ -207,6 +207,56 @@ def test_foundation_optimization_report_discovers_sibling_artifact_when_flag_is_
     assert payload["summary"]["foundation_artifact_optimized_group_count"] == 2
 
 
+def test_foundation_optimization_report_accepts_hard_gate_candidate_evidence(tmp_path: Path) -> None:
+    dataset = tmp_path / "design_optimization_dataset_report.json"
+    _write_json(
+        dataset,
+        {
+            "contract_pass": True,
+            "summary": {"member_count": 24, "group_count": 9, "member_type_counts": {"foundation": 3}},
+        },
+    )
+    artifact = tmp_path / "foundation_optimization_artifact.json"
+    _write_json(
+        artifact,
+        {
+            "contract_pass": True,
+            "summary": {
+                "foundation_member_type_count": 3,
+                "optimized_foundation_member_count": 0,
+                "optimized_foundation_group_count": 0,
+                "accepted_foundation_candidate_group_count": 2,
+            },
+        },
+    )
+    out = tmp_path / "foundation_optimization_report.json"
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "implementation/phase1/generate_foundation_optimization_report.py",
+            "--design-optimization-dataset",
+            str(dataset),
+            "--foundation-optimization-artifact",
+            str(artifact),
+            "--out",
+            str(out),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["contract_pass"] is True
+    assert payload["reason_code"] == "PASS"
+    assert payload["summary"]["optimization_mode"] == "foundation_candidate_optimization_evidence"
+    assert payload["summary"]["foundation_artifact_optimized_group_count"] == 0
+    assert payload["summary"]["accepted_foundation_candidate_group_count"] == 2
+    assert payload["summary"]["foundation_evidence_group_count"] == 2
+
+
 def test_foundation_optimization_report_flags_upstream_foundation_scope_not_promoted(tmp_path: Path) -> None:
     dataset = tmp_path / "design_optimization_dataset_report.json"
     _write_json(
