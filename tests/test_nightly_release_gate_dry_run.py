@@ -47,6 +47,7 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
         "implementation/phase1/run_nightly_release_gate.py",
         "--dry-run",
         "--skip-promotion",
+        "--allow-cpu-required",
         "--ci-report",
         str(ci_report),
         "--out",
@@ -111,6 +112,8 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert "--code-check-report implementation/phase1/release/kds_compliance/code_check_report.json" in str(
         kds_step.get("command", "")
     )
+    wind_step = next(step for step in steps if step.get("step") == "wind_benchmark_gate")
+    assert "--allow-cpu-required" in str(wind_step.get("command", ""))
     assert "surface_interaction_benchmark_gate" in step_names
     assert "solver_breadth_gate" in step_names
     assert "contact_readiness_gate" in step_names

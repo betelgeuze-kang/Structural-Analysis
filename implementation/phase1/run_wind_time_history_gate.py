@@ -17,7 +17,6 @@ import numpy as np
 from experiment_artifact_archive import archive_test_outputs
 from rc_composite_material_model import RCCompositeMaterialConfig, apply_rc_composite_profile
 from rust_nonlinear_frame_bridge import (
-    RustNonlinearFrameConfig,
     RustNonlinearNdthaConfig,
     build_story_load_profile,
     consume_dlpack_bundle,
@@ -105,6 +104,7 @@ INPUT_SCHEMA = {
         "rayleigh_beta",
         "max_drift_pct",
         "require_rust_backend",
+        "allow_cpu_required",
         "out",
     ],
     "properties": {
@@ -132,6 +132,7 @@ INPUT_SCHEMA = {
         "rayleigh_beta": {"type": "number", "minimum": 0.0},
         "max_drift_pct": {"type": "number", "exclusiveMinimum": 0.0},
         "require_rust_backend": {"type": "boolean"},
+        "allow_cpu_required": {"type": "boolean"},
         "case_metrics_npz_out": {"type": "string", "minLength": 1},
         "out": {"type": "string", "minLength": 1},
     },
@@ -301,6 +302,43 @@ def _extract_tail_scalar(result: dict, *, key: str, default: float) -> tuple[flo
     return float(default), "fallback_default"
 
 
+def _response_backend_contract(rows: list[dict], *, allow_cpu_required: bool) -> dict[str, object]:
+    backend_rows: list[str] = []
+    for row in rows:
+        chunks = row.get("chunk_rows_head")
+        if not isinstance(chunks, list) or not chunks:
+            backend_rows.append("missing")
+            continue
+        for chunk in chunks:
+            if isinstance(chunk, dict):
+                backend_rows.append(str(chunk.get("response_backend", "") or "missing"))
+            else:
+                backend_rows.append("missing")
+    backend_set = sorted(set(backend_rows))
+    has_backends = bool(backend_rows)
+    dlpack_all = bool(has_backends and all(item == "dlpack_zero_copy" for item in backend_rows))
+    host_response_all = bool(
+        has_backends
+        and all(item in {"dlpack_zero_copy", "host_response"} for item in backend_rows)
+        and any(item == "host_response" for item in backend_rows)
+    )
+    cpu_required_allowed = bool(allow_cpu_required and host_response_all)
+    return {
+        "response_backends": backend_set,
+        "device_artifacts_consumed": dlpack_all,
+        "host_response_consumed": host_response_all,
+        "cpu_required_allowed": cpu_required_allowed,
+        "response_artifacts_consumed_pass": bool(dlpack_all or cpu_required_allowed),
+        "consumer_label": (
+            "dlpack_zero_copy"
+            if dlpack_all
+            else "host_response_cpu_allowed"
+            if cpu_required_allowed
+            else ",".join(backend_set) or "none"
+        ),
+    }
+
+
 def _write_case_metrics_npz(path: Path, rows: list[dict]) -> dict[str, object]:
     payload = {
         "case_ids": np.asarray([str(row.get("case_id", "")) for row in rows], dtype="<U128"),
@@ -367,6 +405,7 @@ def main() -> None:
     p.add_argument("--rayleigh-beta", type=float, default=1e-6)
     p.add_argument("--max-drift-pct", type=float, default=8.0)
     p.add_argument("--require-rust-backend", action=argparse.BooleanOptionalAction, default=True)
+    p.add_argument("--allow-cpu-required", action="store_true")
     p.add_argument("--case-metrics-npz-out", default="")
     p.add_argument("--out", default="implementation/phase1/wind_time_history_gate_report.json")
     args = p.parse_args()
@@ -397,6 +436,7 @@ def main() -> None:
         "rayleigh_beta": float(args.rayleigh_beta),
         "max_drift_pct": float(args.max_drift_pct),
         "require_rust_backend": bool(args.require_rust_backend),
+        "allow_cpu_required": bool(args.allow_cpu_required),
         "case_metrics_npz_out": str(case_metrics_npz_out),
         "out": str(args.out),
     }
@@ -435,13 +475,6 @@ def main() -> None:
         rows = rows[: int(args.max_case_count)]
         if len(rows) < int(args.min_case_count):
             raise ValueError(f"selected wind cases {len(rows)} < min_case_count {int(args.min_case_count)}")
-
-        rust_cfg = RustNonlinearFrameConfig(
-            tolerance=max(1e-9, float(args.step_tol) * 0.1),
-            max_iter=max(16, int(args.max_step_iterations) * 4),
-            hardening_ratio=float(args.hardening_ratio),
-            pdelta_factor=float(args.pdelta_factor),
-        )
 
         ndtha_cfg = RustNonlinearNdthaConfig(
             dt_s=float(dt),
@@ -683,6 +716,7 @@ def main() -> None:
                 }
             )
 
+        response_contract = _response_backend_contract(out_rows, allow_cpu_required=bool(args.allow_cpu_required))
         checks = {
             "source_manifest_pass": bool(source_manifest_pass),
             "wind_duration_pass": bool(duration_h >= float(args.min_duration_hours)),
@@ -696,11 +730,11 @@ def main() -> None:
             "section_family_pass": bool(section_family_all),
             "material_model_pass": bool(material_model_all),
             "residual_trace_pass": bool(all(bool(row.get("residual_trace_pass", False)) for row in out_rows)),
-            "device_artifacts_consumed_pass": bool(
-                all(
-                    all(str(chunk.get("response_backend", "")) == "dlpack_zero_copy" for chunk in row.get("chunk_rows_head", []))
-                    for row in out_rows
-                )
+            "device_artifacts_consumed_pass": bool(response_contract["response_artifacts_consumed_pass"]),
+            "cpu_required_allowed_pass": bool(
+                (not bool(args.allow_cpu_required))
+                or bool(response_contract["device_artifacts_consumed"])
+                or bool(response_contract["cpu_required_allowed"])
             ),
         }
         contract_pass = bool(all(checks.values()))
@@ -716,7 +750,12 @@ def main() -> None:
             reason_code = "ERR_ENGINE_FAIL"
         elif not checks["section_family_pass"] or not checks["material_model_pass"]:
             reason_code = "ERR_ENGINE_FAIL"
-        elif not checks["long_series_chunked_pass"] or not checks["drift_guard_pass"] or not checks["device_artifacts_consumed_pass"]:
+        elif (
+            not checks["long_series_chunked_pass"]
+            or not checks["drift_guard_pass"]
+            or not checks["device_artifacts_consumed_pass"]
+            or not checks["cpu_required_allowed_pass"]
+        ):
             reason_code = "ERR_VNV_FAIL"
         else:
             reason_code = "PASS"
@@ -766,7 +805,9 @@ def main() -> None:
                     else 1.0
                 ),
                 "material_model_types": sorted({str(row.get("material_model", "")) for row in out_rows}),
-                "device_artifact_consumer": "dlpack_zero_copy",
+                "device_artifact_consumer": str(response_contract["consumer_label"]),
+                "response_backends": list(response_contract["response_backends"]),
+                "cpu_required_allowed": bool(response_contract["cpu_required_allowed"]),
                 "device_artifact_case_count": int(
                     sum(
                         1

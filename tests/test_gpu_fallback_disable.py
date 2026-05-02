@@ -60,6 +60,32 @@ def test_wind_signal_metrics_cpu_path(monkeypatch) -> None:
     assert dom_freq >= 0.0
 
 
+def test_wind_response_backend_contract_allows_cpu_required_host_response() -> None:
+    contract = wind_gate._response_backend_contract(
+        [
+            {
+                "chunk_rows_head": [
+                    {"response_backend": "host_response"},
+                    {"response_backend": "host_response"},
+                ]
+            }
+        ],
+        allow_cpu_required=True,
+    )
+    assert contract["response_artifacts_consumed_pass"] is True
+    assert contract["cpu_required_allowed"] is True
+    assert contract["consumer_label"] == "host_response_cpu_allowed"
+
+
+def test_wind_response_backend_contract_rejects_host_response_without_cpu_required() -> None:
+    contract = wind_gate._response_backend_contract(
+        [{"chunk_rows_head": [{"response_backend": "host_response"}]}],
+        allow_cpu_required=False,
+    )
+    assert contract["response_artifacts_consumed_pass"] is False
+    assert contract["cpu_required_allowed"] is False
+
+
 def test_ssi_preprocess_metrics_cpu_path(monkeypatch) -> None:
     monkeypatch.setattr(ssi_gate, "_load_gpu_torch", lambda: None)
     dom_freq, nonlinear_ratio, backend = ssi_gate._ssi_preprocess_metrics(

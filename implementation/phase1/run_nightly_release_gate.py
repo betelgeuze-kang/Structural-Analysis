@@ -2420,6 +2420,8 @@ def main() -> None:
         "--out",
         str(args.wind_benchmark_report),
     ]
+    if bool(args.allow_cpu_required):
+        cmd_wind.append("--allow-cpu-required")
     if reason_code == "PASS" and not _run_reusable(
         "wind_benchmark_gate",
         cmd_wind,
