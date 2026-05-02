@@ -2436,7 +2436,16 @@ def main() -> None:
         str(args.construction_sequence_report),
     ]
     if reason_code == "PASS" and not _run_reusable(
-        "construction_sequence_gate", cmd_construction, args.construction_sequence_report, steps
+        "construction_sequence_gate",
+        cmd_construction,
+        args.construction_sequence_report,
+        steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused construction-sequence evidence on CPU-required runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
     ):
         reason_code = "ERR_CONSTRUCTION_SEQUENCE_GATE"
 

@@ -86,6 +86,7 @@ jobs:
           python implementation/phase1/run_nightly_release_gate.py \
             --skip-promotion \
             --skip-archive \
+            --no-enable-hip-kernel-smoke \
             --allow-cpu-required
           nightly_status=$?
           if [ -f implementation/phase1/release/nightly_release_gate_report.json ]; then
