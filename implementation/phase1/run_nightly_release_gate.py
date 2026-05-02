@@ -142,6 +142,29 @@ def _run(step: str, cmd: list[str], steps: list[dict]) -> bool:
     return proc.returncode == 0
 
 
+def _record_deferred_step(
+    step: str,
+    cmd: list[str],
+    steps: list[dict],
+    *,
+    reason: str,
+    missing_paths: Iterable[str | Path] = (),
+) -> None:
+    steps.append(
+        {
+            "step": step,
+            "seconds": 0.0,
+            "return_code": 0,
+            "command": shlex.join(cmd),
+            "stdout_tail": f"deferred: {reason}",
+            "stderr_tail": "",
+            "deferred": True,
+            "defer_reason": reason,
+            "missing_paths": [str(path) for path in missing_paths],
+        }
+    )
+
+
 def _load_json(path: str | Path) -> dict:
     target = Path(path)
     if not target.exists():
@@ -2221,13 +2244,28 @@ def main() -> None:
     cmd_midas_kds_bridge_backfill = [
         sys.executable,
         "implementation/phase1/backfill_midas_kds_geometry_bridge_metadata.py",
+        "--report",
+        str(args.code_check_report),
         "--write",
         str(args.mgt_json_out),
         str(Path("implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json")),
         str(Path("implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json")),
     ]
-    if reason_code == "PASS" and not _run("midas_kds_geometry_bridge_backfill", cmd_midas_kds_bridge_backfill, steps):
-        reason_code = "ERR_MIDAS_KDS_GEOMETRY_BRIDGE_BACKFILL"
+    if reason_code == "PASS":
+        if DRY_RUN:
+            if not _run("midas_kds_geometry_bridge_backfill", cmd_midas_kds_bridge_backfill, steps):
+                reason_code = "ERR_MIDAS_KDS_GEOMETRY_BRIDGE_BACKFILL"
+        else:
+            _record_deferred_step(
+                "midas_kds_geometry_bridge_backfill",
+                cmd_midas_kds_bridge_backfill,
+                steps,
+                reason=(
+                    "waiting for kds_compliance_gate to refresh code_check_report.json; "
+                    "midas_kds_geometry_bridge_backfill_after_phase3_pipeline is authoritative"
+                ),
+                missing_paths=[] if Path(args.code_check_report).exists() else [args.code_check_report],
+            )
 
     cmd_real_source_multi = [
         sys.executable,
@@ -2438,6 +2476,8 @@ def main() -> None:
         str(args.commercial_csv_gate),
         "--member-force-gate",
         "implementation/phase1/member_force_soft_accept_report.json",
+        "--code-check-report",
+        str(args.code_check_report),
         "--out-dir",
         str(Path(args.kds_compliance_summary).parent),
     ]

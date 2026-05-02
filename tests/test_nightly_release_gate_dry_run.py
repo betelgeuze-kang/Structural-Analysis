@@ -103,6 +103,14 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert "hardest_external_10case_kickoff_gate" in step_names
     assert "midas_kds_geometry_bridge_backfill" in step_names
     assert "midas_kds_geometry_bridge_backfill_after_phase3_pipeline" in step_names
+    backfill_step = next(step for step in steps if step.get("step") == "midas_kds_geometry_bridge_backfill")
+    assert "--report implementation/phase1/release/kds_compliance/code_check_report.json" in str(
+        backfill_step.get("command", "")
+    )
+    kds_step = next(step for step in steps if step.get("step") == "kds_compliance_gate")
+    assert "--code-check-report implementation/phase1/release/kds_compliance/code_check_report.json" in str(
+        kds_step.get("command", "")
+    )
     assert "surface_interaction_benchmark_gate" in step_names
     assert "solver_breadth_gate" in step_names
     assert "contact_readiness_gate" in step_names
