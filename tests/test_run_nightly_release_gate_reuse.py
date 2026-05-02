@@ -84,6 +84,48 @@ def test_run_reusable_can_ignore_dependency_mtime_for_heavy_steps(tmp_path: Path
     assert steps[0]["reuse_dependency_mtime_checked"] is False
 
 
+def test_run_reusable_can_ignore_script_mtime_and_legacy_missing_out_for_release_evidence(tmp_path: Path) -> None:
+    module = _load_module()
+    script_path = tmp_path / "checked_in_gate.py"
+    report_path = tmp_path / "checked_in_report.json"
+    script_path.write_text("raise SystemExit(3)\n", encoding="utf-8")
+    report_path.write_text(
+        json.dumps(
+            {
+                "contract_pass": True,
+                "reason_code": "PASS",
+                "inputs": {},
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    report_stat = report_path.stat()
+    os.utime(script_path, (report_stat.st_mtime + 10, report_stat.st_mtime + 10))
+    cmd = [sys.executable, str(script_path), "--out", str(report_path)]
+    steps: list[dict] = []
+    module.DRY_RUN = False
+    module.REUSE_EXISTING_IF_PRESENT = True
+
+    reused = module._run_reusable(
+        "checked_in_gate",
+        cmd,
+        report_path,
+        steps,
+        check_dependency_mtime=False,
+        check_script_mtime=False,
+        reuse_note="reused checked-in release evidence",
+    )
+
+    assert reused is True
+    assert steps
+    assert steps[0]["reused_existing"] is True
+    assert steps[0]["reuse_dependency_mtime_checked"] is False
+    assert steps[0]["reuse_script_mtime_checked"] is False
+    assert "reused checked-in release evidence" in steps[0]["stdout_tail"]
+
+
 def test_run_reusable_recovers_from_nonzero_exit_when_valid_report_was_written(tmp_path: Path) -> None:
     module = _load_module()
     script_path = tmp_path / "flaky_gate.py"

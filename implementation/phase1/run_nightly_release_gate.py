@@ -289,6 +289,7 @@ def _report_matches_command_inputs(
     cmd: list[str],
     *,
     check_dependency_mtime: bool = True,
+    check_script_mtime: bool = True,
 ) -> bool:
     if not report_path.exists():
         return False
@@ -307,6 +308,10 @@ def _report_matches_command_inputs(
     if not expected_inputs:
         return False
     for key, expected_value in expected_inputs.items():
+        if key == "out" and key not in existing_inputs:
+            if _reuse_signature_payload(expected_value) == _reuse_signature_payload(report_path):
+                continue
+            return False
         if key not in existing_inputs:
             return False
         if _reuse_signature_payload(existing_inputs.get(key)) != _reuse_signature_payload(expected_value):
@@ -316,7 +321,7 @@ def _report_matches_command_inputs(
     except Exception:
         return False
     script_path = Path(str(cmd[1])) if len(cmd) > 1 else None
-    if script_path is not None and script_path.exists():
+    if check_script_mtime and script_path is not None and script_path.exists():
         try:
             if script_path.stat().st_mtime > report_mtime:
                 return False
@@ -343,12 +348,18 @@ def _run_reusable(
     steps: list[dict],
     *,
     check_dependency_mtime: bool = True,
+    check_script_mtime: bool = True,
     reuse_note: str = "",
 ) -> bool:
     if DRY_RUN or not REUSE_EXISTING_IF_PRESENT:
         return _run(step, cmd, steps)
     report_path = Path(report_path)
-    if _report_matches_command_inputs(report_path, cmd, check_dependency_mtime=check_dependency_mtime):
+    if _report_matches_command_inputs(
+        report_path,
+        cmd,
+        check_dependency_mtime=check_dependency_mtime,
+        check_script_mtime=check_script_mtime,
+    ):
         steps.append(
             {
                 "step": step,
@@ -360,6 +371,7 @@ def _run_reusable(
                 "reused_existing": True,
                 "report_path": str(report_path),
                 "reuse_dependency_mtime_checked": bool(check_dependency_mtime),
+                "reuse_script_mtime_checked": bool(check_script_mtime),
             }
         )
         return True
@@ -368,10 +380,12 @@ def _run_reusable(
         steps[-1]["reused_existing"] = False
         steps[-1]["report_path"] = str(report_path)
         steps[-1]["reuse_dependency_mtime_checked"] = bool(check_dependency_mtime)
+        steps[-1]["reuse_script_mtime_checked"] = bool(check_script_mtime)
     if not ok and _report_matches_command_inputs(
         report_path,
         cmd,
         check_dependency_mtime=check_dependency_mtime,
+        check_script_mtime=check_script_mtime,
     ):
         if steps:
             steps[-1]["report_recovered_success"] = True
@@ -2166,7 +2180,19 @@ def main() -> None:
         "--out",
         str(args.commercial_csv_gate),
     ]
-    if reason_code == "PASS" and not _run_reusable("commercial_csv_gate", cmd_csv, args.commercial_csv_gate, steps):
+    if reason_code == "PASS" and not _run_reusable(
+        "commercial_csv_gate",
+        cmd_csv,
+        args.commercial_csv_gate,
+        steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused commercial CSV evidence on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
+    ):
         reason_code = "ERR_COMMERCIAL_CSV_GATE"
 
     cmd_mgt = [
@@ -2441,6 +2467,7 @@ def main() -> None:
         args.construction_sequence_report,
         steps,
         check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
         reuse_note=(
             "reused construction-sequence evidence on CPU-required runner"
             if bool(args.allow_cpu_required)
