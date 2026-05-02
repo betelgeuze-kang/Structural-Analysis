@@ -67,6 +67,7 @@ REASONS = {
     "ERR_WORKFLOW_PRODUCTIZATION_GATE": "workflow/interoperability productization gate failed",
     "ERR_COMMERCIAL_READINESS": "commercial readiness gate failed",
     "ERR_PHASE3_PIPELINE": "phase3 nightly pipeline failed",
+    "ERR_MIDAS_KDS_GEOMETRY_BRIDGE_BACKFILL": "midas kds geometry bridge metadata backfill failed",
     "ERR_SCALEOUT_IO": "scaleout io profile failed",
     "ERR_NIGHTLY_10M_REPRO": "nightly 10m reproducibility gate failed",
     "ERR_NDTHA_LONG_PROFILE": "10m ndtha long profile gate failed",

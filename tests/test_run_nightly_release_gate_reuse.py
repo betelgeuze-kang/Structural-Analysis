@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import importlib.util
 import json
 import os
@@ -40,6 +41,24 @@ def test_report_matches_command_inputs_normalizes_numeric_strings(tmp_path: Path
     os.utime(script_path, (report_stat.st_mtime - 10, report_stat.st_mtime - 10))
     cmd = [sys.executable, str(script_path), "--min-duration-hours", "10", "--out", str(report_path)]
     assert module._report_matches_command_inputs(report_path, cmd) is True
+
+
+def test_all_nightly_reason_code_assignments_have_reason_messages() -> None:
+    module = _load_module()
+    module_path = Path(__file__).resolve().parents[1] / "implementation/phase1/run_nightly_release_gate.py"
+    tree = ast.parse(module_path.read_text(encoding="utf-8"))
+    assigned_reason_codes: set[str] = set()
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(isinstance(target, ast.Name) and target.id == "reason_code" for target in node.targets):
+            continue
+        if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+            assigned_reason_codes.add(node.value.value)
+
+    assert assigned_reason_codes
+    assert assigned_reason_codes <= set(module.REASONS)
 
 
 def test_run_reusable_can_ignore_dependency_mtime_for_heavy_steps(tmp_path: Path) -> None:
