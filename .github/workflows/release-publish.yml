@@ -36,12 +36,6 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: true
-
       - name: Prepare release workspace paths
         run: |
           {
@@ -52,15 +46,23 @@ jobs:
             echo "RELEASE_UPLOAD_PLAN=$RUNNER_TEMP/structural-release-upload-plan.json"
             echo "P0_STATUS_JSON=$RUNNER_TEMP/structural-p0-closure-status.json"
             echo "P0_STATUS_MD=$RUNNER_TEMP/structural-p0-closure-status.md"
+            echo "PUBLICATION_REPORT_JSON=$RUNNER_TEMP/structural-release-publication-report.json"
+            echo "PUBLICATION_REPORT_MD=$RUNNER_TEMP/structural-release-publication-report.md"
           } >> "$GITHUB_ENV"
 
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.19.0"
           cache: "npm"
@@ -157,13 +159,15 @@ jobs:
           python scripts/check_release_asset_listing.py \
             --manifest "$CANDIDATE_MANIFEST" \
             --assets-json "$RELEASE_ASSETS_JSON" \
-            --require-all
+            --require-all \
+            --require-exact
           python scripts/check_release_p0_closure.py \
             --manifest "$CANDIDATE_MANIFEST" \
             --assets-json "$RELEASE_ASSETS_JSON" \
             --artifact-root "$RELEASE_ROOT" \
             --tag-ref-present true \
             --require-all \
+            --require-exact \
             --fail-unclosed
           python scripts/check_p0_closure_status.py \
             --manifest "$CANDIDATE_MANIFEST" \
@@ -174,9 +178,106 @@ jobs:
             --out-md "$P0_STATUS_MD" \
             --fail-open
 
+      - name: Write publication failure report
+        if: always()
+        env:
+          PUBLICATION_JOB_STATUS: ${{ job.status }}
+        run: |
+          set +e
+          p0_manifest="$CANDIDATE_MANIFEST"
+          if [ ! -f "$p0_manifest" ]; then
+            p0_manifest="implementation/phase1/release_artifacts_manifest.json"
+          fi
+          if [ -f scripts/check_p0_closure_status.py ] && [ ! -s "$P0_STATUS_JSON" ]; then
+            python3 scripts/check_p0_closure_status.py \
+              --manifest "$p0_manifest" \
+              --out "$P0_STATUS_JSON" \
+              --out-md "$P0_STATUS_MD" || true
+          fi
+          python3 - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          def load_json(path: str) -> dict:
+              target = Path(path)
+              if not target.exists():
+                  return {}
+              try:
+                  payload = json.loads(target.read_text(encoding="utf-8"))
+              except Exception as exc:
+                  return {"load_error": str(exc)}
+              return payload if isinstance(payload, dict) else {"load_error": "payload was not a JSON object"}
+
+          def file_status(path: str) -> dict:
+              target = Path(path)
+              return {
+                  "path": str(target),
+                  "exists": target.exists(),
+                  "bytes": target.stat().st_size if target.exists() else 0,
+              }
+
+          nightly_report = "implementation/phase1/release/nightly_release_gate_report.json"
+          p0_status_json = os.environ["P0_STATUS_JSON"]
+          report_json = Path(os.environ["PUBLICATION_REPORT_JSON"])
+          report_md = Path(os.environ["PUBLICATION_REPORT_MD"])
+          p0_payload = load_json(p0_status_json)
+          nightly_payload = load_json(nightly_report)
+          payload = {
+              "schema_version": "release-publication-report.v1",
+              "failure_report_written": True,
+              "generated_at": datetime.now(timezone.utc).isoformat(),
+              "job_status": os.environ.get("PUBLICATION_JOB_STATUS", ""),
+              "inputs": {
+                  "replace_existing": "${{ inputs.replace_existing }}",
+                  "promote_manifest": "${{ inputs.promote_manifest }}",
+              },
+              "files": {
+                  "candidate_manifest": file_status(os.environ["CANDIDATE_MANIFEST"]),
+                  "release_assets_json": file_status(os.environ["RELEASE_ASSETS_JSON"]),
+                  "release_upload_plan": file_status(os.environ["RELEASE_UPLOAD_PLAN"]),
+                  "p0_status_json": file_status(p0_status_json),
+                  "p0_status_md": file_status(os.environ["P0_STATUS_MD"]),
+                  "nightly_release_gate_report": file_status(nightly_report),
+              },
+              "nightly_release_gate": {
+                  "reason_code": str(nightly_payload.get("reason_code", "") or ""),
+                  "reason": str(nightly_payload.get("reason", "") or ""),
+                  "contract_pass": nightly_payload.get("contract_pass"),
+              },
+              "p0_closure": {
+                  "status": str(p0_payload.get("status", "") or ""),
+                  "p0_closed": bool(p0_payload.get("p0_closed", False)),
+                  "release_publication_closed": bool(p0_payload.get("release_publication_closed", False)),
+                  "core_evidence_closed": bool(p0_payload.get("core_evidence_closed", False)),
+                  "next_action": str(p0_payload.get("next_action", "") or ""),
+              },
+          }
+          report_json.parent.mkdir(parents=True, exist_ok=True)
+          report_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+          report_md.write_text(
+              "\n".join(
+                  [
+                      "# Release Publication Report",
+                      "",
+                      f"- Failure report written: `{payload['failure_report_written']}`",
+                      f"- Job status: `{payload['job_status']}`",
+                      f"- P0 status: `{payload['p0_closure']['status']}`",
+                      f"- P0 closed: `{payload['p0_closure']['p0_closed']}`",
+                      f"- Release publication closed: `{payload['p0_closure']['release_publication_closed']}`",
+                      f"- Next action: `{payload['p0_closure']['next_action']}`",
+                      f"- Nightly reason code: `{payload['nightly_release_gate']['reason_code']}`",
+                      "",
+                  ]
+              ),
+              encoding="utf-8",
+          )
+          PY
+
       - name: Upload publication evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-publication-evidence
           path: |
@@ -185,8 +286,10 @@ jobs:
             ${{ runner.temp }}/structural-release-upload-plan.json
             ${{ runner.temp }}/structural-p0-closure-status.json
             ${{ runner.temp }}/structural-p0-closure-status.md
+            ${{ runner.temp }}/structural-release-publication-report.json
+            ${{ runner.temp }}/structural-release-publication-report.md
             implementation/phase1/release/nightly_release_gate_report.json
-          if-no-files-found: ignore
+          if-no-files-found: error
 
       - name: Promote verified manifest
         if: ${{ inputs.promote_manifest == 'true' }}

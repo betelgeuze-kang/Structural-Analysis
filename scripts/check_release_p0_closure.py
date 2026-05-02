@@ -92,6 +92,7 @@ def _asset_listing_status(
     assets_json: Path | None,
     *,
     require_all: bool,
+    require_exact: bool,
 ) -> dict[str, Any]:
     if assets_json is None:
         return {
@@ -99,39 +100,55 @@ def _asset_listing_status(
             "ok": None,
             "assets_json": None,
             "require_all": require_all,
+            "require_exact": require_exact,
             "errors": [],
             "counts": {},
         }
 
     try:
-        summary = check_release_asset_listing(manifest_path, assets_json, require_all=require_all)
+        summary = check_release_asset_listing(
+            manifest_path,
+            assets_json,
+            require_all=require_all,
+            require_exact=require_exact,
+        )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         return {
             "checked": True,
             "ok": False,
             "assets_json": str(assets_json),
             "require_all": require_all,
+            "require_exact": require_exact,
             "errors": [str(exc)],
             "counts": {},
         }
 
     totals = summary.get("totals", {})
     missing_required = totals.get("missing_required", len(summary.get("missing_required", [])))
+    missing_optional = totals.get("missing_optional", len(summary.get("missing_optional", [])))
     size_mismatches = totals.get("size_mismatches", len(summary.get("size_mismatches", [])))
+    extra_assets = totals.get("extra_assets", len(summary.get("extra_assets", [])))
+    exact_ok = not require_exact or (
+        missing_required == 0
+        and missing_optional == 0
+        and size_mismatches == 0
+        and extra_assets == 0
+    )
     return {
         "checked": True,
-        "ok": bool(summary.get("ok")) and missing_required == 0 and size_mismatches == 0,
+        "ok": bool(summary.get("ok")) and missing_required == 0 and size_mismatches == 0 and exact_ok,
         "assets_json": str(assets_json),
         "require_all": require_all,
+        "require_exact": require_exact,
         "errors": [],
         "counts": {
             "manifest_assets": totals.get("manifest_assets", 0),
             "listed_assets": totals.get("listed_assets", 0),
             "matched": totals.get("matched", 0),
             "missing_required": missing_required,
-            "missing_optional": totals.get("missing_optional", 0),
+            "missing_optional": missing_optional,
             "mismatched": size_mismatches,
-            "extra_assets": totals.get("extra_assets", 0),
+            "extra_assets": extra_assets,
         },
     }
 
@@ -148,6 +165,7 @@ def build_status(
     artifact_root: Path | None = None,
     assets_json: Path | None = None,
     require_all: bool = False,
+    require_exact: bool = True,
     tag_ref_present: bool | None = None,
 ) -> dict[str, Any]:
     """Return a no-network P0 closure status composed from existing checks."""
@@ -164,11 +182,17 @@ def build_status(
         "errors": ["skipped because manifest structure is invalid"] if artifact_root is not None else [],
         "counts": {},
     }
-    asset_status = _asset_listing_status(manifest_path, assets_json, require_all=require_all) if manifest_status["ok"] else {
+    asset_status = _asset_listing_status(
+        manifest_path,
+        assets_json,
+        require_all=require_all,
+        require_exact=require_exact,
+    ) if manifest_status["ok"] else {
         "checked": assets_json is not None,
         "ok": False if assets_json is not None else None,
         "assets_json": str(assets_json) if assets_json is not None else None,
         "require_all": require_all,
+        "require_exact": require_exact,
         "errors": ["skipped because manifest structure is invalid"] if assets_json is not None else [],
         "counts": {},
     }
@@ -249,13 +273,26 @@ def build_parser() -> argparse.ArgumentParser:
         description=(
             "Report P0 release closure status by composing local manifest, upload-plan, "
             "and offline asset-listing checks. This command never fetches network data "
-            "and never uploads assets."
+            "and never uploads assets. Asset listing checks are exact by default for P0 closure."
         )
     )
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--artifact-root", type=Path)
     parser.add_argument("--assets-json", type=Path)
     parser.add_argument("--require-all", action="store_true")
+    parser.set_defaults(require_exact=True)
+    parser.add_argument(
+        "--require-exact",
+        dest="require_exact",
+        action="store_true",
+        help="Require the published asset listing to exactly match manifest names and sizes. Enabled by default.",
+    )
+    parser.add_argument(
+        "--allow-non-exact",
+        dest="require_exact",
+        action="store_false",
+        help="Diagnostic mode only: allow optional missing or extra listed assets when checking P0 closure.",
+    )
     parser.add_argument("--tag-ref-present", type=_parse_tag_ref_present, choices=(True, False))
     parser.add_argument("--fail-unclosed", action="store_true")
     parser.add_argument("--json", action="store_true", help="Print a machine-readable JSON status.")
@@ -270,6 +307,7 @@ def main(argv: list[str] | None = None) -> int:
         artifact_root=args.artifact_root,
         assets_json=args.assets_json,
         require_all=args.require_all,
+        require_exact=args.require_exact,
         tag_ref_present=args.tag_ref_present,
     )
 

@@ -141,6 +141,47 @@ def test_require_all_fails_missing_required_asset(tmp_path: Path) -> None:
     assert summary["missing_required"] == [{"name": "required.zip", "expected_bytes": 10}]
 
 
+def test_require_exact_fails_missing_optional_and_extra_assets(tmp_path: Path) -> None:
+    manifest_path = _manifest(tmp_path)
+    assets_path = _assets(
+        tmp_path,
+        [
+            {"name": "required.zip", "size": 10},
+            {"name": "extra.txt", "size": 1},
+        ],
+    )
+
+    summary = check_release_asset_listing.check_release_asset_listing(
+        manifest_path,
+        assets_path,
+        require_exact=True,
+    )
+
+    assert summary["ok"] is False
+    assert summary["exit_code"] == 1
+    assert summary["require_exact"] is True
+    assert summary["missing_required"] == []
+    assert summary["missing_optional"] == [{"name": "optional.pdf", "expected_bytes": 5}]
+    assert summary["extra_assets"] == [{"name": "extra.txt", "bytes": 1}]
+    assert summary["totals"]["missing_optional"] == 1
+    assert summary["totals"]["extra_assets"] == 1
+
+
+def test_require_exact_fails_missing_required_even_without_require_all(tmp_path: Path) -> None:
+    manifest_path = _manifest(tmp_path)
+    assets_path = _assets(tmp_path, [{"name": "optional.pdf", "size": 5}])
+
+    summary = check_release_asset_listing.check_release_asset_listing(
+        manifest_path,
+        assets_path,
+        require_exact=True,
+    )
+
+    assert summary["ok"] is False
+    assert summary["exit_code"] == 1
+    assert summary["missing_required"] == [{"name": "required.zip", "expected_bytes": 10}]
+
+
 def test_cli_json_outputs_machine_readable_summary(tmp_path: Path, capsys) -> None:
     manifest_path = _manifest(tmp_path)
     assets_path = _assets(tmp_path, [{"name": "required.zip", "size": 10}])
@@ -154,6 +195,37 @@ def test_cli_json_outputs_machine_readable_summary(tmp_path: Path, capsys) -> No
     assert json.loads(captured.out)["missing_optional"] == [
         {"name": "optional.pdf", "expected_bytes": 5}
     ]
+    assert captured.err == ""
+
+
+def test_cli_require_exact_json_returns_nonzero_for_non_exact_listing(tmp_path: Path, capsys) -> None:
+    manifest_path = _manifest(tmp_path)
+    assets_path = _assets(
+        tmp_path,
+        [
+            {"name": "required.zip", "size": 10},
+            {"name": "extra.txt", "size": 1},
+        ],
+    )
+
+    exit_code = check_release_asset_listing.main(
+        [
+            "--manifest",
+            str(manifest_path),
+            "--assets-json",
+            str(assets_path),
+            "--require-exact",
+            "--json",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert exit_code == 1
+    assert payload["ok"] is False
+    assert payload["require_exact"] is True
+    assert payload["totals"]["missing_optional"] == 1
+    assert payload["totals"]["extra_assets"] == 1
     assert captured.err == ""
 
 

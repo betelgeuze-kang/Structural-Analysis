@@ -88,6 +88,7 @@ def _release_publication_status(
     artifact_root: Path | None,
     tag_ref_present: bool,
     require_all: bool,
+    require_exact: bool,
 ) -> dict[str, Any]:
     if release_assets_json is None:
         return {
@@ -102,6 +103,7 @@ def _release_publication_status(
         artifact_root=artifact_root,
         assets_json=release_assets_json,
         require_all=require_all,
+        require_exact=require_exact,
         tag_ref_present=tag_ref_present,
     )
     return {
@@ -122,6 +124,7 @@ def build_status(
     artifact_root: Path | None = None,
     tag_ref_present: bool = False,
     require_all: bool = True,
+    require_exact: bool = True,
     reports: dict[str, Path] | None = None,
 ) -> dict[str, Any]:
     report_paths = reports or DEFAULT_REPORTS
@@ -131,6 +134,7 @@ def build_status(
         artifact_root=artifact_root,
         tag_ref_present=tag_ref_present,
         require_all=require_all,
+        require_exact=require_exact,
     )
     midas_exact = _gate_status("P0-2 MIDAS exact roundtrip", report_paths["p0_2_midas_exact_roundtrip"])
     load_combination = _gate_status("P0-3 KDS load combination", report_paths["p0_3_kds_load_combination"])

@@ -4,6 +4,7 @@ from pathlib import Path
 
 
 WORKFLOW = Path(__file__).resolve().parent.parent / ".github" / "workflows" / "release-publish.yml"
+WORKFLOWS_DIR = WORKFLOW.parent
 
 
 def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
@@ -15,6 +16,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
         "Build fresh publication candidate",
         "Publish manifest-listed release assets",
         "Verify published release closure",
+        "Write publication failure report",
         "Upload publication evidence",
         "Promote verified manifest",
     ]
@@ -26,6 +28,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "--replace-existing" in text
     assert "scripts/check_release_p0_closure.py" in text
     assert "scripts/check_p0_closure_status.py" in text
+    assert text.count("--require-exact") >= 2
     assert '--manifest "$CANDIDATE_MANIFEST"' in text
     assert '--release-assets-json "$RELEASE_ASSETS_JSON"' in text
     assert '--artifact-root "$RELEASE_ROOT"' in text
@@ -54,3 +57,38 @@ def test_release_publish_workflow_reuses_checked_in_gate_evidence_and_uploads_fa
     assert "--no-reuse-existing-if-present" not in text
     assert "Nightly release gate summary" in text
     assert "implementation/phase1/release/nightly_release_gate_report.json" in text
+    assert "structural-release-publication-report.json" in text
+    assert "structural-release-publication-report.md" in text
+    assert "release-publication-report" in text
+    assert '"failure_report_written": True' in text
+
+
+def test_release_publish_workflow_uploads_evidence_artifact_even_on_failure() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    report_step = text.split("      - name: Write publication failure report", 1)[1].split(
+        "      - name: Upload publication evidence", 1
+    )[0]
+    upload_step = text.split("      - name: Upload publication evidence", 1)[1].split(
+        "      - name: Promote verified manifest", 1
+    )[0]
+
+    assert "if: always()" in report_step
+    assert "--fail-open" not in report_step
+    assert "if: always()" in upload_step
+    assert "uses: actions/upload-artifact@v7" in upload_step
+    assert "${{ runner.temp }}/structural-release-publication-report.json" in upload_step
+    assert "${{ runner.temp }}/structural-release-publication-report.md" in upload_step
+    assert "if-no-files-found: error" in upload_step
+
+
+def test_workflows_use_node24_ready_official_actions() -> None:
+    combined = "\n".join(path.read_text(encoding="utf-8") for path in sorted(WORKFLOWS_DIR.glob("*.yml")))
+
+    assert "actions/checkout@v4" not in combined
+    assert "actions/setup-python@v5" not in combined
+    assert "actions/setup-node@v4" not in combined
+    assert "actions/upload-artifact@v4" not in combined
+    assert "actions/checkout@v6" in combined
+    assert "actions/setup-python@v6" in combined
+    assert "actions/setup-node@v6" in combined
+    assert "actions/upload-artifact@v7" in combined

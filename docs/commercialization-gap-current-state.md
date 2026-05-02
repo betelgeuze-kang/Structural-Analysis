@@ -31,6 +31,15 @@ source boundary와 P0-2~P0-6 core evidence는 닫혔고, release P0-1만 아직 
 - remote safety는 `origin`과 `structural`을 모두 `betelgeuze-kang/Structural-Analysis`로 맞추고, `scripts/check_git_remote_safety.py`로 예전 Monet-wedding target 재유입을 막는다.
 - 운영 절차는 [release publication runbook](release-publication-runbook.md)에서 그대로 따른다.
 
+## 재실행 및 확인 순서
+
+1. `Publish Release Assets` workflow를 GitHub Actions UI에서 다시 실행하거나, `python3 scripts/dispatch_release_publish_workflow.py --dry-run --json` 후 `GITHUB_TOKEN=<token> python3 scripts/dispatch_release_publish_workflow.py --json`로 다시 dispatch한다.
+2. 로그에 `Node20` warning이 보여도 그것만으로 실패로 판단하지 말고, 실제 step exit code와 증빙 artifact를 확인한다.
+3. `Regenerate release viewer artifacts` 단계가 실패하면 로그의 `Nightly release gate summary:` 블록을 열고, `release-publication-evidence` artifact 안의 `implementation/phase1/release/nightly_release_gate_report.json`을 확인한다.
+4. publication이 성공하면 `python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --json --out <p0-status.json> --out-md <p0-status.md> --fail-open`으로 overall P0를 먼저 확인한다.
+5. P0가 closed일 때만 `python3 scripts/check_p1_readiness_status.py --p0-status <p0-status.json> --json --out <p1-readiness-status.json> --out-md <p1-readiness-status.md> --fail-blocked`를 먼저 실행한다.
+6. 그 다음 `python3 scripts/check_p1_benchmark_breadth_status.py --p1-readiness-status <p1-readiness-status.json> --json --out <p1-benchmark-breadth-status.json> --out-md <p1-benchmark-breadth-status.md> --fail-blocked`로 P1 breadth 상태를 확인한다.
+
 ## P1/P2 작업 순서
 
 P0-1이 닫힌 뒤에는 core fidelity를 재작업하지 말고, 이미 닫힌 evidence를 유지하면서 P1/P2 breadth로 넘어간다.
@@ -52,9 +61,9 @@ P0-1이 닫힌 뒤에는 core fidelity를 재작업하지 말고, 이미 닫힌 
 
 1. fresh artifact root를 다시 생성하고, 필요하면 manifest를 갱신한 뒤 GitHub Release object를 만든다.
 2. `scripts/publish_github_release_assets.py`로 manifest asset 정확히 12개를 업로드하고 metadata preflight와 SHA/bytes verification을 통과시켜 release P0-1을 닫는다.
-3. `scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --fail-open`로 candidate manifest 기준 overall P0 closure를 판정한다.
+3. `scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --json --out <p0-status.json> --out-md <p0-status.md> --fail-open`로 candidate manifest 기준 overall P0 closure를 판정한다.
 4. `scripts/check_repo_hygiene.py --strict-source-boundary`와 `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25`를 반복 가능한 gate로 유지한다.
-5. `scripts/check_p1_readiness_status.py --json`와 `scripts/check_p1_benchmark_breadth_status.py --json`로 P1 inputs/benchmark breadth ready와 P0 release blocker를 분리해서 확인한 뒤 P1 breadth로 넘어간다.
+5. `scripts/check_p1_readiness_status.py --p0-status <p0-status.json> --json --out <p1-readiness-status.json> --out-md <p1-readiness-status.md> --fail-blocked`를 먼저 실행하고, 그다음 `scripts/check_p1_benchmark_breadth_status.py --p1-readiness-status <p1-readiness-status.json> --json --out <p1-benchmark-breadth-status.json> --out-md <p1-benchmark-breadth-status.md> --fail-blocked`로 P1 inputs/benchmark breadth ready와 P0 release blocker를 분리해서 확인한 뒤 P1 breadth로 넘어간다.
 
 ## 참고 문서
 

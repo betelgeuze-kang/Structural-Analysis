@@ -67,6 +67,48 @@ def _release_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
     return manifest, artifact_root, assets_json
 
 
+def _non_exact_release_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
+    required_payload = b"release"
+    optional_payload = b"datasheet"
+    artifact_root = tmp_path / "assets"
+    artifact_root.mkdir()
+    (artifact_root / "bundle.zip").write_bytes(required_payload)
+    (artifact_root / "datasheet.pdf").write_bytes(optional_payload)
+    manifest = _write_json(
+        tmp_path / "manifest.json",
+        {
+            "schema_version": "structural_analysis_release_artifacts_manifest.v1",
+            "release_tag": "test-release",
+            "artifacts": [
+                {
+                    "asset_name": "bundle.zip",
+                    "local_path": "implementation/phase1/release/bundle.zip",
+                    "bytes": len(required_payload),
+                    "sha256": _sha256(required_payload),
+                    "required": True,
+                },
+                {
+                    "asset_name": "datasheet.pdf",
+                    "local_path": "implementation/phase1/release/datasheet.pdf",
+                    "bytes": len(optional_payload),
+                    "sha256": _sha256(optional_payload),
+                    "required": False,
+                },
+            ],
+        },
+    )
+    assets_json = _write_json(
+        tmp_path / "assets.json",
+        {
+            "assets": [
+                {"name": "bundle.zip", "size": len(required_payload)},
+                {"name": "extra.txt", "size": 1},
+            ]
+        },
+    )
+    return manifest, artifact_root, assets_json
+
+
 def test_p0_status_reports_core_closed_and_release_open_without_listing(tmp_path: Path) -> None:
     status = check_p0_closure_status.build_status(
         manifest=tmp_path / "missing-release-manifest.json",
@@ -94,6 +136,26 @@ def test_p0_status_closes_when_release_and_core_evidence_pass(tmp_path: Path) ->
     assert status["release_publication_closed"] is True
     assert status["core_evidence_closed"] is True
     assert status["next_action"] == "promote release manifest and proceed to P1/P2 breadth work"
+
+
+def test_p0_status_keeps_release_open_when_listing_is_not_exact(tmp_path: Path) -> None:
+    manifest, artifact_root, assets_json = _non_exact_release_fixture(tmp_path)
+
+    status = check_p0_closure_status.build_status(
+        manifest=manifest,
+        release_assets_json=assets_json,
+        artifact_root=artifact_root,
+        tag_ref_present=True,
+        reports=_reports(tmp_path),
+    )
+
+    asset_listing = status["gates"][0]["details"]["asset_listing"]
+    assert status["p0_closed"] is False
+    assert status["release_publication_closed"] is False
+    assert status["core_evidence_closed"] is True
+    assert asset_listing["require_exact"] is True
+    assert asset_listing["counts"]["missing_optional"] == 1
+    assert asset_listing["counts"]["extra_assets"] == 1
 
 
 def test_cli_writes_markdown_and_can_fail_open(tmp_path: Path, capsys) -> None:

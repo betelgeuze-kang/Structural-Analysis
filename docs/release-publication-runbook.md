@@ -21,6 +21,16 @@ This is a release-publication gap, not a source-boundary gap. P0-2 through P0-6 
 - Do not promote `implementation/phase1/release_artifacts_manifest.json` until the release asset listing and SHA/bytes checks pass.
 - P0-1 must close before P1 breadth work starts.
 
+## Retry Checklist
+
+When a publication run fails, rerun the same publication path instead of changing code:
+
+1. Re-dispatch `Publish Release Assets` from the GitHub Actions UI, or use `python3 scripts/dispatch_release_publish_workflow.py --dry-run --json` followed by `GITHUB_TOKEN=<token> python3 scripts/dispatch_release_publish_workflow.py --json`.
+2. If GitHub shows a `Node20` warning, treat it as a workflow-runtime warning. The publication result is still decided by the step exit code and the release evidence artifact.
+3. If the run fails in `Regenerate release viewer artifacts`, open the log block that starts with `Nightly release gate summary:`. That block prints `reason_code`, `reason`, the first failed step, and the captured `stdout_tail` / `stderr_tail`.
+4. Download the `release-publication-evidence` artifact from the failed run and inspect `implementation/phase1/release/nightly_release_gate_report.json` inside it.
+5. Fix the failed gate, then rerun the workflow with the same inputs. Use `replace_existing=true` only when same-named assets should be replaced, and use `promote_manifest=true` only after the closure checks pass.
+
 ## Path A: GitHub Actions UI
 
 1. Open the `Publish Release Assets` workflow in GitHub Actions and run `workflow_dispatch`.
@@ -92,13 +102,13 @@ python3 scripts/publish_github_release_assets.py --repo <owner/name> --manifest 
 
 ```bash
 python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>
-python3 scripts/check_release_asset_listing.py --manifest <candidate-manifest.json> --assets-json <release-assets.json> --require-all
+python3 scripts/check_release_asset_listing.py --manifest <candidate-manifest.json> --assets-json <release-assets.json> --require-all --require-exact
 ```
 
 7. Close the P0-1 gate:
 
 ```bash
-python3 scripts/check_release_p0_closure.py --manifest <candidate-manifest.json> --assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present true --require-all --fail-unclosed
+python3 scripts/check_release_p0_closure.py --manifest <candidate-manifest.json> --assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present true --require-all --require-exact --fail-unclosed
 ```
 
 8. Confirm overall P0 status:
@@ -109,14 +119,22 @@ python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> 
 
 Note: `check_release_p0_closure.py` expects `--tag-ref-present true`, while `check_p0_closure_status.py` uses `--tag-ref-present` as a flag.
 
+## Post-Success Status Order
+
+After a successful publication rerun, capture the P0 status first and then check P1 in order:
+
+1. Run `python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-release-asset-root> --tag-ref-present --json --out <p0-status.json> --out-md <p0-status.md> --fail-open`.
+2. If that reports closed, run `python3 scripts/check_p1_readiness_status.py --p0-status <p0-status.json> --json --out <p1-readiness-status.json> --out-md <p1-readiness-status.md> --fail-blocked`.
+3. If P1 readiness is unblocked, run `python3 scripts/check_p1_benchmark_breadth_status.py --p1-readiness-status <p1-readiness-status.json> --json --out <p1-benchmark-breadth-status.json> --out-md <p1-benchmark-breadth-status.md> --fail-blocked`.
+
 ## Completion Criteria
 
 P0-1 is closed only when all of these are true:
 
 - `fetch_github_release_assets.py` succeeds for the release tag.
-- `check_release_asset_listing.py --require-all` reports no missing required assets and no size mismatches.
+- `check_release_asset_listing.py --require-all --require-exact` reports no missing required assets, no missing optional assets, no size mismatches, and no extra assets.
 - `verify_release_artifacts_manifest.py --artifact-root <fresh-root> --require-artifacts` reports clean artifact-root SHA/bytes integrity.
-- `check_release_p0_closure.py --tag-ref-present true --require-all --fail-unclosed` reports closed.
+- `check_release_p0_closure.py --tag-ref-present true --require-all --require-exact --fail-unclosed` reports closed.
 - `check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --fail-open` reports overall P0 closed. The `Publish Release Assets` workflow also writes `structural-p0-closure-status.json` and `structural-p0-closure-status.md` into the publication evidence artifact.
 - The release contains exactly the 12 manifest-listed assets and no wildcard-uploaded extras.
 - Only after that may the candidate manifest be promoted and P1 breadth work begin.

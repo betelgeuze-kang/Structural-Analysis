@@ -94,6 +94,7 @@ def check_release_asset_listing(
     assets_json_path: Path,
     *,
     require_all: bool = False,
+    require_exact: bool = False,
 ) -> dict[str, Any]:
     release_tag, manifest_artifacts = _extract_manifest_artifacts(_load_json(manifest_path))
     listed_assets = _extract_assets(_load_json(assets_json_path))
@@ -137,11 +138,16 @@ def check_release_asset_listing(
         for name in sorted(set(listed_assets) - manifest_names)
     ]
 
-    should_fail = bool(size_mismatches) or bool(require_all and missing_required)
+    exact_mismatch = bool(missing_required or missing_optional or extra_assets)
+    should_fail = bool(size_mismatches) or bool(require_all and missing_required) or bool(
+        require_exact and exact_mismatch
+    )
     return {
         "ok": not should_fail,
         "exit_code": 1 if should_fail else 0,
         "release_tag": release_tag,
+        "require_all": require_all,
+        "require_exact": require_exact,
         "matched": matched,
         "missing_required": missing_required,
         "missing_optional": missing_optional,
@@ -202,7 +208,8 @@ def build_parser() -> argparse.ArgumentParser:
             "Compare GitHub Release asset name/size listing metadata against "
             "implementation/phase1/release_artifacts_manifest.json before any large SHA download. "
             "Size mismatches always fail. Missing required assets are warnings by default and "
-            "fail only with --require-all. Optional missing assets never fail."
+            "fail with --require-all. Use --require-exact for the release-publication gate: "
+            "all manifest assets must be present and no extra assets may be listed."
         )
     )
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
@@ -212,6 +219,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--require-all",
         action="store_true",
         help="Fail when any required manifest asset is missing from the release asset listing.",
+    )
+    parser.add_argument(
+        "--require-exact",
+        action="store_true",
+        help=(
+            "Fail unless the listing exactly matches manifest asset names and sizes, "
+            "including optional assets and no extras."
+        ),
     )
     return parser
 
@@ -225,6 +240,7 @@ def main(argv: list[str] | None = None) -> int:
             args.manifest,
             args.assets_json,
             require_all=args.require_all,
+            require_exact=args.require_exact,
         )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         if args.json:

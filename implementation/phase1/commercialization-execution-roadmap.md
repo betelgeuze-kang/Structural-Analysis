@@ -11,7 +11,7 @@
 - Generated drift gate: `Green`
 - Frontend contract: `Green`
 - Targeted pytest smoke: `Green`
-- Release artifact integrity: `Yellow` (source-side manifest checks are green, but P0-1 publication is still open because `structural-analysis-artifacts-2026-04-26` tag/release is not found, local release is stale, and upload plan fails on mismatched/missing assets)
+- Release artifact integrity: `Yellow` (source-side manifest checks are green, but P0-1 publication is still open because the `structural-analysis-artifacts-2026-04-26` Git tag is present while the GitHub Release object/assets are not verified; local release is stale and must not be uploaded directly)
 - Structural analysis commercial trust: `Red`
 - Viewer product polish: `Yellow`
 
@@ -72,7 +72,7 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 개선 내용:
 
 1. source repo/CI에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`로 manifest 구조만 검증하고, 큰 artifact 다운로드는 요구하지 않는다.
-2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all`을 실행한다.
+2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all --require-exact` 명령을 실행한다.
 3. fresh candidate root는 `python3 scripts/build_release_publication_candidate.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --work-dir <private-release-work-dir> --manifest-out <candidate-manifest.json> --write`로 만든다. 이 단계는 private signing key가 work dir에만 남고 flat artifact root에는 upload-safe manifest assets만 남도록 분리한다.
 4. full integrity는 `python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
 5. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`(12 manifest assets)만 업로드한다. Token-backed publication은 `python3 scripts/publish_github_release_assets.py --repo betelgeuze-kang/Structural-Analysis --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --assets-out <release-assets.json>`로 수행한다.
