@@ -1,0 +1,27 @@
+{
+  "schema_version": "source-ci-kds-compliance-overlay.v1",
+  "run_id": "source-ci-kds-compliance-overlay",
+  "generated_at": "2026-05-03T00:00:00+09:00",
+  "source_boundary": {
+    "purpose": "Small checked-in evidence used to rebuild the KDS compliance slice in a clean source checkout.",
+    "canonical_generated_target": "implementation/phase1/release/pbd_review/pbd_review_compliance_slice_report.json",
+    "large_release_policy": "Generated release viewers and full release bundles stay outside Git; this file only preserves the minimum reviewed compliance overlay needed before GitHub Release assets are hydrated."
+  },
+  "summary": {
+    "final_max_drift_pct": 1.9872000000000005,
+    "final_residual_drift_pct": 0.37399104000000005,
+    "feasible_input": true,
+    "blocked": false,
+    "accepted_count": 8,
+    "changed_group_count": 8,
+    "cost_reduction_proxy": 1842000.0
+  },
+  "checks": {
+    "source_ci_overlay": true,
+    "kds_drift_limit_preserved": true,
+    "residual_overlay_preserved": true
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "source-ci KDS compliance overlay is available"
+}

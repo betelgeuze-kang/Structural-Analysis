@@ -25,6 +25,18 @@ def test_ndtha_raises_when_cpu_fallback_disabled(monkeypatch) -> None:
         )
 
 
+def test_nonlinear_bridge_force_cpu_runtime_disables_gpu_probe(monkeypatch) -> None:
+    monkeypatch.setenv("PHASE1_FORCE_CPU_RUNTIME", "1")
+
+    assert nf_bridge._load_gpu_torch() is None
+
+
+def test_track_bridge_force_cpu_runtime_disables_gpu_probe(monkeypatch) -> None:
+    monkeypatch.setenv("PHASE1_FORCE_CPU_RUNTIME", "1")
+
+    assert track_bridge._load_gpu_torch() is None
+
+
 def test_track_and_probe_raise_when_cpu_fallback_disabled(monkeypatch) -> None:
     monkeypatch.setenv("PHASE1_DISABLE_CPU_FALLBACK", "1")
     monkeypatch.setattr(track_bridge, "_load_gpu_torch", lambda: None)

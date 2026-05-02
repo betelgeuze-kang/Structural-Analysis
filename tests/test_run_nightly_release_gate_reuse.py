@@ -145,6 +145,62 @@ def test_run_reusable_can_ignore_script_mtime_and_legacy_missing_out_for_release
     assert "reused checked-in release evidence" in steps[0]["stdout_tail"]
 
 
+def test_run_reusable_blocks_reuse_when_required_artifact_is_missing(tmp_path: Path) -> None:
+    module = _load_module()
+    script_path = tmp_path / "gate.py"
+    report_path = tmp_path / "gate_report.json"
+    sidecar_path = tmp_path / "sidecar.json"
+    script_path.write_text(
+        "\n".join(
+            [
+                "import json",
+                "import sys",
+                "from pathlib import Path",
+                "out = Path(sys.argv[sys.argv.index('--out') + 1])",
+                "sidecar = Path(sys.argv[sys.argv.index('--sidecar') + 1])",
+                "sidecar.write_text('{}', encoding='utf-8')",
+                "out.write_text(json.dumps({'contract_pass': True, 'inputs': {'out': str(out), 'sidecar': str(sidecar)}}), encoding='utf-8')",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    report_path.write_text(
+        json.dumps(
+            {
+                "contract_pass": True,
+                "inputs": {
+                    "out": str(report_path),
+                    "sidecar": str(sidecar_path),
+                },
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    report_stat = report_path.stat()
+    os.utime(script_path, (report_stat.st_mtime - 10, report_stat.st_mtime - 10))
+    cmd = [sys.executable, str(script_path), "--out", str(report_path), "--sidecar", str(sidecar_path)]
+    steps: list[dict] = []
+    module.DRY_RUN = False
+    module.REUSE_EXISTING_IF_PRESENT = True
+
+    ok = module._run_reusable(
+        "gate",
+        cmd,
+        report_path,
+        steps,
+        required_artifact_paths=[sidecar_path],
+    )
+
+    assert ok is True
+    assert sidecar_path.exists()
+    assert steps
+    assert steps[0]["reused_existing"] is False
+    assert steps[0]["reuse_blocked_missing_artifacts"] == [str(sidecar_path)]
+
+
 def test_run_reusable_recovers_from_nonzero_exit_when_valid_report_was_written(tmp_path: Path) -> None:
     module = _load_module()
     script_path = tmp_path / "flaky_gate.py"

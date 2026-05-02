@@ -26,6 +26,9 @@ This is a release-publication gap, not a source-boundary gap. P0-2 through P0-6 
 - `implementation/phase1/release/nightly_release_gate_report.json` is the canonical nightly heavy report for P0 publication runs.
 - `Nightly release gate summary:` is the triage contract for `Regenerate release viewer artifacts`; treat its `reason_code`, `reason`, first failed step, and captured tails as authoritative.
 - The `release-publication-evidence` artifact must include the nightly heavy report together with the candidate manifest, release asset listing, upload plan, and closure status.
+- KDS/frontend compliance must not depend on stale repo-local `implementation/phase1/release/**` files. The nightly gate rebuilds `pbd_review_package_report.json` from checked-in NDTHA evidence and rebuilds `pbd_review_compliance_slice_report.json` from the small source evidence under `implementation/phase1/release_evidence/kds/` before running the KDS gate.
+- Reused reports that publish sidecar evidence must verify those sidecars exist. For example, `commercial_csv_gate_report.json` is not reusable for release publication unless `implementation/phase1/member_force_soft_accept_report.json` has also been materialized in the same checkout.
+- GPU-only solver HIP e2e evidence is not regenerated on CPU-required GitHub runners. Those runners materialize `implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json`; refreshing that evidence remains a GPU-capable validation task.
 
 ## GitHub Release Asset Hydrate Flow
 

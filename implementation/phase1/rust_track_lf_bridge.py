@@ -137,6 +137,13 @@ def _runtime_telemetry(*, array_bytes: int, kernel_count: int = 0) -> dict[str, 
 
 
 def _load_gpu_torch():
+    if str(os.environ.get("PHASE1_FORCE_CPU_RUNTIME", "")).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }:
+        return None
     try:
         import torch  # type: ignore
     except Exception:
@@ -260,17 +267,17 @@ def solve_track_point_load(cfg: RustTrackConfig, *, keep_device_artifacts: bool 
             b = float(cfg.length_m) - a
             ei = float(cfg.bending_stiffness_n_m2)
             p = float(cfg.point_force_n)
-            l = float(cfg.length_m)
+            span_l = float(cfg.length_m)
             shear_k = max(float(cfg.shear_stiffness_n), 1.0)
 
-            left = p * b * x * (l * l - b * b - x * x) / max(6.0 * l * ei, 1e-12)
-            xr = l - x
-            right = p * a * xr * (l * l - a * a - xr * xr) / max(6.0 * l * ei, 1e-12)
+            left = p * b * x * (span_l * span_l - b * b - x * x) / max(6.0 * span_l * ei, 1e-12)
+            xr = span_l - x
+            right = p * a * xr * (span_l * span_l - a * a - xr * xr) / max(6.0 * span_l * ei, 1e-12)
             w = torch.where(x <= a, left, right)
 
             if _theory_code(cfg.theory) == 1:
-                left_shear = p * b * x / max(l * shear_k, 1e-12)
-                right_shear = p * a * xr / max(l * shear_k, 1e-12)
+                left_shear = p * b * x / max(span_l * shear_k, 1e-12)
+                right_shear = p * a * xr / max(span_l * shear_k, 1e-12)
                 w = w + torch.where(x <= a, left_shear, right_shear)
 
             th = torch.zeros_like(w)

@@ -198,6 +198,13 @@ def _as_f64(arr: np.ndarray | list[float]) -> np.ndarray:
 
 
 def _load_gpu_torch():
+    if str(os.environ.get("PHASE1_FORCE_CPU_RUNTIME", "")).strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }:
+        return None
     try:
         import torch  # type: ignore
     except Exception:

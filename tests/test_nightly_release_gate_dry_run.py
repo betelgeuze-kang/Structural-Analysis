@@ -112,10 +112,27 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert "--code-check-report implementation/phase1/release/kds_compliance/code_check_report.json" in str(
         kds_step.get("command", "")
     )
+    pbd_step = next(step for step in steps if step.get("step") == "pbd_review_package")
+    assert "--no-run-ndtha" in str(pbd_step.get("command", ""))
+    assert "--ndtha-report implementation/phase1/nonlinear_ndtha_stress_report.pbd7.json" in str(
+        pbd_step.get("command", "")
+    )
+    pbd_slice_step = next(step for step in steps if step.get("step") == "pbd_compliance_slice")
+    assert "implementation/phase1/release_evidence/kds/design_optimization_solver_loop_long_report.json" in str(
+        pbd_slice_step.get("command", "")
+    )
     wind_step = next(step for step in steps if step.get("step") == "wind_benchmark_gate")
     assert "--allow-cpu-required" in str(wind_step.get("command", ""))
     ssi_step = next(step for step in steps if step.get("step") == "ssi_boundary_gate")
     assert "--allow-cpu-required" in str(ssi_step.get("command", ""))
+    solver_hip_step = next(step for step in steps if step.get("step") == "solver_hip_e2e_contract")
+    assert "materialize-evidence" in str(solver_hip_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json" in str(
+        solver_hip_step.get("command", "")
+    )
+    scaleout_step = next(step for step in steps if step.get("step") == "scaleout_io_profile")
+    assert "--allow-cpu-required" in str(scaleout_step.get("command", ""))
+    assert "--gpu-strict" not in str(scaleout_step.get("command", ""))
     assert "surface_interaction_benchmark_gate" in step_names
     assert "solver_breadth_gate" in step_names
     assert "contact_readiness_gate" in step_names
@@ -172,6 +189,8 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert "structural_optimization_viewer" in step_names
     assert "optimized_drawing_review" in step_names
     assert "release_registry_gate" in step_names
+    assert step_names.index("pbd_review_package") < step_names.index("pbd_compliance_slice")
+    assert step_names.index("pbd_compliance_slice") < step_names.index("kds_compliance_gate")
     assert step_names.index("global_authority_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("hardest_external_10case_kickoff_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("midas_mgt_conversion_gate") < step_names.index("midas_kds_geometry_bridge_backfill")

@@ -27,23 +27,36 @@ try:
     from implementation.phase1.ui_design_tokens import build_signal_desk_light_css
 except ImportError:  # pragma: no cover - direct script execution fallback
     from ui_design_tokens import build_signal_desk_light_css
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import numpy as np
 
-from implementation.phase1.chart_theme import (
-    ACCENT,
-    DANGER,
-    MUTED,
-    SUCCESS,
-    WARNING,
-    add_badge,
-    add_figure_header,
-    apply_analysis_axis_style,
-    configure_analysis_chart_defaults,
-    empty_state_figure,
-    save_analysis_figure,
-    scale_series,
-)
+try:
+    from implementation.phase1.chart_theme import (
+        ACCENT,
+        DANGER,
+        MUTED,
+        SUCCESS,
+        WARNING,
+        add_badge,
+        add_figure_header,
+        apply_analysis_axis_style,
+        configure_analysis_chart_defaults,
+        save_analysis_figure,
+        scale_series,
+    )
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from chart_theme import (
+        ACCENT,
+        DANGER,
+        MUTED,
+        SUCCESS,
+        WARNING,
+        add_badge,
+        add_figure_header,
+        apply_analysis_axis_style,
+        configure_analysis_chart_defaults,
+        save_analysis_figure,
+        scale_series,
+    )
 
 
 def _load_json(path: Path) -> dict:

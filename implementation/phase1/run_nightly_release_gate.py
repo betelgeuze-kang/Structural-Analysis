@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -45,10 +46,13 @@ REASONS = {
     "ERR_WIND_BENCHMARK_GATE": "wind benchmark gate failed",
     "ERR_SSI_BOUNDARY_GATE": "ssi boundary gate failed",
     "ERR_DAMPER_VALIDATION_GATE": "damper validation gate failed",
+    "ERR_PBD_REVIEW_PACKAGE": "pbd review package generation failed",
+    "ERR_PBD_COMPLIANCE_SLICE": "pbd compliance slice generation failed",
     "ERR_KDS_COMPLIANCE_GATE": "kds/frontend compliance gate failed",
     "ERR_CONSTRUCTION_SEQUENCE_GATE": "construction sequence gate failed",
     "ERR_FLEXIBLE_DIAPHRAGM_GATE": "flexible diaphragm gate failed",
     "ERR_REPRO_VERSION_LOCK_GATE": "reproducibility/version-lock gate failed",
+    "ERR_SOLVER_HIP_E2E_EVIDENCE": "solver hip e2e source evidence materialization failed",
     "ERR_RELEASE_REGISTRY_GATE": "signed release registry gate failed",
     "ERR_PERFORMANCE_PROFILING_GATE": "performance profiling gate failed",
     "ERR_RC_BENCHMARK_LOCK_GATE": "rc benchmark-lock gate failed",
@@ -163,6 +167,64 @@ def _record_deferred_step(
             "missing_paths": [str(path) for path in missing_paths],
         }
     )
+
+
+def _materialize_checked_in_evidence(
+    step: str,
+    *,
+    source: str | Path,
+    destination: str | Path,
+    steps: list[dict],
+    reason: str,
+) -> bool:
+    source_path = Path(source)
+    destination_path = Path(destination)
+    command = f"materialize-evidence {shlex.quote(str(source_path))} {shlex.quote(str(destination_path))}"
+    if DRY_RUN:
+        steps.append(
+            {
+                "step": step,
+                "seconds": 0.0,
+                "return_code": 0,
+                "command": command,
+                "stdout_tail": f"dry-run: {reason}",
+                "stderr_tail": "",
+                "dry_run": True,
+                "source_evidence": str(source_path),
+                "destination": str(destination_path),
+            }
+        )
+        return True
+    t0 = time.time()
+    try:
+        if not source_path.is_file():
+            raise FileNotFoundError(str(source_path))
+        payload = _load_json(source_path)
+        if not bool(payload.get("contract_pass", False)) or str(payload.get("reason_code", "")) != "PASS":
+            raise RuntimeError(f"source evidence is not PASS: {source_path}")
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, destination_path)
+        stdout_tail = f"materialized checked-in evidence: {source_path} -> {destination_path}\n{reason}"
+        return_code = 0
+        stderr_tail = ""
+    except Exception as exc:
+        stdout_tail = ""
+        stderr_tail = str(exc)
+        return_code = 1
+    steps.append(
+        {
+            "step": step,
+            "seconds": float(time.time() - t0),
+            "return_code": int(return_code),
+            "command": command,
+            "stdout_tail": stdout_tail[-2000:],
+            "stderr_tail": stderr_tail[-2000:],
+            "source_evidence": str(source_path),
+            "destination": str(destination_path),
+            "materialized_checked_in_evidence": bool(return_code == 0),
+        }
+    )
+    return return_code == 0
 
 
 def _load_json(path: str | Path) -> dict:
@@ -374,16 +436,22 @@ def _run_reusable(
     check_dependency_mtime: bool = True,
     check_script_mtime: bool = True,
     reuse_note: str = "",
+    required_artifact_paths: Iterable[str | Path] = (),
 ) -> bool:
     if DRY_RUN or not REUSE_EXISTING_IF_PRESENT:
         return _run(step, cmd, steps)
     report_path = Path(report_path)
+    missing_required_artifacts = [
+        str(path)
+        for path in required_artifact_paths
+        if not Path(path).exists()
+    ]
     if _report_matches_command_inputs(
         report_path,
         cmd,
         check_dependency_mtime=check_dependency_mtime,
         check_script_mtime=check_script_mtime,
-    ):
+    ) and not missing_required_artifacts:
         steps.append(
             {
                 "step": step,
@@ -396,6 +464,7 @@ def _run_reusable(
                 "report_path": str(report_path),
                 "reuse_dependency_mtime_checked": bool(check_dependency_mtime),
                 "reuse_script_mtime_checked": bool(check_script_mtime),
+                "required_artifact_paths": [str(path) for path in required_artifact_paths],
             }
         )
         return True
@@ -405,12 +474,20 @@ def _run_reusable(
         steps[-1]["report_path"] = str(report_path)
         steps[-1]["reuse_dependency_mtime_checked"] = bool(check_dependency_mtime)
         steps[-1]["reuse_script_mtime_checked"] = bool(check_script_mtime)
+        steps[-1]["required_artifact_paths"] = [str(path) for path in required_artifact_paths]
+        if missing_required_artifacts:
+            steps[-1]["reuse_blocked_missing_artifacts"] = missing_required_artifacts
+    missing_required_artifacts_after_run = [
+        str(path)
+        for path in required_artifact_paths
+        if not Path(path).exists()
+    ]
     if not ok and _report_matches_command_inputs(
         report_path,
         cmd,
         check_dependency_mtime=check_dependency_mtime,
         check_script_mtime=check_script_mtime,
-    ):
+    ) and not missing_required_artifacts_after_run:
         if steps:
             steps[-1]["report_recovered_success"] = True
             steps[-1]["stdout_tail"] = (
@@ -1433,6 +1510,7 @@ def _build_payload(
             "damper_catalog": str(args.damper_catalog),
             "rc_benchmark_cases": str(args.rc_benchmark_cases),
             "version_lock_manifest": str(args.version_lock_manifest),
+            "solver_hip_e2e_source_evidence": str(args.solver_hip_e2e_source_evidence),
             "skip_promotion": bool(args.skip_promotion),
             "skip_archive": bool(args.skip_archive),
             "dry_run": bool(args.dry_run),
@@ -1445,6 +1523,8 @@ def _build_payload(
             "committee_summary_report": str(args.committee_summary_report),
             "committee_package_report": str(args.committee_package_report),
             "pbd_review_package_report": str(args.pbd_review_package_report),
+            "pbd_review_ndtha_report": str(args.pbd_review_ndtha_report),
+            "pbd_compliance_overlay_report": str(args.pbd_compliance_overlay_report),
             "code_check_report": str(args.code_check_report),
             "design_opt_dataset_report": str(args.design_opt_dataset_report),
             "design_opt_dataset_npz": str(args.design_opt_dataset_npz),
@@ -1850,6 +1930,10 @@ def main() -> None:
     p.add_argument("--release-registry-signature", default="implementation/phase1/release/signing/release_registry.signature.b64")
     p.add_argument("--performance-profiling-report", default="implementation/phase1/performance_profiling_gate_report.json")
     p.add_argument("--solver-hip-e2e-report", default="implementation/phase1/solver_hip_e2e_contract_report.json")
+    p.add_argument(
+        "--solver-hip-e2e-source-evidence",
+        default="implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+    )
     p.add_argument("--solver-truthfulness-report", default="implementation/phase1/solver_truthfulness_gate_report.json")
     p.add_argument(
         "--hardest-external-10case-kickoff-report",
@@ -1888,6 +1972,14 @@ def main() -> None:
     p.add_argument(
         "--pbd-review-package-report",
         default="implementation/phase1/release/pbd_review/pbd_review_package_report.json",
+    )
+    p.add_argument(
+        "--pbd-review-ndtha-report",
+        default="implementation/phase1/nonlinear_ndtha_stress_report.pbd7.json",
+    )
+    p.add_argument(
+        "--pbd-compliance-overlay-report",
+        default="implementation/phase1/release_evidence/kds/design_optimization_solver_loop_long_report.json",
     )
     p.add_argument(
         "--structural-optimization-viewer-dir",
@@ -2168,6 +2260,8 @@ def main() -> None:
         args.pbd_hinge_refresh_artifact = "implementation/phase1/pbd_hinge_refresh_artifact.json"
     RUN_ENV_OVERRIDES = {}
     REUSE_EXISTING_IF_PRESENT = bool(args.reuse_existing_if_present)
+    if bool(args.allow_cpu_required):
+        RUN_ENV_OVERRIDES["PHASE1_FORCE_CPU_RUNTIME"] = "1"
     if bool(args.gpu_strict) and not bool(args.allow_cpu_required):
         RUN_ENV_OVERRIDES["PHASE1_DISABLE_CPU_FALLBACK"] = "1"
         RUN_ENV_OVERRIDES["PHASE1_GPU_PREPROCESS"] = "1"
@@ -2216,6 +2310,7 @@ def main() -> None:
             if bool(args.allow_cpu_required)
             else ""
         ),
+        required_artifact_paths=["implementation/phase1/member_force_soft_accept_report.json"],
     ):
         reason_code = "ERR_COMMERCIAL_CSV_GATE"
 
@@ -2469,13 +2564,56 @@ def main() -> None:
     if reason_code == "PASS" and not _run_reusable("damper_validation_gate", cmd_damper, args.damper_validation_report, steps):
         reason_code = "ERR_DAMPER_VALIDATION_GATE"
 
+    pbd_review_dir = Path(args.pbd_review_package_report).parent
+    pbd_compliance_slice_report = pbd_review_dir / "pbd_review_compliance_slice_report.json"
+    cmd_pbd_review_package = [
+        sys.executable,
+        "implementation/phase1/generate_pbd_review_package.py",
+        "--no-run-ndtha",
+        "--ndtha-report",
+        str(args.pbd_review_ndtha_report),
+        "--dynamic-time-history-report",
+        "implementation/phase1/dynamic_time_history_report.json",
+        "--out-dir",
+        str(pbd_review_dir),
+    ]
+    if reason_code == "PASS" and not _run_reusable(
+        "pbd_review_package",
+        cmd_pbd_review_package,
+        args.pbd_review_package_report,
+        steps,
+        check_dependency_mtime=False,
+        reuse_note="reused source-hydrated PBD review evidence for release viewer regeneration",
+    ):
+        reason_code = "ERR_PBD_REVIEW_PACKAGE"
+
+    cmd_pbd_compliance_slice = [
+        sys.executable,
+        "implementation/phase1/generate_pbd_compliance_slice.py",
+        "--pbd-review-package",
+        str(args.pbd_review_package_report),
+        "--design-optimization-report",
+        str(args.pbd_compliance_overlay_report),
+        "--out",
+        str(pbd_compliance_slice_report),
+    ]
+    if reason_code == "PASS" and not _run_reusable(
+        "pbd_compliance_slice",
+        cmd_pbd_compliance_slice,
+        pbd_compliance_slice_report,
+        steps,
+        check_dependency_mtime=False,
+        reuse_note="reused PBD compliance slice for KDS/frontend compliance gate",
+    ):
+        reason_code = "ERR_PBD_COMPLIANCE_SLICE"
+
     cmd_kds = [
         sys.executable,
         "implementation/phase1/generate_kds_compliance_report.py",
         "--pbd-review-package",
-        "implementation/phase1/release/pbd_review/pbd_review_package_report.json",
+        str(args.pbd_review_package_report),
         "--pbd-compliance-slice-report",
-        "implementation/phase1/release/pbd_review/pbd_review_compliance_slice_report.json",
+        str(pbd_compliance_slice_report),
         "--commercial-csv-gate",
         str(args.commercial_csv_gate),
         "--member-force-gate",
@@ -2581,7 +2719,17 @@ def main() -> None:
         "--out",
         str(args.solver_hip_e2e_report),
     ]
-    _run_reusable("solver_hip_e2e_contract", cmd_solver_hip, args.solver_hip_e2e_report, steps)
+    if bool(args.allow_cpu_required):
+        if reason_code == "PASS" and not _materialize_checked_in_evidence(
+            "solver_hip_e2e_contract",
+            source=args.solver_hip_e2e_source_evidence,
+            destination=args.solver_hip_e2e_report,
+            steps=steps,
+            reason="CPU-required release runner consumes checked-in GPU evidence instead of regenerating GPU-only e2e proof",
+        ):
+            reason_code = "ERR_SOLVER_HIP_E2E_EVIDENCE"
+    else:
+        _run_reusable("solver_hip_e2e_contract", cmd_solver_hip, args.solver_hip_e2e_report, steps)
 
     cmd_solver_truthfulness = [
         sys.executable,
@@ -3218,7 +3366,7 @@ def main() -> None:
         "--out",
         str(args.scaleout_io),
     ]
-    if bool(args.gpu_strict):
+    if bool(args.gpu_strict) and not bool(args.allow_cpu_required):
         cmd_scaleout.append("--gpu-strict")
     if bool(args.allow_cpu_required):
         cmd_scaleout.append("--allow-cpu-required")
