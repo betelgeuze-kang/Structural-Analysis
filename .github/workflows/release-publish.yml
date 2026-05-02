@@ -23,6 +23,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
   group: release-publish-${{ github.ref }}
   cancel-in-progress: false
@@ -77,10 +80,39 @@ jobs:
 
       - name: Regenerate release viewer artifacts
         run: |
+          set +e
           python implementation/phase1/run_nightly_release_gate.py \
             --skip-promotion \
-            --skip-archive \
-            --no-reuse-existing-if-present
+            --skip-archive
+          nightly_status=$?
+          if [ -f implementation/phase1/release/nightly_release_gate_report.json ]; then
+            echo "Nightly release gate summary:"
+            python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = Path("implementation/phase1/release/nightly_release_gate_report.json")
+          payload = json.loads(report.read_text(encoding="utf-8"))
+          print(f"reason_code={payload.get('reason_code', '')}")
+          print(f"reason={payload.get('reason', '')}")
+          for step in payload.get("steps", []):
+              if int(step.get("return_code", 0) or 0) != 0:
+                  print(f"failed_step={step.get('step', '')}")
+                  print(f"return_code={step.get('return_code', '')}")
+                  stdout_tail = str(step.get("stdout_tail", "") or "").strip()
+                  stderr_tail = str(step.get("stderr_tail", "") or "").strip()
+                  if stdout_tail:
+                      print("stdout_tail:")
+                      print(stdout_tail)
+                  if stderr_tail:
+                      print("stderr_tail:")
+                      print(stderr_tail)
+                  break
+          PY
+          fi
+          if [ "$nightly_status" -ne 0 ]; then
+            exit "$nightly_status"
+          fi
           python implementation/phase1/export_optimized_drawing_expert_review_pdf.py \
             --expert-review-metadata-json implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json \
             --out-pdf implementation/phase1/release/visualization/optimized_drawing_expert_review.pdf
@@ -153,6 +185,7 @@ jobs:
             ${{ runner.temp }}/structural-release-upload-plan.json
             ${{ runner.temp }}/structural-p0-closure-status.json
             ${{ runner.temp }}/structural-p0-closure-status.md
+            implementation/phase1/release/nightly_release_gate_report.json
           if-no-files-found: ignore
 
       - name: Promote verified manifest

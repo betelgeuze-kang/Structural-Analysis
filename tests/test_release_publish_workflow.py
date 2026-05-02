@@ -40,3 +40,17 @@ def test_release_publish_workflow_does_not_use_runner_context_in_job_env() -> No
 
     assert "runner.temp" not in job_env
     assert "RUNNER_TEMP" in text
+
+
+def test_release_publish_workflow_opts_into_node24_actions_runtime() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    assert 'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"' in text
+
+
+def test_release_publish_workflow_reuses_checked_in_gate_evidence_and_uploads_failure_report() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "--no-reuse-existing-if-present" not in text
+    assert "Nightly release gate summary" in text
+    assert "implementation/phase1/release/nightly_release_gate_report.json" in text
