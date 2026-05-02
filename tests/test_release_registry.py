@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -10,6 +11,12 @@ from implementation.phase1.generate_signed_release_registry import _mgt_export_p
 
 FIXTURE_PANEL_DIR = Path(__file__).resolve().parent / "fixtures" / "panel_zone_3d"
 FIXTURE_FOUNDATION_DIR = Path(__file__).resolve().parent / "fixtures" / "foundation_realish"
+
+
+def _env_without_pythonpath() -> dict[str, str]:
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    return env
 
 
 def _load_json(path: Path) -> dict:
@@ -116,6 +123,23 @@ def _run_panel_fixture_provenance(tmp_path: Path) -> dict:
     )
     assert proc.returncode == 0, proc.stderr
     return _load_json(clash_report)
+
+
+def test_panel_zone_clash_report_script_bootstraps_repo_root_without_pythonpath() -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "implementation/phase1/generate_panel_zone_clash_report.py",
+            "--help",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=_env_without_pythonpath(),
+    )
+
+    assert proc.returncode == 0, proc.stderr
+    assert "--panel-zone-clash-artifact" in proc.stdout
 
 
 def _run_foundation_fixture_provenance(tmp_path: Path) -> dict:

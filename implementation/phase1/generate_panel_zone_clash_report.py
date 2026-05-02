@@ -7,8 +7,13 @@ import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+import sys
 
-from implementation.phase1.panel_zone_external_validation import (
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from implementation.phase1.panel_zone_external_validation import (  # noqa: E402
     build_panel_zone_external_validation_local_closure_surface,
     build_panel_zone_external_validation_provenance_surface,
     build_panel_zone_external_validation_required_evidence,
