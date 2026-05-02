@@ -16,6 +16,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
         "Build fresh publication candidate",
         "Publish manifest-listed release assets",
         "Verify published release closure",
+        "Hydrate published release assets",
         "Write publication failure report",
         "Upload publication evidence",
         "Promote verified manifest",
@@ -34,6 +35,8 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert '--artifact-root "$RELEASE_ROOT"' in text
     assert "structural-p0-closure-status.json" in text
     assert "structural-p0-closure-status.md" in text
+    assert "structural-release-hydrated-assets" in text
+    assert "scripts/hydrate_github_release_assets.py" in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text
 
 

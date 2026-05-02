@@ -41,6 +41,7 @@ jobs:
           {
             echo "RELEASE_ROOT=$RUNNER_TEMP/structural-release-upload-root"
             echo "RELEASE_WORK=$RUNNER_TEMP/structural-release-private-work"
+            echo "HYDRATED_RELEASE_ROOT=$RUNNER_TEMP/structural-release-hydrated-assets"
             echo "CANDIDATE_MANIFEST=$RUNNER_TEMP/structural-release-candidate-manifest.json"
             echo "RELEASE_ASSETS_JSON=$RUNNER_TEMP/structural-release-assets.json"
             echo "RELEASE_UPLOAD_PLAN=$RUNNER_TEMP/structural-release-upload-plan.json"
@@ -180,6 +181,17 @@ jobs:
             --out-md "$P0_STATUS_MD" \
             --fail-open
 
+      - name: Hydrate published release assets
+        run: |
+          python scripts/hydrate_github_release_assets.py \
+            --repo "${{ github.repository }}" \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --artifact-root "$HYDRATED_RELEASE_ROOT" \
+            --write
+          python scripts/verify_release_artifacts_manifest.py \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --artifact-root "$HYDRATED_RELEASE_ROOT"
+
       - name: Write publication failure report
         if: always()
         env:
@@ -239,6 +251,7 @@ jobs:
                   "candidate_manifest": file_status(os.environ["CANDIDATE_MANIFEST"]),
                   "release_assets_json": file_status(os.environ["RELEASE_ASSETS_JSON"]),
                   "release_upload_plan": file_status(os.environ["RELEASE_UPLOAD_PLAN"]),
+                  "hydrated_release_root": file_status(os.environ["HYDRATED_RELEASE_ROOT"]),
                   "p0_status_json": file_status(p0_status_json),
                   "p0_status_md": file_status(os.environ["P0_STATUS_MD"]),
                   "nightly_release_gate_report": file_status(nightly_report),

@@ -32,12 +32,17 @@ This is a release-publication gap, not a source-boundary gap. P0-2 through P0-6 
 
 ## GitHub Release Asset Hydrate Flow
 
-"Hydrate" here means materializing a fresh flat artifact root from release-side metadata and a private work dir, not copying the stale repo-local `implementation/phase1/release/` tree.
+"Hydrate" here has two explicit meanings:
+
+- Before publication, materialize a fresh flat upload root from regenerated release outputs and a private work dir, not from the stale repo-local `implementation/phase1/release/` tree.
+- After publication, download the published GitHub Release assets into a separate hydrated root with `hydrate_github_release_assets.py` and verify SHA/bytes against the candidate manifest.
 
 1. Fetch release asset metadata with `fetch_github_release_assets.py` so the hydrate run starts from the published release state.
 2. Build a fresh candidate manifest and flat root with `build_release_publication_candidate.py`.
 3. Verify the hydrated root with `verify_release_artifacts_manifest.py --require-artifacts` and the upload plan with `prepare_release_upload_plan.py`.
-4. Publish only manifest-listed files, then re-fetch the release assets and close P0 with `check_release_asset_listing.py`, `check_release_p0_closure.py`, and `check_p0_closure_status.py`.
+4. Publish only manifest-listed files, then re-fetch the release assets and check metadata with `check_release_asset_listing.py`.
+5. Download the published assets with `hydrate_github_release_assets.py --write` into a separate root and run `verify_release_artifacts_manifest.py --artifact-root <hydrated-root>` so the release is byte-verified from GitHub, not just locally generated.
+6. Close P0 with `check_release_p0_closure.py` and `check_p0_closure_status.py`.
 
 ## Retry Checklist
 
@@ -54,7 +59,7 @@ When a publication run fails, rerun the same publication path instead of changin
 1. Open the `Publish Release Assets` workflow in GitHub Actions and run `workflow_dispatch`.
 2. Leave `replace_existing` as `false` unless the release already has same-named assets that you intend to replace.
 3. Set `promote_manifest=true` only when you want the workflow to commit the verified candidate manifest after its built-in closure checks pass.
-4. The workflow already performs source-boundary preflight, fresh candidate generation, upload-plan validation, publication, `fetch_github_release_assets.py`, `check_release_asset_listing.py`, `check_release_p0_closure.py`, `check_p0_closure_status.py`, evidence upload, and optional manifest promotion.
+4. The workflow already performs source-boundary preflight, fresh candidate generation, upload-plan validation, publication, `fetch_github_release_assets.py`, `check_release_asset_listing.py`, `check_release_p0_closure.py`, `check_p0_closure_status.py`, published-asset hydration with SHA/bytes verification, evidence upload, and optional manifest promotion.
 5. Download the publication evidence artifact after the workflow finishes; it contains the candidate manifest, release asset listing, upload plan, and overall P0 closure status.
 6. If the workflow fails, stop at the first failed gate and fix that gate before rerunning.
 
@@ -123,13 +128,20 @@ python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <releas
 python3 scripts/check_release_asset_listing.py --manifest <candidate-manifest.json> --assets-json <release-assets.json> --require-all --require-exact
 ```
 
-7. Close the P0-1 gate:
+7. Hydrate the published GitHub Release assets and verify release-side SHA/bytes:
+
+```bash
+python3 scripts/hydrate_github_release_assets.py --repo <owner/name> --manifest <candidate-manifest.json> --artifact-root <hydrated-release-root> --write
+python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manifest.json> --artifact-root <hydrated-release-root>
+```
+
+8. Close the P0-1 gate:
 
 ```bash
 python3 scripts/check_release_p0_closure.py --manifest <candidate-manifest.json> --assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present true --require-all --require-exact --fail-unclosed
 ```
 
-8. Confirm overall P0 status:
+9. Confirm overall P0 status:
 
 ```bash
 python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --fail-open
@@ -152,6 +164,7 @@ P0-1 is closed only when all of these are true:
 - `fetch_github_release_assets.py` succeeds for the release tag.
 - `check_release_asset_listing.py --require-all --require-exact` reports no missing required assets, no missing optional assets, no size mismatches, and no extra assets.
 - `verify_release_artifacts_manifest.py --artifact-root <fresh-root> --require-artifacts` reports clean artifact-root SHA/bytes integrity.
+- `hydrate_github_release_assets.py --write` can download the published GitHub Release assets into a separate root, and `verify_release_artifacts_manifest.py --artifact-root <hydrated-root>` reports clean SHA/bytes integrity against the downloaded bytes.
 - `check_release_p0_closure.py --tag-ref-present true --require-all --require-exact --fail-unclosed` reports closed.
 - `check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --fail-open` reports overall P0 closed. The `Publish Release Assets` workflow also writes `structural-p0-closure-status.json` and `structural-p0-closure-status.md` into the publication evidence artifact.
 - The release contains exactly the 12 manifest-listed assets and no wildcard-uploaded extras.
