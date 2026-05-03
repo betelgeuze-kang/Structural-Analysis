@@ -1512,6 +1512,7 @@ def _build_payload(
             "version_lock_manifest": str(args.version_lock_manifest),
             "commercial_csv_source_evidence": str(args.commercial_csv_source_evidence),
             "member_force_soft_accept_source_evidence": str(args.member_force_soft_accept_source_evidence),
+            "commercial_readiness_source_evidence": str(args.commercial_readiness_source_evidence),
             "solver_hip_e2e_source_evidence": str(args.solver_hip_e2e_source_evidence),
             "ssi_boundary_source_evidence": str(args.ssi_boundary_source_evidence),
             "gpu_bottleneck_audit_source_evidence": str(args.gpu_bottleneck_audit_source_evidence),
@@ -1836,6 +1837,10 @@ def main() -> None:
     p.add_argument("--hip-kernel-smoke-report", default="implementation/phase1/hip_kernel_smoke_report.json")
     p.add_argument("--phase3-report", default="implementation/phase1/phase3_megastructure_pipeline_report.json")
     p.add_argument("--commercial-readiness-report", default="implementation/phase1/commercial_readiness_report.json")
+    p.add_argument(
+        "--commercial-readiness-source-evidence",
+        default="implementation/phase1/release_evidence/commercial/commercial_readiness_report.json",
+    )
     p.add_argument("--solver-breadth-report", default="implementation/phase1/solver_breadth_report.json")
     p.add_argument("--contact-readiness-report", default="implementation/phase1/contact_readiness_report.json")
     p.add_argument("--material-constitutive-report", default="implementation/phase1/material_constitutive_gate_report.json")
@@ -3027,8 +3032,30 @@ def main() -> None:
         cmd_commercial_readiness.append("--require-gpu-strict")
     else:
         cmd_commercial_readiness.append("--no-require-gpu-strict")
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "commercial_readiness_gate_evidence",
+            source=args.commercial_readiness_source_evidence,
+            destination=args.commercial_readiness_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in commercial-readiness evidence "
+                "instead of rerunning torch-dependent benchmark training during publication."
+            ),
+        ):
+            reason_code = "ERR_COMMERCIAL_READINESS"
     if reason_code == "PASS" and not _run_reusable(
-        "commercial_readiness_gate", cmd_commercial_readiness, args.commercial_readiness_report, steps
+        "commercial_readiness_gate",
+        cmd_commercial_readiness,
+        args.commercial_readiness_report,
+        steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused checked-in commercial-readiness evidence on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
     ):
         reason_code = "ERR_COMMERCIAL_READINESS"
 

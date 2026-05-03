@@ -222,6 +222,14 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert step_names.index("pbd_compliance_slice") < step_names.index("kds_compliance_gate")
     assert step_names.index("commercial_csv_gate_evidence") < step_names.index("member_force_soft_accept_evidence")
     assert step_names.index("member_force_soft_accept_evidence") < step_names.index("commercial_csv_gate")
+    commercial_readiness_evidence_step = next(
+        step for step in steps if step.get("step") == "commercial_readiness_gate_evidence"
+    )
+    assert "materialize-evidence" in str(commercial_readiness_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json" in str(
+        commercial_readiness_evidence_step.get("command", "")
+    )
+    assert step_names.index("commercial_readiness_gate_evidence") < step_names.index("commercial_readiness_gate")
     assert step_names.index("global_authority_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("hardest_external_10case_kickoff_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("midas_mgt_conversion_gate") < step_names.index("midas_kds_geometry_bridge_backfill")
