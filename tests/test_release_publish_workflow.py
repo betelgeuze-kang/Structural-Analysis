@@ -61,6 +61,9 @@ def test_release_publish_workflow_reuses_checked_in_gate_evidence_and_uploads_fa
     assert "--allow-cpu-required" in text
     assert "--no-enable-hip-kernel-smoke" in text
     assert "Nightly release gate summary" in text
+    assert "failed_step_report_path" in text
+    assert "failed_step_report_failed_checks" in text
+    assert "failed_step_report_child_step" in text
     assert "implementation/phase1/release/nightly_release_gate_report.json" in text
     assert "structural-release-publication-report.json" in text
     assert "structural-release-publication-report.md" in text

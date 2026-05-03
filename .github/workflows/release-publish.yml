@@ -100,10 +100,43 @@ jobs:
           payload = json.loads(report.read_text(encoding="utf-8"))
           print(f"reason_code={payload.get('reason_code', '')}")
           print(f"reason={payload.get('reason', '')}")
+
+          def print_step_report(step):
+              report_path = Path(str(step.get("report_path", "") or ""))
+              if not report_path.is_file():
+                  return
+              try:
+                  step_payload = json.loads(report_path.read_text(encoding="utf-8"))
+              except Exception as exc:
+                  print(f"failed_step_report_load_error={exc}")
+                  return
+              print(f"failed_step_report_path={report_path}")
+              print(f"failed_step_report_reason_code={step_payload.get('reason_code', '')}")
+              print(f"failed_step_report_reason={step_payload.get('reason', '')}")
+              checks = step_payload.get("checks")
+              if isinstance(checks, dict):
+                  failed_checks = [str(key) for key, value in checks.items() if not bool(value)]
+                  if failed_checks:
+                      print("failed_step_report_failed_checks=" + ",".join(failed_checks))
+              for child in step_payload.get("steps", []):
+                  if int(child.get("return_code", 0) or 0) != 0:
+                      print(f"failed_step_report_child_step={child.get('step', '')}")
+                      print(f"failed_step_report_child_return_code={child.get('return_code', '')}")
+                      child_stdout = str(child.get("stdout_tail", "") or "").strip()
+                      child_stderr = str(child.get("stderr_tail", "") or "").strip()
+                      if child_stdout:
+                          print("failed_step_report_child_stdout_tail:")
+                          print(child_stdout)
+                      if child_stderr:
+                          print("failed_step_report_child_stderr_tail:")
+                          print(child_stderr)
+                      break
+
           for step in payload.get("steps", []):
               if int(step.get("return_code", 0) or 0) != 0:
                   print(f"failed_step={step.get('step', '')}")
                   print(f"return_code={step.get('return_code', '')}")
+                  print_step_report(step)
                   stdout_tail = str(step.get("stdout_tail", "") or "").strip()
                   stderr_tail = str(step.get("stderr_tail", "") or "").strip()
                   if stdout_tail:
