@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-contact-readiness-gate",
+  "generated_at": "2026-05-02T11:52:59.972194+00:00",
+  "inputs": {
+    "vehicle_model_schema": "implementation/phase1/vehicle_model_schema.json",
+    "vti_report": "implementation/phase1/vti_coupled_solver_report.json",
+    "whitebox_report": "implementation/phase1/whitebox_validation_report.md",
+    "roadmap": "implementation/phase1/commercial_tool_replacement_roadmap.md",
+    "min_converged_ratio": 0.95,
+    "min_contact_force_n": 1e-06,
+    "max_whitebox_contact_rel_err": 0.05,
+    "out": "implementation/phase1/contact_readiness_report.json"
+  },
+  "checks": {
+    "contact_schema_pass": true,
+    "contact_solver_evidence_pass": true,
+    "contact_whitebox_evidence_pass": true,
+    "structural_contact_gap_tracked": false
+  },
+  "coverage_scope": "wheel_rail_hertzian_contact_only",
+  "coverage_grade": "bounded_contact_ready",
+  "schema_evidence": {
+    "contact_model_present": true,
+    "hertz_contact_present": true,
+    "hertzian_enum_present": true,
+    "schema_pass": true,
+    "path": "implementation/phase1/vehicle_model_schema.json",
+    "sha256": "b2ba5d666147f7ab9830ad5954c73692a24ea31d93ba768dfb6235e0f6ba5990"
+  },
+  "solver_evidence": {
+    "finite_response": true,
+    "coupling_pass": true,
+    "adaptive_newton_pass": true,
+    "contact_force_pass": true,
+    "hertz_stiffness_pass": true,
+    "converged_ratio": 0.99375,
+    "max_contact_force_n": 6.0689703127065044,
+    "hertz_k_n_m_3_2": 1050000000.0,
+    "solver_pass": true,
+    "path": "implementation/phase1/vti_coupled_solver_report.json",
+    "sha256": "7b627c7be08742c548f2ab5609f8e476fa20d57a4be73f54041744e1d30c5332"
+  },
+  "whitebox_evidence": {
+    "row_present": true,
+    "domain": "track",
+    "case": "track_moving_load_span",
+    "metric": "contact_force_kN",
+    "lf_rel_err": 0.0324,
+    "gnn_rel_err": 0.0048,
+    "improved": true,
+    "rel_err_pass": true,
+    "whitebox_pass": true,
+    "path": "implementation/phase1/whitebox_validation_report.md",
+    "sha256": "bb24fc3440d318b889eee8dc3edceeb7bcc2af0270543aef9496c12419ee5ade"
+  },
+  "roadmap_gap_state": {
+    "tracked_gap": false,
+    "markers": {
+      "broad_contact_gap": false,
+      "special_link_gap": false,
+      "event_sequence_target": false
+    },
+    "path": "implementation/phase1/commercial_tool_replacement_roadmap.md",
+    "sha256": "73300f1b53667e5634e25d0543c2b05ed260d67aa9a2de77fd61a4a14c2f7fd1"
+  },
+  "limitations": [
+    "This gate only certifies bounded wheel-rail Hertzian contact evidence.",
+    "Broader structural contact/gap/uplift/compression-only workflows remain a tracked roadmap gap."
+  ],
+  "summary_line": "Contact readiness: PASS | scope=wheel_rail_hertzian_contact_only | schema=yes | solver=yes(ratio=0.994,max_force=6.06897N) | whitebox=yes(err=0.0048) | structural_contact=undocumented",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "bounded wheel-rail contact evidence is present; broader structural contact remains a tracked gap",
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/contact_readiness_gate/20260502T115259Z/artifact_archive_manifest.json"
+}

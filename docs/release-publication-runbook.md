@@ -30,6 +30,7 @@ This is a release-publication gap, not a source-boundary gap. P0-2 through P0-6 
 - Reused reports that publish sidecar evidence must verify those sidecars exist. For example, `commercial_csv_gate_report.json` is not reusable for release publication unless `implementation/phase1/member_force_soft_accept_report.json` has also been materialized in the same checkout.
 - CPU-required release runners materialize both `implementation/phase1/release_evidence/commercial/commercial_csv_gate_report.json` and `implementation/phase1/release_evidence/commercial/member_force_soft_accept_report.json` before the commercial CSV gate. This keeps the publication workflow on checked-in evidence instead of re-running the commercial CSV benchmark slice in a clean checkout.
 - GPU-only solver HIP e2e evidence is not regenerated on CPU-required GitHub runners. Those runners materialize `implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json`; refreshing that evidence remains a GPU-capable validation task.
+- Performance profiling inputs that are not reliable to regenerate on GitHub-hosted CPU runners are hydrated from `implementation/phase1/release_evidence/performance/` before the profiling gate. This covers GPU bottleneck audit, SSI boundary, contact readiness, and foundation/soil-link evidence so clean checkouts do not fail with `ERR_BASELINE` from missing baseline reports.
 
 ## GitHub Release Asset Hydrate Flow
 

@@ -1,0 +1,395 @@
+{
+  "reason_code": "PASS",
+  "contract_pass": true,
+  "resolved_bottlenecks": [
+    {
+      "name": "wind_preprocess_gpu_strict",
+      "status": "resolved",
+      "evidence": {
+        "preprocess_backend": "rocm_torch_full",
+        "section_family_coverage_min": 0.96,
+        "material_model_types": [
+          "steel_elastic_plastic"
+        ]
+      }
+    },
+    {
+      "name": "ssi_preprocess_gpu_strict",
+      "status": "resolved",
+      "evidence": {
+        "preprocess_backend": "rocm_torch_full",
+        "nonlinear_ratio_span": 0.282342448413099,
+        "residual_settle_case_count": 4
+      }
+    },
+    {
+      "name": "solver_mainloop_gpu_residency",
+      "status": "resolved",
+      "evidence": {
+        "contract_pass": true,
+        "all_main_loops_gpu_pass": true,
+        "no_cpu_fallback_pass": true,
+        "device_residency_ratio_min": 1.0
+      }
+    },
+    {
+      "name": "frame_bridge_binary_first_postprocess",
+      "status": "resolved",
+      "evidence": {
+        "response_storage": "npz_external+inline_summary",
+        "response_binary_consumer": "dlpack_zero_copy_primary"
+      }
+    },
+    {
+      "name": "ndtha_bridge_binary_first_postprocess",
+      "status": "resolved",
+      "evidence": {
+        "response_storage": "npz_external+inline_head",
+        "response_binary_consumer": "dlpack_zero_copy_primary"
+      }
+    },
+    {
+      "name": "ssi_bridge_binary_first_postprocess",
+      "status": "resolved",
+      "evidence": {
+        "response_storage": "npz_external+inline_summary",
+        "response_binary_consumer": "dlpack_zero_copy_primary",
+        "device_artifact_consumer": "dlpack_zero_copy"
+      }
+    },
+    {
+      "name": "track_bridge_binary_first_postprocess",
+      "status": "resolved",
+      "evidence": {
+        "response_storage": "dlpack_external+inline_summary",
+        "response_binary_consumer": "dlpack_zero_copy_primary"
+      }
+    },
+    {
+      "name": "track_irregularity_gpu_preprocess",
+      "status": "resolved",
+      "evidence": {
+        "preprocess_backend": "rocm_torch_full",
+        "node_count": 4001,
+        "peak_abs_m": 0.0003696087616409231
+      }
+    },
+    {
+      "name": "pbd_binary_first_postprocess",
+      "status": "resolved",
+      "evidence": {
+        "response_storage": "npz_external+inline_summary",
+        "response_binary_consumer": "npz_external_primary",
+        "case_metrics_npz_case_count": 7
+      }
+    },
+    {
+      "name": "authority_binary_first_postprocess",
+      "status": "resolved",
+      "evidence": {
+        "response_storage": "npz_external+inline_summary",
+        "response_binary_consumer": "npz_external_primary",
+        "case_metrics_npz_case_count": 8
+      }
+    }
+  ],
+  "remaining_unavoidable_host_ops": [
+    {
+      "name": "csv_artifact_ingest",
+      "kind": "io",
+      "count": 5,
+      "files": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/run_wind_time_history_gate.py",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/run_ssi_boundary_gate.py",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/run_damper_validation_gate.py",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/generate_pbd_review_package.py",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/compute_global_authority_metrics.py"
+      ],
+      "impact": "Input and report artifacts still enter through host I/O. This is expected unless artifact formats are redesigned end-to-end."
+    },
+    {
+      "name": "report_generation_json_io",
+      "kind": "reporting",
+      "count": 17,
+      "files": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/run_damper_validation_gate.py",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/generate_committee_review_package.py",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/prepare_external_validation_submission.py",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/generate_pbd_review_package.py",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/compute_global_authority_metrics.py"
+      ],
+      "impact": "Committee and external submission packaging are host-side by design."
+    }
+  ],
+  "remaining_optimizable_host_ops": [],
+  "strict_gpu_guards": {
+    "solver_hip_e2e_contract_pass": true,
+    "wind_preprocess_backend": "rocm_torch_full",
+    "ssi_preprocess_backend": "rocm_torch_full",
+    "frame_binary_consumer": "dlpack_zero_copy_primary",
+    "ndtha_binary_consumer": "dlpack_zero_copy_primary",
+    "ssi_binary_consumer": "dlpack_zero_copy_primary",
+    "track_binary_consumer": "dlpack_zero_copy_primary",
+    "pbd_binary_consumer": "npz_external_primary",
+    "authority_binary_consumer": "npz_external_primary",
+    "nightly_env_requires": [
+      "PHASE1_DISABLE_CPU_FALLBACK=1",
+      "PHASE1_GPU_PREPROCESS=1",
+      "PHASE1_GPU_PREPROCESS_STRICT=1"
+    ]
+  },
+  "optimization_architecture_limits": [
+    {
+      "name": "global_label_broadcast",
+      "status": "resolved",
+      "issue": "Project-global drift and residual labels must not be broadcast directly onto every member row.",
+      "evidence": {
+        "drift_envelope_max_pct": 9.200000000000003,
+        "residual_drift_pct_max_abs": 1.9136000000000006,
+        "global_state_split": true
+      },
+      "required_fix": "Keep member-local demand tensors separate from project-global state tensors and reference them by project or case id."
+    },
+    {
+      "name": "narrow_action_space",
+      "status": "narrowing",
+      "issue": "Optimization action space is wider than before, but still not broad enough to cover full commercial redesign workflows.",
+      "evidence": {
+        "action_space_count": 6
+      },
+      "required_fix": "Extend legal action masks across beam, wall, slab thickness, rebar detailing, and connection redesign actions."
+    },
+    {
+      "name": "simple_objective",
+      "status": "narrowing",
+      "issue": "The objective is no longer pure DCR-plus-cost, but it is still short of a full commercial multi-objective surface.",
+      "evidence": {
+        "includes_congestion_detailing_terms": true,
+        "includes_robustness_margin_terms": true,
+        "includes_multi_hazard_terms": true
+      },
+      "required_fix": "Calibrate congestion, detailing complexity, robustness margin, and multi-hazard stability terms against production design decisions."
+    }
+  ],
+  "source_scan": {
+    "runtime_gpu_critical": {
+      "files": [
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/rust_nonlinear_frame_bridge.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 1,
+            "csv_ingest": 0,
+            "json_io": 0,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 1,
+            "strict_gpu_preprocess": 0
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/rust_track_lf_bridge.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 1,
+            "csv_ingest": 0,
+            "json_io": 0,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 1,
+            "strict_gpu_preprocess": 0
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/run_wind_time_history_gate.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 1,
+            "json_io": 4,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 0,
+            "strict_gpu_preprocess": 1
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/run_ssi_boundary_gate.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 1,
+            "json_io": 4,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 0,
+            "strict_gpu_preprocess": 1
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/run_nightly_release_gate.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 0,
+            "json_io": 1,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 1,
+            "strict_gpu_preprocess": 1
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/run_phase3_megastructure_pipeline.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 0,
+            "json_io": 6,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 1,
+            "strict_gpu_preprocess": 1
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/run_phase1_topk_pipeline.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 0,
+            "json_io": 4,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 1,
+            "strict_gpu_preprocess": 1
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/run_p0_core_gap_pipeline.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 0,
+            "json_io": 4,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 1,
+            "strict_gpu_preprocess": 1
+          }
+        }
+      ],
+      "totals": {
+        "host_result_serialization": 0,
+        "dlpack_export": 2,
+        "csv_ingest": 2,
+        "json_io": 23,
+        "numpy_fft": 0,
+        "strict_disable_cpu_fallback": 6,
+        "strict_gpu_preprocess": 6
+      }
+    },
+    "runtime_host_orchestration": {
+      "files": [
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/run_damper_validation_gate.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 1,
+            "json_io": 4,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 0,
+            "strict_gpu_preprocess": 0
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/generate_committee_review_package.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 0,
+            "json_io": 3,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 0,
+            "strict_gpu_preprocess": 0
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/prepare_external_validation_submission.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 0,
+            "json_io": 4,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 0,
+            "strict_gpu_preprocess": 0
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/generate_pbd_review_package.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 1,
+            "json_io": 5,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 0,
+            "strict_gpu_preprocess": 0
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/compute_global_authority_metrics.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 1,
+            "json_io": 1,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 0,
+            "strict_gpu_preprocess": 0
+          }
+        }
+      ],
+      "totals": {
+        "host_result_serialization": 0,
+        "dlpack_export": 0,
+        "csv_ingest": 3,
+        "json_io": 17,
+        "numpy_fft": 0,
+        "strict_disable_cpu_fallback": 0,
+        "strict_gpu_preprocess": 0
+      }
+    },
+    "supporting_cpu_numeric": {
+      "files": [
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/soil_tunnel_ssi.py",
+          "counts": {
+            "host_result_serialization": 0,
+            "dlpack_export": 0,
+            "csv_ingest": 0,
+            "json_io": 1,
+            "numpy_fft": 0,
+            "strict_disable_cpu_fallback": 0,
+            "strict_gpu_preprocess": 0
+          }
+        },
+        {
+          "path": "/home/betelgeuze/건축구조분석/implementation/phase1/track_irregularity_generator.py",
+          "counts": {
+            "host_result_serialization": 2,
+            "dlpack_export": 0,
+            "csv_ingest": 0,
+            "json_io": 3,
+            "numpy_fft": 2,
+            "strict_disable_cpu_fallback": 0,
+            "strict_gpu_preprocess": 1
+          }
+        }
+      ],
+      "totals": {
+        "host_result_serialization": 2,
+        "dlpack_export": 0,
+        "csv_ingest": 0,
+        "json_io": 4,
+        "numpy_fft": 2,
+        "strict_disable_cpu_fallback": 0,
+        "strict_gpu_preprocess": 1
+      }
+    }
+  }
+}

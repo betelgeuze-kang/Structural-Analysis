@@ -1513,6 +1513,10 @@ def _build_payload(
             "commercial_csv_source_evidence": str(args.commercial_csv_source_evidence),
             "member_force_soft_accept_source_evidence": str(args.member_force_soft_accept_source_evidence),
             "solver_hip_e2e_source_evidence": str(args.solver_hip_e2e_source_evidence),
+            "ssi_boundary_source_evidence": str(args.ssi_boundary_source_evidence),
+            "gpu_bottleneck_audit_source_evidence": str(args.gpu_bottleneck_audit_source_evidence),
+            "contact_readiness_source_evidence": str(args.contact_readiness_source_evidence),
+            "foundation_soil_link_source_evidence": str(args.foundation_soil_link_source_evidence),
             "skip_promotion": bool(args.skip_promotion),
             "skip_archive": bool(args.skip_archive),
             "dry_run": bool(args.dry_run),
@@ -1943,6 +1947,22 @@ def main() -> None:
     p.add_argument(
         "--solver-hip-e2e-source-evidence",
         default="implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+    )
+    p.add_argument(
+        "--ssi-boundary-source-evidence",
+        default="implementation/phase1/release_evidence/performance/ssi_boundary_gate_report.json",
+    )
+    p.add_argument(
+        "--gpu-bottleneck-audit-source-evidence",
+        default="implementation/phase1/release_evidence/performance/gpu_bottleneck_audit_report.json",
+    )
+    p.add_argument(
+        "--contact-readiness-source-evidence",
+        default="implementation/phase1/release_evidence/performance/contact_readiness_report.json",
+    )
+    p.add_argument(
+        "--foundation-soil-link-source-evidence",
+        default="implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json",
     )
     p.add_argument("--solver-truthfulness-report", default="implementation/phase1/solver_truthfulness_gate_report.json")
     p.add_argument(
@@ -2578,12 +2598,25 @@ def main() -> None:
     ]
     if bool(args.allow_cpu_required):
         cmd_ssi.append("--allow-cpu-required")
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "ssi_boundary_gate_evidence",
+            source=args.ssi_boundary_source_evidence,
+            destination=args.ssi_boundary_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in SSI boundary evidence "
+                "instead of regenerating this heavy nonlinear boundary slice during publication."
+            ),
+        ):
+            reason_code = "ERR_SSI_BOUNDARY_GATE"
     if reason_code == "PASS" and not _run_reusable(
         "ssi_boundary_gate",
         cmd_ssi,
         args.ssi_boundary_report,
         steps,
         check_dependency_mtime=False,
+        check_script_mtime=not bool(args.allow_cpu_required),
         reuse_note="reused heavy SSI boundary artifact with matching command inputs",
     ):
         reason_code = "ERR_SSI_BOUNDARY_GATE"
@@ -2806,10 +2839,57 @@ def main() -> None:
         "--out",
         str(args.contact_readiness_report),
     ]
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "contact_readiness_gate_evidence",
+            source=args.contact_readiness_source_evidence,
+            destination=args.contact_readiness_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in contact-readiness evidence "
+                "so performance profiling has a complete SSI/contact baseline in a clean checkout."
+            ),
+        ):
+            reason_code = "ERR_CONTACT_READINESS"
     if reason_code == "PASS" and not _run_reusable(
-        "contact_readiness_gate", cmd_contact_readiness, args.contact_readiness_report, steps
+        "contact_readiness_gate",
+        cmd_contact_readiness,
+        args.contact_readiness_report,
+        steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused checked-in contact-readiness evidence on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
     ):
         reason_code = "ERR_CONTACT_READINESS"
+
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "gpu_bottleneck_audit_evidence",
+            source=args.gpu_bottleneck_audit_source_evidence,
+            destination="implementation/phase1/gpu_bottleneck_audit_report.json",
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in GPU bottleneck audit evidence "
+                "instead of requiring a GPU audit refresh during publication."
+            ),
+        ):
+            reason_code = "ERR_PERFORMANCE_PROFILING_GATE"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "foundation_soil_link_evidence",
+            source=args.foundation_soil_link_source_evidence,
+            destination=args.foundation_soil_link_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in foundation/soil-link evidence "
+                "before performance profiling and downstream surface-interaction gates."
+            ),
+        ):
+            reason_code = "ERR_PERFORMANCE_PROFILING_GATE"
 
     cmd_performance_profiling = [
         sys.executable,
@@ -2848,6 +2928,8 @@ def main() -> None:
         cmd_performance_profiling,
         args.performance_profiling_report,
         steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
     ):
         reason_code = "ERR_PERFORMANCE_PROFILING_GATE"
 
