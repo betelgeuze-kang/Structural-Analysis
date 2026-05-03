@@ -11,15 +11,15 @@
     {
       "asset_name": "project_package.zip",
       "local_path": "implementation/phase1/release/project_package.zip",
-      "sha256": "99526e79e2669c07483f35d09e5d4800ca2ab9b8760b07a092db6e5a4a9b2937",
-      "bytes": 3141647,
+      "sha256": "4fd0922dae0cd6228520e05c387fd772ac49d15c7955683791580ec86511d788",
+      "bytes": 3141652,
       "required": true,
       "description": "Regenerated project package with package_sha256 aligned to project_registry.json."
     },
     {
       "asset_name": "project_registry.json",
       "local_path": "implementation/phase1/release/project_registry.json",
-      "sha256": "ed7a4b519c5285d98a787a0b817cb94d0f92037d874da1ddb073760aaaf9db5f",
+      "sha256": "907593a95e64a8cca516a280c267bcd05e9cf669c2ebebff63b6300b1f1bca1a",
       "bytes": 13779,
       "required": true,
       "description": "Signed project registry metadata."
@@ -27,7 +27,7 @@
     {
       "asset_name": "project_registry.signature.b64",
       "local_path": "implementation/phase1/release/signing/project_registry.signature.b64",
-      "sha256": "31c4e43fcc25908e16a6ef73340a1d73724926347a6748cad338df355fc3a86b",
+      "sha256": "7850f5f62fe3a73625033f2e90cb0720386e88ed0233846248bc8966dd2e208e",
       "bytes": 89,
       "required": true,
       "description": "Base64 Ed25519 signature for the project registry body."
@@ -35,7 +35,7 @@
     {
       "asset_name": "project_registry_ed25519.pub.pem",
       "local_path": "implementation/phase1/release/signing/project_registry_ed25519.pub.pem",
-      "sha256": "1f915e8e7251b7824dd117d0092f6253b7b12a658e988bac3f1b7bbeb8d9cff6",
+      "sha256": "f898107a2601a7a41deddedaa28f186433ba38ab47b6cfb10022a4b8ad0209d9",
       "bytes": 113,
       "required": true,
       "description": "Public verification key for project registry signatures."
@@ -43,7 +43,7 @@
     {
       "asset_name": "release_registry.json",
       "local_path": "implementation/phase1/release/release_registry.json",
-      "sha256": "0d5c17d319050cb28682923cea592d6d6bf49762b0cd62c64ac8a08f7cb6d2c5",
+      "sha256": "b525c69a4159e899cb77dacffe149d8ce24ab5f1f6d342a943c1a960512565ce",
       "bytes": 60824,
       "required": true,
       "description": "Signed release registry used as project registry input."
@@ -51,7 +51,7 @@
     {
       "asset_name": "release_registry.signature.b64",
       "local_path": "implementation/phase1/release/signing/release_registry.signature.b64",
-      "sha256": "07da2f9d0d63aee28f5b95491e5f9b9559719112401dbcf5c4dd1c6fe12f7d6d",
+      "sha256": "139e336cfaec4395896ed79485727f0890060cfadd6d1088a1c10b54fee0b985",
       "bytes": 89,
       "required": true,
       "description": "Base64 Ed25519 signature for the release registry body."
@@ -59,7 +59,7 @@
     {
       "asset_name": "release_registry_ed25519.pub.pem",
       "local_path": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
-      "sha256": "23958056992ae12a46389731c58325425ef1b743a5a49deac1cd0a8cbbcd64bb",
+      "sha256": "e85672ef811601521f22ed2c560bbb848d9ba117f528abb7042e137c36b2bc3b",
       "bytes": 113,
       "required": true,
       "description": "Public verification key for release registry signatures."
@@ -83,7 +83,7 @@
     {
       "asset_name": "optimized_drawing_review_summary.json",
       "local_path": "implementation/phase1/release/visualization/optimized_drawing_review_summary.json",
-      "sha256": "91808eb1627509e37a4da7f594093eaa2fd656d16b3b0f26e84cdf5e58e18845",
+      "sha256": "952b6f1f35310d41fc91ba0765fe61fdcfd432de81df22943dcf41c22fac8b93",
       "bytes": 18416104,
       "required": true,
       "description": "Generated optimized drawing review summary payload."
@@ -91,7 +91,7 @@
     {
       "asset_name": "optimized_drawing_expert_review.metadata.json",
       "local_path": "implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json",
-      "sha256": "9aebdafdbccc4e389c9702676522cda7254421451989859abe30cb17098d4319",
+      "sha256": "694ae50fbab44ce7b6c751f55ee8063c2cf513361c2ce0d63bad831cba565609",
       "bytes": 1300589,
       "required": true,
       "description": "Generated expert-review metadata sidecar."
