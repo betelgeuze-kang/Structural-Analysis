@@ -255,6 +255,21 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert "implementation/phase1/release_evidence/productization/workflow_productization_gate_report.json" in str(
         workflow_productization_evidence_step.get("command", "")
     )
+    phase3_evidence_step = next(step for step in steps if step.get("step") == "phase3_pipeline_evidence")
+    assert "materialize-evidence" in str(phase3_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/phase3_megastructure_pipeline_report.json" in str(
+        phase3_evidence_step.get("command", "")
+    )
+    nightly_10m_evidence_step = next(step for step in steps if step.get("step") == "nightly_10m_repro_evidence")
+    assert "materialize-evidence" in str(nightly_10m_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/nightly_10m_repro_report.json" in str(
+        nightly_10m_evidence_step.get("command", "")
+    )
+    ndtha_long_evidence_step = next(step for step in steps if step.get("step") == "ndtha_long_profile_evidence")
+    assert "materialize-evidence" in str(ndtha_long_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/ndtha_long_profile_report.json" in str(
+        ndtha_long_evidence_step.get("command", "")
+    )
     hardest_external_evidence_step = next(
         step for step in steps if step.get("step") == "hardest_external_10case_kickoff_gate_evidence"
     )
@@ -419,6 +434,9 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert step_names.index("irregular_top5_execution_manifest") < step_names.index("irregular_structure_collection_gate")
     assert step_names.index("irregular_structure_collection_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("midas_native_roundtrip_gate") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("phase3_pipeline_evidence") < step_names.index("phase3_pipeline_nightly")
+    assert step_names.index("nightly_10m_repro_evidence") < step_names.index("nightly_10m_repro_gate")
+    assert step_names.index("ndtha_long_profile_evidence") < step_names.index("ndtha_long_profile_gate")
     assert step_names.index("general_fe_contact_benchmark_evidence") < step_names.index(
         "surface_interaction_benchmark_evidence"
     )

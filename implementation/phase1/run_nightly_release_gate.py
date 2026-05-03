@@ -1827,13 +1827,16 @@ def _build_payload(
             "rc_benchmark_lock": str(args.rc_benchmark_lock_report),
             "version_lock_manifest": str(args.version_lock_manifest),
             "phase3_pipeline": str(args.phase3_report),
+            "phase3_source_evidence": str(args.phase3_source_evidence),
             "topology_gate": str(args.topology_gate),
             "partitioned_scaleout": str(args.partitioned_scaleout),
             "sync_stress": str(args.sync_stress),
             "noise_convergence": str(args.noise_convergence),
             "scaleout_io": str(args.scaleout_io),
             "nightly_10m_repro": str(args.nightly_10m_repro),
+            "nightly_10m_repro_source_evidence": str(args.nightly_10m_repro_source_evidence),
             "ndtha_long_profile": str(args.ndtha_long_profile),
+            "ndtha_long_profile_source_evidence": str(args.ndtha_long_profile_source_evidence),
             "ci_gate": str(args.ci_report),
             "design_opt_cost_reduction_smoke": str(args.design_opt_cost_smoke_report),
             "design_opt_cost_reduction_smoke_history": str(args.design_opt_cost_smoke_history),
@@ -2002,6 +2005,10 @@ def main() -> None:
     p.add_argument("--mgt-conversion-report", default="implementation/phase1/midas_mgt_conversion_report.json")
     p.add_argument("--hip-kernel-smoke-report", default="implementation/phase1/hip_kernel_smoke_report.json")
     p.add_argument("--phase3-report", default="implementation/phase1/phase3_megastructure_pipeline_report.json")
+    p.add_argument(
+        "--phase3-source-evidence",
+        default="implementation/phase1/release_evidence/productization/phase3_megastructure_pipeline_report.json",
+    )
     p.add_argument("--commercial-readiness-report", default="implementation/phase1/commercial_readiness_report.json")
     p.add_argument(
         "--commercial-readiness-source-evidence",
@@ -2220,7 +2227,15 @@ def main() -> None:
     p.add_argument("--version-lock-manifest", default="implementation/phase1/release/version_lock_manifest.json")
     p.add_argument("--scaleout-io", default="implementation/phase1/scaleout_io_profile_report.json")
     p.add_argument("--nightly-10m-repro", default="implementation/phase1/nightly_10m_repro_report.json")
+    p.add_argument(
+        "--nightly-10m-repro-source-evidence",
+        default="implementation/phase1/release_evidence/productization/nightly_10m_repro_report.json",
+    )
     p.add_argument("--ndtha-long-profile", default="implementation/phase1/ndtha_long_profile_report.json")
+    p.add_argument(
+        "--ndtha-long-profile-source-evidence",
+        default="implementation/phase1/release_evidence/productization/ndtha_long_profile_report.json",
+    )
     p.add_argument("--global-authority-report", default="implementation/phase1/global_authority_gate_report.json")
     p.add_argument("--ci-report", default="implementation/phase1/ci_gate_report.json")
     p.add_argument("--enable-design-opt-cost-smoke", action=argparse.BooleanOptionalAction, default=True)
@@ -4009,12 +4024,25 @@ def main() -> None:
         cmd_phase3.append("--prefer-mgt-for-partition")
     else:
         cmd_phase3.append("--no-prefer-mgt-for-partition")
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "phase3_pipeline_evidence",
+            source=args.phase3_source_evidence,
+            destination=args.phase3_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in phase3 pipeline evidence "
+                "instead of rerunning torch-dependent top-k benchmark training during publication."
+            ),
+        ):
+            reason_code = "ERR_PHASE3_PIPELINE"
     if reason_code == "PASS" and not _run_reusable(
         "phase3_pipeline_nightly",
         cmd_phase3,
         args.phase3_report,
         steps,
         check_dependency_mtime=False,
+        check_script_mtime=not bool(args.allow_cpu_required),
         reuse_note="reused heavy phase3 pipeline artifact with matching command inputs",
     ):
         reason_code = "ERR_PHASE3_PIPELINE"
@@ -4065,12 +4093,25 @@ def main() -> None:
         cmd_repro.append("--no-gpu-strict")
     if bool(args.allow_cpu_required):
         cmd_repro.append("--allow-cpu-required")
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "nightly_10m_repro_evidence",
+            source=args.nightly_10m_repro_source_evidence,
+            destination=args.nightly_10m_repro,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in 10M reproducibility evidence "
+                "instead of rerunning heavy partitioned scale repro during publication."
+            ),
+        ):
+            reason_code = "ERR_NIGHTLY_10M_REPRO"
     if reason_code == "PASS" and not _run_reusable(
         "nightly_10m_repro_gate",
         cmd_repro,
         args.nightly_10m_repro,
         steps,
         check_dependency_mtime=False,
+        check_script_mtime=not bool(args.allow_cpu_required),
         reuse_note="reused heavy nightly 10m repro artifact with matching command inputs",
     ):
         reason_code = "ERR_NIGHTLY_10M_REPRO"
@@ -4096,12 +4137,25 @@ def main() -> None:
             "--out",
             str(args.ndtha_long_profile),
         ]
+        if reason_code == "PASS" and bool(args.allow_cpu_required):
+            if not _materialize_checked_in_evidence(
+                "ndtha_long_profile_evidence",
+                source=args.ndtha_long_profile_source_evidence,
+                destination=args.ndtha_long_profile,
+                steps=steps,
+                reason=(
+                    "CPU-required release runners reuse checked-in NDTHA long-profile evidence "
+                    "instead of rerunning the 10M dynamic profile during publication."
+                ),
+            ):
+                reason_code = "ERR_NDTHA_LONG_PROFILE"
         if reason_code == "PASS" and not _run_reusable(
             "ndtha_long_profile_gate",
             cmd_ndtha_long,
             args.ndtha_long_profile,
             steps,
             check_dependency_mtime=False,
+            check_script_mtime=not bool(args.allow_cpu_required),
             reuse_note="reused heavy NDTHA long-profile artifact with matching command inputs",
         ):
             reason_code = "ERR_NDTHA_LONG_PROFILE"
