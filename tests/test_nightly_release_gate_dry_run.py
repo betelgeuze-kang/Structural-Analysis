@@ -248,6 +248,13 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert "implementation/phase1/release_evidence/midas/load_combination_engine_gate_report.json" in str(
         loadcomb_engine_evidence_step.get("command", "")
     )
+    geometry_bridge_evidence_step = next(
+        step for step in steps if step.get("step") == "midas_kds_geometry_bridge_validation_evidence"
+    )
+    assert "materialize-evidence" in str(geometry_bridge_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/midas/midas_kds_geometry_bridge_validation_report.json" in str(
+        geometry_bridge_evidence_step.get("command", "")
+    )
     workflow_productization_evidence_step = next(
         step for step in steps if step.get("step") == "workflow_productization_gate_evidence"
     )
@@ -429,6 +436,9 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert step_names.index("structural_contact_gate_evidence") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("midas_exact_roundtrip_closure_evidence") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("load_combination_engine_evidence") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("midas_kds_geometry_bridge_validation_evidence") < step_names.index(
+        "phase1_ci_gate_nightly"
+    )
     assert step_names.index("solver_truthfulness_gate") < step_names.index("performance_profiling_gate")
     assert step_names.index("performance_profiling_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("irregular_top5_execution_manifest") < step_names.index("irregular_structure_collection_gate")

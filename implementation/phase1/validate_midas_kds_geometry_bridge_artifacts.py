@@ -932,11 +932,13 @@ def main(argv: list[str] | None = None) -> int:
         "full_section_crosswalk": full_section_crosswalk_metric,
         "full_load_crosswalk": full_load_crosswalk_metric,
     }
+    contract_pass = bool(exact_pass_count == len(summaries) and bool(summaries))
     report = {
         "schema_version": "1.0",
         "run_id": "phase1-validate-midas-kds-geometry-bridge-artifacts",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "contract_pass": bool(exact_pass_count == len(summaries) and bool(summaries)),
+        "contract_pass": contract_pass,
+        "reason_code": "PASS" if contract_pass else "ERR_MIDAS_KDS_GEOMETRY_BRIDGE_FAIL",
         "checks": checks,
         "aggregate": aggregate,
         "exact_review_load_crosswalk_count_total": int(aggregate["exact_review_load_crosswalk"]["count_total"]),

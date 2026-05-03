@@ -121,6 +121,27 @@ def test_p0_status_reports_core_closed_and_release_open_without_listing(tmp_path
     assert status["next_action"] == "run Publish Release Assets workflow or provide release asset listing"
 
 
+def test_p0_status_uses_checked_in_fallbacks_when_generated_reports_are_absent(tmp_path: Path, monkeypatch) -> None:
+    missing_reports = {
+        key: tmp_path / "generated" / f"{key}.json"
+        for key in check_p0_closure_status.DEFAULT_REPORTS
+    }
+    fallback_reports = {
+        key: (_report(tmp_path / "release_evidence" / f"{key}.json", summary_line=f"{key}: fallback PASS"),)
+        for key in check_p0_closure_status.DEFAULT_REPORTS
+    }
+    monkeypatch.setattr(check_p0_closure_status, "DEFAULT_REPORTS", missing_reports)
+    monkeypatch.setattr(check_p0_closure_status, "DEFAULT_REPORT_FALLBACKS", fallback_reports)
+
+    status = check_p0_closure_status.build_status(manifest=tmp_path / "missing-release-manifest.json")
+
+    assert status["core_evidence_closed"] is True
+    geometry_gate = next(gate for gate in status["gates"] if gate["label"] == "P0-4 MIDAS-KDS geometry identity")
+    assert geometry_gate["status"] == "closed"
+    assert geometry_gate["path"].endswith("release_evidence/p0_4_midas_kds_geometry_identity.json")
+    assert geometry_gate["primary_path"].endswith("generated/p0_4_midas_kds_geometry_identity.json")
+
+
 def test_p0_status_closes_when_release_and_core_evidence_pass(tmp_path: Path) -> None:
     manifest, artifact_root, assets_json = _release_fixture(tmp_path)
 

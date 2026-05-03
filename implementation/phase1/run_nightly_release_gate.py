@@ -79,6 +79,7 @@ REASONS = {
     "ERR_COMMERCIAL_READINESS": "commercial readiness gate failed",
     "ERR_PHASE3_PIPELINE": "phase3 nightly pipeline failed",
     "ERR_MIDAS_KDS_GEOMETRY_BRIDGE_BACKFILL": "midas kds geometry bridge metadata backfill failed",
+    "ERR_MIDAS_KDS_GEOMETRY_BRIDGE_EVIDENCE": "midas kds geometry bridge source evidence materialization failed",
     "ERR_SCALEOUT_IO": "scaleout io profile failed",
     "ERR_NIGHTLY_10M_REPRO": "nightly 10m reproducibility gate failed",
     "ERR_NDTHA_LONG_PROFILE": "10m ndtha long profile gate failed",
@@ -1622,6 +1623,10 @@ def _build_payload(
                 args.midas_exact_roundtrip_closure_source_evidence
             ),
             "load_combination_engine_source_evidence": str(args.load_combination_engine_source_evidence),
+            "midas_kds_geometry_bridge_validation_report": str(args.midas_kds_geometry_bridge_validation_report),
+            "midas_kds_geometry_bridge_validation_source_evidence": str(
+                args.midas_kds_geometry_bridge_validation_source_evidence
+            ),
             "midas_kds_row_provenance_export_report": str(args.midas_kds_row_provenance_export_report),
             "midas_kds_row_provenance_export_source_evidence": str(
                 args.midas_kds_row_provenance_export_source_evidence
@@ -2133,6 +2138,14 @@ def main() -> None:
     p.add_argument(
         "--load-combination-engine-source-evidence",
         default="implementation/phase1/release_evidence/midas/load_combination_engine_gate_report.json",
+    )
+    p.add_argument(
+        "--midas-kds-geometry-bridge-validation-report",
+        default="implementation/phase1/midas_kds_geometry_bridge_validation_report.json",
+    )
+    p.add_argument(
+        "--midas-kds-geometry-bridge-validation-source-evidence",
+        default="implementation/phase1/release_evidence/midas/midas_kds_geometry_bridge_validation_report.json",
     )
     p.add_argument(
         "--midas-kds-row-provenance-export-report",
@@ -3810,6 +3823,18 @@ def main() -> None:
             ),
         ):
             reason_code = "ERR_MIDAS_NATIVE_ROUNDTRIP"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "midas_kds_geometry_bridge_validation_evidence",
+            source=args.midas_kds_geometry_bridge_validation_source_evidence,
+            destination=args.midas_kds_geometry_bridge_validation_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in MIDAS-KDS exact geometry bridge "
+                "evidence so P0 closure can be evaluated from a clean checkout."
+            ),
+        ):
+            reason_code = "ERR_MIDAS_KDS_GEOMETRY_BRIDGE_EVIDENCE"
     if reason_code == "PASS" and bool(args.allow_cpu_required):
         if not _materialize_checked_in_evidence(
             "midas_kds_row_provenance_export_evidence",
