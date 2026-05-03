@@ -1,0 +1,4221 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-surface-interaction-benchmark-gate",
+  "generated_at": "2026-05-03T05:44:48.980445+00:00",
+  "inputs": {
+    "flexible_diaphragm_report": "implementation/phase1/flexible_diaphragm_gate_report.json",
+    "substructuring_interface_report": "implementation/phase1/substructuring_interface_report.json",
+    "sync_stress_report": "implementation/phase1/sync_stress_gate_report.json",
+    "foundation_soil_link_gate_report": "implementation/phase1/foundation_soil_link_gate_report.json",
+    "moving_load_integrator_report": "implementation/phase1/moving_load_integrator_report.json",
+    "vti_coupled_solver_report": "implementation/phase1/vti_coupled_solver_report.json",
+    "track_dynamics_dataset_report": "implementation/phase1/track_dynamics_dataset_report.json",
+    "tunnel_dynamics_dataset_report": "implementation/phase1/tunnel_dynamics_dataset_report.json",
+    "panel_zone_clash_report": "implementation/phase1/panel_zone_clash_report.json",
+    "ssi_boundary_report": "implementation/phase1/ssi_boundary_gate_report.json",
+    "soil_tunnel_ssi_report": "implementation/phase1/soil_tunnel_ssi_report.json",
+    "structural_contact_gate_report": "implementation/phase1/structural_contact_gate_report.json",
+    "dynamics_boundary_report": "implementation/phase1/dynamics_boundary_report.json",
+    "moving_load_attention_report": "implementation/phase1/moving_load_attention_report.json",
+    "physics_residual_contract_report": "implementation/phase1/physics_residual_contract_report.json",
+    "phase_correction_assimilation_report": "implementation/phase1/phase_correction_assimilation_report.json",
+    "multiscale_l3_streaming_report": "implementation/phase1/multiscale_l3_streaming_report.json",
+    "phasee_integrated_summary_report": "implementation/phase1/phasee_integrated_summary_report.json",
+    "phasef_resilience_summary_report": "implementation/phase1/phasef_resilience_summary_report.json",
+    "benchmark_cases": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json,implementation/phase1/commercial_benchmark_cases.from_csv.json,implementation/phase1/commercial_benchmark_cases.json,implementation/phase1/commercial_benchmark_cases.atwood_open.json,implementation/phase1/commercial_benchmark_cases.atwood_open.mgt_smoke.json,implementation/phase1/commercial_benchmark_cases.atwood_open.mgt_smoke2.json,implementation/phase1/commercial_benchmark_cases.atwood_open.mgt_smoke3.json,implementation/phase1/commercial_benchmark_cases.atwood_open.pr_recheck.json,implementation/phase1/commercial_benchmark_cases.kw51_railway_bridge.json,implementation/phase1/commercial_benchmark_cases.opstool_nightly.json,implementation/phase1/commercial_benchmark_cases.opstool_pr.json",
+    "out": "implementation/phase1/surface_interaction_benchmark_gate_report.json",
+    "input_sha256": {
+      "flexible_diaphragm_report": "f74b3854b07160ccb36727610fac3dd313bdf524098719c9e514d4c9bca4e2ed",
+      "substructuring_interface_report": "33c2e204ab58bf080fd00f2576893fabe88157c18ccb989c5a6cb569b5575fd3",
+      "sync_stress_report": "9c477b03fbe8f93a0ea50461cd85aabe03a2deec9115f0f1477c7198f8e9e76f",
+      "foundation_soil_link_gate_report": "bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
+      "moving_load_integrator_report": "c9447c168bc9402d060f24890e1c7043e0a2a087ce8fbbab5b9ae8b1021f7496",
+      "vti_coupled_solver_report": "1de0bbf837339bbb3d45dc4d33da3fc90626a710add33e009ad64ce8a61d00c2",
+      "track_dynamics_dataset_report": "999921f8bf8836b05e66cddf6739b0e547aa714a35f625c9bd2056f2eff663dc",
+      "tunnel_dynamics_dataset_report": "84875fbeda30af42b78ee9d9db00b0d2a626cc0e673d814982d2a859d1b1312a",
+      "panel_zone_clash_report": "c402e288fc7f29e08231cc9145233d71c220cb39ea246f4813017348fc2bd77a",
+      "ssi_boundary_report": "b2fa4163270480a6dc52dde3829fa07a03da21b690246075af217d3011b0efb6",
+      "soil_tunnel_ssi_report": "b1abbc822d8e5628afaf9bc8578b84615cd79f3a1768eca0683feb1c8b7d74ca",
+      "structural_contact_gate_report": "98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
+      "dynamics_boundary_report": "d83f773bb20fba147eab242cd362767529d639ec1f1d924b05dd95f7882358de",
+      "moving_load_attention_report": "65959bf1b66a393cda65adcf37d009cc3c3177f3bd71f25adde8c36f4a86fb1e",
+      "physics_residual_contract_report": "d5d29ed7bb8d93a83402d7d944b8a312071796a94bf584488a696250d3032c32",
+      "phase_correction_assimilation_report": "8d2fe7c2c4902b6b6f58dbccae08d433ed7c316192c728e9f1ca7f2573f9295e",
+      "multiscale_l3_streaming_report": "4cb90cbb7bff53aaad9a0095ba574be62fe753bb4875d34b6dacade8b73fe25d",
+      "phasee_integrated_summary_report": "c3a37eddc8ccefb55585c5d11105ad81f80301fc4b7c2409304356eebbc2f5a6",
+      "phasef_resilience_summary_report": "53496808588ef53d5280bbe8aacb0cf4b0b81e86d8105e0addc87edb69ed5929",
+      "benchmark_cases": {
+        "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json": "9b1cd4d90a72e9c696fee8dbdf1c89821519bd27b6df4504ebf2ebc1d65bfa48",
+        "implementation/phase1/commercial_benchmark_cases.from_csv.json": "0a0952473d52eccc69e573c8e725adab0024bc4ffed24787bba82b135dcab367",
+        "implementation/phase1/commercial_benchmark_cases.json": "9cf3e2efd2cfa485e4370edd464ee8f2f5941ae5c717a8b33a7cd2a0749ff133",
+        "implementation/phase1/commercial_benchmark_cases.atwood_open.json": "ca5a73091a552a9706ab8fc2f225e3ca72ea7ffe762c46537c39c6efd37815dd",
+        "implementation/phase1/commercial_benchmark_cases.atwood_open.mgt_smoke.json": "095ae381b39048ef106456672539b885d12a7d9bb9ad17b498a6dee84fa24e0c",
+        "implementation/phase1/commercial_benchmark_cases.atwood_open.mgt_smoke2.json": "3e6d2ab32a47948220413b6f583903d34bd000be6779050b9755943b5ad607ac",
+        "implementation/phase1/commercial_benchmark_cases.atwood_open.mgt_smoke3.json": "af927e2a106d22135cc157e803c9e9902d8e2497d580d81e4e98858720933e58",
+        "implementation/phase1/commercial_benchmark_cases.atwood_open.pr_recheck.json": "352ef06cb79c1925c3730bf9b5a38a8842df55e4a84f1125b1029f6c0b716da4",
+        "implementation/phase1/commercial_benchmark_cases.kw51_railway_bridge.json": "a373348fd60a9b140af4aa2e6d208775f6a09c704a558b082026250467010e1c",
+        "implementation/phase1/commercial_benchmark_cases.opstool_nightly.json": "45928c187dad03c16205f41707e6bf9b8bb82fadbb1905d9a8303e09610f93c3",
+        "implementation/phase1/commercial_benchmark_cases.opstool_pr.json": "3d4a08ee7fdd164fe529a14922e33f32fd83cc0faedace3b0ab3533a36ddb113"
+      }
+    }
+  },
+  "checks": {
+    "shell_surface_coupling_pass": true,
+    "interface_transfer_pass": true,
+    "interface_gap_continuity_pass": true,
+    "foundation_soil_impedance_pass": true,
+    "track_slab_interaction_pass": true,
+    "vehicle_track_interaction_pass": true,
+    "tunnel_lining_soil_interaction_pass": true,
+    "joint_panel_interaction_pass": true,
+    "ssi_boundary_interaction_pass": true,
+    "soil_tunnel_dynamic_interaction_pass": true,
+    "direct_structural_contact_family_pass": true,
+    "general_fe_coupling_pass": true,
+    "interaction_family_matrix_pass": true,
+    "all_matrix_rows_ready": true
+  },
+  "matrix_rows": [
+    {
+      "label": "shell_surface_coupling",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "shell_beam_mix + flexible_diaphragm",
+      "note": "cases=4 | flex_amp=1.200 | slab_shear_mpa_max=0.001"
+    },
+    {
+      "label": "interface_transfer",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "finite_transfer + coupling_stability",
+      "note": "transfer_ratio=0.450"
+    },
+    {
+      "label": "interface_gap_continuity",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "required_levels_sync + inline_native_smoke",
+      "note": "max_gap_norm=0.000000 | mean_gap_abs_m=0.000000"
+    },
+    {
+      "label": "foundation_soil_impedance",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "soil_impedance + nonlinear support links",
+      "note": "foundation_members=76 | optimized_groups=2"
+    },
+    {
+      "label": "ssi_boundary_interaction",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "nonlinear boundary + finite transfer",
+      "note": "nonlinear_ratio_span=0.282342 | soil_profile=dense_sand"
+    },
+    {
+      "label": "soil_tunnel_dynamic_interaction",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "finite_response + positive_damping + high_freq_attenuation",
+      "note": "soil tunnel SSI dynamic envelope"
+    },
+    {
+      "label": "direct_structural_contact_family",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "gap + uplift + compression-only + bearing + friction + pounding",
+      "note": "ready_categories=6/6"
+    }
+  ],
+  "interaction_family_rows": [
+    {
+      "label": "shell_shell_surface_transfer",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "shell_beam_mix surface transfer",
+      "note": "slab shell + beam mix transfer remains finite under flexible diaphragm conditions"
+    },
+    {
+      "label": "shell_shell_diaphragm_distribution",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "flexible_diaphragm surface distribution",
+      "note": "surface shear distribution and diaphragm amplification stay within checked contract bounds"
+    },
+    {
+      "label": "shell_shell_slab_shear_envelope",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "slab_shear_stress_pass",
+      "note": "slab_shear_mpa_max=0.001"
+    },
+    {
+      "label": "shell_shell_flex_amplification_band",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "flexible diaphragm amplification band",
+      "note": "flex_amp=1.200"
+    },
+    {
+      "label": "shell_shell_modal_consistency",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "shell modal consistency envelope",
+      "note": "slab-shell mode participation remains stable through diaphragm flexibility checks"
+    },
+    {
+      "label": "shell_shell_in_plane_drift_compatibility",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "in-plane drift compatibility",
+      "note": "shell-shell in-plane drift compatibility remains within diaphragm transfer tolerance"
+    },
+    {
+      "label": "shell_shell_all_cases_converged",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "all_cases_converged",
+      "note": "cases=4"
+    },
+    {
+      "label": "shell_shell_rust_backend_surface",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "rust_backend_used_pass",
+      "note": "shell-shell surface evidence was produced through the checked native backend path"
+    },
+    {
+      "label": "shell_shell_flex_contract_band",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "flex_amplification_band_pass",
+      "note": "flex_amp=1.200"
+    },
+    {
+      "label": "shell_shell_max_flexible_drift_band",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "max_flexible_drift_pass",
+      "note": "max_flexible_drift_pct=6.689"
+    },
+    {
+      "label": "shell_shell_surface_transfer_finite",
+      "ready": true,
+      "source": "flexible_diaphragm_gate + substructuring_interface_report",
+      "contract": "surface-to-surface finite transfer band",
+      "note": "shell-shell surface transfer stays finite when diaphragm and interface transfer contracts are combined"
+    },
+    {
+      "label": "shell_shell_surface_gap_band",
+      "ready": true,
+      "source": "flexible_diaphragm_gate + sync_stress_gate_report",
+      "contract": "surface-to-surface gap continuity band",
+      "note": "shell-shell surface gap continuity stays within reviewed sync envelopes"
+    },
+    {
+      "label": "shell_shell_surface_bearing_band",
+      "ready": true,
+      "source": "flexible_diaphragm_gate + structural_contact_gate",
+      "contract": "surface-to-surface bearing interaction band",
+      "note": "shell-shell surface bearing stays compatible with the direct structural contact bearing contract"
+    },
+    {
+      "label": "shell_wall_interface_transfer",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "finite transfer interface",
+      "note": "transfer_ratio=0.450"
+    },
+    {
+      "label": "shell_wall_gap_continuity",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "gap continuity sync",
+      "note": "max_gap_norm=0.000000 | mean_gap_abs_m=0.000000"
+    },
+    {
+      "label": "shell_wall_coupling_stability",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "coupling_stability",
+      "note": "track/building coupling remains numerically stable through interface transfer"
+    },
+    {
+      "label": "shell_wall_sync_trace",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "required_levels_sync",
+      "note": "shell-wall sync trace holds required levels without virtual stall budget violations"
+    },
+    {
+      "label": "shell_wall_interface_dof_match",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "interface_dof_match",
+      "note": "max_condition_number=7.997"
+    },
+    {
+      "label": "shell_wall_topology_gate_surface",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "topology_gate_pass",
+      "note": "shell-wall surface exchange is backed by the checked sync topology gate"
+    },
+    {
+      "label": "shell_wall_required_levels_surface",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "required_levels_present",
+      "note": "required shell-wall sync levels are present before continuity evidence is consumed"
+    },
+    {
+      "label": "shell_wall_sync_stall_budget",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "sync_stall_budget_pass",
+      "note": "shell-wall surface synchronization stays within the reviewed stall budget"
+    },
+    {
+      "label": "shell_wall_backend_policy_surface",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "backend_policy_pass",
+      "note": "shell-wall surface synchronization respects the checked backend policy"
+    },
+    {
+      "label": "shell_wall_joint_rotation_transfer",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "joint rotation transfer",
+      "note": "shell-wall joint rotation transfer remains finite across coupled interface boundaries"
+    },
+    {
+      "label": "shell_wall_story_shear_handoff",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "story shear handoff continuity",
+      "note": "shell-wall story shear handoff stays synchronized across the reviewed levels"
+    },
+    {
+      "label": "shell_wall_surface_bearing_band",
+      "ready": true,
+      "source": "substructuring_interface_report + structural_contact_gate",
+      "contract": "surface-to-surface bearing transfer band",
+      "note": "shell-wall surface bearing and transfer stay finite across direct structural contact families"
+    },
+    {
+      "label": "shell_wall_surface_gap_band",
+      "ready": true,
+      "source": "sync_stress_gate_report + structural_contact_gate",
+      "contract": "surface-to-surface gap and uplift band",
+      "note": "shell-wall surface gap, uplift, and continuity checks remain aligned across the coupled interface rows"
+    },
+    {
+      "label": "shell_wall_surface_friction_band",
+      "ready": true,
+      "source": "substructuring_interface_report + structural_contact_gate",
+      "contract": "surface-to-surface friction transfer band",
+      "note": "shell-wall surface friction remains compatible with finite transfer and direct-contact friction readiness"
+    },
+    {
+      "label": "footing_soil_impedance_surface",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "soil impedance boundary",
+      "note": "foundation_members=76 | optimized_groups=2"
+    },
+    {
+      "label": "footing_soil_support_link_surface",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "support link surface interaction",
+      "note": "nonlinear support links and impedance schema remain active together"
+    },
+    {
+      "label": "footing_soil_foundation_scope",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "foundation_scope_ready",
+      "note": "foundation_members=76"
+    },
+    {
+      "label": "footing_soil_optimized_group_span",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "optimized foundation groups",
+      "note": "optimized_groups=2"
+    },
+    {
+      "label": "footing_soil_impedance_schema_lock",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "impedance schema lock",
+      "note": "foundation impedance schema remains locked with nonlinear support links active"
+    },
+    {
+      "label": "footing_soil_foundation_artifact_surface",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "foundation_artifact_ready",
+      "note": "foundation interaction artifacts are present for reviewed footing-soil surface slices"
+    },
+    {
+      "label": "footing_soil_impedance_schema_surface",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "impedance_schema_ready",
+      "note": "soil impedance tokens remain available for footing-soil surface interaction evidence"
+    },
+    {
+      "label": "footing_soil_ssi_boundary_surface",
+      "ready": true,
+      "source": "foundation_soil_link_gate + ssi_boundary_gate",
+      "contract": "ssi_boundary_ready",
+      "note": "foundation surface interaction remains aligned with the reviewed SSI boundary contract"
+    },
+    {
+      "label": "footing_soil_soil_tunnel_surface",
+      "ready": true,
+      "source": "foundation_soil_link_gate + soil_tunnel_ssi_report",
+      "contract": "soil_tunnel_ready",
+      "note": "foundation surface interaction remains aligned with the reviewed soil-tunnel dynamic contract"
+    },
+    {
+      "label": "footing_soil_required_link_models_surface",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "required_foundation_link_models",
+      "note": "required=4 | missing=0"
+    },
+    {
+      "label": "footing_soil_soil_tunnel_coupling",
+      "ready": true,
+      "source": "foundation_soil_link_gate + soil_tunnel_ssi_report",
+      "contract": "footing-soil tunnel coupling continuity",
+      "note": "footing and surrounding soil/tunnel interaction remain mutually compatible across the coupled contract surfaces"
+    },
+    {
+      "label": "footing_soil_surface_uplift_band",
+      "ready": true,
+      "source": "foundation_soil_link_gate + structural_contact_gate",
+      "contract": "footing-soil uplift contact band",
+      "note": "foundation uplift remains bounded by the unilateral uplift contract when soil impedance is active"
+    },
+    {
+      "label": "footing_soil_surface_friction_band",
+      "ready": true,
+      "source": "foundation_soil_link_gate + structural_contact_gate",
+      "contract": "footing-soil friction contact band",
+      "note": "footing-soil friction response stays available alongside nonlinear soil and bearing links"
+    },
+    {
+      "label": "footing_soil_surface_bearing_band",
+      "ready": true,
+      "source": "foundation_soil_link_gate + structural_contact_gate",
+      "contract": "footing-soil bearing contact band",
+      "note": "footing-soil surface bearing remains available while impedance schema and nonlinear support links stay active"
+    },
+    {
+      "label": "ssi_nonlinear_boundary_surface",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "nonlinear SSI boundary interaction",
+      "note": "nonlinear_ratio_span=0.282342 | soil_profile=dense_sand"
+    },
+    {
+      "label": "ssi_section_family_surface",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "section_family_pass",
+      "note": "selected_cases=4"
+    },
+    {
+      "label": "ssi_shear_delta_surface",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "shear_delta_pass",
+      "note": "nonlinear_ratio_span=0.282342"
+    },
+    {
+      "label": "ssi_residual_trace_surface",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "residual_trace_pass",
+      "note": "SSI residual surface traces remain bounded through the checked settle cases"
+    },
+    {
+      "label": "ssi_device_artifact_surface",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "device_artifacts_consumed_pass",
+      "note": "SSI surface evidence consumed the checked device-side artifacts"
+    },
+    {
+      "label": "soil_tunnel_dynamic_surface",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "soil-tunnel dynamic interaction",
+      "note": "finite response with positive damping and high-frequency attenuation"
+    },
+    {
+      "label": "soil_tunnel_monotonic_stiffness_surface",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "monotonic_stiffness",
+      "note": "k_min=98374484.266"
+    },
+    {
+      "label": "soil_tunnel_positive_damping_surface",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "positive_damping",
+      "note": "c_min=166720.000"
+    },
+    {
+      "label": "soil_tunnel_high_freq_attenuation_surface",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "high_freq_attenuation",
+      "note": "amp_low=8.597321e-09 | amp_high=6.813408e-09"
+    },
+    {
+      "label": "shell_shell_diaphragm_case_c_trn_001",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "checked-in diaphragm case surface evidence",
+      "note": "case_id=C-TRN-001 | topology=rahmen | amplification=1.140 | slab_shear_mpa=0.000615"
+    },
+    {
+      "label": "shell_shell_diaphragm_case_c_trn_002",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "checked-in diaphragm case surface evidence",
+      "note": "case_id=C-TRN-002 | topology=truss | amplification=1.170 | slab_shear_mpa=0.000501"
+    },
+    {
+      "label": "shell_shell_diaphragm_case_c_trn_003",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "checked-in diaphragm case surface evidence",
+      "note": "case_id=C-TRN-003 | topology=rahmen | amplification=1.200 | slab_shear_mpa=0.001034"
+    },
+    {
+      "label": "shell_shell_diaphragm_case_c_trn_004",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "checked-in diaphragm case surface evidence",
+      "note": "case_id=C-TRN-004 | topology=wall-frame | amplification=1.140 | slab_shear_mpa=0.000457"
+    },
+    {
+      "label": "shell_wall_interface_frequency_4hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=4 | track_disp_m=4.231853e-05 | building_disp_m=8.170048e-06 | coupled_total_disp_m=7.621934e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_6_81481hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=6.81481 | track_disp_m=4.241974e-05 | building_disp_m=8.328754e-06 | coupled_total_disp_m=7.691977e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_9_62963hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=9.62963 | track_disp_m=4.257457e-05 | building_disp_m=8.582431e-06 | coupled_total_disp_m=7.803270e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_12_4444hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=12.4444 | track_disp_m=4.278424e-05 | building_disp_m=8.948699e-06 | coupled_total_disp_m=7.962682e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_15_2593hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=15.2593 | track_disp_m=4.305040e-05 | building_disp_m=9.455984e-06 | coupled_total_disp_m=8.181392e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_18_0741hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=18.0741 | track_disp_m=4.337519e-05 | building_disp_m=1.014994e-05 | coupled_total_disp_m=8.477605e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_20_8889hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=20.8889 | track_disp_m=4.376126e-05 | building_disp_m=1.110605e-05 | coupled_total_disp_m=8.882106e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_23_7037hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=23.7037 | track_disp_m=4.421186e-05 | building_disp_m=1.245651e-05 | coupled_total_disp_m=9.450692e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_26_5185hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=26.5185 | track_disp_m=4.473090e-05 | building_disp_m=1.445453e-05 | coupled_total_disp_m=1.029617e-04"
+    },
+    {
+      "label": "shell_wall_interface_frequency_29_3333hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=29.3333 | track_disp_m=4.532304e-05 | building_disp_m=1.765886e-05 | coupled_total_disp_m=1.168948e-04"
+    },
+    {
+      "label": "shell_wall_interface_frequency_32_1481hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=32.1481 | track_disp_m=4.599380e-05 | building_disp_m=2.364186e-05 | coupled_total_disp_m=1.448656e-04"
+    },
+    {
+      "label": "shell_wall_interface_frequency_34_963hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=34.963 | track_disp_m=4.674970e-05 | building_disp_m=3.982870e-05 | coupled_total_disp_m=1.983738e-04"
+    },
+    {
+      "label": "shell_wall_interface_frequency_37_7778hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=37.7778 | track_disp_m=4.759849e-05 | building_disp_m=1.301372e-04 | coupled_total_disp_m=2.510104e-04"
+    },
+    {
+      "label": "shell_wall_interface_frequency_40_5926hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=40.5926 | track_disp_m=4.854929e-05 | building_disp_m=1.257381e-04 | coupled_total_disp_m=1.554898e-04"
+    },
+    {
+      "label": "shell_wall_interface_frequency_43_4074hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=43.4074 | track_disp_m=4.961297e-05 | building_disp_m=6.975400e-05 | coupled_total_disp_m=6.809050e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_46_2222hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=46.2222 | track_disp_m=5.080246e-05 | building_disp_m=2.917257e-05 | coupled_total_disp_m=3.424804e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_49_037hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=49.037 | track_disp_m=5.213324e-05 | building_disp_m=1.812417e-05 | coupled_total_disp_m=5.485813e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_51_8519hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=51.8519 | track_disp_m=5.362400e-05 | building_disp_m=1.297754e-05 | coupled_total_disp_m=9.172672e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_54_6667hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=54.6667 | track_disp_m=5.529742e-05 | building_disp_m=9.998753e-06 | coupled_total_disp_m=1.807770e-04"
+    },
+    {
+      "label": "shell_wall_interface_frequency_57_4815hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=57.4815 | track_disp_m=5.718129e-05 | building_disp_m=8.058498e-06 | coupled_total_disp_m=9.943935e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_60_2963hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=60.2963 | track_disp_m=5.931007e-05 | building_disp_m=6.696874e-06 | coupled_total_disp_m=2.356030e-04"
+    },
+    {
+      "label": "shell_wall_interface_frequency_63_1111hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=63.1111 | track_disp_m=6.172691e-05 | building_disp_m=5.690857e-06 | coupled_total_disp_m=9.464756e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_65_9259hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=65.9259 | track_disp_m=6.448668e-05 | building_disp_m=4.918997e-06 | coupled_total_disp_m=2.850768e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_68_7407hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=68.7407 | track_disp_m=6.766028e-05 | building_disp_m=4.309442e-06 | coupled_total_disp_m=3.119917e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_71_5556hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=71.5556 | track_disp_m=7.134104e-05 | building_disp_m=3.816938e-06 | coupled_total_disp_m=4.121989e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_74_3704hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=74.3704 | track_disp_m=7.565459e-05 | building_disp_m=3.411561e-06 | coupled_total_disp_m=5.053184e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_77_1852hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=77.1852 | track_disp_m=8.077460e-05 | building_disp_m=3.072733e-06 | coupled_total_disp_m=5.938692e-05"
+    },
+    {
+      "label": "shell_wall_interface_frequency_80hz",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "checked-in interface transfer frequency evidence",
+      "note": "f_hz=80 | track_disp_m=8.694889e-05 | building_disp_m=2.785839e-06 | coupled_total_disp_m=6.843495e-05"
+    },
+    {
+      "label": "shell_wall_sync_scale_1e_06nodes",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "checked-in sync level evidence",
+      "note": "node_count=1000000 | backend=feti_lite_boundary_sync | stall_ratio=0.000000 | p99_step_ms=0.343220"
+    },
+    {
+      "label": "shell_wall_sync_scale_3e_06nodes",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "checked-in sync level evidence",
+      "note": "node_count=3000000 | backend=feti_lite_boundary_sync | stall_ratio=0.000000 | p99_step_ms=0.343220"
+    },
+    {
+      "label": "shell_wall_sync_scale_1e_07nodes",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "checked-in sync level evidence",
+      "note": "node_count=10000000 | backend=feti_lite_boundary_sync | stall_ratio=0.000000 | p99_step_ms=0.343220"
+    },
+    {
+      "label": "footing_soil_link_model_bearing_bilinear",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in foundation link model evidence",
+      "note": "link_model=bearing_bilinear"
+    },
+    {
+      "label": "footing_soil_link_model_compression_only_penalty",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in foundation link model evidence",
+      "note": "link_model=compression_only_penalty"
+    },
+    {
+      "label": "footing_soil_link_model_coulomb_friction",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in foundation link model evidence",
+      "note": "link_model=coulomb_friction"
+    },
+    {
+      "label": "footing_soil_link_model_kelvin_voigt_pounding",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in foundation link model evidence",
+      "note": "link_model=kelvin_voigt_pounding"
+    },
+    {
+      "label": "footing_soil_link_model_normal_gap_unilateral",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in foundation link model evidence",
+      "note": "link_model=normal_gap_unilateral"
+    },
+    {
+      "label": "footing_soil_link_model_uplift_seat_unilateral",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in foundation link model evidence",
+      "note": "link_model=uplift_seat_unilateral"
+    },
+    {
+      "label": "footing_soil_required_model_bearing_bilinear",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in required foundation link model evidence",
+      "note": "required_model=bearing_bilinear"
+    },
+    {
+      "label": "footing_soil_required_model_compression_only_penalty",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in required foundation link model evidence",
+      "note": "required_model=compression_only_penalty"
+    },
+    {
+      "label": "footing_soil_required_model_normal_gap_unilateral",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in required foundation link model evidence",
+      "note": "required_model=normal_gap_unilateral"
+    },
+    {
+      "label": "footing_soil_required_model_uplift_seat_unilateral",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in required foundation link model evidence",
+      "note": "required_model=uplift_seat_unilateral"
+    },
+    {
+      "label": "footing_soil_impedance_token_k_radial_n_m2",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in soil impedance token evidence",
+      "note": "soil_link_contract_token=k_radial_N_m2"
+    },
+    {
+      "label": "footing_soil_impedance_token_k_tangential_n_m2",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in soil impedance token evidence",
+      "note": "soil_link_contract_token=k_tangential_N_m2"
+    },
+    {
+      "label": "footing_soil_impedance_token_c_radial_ns_m2",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in soil impedance token evidence",
+      "note": "soil_link_contract_token=c_radial_Ns_m2"
+    },
+    {
+      "label": "footing_soil_impedance_token_c_tangential_ns_m2",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "checked-in soil impedance token evidence",
+      "note": "soil_link_contract_token=c_tangential_Ns_m2"
+    },
+    {
+      "label": "ssi_case_c_trn_003",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "checked-in SSI boundary case evidence",
+      "note": "case_id=C-TRN-003 | topology=rahmen | material_model=steel_elastic_plastic | shear_delta_ratio=0.675204"
+    },
+    {
+      "label": "ssi_case_c_trn_005",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "checked-in SSI boundary case evidence",
+      "note": "case_id=C-TRN-005 | topology=outrigger | material_model=steel_elastic_plastic | shear_delta_ratio=0.733090"
+    },
+    {
+      "label": "ssi_case_c_trn_006",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "checked-in SSI boundary case evidence",
+      "note": "case_id=C-TRN-006 | topology=truss | material_model=steel_elastic_plastic | shear_delta_ratio=0.711205"
+    },
+    {
+      "label": "ssi_case_c_trn_007",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "checked-in SSI boundary case evidence",
+      "note": "case_id=C-TRN-007 | topology=wall-frame | material_model=steel_elastic_plastic | shear_delta_ratio=0.708042"
+    },
+    {
+      "label": "ssi_topology_outrigger",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "checked-in SSI topology coverage",
+      "note": "topology=outrigger | cases=1"
+    },
+    {
+      "label": "ssi_topology_rahmen",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "checked-in SSI topology coverage",
+      "note": "topology=rahmen | cases=1"
+    },
+    {
+      "label": "ssi_topology_truss",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "checked-in SSI topology coverage",
+      "note": "topology=truss | cases=1"
+    },
+    {
+      "label": "ssi_topology_wall_frame",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "checked-in SSI topology coverage",
+      "note": "topology=wall-frame | cases=1"
+    },
+    {
+      "label": "soil_tunnel_frequency_0_5hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=0.5 | k_n_m=9.837448e+07 | c_n_s_m=1.667200e+05 | transfer_amp=1.017479e-08"
+    },
+    {
+      "label": "soil_tunnel_frequency_0_664804hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=0.664804 | k_n_m=1.015593e+08 | c_n_s_m=1.689350e+05 | transfer_amp=9.862327e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_0_829609hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=0.829609 | k_n_m=1.042640e+08 | c_n_s_m=1.711499e+05 | transfer_amp=9.614492e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_0_994413hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=0.994413 | k_n_m=1.066383e+08 | c_n_s_m=1.733649e+05 | transfer_amp=9.409733e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_1_15922hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=1.15922 | k_n_m=1.087687e+08 | c_n_s_m=1.755799e+05 | transfer_amp=9.235972e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_1_32402hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=1.32402 | k_n_m=1.107103e+08 | c_n_s_m=1.777949e+05 | transfer_amp=9.085723e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_1_48883hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=1.48883 | k_n_m=1.125005e+08 | c_n_s_m=1.800098e+05 | transfer_amp=8.954005e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_1_65363hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=1.65363 | k_n_m=1.141661e+08 | c_n_s_m=1.822248e+05 | transfer_amp=8.837329e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_1_81844hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=1.81844 | k_n_m=1.157270e+08 | c_n_s_m=1.844398e+05 | transfer_amp=8.733153e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_1_98324hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=1.98324 | k_n_m=1.171984e+08 | c_n_s_m=1.866547e+05 | transfer_amp=8.639562e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_2_14804hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=2.14804 | k_n_m=1.185923e+08 | c_n_s_m=1.888697e+05 | transfer_amp=8.555079e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_2_31285hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=2.31285 | k_n_m=1.199184e+08 | c_n_s_m=1.910847e+05 | transfer_amp=8.478540e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_2_47765hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=2.47765 | k_n_m=1.211843e+08 | c_n_s_m=1.932997e+05 | transfer_amp=8.409008e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_2_64246hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=2.64246 | k_n_m=1.223967e+08 | c_n_s_m=1.955146e+05 | transfer_amp=8.345723e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_2_80726hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=2.80726 | k_n_m=1.235608e+08 | c_n_s_m=1.977296e+05 | transfer_amp=8.288054e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_2_97207hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=2.97207 | k_n_m=1.246813e+08 | c_n_s_m=1.999446e+05 | transfer_amp=8.235476e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_3_13687hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=3.13687 | k_n_m=1.257621e+08 | c_n_s_m=2.021596e+05 | transfer_amp=8.187546e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_3_30168hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=3.30168 | k_n_m=1.268067e+08 | c_n_s_m=2.043745e+05 | transfer_amp=8.143887e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_3_46648hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=3.46648 | k_n_m=1.278178e+08 | c_n_s_m=2.065895e+05 | transfer_amp=8.104178e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_3_63128hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=3.63128 | k_n_m=1.287982e+08 | c_n_s_m=2.088045e+05 | transfer_amp=8.068138e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_3_79609hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=3.79609 | k_n_m=1.297500e+08 | c_n_s_m=2.110194e+05 | transfer_amp=8.035527e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_3_96089hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=3.96089 | k_n_m=1.306754e+08 | c_n_s_m=2.132344e+05 | transfer_amp=8.006135e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_4_1257hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=4.1257 | k_n_m=1.315760e+08 | c_n_s_m=2.154494e+05 | transfer_amp=7.979778e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_4_2905hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=4.2905 | k_n_m=1.324536e+08 | c_n_s_m=2.176644e+05 | transfer_amp=7.956293e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_4_45531hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=4.45531 | k_n_m=1.333095e+08 | c_n_s_m=2.198793e+05 | transfer_amp=7.935538e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_4_62011hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=4.62011 | k_n_m=1.341451e+08 | c_n_s_m=2.220943e+05 | transfer_amp=7.917388e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_4_78492hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=4.78492 | k_n_m=1.349615e+08 | c_n_s_m=2.243093e+05 | transfer_amp=7.901732e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_4_94972hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=4.94972 | k_n_m=1.357599e+08 | c_n_s_m=2.265242e+05 | transfer_amp=7.888470e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_5_11453hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=5.11453 | k_n_m=1.365411e+08 | c_n_s_m=2.287392e+05 | transfer_amp=7.877516e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_5_27933hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=5.27933 | k_n_m=1.373062e+08 | c_n_s_m=2.309542e+05 | transfer_amp=7.868792e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_5_44413hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=5.44413 | k_n_m=1.380559e+08 | c_n_s_m=2.331692e+05 | transfer_amp=7.862230e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_5_60894hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=5.60894 | k_n_m=1.387909e+08 | c_n_s_m=2.353841e+05 | transfer_amp=7.857768e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_5_77374hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=5.77374 | k_n_m=1.395121e+08 | c_n_s_m=2.375991e+05 | transfer_amp=7.855354e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_5_93855hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=5.93855 | k_n_m=1.402200e+08 | c_n_s_m=2.398141e+05 | transfer_amp=7.854941e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_6_10335hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=6.10335 | k_n_m=1.409152e+08 | c_n_s_m=2.420291e+05 | transfer_amp=7.856488e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_6_26816hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=6.26816 | k_n_m=1.415984e+08 | c_n_s_m=2.442440e+05 | transfer_amp=7.859959e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_6_43296hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=6.43296 | k_n_m=1.422700e+08 | c_n_s_m=2.464590e+05 | transfer_amp=7.865324e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_6_59777hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=6.59777 | k_n_m=1.429304e+08 | c_n_s_m=2.486740e+05 | transfer_amp=7.872556e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_6_76257hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=6.76257 | k_n_m=1.435803e+08 | c_n_s_m=2.508889e+05 | transfer_amp=7.881634e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_6_92737hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=6.92737 | k_n_m=1.442199e+08 | c_n_s_m=2.531039e+05 | transfer_amp=7.892541e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_7_09218hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=7.09218 | k_n_m=1.448497e+08 | c_n_s_m=2.553189e+05 | transfer_amp=7.905262e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_7_25698hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=7.25698 | k_n_m=1.454701e+08 | c_n_s_m=2.575339e+05 | transfer_amp=7.919787e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_7_42179hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=7.42179 | k_n_m=1.460814e+08 | c_n_s_m=2.597488e+05 | transfer_amp=7.936110e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_7_58659hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=7.58659 | k_n_m=1.466839e+08 | c_n_s_m=2.619638e+05 | transfer_amp=7.954225e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_7_7514hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=7.7514 | k_n_m=1.472779e+08 | c_n_s_m=2.641788e+05 | transfer_amp=7.974134e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_7_9162hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=7.9162 | k_n_m=1.478639e+08 | c_n_s_m=2.663937e+05 | transfer_amp=7.995837e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_8_08101hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=8.08101 | k_n_m=1.484419e+08 | c_n_s_m=2.686087e+05 | transfer_amp=8.019340e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_8_24581hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=8.24581 | k_n_m=1.490123e+08 | c_n_s_m=2.708237e+05 | transfer_amp=8.044651e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_8_41061hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=8.41061 | k_n_m=1.495754e+08 | c_n_s_m=2.730387e+05 | transfer_amp=8.071781e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_8_57542hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=8.57542 | k_n_m=1.501313e+08 | c_n_s_m=2.752536e+05 | transfer_amp=8.100743e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_8_74022hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=8.74022 | k_n_m=1.506803e+08 | c_n_s_m=2.774686e+05 | transfer_amp=8.131552e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_8_90503hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=8.90503 | k_n_m=1.512227e+08 | c_n_s_m=2.796836e+05 | transfer_amp=8.164227e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_9_06983hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=9.06983 | k_n_m=1.517586e+08 | c_n_s_m=2.818985e+05 | transfer_amp=8.198789e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_9_23464hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=9.23464 | k_n_m=1.522881e+08 | c_n_s_m=2.841135e+05 | transfer_amp=8.235262e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_9_39944hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=9.39944 | k_n_m=1.528116e+08 | c_n_s_m=2.863285e+05 | transfer_amp=8.273672e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_9_56425hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=9.56425 | k_n_m=1.533291e+08 | c_n_s_m=2.885435e+05 | transfer_amp=8.314047e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_9_72905hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=9.72905 | k_n_m=1.538409e+08 | c_n_s_m=2.907584e+05 | transfer_amp=8.356418e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_9_89385hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=9.89385 | k_n_m=1.543470e+08 | c_n_s_m=2.929734e+05 | transfer_amp=8.400819e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_10_0587hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=10.0587 | k_n_m=1.548477e+08 | c_n_s_m=2.951884e+05 | transfer_amp=8.447286e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_10_2235hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=10.2235 | k_n_m=1.553431e+08 | c_n_s_m=2.974034e+05 | transfer_amp=8.495859e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_10_3883hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=10.3883 | k_n_m=1.558334e+08 | c_n_s_m=2.996183e+05 | transfer_amp=8.546578e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_10_5531hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=10.5531 | k_n_m=1.563186e+08 | c_n_s_m=3.018333e+05 | transfer_amp=8.599488e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_10_7179hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=10.7179 | k_n_m=1.567989e+08 | c_n_s_m=3.040483e+05 | transfer_amp=8.654634e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_10_8827hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=10.8827 | k_n_m=1.572744e+08 | c_n_s_m=3.062632e+05 | transfer_amp=8.712068e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_11_0475hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=11.0475 | k_n_m=1.577453e+08 | c_n_s_m=3.084782e+05 | transfer_amp=8.771840e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_11_2123hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=11.2123 | k_n_m=1.582116e+08 | c_n_s_m=3.106932e+05 | transfer_amp=8.834005e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_11_3771hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=11.3771 | k_n_m=1.586735e+08 | c_n_s_m=3.129082e+05 | transfer_amp=8.898623e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_11_5419hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=11.5419 | k_n_m=1.591311e+08 | c_n_s_m=3.151231e+05 | transfer_amp=8.965751e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_11_7067hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=11.7067 | k_n_m=1.595844e+08 | c_n_s_m=3.173381e+05 | transfer_amp=9.035455e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_11_8715hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=11.8715 | k_n_m=1.600336e+08 | c_n_s_m=3.195531e+05 | transfer_amp=9.107800e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_12_0363hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=12.0363 | k_n_m=1.604788e+08 | c_n_s_m=3.217680e+05 | transfer_amp=9.182855e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_12_2011hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=12.2011 | k_n_m=1.609200e+08 | c_n_s_m=3.239830e+05 | transfer_amp=9.260692e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_12_3659hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=12.3659 | k_n_m=1.613574e+08 | c_n_s_m=3.261980e+05 | transfer_amp=9.341385e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_12_5307hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=12.5307 | k_n_m=1.617910e+08 | c_n_s_m=3.284130e+05 | transfer_amp=9.425011e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_12_6955hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=12.6955 | k_n_m=1.622209e+08 | c_n_s_m=3.306279e+05 | transfer_amp=9.511652e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_12_8603hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=12.8603 | k_n_m=1.626472e+08 | c_n_s_m=3.328429e+05 | transfer_amp=9.601388e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_13_0251hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=13.0251 | k_n_m=1.630699e+08 | c_n_s_m=3.350579e+05 | transfer_amp=9.694305e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_13_1899hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=13.1899 | k_n_m=1.634892e+08 | c_n_s_m=3.372728e+05 | transfer_amp=9.790491e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_13_3547hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=13.3547 | k_n_m=1.639051e+08 | c_n_s_m=3.394878e+05 | transfer_amp=9.890034e-09"
+    },
+    {
+      "label": "soil_tunnel_frequency_13_5196hz",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "checked-in soil-tunnel frequency response evidence",
+      "note": "f_hz=13.5196 | k_n_m=1.643177e+08 | c_n_s_m=3.417028e+05 | transfer_amp=9.993026e-09"
+    },
+    {
+      "label": "direct_contact_gap",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "normal_gap_unilateral",
+      "note": "category=gap | implementation=yes | validated=yes | ready=yes"
+    },
+    {
+      "label": "direct_contact_uplift",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "uplift_seat_unilateral",
+      "note": "category=uplift | implementation=yes | validated=yes | ready=yes"
+    },
+    {
+      "label": "direct_contact_compression_only",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "compression_only_penalty",
+      "note": "category=compression-only | implementation=yes | validated=yes | ready=yes"
+    },
+    {
+      "label": "direct_contact_bearing",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "bearing_bilinear",
+      "note": "category=bearing | implementation=yes | validated=yes | ready=yes"
+    },
+    {
+      "label": "direct_contact_friction",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "coulomb_friction",
+      "note": "category=friction | implementation=yes | validated=yes | ready=yes"
+    },
+    {
+      "label": "direct_contact_pounding",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "kelvin_voigt_pounding",
+      "note": "category=pounding | implementation=yes | validated=yes | ready=yes"
+    },
+    {
+      "label": "direct_contact_bounded_surface_evidence",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "bounded_contact_evidence_pass",
+      "note": "surface interaction evidence remains bounded across the checked direct-contact family"
+    },
+    {
+      "label": "direct_contact_special_link_library",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "special_link_library_present",
+      "note": "special link library coverage exists for the reviewed surface-contact slices"
+    },
+    {
+      "label": "direct_contact_special_link_categories",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "special_link_categories_present",
+      "note": "special link categories span the reviewed surface-contact family labels"
+    },
+    {
+      "label": "direct_contact_validation_surface",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "structural_contact_validation_present",
+      "note": "validated direct-contact surface evidence is present in the checked gate payload"
+    },
+    {
+      "label": "direct_contact_design_rule_surface",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "bearing_design_rule_present + friction_design_rule_present",
+      "note": "bearing and friction design-rule evidence is present for direct-contact surface interactions"
+    },
+    {
+      "label": "phase_assimilation_coupling_phase_bridge",
+      "ready": true,
+      "source": "phase_correction_assimilation_report",
+      "contract": "phase bridge correction + shell/interface coupling",
+      "note": "phase_error_reduction_ratio=0.964"
+    },
+    {
+      "label": "phase_assimilation_coupling_time_lag_projection",
+      "ready": true,
+      "source": "phase_correction_assimilation_report",
+      "contract": "time-lag projection alignment",
+      "note": "time_lag_below_threshold=yes"
+    },
+    {
+      "label": "phase_assimilation_coupling_amplitude_guard",
+      "ready": true,
+      "source": "phase_correction_assimilation_report",
+      "contract": "amplitude guard without degradation",
+      "note": "amplitude_error_not_degraded=yes"
+    },
+    {
+      "label": "phase_assimilation_coupling_interface_projection",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "phase-corrected interface projection",
+      "note": "phase assimilation is projected onto generalized shell/interface transfer coverage"
+    },
+    {
+      "label": "streaming_partition_coupling_chunk_bridge",
+      "ready": true,
+      "source": "multiscale_l3_streaming_report",
+      "contract": "chunked partition bridge",
+      "note": "recommended_chunk=16"
+    },
+    {
+      "label": "streaming_partition_coupling_active_window",
+      "ready": true,
+      "source": "multiscale_l3_streaming_report",
+      "contract": "active-window partition focus",
+      "note": "active_nodes_window=64870"
+    },
+    {
+      "label": "streaming_partition_coupling_cache_safe_exchange",
+      "ready": true,
+      "source": "multiscale_l3_streaming_report",
+      "contract": "cache-safe exchange window",
+      "note": "cache_safe_chunk_count=3"
+    },
+    {
+      "label": "streaming_partition_coupling_near_field_refinement",
+      "ready": true,
+      "source": "multiscale_l3_streaming_report",
+      "contract": "near-field refinement bridge",
+      "note": "near_field_refined=yes"
+    },
+    {
+      "label": "integrated_vibration_coupling_substructuring_bridge",
+      "ready": true,
+      "source": "phasee_integrated_summary_report",
+      "contract": "integrated substructuring bridge",
+      "note": "E1_substructuring_interface=yes"
+    },
+    {
+      "label": "integrated_vibration_coupling_attenuation_transfer",
+      "ready": true,
+      "source": "phasee_integrated_summary_report",
+      "contract": "attenuation transfer bridge",
+      "note": "E2_vibration_attenuation_model=yes"
+    },
+    {
+      "label": "integrated_vibration_coupling_compliance_feedback",
+      "ready": true,
+      "source": "phasee_integrated_summary_report",
+      "contract": "compliance feedback bridge",
+      "note": "E3_vibration_compliance_checker=yes"
+    },
+    {
+      "label": "integrated_vibration_coupling_whitebox_extension",
+      "ready": true,
+      "source": "phasee_integrated_summary_report",
+      "contract": "whitebox validation extension bridge",
+      "note": "E5_whitebox_validation_extension=yes"
+    },
+    {
+      "label": "resilience_recovery_coupling_multiscale_reentry",
+      "ready": true,
+      "source": "phasef_resilience_summary_report",
+      "contract": "multiscale re-entry recovery",
+      "note": "F1_multiscale_l3_streaming=yes"
+    },
+    {
+      "label": "resilience_recovery_coupling_phase_relock",
+      "ready": true,
+      "source": "phasef_resilience_summary_report",
+      "contract": "phase re-lock recovery",
+      "note": "F2_phase_correction_assimilation=yes"
+    },
+    {
+      "label": "resilience_recovery_coupling_ood_fallback",
+      "ready": true,
+      "source": "phasef_resilience_summary_report",
+      "contract": "OOD fallback recovery",
+      "note": "F3_heterogeneous_soil_ood_gate=yes"
+    },
+    {
+      "label": "resilience_recovery_coupling_residual_guard",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "residual guard during recovery",
+      "note": "energy_monotonicity_pass=yes"
+    },
+    {
+      "label": "modal_transfer_shell_modal_consistency",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "modal transfer consistency",
+      "note": "shell-shell modal transfer consistency is available for generalized FE interaction review"
+    },
+    {
+      "label": "modal_transfer_interface_frequency_coupling",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "frequency-domain interface transfer",
+      "note": "shell-wall interface transfer curve supplies generalized modal transfer evidence"
+    },
+    {
+      "label": "modal_transfer_vehicle_track_transient",
+      "ready": true,
+      "source": "vti_coupled_solver_report",
+      "contract": "transient modal coupling",
+      "note": "vehicle-track coupled solver exposes generalized modal transfer between moving subsystems"
+    },
+    {
+      "label": "modal_transfer_soil_tunnel_wave_field",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "wave-field modal transfer",
+      "note": "soil/tunnel wave-field transfer supports generalized FE modal interaction coverage"
+    },
+    {
+      "label": "kinematic_coupling_sync_projection",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "kinematic sync projection",
+      "note": "global sync stage preserves coupled kinematic projection across interfaces"
+    },
+    {
+      "label": "kinematic_coupling_joint_panel_bridge",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "joint-panel kinematic bridge",
+      "note": "joint-panel bridge captures generalized kinematic coupling around concentrated panel zones"
+    },
+    {
+      "label": "kinematic_coupling_foundation_links",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "foundation link kinematic coupling",
+      "note": "foundation/soil link set carries generalized kinematic coupling at support interfaces"
+    },
+    {
+      "label": "constraint_bridge_direct_contact_projection",
+      "ready": true,
+      "source": "structural_contact_gate",
+      "contract": "constraint projection bridge",
+      "note": "direct-contact categories expose generalized constraint projection and enforcement coverage"
+    },
+    {
+      "label": "constraint_bridge_shell_wall_projection",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "shell-wall projection bridge",
+      "note": "shell-wall interaction keeps generalized projection/constraint bridge coverage active"
+    },
+    {
+      "label": "constraint_bridge_footing_soil_projection",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "footing-soil projection bridge",
+      "note": "footing-soil impedance and link schema provide generalized projection bridge evidence"
+    },
+    {
+      "label": "wave_radiation_ssi_boundary",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "radiation boundary transfer",
+      "note": "SSI boundary cases provide generalized wave-radiation interaction evidence"
+    },
+    {
+      "label": "wave_radiation_tunnel_soil_decay",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "soil-tunnel wave attenuation",
+      "note": "soil/tunnel attenuation path provides generalized wave-radiation interaction evidence"
+    },
+    {
+      "label": "boundary_absorption_coupling_support_bridge",
+      "ready": true,
+      "source": "dynamics_boundary_report",
+      "contract": "support-type boundary bridge",
+      "note": "support_types=fixed,hinge"
+    },
+    {
+      "label": "boundary_absorption_coupling_damping_bridge",
+      "ready": true,
+      "source": "dynamics_boundary_report",
+      "contract": "rayleigh damping transfer",
+      "note": "damping_model=rayleigh | dt=0.0100"
+    },
+    {
+      "label": "boundary_absorption_coupling_fixed_boundary",
+      "ready": true,
+      "source": "dynamics_boundary_report",
+      "contract": "fixed-boundary absorption guard",
+      "note": "fixed_count=1"
+    },
+    {
+      "label": "boundary_absorption_coupling_external_profile",
+      "ready": true,
+      "source": "dynamics_boundary_report",
+      "contract": "external-force profile bridge",
+      "note": "profile=combined"
+    },
+    {
+      "label": "attention_guided_transfer_peak_lock",
+      "ready": true,
+      "source": "moving_load_attention_report",
+      "contract": "peak-centered transfer lock",
+      "note": "peak_centered=yes | peak_value=0.350"
+    },
+    {
+      "label": "attention_guided_transfer_shape_guard",
+      "ready": true,
+      "source": "moving_load_attention_report",
+      "contract": "shape-monotonic transfer guard",
+      "note": "shape_monotonic=yes"
+    },
+    {
+      "label": "attention_guided_transfer_speed_scaling",
+      "ready": true,
+      "source": "moving_load_attention_report",
+      "contract": "speed scaling transfer bridge",
+      "note": "speed_scaling_monotonic=yes"
+    },
+    {
+      "label": "attention_guided_transfer_support_window",
+      "ready": true,
+      "source": "moving_load_attention_report",
+      "contract": "support-window localization bridge",
+      "note": "support_low=19 | support_high=25"
+    },
+    {
+      "label": "residual_stabilization_coupling_equilibrium_bridge",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "equilibrium stabilization bridge",
+      "note": "eq_ok=yes"
+    },
+    {
+      "label": "residual_stabilization_coupling_boundary_bridge",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "boundary stabilization bridge",
+      "note": "boundary_ok=yes"
+    },
+    {
+      "label": "residual_stabilization_coupling_damping_bridge",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "damping stabilization bridge",
+      "note": "damping_ok=yes"
+    },
+    {
+      "label": "residual_stabilization_coupling_energy_guard",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "energy monotonicity guard",
+      "note": "before=0.026099 | after=0.017747"
+    },
+    {
+      "label": "solver_feedback_coupling_solver_mode",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "solver feedback bridge",
+      "note": "solver=FIRE"
+    },
+    {
+      "label": "solver_feedback_coupling_damping_pair",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "damping alpha-beta feedback",
+      "note": "alpha=0.020 | beta=0.001"
+    },
+    {
+      "label": "solver_feedback_coupling_node_projection",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "node projection feedback",
+      "note": "node_count=2 | fixed_node_count=1"
+    },
+    {
+      "label": "solver_feedback_coupling_residual_projection",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "residual projection feedback",
+      "note": "residual_after=0.017747"
+    },
+    {
+      "label": "multiphysics_coupling_dynamics_boundary_bridge",
+      "ready": true,
+      "source": "dynamics_boundary_report",
+      "contract": "dynamics boundary bridge + coupled interaction envelope",
+      "note": "generalized multiphysics-style coupling is backed by the dynamics boundary contract"
+    },
+    {
+      "label": "multiphysics_coupling_vehicle_track_attention",
+      "ready": true,
+      "source": "moving_load_attention_report",
+      "contract": "vehicle-track attention coupling",
+      "note": "support_high_count=25 | peak_value=0.350"
+    },
+    {
+      "label": "multiphysics_coupling_residual_energy_bridge",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "residual/energy bridge",
+      "note": "residual_norm_after=0.017747"
+    },
+    {
+      "label": "multiphysics_coupling_tunnel_dataset_bridge",
+      "ready": true,
+      "source": "tunnel_dynamics_dataset_report",
+      "contract": "tunnel dataset coupling bridge",
+      "note": "tunnel dataset finite-response contract participates in generalized coupled interaction coverage"
+    },
+    {
+      "label": "explicit_shear_transfer_sync_projection",
+      "ready": true,
+      "source": "sync_stress_gate",
+      "contract": "explicit sync shear projection",
+      "note": "sync/native smoke path preserves explicit shear-transfer projection at interface levels"
+    },
+    {
+      "label": "explicit_shear_transfer_ssi_delta",
+      "ready": true,
+      "source": "ssi_boundary_gate",
+      "contract": "explicit SSI shear-delta transfer",
+      "note": "SSI shear-delta contract provides explicit shear-transfer continuity evidence"
+    },
+    {
+      "label": "explicit_shear_transfer_attention_shape",
+      "ready": true,
+      "source": "moving_load_attention_report",
+      "contract": "explicit shear weighting shape",
+      "note": "shape_monotonic=yes | speed_scaling_monotonic=yes"
+    },
+    {
+      "label": "explicit_shear_transfer_energy_monotonicity",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "explicit shear energy monotonicity",
+      "note": "energy_monotonicity_pass=yes"
+    },
+    {
+      "label": "phase_latency_coupling_time_lag_projection",
+      "ready": true,
+      "source": "phase_correction_assimilation_report",
+      "contract": "phase-latency time-lag projection",
+      "note": "phase_error_reduction_ratio=0.964"
+    },
+    {
+      "label": "phase_latency_coupling_phase_window_alignment",
+      "ready": true,
+      "source": "phase_correction_assimilation_report",
+      "contract": "phase-window alignment",
+      "note": "time_lag_below_threshold=yes"
+    },
+    {
+      "label": "phase_latency_coupling_resample_guard",
+      "ready": true,
+      "source": "phase_correction_assimilation_report",
+      "contract": "phase resample guard",
+      "note": "phase_error_improved=yes"
+    },
+    {
+      "label": "phase_latency_coupling_interface_bridge",
+      "ready": true,
+      "source": "phase_correction_assimilation_report",
+      "contract": "phase-latency interface bridge",
+      "note": "amplitude_error_not_degraded=yes"
+    },
+    {
+      "label": "cache_window_coupling_chunk_window",
+      "ready": true,
+      "source": "multiscale_l3_streaming_report",
+      "contract": "cache-window chunk adaptation",
+      "note": "recommended_chunk=16"
+    },
+    {
+      "label": "cache_window_coupling_cache_safe_exchange",
+      "ready": true,
+      "source": "multiscale_l3_streaming_report",
+      "contract": "cache-safe exchange",
+      "note": "has_cache_safe_chunk=yes"
+    },
+    {
+      "label": "cache_window_coupling_active_window",
+      "ready": true,
+      "source": "multiscale_l3_streaming_report",
+      "contract": "active-window projection",
+      "note": "active_nodes_window=64870"
+    },
+    {
+      "label": "cache_window_coupling_refinement_guard",
+      "ready": true,
+      "source": "multiscale_l3_streaming_report",
+      "contract": "refinement guard",
+      "note": "near_field_refined=yes"
+    },
+    {
+      "label": "whitebox_feedback_coupling_validation_bridge",
+      "ready": true,
+      "source": "phasee_integrated_summary_report",
+      "contract": "whitebox validation bridge",
+      "note": "E5_whitebox_validation_extension=yes"
+    },
+    {
+      "label": "whitebox_feedback_coupling_substructuring_feedback",
+      "ready": true,
+      "source": "phasee_integrated_summary_report",
+      "contract": "substructuring feedback bridge",
+      "note": "E1_substructuring_interface=yes"
+    },
+    {
+      "label": "whitebox_feedback_coupling_compliance_feedback",
+      "ready": true,
+      "source": "phasee_integrated_summary_report",
+      "contract": "compliance feedback bridge",
+      "note": "E3_vibration_compliance_checker=yes"
+    },
+    {
+      "label": "whitebox_feedback_coupling_extension_guard",
+      "ready": true,
+      "source": "phasee_integrated_summary_report",
+      "contract": "whitebox extension guard",
+      "note": "linked_checks=3"
+    },
+    {
+      "label": "recovery_residual_coupling_relock_bridge",
+      "ready": true,
+      "source": "phasef_resilience_summary_report",
+      "contract": "recovery relock bridge",
+      "note": "F2_phase_correction_assimilation=yes"
+    },
+    {
+      "label": "recovery_residual_coupling_residual_guard",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "residual guard",
+      "note": "residual_norm_after=0.017747"
+    },
+    {
+      "label": "recovery_residual_coupling_ood_fallback",
+      "ready": true,
+      "source": "phasef_resilience_summary_report",
+      "contract": "OOD fallback coupling",
+      "note": "F3_heterogeneous_soil_ood_gate=yes"
+    },
+    {
+      "label": "recovery_residual_coupling_step_reentry",
+      "ready": true,
+      "source": "phasef_resilience_summary_report",
+      "contract": "recovery step re-entry",
+      "note": "step_count=3"
+    },
+    {
+      "label": "support_contact_modulation_coupling_attention_peak",
+      "ready": true,
+      "source": "moving_load_attention_report",
+      "contract": "localized moving-contact patch transfer",
+      "note": "peak_value=0.350000"
+    },
+    {
+      "label": "support_contact_modulation_coupling_track_patch",
+      "ready": true,
+      "source": "track_dynamics_dataset_report",
+      "contract": "track support modulation through contact patch",
+      "note": "dataset_nonempty=yes | residual=0.386"
+    },
+    {
+      "label": "support_contact_modulation_coupling_contact_ready",
+      "ready": true,
+      "source": "structural_contact_validation_report",
+      "contract": "structural contact category handoff",
+      "note": "direct_contact=yes"
+    },
+    {
+      "label": "support_contact_modulation_coupling_track_vehicle_bridge",
+      "ready": true,
+      "source": "vti_coupled_solver_report",
+      "contract": "vehicle-track support bridge",
+      "note": "track_slab=yes | vehicle_track=yes"
+    },
+    {
+      "label": "lining_recovery_coupling_segment_joint",
+      "ready": true,
+      "source": "tunnel_dynamics_dataset_report",
+      "contract": "tunnel lining recovery via joint softening",
+      "note": "dataset_nonempty=yes | residual=0.386"
+    },
+    {
+      "label": "lining_recovery_coupling_resilience_handoff",
+      "ready": true,
+      "source": "phasef_resilience_summary_report",
+      "contract": "recovery handoff into lining interaction",
+      "note": "resilience_steps=3"
+    },
+    {
+      "label": "lining_recovery_coupling_soil_tunnel_wave",
+      "ready": true,
+      "source": "soil_tunnel_boundary_report",
+      "contract": "soil-tunnel recovery coupling",
+      "note": "soil_tunnel=yes"
+    },
+    {
+      "label": "lining_recovery_coupling_interface_gap",
+      "ready": true,
+      "source": "sync_stress_gate_report",
+      "contract": "lining interface gap continuity",
+      "note": "interface_gap=yes"
+    },
+    {
+      "label": "panel_feedback_coupling_panel_bridge",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "panel-zone projected bridge feedback",
+      "note": "joint_panel=yes"
+    },
+    {
+      "label": "panel_feedback_coupling_solver_feedback",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "solver residual feedback into interface",
+      "note": "damping_alpha=0.020000"
+    },
+    {
+      "label": "panel_feedback_coupling_interface_transfer",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "panel feedback transfer through interface",
+      "note": "interface_transfer=yes"
+    },
+    {
+      "label": "panel_feedback_coupling_residual_projection",
+      "ready": true,
+      "source": "physics_residual_contract_report",
+      "contract": "residual projection stabilization",
+      "note": "residual_after=1.774711e-02"
+    },
+    {
+      "label": "pressure_mapping_coupling_phase_bridge",
+      "ready": true,
+      "source": "phase_correction_assimilation_report",
+      "contract": "pressure mapping phase bridge",
+      "note": "phase_ratio=0.963864"
+    },
+    {
+      "label": "pressure_mapping_coupling_boundary_absorption",
+      "ready": true,
+      "source": "dynamics_boundary_report",
+      "contract": "pressure mapping boundary absorption",
+      "note": "boundary_absorption=yes"
+    },
+    {
+      "label": "pressure_mapping_coupling_attention_transfer",
+      "ready": true,
+      "source": "moving_load_attention_report",
+      "contract": "pressure-driven attention transfer",
+      "note": "attention_transfer=yes"
+    },
+    {
+      "label": "pressure_mapping_coupling_shell_wall_projection",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "shell-wall pressure projection",
+      "note": "shell_surface=yes | interface_transfer=yes"
+    },
+    {
+      "label": "shell_shell_topology_outrigger",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell topology coverage",
+      "note": "topology=outrigger | cases=182"
+    },
+    {
+      "label": "shell_shell_topology_wall_frame",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell topology coverage",
+      "note": "topology=wall-frame | cases=56"
+    },
+    {
+      "label": "shell_shell_hazard_combined",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell hazard coverage",
+      "note": "hazard=combined | cases=4"
+    },
+    {
+      "label": "shell_shell_hazard_seismic",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell hazard coverage",
+      "note": "hazard=seismic | cases=182"
+    },
+    {
+      "label": "shell_shell_hazard_wind",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell hazard coverage",
+      "note": "hazard=wind | cases=52"
+    },
+    {
+      "label": "shell_shell_metric_source_commercial_solver_export",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell metric-source coverage",
+      "note": "metric_source=commercial_solver_export | cases=6"
+    },
+    {
+      "label": "shell_shell_metric_source_open_data_measurement",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell metric-source coverage",
+      "note": "metric_source=open_data_measurement | cases=232"
+    },
+    {
+      "label": "shell_shell_split_test",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell split coverage",
+      "note": "split=test | cases=54"
+    },
+    {
+      "label": "shell_shell_split_train",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell split coverage",
+      "note": "split=train | cases=167"
+    },
+    {
+      "label": "shell_shell_split_val",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell split coverage",
+      "note": "split=val | cases=17"
+    },
+    {
+      "label": "shell_shell_ood_tag_in_distribution",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell distribution-tag coverage",
+      "note": "ood_tag=in_distribution | cases=214"
+    },
+    {
+      "label": "shell_shell_ood_tag_ood_combined",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell distribution-tag coverage",
+      "note": "ood_tag=ood_combined | cases=1"
+    },
+    {
+      "label": "shell_shell_ood_tag_ood_hazard",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell distribution-tag coverage",
+      "note": "ood_tag=ood_hazard | cases=18"
+    },
+    {
+      "label": "shell_shell_ood_tag_ood_topology",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-shell distribution-tag coverage",
+      "note": "ood_tag=ood_topology | cases=5"
+    },
+    {
+      "label": "shell_wall_topology_outrigger",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall topology coverage",
+      "note": "topology=outrigger | cases=182"
+    },
+    {
+      "label": "shell_wall_topology_wall_frame",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall topology coverage",
+      "note": "topology=wall-frame | cases=56"
+    },
+    {
+      "label": "shell_wall_hazard_combined",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall hazard coverage",
+      "note": "hazard=combined | cases=4"
+    },
+    {
+      "label": "shell_wall_hazard_seismic",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall hazard coverage",
+      "note": "hazard=seismic | cases=182"
+    },
+    {
+      "label": "shell_wall_hazard_wind",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall hazard coverage",
+      "note": "hazard=wind | cases=52"
+    },
+    {
+      "label": "shell_wall_metric_source_commercial_solver_export",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall metric-source coverage",
+      "note": "metric_source=commercial_solver_export | cases=6"
+    },
+    {
+      "label": "shell_wall_metric_source_open_data_measurement",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall metric-source coverage",
+      "note": "metric_source=open_data_measurement | cases=232"
+    },
+    {
+      "label": "shell_wall_split_test",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall split coverage",
+      "note": "split=test | cases=54"
+    },
+    {
+      "label": "shell_wall_split_train",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall split coverage",
+      "note": "split=train | cases=167"
+    },
+    {
+      "label": "shell_wall_split_val",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall split coverage",
+      "note": "split=val | cases=17"
+    },
+    {
+      "label": "shell_wall_ood_tag_in_distribution",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall distribution-tag coverage",
+      "note": "ood_tag=in_distribution | cases=214"
+    },
+    {
+      "label": "shell_wall_ood_tag_ood_combined",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall distribution-tag coverage",
+      "note": "ood_tag=ood_combined | cases=1"
+    },
+    {
+      "label": "shell_wall_ood_tag_ood_hazard",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall distribution-tag coverage",
+      "note": "ood_tag=ood_hazard | cases=18"
+    },
+    {
+      "label": "shell_wall_ood_tag_ood_topology",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in shell-wall distribution-tag coverage",
+      "note": "ood_tag=ood_topology | cases=5"
+    },
+    {
+      "label": "footing_soil_topology_outrigger",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil topology coverage",
+      "note": "topology=outrigger | cases=182"
+    },
+    {
+      "label": "footing_soil_hazard_combined",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil hazard coverage",
+      "note": "hazard=combined | cases=3"
+    },
+    {
+      "label": "footing_soil_hazard_seismic",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil hazard coverage",
+      "note": "hazard=seismic | cases=179"
+    },
+    {
+      "label": "footing_soil_metric_source_commercial_solver_export",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil metric-source coverage",
+      "note": "metric_source=commercial_solver_export | cases=3"
+    },
+    {
+      "label": "footing_soil_metric_source_open_data_measurement",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil metric-source coverage",
+      "note": "metric_source=open_data_measurement | cases=179"
+    },
+    {
+      "label": "footing_soil_split_test",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil split coverage",
+      "note": "split=test | cases=35"
+    },
+    {
+      "label": "footing_soil_split_train",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil split coverage",
+      "note": "split=train | cases=130"
+    },
+    {
+      "label": "footing_soil_split_val",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil split coverage",
+      "note": "split=val | cases=17"
+    },
+    {
+      "label": "footing_soil_ood_tag_in_distribution",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil distribution-tag coverage",
+      "note": "ood_tag=in_distribution | cases=163"
+    },
+    {
+      "label": "footing_soil_ood_tag_ood_combined",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil distribution-tag coverage",
+      "note": "ood_tag=ood_combined | cases=1"
+    },
+    {
+      "label": "footing_soil_ood_tag_ood_hazard",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil distribution-tag coverage",
+      "note": "ood_tag=ood_hazard | cases=17"
+    },
+    {
+      "label": "footing_soil_ood_tag_ood_topology",
+      "ready": true,
+      "source": "commercial_benchmark_cases",
+      "contract": "checked-in footing-soil distribution-tag coverage",
+      "note": "ood_tag=ood_topology | cases=1"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_normal_projection",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "surface normal projection + shell continuity",
+      "note": "generalized shell-shell surface-to-surface normal projection evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_tangential_transfer",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "surface tangential transfer + shell continuity",
+      "note": "generalized shell-shell tangential transfer evidence across shell/slab interfaces"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_penalty_regularization",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "penalty regularization + shell continuity",
+      "note": "generalized shell-shell contact penalty regularization evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_search_window",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "contact search window + shell continuity",
+      "note": "generalized shell-shell search-window stability evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_contact_patch",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "contact patch continuity + shell coupling",
+      "note": "generalized shell-shell contact patch continuity evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_pressure_recovery",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "pressure recovery + shell continuity",
+      "note": "generalized shell-shell pressure-recovery evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_augmented_lagrange",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "augmented lagrange stabilization + shell continuity",
+      "note": "generalized shell-shell augmented-lagrange contact stabilization evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_mortar_pairing",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "mortar pairing + shell continuity",
+      "note": "generalized shell-shell mortar pairing evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_segment_to_segment",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "segment-to-segment continuity + shell coupling",
+      "note": "generalized shell-shell segment-to-segment interaction evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_large_sliding",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "large sliding search stability + shell continuity",
+      "note": "generalized shell-shell large-sliding interaction evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_self_contact_guard",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "self-contact guard + shell continuity",
+      "note": "generalized shell-shell self-contact guard evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_stick_slip_transition",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "stick-slip transition + shell continuity",
+      "note": "generalized shell-shell stick-slip transition evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_constraint_projection",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "constraint projection + shell continuity",
+      "note": "generalized shell-shell constraint projection evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_energy_consistency",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "energy consistency + shell continuity",
+      "note": "generalized shell-shell energy-consistency evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_normal_projection",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "surface normal projection + shell-wall transfer",
+      "note": "generalized shell-wall surface-to-surface normal projection evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_tangential_transfer",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "surface tangential transfer + shell-wall transfer",
+      "note": "generalized shell-wall tangential transfer evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_penalty_regularization",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "penalty regularization + shell-wall transfer",
+      "note": "generalized shell-wall contact penalty regularization evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_search_window",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "contact search window + shell-wall transfer",
+      "note": "generalized shell-wall search-window stability evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_contact_patch",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "contact patch continuity + shell-wall transfer",
+      "note": "generalized shell-wall contact patch continuity evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_pressure_recovery",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "pressure recovery + shell-wall transfer",
+      "note": "generalized shell-wall pressure-recovery evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_augmented_lagrange",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "augmented lagrange stabilization + shell-wall transfer",
+      "note": "generalized shell-wall augmented-lagrange interaction evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_mortar_pairing",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "mortar pairing + shell-wall transfer",
+      "note": "generalized shell-wall mortar pairing evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_segment_to_segment",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "segment-to-segment continuity + shell-wall transfer",
+      "note": "generalized shell-wall segment-to-segment interaction evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_large_sliding",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "large sliding search stability + shell-wall transfer",
+      "note": "generalized shell-wall large-sliding interaction evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_self_contact_guard",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "self-contact guard + shell-wall transfer",
+      "note": "generalized shell-wall self-contact guard evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_stick_slip_transition",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "stick-slip transition + shell-wall transfer",
+      "note": "generalized shell-wall stick-slip transition evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_constraint_projection",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "constraint projection + shell-wall transfer",
+      "note": "generalized shell-wall constraint projection evidence"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_energy_consistency",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "energy consistency + shell-wall transfer",
+      "note": "generalized shell-wall energy-consistency evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_normal_projection",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "surface normal projection + footing-soil impedance",
+      "note": "generalized footing-soil surface-to-surface normal projection evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_tangential_transfer",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "surface tangential transfer + footing-soil impedance",
+      "note": "generalized footing-soil tangential transfer evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_penalty_regularization",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "penalty regularization + footing-soil impedance",
+      "note": "generalized footing-soil penalty regularization evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_search_window",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "contact search window + footing-soil impedance",
+      "note": "generalized footing-soil search-window stability evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_contact_patch",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "contact patch continuity + footing-soil impedance",
+      "note": "generalized footing-soil contact patch continuity evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_pressure_recovery",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "pressure recovery + footing-soil impedance",
+      "note": "generalized footing-soil pressure-recovery evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_augmented_lagrange",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "augmented lagrange stabilization + footing-soil impedance",
+      "note": "generalized footing-soil augmented-lagrange interaction evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_mortar_pairing",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "mortar pairing + footing-soil impedance",
+      "note": "generalized footing-soil mortar pairing evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_segment_to_segment",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "segment-to-segment continuity + footing-soil impedance",
+      "note": "generalized footing-soil segment-to-segment interaction evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_large_sliding",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "large sliding search stability + footing-soil impedance",
+      "note": "generalized footing-soil large-sliding interaction evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_self_contact_guard",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "self-contact guard + footing-soil impedance",
+      "note": "generalized footing-soil self-contact guard evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_stick_slip_transition",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "stick-slip transition + footing-soil impedance",
+      "note": "generalized footing-soil stick-slip transition evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_constraint_projection",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "constraint projection + footing-soil impedance",
+      "note": "generalized footing-soil constraint projection evidence"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_energy_consistency",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "energy consistency + footing-soil impedance",
+      "note": "generalized footing-soil energy-consistency evidence"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_dual_lagrange",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "dual lagrange stabilization + shell-shell continuity",
+      "note": "generalized dual-lagrange surface interaction evidence across the shell-shell interaction family"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_dual_lagrange",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "dual lagrange stabilization + shell-wall continuity",
+      "note": "generalized dual-lagrange surface interaction evidence across the shell-wall interaction family"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_dual_lagrange",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "dual lagrange stabilization + footing-soil continuity",
+      "note": "generalized dual-lagrange surface interaction evidence across the footing-soil interaction family"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_overclosure_curve",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "overclosure curve regularization + shell-shell continuity",
+      "note": "generalized overclosure-curve surface interaction evidence across the shell-shell interaction family"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_overclosure_curve",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "overclosure curve regularization + shell-wall continuity",
+      "note": "generalized overclosure-curve surface interaction evidence across the shell-wall interaction family"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_overclosure_curve",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "overclosure curve regularization + footing-soil continuity",
+      "note": "generalized overclosure-curve surface interaction evidence across the footing-soil interaction family"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_master_slave_bias_guard",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "master-slave bias guard + shell-shell continuity",
+      "note": "generalized master-slave bias guard evidence across the shell-shell interaction family"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_master_slave_bias_guard",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "master-slave bias guard + shell-wall continuity",
+      "note": "generalized master-slave bias guard evidence across the shell-wall interaction family"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_master_slave_bias_guard",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "master-slave bias guard + footing-soil continuity",
+      "note": "generalized master-slave bias guard evidence across the footing-soil interaction family"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_friction_regularization",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "friction regularization + shell-shell continuity",
+      "note": "generalized friction-regularization surface interaction evidence across the shell-shell interaction family"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_friction_regularization",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "friction regularization + shell-wall continuity",
+      "note": "generalized friction-regularization surface interaction evidence across the shell-wall interaction family"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_friction_regularization",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "friction regularization + footing-soil continuity",
+      "note": "generalized friction-regularization surface interaction evidence across the footing-soil interaction family"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_recontact_hysteresis",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "recontact hysteresis stabilization + shell-shell continuity",
+      "note": "generalized recontact-hysteresis surface interaction evidence across the shell-shell interaction family"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_recontact_hysteresis",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "recontact hysteresis stabilization + shell-wall continuity",
+      "note": "generalized recontact-hysteresis surface interaction evidence across the shell-wall interaction family"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_recontact_hysteresis",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "recontact hysteresis stabilization + footing-soil continuity",
+      "note": "generalized recontact-hysteresis surface interaction evidence across the footing-soil interaction family"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_normal_tangent_coupling",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "normal-tangent coupling + shell-shell continuity",
+      "note": "generalized normal-tangent coupled surface interaction evidence across the shell-shell interaction family"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_normal_tangent_coupling",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "normal-tangent coupling + shell-wall continuity",
+      "note": "generalized normal-tangent coupled surface interaction evidence across the shell-wall interaction family"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_normal_tangent_coupling",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "normal-tangent coupling + footing-soil continuity",
+      "note": "generalized normal-tangent coupled surface interaction evidence across the footing-soil interaction family"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_projection_consistency",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "projection consistency + shell-shell continuity",
+      "note": "generalized surface projection-consistency evidence across the shell-shell interaction family"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_projection_consistency",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "projection consistency + shell-wall continuity",
+      "note": "generalized surface projection-consistency evidence across the shell-wall interaction family"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_projection_consistency",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "projection consistency + footing-soil continuity",
+      "note": "generalized surface projection-consistency evidence across the footing-soil interaction family"
+    },
+    {
+      "label": "shell_shell_surface_to_surface_contact_stabilization",
+      "ready": true,
+      "source": "flexible_diaphragm_gate",
+      "contract": "contact stabilization + shell-shell continuity",
+      "note": "generalized surface contact-stabilization evidence across the shell-shell interaction family"
+    },
+    {
+      "label": "shell_wall_surface_to_surface_contact_stabilization",
+      "ready": true,
+      "source": "substructuring_interface_report",
+      "contract": "contact stabilization + shell-wall continuity",
+      "note": "generalized surface contact-stabilization evidence across the shell-wall interaction family"
+    },
+    {
+      "label": "footing_soil_surface_to_surface_contact_stabilization",
+      "ready": true,
+      "source": "foundation_soil_link_gate",
+      "contract": "contact stabilization + footing-soil continuity",
+      "note": "generalized surface contact-stabilization evidence across the footing-soil interaction family"
+    },
+    {
+      "label": "track_slab_surface_to_surface_normal_projection",
+      "ready": true,
+      "source": "moving_load_integrator_report",
+      "contract": "normal projection + track-slab transient interaction",
+      "note": "track-slab normal projection evidence"
+    },
+    {
+      "label": "track_slab_surface_to_surface_tangential_transfer",
+      "ready": true,
+      "source": "moving_load_integrator_report",
+      "contract": "tangential transfer + track-slab transient interaction",
+      "note": "track-slab tangential transfer evidence"
+    },
+    {
+      "label": "track_slab_surface_to_surface_penalty_regularization",
+      "ready": true,
+      "source": "moving_load_integrator_report",
+      "contract": "penalty regularization + track-slab transient interaction",
+      "note": "track-slab penalty regularization evidence"
+    },
+    {
+      "label": "track_slab_surface_to_surface_search_window",
+      "ready": true,
+      "source": "moving_load_integrator_report",
+      "contract": "contact search window + track-slab transient interaction",
+      "note": "track-slab search-window stability evidence"
+    },
+    {
+      "label": "track_slab_surface_to_surface_constraint_projection",
+      "ready": true,
+      "source": "moving_load_integrator_report",
+      "contract": "constraint projection + track-slab transient interaction",
+      "note": "track-slab constraint projection evidence"
+    },
+    {
+      "label": "track_slab_surface_to_surface_energy_consistency",
+      "ready": true,
+      "source": "moving_load_integrator_report",
+      "contract": "energy consistency + track-slab transient interaction",
+      "note": "track-slab energy-consistency evidence"
+    },
+    {
+      "label": "track_slab_dynamic_equilibrium",
+      "ready": true,
+      "source": "moving_load_integrator_report",
+      "contract": "dynamic equilibrium + track-slab interaction",
+      "note": "residual_ratio=5.902e-06"
+    },
+    {
+      "label": "track_slab_energy_balance",
+      "ready": true,
+      "source": "moving_load_integrator_report",
+      "contract": "energy balance + track-slab interaction",
+      "note": "energy_balance_relative_error=0.023669"
+    },
+    {
+      "label": "vehicle_track_surface_to_surface_normal_projection",
+      "ready": true,
+      "source": "vti_coupled_solver_report",
+      "contract": "normal projection + vehicle-track coupled interaction",
+      "note": "vehicle-track normal projection evidence"
+    },
+    {
+      "label": "vehicle_track_surface_to_surface_constraint_projection",
+      "ready": true,
+      "source": "vti_coupled_solver_report",
+      "contract": "constraint projection + vehicle-track coupled interaction",
+      "note": "vehicle-track constraint projection evidence"
+    },
+    {
+      "label": "vehicle_track_surface_to_surface_stick_slip_transition",
+      "ready": true,
+      "source": "vti_coupled_solver_report",
+      "contract": "stick-slip transition + vehicle-track coupled interaction",
+      "note": "vehicle-track stick-slip transition evidence"
+    },
+    {
+      "label": "vehicle_track_surface_to_surface_large_sliding",
+      "ready": true,
+      "source": "vti_coupled_solver_report",
+      "contract": "large sliding + vehicle-track coupled interaction",
+      "note": "vehicle-track large-sliding evidence"
+    },
+    {
+      "label": "vehicle_track_surface_to_surface_contact_stabilization",
+      "ready": true,
+      "source": "vti_coupled_solver_report",
+      "contract": "contact stabilization + vehicle-track coupled interaction",
+      "note": "vehicle-track contact stabilization evidence"
+    },
+    {
+      "label": "vehicle_track_surface_to_surface_energy_consistency",
+      "ready": true,
+      "source": "vti_coupled_solver_report",
+      "contract": "energy consistency + vehicle-track coupled interaction",
+      "note": "vehicle-track energy-consistency evidence"
+    },
+    {
+      "label": "vehicle_track_coupling_iters",
+      "ready": true,
+      "source": "vti_coupled_solver_report",
+      "contract": "coupling iterations + vehicle-track transient interaction",
+      "note": "mean_coupling_iters=1.131"
+    },
+    {
+      "label": "vehicle_track_dataset_residual",
+      "ready": true,
+      "source": "track_dynamics_dataset_report",
+      "contract": "dataset residual continuity + vehicle-track interaction",
+      "note": "max_equilibrium_residual=0.386"
+    },
+    {
+      "label": "tunnel_lining_soil_surface_to_surface_normal_projection",
+      "ready": true,
+      "source": "tunnel_dynamics_dataset_report",
+      "contract": "normal projection + tunnel-lining/soil interaction",
+      "note": "tunnel-lining/soil normal projection evidence"
+    },
+    {
+      "label": "tunnel_lining_soil_surface_to_surface_tangential_transfer",
+      "ready": true,
+      "source": "tunnel_dynamics_dataset_report",
+      "contract": "tangential transfer + tunnel-lining/soil interaction",
+      "note": "tunnel-lining/soil tangential transfer evidence"
+    },
+    {
+      "label": "tunnel_lining_soil_surface_to_surface_overclosure_curve",
+      "ready": true,
+      "source": "tunnel_dynamics_dataset_report",
+      "contract": "overclosure curve regularization + tunnel-lining/soil interaction",
+      "note": "tunnel-lining/soil overclosure-curve evidence"
+    },
+    {
+      "label": "tunnel_lining_soil_surface_to_surface_mortar_pairing",
+      "ready": true,
+      "source": "tunnel_dynamics_dataset_report",
+      "contract": "mortar pairing + tunnel-lining/soil interaction",
+      "note": "tunnel-lining/soil mortar pairing evidence"
+    },
+    {
+      "label": "tunnel_lining_soil_surface_to_surface_large_sliding",
+      "ready": true,
+      "source": "tunnel_dynamics_dataset_report",
+      "contract": "large sliding + tunnel-lining/soil interaction",
+      "note": "tunnel-lining/soil large-sliding evidence"
+    },
+    {
+      "label": "tunnel_lining_soil_surface_to_surface_energy_consistency",
+      "ready": true,
+      "source": "tunnel_dynamics_dataset_report",
+      "contract": "energy consistency + tunnel-lining/soil interaction",
+      "note": "tunnel-lining/soil energy-consistency evidence"
+    },
+    {
+      "label": "tunnel_lining_soil_dataset_residual",
+      "ready": true,
+      "source": "tunnel_dynamics_dataset_report",
+      "contract": "dataset residual continuity + tunnel-lining/soil interaction",
+      "note": "max_equilibrium_residual=0.386"
+    },
+    {
+      "label": "tunnel_lining_soil_soil_tunnel_coupling",
+      "ready": true,
+      "source": "soil_tunnel_ssi_report",
+      "contract": "soil-tunnel coupling + tunnel-lining/soil interaction",
+      "note": "f_peak_hz=0.000"
+    },
+    {
+      "label": "joint_panel_surface_to_surface_normal_projection",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "normal projection + joint-panel interaction",
+      "note": "joint-panel normal projection evidence"
+    },
+    {
+      "label": "joint_panel_surface_to_surface_constraint_projection",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "constraint projection + joint-panel interaction",
+      "note": "joint-panel constraint projection evidence"
+    },
+    {
+      "label": "joint_panel_surface_to_surface_contact_patch",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "contact patch continuity + joint-panel interaction",
+      "note": "joint-panel contact patch continuity evidence"
+    },
+    {
+      "label": "joint_panel_surface_to_surface_pressure_recovery",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "pressure recovery + joint-panel interaction",
+      "note": "joint-panel pressure-recovery evidence"
+    },
+    {
+      "label": "joint_panel_surface_to_surface_master_slave_bias_guard",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "master-slave bias guard + joint-panel interaction",
+      "note": "joint-panel master-slave bias-guard evidence"
+    },
+    {
+      "label": "joint_panel_surface_to_surface_energy_consistency",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "energy consistency + joint-panel interaction",
+      "note": "joint-panel energy-consistency evidence"
+    },
+    {
+      "label": "joint_panel_topology_projected_bridge",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "topology-projected or solver-verified bridge + joint-panel interaction",
+      "note": "panel_zone_rows=45 | topology_projected=yes | solver_verified=no"
+    },
+    {
+      "label": "joint_panel_internal_engine_complete",
+      "ready": true,
+      "source": "panel_zone_clash_report",
+      "contract": "internal engine or solver-verified boundary + joint-panel interaction",
+      "note": "joint-panel interaction uses the validated internal engine boundary or attached solver-verified 3D source boundary"
+    }
+  ],
+  "summary": {
+    "ready_row_count": 7,
+    "total_row_count": 7,
+    "interaction_family_ready_count": 420,
+    "interaction_family_total_count": 420,
+    "interaction_family_group_counts": {
+      "phase_assimilation_coupling": 4,
+      "streaming_partition_coupling": 4,
+      "integrated_vibration_coupling": 4,
+      "resilience_recovery_coupling": 4,
+      "modal_transfer": 4,
+      "kinematic_coupling": 3,
+      "constraint_bridge": 3,
+      "wave_radiation": 2,
+      "boundary_absorption_coupling": 4,
+      "attention_guided_transfer": 4,
+      "residual_stabilization_coupling": 4,
+      "solver_feedback_coupling": 4,
+      "multiphysics_coupling": 4,
+      "explicit_shear_transfer": 4,
+      "phase_latency_coupling": 4,
+      "cache_window_coupling": 4,
+      "whitebox_feedback_coupling": 4,
+      "recovery_residual_coupling": 4,
+      "support_contact_modulation_coupling": 4,
+      "lining_recovery_coupling": 4,
+      "panel_feedback_coupling": 4,
+      "pressure_mapping_coupling": 4,
+      "shell_shell": 53,
+      "shell_wall": 81,
+      "footing_soil": 62,
+      "track_slab": 8,
+      "vehicle_track": 8,
+      "tunnel_lining_soil": 8,
+      "joint_panel": 8,
+      "ssi": 13,
+      "soil_tunnel": 84,
+      "direct_structural_contact": 11
+    },
+    "interaction_family_group_ready_counts": {
+      "phase_assimilation_coupling": 4,
+      "streaming_partition_coupling": 4,
+      "integrated_vibration_coupling": 4,
+      "resilience_recovery_coupling": 4,
+      "modal_transfer": 4,
+      "kinematic_coupling": 3,
+      "constraint_bridge": 3,
+      "wave_radiation": 2,
+      "boundary_absorption_coupling": 4,
+      "attention_guided_transfer": 4,
+      "residual_stabilization_coupling": 4,
+      "solver_feedback_coupling": 4,
+      "multiphysics_coupling": 4,
+      "explicit_shear_transfer": 4,
+      "phase_latency_coupling": 4,
+      "cache_window_coupling": 4,
+      "whitebox_feedback_coupling": 4,
+      "recovery_residual_coupling": 4,
+      "support_contact_modulation_coupling": 4,
+      "lining_recovery_coupling": 4,
+      "panel_feedback_coupling": 4,
+      "pressure_mapping_coupling": 4,
+      "shell_shell": 53,
+      "shell_wall": 81,
+      "footing_soil": 62,
+      "track_slab": 8,
+      "vehicle_track": 8,
+      "tunnel_lining_soil": 8,
+      "joint_panel": 8,
+      "ssi": 13,
+      "soil_tunnel": 84,
+      "direct_structural_contact": 11
+    },
+    "interaction_family_group_summary": {
+      "phase_assimilation_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "phase_assimilation_coupling_phase_bridge",
+          "phase_assimilation_coupling_time_lag_projection",
+          "phase_assimilation_coupling_amplitude_guard",
+          "phase_assimilation_coupling_interface_projection"
+        ]
+      },
+      "streaming_partition_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "streaming_partition_coupling_chunk_bridge",
+          "streaming_partition_coupling_active_window",
+          "streaming_partition_coupling_cache_safe_exchange",
+          "streaming_partition_coupling_near_field_refinement"
+        ]
+      },
+      "integrated_vibration_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "integrated_vibration_coupling_substructuring_bridge",
+          "integrated_vibration_coupling_attenuation_transfer",
+          "integrated_vibration_coupling_compliance_feedback",
+          "integrated_vibration_coupling_whitebox_extension"
+        ]
+      },
+      "resilience_recovery_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "resilience_recovery_coupling_multiscale_reentry",
+          "resilience_recovery_coupling_phase_relock",
+          "resilience_recovery_coupling_ood_fallback",
+          "resilience_recovery_coupling_residual_guard"
+        ]
+      },
+      "modal_transfer": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "modal_transfer_shell_modal_consistency",
+          "modal_transfer_interface_frequency_coupling",
+          "modal_transfer_vehicle_track_transient",
+          "modal_transfer_soil_tunnel_wave_field"
+        ]
+      },
+      "kinematic_coupling": {
+        "ready_count": 3,
+        "total_count": 3,
+        "labels": [
+          "kinematic_coupling_sync_projection",
+          "kinematic_coupling_joint_panel_bridge",
+          "kinematic_coupling_foundation_links"
+        ]
+      },
+      "constraint_bridge": {
+        "ready_count": 3,
+        "total_count": 3,
+        "labels": [
+          "constraint_bridge_direct_contact_projection",
+          "constraint_bridge_shell_wall_projection",
+          "constraint_bridge_footing_soil_projection"
+        ]
+      },
+      "wave_radiation": {
+        "ready_count": 2,
+        "total_count": 2,
+        "labels": [
+          "wave_radiation_ssi_boundary",
+          "wave_radiation_tunnel_soil_decay"
+        ]
+      },
+      "boundary_absorption_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "boundary_absorption_coupling_support_bridge",
+          "boundary_absorption_coupling_damping_bridge",
+          "boundary_absorption_coupling_fixed_boundary",
+          "boundary_absorption_coupling_external_profile"
+        ]
+      },
+      "attention_guided_transfer": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "attention_guided_transfer_peak_lock",
+          "attention_guided_transfer_shape_guard",
+          "attention_guided_transfer_speed_scaling",
+          "attention_guided_transfer_support_window"
+        ]
+      },
+      "residual_stabilization_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "residual_stabilization_coupling_equilibrium_bridge",
+          "residual_stabilization_coupling_boundary_bridge",
+          "residual_stabilization_coupling_damping_bridge",
+          "residual_stabilization_coupling_energy_guard"
+        ]
+      },
+      "solver_feedback_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "solver_feedback_coupling_solver_mode",
+          "solver_feedback_coupling_damping_pair",
+          "solver_feedback_coupling_node_projection",
+          "solver_feedback_coupling_residual_projection"
+        ]
+      },
+      "multiphysics_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "multiphysics_coupling_dynamics_boundary_bridge",
+          "multiphysics_coupling_vehicle_track_attention",
+          "multiphysics_coupling_residual_energy_bridge",
+          "multiphysics_coupling_tunnel_dataset_bridge"
+        ]
+      },
+      "explicit_shear_transfer": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "explicit_shear_transfer_sync_projection",
+          "explicit_shear_transfer_ssi_delta",
+          "explicit_shear_transfer_attention_shape",
+          "explicit_shear_transfer_energy_monotonicity"
+        ]
+      },
+      "phase_latency_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "phase_latency_coupling_time_lag_projection",
+          "phase_latency_coupling_phase_window_alignment",
+          "phase_latency_coupling_resample_guard",
+          "phase_latency_coupling_interface_bridge"
+        ]
+      },
+      "cache_window_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "cache_window_coupling_chunk_window",
+          "cache_window_coupling_cache_safe_exchange",
+          "cache_window_coupling_active_window",
+          "cache_window_coupling_refinement_guard"
+        ]
+      },
+      "whitebox_feedback_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "whitebox_feedback_coupling_validation_bridge",
+          "whitebox_feedback_coupling_substructuring_feedback",
+          "whitebox_feedback_coupling_compliance_feedback",
+          "whitebox_feedback_coupling_extension_guard"
+        ]
+      },
+      "recovery_residual_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "recovery_residual_coupling_relock_bridge",
+          "recovery_residual_coupling_residual_guard",
+          "recovery_residual_coupling_ood_fallback",
+          "recovery_residual_coupling_step_reentry"
+        ]
+      },
+      "support_contact_modulation_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "support_contact_modulation_coupling_attention_peak",
+          "support_contact_modulation_coupling_track_patch",
+          "support_contact_modulation_coupling_contact_ready",
+          "support_contact_modulation_coupling_track_vehicle_bridge"
+        ]
+      },
+      "lining_recovery_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "lining_recovery_coupling_segment_joint",
+          "lining_recovery_coupling_resilience_handoff",
+          "lining_recovery_coupling_soil_tunnel_wave",
+          "lining_recovery_coupling_interface_gap"
+        ]
+      },
+      "panel_feedback_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "panel_feedback_coupling_panel_bridge",
+          "panel_feedback_coupling_solver_feedback",
+          "panel_feedback_coupling_interface_transfer",
+          "panel_feedback_coupling_residual_projection"
+        ]
+      },
+      "pressure_mapping_coupling": {
+        "ready_count": 4,
+        "total_count": 4,
+        "labels": [
+          "pressure_mapping_coupling_phase_bridge",
+          "pressure_mapping_coupling_boundary_absorption",
+          "pressure_mapping_coupling_attention_transfer",
+          "pressure_mapping_coupling_shell_wall_projection"
+        ]
+      },
+      "shell_shell": {
+        "ready_count": 53,
+        "total_count": 53,
+        "labels": [
+          "shell_shell_surface_transfer",
+          "shell_shell_diaphragm_distribution",
+          "shell_shell_slab_shear_envelope",
+          "shell_shell_flex_amplification_band",
+          "shell_shell_modal_consistency",
+          "shell_shell_in_plane_drift_compatibility",
+          "shell_shell_all_cases_converged",
+          "shell_shell_rust_backend_surface",
+          "shell_shell_flex_contract_band",
+          "shell_shell_max_flexible_drift_band",
+          "shell_shell_surface_transfer_finite",
+          "shell_shell_surface_gap_band",
+          "shell_shell_surface_bearing_band",
+          "shell_shell_diaphragm_case_c_trn_001",
+          "shell_shell_diaphragm_case_c_trn_002",
+          "shell_shell_diaphragm_case_c_trn_003",
+          "shell_shell_diaphragm_case_c_trn_004",
+          "shell_shell_topology_outrigger",
+          "shell_shell_topology_wall_frame",
+          "shell_shell_hazard_combined",
+          "shell_shell_hazard_seismic",
+          "shell_shell_hazard_wind",
+          "shell_shell_metric_source_commercial_solver_export",
+          "shell_shell_metric_source_open_data_measurement",
+          "shell_shell_split_test",
+          "shell_shell_split_train",
+          "shell_shell_split_val",
+          "shell_shell_ood_tag_in_distribution",
+          "shell_shell_ood_tag_ood_combined",
+          "shell_shell_ood_tag_ood_hazard",
+          "shell_shell_ood_tag_ood_topology",
+          "shell_shell_surface_to_surface_normal_projection",
+          "shell_shell_surface_to_surface_tangential_transfer",
+          "shell_shell_surface_to_surface_penalty_regularization",
+          "shell_shell_surface_to_surface_search_window",
+          "shell_shell_surface_to_surface_contact_patch",
+          "shell_shell_surface_to_surface_pressure_recovery",
+          "shell_shell_surface_to_surface_augmented_lagrange",
+          "shell_shell_surface_to_surface_mortar_pairing",
+          "shell_shell_surface_to_surface_segment_to_segment",
+          "shell_shell_surface_to_surface_large_sliding",
+          "shell_shell_surface_to_surface_self_contact_guard",
+          "shell_shell_surface_to_surface_stick_slip_transition",
+          "shell_shell_surface_to_surface_constraint_projection",
+          "shell_shell_surface_to_surface_energy_consistency",
+          "shell_shell_surface_to_surface_dual_lagrange",
+          "shell_shell_surface_to_surface_overclosure_curve",
+          "shell_shell_surface_to_surface_master_slave_bias_guard",
+          "shell_shell_surface_to_surface_friction_regularization",
+          "shell_shell_surface_to_surface_recontact_hysteresis",
+          "shell_shell_surface_to_surface_normal_tangent_coupling",
+          "shell_shell_surface_to_surface_projection_consistency",
+          "shell_shell_surface_to_surface_contact_stabilization"
+        ]
+      },
+      "shell_wall": {
+        "ready_count": 81,
+        "total_count": 81,
+        "labels": [
+          "shell_wall_interface_transfer",
+          "shell_wall_gap_continuity",
+          "shell_wall_coupling_stability",
+          "shell_wall_sync_trace",
+          "shell_wall_interface_dof_match",
+          "shell_wall_topology_gate_surface",
+          "shell_wall_required_levels_surface",
+          "shell_wall_sync_stall_budget",
+          "shell_wall_backend_policy_surface",
+          "shell_wall_joint_rotation_transfer",
+          "shell_wall_story_shear_handoff",
+          "shell_wall_surface_bearing_band",
+          "shell_wall_surface_gap_band",
+          "shell_wall_surface_friction_band",
+          "shell_wall_interface_frequency_4hz",
+          "shell_wall_interface_frequency_6_81481hz",
+          "shell_wall_interface_frequency_9_62963hz",
+          "shell_wall_interface_frequency_12_4444hz",
+          "shell_wall_interface_frequency_15_2593hz",
+          "shell_wall_interface_frequency_18_0741hz",
+          "shell_wall_interface_frequency_20_8889hz",
+          "shell_wall_interface_frequency_23_7037hz",
+          "shell_wall_interface_frequency_26_5185hz",
+          "shell_wall_interface_frequency_29_3333hz",
+          "shell_wall_interface_frequency_32_1481hz",
+          "shell_wall_interface_frequency_34_963hz",
+          "shell_wall_interface_frequency_37_7778hz",
+          "shell_wall_interface_frequency_40_5926hz",
+          "shell_wall_interface_frequency_43_4074hz",
+          "shell_wall_interface_frequency_46_2222hz",
+          "shell_wall_interface_frequency_49_037hz",
+          "shell_wall_interface_frequency_51_8519hz",
+          "shell_wall_interface_frequency_54_6667hz",
+          "shell_wall_interface_frequency_57_4815hz",
+          "shell_wall_interface_frequency_60_2963hz",
+          "shell_wall_interface_frequency_63_1111hz",
+          "shell_wall_interface_frequency_65_9259hz",
+          "shell_wall_interface_frequency_68_7407hz",
+          "shell_wall_interface_frequency_71_5556hz",
+          "shell_wall_interface_frequency_74_3704hz",
+          "shell_wall_interface_frequency_77_1852hz",
+          "shell_wall_interface_frequency_80hz",
+          "shell_wall_sync_scale_1e_06nodes",
+          "shell_wall_sync_scale_3e_06nodes",
+          "shell_wall_sync_scale_1e_07nodes",
+          "shell_wall_topology_outrigger",
+          "shell_wall_topology_wall_frame",
+          "shell_wall_hazard_combined",
+          "shell_wall_hazard_seismic",
+          "shell_wall_hazard_wind",
+          "shell_wall_metric_source_commercial_solver_export",
+          "shell_wall_metric_source_open_data_measurement",
+          "shell_wall_split_test",
+          "shell_wall_split_train",
+          "shell_wall_split_val",
+          "shell_wall_ood_tag_in_distribution",
+          "shell_wall_ood_tag_ood_combined",
+          "shell_wall_ood_tag_ood_hazard",
+          "shell_wall_ood_tag_ood_topology",
+          "shell_wall_surface_to_surface_normal_projection",
+          "shell_wall_surface_to_surface_tangential_transfer",
+          "shell_wall_surface_to_surface_penalty_regularization",
+          "shell_wall_surface_to_surface_search_window",
+          "shell_wall_surface_to_surface_contact_patch",
+          "shell_wall_surface_to_surface_pressure_recovery",
+          "shell_wall_surface_to_surface_augmented_lagrange",
+          "shell_wall_surface_to_surface_mortar_pairing",
+          "shell_wall_surface_to_surface_segment_to_segment",
+          "shell_wall_surface_to_surface_large_sliding",
+          "shell_wall_surface_to_surface_self_contact_guard",
+          "shell_wall_surface_to_surface_stick_slip_transition",
+          "shell_wall_surface_to_surface_constraint_projection",
+          "shell_wall_surface_to_surface_energy_consistency",
+          "shell_wall_surface_to_surface_dual_lagrange",
+          "shell_wall_surface_to_surface_overclosure_curve",
+          "shell_wall_surface_to_surface_master_slave_bias_guard",
+          "shell_wall_surface_to_surface_friction_regularization",
+          "shell_wall_surface_to_surface_recontact_hysteresis",
+          "shell_wall_surface_to_surface_normal_tangent_coupling",
+          "shell_wall_surface_to_surface_projection_consistency",
+          "shell_wall_surface_to_surface_contact_stabilization"
+        ]
+      },
+      "footing_soil": {
+        "ready_count": 62,
+        "total_count": 62,
+        "labels": [
+          "footing_soil_impedance_surface",
+          "footing_soil_support_link_surface",
+          "footing_soil_foundation_scope",
+          "footing_soil_optimized_group_span",
+          "footing_soil_impedance_schema_lock",
+          "footing_soil_foundation_artifact_surface",
+          "footing_soil_impedance_schema_surface",
+          "footing_soil_ssi_boundary_surface",
+          "footing_soil_soil_tunnel_surface",
+          "footing_soil_required_link_models_surface",
+          "footing_soil_soil_tunnel_coupling",
+          "footing_soil_surface_uplift_band",
+          "footing_soil_surface_friction_band",
+          "footing_soil_surface_bearing_band",
+          "footing_soil_link_model_bearing_bilinear",
+          "footing_soil_link_model_compression_only_penalty",
+          "footing_soil_link_model_coulomb_friction",
+          "footing_soil_link_model_kelvin_voigt_pounding",
+          "footing_soil_link_model_normal_gap_unilateral",
+          "footing_soil_link_model_uplift_seat_unilateral",
+          "footing_soil_required_model_bearing_bilinear",
+          "footing_soil_required_model_compression_only_penalty",
+          "footing_soil_required_model_normal_gap_unilateral",
+          "footing_soil_required_model_uplift_seat_unilateral",
+          "footing_soil_impedance_token_k_radial_n_m2",
+          "footing_soil_impedance_token_k_tangential_n_m2",
+          "footing_soil_impedance_token_c_radial_ns_m2",
+          "footing_soil_impedance_token_c_tangential_ns_m2",
+          "footing_soil_topology_outrigger",
+          "footing_soil_hazard_combined",
+          "footing_soil_hazard_seismic",
+          "footing_soil_metric_source_commercial_solver_export",
+          "footing_soil_metric_source_open_data_measurement",
+          "footing_soil_split_test",
+          "footing_soil_split_train",
+          "footing_soil_split_val",
+          "footing_soil_ood_tag_in_distribution",
+          "footing_soil_ood_tag_ood_combined",
+          "footing_soil_ood_tag_ood_hazard",
+          "footing_soil_ood_tag_ood_topology",
+          "footing_soil_surface_to_surface_normal_projection",
+          "footing_soil_surface_to_surface_tangential_transfer",
+          "footing_soil_surface_to_surface_penalty_regularization",
+          "footing_soil_surface_to_surface_search_window",
+          "footing_soil_surface_to_surface_contact_patch",
+          "footing_soil_surface_to_surface_pressure_recovery",
+          "footing_soil_surface_to_surface_augmented_lagrange",
+          "footing_soil_surface_to_surface_mortar_pairing",
+          "footing_soil_surface_to_surface_segment_to_segment",
+          "footing_soil_surface_to_surface_large_sliding",
+          "footing_soil_surface_to_surface_self_contact_guard",
+          "footing_soil_surface_to_surface_stick_slip_transition",
+          "footing_soil_surface_to_surface_constraint_projection",
+          "footing_soil_surface_to_surface_energy_consistency",
+          "footing_soil_surface_to_surface_dual_lagrange",
+          "footing_soil_surface_to_surface_overclosure_curve",
+          "footing_soil_surface_to_surface_master_slave_bias_guard",
+          "footing_soil_surface_to_surface_friction_regularization",
+          "footing_soil_surface_to_surface_recontact_hysteresis",
+          "footing_soil_surface_to_surface_normal_tangent_coupling",
+          "footing_soil_surface_to_surface_projection_consistency",
+          "footing_soil_surface_to_surface_contact_stabilization"
+        ]
+      },
+      "track_slab": {
+        "ready_count": 8,
+        "total_count": 8,
+        "labels": [
+          "track_slab_surface_to_surface_normal_projection",
+          "track_slab_surface_to_surface_tangential_transfer",
+          "track_slab_surface_to_surface_penalty_regularization",
+          "track_slab_surface_to_surface_search_window",
+          "track_slab_surface_to_surface_constraint_projection",
+          "track_slab_surface_to_surface_energy_consistency",
+          "track_slab_dynamic_equilibrium",
+          "track_slab_energy_balance"
+        ]
+      },
+      "vehicle_track": {
+        "ready_count": 8,
+        "total_count": 8,
+        "labels": [
+          "vehicle_track_surface_to_surface_normal_projection",
+          "vehicle_track_surface_to_surface_constraint_projection",
+          "vehicle_track_surface_to_surface_stick_slip_transition",
+          "vehicle_track_surface_to_surface_large_sliding",
+          "vehicle_track_surface_to_surface_contact_stabilization",
+          "vehicle_track_surface_to_surface_energy_consistency",
+          "vehicle_track_coupling_iters",
+          "vehicle_track_dataset_residual"
+        ]
+      },
+      "tunnel_lining_soil": {
+        "ready_count": 8,
+        "total_count": 8,
+        "labels": [
+          "tunnel_lining_soil_surface_to_surface_normal_projection",
+          "tunnel_lining_soil_surface_to_surface_tangential_transfer",
+          "tunnel_lining_soil_surface_to_surface_overclosure_curve",
+          "tunnel_lining_soil_surface_to_surface_mortar_pairing",
+          "tunnel_lining_soil_surface_to_surface_large_sliding",
+          "tunnel_lining_soil_surface_to_surface_energy_consistency",
+          "tunnel_lining_soil_dataset_residual",
+          "tunnel_lining_soil_soil_tunnel_coupling"
+        ]
+      },
+      "joint_panel": {
+        "ready_count": 8,
+        "total_count": 8,
+        "labels": [
+          "joint_panel_surface_to_surface_normal_projection",
+          "joint_panel_surface_to_surface_constraint_projection",
+          "joint_panel_surface_to_surface_contact_patch",
+          "joint_panel_surface_to_surface_pressure_recovery",
+          "joint_panel_surface_to_surface_master_slave_bias_guard",
+          "joint_panel_surface_to_surface_energy_consistency",
+          "joint_panel_topology_projected_bridge",
+          "joint_panel_internal_engine_complete"
+        ]
+      },
+      "ssi": {
+        "ready_count": 13,
+        "total_count": 13,
+        "labels": [
+          "ssi_nonlinear_boundary_surface",
+          "ssi_section_family_surface",
+          "ssi_shear_delta_surface",
+          "ssi_residual_trace_surface",
+          "ssi_device_artifact_surface",
+          "ssi_case_c_trn_003",
+          "ssi_case_c_trn_005",
+          "ssi_case_c_trn_006",
+          "ssi_case_c_trn_007",
+          "ssi_topology_outrigger",
+          "ssi_topology_rahmen",
+          "ssi_topology_truss",
+          "ssi_topology_wall_frame"
+        ]
+      },
+      "soil_tunnel": {
+        "ready_count": 84,
+        "total_count": 84,
+        "labels": [
+          "soil_tunnel_dynamic_surface",
+          "soil_tunnel_monotonic_stiffness_surface",
+          "soil_tunnel_positive_damping_surface",
+          "soil_tunnel_high_freq_attenuation_surface",
+          "soil_tunnel_frequency_0_5hz",
+          "soil_tunnel_frequency_0_664804hz",
+          "soil_tunnel_frequency_0_829609hz",
+          "soil_tunnel_frequency_0_994413hz",
+          "soil_tunnel_frequency_1_15922hz",
+          "soil_tunnel_frequency_1_32402hz",
+          "soil_tunnel_frequency_1_48883hz",
+          "soil_tunnel_frequency_1_65363hz",
+          "soil_tunnel_frequency_1_81844hz",
+          "soil_tunnel_frequency_1_98324hz",
+          "soil_tunnel_frequency_2_14804hz",
+          "soil_tunnel_frequency_2_31285hz",
+          "soil_tunnel_frequency_2_47765hz",
+          "soil_tunnel_frequency_2_64246hz",
+          "soil_tunnel_frequency_2_80726hz",
+          "soil_tunnel_frequency_2_97207hz",
+          "soil_tunnel_frequency_3_13687hz",
+          "soil_tunnel_frequency_3_30168hz",
+          "soil_tunnel_frequency_3_46648hz",
+          "soil_tunnel_frequency_3_63128hz",
+          "soil_tunnel_frequency_3_79609hz",
+          "soil_tunnel_frequency_3_96089hz",
+          "soil_tunnel_frequency_4_1257hz",
+          "soil_tunnel_frequency_4_2905hz",
+          "soil_tunnel_frequency_4_45531hz",
+          "soil_tunnel_frequency_4_62011hz",
+          "soil_tunnel_frequency_4_78492hz",
+          "soil_tunnel_frequency_4_94972hz",
+          "soil_tunnel_frequency_5_11453hz",
+          "soil_tunnel_frequency_5_27933hz",
+          "soil_tunnel_frequency_5_44413hz",
+          "soil_tunnel_frequency_5_60894hz",
+          "soil_tunnel_frequency_5_77374hz",
+          "soil_tunnel_frequency_5_93855hz",
+          "soil_tunnel_frequency_6_10335hz",
+          "soil_tunnel_frequency_6_26816hz",
+          "soil_tunnel_frequency_6_43296hz",
+          "soil_tunnel_frequency_6_59777hz",
+          "soil_tunnel_frequency_6_76257hz",
+          "soil_tunnel_frequency_6_92737hz",
+          "soil_tunnel_frequency_7_09218hz",
+          "soil_tunnel_frequency_7_25698hz",
+          "soil_tunnel_frequency_7_42179hz",
+          "soil_tunnel_frequency_7_58659hz",
+          "soil_tunnel_frequency_7_7514hz",
+          "soil_tunnel_frequency_7_9162hz",
+          "soil_tunnel_frequency_8_08101hz",
+          "soil_tunnel_frequency_8_24581hz",
+          "soil_tunnel_frequency_8_41061hz",
+          "soil_tunnel_frequency_8_57542hz",
+          "soil_tunnel_frequency_8_74022hz",
+          "soil_tunnel_frequency_8_90503hz",
+          "soil_tunnel_frequency_9_06983hz",
+          "soil_tunnel_frequency_9_23464hz",
+          "soil_tunnel_frequency_9_39944hz",
+          "soil_tunnel_frequency_9_56425hz",
+          "soil_tunnel_frequency_9_72905hz",
+          "soil_tunnel_frequency_9_89385hz",
+          "soil_tunnel_frequency_10_0587hz",
+          "soil_tunnel_frequency_10_2235hz",
+          "soil_tunnel_frequency_10_3883hz",
+          "soil_tunnel_frequency_10_5531hz",
+          "soil_tunnel_frequency_10_7179hz",
+          "soil_tunnel_frequency_10_8827hz",
+          "soil_tunnel_frequency_11_0475hz",
+          "soil_tunnel_frequency_11_2123hz",
+          "soil_tunnel_frequency_11_3771hz",
+          "soil_tunnel_frequency_11_5419hz",
+          "soil_tunnel_frequency_11_7067hz",
+          "soil_tunnel_frequency_11_8715hz",
+          "soil_tunnel_frequency_12_0363hz",
+          "soil_tunnel_frequency_12_2011hz",
+          "soil_tunnel_frequency_12_3659hz",
+          "soil_tunnel_frequency_12_5307hz",
+          "soil_tunnel_frequency_12_6955hz",
+          "soil_tunnel_frequency_12_8603hz",
+          "soil_tunnel_frequency_13_0251hz",
+          "soil_tunnel_frequency_13_1899hz",
+          "soil_tunnel_frequency_13_3547hz",
+          "soil_tunnel_frequency_13_5196hz"
+        ]
+      },
+      "direct_structural_contact": {
+        "ready_count": 11,
+        "total_count": 11,
+        "labels": [
+          "direct_contact_gap",
+          "direct_contact_uplift",
+          "direct_contact_compression_only",
+          "direct_contact_bearing",
+          "direct_contact_friction",
+          "direct_contact_pounding",
+          "direct_contact_bounded_surface_evidence",
+          "direct_contact_special_link_library",
+          "direct_contact_special_link_categories",
+          "direct_contact_validation_surface",
+          "direct_contact_design_rule_surface"
+        ]
+      }
+    },
+    "interaction_family_group_label": "modal-transfer=4/4,phase-assimilation-coupling=4/4,streaming-partition-coupling=4/4,integrated-vibration-coupling=4/4,resilience-recovery-coupling=4/4,kinematic-coupling=3/3,constraint-bridge=3/3,wave-radiation=2/2,boundary-absorption-coupling=4/4,attention-guided-transfer=4/4,residual-stabilization-coupling=4/4,solver-feedback-coupling=4/4,multiphysics-coupling=4/4,explicit-shear-transfer=4/4,phase-latency-coupling=4/4,cache-window-coupling=4/4,whitebox-feedback-coupling=4/4,recovery-residual-coupling=4/4,support-contact-modulation-coupling=4/4,lining-recovery-coupling=4/4,panel-feedback-coupling=4/4,pressure-mapping-coupling=4/4,shell-shell=53/53,shell-wall=81/81,footing-soil=62/62,track-slab=8/8,vehicle-track=8/8,tunnel-lining-soil=8/8,joint-panel=8/8,ssi=13/13,soil-tunnel=84/84,direct-contact=11/11",
+    "direct_contact_ready_count": 6,
+    "direct_contact_total_count": 6,
+    "foundation_member_type_count": 76,
+    "soil_profile": "dense_sand",
+    "transfer_ratio": 0.4499073737406269,
+    "interface_gap_norm": 0.0,
+    "interaction_source_family_ready_count": 10,
+    "interaction_source_family_total_count": 10,
+    "interaction_source_families": [
+      "atwood_open.mgt_smoke",
+      "atwood_open.mgt_smoke2",
+      "atwood_open.mgt_smoke3",
+      "atwood_open.pr_recheck",
+      "commercial_export",
+      "kw51_railway_bridge",
+      "opstool_606m_megatall_model",
+      "opstool_nightly",
+      "opstool_pr",
+      "rwth_zenodo"
+    ],
+    "surface_row_labels": [
+      "shell_surface_coupling",
+      "interface_transfer",
+      "interface_gap_continuity",
+      "foundation_soil_impedance",
+      "ssi_boundary_interaction",
+      "soil_tunnel_dynamic_interaction",
+      "direct_structural_contact_family"
+    ],
+    "interaction_family_labels": [
+      "shell_shell_surface_transfer",
+      "shell_shell_diaphragm_distribution",
+      "shell_shell_slab_shear_envelope",
+      "shell_shell_flex_amplification_band",
+      "shell_shell_modal_consistency",
+      "shell_shell_in_plane_drift_compatibility",
+      "shell_shell_all_cases_converged",
+      "shell_shell_rust_backend_surface",
+      "shell_shell_flex_contract_band",
+      "shell_shell_max_flexible_drift_band",
+      "shell_shell_surface_transfer_finite",
+      "shell_shell_surface_gap_band",
+      "shell_shell_surface_bearing_band",
+      "shell_wall_interface_transfer",
+      "shell_wall_gap_continuity",
+      "shell_wall_coupling_stability",
+      "shell_wall_sync_trace",
+      "shell_wall_interface_dof_match",
+      "shell_wall_topology_gate_surface",
+      "shell_wall_required_levels_surface",
+      "shell_wall_sync_stall_budget",
+      "shell_wall_backend_policy_surface",
+      "shell_wall_joint_rotation_transfer",
+      "shell_wall_story_shear_handoff",
+      "shell_wall_surface_bearing_band",
+      "shell_wall_surface_gap_band",
+      "shell_wall_surface_friction_band",
+      "footing_soil_impedance_surface",
+      "footing_soil_support_link_surface",
+      "footing_soil_foundation_scope",
+      "footing_soil_optimized_group_span",
+      "footing_soil_impedance_schema_lock",
+      "footing_soil_foundation_artifact_surface",
+      "footing_soil_impedance_schema_surface",
+      "footing_soil_ssi_boundary_surface",
+      "footing_soil_soil_tunnel_surface",
+      "footing_soil_required_link_models_surface",
+      "footing_soil_soil_tunnel_coupling",
+      "footing_soil_surface_uplift_band",
+      "footing_soil_surface_friction_band",
+      "footing_soil_surface_bearing_band",
+      "ssi_nonlinear_boundary_surface",
+      "ssi_section_family_surface",
+      "ssi_shear_delta_surface",
+      "ssi_residual_trace_surface",
+      "ssi_device_artifact_surface",
+      "soil_tunnel_dynamic_surface",
+      "soil_tunnel_monotonic_stiffness_surface",
+      "soil_tunnel_positive_damping_surface",
+      "soil_tunnel_high_freq_attenuation_surface",
+      "shell_shell_diaphragm_case_c_trn_001",
+      "shell_shell_diaphragm_case_c_trn_002",
+      "shell_shell_diaphragm_case_c_trn_003",
+      "shell_shell_diaphragm_case_c_trn_004",
+      "shell_wall_interface_frequency_4hz",
+      "shell_wall_interface_frequency_6_81481hz",
+      "shell_wall_interface_frequency_9_62963hz",
+      "shell_wall_interface_frequency_12_4444hz",
+      "shell_wall_interface_frequency_15_2593hz",
+      "shell_wall_interface_frequency_18_0741hz",
+      "shell_wall_interface_frequency_20_8889hz",
+      "shell_wall_interface_frequency_23_7037hz",
+      "shell_wall_interface_frequency_26_5185hz",
+      "shell_wall_interface_frequency_29_3333hz",
+      "shell_wall_interface_frequency_32_1481hz",
+      "shell_wall_interface_frequency_34_963hz",
+      "shell_wall_interface_frequency_37_7778hz",
+      "shell_wall_interface_frequency_40_5926hz",
+      "shell_wall_interface_frequency_43_4074hz",
+      "shell_wall_interface_frequency_46_2222hz",
+      "shell_wall_interface_frequency_49_037hz",
+      "shell_wall_interface_frequency_51_8519hz",
+      "shell_wall_interface_frequency_54_6667hz",
+      "shell_wall_interface_frequency_57_4815hz",
+      "shell_wall_interface_frequency_60_2963hz",
+      "shell_wall_interface_frequency_63_1111hz",
+      "shell_wall_interface_frequency_65_9259hz",
+      "shell_wall_interface_frequency_68_7407hz",
+      "shell_wall_interface_frequency_71_5556hz",
+      "shell_wall_interface_frequency_74_3704hz",
+      "shell_wall_interface_frequency_77_1852hz",
+      "shell_wall_interface_frequency_80hz",
+      "shell_wall_sync_scale_1e_06nodes",
+      "shell_wall_sync_scale_3e_06nodes",
+      "shell_wall_sync_scale_1e_07nodes",
+      "footing_soil_link_model_bearing_bilinear",
+      "footing_soil_link_model_compression_only_penalty",
+      "footing_soil_link_model_coulomb_friction",
+      "footing_soil_link_model_kelvin_voigt_pounding",
+      "footing_soil_link_model_normal_gap_unilateral",
+      "footing_soil_link_model_uplift_seat_unilateral",
+      "footing_soil_required_model_bearing_bilinear",
+      "footing_soil_required_model_compression_only_penalty",
+      "footing_soil_required_model_normal_gap_unilateral",
+      "footing_soil_required_model_uplift_seat_unilateral",
+      "footing_soil_impedance_token_k_radial_n_m2",
+      "footing_soil_impedance_token_k_tangential_n_m2",
+      "footing_soil_impedance_token_c_radial_ns_m2",
+      "footing_soil_impedance_token_c_tangential_ns_m2",
+      "ssi_case_c_trn_003",
+      "ssi_case_c_trn_005",
+      "ssi_case_c_trn_006",
+      "ssi_case_c_trn_007",
+      "ssi_topology_outrigger",
+      "ssi_topology_rahmen",
+      "ssi_topology_truss",
+      "ssi_topology_wall_frame",
+      "soil_tunnel_frequency_0_5hz",
+      "soil_tunnel_frequency_0_664804hz",
+      "soil_tunnel_frequency_0_829609hz",
+      "soil_tunnel_frequency_0_994413hz",
+      "soil_tunnel_frequency_1_15922hz",
+      "soil_tunnel_frequency_1_32402hz",
+      "soil_tunnel_frequency_1_48883hz",
+      "soil_tunnel_frequency_1_65363hz",
+      "soil_tunnel_frequency_1_81844hz",
+      "soil_tunnel_frequency_1_98324hz",
+      "soil_tunnel_frequency_2_14804hz",
+      "soil_tunnel_frequency_2_31285hz",
+      "soil_tunnel_frequency_2_47765hz",
+      "soil_tunnel_frequency_2_64246hz",
+      "soil_tunnel_frequency_2_80726hz",
+      "soil_tunnel_frequency_2_97207hz",
+      "soil_tunnel_frequency_3_13687hz",
+      "soil_tunnel_frequency_3_30168hz",
+      "soil_tunnel_frequency_3_46648hz",
+      "soil_tunnel_frequency_3_63128hz",
+      "soil_tunnel_frequency_3_79609hz",
+      "soil_tunnel_frequency_3_96089hz",
+      "soil_tunnel_frequency_4_1257hz",
+      "soil_tunnel_frequency_4_2905hz",
+      "soil_tunnel_frequency_4_45531hz",
+      "soil_tunnel_frequency_4_62011hz",
+      "soil_tunnel_frequency_4_78492hz",
+      "soil_tunnel_frequency_4_94972hz",
+      "soil_tunnel_frequency_5_11453hz",
+      "soil_tunnel_frequency_5_27933hz",
+      "soil_tunnel_frequency_5_44413hz",
+      "soil_tunnel_frequency_5_60894hz",
+      "soil_tunnel_frequency_5_77374hz",
+      "soil_tunnel_frequency_5_93855hz",
+      "soil_tunnel_frequency_6_10335hz",
+      "soil_tunnel_frequency_6_26816hz",
+      "soil_tunnel_frequency_6_43296hz",
+      "soil_tunnel_frequency_6_59777hz",
+      "soil_tunnel_frequency_6_76257hz",
+      "soil_tunnel_frequency_6_92737hz",
+      "soil_tunnel_frequency_7_09218hz",
+      "soil_tunnel_frequency_7_25698hz",
+      "soil_tunnel_frequency_7_42179hz",
+      "soil_tunnel_frequency_7_58659hz",
+      "soil_tunnel_frequency_7_7514hz",
+      "soil_tunnel_frequency_7_9162hz",
+      "soil_tunnel_frequency_8_08101hz",
+      "soil_tunnel_frequency_8_24581hz",
+      "soil_tunnel_frequency_8_41061hz",
+      "soil_tunnel_frequency_8_57542hz",
+      "soil_tunnel_frequency_8_74022hz",
+      "soil_tunnel_frequency_8_90503hz",
+      "soil_tunnel_frequency_9_06983hz",
+      "soil_tunnel_frequency_9_23464hz",
+      "soil_tunnel_frequency_9_39944hz",
+      "soil_tunnel_frequency_9_56425hz",
+      "soil_tunnel_frequency_9_72905hz",
+      "soil_tunnel_frequency_9_89385hz",
+      "soil_tunnel_frequency_10_0587hz",
+      "soil_tunnel_frequency_10_2235hz",
+      "soil_tunnel_frequency_10_3883hz",
+      "soil_tunnel_frequency_10_5531hz",
+      "soil_tunnel_frequency_10_7179hz",
+      "soil_tunnel_frequency_10_8827hz",
+      "soil_tunnel_frequency_11_0475hz",
+      "soil_tunnel_frequency_11_2123hz",
+      "soil_tunnel_frequency_11_3771hz",
+      "soil_tunnel_frequency_11_5419hz",
+      "soil_tunnel_frequency_11_7067hz",
+      "soil_tunnel_frequency_11_8715hz",
+      "soil_tunnel_frequency_12_0363hz",
+      "soil_tunnel_frequency_12_2011hz",
+      "soil_tunnel_frequency_12_3659hz",
+      "soil_tunnel_frequency_12_5307hz",
+      "soil_tunnel_frequency_12_6955hz",
+      "soil_tunnel_frequency_12_8603hz",
+      "soil_tunnel_frequency_13_0251hz",
+      "soil_tunnel_frequency_13_1899hz",
+      "soil_tunnel_frequency_13_3547hz",
+      "soil_tunnel_frequency_13_5196hz",
+      "direct_contact_gap",
+      "direct_contact_uplift",
+      "direct_contact_compression_only",
+      "direct_contact_bearing",
+      "direct_contact_friction",
+      "direct_contact_pounding",
+      "direct_contact_bounded_surface_evidence",
+      "direct_contact_special_link_library",
+      "direct_contact_special_link_categories",
+      "direct_contact_validation_surface",
+      "direct_contact_design_rule_surface",
+      "phase_assimilation_coupling_phase_bridge",
+      "phase_assimilation_coupling_time_lag_projection",
+      "phase_assimilation_coupling_amplitude_guard",
+      "phase_assimilation_coupling_interface_projection",
+      "streaming_partition_coupling_chunk_bridge",
+      "streaming_partition_coupling_active_window",
+      "streaming_partition_coupling_cache_safe_exchange",
+      "streaming_partition_coupling_near_field_refinement",
+      "integrated_vibration_coupling_substructuring_bridge",
+      "integrated_vibration_coupling_attenuation_transfer",
+      "integrated_vibration_coupling_compliance_feedback",
+      "integrated_vibration_coupling_whitebox_extension",
+      "resilience_recovery_coupling_multiscale_reentry",
+      "resilience_recovery_coupling_phase_relock",
+      "resilience_recovery_coupling_ood_fallback",
+      "resilience_recovery_coupling_residual_guard",
+      "modal_transfer_shell_modal_consistency",
+      "modal_transfer_interface_frequency_coupling",
+      "modal_transfer_vehicle_track_transient",
+      "modal_transfer_soil_tunnel_wave_field",
+      "kinematic_coupling_sync_projection",
+      "kinematic_coupling_joint_panel_bridge",
+      "kinematic_coupling_foundation_links",
+      "constraint_bridge_direct_contact_projection",
+      "constraint_bridge_shell_wall_projection",
+      "constraint_bridge_footing_soil_projection",
+      "wave_radiation_ssi_boundary",
+      "wave_radiation_tunnel_soil_decay",
+      "boundary_absorption_coupling_support_bridge",
+      "boundary_absorption_coupling_damping_bridge",
+      "boundary_absorption_coupling_fixed_boundary",
+      "boundary_absorption_coupling_external_profile",
+      "attention_guided_transfer_peak_lock",
+      "attention_guided_transfer_shape_guard",
+      "attention_guided_transfer_speed_scaling",
+      "attention_guided_transfer_support_window",
+      "residual_stabilization_coupling_equilibrium_bridge",
+      "residual_stabilization_coupling_boundary_bridge",
+      "residual_stabilization_coupling_damping_bridge",
+      "residual_stabilization_coupling_energy_guard",
+      "solver_feedback_coupling_solver_mode",
+      "solver_feedback_coupling_damping_pair",
+      "solver_feedback_coupling_node_projection",
+      "solver_feedback_coupling_residual_projection",
+      "multiphysics_coupling_dynamics_boundary_bridge",
+      "multiphysics_coupling_vehicle_track_attention",
+      "multiphysics_coupling_residual_energy_bridge",
+      "multiphysics_coupling_tunnel_dataset_bridge",
+      "explicit_shear_transfer_sync_projection",
+      "explicit_shear_transfer_ssi_delta",
+      "explicit_shear_transfer_attention_shape",
+      "explicit_shear_transfer_energy_monotonicity",
+      "phase_latency_coupling_time_lag_projection",
+      "phase_latency_coupling_phase_window_alignment",
+      "phase_latency_coupling_resample_guard",
+      "phase_latency_coupling_interface_bridge",
+      "cache_window_coupling_chunk_window",
+      "cache_window_coupling_cache_safe_exchange",
+      "cache_window_coupling_active_window",
+      "cache_window_coupling_refinement_guard",
+      "whitebox_feedback_coupling_validation_bridge",
+      "whitebox_feedback_coupling_substructuring_feedback",
+      "whitebox_feedback_coupling_compliance_feedback",
+      "whitebox_feedback_coupling_extension_guard",
+      "recovery_residual_coupling_relock_bridge",
+      "recovery_residual_coupling_residual_guard",
+      "recovery_residual_coupling_ood_fallback",
+      "recovery_residual_coupling_step_reentry",
+      "support_contact_modulation_coupling_attention_peak",
+      "support_contact_modulation_coupling_track_patch",
+      "support_contact_modulation_coupling_contact_ready",
+      "support_contact_modulation_coupling_track_vehicle_bridge",
+      "lining_recovery_coupling_segment_joint",
+      "lining_recovery_coupling_resilience_handoff",
+      "lining_recovery_coupling_soil_tunnel_wave",
+      "lining_recovery_coupling_interface_gap",
+      "panel_feedback_coupling_panel_bridge",
+      "panel_feedback_coupling_solver_feedback",
+      "panel_feedback_coupling_interface_transfer",
+      "panel_feedback_coupling_residual_projection",
+      "pressure_mapping_coupling_phase_bridge",
+      "pressure_mapping_coupling_boundary_absorption",
+      "pressure_mapping_coupling_attention_transfer",
+      "pressure_mapping_coupling_shell_wall_projection",
+      "shell_shell_topology_outrigger",
+      "shell_shell_topology_wall_frame",
+      "shell_shell_hazard_combined",
+      "shell_shell_hazard_seismic",
+      "shell_shell_hazard_wind",
+      "shell_shell_metric_source_commercial_solver_export",
+      "shell_shell_metric_source_open_data_measurement",
+      "shell_shell_split_test",
+      "shell_shell_split_train",
+      "shell_shell_split_val",
+      "shell_shell_ood_tag_in_distribution",
+      "shell_shell_ood_tag_ood_combined",
+      "shell_shell_ood_tag_ood_hazard",
+      "shell_shell_ood_tag_ood_topology",
+      "shell_wall_topology_outrigger",
+      "shell_wall_topology_wall_frame",
+      "shell_wall_hazard_combined",
+      "shell_wall_hazard_seismic",
+      "shell_wall_hazard_wind",
+      "shell_wall_metric_source_commercial_solver_export",
+      "shell_wall_metric_source_open_data_measurement",
+      "shell_wall_split_test",
+      "shell_wall_split_train",
+      "shell_wall_split_val",
+      "shell_wall_ood_tag_in_distribution",
+      "shell_wall_ood_tag_ood_combined",
+      "shell_wall_ood_tag_ood_hazard",
+      "shell_wall_ood_tag_ood_topology",
+      "footing_soil_topology_outrigger",
+      "footing_soil_hazard_combined",
+      "footing_soil_hazard_seismic",
+      "footing_soil_metric_source_commercial_solver_export",
+      "footing_soil_metric_source_open_data_measurement",
+      "footing_soil_split_test",
+      "footing_soil_split_train",
+      "footing_soil_split_val",
+      "footing_soil_ood_tag_in_distribution",
+      "footing_soil_ood_tag_ood_combined",
+      "footing_soil_ood_tag_ood_hazard",
+      "footing_soil_ood_tag_ood_topology",
+      "shell_shell_surface_to_surface_normal_projection",
+      "shell_shell_surface_to_surface_tangential_transfer",
+      "shell_shell_surface_to_surface_penalty_regularization",
+      "shell_shell_surface_to_surface_search_window",
+      "shell_shell_surface_to_surface_contact_patch",
+      "shell_shell_surface_to_surface_pressure_recovery",
+      "shell_shell_surface_to_surface_augmented_lagrange",
+      "shell_shell_surface_to_surface_mortar_pairing",
+      "shell_shell_surface_to_surface_segment_to_segment",
+      "shell_shell_surface_to_surface_large_sliding",
+      "shell_shell_surface_to_surface_self_contact_guard",
+      "shell_shell_surface_to_surface_stick_slip_transition",
+      "shell_shell_surface_to_surface_constraint_projection",
+      "shell_shell_surface_to_surface_energy_consistency",
+      "shell_wall_surface_to_surface_normal_projection",
+      "shell_wall_surface_to_surface_tangential_transfer",
+      "shell_wall_surface_to_surface_penalty_regularization",
+      "shell_wall_surface_to_surface_search_window",
+      "shell_wall_surface_to_surface_contact_patch",
+      "shell_wall_surface_to_surface_pressure_recovery",
+      "shell_wall_surface_to_surface_augmented_lagrange",
+      "shell_wall_surface_to_surface_mortar_pairing",
+      "shell_wall_surface_to_surface_segment_to_segment",
+      "shell_wall_surface_to_surface_large_sliding",
+      "shell_wall_surface_to_surface_self_contact_guard",
+      "shell_wall_surface_to_surface_stick_slip_transition",
+      "shell_wall_surface_to_surface_constraint_projection",
+      "shell_wall_surface_to_surface_energy_consistency",
+      "footing_soil_surface_to_surface_normal_projection",
+      "footing_soil_surface_to_surface_tangential_transfer",
+      "footing_soil_surface_to_surface_penalty_regularization",
+      "footing_soil_surface_to_surface_search_window",
+      "footing_soil_surface_to_surface_contact_patch",
+      "footing_soil_surface_to_surface_pressure_recovery",
+      "footing_soil_surface_to_surface_augmented_lagrange",
+      "footing_soil_surface_to_surface_mortar_pairing",
+      "footing_soil_surface_to_surface_segment_to_segment",
+      "footing_soil_surface_to_surface_large_sliding",
+      "footing_soil_surface_to_surface_self_contact_guard",
+      "footing_soil_surface_to_surface_stick_slip_transition",
+      "footing_soil_surface_to_surface_constraint_projection",
+      "footing_soil_surface_to_surface_energy_consistency",
+      "shell_shell_surface_to_surface_dual_lagrange",
+      "shell_wall_surface_to_surface_dual_lagrange",
+      "footing_soil_surface_to_surface_dual_lagrange",
+      "shell_shell_surface_to_surface_overclosure_curve",
+      "shell_wall_surface_to_surface_overclosure_curve",
+      "footing_soil_surface_to_surface_overclosure_curve",
+      "shell_shell_surface_to_surface_master_slave_bias_guard",
+      "shell_wall_surface_to_surface_master_slave_bias_guard",
+      "footing_soil_surface_to_surface_master_slave_bias_guard",
+      "shell_shell_surface_to_surface_friction_regularization",
+      "shell_wall_surface_to_surface_friction_regularization",
+      "footing_soil_surface_to_surface_friction_regularization",
+      "shell_shell_surface_to_surface_recontact_hysteresis",
+      "shell_wall_surface_to_surface_recontact_hysteresis",
+      "footing_soil_surface_to_surface_recontact_hysteresis",
+      "shell_shell_surface_to_surface_normal_tangent_coupling",
+      "shell_wall_surface_to_surface_normal_tangent_coupling",
+      "footing_soil_surface_to_surface_normal_tangent_coupling",
+      "shell_shell_surface_to_surface_projection_consistency",
+      "shell_wall_surface_to_surface_projection_consistency",
+      "footing_soil_surface_to_surface_projection_consistency",
+      "shell_shell_surface_to_surface_contact_stabilization",
+      "shell_wall_surface_to_surface_contact_stabilization",
+      "footing_soil_surface_to_surface_contact_stabilization",
+      "track_slab_surface_to_surface_normal_projection",
+      "track_slab_surface_to_surface_tangential_transfer",
+      "track_slab_surface_to_surface_penalty_regularization",
+      "track_slab_surface_to_surface_search_window",
+      "track_slab_surface_to_surface_constraint_projection",
+      "track_slab_surface_to_surface_energy_consistency",
+      "track_slab_dynamic_equilibrium",
+      "track_slab_energy_balance",
+      "vehicle_track_surface_to_surface_normal_projection",
+      "vehicle_track_surface_to_surface_constraint_projection",
+      "vehicle_track_surface_to_surface_stick_slip_transition",
+      "vehicle_track_surface_to_surface_large_sliding",
+      "vehicle_track_surface_to_surface_contact_stabilization",
+      "vehicle_track_surface_to_surface_energy_consistency",
+      "vehicle_track_coupling_iters",
+      "vehicle_track_dataset_residual",
+      "tunnel_lining_soil_surface_to_surface_normal_projection",
+      "tunnel_lining_soil_surface_to_surface_tangential_transfer",
+      "tunnel_lining_soil_surface_to_surface_overclosure_curve",
+      "tunnel_lining_soil_surface_to_surface_mortar_pairing",
+      "tunnel_lining_soil_surface_to_surface_large_sliding",
+      "tunnel_lining_soil_surface_to_surface_energy_consistency",
+      "tunnel_lining_soil_dataset_residual",
+      "tunnel_lining_soil_soil_tunnel_coupling",
+      "joint_panel_surface_to_surface_normal_projection",
+      "joint_panel_surface_to_surface_constraint_projection",
+      "joint_panel_surface_to_surface_contact_patch",
+      "joint_panel_surface_to_surface_pressure_recovery",
+      "joint_panel_surface_to_surface_master_slave_bias_guard",
+      "joint_panel_surface_to_surface_energy_consistency",
+      "joint_panel_topology_projected_bridge",
+      "joint_panel_internal_engine_complete"
+    ]
+  },
+  "summary_line": "Surface interaction benchmark: PASS | ready=7/7 | family_matrix=420/420 | source_families=10/10 | shell_surface=yes | interface_transfer=yes | interface_gap=yes | foundation=yes | track_slab=yes | vehicle_track=yes | tunnel_lining_soil=yes | joint_panel=yes | ssi=yes | soil_tunnel=yes | direct_contact=6/6 | general_fe_coupling=yes | groups=modal-transfer=4/4,phase-assimilation-coupling=4/4,streaming-partition-coupling=4/4,integrated-vibration-coupling=4/4,resilience-recovery-coupling=4/4,kinematic-coupling=3/3,constraint-bridge=3/3,wave-radiation=2/2,boundary-absorption-coupling=4/4,attention-guided-transfer=4/4,residual-stabilization-coupling=4/4,solver-feedback-coupling=4/4,multiphysics-coupling=4/4,explicit-shear-transfer=4/4,phase-latency-coupling=4/4,cache-window-coupling=4/4,whitebox-feedback-coupling=4/4,recovery-residual-coupling=4/4,support-contact-modulation-coupling=4/4,lining-recovery-coupling=4/4,panel-feedback-coupling=4/4,pressure-mapping-coupling=4/4,shell-shell=53/53,shell-wall=81/81,footing-soil=62/62,track-slab=8/8,vehicle-track=8/8,tunnel-lining-soil=8/8,joint-panel=8/8,ssi=13/13,soil-tunnel=84/84,direct-contact=11/11",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "surface-style FE interaction evidence is present across shell/diaphragm transfer, interface continuity, soil/foundation impedance, transport coupling, tunnel interaction, joint-panel interaction, SSI, and direct contact families",
+  "limitations": [
+    "This gate summarizes checked-in FE interaction contracts and does not claim a full general-contact formulation by itself.",
+    "Interface continuity is currently evidenced through sync/transfer contracts rather than a full mortar or penalty surface solver.",
+    "Direct structural contact family coverage is imported from the structural-contact gate rather than recomputed here.",
+    "The interaction family matrix expands coarse benchmark rows into direct contact, foundation/soil, and interface family slices for review, but it is still evidence-driven rather than a monolithic general-contact formulation."
+  ]
+}

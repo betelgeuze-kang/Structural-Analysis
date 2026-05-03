@@ -1,0 +1,218 @@
+{
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "steel/composite constitutive benchmark matrix satisfies the active closure gate",
+  "summary_line": "Steel/composite constitutive gate: PASS | steel=12/12 | composite=8/8 | steel_cases=4 | composite_cases=4 | source=constitutive_library_benchmarks",
+  "summary": {
+    "steel": {
+      "row_count": 12,
+      "pass_count": 12,
+      "fail_count": 0,
+      "case_count": 4,
+      "case_ids": [
+        "compression_local_buckling",
+        "compressive_plasticity",
+        "fracture_limit",
+        "yield_transition"
+      ],
+      "min_required_rows": 12
+    },
+    "composite": {
+      "row_count": 8,
+      "pass_count": 8,
+      "fail_count": 0,
+      "case_count": 4,
+      "case_ids": [
+        "composite_gain",
+        "compression_capacity",
+        "connector_slip_transition",
+        "tension_participation_limit"
+      ],
+      "min_required_rows": 8
+    },
+    "source": "constitutive_library_benchmarks",
+    "libraries": [
+      "steel_constitutive_library",
+      "composite_constitutive_library",
+      "bond_slip_interface"
+    ]
+  },
+  "checks": {
+    "steel_rows_sufficient": true,
+    "steel_all_rows_pass": true,
+    "steel_local_buckling_pass": true,
+    "steel_fracture_pass": true,
+    "composite_rows_sufficient": true,
+    "composite_all_rows_pass": true,
+    "composite_slip_pass": true,
+    "composite_tension_limit_pass": true
+  },
+  "benchmark_rows": [
+    {
+      "family": "steel",
+      "case_id": "yield_transition",
+      "metric": "elastic_state",
+      "value": "elastic",
+      "passed": true,
+      "detail": "small tensile strain should remain elastic"
+    },
+    {
+      "family": "steel",
+      "case_id": "yield_transition",
+      "metric": "plastic_state",
+      "value": "plastic_hardening",
+      "passed": true,
+      "detail": "post-yield tensile strain should enter plastic hardening/cap"
+    },
+    {
+      "family": "steel",
+      "case_id": "yield_transition",
+      "metric": "stress_growth",
+      "value": 287.9,
+      "passed": true,
+      "detail": "plastic branch should grow stress while reducing tangent from the elastic slope"
+    },
+    {
+      "family": "steel",
+      "case_id": "compression_local_buckling",
+      "metric": "buckling_state",
+      "value": "compression_local_buckling",
+      "passed": true,
+      "detail": "compressive response past the buckling strain should enter the post-buckling branch"
+    },
+    {
+      "family": "steel",
+      "case_id": "compression_local_buckling",
+      "metric": "softened_strength",
+      "value": 168.71447368421053,
+      "passed": true,
+      "detail": "local buckling should reduce the available compressive stress"
+    },
+    {
+      "family": "steel",
+      "case_id": "compression_local_buckling",
+      "metric": "negative_tangent",
+      "value": -3064.578947368421,
+      "passed": true,
+      "detail": "post-buckling branch should soften with a negative tangent"
+    },
+    {
+      "family": "steel",
+      "case_id": "fracture_limit",
+      "metric": "fracture_state",
+      "value": "fracture_limit",
+      "passed": true,
+      "detail": "strain beyond the fracture limit should clamp the response"
+    },
+    {
+      "family": "steel",
+      "case_id": "fracture_limit",
+      "metric": "zero_tangent",
+      "value": 0.0,
+      "passed": true,
+      "detail": "fracture-limited response should not continue hardening"
+    },
+    {
+      "family": "steel",
+      "case_id": "fracture_limit",
+      "metric": "capped_strength",
+      "value": 540.0,
+      "passed": true,
+      "detail": "fracture response should remain capped by the ultimate strength"
+    },
+    {
+      "family": "steel",
+      "case_id": "compressive_plasticity",
+      "metric": "compressive_sign",
+      "value": -387.9,
+      "passed": true,
+      "detail": "compressive strain should produce compressive stress"
+    },
+    {
+      "family": "steel",
+      "case_id": "compressive_plasticity",
+      "metric": "yield_exceeded",
+      "value": 387.9,
+      "passed": true,
+      "detail": "compressive plasticity should develop stress beyond the yield point"
+    },
+    {
+      "family": "steel",
+      "case_id": "compressive_plasticity",
+      "metric": "plastic_state",
+      "value": "plastic_hardening",
+      "passed": true,
+      "detail": "compressive post-yield response should remain on the plastic branch"
+    },
+    {
+      "family": "composite",
+      "case_id": "connector_slip_transition",
+      "metric": "full_interaction_state",
+      "value": "full_interaction",
+      "passed": true,
+      "detail": "small connector slip should preserve full interaction"
+    },
+    {
+      "family": "composite",
+      "case_id": "connector_slip_transition",
+      "metric": "residual_interaction_state",
+      "value": "residual_interaction",
+      "passed": true,
+      "detail": "large connector slip should clamp to the residual interaction ratio"
+    },
+    {
+      "family": "composite",
+      "case_id": "compression_capacity",
+      "metric": "stress_drop_with_slip",
+      "value": 18.899999999999977,
+      "passed": true,
+      "detail": "connector slip should reduce the compression-carrying capacity"
+    },
+    {
+      "family": "composite",
+      "case_id": "compression_capacity",
+      "metric": "tangent_drop_with_slip",
+      "value": 7000.0,
+      "passed": true,
+      "detail": "connector slip should reduce the effective composite tangent"
+    },
+    {
+      "family": "composite",
+      "case_id": "tension_participation_limit",
+      "metric": "concrete_tension_state",
+      "value": "tension_softening",
+      "passed": true,
+      "detail": "positive concrete strain should move the concrete branch into tension softening"
+    },
+    {
+      "family": "composite",
+      "case_id": "tension_participation_limit",
+      "metric": "reduced_tension_carry",
+      "value": 0.5221245747473517,
+      "passed": true,
+      "detail": "reduced concrete tension carry ratio should lower the composite tensile stress"
+    },
+    {
+      "family": "composite",
+      "case_id": "composite_gain",
+      "metric": "full_interaction_gain",
+      "value": 25.19999999999999,
+      "passed": true,
+      "detail": "full interaction should exceed the standalone steel contribution in compression"
+    },
+    {
+      "family": "composite",
+      "case_id": "composite_gain",
+      "metric": "residual_interaction_gain",
+      "value": 6.300000000000011,
+      "passed": true,
+      "detail": "even residual interaction should retain some concrete compression participation"
+    }
+  ],
+  "generated_at": "2026-04-11T14:40:12.241427Z",
+  "inputs": {
+    "min_steel_rows": 12,
+    "min_composite_rows": 8,
+    "out": "implementation/phase1/steel_composite_constitutive_gate_report.json"
+  }
+}

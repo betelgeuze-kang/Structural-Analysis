@@ -1288,6 +1288,7 @@ def main() -> None:
             ndtha_stress_report=_load_json(Path(args.ndtha_stress_report)),
             foundation_soil_link_gate_report=_load_json(Path(args.foundation_soil_link_gate_report)),
         )
+        report["inputs"] = input_payload
     except (InputContractError, ValueError, FileNotFoundError) as exc:
         report = {
             "schema_version": "1.0",

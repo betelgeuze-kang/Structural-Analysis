@@ -438,6 +438,7 @@ def main() -> None:
             corpus_manifest=_load_json(Path(args.corpus_manifest)),
             diff_receipts_report=_load_json(Path(args.diff_receipts_report)),
         )
+        report["inputs"] = input_payload
     except (InputContractError, ValueError, FileNotFoundError) as exc:
         report = {
             "schema_version": "1.0",

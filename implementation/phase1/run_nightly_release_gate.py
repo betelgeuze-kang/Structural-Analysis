@@ -32,6 +32,12 @@ MIDAS_SECTION_LIBRARY_ARTIFACTS = (
     "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json",
     "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
 )
+PRE_GAP_FREEZE_EXCLUDED_ARTIFACTS = (
+    "release/release_gap_report.json",
+    "release/release_gap_report.md",
+    "release/release_gap_smoke_history.png",
+    "release/release_gap_measured_chain_categories.png",
+)
 
 REASONS = {
     "PASS": "nightly gate and release freeze passed",
@@ -60,6 +66,7 @@ REASONS = {
     "ERR_MIDAS_MGT_CONVERSION": "midas mgt conversion gate failed",
     "ERR_VTI_COUPLED_SOLVER": "vehicle-track interaction coupled solver failed",
     "ERR_SOLVER_BREADTH_GATE": "solver breadth gate failed",
+    "ERR_MATERIAL_CONSTITUTIVE_GATE": "material constitutive evidence materialization failed",
     "ERR_CONTACT_READINESS": "contact-readiness gate failed",
     "ERR_SURFACE_INTERACTION_BENCHMARK": "surface interaction benchmark gate failed",
     "ERR_MIDAS_INTEROPERABILITY": "midas interoperability/export gate failed",
@@ -82,6 +89,7 @@ REASONS = {
     "ERR_DESIGN_OPT_CONNECTION_DETAILING_PAYLOAD_PROJECTION": "design optimization connection-detailing payload projection failed",
     "ERR_DESIGN_OPT_DETAILING_PAYLOAD_PROJECTION": "design optimization detailing payload projection failed",
     "ERR_MGT_EXPORT_DIRECT_PATCH": "mgt direct patch export failed",
+    "ERR_COMMITTEE_REVIEW_EVIDENCE": "committee review evidence materialization failed",
     "ERR_PBD_HINGE_REFRESH_SOURCE": "pbd hinge refresh source generation failed",
     "ERR_PBD_HINGE_REFRESH_ARTIFACT": "pbd hinge refresh artifact generation failed",
     "ERR_PBD_HINGE_REFRESH_REPORT": "pbd hinge refresh report generation failed",
@@ -222,6 +230,126 @@ def _materialize_checked_in_evidence(
             "source_evidence": str(source_path),
             "destination": str(destination_path),
             "materialized_checked_in_evidence": bool(return_code == 0),
+        }
+    )
+    return return_code == 0
+
+
+def _materialize_checked_in_file(
+    step: str,
+    *,
+    source: str | Path,
+    destination: str | Path,
+    steps: list[dict],
+    reason: str,
+) -> bool:
+    source_path = Path(source)
+    destination_path = Path(destination)
+    command = f"materialize-file {shlex.quote(str(source_path))} {shlex.quote(str(destination_path))}"
+    if DRY_RUN:
+        steps.append(
+            {
+                "step": step,
+                "seconds": 0.0,
+                "return_code": 0,
+                "command": command,
+                "stdout_tail": f"dry-run: {reason}",
+                "stderr_tail": "",
+                "dry_run": True,
+                "source_evidence": str(source_path),
+                "destination": str(destination_path),
+            }
+        )
+        return True
+    t0 = time.time()
+    try:
+        if not source_path.is_file():
+            raise FileNotFoundError(str(source_path))
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, destination_path)
+        stdout_tail = f"materialized checked-in file: {source_path} -> {destination_path}\n{reason}"
+        return_code = 0
+        stderr_tail = ""
+    except Exception as exc:
+        stdout_tail = ""
+        stderr_tail = str(exc)
+        return_code = 1
+    steps.append(
+        {
+            "step": step,
+            "seconds": float(time.time() - t0),
+            "return_code": int(return_code),
+            "command": command,
+            "stdout_tail": stdout_tail[-2000:],
+            "stderr_tail": stderr_tail[-2000:],
+            "source_evidence": str(source_path),
+            "destination": str(destination_path),
+            "materialized_checked_in_file": bool(return_code == 0),
+        }
+    )
+    return return_code == 0
+
+
+def _write_skipped_promotion_report(
+    step: str,
+    *,
+    destination: str | Path,
+    steps: list[dict],
+    reason: str,
+) -> bool:
+    destination_path = Path(destination)
+    command = f"write-skipped-promotion {shlex.quote(str(destination_path))}"
+    if DRY_RUN:
+        steps.append(
+            {
+                "step": step,
+                "seconds": 0.0,
+                "return_code": 0,
+                "command": command,
+                "stdout_tail": f"dry-run: {reason}",
+                "stderr_tail": "",
+                "dry_run": True,
+                "destination": str(destination_path),
+            }
+        )
+        return True
+    t0 = time.time()
+    try:
+        destination_path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "schema_version": "1.0",
+            "run_id": "phase1-release-candidate-promotion-skipped",
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "summary": {
+                "promotion_skipped": True,
+                "promotion_skip_mode": "release_publication_manifest_only",
+            },
+            "checks": {
+                "skip_promotion_requested": True,
+                "promotion_report_available_for_release_gap": True,
+            },
+            "contract_pass": True,
+            "reason_code": "SKIPPED_BY_REQUEST",
+            "reason": reason,
+        }
+        destination_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        stdout_tail = f"wrote skipped promotion report: {destination_path}\n{reason}"
+        return_code = 0
+        stderr_tail = ""
+    except Exception as exc:
+        stdout_tail = ""
+        stderr_tail = str(exc)
+        return_code = 1
+    steps.append(
+        {
+            "step": step,
+            "seconds": float(time.time() - t0),
+            "return_code": int(return_code),
+            "command": command,
+            "stdout_tail": stdout_tail[-2000:],
+            "stderr_tail": stderr_tail[-2000:],
+            "destination": str(destination_path),
+            "wrote_skipped_promotion_report": bool(return_code == 0),
         }
     )
     return return_code == 0
@@ -1486,8 +1614,21 @@ def _build_payload(
             "irregular_top5_execution_manifest": str(args.irregular_top5_execution_manifest),
             "midas_native_writeback_diff_receipts_report": str(args.midas_native_writeback_diff_receipts_report),
             "midas_native_roundtrip_report": str(args.midas_native_roundtrip_report),
+            "midas_native_writeback_diff_receipts_source_evidence": str(
+                args.midas_native_writeback_diff_receipts_source_evidence
+            ),
+            "midas_native_roundtrip_source_evidence": str(args.midas_native_roundtrip_source_evidence),
+            "midas_exact_roundtrip_closure_source_evidence": str(
+                args.midas_exact_roundtrip_closure_source_evidence
+            ),
+            "load_combination_engine_source_evidence": str(args.load_combination_engine_source_evidence),
+            "midas_kds_row_provenance_export_report": str(args.midas_kds_row_provenance_export_report),
+            "midas_kds_row_provenance_export_source_evidence": str(
+                args.midas_kds_row_provenance_export_source_evidence
+            ),
             "nonlinear_generalization_report": str(args.nonlinear_generalization_report),
             "workflow_productization_report": str(args.workflow_productization_report),
+            "workflow_productization_source_evidence": str(args.workflow_productization_source_evidence),
             "ndtha_cases": str(args.ndtha_cases),
             "ndtha_target_split": str(args.ndtha_target_split),
             "ndtha_ground_motion_csv": str(args.ndtha_ground_motion_csv),
@@ -1518,17 +1659,32 @@ def _build_payload(
             "gpu_bottleneck_audit_source_evidence": str(args.gpu_bottleneck_audit_source_evidence),
             "contact_readiness_source_evidence": str(args.contact_readiness_source_evidence),
             "foundation_soil_link_source_evidence": str(args.foundation_soil_link_source_evidence),
+            "general_fe_contact_benchmark_source_evidence": str(args.general_fe_contact_benchmark_source_evidence),
+            "surface_interaction_benchmark_source_evidence": str(args.surface_interaction_benchmark_source_evidence),
+            "solver_breadth_source_evidence": str(args.solver_breadth_source_evidence),
+            "element_material_breadth_source_evidence": str(args.element_material_breadth_source_evidence),
+            "material_constitutive_source_evidence": str(args.material_constitutive_source_evidence),
+            "steel_composite_constitutive_source_evidence": str(args.steel_composite_constitutive_source_evidence),
+            "structural_contact_source_evidence": str(args.structural_contact_source_evidence),
+            "midas_interoperability_source_evidence": str(args.midas_interoperability_source_evidence),
             "skip_promotion": bool(args.skip_promotion),
             "skip_archive": bool(args.skip_archive),
             "dry_run": bool(args.dry_run),
             "enable_design_opt_cost_smoke": bool(args.enable_design_opt_cost_smoke),
             "strict_design_opt_cost_smoke": bool(args.strict_design_opt_cost_smoke),
+            "design_opt_cost_smoke_source_evidence": str(args.design_opt_cost_smoke_source_evidence),
             "design_opt_cost_smoke_history": str(args.design_opt_cost_smoke_history),
             "design_opt_cost_smoke_history_limit": int(args.design_opt_cost_smoke_history_limit),
             "design_opt_cost_smoke_objective_profile": str(args.design_opt_cost_smoke_objective_profile),
             "design_opt_cost_smoke_ndtha_step_count": int(args.design_opt_cost_smoke_ndtha_step_count),
             "committee_summary_report": str(args.committee_summary_report),
             "committee_package_report": str(args.committee_package_report),
+            "committee_package_source_evidence": str(args.committee_package_source_evidence),
+            "committee_summary_source_evidence": str(args.committee_summary_source_evidence),
+            "authority_catalog_routing_diff_report": str(args.authority_catalog_routing_diff_report),
+            "authority_catalog_routing_diff_source_evidence": str(
+                args.authority_catalog_routing_diff_source_evidence
+            ),
             "pbd_review_package_report": str(args.pbd_review_package_report),
             "pbd_review_ndtha_report": str(args.pbd_review_ndtha_report),
             "pbd_compliance_overlay_report": str(args.pbd_compliance_overlay_report),
@@ -1536,6 +1692,13 @@ def _build_payload(
             "design_opt_dataset_report": str(args.design_opt_dataset_report),
             "design_opt_dataset_npz": str(args.design_opt_dataset_npz),
             "design_opt_cost_reduction_changes": str(args.design_opt_cost_reduction_changes),
+            "design_opt_cost_reduction_changes_source_evidence": str(
+                args.design_opt_cost_reduction_changes_source_evidence
+            ),
+            "design_opt_cost_reduction_blocked_actions": str(args.design_opt_cost_reduction_blocked_actions),
+            "design_opt_cost_reduction_blocked_actions_source_evidence": str(
+                args.design_opt_cost_reduction_blocked_actions_source_evidence
+            ),
             "design_opt_rebar_payload_projection_json": str(args.design_opt_rebar_payload_projection_json),
             "design_opt_connection_detailing_payload_projection_json": str(
                 args.design_opt_connection_detailing_payload_projection_json
@@ -1658,6 +1821,9 @@ def _build_payload(
             "solver_hip_e2e": str(args.solver_hip_e2e_report),
             "solver_truthfulness": str(args.solver_truthfulness_report),
             "hardest_external_10case_kickoff": str(args.hardest_external_10case_kickoff_report),
+            "hardest_external_10case_kickoff_source_evidence": str(
+                args.hardest_external_10case_kickoff_source_evidence
+            ),
             "rc_benchmark_lock": str(args.rc_benchmark_lock_report),
             "version_lock_manifest": str(args.version_lock_manifest),
             "phase3_pipeline": str(args.phase3_report),
@@ -1842,10 +2008,42 @@ def main() -> None:
         default="implementation/phase1/release_evidence/commercial/commercial_readiness_report.json",
     )
     p.add_argument("--solver-breadth-report", default="implementation/phase1/solver_breadth_report.json")
+    p.add_argument(
+        "--solver-breadth-source-evidence",
+        default="implementation/phase1/release_evidence/surface/solver_breadth_report.json",
+    )
+    p.add_argument(
+        "--element-material-breadth-report",
+        default="implementation/phase1/element_material_breadth_gate_report.json",
+    )
+    p.add_argument(
+        "--element-material-breadth-source-evidence",
+        default="implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json",
+    )
     p.add_argument("--contact-readiness-report", default="implementation/phase1/contact_readiness_report.json")
     p.add_argument("--material-constitutive-report", default="implementation/phase1/material_constitutive_gate_report.json")
+    p.add_argument(
+        "--material-constitutive-source-evidence",
+        default="implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json",
+    )
+    p.add_argument(
+        "--steel-composite-constitutive-report",
+        default="implementation/phase1/steel_composite_constitutive_gate_report.json",
+    )
+    p.add_argument(
+        "--steel-composite-constitutive-source-evidence",
+        default="implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json",
+    )
     p.add_argument("--surface-interaction-benchmark-report", default="implementation/phase1/surface_interaction_benchmark_gate_report.json")
+    p.add_argument(
+        "--surface-interaction-benchmark-source-evidence",
+        default="implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json",
+    )
     p.add_argument("--midas-interoperability-report", default="implementation/phase1/midas_interoperability_gate_report.json")
+    p.add_argument(
+        "--midas-interoperability-source-evidence",
+        default="implementation/phase1/release_evidence/midas/midas_interoperability_gate_report.json",
+    )
     p.add_argument(
         "--public-native-corpus-catalog",
         default="implementation/phase1/open_data/midas/public_native_mgt_source_catalog.json",
@@ -1910,11 +2108,49 @@ def main() -> None:
         "--midas-native-writeback-diff-receipts-report",
         default="implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json",
     )
+    p.add_argument(
+        "--midas-native-writeback-diff-receipts-source-evidence",
+        default="implementation/phase1/release_evidence/midas/midas_native_writeback_diff_receipts_report.json",
+    )
     p.add_argument("--midas-native-roundtrip-report", default="implementation/phase1/midas_native_roundtrip_gate_report.json")
+    p.add_argument(
+        "--midas-native-roundtrip-source-evidence",
+        default="implementation/phase1/release_evidence/midas/midas_native_roundtrip_gate_report.json",
+    )
+    p.add_argument("--midas-exact-roundtrip-closure-report", default="implementation/phase1/midas_exact_roundtrip_closure_gate_report.json")
+    p.add_argument(
+        "--midas-exact-roundtrip-closure-source-evidence",
+        default="implementation/phase1/release_evidence/midas/midas_exact_roundtrip_closure_gate_report.json",
+    )
+    p.add_argument("--load-combination-engine-report", default="implementation/phase1/load_combination_engine_gate_report.json")
+    p.add_argument(
+        "--load-combination-engine-source-evidence",
+        default="implementation/phase1/release_evidence/midas/load_combination_engine_gate_report.json",
+    )
+    p.add_argument(
+        "--midas-kds-row-provenance-export-report",
+        default="implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json",
+    )
+    p.add_argument(
+        "--midas-kds-row-provenance-export-source-evidence",
+        default="implementation/phase1/release_evidence/kds/midas_kds_row_provenance_table_report.json",
+    )
     p.add_argument("--nonlinear-generalization-report", default="implementation/phase1/nonlinear_generalization_gate_report.json")
     p.add_argument("--workflow-productization-report", default="implementation/phase1/workflow_productization_gate_report.json")
+    p.add_argument(
+        "--workflow-productization-source-evidence",
+        default="implementation/phase1/release_evidence/productization/workflow_productization_gate_report.json",
+    )
     p.add_argument("--structural-contact-report", default="implementation/phase1/structural_contact_gate_report.json")
+    p.add_argument(
+        "--structural-contact-source-evidence",
+        default="implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
+    )
     p.add_argument("--general-fe-contact-benchmark-report", default="implementation/phase1/general_fe_contact_benchmark_gate_report.json")
+    p.add_argument(
+        "--general-fe-contact-benchmark-source-evidence",
+        default="implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
+    )
     p.add_argument("--foundation-soil-link-report", default="implementation/phase1/foundation_soil_link_gate_report.json")
     p.add_argument("--substructuring-interface-report", default="implementation/phase1/substructuring_interface_report.json")
     p.add_argument("--soil-tunnel-ssi-report", default="implementation/phase1/soil_tunnel_ssi_report.json")
@@ -1974,6 +2210,10 @@ def main() -> None:
         "--hardest-external-10case-kickoff-report",
         default="implementation/phase1/hardest_external_10case_kickoff_gate_report.json",
     )
+    p.add_argument(
+        "--hardest-external-10case-kickoff-source-evidence",
+        default="implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json",
+    )
     p.add_argument("--rc-benchmark-lock-report", default="implementation/phase1/rc_benchmark_lock_report.json")
     p.add_argument("--rc-benchmark-cases", default="implementation/phase1/open_data/rc/rc_benchmark_lock_cases.json")
     p.add_argument("--rc-authority-catalog", default="implementation/phase1/open_data/global_authority/authority_source_catalog.json")
@@ -1990,6 +2230,10 @@ def main() -> None:
         default="implementation/phase1/release/design_optimization/design_optimization_cost_reduction_smoke_report.json",
     )
     p.add_argument(
+        "--design-opt-cost-smoke-source-evidence",
+        default="implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_smoke_report.json",
+    )
+    p.add_argument(
         "--design-opt-cost-smoke-history",
         default="implementation/phase1/release/design_optimization/design_optimization_cost_reduction_smoke_history.json",
     )
@@ -2003,7 +2247,23 @@ def main() -> None:
         "--committee-package-report",
         default="implementation/phase1/release/committee_review/committee_review_package_report.json",
     )
+    p.add_argument(
+        "--committee-package-source-evidence",
+        default="implementation/phase1/release_evidence/productization/committee_review_package_report.json",
+    )
     p.add_argument("--committee-summary-report", default="implementation/phase1/release/committee_review/committee_summary.json")
+    p.add_argument(
+        "--committee-summary-source-evidence",
+        default="implementation/phase1/release_evidence/productization/committee_summary.json",
+    )
+    p.add_argument(
+        "--authority-catalog-routing-diff-report",
+        default="implementation/phase1/release/committee_review/authority_catalog_routing_diff.json",
+    )
+    p.add_argument(
+        "--authority-catalog-routing-diff-source-evidence",
+        default="implementation/phase1/release_evidence/productization/authority_catalog_routing_diff.json",
+    )
     p.add_argument(
         "--pbd-review-package-report",
         default="implementation/phase1/release/pbd_review/pbd_review_package_report.json",
@@ -2035,6 +2295,18 @@ def main() -> None:
     p.add_argument(
         "--design-opt-cost-reduction-changes",
         default="implementation/phase1/release/design_optimization/design_optimization_cost_reduction_changes.json",
+    )
+    p.add_argument(
+        "--design-opt-cost-reduction-changes-source-evidence",
+        default="implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+    )
+    p.add_argument(
+        "--design-opt-cost-reduction-blocked-actions",
+        default="implementation/phase1/release/design_optimization/design_optimization_cost_reduction_blocked_actions.json",
+    )
+    p.add_argument(
+        "--design-opt-cost-reduction-blocked-actions-source-evidence",
+        default="implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_blocked_actions.json",
     )
     p.add_argument(
         "--design-opt-rebar-payload-projection-json",
@@ -2938,6 +3210,43 @@ def main() -> None:
     ):
         reason_code = "ERR_PERFORMANCE_PROFILING_GATE"
 
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "committee_review_package_evidence",
+            source=args.committee_package_source_evidence,
+            destination=args.committee_package_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners hydrate the checked-in committee review package "
+                "before registry, release-gap, viewer, and freeze steps."
+            ),
+        ):
+            reason_code = "ERR_COMMITTEE_REVIEW_EVIDENCE"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_file(
+            "committee_summary_evidence",
+            source=args.committee_summary_source_evidence,
+            destination=args.committee_summary_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners hydrate the checked-in committee summary "
+                "so downstream release reports use the same governance snapshot as the package."
+            ),
+        ):
+            reason_code = "ERR_COMMITTEE_REVIEW_EVIDENCE"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_file(
+            "authority_catalog_routing_diff_evidence",
+            source=args.authority_catalog_routing_diff_source_evidence,
+            destination=args.authority_catalog_routing_diff_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners hydrate the authority-catalog routing diff "
+                "required by the immutable release snapshot manifest."
+            ),
+        ):
+            reason_code = "ERR_COMMITTEE_REVIEW_EVIDENCE"
+
     def _release_registry_cmd() -> list[str]:
         return [
             sys.executable,
@@ -3079,11 +3388,43 @@ def main() -> None:
         "--out",
         str(args.surface_interaction_benchmark_report),
     ]
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "general_fe_contact_benchmark_evidence",
+            source=args.general_fe_contact_benchmark_source_evidence,
+            destination=args.general_fe_contact_benchmark_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in general-FE contact evidence "
+                "so downstream surface and solver-breadth gates do not depend on clean-runner "
+                "contact matrix regeneration."
+            ),
+        ):
+            reason_code = "ERR_SURFACE_INTERACTION_BENCHMARK"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "surface_interaction_benchmark_evidence",
+            source=args.surface_interaction_benchmark_source_evidence,
+            destination=args.surface_interaction_benchmark_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in surface-interaction evidence "
+                "instead of rebuilding the joint-panel/direct-contact family matrix during publication."
+            ),
+        ):
+            reason_code = "ERR_SURFACE_INTERACTION_BENCHMARK"
     if reason_code == "PASS" and not _run_reusable(
         "surface_interaction_benchmark_gate",
         cmd_surface_interaction,
         args.surface_interaction_benchmark_report,
         steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused checked-in surface-interaction evidence on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
     ):
         reason_code = "ERR_SURFACE_INTERACTION_BENCHMARK"
 
@@ -3119,8 +3460,80 @@ def main() -> None:
         "--out",
         str(args.solver_breadth_report),
     ]
-    if reason_code == "PASS" and not _run_reusable("solver_breadth_gate", cmd_solver_breadth, args.solver_breadth_report, steps):
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "solver_breadth_gate_evidence",
+            source=args.solver_breadth_source_evidence,
+            destination=args.solver_breadth_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in solver-breadth evidence after "
+                "surface/general-FE hydration; full refresh belongs in the heavy validation lane."
+            ),
+        ):
+            reason_code = "ERR_SOLVER_BREADTH_GATE"
+    if reason_code == "PASS" and not _run_reusable(
+        "solver_breadth_gate",
+        cmd_solver_breadth,
+        args.solver_breadth_report,
+        steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused checked-in solver-breadth evidence on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
+    ):
         reason_code = "ERR_SOLVER_BREADTH_GATE"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "element_material_breadth_gate_evidence",
+            source=args.element_material_breadth_source_evidence,
+            destination=args.element_material_breadth_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in element/material breadth evidence "
+                "so phase1 CI can run from a clean checkout without missing core breadth sidecars."
+            ),
+        ):
+            reason_code = "ERR_SOLVER_BREADTH_GATE"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "material_constitutive_gate_evidence",
+            source=args.material_constitutive_source_evidence,
+            destination=args.material_constitutive_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in material constitutive evidence "
+                "so phase1 CI can run from a clean checkout without missing constitutive sidecars."
+            ),
+        ):
+            reason_code = "ERR_MATERIAL_CONSTITUTIVE_GATE"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "steel_composite_constitutive_gate_evidence",
+            source=args.steel_composite_constitutive_source_evidence,
+            destination=args.steel_composite_constitutive_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in steel/composite constitutive evidence "
+                "so phase1 CI preserves the active constitutive closure contract."
+            ),
+        ):
+            reason_code = "ERR_MATERIAL_CONSTITUTIVE_GATE"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "structural_contact_gate_evidence",
+            source=args.structural_contact_source_evidence,
+            destination=args.structural_contact_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in structural contact evidence "
+                "so phase1 CI can run from a clean checkout without missing contact sidecars."
+            ),
+        ):
+            reason_code = "ERR_CONTACT_READINESS"
 
     cmd_midas_interoperability = [
         sys.executable,
@@ -3128,8 +3541,30 @@ def main() -> None:
         "--out",
         str(args.midas_interoperability_report),
     ]
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "midas_interoperability_gate_evidence",
+            source=args.midas_interoperability_source_evidence,
+            destination=args.midas_interoperability_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in MIDAS interoperability evidence "
+                "instead of rebuilding preview/LOADCOMB round-trip artifacts during publication."
+            ),
+        ):
+            reason_code = "ERR_MIDAS_INTEROPERABILITY"
     if reason_code == "PASS" and not _run_reusable(
-        "midas_interoperability_gate", cmd_midas_interoperability, args.midas_interoperability_report, steps
+        "midas_interoperability_gate",
+        cmd_midas_interoperability,
+        args.midas_interoperability_report,
+        steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused checked-in MIDAS interoperability evidence on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
     ):
         reason_code = "ERR_MIDAS_INTEROPERABILITY"
 
@@ -3273,11 +3708,30 @@ def main() -> None:
         "--out",
         str(args.midas_native_writeback_diff_receipts_report),
     ]
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "midas_native_writeback_diff_receipts_evidence",
+            source=args.midas_native_writeback_diff_receipts_source_evidence,
+            destination=args.midas_native_writeback_diff_receipts_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in MIDAS native write-back receipts "
+                "instead of regenerating native write-back diffs from a clean publication checkout."
+            ),
+        ):
+            reason_code = "ERR_MIDAS_NATIVE_ROUNDTRIP"
     if reason_code == "PASS" and not _run_reusable(
         "midas_native_writeback_diff_receipts",
         cmd_midas_native_writeback_diff_receipts,
         args.midas_native_writeback_diff_receipts_report,
         steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused checked-in MIDAS native write-back receipts on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
     ):
         reason_code = "ERR_MIDAS_NATIVE_ROUNDTRIP"
 
@@ -3291,13 +3745,68 @@ def main() -> None:
         "--out",
         str(args.midas_native_roundtrip_report),
     ]
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "midas_native_roundtrip_gate_evidence",
+            source=args.midas_native_roundtrip_source_evidence,
+            destination=args.midas_native_roundtrip_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in MIDAS native roundtrip evidence "
+                "after receipt hydration; exact native refresh belongs in the MIDAS validation lane."
+            ),
+        ):
+            reason_code = "ERR_MIDAS_NATIVE_ROUNDTRIP"
     if reason_code == "PASS" and not _run_reusable(
         "midas_native_roundtrip_gate",
         cmd_midas_native_roundtrip,
         args.midas_native_roundtrip_report,
         steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused checked-in MIDAS native roundtrip evidence on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
     ):
         reason_code = "ERR_MIDAS_NATIVE_ROUNDTRIP"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "midas_exact_roundtrip_closure_evidence",
+            source=args.midas_exact_roundtrip_closure_source_evidence,
+            destination=args.midas_exact_roundtrip_closure_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in MIDAS exact roundtrip closure evidence "
+                "so phase1 CI can validate exact-roundtrip closure from a clean checkout."
+            ),
+        ):
+            reason_code = "ERR_MIDAS_NATIVE_ROUNDTRIP"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "load_combination_engine_evidence",
+            source=args.load_combination_engine_source_evidence,
+            destination=args.load_combination_engine_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in load-combination engine evidence "
+                "alongside MIDAS exact-roundtrip closure evidence."
+            ),
+        ):
+            reason_code = "ERR_MIDAS_NATIVE_ROUNDTRIP"
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "midas_kds_row_provenance_export_evidence",
+            source=args.midas_kds_row_provenance_export_source_evidence,
+            destination=args.midas_kds_row_provenance_export_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in MIDAS KDS row-provenance evidence "
+                "so workflow productization and phase1 CI can run from a clean checkout."
+            ),
+        ):
+            reason_code = "ERR_KDS_COMPLIANCE_GATE"
 
     cmd_irregular_top5_execution_manifest = [
         sys.executable,
@@ -3390,7 +3899,7 @@ def main() -> None:
         "--midas-native-roundtrip-report",
         str(args.midas_native_roundtrip_report),
         "--row-provenance-export-report",
-        "implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json",
+        str(args.midas_kds_row_provenance_export_report),
         "--viewer-json",
         str(Path(args.structural_optimization_viewer_dir) / "structural_optimization_viewer.json"),
         "--viewer-html",
@@ -3410,11 +3919,30 @@ def main() -> None:
         "--out",
         str(args.workflow_productization_report),
     ]
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "workflow_productization_gate_evidence",
+            source=args.workflow_productization_source_evidence,
+            destination=args.workflow_productization_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in workflow productization evidence "
+                "instead of validating viewer/audit authoring automation before release artifacts are regenerated."
+            ),
+        ):
+            reason_code = "ERR_WORKFLOW_PRODUCTIZATION_GATE"
     if reason_code == "PASS" and not _run_reusable(
         "workflow_productization_gate",
         cmd_workflow_productization,
         args.workflow_productization_report,
         steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused checked-in workflow productization evidence on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
     ):
         reason_code = "ERR_WORKFLOW_PRODUCTIZATION_GATE"
 
@@ -3643,11 +4171,30 @@ def main() -> None:
         "--out",
         str(args.hardest_external_10case_kickoff_report),
     ]
+    if reason_code == "PASS" and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "hardest_external_10case_kickoff_gate_evidence",
+            source=args.hardest_external_10case_kickoff_source_evidence,
+            destination=args.hardest_external_10case_kickoff_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in hardest external 10-case kickoff evidence "
+                "instead of recomputing start readiness from publication-hydrated heavy reports."
+            ),
+        ):
+            reason_code = "ERR_HARDEST_EXTERNAL_10CASE_KICKOFF_GATE"
     if reason_code == "PASS" and not _run_reusable(
         "hardest_external_10case_kickoff_gate",
         cmd_hardest_external_10case_kickoff,
         args.hardest_external_10case_kickoff_report,
         steps,
+        check_dependency_mtime=not bool(args.allow_cpu_required),
+        check_script_mtime=not bool(args.allow_cpu_required),
+        reuse_note=(
+            "reused checked-in hardest external 10-case kickoff evidence on CPU-required release runner"
+            if bool(args.allow_cpu_required)
+            else ""
+        ),
     ):
         reason_code = "ERR_HARDEST_EXTERNAL_10CASE_KICKOFF_GATE"
 
@@ -3686,8 +4233,16 @@ def main() -> None:
         str(args.commercial_readiness_report),
         "--solver-breadth-report",
         str(args.solver_breadth_report),
+        "--element-material-breadth-report",
+        str(args.element_material_breadth_report),
+        "--material-constitutive-report",
+        str(args.material_constitutive_report),
+        "--steel-composite-constitutive-gate-report",
+        str(args.steel_composite_constitutive_report),
         "--contact-readiness-report",
         str(args.contact_readiness_report),
+        "--structural-contact-report",
+        str(args.structural_contact_report),
         "--general-fe-contact-benchmark-report",
         str(args.general_fe_contact_benchmark_report),
         "--surface-interaction-benchmark-report",
@@ -3698,6 +4253,12 @@ def main() -> None:
         str(args.korean_source_ingest_gate_report),
         "--midas-native-roundtrip-report",
         str(args.midas_native_roundtrip_report),
+        "--midas-exact-roundtrip-closure-report",
+        str(args.midas_exact_roundtrip_closure_report),
+        "--load-combination-engine-gate-report",
+        str(args.load_combination_engine_report),
+        "--midas-kds-row-provenance-export-report",
+        str(args.midas_kds_row_provenance_export_report),
         "--performance-profiling-report",
         str(args.performance_profiling_report),
         "--irregular-structure-collection-gate-report",
@@ -3783,12 +4344,31 @@ def main() -> None:
         "--out",
         str(args.design_opt_cost_smoke_report),
     ]
+    if reason_code == "PASS" and bool(args.enable_design_opt_cost_smoke) and bool(args.allow_cpu_required):
+        if not _materialize_checked_in_evidence(
+            "design_optimization_cost_reduction_smoke_evidence",
+            source=args.design_opt_cost_smoke_source_evidence,
+            destination=args.design_opt_cost_smoke_report,
+            steps=steps,
+            reason=(
+                "CPU-required release runners reuse checked-in design optimization cost-smoke evidence "
+                "instead of rerunning the release-side solver-loop NPZ smoke probe during publication."
+            ),
+        ):
+            reason_code = "ERR_DESIGN_OPT_COST_REDUCTION_SMOKE"
     if reason_code == "PASS" and bool(args.enable_design_opt_cost_smoke):
         smoke_ok = _run_reusable(
             "design_optimization_cost_reduction_smoke",
             cmd_design_opt_smoke,
             args.design_opt_cost_smoke_report,
             steps,
+            check_dependency_mtime=not bool(args.allow_cpu_required),
+            check_script_mtime=not bool(args.allow_cpu_required),
+            reuse_note=(
+                "reused checked-in design optimization cost-smoke evidence on CPU-required release runner"
+                if bool(args.allow_cpu_required)
+                else ""
+            ),
         )
         if (not smoke_ok) and bool(args.strict_design_opt_cost_smoke):
             reason_code = "ERR_DESIGN_OPT_COST_REDUCTION_SMOKE"
@@ -4081,6 +4661,10 @@ def main() -> None:
         str(args.design_opt_dataset_npz),
         "--midas-model",
         str(args.mgt_json_out),
+        "--cost-reduction-changes",
+        str(args.design_opt_cost_reduction_changes),
+        "--cost-reduction-blocked-actions",
+        str(args.design_opt_cost_reduction_blocked_actions),
         "--out",
         str(args.foundation_optimization_artifact),
     ]
@@ -4196,6 +4780,30 @@ def main() -> None:
             steps,
         ):
             reason_code = "ERR_DESIGN_OPT_DATASET_REFRESH"
+        if reason_code == "PASS" and bool(args.allow_cpu_required):
+            if not _materialize_checked_in_file(
+                "design_optimization_cost_reduction_changes_evidence",
+                source=args.design_opt_cost_reduction_changes_source_evidence,
+                destination=args.design_opt_cost_reduction_changes,
+                steps=steps,
+                reason=(
+                    "CPU-required release runners reuse checked-in design optimization changes payload "
+                    "before payload projection and MGT export steps."
+                ),
+            ):
+                reason_code = "ERR_DESIGN_OPT_REBAR_PAYLOAD_PROJECTION"
+        if reason_code == "PASS" and bool(args.allow_cpu_required):
+            if not _materialize_checked_in_file(
+                "design_optimization_cost_reduction_blocked_actions_evidence",
+                source=args.design_opt_cost_reduction_blocked_actions_source_evidence,
+                destination=args.design_opt_cost_reduction_blocked_actions,
+                steps=steps,
+                reason=(
+                    "CPU-required release runners reuse checked-in blocked-action payloads "
+                    "so foundation hard-gate candidate evidence survives clean publication runs."
+                ),
+            ):
+                reason_code = "ERR_FOUNDATION_OPTIMIZATION_ARTIFACT"
         if reason_code == "PASS" and not _run_reusable(
             "design_optimization_rebar_payload_projection",
             cmd_design_opt_rebar_payload_projection,
@@ -4418,6 +5026,11 @@ def main() -> None:
         "--out",
         str(args.freeze_report),
     ]
+    cmd_freeze_pre_gap = [
+        *cmd_freeze,
+        "--exclude-artifact-files",
+        ",".join(PRE_GAP_FREEZE_EXCLUDED_ARTIFACTS),
+    ]
     cmd_promote = [
         sys.executable,
         "implementation/phase1/promote_release_candidate.py",
@@ -4429,9 +5042,19 @@ def main() -> None:
 
     if reason_code == "PASS":
         _run_reusable("static_artifact_validation_pre_gap", cmd_val, args.static_validation, steps)
-        _run_reusable("freeze_release_snapshot_pre_gap", cmd_freeze, args.freeze_report, steps)
+        _run_reusable("freeze_release_snapshot_pre_gap", cmd_freeze_pre_gap, args.freeze_report, steps)
         if not bool(args.skip_promotion):
             _run_reusable("promote_release_candidate_pre_gap", cmd_promote, args.promotion_report, steps)
+        elif not _write_skipped_promotion_report(
+            "promotion_report_skipped",
+            destination=args.promotion_report,
+            steps=steps,
+            reason=(
+                "promotion was skipped by the publication lane; this marker keeps release-gap "
+                "generation deterministic without promoting artifacts."
+            ),
+        ):
+            reason_code = "ERR_PROMOTION"
 
     provisional_payload = _build_payload(
         args,

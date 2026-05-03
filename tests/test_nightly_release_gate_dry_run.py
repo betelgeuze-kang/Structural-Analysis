@@ -159,6 +159,150 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert "implementation/phase1/release_evidence/performance/foundation_soil_link_gate_report.json" in str(
         foundation_evidence_step.get("command", "")
     )
+    general_fe_evidence_step = next(
+        step for step in steps if step.get("step") == "general_fe_contact_benchmark_evidence"
+    )
+    assert "materialize-evidence" in str(general_fe_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json" in str(
+        general_fe_evidence_step.get("command", "")
+    )
+    surface_evidence_step = next(
+        step for step in steps if step.get("step") == "surface_interaction_benchmark_evidence"
+    )
+    assert "materialize-evidence" in str(surface_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json" in str(
+        surface_evidence_step.get("command", "")
+    )
+    solver_breadth_evidence_step = next(step for step in steps if step.get("step") == "solver_breadth_gate_evidence")
+    assert "materialize-evidence" in str(solver_breadth_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/surface/solver_breadth_report.json" in str(
+        solver_breadth_evidence_step.get("command", "")
+    )
+    element_material_evidence_step = next(
+        step for step in steps if step.get("step") == "element_material_breadth_gate_evidence"
+    )
+    assert "materialize-evidence" in str(element_material_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json" in str(
+        element_material_evidence_step.get("command", "")
+    )
+    material_constitutive_evidence_step = next(
+        step for step in steps if step.get("step") == "material_constitutive_gate_evidence"
+    )
+    assert "materialize-evidence" in str(material_constitutive_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json" in str(
+        material_constitutive_evidence_step.get("command", "")
+    )
+    steel_composite_evidence_step = next(
+        step for step in steps if step.get("step") == "steel_composite_constitutive_gate_evidence"
+    )
+    assert "materialize-evidence" in str(steel_composite_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json" in str(
+        steel_composite_evidence_step.get("command", "")
+    )
+    structural_contact_evidence_step = next(
+        step for step in steps if step.get("step") == "structural_contact_gate_evidence"
+    )
+    assert "materialize-evidence" in str(structural_contact_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json" in str(
+        structural_contact_evidence_step.get("command", "")
+    )
+    midas_interop_evidence_step = next(
+        step for step in steps if step.get("step") == "midas_interoperability_gate_evidence"
+    )
+    assert "materialize-evidence" in str(midas_interop_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/midas/midas_interoperability_gate_report.json" in str(
+        midas_interop_evidence_step.get("command", "")
+    )
+    midas_receipts_evidence_step = next(
+        step for step in steps if step.get("step") == "midas_native_writeback_diff_receipts_evidence"
+    )
+    assert "materialize-evidence" in str(midas_receipts_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/midas/midas_native_writeback_diff_receipts_report.json" in str(
+        midas_receipts_evidence_step.get("command", "")
+    )
+    midas_native_evidence_step = next(
+        step for step in steps if step.get("step") == "midas_native_roundtrip_gate_evidence"
+    )
+    assert "materialize-evidence" in str(midas_native_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/midas/midas_native_roundtrip_gate_report.json" in str(
+        midas_native_evidence_step.get("command", "")
+    )
+    kds_row_provenance_evidence_step = next(
+        step for step in steps if step.get("step") == "midas_kds_row_provenance_export_evidence"
+    )
+    assert "materialize-evidence" in str(kds_row_provenance_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/kds/midas_kds_row_provenance_table_report.json" in str(
+        kds_row_provenance_evidence_step.get("command", "")
+    )
+    midas_exact_evidence_step = next(
+        step for step in steps if step.get("step") == "midas_exact_roundtrip_closure_evidence"
+    )
+    assert "materialize-evidence" in str(midas_exact_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/midas/midas_exact_roundtrip_closure_gate_report.json" in str(
+        midas_exact_evidence_step.get("command", "")
+    )
+    loadcomb_engine_evidence_step = next(
+        step for step in steps if step.get("step") == "load_combination_engine_evidence"
+    )
+    assert "materialize-evidence" in str(loadcomb_engine_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/midas/load_combination_engine_gate_report.json" in str(
+        loadcomb_engine_evidence_step.get("command", "")
+    )
+    workflow_productization_evidence_step = next(
+        step for step in steps if step.get("step") == "workflow_productization_gate_evidence"
+    )
+    assert "materialize-evidence" in str(workflow_productization_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/workflow_productization_gate_report.json" in str(
+        workflow_productization_evidence_step.get("command", "")
+    )
+    hardest_external_evidence_step = next(
+        step for step in steps if step.get("step") == "hardest_external_10case_kickoff_gate_evidence"
+    )
+    assert "materialize-evidence" in str(hardest_external_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json" in str(
+        hardest_external_evidence_step.get("command", "")
+    )
+    design_smoke_evidence_step = next(
+        step for step in steps if step.get("step") == "design_optimization_cost_reduction_smoke_evidence"
+    )
+    assert "materialize-evidence" in str(design_smoke_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_smoke_report.json" in str(
+        design_smoke_evidence_step.get("command", "")
+    )
+    design_changes_evidence_step = next(
+        step for step in steps if step.get("step") == "design_optimization_cost_reduction_changes_evidence"
+    )
+    assert "materialize-file" in str(design_changes_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json" in str(
+        design_changes_evidence_step.get("command", "")
+    )
+    design_blocked_evidence_step = next(
+        step for step in steps if step.get("step") == "design_optimization_cost_reduction_blocked_actions_evidence"
+    )
+    assert "materialize-file" in str(design_blocked_evidence_step.get("command", ""))
+    assert (
+        "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_blocked_actions.json"
+        in str(design_blocked_evidence_step.get("command", ""))
+    )
+    committee_package_evidence_step = next(
+        step for step in steps if step.get("step") == "committee_review_package_evidence"
+    )
+    assert "materialize-evidence" in str(committee_package_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/committee_review_package_report.json" in str(
+        committee_package_evidence_step.get("command", "")
+    )
+    committee_summary_evidence_step = next(step for step in steps if step.get("step") == "committee_summary_evidence")
+    assert "materialize-file" in str(committee_summary_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/committee_summary.json" in str(
+        committee_summary_evidence_step.get("command", "")
+    )
+    authority_diff_evidence_step = next(
+        step for step in steps if step.get("step") == "authority_catalog_routing_diff_evidence"
+    )
+    assert "materialize-file" in str(authority_diff_evidence_step.get("command", ""))
+    assert "implementation/phase1/release_evidence/productization/authority_catalog_routing_diff.json" in str(
+        authority_diff_evidence_step.get("command", "")
+    )
     scaleout_step = next(step for step in steps if step.get("step") == "scaleout_io_profile")
     assert "--allow-cpu-required" in str(scaleout_step.get("command", ""))
     assert "--gpu-strict" not in str(scaleout_step.get("command", ""))
@@ -231,6 +375,9 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     )
     assert step_names.index("commercial_readiness_gate_evidence") < step_names.index("commercial_readiness_gate")
     assert step_names.index("global_authority_gate") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("hardest_external_10case_kickoff_gate_evidence") < step_names.index(
+        "hardest_external_10case_kickoff_gate"
+    )
     assert step_names.index("hardest_external_10case_kickoff_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("midas_mgt_conversion_gate") < step_names.index("midas_kds_geometry_bridge_backfill")
     assert step_names.index("midas_kds_geometry_bridge_backfill") < step_names.index("phase1_ci_gate_nightly")
@@ -252,19 +399,58 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert step_names.index("korean_solver_ready_reconstruction") < step_names.index("midas_native_corpus_manifest")
     assert step_names.index("public_native_corpus") < step_names.index("midas_native_corpus_manifest")
     assert step_names.index("midas_native_corpus_manifest") < step_names.index("midas_native_writeback_diff_receipts")
+    assert step_names.index("midas_native_writeback_diff_receipts_evidence") < step_names.index(
+        "midas_native_writeback_diff_receipts"
+    )
     assert step_names.index("midas_native_writeback_diff_receipts") < step_names.index("midas_native_roundtrip_gate")
+    assert step_names.index("midas_native_roundtrip_gate_evidence") < step_names.index("midas_native_roundtrip_gate")
+    assert step_names.index("midas_kds_row_provenance_export_evidence") < step_names.index(
+        "phase1_ci_gate_nightly"
+    )
+    assert step_names.index("workflow_productization_gate_evidence") < step_names.index("workflow_productization_gate")
+    assert step_names.index("element_material_breadth_gate_evidence") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("material_constitutive_gate_evidence") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("steel_composite_constitutive_gate_evidence") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("structural_contact_gate_evidence") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("midas_exact_roundtrip_closure_evidence") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("load_combination_engine_evidence") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("solver_truthfulness_gate") < step_names.index("performance_profiling_gate")
     assert step_names.index("performance_profiling_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("irregular_top5_execution_manifest") < step_names.index("irregular_structure_collection_gate")
     assert step_names.index("irregular_structure_collection_gate") < step_names.index("phase1_ci_gate_nightly")
     assert step_names.index("midas_native_roundtrip_gate") < step_names.index("phase1_ci_gate_nightly")
+    assert step_names.index("general_fe_contact_benchmark_evidence") < step_names.index(
+        "surface_interaction_benchmark_evidence"
+    )
+    assert step_names.index("surface_interaction_benchmark_evidence") < step_names.index(
+        "surface_interaction_benchmark_gate"
+    )
     assert step_names.index("surface_interaction_benchmark_gate") < step_names.index("solver_breadth_gate")
+    assert step_names.index("solver_breadth_gate_evidence") < step_names.index("solver_breadth_gate")
+    assert step_names.index("midas_interoperability_gate_evidence") < step_names.index("midas_interoperability_gate")
     assert step_names.index("ssi_boundary_gate_evidence") < step_names.index("ssi_boundary_gate")
     assert step_names.index("contact_readiness_gate_evidence") < step_names.index("contact_readiness_gate")
     assert step_names.index("gpu_bottleneck_audit_evidence") < step_names.index("performance_profiling_gate")
     assert step_names.index("foundation_soil_link_evidence") < step_names.index("performance_profiling_gate")
     assert step_names.index("foundation_soil_link_evidence") < step_names.index("surface_interaction_benchmark_gate")
     assert step_names.index("phase1_ci_gate_nightly") < step_names.index("design_optimization_cost_reduction_smoke")
+    assert step_names.index("design_optimization_cost_reduction_smoke_evidence") < step_names.index(
+        "design_optimization_cost_reduction_smoke"
+    )
+    assert step_names.index("design_optimization_dataset_refresh") < step_names.index(
+        "design_optimization_cost_reduction_changes_evidence"
+    )
+    assert step_names.index("design_optimization_cost_reduction_changes_evidence") < step_names.index(
+        "design_optimization_rebar_payload_projection"
+    )
+    assert step_names.index("design_optimization_cost_reduction_blocked_actions_evidence") < step_names.index(
+        "foundation_optimization_artifact"
+    )
+    assert step_names.index("committee_review_package_evidence") < step_names.index("release_registry_gate_pre_gap")
+    assert step_names.index("committee_summary_evidence") < step_names.index("release_registry_gate_pre_gap")
+    assert step_names.index("authority_catalog_routing_diff_evidence") < step_names.index(
+        "freeze_release_snapshot_pre_gap"
+    )
     assert step_names.index("design_optimization_dataset_refresh") < step_names.index("pbd_hinge_refresh_source")
     assert step_names.index("design_optimization_dataset_refresh") < step_names.index("design_optimization_rebar_payload_projection")
     assert step_names.index("design_optimization_rebar_payload_projection") < step_names.index("design_optimization_connection_detailing_payload_projection")
@@ -299,6 +485,14 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert step_names.index("peer_spd_hinge_fixture_regression") < step_names.index("peer_spd_hinge_alignment")
     assert step_names.index("peer_spd_hinge_alignment") < step_names.index("release_gap_report")
     assert step_names.index("release_gap_report") < step_names.index("external_benchmark_submission_readiness")
+    pre_gap_freeze_step = next(step for step in steps if step.get("step") == "freeze_release_snapshot_pre_gap")
+    assert "--exclude-artifact-files" in str(pre_gap_freeze_step.get("command", ""))
+    assert "release/release_gap_report.json" in str(pre_gap_freeze_step.get("command", ""))
+    final_freeze_step = next(step for step in steps if step.get("step") == "freeze_release_snapshot")
+    assert "--exclude-artifact-files" not in str(final_freeze_step.get("command", ""))
+    skipped_promotion_step = next(step for step in steps if step.get("step") == "promotion_report_skipped")
+    assert "write-skipped-promotion" in str(skipped_promotion_step.get("command", ""))
+    assert step_names.index("promotion_report_skipped") < step_names.index("release_gap_report")
     assert step_names.index("external_benchmark_submission_readiness") < step_names.index("external_benchmark_kickoff_package")
     assert step_names.index("external_benchmark_kickoff_package") < step_names.index("external_benchmark_execution_manifest")
     assert step_names.index("external_benchmark_execution_manifest") < step_names.index("external_benchmark_execution_status_manifest")
@@ -322,11 +516,18 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
     assert "--midas-loadcomb-roundtrip-artifact implementation/phase1/open_data/midas/midas_generator_33.json" in ci_command
     assert "--midas-loadcomb-roundtrip-artifact implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json" in ci_command
     assert "--midas-loadcomb-roundtrip-artifact implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json" in ci_command
+    assert "--element-material-breadth-report implementation/phase1/element_material_breadth_gate_report.json" in ci_command
+    assert "--material-constitutive-report implementation/phase1/material_constitutive_gate_report.json" in ci_command
+    assert "--steel-composite-constitutive-gate-report implementation/phase1/steel_composite_constitutive_gate_report.json" in ci_command
+    assert "--structural-contact-report implementation/phase1/structural_contact_gate_report.json" in ci_command
     assert "--general-fe-contact-benchmark-report implementation/phase1/general_fe_contact_benchmark_gate_report.json" in ci_command
     assert "--surface-interaction-benchmark-report implementation/phase1/surface_interaction_benchmark_gate_report.json" in ci_command
     assert "--korean-source-ingest-gate-report implementation/phase1/korean_source_ingest_gate_report.json" in ci_command
     assert "--hardest-external-10case-kickoff-report implementation/phase1/hardest_external_10case_kickoff_gate_report.json" in ci_command
     assert "--midas-native-roundtrip-report implementation/phase1/midas_native_roundtrip_gate_report.json" in ci_command
+    assert "--midas-exact-roundtrip-closure-report implementation/phase1/midas_exact_roundtrip_closure_gate_report.json" in ci_command
+    assert "--load-combination-engine-gate-report implementation/phase1/load_combination_engine_gate_report.json" in ci_command
+    assert "--midas-kds-row-provenance-export-report implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json" in ci_command
     assert "--performance-profiling-report implementation/phase1/performance_profiling_gate_report.json" in ci_command
     assert "--irregular-structure-collection-gate-report implementation/phase1/irregular_structure_collection_gate_report.json" in ci_command
     assert "--irregular-top5-execution-manifest implementation/phase1/open_data/irregular/irregular_top5_execution_manifest.json" in ci_command

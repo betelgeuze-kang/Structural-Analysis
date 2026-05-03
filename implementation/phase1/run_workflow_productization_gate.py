@@ -1926,6 +1926,7 @@ def main() -> None:
             korean_source_ingest_gate_report_path=Path(args.korean_source_ingest_gate_report),
             korean_structural_preview_promotion_queue_path=Path(args.korean_structural_preview_promotion_queue),
         )
+        report["inputs"] = input_payload
     except (InputContractError, ValueError, FileNotFoundError) as exc:
         report = {
             "schema_version": "1.0",

@@ -1,0 +1,346 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-structural-contact-gate",
+  "generated_at": "2026-04-11T18:04:36.762142+00:00",
+  "inputs": {
+    "contact_readiness_report": "implementation/phase1/contact_readiness_report.json",
+    "roadmap": "implementation/phase1/commercial_tool_replacement_roadmap.md",
+    "kds_rc_rule_engine": "implementation/phase1/kds_rc_rule_engine.py",
+    "special_link_library": "implementation/phase1/special_link_library.py",
+    "structural_contact_validation_report": "implementation/phase1/structural_contact_validation_report.json",
+    "out": "implementation/phase1/structural_contact_gate_report.json"
+  },
+  "summary_line": "Structural contact readiness: PASS | bounded_contact=yes | impl=6/6 | validated=6/6 | ready=6/6 | support=contact:6,foundation:4,device:5 | support_search=9 | node_surface_proxy=5 | support_depth=21 | support_families=2 | proxy_families=2 | partial_only=none | missing=none",
+  "contract_pass": true,
+  "checks": {
+    "bounded_contact_evidence_pass": true,
+    "roadmap_tracks_broader_structural_contact_gap": false,
+    "special_link_library_present": true,
+    "special_link_categories_present": true,
+    "structural_contact_validation_present": true,
+    "structural_contact_event_sequence_zero_pass": true,
+    "bearing_design_rule_present": true,
+    "friction_design_rule_present": true,
+    "foundation_support_surface_present": true,
+    "device_model_surface_present": true,
+    "contact_search_surface_present": true,
+    "support_search_surface_present": true,
+    "node_to_surface_proxy_surface_present": true,
+    "support_depth_surface_present": true,
+    "contact_family_surface_present": true,
+    "support_search_family_surface_present": true,
+    "node_to_surface_proxy_family_surface_present": true,
+    "gap_ready": true,
+    "uplift_ready": true,
+    "compression_only_ready": true,
+    "bearing_ready": true,
+    "friction_ready": true,
+    "pounding_ready": true,
+    "all_structural_contact_categories_ready": true
+  },
+  "category_readiness": [
+    {
+      "category": "gap",
+      "implementation_present": true,
+      "validated": true,
+      "partial_design_rule_only": false,
+      "roadmap_gap_tracked": true,
+      "ready": true
+    },
+    {
+      "category": "uplift",
+      "implementation_present": true,
+      "validated": true,
+      "partial_design_rule_only": false,
+      "roadmap_gap_tracked": true,
+      "ready": true
+    },
+    {
+      "category": "compression-only",
+      "implementation_present": true,
+      "validated": true,
+      "partial_design_rule_only": false,
+      "roadmap_gap_tracked": true,
+      "ready": true
+    },
+    {
+      "category": "bearing",
+      "implementation_present": true,
+      "validated": true,
+      "partial_design_rule_only": false,
+      "roadmap_gap_tracked": true,
+      "ready": true
+    },
+    {
+      "category": "friction",
+      "implementation_present": true,
+      "validated": true,
+      "partial_design_rule_only": false,
+      "roadmap_gap_tracked": true,
+      "ready": true
+    },
+    {
+      "category": "pounding",
+      "implementation_present": true,
+      "validated": true,
+      "partial_design_rule_only": false,
+      "roadmap_gap_tracked": true,
+      "ready": true
+    }
+  ],
+  "limitations": [
+    "Bounded wheel-rail Hertzian contact evidence does not certify broader structural contact readiness by itself.",
+    "Bearing and shear-friction design checks count as partial evidence only and do not satisfy nonlinear link readiness for gap/uplift/compression-only/bearing/friction/pounding.",
+    "This gate requires separate broader-link implementation evidence plus validation evidence before any structural contact category is marked ready."
+  ],
+  "contact_readiness_evidence": {
+    "report_present": true,
+    "contract_pass": true,
+    "bounded_scope_pass": true,
+    "upstream_contact_ready": true,
+    "coverage_scope": "wheel_rail_hertzian_contact_only",
+    "summary_line": "Contact readiness: PASS | scope=wheel_rail_hertzian_contact_only | schema=yes | solver=yes(ratio=0.994,max_force=6.52235N) | whitebox=yes(err=0.0048) | structural_contact=undocumented",
+    "structural_contact_label": "undocumented"
+  },
+  "roadmap_evidence": {
+    "tracked_gap": false,
+    "tracked_gap_markers": {
+      "broad_contact_gap": false,
+      "special_link_gap": false,
+      "event_sequence_target": false
+    },
+    "category_markers": {
+      "gap": true,
+      "uplift": true,
+      "compression_only": true,
+      "bearing": true,
+      "friction": true,
+      "pounding": true
+    }
+  },
+  "design_rule_partial_evidence": {
+    "bearing_design_rule_present": true,
+    "friction_design_rule_present": true,
+    "partial_categories": {
+      "gap": false,
+      "uplift": false,
+      "compression_only": false,
+      "bearing": true,
+      "friction": true,
+      "pounding": false
+    }
+  },
+  "implementation_evidence": {
+    "library_present": true,
+    "per_category": {
+      "gap": true,
+      "uplift": true,
+      "compression_only": true,
+      "bearing": true,
+      "friction": true,
+      "pounding": true
+    },
+    "all_categories_present": true
+  },
+  "validation_evidence": {
+    "report_present": true,
+    "event_sequence_zero_pass": true,
+    "event_sequence_mismatch": 0,
+    "per_category": {
+      "gap": true,
+      "uplift": true,
+      "compression_only": true,
+      "bearing": true,
+      "friction": true,
+      "pounding": true
+    },
+    "all_categories_validated": true
+  },
+  "support_surface_evidence": {
+    "foundation_support_model_types": [
+      "p-y",
+      "pile_head",
+      "q-z",
+      "t-z"
+    ],
+    "device_model_types": [
+      "friction_pendulum",
+      "lead_rubber_bearing",
+      "tmd",
+      "viscoelastic_damper",
+      "viscous_damper"
+    ],
+    "support_search_model_types": [
+      "friction_pendulum",
+      "lead_rubber_bearing",
+      "p-y",
+      "pile_head",
+      "q-z",
+      "t-z",
+      "tmd",
+      "viscoelastic_damper",
+      "viscous_damper"
+    ],
+    "node_to_surface_proxy_model_types": [
+      "friction_pendulum",
+      "lead_rubber_bearing",
+      "p-y",
+      "q-z",
+      "t-z"
+    ],
+    "contact_search_surface_types": [
+      "bearing_bilinear",
+      "compression_only_penalty",
+      "coulomb_friction",
+      "kelvin_voigt_pounding",
+      "normal_gap_unilateral",
+      "uplift_seat_unilateral"
+    ],
+    "contact_family_count": 6,
+    "support_link_group_counts": {
+      "contact": 6,
+      "foundation": 4,
+      "device": 5
+    },
+    "search_surface_mode_counts": {
+      "node_to_soil_surface_proxy": 1,
+      "node_to_shaft_surface_proxy": 1,
+      "node_to_tip_surface_proxy": 1,
+      "support_head_rotation_search": 1,
+      "brace_end_support_search": 2,
+      "node_to_surface_isolation_proxy": 2,
+      "tuned_mass_attachment_search": 1
+    },
+    "search_family_counts": {
+      "foundation_support_search": 4,
+      "device_support_search": 5
+    },
+    "support_search_family_types": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "node_to_surface_proxy_family_types": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "support_search_family_requirements": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "search_ready_group_counts": {
+      "contact": 6,
+      "support_ready": 9,
+      "node_to_surface_proxy": 5
+    },
+    "support_search_evidence_rows": [
+      {
+        "link_name": "p-y",
+        "support_role": "soil_lateral_support",
+        "search_surface_mode": "node_to_soil_surface_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "plastic",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "t-z",
+        "support_role": "shaft_friction_transfer",
+        "search_surface_mode": "node_to_shaft_surface_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "residual",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "q-z",
+        "support_role": "tip_bearing_transfer",
+        "search_surface_mode": "node_to_tip_surface_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "capped",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "pile_head",
+        "support_role": "head_fixity_transfer",
+        "search_surface_mode": "support_head_rotation_search",
+        "node_to_surface_proxy": false,
+        "support_search_ready": true,
+        "sample_probe_state": "post-yield",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "viscous_damper",
+        "support_role": "energy_dissipation_path",
+        "search_surface_mode": "brace_end_support_search",
+        "node_to_surface_proxy": false,
+        "support_search_ready": true,
+        "sample_probe_state": "dissipating",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "viscoelastic_damper",
+        "support_role": "stiffness_damping_coupler",
+        "search_surface_mode": "brace_end_support_search",
+        "node_to_surface_proxy": false,
+        "support_search_ready": true,
+        "sample_probe_state": "viscoelastic",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "friction_pendulum",
+        "support_role": "isolation_interface",
+        "search_surface_mode": "node_to_surface_isolation_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "stick",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "lead_rubber_bearing",
+        "support_role": "isolation_bearing_support",
+        "search_surface_mode": "node_to_surface_isolation_proxy",
+        "node_to_surface_proxy": true,
+        "support_search_ready": true,
+        "sample_probe_state": "yielded",
+        "sample_probe_engaged": true
+      },
+      {
+        "link_name": "tmd",
+        "support_role": "secondary_mass_tuning",
+        "search_surface_mode": "tuned_mass_attachment_search",
+        "node_to_surface_proxy": false,
+        "support_search_ready": true,
+        "sample_probe_state": "tracking",
+        "sample_probe_engaged": true
+      }
+    ],
+    "support_search_model_count": 9,
+    "node_to_surface_proxy_count": 5,
+    "support_depth_score": 21
+  },
+  "reason_code": "PASS",
+  "reason": "broader structural contact evidence is present for gap/uplift/compression-only/bearing/friction/pounding",
+  "evidence_paths": {
+    "contact_readiness_report": {
+      "path": "implementation/phase1/contact_readiness_report.json",
+      "sha256": "4ea48a9fc434ba1a947e6cfa154e33f24f3742ccdd3275233f047629d60ecdaf"
+    },
+    "roadmap": {
+      "path": "implementation/phase1/commercial_tool_replacement_roadmap.md",
+      "sha256": "61b2e402ee4ed07e407ece8ba49722a1c7e2f93498a55614b5179289bd7201da"
+    },
+    "kds_rc_rule_engine": {
+      "path": "implementation/phase1/kds_rc_rule_engine.py",
+      "sha256": "0bf94110e0a1b0e824c871cd0633b30f5285ae8e52fe9ae8a8bcce7465aa893a"
+    },
+    "special_link_library": {
+      "path": "implementation/phase1/special_link_library.py",
+      "sha256": "d57400ae148f6420c731be7ce76913527afab7775311078d6f66af256f5f6ca9"
+    },
+    "structural_contact_validation_report": {
+      "path": "implementation/phase1/structural_contact_validation_report.json",
+      "sha256": "8ddc1ff52301ce17555e13c23e8ee07838662c2c720594a1093d34f07bcbbbd0"
+    }
+  }
+}

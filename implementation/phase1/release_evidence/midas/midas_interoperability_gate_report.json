@@ -1,0 +1,207 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-midas-interoperability-gate",
+  "generated_at": "2026-05-02T11:54:35.282313+00:00",
+  "inputs": {
+    "model_jsons": "implementation/phase1/open_data/midas/midas_generator_33.json,implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json,implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "export_report": "implementation/phase1/open_data/midas/midas_generator_33.optimized.export_report.json",
+    "loadcomb_roundtrip_reports": "implementation/phase1/release/midas_generator_33_loadcomb_roundtrip_report.json,implementation/phase1/release/midas_generator_33_pr_recheck_loadcomb_roundtrip_report.json,implementation/phase1/release/midas_generator_33_optimized_roundtrip_loadcomb_roundtrip_report.json",
+    "loadcomb_preview_files": "implementation/phase1/release/midas_generator_33_loadcomb_preview.mgt,implementation/phase1/release/midas_generator_33_pr_recheck_loadcomb_preview.mgt,implementation/phase1/release/midas_generator_33_optimized_roundtrip_loadcomb_preview.mgt",
+    "out": "implementation/phase1/midas_interoperability_gate_report.json"
+  },
+  "checks": {
+    "model_artifacts_present_pass": true,
+    "editor_seed_present_pass": true,
+    "load_pattern_library_present_pass": true,
+    "export_report_pass": true,
+    "loadcomb_preview_files_pass": true,
+    "loadcomb_roundtrip_reports_pass": true
+  },
+  "summary": {
+    "model_count": 3,
+    "model_artifact_count": 3,
+    "model_paths": [
+      "implementation/phase1/open_data/midas/midas_generator_33.json",
+      "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json",
+      "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+    ],
+    "model_sha256": {
+      "midas_generator_33.json": "81328dce200f5c74875383357737dbc9199929ca4fa34587fbc09c1545edaac8",
+      "midas_generator_33.pr_recheck.json": "1779127dcc431e2fde4917480c07f29a1ab01ec7f7eccbd2c31b061bd5d6126e",
+      "midas_generator_33.optimized.roundtrip.json": "83bddac7b257238232b79478200e4ebb32e5fca102e43c7d8302788a6a5b21bf"
+    },
+    "recovery_mode_counts": {
+      "combination_only_raw_recovery": 1,
+      "embedded_metadata": 2
+    },
+    "heuristic_raw_recovery_model_count": 0,
+    "structured_loads_contract_present_count": 3,
+    "seed_kind_counts": {
+      "midas_load_combination_editor_seed": 3
+    },
+    "pattern_provenance_counts": {
+      "combination_only_raw_recovery": 1,
+      "parser_additive_metadata": 2
+    },
+    "seed_present_count": 3,
+    "pattern_present_count": 3,
+    "kds_geometry_bridge_present_count": 3,
+    "kds_geometry_bridge_provenance_counts": {
+      "kds_codecheck_bridge_metadata": 3
+    },
+    "kds_geometry_bridge_registry_source_counts": {
+      "merged_registry": 3
+    },
+    "kds_geometry_bridge_exact_review_id_total": 36,
+    "kds_geometry_bridge_heuristic_review_id_total": 0,
+    "kds_geometry_bridge_exact_row_provenance_total": 3168,
+    "kds_geometry_bridge_heuristic_row_provenance_total": 0,
+    "heuristic_kds_geometry_bridge_model_count": 0,
+    "seed_case_count_by_model": {
+      "midas_generator_33.json": 2,
+      "midas_generator_33.pr_recheck.json": 2,
+      "midas_generator_33.optimized.roundtrip.json": 2
+    },
+    "seed_combo_count_by_model": {
+      "midas_generator_33.json": 8,
+      "midas_generator_33.pr_recheck.json": 8,
+      "midas_generator_33.optimized.roundtrip.json": 8
+    },
+    "pattern_count_by_model": {
+      "midas_generator_33.json": 2,
+      "midas_generator_33.pr_recheck.json": 2,
+      "midas_generator_33.optimized.roundtrip.json": 2
+    },
+    "pattern_primitive_count_by_model": {
+      "midas_generator_33.json": 5,
+      "midas_generator_33.pr_recheck.json": 0,
+      "midas_generator_33.optimized.roundtrip.json": 5
+    },
+    "export_report_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.export_report.json",
+    "export_report_summary_line": "MGT export LOADCOMB roundtrip: ok | entry_row_coverage=1.00 | combos=8",
+    "export_delivery_boundary": "direct_patch=beam_section=1, connection_detailing=6, detailing=5, perimeter_frame=1, rebar=5, slab_thickness=2, wall_thickness=5 | sidecar=none | connection_payload=direct_patch_native_authoring_zero_touch_verified | detailing_payload=direct_patch_native_authoring_zero_touch_verified",
+    "export_preview_roundtrip_verified": true,
+    "group_local_connection_detailing_payload_available_count": 6,
+    "group_local_detailing_payload_available_count": 5,
+    "group_local_rebar_payload_available_count": 6,
+    "loadcomb_combo_count": 8,
+    "loadcomb_preview_exists": true,
+    "loadcomb_roundtrip_pass": true,
+    "loadcomb_roundtrip_report_exists": true,
+    "preview_file_count": 3,
+    "preview_file_present_count": 3,
+    "preview_file_rows": [
+      {
+        "path": "implementation/phase1/release/midas_generator_33_loadcomb_preview.mgt",
+        "exists": true,
+        "sha256": "75e224e9b874b8eb021a86393706323837c6d89d2f4722a458568267e574f32b",
+        "size_bytes": 909
+      },
+      {
+        "path": "implementation/phase1/release/midas_generator_33_pr_recheck_loadcomb_preview.mgt",
+        "exists": true,
+        "sha256": "75e224e9b874b8eb021a86393706323837c6d89d2f4722a458568267e574f32b",
+        "size_bytes": 909
+      },
+      {
+        "path": "implementation/phase1/release/midas_generator_33_optimized_roundtrip_loadcomb_preview.mgt",
+        "exists": true,
+        "sha256": "75e224e9b874b8eb021a86393706323837c6d89d2f4722a458568267e574f32b",
+        "size_bytes": 909
+      }
+    ],
+    "roundtrip_report_count": 3,
+    "roundtrip_report_pass_count": 3,
+    "roundtrip_reports": [
+      {
+        "path": "implementation/phase1/release/midas_generator_33_loadcomb_roundtrip_report.json",
+        "exists": true,
+        "pass": true,
+        "exact_name_coverage": 1.0,
+        "exact_entry_row_coverage": 1.0,
+        "exact_header_coverage": 1.0,
+        "exact_factor_map_coverage": 1.0,
+        "exact_expression_coverage": 1.3333333333333333,
+        "raw_combo_count": 8,
+        "export_combo_count": 8,
+        "recovery_mode": "",
+        "source_model_json": "implementation/phase1/open_data/midas/midas_generator_33.json"
+      },
+      {
+        "path": "implementation/phase1/release/midas_generator_33_pr_recheck_loadcomb_roundtrip_report.json",
+        "exists": true,
+        "pass": true,
+        "exact_name_coverage": 1.0,
+        "exact_entry_row_coverage": 1.0,
+        "exact_header_coverage": 1.0,
+        "exact_factor_map_coverage": 1.0,
+        "exact_expression_coverage": 1.3333333333333333,
+        "raw_combo_count": 8,
+        "export_combo_count": 8,
+        "recovery_mode": "combination_only_raw_recovery",
+        "source_model_json": "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json"
+      },
+      {
+        "path": "implementation/phase1/release/midas_generator_33_optimized_roundtrip_loadcomb_roundtrip_report.json",
+        "exists": true,
+        "pass": true,
+        "exact_name_coverage": 1.0,
+        "exact_entry_row_coverage": 1.0,
+        "exact_header_coverage": 1.0,
+        "exact_factor_map_coverage": 1.0,
+        "exact_expression_coverage": 1.3333333333333333,
+        "raw_combo_count": 8,
+        "export_combo_count": 8,
+        "recovery_mode": "",
+        "source_model_json": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+      }
+    ],
+    "roundtrip_exact_name_coverage_min": 1.0,
+    "roundtrip_exact_entry_row_coverage_min": 1.0,
+    "roundtrip_exact_header_coverage_min": 1.0,
+    "roundtrip_exact_factor_map_coverage_min": 1.0,
+    "roundtrip_exact_expression_coverage_min": 1.3333333333333333,
+    "loadcomb_exact_roundtrip_pass": true,
+    "roundtrip_recovery_modes": {
+      "combination_only_raw_recovery": 1,
+      "embedded_metadata": 2
+    },
+    "roundtrip_source_model_jsons": [
+      "implementation/phase1/open_data/midas/midas_generator_33.json",
+      "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json",
+      "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+    ],
+    "bounded_subset_mode": "full_exact_roundtrip",
+    "remaining_limits": [],
+    "exact_roundtrip_closure_pass": true,
+    "exact_roundtrip_closure_status": "closed",
+    "exact_roundtrip_closure_blockers": [],
+    "evidence_notes": [
+      "LOADCOMB preview files are bounded authoring exports, not a full commercial editor round-trip.",
+      "Exact entry-row coverage is the primary fidelity signal for the current interoperability subset."
+    ]
+  },
+  "summary_line": "MIDAS interoperability/export readiness: PASS | seeds=3/3 | patterns=3/3 | preview=3/3 | roundtrip=3/3 exact_entry_row_min=1.00 | bounded_subset=full_exact_roundtrip | limits=none | exact_closure=closed",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "MIDAS interoperability/export readiness is satisfied for the current bounded subset",
+  "artifacts": {
+    "model_jsons": [
+      "implementation/phase1/open_data/midas/midas_generator_33.json",
+      "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json",
+      "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+    ],
+    "export_report": "implementation/phase1/open_data/midas/midas_generator_33.optimized.export_report.json",
+    "loadcomb_roundtrip_reports": [
+      "implementation/phase1/release/midas_generator_33_loadcomb_roundtrip_report.json",
+      "implementation/phase1/release/midas_generator_33_pr_recheck_loadcomb_roundtrip_report.json",
+      "implementation/phase1/release/midas_generator_33_optimized_roundtrip_loadcomb_roundtrip_report.json"
+    ],
+    "loadcomb_preview_files": [
+      "implementation/phase1/release/midas_generator_33_loadcomb_preview.mgt",
+      "implementation/phase1/release/midas_generator_33_pr_recheck_loadcomb_preview.mgt",
+      "implementation/phase1/release/midas_generator_33_optimized_roundtrip_loadcomb_preview.mgt"
+    ]
+  },
+  "artifact_archive_manifest": "implementation/phase1/experiments/by_test/midas_interoperability_gate/20260502T115435Z/artifact_archive_manifest.json"
+}

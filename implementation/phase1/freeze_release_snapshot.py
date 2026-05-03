@@ -925,6 +925,11 @@ def main() -> None:
         ),
         help="Optional artifacts to include in the manifest when present; missing files are recorded but do not fail the snapshot.",
     )
+    p.add_argument(
+        "--exclude-artifact-files",
+        default="",
+        help="Comma-separated artifact paths to exclude from this snapshot pass.",
+    )
     p.add_argument("--require-green-json", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--enforce-release-policy", action=argparse.BooleanOptionalAction, default=True)
     p.add_argument("--latest-pointer", default="implementation/phase1/release/phase3_nightly_latest.json")
@@ -937,6 +942,10 @@ def main() -> None:
 
     files = _parse_files(args.artifact_files)
     optional_files = _parse_optional_files(args.optional_artifact_files)
+    excluded_files = set(_parse_optional_files(args.exclude_artifact_files))
+    if excluded_files:
+        files = [rel for rel in files if rel not in excluded_files]
+        optional_files = [rel for rel in optional_files if rel not in excluded_files]
     release_policy = _release_policy_checks(source_dir)
     accelerated_coverage = _registry_accelerated_coverage_summary(source_dir)
     if bool(args.enforce_release_policy) and not bool(release_policy.get("policy_pass", False)):

@@ -540,6 +540,7 @@ def main(argv: list[str] | None = None) -> int:
         tunnel_dynamics_dataset_report=_load_json(Path(args.tunnel_dynamics_dataset_report)),
         foundation_soil_link_gate_report=_load_json(Path(args.foundation_soil_link_gate_report)),
     )
+    report["inputs"] = payload
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")

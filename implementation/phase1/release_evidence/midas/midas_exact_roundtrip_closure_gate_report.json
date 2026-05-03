@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-midas-exact-roundtrip-closure-gate",
+  "generated_at": "2026-04-11T13:03:10.567466+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "MIDAS exact roundtrip closure is satisfied for the current evidence set",
+  "checks": {
+    "native_roundtrip_gate_pass": true,
+    "interoperability_gate_pass": true,
+    "ready_case_present_pass": true,
+    "all_ready_cases_exact_pass": true,
+    "canonical_rewrite_zero_pass": true,
+    "lossy_rewrite_zero_pass": true,
+    "unsupported_card_zero_pass": true,
+    "manual_review_zero_pass": true,
+    "parser_drop_suspected_zero_pass": true,
+    "pending_review_zero_pass": true,
+    "exact_queue_zero_pass": true,
+    "remaining_limits_zero_pass": true
+  },
+  "summary": {
+    "native_roundtrip_summary_line": "MIDAS native roundtrip: PASS | corpus=77 | native_text=35 | public_native=9 | public_raw_native=8 | public_bridge_native=1 | public_preview_native=7 | public_structural_preview_native=8 | fixture_native=4 | repo_native=3 | experiment_native=3 | archives=7 | ready=35 | public_ready=25 | public_native_ready=9 | public_raw_ready=8 | public_bridge_ready=1 | public_preview_ready=7 | public_structural_preview_ready=8 | exact_queue=0/8 | korean_reconstruction=5/5 | korean_promotions=0/0 | fixture_ready=4 | repo_ready=3 | experiment_ready=3 | receipts=35/35 | topology=35/35 | load=35/35 | loadcomb=35/35 exact | coverage=ready:100%,receipts:100%,loadcomb:100%,public_source:71%,exact_queue:100%,kr_recon:100% | gaps=ready:0,receipts:0,topology:0,load:0,loadcomb:0,public_source:10,exact_queue:0,korean_reconstruction:0 | types=12 | taxonomy=exact:34,canonical:1,lossy:0,unsupported:0,manual:0 | pending_review=0",
+    "interoperability_summary_line": "MIDAS interoperability/export readiness: PASS | seeds=3/3 | patterns=3/3 | preview=3/3 | roundtrip=3/3 exact_entry_row_min=1.00 | bounded_subset=full_exact_roundtrip | limits=none | exact_closure=closed",
+    "ready_case_count": 33,
+    "exact_case_count": 33,
+    "exact_case_ratio": 1.0,
+    "eligible_exact_candidate_count": 33,
+    "eligible_exact_case_count": 33,
+    "canonical_rewrite_case_count": 0,
+    "lossy_rewrite_case_count": 0,
+    "unsupported_card_case_count": 0,
+    "manual_review_case_count": 0,
+    "parser_drop_suspected_case_count": 0,
+    "pending_review_total": 0,
+    "exact_queue_pending_candidate_count": 0,
+    "exact_queue_candidate_total": 8,
+    "closure_scope_used_precise_receipts": true,
+    "closure_scope_excluded_case_count": 2,
+    "closure_scope_excluded_case_ids": [
+      "fixture_foundation_parser_drop_small__identity_writeback",
+      "midas_generator_33_github__optimized_writeback"
+    ],
+    "closure_scope_excluded_case_counts_by_reason": {
+      "parser_drop_fixture": 1,
+      "intentional_optimized_writeback": 1
+    },
+    "eligible_exact_exclusion_case_count": 2,
+    "eligible_exact_exclusion_labels": [
+      "intentional_optimized_writeback",
+      "parser_drop_fixture"
+    ],
+    "eligible_exact_exclusion_label_counts": {
+      "intentional_optimized_writeback": 1,
+      "parser_drop_fixture": 1
+    },
+    "remaining_limits": [],
+    "bounded_subset_mode": "full_exact_roundtrip",
+    "roundtrip_exact_entry_row_coverage_min": 1.0,
+    "roundtrip_exact_header_coverage_min": 1.0,
+    "roundtrip_exact_factor_map_coverage_min": 1.0
+  },
+  "summary_line": "MIDAS exact roundtrip closure: PASS | exact=33/33 | canonical=0 | lossy=0 | unsupported=0 | manual=0 | pending_review=0 | exact_queue=0/8 | scope_excluded=2 | limits=none"
+}

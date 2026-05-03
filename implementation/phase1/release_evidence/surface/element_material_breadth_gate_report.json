@@ -1,0 +1,301 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-element-material-breadth-gate",
+  "generated_at": "2026-04-12T08:54:07.534570+00:00",
+  "inputs": {
+    "topology_report": "implementation/phase1/opensees_topology_report.json",
+    "flexible_diaphragm_report": "implementation/phase1/flexible_diaphragm_gate_report.json",
+    "pushover_stress_report": "implementation/phase1/nonlinear_pushover_stress_report.json",
+    "ndtha_stress_report": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+    "ssi_boundary_report": "implementation/phase1/ssi_boundary_gate_report.json",
+    "substructuring_interface_report": "implementation/phase1/substructuring_interface_report.json",
+    "wind_time_history_report": "implementation/phase1/wind_time_history_gate_report.json",
+    "special_link_library": "implementation/phase1/special_link_library.py",
+    "structural_contact_validation_report": "implementation/phase1/structural_contact_validation_report.json",
+    "structural_contact_gate_report": "implementation/phase1/structural_contact_gate_report.json",
+    "rc_benchmark_lock_report": "implementation/phase1/rc_benchmark_lock_report.json",
+    "construction_sequence_report": "implementation/phase1/construction_sequence_gate_report.json",
+    "damper_validation_report": "implementation/phase1/damper_validation_gate_report.json",
+    "foundation_soil_link_gate_report": "implementation/phase1/foundation_soil_link_gate_report.json",
+    "benchmark_cases": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json,implementation/phase1/commercial_benchmark_cases.from_csv.json,implementation/phase1/commercial_benchmark_cases.atwood_open.json",
+    "required_material_models": "rc_composite,steel_elastic_plastic",
+    "required_link_models": "normal_gap_unilateral,uplift_seat_unilateral,compression_only_penalty,bearing_bilinear,coulomb_friction,kelvin_voigt_pounding",
+    "required_material_capabilities": "rc_cracking,rc_bond_slip,rc_creep_shrinkage,slab_wall_interaction,wall_compression_damage,shell_surface_transfer,interface_transfer_finite,soil_boundary_nonlinear,dissipative_device_response,foundation_soil_link_nonlinear,contact_gap_uplift_unilateral,contact_bearing_friction_impact",
+    "min_shell_elements": 1,
+    "min_shell_beam_mix_cases": 1,
+    "min_wall_rows": 1,
+    "min_wall_frame_cases": 1,
+    "min_compression_surrogate_rows": 1,
+    "out": "implementation/phase1/element_material_breadth_gate_report.json"
+  },
+  "checks": {
+    "shell_topology_evidence_pass": true,
+    "shell_diaphragm_evidence_pass": true,
+    "shell_direct_contract_pass": true,
+    "pushover_wall_evidence_pass": true,
+    "ndtha_wall_evidence_pass": true,
+    "wall_direct_contract_pass": true,
+    "ssi_boundary_evidence_pass": true,
+    "substructuring_interface_evidence_pass": true,
+    "contact_interface_compression_surrogate_pass": true,
+    "special_link_keywords_present": true,
+    "structural_contact_direct_contract_pass": true,
+    "foundation_soil_link_direct_contract_pass": true,
+    "support_link_surface_present": true,
+    "material_model_breadth_pass": true,
+    "link_model_breadth_pass": true,
+    "material_capability_breadth_pass": true,
+    "panel_rc_cyclic_surface_present": true,
+    "beam_column_global_surface_present": true,
+    "beam_column_global_equilibrium_pass": true,
+    "layered_panel_assembled_surface_present": true,
+    "layered_panel_force_balance_pass": true,
+    "assembled_global_depth_surface_present": true,
+    "beam_shell_contact_coupling_surface_present": true
+  },
+  "summary": {
+    "shell_element_count": 5,
+    "shell_beam_mix_case_count": 31,
+    "wall_frame_case_count": 14,
+    "benchmark_case_count": 63,
+    "pushover_wall_row_count": 1,
+    "ndtha_wall_row_count": 1,
+    "wall_family_counts": {
+      "wall_boundary": 12,
+      "wall_web": 18
+    },
+    "contact_surface_status": "full_structural_contact",
+    "panel_rc_cyclic_surface_status": "pass",
+    "panel_rc_cyclic_section_count": 2,
+    "panel_rc_cyclic_section_families": [
+      "slab",
+      "wall"
+    ],
+    "panel_rc_cyclic_section_names": [
+      "layered_slab",
+      "layered_wall"
+    ],
+    "panel_rc_cyclic_reversal_count_min": 2,
+    "panel_rc_cyclic_reversal_count_max": 2,
+    "panel_rc_cyclic_min_pinching_ratio": 0.18,
+    "panel_rc_cyclic_max_crushing_ratio": 1.0,
+    "panel_rc_cyclic_max_stiffness_degradation": 0.7316666666666667,
+    "panel_rc_cyclic_max_strength_degradation": 0.5133333333333334,
+    "panel_rc_cyclic_evidence_tags": [
+      "crack_open",
+      "crushing",
+      "degradation",
+      "monotonic",
+      "pinching",
+      "reversal"
+    ],
+    "panel_rc_cyclic_total_energy_like": 298408.0550108607,
+    "assembled_global_depth_surface_status": "pass",
+    "assembled_global_depth_signal_count": 5,
+    "beam_column_global_case_count": 1,
+    "beam_column_global_iteration_count": 2,
+    "beam_column_global_yielded_end_count": 1,
+    "beam_column_global_tangent_scale_min": 0.05,
+    "beam_column_global_free_dof_residual_max": 7.275957614183426e-11,
+    "beam_column_global_displacement_max_m": 2.625641025641027,
+    "layered_panel_assembled_case_count": 2,
+    "layered_panel_assembled_section_families": [
+      "slab",
+      "wall"
+    ],
+    "layered_panel_assembled_force_balance_error_max_n": 0.0,
+    "layered_panel_assembled_corner_force_max_n": 7555111.369364945,
+    "layered_panel_assembled_torsional_case_count": 1,
+    "layered_panel_assembled_diaphragm_coupling_case_count": 1,
+    "beam_shell_contact_coupling_surface_status": "pass",
+    "beam_shell_contact_coupling_signal_count": 21,
+    "beam_shell_contact_support_depth_score": 21,
+    "beam_shell_contact_support_search_count": 9,
+    "beam_shell_contact_node_surface_proxy_count": 5,
+    "beam_shell_contact_support_family_count": 2,
+    "beam_shell_contact_proxy_family_count": 2,
+    "substructuring_transfer_ratio": 0.4499073737406269,
+    "pushover_compression_surrogate_row_count": 3,
+    "ndtha_compression_surrogate_row_count": 3,
+    "material_model_types": [
+      "rc_composite",
+      "steel_elastic_plastic"
+    ],
+    "material_model_source_map": {
+      "rc_composite": [
+        "ndtha_stress_report",
+        "pushover_stress_report"
+      ],
+      "steel_elastic_plastic": [
+        "ssi_boundary_report",
+        "wind_time_history_report"
+      ]
+    },
+    "required_material_models": [
+      "rc_composite",
+      "steel_elastic_plastic"
+    ],
+    "missing_material_models": [],
+    "link_model_types": [
+      "bearing_bilinear",
+      "compression_only_penalty",
+      "coulomb_friction",
+      "kelvin_voigt_pounding",
+      "normal_gap_unilateral",
+      "uplift_seat_unilateral"
+    ],
+    "required_link_models": [
+      "bearing_bilinear",
+      "compression_only_penalty",
+      "coulomb_friction",
+      "kelvin_voigt_pounding",
+      "normal_gap_unilateral",
+      "uplift_seat_unilateral"
+    ],
+    "missing_link_models": [],
+    "foundation_soil_link_status": "pass",
+    "foundation_support_model_types": [
+      "p-y",
+      "pile_head",
+      "q-z",
+      "t-z"
+    ],
+    "device_model_types": [
+      "friction_pendulum",
+      "lead_rubber_bearing",
+      "tmd",
+      "viscoelastic_damper",
+      "viscous_damper"
+    ],
+    "support_link_group_counts": {
+      "contact": 6,
+      "foundation": 4,
+      "device": 5
+    },
+    "support_link_family_count": 15,
+    "material_capability_types": [
+      "contact_bearing_friction_impact",
+      "contact_gap_uplift_unilateral",
+      "dissipative_device_response",
+      "foundation_soil_link_nonlinear",
+      "interface_transfer_finite",
+      "rc_bond_slip",
+      "rc_cracking",
+      "rc_creep_shrinkage",
+      "shell_surface_transfer",
+      "slab_wall_interaction",
+      "soil_boundary_nonlinear",
+      "wall_compression_damage"
+    ],
+    "material_capability_group_counts": {
+      "rc": 5,
+      "shell_interface": 2,
+      "foundation_soil": 2,
+      "device_contact": 3
+    },
+    "required_material_capabilities": [
+      "contact_bearing_friction_impact",
+      "contact_gap_uplift_unilateral",
+      "dissipative_device_response",
+      "foundation_soil_link_nonlinear",
+      "interface_transfer_finite",
+      "rc_bond_slip",
+      "rc_cracking",
+      "rc_creep_shrinkage",
+      "shell_surface_transfer",
+      "slab_wall_interaction",
+      "soil_boundary_nonlinear",
+      "wall_compression_damage"
+    ],
+    "missing_material_capabilities": []
+  },
+  "benchmark_cases": {
+    "case_count": 63,
+    "topology_counts": {
+      "outrigger": 17,
+      "rahmen": 21,
+      "truss": 11,
+      "wall-frame": 14
+    },
+    "element_mix_counts": {
+      "beam_only": 32,
+      "shell_beam_mix": 31
+    },
+    "rows_by_file": [
+      {
+        "cases_path": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+        "cases_sha256": "9b1cd4d90a72e9c696fee8dbdf1c89821519bd27b6df4504ebf2ebc1d65bfa48",
+        "case_count": 22,
+        "topology_counts": {
+          "outrigger": 3,
+          "rahmen": 11,
+          "truss": 4,
+          "wall-frame": 4
+        },
+        "element_mix_counts": {
+          "beam_only": 15,
+          "shell_beam_mix": 7
+        }
+      },
+      {
+        "cases_path": "implementation/phase1/commercial_benchmark_cases.from_csv.json",
+        "cases_sha256": "0a0952473d52eccc69e573c8e725adab0024bc4ffed24787bba82b135dcab367",
+        "case_count": 12,
+        "topology_counts": {
+          "outrigger": 3,
+          "rahmen": 3,
+          "truss": 3,
+          "wall-frame": 3
+        },
+        "element_mix_counts": {
+          "beam_only": 6,
+          "shell_beam_mix": 6
+        }
+      },
+      {
+        "cases_path": "implementation/phase1/commercial_benchmark_cases.atwood_open.json",
+        "cases_sha256": "ca5a73091a552a9706ab8fc2f225e3ca72ea7ffe762c46537c39c6efd37815dd",
+        "case_count": 29,
+        "topology_counts": {
+          "outrigger": 11,
+          "rahmen": 7,
+          "truss": 4,
+          "wall-frame": 7
+        },
+        "element_mix_counts": {
+          "beam_only": 11,
+          "shell_beam_mix": 18
+        }
+      }
+    ]
+  },
+  "summary_line": "Element/material breadth: PASS | shell=yes(elems=5,cases=31) | wall=yes(rows=2,cases=14) | panel_cyclic=yes(sections=2,pinch=0.18,crush=1.00) | assembled_depth=yes(beam_iter=2,tangent=0.05,panel=2,torsion=1) | coupling=yes(beam=1,panel=2,support=21,search=9,proxy=5) | contact=full_structural_contact | support=15(contact=6,foundation=4,device=5) | materials=2(rc_composite,steel_elastic_plastic) | links=6(bearing_bilinear,compression_only_penalty,coulomb_friction,kelvin_voigt_pounding,normal_gap_unilateral,uplift_seat_unilateral) | capabilities=12(contact_bearing_friction_impact,contact_gap_uplift_unilateral,dissipative_device_response,foundation_soil_link_nonlinear,interface_transfer_finite,rc_bond_slip,rc_cracking,rc_creep_shrinkage,shell_surface_transfer,slab_wall_interaction,soil_boundary_nonlinear,wall_compression_damage) | groups=4(rc=5,shell_interface=2,foundation_soil=2,device_contact=3)",
+  "reasons": [
+    "shell=pass via topology=yes, diaphragm=yes, shell_beam_mix_cases=31.",
+    "wall=pass via pushover_rows=1, ndtha_rows=1, wall_frame_cases=14.",
+    "contact_interface_surrogate=pass via ssi_boundary=yes, substructuring=yes, compression_rows=3/3.",
+    "panel_rc_cyclic=pass via sections=['slab', 'wall'], reversal=2-2, pinch=0.18, crush=1.00.",
+    "assembled_global_depth=pass via beam_iter=2, beam_tangent=0.05, beam_residual=7.28e-11, panel_cases=2, torsion_cases=1, diaphragm_cases=1.",
+    "beam_shell_contact_coupling=pass via beam=1, panel=2, support_depth=21, support_search=9, node_surface_proxy=5.",
+    "structural_contact=pass via special_link_keywords=yes, gate=yes, validation=yes, link_models=['bearing_bilinear', 'compression_only_penalty', 'coulomb_friction', 'kelvin_voigt_pounding', 'normal_gap_unilateral', 'uplift_seat_unilateral'].",
+    "foundation_soil_link=pass via gate=yes, foundation_scope=yes, ssi=yes, soil_tunnel=yes.",
+    "support_link_surface=pass via contact=['bearing_bilinear', 'compression_only_penalty', 'coulomb_friction', 'kelvin_voigt_pounding', 'normal_gap_unilateral', 'uplift_seat_unilateral'], foundation=['p-y', 'pile_head', 'q-z', 't-z'], device=['friction_pendulum', 'lead_rubber_bearing', 'tmd', 'viscoelastic_damper', 'viscous_damper'].",
+    "material_models=pass via found=['rc_composite', 'steel_elastic_plastic'], required=['rc_composite', 'steel_elastic_plastic'], missing=['none'].",
+    "link_models=pass via found=['bearing_bilinear', 'compression_only_penalty', 'coulomb_friction', 'kelvin_voigt_pounding', 'normal_gap_unilateral', 'uplift_seat_unilateral'], required=['bearing_bilinear', 'compression_only_penalty', 'coulomb_friction', 'kelvin_voigt_pounding', 'normal_gap_unilateral', 'uplift_seat_unilateral'], missing=['none'].",
+    "material_capabilities=pass via found=['contact_bearing_friction_impact', 'contact_gap_uplift_unilateral', 'dissipative_device_response', 'foundation_soil_link_nonlinear', 'interface_transfer_finite', 'rc_bond_slip', 'rc_cracking', 'rc_creep_shrinkage', 'shell_surface_transfer', 'slab_wall_interaction', 'soil_boundary_nonlinear', 'wall_compression_damage'], required=['contact_bearing_friction_impact', 'contact_gap_uplift_unilateral', 'dissipative_device_response', 'foundation_soil_link_nonlinear', 'interface_transfer_finite', 'rc_bond_slip', 'rc_cracking', 'rc_creep_shrinkage', 'shell_surface_transfer', 'slab_wall_interaction', 'soil_boundary_nonlinear', 'wall_compression_damage'], missing=['none']."
+  ],
+  "limitations": [
+    "This gate summarizes checked-in contract evidence and does not rerun the underlying solvers.",
+    "Structural-contact breadth is measured from the validated special-link library plus the broader structural-contact gate, not a full finite-element general-contact benchmark matrix.",
+    "Foundation/soil-link breadth is measured from checked-in foundation optimization, SSI, soil-tunnel, and impedance/support-link contracts, not a full geotechnical FE interaction matrix.",
+    "Support-link surface counts roll up contact, foundation, and device libraries to make the implementation catalog explicit, but they do not replace solver validation by themselves.",
+    "Material-model breadth is inferred from reported material_model labels across contract reports, not exhaustive constitutive feature parity.",
+    "Material/link breadth can be assembled from different contract reports rather than one single cross-element benchmark.",
+    "Panel RC cyclic surface is a bounded library-backed wall/slab helper summary and does not replace a full shell/smeared-crack cyclic benchmark matrix.",
+    "Assembled/global depth is a bounded helper-backed surface built from one beam-column solve and two layered-panel assemblies; it exposes integration depth signals without replacing full multi-member solver validation.",
+    "Beam/shell-contact coupling is a bounded rollup of assembled beam depth, panel assembly depth, and support-search depth from validated contact/foundation summaries; it does not replace the separate general FE contact benchmark matrix."
+  ],
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "direct solver contract coverage is present for shell, wall, structural-contact links, interface/compression-surrogate, and material/link breadth"
+}

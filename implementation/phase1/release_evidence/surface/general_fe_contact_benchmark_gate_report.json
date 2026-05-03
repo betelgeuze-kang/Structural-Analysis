@@ -1,0 +1,291 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-general-fe-contact-benchmark-gate",
+  "generated_at": "2026-04-12T09:17:54.060139+00:00",
+  "inputs": {
+    "structural_contact_validation_report": "implementation/phase1/structural_contact_validation_report.json",
+    "structural_contact_gate_report": "implementation/phase1/structural_contact_gate_report.json",
+    "foundation_soil_link_gate_report": "implementation/phase1/foundation_soil_link_gate_report.json",
+    "ssi_boundary_report": "implementation/phase1/ssi_boundary_gate_report.json",
+    "substructuring_interface_report": "implementation/phase1/substructuring_interface_report.json",
+    "soil_tunnel_ssi_report": "implementation/phase1/soil_tunnel_ssi_report.json",
+    "out": "implementation/phase1/general_fe_contact_benchmark_gate_report.json",
+    "input_sha256": {
+      "structural_contact_validation_report": "8ddc1ff52301ce17555e13c23e8ee07838662c2c720594a1093d34f07bcbbbd0",
+      "structural_contact_gate_report": "98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
+      "foundation_soil_link_gate_report": "bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
+      "ssi_boundary_report": "92bab8ccac2cf33f69e6aacc4deab88819820050e6fa17465c425f139b8997bd",
+      "substructuring_interface_report": "33c2e204ab58bf080fd00f2576893fabe88157c18ccb989c5a6cb569b5575fd3",
+      "soil_tunnel_ssi_report": "b1abbc822d8e5628afaf9bc8578b84615cd79f3a1768eca0683feb1c8b7d74ca"
+    }
+  },
+  "checks": {
+    "direct_structural_contact_pass": true,
+    "foundation_soil_link_pass": true,
+    "interface_transfer_pass": true,
+    "ssi_boundary_pass": true,
+    "soil_tunnel_dynamic_pass": true,
+    "support_search_surface_pass": true,
+    "node_to_surface_proxy_surface_pass": true,
+    "support_depth_surface_pass": true,
+    "support_search_family_surface_required": true,
+    "node_to_surface_proxy_family_surface_required": true,
+    "support_search_family_surface_explicit": true,
+    "node_to_surface_proxy_family_surface_explicit": true,
+    "support_search_family_requirements_met": true,
+    "node_to_surface_proxy_family_requirements_met": true,
+    "support_search_family_count_coverage_pass": true,
+    "support_search_family_surface_pass": true,
+    "node_to_surface_proxy_family_surface_pass": true,
+    "all_matrix_rows_ready": true
+  },
+  "general_fe_contact_matrix_surface": {
+    "status": "PASS",
+    "ready_row_count": 10,
+    "total_row_count": 10,
+    "direct_structural_contact_ready_count": 6,
+    "direct_structural_contact_total_count": 6,
+    "foundation_ready": true,
+    "interface_ready": true,
+    "ssi_boundary_ready": true,
+    "soil_tunnel_ready": true,
+    "support_link_group_counts": {
+      "contact": 6,
+      "foundation": 4,
+      "device": 5
+    },
+    "support_search_model_count": 9,
+    "node_to_surface_proxy_model_count": 5,
+    "support_depth_score": 21,
+    "coupling_depth_score": 31,
+    "search_family_counts": {
+      "foundation_support_search": 4,
+      "device_support_search": 5
+    },
+    "support_search_family_types": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "support_search_family_count": 2,
+    "support_search_family_requirement_count": 2,
+    "support_search_missing_family_types": [],
+    "support_search_missing_family_counts": [],
+    "node_to_surface_proxy_family_types": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "node_to_surface_proxy_family_count": 2,
+    "node_to_surface_proxy_family_requirement_count": 2,
+    "node_to_surface_proxy_missing_family_types": [],
+    "support_search_family_surface_pass": true,
+    "node_to_surface_proxy_family_surface_pass": true
+  },
+  "summary": {
+    "ready_row_count": 10,
+    "total_row_count": 10,
+    "direct_structural_contact_ready_count": 6,
+    "direct_structural_contact_total_count": 6,
+    "direct_link_model_types": [
+      "bearing_bilinear",
+      "compression_only_penalty",
+      "coulomb_friction",
+      "kelvin_voigt_pounding",
+      "normal_gap_unilateral",
+      "uplift_seat_unilateral"
+    ],
+    "foundation_member_type_count": 76,
+    "optimized_foundation_group_count": 2,
+    "support_link_group_counts": {
+      "contact": 6,
+      "foundation": 4,
+      "device": 5
+    },
+    "support_search_model_types": [
+      "friction_pendulum",
+      "lead_rubber_bearing",
+      "p-y",
+      "pile_head",
+      "q-z",
+      "t-z",
+      "tmd",
+      "viscoelastic_damper",
+      "viscous_damper"
+    ],
+    "support_search_model_count": 9,
+    "node_to_surface_proxy_model_types": [
+      "friction_pendulum",
+      "lead_rubber_bearing",
+      "p-y",
+      "q-z",
+      "t-z"
+    ],
+    "node_to_surface_proxy_model_count": 5,
+    "search_surface_mode_counts": {
+      "node_to_soil_surface_proxy": 1,
+      "node_to_shaft_surface_proxy": 1,
+      "node_to_tip_surface_proxy": 1,
+      "support_head_rotation_search": 1,
+      "brace_end_support_search": 2,
+      "node_to_surface_isolation_proxy": 2,
+      "tuned_mass_attachment_search": 1
+    },
+    "search_family_counts": {
+      "foundation_support_search": 4,
+      "device_support_search": 5
+    },
+    "support_search_family_types": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "support_search_family_requirements": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "support_search_family_count": 2,
+    "support_search_missing_family_types": [],
+    "support_search_missing_family_counts": [],
+    "node_to_surface_proxy_family_types": [
+      "device_support_search",
+      "foundation_support_search"
+    ],
+    "node_to_surface_proxy_family_count": 2,
+    "node_to_surface_proxy_missing_family_types": [],
+    "support_depth_score": 21,
+    "coupling_depth_score": 31,
+    "interface_transfer_ratio": 0.4499073737406269,
+    "soil_tunnel_k_min": 98374484.2662655,
+    "soil_tunnel_k_max": 195309804.23968476,
+    "general_fe_contact_matrix_surface": {
+      "status": "PASS",
+      "ready_row_count": 10,
+      "total_row_count": 10,
+      "direct_structural_contact_ready_count": 6,
+      "direct_structural_contact_total_count": 6,
+      "foundation_ready": true,
+      "interface_ready": true,
+      "ssi_boundary_ready": true,
+      "soil_tunnel_ready": true,
+      "support_link_group_counts": {
+        "contact": 6,
+        "foundation": 4,
+        "device": 5
+      },
+      "support_search_model_count": 9,
+      "node_to_surface_proxy_model_count": 5,
+      "support_depth_score": 21,
+      "coupling_depth_score": 31,
+      "search_family_counts": {
+        "foundation_support_search": 4,
+        "device_support_search": 5
+      },
+      "support_search_family_types": [
+        "device_support_search",
+        "foundation_support_search"
+      ],
+      "support_search_family_count": 2,
+      "support_search_family_requirement_count": 2,
+      "support_search_missing_family_types": [],
+      "support_search_missing_family_counts": [],
+      "node_to_surface_proxy_family_types": [
+        "device_support_search",
+        "foundation_support_search"
+      ],
+      "node_to_surface_proxy_family_count": 2,
+      "node_to_surface_proxy_family_requirement_count": 2,
+      "node_to_surface_proxy_missing_family_types": [],
+      "support_search_family_surface_pass": true,
+      "node_to_surface_proxy_family_surface_pass": true
+    }
+  },
+  "matrix_rows": [
+    {
+      "label": "gap",
+      "ready": true,
+      "evidence_kind": "direct_structural_contact",
+      "contract": "normal_gap_unilateral",
+      "source": "structural_contact_validation+gate",
+      "note": "class=GapLink | validated=True | gate_ready=True"
+    },
+    {
+      "label": "uplift",
+      "ready": true,
+      "evidence_kind": "direct_structural_contact",
+      "contract": "uplift_seat_unilateral",
+      "source": "structural_contact_validation+gate",
+      "note": "class=UpliftLink | validated=True | gate_ready=True"
+    },
+    {
+      "label": "compression-only",
+      "ready": true,
+      "evidence_kind": "direct_structural_contact",
+      "contract": "compression_only_penalty",
+      "source": "structural_contact_validation+gate",
+      "note": "class=CompressionOnlyLink | validated=True | gate_ready=True"
+    },
+    {
+      "label": "bearing",
+      "ready": true,
+      "evidence_kind": "direct_structural_contact",
+      "contract": "bearing_bilinear",
+      "source": "structural_contact_validation+gate",
+      "note": "class=BearingLink | validated=True | gate_ready=True"
+    },
+    {
+      "label": "friction",
+      "ready": true,
+      "evidence_kind": "direct_structural_contact",
+      "contract": "coulomb_friction",
+      "source": "structural_contact_validation+gate",
+      "note": "class=FrictionLink | validated=True | gate_ready=True"
+    },
+    {
+      "label": "pounding",
+      "ready": true,
+      "evidence_kind": "direct_structural_contact",
+      "contract": "kelvin_voigt_pounding",
+      "source": "structural_contact_validation+gate",
+      "note": "class=PoundingLink | validated=True | gate_ready=True"
+    },
+    {
+      "label": "foundation_soil_link",
+      "ready": true,
+      "evidence_kind": "foundation_soil_link",
+      "contract": "soil_impedance+support_links",
+      "source": "foundation_soil_link_gate",
+      "note": "foundation_members=76 | optimized_groups=2 | links=6"
+    },
+    {
+      "label": "interface_transfer",
+      "ready": true,
+      "evidence_kind": "substructuring_interface",
+      "contract": "finite_transfer+coupling_stability",
+      "source": "substructuring_interface_report",
+      "note": "transfer_ratio=0.450"
+    },
+    {
+      "label": "ssi_boundary_nonlinear",
+      "ready": true,
+      "evidence_kind": "ssi_boundary",
+      "contract": "nonlinear_boundary",
+      "source": "ssi_boundary_gate_report",
+      "note": "section_family=True | material_model=True"
+    },
+    {
+      "label": "soil_tunnel_dynamic",
+      "ready": true,
+      "evidence_kind": "soil_tunnel_ssi",
+      "contract": "dynamic_impedance_response",
+      "source": "soil_tunnel_ssi_report",
+      "note": "k_range=9.84e+07-1.95e+08 | damping_range=1.67e+05-5.63e+05"
+    }
+  ],
+  "summary_line": "General FE contact matrix: PASS | ready=10/10 | direct=6/6 | foundation=yes | interface=yes | ssi=yes | soil_tunnel=yes | support=contact:6,foundation:4,device:5 | support_search=9 | node_surface_proxy=5 | support_depth=21 | coupling_depth=31 | support_families=2/2 | proxy_families=2/2",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "general FE contact benchmark evidence is present across direct structural links, interface transfer, foundation/soil links, and SSI dynamics",
+  "limitations": [
+    "This matrix summarizes checked-in benchmark/gate evidence; it does not claim full general-contact FE parity on its own.",
+    "Direct structural-contact rows currently rely on validated special-link constitutive contracts rather than arbitrary mesh-to-mesh contact surfaces.",
+    "Foundation/soil and interface rows are contract-backed interaction surfaces used to track solver breadth, not a full multiphysics contact stack."
+  ]
+}
