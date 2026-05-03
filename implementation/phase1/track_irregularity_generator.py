@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 
 import numpy as np
-import torch
 
 from runtime_contracts import InputContractError, get_logger, log_event, validate_input_contract
 
@@ -89,16 +88,30 @@ def _psd_profile(n_cpm: np.ndarray, quality_class: str, n0_cpm: float) -> np.nda
     return a * n0_2 / np.maximum(n2 + n0_2, 1e-12)
 
 
+def _env_flag(name: str) -> bool:
+    return str(os.environ.get(name, "")).strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _gpu_preprocess_enabled() -> bool:
-    return os.environ.get("PHASE1_GPU_PREPROCESS", "0") == "1" or os.environ.get(
-        "PHASE1_GPU_PREPROCESS_STRICT", "0"
-    ) == "1"
+    if _env_flag("PHASE1_FORCE_CPU_RUNTIME"):
+        return False
+    return _env_flag("PHASE1_GPU_PREPROCESS") or _env_flag("PHASE1_GPU_PREPROCESS_STRICT")
 
 
-def _rocm_device() -> str | None:
+def _gpu_preprocess_strict() -> bool:
+    return _gpu_preprocess_enabled() and _env_flag("PHASE1_GPU_PREPROCESS_STRICT")
+
+
+def _load_gpu_torch():
+    if not _gpu_preprocess_enabled():
+        return None
+    try:
+        import torch  # type: ignore
+    except Exception:
+        return None
     try:
         if torch.cuda.is_available():
-            return "cuda"
+            return torch
     except Exception:  # noqa: BLE001
         return None
     return None
@@ -110,8 +123,9 @@ def generate_profile(cfg: IrregularityConfig) -> tuple[np.ndarray, np.ndarray, d
     x = np.linspace(0.0, float(cfg.length_m), n_nodes, dtype=np.float64)
 
     preprocess_backend = "numpy_cpu"
-    device = _rocm_device() if _gpu_preprocess_enabled() else None
-    if device:
+    torch = _load_gpu_torch()
+    if torch is not None:
+        device = "cuda"
         preprocess_backend = "rocm_torch_full"
         freq_count = (n_nodes // 2) + 1
         freqs_t = torch.arange(freq_count, device=device, dtype=torch.float64) / (float(n_nodes) * float(cfg.dx_m))
@@ -139,6 +153,8 @@ def generate_profile(cfg: IrregularityConfig) -> tuple[np.ndarray, np.ndarray, d
         freqs = freqs_t.detach().cpu().numpy()
         z = z_t.detach().cpu().numpy()
     else:
+        if _gpu_preprocess_strict():
+            raise RuntimeError("GPU preprocess required for track irregularity; GPU runtime unavailable")
         # Positive-frequency bins for real-valued synthesis.
         freqs = np.fft.rfftfreq(n_nodes, d=float(cfg.dx_m))  # cycles/m
         if len(freqs) < 3:
