@@ -83,6 +83,10 @@ jobs:
 
       - name: Regenerate release viewer artifacts
         run: |
+          echo "Release workflow github.sha: $GITHUB_SHA"
+          echo "Release workflow checkout HEAD: $(git rev-parse HEAD)"
+          echo "Track irregularity generator import preflight:"
+          nl -ba implementation/phase1/track_irregularity_generator.py | sed -n '1,32p'
           set +e
           python implementation/phase1/run_nightly_release_gate.py \
             --skip-promotion \

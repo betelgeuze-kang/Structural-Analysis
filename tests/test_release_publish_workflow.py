@@ -60,6 +60,10 @@ def test_release_publish_workflow_reuses_checked_in_gate_evidence_and_uploads_fa
     assert "--no-reuse-existing-if-present" not in text
     assert "--allow-cpu-required" in text
     assert "--no-enable-hip-kernel-smoke" in text
+    assert "Release workflow github.sha" in text
+    assert "Release workflow checkout HEAD" in text
+    assert "Track irregularity generator import preflight" in text
+    assert "implementation/phase1/track_irregularity_generator.py" in text
     assert "Nightly release gate summary" in text
     assert "failed_step_report_path" in text
     assert "failed_step_report_failed_checks" in text
