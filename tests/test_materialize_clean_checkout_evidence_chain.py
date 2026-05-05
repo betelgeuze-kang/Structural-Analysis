@@ -291,6 +291,10 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert payload["p1_execution_unblocked"] is True
     assert payload["p1_benchmark_execution_unblocked"] is True
     assert payload["publication_sidecars_pass"] is True
+    assert payload["p1_evidence_intake_ready"] is False
+    assert payload["p1_evidence_sidecar_preflight"]["contract_pass"] is False
+    assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_pending_count"] == 4
+    assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 0
     assert payload["external_benchmark_submission_updates"]["all_expected_updates_present"] is True
     assert payload["residual_holdout_closure_updates"]["all_expected_updates_present"] is True
     assert payload["p1_operational_queues_pass"] is True
@@ -478,6 +482,11 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
     assert external_updates_step["hydrated_from_source"] is True
     assert residual_updates_step["hydrated_from_source"] is True
     assert payload["publication_sidecars_pass"] is True
+    assert payload["p1_evidence_intake_ready"] is False
+    assert payload["p1_evidence_sidecar_preflight"]["contract_pass"] is False
+    assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_attached_count"] == 1
+    assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_pending_count"] == 3
+    assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 0
     assert external_updates_step["all_expected_updates_present"] is True
     assert residual_updates_step["all_expected_updates_present"] is True
     assert payload["artifacts"]["external_benchmark_submission_readiness"] == str(external_submission)

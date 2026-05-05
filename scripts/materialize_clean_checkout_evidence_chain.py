@@ -429,6 +429,22 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     )
     steps.append(residual_holdout_updates_step)
 
+    evidence_sidecar_preflight_step = _run_json_command(
+        [
+            sys.executable,
+            "scripts/preflight_p1_evidence_sidecar_intake.py",
+            "--external-benchmark-submission-updates",
+            str(args.external_benchmark_submission_updates),
+            "--residual-holdout-closure-updates",
+            str(args.residual_holdout_closure_updates),
+            "--repo-root",
+            str(Path.cwd()),
+            "--json",
+        ]
+    )
+    evidence_sidecar_preflight_step.update({"label": "P1 evidence sidecar intake preflight"})
+    steps.append(evidence_sidecar_preflight_step)
+
     coverage_cmd = [
         sys.executable,
         "implementation/phase1/generate_real_project_parser_coverage_matrix.py",
@@ -563,6 +579,11 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     row_payload = _json_summary(args.row_provenance)
     p1_readiness = p1_step.get("json") if isinstance(p1_step.get("json"), dict) else {}
     p1_benchmark = benchmark_step.get("json") if isinstance(benchmark_step.get("json"), dict) else {}
+    p1_evidence_sidecar_preflight = (
+        evidence_sidecar_preflight_step.get("json")
+        if isinstance(evidence_sidecar_preflight_step.get("json"), dict)
+        else {}
+    )
     inputs_contract_pass = bool(
         (publication_step is None or publication_step.get("ok"))
         and midas_payload.get("ok")
@@ -597,6 +618,7 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "inputs_contract_pass": inputs_contract_pass,
         "p0_closure_evidence_consumed": p0_closure_evidence_consumed,
         "publication_sidecars_pass": publication_sidecars_pass,
+        "p1_evidence_intake_ready": bool(p1_evidence_sidecar_preflight.get("contract_pass", False)),
         "artifacts": {
             "manifest": str(args.manifest),
             "publication_evidence_index": (
@@ -624,6 +646,7 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "row_provenance": row_payload,
         "external_benchmark_submission_updates": external_submission_updates_step,
         "residual_holdout_closure_updates": residual_holdout_updates_step,
+        "p1_evidence_sidecar_preflight": p1_evidence_sidecar_preflight,
         "p1_readiness_status": p1_readiness,
         "p1_benchmark_breadth_status": p1_benchmark,
         "p1_operational_queues": operational_payload,
