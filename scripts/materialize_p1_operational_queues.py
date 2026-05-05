@@ -17,6 +17,7 @@ if str(SCRIPT_DIR) not in sys.path:
 from check_p1_benchmark_breadth_status import (  # noqa: E402
     DEFAULT_COMMERCIAL_READINESS,
     DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     _commercial_gate,
     _external_submission_queue_gate,
     _load_json,
@@ -83,6 +84,8 @@ def _normalize_residual(row: dict[str, Any], *, artifact_root: Path) -> dict[str
         "closure_evidence_required": str(row.get("closure_evidence_required", "") or ""),
         "closure_evidence_path": str(row.get("closure_evidence_path", "") or ""),
         "closure_evidence_status": str(row.get("closure_evidence_status", "") or "pending"),
+        "last_checked_at_utc": str(row.get("last_checked_at_utc", "") or ""),
+        "closed_at_utc": str(row.get("closed_at_utc", "") or ""),
         "closure_packet_template_path": str(packet_path),
         "owner_action": _residual_owner_action(row),
     }
@@ -134,10 +137,14 @@ def build_operational_queues(
     *,
     commercial_readiness: Path,
     external_benchmark_submission_readiness: Path,
+    residual_holdout_closure_updates: Path | None = DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     p1_benchmark_breadth_status: Path | None,
     artifact_root: Path,
 ) -> dict[str, Any]:
-    commercial_gate = _commercial_gate(commercial_readiness)
+    commercial_gate = _commercial_gate(
+        commercial_readiness,
+        residual_holdout_closure_updates=residual_holdout_closure_updates,
+    )
     external_gate = _external_submission_queue_gate(external_benchmark_submission_readiness)
     residual_items = [
         _normalize_residual(row, artifact_root=artifact_root)
@@ -204,7 +211,17 @@ def build_operational_queues(
             "residual_holdout_work_item_count": len(residual_items),
             "residual_holdout_open_count": sum(1 for row in residual_items if not _is_closed(row)),
             "residual_holdout_closure_evidence_pending_count": sum(
-                1 for row in residual_items if str(row.get("closure_evidence_status", "") or "") == "pending"
+                1
+                for row in residual_items
+                if not _is_closed(row) and str(row.get("closure_evidence_status", "") or "") == "pending"
+            ),
+            "residual_holdout_closure_evidence_attached_count": sum(
+                1
+                for row in residual_items
+                if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+            ),
+            "residual_holdout_last_checked_count": sum(
+                1 for row in residual_items if str(row.get("last_checked_at_utc", "") or "").strip()
             ),
             "residual_holdout_operational": residual_operational,
             "commercial_scope_ready": bool(commercial_gate.get("commercial_scope_ready", False)),
@@ -220,6 +237,10 @@ def build_operational_queues(
         "artifacts": {
             "commercial_readiness": str(commercial_readiness),
             "external_benchmark_submission_readiness": str(external_benchmark_submission_readiness),
+            "residual_holdout_closure_updates": str(residual_holdout_closure_updates or ""),
+            "residual_holdout_closure_updates_present": bool(
+                residual_holdout_closure_updates and residual_holdout_closure_updates.exists()
+            ),
             "p1_benchmark_breadth_status": str(p1_benchmark_breadth_status) if p1_benchmark_breadth_status else "",
             "artifact_root": str(artifact_root),
             "external_benchmark_submission_work_items": str(
@@ -243,6 +264,8 @@ def _packet_template(row: dict[str, Any], *, schema_version: str) -> dict[str, A
         "closure_evidence_required": row.get("closure_evidence_required", ""),
         "closure_evidence_path": row.get("closure_evidence_path", ""),
         "closure_evidence_status": row.get("closure_evidence_status", ""),
+        "last_checked_at_utc": row.get("last_checked_at_utc", ""),
+        "closed_at_utc": row.get("closed_at_utc", ""),
         "owner_action": row.get("owner_action", ""),
     }
 
@@ -295,6 +318,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `reason_code`: `{payload.get('reason_code', '')}`",
         f"- `external_submission_queue_count`: `{summary.get('external_submission_queue_count', 0)}`",
         f"- `residual_holdout_work_item_count`: `{summary.get('residual_holdout_work_item_count', 0)}`",
+        f"- `residual_holdout_open_count`: `{summary.get('residual_holdout_open_count', 0)}`",
+        f"- `residual_holdout_closure_evidence_pending_count`: `{summary.get('residual_holdout_closure_evidence_pending_count', 0)}`",
         f"- `full_commercial_replacement_ready`: `{bool(summary.get('full_commercial_replacement_ready', False))}`",
         "",
         "## External Benchmark Submission",
@@ -315,15 +340,16 @@ def _markdown(payload: dict[str, Any]) -> str:
             "",
             "## Residual Holdout",
             "",
-            "| Work Item | Category | Owner | Queue Status | SLA | Due | Closure Evidence | Packet Template | Owner Action |",
-            "|---|---|---|---|---|---|---|---|---|",
+            "| Work Item | Category | Owner | Queue Status | SLA | Due | Closure Evidence | Last Checked | Packet Template | Owner Action |",
+            "|---|---|---|---|---|---|---|---|---|---|",
         ]
     )
     for row in payload["queues"]["residual_holdout_work_items"]:
         lines.append(
             f"| {row.get('work_item_id', '')} | {row.get('category_id', '')} | {row.get('owner', '')} | "
             f"{row.get('queue_status', '')} | {row.get('sla_label', '')} | {row.get('due_date', '')} | "
-            f"{row.get('closure_evidence_required', '')} ({row.get('closure_evidence_status', '')}) | "
+            f"{row.get('closure_evidence_required', '')} ({row.get('closure_evidence_status', '')}: "
+            f"{row.get('closure_evidence_path', '') or 'pending'}) | {row.get('last_checked_at_utc', '')} | "
             f"{row.get('closure_packet_template_path', '')} | {row.get('owner_action', '')} |"
         )
     return "\n".join(lines) + "\n"
@@ -336,6 +362,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--external-benchmark-submission-readiness",
         type=Path,
         default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    )
+    parser.add_argument(
+        "--residual-holdout-closure-updates",
+        type=Path,
+        default=DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     )
     parser.add_argument("--p1-benchmark-breadth-status", type=Path)
     parser.add_argument("--artifact-root", type=Path)
@@ -355,6 +386,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = build_operational_queues(
         commercial_readiness=args.commercial_readiness,
         external_benchmark_submission_readiness=args.external_benchmark_submission_readiness,
+        residual_holdout_closure_updates=args.residual_holdout_closure_updates,
         p1_benchmark_breadth_status=args.p1_benchmark_breadth_status,
         artifact_root=artifact_root,
     )

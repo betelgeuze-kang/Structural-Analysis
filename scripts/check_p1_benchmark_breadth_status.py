@@ -20,6 +20,9 @@ DEFAULT_COMMERCIAL_READINESS = Path("implementation/phase1/commercial_readiness_
 DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS = Path(
     "implementation/phase1/release/external_benchmark_submission_readiness.json"
 )
+DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES = Path(
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
+)
 DEFAULT_BENCHMARK_REPORTS = (
     Path("implementation/phase1/hf_benchmark_report.json"),
     Path("implementation/phase1/hf_benchmark_report.rwth_zenodo.json"),
@@ -85,6 +88,34 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _load_residual_holdout_updates(path: Path | None) -> dict[str, dict[str, Any]]:
+    if path is None or not path.exists():
+        return {}
+    payload = _load_json(path)
+    rows: Any = payload.get("updates", payload.get("residual_holdout_updates", payload))
+    if isinstance(rows, dict) and "residual_holdout_work_items" in rows:
+        rows = rows.get("residual_holdout_work_items", [])
+    elif rows is payload and isinstance(payload.get("queues"), dict):
+        rows = payload["queues"].get("residual_holdout_work_items", [])
+    elif rows is payload:
+        rows = payload.get("residual_holdout_work_items", payload)
+
+    updates: dict[str, dict[str, Any]] = {}
+    if isinstance(rows, list):
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            for key in ("work_item_id", "category_id", "id"):
+                row_id = str(row.get(key, "") or "").strip()
+                if row_id:
+                    updates[row_id] = row
+    elif isinstance(rows, dict):
+        for row_id, row in rows.items():
+            if isinstance(row, dict):
+                updates[str(row_id)] = row
+    return updates
+
+
 def _status(ok: bool) -> str:
     return "ready" if ok else "blocked"
 
@@ -108,7 +139,10 @@ def _summary_line(payload: dict[str, Any], path: Path) -> str:
     return nested or path.name
 
 
-def _commercial_gate(path: Path) -> dict[str, Any]:
+def _commercial_gate(
+    path: Path,
+    residual_holdout_closure_updates: Path | None = DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
+) -> dict[str, Any]:
     payload = _load_json(path)
     checks = payload.get("checks") if isinstance(payload.get("checks"), dict) else {}
     grade = payload.get("grade") if isinstance(payload.get("grade"), dict) else {}
@@ -118,7 +152,11 @@ def _commercial_gate(path: Path) -> dict[str, Any]:
         if isinstance(payload.get("residual_holdout_categories"), list)
         else []
     )
-    residual_work_items = _residual_holdout_work_items(payload, residual_holdouts)
+    residual_work_items = _residual_holdout_work_items(
+        payload,
+        residual_holdouts,
+        updates=_load_residual_holdout_updates(residual_holdout_closure_updates),
+    )
     missing_checks = [name for name in REQUIRED_COMMERCIAL_CHECKS if not bool(checks.get(name, False))]
     commercial_grade_pass = bool(grade.get("commercial_pass", False))
     engineer_in_loop_ready = bool(deployment_model.get("engineer_in_loop_accelerated_coverage_ready", False))
@@ -144,7 +182,25 @@ def _commercial_gate(path: Path) -> dict[str, Any]:
         "residual_holdout_target_pct_range": deployment_model.get("residual_holdout_target_pct_range", []),
         "residual_holdout_category_count": len(residual_holdouts),
         "residual_holdout_work_item_count": len(residual_work_items),
+        "residual_holdout_open_count": sum(1 for row in residual_work_items if not _is_residual_closed(row)),
+        "residual_holdout_closure_evidence_pending_count": sum(
+            1
+            for row in residual_work_items
+            if not _is_residual_closed(row) and str(row.get("closure_evidence_status", "") or "").lower() == "pending"
+        ),
+        "residual_holdout_closure_evidence_attached_count": sum(
+            1
+            for row in residual_work_items
+            if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+        ),
+        "residual_holdout_last_checked_count": sum(
+            1 for row in residual_work_items if str(row.get("last_checked_at_utc", "") or "").strip()
+        ),
         "residual_holdout_work_items": residual_work_items,
+        "residual_holdout_closure_updates_path": str(residual_holdout_closure_updates or ""),
+        "residual_holdout_closure_updates_present": bool(
+            residual_holdout_closure_updates and residual_holdout_closure_updates.exists()
+        ),
         "commercial_scope_ready": commercial_scope_ready,
     }
 
@@ -287,10 +343,46 @@ def _external_submission_queue_gate(path: Path) -> dict[str, Any]:
     }
 
 
+def _is_residual_closed(row: dict[str, Any]) -> bool:
+    status = str(row.get("status", "") or "").lower()
+    evidence_status = str(row.get("closure_evidence_status", "") or "").lower()
+    return status in {"closed", "complete", "completed"} or evidence_status in {"attached", "verified", "closed"}
+
+
+def _merge_residual_update(row: dict[str, Any], updates: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    update = updates.get(str(row.get("work_item_id", "") or "")) or updates.get(str(row.get("category_id", "") or ""))
+    if not update:
+        return row
+    merged = dict(row)
+    for key in (
+        "owner",
+        "queue_name",
+        "queue_status",
+        "status",
+        "sla_label",
+        "due_date",
+        "closure_evidence_required",
+        "closure_evidence_path",
+        "closure_evidence_status",
+        "last_checked_at_utc",
+        "closed_at_utc",
+    ):
+        if key in update:
+            merged[key] = str(update.get(key, "") or "")
+    if "sla_hours" in update:
+        merged["sla_hours"] = int(update.get("sla_hours", merged.get("sla_hours", 0)) or 0)
+    if "closure_evidence_status" not in update and str(merged.get("closure_evidence_path", "") or "").strip():
+        merged["closure_evidence_status"] = "attached"
+    return merged
+
+
 def _residual_holdout_work_items(
     payload: dict[str, Any],
     residual_holdouts: list[Any],
+    *,
+    updates: dict[str, dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
+    updates = updates or {}
     explicit_items = payload.get("residual_holdout_work_items")
     if isinstance(explicit_items, list) and explicit_items:
         enriched: list[dict[str, Any]] = []
@@ -300,44 +392,12 @@ def _residual_holdout_work_items(
             category_id = str(row.get("category_id", row.get("id", "")) or "")
             defaults = RESIDUAL_HOLDOUT_QUEUE_DEFAULTS.get(category_id, {})
             closure_evidence_path = str(row.get("closure_evidence_path", "") or "")
-            enriched.append(
-                {
-                    **row,
-                    "work_item_id": str(
-                        row.get("work_item_id", "")
-                        or defaults.get("work_item_id", f"RH-{len(enriched) + 1:03d}")
-                    ),
-                    "category_id": category_id,
-                    "owner": str(row.get("owner", "") or ""),
-                    "queue_name": str(row.get("queue_name", "") or defaults.get("queue_name", "residual_holdout_queue")),
-                    "queue_status": str(row.get("queue_status", "") or defaults.get("queue_status", "pending_review")),
-                    "status": str(row.get("status", "") or defaults.get("status", "open")),
-                    "sla_hours": int(row.get("sla_hours", defaults.get("sla_hours", 120)) or defaults.get("sla_hours", 120)),
-                    "sla_label": str(row.get("sla_label", "") or defaults.get("sla_label", "120h")),
-                    "due_date": str(
-                        row.get("due_date", "") or defaults.get("due_date", "assignment_plus_5_business_days")
-                    ),
-                    "closure_evidence_required": str(
-                        row.get("closure_evidence_required", "")
-                        or defaults.get("closure_evidence_required", "owner_approved_closure_evidence")
-                    ),
-                    "closure_evidence_path": closure_evidence_path,
-                    "closure_evidence_status": str(
-                        row.get("closure_evidence_status", "") or ("attached" if closure_evidence_path else "pending")
-                    ),
-                }
-            )
-        return enriched
-
-    work_items: list[dict[str, Any]] = []
-    for row in residual_holdouts:
-        if not isinstance(row, dict):
-            continue
-        category_id = str(row.get("id", "") or "")
-        defaults = RESIDUAL_HOLDOUT_QUEUE_DEFAULTS.get(category_id, {})
-        work_items.append(
-            {
-                "work_item_id": str(row.get("work_item_id", "") or defaults.get("work_item_id", f"RH-{len(work_items) + 1:03d}")),
+            item = {
+                **row,
+                "work_item_id": str(
+                    row.get("work_item_id", "")
+                    or defaults.get("work_item_id", f"RH-{len(enriched) + 1:03d}")
+                ),
                 "category_id": category_id,
                 "owner": str(row.get("owner", "") or ""),
                 "queue_name": str(row.get("queue_name", "") or defaults.get("queue_name", "residual_holdout_queue")),
@@ -350,13 +410,45 @@ def _residual_holdout_work_items(
                     row.get("closure_evidence_required", "")
                     or defaults.get("closure_evidence_required", "owner_approved_closure_evidence")
                 ),
-                "closure_evidence_path": str(row.get("closure_evidence_path", "") or ""),
+                "closure_evidence_path": closure_evidence_path,
                 "closure_evidence_status": str(
-                    row.get("closure_evidence_status", "")
-                    or ("attached" if str(row.get("closure_evidence_path", "") or "") else "pending")
+                    row.get("closure_evidence_status", "") or ("attached" if closure_evidence_path else "pending")
                 ),
+                "last_checked_at_utc": str(row.get("last_checked_at_utc", "") or ""),
             }
-        )
+            enriched.append(_merge_residual_update(item, updates))
+        return enriched
+
+    work_items: list[dict[str, Any]] = []
+    for row in residual_holdouts:
+        if not isinstance(row, dict):
+            continue
+        category_id = str(row.get("id", "") or "")
+        defaults = RESIDUAL_HOLDOUT_QUEUE_DEFAULTS.get(category_id, {})
+        item = {
+            "work_item_id": str(
+                row.get("work_item_id", "") or defaults.get("work_item_id", f"RH-{len(work_items) + 1:03d}")
+            ),
+            "category_id": category_id,
+            "owner": str(row.get("owner", "") or ""),
+            "queue_name": str(row.get("queue_name", "") or defaults.get("queue_name", "residual_holdout_queue")),
+            "queue_status": str(row.get("queue_status", "") or defaults.get("queue_status", "pending_review")),
+            "status": str(row.get("status", "") or defaults.get("status", "open")),
+            "sla_hours": int(row.get("sla_hours", defaults.get("sla_hours", 120)) or defaults.get("sla_hours", 120)),
+            "sla_label": str(row.get("sla_label", "") or defaults.get("sla_label", "120h")),
+            "due_date": str(row.get("due_date", "") or defaults.get("due_date", "assignment_plus_5_business_days")),
+            "closure_evidence_required": str(
+                row.get("closure_evidence_required", "")
+                or defaults.get("closure_evidence_required", "owner_approved_closure_evidence")
+            ),
+            "closure_evidence_path": str(row.get("closure_evidence_path", "") or ""),
+            "closure_evidence_status": str(
+                row.get("closure_evidence_status", "")
+                or ("attached" if str(row.get("closure_evidence_path", "") or "") else "pending")
+            ),
+            "last_checked_at_utc": str(row.get("last_checked_at_utc", "") or ""),
+        }
+        work_items.append(_merge_residual_update(item, updates))
     return work_items
 
 
@@ -398,11 +490,15 @@ def build_status(
     p1_readiness_status: Path | None = None,
     commercial_readiness: Path = DEFAULT_COMMERCIAL_READINESS,
     external_benchmark_submission_readiness: Path = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    residual_holdout_closure_updates: Path | None = DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     benchmark_reports: list[Path] | tuple[Path, ...] | None = None,
 ) -> dict[str, Any]:
     p1_gate = _p1_gate(_read_or_build_p1(p1_readiness_status))
     reports = list(benchmark_reports if benchmark_reports is not None else DEFAULT_BENCHMARK_REPORTS)
-    commercial_gate = _commercial_gate(commercial_readiness)
+    commercial_gate = _commercial_gate(
+        commercial_readiness,
+        residual_holdout_closure_updates=residual_holdout_closure_updates,
+    )
     external_submission_gate = _external_submission_queue_gate(external_benchmark_submission_readiness)
     evidence_gates = [commercial_gate, external_submission_gate, *[_benchmark_gate(path) for path in reports]]
     benchmark_breadth_inputs_ready = all(bool(gate["ok"]) for gate in evidence_gates)
@@ -465,6 +561,18 @@ def build_status(
                 "residual_holdout_target_pct_range": commercial_gate["residual_holdout_target_pct_range"],
                 "residual_holdout_category_count": commercial_gate["residual_holdout_category_count"],
                 "residual_holdout_work_item_count": commercial_gate["residual_holdout_work_item_count"],
+                "residual_holdout_open_count": commercial_gate["residual_holdout_open_count"],
+                "residual_holdout_closure_evidence_pending_count": commercial_gate[
+                    "residual_holdout_closure_evidence_pending_count"
+                ],
+                "residual_holdout_closure_evidence_attached_count": commercial_gate[
+                    "residual_holdout_closure_evidence_attached_count"
+                ],
+                "residual_holdout_last_checked_count": commercial_gate["residual_holdout_last_checked_count"],
+                "residual_holdout_closure_updates_path": commercial_gate["residual_holdout_closure_updates_path"],
+                "residual_holdout_closure_updates_present": commercial_gate[
+                    "residual_holdout_closure_updates_present"
+                ],
                 "commercial_scope_ready": commercial_gate["commercial_scope_ready"],
             },
         },
@@ -502,6 +610,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
     )
     parser.add_argument(
+        "--residual-holdout-closure-updates",
+        type=Path,
+        default=DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
+    )
+    parser.add_argument(
         "--benchmark-report",
         action="append",
         type=Path,
@@ -522,6 +635,7 @@ def main(argv: list[str] | None = None) -> int:
             p1_readiness_status=args.p1_readiness_status,
             commercial_readiness=args.commercial_readiness,
             external_benchmark_submission_readiness=args.external_benchmark_submission_readiness,
+            residual_holdout_closure_updates=args.residual_holdout_closure_updates,
             benchmark_reports=args.benchmark_reports,
         )
     except (OSError, ValueError, json.JSONDecodeError) as exc:

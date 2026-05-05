@@ -168,6 +168,7 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     midas_source = tmp_path / "release_evidence" / "midas" / "midas_kds_geometry_bridge_validation_report.json"
     commercial_source = tmp_path / "release_evidence" / "commercial" / "commercial_readiness_report.json"
     external_submission = tmp_path / "release_evidence" / "external" / "external_benchmark_submission_readiness.json"
+    residual_updates = tmp_path / "release_evidence" / "productization" / "residual_holdout_closure_updates.json"
     midas_target = tmp_path / "generated" / "midas_kds_geometry_bridge_validation_report.json"
     commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
     coverage = tmp_path / "generated" / "real_project_parser_coverage_matrix.json"
@@ -191,6 +192,20 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     _write_json(midas_source, _midas_report())
     _write_json(commercial_source, _commercial_report())
     _write_json(external_submission, _external_submission())
+    _write_json(
+        residual_updates,
+        {
+            "schema_version": "residual-holdout-closure-updates.v1",
+            "updates": {
+                "RH-001": {
+                    "status": "closed",
+                    "closure_evidence_path": "release_evidence/productization/RH-001.closure.json",
+                    "closure_evidence_status": "attached",
+                    "last_checked_at_utc": "2026-05-05T04:05:06Z",
+                }
+            },
+        },
+    )
 
     cmd = [
         sys.executable,
@@ -215,6 +230,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
         str(commercial_source),
         "--external-benchmark-submission-readiness",
         str(external_submission),
+        "--residual-holdout-closure-updates",
+        str(residual_updates),
         "--p1-readiness-out",
         str(p1_status),
         "--p1-benchmark-out",
@@ -245,6 +262,9 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert payload["p1_operational_queues_pass"] is True
     assert payload["p1_operational_queues"]["summary"]["external_submission_queue_count"] == 4
     assert payload["p1_operational_queues"]["summary"]["residual_holdout_work_item_count"] == 3
+    assert payload["p1_operational_queues"]["summary"]["residual_holdout_open_count"] == 2
+    assert payload["p1_operational_queues"]["summary"]["residual_holdout_closure_evidence_attached_count"] == 1
+    assert payload["artifacts"]["residual_holdout_closure_updates"] == str(residual_updates)
     assert payload["p1_readiness_status"]["p1_inputs_ready"] is True
     assert payload["p1_readiness_status"]["p1_execution_unblocked"] is True
     assert payload["p1_benchmark_breadth_status"]["benchmark_breadth_inputs_ready"] is True

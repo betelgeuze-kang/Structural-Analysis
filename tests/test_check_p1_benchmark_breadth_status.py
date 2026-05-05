@@ -163,6 +163,7 @@ def _paths(tmp_path: Path) -> dict[str, object]:
         "p1_readiness_status": _p1_status(tmp_path / "p1.json"),
         "commercial_readiness": _commercial(tmp_path / "commercial.json"),
         "external_benchmark_submission_readiness": _external_submission(tmp_path / "external_submission.json"),
+        "residual_holdout_closure_updates": tmp_path / "missing_rh_updates.json",
         "benchmark_reports": [
             _benchmark(tmp_path / "hf.json", label="HF benchmark"),
             _benchmark(tmp_path / "wind.json", label="Wind benchmark"),
@@ -214,6 +215,12 @@ def test_benchmark_breadth_is_ready_but_blocked_by_p0_release(tmp_path: Path) ->
         "residual_holdout_target_pct_range": [1, 5],
         "residual_holdout_category_count": 2,
         "residual_holdout_work_item_count": 2,
+        "residual_holdout_open_count": 2,
+        "residual_holdout_closure_evidence_pending_count": 2,
+        "residual_holdout_closure_evidence_attached_count": 0,
+        "residual_holdout_last_checked_count": 0,
+        "residual_holdout_closure_updates_path": str(tmp_path / "missing_rh_updates.json"),
+        "residual_holdout_closure_updates_present": False,
         "commercial_scope_ready": True,
     }
     assert status["summary"]["external_benchmark_submission"] == {
@@ -242,6 +249,43 @@ def test_benchmark_breadth_unblocks_after_p1_execution_gate(tmp_path: Path) -> N
     assert status["benchmark_breadth_inputs_ready"] is True
     assert status["p1_benchmark_execution_unblocked"] is True
     assert status["next_action"] == "run P1 quality/fallback/benchmark breadth execution"
+
+
+def test_benchmark_breadth_merges_residual_holdout_closure_sidecar(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    updates = _write_json(
+        tmp_path / "rh_updates.json",
+        {
+            "schema_version": "residual-holdout-closure-updates.v1",
+            "updates": {
+                "RH-001": {
+                    "status": "closed",
+                    "queue_status": "closure_evidence_attached",
+                    "closure_evidence_path": "release_evidence/productization/RH-001.closure.json",
+                    "closure_evidence_status": "attached",
+                    "last_checked_at_utc": "2026-05-05T04:05:06Z",
+                    "closed_at_utc": "2026-05-05T04:06:07Z",
+                }
+            },
+        },
+    )
+    paths["residual_holdout_closure_updates"] = updates
+
+    status = check_p1_benchmark.build_status(**paths)
+    commercial_gate = status["gates"][1]
+    work_items = {row["work_item_id"]: row for row in commercial_gate["residual_holdout_work_items"]}
+
+    assert work_items["RH-001"]["status"] == "closed"
+    assert work_items["RH-001"]["closure_evidence_status"] == "attached"
+    assert work_items["RH-001"]["closure_evidence_path"].endswith("RH-001.closure.json")
+    assert work_items["RH-001"]["last_checked_at_utc"] == "2026-05-05T04:05:06Z"
+    scope = status["summary"]["commercialization_scope"]
+    assert scope["residual_holdout_work_item_count"] == 2
+    assert scope["residual_holdout_open_count"] == 1
+    assert scope["residual_holdout_closure_evidence_pending_count"] == 1
+    assert scope["residual_holdout_closure_evidence_attached_count"] == 1
+    assert scope["residual_holdout_last_checked_count"] == 1
+    assert scope["residual_holdout_closure_updates_present"] is True
 
 
 def test_benchmark_breadth_blocks_on_failed_report(tmp_path: Path) -> None:
@@ -305,6 +349,8 @@ def test_cli_writes_markdown_and_fails_when_blocked(tmp_path: Path, capsys) -> N
             str(paths["commercial_readiness"]),
             "--external-benchmark-submission-readiness",
             str(paths["external_benchmark_submission_readiness"]),
+            "--residual-holdout-closure-updates",
+            str(paths["residual_holdout_closure_updates"]),
             "--benchmark-report",
             str(paths["benchmark_reports"][0]),
             "--benchmark-report",

@@ -248,3 +248,71 @@ def test_materialize_p1_operational_queues_preserves_submission_receipt_update_f
     assert payload["summary"]["external_submission_closure_evidence_attached_count"] == 1
     receipt_template = json.loads(Path(row["receipt_template_path"]).read_text(encoding="utf-8"))
     assert receipt_template["last_checked_at_utc"] == "2026-05-05T02:03:04Z"
+
+
+def test_materialize_p1_operational_queues_merges_residual_holdout_closure_sidecar(tmp_path: Path) -> None:
+    out = tmp_path / "ops" / "p1_operational_queues.json"
+    out_md = tmp_path / "ops" / "p1_operational_queues.md"
+    updates = _write_json(
+        tmp_path / "rh_updates.json",
+        {
+            "schema_version": "residual-holdout-closure-updates.v1",
+            "updates": {
+                "RH-001": {
+                    "status": "closed",
+                    "queue_status": "closure_evidence_attached",
+                    "closure_evidence_path": "release_evidence/productization/RH-001.closure.json",
+                    "closure_evidence_status": "attached",
+                    "last_checked_at_utc": "2026-05-05T04:05:06Z",
+                    "closed_at_utc": "2026-05-05T04:06:07Z",
+                },
+                "legacy_tool_cross_validation_required": {
+                    "closure_evidence_path": "release_evidence/productization/RH-002.cross_validation.json",
+                    "last_checked_at_utc": "2026-05-05T05:06:07Z",
+                },
+            },
+        },
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--commercial-readiness",
+            str(_commercial(tmp_path / "commercial.json")),
+            "--external-benchmark-submission-readiness",
+            str(_external_submission(tmp_path / "external.json")),
+            "--residual-holdout-closure-updates",
+            str(updates),
+            "--out",
+            str(out),
+            "--out-md",
+            str(out_md),
+            "--json",
+            "--fail-open",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    rows = {row["work_item_id"]: row for row in payload["queues"]["residual_holdout_work_items"]}
+    assert rows["RH-001"]["status"] == "closed"
+    assert rows["RH-001"]["closure_evidence_status"] == "attached"
+    assert rows["RH-001"]["last_checked_at_utc"] == "2026-05-05T04:05:06Z"
+    assert rows["RH-002"]["closure_evidence_status"] == "attached"
+    assert rows["RH-002"]["closure_evidence_path"].endswith("RH-002.cross_validation.json")
+    assert payload["summary"]["residual_holdout_work_item_count"] == 3
+    assert payload["summary"]["residual_holdout_open_count"] == 1
+    assert payload["summary"]["residual_holdout_closure_evidence_pending_count"] == 1
+    assert payload["summary"]["residual_holdout_closure_evidence_attached_count"] == 2
+    assert payload["summary"]["residual_holdout_last_checked_count"] == 2
+
+    closure_template = json.loads(Path(rows["RH-001"]["closure_packet_template_path"]).read_text(encoding="utf-8"))
+    markdown = out_md.read_text(encoding="utf-8")
+    assert closure_template["closure_evidence_path"].endswith("RH-001.closure.json")
+    assert closure_template["last_checked_at_utc"] == "2026-05-05T04:05:06Z"
+    assert "RH-001.closure.json" in markdown
+    assert "2026-05-05T04:05:06Z" in markdown

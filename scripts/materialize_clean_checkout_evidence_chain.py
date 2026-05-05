@@ -289,6 +289,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         str(args.commercial_readiness),
         "--external-benchmark-submission-readiness",
         str(args.external_benchmark_submission_readiness),
+        "--residual-holdout-closure-updates",
+        str(args.residual_holdout_closure_updates),
         "--json",
     ]
     p1_status = p1_step.get("json") if isinstance(p1_step.get("json"), dict) else {}
@@ -321,6 +323,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             str(args.commercial_readiness),
             "--external-benchmark-submission-readiness",
             str(args.external_benchmark_submission_readiness),
+            "--residual-holdout-closure-updates",
+            str(args.residual_holdout_closure_updates),
             "--p1-benchmark-breadth-status",
             str(p1_benchmark_path),
             "--out",
@@ -381,6 +385,7 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             "midas_kds_validation_report": str(args.midas_kds_validation_report),
             "commercial_readiness": str(args.commercial_readiness),
             "external_benchmark_submission_readiness": str(args.external_benchmark_submission_readiness),
+            "residual_holdout_closure_updates": str(args.residual_holdout_closure_updates),
             "row_provenance": str(args.row_provenance),
             "p1_operational_queues": str(args.p1_operational_queues_out) if args.p1_operational_queues_out else "",
         },
@@ -425,6 +430,11 @@ def main() -> int:
         "--external-benchmark-submission-readiness",
         type=Path,
         default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    )
+    parser.add_argument(
+        "--residual-holdout-closure-updates",
+        type=Path,
+        default=Path("implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"),
     )
     parser.add_argument(
         "--commercial-readiness-source-evidence",
