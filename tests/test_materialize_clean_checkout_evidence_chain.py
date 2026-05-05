@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 
@@ -280,6 +281,109 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert p1_breadth.exists()
     assert p1_operational.exists()
     assert p1_operational_md.exists()
+
+
+def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_from_release_package(
+    tmp_path: Path,
+) -> None:
+    manifest = tmp_path / "real_project_corpus_seed_manifest.json"
+    p0_status = tmp_path / "published" / "p0-status.json"
+    artifact_root = tmp_path / "published" / "hydrated_release_assets"
+    evidence_index = tmp_path / "published" / "release-publication-evidence-index.json"
+    midas_source = tmp_path / "release_evidence" / "midas" / "midas_kds_geometry_bridge_validation_report.json"
+    commercial_source = tmp_path / "release_evidence" / "commercial" / "commercial_readiness_report.json"
+    external_submission = tmp_path / "generated" / "external_benchmark_submission_readiness.json"
+    residual_updates = tmp_path / "release_evidence" / "productization" / "residual_holdout_closure_updates.json"
+    midas_target = tmp_path / "generated" / "midas_kds_geometry_bridge_validation_report.json"
+    commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
+    coverage = tmp_path / "generated" / "real_project_parser_coverage_matrix.json"
+    peer = tmp_path / "generated" / "peer_tbi_benchmark_metric_records.json"
+    row_provenance = tmp_path / "generated" / "real_project_row_provenance_report.json"
+    p1_status = tmp_path / "generated" / "p1-readiness-status.json"
+    p1_breadth = tmp_path / "generated" / "p1-benchmark-breadth-status.json"
+    p1_operational = tmp_path / "generated" / "p1-operational-queues" / "p1_operational_queues.json"
+    out = tmp_path / "generated" / "clean-checkout-evidence-chain.json"
+
+    _write_json(manifest, _manifest())
+    _write_json(p0_status, _p0_status())
+    _write_json(
+        evidence_index,
+        {
+            "schema_version": "release-publication-evidence-index.v1",
+            "paths": {
+                "p0_status_json": str(p0_status),
+                "artifact_root": str(artifact_root),
+            },
+        },
+    )
+    _write_json(midas_source, _midas_report())
+    _write_json(commercial_source, _commercial_report())
+    _write_json(
+        residual_updates,
+        {
+            "schema_version": "residual-holdout-closure-updates.v1",
+            "updates": {},
+        },
+    )
+    artifact_root.mkdir(parents=True)
+    with zipfile.ZipFile(artifact_root / "project_package.zip", "w") as archive:
+        archive.writestr(
+            "artifacts/external_benchmark_submission_readiness.json",
+            json.dumps(_external_submission()),
+        )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--manifest",
+            str(manifest),
+            "--publication-evidence-index",
+            str(evidence_index),
+            "--coverage-matrix",
+            str(coverage),
+            "--peer-metric-records",
+            str(peer),
+            "--row-provenance",
+            str(row_provenance),
+            "--midas-kds-validation-report",
+            str(midas_target),
+            "--midas-kds-source-evidence",
+            str(midas_source),
+            "--commercial-readiness",
+            str(commercial_target),
+            "--commercial-readiness-source-evidence",
+            str(commercial_source),
+            "--external-benchmark-submission-readiness",
+            str(external_submission),
+            "--residual-holdout-closure-updates",
+            str(residual_updates),
+            "--p1-readiness-out",
+            str(p1_status),
+            "--p1-benchmark-out",
+            str(p1_breadth),
+            "--p1-operational-queues-out",
+            str(p1_operational),
+            "--json",
+            "--out",
+            str(out),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["contract_pass"] is True
+    assert external_submission.exists()
+    external_step = next(
+        step for step in payload["steps"] if step["label"] == "external benchmark submission readiness"
+    )
+    assert external_step["hydrated_from_source"] is True
+    assert external_step["source_evidence"].endswith("project_package.zip")
+    assert payload["artifacts"]["external_benchmark_submission_readiness"] == str(external_submission)
+    assert payload["p1_operational_queues"]["summary"]["external_submission_queue_count"] == 4
 
 
 def test_materialize_clean_checkout_evidence_chain_keeps_contract_blocked_without_p0_closure(

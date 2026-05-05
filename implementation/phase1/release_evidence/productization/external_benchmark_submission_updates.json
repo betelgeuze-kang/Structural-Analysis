@@ -1,0 +1,58 @@
+{
+  "evidence_basis": {
+    "actual_external_submission_receipts_attached": false,
+    "basis_kind": "release_publication_ready_update",
+    "note": "Current checkout has the P0 publication bundle and full-submission-ready EB queues, but no external benchmark service receipts are attached yet.",
+    "publication_evidence_index_path": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
+    "release_tag": "structural-analysis-artifacts-2026-04-26",
+    "release_url": "https://github.com/betelgeuze-kang/Structural-Analysis/releases/tag/structural-analysis-artifacts-2026-04-26"
+  },
+  "generated_at": "2026-05-05T05:05:53Z",
+  "schema_version": "external-benchmark-submission-updates.v1",
+  "updates": {
+    "hardest_external_10case": {
+      "closure_evidence_path": "",
+      "closure_evidence_required": "hardest_external_10case_submission_receipt",
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "receipt_status": "pending_external_submission_receipt",
+      "submission_id": "p1-hardest-external-10case",
+      "submission_lifecycle_status": "ready_to_submit",
+      "submission_owner_action": "submit_external_benchmark_package_and_attach_receipt",
+      "submission_status": "ready_to_submit"
+    },
+    "korean_public_structures": {
+      "closure_evidence_path": "",
+      "closure_evidence_required": "korean_public_structures_submission_receipt_or_authority_review_hold",
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "receipt_status": "pending_external_submission_receipt",
+      "submission_id": "p1-korean-public-structures",
+      "submission_lifecycle_status": "ready_to_submit",
+      "submission_owner_action": "submit_external_benchmark_package_and_attach_receipt",
+      "submission_status": "ready_to_submit"
+    },
+    "peer_spd_hinge": {
+      "closure_evidence_path": "",
+      "closure_evidence_required": "peer_spd_hinge_submission_receipt",
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "receipt_status": "pending_external_submission_receipt",
+      "submission_id": "p1-peer-spd-hinge",
+      "submission_lifecycle_status": "ready_to_submit",
+      "submission_owner_action": "submit_external_benchmark_package_and_attach_receipt",
+      "submission_status": "ready_to_submit"
+    },
+    "tpu_hffb": {
+      "closure_evidence_path": "",
+      "closure_evidence_required": "tpu_hffb_submission_receipt",
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "receipt_status": "pending_external_submission_receipt",
+      "submission_id": "p1-tpu-hffb",
+      "submission_lifecycle_status": "ready_to_submit",
+      "submission_owner_action": "submit_external_benchmark_package_and_attach_receipt",
+      "submission_status": "ready_to_submit"
+    }
+  }
+}

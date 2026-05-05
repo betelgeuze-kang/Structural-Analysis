@@ -1,4 +1,52 @@
 {
   "schema_version": "residual-holdout-closure-updates.v1",
-  "updates": {}
+  "generated_at": "2026-05-05T05:05:53Z",
+  "evidence_basis": {
+    "actual_closure_evidence_attached": false,
+    "basis_kind": "current_checkout_residual_holdout_queue_update",
+    "note": "No signed engineer packet, legacy-tool cross-validation report, or legal/authority signoff receipt was present in the current checkout. Rows remain open and evidence-pending.",
+    "publication_evidence_index_path": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
+    "release_tag": "structural-analysis-artifacts-2026-04-26"
+  },
+  "updates": {
+    "RH-001": {
+      "closure_evidence_path": "",
+      "closure_evidence_required": "signed_engineer_review_packet",
+      "closure_evidence_status": "pending",
+      "due_date": "assignment_plus_3_business_days",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "owner": "licensed_engineer",
+      "queue_name": "licensed_engineer_review_queue",
+      "queue_status": "pending_review",
+      "sla_hours": 72,
+      "sla_label": "72h",
+      "status": "open"
+    },
+    "RH-002": {
+      "closure_evidence_path": "",
+      "closure_evidence_required": "legacy_tool_cross_validation_report",
+      "closure_evidence_status": "pending",
+      "due_date": "assignment_plus_5_business_days",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "owner": "legacy_tool_owner",
+      "queue_name": "legacy_tool_cross_validation_queue",
+      "queue_status": "pending_cross_validation",
+      "sla_hours": 120,
+      "sla_label": "120h",
+      "status": "open"
+    },
+    "RH-003": {
+      "closure_evidence_path": "",
+      "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
+      "closure_evidence_status": "pending",
+      "due_date": "authority_submission_window",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "owner": "authority_workflow_owner",
+      "queue_name": "legal_authority_signoff_queue",
+      "queue_status": "pending_signoff",
+      "sla_hours": 168,
+      "sla_label": "168h",
+      "status": "open"
+    }
+  }
 }

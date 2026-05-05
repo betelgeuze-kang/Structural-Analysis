@@ -127,6 +127,8 @@ def _run(
     ]
     if submission_updates is not None:
         cmd.extend(["--submission-updates", str(updates)])
+    else:
+        cmd.extend(["--submission-updates", ""])
     proc = subprocess.run(
         cmd,
         check=False,

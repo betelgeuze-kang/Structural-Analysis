@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -134,6 +135,80 @@ def _materialize_evidence(
     return summary
 
 
+def _materialize_external_submission_readiness(
+    *,
+    source_artifact_root: Path | None,
+    destination: Path,
+    force: bool,
+) -> dict[str, Any]:
+    label = "external benchmark submission readiness"
+    if destination.exists() and not force:
+        summary = _json_summary(destination)
+        summary.update(
+            {
+                "label": label,
+                "source_evidence": "",
+                "hydrated_from_source": False,
+            }
+        )
+        return summary
+
+    if source_artifact_root is None:
+        return {
+            "label": label,
+            "exists": destination.exists(),
+            "ok": False,
+            "path": str(destination),
+            "source_evidence": "",
+            "hydrated_from_source": False,
+            "reason": "publication_artifact_root_missing",
+        }
+
+    direct_source = source_artifact_root / "external_benchmark_submission_readiness.json"
+    package_source = source_artifact_root / "project_package.zip"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    source_evidence = ""
+    try:
+        if direct_source.exists():
+            shutil.copyfile(direct_source, destination)
+            source_evidence = str(direct_source)
+        elif package_source.exists():
+            with zipfile.ZipFile(package_source) as archive:
+                with archive.open("artifacts/external_benchmark_submission_readiness.json") as handle:
+                    destination.write_bytes(handle.read())
+            source_evidence = str(package_source)
+        else:
+            return {
+                "label": label,
+                "exists": destination.exists(),
+                "ok": False,
+                "path": str(destination),
+                "source_evidence": str(source_artifact_root),
+                "hydrated_from_source": False,
+                "reason": "external_submission_readiness_source_missing",
+            }
+    except (KeyError, OSError, zipfile.BadZipFile) as exc:
+        return {
+            "label": label,
+            "exists": destination.exists(),
+            "ok": False,
+            "path": str(destination),
+            "source_evidence": str(package_source),
+            "hydrated_from_source": False,
+            "reason": f"external_submission_readiness_hydration_failed: {exc}",
+        }
+
+    summary = _json_summary(destination)
+    summary.update(
+        {
+            "label": label,
+            "source_evidence": source_evidence,
+            "hydrated_from_source": True,
+        }
+    )
+    return summary
+
+
 def _run_command(command: list[str]) -> dict[str, Any]:
     proc = subprocess.run(command, check=False, capture_output=True, text=True)
     return {
@@ -214,6 +289,13 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         force=args.force_hydrate,
     )
     steps.append(commercial_step)
+
+    external_submission_step = _materialize_external_submission_readiness(
+        source_artifact_root=index_paths.get("artifact_root"),
+        destination=args.external_benchmark_submission_readiness,
+        force=args.force_hydrate,
+    )
+    steps.append(external_submission_step)
 
     coverage_cmd = [
         sys.executable,

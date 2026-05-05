@@ -679,6 +679,7 @@ def _run_committee_package_with_panel_and_foundation_fixtures(
         design_opt_entrypoint_rows,
         design_opt_entrypoint_groups,
         smoke_recent_samples,
+        external_benchmark_submission_queue_rows,
         residual_holdout_buckets,
         residual_holdout_detail_rows,
         residual_holdout_matrix_rows,
