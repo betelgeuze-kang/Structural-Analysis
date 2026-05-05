@@ -202,9 +202,14 @@ def test_release_gap_report_emits_time_saved_and_holdout_split(tmp_path: Path) -
         "pending_signoff",
     ]
     assert [row["status"] for row in buckets] == ["open", "open", "open"]
+    assert [row["sla_label"] for row in buckets] == ["72h", "120h", "168h"]
+    assert buckets[0]["due_date"] == "assignment_plus_3_business_days"
+    assert buckets[0]["closure_evidence_required"] == "signed_engineer_review_packet"
+    assert buckets[0]["closure_evidence_status"] == "pending"
 
     markdown = out_md.read_text(encoding="utf-8")
     assert "Estimated time saved" in markdown
     assert "Relative Share" in markdown
+    assert "Closure Evidence" in markdown
     assert "Commercial scope" in markdown
     assert "Commercial reliability breadth" in markdown

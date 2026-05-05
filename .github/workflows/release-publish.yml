@@ -51,6 +51,7 @@ jobs:
             echo "PUBLICATION_REPORT_JSON=$RUNNER_TEMP/structural-release-publication-report.json"
             echo "PUBLICATION_REPORT_MD=$RUNNER_TEMP/structural-release-publication-report.md"
             echo "PUBLICATION_EVIDENCE_INDEX=$RUNNER_TEMP/structural-release-publication-evidence-index.json"
+            echo "POST_PUBLISH_ROUNDTRIP_JSON=$RUNNER_TEMP/structural-post-publish-roundtrip.json"
           } >> "$GITHUB_ENV"
 
       - name: Checkout
@@ -235,10 +236,22 @@ jobs:
             --repo "${{ github.repository }}" \
             --manifest "$CANDIDATE_MANIFEST" \
             --artifact-root "$HYDRATED_RELEASE_ROOT" \
+            --out "$POST_PUBLISH_ROUNDTRIP_JSON" \
             --write
           python scripts/verify_release_artifacts_manifest.py \
             --manifest "$CANDIDATE_MANIFEST" \
             --artifact-root "$HYDRATED_RELEASE_ROOT"
+          python scripts/check_p0_closure_status.py \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --release-assets-json "$RELEASE_ASSETS_JSON" \
+            --artifact-root "$RELEASE_ROOT" \
+            --upload-plan-json "$RELEASE_UPLOAD_PLAN" \
+            --metadata-preflight-json "$RELEASE_METADATA_PREFLIGHT" \
+            --post-publish-roundtrip-json "$POST_PUBLISH_ROUNDTRIP_JSON" \
+            --tag-ref-present \
+            --out "$P0_STATUS_JSON" \
+            --out-md "$P0_STATUS_MD" \
+            --fail-open
 
       - name: Write publication failure report
         if: always()
@@ -303,6 +316,7 @@ jobs:
                   "hydrated_release_root": file_status(os.environ["HYDRATED_RELEASE_ROOT"]),
                   "p0_status_json": file_status(p0_status_json),
                   "p0_status_md": file_status(os.environ["P0_STATUS_MD"]),
+                  "post_publish_roundtrip_json": file_status(os.environ["POST_PUBLISH_ROUNDTRIP_JSON"]),
                   "nightly_release_gate_report": file_status(nightly_report),
               },
               "nightly_release_gate": {
@@ -337,6 +351,26 @@ jobs:
               ),
               encoding="utf-8",
           )
+          roundtrip_json = Path(os.environ["POST_PUBLISH_ROUNDTRIP_JSON"])
+          if not roundtrip_json.exists():
+              roundtrip_json.write_text(
+                  json.dumps(
+                      {
+                          "ok": False,
+                          "schema_version": "release-post-publish-roundtrip.v1",
+                          "status": "not_run",
+                          "reason": "post-publish hydrate round-trip did not complete before report collation",
+                          "generated_at": payload["generated_at"],
+                          "artifact_root": os.environ["HYDRATED_RELEASE_ROOT"],
+                          "manifest": p0_manifest,
+                      },
+                      ensure_ascii=False,
+                      indent=2,
+                      sort_keys=True,
+                  )
+                  + "\n",
+                  encoding="utf-8",
+              )
           PY
           python3 scripts/build_release_publication_evidence_index.py \
             --manifest "$p0_manifest" \
@@ -347,6 +381,7 @@ jobs:
             --p0-status-json "$P0_STATUS_JSON" \
             --p0-status-md "$P0_STATUS_MD" \
             --publication-report-json "$PUBLICATION_REPORT_JSON" \
+            --post-publish-roundtrip-json "$POST_PUBLISH_ROUNDTRIP_JSON" \
             --out "$PUBLICATION_EVIDENCE_INDEX" || true
 
       - name: Upload publication evidence
@@ -364,6 +399,7 @@ jobs:
             ${{ runner.temp }}/structural-release-publication-report.json
             ${{ runner.temp }}/structural-release-publication-report.md
             ${{ runner.temp }}/structural-release-publication-evidence-index.json
+            ${{ runner.temp }}/structural-post-publish-roundtrip.json
             implementation/phase1/release/nightly_release_gate_report.json
           if-no-files-found: error
 

@@ -45,6 +45,9 @@ def _run(
                 "commercial_scope_summary_line": "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%",
                 "commercial_reliability_breadth_summary_line": "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True",
                 "midas_kds_row_provenance_export_summary_line": "MIDAS KDS row provenance export: PASS | combos=6 | rows=144 | members=12 | clauses=6 | exact_rows=144",
+                "hardest_external_10case_kickoff_summary_line": "Hardest external 10-case kickoff: PASS | cases=10 | coverage=100% | dry_run=ready",
+                "korean_source_ingest_summary_line": "KR ingest: PASS | src=4 | cls=4 | got=0 | fp=0 | meta=4 | rej=0 | dup=0 | seed=4 | topo=1 | native=1 | p0=3",
+                "korean_structural_preview_queue_summary_line": "KR preview queue: PASS | cand=4 | pend=1 | state=open",
                 "midas_kds_row_provenance_export_row_count": 144,
                 "midas_kds_row_provenance_export_exact_row_count": 144,
                 "midas_kds_row_provenance_preview_rows": [
@@ -71,8 +74,34 @@ def _run(
             },
         },
     )
-    for path in (tpu, peer, fixture, alignment):
-        _write(path, {"contract_pass": True})
+    _write(
+        tpu,
+        {
+            "contract_pass": True,
+            "summary_line": "TPU/HFFB benchmark gate: PASS | assets=2 | ready=2 | raw_mapping=eligible",
+        },
+    )
+    _write(
+        peer,
+        {
+            "contract_pass": True,
+            "summary_line": "PEER/SPD hinge benchmark gate: PASS | assets=2 | ready=2 | split=train:1,holdout:1",
+        },
+    )
+    _write(
+        fixture,
+        {
+            "contract_pass": True,
+            "summary_line": "PEER/SPD hinge fixture regression: PASS | fixtures=2 | min_points=449",
+        },
+    )
+    _write(
+        alignment,
+        {
+            "contract_pass": True,
+            "summary_line": "PEER/SPD hinge alignment: PASS | refresh_columns=2 | rebar_sensitive_columns=0",
+        },
+    )
 
     proc = subprocess.run(
         [
@@ -129,6 +158,21 @@ def test_external_benchmark_submission_readiness_allows_limited_start_with_clean
     assert all(
         row["status"] == "ready_for_benchmark_start_final_review_pending"
         for row in payload["submission_queue"]
+    )
+    assert all("dry_run_evidence" in row for row in payload["submission_queue"])
+    assert all("onepage_attestation_status" in row for row in payload["submission_queue"])
+    assert payload["submission_queue"][0]["dry_run_evidence"] == "Hardest external 10-case kickoff: PASS | cases=10 | coverage=100% | dry_run=ready"
+    assert payload["submission_queue"][1]["dry_run_evidence"] == (
+        "TPU/HFFB benchmark gate: PASS | assets=2 | ready=2 | raw_mapping=eligible"
+    )
+    assert payload["submission_queue"][2]["dry_run_evidence"] == (
+        "PEER/SPD hinge benchmark gate: PASS | assets=2 | ready=2 | split=train:1,holdout:1 | "
+        "PEER/SPD hinge fixture regression: PASS | fixtures=2 | min_points=449 | "
+        "PEER/SPD hinge alignment: PASS | refresh_columns=2 | rebar_sensitive_columns=0"
+    )
+    assert payload["submission_queue"][3]["dry_run_evidence"] == (
+        "KR ingest: PASS | src=4 | cls=4 | got=0 | fp=0 | meta=4 | rej=0 | dup=0 | seed=4 | topo=1 | native=1 | p0=3 | "
+        "KR preview queue: PASS | cand=4 | pend=1 | state=open"
     )
     assert all(
         row["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")

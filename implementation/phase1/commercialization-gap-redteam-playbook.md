@@ -27,11 +27,11 @@
 
 1. source repo/CI에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only`로 manifest 구조만 검증하고 큰 artifact 다운로드는 요구하지 않는다.
 2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all --require-exact` 명령으로 manifest asset names/bytes를 비교하고 optional 누락/extra asset도 차단한다.
-3. fresh GitHub Release asset root의 12 manifest assets에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
+3. fresh GitHub Release asset root의 current manifest assets(현재 22개)에서는 `python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
 4. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`만 업로드한다.
-5. current blocker는 `structural-analysis-artifacts-2026-04-26` Git tag 이후의 GitHub Release object와 manifest-listed 12개 asset publication이다. P0-1은 tag, release object, required/optional manifest assets가 정확히 published 되기 전에는 close되지 않는다.
+5. current blocker는 `structural-analysis-artifacts-2026-04-26` Git tag 이후의 GitHub Release object와 manifest-listed current asset set publication이다. P0-1은 tag, release object, required/optional manifest assets가 정확히 published 되기 전에는 close되지 않는다.
 6. 로컬 `implementation/phase1/release/`는 stale local state이며, `prepare_release_upload_plan.py`는 mismatched/missing assets에서 실패하므로 별도 `release-artifact-refresh` 작업으로 분리한다.
-7. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets 정확히 12개만 업로드한다.
+7. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets(current set, 현재 22개)만 업로드한다.
 8. close path는 fresh artifact root 재생성 -> manifest 갱신(필요 시) -> tag/release 생성 -> metadata preflight -> SHA/bytes verification 순서로 고정한다.
 
 ## 0-1) 실행 맵 (12개 백로그)

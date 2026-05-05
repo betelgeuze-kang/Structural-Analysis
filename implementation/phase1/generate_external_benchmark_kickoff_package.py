@@ -120,8 +120,10 @@ def _build_markdown(payload: dict[str, Any]) -> str:
     for row in submission_queue:
         lines.append(
             f"- `{row.get('queue_id', '')}` | scope=`{row.get('submission_scope', '')}` | "
-            f"status=`{row.get('status', '')}` | owner=`{row.get('owner', '')}` | "
-            f"onepage=`{row.get('onepage_attestation', '')}`"
+            f"owner=`{row.get('owner', '')}` | status=`{row.get('status', '')}` | "
+            f"onepage=`{row.get('onepage_attestation', '')}` | "
+            f"onepage_status=`{row.get('onepage_attestation_status', '') or 'unknown'}` | "
+            f"dry_run_evidence=`{row.get('dry_run_evidence', '') or 'n/a'}`"
         )
     lines.extend(["", "## Review Boundary", ""])
     lines.append(

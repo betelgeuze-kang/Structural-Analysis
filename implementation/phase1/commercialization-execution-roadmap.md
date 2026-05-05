@@ -11,7 +11,7 @@
 - Generated drift gate: `Green`
 - Frontend contract: `Green`
 - Targeted pytest smoke: `Green`
-- Release artifact integrity: `Green` (`structural-analysis-artifacts-2026-04-26` is published with 12/12 manifest assets, metadata preflight, upload-plan evidence, and hydrated published-byte SHA/bytes verification)
+- Release artifact integrity: `Green` (`structural-analysis-artifacts-2026-04-26` publication evidence must cover the current 22/22 manifest assets, metadata preflight, upload-plan evidence, and hydrated post-publish SHA/bytes round-trip verification)
 - Structural analysis commercial trust: `Yellow` (`Commercial` grade and engineer-in-loop 95-99% accelerated coverage are ready, but `full_commercial_replacement_ready=false`)
 - Viewer product polish: `Yellow`
 
@@ -76,9 +76,9 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 
 ### 1. P0-1 Release / Review Chain Stabilization
 
-목표: source repo/CI의 manifest 구조 검증, release asset listing preflight, fresh GitHub Release asset root의 12 manifest assets SHA/bytes 무결성을 분리하고, 정식 P0-1 close 기준을 후자로 고정한다. 이 항목은 source-boundary 갭이 아니라 release-publication 갭이다.
+목표: source repo/CI의 manifest 구조 검증, release asset listing preflight, fresh GitHub Release asset root의 current manifest assets(현재 22개) SHA/bytes 무결성을 분리하고, 정식 P0-1 close 기준을 후자로 고정한다. 이 항목은 source-boundary 갭이 아니라 release-publication 갭이다.
 
-현재 `structural-analysis-artifacts-2026-04-26`는 GitHub Release로 published 상태이며, 12개 manifest asset 업로드와 metadata/published-byte SHA 검증이 완료됐다. 로컬 `implementation/phase1/release/`는 stale state일 수 있으므로, fresh candidate root가 아닌 이 경로를 업로드 소스로 쓰면 mismatched/missing asset에서 실패한다.
+현재 `structural-analysis-artifacts-2026-04-26`는 GitHub Release로 published 상태이며, close evidence는 current manifest asset set(현재 22개) 업로드와 metadata/published-byte SHA 검증을 요구한다. 로컬 `implementation/phase1/release/`는 stale state일 수 있으므로, fresh candidate root가 아닌 이 경로를 업로드 소스로 쓰면 mismatched/missing asset에서 실패한다.
 
 개선 내용:
 
@@ -86,11 +86,11 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 2. metadata preflight는 `python3 scripts/fetch_github_release_assets.py --repo <owner/name> --tag <release-tag> --out <release-assets.json>`로 release asset metadata를 export한 뒤 진행한다. 이어서 `python3 scripts/check_release_asset_listing.py --manifest implementation/phase1/release_artifacts_manifest.json --assets-json <release-assets.json> --require-all --require-exact` 명령을 실행한다.
 3. fresh candidate root는 `python3 scripts/build_release_publication_candidate.py --manifest implementation/phase1/release_artifacts_manifest.json --artifact-root <fresh-release-asset-root> --work-dir <private-release-work-dir> --manifest-out <candidate-manifest.json> --write`로 만든다. 이 단계는 private signing key가 work dir에만 남고 flat artifact root에는 upload-safe manifest assets만 남도록 분리한다.
 4. full integrity는 `python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --require-artifacts`로 SHA/bytes 무결성을 검증한다.
-5. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`(12 manifest assets)만 업로드한다. Token-backed publication은 `python3 scripts/publish_github_release_assets.py --repo betelgeuze-kang/Structural-Analysis --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --assets-out <release-assets.json>`로 수행한다.
+5. upload plan은 `python3 scripts/prepare_release_upload_plan.py --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --out <release-upload-plan.json>`으로 생성하고, plan의 `upload_assets`(current manifest assets, 현재 22개)만 업로드한다. Token-backed publication은 `python3 scripts/publish_github_release_assets.py --repo betelgeuze-kang/Structural-Analysis --manifest <candidate-manifest.json> --artifact-root <fresh-release-asset-root> --assets-out <release-assets.json>`로 수행한다.
 6. closure gate는 publication 전에는 `<candidate-manifest.json>`을 기준으로 실행하고, GitHub Release asset listing과 SHA/bytes checks가 통과한 뒤에만 candidate manifest를 `implementation/phase1/release_artifacts_manifest.json`으로 승격한다.
 7. current blocker는 `structural-analysis-artifacts-2026-04-26` Git tag 이후의 GitHub Release object 생성과 manifest-listed assets 업로드다. P0-1은 release object와 manifest-listed assets가 published 되기 전에는 close되지 않는다.
 8. stale local `implementation/phase1/release/` 검증 실패와 `prepare_release_upload_plan.py`의 mismatched/missing asset 실패는 P0-1 실패가 아니라 별도 `release-artifact-refresh` 작업으로 분리한다.
-9. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets 정확히 12개만 업로드한다.
+9. repo-local `implementation/phase1/release/`는 wildcard upload 금지 대상으로 두고, freshly regenerated asset root에서 manifest-listed assets(current set, 현재 22개)만 업로드한다.
 10. close path는 private work dir에서 signed registry/package 재생성 -> flat artifact root materialization -> candidate manifest 검증 -> GitHub Release 생성/asset 업로드 -> metadata preflight -> SHA/bytes verification -> source manifest promotion 순서로 고정한다.
 11. 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다. 외부 의존 단계는 fresh release output 재생성과 token-backed GitHub Release publication이다. 로컬 토큰이 없으면 `Publish Release Assets` GitHub Actions workflow를 `replace_existing=false`, `promote_manifest=true`로 실행해 release publish와 source manifest promotion을 한 번에 닫는다.
 
@@ -236,7 +236,7 @@ python3 -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
 ## Next Action Queue
 
 1. fresh GitHub Release asset root를 다시 만들고, manifest를 갱신(필요 시)한 뒤 tag/release를 생성한다.
-2. manifest asset 정확히 12개를 업로드하고 metadata preflight와 SHA/bytes verification을 통과시켜 `P0-1 Release / Review Chain Stabilization`을 닫는다.
+2. current manifest asset set(현재 22개)을 업로드하고 metadata preflight와 SHA/bytes verification을 통과시켜 `P0-1 Release / Review Chain Stabilization`을 닫는다.
 3. `P0-2 MIDAS Exact Roundtrip` 테스트와 report를 확장한다.
 4. `P0-3 KDS Load Combination Engine`을 닫는다.
 5. `P0-4 MIDAS-KDS Exact Geometry Bridge`를 닫는다.

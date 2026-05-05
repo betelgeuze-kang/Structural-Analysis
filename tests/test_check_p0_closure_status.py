@@ -128,6 +128,32 @@ def _metadata_preflight_json(tmp_path: Path) -> Path:
     )
 
 
+def _post_publish_roundtrip_json(tmp_path: Path) -> Path:
+    payload = b"release"
+    return _write_json(
+        tmp_path / "post-publish-roundtrip.json",
+        {
+            "ok": True,
+            "release_tag": "test-release",
+            "manifest": str(tmp_path / "manifest.json"),
+            "artifact_root": str(tmp_path / "hydrated"),
+            "actions": [
+                {
+                    "asset_name": "bundle.zip",
+                    "status": "downloaded",
+                    "manifest_bytes": len(payload),
+                    "manifest_sha256": _sha256(payload),
+                    "downloaded_bytes": len(payload),
+                    "downloaded_sha256": _sha256(payload),
+                    "required": True,
+                }
+            ],
+            "errors": [],
+            "totals": {"selected_assets": 1, "downloaded": 1, "already_present": 0, "errors": 0},
+        },
+    )
+
+
 def _non_exact_release_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
     required_payload = b"release"
     optional_payload = b"datasheet"
@@ -224,6 +250,7 @@ def test_p0_status_can_read_release_publication_evidence_index(tmp_path: Path) -
     manifest, artifact_root, assets_json = _release_fixture(tmp_path)
     upload_plan_json = _upload_plan_json(tmp_path)
     metadata_preflight_json = _metadata_preflight_json(tmp_path)
+    roundtrip_json = _post_publish_roundtrip_json(tmp_path)
     p0_status_json = _write_json(tmp_path / "p0-status.json", {"p0_closed": True})
     evidence_index = _write_json(
         tmp_path / "release-publication-evidence-index.json",
@@ -236,6 +263,7 @@ def test_p0_status_can_read_release_publication_evidence_index(tmp_path: Path) -
                 "artifact_root": str(artifact_root),
                 "upload_plan_json": str(upload_plan_json),
                 "metadata_preflight_json": str(metadata_preflight_json),
+                "post_publish_roundtrip_json": str(roundtrip_json),
                 "p0_status_json": str(p0_status_json),
             },
         },
@@ -253,12 +281,15 @@ def test_p0_status_can_read_release_publication_evidence_index(tmp_path: Path) -
     assert release_gate["manifest"] == str(manifest)
     assert release_gate["release_assets_json"] == str(assets_json)
     assert release_gate["details"]["tag_ref"]["present"] is True
+    assert release_gate["details"]["post_publish_roundtrip"]["ok"] is True
+    assert release_gate["details"]["post_publish_roundtrip"]["evidence_json"] == str(roundtrip_json)
 
 
 def test_p0_status_surfaces_upload_plan_and_metadata_preflight_evidence(tmp_path: Path) -> None:
     manifest, artifact_root, assets_json = _release_fixture(tmp_path)
     upload_plan_json = _upload_plan_json(tmp_path)
     metadata_preflight_json = _metadata_preflight_json(tmp_path)
+    roundtrip_json = _post_publish_roundtrip_json(tmp_path)
 
     status = check_p0_closure_status.build_status(
         manifest=manifest,
@@ -266,6 +297,7 @@ def test_p0_status_surfaces_upload_plan_and_metadata_preflight_evidence(tmp_path
         artifact_root=artifact_root,
         upload_plan_json=upload_plan_json,
         metadata_preflight_json=metadata_preflight_json,
+        post_publish_roundtrip_json=roundtrip_json,
         tag_ref_present=True,
         reports=_reports(tmp_path),
     )
@@ -276,6 +308,8 @@ def test_p0_status_surfaces_upload_plan_and_metadata_preflight_evidence(tmp_path
     assert release_gate["details"]["upload_plan"]["evidence_ok"] is True
     assert release_gate["details"]["metadata_preflight"]["evidence_json"] == str(metadata_preflight_json)
     assert release_gate["details"]["metadata_preflight"]["ok"] is True
+    assert release_gate["details"]["post_publish_roundtrip"]["evidence_json"] == str(roundtrip_json)
+    assert release_gate["details"]["post_publish_roundtrip"]["ok"] is True
 
 
 def test_p0_status_can_use_promoted_manifest_when_local_manifest_is_stale(tmp_path: Path) -> None:

@@ -251,6 +251,10 @@ def test_release_gap_report_uses_engineer_in_loop_holdout_model(tmp_path: Path) 
     assert set(work_items) == {"RH-001", "RH-002", "RH-003"}
     assert work_items["RH-001"]["queue_name"] == "licensed_engineer_review_queue"
     assert work_items["RH-001"]["status"] == "open"
+    assert work_items["RH-001"]["sla_label"] == "72h"
+    assert work_items["RH-001"]["due_date"] == "assignment_plus_3_business_days"
+    assert work_items["RH-001"]["closure_evidence_required"] == "signed_engineer_review_packet"
+    assert work_items["RH-001"]["closure_evidence_status"] == "pending"
     assert work_items["RH-002"]["queue_status"] == "pending_cross_validation"
     assert work_items["RH-003"]["owner"] == "기술사/기존 승인 workflow"
     assert summary["residual_holdout_work_item_count"] == 3

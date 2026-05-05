@@ -463,6 +463,11 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         "external_benchmark_execution_ready_task_count": 10,
         "external_benchmark_execution_blocked_task_count": 2,
         "external_benchmark_execution_review_boundary_pending_count": 2,
+        "external_benchmark_submission_queue_count": 4,
+        "external_benchmark_submission_queue_ready_count": 0,
+        "external_benchmark_submission_queue_review_pending_count": 4,
+        "external_benchmark_submission_queue_blocked_count": 0,
+        "external_benchmark_submission_onepage_attestation_status": "draft_ready_final_review_pending",
         "external_benchmark_execution_review_boundary_resolution_label": "approve_all=PASS_START_NOW_FULL/ready_full=yes; reject_one=ERR_ARCHITECTURE_BLOCKERS/open_revision=1",
         "external_benchmark_execution_review_boundary_owner_label": "licensed_engineer=2",
         "external_benchmark_execution_review_boundary_assignee_label": "unassigned=2",
@@ -631,6 +636,10 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "label": "Licensed Engineer Review",
             "owner": "기술사",
             "work_item_id": "RH-001",
+            "due_date": "assignment_plus_3_business_days",
+            "sla_label": "72h",
+            "closure_evidence_required": "signed_engineer_review_packet",
+            "closure_evidence_status": "pending",
             "queue_status": "pending_review",
             "status": "open",
             "relative_share_pct": 50,
@@ -642,6 +651,10 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "label": "Legacy Tool Cross-Validation",
             "owner": "기존툴+기술사",
             "work_item_id": "RH-002",
+            "due_date": "assignment_plus_5_business_days",
+            "sla_label": "120h",
+            "closure_evidence_required": "legacy_tool_cross_validation_packet",
+            "closure_evidence_status": "pending",
             "queue_status": "pending_cross_validation",
             "status": "open",
             "relative_share_pct": 30,
@@ -653,6 +666,10 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "label": "Legal Sign-Off",
             "owner": "기술사/기존 승인 workflow",
             "work_item_id": "RH-003",
+            "due_date": "assignment_plus_7_business_days",
+            "sla_label": "168h",
+            "closure_evidence_required": "authority_signoff_packet",
+            "closure_evidence_status": "pending",
             "queue_status": "pending_signoff",
             "status": "open",
             "relative_share_pct": 20,
@@ -667,6 +684,10 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "detail_axis": "review_story_zone",
             "detail_value": "S02/perimeter",
             "owner": "기술사",
+            "due_date": "assignment_plus_3_business_days",
+            "sla_label": "72h",
+            "closure_evidence_required": "signed_engineer_review_packet",
+            "closure_evidence_status": "pending",
             "status": "open",
             "why": "Top story-zone review pockets remain under engineer review.",
         },
@@ -676,6 +697,10 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "detail_axis": "submodel_family",
             "detail_value": "SCBF16B_shell_beam_mix",
             "owner": "기존툴+기술사",
+            "due_date": "assignment_plus_5_business_days",
+            "sla_label": "120h",
+            "closure_evidence_required": "legacy_tool_cross_validation_packet",
+            "closure_evidence_status": "pending",
             "status": "open",
             "why": "Authority submodel families remain outside the accelerated envelope.",
         },
@@ -685,6 +710,10 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "detail_axis": "authority_catalog_track",
             "detail_value": "sac (1)",
             "owner": "기술사/기존 승인 workflow",
+            "due_date": "assignment_plus_7_business_days",
+            "sla_label": "168h",
+            "closure_evidence_required": "authority_signoff_packet",
+            "closure_evidence_status": "pending",
             "status": "open",
             "why": "Formal authority-facing responsibility stays outside automated scope.",
         },
@@ -706,6 +735,7 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         [],
         [],
         [],
+        [],
         holdout_buckets,
         holdout_detail_rows,
         [],
@@ -721,6 +751,7 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         [],
         [],
         {},
+        [],
         [],
         [],
         [],
@@ -817,8 +848,8 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         "full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%"
     ) in markdown
     assert "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True" in markdown
-    assert "| Work Item | Category | Owner | Queue Status | Status | Relative Share | Absolute Project % | Scope |" in markdown
-    assert "| Category | Work Item | Axis | Detail | Owner | Status | Why |" in markdown
+    assert "| Work Item | Category | Due Date | SLA | Closure Evidence | Owner | Queue Status | Status | Relative Share | Absolute Project % | Scope |" in markdown
+    assert "| Category | Work Item | Axis | Detail | Owner | Queue Status | Status | SLA | Due | Closure Evidence | Why |" in markdown
     assert "RH-001" in markdown
     assert "pending_review" in markdown
     assert "midas_kds_row_provenance_exact_row_coverage_label" in markdown
@@ -1310,6 +1341,7 @@ def test_committee_markdown_and_html_include_row_provenance_appendix(tmp_path: P
         [],
         [],
         [],
+        [],
         {},
     )
     _write_html(
@@ -1322,6 +1354,7 @@ def test_committee_markdown_and_html_include_row_provenance_appendix(tmp_path: P
         [],
         [],
         {},
+        [],
         [],
         [],
         [],

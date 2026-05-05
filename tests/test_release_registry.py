@@ -484,6 +484,28 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
+    external_readiness = tmp_path / "external_benchmark_submission_readiness.json"
+    external_readiness.write_text(
+        json.dumps(
+            {
+                "contract_pass": True,
+                "reason_code": "PASS_START_NOW_FULL",
+                "summary": {
+                    "submission_queue_count": 4,
+                    "onepage_attestation_status": "ready_for_full_submission",
+                },
+                "submission_queue": [
+                    {"queue_id": "hardest_external_10case", "status": "ready_for_full_submission"}
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    external_kickoff = tmp_path / "external_benchmark_kickoff_package.json"
+    external_kickoff.write_text(
+        json.dumps({"contract_pass": True, "reason_code": "PASS_START_NOW_FULL"}),
+        encoding="utf-8",
+    )
 
     cmd = [
         sys.executable,
@@ -502,6 +524,10 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
         str(committee_summary),
         "--gap-report",
         str(gap_report),
+        "--external-benchmark-submission-readiness",
+        str(external_readiness),
+        "--external-benchmark-kickoff-package",
+        str(external_kickoff),
         "--parser-script",
         str(parser_script),
         "--public-key-out",
@@ -546,6 +572,9 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
     assert report["summary"]["external_benchmark_submission_preview_approve_all_ready_full"] is True
     assert report["summary"]["external_benchmark_submission_preview_reject_one_reason_code"] == "ERR_ARCHITECTURE_BLOCKERS"
     assert report["summary"]["external_benchmark_submission_preview_reject_one_blocker_label"] == "audit_review_resolution_has_open_revisions"
+    assert report["summary"]["external_benchmark_release_asset_count"] == 2
+    assert report["summary"]["external_benchmark_submission_queue_count"] == 4
+    assert report["summary"]["external_benchmark_onepage_attestation_status"] == "ready_for_full_submission"
     assert report["summary"]["audit_review_decision_batch_runner_reason_code"] == "PASS"
     assert report["summary"]["audit_review_decision_batch_runner_apply_live"] is False
     assert report["summary"]["audit_review_decision_batch_runner_live_applied"] is False
@@ -621,6 +650,18 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
     )
     assert report["registry_body"]["package_provenance"]["pbd_response_source"]["resolved_ndtha_report"] == "implementation/phase1/experiments/by_test/nonlinear_ndtha_stress/latest/pbd7.json"
     assert report["registry_body"]["package_provenance"]["pbd_response_source"]["fallback_used"] is True
+    assert len(report["registry_body"]["package_provenance"]["external_benchmark_release_assets"]) == 2
+    assert {
+        row["label"] for row in report["registry_body"]["package_provenance"]["external_benchmark_release_assets"]
+    } == {"external_benchmark_submission_readiness", "external_benchmark_kickoff_package"}
+    assert (
+        report["registry_body"]["accelerated_coverage_provenance"]["external_benchmark_release_asset_count"]
+        == 2
+    )
+    assert (
+        report["registry_body"]["accelerated_coverage_provenance"]["external_benchmark_onepage_attestation_status"]
+        == "ready_for_full_submission"
+    )
     assert report["registry_body"]["accelerated_coverage_provenance"]["audit_review_decision_batch_template_item_count"] == 2
     assert report["registry_body"]["accelerated_coverage_provenance"]["audit_review_decision_batch_template_current_status_label"] == "pending_review=2"
     assert report["registry_body"]["accelerated_coverage_provenance"]["external_benchmark_submission_preview_approve_all_reason_code"] == "PASS_START_NOW_FULL"

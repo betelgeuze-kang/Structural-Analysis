@@ -103,6 +103,86 @@
       "bytes": 126788,
       "required": false,
       "description": "Optional generated PDF export for the expert review surface."
+    },
+    {
+      "asset_name": "external_benchmark_kickoff_package.json",
+      "local_path": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_kickoff_package.json",
+      "sha256": "6f9cebb4431be6567df412916ed0319cd42e1d2252992a7ded6d97b7a6d81897",
+      "bytes": 9943,
+      "required": true,
+      "description": "External benchmark kickoff package manifest for submission readiness."
+    },
+    {
+      "asset_name": "external_benchmark_kickoff_package.md",
+      "local_path": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_kickoff_package.md",
+      "sha256": "32cf0b47ff988922cc2123a3fff0dfb4005e9e369398159e54f3da6f12698325",
+      "bytes": 2639,
+      "required": true,
+      "description": "Human-readable external benchmark kickoff package summary."
+    },
+    {
+      "asset_name": "external_benchmark_submission_readiness_preview.approve_all.json",
+      "local_path": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_submission_readiness_preview.approve_all.json",
+      "sha256": "387d24f7a335f037dbbfce81ae4b69a6b0106a2741ccd23c1ca49c00dc7f91d1",
+      "bytes": 488,
+      "required": true,
+      "description": "Approve-all external benchmark submission readiness preview."
+    },
+    {
+      "asset_name": "external_benchmark_submission_readiness_preview.approve_all.md",
+      "local_path": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_submission_readiness_preview.approve_all.md",
+      "sha256": "4f7c08c2a37a7eaa6c41238300e42d0fc3aaa456d81c078a3029f12d05e274f9",
+      "bytes": 117,
+      "required": true,
+      "description": "Human-readable approve-all external benchmark submission readiness preview."
+    },
+    {
+      "asset_name": "case_onepage_attestation_index.json",
+      "local_path": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_index.json",
+      "sha256": "0b1c0fe0a8f95770d5c3daac38b486b484ca2d2a38820e2761bdf4180825c54c",
+      "bytes": 13499,
+      "required": true,
+      "description": "Onepage attestation manifest index for external benchmark cases."
+    },
+    {
+      "asset_name": "case_onepage_attestation_index.md",
+      "local_path": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_index.md",
+      "sha256": "c37e13d0849bcf41634f2d615d8818cc5a4e4cf8cce780038ed10a5f631cdbb3",
+      "bytes": 3005,
+      "required": true,
+      "description": "Human-readable onepage attestation index for external benchmark cases."
+    },
+    {
+      "asset_name": "audit_review_decision_batch_template.json",
+      "local_path": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_template.json",
+      "sha256": "8d432f8c2920038c2bf1ead4918c7ee18470da6b7983e88713098172dc9e17bf",
+      "bytes": 688,
+      "required": true,
+      "description": "External benchmark audit review decision queue template."
+    },
+    {
+      "asset_name": "audit_review_decision_batch_template.md",
+      "local_path": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_template.md",
+      "sha256": "cafb81c8c88d1c5fe693ed71181736a3bdf73d25c397ad8b7c037460c31088fa",
+      "bytes": 491,
+      "required": true,
+      "description": "Human-readable external benchmark audit review decision queue template."
+    },
+    {
+      "asset_name": "exact_topology_structural_preview_promotion_queue.json",
+      "local_path": "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.json",
+      "sha256": "14dcafc3da92f02189cc5618c97633d8c7da275bcf7c52e25ca6325b6a3bc001",
+      "bytes": 394,
+      "required": true,
+      "description": "MIDAS native round-trip structural preview promotion queue evidence."
+    },
+    {
+      "asset_name": "exact_topology_structural_preview_promotion_queue.md",
+      "local_path": "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.md",
+      "sha256": "62709c39f6e269e1267bb37206b3e551a4b8fc8f82695f546810377b000476d6",
+      "bytes": 568,
+      "required": true,
+      "description": "Human-readable MIDAS native round-trip structural preview promotion queue evidence."
     }
   ],
   "publication_candidate": {

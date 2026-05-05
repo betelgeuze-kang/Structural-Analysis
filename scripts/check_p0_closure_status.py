@@ -97,6 +97,7 @@ def _publication_index_paths(path: Path | None) -> dict[str, Any]:
         "artifact_root": resolve(paths.get("artifact_root")),
         "upload_plan_json": resolve(paths.get("upload_plan_json")),
         "metadata_preflight_json": resolve(paths.get("metadata_preflight_json")),
+        "post_publish_roundtrip_json": resolve(paths.get("post_publish_roundtrip_json")),
         "p0_status_json": resolve(paths.get("p0_status_json")),
         "tag_ref_present": bool(payload.get("tag_ref_present", False)),
     }
@@ -164,6 +165,7 @@ def _release_publication_status(
     artifact_root: Path | None,
     upload_plan_json: Path | None,
     metadata_preflight_json: Path | None,
+    post_publish_roundtrip_json: Path | None,
     tag_ref_present: bool,
     require_all: bool,
     require_exact: bool,
@@ -183,6 +185,7 @@ def _release_publication_status(
         assets_json=release_assets_json,
         upload_plan_json=upload_plan_json,
         metadata_preflight_json=metadata_preflight_json,
+        post_publish_roundtrip_json=post_publish_roundtrip_json,
         require_all=require_all,
         require_exact=require_exact,
         tag_ref_present=tag_ref_present,
@@ -195,6 +198,7 @@ def _release_publication_status(
         "promoted_manifest_json": str(promoted_manifest_json) if promoted_manifest_json else "",
         "release_assets_json": str(release_assets_json),
         "artifact_root": str(artifact_root) if artifact_root else "",
+        "post_publish_roundtrip_json": str(post_publish_roundtrip_json) if post_publish_roundtrip_json else "",
         "details": status,
     }
 
@@ -207,6 +211,7 @@ def build_status(
     artifact_root: Path | None = None,
     upload_plan_json: Path | None = None,
     metadata_preflight_json: Path | None = None,
+    post_publish_roundtrip_json: Path | None = None,
     tag_ref_present: bool = False,
     require_all: bool = True,
     require_exact: bool = True,
@@ -220,6 +225,7 @@ def build_status(
     artifact_root = index_paths.get("artifact_root") or artifact_root
     upload_plan_json = index_paths.get("upload_plan_json") or upload_plan_json
     metadata_preflight_json = index_paths.get("metadata_preflight_json") or metadata_preflight_json
+    post_publish_roundtrip_json = index_paths.get("post_publish_roundtrip_json") or post_publish_roundtrip_json
     tag_ref_present = bool(index_paths.get("tag_ref_present", tag_ref_present))
     report_paths = reports or DEFAULT_REPORTS
     report_fallbacks = {} if reports is not None else DEFAULT_REPORT_FALLBACKS
@@ -230,6 +236,7 @@ def build_status(
         artifact_root=artifact_root,
         upload_plan_json=upload_plan_json,
         metadata_preflight_json=metadata_preflight_json,
+        post_publish_roundtrip_json=post_publish_roundtrip_json,
         tag_ref_present=tag_ref_present,
         require_all=require_all,
         require_exact=require_exact,
@@ -346,6 +353,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--artifact-root", type=Path)
     parser.add_argument("--upload-plan-json", type=Path)
     parser.add_argument("--metadata-preflight-json", type=Path)
+    parser.add_argument("--post-publish-roundtrip-json", type=Path)
     parser.add_argument(
         "--publication-evidence-index",
         type=Path,
@@ -370,6 +378,7 @@ def main(argv: list[str] | None = None) -> int:
             artifact_root=args.artifact_root,
             upload_plan_json=args.upload_plan_json,
             metadata_preflight_json=args.metadata_preflight_json,
+            post_publish_roundtrip_json=args.post_publish_roundtrip_json,
             tag_ref_present=bool(args.tag_ref_present),
             publication_evidence_index=args.publication_evidence_index,
         )

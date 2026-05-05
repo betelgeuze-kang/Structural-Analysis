@@ -89,6 +89,19 @@ def _artifact_entry(label: str, path: Path, payload: dict | None = None) -> dict
     return entry
 
 
+def _optional_artifact_entry(label: str, path: Path | None) -> tuple[dict | None, dict]:
+    if path is None or not path.exists():
+        return None, {}
+    payload: dict | None = None
+    try:
+        if path.suffix.lower() == ".json":
+            loaded = _load_json(path)
+            payload = loaded if isinstance(loaded, dict) else None
+    except Exception:
+        payload = None
+    return _artifact_entry(label, path, payload), (payload or {})
+
+
 def _project_registry_audit_payload(*, artifact_entries: list[dict], generated_at: str) -> dict:
     rows = []
     for index, entry in enumerate(artifact_entries, start=1):
@@ -742,6 +755,21 @@ def main() -> None:
     p.add_argument("--committee-package", default="implementation/phase1/release/committee_review/committee_review_package_report.json")
     p.add_argument("--committee-summary", default="implementation/phase1/release/committee_review/committee_summary.json")
     p.add_argument("--gap-report", default="implementation/phase1/release/release_gap_report.json")
+    p.add_argument("--external-benchmark-submission-readiness", default="")
+    p.add_argument("--external-benchmark-kickoff-package", default="")
+    p.add_argument("--external-benchmark-kickoff-markdown", default="")
+    p.add_argument("--external-benchmark-execution-manifest", default="")
+    p.add_argument("--external-benchmark-execution-manifest-markdown", default="")
+    p.add_argument("--external-benchmark-execution-status", default="")
+    p.add_argument("--external-benchmark-execution-status-markdown", default="")
+    p.add_argument("--case-onepage-attestation-index", default="")
+    p.add_argument("--case-onepage-attestation-index-markdown", default="")
+    p.add_argument("--audit-review-decision-batch-template", default="")
+    p.add_argument("--audit-review-decision-batch-template-markdown", default="")
+    p.add_argument("--approve-all-submission-readiness-preview", default="")
+    p.add_argument("--approve-all-submission-readiness-preview-markdown", default="")
+    p.add_argument("--exact-topology-structural-preview-promotion-queue", default="")
+    p.add_argument("--exact-topology-structural-preview-promotion-queue-markdown", default="")
     p.add_argument("--ci-report", default="")
     p.add_argument("--parser-script", default="implementation/phase1/parse_midas_mgt_to_json_npz.py")
     p.add_argument("--private-key-out", default="implementation/phase1/release/signing/release_registry_ed25519.pem")
@@ -772,6 +800,23 @@ def main() -> None:
         committee_path = Path(args.committee_package) if str(args.committee_package).strip() else None
         committee_summary_path = Path(args.committee_summary) if str(args.committee_summary).strip() else None
         gap_report_path = Path(args.gap_report) if str(args.gap_report).strip() else None
+        external_artifact_paths = [
+            ("external_benchmark_submission_readiness", Path(args.external_benchmark_submission_readiness) if str(args.external_benchmark_submission_readiness).strip() else None),
+            ("external_benchmark_kickoff_package", Path(args.external_benchmark_kickoff_package) if str(args.external_benchmark_kickoff_package).strip() else None),
+            ("external_benchmark_kickoff_markdown", Path(args.external_benchmark_kickoff_markdown) if str(args.external_benchmark_kickoff_markdown).strip() else None),
+            ("external_benchmark_execution_manifest", Path(args.external_benchmark_execution_manifest) if str(args.external_benchmark_execution_manifest).strip() else None),
+            ("external_benchmark_execution_manifest_markdown", Path(args.external_benchmark_execution_manifest_markdown) if str(args.external_benchmark_execution_manifest_markdown).strip() else None),
+            ("external_benchmark_execution_status", Path(args.external_benchmark_execution_status) if str(args.external_benchmark_execution_status).strip() else None),
+            ("external_benchmark_execution_status_markdown", Path(args.external_benchmark_execution_status_markdown) if str(args.external_benchmark_execution_status_markdown).strip() else None),
+            ("case_onepage_attestation_index", Path(args.case_onepage_attestation_index) if str(args.case_onepage_attestation_index).strip() else None),
+            ("case_onepage_attestation_index_markdown", Path(args.case_onepage_attestation_index_markdown) if str(args.case_onepage_attestation_index_markdown).strip() else None),
+            ("audit_review_decision_batch_template", Path(args.audit_review_decision_batch_template) if str(args.audit_review_decision_batch_template).strip() else None),
+            ("audit_review_decision_batch_template_markdown", Path(args.audit_review_decision_batch_template_markdown) if str(args.audit_review_decision_batch_template_markdown).strip() else None),
+            ("approve_all_submission_readiness_preview", Path(args.approve_all_submission_readiness_preview) if str(args.approve_all_submission_readiness_preview).strip() else None),
+            ("approve_all_submission_readiness_preview_markdown", Path(args.approve_all_submission_readiness_preview_markdown) if str(args.approve_all_submission_readiness_preview_markdown).strip() else None),
+            ("exact_topology_structural_preview_promotion_queue", Path(args.exact_topology_structural_preview_promotion_queue) if str(args.exact_topology_structural_preview_promotion_queue).strip() else None),
+            ("exact_topology_structural_preview_promotion_queue_markdown", Path(args.exact_topology_structural_preview_promotion_queue_markdown) if str(args.exact_topology_structural_preview_promotion_queue_markdown).strip() else None),
+        ]
         parser_script = Path(args.parser_script)
         ci_path = Path(args.ci_report) if str(args.ci_report).strip() else None
         private_key = Path(args.private_key_out)
@@ -832,6 +877,30 @@ def main() -> None:
             artifact_entries.append(_artifact_entry("release_gap_report", gap_report_path, gap_report))
         if ci_path is not None:
             artifact_entries.append(_artifact_entry("ci_report", ci_path, ci))
+        external_benchmark_asset_payloads: dict[str, dict] = {}
+        for label, path in external_artifact_paths:
+            entry, payload = _optional_artifact_entry(label, path)
+            if entry is not None:
+                artifact_entries.append(entry)
+                external_benchmark_asset_payloads[label] = payload
+        external_benchmark_asset_entries = [
+            {
+                "label": str(row.get("label", "") or ""),
+                "path": str(row.get("path", "") or ""),
+                "sha256": str(row.get("sha256", "") or ""),
+                "bytes": int(row.get("bytes", 0) or 0),
+            }
+            for row in artifact_entries
+            if str(row.get("label", "") or "").startswith(
+                (
+                    "external_benchmark_",
+                    "case_onepage_",
+                    "audit_review_decision_batch_",
+                    "approve_all_submission_",
+                    "exact_topology_",
+                )
+            )
+        ]
 
         mgt_export_provenance = _mgt_export_provenance_from_gap(gap_context)
         advanced_holdout_provenance = _advanced_holdout_provenance_from_gap(gap_context)
@@ -887,6 +956,7 @@ def main() -> None:
                     ),
                     "label": str(external_benchmark_execution_provenance.get("pbd_response_source_label", "") or ""),
                 },
+                "external_benchmark_release_assets": external_benchmark_asset_entries,
             },
             "accelerated_coverage_provenance": {
                 "deployment_model": str(gap_context.get("deployment_model", "")),
@@ -903,6 +973,26 @@ def main() -> None:
                 **mgt_export_provenance,
                 **advanced_holdout_provenance,
                 **advanced_holdout_closure_surface,
+                "external_benchmark_release_asset_count": int(len(external_benchmark_asset_entries)),
+                "external_benchmark_release_asset_labels": [
+                    str(row.get("label", "") or "") for row in external_benchmark_asset_entries
+                ],
+                "external_benchmark_submission_queue_count": int(
+                    (
+                        external_benchmark_asset_payloads.get("external_benchmark_submission_readiness", {})
+                        .get("summary", {})
+                        .get("submission_queue_count", 0)
+                    )
+                    or 0
+                ),
+                "external_benchmark_onepage_attestation_status": str(
+                    (
+                        external_benchmark_asset_payloads.get("external_benchmark_submission_readiness", {})
+                        .get("summary", {})
+                        .get("onepage_attestation_status", "")
+                    )
+                    or ""
+                ),
             },
         }
 
@@ -1036,6 +1126,9 @@ def main() -> None:
                 "committee_package": str(committee_path) if committee_path is not None else "",
                 "committee_summary": str(committee_summary_path) if committee_summary_path is not None else "",
                 "gap_report": str(gap_report_path) if gap_report_path is not None else "",
+                "external_benchmark_artifacts": {
+                    label: str(path) if path is not None else "" for label, path in external_artifact_paths
+                },
                 "ci_report": str(ci_path) if ci_path is not None else "",
                 "parser_script": str(parser_script),
                 "public_key_out": str(public_key),
@@ -1071,6 +1164,26 @@ def main() -> None:
                 "project_registry_approval_count": int(project_registry_summary.get("approval_count", 0) or 0),
                 "project_registry_package_sha256": str(project_registry_summary.get("package_sha256", "") or ""),
                 "project_registry_package_bytes": int(project_registry_summary.get("package_bytes", 0) or 0),
+                "external_benchmark_release_asset_count": int(len(external_benchmark_asset_entries)),
+                "external_benchmark_release_asset_labels": [
+                    str(row.get("label", "") or "") for row in external_benchmark_asset_entries
+                ],
+                "external_benchmark_submission_queue_count": int(
+                    (
+                        external_benchmark_asset_payloads.get("external_benchmark_submission_readiness", {})
+                        .get("summary", {})
+                        .get("submission_queue_count", 0)
+                    )
+                    or 0
+                ),
+                "external_benchmark_onepage_attestation_status": str(
+                    (
+                        external_benchmark_asset_payloads.get("external_benchmark_submission_readiness", {})
+                        .get("summary", {})
+                        .get("onepage_attestation_status", "")
+                    )
+                    or ""
+                ),
                 **external_benchmark_execution_provenance,
                 **mgt_export_provenance,
                 **advanced_holdout_provenance,

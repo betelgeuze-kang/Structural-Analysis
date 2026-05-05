@@ -57,6 +57,8 @@ def test_generate_external_benchmark_kickoff_package_limited_start(tmp_path: Pat
                     "owner": "benchmark_program_owner",
                     "status": "ready_for_benchmark_start_final_review_pending",
                     "onepage_attestation": "hardest external 10-case one-page attestation",
+                    "onepage_attestation_status": "draft_ready_final_review_pending",
+                    "dry_run_evidence": "Hardest external 10-case kickoff: PASS | cases=10 | coverage=100% | dry_run=ready",
                 },
                 {
                     "queue_id": "tpu_hffb",
@@ -64,6 +66,33 @@ def test_generate_external_benchmark_kickoff_package_limited_start(tmp_path: Pat
                     "owner": "wind_benchmark_owner",
                     "status": "ready_for_benchmark_start_final_review_pending",
                     "onepage_attestation": "TPU/HFFB component benchmark one-page attestation",
+                    "onepage_attestation_status": "draft_ready_final_review_pending",
+                    "dry_run_evidence": "TPU/HFFB benchmark gate: PASS | assets=2 | ready=2 | raw_mapping=eligible",
+                },
+                {
+                    "queue_id": "peer_spd_hinge",
+                    "submission_scope": "component_hinge_benchmark_submission",
+                    "owner": "pbd_benchmark_owner",
+                    "status": "ready_for_benchmark_start_final_review_pending",
+                    "onepage_attestation": "PEER/SPD hinge component one-page attestation",
+                    "onepage_attestation_status": "draft_ready_final_review_pending",
+                    "dry_run_evidence": (
+                        "PEER/SPD hinge benchmark gate: PASS | assets=2 | ready=2 | split=train:1,holdout:1 | "
+                        "PEER/SPD hinge fixture regression: PASS | fixtures=2 | min_points=449 | "
+                        "PEER/SPD hinge alignment: PASS | refresh_columns=2 | rebar_sensitive_columns=0"
+                    ),
+                },
+                {
+                    "queue_id": "korean_public_structures",
+                    "submission_scope": "korean_public_structure_release_review",
+                    "owner": "korean_source_owner",
+                    "status": "ready_for_benchmark_start_final_review_pending",
+                    "onepage_attestation": "Korean public structures provenance one-page attestation",
+                    "onepage_attestation_status": "draft_ready_final_review_pending",
+                    "dry_run_evidence": (
+                        "KR ingest: PASS | src=4 | cls=4 | got=0 | fp=0 | meta=4 | rej=0 | dup=0 | seed=4 | topo=1 | native=1 | p0=3 | "
+                        "KR preview queue: PASS | cand=4 | pend=1 | state=open"
+                    ),
                 },
             ],
         },
@@ -203,6 +232,11 @@ def test_generate_external_benchmark_kickoff_package_limited_start(tmp_path: Pat
     assert package["benchmark_contracts"]["tpu_hffb_benchmark_gate_pass"] is True
     assert package["benchmark_contracts"]["peer_spd_hinge_benchmark_gate_pass"] is True
     assert package["submission_queue"][0]["queue_id"] == "hardest_external_10case"
+    assert package["submission_queue"][0]["onepage_attestation_status"] == "draft_ready_final_review_pending"
+    assert package["submission_queue"][0]["dry_run_evidence"].startswith("Hardest external 10-case kickoff: PASS")
+    assert package["submission_queue"][1]["dry_run_evidence"] == "TPU/HFFB benchmark gate: PASS | assets=2 | ready=2 | raw_mapping=eligible"
+    assert package["submission_queue"][2]["dry_run_evidence"].startswith("PEER/SPD hinge benchmark gate: PASS")
+    assert package["submission_queue"][3]["dry_run_evidence"].startswith("KR ingest: PASS")
     assert "start_now_limited_external_benchmark" in markdown
     assert "component_and_system_performance_benchmark_with_review_boundary" in markdown
     assert "connection_detailing|connection_detailing_audit_after_material_patch|high" in markdown
@@ -210,6 +244,9 @@ def test_generate_external_benchmark_kickoff_package_limited_start(tmp_path: Pat
     assert "Commercial reliability breadth" in markdown
     assert "hardest_external_10case" in markdown
     assert "onepage_attestation_status" in markdown
+    assert "onepage_status=`draft_ready_final_review_pending`" in markdown
+    assert "dry_run_evidence=`Hardest external 10-case kickoff: PASS" in markdown
+    assert "dry_run_evidence=`KR ingest: PASS" in markdown
     assert "queue_status=pending_review" in markdown
 
 

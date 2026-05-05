@@ -42,6 +42,8 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert '--metadata-preflight-json "$RELEASE_METADATA_PREFLIGHT"' in text
     assert "structural-release-hydrated-assets" in text
     assert "scripts/hydrate_github_release_assets.py" in text
+    assert "structural-post-publish-roundtrip.json" in text
+    assert '--post-publish-roundtrip-json "$POST_PUBLISH_ROUNDTRIP_JSON"' in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text
 
 

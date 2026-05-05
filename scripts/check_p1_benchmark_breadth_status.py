@@ -47,18 +47,30 @@ RESIDUAL_HOLDOUT_QUEUE_DEFAULTS = {
         "queue_name": "licensed_engineer_review_queue",
         "queue_status": "pending_review",
         "status": "open",
+        "sla_hours": 72,
+        "sla_label": "72h",
+        "due_date": "assignment_plus_3_business_days",
+        "closure_evidence_required": "signed_engineer_review_packet",
     },
     "legacy_tool_cross_validation_required": {
         "work_item_id": "RH-002",
         "queue_name": "legacy_tool_cross_validation_queue",
         "queue_status": "pending_cross_validation",
         "status": "open",
+        "sla_hours": 120,
+        "sla_label": "120h",
+        "due_date": "assignment_plus_5_business_days",
+        "closure_evidence_required": "legacy_tool_cross_validation_report",
     },
     "legal_authority_signoff_required": {
         "work_item_id": "RH-003",
         "queue_name": "legal_authority_signoff_queue",
         "queue_status": "pending_signoff",
         "status": "open",
+        "sla_hours": 168,
+        "sla_label": "168h",
+        "due_date": "authority_submission_window",
+        "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
     },
 }
 
@@ -140,7 +152,33 @@ def _residual_holdout_work_items(
 ) -> list[dict[str, Any]]:
     explicit_items = payload.get("residual_holdout_work_items")
     if isinstance(explicit_items, list) and explicit_items:
-        return [row for row in explicit_items if isinstance(row, dict)]
+        enriched: list[dict[str, Any]] = []
+        for row in explicit_items:
+            if not isinstance(row, dict):
+                continue
+            category_id = str(row.get("category_id", row.get("id", "")) or "")
+            defaults = RESIDUAL_HOLDOUT_QUEUE_DEFAULTS.get(category_id, {})
+            closure_evidence_path = str(row.get("closure_evidence_path", "") or "")
+            enriched.append(
+                {
+                    **row,
+                    "category_id": category_id,
+                    "sla_hours": int(row.get("sla_hours", defaults.get("sla_hours", 120)) or defaults.get("sla_hours", 120)),
+                    "sla_label": str(row.get("sla_label", "") or defaults.get("sla_label", "120h")),
+                    "due_date": str(
+                        row.get("due_date", "") or defaults.get("due_date", "assignment_plus_5_business_days")
+                    ),
+                    "closure_evidence_required": str(
+                        row.get("closure_evidence_required", "")
+                        or defaults.get("closure_evidence_required", "owner_approved_closure_evidence")
+                    ),
+                    "closure_evidence_path": closure_evidence_path,
+                    "closure_evidence_status": str(
+                        row.get("closure_evidence_status", "") or ("attached" if closure_evidence_path else "pending")
+                    ),
+                }
+            )
+        return enriched
 
     work_items: list[dict[str, Any]] = []
     for row in residual_holdouts:
@@ -156,6 +194,18 @@ def _residual_holdout_work_items(
                 "queue_name": str(row.get("queue_name", "") or defaults.get("queue_name", "residual_holdout_queue")),
                 "queue_status": str(row.get("queue_status", "") or defaults.get("queue_status", "pending_review")),
                 "status": str(row.get("status", "") or defaults.get("status", "open")),
+                "sla_hours": int(row.get("sla_hours", defaults.get("sla_hours", 120)) or defaults.get("sla_hours", 120)),
+                "sla_label": str(row.get("sla_label", "") or defaults.get("sla_label", "120h")),
+                "due_date": str(row.get("due_date", "") or defaults.get("due_date", "assignment_plus_5_business_days")),
+                "closure_evidence_required": str(
+                    row.get("closure_evidence_required", "")
+                    or defaults.get("closure_evidence_required", "owner_approved_closure_evidence")
+                ),
+                "closure_evidence_path": str(row.get("closure_evidence_path", "") or ""),
+                "closure_evidence_status": str(
+                    row.get("closure_evidence_status", "")
+                    or ("attached" if str(row.get("closure_evidence_path", "") or "") else "pending")
+                ),
             }
         )
     return work_items

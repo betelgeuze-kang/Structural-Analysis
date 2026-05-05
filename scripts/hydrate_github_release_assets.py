@@ -342,7 +342,9 @@ def hydrate_github_release_assets(
             action["status"] = "downloaded"
 
     return {
+        "schema_version": "release-post-publish-roundtrip.v1",
         "ok": not errors,
+        "status": "verified" if not errors else "unverified",
         "write": write,
         "required_only": required_only,
         "replace_mismatched": replace_mismatched,
@@ -396,6 +398,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Replace files in artifact-root when their bytes/sha do not match the manifest.",
     )
+    parser.add_argument("--out", type=Path, help="Optional JSON evidence output path.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
     return parser
 
@@ -416,7 +419,9 @@ def main(argv: list[str] | None = None) -> int:
         )
     except (OSError, ValueError, HydrateReleaseAssetsError, json.JSONDecodeError) as exc:
         result = {
+            "schema_version": "release-post-publish-roundtrip.v1",
             "ok": False,
+            "status": "unverified",
             "write": args.write,
             "repo": args.repo,
             "manifest": str(args.manifest),
@@ -426,6 +431,9 @@ def main(argv: list[str] | None = None) -> int:
             "errors": [str(exc)],
             "totals": {"selected_assets": 0, "errors": 1},
         }
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.json:
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))
     else:

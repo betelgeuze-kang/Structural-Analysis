@@ -257,6 +257,7 @@ def test_404_release_error_is_actionable(tmp_path: Path, monkeypatch) -> None:
 
 def test_cli_json_reports_hydration_plan(tmp_path: Path, monkeypatch, capsys) -> None:
     manifest = _write_manifest(tmp_path, [_artifact("bundle.zip", b"bundle bytes")])
+    out = tmp_path / "roundtrip.json"
 
     def fake_hydrate(**kwargs):
         assert kwargs["repo"] == "acme/widgets"
@@ -284,6 +285,8 @@ def test_cli_json_reports_hydration_plan(tmp_path: Path, monkeypatch, capsys) ->
             str(manifest),
             "--artifact-root",
             str(tmp_path / "hydrated"),
+            "--out",
+            str(out),
             "--json",
         ]
     )
@@ -292,3 +295,4 @@ def test_cli_json_reports_hydration_plan(tmp_path: Path, monkeypatch, capsys) ->
     assert exit_code == 0
     assert payload["ok"] is True
     assert payload["totals"]["would_download"] == 1
+    assert json.loads(out.read_text(encoding="utf-8"))["totals"]["would_download"] == 1

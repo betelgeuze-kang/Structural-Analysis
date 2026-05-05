@@ -32,6 +32,7 @@ def test_build_release_publication_evidence_index_records_p0_and_handoff_paths(t
             "core_evidence_closed": True,
         },
     )
+    roundtrip = _write_json(tmp_path / "post-publish-roundtrip.json", {"ok": True})
     artifact_root = tmp_path / "release-root"
     artifact_root.mkdir()
 
@@ -42,6 +43,7 @@ def test_build_release_publication_evidence_index_records_p0_and_handoff_paths(t
         upload_plan_json=upload_plan,
         metadata_preflight_json=metadata,
         p0_status_json=p0_status,
+        post_publish_roundtrip_json=roundtrip,
     )
 
     assert payload["schema_version"] == "release-publication-evidence-index.v1"
@@ -49,6 +51,8 @@ def test_build_release_publication_evidence_index_records_p0_and_handoff_paths(t
     assert payload["p0_closed"] is True
     assert payload["release_publication_closed"] is True
     assert payload["paths"]["p0_status_json"] == str(p0_status)
+    assert payload["paths"]["post_publish_roundtrip_json"] == str(roundtrip)
+    assert payload["files"]["post_publish_roundtrip_json"]["exists"] is True
     assert payload["files"]["artifact_root"]["exists"] is True
     assert payload["handoff_commands"]["clean_checkout_chain"] == [
         "python3",
@@ -56,4 +60,17 @@ def test_build_release_publication_evidence_index_records_p0_and_handoff_paths(t
         "--publication-evidence-index",
         "<release-publication-evidence-index.json>",
         "--json",
+    ]
+    assert payload["handoff_commands"]["post_publish_roundtrip"] == [
+        "python3",
+        "scripts/hydrate_github_release_assets.py",
+        "--repo",
+        "<owner/repo>",
+        "--manifest",
+        str(manifest),
+        "--artifact-root",
+        "<hydrated-release-root>",
+        "--write",
+        "--out",
+        "<post-publish-roundtrip.json>",
     ]

@@ -94,6 +94,16 @@ def _committee_meta_list_html(items: list[tuple[str, object]]) -> str:
     return "<ul class=\"committee-meta-list\">" + "".join(rows) + "</ul>"
 
 
+def _holdout_closure_evidence_label(row: dict[str, Any]) -> str:
+    closure_evidence = str(row.get("closure_evidence_path", "") or "").strip()
+    if not closure_evidence:
+        closure_evidence = str(row.get("closure_evidence_required", "") or "").strip()
+    closure_status = str(row.get("closure_evidence_status", "") or "").strip()
+    if closure_evidence and closure_status and closure_status != "attached":
+        return f"{closure_evidence} ({closure_status})"
+    return closure_evidence or closure_status or "n/a"
+
+
 def _advanced_holdout_closure_surface(rows: list[dict[str, Any]]) -> dict[str, Any]:
     def _compact_text(value: object, *, limit: int) -> str:
         text = " ".join(str(value or "").split())
@@ -1150,18 +1160,60 @@ def _build_residual_holdout_detail_rows(
     top_authority_submodel_text = ", ".join(f"{name} ({count})" for name, count in authority_submodel_counts.most_common(4)) or "n/a"
 
     bucket_by_id = {str(row.get("id", "")): row for row in holdout_buckets if isinstance(row, dict)}
-    default_holdout_meta: dict[str, tuple[str, str, str, str]] = {
-        "licensed_engineer_review_required": ("RH-001", "pending_review", "open", "기술사"),
-        "legacy_tool_cross_validation_required": ("RH-002", "pending_cross_validation", "open", "기존툴+기술사"),
-        "legal_authority_signoff_required": ("RH-003", "pending_signoff", "open", "기술사/기존 승인 workflow"),
+    default_holdout_meta: dict[str, tuple[str, str, str, str, int, str, str]] = {
+        "licensed_engineer_review_required": (
+            "RH-001",
+            "pending_review",
+            "open",
+            "기술사",
+            72,
+            "assignment_plus_3_business_days",
+            "signed_engineer_review_packet",
+        ),
+        "legacy_tool_cross_validation_required": (
+            "RH-002",
+            "pending_cross_validation",
+            "open",
+            "기존툴+기술사",
+            120,
+            "assignment_plus_5_business_days",
+            "legacy_tool_cross_validation_report",
+        ),
+        "legal_authority_signoff_required": (
+            "RH-003",
+            "pending_signoff",
+            "open",
+            "기술사/기존 승인 workflow",
+            168,
+            "authority_submission_window",
+            "authority_signoff_receipt_or_formal_hold",
+        ),
     }
 
     def _detail_row(bucket_id: str, detail_axis: str, detail_value: str, why: str) -> dict[str, str]:
         bucket = bucket_by_id.get(bucket_id, {})
-        default_work_item_id, default_queue_status, default_status, default_owner = default_holdout_meta.get(
+        (
+            default_work_item_id,
+            default_queue_status,
+            default_status,
+            default_owner,
+            default_sla_hours,
+            default_due_date,
+            default_closure_evidence_required,
+        ) = default_holdout_meta.get(
             bucket_id,
-            (f"RH-{len(detail_rows) + 1:03d}", "pending_review", "open", ""),
+            (
+                f"RH-{len(detail_rows) + 1:03d}",
+                "pending_review",
+                "open",
+                "",
+                120,
+                "assignment_plus_5_business_days",
+                "owner_approved_closure_evidence",
+            ),
         )
+        closure_evidence_path = str(bucket.get("closure_evidence_path", "") or "")
+        sla_hours = int(bucket.get("sla_hours", default_sla_hours) or default_sla_hours)
         return {
             "bucket_id": bucket_id,
             "bucket_label": str(bucket.get("label", bucket_id) or bucket_id),
@@ -1171,6 +1223,16 @@ def _build_residual_holdout_detail_rows(
             "owner": str(bucket.get("owner", default_owner) or default_owner),
             "queue_status": str(bucket.get("queue_status", default_queue_status) or default_queue_status),
             "status": str(bucket.get("status", default_status) or default_status),
+            "sla_hours": str(sla_hours),
+            "sla_label": str(bucket.get("sla_label", "") or f"{sla_hours}h"),
+            "due_date": str(bucket.get("due_date", "") or default_due_date),
+            "closure_evidence_required": str(
+                bucket.get("closure_evidence_required", "") or default_closure_evidence_required
+            ),
+            "closure_evidence_path": closure_evidence_path,
+            "closure_evidence_status": str(
+                bucket.get("closure_evidence_status", "") or ("attached" if closure_evidence_path else "pending")
+            ),
             "why": why,
         }
 
@@ -4018,6 +4080,7 @@ def _write_markdown(
     design_opt_entrypoint_rows: list[dict],
     design_opt_entrypoint_groups: list[dict],
     smoke_recent_samples: list[dict],
+    external_benchmark_submission_queue_rows: list[dict],
     holdout_buckets: list[dict],
     holdout_detail_rows: list[dict],
     holdout_matrix_rows: list[dict],
@@ -4302,6 +4365,27 @@ def _write_markdown(
                 ),
             ]
         )
+    if external_benchmark_submission_queue_rows:
+        lines.extend(
+            [
+                "",
+                "## External Benchmark Submission Queue",
+                "",
+                f"- `external_benchmark_submission_onepage_attestation_status`: "
+                f"`{metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown'}`",
+                f"- `external_benchmark_submission_queue_count`: "
+                f"`{int(metrics.get('external_benchmark_submission_queue_count', len(external_benchmark_submission_queue_rows)))}`",
+                "",
+                "| Queue | Scope | Owner | Status | Onepage Attestation | Onepage Status | Dry-run Evidence |",
+                "|---|---|---|---|---|---|---|",
+            ]
+        )
+        for row in external_benchmark_submission_queue_rows:
+            lines.append(
+                f"| {row.get('queue_id', '')} | {row.get('submission_scope', '')} | {row.get('owner', '')} | "
+                f"{row.get('status', '')} | {row.get('onepage_attestation', '')} | "
+                f"{row.get('onepage_attestation_status', '') or 'unknown'} | {row.get('dry_run_evidence', '') or 'n/a'} |"
+            )
     lines.extend(
         [
             "",
@@ -4457,13 +4541,14 @@ def _write_markdown(
         lines.extend(["", "## Residual Holdout Boundary", ""])
         lines.extend(
             [
-                "| Work Item | Category | Owner | Queue Status | Status | Relative Share | Absolute Project % | Scope |",
-                "|---|---|---|---|---|---:|---|---|",
+                "| Work Item | Category | Due Date | SLA | Closure Evidence | Owner | Queue Status | Status | Relative Share | Absolute Project % | Scope |",
+                "|---|---|---|---|---|---|---|---|---:|---|---|",
             ]
         )
         for row in holdout_buckets:
             lines.append(
-                f"| {row.get('work_item_id', '')} | {row.get('label', row.get('id', ''))} | {row.get('owner', '')} | "
+                f"| {row.get('work_item_id', '')} | {row.get('label', row.get('id', ''))} | {row.get('due_date', '')} | "
+                f"{row.get('sla_label', '')} | {_holdout_closure_evidence_label(row)} | {row.get('owner', '')} | "
                 f"{row.get('queue_status', '')} | {row.get('status', '')} | {int(row.get('relative_share_pct', 0))}% | "
                 f"{_coverage_range_label(row.get('absolute_project_pct_range'))} | {row.get('scope', '')} |"
             )
@@ -4490,11 +4575,18 @@ def _write_markdown(
             )
     if holdout_detail_rows:
         lines.extend(["", "## Residual Holdout Review Table", ""])
-        lines.extend(["| Category | Work Item | Axis | Detail | Owner | Status | Why |", "|---|---|---|---|---|---|---|"])
+        lines.extend(
+            [
+                "| Category | Work Item | Axis | Detail | Owner | Queue Status | Status | SLA | Due | Closure Evidence | Why |",
+                "|---|---|---|---|---|---|---|---:|---|---|---|",
+            ]
+        )
         for row in holdout_detail_rows:
             lines.append(
                 f"| {row.get('bucket_label', row.get('bucket_id', ''))} | {row.get('work_item_id', '')} | {row.get('detail_axis', '')} | "
-                f"{row.get('detail_value', '')} | {row.get('owner', '')} | {row.get('status', '')} | {row.get('why', '')} |"
+                f"{row.get('detail_value', '')} | {row.get('owner', '')} | {row.get('queue_status', '')} | "
+                f"{row.get('status', '')} | {row.get('sla_label', '')} | {row.get('due_date', '')} | "
+                f"{row.get('closure_evidence_required', '')} ({row.get('closure_evidence_status', '')}) | {row.get('why', '')} |"
             )
     if holdout_matrix_rows:
         lines.extend(["", "## Residual Holdout Routing Matrix", ""])
@@ -4759,6 +4851,7 @@ def _write_html(
     design_opt_entrypoint_rows: list[dict],
     design_opt_entrypoint_groups: list[dict],
     smoke_recent_samples: list[dict],
+    external_benchmark_submission_queue_rows: list[dict],
     holdout_buckets: list[dict],
     holdout_detail_rows: list[dict],
     holdout_matrix_rows: list[dict],
@@ -5507,10 +5600,10 @@ def _write_html(
         <h2>Residual Holdout Boundary</h2>
         <table>
           <thead>
-            <tr><th>Work Item</th><th>Category</th><th>Owner</th><th>Queue Status</th><th>Status</th><th>Relative Share</th><th>Absolute Project %</th><th>Scope</th></tr>
+            <tr><th>Work Item</th><th>Category</th><th>Due Date</th><th>SLA</th><th>Closure Evidence</th><th>Owner</th><th>Queue Status</th><th>Status</th><th>Relative Share</th><th>Absolute Project %</th><th>Scope</th></tr>
           </thead>
           <tbody>
-            {''.join(f"<tr><td>{row.get('work_item_id', '')}</td><td>{row.get('label', row.get('id', ''))}</td><td>{row.get('owner', '')}</td><td>{row.get('queue_status', '')}</td><td>{row.get('status', '')}</td><td>{int(row.get('relative_share_pct', 0))}%</td><td>{_coverage_range_label(row.get('absolute_project_pct_range'))}</td><td>{row.get('scope', '')}</td></tr>" for row in holdout_buckets)}
+            {''.join(f"<tr><td>{row.get('work_item_id', '')}</td><td>{row.get('label', row.get('id', ''))}</td><td>{row.get('due_date', '')}</td><td>{row.get('sla_label', '')}</td><td>{_holdout_closure_evidence_label(row)}</td><td>{row.get('owner', '')}</td><td>{row.get('queue_status', '')}</td><td>{row.get('status', '')}</td><td>{int(row.get('relative_share_pct', 0))}%</td><td>{_coverage_range_label(row.get('absolute_project_pct_range'))}</td><td>{row.get('scope', '')}</td></tr>" for row in holdout_buckets)}
           </tbody>
         </table>
       </div>
@@ -5584,6 +5677,7 @@ def _write_html(
           <tr><td>Audit review decision batch runner</td><td>reason={metrics.get('audit_review_decision_batch_runner_reason_code', '')} | apply_live={bool(metrics.get('audit_review_decision_batch_runner_apply_live', False))} | live_applied={bool(metrics.get('audit_review_decision_batch_runner_live_applied', False))} | preview_reason={metrics.get('audit_review_decision_batch_runner_preview_reason_code', '') or 'none'} | preview_ready_full={bool(metrics.get('audit_review_decision_batch_runner_preview_ready_full', False))} | preview_pending={int(metrics.get('audit_review_decision_batch_runner_preview_pending_count', 0))} | preview_open_revision={int(metrics.get('audit_review_decision_batch_runner_preview_open_revision_count', 0))}</td></tr>
         </table>
       </div>
+      {'<div class="panel"><h2>External Benchmark Submission Queue</h2><table><thead><tr><th>Queue</th><th>Scope</th><th>Owner</th><th>Status</th><th>Onepage Attestation</th><th>Onepage Status</th><th>Dry-run Evidence</th></tr></thead><tbody>' + ''.join(f"<tr><td>{row.get('queue_id', '')}</td><td>{row.get('submission_scope', '')}</td><td>{row.get('owner', '')}</td><td>{row.get('status', '')}</td><td>{row.get('onepage_attestation', '')}</td><td>{row.get('onepage_attestation_status', '') or 'unknown'}</td><td>{row.get('dry_run_evidence', '') or 'n/a'}</td></tr>" for row in external_benchmark_submission_queue_rows) + '</tbody></table><div class="panel-note">onepage_attestation_status=' + (str(metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown')) + '</div></div>' if external_benchmark_submission_queue_rows else ''}
       <div class="panel">
         <h2>Design Opt Raw vs Repaired</h2>
         <table>
@@ -5695,10 +5789,10 @@ def _write_html(
         <h2>Residual Holdout Review Table</h2>
         <table>
           <thead>
-            <tr><th>Category</th><th>Work Item</th><th>Axis</th><th>Detail</th><th>Owner</th><th>Status</th><th>Why</th></tr>
+            <tr><th>Category</th><th>Work Item</th><th>Axis</th><th>Detail</th><th>Owner</th><th>Queue Status</th><th>Status</th><th>SLA</th><th>Due</th><th>Closure Evidence</th><th>Why</th></tr>
           </thead>
           <tbody>
-            {''.join(f"<tr><td>{row.get('bucket_label', row.get('bucket_id', ''))}</td><td>{row.get('work_item_id', '')}</td><td>{row.get('detail_axis', '')}</td><td>{row.get('detail_value', '')}</td><td>{row.get('owner', '')}</td><td>{row.get('status', '')}</td><td>{row.get('why', '')}</td></tr>" for row in holdout_detail_rows)}
+            {''.join(f"<tr><td>{row.get('bucket_label', row.get('bucket_id', ''))}</td><td>{row.get('work_item_id', '')}</td><td>{row.get('detail_axis', '')}</td><td>{row.get('detail_value', '')}</td><td>{row.get('owner', '')}</td><td>{row.get('queue_status', '')}</td><td>{row.get('status', '')}</td><td>{row.get('sla_label', '')}</td><td>{row.get('due_date', '')}</td><td>{row.get('closure_evidence_required', '')} ({row.get('closure_evidence_status', '')})</td><td>{row.get('why', '')}</td></tr>" for row in holdout_detail_rows)}
           </tbody>
         </table>
       </div>
@@ -6075,6 +6169,7 @@ def _write_pdf(
     design_opt_entrypoint_rows: list[dict],
     design_opt_entrypoint_groups: list[dict],
     smoke_recent_samples: list[dict],
+    external_benchmark_submission_queue_rows: list[dict],
     holdout_buckets: list[dict],
     holdout_detail_rows: list[dict],
     holdout_matrix_rows: list[dict],
@@ -6512,12 +6607,25 @@ def _write_pdf(
                 ax.text(
                     0.04,
                     y,
-                    f"{row.get('label', row.get('id', ''))} | owner={row.get('owner', '')} | share={int(row.get('relative_share_pct', 0))}% | "
-                    f"project={_coverage_range_label(row.get('absolute_project_pct_range'))} | {row.get('scope', '')}",
+                    f"{row.get('work_item_id', '')} | {row.get('label', row.get('id', ''))} | due={row.get('due_date', '')} | "
+                    f"sla={row.get('sla_label', '')} | closure={_holdout_closure_evidence_label(row)} | owner={row.get('owner', '')}",
                     fontsize=9.4,
                     va="top",
                 )
-                y -= 0.075
+                y -= 0.034
+                ax.text(
+                    0.06,
+                    y,
+                    (
+                        f"queue={row.get('queue_status', '')} | status={row.get('status', '')} | "
+                        f"share={int(row.get('relative_share_pct', 0))}% | project={_coverage_range_label(row.get('absolute_project_pct_range'))} | "
+                        f"{row.get('scope', '')}"
+                    ),
+                    fontsize=8.7,
+                    va="top",
+                    wrap=True,
+                )
+                y -= 0.055
                 if y < 0.08:
                     _save_text_page(fig)
                     plt.close(fig)
@@ -6543,6 +6651,67 @@ def _write_pdf(
             ax.text(0.04, 0.44, f"Empirical smoke runtime reduction: {metrics.get('empirical_smoke_runtime_saved_pct_label', 'n/a')}", fontsize=10.2, va="top")
             ax.text(0.04, 0.38, f"Basis: {metrics.get('estimated_time_saved_basis', '')}", fontsize=9.6, va="top", wrap=True)
             ax.text(0.04, 0.24, str(metrics.get("time_saving_focus", "")), fontsize=10.0, va="top", wrap=True)
+            _save_text_page(fig)
+            plt.close(fig)
+        if external_benchmark_submission_queue_rows:
+            fig = plt.figure(figsize=(11, 8.5))
+            ax = fig.add_subplot(111)
+            ax.axis("off")
+            ax.text(0.03, 0.96, "External Benchmark Submission Queue", fontsize=18, weight="bold", va="top")
+            ax.text(
+                0.04,
+                0.89,
+                (
+                    f"onepage_attestation_status={metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown'} | "
+                    f"queue_count={int(metrics.get('external_benchmark_submission_queue_count', len(external_benchmark_submission_queue_rows)))}"
+                ),
+                fontsize=10.4,
+                va="top",
+            )
+            y = 0.82
+            for row in external_benchmark_submission_queue_rows:
+                ax.text(
+                    0.04,
+                    y,
+                    (
+                        f"{row.get('queue_id', '')} | scope={row.get('submission_scope', '')} | "
+                        f"owner={row.get('owner', '')} | status={row.get('status', '')}"
+                    ),
+                    fontsize=9.5,
+                    va="top",
+                )
+                y -= 0.034
+                ax.text(
+                    0.06,
+                    y,
+                    (
+                        f"onepage={row.get('onepage_attestation', '')} | "
+                        f"onepage_status={row.get('onepage_attestation_status', '') or 'unknown'} | "
+                        f"dry_run_evidence={row.get('dry_run_evidence', '') or 'n/a'}"
+                    ),
+                    fontsize=8.5,
+                    va="top",
+                    wrap=True,
+                )
+                y -= 0.055
+                if y < 0.10:
+                    _save_text_page(fig)
+                    plt.close(fig)
+                    fig = plt.figure(figsize=(11, 8.5))
+                    ax = fig.add_subplot(111)
+                    ax.axis("off")
+                    ax.text(0.03, 0.96, "External Benchmark Submission Queue", fontsize=18, weight="bold", va="top")
+                    ax.text(
+                        0.04,
+                        0.89,
+                        (
+                            f"onepage_attestation_status={metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown'} | "
+                            f"queue_count={int(metrics.get('external_benchmark_submission_queue_count', len(external_benchmark_submission_queue_rows)))}"
+                        ),
+                        fontsize=10.4,
+                        va="top",
+                    )
+                    y = 0.82
             _save_text_page(fig)
             plt.close(fig)
         advanced_holdout_status_rows = [
@@ -6617,7 +6786,19 @@ def _write_pdf(
                     va="top",
                 )
                 y -= 0.034
-                ax.text(0.06, y, f"owner={row.get('owner', '')} | why={row.get('why', '')}", fontsize=8.8, va="top", wrap=True)
+                ax.text(
+                    0.06,
+                    y,
+                    (
+                        f"owner={row.get('owner', '')} | queue={row.get('queue_status', '')} | "
+                        f"sla={row.get('sla_label', '')} | due={row.get('due_date', '')} | "
+                        f"closure={row.get('closure_evidence_required', '')}:{row.get('closure_evidence_status', '')} | "
+                        f"why={row.get('why', '')}"
+                    ),
+                    fontsize=8.8,
+                    va="top",
+                    wrap=True,
+                )
                 y -= 0.05
                 if y < 0.10:
                     _save_text_page(fig)
@@ -6797,6 +6978,11 @@ def main() -> None:
         if isinstance(external_benchmark_submission_readiness.get("summary"), dict)
         else {}
     )
+    external_benchmark_submission_queue_rows = [
+        row
+        for row in (external_benchmark_submission_readiness.get("submission_queue") or [])
+        if isinstance(row, dict)
+    ]
     external_benchmark_execution_manifest = _load_json(Path(args.external_benchmark_execution_manifest_report))
     external_benchmark_execution_summary = (
         external_benchmark_execution_manifest.get("summary")
@@ -7229,6 +7415,27 @@ def main() -> None:
             ),
             "external_benchmark_submission_caution_label": str(
                 external_benchmark_submission_summary.get("caution_label", "") or ""
+            ),
+            "external_benchmark_submission_queue_count": int(len(external_benchmark_submission_queue_rows)),
+            "external_benchmark_submission_queue_ready_count": int(
+                sum(
+                    1
+                    for row in external_benchmark_submission_queue_rows
+                    if str(row.get("status", "") or "") == "ready_for_full_submission"
+                )
+            ),
+            "external_benchmark_submission_queue_review_pending_count": int(
+                sum(
+                    1
+                    for row in external_benchmark_submission_queue_rows
+                    if str(row.get("status", "") or "") == "ready_for_benchmark_start_final_review_pending"
+                )
+            ),
+            "external_benchmark_submission_queue_blocked_count": int(
+                sum(1 for row in external_benchmark_submission_queue_rows if str(row.get("status", "") or "") == "blocked")
+            ),
+            "external_benchmark_submission_onepage_attestation_status": str(
+                external_benchmark_submission_summary.get("onepage_attestation_status", "") or ""
             ),
             "external_benchmark_execution_mode": str(
                 external_benchmark_execution_summary.get("execution_mode", "") or ""
@@ -8281,6 +8488,28 @@ def main() -> None:
         "design_change_zone_rows": design_change_zone_rows,
         "accepted_candidate_rows": accepted_candidate_rows,
         "nightly_smoke_recent_samples": smoke_recent_samples,
+        "external_benchmark_submission_queue_rows": external_benchmark_submission_queue_rows,
+        "external_benchmark_submission_queue_count": int(len(external_benchmark_submission_queue_rows)),
+        "external_benchmark_submission_queue_ready_count": int(
+            sum(
+                1
+                for row in external_benchmark_submission_queue_rows
+                if str(row.get("status", "") or "") == "ready_for_full_submission"
+            )
+        ),
+        "external_benchmark_submission_queue_review_pending_count": int(
+            sum(
+                1
+                for row in external_benchmark_submission_queue_rows
+                if str(row.get("status", "") or "") == "ready_for_benchmark_start_final_review_pending"
+            )
+        ),
+        "external_benchmark_submission_queue_blocked_count": int(
+            sum(1 for row in external_benchmark_submission_queue_rows if str(row.get("status", "") or "") == "blocked")
+        ),
+        "external_benchmark_submission_onepage_attestation_status": str(
+            metrics.get("external_benchmark_submission_onepage_attestation_status", "") or ""
+        ),
         "advanced_holdouts": advanced_holdouts,
         "residual_holdout_buckets": residual_holdout_buckets,
         "residual_holdout_detail_rows": residual_holdout_detail_rows,
@@ -8294,7 +8523,15 @@ def main() -> None:
         {
             key: value
             for key, value in summary_payload.items()
-            if key not in {"schema_version", "run_id", "generated_at", "metrics", "artifact_links"}
+            if key
+            not in {
+                "schema_version",
+                "run_id",
+                "generated_at",
+                "metrics",
+                "artifact_links",
+                "external_benchmark_submission_queue_rows",
+            }
         }
     )
     summary_json.write_text(json.dumps(summary_payload, indent=2), encoding="utf-8")
@@ -8309,7 +8546,7 @@ def main() -> None:
         design_opt_entrypoint_rows,
         design_opt_entrypoint_groups,
     )
-    _write_html(dashboard_html, cards, rows, artifact_links, metrics, authority_rows, residual_case_rows, design_change_rows, blocked_action_summary, accepted_candidate_rows, design_opt_entrypoint_rows, design_opt_entrypoint_groups, smoke_recent_samples, residual_holdout_buckets, residual_holdout_detail_rows, residual_holdout_matrix_rows, authority_catalog_diff)
+    _write_html(dashboard_html, cards, rows, artifact_links, metrics, authority_rows, residual_case_rows, design_change_rows, blocked_action_summary, accepted_candidate_rows, design_opt_entrypoint_rows, design_opt_entrypoint_groups, smoke_recent_samples, external_benchmark_submission_queue_rows, residual_holdout_buckets, residual_holdout_detail_rows, residual_holdout_matrix_rows, authority_catalog_diff)
     _write_markdown(
         report_md,
         cards,
@@ -8325,12 +8562,13 @@ def main() -> None:
         design_opt_entrypoint_rows,
         design_opt_entrypoint_groups,
         smoke_recent_samples,
+        external_benchmark_submission_queue_rows,
         residual_holdout_buckets,
         residual_holdout_detail_rows,
         residual_holdout_matrix_rows,
         authority_catalog_diff,
     )
-    _write_pdf(report_pdf, cards, rows, artifact_links, metrics, authority_rows, residual_case_rows, design_change_rows, blocked_action_summary, accepted_candidate_rows, design_opt_entrypoint_rows, design_opt_entrypoint_groups, smoke_recent_samples, residual_holdout_buckets, residual_holdout_detail_rows, residual_holdout_matrix_rows, authority_catalog_diff)
+    _write_pdf(report_pdf, cards, rows, artifact_links, metrics, authority_rows, residual_case_rows, design_change_rows, blocked_action_summary, accepted_candidate_rows, design_opt_entrypoint_rows, design_opt_entrypoint_groups, smoke_recent_samples, external_benchmark_submission_queue_rows, residual_holdout_buckets, residual_holdout_detail_rows, residual_holdout_matrix_rows, authority_catalog_diff)
 
     required_input_reports_pass = all(
         bool(report.get("contract_pass", report.get("all_pass", report.get("pass", False))))

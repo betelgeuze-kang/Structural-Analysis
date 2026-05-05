@@ -4395,18 +4395,27 @@ def _build_holdout_breakdown(
             "licensed_engineer_review_queue",
             "pending_review",
             "Assign the highest-touch irregular/member-edge cases to licensed engineer review before full-replacement claims.",
+            72,
+            "assignment_plus_3_business_days",
+            "signed_engineer_review_packet",
         ),
         "legacy_tool_cross_validation_required": (
             "RH-002",
             "legacy_tool_cross_validation_queue",
             "pending_cross_validation",
             "Queue novel load-path and authority-critical submodels for legacy-tool cross-validation.",
+            120,
+            "assignment_plus_5_business_days",
+            "legacy_tool_cross_validation_report",
         ),
         "legal_authority_signoff_required": (
             "RH-003",
             "legal_authority_signoff_queue",
             "pending_signoff",
             "Route formal seal, legal submission, and authority-facing responsibility to sign-off workflow.",
+            168,
+            "authority_submission_window",
+            "authority_signoff_receipt_or_formal_hold",
         ),
     }
     breakdown: list[dict[str, Any]] = []
@@ -4419,15 +4428,28 @@ def _build_holdout_breakdown(
             round(holdout_low * relative_share_pct / 100.0, 2),
             round(holdout_high * relative_share_pct / 100.0, 2),
         ]
-        default_work_item_id, default_queue_name, default_queue_status, default_next_action = default_queue_by_id.get(
+        (
+            default_work_item_id,
+            default_queue_name,
+            default_queue_status,
+            default_next_action,
+            default_sla_hours,
+            default_due_date,
+            default_closure_evidence_required,
+        ) = default_queue_by_id.get(
             category_id,
             (
                 f"RH-{len(breakdown) + 1:03d}",
                 f"{category_id}_queue" if category_id else "residual_holdout_queue",
                 "pending_review",
                 "Assign residual holdout case to the matching review owner.",
+                120,
+                "assignment_plus_5_business_days",
+                "owner_approved_closure_evidence",
             ),
         )
+        closure_evidence_path = str(row.get("closure_evidence_path", "") or "")
+        sla_hours = int(row.get("sla_hours", default_sla_hours) or default_sla_hours)
         breakdown.append(
             {
                 **row,
@@ -4437,6 +4459,16 @@ def _build_holdout_breakdown(
                 "queue_name": str(row.get("queue_name", "") or default_queue_name),
                 "queue_status": str(row.get("queue_status", "") or default_queue_status),
                 "status": str(row.get("status", "") or "open"),
+                "sla_hours": sla_hours,
+                "sla_label": str(row.get("sla_label", "") or f"{sla_hours}h"),
+                "due_date": str(row.get("due_date", "") or default_due_date),
+                "closure_evidence_required": str(
+                    row.get("closure_evidence_required", "") or default_closure_evidence_required
+                ),
+                "closure_evidence_path": closure_evidence_path,
+                "closure_evidence_status": str(
+                    row.get("closure_evidence_status", "") or ("attached" if closure_evidence_path else "pending")
+                ),
                 "next_action": str(row.get("next_action", "") or default_next_action),
                 "full_commercial_replacement_blocker": True,
             }
@@ -4458,6 +4490,12 @@ def _build_holdout_work_items(buckets: list[dict[str, Any]]) -> list[dict[str, A
                 "queue_name": str(row.get("queue_name", "") or ""),
                 "queue_status": str(row.get("queue_status", "") or ""),
                 "status": str(row.get("status", "") or ""),
+                "sla_hours": int(row.get("sla_hours", 0) or 0),
+                "sla_label": str(row.get("sla_label", "") or ""),
+                "due_date": str(row.get("due_date", "") or ""),
+                "closure_evidence_required": str(row.get("closure_evidence_required", "") or ""),
+                "closure_evidence_path": str(row.get("closure_evidence_path", "") or ""),
+                "closure_evidence_status": str(row.get("closure_evidence_status", "") or ""),
                 "absolute_project_pct_range": row.get("absolute_project_pct_range", []),
                 "relative_share_pct": int(row.get("relative_share_pct", 0) or 0),
                 "next_action": str(row.get("next_action", "") or ""),
@@ -5191,13 +5229,16 @@ def _write_markdown(path: Path, payload: dict) -> None:
     if holdout_buckets:
         lines.append("## Residual Holdout Model")
         lines.append("")
-        lines.append("| Work Item | Category | Owner | Queue | Queue Status | Status | Relative Share | Absolute Project % | Scope |")
-        lines.append("|---|---|---|---|---|---|---:|---|---|")
+        lines.append("| Work Item | Category | Owner | Queue | Queue Status | Status | SLA | Due | Closure Evidence | Relative Share | Absolute Project % | Scope |")
+        lines.append("|---|---|---|---|---|---|---:|---|---|---:|---|---|")
         for row in holdout_buckets:
             lines.append(
                 f"| {row.get('work_item_id', '')} | {row.get('label', row.get('id', ''))} | "
                 f"{row.get('owner', '')} | "
                 f"{row.get('queue_name', '')} | {row.get('queue_status', '')} | {row.get('status', '')} | "
+                f"{row.get('sla_label', '') or str(row.get('sla_hours', '')) + 'h'} | "
+                f"{row.get('due_date', '')} | "
+                f"{row.get('closure_evidence_required', '')} ({row.get('closure_evidence_status', '')}) | "
                 f"{int(row.get('relative_share_pct', 0))}% | "
                 f"{_coverage_range_label(row.get('absolute_project_pct_range'))} | {row.get('scope', '')} |"
             )

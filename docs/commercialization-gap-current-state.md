@@ -5,7 +5,7 @@
 
 ## 한 줄 요약
 
-source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다. P0-1 닫힘 기준은 GitHub Release의 12개 manifest asset, upload plan, metadata preflight, hydrated published-byte SHA/bytes verification이며, P1 quality/fallback/benchmark breadth 실행은 P0 status evidence를 넘길 때 unblocked 상태다.
+source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다. P0-1 닫힘 기준은 GitHub Release의 current manifest asset set(현재 source manifest 기준 22개), upload plan, metadata preflight, post-publish round-trip JSON, hydrated published-byte SHA/bytes verification이며, P1 quality/fallback/benchmark breadth 실행은 P0 status evidence를 넘길 때 unblocked 상태다.
 
 ## 현재 상태
 
@@ -18,18 +18,18 @@ source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다.
 - release evidence 없이 `python3 scripts/check_p0_closure_status.py --json`를 실행하면 P0-1 open을 보고하는 것이 정상이다. release asset listing, upload plan, metadata preflight, hydrated artifact root, `--tag-ref-present`를 함께 넘기면 overall P0는 closed다.
 - P1은 quality/fallback/benchmark breadth를 순차적으로 닫아야 하며, heavy validation 전에 [open-data artifact restore runbook](open-data-artifact-restore-runbook.md)과 `scripts/check_p1_readiness_status.py`로 externalized artifact와 real-project seed 준비 상태를 확인한다.
 - `scripts/check_p1_benchmark_breadth_status.py`는 tracked commercial readiness, HF benchmark, TPU wind, PEER hinge, irregular top5, Korean public structure collection evidence를 하나로 묶어 P1 benchmark breadth inputs ready와 P0 release blocker를 분리해서 보고한다.
-- 상용화 표기는 release-facing 문서 기준으로 `Commercial` grade이지만 과장하지 않는다. `full_commercial_replacement_ready=false`, `engineer_in_loop_accelerated_coverage_ready=true`, accelerated coverage target은 95-99%, residual holdout은 1-5%이며 holdout은 owner/status/work item이 보이는 licensed engineer review, legacy tool cross-validation, legal/authority sign-off queue로 운영한다.
+- 상용화 표기는 release-facing 문서 기준으로 `Commercial` grade이지만 과장하지 않는다. `full_commercial_replacement_ready=false`, `engineer_in_loop_accelerated_coverage_ready=true`, accelerated coverage target은 95-99%, residual holdout은 1-5%이며 holdout은 owner/status/work item/SLA/due policy/closure evidence가 보이는 licensed engineer review, legacy tool cross-validation, legal/authority sign-off queue로 운영한다.
 - wind/SSI gate outputs는 `response_artifacts_consumed`를 canonical contract name으로 쓴다. 현재 machine-readable evidence는 rename transition 동안 `_pass` suffix가 붙은 필드를 계속 노출할 수 있다.
 - P2는 viewer/report 제품화 단계로, shared selection과 provenance를 전 surface에 통일하고 wall/slab batching/LOD, solver-verified panel-zone, SVG sheet/revision/callout을 정리해야 한다.
 
 ## P0-1 Release closure
 
-- 완료 상태: `structural-analysis-artifacts-2026-04-26` GitHub Release object와 12개 manifest asset이 published 상태이며, metadata preflight와 hydrated published-byte SHA/bytes verification으로 P0-1을 닫았다. 로컬 `implementation/phase1/release/`는 여전히 upload source로 쓰지 않는다.
+- 완료 상태: `structural-analysis-artifacts-2026-04-26` GitHub Release object는 current manifest asset set(현재 source manifest 기준 22개)과 metadata preflight, post-publish round-trip JSON, hydrated published-byte SHA/bytes verification이 일치할 때 P0-1을 닫는다. 로컬 `implementation/phase1/release/`는 여전히 upload source로 쓰지 않는다.
 - `scripts/prepare_release_upload_plan.py`는 fresh candidate root에서는 통과하지만, stale local release에 대해서는 mismatched/missing assets를 정확히 실패시킨다.
-- 닫힘 기준: `scripts/build_release_publication_candidate.py`로 private work dir과 flat artifact root 생성 -> candidate manifest 검증 -> GitHub Release 생성 -> `scripts/publish_github_release_assets.py`로 manifest asset 정확히 12개 업로드 -> metadata preflight -> `scripts/hydrate_github_release_assets.py`로 published asset 재다운로드 -> SHA/bytes verification 통과 순서로 고정한다.
+- 닫힘 기준: `scripts/build_release_publication_candidate.py`로 private work dir과 flat artifact root 생성 -> candidate manifest 검증 -> GitHub Release 생성 -> `scripts/publish_github_release_assets.py`로 current manifest asset set만 업로드 -> metadata preflight -> `scripts/hydrate_github_release_assets.py --out <post-publish-roundtrip.json>`로 published asset 재다운로드 -> SHA/bytes verification 통과 순서로 고정한다.
 - 자동 검증 가능한 단계는 manifest structure, flat root materialization preflight, asset listing, SHA/bytes verification이다.
 - 전체 P0 판정은 `scripts/check_p0_closure_status.py`로 고정한다. release asset listing 없이 실행하면 P0-1 open, P0-2~P0-6 closed 상태를 명시적으로 보고한다.
-- 수작업/외부 의존 단계는 fresh release output 재생성과 GitHub Release publication이다. 로컬 토큰이 없을 때는 `Publish Release Assets` GitHub Actions workflow가 Actions `GITHUB_TOKEN`으로 release 생성, 12개 asset 업로드, release-side hydration/SHA 검증, release closure 검증, 선택적 manifest promotion을 수행한다.
+- 수작업/외부 의존 단계는 fresh release output 재생성과 GitHub Release publication이다. 로컬 토큰이 없을 때는 `Publish Release Assets` GitHub Actions workflow가 Actions `GITHUB_TOKEN`으로 release 생성, current manifest asset set 업로드, release-side hydration/SHA 검증, release closure 검증, 선택적 manifest promotion을 수행한다.
 - `Regenerate release viewer artifacts`는 clean checkout 기준으로 동작해야 하므로 KDS/frontend compliance 이전에 PBD review package와 PBD compliance slice를 다시 materialize한다. 이때 release tree를 소스로 쓰지 않고 tracked NDTHA evidence와 `implementation/phase1/release_evidence/kds/`의 작은 source evidence만 사용한다.
 - MIDAS KDS row-provenance export는 compact PASS report만 `implementation/phase1/release_evidence/kds/midas_kds_row_provenance_table_report.json`로 hydrate한다. 대형 row table/CSV 전체를 source repo로 되돌리지 않고도 workflow productization과 phase1 CI가 clean checkout에서 같은 provenance 계약을 검증할 수 있게 한다.
 - clean checkout에서는 `python3 scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --json --out <clean-checkout-evidence-chain.json>` 한 번으로 MIDAS/KDS validation evidence, commercial readiness evidence, parser coverage, PEER metric records, row provenance, P1 readiness/breadth status를 같은 순서로 materialize한다.
@@ -85,7 +85,7 @@ P1 상용화 코어 순서는 `MIDAS exact roundtrip -> KDS load combination -> 
 1. 현재 feature branch를 promoted manifest commit 위로 정리하거나, `--promoted-manifest-json`로 published manifest evidence를 명시해서 stale local manifest가 P0를 다시 열지 않게 한다.
 2. `scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --p1-readiness-out <p1-readiness-status.json> --p1-benchmark-out <p1-benchmark-breadth-status.json> --json --out <clean-checkout-evidence-chain.json>`로 clean checkout P1 handoff를 한 커맨드로 재현한다.
 3. P1 quality/fallback/benchmark breadth 실행을 refresh하고 hardest 10-case, PEER/SPD, TPU/HFFB, Korean public structures submission queue와 one-page attestation을 최신 evidence로 갱신한다.
-4. `licensed_engineer_review_required`, `legacy_tool_cross_validation_required`, `legal_authority_signoff_required`를 owner/status/work item/due evidence가 있는 residual holdout work queue로 운영한다.
+4. `licensed_engineer_review_required`, `legacy_tool_cross_validation_required`, `legal_authority_signoff_required`를 owner/status/work item/SLA/due policy/closure evidence가 있는 residual holdout work queue로 운영한다.
 5. release package, committee package, README가 `Commercial` grade와 `full_commercial_replacement_ready=false`를 계속 같이 노출하는지 회귀 테스트로 고정한다.
 
 ## 참고 문서

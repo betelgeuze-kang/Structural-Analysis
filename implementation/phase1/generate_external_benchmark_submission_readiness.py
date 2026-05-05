@@ -64,6 +64,22 @@ def _midas_kds_exact_row_coverage_label(summary: dict[str, Any]) -> str:
     return "0/0"
 
 
+def _report_summary_line(report: dict[str, Any], *, fallback_label: str) -> str:
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    for key in ("summary_line", "reason", "reason_code"):
+        value = str(report.get(key, "") or summary.get(key, "") or "").strip()
+        if value:
+            return value
+    if _truthy(report):
+        return f"{fallback_label}: PASS"
+    return f"{fallback_label}: CHECK"
+
+
+def _submission_dry_run_evidence(*parts: object) -> str:
+    evidence_parts = [str(part).strip() for part in parts if str(part).strip()]
+    return " | ".join(evidence_parts) if evidence_parts else "n/a"
+
+
 def _submission_queue_status(*, contract_pass: bool, queue_closed: bool) -> str:
     if not contract_pass:
         return "blocked"
@@ -79,6 +95,10 @@ def _build_submission_queue(
     blockers: list[str],
     cautions: list[str],
     gap_summary: dict[str, Any],
+    tpu_hffb_benchmark_payload: dict[str, Any],
+    peer_spd_hinge_benchmark_payload: dict[str, Any],
+    peer_spd_hinge_fixture_regression_payload: dict[str, Any],
+    peer_spd_hinge_alignment_payload: dict[str, Any],
 ) -> list[dict[str, Any]]:
     status = _submission_queue_status(contract_pass=contract_pass, queue_closed=queue_closed)
     blocker_label = _label(blockers) if blockers else "none"
@@ -86,30 +106,51 @@ def _build_submission_queue(
     commercial_scope = str(gap_summary.get("commercial_scope_summary_line", "") or "")
     commercial_breadth = str(gap_summary.get("commercial_reliability_breadth_summary_line", "") or "")
     exact_rows = _midas_kds_exact_row_coverage_label(gap_summary)
+    hardest_external_10case_evidence = str(
+        gap_summary.get("hardest_external_10case_kickoff_summary_line", "") or ""
+    ).strip()
+    if not hardest_external_10case_evidence:
+        hardest_external_10case_evidence = f"hardest_external_10case_kickoff: {status}"
+    tpu_hffb_evidence = _report_summary_line(tpu_hffb_benchmark_payload, fallback_label="tpu_hffb_benchmark_gate")
+    peer_spd_hinge_evidence = _submission_dry_run_evidence(
+        _report_summary_line(peer_spd_hinge_benchmark_payload, fallback_label="peer_spd_hinge_benchmark_gate"),
+        _report_summary_line(peer_spd_hinge_fixture_regression_payload, fallback_label="peer_spd_hinge_fixture_regression"),
+        _report_summary_line(peer_spd_hinge_alignment_payload, fallback_label="peer_spd_hinge_alignment"),
+    )
+    korean_public_structures_evidence = _submission_dry_run_evidence(
+        str(gap_summary.get("korean_source_ingest_summary_line", "") or "").strip(),
+        str(gap_summary.get("korean_structural_preview_queue_summary_line", "") or "").strip(),
+    )
+    if korean_public_structures_evidence == "n/a":
+        korean_public_structures_evidence = f"korean_public_structures: {status}"
     tracks = [
         (
             "hardest_external_10case",
             "hardest_external_benchmark_program",
             "benchmark_program_owner",
             "hardest external 10-case one-page attestation",
+            hardest_external_10case_evidence,
         ),
         (
             "tpu_hffb",
             "component_wind_benchmark_submission",
             "wind_benchmark_owner",
             "TPU/HFFB component benchmark one-page attestation",
+            tpu_hffb_evidence,
         ),
         (
             "peer_spd_hinge",
             "component_hinge_benchmark_submission",
             "pbd_benchmark_owner",
             "PEER/SPD hinge component one-page attestation",
+            peer_spd_hinge_evidence,
         ),
         (
             "korean_public_structures",
             "korean_public_structure_release_review",
             "korean_source_owner",
             "Korean public structures provenance one-page attestation",
+            korean_public_structures_evidence,
         ),
     ]
     return [
@@ -119,13 +160,15 @@ def _build_submission_queue(
             "owner": owner,
             "status": status,
             "onepage_attestation": attestation,
+            "onepage_attestation_status": "",
+            "dry_run_evidence": dry_run_evidence,
             "blocker_label": blocker_label,
             "caution_label": caution_label,
             "commercial_scope_summary_line": commercial_scope,
             "commercial_reliability_breadth_summary_line": commercial_breadth,
             "midas_kds_row_provenance_exact_row_coverage_label": exact_rows,
         }
-        for queue_id, submission_scope, owner, attestation in tracks
+        for queue_id, submission_scope, owner, attestation, dry_run_evidence in tracks
     ]
 
 
@@ -231,6 +274,10 @@ def build_submission_readiness(
         blockers=blockers,
         cautions=cautions,
         gap_summary=gap_summary,
+        tpu_hffb_benchmark_payload=tpu_hffb_benchmark_payload,
+        peer_spd_hinge_benchmark_payload=peer_spd_hinge_benchmark_payload,
+        peer_spd_hinge_fixture_regression_payload=peer_spd_hinge_fixture_regression_payload,
+        peer_spd_hinge_alignment_payload=peer_spd_hinge_alignment_payload,
     )
     submission_ready_count = sum(
         1 for row in submission_queue if str(row.get("status", "") or "") == "ready_for_full_submission"
@@ -247,6 +294,8 @@ def build_submission_readiness(
         if submission_review_pending_count == len(submission_queue)
         else "blocked"
     )
+    for row in submission_queue:
+        row["onepage_attestation_status"] = onepage_attestation_status
     evidence_parts = [
         f"core_holdouts_closed={core_holdouts_closed}",
         f"diversified_benchmarks={diversified_benchmark_gates_pass}",

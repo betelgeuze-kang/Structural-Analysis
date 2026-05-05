@@ -7,7 +7,7 @@ This runbook closes P0-1 release publication for `structural-analysis-artifacts-
 As of 2026-05-05, P0-1 is closed for `structural-analysis-artifacts-2026-04-26` when the captured publication evidence is supplied:
 
 - The Git tag and GitHub Release object exist.
-- The release asset listing contains exactly the 12 manifest-listed assets.
+- The release asset listing contains exactly the current manifest-listed assets (22 after the benchmark/onepage/queue evidence expansion).
 - The upload plan and metadata preflight validate SHA/bytes against the promoted manifest.
 - A hydrated download of the published GitHub Release assets verifies SHA/bytes cleanly.
 - The repo-local `implementation/phase1/release/` tree remains outside the safe upload path.
@@ -188,7 +188,7 @@ P0-1 is closed only when all of these are true:
 - `hydrate_github_release_assets.py --write` can download the published GitHub Release assets into a separate root, and `verify_release_artifacts_manifest.py --artifact-root <hydrated-root>` reports clean SHA/bytes integrity against the downloaded bytes.
 - `check_release_p0_closure.py --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --tag-ref-present true --require-all --require-exact --fail-unclosed` reports closed.
 - `check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --tag-ref-present --fail-open` reports overall P0 closed. The `Publish Release Assets` workflow also writes `structural-p0-closure-status.json` and `structural-p0-closure-status.md` into the publication evidence artifact.
-- The release contains exactly the 12 manifest-listed assets and no wildcard-uploaded extras.
+- The release contains exactly the current manifest-listed assets and no wildcard-uploaded extras.
 - Only after that may the candidate manifest be promoted and P1 quality/fallback/benchmark breadth work begin.
 
 ## Troubleshooting

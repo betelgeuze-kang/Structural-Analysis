@@ -416,6 +416,109 @@ def _asset_listing_status(
     }
 
 
+def _post_publish_roundtrip_status(roundtrip_json: Path | None, manifest: Any) -> dict[str, Any]:
+    if roundtrip_json is None:
+        return {
+            "checked": False,
+            "ok": None,
+            "evidence_json": None,
+            "errors": [],
+            "counts": {},
+        }
+
+    errors: list[str] = []
+    try:
+        payload = _load_json(roundtrip_json)
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "checked": True,
+            "ok": False,
+            "evidence_json": str(roundtrip_json),
+            "errors": [str(exc)],
+            "counts": {},
+        }
+    if not isinstance(payload, dict):
+        return {
+            "checked": True,
+            "ok": False,
+            "evidence_json": str(roundtrip_json),
+            "errors": ["post-publish roundtrip evidence root must be an object"],
+            "counts": {},
+        }
+    if payload.get("ok") is not True:
+        errors.append("post-publish roundtrip ok must be true")
+    for error in _json_list(payload.get("errors")):
+        errors.append(f"post-publish roundtrip evidence error: {error}")
+
+    manifest_rows = _manifest_artifact_index(manifest)
+    actions = payload.get("actions")
+    if not isinstance(actions, list):
+        errors.append("post-publish roundtrip actions must be a list")
+        actions = []
+
+    seen: set[str] = set()
+    for index, row in enumerate(actions):
+        if not isinstance(row, dict):
+            errors.append(f"post-publish roundtrip actions[{index}] must be an object")
+            continue
+        asset_name = str(row.get("asset_name", "") or "").strip()
+        if not asset_name:
+            errors.append(f"post-publish roundtrip actions[{index}].asset_name is required")
+            continue
+        if asset_name in seen:
+            errors.append(f"post-publish roundtrip duplicate asset: {asset_name}")
+        seen.add(asset_name)
+        manifest_row = manifest_rows.get(asset_name)
+        if manifest_row is None:
+            errors.append(f"post-publish roundtrip contains non-manifest asset: {asset_name}")
+            continue
+        status = str(row.get("status", "") or "")
+        if status not in {"already_present", "downloaded"}:
+            errors.append(f"post-publish roundtrip asset is not verified: {asset_name} status={status}")
+        expected_bytes = manifest_row.get("bytes")
+        if row.get("manifest_bytes") != expected_bytes:
+            errors.append(
+                f"post-publish roundtrip manifest bytes mismatch for {asset_name}: "
+                f"manifest={expected_bytes} evidence={row.get('manifest_bytes')}"
+            )
+        expected_sha = str(manifest_row.get("sha256", "") or "")
+        if str(row.get("manifest_sha256", "") or "") != expected_sha:
+            errors.append(
+                f"post-publish roundtrip manifest sha256 mismatch for {asset_name}: "
+                f"manifest={expected_sha} evidence={row.get('manifest_sha256')}"
+            )
+        actual_bytes = row.get("downloaded_bytes", row.get("destination_bytes"))
+        if actual_bytes is not None and actual_bytes != expected_bytes:
+            errors.append(
+                f"post-publish roundtrip actual bytes mismatch for {asset_name}: "
+                f"manifest={expected_bytes} evidence={actual_bytes}"
+            )
+        actual_sha = str(row.get("downloaded_sha256", row.get("destination_sha256", "")) or "")
+        if actual_sha and actual_sha != expected_sha:
+            errors.append(
+                f"post-publish roundtrip actual sha256 mismatch for {asset_name}: "
+                f"manifest={expected_sha} evidence={actual_sha}"
+            )
+
+    for asset_name in sorted(set(manifest_rows) - seen):
+        errors.append(f"post-publish roundtrip missing manifest asset: {asset_name}")
+
+    totals = payload.get("totals") if isinstance(payload.get("totals"), dict) else {}
+    return {
+        "checked": True,
+        "ok": not errors,
+        "evidence_json": str(roundtrip_json),
+        "errors": errors,
+        "counts": {
+            "manifest_assets": len(manifest_rows),
+            "selected_assets": totals.get("selected_assets", len(actions)),
+            "already_present": totals.get("already_present", 0),
+            "downloaded": totals.get("downloaded", 0),
+            "errors": len(errors),
+        },
+    }
+
+
 def _split_error_message(message: str) -> list[str]:
     if not message:
         return ["unknown error"]
@@ -430,6 +533,7 @@ def build_status(
     assets_json: Path | None = None,
     upload_plan_json: Path | None = None,
     metadata_preflight_json: Path | None = None,
+    post_publish_roundtrip_json: Path | None = None,
     require_all: bool = False,
     require_exact: bool = True,
     tag_ref_present: bool | None = None,
@@ -444,6 +548,7 @@ def build_status(
 
     upload_checked = artifact_root is not None or upload_plan_json is not None
     metadata_checked = metadata_preflight_json is not None
+    roundtrip_checked = post_publish_roundtrip_json is not None
     upload_status = _merge_upload_plan_status(
         _upload_plan_status(publication_manifest_path, artifact_root),
         _upload_plan_evidence_status(
@@ -485,16 +590,28 @@ def build_status(
         "errors": ["skipped because manifest structure is invalid"] if assets_json is not None else [],
         "counts": {},
     }
+    roundtrip_status = _post_publish_roundtrip_status(
+        post_publish_roundtrip_json,
+        manifest,
+    ) if manifest_status["ok"] else {
+        "checked": roundtrip_checked,
+        "ok": False if roundtrip_checked else None,
+        "evidence_json": str(post_publish_roundtrip_json) if post_publish_roundtrip_json is not None else None,
+        "errors": ["skipped because manifest structure is invalid"] if roundtrip_checked else [],
+        "counts": {},
+    }
     tag_status = _tag_ref_status(tag_ref_present)
 
     upload_closed = not bool(upload_status.get("checked")) or upload_status["ok"] is True
     metadata_closed = not bool(metadata_status.get("checked")) or metadata_status["ok"] is True
+    roundtrip_closed = not bool(roundtrip_status.get("checked")) or roundtrip_status["ok"] is True
     p0_closed = (
         manifest_status["ok"] is True
         and tag_ref_present is True
         and asset_status["ok"] is True
         and upload_closed
         and metadata_closed
+        and roundtrip_closed
     )
     return {
         "ok": p0_closed,
@@ -509,6 +626,7 @@ def build_status(
         "asset_listing": asset_status,
         "upload_plan": upload_status,
         "metadata_preflight": metadata_status,
+        "post_publish_roundtrip": roundtrip_status,
     }
 
 
@@ -564,6 +682,17 @@ def _print_text(status: dict[str, Any]) -> None:
         for error in metadata["errors"]:
             print(f"  - {error}")
 
+    roundtrip = status["post_publish_roundtrip"]
+    if not roundtrip["checked"]:
+        print("Post-publish roundtrip: not checked")
+    else:
+        roundtrip_label = "ok" if roundtrip["ok"] else "error"
+        counts = _format_counts(roundtrip["counts"])
+        suffix = f" ({counts})" if counts else ""
+        print(f"Post-publish roundtrip: {roundtrip_label}{suffix}")
+        for error in roundtrip["errors"]:
+            print(f"  - {error}")
+
 
 def _parse_tag_ref_present(value: str) -> bool:
     normalized = value.strip().lower()
@@ -596,6 +725,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--assets-json", type=Path)
     parser.add_argument("--upload-plan-json", type=Path)
     parser.add_argument("--metadata-preflight-json", type=Path)
+    parser.add_argument("--post-publish-roundtrip-json", type=Path)
     parser.add_argument("--require-all", action="store_true")
     parser.set_defaults(require_exact=True)
     parser.add_argument(
@@ -626,6 +756,7 @@ def main(argv: list[str] | None = None) -> int:
         assets_json=args.assets_json,
         upload_plan_json=args.upload_plan_json,
         metadata_preflight_json=args.metadata_preflight_json,
+        post_publish_roundtrip_json=args.post_publish_roundtrip_json,
         require_all=args.require_all,
         require_exact=args.require_exact,
         tag_ref_present=args.tag_ref_present,

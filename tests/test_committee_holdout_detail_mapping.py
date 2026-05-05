@@ -53,7 +53,12 @@ def test_holdout_detail_rows_include_story_zone_and_submodel_family() -> None:
     assert "S02/perimeter" in review_row["detail_value"]
     assert review_row["work_item_id"] == "RH-001"
     assert review_row["status"] == "open"
+    assert review_row["sla_label"] == "72h"
+    assert review_row["due_date"] == "assignment_plus_3_business_days"
+    assert review_row["closure_evidence_required"] == "signed_engineer_review_packet"
+    assert review_row["closure_evidence_status"] == "pending"
     submodel_row = next(row for row in rows if row["detail_axis"] == "submodel_family")
     assert "SCBF16B" in submodel_row["detail_value"]
     assert submodel_row["work_item_id"] == "RH-002"
     assert submodel_row["queue_status"] == "pending_cross_validation"
+    assert submodel_row["closure_evidence_required"] == "legacy_tool_cross_validation_report"

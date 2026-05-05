@@ -145,6 +145,45 @@ def _metadata_preflight_json(tmp_path: Path) -> Path:
     )
 
 
+def _post_publish_roundtrip_json(tmp_path: Path) -> Path:
+    return _write_json(
+        tmp_path / "post-publish-roundtrip.json",
+        {
+            "ok": True,
+            "release_tag": "structural-analysis-artifacts-test",
+            "manifest": str(tmp_path / "manifest.json"),
+            "artifact_root": str(tmp_path / "hydrated"),
+            "actions": [
+                {
+                    "asset_name": "required.zip",
+                    "status": "downloaded",
+                    "manifest_bytes": len(b"required"),
+                    "manifest_sha256": _sha256(b"required"),
+                    "downloaded_bytes": len(b"required"),
+                    "downloaded_sha256": _sha256(b"required"),
+                    "required": True,
+                },
+                {
+                    "asset_name": "optional.pdf",
+                    "status": "already_present",
+                    "manifest_bytes": len(b"optional"),
+                    "manifest_sha256": _sha256(b"optional"),
+                    "destination_bytes": len(b"optional"),
+                    "destination_sha256": _sha256(b"optional"),
+                    "required": False,
+                },
+            ],
+            "errors": [],
+            "totals": {
+                "selected_assets": 2,
+                "already_present": 1,
+                "downloaded": 1,
+                "errors": 0,
+            },
+        },
+    )
+
+
 def test_status_reports_closed_when_all_required_offline_checks_pass(tmp_path: Path) -> None:
     manifest_path = _manifest(tmp_path)
     artifact_root = _artifact_root(tmp_path)
@@ -175,6 +214,7 @@ def test_status_validates_upload_plan_and_metadata_preflight_evidence(tmp_path: 
     assets_path = _assets_json(tmp_path)
     upload_plan_path = _upload_plan_json(tmp_path)
     preflight_path = _metadata_preflight_json(tmp_path)
+    roundtrip_path = _post_publish_roundtrip_json(tmp_path)
 
     status = check_release_p0_closure.build_status(
         manifest_path=manifest_path,
@@ -182,6 +222,7 @@ def test_status_validates_upload_plan_and_metadata_preflight_evidence(tmp_path: 
         assets_json=assets_path,
         upload_plan_json=upload_plan_path,
         metadata_preflight_json=preflight_path,
+        post_publish_roundtrip_json=roundtrip_path,
         require_all=True,
         require_exact=True,
         tag_ref_present=True,
@@ -193,6 +234,38 @@ def test_status_validates_upload_plan_and_metadata_preflight_evidence(tmp_path: 
     assert status["metadata_preflight"]["evidence_json"] == str(preflight_path)
     assert status["metadata_preflight"]["ok"] is True
     assert status["metadata_preflight"]["counts"]["present"] == 2
+    assert status["post_publish_roundtrip"]["evidence_json"] == str(roundtrip_path)
+    assert status["post_publish_roundtrip"]["ok"] is True
+    assert status["post_publish_roundtrip"]["counts"]["downloaded"] == 1
+
+
+def test_status_keeps_p0_open_when_post_publish_roundtrip_sha_does_not_match_manifest(tmp_path: Path) -> None:
+    manifest_path = _manifest(tmp_path)
+    artifact_root = _artifact_root(tmp_path)
+    assets_path = _assets_json(tmp_path)
+    roundtrip_path = _post_publish_roundtrip_json(tmp_path)
+    roundtrip = json.loads(roundtrip_path.read_text(encoding="utf-8"))
+    roundtrip["actions"][0]["downloaded_sha256"] = "0" * 64
+    roundtrip_path.write_text(json.dumps(roundtrip), encoding="utf-8")
+
+    status = check_release_p0_closure.build_status(
+        manifest_path=manifest_path,
+        artifact_root=artifact_root,
+        assets_json=assets_path,
+        upload_plan_json=_upload_plan_json(tmp_path),
+        metadata_preflight_json=_metadata_preflight_json(tmp_path),
+        post_publish_roundtrip_json=roundtrip_path,
+        require_all=True,
+        require_exact=True,
+        tag_ref_present=True,
+    )
+
+    assert status["p0_closed"] is False
+    assert status["post_publish_roundtrip"]["ok"] is False
+    assert any(
+        "post-publish roundtrip actual sha256 mismatch for required.zip" in error
+        for error in status["post_publish_roundtrip"]["errors"]
+    )
 
 
 def test_status_can_close_against_promoted_manifest_when_local_manifest_is_stale(tmp_path: Path) -> None:

@@ -41,6 +41,7 @@ def build_index(
     p0_status_md: Path | None = None,
     publication_report_json: Path | None = None,
     promoted_manifest_json: Path | None = None,
+    post_publish_roundtrip_json: Path | None = None,
     tag_ref_present: bool = True,
 ) -> dict[str, Any]:
     manifest_payload = _load_json(manifest)
@@ -65,6 +66,7 @@ def build_index(
             "p0_status_json": str(p0_status_json),
             "p0_status_md": str(p0_status_md) if p0_status_md else "",
             "publication_report_json": str(publication_report_json) if publication_report_json else "",
+            "post_publish_roundtrip_json": str(post_publish_roundtrip_json) if post_publish_roundtrip_json else "",
         },
         "files": {
             "manifest": _file_entry(manifest),
@@ -76,6 +78,7 @@ def build_index(
             "p0_status_json": _file_entry(p0_status_json),
             "p0_status_md": _file_entry(p0_status_md),
             "publication_report_json": _file_entry(publication_report_json),
+            "post_publish_roundtrip_json": _file_entry(post_publish_roundtrip_json),
         },
         "handoff_commands": {
             "p0_status": [
@@ -99,6 +102,19 @@ def build_index(
                 "<release-publication-evidence-index.json>",
                 "--json",
             ],
+            "post_publish_roundtrip": [
+                "python3",
+                "scripts/hydrate_github_release_assets.py",
+                "--repo",
+                "<owner/repo>",
+                "--manifest",
+                str(manifest),
+                "--artifact-root",
+                "<hydrated-release-root>",
+                "--write",
+                "--out",
+                "<post-publish-roundtrip.json>",
+            ],
         },
     }
 
@@ -114,6 +130,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--p0-status-json", type=Path, required=True)
     parser.add_argument("--p0-status-md", type=Path)
     parser.add_argument("--publication-report-json", type=Path)
+    parser.add_argument("--post-publish-roundtrip-json", type=Path)
     parser.add_argument("--tag-ref-present", action="store_true", default=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--json", action="store_true")
@@ -132,6 +149,7 @@ def main(argv: list[str] | None = None) -> int:
         p0_status_json=args.p0_status_json,
         p0_status_md=args.p0_status_md,
         publication_report_json=args.publication_report_json,
+        post_publish_roundtrip_json=args.post_publish_roundtrip_json,
         tag_ref_present=bool(args.tag_ref_present),
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)

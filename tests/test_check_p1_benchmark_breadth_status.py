@@ -117,6 +117,10 @@ def test_benchmark_breadth_is_ready_but_blocked_by_p0_release(tmp_path: Path) ->
     work_items = {row["work_item_id"]: row for row in commercial_gate["residual_holdout_work_items"]}
     assert set(work_items) == {"RH-001", "RH-002"}
     assert work_items["RH-001"]["queue_name"] == "licensed_engineer_review_queue"
+    assert work_items["RH-001"]["sla_label"] == "72h"
+    assert work_items["RH-001"]["due_date"] == "assignment_plus_3_business_days"
+    assert work_items["RH-001"]["closure_evidence_required"] == "signed_engineer_review_packet"
+    assert work_items["RH-001"]["closure_evidence_status"] == "pending"
     assert work_items["RH-002"]["queue_status"] == "pending_cross_validation"
     assert commercial_gate["commercial_scope_ready"] is True
     assert status["summary"]["commercialization_scope"] == {
