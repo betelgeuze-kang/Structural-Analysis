@@ -313,6 +313,31 @@ def _summary(
     }
 
 
+def _failure_summary(
+    *,
+    error: Exception,
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    message = str(error)
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "contract_pass": False,
+        "reason_code": "ERR_P1_EVIDENCE_SIDECAR_BUILD_FAILED",
+        "summary": {
+            "external_expected_queue_count": len(EXTERNAL_EXPECTED_QUEUE_IDS),
+            "residual_expected_work_item_count": len(RESIDUAL_EXPECTED_WORK_ITEM_IDS),
+            "error": message,
+        },
+        "blockers": [message],
+        "artifacts": {
+            "intake_manifest": str(args.intake_manifest),
+            "external_benchmark_submission_updates": str(args.external_out),
+            "residual_holdout_closure_updates": str(args.residual_out),
+            "repo_root": str(args.repo_root),
+        },
+    }
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--intake-manifest", type=Path, required=True)
@@ -346,6 +371,13 @@ def main(argv: list[str] | None = None) -> int:
             repo_root=args.repo_root,
         )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
+        summary = _failure_summary(error=exc, args=args)
+        if args.summary_out:
+            _write_json(args.summary_out, summary)
+        if args.json:
+            print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
+        else:
+            print(summary["reason_code"])
         print(f"P1 evidence sidecar build failed: {exc}", file=sys.stderr)
         return 2
 

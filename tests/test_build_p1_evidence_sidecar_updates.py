@@ -191,3 +191,46 @@ def test_build_sidecars_cli_writes_outputs_and_summary(tmp_path: Path) -> None:
     assert summary["contract_pass"] is True
     assert summary["summary"]["external_receipt_attached_count"] == 4
     assert summary["summary"]["residual_closed_count"] == 3
+
+
+def test_build_sidecars_cli_reports_machine_readable_failure(tmp_path: Path) -> None:
+    external_out = tmp_path / "out" / "external_benchmark_submission_updates.json"
+    residual_out = tmp_path / "out" / "residual_holdout_closure_updates.json"
+    summary_out = tmp_path / "out" / "summary.json"
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--intake-manifest",
+            str(_intake_manifest(tmp_path, complete=False)),
+            "--base-external-updates",
+            str(tmp_path / "missing-eb.json"),
+            "--base-residual-updates",
+            str(tmp_path / "missing-rh.json"),
+            "--external-out",
+            str(external_out),
+            "--residual-out",
+            str(residual_out),
+            "--summary-out",
+            str(summary_out),
+            "--repo-root",
+            str(tmp_path),
+            "--json",
+            "--require-complete",
+            "--fail-open",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert proc.returncode == 2
+    payload = json.loads(proc.stdout)
+    summary = json.loads(summary_out.read_text(encoding="utf-8"))
+    assert payload == summary
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_P1_EVIDENCE_SIDECAR_BUILD_FAILED"
+    assert "complete intake required" in payload["blockers"][0]
+    assert "tpu_hffb" in payload["blockers"][0]
+    assert "RH-002" in payload["blockers"][0]
