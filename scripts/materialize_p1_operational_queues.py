@@ -17,10 +17,12 @@ if str(SCRIPT_DIR) not in sys.path:
 from check_p1_benchmark_breadth_status import (  # noqa: E402
     DEFAULT_COMMERCIAL_READINESS,
     DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
     DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     _commercial_gate,
     _external_submission_queue_gate,
     _load_json,
+    _load_submission_updates,
 )
 
 
@@ -137,6 +139,7 @@ def build_operational_queues(
     *,
     commercial_readiness: Path,
     external_benchmark_submission_readiness: Path,
+    external_benchmark_submission_updates: Path | None = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
     residual_holdout_closure_updates: Path | None = DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     p1_benchmark_breadth_status: Path | None,
     artifact_root: Path,
@@ -145,7 +148,10 @@ def build_operational_queues(
         commercial_readiness,
         residual_holdout_closure_updates=residual_holdout_closure_updates,
     )
-    external_gate = _external_submission_queue_gate(external_benchmark_submission_readiness)
+    external_gate = _external_submission_queue_gate(
+        external_benchmark_submission_readiness,
+        submission_updates=_load_submission_updates(external_benchmark_submission_updates),
+    )
     residual_items = [
         _normalize_residual(row, artifact_root=artifact_root)
         for row in commercial_gate.get("residual_holdout_work_items", [])
@@ -207,6 +213,9 @@ def build_operational_queues(
                 for row in external_items
                 if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
             ),
+            "external_submission_updates_applied_count": int(
+                external_gate.get("external_benchmark_submission_updates_applied_count", 0) or 0
+            ),
             "external_submission_operational": external_operational,
             "residual_holdout_work_item_count": len(residual_items),
             "residual_holdout_open_count": sum(1 for row in residual_items if not _is_closed(row)),
@@ -237,6 +246,10 @@ def build_operational_queues(
         "artifacts": {
             "commercial_readiness": str(commercial_readiness),
             "external_benchmark_submission_readiness": str(external_benchmark_submission_readiness),
+            "external_benchmark_submission_updates": str(external_benchmark_submission_updates or ""),
+            "external_benchmark_submission_updates_present": bool(
+                external_benchmark_submission_updates and external_benchmark_submission_updates.exists()
+            ),
             "residual_holdout_closure_updates": str(residual_holdout_closure_updates or ""),
             "residual_holdout_closure_updates_present": bool(
                 residual_holdout_closure_updates and residual_holdout_closure_updates.exists()
@@ -364,6 +377,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
     )
     parser.add_argument(
+        "--external-benchmark-submission-updates",
+        type=Path,
+        default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
+    )
+    parser.add_argument(
         "--residual-holdout-closure-updates",
         type=Path,
         default=DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
@@ -386,6 +404,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = build_operational_queues(
         commercial_readiness=args.commercial_readiness,
         external_benchmark_submission_readiness=args.external_benchmark_submission_readiness,
+        external_benchmark_submission_updates=args.external_benchmark_submission_updates,
         residual_holdout_closure_updates=args.residual_holdout_closure_updates,
         p1_benchmark_breadth_status=args.p1_benchmark_breadth_status,
         artifact_root=artifact_root,

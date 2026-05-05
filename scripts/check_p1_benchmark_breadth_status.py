@@ -12,13 +12,23 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+REPO_ROOT = SCRIPT_DIR.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from check_p1_readiness_status import build_status as build_p1_readiness_status  # noqa: E402
+from implementation.phase1.generate_external_benchmark_submission_readiness import (  # noqa: E402
+    _load_submission_updates,
+    _merge_submission_update,
+)
 
 
 DEFAULT_COMMERCIAL_READINESS = Path("implementation/phase1/commercial_readiness_report.json")
 DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS = Path(
     "implementation/phase1/release/external_benchmark_submission_readiness.json"
+)
+DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES = Path(
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json"
 )
 DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES = Path(
     "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
@@ -220,75 +230,64 @@ def _submission_receipt(row: dict[str, Any]) -> str:
     return str(row.get("receipt_url", "") or row.get("submission_receipt_url", "") or "pending")
 
 
-def _external_submission_queue_gate(path: Path) -> dict[str, Any]:
+def _external_submission_queue_gate(
+    path: Path,
+    *,
+    submission_updates: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     payload = _load_json(path)
     summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
-    rows = [row for row in (payload.get("submission_queue") or []) if isinstance(row, dict)]
+    updates = submission_updates or {}
+    rows: list[dict[str, Any]] = []
+    updates_applied_count = 0
+    for raw_row in (payload.get("submission_queue") or []):
+        if not isinstance(raw_row, dict):
+            continue
+        queue_id = str(raw_row.get("queue_id", "") or "").strip()
+        work_item_id = str(raw_row.get("work_item_id", "") or "").strip()
+        update = updates.get(queue_id) or updates.get(work_item_id) or {}
+        row = raw_row
+        if update:
+            updates_applied_count += 1
+            row = _merge_submission_update(
+                raw_row,
+                update,
+                onepage_attestation_status=str(
+                    raw_row.get("onepage_attestation_status", "")
+                    or summary.get("onepage_attestation_status", "")
+                    or ""
+                ),
+            )
+        rows.append(row)
     exists = path.exists()
-    queue_count = int(summary.get("submission_queue_count", len(rows)) or len(rows))
-    ready_count = int(
-        summary.get(
-            "submission_queue_ready_count",
-            sum(1 for row in rows if str(row.get("status", "") or "") == "ready_for_full_submission"),
-        )
-        or 0
+    queue_count = len(rows) if rows else int(summary.get("submission_queue_count", 0) or 0)
+    ready_count = sum(
+        1 for row in rows if str(row.get("status", "") or "") == "ready_for_full_submission"
     )
-    review_pending_count = int(
-        summary.get(
-            "submission_queue_review_pending_count",
-            sum(
-                1
-                for row in rows
-                if str(row.get("status", "") or "") == "ready_for_benchmark_start_final_review_pending"
-            ),
-        )
-        or 0
+    review_pending_count = sum(
+        1
+        for row in rows
+        if str(row.get("status", "") or "") == "ready_for_benchmark_start_final_review_pending"
     )
-    blocked_count = int(
-        summary.get(
-            "submission_queue_blocked_count",
-            sum(1 for row in rows if str(row.get("status", "") or "") == "blocked"),
-        )
-        or 0
+    blocked_count = sum(1 for row in rows if str(row.get("status", "") or "") == "blocked")
+    lifecycle_ready_count = sum(
+        1 for row in rows if str(row.get("submission_lifecycle_status", "") or "") == "ready_to_submit"
     )
-    lifecycle_ready_count = int(
-        summary.get(
-            "submission_lifecycle_ready_to_submit_count",
-            sum(1 for row in rows if str(row.get("submission_lifecycle_status", "") or "") == "ready_to_submit"),
-        )
-        or 0
+    lifecycle_review_pending_count = sum(
+        1
+        for row in rows
+        if str(row.get("submission_lifecycle_status", "") or "")
+        == "benchmark_start_ready_review_boundary_pending"
     )
-    lifecycle_review_pending_count = int(
-        summary.get(
-            "submission_lifecycle_review_boundary_pending_count",
-            sum(
-                1
-                for row in rows
-                if str(row.get("submission_lifecycle_status", "") or "")
-                == "benchmark_start_ready_review_boundary_pending"
-            ),
-        )
-        or 0
+    lifecycle_blocked_count = sum(
+        1 for row in rows if str(row.get("submission_lifecycle_status", "") or "") == "blocked"
     )
-    lifecycle_blocked_count = int(
-        summary.get(
-            "submission_lifecycle_blocked_count",
-            sum(1 for row in rows if str(row.get("submission_lifecycle_status", "") or "") == "blocked"),
+    receipt_pending_count = sum(
+        1
+        for row in rows
+        if str(row.get("receipt_status", "") or row.get("submission_receipt_status", "") or "").startswith(
+            "pending"
         )
-        or 0
-    )
-    receipt_pending_count = int(
-        summary.get(
-            "submission_receipt_pending_count",
-            sum(
-                1
-                for row in rows
-                if str(row.get("receipt_status", "") or row.get("submission_receipt_status", "") or "").startswith(
-                    "pending"
-                )
-            ),
-        )
-        or 0
     )
     required_fields_present = bool(
         rows
@@ -339,6 +338,7 @@ def _external_submission_queue_gate(path: Path) -> dict[str, Any]:
         ),
         "onepage_attestation_status": str(summary.get("onepage_attestation_status", "") or ""),
         "required_lifecycle_fields_present": required_fields_present,
+        "external_benchmark_submission_updates_applied_count": updates_applied_count,
         "submission_queue": rows,
     }
 
@@ -490,6 +490,7 @@ def build_status(
     p1_readiness_status: Path | None = None,
     commercial_readiness: Path = DEFAULT_COMMERCIAL_READINESS,
     external_benchmark_submission_readiness: Path = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    external_benchmark_submission_updates: Path | None = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
     residual_holdout_closure_updates: Path | None = DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     benchmark_reports: list[Path] | tuple[Path, ...] | None = None,
 ) -> dict[str, Any]:
@@ -499,7 +500,11 @@ def build_status(
         commercial_readiness,
         residual_holdout_closure_updates=residual_holdout_closure_updates,
     )
-    external_submission_gate = _external_submission_queue_gate(external_benchmark_submission_readiness)
+    external_submission_updates = _load_submission_updates(external_benchmark_submission_updates)
+    external_submission_gate = _external_submission_queue_gate(
+        external_benchmark_submission_readiness,
+        submission_updates=external_submission_updates,
+    )
     evidence_gates = [commercial_gate, external_submission_gate, *[_benchmark_gate(path) for path in reports]]
     benchmark_breadth_inputs_ready = all(bool(gate["ok"]) for gate in evidence_gates)
     p1_benchmark_execution_unblocked = bool(benchmark_breadth_inputs_ready and p1_gate["p1_execution_unblocked"])
@@ -543,6 +548,13 @@ def build_status(
                 "submission_receipt_pending_count": external_submission_gate["submission_receipt_pending_count"],
                 "submission_last_checked_count": external_submission_gate["submission_last_checked_count"],
                 "closure_evidence_attached_count": external_submission_gate["closure_evidence_attached_count"],
+                "external_benchmark_submission_updates_path": str(external_benchmark_submission_updates or ""),
+                "external_benchmark_submission_updates_present": bool(
+                    external_benchmark_submission_updates and external_benchmark_submission_updates.exists()
+                ),
+                "external_benchmark_submission_updates_applied_count": external_submission_gate[
+                    "external_benchmark_submission_updates_applied_count"
+                ],
                 "onepage_attestation_status": external_submission_gate["onepage_attestation_status"],
                 "required_lifecycle_fields_present": external_submission_gate[
                     "required_lifecycle_fields_present"
@@ -610,6 +622,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
     )
     parser.add_argument(
+        "--external-benchmark-submission-updates",
+        type=Path,
+        default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
+    )
+    parser.add_argument(
         "--residual-holdout-closure-updates",
         type=Path,
         default=DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
@@ -635,6 +652,7 @@ def main(argv: list[str] | None = None) -> int:
             p1_readiness_status=args.p1_readiness_status,
             commercial_readiness=args.commercial_readiness,
             external_benchmark_submission_readiness=args.external_benchmark_submission_readiness,
+            external_benchmark_submission_updates=args.external_benchmark_submission_updates,
             residual_holdout_closure_updates=args.residual_holdout_closure_updates,
             benchmark_reports=args.benchmark_reports,
         )

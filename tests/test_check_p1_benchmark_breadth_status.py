@@ -163,6 +163,7 @@ def _paths(tmp_path: Path) -> dict[str, object]:
         "p1_readiness_status": _p1_status(tmp_path / "p1.json"),
         "commercial_readiness": _commercial(tmp_path / "commercial.json"),
         "external_benchmark_submission_readiness": _external_submission(tmp_path / "external_submission.json"),
+        "external_benchmark_submission_updates": tmp_path / "missing_eb_updates.json",
         "residual_holdout_closure_updates": tmp_path / "missing_rh_updates.json",
         "benchmark_reports": [
             _benchmark(tmp_path / "hf.json", label="HF benchmark"),
@@ -235,6 +236,9 @@ def test_benchmark_breadth_is_ready_but_blocked_by_p0_release(tmp_path: Path) ->
         "submission_receipt_pending_count": 4,
         "submission_last_checked_count": 0,
         "closure_evidence_attached_count": 0,
+        "external_benchmark_submission_updates_path": str(tmp_path / "missing_eb_updates.json"),
+        "external_benchmark_submission_updates_present": False,
+        "external_benchmark_submission_updates_applied_count": 0,
         "onepage_attestation_status": "ready_for_full_submission",
         "required_lifecycle_fields_present": True,
     }
@@ -286,6 +290,40 @@ def test_benchmark_breadth_merges_residual_holdout_closure_sidecar(tmp_path: Pat
     assert scope["residual_holdout_closure_evidence_attached_count"] == 1
     assert scope["residual_holdout_last_checked_count"] == 1
     assert scope["residual_holdout_closure_updates_present"] is True
+
+
+def test_benchmark_breadth_merges_external_submission_update_sidecar(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    updates = _write_json(
+        tmp_path / "eb_updates.json",
+        {
+            "schema_version": "external-benchmark-submission-updates.v1",
+            "updates": {
+                "hardest_external_10case": {
+                    "receipt_url": "https://bench.example/receipts/EB-001",
+                    "receipt_status": "attached",
+                    "submitted_at_utc": "2026-05-05T01:02:03Z",
+                    "last_checked_at_utc": "2026-05-05T02:03:04Z",
+                    "closure_evidence_status": "attached",
+                }
+            },
+        },
+    )
+    paths["external_benchmark_submission_updates"] = updates
+
+    status = check_p1_benchmark.build_status(**paths)
+    external_gate = status["gates"][2]
+    first = external_gate["submission_queue"][0]
+
+    assert first["receipt_url"] == "https://bench.example/receipts/EB-001"
+    assert first["receipt_status"] == "attached"
+    assert first["last_checked_at_utc"] == "2026-05-05T02:03:04Z"
+    assert external_gate["external_benchmark_submission_updates_applied_count"] == 1
+    summary = status["summary"]["external_benchmark_submission"]
+    assert summary["external_benchmark_submission_updates_present"] is True
+    assert summary["external_benchmark_submission_updates_applied_count"] == 1
+    assert summary["submission_receipt_attached_count"] == 1
+    assert summary["submission_last_checked_count"] == 1
 
 
 def test_benchmark_breadth_blocks_on_failed_report(tmp_path: Path) -> None:
@@ -349,6 +387,8 @@ def test_cli_writes_markdown_and_fails_when_blocked(tmp_path: Path, capsys) -> N
             str(paths["commercial_readiness"]),
             "--external-benchmark-submission-readiness",
             str(paths["external_benchmark_submission_readiness"]),
+            "--external-benchmark-submission-updates",
+            str(paths["external_benchmark_submission_updates"]),
             "--residual-holdout-closure-updates",
             str(paths["residual_holdout_closure_updates"]),
             "--benchmark-report",

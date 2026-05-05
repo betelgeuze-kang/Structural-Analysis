@@ -19,6 +19,19 @@ PUBLICATION_EVIDENCE_INDEX_SCHEMA = "release-publication-evidence-index.v1"
 DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS = Path(
     "implementation/phase1/release/external_benchmark_submission_readiness.json"
 )
+DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES = Path(
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json"
+)
+DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES = Path(
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
+)
+EXPECTED_EXTERNAL_BENCHMARK_UPDATE_IDS = (
+    "hardest_external_10case",
+    "tpu_hffb",
+    "peer_spd_hinge",
+    "korean_public_structures",
+)
+EXPECTED_RESIDUAL_HOLDOUT_UPDATE_IDS = ("RH-001", "RH-002", "RH-003")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -135,19 +148,94 @@ def _materialize_evidence(
     return summary
 
 
-def _materialize_external_submission_readiness(
+def _extract_update_ids(payload: dict[str, Any]) -> tuple[set[str], int]:
+    rows: Any = payload.get("updates", payload.get("submission_updates", payload.get("residual_holdout_updates", payload)))
+    if isinstance(rows, dict) and "external_benchmark_submission_work_items" in rows:
+        rows = rows.get("external_benchmark_submission_work_items", [])
+    elif isinstance(rows, dict) and "residual_holdout_work_items" in rows:
+        rows = rows.get("residual_holdout_work_items", [])
+    elif rows is payload and isinstance(payload.get("queues"), dict):
+        queue_payload = payload["queues"]
+        if isinstance(queue_payload, dict):
+            rows = (
+                queue_payload.get("external_benchmark_submission_work_items")
+                or queue_payload.get("residual_holdout_work_items")
+                or queue_payload
+            )
+    elif rows is payload:
+        rows = payload.get("submission_queue", payload.get("residual_holdout_work_items", payload))
+
+    update_ids: set[str] = set()
+    update_count = 0
+    if isinstance(rows, dict):
+        update_count = len(rows)
+        for row_id, row in rows.items():
+            update_ids.add(str(row_id))
+            if isinstance(row, dict):
+                for key in ("queue_id", "work_item_id", "category_id", "id", "submission_id"):
+                    value = str(row.get(key, "") or "").strip()
+                    if value:
+                        update_ids.add(value)
+    elif isinstance(rows, list):
+        update_count = len([row for row in rows if isinstance(row, dict)])
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            for key in ("queue_id", "work_item_id", "category_id", "id", "submission_id"):
+                value = str(row.get(key, "") or "").strip()
+                if value:
+                    update_ids.add(value)
+    return update_ids, update_count
+
+
+def _json_summary_or_present(
+    path: Path,
     *,
+    ok_when_present: bool = False,
+    expected_update_ids: tuple[str, ...] = (),
+) -> dict[str, Any]:
+    summary = _json_summary(path)
+    if not summary.get("exists") or "reason" in summary:
+        return summary
+    if expected_update_ids:
+        payload = _load_json(path)
+        update_ids, update_count = _extract_update_ids(payload)
+        missing_update_ids = sorted(set(expected_update_ids) - update_ids)
+        summary.update(
+            {
+                "update_count": update_count,
+                "expected_update_count": len(expected_update_ids),
+                "missing_update_ids": missing_update_ids,
+                "all_expected_updates_present": not missing_update_ids,
+            }
+        )
+        summary["ok"] = not missing_update_ids
+    elif ok_when_present:
+        summary["ok"] = True
+    return summary
+
+
+def _materialize_package_json(
+    *,
+    label: str,
     source_artifact_root: Path | None,
     destination: Path,
+    direct_asset_name: str,
+    package_member: str,
     force: bool,
+    ok_when_present: bool = False,
+    expected_update_ids: tuple[str, ...] = (),
 ) -> dict[str, Any]:
-    label = "external benchmark submission readiness"
-    if destination.exists() and not force:
-        summary = _json_summary(destination)
+    if destination.exists() and not force and source_artifact_root is None:
+        summary = _json_summary_or_present(
+            destination,
+            ok_when_present=ok_when_present,
+            expected_update_ids=expected_update_ids,
+        )
         summary.update(
             {
                 "label": label,
-                "source_evidence": "",
+                "source_evidence": str(destination),
                 "hydrated_from_source": False,
             }
         )
@@ -164,7 +252,7 @@ def _materialize_external_submission_readiness(
             "reason": "publication_artifact_root_missing",
         }
 
-    direct_source = source_artifact_root / "external_benchmark_submission_readiness.json"
+    direct_source = source_artifact_root / direct_asset_name
     package_source = source_artifact_root / "project_package.zip"
     destination.parent.mkdir(parents=True, exist_ok=True)
     source_evidence = ""
@@ -174,7 +262,7 @@ def _materialize_external_submission_readiness(
             source_evidence = str(direct_source)
         elif package_source.exists():
             with zipfile.ZipFile(package_source) as archive:
-                with archive.open("artifacts/external_benchmark_submission_readiness.json") as handle:
+                with archive.open(package_member) as handle:
                     destination.write_bytes(handle.read())
             source_evidence = str(package_source)
         else:
@@ -185,7 +273,7 @@ def _materialize_external_submission_readiness(
                 "path": str(destination),
                 "source_evidence": str(source_artifact_root),
                 "hydrated_from_source": False,
-                "reason": "external_submission_readiness_source_missing",
+                "reason": f"{direct_asset_name}_source_missing",
             }
     except (KeyError, OSError, zipfile.BadZipFile) as exc:
         return {
@@ -195,10 +283,14 @@ def _materialize_external_submission_readiness(
             "path": str(destination),
             "source_evidence": str(package_source),
             "hydrated_from_source": False,
-            "reason": f"external_submission_readiness_hydration_failed: {exc}",
+            "reason": f"{direct_asset_name}_hydration_failed: {exc}",
         }
 
-    summary = _json_summary(destination)
+    summary = _json_summary_or_present(
+        destination,
+        ok_when_present=ok_when_present,
+        expected_update_ids=expected_update_ids,
+    )
     summary.update(
         {
             "label": label,
@@ -207,6 +299,22 @@ def _materialize_external_submission_readiness(
         }
     )
     return summary
+
+
+def _materialize_external_submission_readiness(
+    *,
+    source_artifact_root: Path | None,
+    destination: Path,
+    force: bool,
+) -> dict[str, Any]:
+    return _materialize_package_json(
+        label="external benchmark submission readiness",
+        source_artifact_root=source_artifact_root,
+        destination=destination,
+        direct_asset_name="external_benchmark_submission_readiness.json",
+        package_member="artifacts/external_benchmark_submission_readiness.json",
+        force=force,
+    )
 
 
 def _run_command(command: list[str]) -> dict[str, Any]:
@@ -297,6 +405,30 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     )
     steps.append(external_submission_step)
 
+    external_submission_updates_step = _materialize_package_json(
+        label="external benchmark submission updates",
+        source_artifact_root=index_paths.get("artifact_root"),
+        destination=args.external_benchmark_submission_updates,
+        direct_asset_name="external_benchmark_submission_updates.json",
+        package_member="artifacts/external_benchmark_submission_updates.json",
+        force=args.force_hydrate,
+        ok_when_present=True,
+        expected_update_ids=EXPECTED_EXTERNAL_BENCHMARK_UPDATE_IDS,
+    )
+    steps.append(external_submission_updates_step)
+
+    residual_holdout_updates_step = _materialize_package_json(
+        label="residual holdout closure updates",
+        source_artifact_root=index_paths.get("artifact_root"),
+        destination=args.residual_holdout_closure_updates,
+        direct_asset_name="residual_holdout_closure_updates.json",
+        package_member="artifacts/residual_holdout_closure_updates.json",
+        force=args.force_hydrate,
+        ok_when_present=True,
+        expected_update_ids=EXPECTED_RESIDUAL_HOLDOUT_UPDATE_IDS,
+    )
+    steps.append(residual_holdout_updates_step)
+
     coverage_cmd = [
         sys.executable,
         "implementation/phase1/generate_real_project_parser_coverage_matrix.py",
@@ -371,6 +503,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         str(args.commercial_readiness),
         "--external-benchmark-submission-readiness",
         str(args.external_benchmark_submission_readiness),
+        "--external-benchmark-submission-updates",
+        str(args.external_benchmark_submission_updates),
         "--residual-holdout-closure-updates",
         str(args.residual_holdout_closure_updates),
         "--json",
@@ -405,6 +539,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             str(args.commercial_readiness),
             "--external-benchmark-submission-readiness",
             str(args.external_benchmark_submission_readiness),
+            "--external-benchmark-submission-updates",
+            str(args.external_benchmark_submission_updates),
             "--residual-holdout-closure-updates",
             str(args.residual_holdout_closure_updates),
             "--p1-benchmark-breadth-status",
@@ -444,11 +580,15 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     operational_queues_pass = bool(
         operational_step is None or (operational_step.get("ok") and operational_payload.get("contract_pass", False))
     )
+    publication_sidecars_pass = bool(
+        external_submission_updates_step.get("ok") and residual_holdout_updates_step.get("ok")
+    )
     contract_pass = bool(
         inputs_contract_pass
         and p0_closure_evidence_consumed
         and p1_benchmark_execution_unblocked
         and operational_queues_pass
+        and publication_sidecars_pass
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -456,6 +596,7 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "reason_code": "PASS" if contract_pass else "ERR_CLEAN_CHECKOUT_EVIDENCE_CHAIN_INCOMPLETE",
         "inputs_contract_pass": inputs_contract_pass,
         "p0_closure_evidence_consumed": p0_closure_evidence_consumed,
+        "publication_sidecars_pass": publication_sidecars_pass,
         "artifacts": {
             "manifest": str(args.manifest),
             "publication_evidence_index": (
@@ -467,6 +608,7 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             "midas_kds_validation_report": str(args.midas_kds_validation_report),
             "commercial_readiness": str(args.commercial_readiness),
             "external_benchmark_submission_readiness": str(args.external_benchmark_submission_readiness),
+            "external_benchmark_submission_updates": str(args.external_benchmark_submission_updates),
             "residual_holdout_closure_updates": str(args.residual_holdout_closure_updates),
             "row_provenance": str(args.row_provenance),
             "p1_operational_queues": str(args.p1_operational_queues_out) if args.p1_operational_queues_out else "",
@@ -480,6 +622,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             "commercial_scope": _commercial_scope(args.commercial_readiness),
         },
         "row_provenance": row_payload,
+        "external_benchmark_submission_updates": external_submission_updates_step,
+        "residual_holdout_closure_updates": residual_holdout_updates_step,
         "p1_readiness_status": p1_readiness,
         "p1_benchmark_breadth_status": p1_benchmark,
         "p1_operational_queues": operational_payload,
@@ -514,9 +658,14 @@ def main() -> int:
         default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
     )
     parser.add_argument(
+        "--external-benchmark-submission-updates",
+        type=Path,
+        default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
+    )
+    parser.add_argument(
         "--residual-holdout-closure-updates",
         type=Path,
-        default=Path("implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"),
+        default=DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     )
     parser.add_argument(
         "--commercial-readiness-source-evidence",

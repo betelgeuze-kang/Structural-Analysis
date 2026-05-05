@@ -169,6 +169,7 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     midas_source = tmp_path / "release_evidence" / "midas" / "midas_kds_geometry_bridge_validation_report.json"
     commercial_source = tmp_path / "release_evidence" / "commercial" / "commercial_readiness_report.json"
     external_submission = tmp_path / "release_evidence" / "external" / "external_benchmark_submission_readiness.json"
+    external_updates = tmp_path / "release_evidence" / "productization" / "external_benchmark_submission_updates.json"
     residual_updates = tmp_path / "release_evidence" / "productization" / "residual_holdout_closure_updates.json"
     midas_target = tmp_path / "generated" / "midas_kds_geometry_bridge_validation_report.json"
     commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
@@ -194,6 +195,25 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     _write_json(commercial_source, _commercial_report())
     _write_json(external_submission, _external_submission())
     _write_json(
+        external_updates,
+        {
+            "schema_version": "external-benchmark-submission-updates.v1",
+            "updates": {
+                queue_id: {
+                    "receipt_status": "pending_external_submission_receipt",
+                    "closure_evidence_status": "pending",
+                    "last_checked_at_utc": "2026-05-05T04:05:06Z",
+                }
+                for queue_id in (
+                    "hardest_external_10case",
+                    "tpu_hffb",
+                    "peer_spd_hinge",
+                    "korean_public_structures",
+                )
+            },
+        },
+    )
+    _write_json(
         residual_updates,
         {
             "schema_version": "residual-holdout-closure-updates.v1",
@@ -203,7 +223,15 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
                     "closure_evidence_path": "release_evidence/productization/RH-001.closure.json",
                     "closure_evidence_status": "attached",
                     "last_checked_at_utc": "2026-05-05T04:05:06Z",
-                }
+                },
+                "RH-002": {
+                    "closure_evidence_status": "pending",
+                    "last_checked_at_utc": "2026-05-05T04:05:06Z",
+                },
+                "RH-003": {
+                    "closure_evidence_status": "pending",
+                    "last_checked_at_utc": "2026-05-05T04:05:06Z",
+                },
             },
         },
     )
@@ -231,6 +259,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
         str(commercial_source),
         "--external-benchmark-submission-readiness",
         str(external_submission),
+        "--external-benchmark-submission-updates",
+        str(external_updates),
         "--residual-holdout-closure-updates",
         str(residual_updates),
         "--p1-readiness-out",
@@ -260,8 +290,12 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert payload["p0_release_blocker"] is False
     assert payload["p1_execution_unblocked"] is True
     assert payload["p1_benchmark_execution_unblocked"] is True
+    assert payload["publication_sidecars_pass"] is True
+    assert payload["external_benchmark_submission_updates"]["all_expected_updates_present"] is True
+    assert payload["residual_holdout_closure_updates"]["all_expected_updates_present"] is True
     assert payload["p1_operational_queues_pass"] is True
     assert payload["p1_operational_queues"]["summary"]["external_submission_queue_count"] == 4
+    assert payload["p1_operational_queues"]["summary"]["external_submission_updates_applied_count"] == 4
     assert payload["p1_operational_queues"]["summary"]["residual_holdout_work_item_count"] == 3
     assert payload["p1_operational_queues"]["summary"]["residual_holdout_open_count"] == 2
     assert payload["p1_operational_queues"]["summary"]["residual_holdout_closure_evidence_attached_count"] == 1
@@ -293,7 +327,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
     midas_source = tmp_path / "release_evidence" / "midas" / "midas_kds_geometry_bridge_validation_report.json"
     commercial_source = tmp_path / "release_evidence" / "commercial" / "commercial_readiness_report.json"
     external_submission = tmp_path / "generated" / "external_benchmark_submission_readiness.json"
-    residual_updates = tmp_path / "release_evidence" / "productization" / "residual_holdout_closure_updates.json"
+    external_updates = tmp_path / "generated" / "external_benchmark_submission_updates.json"
+    residual_updates = tmp_path / "generated" / "residual_holdout_closure_updates.json"
     midas_target = tmp_path / "generated" / "midas_kds_geometry_bridge_validation_report.json"
     commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
     coverage = tmp_path / "generated" / "real_project_parser_coverage_matrix.json"
@@ -318,18 +353,66 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
     )
     _write_json(midas_source, _midas_report())
     _write_json(commercial_source, _commercial_report())
-    _write_json(
-        residual_updates,
-        {
-            "schema_version": "residual-holdout-closure-updates.v1",
-            "updates": {},
-        },
-    )
     artifact_root.mkdir(parents=True)
     with zipfile.ZipFile(artifact_root / "project_package.zip", "w") as archive:
         archive.writestr(
             "artifacts/external_benchmark_submission_readiness.json",
             json.dumps(_external_submission()),
+        )
+        archive.writestr(
+            "artifacts/external_benchmark_submission_updates.json",
+            json.dumps(
+                {
+                    "schema_version": "external-benchmark-submission-updates.v1",
+                    "updates": {
+                        "hardest_external_10case": {
+                            "receipt_status": "attached",
+                            "receipt_url": "https://bench.example.test/receipts/EB-001",
+                            "submitted_at_utc": "2026-05-05T05:04:53Z",
+                            "closure_evidence_status": "attached",
+                            "last_checked_at_utc": "2026-05-05T05:05:53Z",
+                        },
+                        "tpu_hffb": {
+                            "receipt_status": "pending_external_submission_receipt",
+                            "closure_evidence_status": "pending",
+                            "last_checked_at_utc": "2026-05-05T05:05:53Z",
+                        },
+                        "peer_spd_hinge": {
+                            "receipt_status": "pending_external_submission_receipt",
+                            "closure_evidence_status": "pending",
+                            "last_checked_at_utc": "2026-05-05T05:05:53Z",
+                        },
+                        "korean_public_structures": {
+                            "receipt_status": "pending_external_submission_receipt",
+                            "closure_evidence_status": "pending",
+                            "last_checked_at_utc": "2026-05-05T05:05:53Z",
+                        },
+                    },
+                }
+            ),
+        )
+        archive.writestr(
+            "artifacts/residual_holdout_closure_updates.json",
+            json.dumps(
+                {
+                    "schema_version": "residual-holdout-closure-updates.v1",
+                    "updates": {
+                        "RH-001": {
+                            "closure_evidence_status": "pending",
+                            "last_checked_at_utc": "2026-05-05T05:06:07Z",
+                        },
+                        "RH-002": {
+                            "closure_evidence_path": "release_evidence/productization/RH-002.cross_validation.json",
+                            "closure_evidence_status": "attached",
+                            "last_checked_at_utc": "2026-05-05T05:06:07Z",
+                        },
+                        "RH-003": {
+                            "closure_evidence_status": "pending",
+                            "last_checked_at_utc": "2026-05-05T05:06:07Z",
+                        },
+                    },
+                }
+            ),
         )
 
     proc = subprocess.run(
@@ -356,6 +439,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
             str(commercial_source),
             "--external-benchmark-submission-readiness",
             str(external_submission),
+            "--external-benchmark-submission-updates",
+            str(external_updates),
             "--residual-holdout-closure-updates",
             str(residual_updates),
             "--p1-readiness-out",
@@ -377,13 +462,37 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["contract_pass"] is True
     assert external_submission.exists()
+    assert external_updates.exists()
+    assert residual_updates.exists()
     external_step = next(
         step for step in payload["steps"] if step["label"] == "external benchmark submission readiness"
     )
+    external_updates_step = next(
+        step for step in payload["steps"] if step["label"] == "external benchmark submission updates"
+    )
+    residual_updates_step = next(
+        step for step in payload["steps"] if step["label"] == "residual holdout closure updates"
+    )
     assert external_step["hydrated_from_source"] is True
     assert external_step["source_evidence"].endswith("project_package.zip")
+    assert external_updates_step["hydrated_from_source"] is True
+    assert residual_updates_step["hydrated_from_source"] is True
+    assert payload["publication_sidecars_pass"] is True
+    assert external_updates_step["all_expected_updates_present"] is True
+    assert residual_updates_step["all_expected_updates_present"] is True
     assert payload["artifacts"]["external_benchmark_submission_readiness"] == str(external_submission)
+    assert payload["artifacts"]["external_benchmark_submission_updates"] == str(external_updates)
+    assert payload["artifacts"]["residual_holdout_closure_updates"] == str(residual_updates)
     assert payload["p1_operational_queues"]["summary"]["external_submission_queue_count"] == 4
+    assert payload["p1_operational_queues"]["summary"]["external_submission_updates_applied_count"] == 4
+    assert payload["p1_operational_queues"]["summary"]["external_submission_receipt_attached_count"] == 1
+    assert payload["p1_benchmark_breadth_status"]["summary"]["external_benchmark_submission"][
+        "external_benchmark_submission_updates_applied_count"
+    ] == 4
+    assert payload["p1_benchmark_breadth_status"]["summary"]["external_benchmark_submission"][
+        "submission_receipt_attached_count"
+    ] == 1
+    assert payload["p1_operational_queues"]["summary"]["residual_holdout_closure_evidence_attached_count"] == 1
 
 
 def test_materialize_clean_checkout_evidence_chain_keeps_contract_blocked_without_p0_closure(
