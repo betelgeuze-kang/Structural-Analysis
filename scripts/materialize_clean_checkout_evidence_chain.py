@@ -574,6 +574,64 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     if operational_temp_dir is not None:
         operational_temp_dir.cleanup()
 
+    p1_evidence_intake_template_step: dict[str, Any] | None = None
+    p1_evidence_intake_template_payload: dict[str, Any] = {}
+    if args.p1_evidence_intake_template_out:
+        if not args.p1_operational_queues_out:
+            p1_evidence_intake_template_step = {
+                "label": "P1 evidence intake template",
+                "path": str(args.p1_evidence_intake_template_out),
+                "ok": False,
+                "returncode": 2,
+                "reason": "p1_operational_queues_out_required",
+            }
+        elif operational_step is not None and not operational_step.get("ok"):
+            p1_evidence_intake_template_step = {
+                "label": "P1 evidence intake template",
+                "path": str(args.p1_evidence_intake_template_out),
+                "ok": False,
+                "returncode": 2,
+                "reason": "p1_operational_queues_failed",
+            }
+        elif not args.p1_operational_queues_out.exists():
+            p1_evidence_intake_template_step = {
+                "label": "P1 evidence intake template",
+                "path": str(args.p1_evidence_intake_template_out),
+                "ok": False,
+                "returncode": 2,
+                "reason": "p1_operational_queues_missing",
+            }
+        else:
+            template_cmd = [
+                sys.executable,
+                "scripts/generate_p1_evidence_intake_template.py",
+                "--p1-operational-queues",
+                str(args.p1_operational_queues_out),
+                "--out",
+                str(args.p1_evidence_intake_template_out),
+                "--json",
+            ]
+            if args.p1_evidence_intake_template_out_md:
+                template_cmd.extend(["--out-md", str(args.p1_evidence_intake_template_out_md)])
+            p1_evidence_intake_template_step = _run_json_command(template_cmd)
+            p1_evidence_intake_template_step.update(
+                {
+                    "label": "P1 evidence intake template",
+                    "path": str(args.p1_evidence_intake_template_out),
+                    "markdown_path": (
+                        str(args.p1_evidence_intake_template_out_md)
+                        if args.p1_evidence_intake_template_out_md
+                        else ""
+                    ),
+                }
+            )
+            p1_evidence_intake_template_payload = (
+                p1_evidence_intake_template_step.get("json")
+                if isinstance(p1_evidence_intake_template_step.get("json"), dict)
+                else {}
+            )
+        steps.append(p1_evidence_intake_template_step)
+
     midas_payload = _json_summary(args.midas_kds_validation_report)
     commercial_payload = _json_summary(args.commercial_readiness)
     row_payload = _json_summary(args.row_provenance)
@@ -601,6 +659,13 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     operational_queues_pass = bool(
         operational_step is None or (operational_step.get("ok") and operational_payload.get("contract_pass", False))
     )
+    p1_evidence_intake_template_pass = bool(
+        p1_evidence_intake_template_step is None
+        or (
+            p1_evidence_intake_template_step.get("ok")
+            and p1_evidence_intake_template_payload.get("template_kind") == "p1_evidence_intake_fill_in"
+        )
+    )
     publication_sidecars_pass = bool(
         external_submission_updates_step.get("ok") and residual_holdout_updates_step.get("ok")
     )
@@ -609,6 +674,7 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         and p0_closure_evidence_consumed
         and p1_benchmark_execution_unblocked
         and operational_queues_pass
+        and p1_evidence_intake_template_pass
         and publication_sidecars_pass
     )
     return {
@@ -634,6 +700,12 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             "residual_holdout_closure_updates": str(args.residual_holdout_closure_updates),
             "row_provenance": str(args.row_provenance),
             "p1_operational_queues": str(args.p1_operational_queues_out) if args.p1_operational_queues_out else "",
+            "p1_evidence_intake_template": (
+                str(args.p1_evidence_intake_template_out) if args.p1_evidence_intake_template_out else ""
+            ),
+            "p1_evidence_intake_template_md": (
+                str(args.p1_evidence_intake_template_out_md) if args.p1_evidence_intake_template_out_md else ""
+            ),
         },
         "release_publication_evidence_status": (
             publication_step.get("json", {}) if isinstance(publication_step, dict) else {}
@@ -651,6 +723,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "p1_benchmark_breadth_status": p1_benchmark,
         "p1_operational_queues": operational_payload,
         "p1_operational_queues_pass": operational_queues_pass,
+        "p1_evidence_intake_template": p1_evidence_intake_template_payload,
+        "p1_evidence_intake_template_pass": p1_evidence_intake_template_pass,
         "p0_release_blocker": bool(p1_readiness.get("p0_release_blocker", False)),
         "p1_execution_unblocked": bool(p1_readiness.get("p1_execution_unblocked", False)),
         "p1_benchmark_execution_unblocked": p1_benchmark_execution_unblocked,
@@ -711,6 +785,8 @@ def main() -> int:
     parser.add_argument("--p1-benchmark-out", type=Path, default=None)
     parser.add_argument("--p1-operational-queues-out", type=Path, default=None)
     parser.add_argument("--p1-operational-queues-out-md", type=Path, default=None)
+    parser.add_argument("--p1-evidence-intake-template-out", type=Path, default=None)
+    parser.add_argument("--p1-evidence-intake-template-out-md", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--force-hydrate", action="store_true")

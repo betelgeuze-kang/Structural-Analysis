@@ -180,6 +180,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     p1_breadth = tmp_path / "generated" / "p1-benchmark-breadth-status.json"
     p1_operational = tmp_path / "generated" / "p1-operational-queues" / "p1_operational_queues.json"
     p1_operational_md = tmp_path / "generated" / "p1-operational-queues" / "p1_operational_queues.md"
+    p1_intake_template = tmp_path / "generated" / "p1-evidence-intake.template.json"
+    p1_intake_template_md = tmp_path / "generated" / "p1-evidence-intake.template.md"
     out = tmp_path / "generated" / "clean-checkout-evidence-chain.json"
 
     _write_json(manifest, _manifest())
@@ -271,6 +273,10 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
         str(p1_operational),
         "--p1-operational-queues-out-md",
         str(p1_operational_md),
+        "--p1-evidence-intake-template-out",
+        str(p1_intake_template),
+        "--p1-evidence-intake-template-out-md",
+        str(p1_intake_template_md),
         "--json",
         "--out",
         str(out),
@@ -303,7 +309,14 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert payload["p1_operational_queues"]["summary"]["residual_holdout_work_item_count"] == 3
     assert payload["p1_operational_queues"]["summary"]["residual_holdout_open_count"] == 2
     assert payload["p1_operational_queues"]["summary"]["residual_holdout_closure_evidence_attached_count"] == 1
+    assert payload["p1_evidence_intake_template_pass"] is True
+    assert payload["p1_evidence_intake_template"]["template_kind"] == "p1_evidence_intake_fill_in"
+    assert payload["p1_evidence_intake_template"]["summary"]["external_expected_queue_count"] == 4
+    assert payload["p1_evidence_intake_template"]["summary"]["residual_expected_work_item_count"] == 3
+    assert payload["p1_evidence_intake_template"]["summary"]["empty_required_field_count"] == 15
     assert payload["artifacts"]["residual_holdout_closure_updates"] == str(residual_updates)
+    assert payload["artifacts"]["p1_evidence_intake_template"] == str(p1_intake_template)
+    assert payload["artifacts"]["p1_evidence_intake_template_md"] == str(p1_intake_template_md)
     assert payload["p1_readiness_status"]["p1_inputs_ready"] is True
     assert payload["p1_readiness_status"]["p1_execution_unblocked"] is True
     assert payload["p1_benchmark_breadth_status"]["benchmark_breadth_inputs_ready"] is True
@@ -319,6 +332,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert p1_breadth.exists()
     assert p1_operational.exists()
     assert p1_operational_md.exists()
+    assert p1_intake_template.exists()
+    assert p1_intake_template_md.exists()
 
 
 def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_from_release_package(
