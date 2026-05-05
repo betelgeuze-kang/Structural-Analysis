@@ -429,6 +429,49 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     )
     steps.append(residual_holdout_updates_step)
 
+    p1_evidence_sidecar_build_step: dict[str, Any] | None = None
+    p1_evidence_sidecar_build_payload: dict[str, Any] = {}
+    if args.p1_evidence_intake:
+        sidecar_build_cmd = [
+            sys.executable,
+            "scripts/build_p1_evidence_sidecar_updates.py",
+            "--intake-manifest",
+            str(args.p1_evidence_intake),
+            "--base-external-updates",
+            str(args.external_benchmark_submission_updates),
+            "--base-residual-updates",
+            str(args.residual_holdout_closure_updates),
+            "--external-out",
+            str(args.external_benchmark_submission_updates),
+            "--residual-out",
+            str(args.residual_holdout_closure_updates),
+            "--repo-root",
+            str(Path.cwd()),
+            "--require-complete",
+            "--fail-open",
+            "--json",
+        ]
+        if args.p1_evidence_sidecar_build_summary_out:
+            sidecar_build_cmd.extend(["--summary-out", str(args.p1_evidence_sidecar_build_summary_out)])
+        p1_evidence_sidecar_build_step = _run_json_command(sidecar_build_cmd)
+        p1_evidence_sidecar_build_step.update(
+            {
+                "label": "P1 evidence sidecar build",
+                "path": str(args.p1_evidence_intake),
+                "summary_path": (
+                    str(args.p1_evidence_sidecar_build_summary_out)
+                    if args.p1_evidence_sidecar_build_summary_out
+                    else ""
+                ),
+            }
+        )
+        p1_evidence_sidecar_build_payload = (
+            p1_evidence_sidecar_build_step.get("json")
+            if isinstance(p1_evidence_sidecar_build_step.get("json"), dict)
+            else {}
+        )
+        steps.append(p1_evidence_sidecar_build_step)
+
     evidence_sidecar_preflight_step = _run_json_command(
         [
             sys.executable,
@@ -666,6 +709,13 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             and p1_evidence_intake_template_payload.get("template_kind") == "p1_evidence_intake_fill_in"
         )
     )
+    p1_evidence_sidecar_build_pass = bool(
+        p1_evidence_sidecar_build_step is None
+        or (
+            p1_evidence_sidecar_build_step.get("ok")
+            and p1_evidence_sidecar_build_payload.get("contract_pass", False)
+        )
+    )
     publication_sidecars_pass = bool(
         external_submission_updates_step.get("ok") and residual_holdout_updates_step.get("ok")
     )
@@ -675,6 +725,7 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         and p1_benchmark_execution_unblocked
         and operational_queues_pass
         and p1_evidence_intake_template_pass
+        and p1_evidence_sidecar_build_pass
         and publication_sidecars_pass
     )
     return {
@@ -700,6 +751,12 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             "residual_holdout_closure_updates": str(args.residual_holdout_closure_updates),
             "row_provenance": str(args.row_provenance),
             "p1_operational_queues": str(args.p1_operational_queues_out) if args.p1_operational_queues_out else "",
+            "p1_evidence_intake": str(args.p1_evidence_intake) if args.p1_evidence_intake else "",
+            "p1_evidence_sidecar_build_summary": (
+                str(args.p1_evidence_sidecar_build_summary_out)
+                if args.p1_evidence_sidecar_build_summary_out
+                else ""
+            ),
             "p1_evidence_intake_template": (
                 str(args.p1_evidence_intake_template_out) if args.p1_evidence_intake_template_out else ""
             ),
@@ -718,6 +775,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "row_provenance": row_payload,
         "external_benchmark_submission_updates": external_submission_updates_step,
         "residual_holdout_closure_updates": residual_holdout_updates_step,
+        "p1_evidence_sidecar_build": p1_evidence_sidecar_build_payload,
+        "p1_evidence_sidecar_build_pass": p1_evidence_sidecar_build_pass,
         "p1_evidence_sidecar_preflight": p1_evidence_sidecar_preflight,
         "p1_readiness_status": p1_readiness,
         "p1_benchmark_breadth_status": p1_benchmark,
@@ -785,6 +844,8 @@ def main() -> int:
     parser.add_argument("--p1-benchmark-out", type=Path, default=None)
     parser.add_argument("--p1-operational-queues-out", type=Path, default=None)
     parser.add_argument("--p1-operational-queues-out-md", type=Path, default=None)
+    parser.add_argument("--p1-evidence-intake", type=Path, default=None)
+    parser.add_argument("--p1-evidence-sidecar-build-summary-out", type=Path, default=None)
     parser.add_argument("--p1-evidence-intake-template-out", type=Path, default=None)
     parser.add_argument("--p1-evidence-intake-template-out-md", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=None)

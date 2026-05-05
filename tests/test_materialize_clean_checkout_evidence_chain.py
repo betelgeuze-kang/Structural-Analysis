@@ -8,6 +8,8 @@ from pathlib import Path
 
 
 SCRIPT = Path("scripts/materialize_clean_checkout_evidence_chain.py")
+QUEUE_IDS = ["hardest_external_10case", "tpu_hffb", "peer_spd_hinge", "korean_public_structures"]
+RH_IDS = ["RH-001", "RH-002", "RH-003"]
 
 
 def _write_json(path: Path, payload: dict) -> None:
@@ -160,6 +162,65 @@ def _p0_status() -> dict:
         "gates": [],
         "next_action": "promote release manifest and proceed to P1/P2 breadth work",
     }
+
+
+def _pending_external_updates() -> dict:
+    return {
+        "schema_version": "external-benchmark-submission-updates.v1",
+        "updates": {
+            queue_id: {
+                "receipt_status": "pending_external_submission_receipt",
+                "closure_evidence_status": "pending",
+                "last_checked_at_utc": "2026-05-05T04:05:06Z",
+            }
+            for queue_id in QUEUE_IDS
+        },
+    }
+
+
+def _pending_residual_updates() -> dict:
+    return {
+        "schema_version": "residual-holdout-closure-updates.v1",
+        "updates": {
+            work_item_id: {
+                "closure_evidence_status": "pending",
+                "last_checked_at_utc": "2026-05-05T04:05:06Z",
+            }
+            for work_item_id in RH_IDS
+        },
+    }
+
+
+def _completed_intake(path: Path, evidence_root: Path) -> None:
+    residual_rows = {}
+    for work_item_id in RH_IDS:
+        evidence = evidence_root / f"{work_item_id}.closure.json"
+        _write_json(evidence, {"work_item_id": work_item_id, "contract_pass": True})
+        residual_rows[work_item_id] = {
+            "work_item_id": work_item_id,
+            "closure_evidence_path": str(evidence),
+            "last_checked_at_utc": "2026-05-05T04:05:06Z",
+            "closed_at_utc": "2026-05-05T04:06:07Z",
+        }
+    _write_json(
+        path,
+        {
+            "schema_version": "p1-evidence-sidecar-intake.v1",
+            "generated_at": "2026-05-05T04:00:00Z",
+            "external_benchmark_receipts": {
+                queue_id: {
+                    "work_item_id": f"EB-{index:03d}",
+                    "queue_id": queue_id,
+                    "submission_id": f"p1-{queue_id.replace('_', '-')}",
+                    "receipt_url": f"https://bench.example.test/receipts/{queue_id}",
+                    "submitted_at_utc": "2026-05-05T04:02:03Z",
+                    "last_checked_at_utc": "2026-05-05T04:03:04Z",
+                }
+                for index, queue_id in enumerate(QUEUE_IDS, start=1)
+            },
+            "residual_holdout_closures": residual_rows,
+        },
+    )
 
 
 def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordered_reports(tmp_path: Path) -> None:
@@ -334,6 +395,115 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert p1_operational_md.exists()
     assert p1_intake_template.exists()
     assert p1_intake_template_md.exists()
+
+
+def test_materialize_clean_checkout_evidence_chain_builds_sidecars_from_completed_intake(
+    tmp_path: Path,
+) -> None:
+    manifest = tmp_path / "real_project_corpus_seed_manifest.json"
+    p0_status = tmp_path / "published" / "p0-status.json"
+    evidence_index = tmp_path / "published" / "release-publication-evidence-index.json"
+    midas_source = tmp_path / "release_evidence" / "midas" / "midas_kds_geometry_bridge_validation_report.json"
+    commercial_source = tmp_path / "release_evidence" / "commercial" / "commercial_readiness_report.json"
+    external_submission = tmp_path / "release_evidence" / "external" / "external_benchmark_submission_readiness.json"
+    external_updates = tmp_path / "generated" / "external_benchmark_submission_updates.json"
+    residual_updates = tmp_path / "generated" / "residual_holdout_closure_updates.json"
+    intake = tmp_path / "p1-evidence-intake.json"
+    build_summary = tmp_path / "generated" / "p1-evidence-sidecar-build-summary.json"
+    midas_target = tmp_path / "generated" / "midas_kds_geometry_bridge_validation_report.json"
+    commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
+    coverage = tmp_path / "generated" / "real_project_parser_coverage_matrix.json"
+    peer = tmp_path / "generated" / "peer_tbi_benchmark_metric_records.json"
+    row_provenance = tmp_path / "generated" / "real_project_row_provenance_report.json"
+    p1_status = tmp_path / "generated" / "p1-readiness-status.json"
+    p1_breadth = tmp_path / "generated" / "p1-benchmark-breadth-status.json"
+    p1_operational = tmp_path / "generated" / "p1-operational-queues.json"
+    out = tmp_path / "generated" / "clean-checkout-evidence-chain.json"
+
+    _write_json(manifest, _manifest())
+    _write_json(p0_status, _p0_status())
+    _write_json(
+        evidence_index,
+        {
+            "schema_version": "release-publication-evidence-index.v1",
+            "paths": {"p0_status_json": str(p0_status)},
+        },
+    )
+    _write_json(midas_source, _midas_report())
+    _write_json(commercial_source, _commercial_report())
+    _write_json(external_submission, _external_submission())
+    _write_json(external_updates, _pending_external_updates())
+    _write_json(residual_updates, _pending_residual_updates())
+    _completed_intake(intake, tmp_path / "evidence")
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--manifest",
+            str(manifest),
+            "--publication-evidence-index",
+            str(evidence_index),
+            "--coverage-matrix",
+            str(coverage),
+            "--peer-metric-records",
+            str(peer),
+            "--row-provenance",
+            str(row_provenance),
+            "--midas-kds-validation-report",
+            str(midas_target),
+            "--midas-kds-source-evidence",
+            str(midas_source),
+            "--commercial-readiness",
+            str(commercial_target),
+            "--commercial-readiness-source-evidence",
+            str(commercial_source),
+            "--external-benchmark-submission-readiness",
+            str(external_submission),
+            "--external-benchmark-submission-updates",
+            str(external_updates),
+            "--residual-holdout-closure-updates",
+            str(residual_updates),
+            "--p1-readiness-out",
+            str(p1_status),
+            "--p1-benchmark-out",
+            str(p1_breadth),
+            "--p1-operational-queues-out",
+            str(p1_operational),
+            "--p1-evidence-intake",
+            str(intake),
+            "--p1-evidence-sidecar-build-summary-out",
+            str(build_summary),
+            "--json",
+            "--out",
+            str(out),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["contract_pass"] is True
+    assert payload["p1_evidence_sidecar_build_pass"] is True
+    assert payload["p1_evidence_sidecar_build"]["contract_pass"] is True
+    assert payload["p1_evidence_intake_ready"] is True
+    assert payload["p1_evidence_sidecar_preflight"]["contract_pass"] is True
+    assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_attached_count"] == 4
+    assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_closure_evidence_attached_count"] == 4
+    assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 3
+    assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closure_evidence_attached_count"] == 3
+    assert payload["p1_operational_queues"]["summary"]["external_submission_receipt_attached_count"] == 4
+    assert payload["p1_operational_queues"]["summary"]["residual_holdout_open_count"] == 0
+    assert payload["artifacts"]["p1_evidence_intake"] == str(intake)
+    assert payload["artifacts"]["p1_evidence_sidecar_build_summary"] == str(build_summary)
+    assert build_summary.exists()
+
+    external_payload = json.loads(external_updates.read_text(encoding="utf-8"))
+    residual_payload = json.loads(residual_updates.read_text(encoding="utf-8"))
+    assert all(row["receipt_status"] == "attached" for row in external_payload["updates"].values())
+    assert all(row["status"] == "closed" for row in residual_payload["updates"].values())
 
 
 def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_from_release_package(
