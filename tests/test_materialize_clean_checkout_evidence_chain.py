@@ -394,6 +394,12 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 0
     assert payload["external_benchmark_submission_updates"]["all_expected_updates_present"] is True
     assert payload["residual_holdout_closure_updates"]["all_expected_updates_present"] is True
+    assert payload["external_benchmark_submission_updates_final"]["updated_by_p1_evidence_intake"] is False
+    assert payload["external_benchmark_submission_updates_final"]["external_receipt_attached_count"] == 0
+    assert payload["external_benchmark_submission_updates_final"]["external_receipt_pending_count"] == 4
+    assert payload["residual_holdout_closure_updates_final"]["updated_by_p1_evidence_intake"] is False
+    assert payload["residual_holdout_closure_updates_final"]["residual_closed_count"] == 0
+    assert payload["residual_holdout_closure_updates_final"]["residual_closure_pending_count"] == 3
     assert payload["p1_operational_queues_pass"] is True
     assert payload["p1_operational_queues"]["summary"]["external_submission_queue_count"] == 4
     assert payload["p1_operational_queues"]["summary"]["external_submission_updates_applied_count"] == 4
@@ -524,6 +530,12 @@ def test_materialize_clean_checkout_evidence_chain_builds_sidecars_from_complete
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_closure_evidence_attached_count"] == 4
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 3
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closure_evidence_attached_count"] == 3
+    assert payload["external_benchmark_submission_updates_final"]["updated_by_p1_evidence_intake"] is True
+    assert payload["external_benchmark_submission_updates_final"]["external_receipt_attached_count"] == 4
+    assert payload["external_benchmark_submission_updates_final"]["external_closure_evidence_attached_count"] == 4
+    assert payload["residual_holdout_closure_updates_final"]["updated_by_p1_evidence_intake"] is True
+    assert payload["residual_holdout_closure_updates_final"]["residual_closed_count"] == 3
+    assert payload["residual_holdout_closure_updates_final"]["residual_closure_evidence_attached_count"] == 3
     assert payload["p1_operational_queues"]["summary"]["external_submission_receipt_attached_count"] == 4
     assert payload["p1_operational_queues"]["summary"]["residual_holdout_open_count"] == 0
     assert payload["artifacts"]["p1_evidence_intake"] == str(intake)
@@ -633,6 +645,10 @@ def test_materialize_clean_checkout_evidence_chain_reports_incomplete_intake_bui
     assert payload["p1_evidence_intake_ready"] is False
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_attached_count"] == 0
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 0
+    assert payload["external_benchmark_submission_updates_final"]["updated_by_p1_evidence_intake"] is False
+    assert payload["external_benchmark_submission_updates_final"]["external_receipt_attached_count"] == 0
+    assert payload["residual_holdout_closure_updates_final"]["updated_by_p1_evidence_intake"] is False
+    assert payload["residual_holdout_closure_updates_final"]["residual_closed_count"] == 0
 
     summary = json.loads(build_summary.read_text(encoding="utf-8"))
     assert summary == payload["p1_evidence_sidecar_build"]
@@ -804,6 +820,11 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_attached_count"] == 1
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_pending_count"] == 3
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 0
+    assert payload["external_benchmark_submission_updates_final"]["updated_by_p1_evidence_intake"] is False
+    assert payload["external_benchmark_submission_updates_final"]["external_receipt_attached_count"] == 1
+    assert payload["external_benchmark_submission_updates_final"]["external_receipt_pending_count"] == 3
+    assert payload["residual_holdout_closure_updates_final"]["updated_by_p1_evidence_intake"] is False
+    assert payload["residual_holdout_closure_updates_final"]["residual_closed_count"] == 0
     assert external_updates_step["all_expected_updates_present"] is True
     assert residual_updates_step["all_expected_updates_present"] is True
     assert payload["artifacts"]["external_benchmark_submission_readiness"] == str(external_submission)

@@ -317,6 +317,33 @@ def _materialize_external_submission_readiness(
     )
 
 
+def _p1_sidecar_final_summary(
+    *,
+    label: str,
+    path: Path,
+    expected_update_ids: tuple[str, ...],
+    preflight_summary: dict[str, Any],
+    preflight_keys: tuple[str, ...],
+    updated_by_intake: bool,
+) -> dict[str, Any]:
+    summary = _json_summary_or_present(
+        path,
+        ok_when_present=True,
+        expected_update_ids=expected_update_ids,
+    )
+    summary.update(
+        {
+            "label": label,
+            "final_sidecar_state": True,
+            "updated_by_p1_evidence_intake": updated_by_intake,
+        }
+    )
+    for key in preflight_keys:
+        if key in preflight_summary:
+            summary[key] = preflight_summary[key]
+    return summary
+
+
 def _run_command(command: list[str]) -> dict[str, Any]:
     proc = subprocess.run(command, check=False, capture_output=True, text=True)
     return {
@@ -685,6 +712,41 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         if isinstance(evidence_sidecar_preflight_step.get("json"), dict)
         else {}
     )
+    p1_evidence_sidecar_preflight_summary = (
+        p1_evidence_sidecar_preflight.get("summary")
+        if isinstance(p1_evidence_sidecar_preflight.get("summary"), dict)
+        else {}
+    )
+    external_submission_updates_final = _p1_sidecar_final_summary(
+        label="external benchmark submission updates final",
+        path=args.external_benchmark_submission_updates,
+        expected_update_ids=EXPECTED_EXTERNAL_BENCHMARK_UPDATE_IDS,
+        preflight_summary=p1_evidence_sidecar_preflight_summary,
+        preflight_keys=(
+            "external_expected_queue_count",
+            "external_update_row_count",
+            "external_expected_rows_present",
+            "external_receipt_attached_count",
+            "external_closure_evidence_attached_count",
+            "external_receipt_pending_count",
+        ),
+        updated_by_intake=bool(p1_evidence_sidecar_build_step and p1_evidence_sidecar_build_step.get("ok")),
+    )
+    residual_holdout_updates_final = _p1_sidecar_final_summary(
+        label="residual holdout closure updates final",
+        path=args.residual_holdout_closure_updates,
+        expected_update_ids=EXPECTED_RESIDUAL_HOLDOUT_UPDATE_IDS,
+        preflight_summary=p1_evidence_sidecar_preflight_summary,
+        preflight_keys=(
+            "residual_expected_work_item_count",
+            "residual_update_row_count",
+            "residual_expected_rows_present",
+            "residual_closed_count",
+            "residual_closure_evidence_attached_count",
+            "residual_closure_pending_count",
+        ),
+        updated_by_intake=bool(p1_evidence_sidecar_build_step and p1_evidence_sidecar_build_step.get("ok")),
+    )
     inputs_contract_pass = bool(
         (publication_step is None or publication_step.get("ok"))
         and midas_payload.get("ok")
@@ -775,6 +837,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "row_provenance": row_payload,
         "external_benchmark_submission_updates": external_submission_updates_step,
         "residual_holdout_closure_updates": residual_holdout_updates_step,
+        "external_benchmark_submission_updates_final": external_submission_updates_final,
+        "residual_holdout_closure_updates_final": residual_holdout_updates_final,
         "p1_evidence_sidecar_build": p1_evidence_sidecar_build_payload,
         "p1_evidence_sidecar_build_pass": p1_evidence_sidecar_build_pass,
         "p1_evidence_sidecar_preflight": p1_evidence_sidecar_preflight,
