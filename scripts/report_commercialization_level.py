@@ -16,11 +16,13 @@ if str(SCRIPT_DIR) not in sys.path:
 from check_p1_benchmark_breadth_status import (  # noqa: E402
     DEFAULT_COMMERCIAL_READINESS,
     DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
     DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     build_status as build_p1_benchmark_breadth_status,
     _commercial_gate,
     _external_submission_queue_gate,
     _load_json,
+    _load_submission_updates,
 )
 
 
@@ -65,6 +67,12 @@ def _score_from_gates(
 
     queue_count = int(external_gate.get("submission_queue_count", 0) or 0)
     receipt_attached = int(external_gate.get("submission_receipt_attached_count", 0) or 0)
+    updates_applied = int(external_gate.get("external_benchmark_submission_updates_applied_count", 0) or 0)
+    last_checked = int(external_gate.get("submission_last_checked_count", 0) or 0)
+    if queue_count and updates_applied >= queue_count and last_checked >= queue_count:
+        accelerators.append("external_submission_update_sidecar_applied")
+    elif updates_applied:
+        accelerators.append("external_submission_update_sidecar_partially_applied")
     if queue_count and receipt_attached >= queue_count:
         score += 1.0
         accelerators.append("external_submission_receipts_closed")
@@ -138,6 +146,7 @@ def build_report(
     *,
     commercial_readiness: Path = DEFAULT_COMMERCIAL_READINESS,
     external_benchmark_submission_readiness: Path = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    external_benchmark_submission_updates: Path | None = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
     residual_holdout_closure_updates: Path | None = DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     p1_benchmark_breadth_status: Path = DEFAULT_P1_BENCHMARK_BREADTH_STATUS,
     p1_operational_queues: Path = DEFAULT_P1_OPERATIONAL_QUEUES,
@@ -146,13 +155,18 @@ def build_report(
         commercial_readiness,
         residual_holdout_closure_updates=residual_holdout_closure_updates,
     )
-    external_gate = _external_submission_queue_gate(external_benchmark_submission_readiness)
+    external_submission_updates = _load_submission_updates(external_benchmark_submission_updates)
+    external_gate = _external_submission_queue_gate(
+        external_benchmark_submission_readiness,
+        submission_updates=external_submission_updates,
+    )
     p1_benchmark_payload = (
         _load_json(p1_benchmark_breadth_status)
         if p1_benchmark_breadth_status.exists()
         else build_p1_benchmark_breadth_status(
             commercial_readiness=commercial_readiness,
             external_benchmark_submission_readiness=external_benchmark_submission_readiness,
+            external_benchmark_submission_updates=external_benchmark_submission_updates,
             residual_holdout_closure_updates=residual_holdout_closure_updates,
         )
     )
@@ -203,7 +217,15 @@ def build_report(
             "submission_queue_count": int(external_gate.get("submission_queue_count", 0) or 0),
             "submission_receipt_attached_count": int(external_gate.get("submission_receipt_attached_count", 0) or 0),
             "submission_receipt_pending_count": int(external_gate.get("submission_receipt_pending_count", 0) or 0),
+            "submission_last_checked_count": int(external_gate.get("submission_last_checked_count", 0) or 0),
             "closure_evidence_attached_count": int(external_gate.get("closure_evidence_attached_count", 0) or 0),
+            "external_benchmark_submission_updates_path": str(external_benchmark_submission_updates or ""),
+            "external_benchmark_submission_updates_present": bool(
+                external_benchmark_submission_updates and external_benchmark_submission_updates.exists()
+            ),
+            "external_benchmark_submission_updates_applied_count": int(
+                external_gate.get("external_benchmark_submission_updates_applied_count", 0) or 0
+            ),
         },
         "p1_benchmark_execution_unblocked": bool(
             p1_benchmark_payload.get("p1_benchmark_execution_unblocked", False)
@@ -214,6 +236,7 @@ def build_report(
         "artifacts": {
             "commercial_readiness": str(commercial_readiness),
             "external_benchmark_submission_readiness": str(external_benchmark_submission_readiness),
+            "external_benchmark_submission_updates": str(external_benchmark_submission_updates or ""),
             "residual_holdout_closure_updates": str(residual_holdout_closure_updates or ""),
             "p1_benchmark_breadth_status": str(p1_benchmark_breadth_status),
             "p1_operational_queues": str(p1_operational_queues),
@@ -229,6 +252,10 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"- `summary_line`: `{payload['summary_line']}`",
             f"- `recommended_claim`: `{payload['recommended_claim']}`",
             f"- `contract_pass`: `{bool(payload['contract_pass'])}`",
+            "- `external_benchmark_submission_updates`: "
+            f"`present={bool(payload['external_benchmark_submission']['external_benchmark_submission_updates_present'])}, "
+            f"applied={int(payload['external_benchmark_submission']['external_benchmark_submission_updates_applied_count'])}, "
+            f"last_checked={int(payload['external_benchmark_submission']['submission_last_checked_count'])}`",
             f"- `blockers`: `{', '.join(payload['blockers']) or 'none'}`",
             f"- `accelerators`: `{', '.join(payload['accelerators']) or 'none'}`",
             "",
@@ -243,6 +270,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--external-benchmark-submission-readiness",
         type=Path,
         default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    )
+    parser.add_argument(
+        "--external-benchmark-submission-updates",
+        type=Path,
+        default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
     )
     parser.add_argument(
         "--residual-holdout-closure-updates",
@@ -263,6 +295,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = build_report(
         commercial_readiness=args.commercial_readiness,
         external_benchmark_submission_readiness=args.external_benchmark_submission_readiness,
+        external_benchmark_submission_updates=args.external_benchmark_submission_updates,
         residual_holdout_closure_updates=args.residual_holdout_closure_updates,
         p1_benchmark_breadth_status=args.p1_benchmark_breadth_status,
         p1_operational_queues=args.p1_operational_queues,

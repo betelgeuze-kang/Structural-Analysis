@@ -103,10 +103,33 @@ def _external(path: Path, *, attached_count: int = 0) -> Path:
     )
 
 
+def _external_updates(path: Path) -> Path:
+    return _write_json(
+        path,
+        {
+            "schema_version": "external-benchmark-submission-updates.v1",
+            "updates": {
+                queue_id: {
+                    "receipt_status": "pending_external_submission_receipt",
+                    "last_checked_at_utc": "2026-05-05T05:05:53Z",
+                    "closure_evidence_status": "pending",
+                }
+                for queue_id in [
+                    "hardest_external_10case",
+                    "tpu_hffb",
+                    "peer_spd_hinge",
+                    "korean_public_structures",
+                ]
+            },
+        },
+    )
+
+
 def test_report_commercialization_level_marks_engineer_in_loop_commercial_assist(tmp_path: Path) -> None:
     payload = report_commercialization_level.build_report(
         commercial_readiness=_commercial(tmp_path / "commercial.json"),
         external_benchmark_submission_readiness=_external(tmp_path / "external.json"),
+        external_benchmark_submission_updates=tmp_path / "missing-eb-updates.json",
         p1_benchmark_breadth_status=tmp_path / "missing-p1-breadth.json",
         p1_operational_queues=tmp_path / "missing-ops.json",
     )
@@ -116,6 +139,9 @@ def test_report_commercialization_level_marks_engineer_in_loop_commercial_assist
     assert payload["commercialization_level"] == "L3"
     assert payload["commercialization_level_label"] == "engineer_in_loop_commercial_assist_ready"
     assert payload["commercial_scope"]["full_commercial_replacement_ready"] is False
+    assert payload["external_benchmark_submission"]["external_benchmark_submission_updates_present"] is False
+    assert payload["external_benchmark_submission"]["external_benchmark_submission_updates_applied_count"] == 0
+    assert payload["external_benchmark_submission"]["submission_last_checked_count"] == 0
     assert "not a full autonomous commercial replacement" in payload["recommended_claim"]
     assert "external_submission_receipts_pending=4" in payload["blockers"]
     assert "p1_benchmark_execution_blocked_by_p0_or_execution_gate" in payload["blockers"]
@@ -145,6 +171,7 @@ def test_report_commercialization_level_promotes_when_evidence_closes(tmp_path: 
     payload = report_commercialization_level.build_report(
         commercial_readiness=_commercial(tmp_path / "commercial.json"),
         external_benchmark_submission_readiness=_external(tmp_path / "external.json", attached_count=4),
+        external_benchmark_submission_updates=tmp_path / "missing-eb-updates.json",
         p1_benchmark_breadth_status=p1_breadth,
         p1_operational_queues=ops,
     )
@@ -184,6 +211,7 @@ def test_report_commercialization_level_reads_residual_holdout_sidecar(tmp_path:
     payload = report_commercialization_level.build_report(
         commercial_readiness=_commercial(tmp_path / "commercial.json"),
         external_benchmark_submission_readiness=_external(tmp_path / "external.json"),
+        external_benchmark_submission_updates=tmp_path / "missing-eb-updates.json",
         residual_holdout_closure_updates=rh_updates,
         p1_benchmark_breadth_status=tmp_path / "missing-p1-breadth.json",
         p1_operational_queues=tmp_path / "missing-ops.json",
@@ -193,3 +221,24 @@ def test_report_commercialization_level_reads_residual_holdout_sidecar(tmp_path:
     assert "residual_holdout_closure_evidence_closed" in payload["accelerators"]
     assert all(not blocker.startswith("residual_holdout_closure_pending") for blocker in payload["blockers"])
     assert payload["artifacts"]["residual_holdout_closure_updates"].endswith("rh-updates.json")
+
+
+def test_report_commercialization_level_reads_external_submission_update_sidecar(tmp_path: Path) -> None:
+    eb_updates = _external_updates(tmp_path / "eb-updates.json")
+
+    payload = report_commercialization_level.build_report(
+        commercial_readiness=_commercial(tmp_path / "commercial.json"),
+        external_benchmark_submission_readiness=_external(tmp_path / "external.json"),
+        external_benchmark_submission_updates=eb_updates,
+        p1_benchmark_breadth_status=tmp_path / "missing-p1-breadth.json",
+        p1_operational_queues=tmp_path / "missing-ops.json",
+    )
+
+    external = payload["external_benchmark_submission"]
+    assert external["external_benchmark_submission_updates_present"] is True
+    assert external["external_benchmark_submission_updates_applied_count"] == 4
+    assert external["submission_last_checked_count"] == 4
+    assert external["submission_receipt_attached_count"] == 0
+    assert external["submission_receipt_pending_count"] == 4
+    assert "external_submission_update_sidecar_applied" in payload["accelerators"]
+    assert payload["artifacts"]["external_benchmark_submission_updates"].endswith("eb-updates.json")

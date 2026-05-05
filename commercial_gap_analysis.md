@@ -2,6 +2,13 @@
 
 기준일: `2026-04-21`
 
+> 최신 release-facing 기준은 [docs/commercialization-gap-current-state.md](docs/commercialization-gap-current-state.md)와
+> `scripts/report_commercialization_level.py --external-benchmark-submission-updates <external_benchmark_submission_updates.json> --json`를 우선한다.
+> 현재 상용화 표기는 `Commercial` grade + engineer-in-loop 95-99% coverage이고,
+> `full_commercial_replacement_ready=false`, EB actual receipt `0/4`, RH closure evidence `0/3` 상태다.
+> 아래 `open_gap_counts={P0:0,P1:0,P2:0}`는 2026-04-21 내부 gate closeout 문맥이며
+> 외부 benchmark receipt/RH closure evidence가 실제 첨부됐다는 뜻이 아니다.
+
 ## 목적
 
 이 문서는 현재 저장소의 상용화 수준을 `internal gate closure`와 `commercial tool replacement depth`로 분리해 읽기 위한 실행 메모다.
