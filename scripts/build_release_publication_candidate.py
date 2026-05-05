@@ -84,6 +84,12 @@ def _external_registry_artifact_args(artifacts: list[dict[str, Any]]) -> list[st
         "--external-benchmark-submission-readiness": Path(
             "implementation/phase1/release/external_benchmark_submission_readiness.json"
         ),
+        "--external-benchmark-submission-updates": Path(
+            "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json"
+        ),
+        "--residual-holdout-closure-updates": Path(
+            "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
+        ),
         "--external-benchmark-execution-manifest": Path(
             "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json"
         ),

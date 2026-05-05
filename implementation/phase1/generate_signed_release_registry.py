@@ -756,6 +756,8 @@ def main() -> None:
     p.add_argument("--committee-summary", default="implementation/phase1/release/committee_review/committee_summary.json")
     p.add_argument("--gap-report", default="implementation/phase1/release/release_gap_report.json")
     p.add_argument("--external-benchmark-submission-readiness", default="")
+    p.add_argument("--external-benchmark-submission-updates", default="")
+    p.add_argument("--residual-holdout-closure-updates", default="")
     p.add_argument("--external-benchmark-kickoff-package", default="")
     p.add_argument("--external-benchmark-kickoff-markdown", default="")
     p.add_argument("--external-benchmark-execution-manifest", default="")
@@ -802,6 +804,8 @@ def main() -> None:
         gap_report_path = Path(args.gap_report) if str(args.gap_report).strip() else None
         external_artifact_paths = [
             ("external_benchmark_submission_readiness", Path(args.external_benchmark_submission_readiness) if str(args.external_benchmark_submission_readiness).strip() else None),
+            ("external_benchmark_submission_updates", Path(args.external_benchmark_submission_updates) if str(args.external_benchmark_submission_updates).strip() else None),
+            ("residual_holdout_closure_updates", Path(args.residual_holdout_closure_updates) if str(args.residual_holdout_closure_updates).strip() else None),
             ("external_benchmark_kickoff_package", Path(args.external_benchmark_kickoff_package) if str(args.external_benchmark_kickoff_package).strip() else None),
             ("external_benchmark_kickoff_markdown", Path(args.external_benchmark_kickoff_markdown) if str(args.external_benchmark_kickoff_markdown).strip() else None),
             ("external_benchmark_execution_manifest", Path(args.external_benchmark_execution_manifest) if str(args.external_benchmark_execution_manifest).strip() else None),
@@ -894,6 +898,7 @@ def main() -> None:
             if str(row.get("label", "") or "").startswith(
                 (
                     "external_benchmark_",
+                    "residual_holdout_",
                     "case_onepage_",
                     "audit_review_decision_batch_",
                     "approve_all_submission_",
@@ -992,6 +997,30 @@ def main() -> None:
                         .get("onepage_attestation_status", "")
                     )
                     or ""
+                ),
+                "external_benchmark_submission_updates_present": bool(
+                    external_benchmark_asset_payloads.get("external_benchmark_submission_updates")
+                ),
+                "external_benchmark_submission_update_count": int(
+                    len(
+                        (
+                            external_benchmark_asset_payloads.get("external_benchmark_submission_updates", {})
+                            .get("updates", {})
+                        )
+                        or {}
+                    )
+                ),
+                "residual_holdout_closure_updates_present": bool(
+                    external_benchmark_asset_payloads.get("residual_holdout_closure_updates")
+                ),
+                "residual_holdout_closure_update_count": int(
+                    len(
+                        (
+                            external_benchmark_asset_payloads.get("residual_holdout_closure_updates", {})
+                            .get("updates", {})
+                        )
+                        or {}
+                    )
                 ),
             },
         }
@@ -1183,6 +1212,30 @@ def main() -> None:
                         .get("onepage_attestation_status", "")
                     )
                     or ""
+                ),
+                "external_benchmark_submission_updates_present": bool(
+                    external_benchmark_asset_payloads.get("external_benchmark_submission_updates")
+                ),
+                "external_benchmark_submission_update_count": int(
+                    len(
+                        (
+                            external_benchmark_asset_payloads.get("external_benchmark_submission_updates", {})
+                            .get("updates", {})
+                        )
+                        or {}
+                    )
+                ),
+                "residual_holdout_closure_updates_present": bool(
+                    external_benchmark_asset_payloads.get("residual_holdout_closure_updates")
+                ),
+                "residual_holdout_closure_update_count": int(
+                    len(
+                        (
+                            external_benchmark_asset_payloads.get("residual_holdout_closure_updates", {})
+                            .get("updates", {})
+                        )
+                        or {}
+                    )
                 ),
                 **external_benchmark_execution_provenance,
                 **mgt_export_provenance,

@@ -216,6 +216,17 @@ def test_registry_generation_forwards_release_facing_manifest_assets(tmp_path: P
         return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
 
     monkeypatch.setattr(build_release_publication_candidate.subprocess, "run", fake_run)
+    monkeypatch.chdir(tmp_path)
+    sidecar_root = tmp_path / "implementation" / "phase1" / "release_evidence" / "productization"
+    sidecar_root.mkdir(parents=True)
+    (sidecar_root / "external_benchmark_submission_updates.json").write_text(
+        json.dumps({"updates": {"hardest_external_10case": {"receipt_status": "pending"}}}),
+        encoding="utf-8",
+    )
+    (sidecar_root / "residual_holdout_closure_updates.json").write_text(
+        json.dumps({"updates": {"RH-001": {"closure_evidence_status": "pending"}}}),
+        encoding="utf-8",
+    )
     artifacts = [
         _artifact(
             "external_benchmark_kickoff_package.json",
@@ -258,6 +269,8 @@ def test_registry_generation_forwards_release_facing_manifest_assets(tmp_path: P
 
     assert len(calls) == 2
     assert calls[0] == calls[1] == command
+    assert "--external-benchmark-submission-updates" in command
+    assert "--residual-holdout-closure-updates" in command
     assert "--external-benchmark-kickoff-package" in command
     assert "--external-benchmark-kickoff-markdown" in command
     assert "--case-onepage-attestation-index" in command
