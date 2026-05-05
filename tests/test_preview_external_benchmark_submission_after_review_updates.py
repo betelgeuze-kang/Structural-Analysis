@@ -146,7 +146,12 @@ def test_preview_external_benchmark_submission_after_review_updates_predicts_ful
     assert payload["summary"]["preview_queue_pending_count"] == 0
     assert payload["summary"]["preview_resolution_open_revision_count"] == 0
     assert payload["readiness_preview"]["summary"]["ready_to_start_full_submission_now"] is True
-    assert out.with_suffix(".md").exists()
+    markdown = out.with_suffix(".md").read_text(encoding="utf-8")
+    assert "External Benchmark Submission Readiness Preview" in markdown
+    assert "predicted_reason_code" in markdown
+    assert "PASS_START_NOW_FULL" in markdown
+    assert "connection|high" in markdown
+    assert "approved" in markdown
 
 
 def test_preview_external_benchmark_submission_after_review_updates_blocks_open_revision(tmp_path: Path) -> None:
@@ -198,3 +203,8 @@ def test_preview_external_benchmark_submission_after_review_updates_blocks_open_
     assert payload["summary"]["preview_queue_pending_count"] == 0
     assert payload["summary"]["preview_resolution_open_revision_count"] == 1
     assert "audit_review_resolution_has_open_revisions" in payload["readiness_preview"]["summary"]["blockers"]
+    markdown = out.with_suffix(".md").read_text(encoding="utf-8")
+    assert "External Benchmark Submission Readiness Preview" in markdown
+    assert "ERR_ARCHITECTURE_BLOCKERS" in markdown
+    assert "detail|medium" in markdown
+    assert "rejected" in markdown

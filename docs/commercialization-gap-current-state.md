@@ -86,8 +86,8 @@ P1 상용화 코어 순서는 `MIDAS exact roundtrip -> KDS load combination -> 
 
 1. 현재 feature branch를 promoted manifest commit 위로 정리하거나, `--promoted-manifest-json`로 published manifest evidence를 명시해서 stale local manifest가 P0를 다시 열지 않게 한다.
 2. `scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --p1-readiness-out <p1-readiness-status.json> --p1-benchmark-out <p1-benchmark-breadth-status.json> --p1-operational-queues-out <p1-operational-queues.json> --p1-operational-queues-out-md <p1-operational-queues.md> --json --out <clean-checkout-evidence-chain.json>`로 clean checkout P1 handoff를 한 커맨드로 재현한다.
-3. P1 quality/fallback/benchmark breadth 실행을 refresh하고 hardest 10-case, PEER/SPD, TPU/HFFB, Korean public structures submission queue의 submission id/receipt/lifecycle과 one-page attestation을 최신 evidence로 갱신한다.
-4. `licensed_engineer_review_required`, `legacy_tool_cross_validation_required`, `legal_authority_signoff_required`를 owner/status/work item/SLA/due policy/closure evidence packet template가 있는 residual holdout work queue로 운영한다.
+3. P1 quality/fallback/benchmark breadth 실행을 refresh하고 `preview_external_benchmark_submission_after_review_updates.py`로 external benchmark review updates/receipts의 preview를 확인한 뒤 hardest 10-case, PEER/SPD, TPU/HFFB, Korean public structures submission queue의 submission id/receipt/lifecycle과 one-page attestation을 최신 evidence로 갱신한다.
+4. `materialize_p1_operational_queues.py`로 `external_benchmark_submission_queue/*.receipt_template.json`와 `residual_holdout_queue/*.closure_packet_template.json` sidecar를 생성하고, `licensed_engineer_review_required`, `legacy_tool_cross_validation_required`, `legal_authority_signoff_required`를 owner/status/work item/SLA/due policy/closure evidence packet template가 있는 residual holdout work queue로 운영한다.
 5. release package, committee package, README가 `Commercial` grade와 `full_commercial_replacement_ready=false`를 계속 같이 노출하는지 회귀 테스트로 고정한다.
 
 ## 참고 문서

@@ -94,7 +94,16 @@ def _normalize_external(row: dict[str, Any], *, artifact_root: Path) -> dict[str
         artifact_root / "external_benchmark_submission_queue" / f"{work_item_id or 'external_submission'}.receipt_template.json"
     )
     receipt_status = str(row.get("receipt_status", "") or row.get("submission_receipt_status", "") or "pending")
-    lifecycle = str(row.get("submission_lifecycle_status", "") or row.get("lifecycle_status", "") or "")
+    submission_receipt = str(row.get("submission_receipt", "") or "").strip()
+    if submission_receipt == "pending":
+        submission_receipt = ""
+    lifecycle = str(
+        row.get("submission_lifecycle_status", "")
+        or row.get("submission_lifecycle", "")
+        or row.get("lifecycle", "")
+        or row.get("lifecycle_status", "")
+        or ""
+    )
     return {
         "work_item_id": work_item_id,
         "queue_id": str(row.get("queue_id", "") or ""),
@@ -106,9 +115,10 @@ def _normalize_external(row: dict[str, Any], *, artifact_root: Path) -> dict[str
         "queue_status": str(row.get("queue_status", "") or row.get("status", "") or ""),
         "submission_status": str(row.get("submission_status", "") or lifecycle),
         "submission_lifecycle_status": lifecycle,
-        "receipt_url": str(row.get("receipt_url", "") or row.get("submission_receipt_url", "") or ""),
+        "receipt_url": str(row.get("receipt_url", "") or row.get("submission_receipt_url", "") or submission_receipt),
         "receipt_status": receipt_status,
         "submitted_at_utc": str(row.get("submitted_at_utc", "") or ""),
+        "last_checked_at_utc": str(row.get("last_checked_at_utc", "") or ""),
         "onepage_attestation": str(row.get("onepage_attestation", "") or ""),
         "onepage_attestation_status": str(row.get("onepage_attestation_status", "") or ""),
         "dry_run_evidence": str(row.get("dry_run_evidence", "") or ""),
@@ -179,6 +189,17 @@ def build_operational_queues(
             "external_submission_receipt_pending_count": sum(
                 1 for row in external_items if str(row.get("receipt_status", "") or "").startswith("pending")
             ),
+            "external_submission_receipt_attached_count": sum(
+                1 for row in external_items if str(row.get("receipt_url", "") or "").strip()
+            ),
+            "external_submission_last_checked_count": sum(
+                1 for row in external_items if str(row.get("last_checked_at_utc", "") or "").strip()
+            ),
+            "external_submission_closure_evidence_attached_count": sum(
+                1
+                for row in external_items
+                if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+            ),
             "external_submission_operational": external_operational,
             "residual_holdout_work_item_count": len(residual_items),
             "residual_holdout_open_count": sum(1 for row in residual_items if not _is_closed(row)),
@@ -246,6 +267,7 @@ def write_operational_artifacts(payload: dict[str, Any], *, out: Path, out_md: P
                 "receipt_url": row.get("receipt_url", ""),
                 "receipt_status": row.get("receipt_status", ""),
                 "submitted_at_utc": row.get("submitted_at_utc", ""),
+                "last_checked_at_utc": row.get("last_checked_at_utc", ""),
             },
         )
     for row in residual_items:
@@ -277,14 +299,15 @@ def _markdown(payload: dict[str, Any]) -> str:
         "",
         "## External Benchmark Submission",
         "",
-        "| Work Item | Queue | Submission ID | Owner | Status | Lifecycle | Receipt Status | Receipt URL | Owner Action |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| Work Item | Queue | Submission ID | Owner | Status | Lifecycle | Receipt Status | Receipt URL | Receipt Template | Owner Action |",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for row in payload["queues"]["external_benchmark_submission_work_items"]:
         lines.append(
             f"| {row.get('work_item_id', '')} | {row.get('queue_id', '')} | {row.get('submission_id', '')} | "
             f"{row.get('owner', '')} | {row.get('status', '')} | {row.get('submission_lifecycle_status', '')} | "
             f"{row.get('receipt_status', '')} | {row.get('receipt_url', '') or 'pending'} | "
+            f"{row.get('receipt_template_path', '')} | "
             f"{row.get('owner_action', '')} |"
         )
     lines.extend(

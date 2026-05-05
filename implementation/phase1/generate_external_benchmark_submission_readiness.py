@@ -22,6 +22,9 @@ DEFAULT_PEER_SPD_HINGE_ALIGNMENT_REPORT = Path(
     "implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_refresh_alignment_report.json"
 )
 DEFAULT_OUT = Path("implementation/phase1/release/external_benchmark_submission_readiness.json")
+DEFAULT_SUBMISSION_UPDATES = Path(
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json"
+)
 
 REASONS = {
     "PASS_START_NOW_FULL": "Current release is ready for a full external benchmark submission package.",
@@ -55,6 +58,36 @@ SUBMISSION_LANE_DEFAULTS = {
 
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def _load_submission_updates(path: Path | None) -> dict[str, dict[str, Any]]:
+    if path is None or not path.exists():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    rows: Any = payload
+    if isinstance(payload, dict):
+        rows = payload.get("updates", payload.get("submission_updates", payload))
+        if isinstance(rows, dict) and "external_benchmark_submission_work_items" in rows:
+            rows = rows.get("external_benchmark_submission_work_items", [])
+        elif rows is payload and isinstance(payload.get("queues"), dict):
+            rows = payload["queues"].get("external_benchmark_submission_work_items", payload["queues"])
+        elif rows is payload and "queues" in payload:
+            rows = payload.get("queues", payload)
+        elif rows is payload:
+            rows = payload.get("submission_queue", payload)
+    updates: dict[str, dict[str, Any]] = {}
+    if isinstance(rows, list):
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            queue_id = str(row.get("queue_id", "") or "").strip()
+            if queue_id:
+                updates[queue_id] = row
+    elif isinstance(rows, dict):
+        for queue_id, row in rows.items():
+            if isinstance(row, dict):
+                updates[str(queue_id)] = row
+    return updates
 
 
 def _summary(payload: dict[str, Any]) -> dict[str, Any]:
@@ -149,6 +182,108 @@ def _submission_lifecycle(
     }
 
 
+def _merge_submission_update(
+    row: dict[str, Any],
+    update: dict[str, Any],
+    *,
+    onepage_attestation_status: str,
+) -> dict[str, Any]:
+    if not update:
+        return row
+
+    merged = dict(row)
+    for key in (
+        "submission_id",
+        "receipt_url",
+        "submission_receipt_url",
+        "submitted_at_utc",
+        "last_checked_at_utc",
+        "closure_evidence_path",
+        "closure_evidence_status",
+        "closure_evidence_required",
+    ):
+        if key in update:
+            merged[key] = str(update.get(key, "") or "")
+
+    update_receipt = str(update.get("submission_receipt", "") or "")
+    if update_receipt == "pending":
+        update_receipt = ""
+    receipt_url = str(
+        merged.get("receipt_url", "")
+        or merged.get("submission_receipt_url", "")
+        or update_receipt
+    )
+    closure_evidence_path = str(merged.get("closure_evidence_path", "") or "")
+    submitted_at_utc = str(merged.get("submitted_at_utc", "") or "")
+    if receipt_url:
+        merged["receipt_url"] = receipt_url
+        merged["submission_receipt_url"] = receipt_url
+        merged["submission_receipt"] = receipt_url
+    elif "submission_receipt" in update:
+        merged["submission_receipt"] = str(update.get("submission_receipt", "") or "pending")
+
+    if "closure_evidence_status" not in update and (receipt_url or closure_evidence_path):
+        merged["closure_evidence_status"] = "attached"
+
+    lifecycle = _submission_lifecycle(
+        status=str(merged.get("status", "") or ""),
+        onepage_attestation_status=onepage_attestation_status,
+        receipt_url=receipt_url,
+        closure_evidence_path=closure_evidence_path,
+    )
+    submitted = bool(receipt_url or submitted_at_utc or update.get("submitted", False))
+    receipt_verified = bool(receipt_url or update.get("receipt_verified", False))
+    lifecycle_status = str(
+        update.get("submission_lifecycle_status", "")
+        or update.get("lifecycle", "")
+        or update.get("lifecycle_status", "")
+        or (
+            "submitted_pending_receipt"
+            if submitted and not receipt_verified
+            else lifecycle.get("submission_lifecycle_status", "")
+        )
+    )
+    submission_status = str(update.get("submission_status", "") or lifecycle_status)
+    receipt_status = str(
+        update.get("receipt_status", "")
+        or update.get("submission_receipt_status", "")
+        or ("pending_external_submission_receipt" if submitted and not receipt_verified else "")
+        or lifecycle.get("submission_receipt_status", "")
+    )
+    owner_action = str(
+        update.get("submission_owner_action", "")
+        or (
+            "attach_external_submission_receipt"
+            if submitted and not receipt_verified
+            else lifecycle.get("submission_owner_action", "")
+        )
+    )
+    lifecycle = {
+        **lifecycle,
+        "submission_lifecycle_status": lifecycle_status,
+        "submission_owner_action": owner_action,
+        "submission_receipt_status": receipt_status,
+        "submitted": submitted,
+        "receipt_verified": receipt_verified,
+        "closure_evidence_attached": bool(
+            receipt_url
+            or closure_evidence_path
+            or str(merged.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+        ),
+    }
+    lifecycle["terminal"] = bool(lifecycle.get("terminal", False) or lifecycle["receipt_verified"])
+
+    merged["submission_lifecycle_status"] = lifecycle_status
+    merged["submission_lifecycle"] = lifecycle_status
+    merged["lifecycle"] = lifecycle_status
+    merged["submission_status"] = submission_status
+    merged["submission_owner_action"] = owner_action
+    merged["submission_receipt_status"] = receipt_status
+    merged["receipt_status"] = receipt_status
+    merged["status_lifecycle"] = lifecycle
+    return merged
+
+
 def _submission_lane_row(
     *,
     queue_id: str,
@@ -164,6 +299,7 @@ def _submission_lane_row(
     commercial_breadth: str,
     exact_rows: str,
     gap_summary: dict[str, Any],
+    submission_updates: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     defaults = SUBMISSION_LANE_DEFAULTS.get(queue_id, {})
     receipt_url = str(gap_summary.get(f"{queue_id}_receipt_url", "") or "")
@@ -179,7 +315,7 @@ def _submission_lane_row(
         receipt_url=receipt_url,
         closure_evidence_path=closure_evidence_path,
     )
-    return {
+    row = {
         "work_item_id": str(defaults.get("work_item_id", "")),
         "queue_id": queue_id,
         "submission_id": str(gap_summary.get(f"{queue_id}_submission_id", "") or defaults.get("submission_id", queue_id)),
@@ -189,6 +325,8 @@ def _submission_lane_row(
         "queue_status": status,
         "lifecycle_status": status,
         "submission_lifecycle_status": str(lifecycle.get("submission_lifecycle_status", "")),
+        "submission_lifecycle": str(lifecycle.get("submission_lifecycle_status", "")),
+        "lifecycle": str(lifecycle.get("submission_lifecycle_status", "")),
         "submission_status": str(lifecycle.get("submission_lifecycle_status", "")),
         "submission_owner_action": str(lifecycle.get("submission_owner_action", "")),
         "submission_receipt": str(receipt_url or "pending"),
@@ -197,6 +335,7 @@ def _submission_lane_row(
         "receipt_url": receipt_url,
         "submission_receipt_url": receipt_url,
         "submitted_at_utc": submitted_at_utc,
+        "last_checked_at_utc": str(gap_summary.get(f"{queue_id}_last_checked_at_utc", "") or ""),
         "onepage_attestation": onepage_attestation,
         "onepage_attestation_status": onepage_attestation_status,
         "dry_run_evidence": dry_run_evidence,
@@ -213,6 +352,11 @@ def _submission_lane_row(
         "commercial_reliability_breadth_summary_line": commercial_breadth,
         "midas_kds_row_provenance_exact_row_coverage_label": exact_rows,
     }
+    return _merge_submission_update(
+        row,
+        submission_updates.get(queue_id, {}),
+        onepage_attestation_status=onepage_attestation_status,
+    )
 
 
 def _build_submission_queue(
@@ -227,6 +371,7 @@ def _build_submission_queue(
     peer_spd_hinge_fixture_regression_payload: dict[str, Any],
     peer_spd_hinge_alignment_payload: dict[str, Any],
     onepage_attestation_status: str,
+    submission_updates: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
     status = _submission_queue_status(contract_pass=contract_pass, queue_closed=queue_closed)
     blocker_label = _label(blockers) if blockers else "none"
@@ -296,6 +441,7 @@ def _build_submission_queue(
             commercial_breadth=commercial_breadth,
             exact_rows=exact_rows,
             gap_summary=gap_summary,
+            submission_updates=submission_updates,
         )
         for queue_id, submission_scope, owner, attestation, dry_run_evidence in tracks
     ]
@@ -308,6 +454,7 @@ def build_submission_readiness(
     peer_spd_hinge_benchmark_payload: dict[str, Any],
     peer_spd_hinge_fixture_regression_payload: dict[str, Any],
     peer_spd_hinge_alignment_payload: dict[str, Any],
+    submission_updates: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     gap_summary = _summary(release_gap_payload)
     commercial_summary = _summary(commercial_readiness_payload)
@@ -416,6 +563,7 @@ def build_submission_readiness(
         peer_spd_hinge_fixture_regression_payload=peer_spd_hinge_fixture_regression_payload,
         peer_spd_hinge_alignment_payload=peer_spd_hinge_alignment_payload,
         onepage_attestation_status=onepage_attestation_status,
+        submission_updates=submission_updates or {},
     )
     submission_ready_count = sum(
         1 for row in submission_queue if str(row.get("status", "") or "") == "ready_for_full_submission"
@@ -528,6 +676,19 @@ def build_submission_readiness(
                     or str(row.get("submission_receipt_status", "") or "").startswith("pending")
                 )
             ),
+            "submission_receipt_attached_count": int(
+                sum(1 for row in submission_queue if str(row.get("submission_receipt", "") or "") != "pending")
+            ),
+            "submission_last_checked_count": int(
+                sum(1 for row in submission_queue if str(row.get("last_checked_at_utc", "") or "").strip())
+            ),
+            "closure_evidence_attached_count": int(
+                sum(
+                    1
+                    for row in submission_queue
+                    if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+                )
+            ),
             "onepage_attestation_status": onepage_attestation_status,
             "onepage_attestation_required_count": int(len(submission_queue)),
             "onepage_attestation_ready_count": int(submission_ready_count),
@@ -549,9 +710,11 @@ def main() -> None:
         default=str(DEFAULT_PEER_SPD_HINGE_FIXTURE_REGRESSION_REPORT),
     )
     parser.add_argument("--peer-spd-hinge-alignment-report", default=str(DEFAULT_PEER_SPD_HINGE_ALIGNMENT_REPORT))
+    parser.add_argument("--submission-updates", default=str(DEFAULT_SUBMISSION_UPDATES))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     args = parser.parse_args()
 
+    submission_updates_path = Path(args.submission_updates) if args.submission_updates else None
     payload = build_submission_readiness(
         _load_json(Path(args.release_gap_report)),
         _load_json(Path(args.commercial_readiness_report)),
@@ -559,7 +722,15 @@ def main() -> None:
         _load_json(Path(args.peer_spd_hinge_benchmark_report)),
         _load_json(Path(args.peer_spd_hinge_fixture_regression_report)),
         _load_json(Path(args.peer_spd_hinge_alignment_report)),
+        _load_submission_updates(submission_updates_path),
     )
+    payload["artifacts"] = {
+        **(payload.get("artifacts") if isinstance(payload.get("artifacts"), dict) else {}),
+        "external_benchmark_submission_updates": str(submission_updates_path) if submission_updates_path else "",
+        "external_benchmark_submission_updates_present": bool(
+            submission_updates_path and submission_updates_path.exists()
+        ),
+    }
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

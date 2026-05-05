@@ -50,7 +50,7 @@ def _commercial(path: Path) -> Path:
     )
 
 
-def _external_submission(path: Path, *, missing_lifecycle: bool = False) -> Path:
+def _external_submission(path: Path, *, missing_lifecycle: bool = False, submitted_first: bool = False) -> Path:
     rows = []
     for index, queue_id in enumerate(
         ["hardest_external_10case", "tpu_hffb", "peer_spd_hinge", "korean_public_structures"],
@@ -72,6 +72,7 @@ def _external_submission(path: Path, *, missing_lifecycle: bool = False) -> Path
             "receipt_status": "pending_external_submission_receipt",
             "receipt_url": "",
             "submitted_at_utc": "",
+            "last_checked_at_utc": "",
             "onepage_attestation": f"{queue_id} one-page attestation",
             "onepage_attestation_status": "ready_for_full_submission",
             "dry_run_evidence": f"{queue_id}: PASS",
@@ -84,6 +85,27 @@ def _external_submission(path: Path, *, missing_lifecycle: bool = False) -> Path
                 "submission_owner_action": "submit_external_benchmark_package_and_attach_receipt",
             },
         }
+        if submitted_first and index == 1:
+            row.update(
+                {
+                    "submission_lifecycle_status": "submitted_receipt_attached",
+                    "submission_status": "submitted_receipt_attached",
+                    "submission_owner_action": "submission_receipt_attached_verify_roundtrip",
+                    "submission_receipt": "https://bench.example/receipts/EB-001",
+                    "submission_receipt_status": "attached",
+                    "receipt_status": "attached",
+                    "receipt_url": "https://bench.example/receipts/EB-001",
+                    "submitted_at_utc": "2026-05-05T01:02:03Z",
+                    "last_checked_at_utc": "2026-05-05T02:03:04Z",
+                    "closure_evidence_path": "release_evidence/productization/EB-001.receipt.json",
+                    "closure_evidence_status": "attached",
+                    "status_lifecycle": {
+                        "current_status": "ready_for_full_submission",
+                        "submission_lifecycle_status": "submitted_receipt_attached",
+                        "submission_owner_action": "submission_receipt_attached_verify_roundtrip",
+                    },
+                }
+            )
         if missing_lifecycle:
             row.pop("submission_id")
             row.pop("status_lifecycle")
@@ -157,8 +179,14 @@ def test_materialize_p1_operational_queues_writes_backlog_and_packet_templates(t
     assert (tmp_path / "ops" / "residual_holdout_queue" / "residual_holdout_work_items.json").exists()
     assert (tmp_path / "ops" / "residual_holdout_queue" / "RH-001.closure_packet_template.json").exists()
     assert "P1 Operational Queues" in markdown
+    assert "`full_commercial_replacement_ready`: `False`" in markdown
     assert "p1-hardest_external_10case" in markdown
     assert "licensed_engineer_review_required" in markdown
+    assert "Receipt Template" in markdown
+    assert "EB-001.receipt_template.json" in markdown
+    assert "RH-001.closure_packet_template.json" in markdown
+    assert "submit_external_benchmark_package_and_attach_receipt" in markdown
+    assert "complete_engineer_review_and_attach_signed_packet" in markdown
 
 
 def test_materialize_p1_operational_queues_fails_when_external_queue_is_not_operational(tmp_path: Path) -> None:
@@ -185,3 +213,38 @@ def test_materialize_p1_operational_queues_fails_when_external_queue_is_not_oper
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["contract_pass"] is False
     assert payload["summary"]["external_submission_operational"] is False
+
+
+def test_materialize_p1_operational_queues_preserves_submission_receipt_update_fields(tmp_path: Path) -> None:
+    out = tmp_path / "ops" / "p1_operational_queues.json"
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--commercial-readiness",
+            str(_commercial(tmp_path / "commercial.json")),
+            "--external-benchmark-submission-readiness",
+            str(_external_submission(tmp_path / "external.json", submitted_first=True)),
+            "--out",
+            str(out),
+            "--json",
+            "--fail-open",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    row = payload["queues"]["external_benchmark_submission_work_items"][0]
+    assert row["receipt_url"] == "https://bench.example/receipts/EB-001"
+    assert row["receipt_status"] == "attached"
+    assert row["submitted_at_utc"] == "2026-05-05T01:02:03Z"
+    assert row["last_checked_at_utc"] == "2026-05-05T02:03:04Z"
+    assert row["closure_evidence_status"] == "attached"
+    assert payload["summary"]["external_submission_receipt_attached_count"] == 1
+    assert payload["summary"]["external_submission_last_checked_count"] == 1
+    assert payload["summary"]["external_submission_closure_evidence_attached_count"] == 1
+    receipt_template = json.loads(Path(row["receipt_template_path"]).read_text(encoding="utf-8"))
+    assert receipt_template["last_checked_at_utc"] == "2026-05-05T02:03:04Z"

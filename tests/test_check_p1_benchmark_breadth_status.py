@@ -226,6 +226,8 @@ def test_benchmark_breadth_is_ready_but_blocked_by_p0_release(tmp_path: Path) ->
         "submission_lifecycle_blocked_count": 0,
         "submission_receipt_attached_count": 0,
         "submission_receipt_pending_count": 4,
+        "submission_last_checked_count": 0,
+        "closure_evidence_attached_count": 0,
         "onepage_attestation_status": "ready_for_full_submission",
         "required_lifecycle_fields_present": True,
     }

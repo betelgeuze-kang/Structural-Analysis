@@ -158,7 +158,10 @@ def _submission_owner_action(row: dict[str, Any]) -> str:
 
 
 def _submission_receipt(row: dict[str, Any]) -> str:
-    return str(row.get("submission_receipt", "") or row.get("receipt_url", "") or "pending")
+    direct = str(row.get("submission_receipt", "") or "").strip()
+    if direct and direct != "pending":
+        return direct
+    return str(row.get("receipt_url", "") or row.get("submission_receipt_url", "") or "pending")
 
 
 def _external_submission_queue_gate(path: Path) -> dict[str, Any]:
@@ -268,6 +271,16 @@ def _external_submission_queue_gate(path: Path) -> dict[str, Any]:
             sum(1 for row in rows if _submission_receipt(row) != "pending")
         ),
         "submission_receipt_pending_count": receipt_pending_count,
+        "submission_last_checked_count": int(
+            sum(1 for row in rows if str(row.get("last_checked_at_utc", "") or "").strip())
+        ),
+        "closure_evidence_attached_count": int(
+            sum(
+                1
+                for row in rows
+                if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+            )
+        ),
         "onepage_attestation_status": str(summary.get("onepage_attestation_status", "") or ""),
         "required_lifecycle_fields_present": required_fields_present,
         "submission_queue": rows,
@@ -432,6 +445,8 @@ def build_status(
                 ],
                 "submission_receipt_attached_count": external_submission_gate["submission_receipt_attached_count"],
                 "submission_receipt_pending_count": external_submission_gate["submission_receipt_pending_count"],
+                "submission_last_checked_count": external_submission_gate["submission_last_checked_count"],
+                "closure_evidence_attached_count": external_submission_gate["closure_evidence_attached_count"],
                 "onepage_attestation_status": external_submission_gate["onepage_attestation_status"],
                 "required_lifecycle_fields_present": external_submission_gate[
                     "required_lifecycle_fields_present"

@@ -19,6 +19,7 @@ def _run(
     open_revision: int = 0,
     wind_ready: bool = True,
     commercial_pass: bool = True,
+    submission_updates: dict | None = None,
 ) -> dict:
     gap = tmp_path / "release_gap_report.json"
     commercial = tmp_path / "commercial_readiness_report.json"
@@ -27,6 +28,7 @@ def _run(
     fixture = tmp_path / "peer_spd_hinge_fixture_regression_report.json"
     alignment = tmp_path / "peer_spd_hinge_refresh_alignment_report.json"
     out = tmp_path / "external_benchmark_submission_readiness.json"
+    updates = tmp_path / "external_benchmark_submission_updates.json"
 
     _write(
         gap,
@@ -102,26 +104,31 @@ def _run(
             "summary_line": "PEER/SPD hinge alignment: PASS | refresh_columns=2 | rebar_sensitive_columns=0",
         },
     )
+    if submission_updates is not None:
+        _write(updates, submission_updates)
 
+    cmd = [
+        sys.executable,
+        "implementation/phase1/generate_external_benchmark_submission_readiness.py",
+        "--release-gap-report",
+        str(gap),
+        "--commercial-readiness-report",
+        str(commercial),
+        "--tpu-hffb-benchmark-report",
+        str(tpu),
+        "--peer-spd-hinge-benchmark-report",
+        str(peer),
+        "--peer-spd-hinge-fixture-regression-report",
+        str(fixture),
+        "--peer-spd-hinge-alignment-report",
+        str(alignment),
+        "--out",
+        str(out),
+    ]
+    if submission_updates is not None:
+        cmd.extend(["--submission-updates", str(updates)])
     proc = subprocess.run(
-        [
-            sys.executable,
-            "implementation/phase1/generate_external_benchmark_submission_readiness.py",
-            "--release-gap-report",
-            str(gap),
-            "--commercial-readiness-report",
-            str(commercial),
-            "--tpu-hffb-benchmark-report",
-            str(tpu),
-            "--peer-spd-hinge-benchmark-report",
-            str(peer),
-            "--peer-spd-hinge-fixture-regression-report",
-            str(fixture),
-            "--peer-spd-hinge-alignment-report",
-            str(alignment),
-            "--out",
-            str(out),
-        ],
+        cmd,
         check=False,
         capture_output=True,
         text=True,
@@ -142,6 +149,8 @@ def test_external_benchmark_submission_readiness_allows_limited_start_with_clean
     assert payload["summary"]["audit_review_queue_overdue_item_count"] == 0
     assert payload["summary"]["audit_review_resolution_open_revision_count"] == 0
     assert payload["summary"]["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")
+    assert "engineer_in_loop_accelerated_coverage_ready=True" in payload["summary"]["commercial_scope_summary_line"]
+    assert "full_commercial_replacement_ready=False" in payload["summary"]["commercial_scope_summary_line"]
     assert payload["summary"]["commercial_reliability_breadth_summary_line"].startswith("Commercial reliability breadth: PASS")
     assert payload["summary"]["midas_kds_row_provenance_exact_row_coverage_label"] == "144/144"
     assert payload["summary"]["midas_kds_row_provenance_preview_rows_present"] is True
@@ -220,6 +229,89 @@ def test_external_benchmark_submission_readiness_allows_full_start_when_queue_cl
         row["submission_receipt_status"] == "pending_external_submission_receipt"
         for row in payload["submission_queue"]
     )
+
+
+def test_external_benchmark_submission_readiness_merges_submission_update_sidecar(tmp_path: Path) -> None:
+    payload = _run(
+        tmp_path,
+        pending=0,
+        overdue=0,
+        submission_updates={
+            "updates": {
+                "hardest_external_10case": {
+                    "submission_id": "ext-bench-2026-05-hardest",
+                    "receipt_url": "https://bench.example/receipts/EB-001",
+                    "submitted_at_utc": "2026-05-05T01:02:03Z",
+                    "last_checked_at_utc": "2026-05-05T02:03:04Z",
+                    "closure_evidence_path": "release_evidence/productization/EB-001.receipt.json",
+                    "closure_evidence_status": "attached",
+                }
+            }
+        },
+    )
+
+    row = payload["submission_queue"][0]
+    assert row["queue_id"] == "hardest_external_10case"
+    assert row["submission_id"] == "ext-bench-2026-05-hardest"
+    assert row["receipt_url"] == "https://bench.example/receipts/EB-001"
+    assert row["submission_receipt"] == "https://bench.example/receipts/EB-001"
+    assert row["submitted_at_utc"] == "2026-05-05T01:02:03Z"
+    assert row["last_checked_at_utc"] == "2026-05-05T02:03:04Z"
+    assert row["closure_evidence_status"] == "attached"
+    assert row["closure_evidence_path"].endswith("EB-001.receipt.json")
+    assert row["submission_status"] == "submitted_receipt_attached"
+    assert row["submission_lifecycle_status"] == "submitted_receipt_attached"
+    assert row["submission_lifecycle"] == "submitted_receipt_attached"
+    assert row["lifecycle"] == "submitted_receipt_attached"
+    assert row["receipt_status"] == "attached"
+    assert row["status_lifecycle"]["submitted"] is True
+    assert row["status_lifecycle"]["receipt_verified"] is True
+    assert payload["summary"]["submission_receipt_pending_count"] == 3
+    assert payload["summary"]["submission_receipt_attached_count"] == 1
+    assert payload["summary"]["submission_last_checked_count"] == 1
+    assert payload["summary"]["closure_evidence_attached_count"] == 1
+    assert payload["artifacts"]["external_benchmark_submission_updates_present"] is True
+
+
+def test_external_benchmark_submission_readiness_accepts_operational_queue_sidecar(tmp_path: Path) -> None:
+    payload = _run(
+        tmp_path,
+        pending=0,
+        overdue=0,
+        submission_updates={
+            "queues": {
+                "external_benchmark_submission_work_items": [
+                    {
+                        "queue_id": "tpu_hffb",
+                        "submitted_at_utc": "2026-05-05T03:04:05Z",
+                        "last_checked_at_utc": "2026-05-05T04:05:06Z",
+                    },
+                    {
+                        "queue_id": "peer_spd_hinge",
+                        "submission_receipt": "https://bench.example/receipts/EB-003",
+                        "last_checked_at_utc": "2026-05-05T04:05:06Z",
+                        "closure_evidence_path": "release_evidence/productization/EB-003.receipt.json",
+                    },
+                ]
+            }
+        },
+    )
+
+    tpu_row = next(row for row in payload["submission_queue"] if row["queue_id"] == "tpu_hffb")
+    assert tpu_row["submission_lifecycle_status"] == "submitted_pending_receipt"
+    assert tpu_row["receipt_status"] == "pending_external_submission_receipt"
+    assert tpu_row["submission_owner_action"] == "attach_external_submission_receipt"
+    assert tpu_row["status_lifecycle"]["submitted"] is True
+    assert tpu_row["status_lifecycle"]["receipt_verified"] is False
+
+    peer_row = next(row for row in payload["submission_queue"] if row["queue_id"] == "peer_spd_hinge")
+    assert peer_row["receipt_url"] == "https://bench.example/receipts/EB-003"
+    assert peer_row["submission_receipt_status"] == "attached"
+    assert peer_row["closure_evidence_status"] == "attached"
+    assert payload["summary"]["submission_receipt_pending_count"] == 3
+    assert payload["summary"]["submission_receipt_attached_count"] == 1
+    assert payload["summary"]["submission_last_checked_count"] == 2
+    assert payload["summary"]["closure_evidence_attached_count"] == 1
 
 
 def test_external_benchmark_submission_readiness_blocks_on_open_revision_cycle(tmp_path: Path) -> None:
