@@ -74,11 +74,62 @@ def _source_for_asset(row: dict[str, Any], work_dir: Path) -> Path:
     return Path(str(row.get("local_path", "") or ""))
 
 
+def _external_registry_artifact_args(artifacts: list[dict[str, Any]]) -> list[str]:
+    by_name = {
+        str(row.get("asset_name", "") or "").strip(): Path(str(row.get("local_path", "") or ""))
+        for row in artifacts
+        if str(row.get("asset_name", "") or "").strip() and str(row.get("local_path", "") or "").strip()
+    }
+    optional_paths = {
+        "--external-benchmark-submission-readiness": Path(
+            "implementation/phase1/release/external_benchmark_submission_readiness.json"
+        ),
+        "--external-benchmark-execution-manifest": Path(
+            "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json"
+        ),
+        "--external-benchmark-execution-manifest-markdown": Path(
+            "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.md"
+        ),
+        "--external-benchmark-execution-status": Path(
+            "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json"
+        ),
+        "--external-benchmark-execution-status-markdown": Path(
+            "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md"
+        ),
+    }
+    manifest_asset_args = {
+        "--external-benchmark-kickoff-package": by_name.get("external_benchmark_kickoff_package.json"),
+        "--external-benchmark-kickoff-markdown": by_name.get("external_benchmark_kickoff_package.md"),
+        "--approve-all-submission-readiness-preview": by_name.get(
+            "external_benchmark_submission_readiness_preview.approve_all.json"
+        ),
+        "--approve-all-submission-readiness-preview-markdown": by_name.get(
+            "external_benchmark_submission_readiness_preview.approve_all.md"
+        ),
+        "--case-onepage-attestation-index": by_name.get("case_onepage_attestation_index.json"),
+        "--case-onepage-attestation-index-markdown": by_name.get("case_onepage_attestation_index.md"),
+        "--audit-review-decision-batch-template": by_name.get("audit_review_decision_batch_template.json"),
+        "--audit-review-decision-batch-template-markdown": by_name.get("audit_review_decision_batch_template.md"),
+        "--exact-topology-structural-preview-promotion-queue": by_name.get(
+            "exact_topology_structural_preview_promotion_queue.json"
+        ),
+        "--exact-topology-structural-preview-promotion-queue-markdown": by_name.get(
+            "exact_topology_structural_preview_promotion_queue.md"
+        ),
+    }
+    args: list[str] = []
+    for flag, path in {**optional_paths, **manifest_asset_args}.items():
+        if path is not None and (flag in manifest_asset_args or path.exists()):
+            args.extend([flag, str(path)])
+    return args
+
+
 def _run_registry_generation(
     *,
     work_dir: Path,
     generated_at: str,
     python_executable: str,
+    manifest_artifacts: list[dict[str, Any]] | None = None,
 ) -> list[str]:
     signing_dir = work_dir / "signing"
     command = [
@@ -103,6 +154,7 @@ def _run_registry_generation(
         "--out",
         str(work_dir / "release_registry.json"),
     ]
+    command.extend(_external_registry_artifact_args(manifest_artifacts or []))
     if generated_at:
         command.extend(["--generated-at", generated_at])
     # First pass may create keys and set key_generated_this_run=true in registry metadata.
@@ -207,6 +259,7 @@ def build_release_publication_candidate(
             work_dir=resolved_work_dir,
             generated_at=timestamp,
             python_executable=python_executable,
+            manifest_artifacts=artifacts,
         )
 
     candidate_manifest = dict(manifest)

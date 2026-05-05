@@ -206,3 +206,61 @@ def test_registry_generation_runs_twice_to_stabilize_key_metadata(tmp_path: Path
     assert len(calls) == 2
     assert calls[0] == calls[1] == command
     assert command[-2:] == ["--generated-at", "2026-04-26T00:00:00+09:00"]
+
+
+def test_registry_generation_forwards_release_facing_manifest_assets(tmp_path: Path, monkeypatch) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(command, **_kwargs):
+        calls.append(list(command))
+        return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(build_release_publication_candidate.subprocess, "run", fake_run)
+    artifacts = [
+        _artifact(
+            "external_benchmark_kickoff_package.json",
+            "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_kickoff_package.json",
+            b"kickoff",
+        ),
+        _artifact(
+            "external_benchmark_kickoff_package.md",
+            "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_kickoff_package.md",
+            b"kickoff-md",
+        ),
+        _artifact(
+            "case_onepage_attestation_index.json",
+            "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_index.json",
+            b"case-index",
+        ),
+        _artifact(
+            "case_onepage_attestation_index.md",
+            "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_index.md",
+            b"case-index-md",
+        ),
+        _artifact(
+            "exact_topology_structural_preview_promotion_queue.json",
+            "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.json",
+            b"queue",
+        ),
+        _artifact(
+            "exact_topology_structural_preview_promotion_queue.md",
+            "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.md",
+            b"queue-md",
+        ),
+    ]
+
+    command = build_release_publication_candidate._run_registry_generation(
+        work_dir=tmp_path / "work",
+        generated_at="",
+        python_executable="python",
+        manifest_artifacts=artifacts,
+    )
+
+    assert len(calls) == 2
+    assert calls[0] == calls[1] == command
+    assert "--external-benchmark-kickoff-package" in command
+    assert "--external-benchmark-kickoff-markdown" in command
+    assert "--case-onepage-attestation-index" in command
+    assert "--case-onepage-attestation-index-markdown" in command
+    assert "--exact-topology-structural-preview-promotion-queue" in command
+    assert "--exact-topology-structural-preview-promotion-queue-markdown" in command

@@ -184,7 +184,7 @@ def _post_publish_roundtrip_json(tmp_path: Path) -> Path:
     )
 
 
-def test_status_reports_closed_when_all_required_offline_checks_pass(tmp_path: Path) -> None:
+def test_status_keeps_p0_open_without_required_post_publish_evidence(tmp_path: Path) -> None:
     manifest_path = _manifest(tmp_path)
     artifact_root = _artifact_root(tmp_path)
     assets_path = _assets_json(tmp_path)
@@ -198,11 +198,16 @@ def test_status_reports_closed_when_all_required_offline_checks_pass(tmp_path: P
         tag_ref_present=True,
     )
 
-    assert status["p0_closed"] is True
-    assert status["status"] == "closed"
+    assert status["p0_closed"] is False
+    assert status["status"] == "unclosed"
     assert status["manifest"]["ok"] is True
     assert status["tag_ref"]["present"] is True
     assert status["upload_plan"]["ok"] is True
+    assert status["metadata_preflight"]["ok"] is False
+    assert status["post_publish_roundtrip"]["ok"] is False
+    assert status["post_publish_roundtrip"]["errors"] == [
+        "post-publish roundtrip evidence is required for P0 release closure"
+    ]
     assert status["asset_listing"]["ok"] is True
     assert status["asset_listing"]["counts"]["matched"] == 2
     assert status["asset_listing"]["require_exact"] is True
@@ -284,6 +289,7 @@ def test_status_can_close_against_promoted_manifest_when_local_manifest_is_stale
         assets_json=_assets_json(tmp_path),
         upload_plan_json=_upload_plan_json(tmp_path),
         metadata_preflight_json=_metadata_preflight_json(tmp_path),
+        post_publish_roundtrip_json=_post_publish_roundtrip_json(tmp_path),
         require_all=True,
         require_exact=True,
         tag_ref_present=True,

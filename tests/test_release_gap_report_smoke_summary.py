@@ -174,6 +174,48 @@ def test_release_gap_report_includes_nightly_smoke_summary(tmp_path: Path) -> No
                 "midas_kds_row_provenance_export_csv": "implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.csv",
                 "midas_kds_row_provenance_export_report": "implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json",
             },
+            "external_benchmark_submission_queue_rows": [
+                {
+                    "queue_id": "hardest_external_10case",
+                    "submission_scope": "hardest_external_benchmark_program",
+                    "owner": "benchmark_program_owner",
+                    "status": "ready_for_full_submission",
+                    "onepage_attestation": "hardest external 10-case one-page attestation",
+                    "onepage_attestation_status": "ready_for_full_submission",
+                    "dry_run_evidence": "hardest_external_10case_kickoff: PASS_START_NOW_FULL",
+                },
+                {
+                    "queue_id": "tpu_hffb",
+                    "submission_scope": "component_wind_benchmark_submission",
+                    "owner": "wind_benchmark_owner",
+                    "status": "ready_for_full_submission",
+                    "onepage_attestation": "TPU/HFFB component benchmark one-page attestation",
+                    "onepage_attestation_status": "ready_for_full_submission",
+                    "dry_run_evidence": "tpu_hffb_benchmark_gate: PASS",
+                },
+                {
+                    "queue_id": "peer_spd_hinge",
+                    "submission_scope": "component_hinge_benchmark_submission",
+                    "owner": "pbd_benchmark_owner",
+                    "status": "ready_for_full_submission",
+                    "onepage_attestation": "PEER/SPD hinge component one-page attestation",
+                    "onepage_attestation_status": "ready_for_full_submission",
+                    "dry_run_evidence": (
+                        "peer_spd_hinge_benchmark_gate: PASS | "
+                        "peer_spd_hinge_fixture_regression: PASS | "
+                        "peer_spd_hinge_alignment: PASS"
+                    ),
+                },
+                {
+                    "queue_id": "korean_public_structures",
+                    "submission_scope": "korean_public_structure_release_review",
+                    "owner": "korean_source_owner",
+                    "status": "ready_for_full_submission",
+                    "onepage_attestation": "Korean public structures provenance one-page attestation",
+                    "onepage_attestation_status": "ready_for_full_submission",
+                    "dry_run_evidence": "korean_public_structures: PASS",
+                },
+            ],
         },
     )
     irregular_top5_rows = [
@@ -901,6 +943,17 @@ def test_release_gap_report_surfaces_panel_zone_status_semantics(tmp_path: Path)
         summary["advanced_holdout_status_label"]
         == "foundation_mat_pile_optimization:open, panel_zone_3d_clash_and_anchorage:closed, pbd_dynamic_hinge_refresh:closed, wind_tunnel_raw_mapping:open"
     )
+    assert summary["external_benchmark_submission_queue_count"] == 4
+    assert summary["external_benchmark_submission_queue_ready_count"] == 4
+    assert summary["external_benchmark_submission_queue_review_pending_count"] == 0
+    assert summary["external_benchmark_submission_queue_blocked_count"] == 0
+    assert summary["external_benchmark_submission_onepage_attestation_status"] == "ready_for_full_submission"
+    assert summary["external_benchmark_submission_summary_line"] == (
+        "External benchmark submission queue: queue=4 | ready=4 | review_pending=0 | "
+        "blocked=0 | onepage_attestation_status=ready_for_full_submission | "
+        "start_mode=start_now_full_external_submission | "
+        "submission_scope=full_external_submission_package | blocker=none | caution=none"
+    )
     assert "inbox=empty_without_history" in summary["panel_zone_external_validation_closing_summary_label"]
     assert release_status["panel_zone_status_label"] == "validated_fallback_only_gap_no_solver_input"
     assert release_status["panel_zone_advisory_only"] is True
@@ -914,6 +967,12 @@ def test_release_gap_report_surfaces_panel_zone_status_semantics(tmp_path: Path)
     assert release_status["advanced_holdout_ready_count"] == 2
     assert release_status["advanced_holdout_open_count"] == 2
     assert release_status["advanced_holdout_status_label"] == summary["advanced_holdout_status_label"]
+    assert release_status["external_benchmark_submission_queue_count"] == 4
+    assert release_status["external_benchmark_submission_queue_ready_count"] == 4
+    assert release_status["external_benchmark_submission_queue_review_pending_count"] == 0
+    assert release_status["external_benchmark_submission_queue_blocked_count"] == 0
+    assert release_status["external_benchmark_submission_onepage_attestation_status"] == "ready_for_full_submission"
+    assert release_status["external_benchmark_submission_summary_line"] == summary["external_benchmark_submission_summary_line"]
     assert advanced["pbd_dynamic_hinge_refresh"]["status"] == "closed"
     assert advanced["pbd_dynamic_hinge_refresh"]["status_label"].startswith("closed_")
     assert advanced["pbd_dynamic_hinge_refresh"]["closure_label"] == advanced["pbd_dynamic_hinge_refresh"]["status_label"]
@@ -954,6 +1013,16 @@ def test_release_gap_report_surfaces_panel_zone_status_semantics(tmp_path: Path)
     assert "| Area | Status | Label | Mode | Why It Remains | Exit Criteria | Next Step |" in markdown
     assert "Dynamic plastic-hinge refresh | closed | closed_" in markdown
     assert "Panel-zone 3D clash and anchorage coverage | closed | validated_fallback_only_gap_no_solver_input" in markdown
+    assert (
+        "External benchmark submission queue: `External benchmark submission queue: queue=4 | "
+        "ready=4 | review_pending=0 | blocked=0 | "
+        "onepage_attestation_status=ready_for_full_submission"
+    ) in markdown
+    assert "| Queue | Scope | Owner | Status | Onepage Attestation | Onepage Status | Dry-run Evidence |" in markdown
+    assert "hardest_external_10case" in markdown
+    assert "tpu_hffb" in markdown
+    assert "peer_spd_hinge" in markdown
+    assert "korean_public_structures" in markdown
 
 
 def test_release_gap_report_accepts_committee_artifacts_fallback(tmp_path: Path) -> None:

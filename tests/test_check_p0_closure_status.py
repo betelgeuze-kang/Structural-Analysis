@@ -231,11 +231,17 @@ def test_p0_status_uses_checked_in_fallbacks_when_generated_reports_are_absent(t
 
 def test_p0_status_closes_when_release_and_core_evidence_pass(tmp_path: Path) -> None:
     manifest, artifact_root, assets_json = _release_fixture(tmp_path)
+    upload_plan_json = _upload_plan_json(tmp_path)
+    metadata_preflight_json = _metadata_preflight_json(tmp_path)
+    roundtrip_json = _post_publish_roundtrip_json(tmp_path)
 
     status = check_p0_closure_status.build_status(
         manifest=manifest,
         release_assets_json=assets_json,
         artifact_root=artifact_root,
+        upload_plan_json=upload_plan_json,
+        metadata_preflight_json=metadata_preflight_json,
+        post_publish_roundtrip_json=roundtrip_json,
         tag_ref_present=True,
         reports=_reports(tmp_path),
     )
@@ -312,6 +318,29 @@ def test_p0_status_surfaces_upload_plan_and_metadata_preflight_evidence(tmp_path
     assert release_gate["details"]["post_publish_roundtrip"]["ok"] is True
 
 
+def test_p0_status_keeps_release_open_when_post_publish_roundtrip_is_missing(tmp_path: Path) -> None:
+    manifest, artifact_root, assets_json = _release_fixture(tmp_path)
+
+    status = check_p0_closure_status.build_status(
+        manifest=manifest,
+        release_assets_json=assets_json,
+        artifact_root=artifact_root,
+        upload_plan_json=_upload_plan_json(tmp_path),
+        metadata_preflight_json=_metadata_preflight_json(tmp_path),
+        tag_ref_present=True,
+        reports=_reports(tmp_path),
+    )
+
+    release_gate = status["gates"][0]
+    assert status["p0_closed"] is False
+    assert status["release_publication_closed"] is False
+    assert status["core_evidence_closed"] is True
+    assert release_gate["details"]["post_publish_roundtrip"]["ok"] is False
+    assert release_gate["details"]["post_publish_roundtrip"]["errors"] == [
+        "post-publish roundtrip evidence is required for P0 release closure"
+    ]
+
+
 def test_p0_status_can_use_promoted_manifest_when_local_manifest_is_stale(tmp_path: Path) -> None:
     local_manifest, artifact_root, assets_json = _release_fixture(tmp_path)
     promoted_manifest = tmp_path / "promoted-manifest.json"
@@ -328,6 +357,7 @@ def test_p0_status_can_use_promoted_manifest_when_local_manifest_is_stale(tmp_pa
         artifact_root=artifact_root,
         upload_plan_json=_upload_plan_json(tmp_path),
         metadata_preflight_json=_metadata_preflight_json(tmp_path),
+        post_publish_roundtrip_json=_post_publish_roundtrip_json(tmp_path),
         tag_ref_present=True,
         reports=_reports(tmp_path),
     )

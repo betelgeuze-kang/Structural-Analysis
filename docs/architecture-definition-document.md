@@ -584,3 +584,15 @@ Rust/HIP Low-Fidelity 결과를 Phase 2 GNN 입력으로 직접 연결한다.
 - **2:** 실 DLPack zero-copy 검증 + I/O 병목 분리 계측
 - **3:** Parser 룰셋 버전관리 + warning 등급 기반 Gate 연동
 - **4:** LF→GNN E2E CI smoke + fallback 정책 파일화
+
+---
+
+## 14) Release-facing Commercial Boundary
+
+이 ADD가 가정하는 release-facing 상용화 계약은 아래 상태를 기준으로 한다.
+
+- `engineer_in_loop_accelerated_coverage_ready=true`
+- `full_commercial_replacement_ready=false`
+- accelerated coverage target은 95-99%, residual holdout target은 1-5%
+- residual holdout queue는 `licensed_engineer_review_required`, `legacy_tool_cross_validation_required`, `legal_authority_signoff_required` 3개 항목으로 유지하고, 각 항목은 owner/status/work item/SLA/due/closure evidence를 함께 노출한다
+- external benchmark submission queue는 `hardest_external_10case`, `tpu_hffb`, `peer_spd_hinge`, `korean_public_structures` 4개 one-page lane을 사용하며, one-page attestation과 dry-run evidence를 release-gap/committee package에서 같이 확인한다

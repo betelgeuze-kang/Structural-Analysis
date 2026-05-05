@@ -19,6 +19,7 @@ source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다.
 - P1은 quality/fallback/benchmark breadth를 순차적으로 닫아야 하며, heavy validation 전에 [open-data artifact restore runbook](open-data-artifact-restore-runbook.md)과 `scripts/check_p1_readiness_status.py`로 externalized artifact와 real-project seed 준비 상태를 확인한다.
 - `scripts/check_p1_benchmark_breadth_status.py`는 tracked commercial readiness, HF benchmark, TPU wind, PEER hinge, irregular top5, Korean public structure collection evidence를 하나로 묶어 P1 benchmark breadth inputs ready와 P0 release blocker를 분리해서 보고한다.
 - 상용화 표기는 release-facing 문서 기준으로 `Commercial` grade이지만 과장하지 않는다. `full_commercial_replacement_ready=false`, `engineer_in_loop_accelerated_coverage_ready=true`, accelerated coverage target은 95-99%, residual holdout은 1-5%이며 holdout은 owner/status/work item/SLA/due policy/closure evidence가 보이는 licensed engineer review, legacy tool cross-validation, legal/authority sign-off queue로 운영한다.
+- 외부 benchmark submission queue는 residual holdout과 별개로 `hardest_external_10case`, `tpu_hffb`, `peer_spd_hinge`, `korean_public_structures` 4개 one-page lane을 노출하고, owner/status/dry-run evidence와 queue-wide `onepage_attestation_status`를 release-gap/committee package에서 함께 본다.
 - wind/SSI gate outputs는 `response_artifacts_consumed`를 canonical contract name으로 쓴다. 현재 machine-readable evidence는 rename transition 동안 `_pass` suffix가 붙은 필드를 계속 노출할 수 있다.
 - P2는 viewer/report 제품화 단계로, shared selection과 provenance를 전 surface에 통일하고 wall/slab batching/LOD, solver-verified panel-zone, SVG sheet/revision/callout을 정리해야 한다.
 
@@ -53,11 +54,11 @@ source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다.
 
 ## 재실행 및 확인 순서
 
-1. `Publish Release Assets` workflow를 GitHub Actions UI에서 다시 실행하거나, `python3 scripts/dispatch_release_publish_workflow.py --dry-run --json` 후 `GITHUB_TOKEN=<token> python3 scripts/dispatch_release_publish_workflow.py --json`로 다시 dispatch한다.
+1. `Publish Release Assets` workflow를 GitHub Actions UI에서 다시 실행하거나, `python3 scripts/dispatch_release_publish_workflow.py --allow-gh-auth-token --dry-run --json` 후 같은 명령에서 `--dry-run`만 빼고 다시 dispatch한다. env token을 쓰는 runner라면 `GITHUB_TOKEN=<token> python3 scripts/dispatch_release_publish_workflow.py --json`를 사용한다.
 2. 로그에 `Node20` warning이 보여도 그것만으로 실패로 판단하지 말고, 실제 step exit code와 증빙 artifact를 확인한다.
 3. `Regenerate release viewer artifacts` 단계가 실패하면 로그의 `Nightly release gate summary:` 블록을 열고, `release-publication-evidence` artifact 안의 `implementation/phase1/release/nightly_release_gate_report.json`을 확인한다.
 4. publication이 성공하면 `python3 scripts/hydrate_github_release_assets.py --repo <owner/name> --manifest <candidate-manifest.json> --artifact-root <hydrated-root> --write`와 `python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manifest.json> --artifact-root <hydrated-root>`로 GitHub Release에 올라간 실제 bytes를 먼저 확인한다.
-5. 그 다음 `python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --tag-ref-present --json --out <p0-status.json> --out-md <p0-status.md> --fail-open`으로 overall P0를 확인한다.
+5. 그 다음 `python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --post-publish-roundtrip-json <post-publish-roundtrip.json> --tag-ref-present --json --out <p0-status.json> --out-md <p0-status.md> --fail-open`으로 overall P0를 확인한다.
 6. P0가 closed일 때만 `python3 scripts/check_p1_readiness_status.py --p0-status <p0-status.json> --json --out <p1-readiness-status.json> --out-md <p1-readiness-status.md> --fail-blocked`를 먼저 실행한다.
 7. 그 다음 `python3 scripts/check_p1_benchmark_breadth_status.py --p1-readiness-status <p1-readiness-status.json> --json --out <p1-benchmark-breadth-status.json> --out-md <p1-benchmark-breadth-status.md> --fail-blocked`로 P1 quality/fallback/benchmark breadth 상태를 확인한다.
 

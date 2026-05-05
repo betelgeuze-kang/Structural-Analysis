@@ -4594,6 +4594,11 @@ def _write_markdown(path: Path, payload: dict) -> None:
         for row in (summary.get("commercial_workflow_breadth_rows") or [])
         if isinstance(row, dict)
     ]
+    external_benchmark_submission_queue_rows = [
+        row
+        for row in (summary.get("external_benchmark_submission_queue_rows") or [])
+        if isinstance(row, dict)
+    ]
 
     lines: list[str] = []
     lines.append("# Release Gap Report")
@@ -4626,6 +4631,22 @@ def _write_markdown(path: Path, payload: dict) -> None:
     lines.append(f"- Engineer-in-loop accelerated coverage ready: `{summary['engineer_in_loop_accelerated_coverage_ready']}`")
     lines.append(f"- Time-saving focus: `{summary.get('time_saving_focus', '')}`")
     lines.append(f"- Full commercial replacement ready: `{summary['full_commercial_replacement_ready']}`")
+    if str(summary.get("external_benchmark_submission_summary_line", "")).strip():
+        lines.append(
+            f"- External benchmark submission queue: "
+            f"`{str(summary.get('external_benchmark_submission_summary_line', '')).strip()}`"
+        )
+    if str(summary.get("external_benchmark_submission_recommended_start_mode", "")).strip() or str(
+        summary.get("external_benchmark_submission_recommended_submission_scope", "")
+    ).strip():
+        lines.append(
+            f"- External benchmark submission lane: "
+            f"`start_mode={str(summary.get('external_benchmark_submission_recommended_start_mode', '') or 'n/a')}` | "
+            f"`submission_scope={str(summary.get('external_benchmark_submission_recommended_submission_scope', '') or 'n/a')}` | "
+            f"`blocker={str(summary.get('external_benchmark_submission_blocker_label', '') or 'none')}` | "
+            f"`caution={str(summary.get('external_benchmark_submission_caution_label', '') or 'none')}` | "
+            f"`onepage_attestation_status={str(summary.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown')}`"
+        )
     lines.append(
         f"- MIDAS semantic load binding: `{bool(summary.get('midas_semantic_load_binding_pass', False))}` "
         f"(use_stld={int(summary.get('midas_use_stld_block_count', 0))}, "
@@ -5241,6 +5262,47 @@ def _write_markdown(path: Path, payload: dict) -> None:
                 f"{row.get('closure_evidence_required', '')} ({row.get('closure_evidence_status', '')}) | "
                 f"{int(row.get('relative_share_pct', 0))}% | "
                 f"{_coverage_range_label(row.get('absolute_project_pct_range'))} | {row.get('scope', '')} |"
+            )
+        lines.append("")
+    if external_benchmark_submission_queue_rows:
+        lines.append("## External Benchmark Submission Queue")
+        lines.append("")
+        lines.append(
+            f"- `external_benchmark_submission_summary_line`: "
+            f"`{str(summary.get('external_benchmark_submission_summary_line', '')).strip() or 'n/a'}`"
+        )
+        lines.append(
+            f"- `external_benchmark_submission_queue_count`: "
+            f"`{int(summary.get('external_benchmark_submission_queue_count', len(external_benchmark_submission_queue_rows)) or 0)}` | "
+            f"`ready={int(summary.get('external_benchmark_submission_queue_ready_count', 0) or 0)}` | "
+            f"`review_pending={int(summary.get('external_benchmark_submission_queue_review_pending_count', 0) or 0)}` | "
+            f"`blocked={int(summary.get('external_benchmark_submission_queue_blocked_count', 0) or 0)}`"
+        )
+        lines.append(
+            f"- `external_benchmark_submission_onepage_attestation_status`: "
+            f"`{str(summary.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown')}`"
+        )
+        if str(summary.get("external_benchmark_submission_recommended_start_mode", "")).strip() or str(
+            summary.get("external_benchmark_submission_recommended_submission_scope", "")
+        ).strip():
+            lines.append(
+                f"- `external_benchmark_submission_recommended_start_mode`: "
+                f"`{str(summary.get('external_benchmark_submission_recommended_start_mode', '') or 'n/a')}` | "
+                f"`external_benchmark_submission_recommended_submission_scope`: "
+                f"`{str(summary.get('external_benchmark_submission_recommended_submission_scope', '') or 'n/a')}` | "
+                f"`blocker={str(summary.get('external_benchmark_submission_blocker_label', '') or 'none')}` | "
+                f"`caution={str(summary.get('external_benchmark_submission_caution_label', '') or 'none')}`"
+            )
+        lines.append("")
+        lines.append("| Queue | Scope | Owner | Status | Onepage Attestation | Onepage Status | Dry-run Evidence |")
+        lines.append("|---|---|---|---|---|---|---|")
+        for row in external_benchmark_submission_queue_rows:
+            lines.append(
+                f"| {_markdown_cell(row.get('queue_id', ''))} | {_markdown_cell(row.get('submission_scope', ''))} | "
+                f"{_markdown_cell(row.get('owner', ''))} | {_markdown_cell(row.get('status', ''))} | "
+                f"{_markdown_cell(row.get('onepage_attestation', ''))} | "
+                f"{_markdown_cell(row.get('onepage_attestation_status', '') or 'unknown')} | "
+                f"{_markdown_cell(row.get('dry_run_evidence', '') or 'n/a')} |"
             )
         lines.append("")
     lines.append("## Time-Saving Coverage")
@@ -6387,6 +6449,110 @@ def main() -> None:
     pbd_artifacts = pbd_package.get("artifacts") if isinstance(pbd_package.get("artifacts"), dict) else {}
     design_opt_dataset_summary = design_opt_dataset.get("summary") if isinstance(design_opt_dataset.get("summary"), dict) else {}
     committee_metrics = committee_summary.get("metrics") if isinstance(committee_summary.get("metrics"), dict) else {}
+    committee_external_benchmark_submission_queue_rows = [
+        row
+        for row in (committee_summary.get("external_benchmark_submission_queue_rows") or [])
+        if isinstance(row, dict)
+    ]
+    committee_external_benchmark_submission_queue_count = int(
+        committee_summary.get(
+            "external_benchmark_submission_queue_count",
+            len(committee_external_benchmark_submission_queue_rows),
+        )
+        or len(committee_external_benchmark_submission_queue_rows)
+    )
+    committee_external_benchmark_submission_queue_ready_count = int(
+        committee_summary.get(
+            "external_benchmark_submission_queue_ready_count",
+            sum(
+                1
+                for row in committee_external_benchmark_submission_queue_rows
+                if str(row.get("status", "") or "") == "ready_for_full_submission"
+            ),
+        )
+        or sum(
+            1
+            for row in committee_external_benchmark_submission_queue_rows
+            if str(row.get("status", "") or "") == "ready_for_full_submission"
+        )
+    )
+    committee_external_benchmark_submission_queue_review_pending_count = int(
+        committee_summary.get(
+            "external_benchmark_submission_queue_review_pending_count",
+            sum(
+                1
+                for row in committee_external_benchmark_submission_queue_rows
+                if str(row.get("status", "") or "") == "ready_for_benchmark_start_final_review_pending"
+            ),
+        )
+        or sum(
+            1
+            for row in committee_external_benchmark_submission_queue_rows
+            if str(row.get("status", "") or "") == "ready_for_benchmark_start_final_review_pending"
+        )
+    )
+    committee_external_benchmark_submission_queue_blocked_count = int(
+        committee_summary.get(
+            "external_benchmark_submission_queue_blocked_count",
+            sum(1 for row in committee_external_benchmark_submission_queue_rows if str(row.get("status", "") or "") == "blocked"),
+        )
+        or sum(1 for row in committee_external_benchmark_submission_queue_rows if str(row.get("status", "") or "") == "blocked")
+    )
+    committee_external_benchmark_submission_onepage_attestation_status = str(
+        committee_summary.get("external_benchmark_submission_onepage_attestation_status", "")
+        or committee_metrics.get("external_benchmark_submission_onepage_attestation_status", "")
+        or (
+            "ready_for_full_submission"
+            if committee_external_benchmark_submission_queue_count
+            and committee_external_benchmark_submission_queue_ready_count
+            == committee_external_benchmark_submission_queue_count
+            else "draft_ready_final_review_pending"
+            if committee_external_benchmark_submission_queue_count
+            and committee_external_benchmark_submission_queue_review_pending_count
+            == committee_external_benchmark_submission_queue_count
+            else "blocked"
+            if committee_external_benchmark_submission_queue_count
+            else ""
+        )
+    )
+    committee_external_benchmark_submission_recommended_start_mode = str(
+        committee_summary.get("external_benchmark_submission_recommended_start_mode", "")
+        or committee_metrics.get("external_benchmark_submission_recommended_start_mode", "")
+        or ""
+    )
+    committee_external_benchmark_submission_recommended_submission_scope = str(
+        committee_summary.get("external_benchmark_submission_recommended_submission_scope", "")
+        or committee_metrics.get("external_benchmark_submission_recommended_submission_scope", "")
+        or ""
+    )
+    committee_external_benchmark_submission_blocker_label = str(
+        committee_summary.get("external_benchmark_submission_blocker_label", "")
+        or committee_metrics.get("external_benchmark_submission_blocker_label", "")
+        or "none"
+    )
+    committee_external_benchmark_submission_caution_label = str(
+        committee_summary.get("external_benchmark_submission_caution_label", "")
+        or committee_metrics.get("external_benchmark_submission_caution_label", "")
+        or "none"
+    )
+    committee_external_benchmark_submission_summary_line = (
+        "External benchmark submission queue: "
+        f"queue={committee_external_benchmark_submission_queue_count} | "
+        f"ready={committee_external_benchmark_submission_queue_ready_count} | "
+        f"review_pending={committee_external_benchmark_submission_queue_review_pending_count} | "
+        f"blocked={committee_external_benchmark_submission_queue_blocked_count} | "
+        f"onepage_attestation_status={committee_external_benchmark_submission_onepage_attestation_status or 'unknown'}"
+    )
+    if committee_external_benchmark_submission_recommended_start_mode or committee_external_benchmark_submission_recommended_submission_scope:
+        committee_external_benchmark_submission_summary_line += (
+            f" | start_mode={committee_external_benchmark_submission_recommended_start_mode or 'n/a'}"
+            f" | submission_scope={committee_external_benchmark_submission_recommended_submission_scope or 'n/a'}"
+        )
+    if committee_external_benchmark_submission_blocker_label or committee_external_benchmark_submission_caution_label:
+        committee_external_benchmark_submission_summary_line += (
+            f" | blocker={committee_external_benchmark_submission_blocker_label or 'none'}"
+            f" | caution={committee_external_benchmark_submission_caution_label or 'none'}"
+        )
     committee_artifact_links = (
         committee_summary.get("artifact_links")
         if isinstance(committee_summary.get("artifact_links"), dict)
@@ -7861,6 +8027,18 @@ def main() -> None:
         "wind_workflow_pass": wind_workflow_pass,
         "wind_workflow_occupant_comfort_class": wind_workflow_comfort_class,
         "wind_workflow_occupant_comfort_crosswind_bias_ratio": wind_workflow_crosswind_bias_ratio,
+        "external_benchmark_submission_summary_line": committee_external_benchmark_submission_summary_line,
+        "external_benchmark_submission_recommended_start_mode": committee_external_benchmark_submission_recommended_start_mode,
+        "external_benchmark_submission_recommended_submission_scope": committee_external_benchmark_submission_recommended_submission_scope,
+        "external_benchmark_submission_blocker_label": committee_external_benchmark_submission_blocker_label,
+        "external_benchmark_submission_caution_label": committee_external_benchmark_submission_caution_label,
+        "external_benchmark_submission_queue_count": committee_external_benchmark_submission_queue_count,
+        "external_benchmark_submission_queue_ready_count": committee_external_benchmark_submission_queue_ready_count,
+        "external_benchmark_submission_queue_review_pending_count": committee_external_benchmark_submission_queue_review_pending_count,
+        "external_benchmark_submission_queue_blocked_count": committee_external_benchmark_submission_queue_blocked_count,
+        "external_benchmark_submission_onepage_attestation_status": committee_external_benchmark_submission_onepage_attestation_status,
+        "external_benchmark_submission_queue_rows": committee_external_benchmark_submission_queue_rows,
+        "external_benchmark_submission_queue_rows_present": bool(committee_external_benchmark_submission_queue_rows),
         "panel_zone_status_label": panel_zone_status_label,
         "panel_zone_advisory_only": bool(panel_zone_advisory_only),
         "panel_zone_release_blocking": bool(panel_zone_release_blocking),
@@ -9022,6 +9200,18 @@ def main() -> None:
         "external_benchmark_batch_completed_count": external_benchmark_batch_completed_count,
         "external_benchmark_batch_failed_count": external_benchmark_batch_failed_count,
         "external_benchmark_batch_rerun_count": external_benchmark_batch_rerun_count,
+        "external_benchmark_submission_summary_line": committee_external_benchmark_submission_summary_line,
+        "external_benchmark_submission_recommended_start_mode": committee_external_benchmark_submission_recommended_start_mode,
+        "external_benchmark_submission_recommended_submission_scope": committee_external_benchmark_submission_recommended_submission_scope,
+        "external_benchmark_submission_blocker_label": committee_external_benchmark_submission_blocker_label,
+        "external_benchmark_submission_caution_label": committee_external_benchmark_submission_caution_label,
+        "external_benchmark_submission_queue_count": committee_external_benchmark_submission_queue_count,
+        "external_benchmark_submission_queue_ready_count": committee_external_benchmark_submission_queue_ready_count,
+        "external_benchmark_submission_queue_review_pending_count": committee_external_benchmark_submission_queue_review_pending_count,
+        "external_benchmark_submission_queue_blocked_count": committee_external_benchmark_submission_queue_blocked_count,
+        "external_benchmark_submission_onepage_attestation_status": committee_external_benchmark_submission_onepage_attestation_status,
+        "external_benchmark_submission_queue_rows": committee_external_benchmark_submission_queue_rows,
+        "external_benchmark_submission_queue_rows_present": bool(committee_external_benchmark_submission_queue_rows),
         "baseline_measured_family_count": int(measured_benchmark_breadth_summary.get("baseline_measured_family_count", 0)),
         "baseline_measured_case_count": int(measured_benchmark_breadth_summary.get("baseline_measured_case_count", 0)),
         "opensees_incremental_family_count": int(

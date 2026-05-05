@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
@@ -83,11 +84,47 @@ def _token_from_env(token_env: str) -> tuple[str | None, str | None]:
     return None, None
 
 
+def _token_from_gh_auth() -> tuple[str | None, str | None]:
+    commands = (
+        (["gh", "auth", "token"], "gh-auth-token"),
+        (["gh", "auth", "status", "--hostname", "github.com", "--show-token"], "gh-auth-status"),
+    )
+    for command, source in commands:
+        try:
+            proc = subprocess.run(
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+        except (OSError, subprocess.SubprocessError):
+            continue
+        candidates = [proc.stdout.strip()]
+        for line in (proc.stdout + "\n" + proc.stderr).splitlines():
+            if "Token:" in line:
+                candidates.append(line.split("Token:", 1)[1].strip())
+        for token in candidates:
+            if proc.returncode == 0 and token and set(token) != {"*"}:
+                return token, source
+    return None, None
+
+
+def _resolve_token(token_env: str, *, allow_gh_auth_token: bool = False) -> tuple[str | None, str | None]:
+    token, resolved_env = _token_from_env(token_env)
+    if token is not None:
+        return token, resolved_env
+    if allow_gh_auth_token:
+        return _token_from_gh_auth()
+    return None, None
+
+
 def _missing_token_message(token_env: str) -> str:
     if token_env == "GITHUB_TOKEN":
         return (
             "Missing GitHub token. Set GITHUB_TOKEN or GH_TOKEN, or rerun with "
-            "--dry-run to write a dispatch plan without network access."
+            "--dry-run to write a dispatch plan without network access. If `gh` is "
+            "already authenticated, rerun with --allow-gh-auth-token."
         )
     return (
         f"Missing GitHub token. Set {token_env}, or rerun with --dry-run to "
@@ -103,11 +140,12 @@ def build_dispatch_plan(
     replace_existing: bool = False,
     promote_manifest: bool = False,
     token_env: str = "GITHUB_TOKEN",
+    allow_gh_auth_token: bool = False,
     dry_run: bool = False,
 ) -> dict[str, Any]:
     """Return a JSON-serializable dispatch plan without exposing token values."""
 
-    token, resolved_env = _token_from_env(token_env)
+    token, resolved_env = _resolve_token(token_env, allow_gh_auth_token=allow_gh_auth_token)
     return {
         "ok": True,
         "dry_run": dry_run,
@@ -128,10 +166,50 @@ def build_dispatch_plan(
             "url": _runs_url(repo, workflow, ref),
             "note": "Use after dispatch to inspect recent workflow runs for this ref.",
         },
+        "required_publication_evidence": {
+            "post_publish_roundtrip_json": "structural-post-publish-roundtrip.json",
+            "validation_commands": [
+                [
+                    "python3",
+                    "scripts/hydrate_github_release_assets.py",
+                    "--repo",
+                    repo,
+                    "--manifest",
+                    "<candidate-manifest.json>",
+                    "--artifact-root",
+                    "<hydrated-release-root>",
+                    "--write",
+                    "--out",
+                    "<post-publish-roundtrip.json>",
+                ],
+                [
+                    "python3",
+                    "scripts/check_release_p0_closure.py",
+                    "--manifest",
+                    "<candidate-manifest.json>",
+                    "--assets-json",
+                    "<release-assets.json>",
+                    "--artifact-root",
+                    "<release-upload-root>",
+                    "--upload-plan-json",
+                    "<release-upload-plan.json>",
+                    "--metadata-preflight-json",
+                    "<metadata-preflight.json>",
+                    "--post-publish-roundtrip-json",
+                    "<post-publish-roundtrip.json>",
+                    "--tag-ref-present",
+                    "true",
+                    "--require-all",
+                    "--require-exact",
+                    "--fail-unclosed",
+                ],
+            ],
+        },
         "token": {
             "env": token_env,
             "resolved_env": resolved_env,
             "available": token is not None,
+            "gh_auth_fallback_allowed": allow_gh_auth_token,
         },
     }
 
@@ -166,6 +244,7 @@ def dispatch_workflow(
     replace_existing: bool = False,
     promote_manifest: bool = False,
     token_env: str = "GITHUB_TOKEN",
+    allow_gh_auth_token: bool = False,
     dry_run: bool = False,
     urlopen: Callable[..., Any] = urllib_urlopen,
 ) -> dict[str, Any]:
@@ -178,12 +257,13 @@ def dispatch_workflow(
         replace_existing=replace_existing,
         promote_manifest=promote_manifest,
         token_env=token_env,
+        allow_gh_auth_token=allow_gh_auth_token,
         dry_run=dry_run,
     )
     if dry_run:
         return plan
 
-    token, resolved_env = _token_from_env(token_env)
+    token, resolved_env = _resolve_token(token_env, allow_gh_auth_token=allow_gh_auth_token)
     if token is None:
         raise MissingTokenError(_missing_token_message(token_env))
 
@@ -220,6 +300,7 @@ def dispatch_workflow(
             "env": token_env,
             "resolved_env": resolved_env,
             "available": True,
+            "gh_auth_fallback_allowed": allow_gh_auth_token,
         },
         "message": "workflow_dispatch accepted by GitHub",
     }
@@ -231,11 +312,12 @@ def check_workflow_status(
     workflow: str = DEFAULT_WORKFLOW,
     ref: str = DEFAULT_REF,
     token_env: str = "GITHUB_TOKEN",
+    allow_gh_auth_token: bool = False,
     urlopen: Callable[..., Any] = urllib_urlopen,
 ) -> dict[str, Any]:
     """Fetch recent workflow runs for the configured ref."""
 
-    token, resolved_env = _token_from_env(token_env)
+    token, resolved_env = _resolve_token(token_env, allow_gh_auth_token=allow_gh_auth_token)
     if token is None:
         raise MissingTokenError(_missing_token_message(token_env))
 
@@ -279,6 +361,7 @@ def check_workflow_status(
             "env": token_env,
             "resolved_env": resolved_env,
             "available": True,
+            "gh_auth_fallback_allowed": allow_gh_auth_token,
         },
         "workflow_runs": runs,
     }
@@ -334,6 +417,11 @@ def _parser() -> argparse.ArgumentParser:
         default="GITHUB_TOKEN",
         help="Environment variable containing the GitHub token. GITHUB_TOKEN falls back to GH_TOKEN.",
     )
+    parser.add_argument(
+        "--allow-gh-auth-token",
+        action="store_true",
+        help="If token env vars are missing, use `gh auth token` from an already-authenticated GitHub CLI session.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Print/write the request plan without network calls.")
     parser.add_argument("--status", action="store_true", help="Fetch recent workflow runs for the selected ref.")
     parser.add_argument("--json", action="store_true", help="Print JSON output for automation evidence.")
@@ -350,6 +438,7 @@ def main(argv: list[str] | None = None) -> int:
                 workflow=args.workflow,
                 ref=args.ref,
                 token_env=args.token_env,
+                allow_gh_auth_token=args.allow_gh_auth_token,
             )
         else:
             payload = dispatch_workflow(
@@ -359,6 +448,7 @@ def main(argv: list[str] | None = None) -> int:
                 replace_existing=args.replace_existing,
                 promote_manifest=args.promote_manifest,
                 token_env=args.token_env,
+                allow_gh_auth_token=args.allow_gh_auth_token,
                 dry_run=args.dry_run,
             )
     except MissingTokenError as exc:

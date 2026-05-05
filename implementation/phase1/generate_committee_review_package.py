@@ -4366,11 +4366,22 @@ def _write_markdown(
             ]
         )
     if external_benchmark_submission_queue_rows:
+        external_benchmark_submission_summary_line = str(
+            metrics.get("external_benchmark_submission_summary_line", "") or ""
+        ).strip()
+        if not external_benchmark_submission_summary_line:
+            external_benchmark_submission_summary_line = (
+                f"queue={len(external_benchmark_submission_queue_rows)} | "
+                f"onepage_attestation_status="
+                f"{metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown'}"
+            )
         lines.extend(
             [
                 "",
                 "## External Benchmark Submission Queue",
                 "",
+                f"- `external_benchmark_submission_summary_line`: "
+                f"`{external_benchmark_submission_summary_line}`",
                 f"- `external_benchmark_submission_onepage_attestation_status`: "
                 f"`{metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown'}`",
                 f"- `external_benchmark_submission_queue_count`: "

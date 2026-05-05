@@ -47,6 +47,26 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "implementation/phase1/release_artifacts_manifest.json" in text
 
 
+def test_release_publish_workflow_only_closes_p0_after_post_publish_roundtrip() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    listing_step = text.split("      - name: Verify published release closure", 1)[1].split(
+        "      - name: Hydrate published release assets", 1
+    )[0]
+    hydrate_step = text.split("      - name: Hydrate published release assets", 1)[1].split(
+        "      - name: Write publication failure report", 1
+    )[0]
+
+    assert "scripts/check_release_asset_listing.py" in listing_step
+    assert "scripts/check_release_p0_closure.py" not in listing_step
+    assert "scripts/check_p0_closure_status.py" not in listing_step
+    assert "scripts/hydrate_github_release_assets.py" in hydrate_step
+    assert "scripts/check_release_p0_closure.py" in hydrate_step
+    assert "scripts/check_p0_closure_status.py" in hydrate_step
+    assert hydrate_step.index("scripts/hydrate_github_release_assets.py") < hydrate_step.index(
+        "scripts/check_release_p0_closure.py"
+    )
+
+
 def test_release_publish_workflow_does_not_use_runner_context_in_job_env() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
     job_env = text.split("    env:", 1)[1].split("    steps:", 1)[0]
@@ -71,6 +91,7 @@ def test_release_publish_workflow_reuses_checked_in_gate_evidence_and_uploads_fa
     assert "Release workflow checkout HEAD" in text
     assert "Track irregularity generator import preflight" in text
     assert "implementation/phase1/track_irregularity_generator.py" in text
+    assert "scripts/materialize_release_publication_sidecars.py" in text
     assert "Nightly release gate summary" in text
     assert "failed_step_report_path" in text
     assert "failed_step_report_failed_checks" in text

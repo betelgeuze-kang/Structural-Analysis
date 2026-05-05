@@ -519,6 +519,17 @@ def _post_publish_roundtrip_status(roundtrip_json: Path | None, manifest: Any) -
     }
 
 
+def _require_checked_status(status: dict[str, Any], *, label: str) -> dict[str, Any]:
+    if bool(status.get("checked")):
+        return status
+    return {
+        **status,
+        "checked": True,
+        "ok": False,
+        "errors": [f"{label} evidence is required for P0 release closure"],
+    }
+
+
 def _split_error_message(message: str) -> list[str]:
     if not message:
         return ["unknown error"]
@@ -602,9 +613,15 @@ def build_status(
     }
     tag_status = _tag_ref_status(tag_ref_present)
 
-    upload_closed = not bool(upload_status.get("checked")) or upload_status["ok"] is True
-    metadata_closed = not bool(metadata_status.get("checked")) or metadata_status["ok"] is True
-    roundtrip_closed = not bool(roundtrip_status.get("checked")) or roundtrip_status["ok"] is True
+    publication_evidence_present = assets_json is not None or tag_ref_present is not None
+    if publication_evidence_present:
+        upload_status = _require_checked_status(upload_status, label="upload plan")
+        metadata_status = _require_checked_status(metadata_status, label="metadata preflight")
+        roundtrip_status = _require_checked_status(roundtrip_status, label="post-publish roundtrip")
+
+    upload_closed = bool(upload_status.get("checked")) and upload_status["ok"] is True
+    metadata_closed = bool(metadata_status.get("checked")) and metadata_status["ok"] is True
+    roundtrip_closed = bool(roundtrip_status.get("checked")) and roundtrip_status["ok"] is True
     p0_closed = (
         manifest_status["ok"] is True
         and tag_ref_present is True

@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 from urllib.error import HTTPError
 
 import pytest
@@ -73,6 +74,14 @@ def test_dry_run_writes_dispatch_plan_without_token(tmp_path: Path, monkeypatch,
     }
     assert plan["token"]["available"] is False
     assert plan["token"]["env"] == "GITHUB_TOKEN"
+    assert plan["token"]["gh_auth_fallback_allowed"] is False
+    assert plan["required_publication_evidence"]["post_publish_roundtrip_json"] == (
+        "structural-post-publish-roundtrip.json"
+    )
+    assert any(
+        "--post-publish-roundtrip-json" in command
+        for command in plan["required_publication_evidence"]["validation_commands"]
+    )
 
 
 def test_dispatch_plan_encodes_urls_and_never_serializes_token(monkeypatch) -> None:
@@ -89,11 +98,10 @@ def test_dispatch_plan_encodes_urls_and_never_serializes_token(monkeypatch) -> N
     serialized = json.dumps(plan, sort_keys=True)
 
     assert "super-secret-token" not in serialized
-    assert plan["token"] == {
-        "env": "GITHUB_TOKEN",
-        "resolved_env": "GITHUB_TOKEN",
-        "available": True,
-    }
+    assert plan["token"]["env"] == "GITHUB_TOKEN"
+    assert plan["token"]["resolved_env"] == "GITHUB_TOKEN"
+    assert plan["token"]["available"] is True
+    assert plan["token"]["gh_auth_fallback_allowed"] is False
     assert plan["request"]["url"].endswith("/actions/workflows/release%20publish.yml/dispatches")
     assert plan["status_check"]["url"].endswith(
         "/actions/workflows/release%20publish.yml/runs?branch=release%2F2026%20q2&per_page=5"
@@ -113,6 +121,63 @@ def test_missing_token_returns_exit_code_2_before_network(monkeypatch, capsys) -
     assert "Missing GitHub token" in payload["error"]
     assert "GITHUB_TOKEN" in payload["error"]
     assert "GH_TOKEN" in payload["error"]
+    assert "--allow-gh-auth-token" in payload["error"]
+
+
+def test_dispatch_plan_can_use_authenticated_gh_cli_without_serializing_token(monkeypatch) -> None:
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.delenv("GH_TOKEN", raising=False)
+    monkeypatch.setattr(dispatch_release_publish_workflow, "_token_from_gh_auth", lambda: ("gh-secret", "gh-auth-token"))
+
+    plan = dispatch_release_publish_workflow.build_dispatch_plan(
+        ref="release-branch",
+        replace_existing=True,
+        promote_manifest=True,
+        allow_gh_auth_token=True,
+        dry_run=True,
+    )
+    serialized = json.dumps(plan, sort_keys=True)
+
+    assert "gh-secret" not in serialized
+    assert plan["token"] == {
+        "env": "GITHUB_TOKEN",
+        "resolved_env": "gh-auth-token",
+        "available": True,
+        "gh_auth_fallback_allowed": True,
+    }
+    assert plan["request"]["payload"] == {
+        "ref": "release-branch",
+        "inputs": {
+            "replace_existing": "true",
+            "promote_manifest": "true",
+        },
+    }
+
+
+def test_gh_auth_token_fallback_supports_older_status_show_token(monkeypatch) -> None:
+    calls = []
+
+    def fake_run(command, check, capture_output, text, timeout):
+        calls.append(command)
+        if command == ["gh", "auth", "token"]:
+            return subprocess.CompletedProcess(command, 1, stdout="", stderr='unknown command "token"')
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout="",
+            stderr="github.com\n  ✓ Token: ghp_status_secret\n",
+        )
+
+    monkeypatch.setattr(dispatch_release_publish_workflow.subprocess, "run", fake_run)
+
+    token, source = dispatch_release_publish_workflow._token_from_gh_auth()
+
+    assert token == "ghp_status_secret"
+    assert source == "gh-auth-status"
+    assert calls == [
+        ["gh", "auth", "token"],
+        ["gh", "auth", "status", "--hostname", "github.com", "--show-token"],
+    ]
 
 
 def test_dispatch_success_204_sends_boolean_inputs_as_strings(monkeypatch) -> None:
@@ -148,6 +213,31 @@ def test_dispatch_success_204_sends_boolean_inputs_as_strings(monkeypatch) -> No
             "promote_manifest": "false",
         },
     }
+
+
+def test_dispatch_success_can_use_gh_cli_token_fallback(monkeypatch) -> None:
+    monkeypatch.delenv("GITHUB_TOKEN", raising=False)
+    monkeypatch.delenv("GH_TOKEN", raising=False)
+    monkeypatch.setattr(dispatch_release_publish_workflow, "_token_from_gh_auth", lambda: ("gh-secret", "gh-auth-token"))
+    requests = []
+
+    def fake_urlopen(request, timeout):
+        requests.append(request)
+        return _Response(status=204)
+
+    result = dispatch_release_publish_workflow.dispatch_workflow(
+        repo="acme/widgets",
+        workflow="ship.yml",
+        ref="release",
+        replace_existing=True,
+        promote_manifest=True,
+        allow_gh_auth_token=True,
+        urlopen=fake_urlopen,
+    )
+
+    assert result["ok"] is True
+    assert result["token"]["resolved_env"] == "gh-auth-token"
+    assert dict(requests[0].header_items())["Authorization"] == "Bearer gh-secret"
 
 
 def test_dispatch_failure_includes_status_and_body(monkeypatch) -> None:

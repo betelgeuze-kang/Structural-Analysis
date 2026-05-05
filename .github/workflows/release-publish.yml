@@ -161,6 +161,7 @@ jobs:
           python implementation/phase1/export_optimized_drawing_expert_review_pdf.py \
             --expert-review-metadata-json implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json \
             --out-pdf implementation/phase1/release/visualization/optimized_drawing_expert_review.pdf
+          python scripts/materialize_release_publication_sidecars.py
 
       - name: Build fresh publication candidate
         run: |
@@ -209,26 +210,6 @@ jobs:
             --assets-json "$RELEASE_ASSETS_JSON" \
             --require-all \
             --require-exact
-          python scripts/check_release_p0_closure.py \
-            --manifest "$CANDIDATE_MANIFEST" \
-            --assets-json "$RELEASE_ASSETS_JSON" \
-            --artifact-root "$RELEASE_ROOT" \
-            --upload-plan-json "$RELEASE_UPLOAD_PLAN" \
-            --metadata-preflight-json "$RELEASE_METADATA_PREFLIGHT" \
-            --tag-ref-present true \
-            --require-all \
-            --require-exact \
-            --fail-unclosed
-          python scripts/check_p0_closure_status.py \
-            --manifest "$CANDIDATE_MANIFEST" \
-            --release-assets-json "$RELEASE_ASSETS_JSON" \
-            --artifact-root "$RELEASE_ROOT" \
-            --upload-plan-json "$RELEASE_UPLOAD_PLAN" \
-            --metadata-preflight-json "$RELEASE_METADATA_PREFLIGHT" \
-            --tag-ref-present \
-            --out "$P0_STATUS_JSON" \
-            --out-md "$P0_STATUS_MD" \
-            --fail-open
 
       - name: Hydrate published release assets
         run: |
@@ -241,6 +222,17 @@ jobs:
           python scripts/verify_release_artifacts_manifest.py \
             --manifest "$CANDIDATE_MANIFEST" \
             --artifact-root "$HYDRATED_RELEASE_ROOT"
+          python scripts/check_release_p0_closure.py \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --assets-json "$RELEASE_ASSETS_JSON" \
+            --artifact-root "$RELEASE_ROOT" \
+            --upload-plan-json "$RELEASE_UPLOAD_PLAN" \
+            --metadata-preflight-json "$RELEASE_METADATA_PREFLIGHT" \
+            --post-publish-roundtrip-json "$POST_PUBLISH_ROUNDTRIP_JSON" \
+            --tag-ref-present true \
+            --require-all \
+            --require-exact \
+            --fail-unclosed
           python scripts/check_p0_closure_status.py \
             --manifest "$CANDIDATE_MANIFEST" \
             --release-assets-json "$RELEASE_ASSETS_JSON" \

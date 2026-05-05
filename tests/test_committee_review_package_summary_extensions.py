@@ -718,6 +718,48 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "why": "Formal authority-facing responsibility stays outside automated scope.",
         },
     ]
+    external_benchmark_submission_queue_rows = [
+        {
+            "queue_id": "hardest_external_10case",
+            "submission_scope": "hardest_external_benchmark_program",
+            "owner": "benchmark_program_owner",
+            "status": "ready_for_benchmark_start_final_review_pending",
+            "onepage_attestation": "hardest external 10-case one-page attestation",
+            "onepage_attestation_status": "draft_ready_final_review_pending",
+            "dry_run_evidence": "hardest_external_10case_kickoff: PASS_START_NOW_FULL",
+        },
+        {
+            "queue_id": "tpu_hffb",
+            "submission_scope": "component_wind_benchmark_submission",
+            "owner": "wind_benchmark_owner",
+            "status": "ready_for_benchmark_start_final_review_pending",
+            "onepage_attestation": "TPU/HFFB component benchmark one-page attestation",
+            "onepage_attestation_status": "draft_ready_final_review_pending",
+            "dry_run_evidence": "tpu_hffb_benchmark_gate: PASS",
+        },
+        {
+            "queue_id": "peer_spd_hinge",
+            "submission_scope": "component_hinge_benchmark_submission",
+            "owner": "pbd_benchmark_owner",
+            "status": "ready_for_benchmark_start_final_review_pending",
+            "onepage_attestation": "PEER/SPD hinge component one-page attestation",
+            "onepage_attestation_status": "draft_ready_final_review_pending",
+            "dry_run_evidence": (
+                "peer_spd_hinge_benchmark_gate: PASS | "
+                "peer_spd_hinge_fixture_regression: PASS | "
+                "peer_spd_hinge_alignment: PASS"
+            ),
+        },
+        {
+            "queue_id": "korean_public_structures",
+            "submission_scope": "korean_public_structure_release_review",
+            "owner": "korean_source_owner",
+            "status": "ready_for_benchmark_start_final_review_pending",
+            "onepage_attestation": "Korean public structures provenance one-page attestation",
+            "onepage_attestation_status": "draft_ready_final_review_pending",
+            "dry_run_evidence": "korean_public_structures: PASS",
+        },
+    ]
     md = tmp_path / "committee_review_report.md"
     html = tmp_path / "committee_review_report.html"
     _write_markdown(
@@ -735,7 +777,7 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         [],
         [],
         [],
-        [],
+        external_benchmark_submission_queue_rows,
         holdout_buckets,
         holdout_detail_rows,
         [],
@@ -755,7 +797,7 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         [],
         [],
         [],
-        [],
+        external_benchmark_submission_queue_rows,
         holdout_buckets,
         holdout_detail_rows,
         [],
@@ -847,6 +889,15 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | "
         "full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%"
     ) in markdown
+    assert "External Benchmark Submission Queue" in markdown
+    assert "external_benchmark_submission_summary_line" in markdown
+    assert "queue=4" in markdown
+    assert "onepage_attestation_status=draft_ready_final_review_pending" in markdown
+    assert "| Queue | Scope | Owner | Status | Onepage Attestation | Onepage Status | Dry-run Evidence |" in markdown
+    assert "hardest_external_10case" in markdown
+    assert "tpu_hffb" in markdown
+    assert "peer_spd_hinge" in markdown
+    assert "korean_public_structures" in markdown
     assert "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True" in markdown
     assert "| Work Item | Category | Due Date | SLA | Closure Evidence | Owner | Queue Status | Status | Relative Share | Absolute Project % | Scope |" in markdown
     assert "| Category | Work Item | Axis | Detail | Owner | Queue Status | Status | SLA | Due | Closure Evidence | Why |" in markdown
@@ -894,6 +945,10 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | "
         "full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%"
     ) in html_text
+    assert "External Benchmark Submission Queue" in html_text
+    assert "onepage_attestation_status=draft_ready_final_review_pending" in html_text
+    assert "hardest_external_10case" in html_text
+    assert "korean_public_structures" in html_text
     assert "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True" in html_text
     assert "<th>Work Item</th>" in html_text
     assert "RH-001" in html_text

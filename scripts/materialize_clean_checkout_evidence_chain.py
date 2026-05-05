@@ -35,14 +35,32 @@ def _publication_index_paths(path: Path | None) -> dict[str, Path]:
     paths = payload.get("paths")
     if not isinstance(paths, dict):
         raise ValueError(f"publication evidence index paths must be an object: {path}")
-    p0_status = paths.get("p0_status_json")
-    if not p0_status:
-        return {}
-    candidate = Path(str(p0_status))
-    if candidate.exists():
-        return {"p0_status": candidate}
-    sibling = path.parent / candidate.name
-    return {"p0_status": sibling if sibling.exists() else candidate}
+
+    def resolve(key: str, value: object) -> tuple[str, Path] | None:
+        if not value:
+            return None
+        candidate = Path(str(value))
+        if candidate.exists():
+            return key, candidate
+        sibling = path.parent / candidate.name
+        return key, sibling if sibling.exists() else candidate
+
+    resolved: dict[str, Path] = {}
+    for key in (
+        "p0_status_json",
+        "manifest",
+        "release_assets_json",
+        "artifact_root",
+        "upload_plan_json",
+        "metadata_preflight_json",
+        "post_publish_roundtrip_json",
+    ):
+        entry = resolve(key, paths.get(key))
+        if entry is not None:
+            resolved[entry[0]] = entry[1]
+    if "p0_status_json" in resolved:
+        resolved["p0_status"] = resolved["p0_status_json"]
+    return resolved
 
 
 def _compact_summary(summary: object) -> dict[str, Any]:
@@ -163,6 +181,20 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     steps: list[dict[str, Any]] = []
     index_paths = _publication_index_paths(args.publication_evidence_index)
     p0_status_path = args.p0_status or index_paths.get("p0_status")
+    publication_step: dict[str, Any] | None = None
+
+    if args.publication_evidence_index is not None and "release_assets_json" in index_paths:
+        publication_cmd = [
+            sys.executable,
+            "scripts/check_p0_closure_status.py",
+            "--publication-evidence-index",
+            str(args.publication_evidence_index),
+            "--json",
+            "--fail-open",
+        ]
+        publication_step = _run_json_command(publication_cmd)
+        publication_step.update({"label": "release publication evidence status"})
+        steps.append(publication_step)
 
     midas_step = _materialize_evidence(
         label="MIDAS/KDS validation report",
@@ -273,7 +305,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     p1_readiness = p1_step.get("json") if isinstance(p1_step.get("json"), dict) else {}
     p1_benchmark = benchmark_step.get("json") if isinstance(benchmark_step.get("json"), dict) else {}
     contract_pass = bool(
-        midas_payload.get("ok")
+        (publication_step is None or publication_step.get("ok"))
+        and midas_payload.get("ok")
         and commercial_payload.get("ok")
         and row_payload.get("ok")
         and p1_readiness.get("p1_inputs_ready", False)
@@ -295,6 +328,9 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             "commercial_readiness": str(args.commercial_readiness),
             "row_provenance": str(args.row_provenance),
         },
+        "release_publication_evidence_status": (
+            publication_step.get("json", {}) if isinstance(publication_step, dict) else {}
+        ),
         "midas_kds_validation": midas_payload,
         "commercial_readiness": {
             **commercial_payload,
