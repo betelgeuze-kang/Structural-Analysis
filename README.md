@@ -21,12 +21,12 @@
 
 ## Commercial Priority Snapshot
 
-- Current state: source-boundary cleanup is closed, and P0-1 release publication for `structural-analysis-artifacts-2026-04-26` is verified against the GitHub Release asset listing, metadata preflight, and published-byte SHA/bytes evidence.
+- Current state: source-boundary cleanup is closed, P0 is closed, P1 is now unblocked, and P0-1 release publication for `structural-analysis-artifacts-2026-04-26` is verified against the GitHub Release asset listing, metadata preflight, and published-byte SHA/bytes evidence.
 - P0 closure status is scriptable: `python3 scripts/check_p0_closure_status.py --json` without release evidence still reports the publication gate as open by design, while the same command with release assets, upload plan, metadata preflight, hydrated artifact root, and `--tag-ref-present` reports overall P0 closed.
 - Commercial scope is release-facing and intentionally bounded: grade is `Commercial`, `engineer_in_loop_accelerated_coverage_ready=true` for 95-99% accelerated coverage, `full_commercial_replacement_ready=false`, and the residual holdout queue stays explicit as `licensed_engineer_review_required` (`owner=기술사`, `status=pending_review`, `work_item=RH-001`, `SLA=72h`, `due=assignment_plus_3_business_days`, `closure_evidence=signed_engineer_review_packet`), `legacy_tool_cross_validation_required` (`owner=기존툴+기술사`, `status=pending_cross_validation`, `work_item=RH-002`, `SLA=120h`, `due=assignment_plus_5_business_days`, `closure_evidence=legacy_tool_cross_validation_packet`), and `legal_authority_signoff_required` (`owner=기술사/기존 승인 workflow`, `status=pending_signoff`, `work_item=RH-003`, `SLA=168h`, `due=assignment_plus_7_business_days`, `closure_evidence=authority_signoff_packet`).
-- External benchmark handoff is tracked separately through the one-page attestation queue (`hardest_external_10case`, `tpu_hffb`, `peer_spd_hinge`, `korean_public_structures`), with owner/status/dry-run evidence visible in the release-gap and committee package surfaces.
+- External benchmark handoff is tracked separately through the one-page attestation queue (`hardest_external_10case`, `tpu_hffb`, `peer_spd_hinge`, `korean_public_structures`), with work item, submission id, lifecycle, receipt status, owner action, and dry-run evidence visible in the release-gap and committee package surfaces.
 - P0 source-boundary item: tracked stress/workspace/output/rust target artifacts are removed from Git tracking; 25MiB+ open-data artifacts are externalized in `implementation/phase1/open_data_external_artifacts_manifest.json`.
-- Next order: P1 quality/fallback/benchmark breadth -> real-project row provenance/parser breadth -> residual holdout queue ownership/status -> P2 viewer shared selection/provenance and report polish.
+- Next order: P1 quality/fallback/benchmark breadth (now unblocked) -> real-project row provenance/parser breadth -> residual holdout queue ownership/status -> P2 viewer shared selection/provenance and report polish.
 - P0-1 remains closed only while the release has exactly the current 22 manifest assets, metadata preflight passes, upload-plan SHA/bytes match the promoted manifest, and hydrated published bytes plus post-publish round-trip evidence verify cleanly.
 - Viewer provenance/performance/report polish stays in P2, including shared selection/provenance, wall/slab batching/LOD, solver-verified panel-zone, and SVG sheet/revision/callout.
 
@@ -47,10 +47,9 @@ python3 scripts/check_p0_closure_status.py --json
 python3 scripts/verify_open_data_external_artifacts_manifest.py --manifest implementation/phase1/open_data_external_artifacts_manifest.json --structure-only
 python3 scripts/plan_open_data_artifact_restore.py --json --out /tmp/open-data-restore-plan.json
 python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
-python3 scripts/materialize_clean_checkout_evidence_chain.py --p1-readiness-out /tmp/p1-readiness-status.json --p1-benchmark-out /tmp/p1-benchmark-breadth-status.json --json --out /tmp/clean-checkout-evidence-chain.json
 ```
 
-After publication, pass the captured P0 closure evidence into the same clean-checkout materializer: `python3 scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --p1-readiness-out <p1-readiness-status.json> --p1-benchmark-out <p1-benchmark-breadth-status.json> --json --out <clean-checkout-evidence-chain.json>`.
+After publication, pass the captured P0 closure evidence into the same clean-checkout materializer: `python3 scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --p1-readiness-out <p1-readiness-status.json> --p1-benchmark-out <p1-benchmark-breadth-status.json> --p1-operational-queues-out <p1-operational-queues.json> --p1-operational-queues-out-md <p1-operational-queues.md> --json --out <clean-checkout-evidence-chain.json>`. The materializer now keeps `contract_pass=false` unless P0 closure evidence is consumed and P1 execution/breadth gates are unblocked; `inputs_contract_pass` remains available for the softer pre-P0 materialization check.
 
 If you want the clean-clone smoke path instead of the manual build step, run `npm run verify:frontend-smoke`; it already performs the frontend contract check, a clean `npm ci`, and `npm run build`.
 
@@ -96,7 +95,8 @@ If you want the clean-clone smoke path instead of the manual build step, run `np
 - `implementation/phase1/open_data_external_artifacts_manifest.json` records SHA-256 and byte counts for externalized open-data assets that should be restored from GitHub Releases or the source-family artifact cache when running heavy validation.
 - Use [Open-data artifact restore runbook](docs/open-data-artifact-restore-runbook.md) and `python3 scripts/plan_open_data_artifact_restore.py --cache-root <cache-root> --fail-unready` before P1 heavy validation.
 - `python3 scripts/check_p1_readiness_status.py --json` separates P1 input readiness from the P0-1 release-publication blocker, so P1 work does not accidentally start before release closure.
-- `python3 scripts/check_p1_benchmark_breadth_status.py --json` summarizes the tracked P1 commercial/benchmark breadth evidence and keeps execution blocked until `check_p1_readiness_status.py` reports P0-1 closed.
+- `python3 scripts/check_p1_benchmark_breadth_status.py --json` summarizes the tracked P1 commercial/benchmark breadth evidence, including the external benchmark submission queue lifecycle, and keeps execution blocked until `check_p1_readiness_status.py` reports P0-1 closed.
+- `python3 scripts/materialize_p1_operational_queues.py --json` writes the combined P1 operational backlog: external benchmark submission work items plus residual holdout closure packet templates for RH-001/RH-002/RH-003.
 
 ## Real Project Corpus P0/P1/P2
 

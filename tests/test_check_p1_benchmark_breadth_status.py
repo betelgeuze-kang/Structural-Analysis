@@ -88,10 +88,81 @@ def _benchmark(path: Path, *, ok: bool = True, label: str = "Benchmark") -> Path
     )
 
 
+def _external_submission(path: Path, *, ok: bool = True, blocked: bool = False) -> Path:
+    status = "blocked" if blocked else "ready_for_full_submission"
+    queue = []
+    for idx, queue_id in enumerate(
+        ["hardest_external_10case", "tpu_hffb", "peer_spd_hinge", "korean_public_structures"],
+        start=1,
+    ):
+        queue.append(
+            {
+                "work_item_id": f"EB-{idx:03d}",
+                "queue_id": queue_id,
+                "submission_id": f"p1-{queue_id}",
+                "submission_scope": "full_external_submission_package",
+                "owner": f"{queue_id}_owner",
+                "status": status,
+                "lifecycle_status": status,
+                "submission_lifecycle_status": "blocked" if blocked else "ready_to_submit",
+                "submission_status": "blocked" if blocked else "ready_to_submit",
+                "submission_owner_action": (
+                    "clear_blockers_before_submission"
+                    if blocked
+                    else "submit_external_benchmark_package_and_attach_receipt"
+                ),
+                "receipt_status": "blocked" if blocked else "pending_external_submission_receipt",
+                "submission_receipt": "pending",
+                "submission_receipt_status": "blocked" if blocked else "pending_external_submission_receipt",
+                "receipt_url": "",
+                "onepage_attestation": f"{queue_id} one-page attestation",
+                "onepage_attestation_status": "ready_for_full_submission" if not blocked else "blocked",
+                "dry_run_evidence": f"{queue_id}: PASS",
+                "closure_evidence_required": f"{queue_id}_submission_receipt",
+                "closure_evidence_path": "",
+                "closure_evidence_status": "pending",
+                "status_lifecycle": {
+                    "current_status": status,
+                    "submission_lifecycle_status": "blocked" if blocked else "ready_to_submit",
+                    "submission_owner_action": (
+                        "clear_blockers_before_submission"
+                        if blocked
+                        else "submit_external_benchmark_package_and_attach_receipt"
+                    ),
+                    "submitted": False,
+                    "receipt_verified": False,
+                    "closure_evidence_attached": False,
+                    "terminal": False,
+                },
+            }
+        )
+    return _write_json(
+        path,
+        {
+            "schema_version": "1.0",
+            "contract_pass": ok,
+            "reason_code": "PASS_START_NOW_FULL" if ok else "ERR_ARCHITECTURE_BLOCKERS",
+            "summary": {
+                "submission_queue_count": 4,
+                "submission_queue_ready_count": 0 if blocked else 4,
+                "submission_queue_review_pending_count": 0,
+                "submission_queue_blocked_count": 4 if blocked else 0,
+                "submission_lifecycle_ready_to_submit_count": 0 if blocked else 4,
+                "submission_lifecycle_review_boundary_pending_count": 0,
+                "submission_lifecycle_blocked_count": 4 if blocked else 0,
+                "submission_receipt_pending_count": 0 if blocked else 4,
+                "onepage_attestation_status": "ready_for_full_submission" if not blocked else "blocked",
+            },
+            "submission_queue": queue,
+        },
+    )
+
+
 def _paths(tmp_path: Path) -> dict[str, object]:
     return {
         "p1_readiness_status": _p1_status(tmp_path / "p1.json"),
         "commercial_readiness": _commercial(tmp_path / "commercial.json"),
+        "external_benchmark_submission_readiness": _external_submission(tmp_path / "external_submission.json"),
         "benchmark_reports": [
             _benchmark(tmp_path / "hf.json", label="HF benchmark"),
             _benchmark(tmp_path / "wind.json", label="Wind benchmark"),
@@ -122,6 +193,17 @@ def test_benchmark_breadth_is_ready_but_blocked_by_p0_release(tmp_path: Path) ->
     assert work_items["RH-001"]["closure_evidence_required"] == "signed_engineer_review_packet"
     assert work_items["RH-001"]["closure_evidence_status"] == "pending"
     assert work_items["RH-002"]["queue_status"] == "pending_cross_validation"
+    external_gate = status["gates"][2]
+    assert external_gate["label"] == "External benchmark submission queue"
+    assert external_gate["submission_queue_count"] == 4
+    assert external_gate["required_lifecycle_fields_present"] is True
+    assert external_gate["submission_queue"][0]["work_item_id"] == "EB-001"
+    assert external_gate["submission_queue"][0]["submission_id"] == "p1-hardest_external_10case"
+    assert external_gate["submission_queue"][0]["receipt_url"] == ""
+    assert external_gate["submission_queue"][0]["submission_receipt"] == "pending"
+    assert external_gate["submission_queue"][0]["submission_receipt_status"] == "pending_external_submission_receipt"
+    assert external_gate["submission_queue"][0]["closure_evidence_status"] == "pending"
+    assert external_gate["submission_queue"][0]["status_lifecycle"]["current_status"] == "ready_for_full_submission"
     assert commercial_gate["commercial_scope_ready"] is True
     assert status["summary"]["commercialization_scope"] == {
         "commercial_grade_label": "Commercial",
@@ -133,6 +215,19 @@ def test_benchmark_breadth_is_ready_but_blocked_by_p0_release(tmp_path: Path) ->
         "residual_holdout_category_count": 2,
         "residual_holdout_work_item_count": 2,
         "commercial_scope_ready": True,
+    }
+    assert status["summary"]["external_benchmark_submission"] == {
+        "submission_queue_count": 4,
+        "submission_queue_ready_count": 4,
+        "submission_queue_review_pending_count": 0,
+        "submission_queue_blocked_count": 0,
+        "submission_lifecycle_ready_to_submit_count": 4,
+        "submission_lifecycle_review_boundary_pending_count": 0,
+        "submission_lifecycle_blocked_count": 0,
+        "submission_receipt_attached_count": 0,
+        "submission_receipt_pending_count": 4,
+        "onepage_attestation_status": "ready_for_full_submission",
+        "required_lifecycle_fields_present": True,
     }
 
 
@@ -160,6 +255,22 @@ def test_benchmark_breadth_blocks_on_failed_report(tmp_path: Path) -> None:
     assert status["benchmark_breadth_inputs_ready"] is False
     assert failed_gate["status"] == "blocked"
     assert failed_gate["reason_code"] == "ERR_BENCHMARK"
+
+
+def test_benchmark_breadth_blocks_on_non_operational_external_submission_queue(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    paths["external_benchmark_submission_readiness"] = _external_submission(
+        tmp_path / "external_submission.json",
+        ok=False,
+        blocked=True,
+    )
+
+    status = check_p1_benchmark.build_status(**paths)
+    external_gate = status["gates"][2]
+
+    assert status["benchmark_breadth_inputs_ready"] is False
+    assert external_gate["status"] == "blocked"
+    assert external_gate["submission_queue_blocked_count"] == 4
 
 
 def test_benchmark_breadth_blocks_when_commercial_scope_is_not_ready(tmp_path: Path) -> None:
@@ -190,6 +301,8 @@ def test_cli_writes_markdown_and_fails_when_blocked(tmp_path: Path, capsys) -> N
             str(paths["p1_readiness_status"]),
             "--commercial-readiness",
             str(paths["commercial_readiness"]),
+            "--external-benchmark-submission-readiness",
+            str(paths["external_benchmark_submission_readiness"]),
             "--benchmark-report",
             str(paths["benchmark_reports"][0]),
             "--benchmark-report",

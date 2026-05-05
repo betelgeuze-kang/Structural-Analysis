@@ -15,6 +15,9 @@ from typing import Any
 
 SCHEMA_VERSION = "clean_checkout_evidence_chain.v1"
 PUBLICATION_EVIDENCE_INDEX_SCHEMA = "release-publication-evidence-index.v1"
+DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS = Path(
+    "implementation/phase1/release/external_benchmark_submission_readiness.json"
+)
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -284,6 +287,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "scripts/check_p1_benchmark_breadth_status.py",
         "--commercial-readiness",
         str(args.commercial_readiness),
+        "--external-benchmark-submission-readiness",
+        str(args.external_benchmark_submission_readiness),
         "--json",
     ]
     p1_status = p1_step.get("json") if isinstance(p1_step.get("json"), dict) else {}
@@ -299,12 +304,44 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     if args.p1_benchmark_out and isinstance(benchmark_step.get("json"), dict):
         _write_json(args.p1_benchmark_out, benchmark_step["json"])
 
+    operational_step: dict[str, Any] | None = None
+    operational_payload: dict[str, Any] = {}
+    operational_temp_dir: tempfile.TemporaryDirectory[str] | None = None
+    if args.p1_operational_queues_out:
+        p1_benchmark_path = args.p1_benchmark_out
+        if p1_benchmark_path is None:
+            operational_temp_dir = tempfile.TemporaryDirectory(prefix="p1-operational-queues-")
+            p1_benchmark_path = Path(operational_temp_dir.name) / "p1-benchmark-breadth-status.json"
+            if isinstance(benchmark_step.get("json"), dict):
+                _write_json(p1_benchmark_path, benchmark_step["json"])
+        operational_cmd = [
+            sys.executable,
+            "scripts/materialize_p1_operational_queues.py",
+            "--commercial-readiness",
+            str(args.commercial_readiness),
+            "--external-benchmark-submission-readiness",
+            str(args.external_benchmark_submission_readiness),
+            "--p1-benchmark-breadth-status",
+            str(p1_benchmark_path),
+            "--out",
+            str(args.p1_operational_queues_out),
+            "--json",
+        ]
+        if args.p1_operational_queues_out_md:
+            operational_cmd.extend(["--out-md", str(args.p1_operational_queues_out_md)])
+        operational_step = _run_json_command(operational_cmd)
+        operational_step.update({"label": "P1 operational queues", "path": str(args.p1_operational_queues_out)})
+        operational_payload = operational_step.get("json") if isinstance(operational_step.get("json"), dict) else {}
+        steps.append(operational_step)
+    if operational_temp_dir is not None:
+        operational_temp_dir.cleanup()
+
     midas_payload = _json_summary(args.midas_kds_validation_report)
     commercial_payload = _json_summary(args.commercial_readiness)
     row_payload = _json_summary(args.row_provenance)
     p1_readiness = p1_step.get("json") if isinstance(p1_step.get("json"), dict) else {}
     p1_benchmark = benchmark_step.get("json") if isinstance(benchmark_step.get("json"), dict) else {}
-    contract_pass = bool(
+    inputs_contract_pass = bool(
         (publication_step is None or publication_step.get("ok"))
         and midas_payload.get("ok")
         and commercial_payload.get("ok")
@@ -312,10 +349,27 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         and p1_readiness.get("p1_inputs_ready", False)
         and p1_benchmark.get("benchmark_breadth_inputs_ready", False)
     )
+    p0_closure_evidence_consumed = bool(
+        p0_status_path is not None
+        and not bool(p1_readiness.get("p0_release_blocker", True))
+        and bool(p1_readiness.get("p1_execution_unblocked", False))
+    )
+    p1_benchmark_execution_unblocked = bool(p1_benchmark.get("p1_benchmark_execution_unblocked", False))
+    operational_queues_pass = bool(
+        operational_step is None or (operational_step.get("ok") and operational_payload.get("contract_pass", False))
+    )
+    contract_pass = bool(
+        inputs_contract_pass
+        and p0_closure_evidence_consumed
+        and p1_benchmark_execution_unblocked
+        and operational_queues_pass
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_CLEAN_CHECKOUT_EVIDENCE_CHAIN_INCOMPLETE",
+        "inputs_contract_pass": inputs_contract_pass,
+        "p0_closure_evidence_consumed": p0_closure_evidence_consumed,
         "artifacts": {
             "manifest": str(args.manifest),
             "publication_evidence_index": (
@@ -326,7 +380,9 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
             "peer_metric_records": str(args.peer_metric_records),
             "midas_kds_validation_report": str(args.midas_kds_validation_report),
             "commercial_readiness": str(args.commercial_readiness),
+            "external_benchmark_submission_readiness": str(args.external_benchmark_submission_readiness),
             "row_provenance": str(args.row_provenance),
+            "p1_operational_queues": str(args.p1_operational_queues_out) if args.p1_operational_queues_out else "",
         },
         "release_publication_evidence_status": (
             publication_step.get("json", {}) if isinstance(publication_step, dict) else {}
@@ -339,11 +395,11 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "row_provenance": row_payload,
         "p1_readiness_status": p1_readiness,
         "p1_benchmark_breadth_status": p1_benchmark,
+        "p1_operational_queues": operational_payload,
+        "p1_operational_queues_pass": operational_queues_pass,
         "p0_release_blocker": bool(p1_readiness.get("p0_release_blocker", False)),
         "p1_execution_unblocked": bool(p1_readiness.get("p1_execution_unblocked", False)),
-        "p1_benchmark_execution_unblocked": bool(
-            p1_benchmark.get("p1_benchmark_execution_unblocked", False)
-        ),
+        "p1_benchmark_execution_unblocked": p1_benchmark_execution_unblocked,
         "steps": steps,
     }
 
@@ -366,6 +422,11 @@ def main() -> int:
     )
     parser.add_argument("--commercial-readiness", type=Path, default=Path("implementation/phase1/commercial_readiness_report.json"))
     parser.add_argument(
+        "--external-benchmark-submission-readiness",
+        type=Path,
+        default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    )
+    parser.add_argument(
         "--commercial-readiness-source-evidence",
         type=Path,
         default=Path("implementation/phase1/release_evidence/commercial/commercial_readiness_report.json"),
@@ -384,6 +445,8 @@ def main() -> int:
     )
     parser.add_argument("--p1-readiness-out", type=Path, default=None)
     parser.add_argument("--p1-benchmark-out", type=Path, default=None)
+    parser.add_argument("--p1-operational-queues-out", type=Path, default=None)
+    parser.add_argument("--p1-operational-queues-out-md", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--force-hydrate", action="store_true")

@@ -241,6 +241,10 @@ def test_release_gap_report_uses_engineer_in_loop_holdout_model(tmp_path: Path) 
     assert summary["engineer_in_loop_accelerated_coverage_ready"] is True
     assert "residual engineer holdout" in summary["time_saving_focus"]
     assert summary["full_commercial_replacement_ready"] is False
+    assert summary["p0_closed"] is True
+    assert summary["p0_closure_status"] == "closed"
+    assert summary["p1_unblocked"] is True
+    assert summary["p1_handoff_status"] == "unblocked"
     bucket_ids = {row["id"] for row in payload["residual_holdout_buckets"]}
     assert bucket_ids == {
         "licensed_engineer_review_required",
@@ -259,6 +263,8 @@ def test_release_gap_report_uses_engineer_in_loop_holdout_model(tmp_path: Path) 
     assert work_items["RH-003"]["owner"] == "기술사/기존 승인 workflow"
     assert summary["residual_holdout_work_item_count"] == 3
     markdown = out_md.read_text(encoding="utf-8")
+    assert "P0 closure status: `closed`" in markdown
+    assert "P1 handoff status: `unblocked`" in markdown
     assert "Residual Holdout Model" in markdown
     assert "RH-001" in markdown
     assert "Engineer-in-loop accelerated coverage ready" in markdown

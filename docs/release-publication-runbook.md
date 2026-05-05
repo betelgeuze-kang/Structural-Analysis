@@ -176,8 +176,9 @@ After a successful publication rerun, capture the P0 status first and then check
 
 1. Run `python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-release-asset-root> --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --post-publish-roundtrip-json <post-publish-roundtrip.json> --tag-ref-present --json --out <p0-status.json> --out-md <p0-status.md> --fail-open`.
 2. If that reports closed, run `python3 scripts/check_p1_readiness_status.py --p0-status <p0-status.json> --json --out <p1-readiness-status.json> --out-md <p1-readiness-status.md> --fail-blocked` to confirm the P1 quality/fallback/benchmark breadth slice is unblocked.
-3. If P1 readiness is unblocked, run `python3 scripts/check_p1_benchmark_breadth_status.py --p1-readiness-status <p1-readiness-status.json> --json --out <p1-benchmark-breadth-status.json> --out-md <p1-benchmark-breadth-status.md> --fail-blocked` to execute the P1 quality/fallback/benchmark breadth slice.
-4. For clean-checkout reproduction, run `python3 scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --p1-readiness-out <p1-readiness-status.json> --p1-benchmark-out <p1-benchmark-breadth-status.json> --json --out <clean-checkout-evidence-chain.json>`.
+3. If P1 readiness is unblocked, run `python3 scripts/check_p1_benchmark_breadth_status.py --p1-readiness-status <p1-readiness-status.json> --json --out <p1-benchmark-breadth-status.json> --out-md <p1-benchmark-breadth-status.md> --fail-blocked` to execute the P1 quality/fallback/benchmark breadth slice and validate the external benchmark submission lifecycle queue.
+4. Materialize the actionable P1 backlog with `python3 scripts/materialize_p1_operational_queues.py --p1-benchmark-breadth-status <p1-benchmark-breadth-status.json> --json --out <p1-operational-queues.json> --out-md <p1-operational-queues.md> --fail-open`.
+5. For clean-checkout reproduction, run `python3 scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --p1-readiness-out <p1-readiness-status.json> --p1-benchmark-out <p1-benchmark-breadth-status.json> --p1-operational-queues-out <p1-operational-queues.json> --p1-operational-queues-out-md <p1-operational-queues.md> --json --out <clean-checkout-evidence-chain.json>`.
 
 ## Completion Criteria
 
@@ -202,4 +203,4 @@ P0-1 is closed only when all of these are true:
 
 ## After P0-1
 
-P0-1 is closed, so the next order is P1 quality/fallback/benchmark breadth, residual holdout queue ownership/status, and then viewer/report polish. Keep `check_p0_closure_status.py` in the loop whenever the release assets or promoted manifest change.
+P0-1 is closed, so the next order is P1 quality/fallback/benchmark breadth, external benchmark submission receipts, residual holdout closure packet execution, and then viewer/report polish. Keep `check_p0_closure_status.py` in the loop whenever the release assets or promoted manifest change.

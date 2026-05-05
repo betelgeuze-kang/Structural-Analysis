@@ -467,6 +467,8 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         "external_benchmark_submission_queue_ready_count": 0,
         "external_benchmark_submission_queue_review_pending_count": 4,
         "external_benchmark_submission_queue_blocked_count": 0,
+        "external_benchmark_submission_receipt_attached_count": 0,
+        "external_benchmark_submission_receipt_pending_count": 4,
         "external_benchmark_submission_onepage_attestation_status": "draft_ready_final_review_pending",
         "external_benchmark_execution_review_boundary_resolution_label": "approve_all=PASS_START_NOW_FULL/ready_full=yes; reject_one=ERR_ARCHITECTURE_BLOCKERS/open_revision=1",
         "external_benchmark_execution_review_boundary_owner_label": "licensed_engineer=2",
@@ -618,6 +620,18 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "value": "engineer_in_the_loop_accelerated_coverage",
             "status": "INFO",
             "note": "95-99%",
+        },
+        {
+            "label": "P0 Closed",
+            "value": "closed",
+            "status": "PASS",
+            "note": "release publication and core evidence",
+        },
+        {
+            "label": "P1 Unblocked",
+            "value": "unblocked",
+            "status": "PASS",
+            "note": "quality/fallback/benchmark breadth can proceed",
         }
     ]
     rows = [
@@ -726,6 +740,8 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "status": "ready_for_benchmark_start_final_review_pending",
             "onepage_attestation": "hardest external 10-case one-page attestation",
             "onepage_attestation_status": "draft_ready_final_review_pending",
+            "submission_receipt": "pending",
+            "submission_receipt_status": "not_due_review_boundary_pending",
             "dry_run_evidence": "hardest_external_10case_kickoff: PASS_START_NOW_FULL",
         },
         {
@@ -735,6 +751,8 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "status": "ready_for_benchmark_start_final_review_pending",
             "onepage_attestation": "TPU/HFFB component benchmark one-page attestation",
             "onepage_attestation_status": "draft_ready_final_review_pending",
+            "submission_receipt": "pending",
+            "submission_receipt_status": "not_due_review_boundary_pending",
             "dry_run_evidence": "tpu_hffb_benchmark_gate: PASS",
         },
         {
@@ -744,6 +762,8 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "status": "ready_for_benchmark_start_final_review_pending",
             "onepage_attestation": "PEER/SPD hinge component one-page attestation",
             "onepage_attestation_status": "draft_ready_final_review_pending",
+            "submission_receipt": "pending",
+            "submission_receipt_status": "not_due_review_boundary_pending",
             "dry_run_evidence": (
                 "peer_spd_hinge_benchmark_gate: PASS | "
                 "peer_spd_hinge_fixture_regression: PASS | "
@@ -757,6 +777,8 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "status": "ready_for_benchmark_start_final_review_pending",
             "onepage_attestation": "Korean public structures provenance one-page attestation",
             "onepage_attestation_status": "draft_ready_final_review_pending",
+            "submission_receipt": "pending",
+            "submission_receipt_status": "not_due_review_boundary_pending",
             "dry_run_evidence": "korean_public_structures: PASS",
         },
     ]
@@ -889,11 +911,14 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | "
         "full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%"
     ) in markdown
+    assert "P0 Closed" in markdown
+    assert "P1 Unblocked" in markdown
     assert "External Benchmark Submission Queue" in markdown
     assert "external_benchmark_submission_summary_line" in markdown
     assert "queue=4" in markdown
     assert "onepage_attestation_status=draft_ready_final_review_pending" in markdown
-    assert "| Queue | Scope | Owner | Status | Onepage Attestation | Onepage Status | Dry-run Evidence |" in markdown
+    assert "receipt_pending=4" in markdown
+    assert "| Work Item | Queue | Submission ID | Scope | Owner | Status | Receipt | Receipt Status | Onepage Status | Dry-run Evidence |" in markdown
     assert "hardest_external_10case" in markdown
     assert "tpu_hffb" in markdown
     assert "peer_spd_hinge" in markdown
@@ -947,10 +972,15 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
     ) in html_text
     assert "External Benchmark Submission Queue" in html_text
     assert "onepage_attestation_status=draft_ready_final_review_pending" in html_text
+    assert "receipt_pending=4" in html_text
+    assert "P0 Closed" in html_text
+    assert "P1 Unblocked" in html_text
     assert "hardest_external_10case" in html_text
     assert "korean_public_structures" in html_text
     assert "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True" in html_text
     assert "<th>Work Item</th>" in html_text
+    assert "<th>Receipt</th>" in html_text
+    assert "<th>Receipt Status</th>" in html_text
     assert "RH-001" in html_text
     assert "pending_review" in html_text
     assert "MIDAS KDS geometry full-crosswalk depth" in html_text

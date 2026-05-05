@@ -159,6 +159,26 @@ def test_external_benchmark_submission_readiness_allows_limited_start_with_clean
         row["status"] == "ready_for_benchmark_start_final_review_pending"
         for row in payload["submission_queue"]
     )
+    assert [row["work_item_id"] for row in payload["submission_queue"]] == ["EB-001", "EB-002", "EB-003", "EB-004"]
+    assert [row["submission_id"] for row in payload["submission_queue"]] == [
+        "p1-hardest-external-10case",
+        "p1-tpu-hffb",
+        "p1-peer-spd-hinge",
+        "p1-korean-public-structures",
+    ]
+    assert all("receipt_url" in row for row in payload["submission_queue"])
+    assert all(row["closure_evidence_status"] == "pending" for row in payload["submission_queue"])
+    assert all(row["status_lifecycle"]["current_status"] == row["status"] for row in payload["submission_queue"])
+    assert all(row["submission_receipt"] == "pending" for row in payload["submission_queue"])
+    assert all(
+        row["submission_receipt_status"] == "not_due_review_boundary_pending"
+        for row in payload["submission_queue"]
+    )
+    assert all(
+        row["status_lifecycle"]["submission_receipt_status"] == row["submission_receipt_status"]
+        for row in payload["submission_queue"]
+    )
+    assert payload["submission_queue"][0]["closure_evidence_required"] == "hardest_external_10case_submission_receipt"
     assert all("dry_run_evidence" in row for row in payload["submission_queue"])
     assert all("onepage_attestation_status" in row for row in payload["submission_queue"])
     assert payload["submission_queue"][0]["dry_run_evidence"] == "Hardest external 10-case kickoff: PASS | cases=10 | coverage=100% | dry_run=ready"
@@ -195,6 +215,11 @@ def test_external_benchmark_submission_readiness_allows_full_start_when_queue_cl
     assert payload["summary"]["submission_queue_ready_count"] == 4
     assert payload["summary"]["onepage_attestation_status"] == "ready_for_full_submission"
     assert all(row["status"] == "ready_for_full_submission" for row in payload["submission_queue"])
+    assert all(row["submission_receipt"] == "pending" for row in payload["submission_queue"])
+    assert all(
+        row["submission_receipt_status"] == "pending_external_submission_receipt"
+        for row in payload["submission_queue"]
+    )
 
 
 def test_external_benchmark_submission_readiness_blocks_on_open_revision_cycle(tmp_path: Path) -> None:
@@ -219,3 +244,4 @@ def test_external_benchmark_submission_readiness_blocks_on_architecture_gaps(tmp
     assert payload["summary"]["submission_queue_blocked_count"] == 4
     assert payload["summary"]["onepage_attestation_status"] == "blocked"
     assert all(row["status"] == "blocked" for row in payload["submission_queue"])
+    assert all(row["submission_receipt_status"] == "blocked" for row in payload["submission_queue"])

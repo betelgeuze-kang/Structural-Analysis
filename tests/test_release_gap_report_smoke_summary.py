@@ -950,7 +950,8 @@ def test_release_gap_report_surfaces_panel_zone_status_semantics(tmp_path: Path)
     assert summary["external_benchmark_submission_onepage_attestation_status"] == "ready_for_full_submission"
     assert summary["external_benchmark_submission_summary_line"] == (
         "External benchmark submission queue: queue=4 | ready=4 | review_pending=0 | "
-        "blocked=0 | onepage_attestation_status=ready_for_full_submission | "
+        "blocked=0 | receipt_attached=0 | receipt_pending=4 | "
+        "onepage_attestation_status=ready_for_full_submission | "
         "start_mode=start_now_full_external_submission | "
         "submission_scope=full_external_submission_package | blocker=none | caution=none"
     )
@@ -1016,9 +1017,10 @@ def test_release_gap_report_surfaces_panel_zone_status_semantics(tmp_path: Path)
     assert (
         "External benchmark submission queue: `External benchmark submission queue: queue=4 | "
         "ready=4 | review_pending=0 | blocked=0 | "
+        "receipt_attached=0 | receipt_pending=4 | "
         "onepage_attestation_status=ready_for_full_submission"
     ) in markdown
-    assert "| Queue | Scope | Owner | Status | Onepage Attestation | Onepage Status | Dry-run Evidence |" in markdown
+    assert "| Work Item | Queue | Submission ID | Scope | Owner | Status | Receipt | Receipt Status | Onepage Status | Dry-run Evidence |" in markdown
     assert "hardest_external_10case" in markdown
     assert "tpu_hffb" in markdown
     assert "peer_spd_hinge" in markdown

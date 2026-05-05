@@ -2223,6 +2223,20 @@ def _build_summary(
         _card("authority_binary", "Authority Binary Cases", int(authority_summary.get("case_metrics_npz_case_count", 0)), "PASS", str(authority_summary.get("response_storage", "n/a"))),
         _card("gaps", "Open P0/P1", f"{gap_summary.get('open_gap_counts', {}).get('P0', 0)}/{gap_summary.get('open_gap_counts', {}).get('P1', 0)}", "INFO", "remaining commercialization gaps"),
         _card(
+            "p0_closed",
+            "P0 Closed",
+            "closed" if int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0 else "open",
+            _status(int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0),
+            "release publication and core evidence",
+        ),
+        _card(
+            "p1_unblocked",
+            "P1 Unblocked",
+            "unblocked" if int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0 else "blocked",
+            _status(int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0),
+            "P1 quality/fallback/benchmark breadth can proceed",
+        ),
+        _card(
             "advanced_holdout_closure",
             "Advanced Holdout Closure",
             f"{int(advanced_holdout_surface.get('closed_count', 0))}/{int(advanced_holdout_surface.get('total_count', 0))} closed",
@@ -3286,6 +3300,10 @@ def _build_summary(
         "authority_catalog_diff_change_count": 0,
         "open_gap_p0": int(gap_summary.get("open_gap_counts", {}).get("P0", 0)),
         "open_gap_p1": int(gap_summary.get("open_gap_counts", {}).get("P1", 0)),
+        "p0_closed": bool(int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0),
+        "p0_closure_status": "closed" if int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0 else "open",
+        "p1_unblocked": bool(int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0),
+        "p1_handoff_status": "unblocked" if int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0 else "blocked",
         "design_opt_long_final_max_dcr": _finite(design_opt_long_summary.get("final_max_dcr")),
         "design_opt_long_feasible": bool(design_opt_long_summary.get("solver_feasible_final", False)),
         "design_opt_raw_max_drift_pct": design_opt_raw_max_drift,
@@ -4065,6 +4083,15 @@ def _write_csv(
         )
 
 
+def _submission_receipt_label(row: dict) -> str:
+    return str(row.get("submission_receipt", "") or row.get("receipt_url", "") or "pending")
+
+
+def _submission_receipt_status_label(row: dict) -> str:
+    lifecycle = row.get("status_lifecycle") if isinstance(row.get("status_lifecycle"), dict) else {}
+    return str(row.get("submission_receipt_status", "") or lifecycle.get("submission_receipt_status", "unknown"))
+
+
 def _write_markdown(
     path: Path,
     cards: list[dict],
@@ -4375,6 +4402,12 @@ def _write_markdown(
                 f"onepage_attestation_status="
                 f"{metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown'}"
             )
+        receipt_attached_count = sum(
+            1
+            for row in external_benchmark_submission_queue_rows
+            if _submission_receipt_label(row) != "pending"
+        )
+        receipt_pending_count = len(external_benchmark_submission_queue_rows) - receipt_attached_count
         lines.extend(
             [
                 "",
@@ -4385,16 +4418,20 @@ def _write_markdown(
                 f"- `external_benchmark_submission_onepage_attestation_status`: "
                 f"`{metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown'}`",
                 f"- `external_benchmark_submission_queue_count`: "
-                f"`{int(metrics.get('external_benchmark_submission_queue_count', len(external_benchmark_submission_queue_rows)))}`",
+                f"`{int(metrics.get('external_benchmark_submission_queue_count', len(external_benchmark_submission_queue_rows)))}` | "
+                f"`receipt_attached={receipt_attached_count}` | "
+                f"`receipt_pending={receipt_pending_count}`",
                 "",
-                "| Queue | Scope | Owner | Status | Onepage Attestation | Onepage Status | Dry-run Evidence |",
-                "|---|---|---|---|---|---|---|",
+                "| Work Item | Queue | Submission ID | Scope | Owner | Status | Receipt | Receipt Status | Onepage Status | Dry-run Evidence |",
+                "|---|---|---|---|---|---|---|---|---|---|",
             ]
         )
         for row in external_benchmark_submission_queue_rows:
             lines.append(
-                f"| {row.get('queue_id', '')} | {row.get('submission_scope', '')} | {row.get('owner', '')} | "
-                f"{row.get('status', '')} | {row.get('onepage_attestation', '')} | "
+                f"| {row.get('work_item_id', '')} | {row.get('queue_id', '')} | {row.get('submission_id', '')} | "
+                f"{row.get('submission_scope', '')} | {row.get('owner', '')} | {row.get('status', '')} | "
+                f"{_submission_receipt_label(row)} | "
+                f"{_submission_receipt_status_label(row)} | "
                 f"{row.get('onepage_attestation_status', '') or 'unknown'} | {row.get('dry_run_evidence', '') or 'n/a'} |"
             )
     lines.extend(
@@ -5688,7 +5725,7 @@ def _write_html(
           <tr><td>Audit review decision batch runner</td><td>reason={metrics.get('audit_review_decision_batch_runner_reason_code', '')} | apply_live={bool(metrics.get('audit_review_decision_batch_runner_apply_live', False))} | live_applied={bool(metrics.get('audit_review_decision_batch_runner_live_applied', False))} | preview_reason={metrics.get('audit_review_decision_batch_runner_preview_reason_code', '') or 'none'} | preview_ready_full={bool(metrics.get('audit_review_decision_batch_runner_preview_ready_full', False))} | preview_pending={int(metrics.get('audit_review_decision_batch_runner_preview_pending_count', 0))} | preview_open_revision={int(metrics.get('audit_review_decision_batch_runner_preview_open_revision_count', 0))}</td></tr>
         </table>
       </div>
-      {'<div class="panel"><h2>External Benchmark Submission Queue</h2><table><thead><tr><th>Queue</th><th>Scope</th><th>Owner</th><th>Status</th><th>Onepage Attestation</th><th>Onepage Status</th><th>Dry-run Evidence</th></tr></thead><tbody>' + ''.join(f"<tr><td>{row.get('queue_id', '')}</td><td>{row.get('submission_scope', '')}</td><td>{row.get('owner', '')}</td><td>{row.get('status', '')}</td><td>{row.get('onepage_attestation', '')}</td><td>{row.get('onepage_attestation_status', '') or 'unknown'}</td><td>{row.get('dry_run_evidence', '') or 'n/a'}</td></tr>" for row in external_benchmark_submission_queue_rows) + '</tbody></table><div class="panel-note">onepage_attestation_status=' + (str(metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown')) + '</div></div>' if external_benchmark_submission_queue_rows else ''}
+      {'<div class="panel"><h2>External Benchmark Submission Queue</h2><table><thead><tr><th>Work Item</th><th>Queue</th><th>Submission ID</th><th>Scope</th><th>Owner</th><th>Status</th><th>Receipt</th><th>Receipt Status</th><th>Onepage Status</th><th>Dry-run Evidence</th></tr></thead><tbody>' + ''.join(f"<tr><td>{row.get('work_item_id', '')}</td><td>{row.get('queue_id', '')}</td><td>{row.get('submission_id', '')}</td><td>{row.get('submission_scope', '')}</td><td>{row.get('owner', '')}</td><td>{row.get('status', '')}</td><td>{_submission_receipt_label(row)}</td><td>{_submission_receipt_status_label(row)}</td><td>{row.get('onepage_attestation_status', '') or 'unknown'}</td><td>{row.get('dry_run_evidence', '') or 'n/a'}</td></tr>" for row in external_benchmark_submission_queue_rows) + '</tbody></table><div class="panel-note">onepage_attestation_status=' + (str(metrics.get('external_benchmark_submission_onepage_attestation_status', '') or 'unknown')) + ' | receipt_attached=' + str(int(metrics.get('external_benchmark_submission_receipt_attached_count', 0))) + ' | receipt_pending=' + str(int(metrics.get('external_benchmark_submission_receipt_pending_count', 0))) + '</div></div>' if external_benchmark_submission_queue_rows else ''}
       <div class="panel">
         <h2>Design Opt Raw vs Repaired</h2>
         <table>
@@ -6685,7 +6722,8 @@ def _write_pdf(
                     0.04,
                     y,
                     (
-                        f"{row.get('queue_id', '')} | scope={row.get('submission_scope', '')} | "
+                        f"{row.get('work_item_id', '')} | {row.get('queue_id', '')} | "
+                        f"submission_id={row.get('submission_id', '')} | scope={row.get('submission_scope', '')} | "
                         f"owner={row.get('owner', '')} | status={row.get('status', '')}"
                     ),
                     fontsize=9.5,
@@ -6696,7 +6734,9 @@ def _write_pdf(
                     0.06,
                     y,
                     (
-                        f"onepage={row.get('onepage_attestation', '')} | "
+                        f"receipt_url={row.get('receipt_url', '') or 'pending'} | "
+                        f"closure_evidence={row.get('closure_evidence_required', '') or 'external_submission_receipt'} "
+                        f"({row.get('closure_evidence_status', '') or 'pending'}) | "
                         f"onepage_status={row.get('onepage_attestation_status', '') or 'unknown'} | "
                         f"dry_run_evidence={row.get('dry_run_evidence', '') or 'n/a'}"
                     ),
@@ -8518,9 +8558,27 @@ def main() -> None:
         "external_benchmark_submission_queue_blocked_count": int(
             sum(1 for row in external_benchmark_submission_queue_rows if str(row.get("status", "") or "") == "blocked")
         ),
+        "external_benchmark_submission_receipt_attached_count": int(
+            sum(
+                1
+                for row in external_benchmark_submission_queue_rows
+                if _submission_receipt_label(row) != "pending"
+            )
+        ),
+        "external_benchmark_submission_receipt_pending_count": int(
+            sum(
+                1
+                for row in external_benchmark_submission_queue_rows
+                if _submission_receipt_label(row) == "pending"
+            )
+        ),
         "external_benchmark_submission_onepage_attestation_status": str(
             metrics.get("external_benchmark_submission_onepage_attestation_status", "") or ""
         ),
+        "p0_closed": bool(int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0),
+        "p0_closure_status": "closed" if int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0 else "open",
+        "p1_unblocked": bool(int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0),
+        "p1_handoff_status": "unblocked" if int(gap_summary.get("open_gap_counts", {}).get("P0", 0)) == 0 else "blocked",
         "advanced_holdouts": advanced_holdouts,
         "residual_holdout_buckets": residual_holdout_buckets,
         "residual_holdout_detail_rows": residual_holdout_detail_rows,

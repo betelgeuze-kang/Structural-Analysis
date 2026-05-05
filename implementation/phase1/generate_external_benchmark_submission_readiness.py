@@ -29,6 +29,29 @@ REASONS = {
     "ERR_ARCHITECTURE_BLOCKERS": "Core architecture or benchmark coverage blockers remain before external benchmark submission should start.",
 }
 
+SUBMISSION_LANE_DEFAULTS = {
+    "hardest_external_10case": {
+        "work_item_id": "EB-001",
+        "submission_id": "p1-hardest-external-10case",
+        "closure_evidence_required": "hardest_external_10case_submission_receipt",
+    },
+    "tpu_hffb": {
+        "work_item_id": "EB-002",
+        "submission_id": "p1-tpu-hffb",
+        "closure_evidence_required": "tpu_hffb_submission_receipt",
+    },
+    "peer_spd_hinge": {
+        "work_item_id": "EB-003",
+        "submission_id": "p1-peer-spd-hinge",
+        "closure_evidence_required": "peer_spd_hinge_submission_receipt",
+    },
+    "korean_public_structures": {
+        "work_item_id": "EB-004",
+        "submission_id": "p1-korean-public-structures",
+        "closure_evidence_required": "korean_public_structures_submission_receipt_or_authority_review_hold",
+    },
+}
+
 
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
@@ -88,6 +111,110 @@ def _submission_queue_status(*, contract_pass: bool, queue_closed: bool) -> str:
     return "ready_for_benchmark_start_final_review_pending"
 
 
+def _submission_lifecycle(
+    *,
+    status: str,
+    onepage_attestation_status: str,
+    receipt_url: str,
+    closure_evidence_path: str,
+) -> dict[str, Any]:
+    submitted = bool(receipt_url)
+    closure_evidence_attached = bool(receipt_url or closure_evidence_path)
+    if status == "ready_for_full_submission":
+        lifecycle_status = "ready_to_submit" if not submitted else "submitted_receipt_attached"
+        owner_action = (
+            "submission_receipt_attached_verify_roundtrip"
+            if submitted
+            else "submit_external_benchmark_package_and_attach_receipt"
+        )
+        receipt_status = "attached" if submitted else "pending_external_submission_receipt"
+    elif status == "ready_for_benchmark_start_final_review_pending":
+        lifecycle_status = "benchmark_start_ready_review_boundary_pending"
+        owner_action = "start_benchmark_execution_then_close_review_boundary_before_submission"
+        receipt_status = "not_due_review_boundary_pending"
+    else:
+        lifecycle_status = "blocked"
+        owner_action = "clear_blockers_before_submission"
+        receipt_status = "blocked"
+    return {
+        "current_status": status,
+        "submission_lifecycle_status": lifecycle_status,
+        "submission_owner_action": owner_action,
+        "submission_receipt_status": receipt_status,
+        "onepage_attestation_status": onepage_attestation_status,
+        "submitted": submitted,
+        "receipt_verified": submitted,
+        "closure_evidence_attached": closure_evidence_attached,
+        "terminal": bool(status == "blocked" or (status == "ready_for_full_submission" and submitted)),
+    }
+
+
+def _submission_lane_row(
+    *,
+    queue_id: str,
+    submission_scope: str,
+    owner: str,
+    status: str,
+    onepage_attestation: str,
+    onepage_attestation_status: str,
+    dry_run_evidence: str,
+    blocker_label: str,
+    caution_label: str,
+    commercial_scope: str,
+    commercial_breadth: str,
+    exact_rows: str,
+    gap_summary: dict[str, Any],
+) -> dict[str, Any]:
+    defaults = SUBMISSION_LANE_DEFAULTS.get(queue_id, {})
+    receipt_url = str(gap_summary.get(f"{queue_id}_receipt_url", "") or "")
+    closure_evidence_path = str(gap_summary.get(f"{queue_id}_closure_evidence_path", "") or "")
+    submitted_at_utc = str(gap_summary.get(f"{queue_id}_submitted_at_utc", "") or "")
+    closure_evidence_status = str(
+        gap_summary.get(f"{queue_id}_closure_evidence_status", "")
+        or ("attached" if receipt_url or closure_evidence_path else "pending")
+    )
+    lifecycle = _submission_lifecycle(
+        status=status,
+        onepage_attestation_status=onepage_attestation_status,
+        receipt_url=receipt_url,
+        closure_evidence_path=closure_evidence_path,
+    )
+    return {
+        "work_item_id": str(defaults.get("work_item_id", "")),
+        "queue_id": queue_id,
+        "submission_id": str(gap_summary.get(f"{queue_id}_submission_id", "") or defaults.get("submission_id", queue_id)),
+        "submission_scope": submission_scope,
+        "owner": owner,
+        "status": status,
+        "queue_status": status,
+        "lifecycle_status": status,
+        "submission_lifecycle_status": str(lifecycle.get("submission_lifecycle_status", "")),
+        "submission_status": str(lifecycle.get("submission_lifecycle_status", "")),
+        "submission_owner_action": str(lifecycle.get("submission_owner_action", "")),
+        "submission_receipt": str(receipt_url or "pending"),
+        "submission_receipt_status": str(lifecycle.get("submission_receipt_status", "")),
+        "receipt_status": str(lifecycle.get("submission_receipt_status", "")),
+        "receipt_url": receipt_url,
+        "submission_receipt_url": receipt_url,
+        "submitted_at_utc": submitted_at_utc,
+        "onepage_attestation": onepage_attestation,
+        "onepage_attestation_status": onepage_attestation_status,
+        "dry_run_evidence": dry_run_evidence,
+        "closure_evidence_required": str(
+            gap_summary.get(f"{queue_id}_closure_evidence_required", "")
+            or defaults.get("closure_evidence_required", "external_submission_receipt")
+        ),
+        "closure_evidence_path": closure_evidence_path,
+        "closure_evidence_status": closure_evidence_status,
+        "status_lifecycle": lifecycle,
+        "blocker_label": blocker_label,
+        "caution_label": caution_label,
+        "commercial_scope_summary_line": commercial_scope,
+        "commercial_reliability_breadth_summary_line": commercial_breadth,
+        "midas_kds_row_provenance_exact_row_coverage_label": exact_rows,
+    }
+
+
 def _build_submission_queue(
     *,
     contract_pass: bool,
@@ -99,6 +226,7 @@ def _build_submission_queue(
     peer_spd_hinge_benchmark_payload: dict[str, Any],
     peer_spd_hinge_fixture_regression_payload: dict[str, Any],
     peer_spd_hinge_alignment_payload: dict[str, Any],
+    onepage_attestation_status: str,
 ) -> list[dict[str, Any]]:
     status = _submission_queue_status(contract_pass=contract_pass, queue_closed=queue_closed)
     blocker_label = _label(blockers) if blockers else "none"
@@ -154,20 +282,21 @@ def _build_submission_queue(
         ),
     ]
     return [
-        {
-            "queue_id": queue_id,
-            "submission_scope": submission_scope,
-            "owner": owner,
-            "status": status,
-            "onepage_attestation": attestation,
-            "onepage_attestation_status": "",
-            "dry_run_evidence": dry_run_evidence,
-            "blocker_label": blocker_label,
-            "caution_label": caution_label,
-            "commercial_scope_summary_line": commercial_scope,
-            "commercial_reliability_breadth_summary_line": commercial_breadth,
-            "midas_kds_row_provenance_exact_row_coverage_label": exact_rows,
-        }
+        _submission_lane_row(
+            queue_id=queue_id,
+            submission_scope=submission_scope,
+            owner=owner,
+            status=status,
+            onepage_attestation=attestation,
+            onepage_attestation_status=onepage_attestation_status,
+            dry_run_evidence=dry_run_evidence,
+            blocker_label=blocker_label,
+            caution_label=caution_label,
+            commercial_scope=commercial_scope,
+            commercial_breadth=commercial_breadth,
+            exact_rows=exact_rows,
+            gap_summary=gap_summary,
+        )
         for queue_id, submission_scope, owner, attestation, dry_run_evidence in tracks
     ]
 
@@ -268,6 +397,14 @@ def build_submission_readiness(
         recommended_submission_scope = "component_and_system_performance_benchmark_with_review_boundary"
         contract_pass = True
 
+    queue_status = _submission_queue_status(contract_pass=contract_pass, queue_closed=queue_closed)
+    onepage_attestation_status = (
+        "ready_for_full_submission"
+        if queue_status == "ready_for_full_submission"
+        else "draft_ready_final_review_pending"
+        if queue_status == "ready_for_benchmark_start_final_review_pending"
+        else "blocked"
+    )
     submission_queue = _build_submission_queue(
         contract_pass=contract_pass,
         queue_closed=queue_closed,
@@ -278,6 +415,7 @@ def build_submission_readiness(
         peer_spd_hinge_benchmark_payload=peer_spd_hinge_benchmark_payload,
         peer_spd_hinge_fixture_regression_payload=peer_spd_hinge_fixture_regression_payload,
         peer_spd_hinge_alignment_payload=peer_spd_hinge_alignment_payload,
+        onepage_attestation_status=onepage_attestation_status,
     )
     submission_ready_count = sum(
         1 for row in submission_queue if str(row.get("status", "") or "") == "ready_for_full_submission"
@@ -287,15 +425,6 @@ def build_submission_readiness(
         for row in submission_queue
         if str(row.get("status", "") or "") == "ready_for_benchmark_start_final_review_pending"
     )
-    onepage_attestation_status = (
-        "ready_for_full_submission"
-        if submission_ready_count == len(submission_queue)
-        else "draft_ready_final_review_pending"
-        if submission_review_pending_count == len(submission_queue)
-        else "blocked"
-    )
-    for row in submission_queue:
-        row["onepage_attestation_status"] = onepage_attestation_status
     evidence_parts = [
         f"core_holdouts_closed={core_holdouts_closed}",
         f"diversified_benchmarks={diversified_benchmark_gates_pass}",
@@ -377,6 +506,27 @@ def build_submission_readiness(
             "submission_queue_review_pending_count": int(submission_review_pending_count),
             "submission_queue_blocked_count": int(
                 len(submission_queue) - submission_ready_count - submission_review_pending_count
+            ),
+            "submission_lifecycle_ready_to_submit_count": int(
+                sum(1 for row in submission_queue if row.get("submission_lifecycle_status") == "ready_to_submit")
+            ),
+            "submission_lifecycle_review_boundary_pending_count": int(
+                sum(
+                    1
+                    for row in submission_queue
+                    if row.get("submission_lifecycle_status") == "benchmark_start_ready_review_boundary_pending"
+                )
+            ),
+            "submission_lifecycle_blocked_count": int(
+                sum(1 for row in submission_queue if row.get("submission_lifecycle_status") == "blocked")
+            ),
+            "submission_receipt_pending_count": int(
+                sum(
+                    1
+                    for row in submission_queue
+                    if str(row.get("receipt_status", "") or "").startswith("pending")
+                    or str(row.get("submission_receipt_status", "") or "").startswith("pending")
+                )
             ),
             "onepage_attestation_status": onepage_attestation_status,
             "onepage_attestation_required_count": int(len(submission_queue)),

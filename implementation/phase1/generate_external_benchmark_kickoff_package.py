@@ -119,9 +119,14 @@ def _build_markdown(payload: dict[str, Any]) -> str:
     lines.extend(["", "## Submission Queue", ""])
     for row in submission_queue:
         lines.append(
-            f"- `{row.get('queue_id', '')}` | scope=`{row.get('submission_scope', '')}` | "
+            f"- `{row.get('work_item_id', '')}` / `{row.get('queue_id', '')}` | "
+            f"submission_id=`{row.get('submission_id', '')}` | scope=`{row.get('submission_scope', '')}` | "
             f"owner=`{row.get('owner', '')}` | status=`{row.get('status', '')}` | "
-            f"onepage=`{row.get('onepage_attestation', '')}` | "
+            f"lifecycle=`{row.get('submission_lifecycle_status', row.get('lifecycle_status', ''))}` | "
+            f"receipt_status=`{row.get('receipt_status', row.get('submission_receipt_status', '')) or 'unknown'}` | "
+            f"receipt_url=`{row.get('receipt_url', '') or 'pending'}` | "
+            f"closure_evidence=`{row.get('closure_evidence_required', '') or 'external_submission_receipt'} "
+            f"({row.get('closure_evidence_status', '') or 'pending'})` | "
             f"onepage_status=`{row.get('onepage_attestation_status', '') or 'unknown'}` | "
             f"dry_run_evidence=`{row.get('dry_run_evidence', '') or 'n/a'}`"
         )
@@ -281,6 +286,18 @@ def build_kickoff_package(
             ),
             "submission_queue_blocked_count": int(
                 readiness_summary.get("submission_queue_blocked_count", 0) or 0
+            ),
+            "submission_lifecycle_ready_to_submit_count": int(
+                readiness_summary.get("submission_lifecycle_ready_to_submit_count", 0) or 0
+            ),
+            "submission_lifecycle_review_boundary_pending_count": int(
+                readiness_summary.get("submission_lifecycle_review_boundary_pending_count", 0) or 0
+            ),
+            "submission_lifecycle_blocked_count": int(
+                readiness_summary.get("submission_lifecycle_blocked_count", 0) or 0
+            ),
+            "submission_receipt_pending_count": int(
+                readiness_summary.get("submission_receipt_pending_count", 0) or 0
             ),
             "onepage_attestation_status": onepage_attestation_status,
             "onepage_attestation_required_count": int(

@@ -4605,6 +4605,12 @@ def _write_markdown(path: Path, payload: dict) -> None:
     lines.append("")
     lines.append(f"- Generated at: `{payload['generated_at']}`")
     lines.append(f"- Release-candidate gates: `{summary['release_candidate_pass']}`")
+    lines.append(
+        f"- P0 closure status: `{summary.get('p0_closure_status', 'closed' if summary.get('p0_closed', False) else 'open')}`"
+    )
+    lines.append(
+        f"- P1 handoff status: `{summary.get('p1_handoff_status', 'unblocked' if summary.get('p1_unblocked', False) else 'blocked')}`"
+    )
     lines.append(f"- Commercial readiness grade: `{summary['commercial_grade']}`")
     if str(summary.get("commercial_scope_summary_line", "")).strip():
         lines.append(f"- Commercial scope: `{str(summary.get('commercial_scope_summary_line', '')).strip()}`")
@@ -5265,6 +5271,12 @@ def _write_markdown(path: Path, payload: dict) -> None:
             )
         lines.append("")
     if external_benchmark_submission_queue_rows:
+        receipt_attached_count = sum(
+            1
+            for row in external_benchmark_submission_queue_rows
+            if str(row.get("submission_receipt", "") or row.get("receipt_url", "") or "pending") != "pending"
+        )
+        receipt_pending_count = len(external_benchmark_submission_queue_rows) - receipt_attached_count
         lines.append("## External Benchmark Submission Queue")
         lines.append("")
         lines.append(
@@ -5276,7 +5288,9 @@ def _write_markdown(path: Path, payload: dict) -> None:
             f"`{int(summary.get('external_benchmark_submission_queue_count', len(external_benchmark_submission_queue_rows)) or 0)}` | "
             f"`ready={int(summary.get('external_benchmark_submission_queue_ready_count', 0) or 0)}` | "
             f"`review_pending={int(summary.get('external_benchmark_submission_queue_review_pending_count', 0) or 0)}` | "
-            f"`blocked={int(summary.get('external_benchmark_submission_queue_blocked_count', 0) or 0)}`"
+            f"`blocked={int(summary.get('external_benchmark_submission_queue_blocked_count', 0) or 0)}` | "
+            f"`receipt_attached={receipt_attached_count}` | "
+            f"`receipt_pending={receipt_pending_count}`"
         )
         lines.append(
             f"- `external_benchmark_submission_onepage_attestation_status`: "
@@ -5294,13 +5308,18 @@ def _write_markdown(path: Path, payload: dict) -> None:
                 f"`caution={str(summary.get('external_benchmark_submission_caution_label', '') or 'none')}`"
             )
         lines.append("")
-        lines.append("| Queue | Scope | Owner | Status | Onepage Attestation | Onepage Status | Dry-run Evidence |")
-        lines.append("|---|---|---|---|---|---|---|")
+        lines.append(
+            "| Work Item | Queue | Submission ID | Scope | Owner | Status | Receipt | Receipt Status | Onepage Status | Dry-run Evidence |"
+        )
+        lines.append("|---|---|---|---|---|---|---|---|---|---|")
         for row in external_benchmark_submission_queue_rows:
+            status_lifecycle = row.get("status_lifecycle") if isinstance(row.get("status_lifecycle"), dict) else {}
             lines.append(
-                f"| {_markdown_cell(row.get('queue_id', ''))} | {_markdown_cell(row.get('submission_scope', ''))} | "
+                f"| {_markdown_cell(row.get('work_item_id', ''))} | {_markdown_cell(row.get('queue_id', ''))} | "
+                f"{_markdown_cell(row.get('submission_id', ''))} | {_markdown_cell(row.get('submission_scope', ''))} | "
                 f"{_markdown_cell(row.get('owner', ''))} | {_markdown_cell(row.get('status', ''))} | "
-                f"{_markdown_cell(row.get('onepage_attestation', ''))} | "
+                f"{_markdown_cell(row.get('submission_receipt', '') or row.get('receipt_url', '') or 'pending')} | "
+                f"{_markdown_cell(row.get('submission_receipt_status', '') or status_lifecycle.get('submission_receipt_status', 'unknown'))} | "
                 f"{_markdown_cell(row.get('onepage_attestation_status', '') or 'unknown')} | "
                 f"{_markdown_cell(row.get('dry_run_evidence', '') or 'n/a')} |"
             )
@@ -6535,12 +6554,24 @@ def main() -> None:
         or committee_metrics.get("external_benchmark_submission_caution_label", "")
         or "none"
     )
+    committee_external_benchmark_submission_receipt_attached_count = int(
+        sum(
+            1
+            for row in committee_external_benchmark_submission_queue_rows
+            if str(row.get("submission_receipt", "") or row.get("receipt_url", "") or "pending") != "pending"
+        )
+    )
+    committee_external_benchmark_submission_receipt_pending_count = int(
+        len(committee_external_benchmark_submission_queue_rows) - committee_external_benchmark_submission_receipt_attached_count
+    )
     committee_external_benchmark_submission_summary_line = (
         "External benchmark submission queue: "
         f"queue={committee_external_benchmark_submission_queue_count} | "
         f"ready={committee_external_benchmark_submission_queue_ready_count} | "
         f"review_pending={committee_external_benchmark_submission_queue_review_pending_count} | "
         f"blocked={committee_external_benchmark_submission_queue_blocked_count} | "
+        f"receipt_attached={committee_external_benchmark_submission_receipt_attached_count} | "
+        f"receipt_pending={committee_external_benchmark_submission_receipt_pending_count} | "
         f"onepage_attestation_status={committee_external_benchmark_submission_onepage_attestation_status or 'unknown'}"
     )
     if committee_external_benchmark_submission_recommended_start_mode or committee_external_benchmark_submission_recommended_submission_scope:
@@ -8036,6 +8067,8 @@ def main() -> None:
         "external_benchmark_submission_queue_ready_count": committee_external_benchmark_submission_queue_ready_count,
         "external_benchmark_submission_queue_review_pending_count": committee_external_benchmark_submission_queue_review_pending_count,
         "external_benchmark_submission_queue_blocked_count": committee_external_benchmark_submission_queue_blocked_count,
+        "external_benchmark_submission_receipt_attached_count": committee_external_benchmark_submission_receipt_attached_count,
+        "external_benchmark_submission_receipt_pending_count": committee_external_benchmark_submission_receipt_pending_count,
         "external_benchmark_submission_onepage_attestation_status": committee_external_benchmark_submission_onepage_attestation_status,
         "external_benchmark_submission_queue_rows": committee_external_benchmark_submission_queue_rows,
         "external_benchmark_submission_queue_rows_present": bool(committee_external_benchmark_submission_queue_rows),
@@ -9209,6 +9242,8 @@ def main() -> None:
         "external_benchmark_submission_queue_ready_count": committee_external_benchmark_submission_queue_ready_count,
         "external_benchmark_submission_queue_review_pending_count": committee_external_benchmark_submission_queue_review_pending_count,
         "external_benchmark_submission_queue_blocked_count": committee_external_benchmark_submission_queue_blocked_count,
+        "external_benchmark_submission_receipt_attached_count": committee_external_benchmark_submission_receipt_attached_count,
+        "external_benchmark_submission_receipt_pending_count": committee_external_benchmark_submission_receipt_pending_count,
         "external_benchmark_submission_onepage_attestation_status": committee_external_benchmark_submission_onepage_attestation_status,
         "external_benchmark_submission_queue_rows": committee_external_benchmark_submission_queue_rows,
         "external_benchmark_submission_queue_rows_present": bool(committee_external_benchmark_submission_queue_rows),
@@ -9455,6 +9490,10 @@ def main() -> None:
             )
         ),
         "full_commercial_replacement_ready": bool(deployment_model.get("full_commercial_replacement_ready", False)),
+        "p0_closed": bool(release_candidate_pass and open_p0 == 0),
+        "p0_closure_status": "closed" if release_candidate_pass and open_p0 == 0 else "open",
+        "p1_unblocked": bool(release_candidate_pass and open_p0 == 0),
+        "p1_handoff_status": "unblocked" if release_candidate_pass and open_p0 == 0 else "blocked",
         "midas_semantic_load_binding_pass": midas_semantic_load_binding_pass,
         "midas_use_stld_block_count": midas_use_stld_block_count,
         "midas_semantic_load_case_count": midas_semantic_load_case_count,
