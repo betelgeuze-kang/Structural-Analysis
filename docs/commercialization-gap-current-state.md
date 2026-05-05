@@ -18,7 +18,7 @@ source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다.
 - release evidence 없이 `python3 scripts/check_p0_closure_status.py --json`를 실행하면 P0-1 open을 보고하는 것이 정상이다. release asset listing, upload plan, metadata preflight, hydrated artifact root, `--tag-ref-present`를 함께 넘기면 overall P0는 closed다.
 - P1은 quality/fallback/benchmark breadth를 순차적으로 닫아야 하며, heavy validation 전에 [open-data artifact restore runbook](open-data-artifact-restore-runbook.md)과 `scripts/check_p1_readiness_status.py`로 externalized artifact와 real-project seed 준비 상태를 확인한다.
 - `scripts/check_p1_benchmark_breadth_status.py`는 tracked commercial readiness, HF benchmark, TPU wind, PEER hinge, irregular top5, Korean public structure collection evidence를 하나로 묶어 P1 benchmark breadth inputs ready와 P0 release blocker를 분리해서 보고한다.
-- 상용화 표기는 release-facing 문서 기준으로 `Commercial` grade이지만 과장하지 않는다. `full_commercial_replacement_ready=false`, `engineer_in_loop_accelerated_coverage_ready=true`, accelerated coverage target은 95-99%, residual holdout은 1-5%이며 holdout은 licensed engineer review, legacy tool cross-validation, legal/authority sign-off queue로 운영한다.
+- 상용화 표기는 release-facing 문서 기준으로 `Commercial` grade이지만 과장하지 않는다. `full_commercial_replacement_ready=false`, `engineer_in_loop_accelerated_coverage_ready=true`, accelerated coverage target은 95-99%, residual holdout은 1-5%이며 holdout은 owner/status/work item이 보이는 licensed engineer review, legacy tool cross-validation, legal/authority sign-off queue로 운영한다.
 - wind/SSI gate outputs는 `response_artifacts_consumed`를 canonical contract name으로 쓴다. 현재 machine-readable evidence는 rename transition 동안 `_pass` suffix가 붙은 필드를 계속 노출할 수 있다.
 - P2는 viewer/report 제품화 단계로, shared selection과 provenance를 전 surface에 통일하고 wall/slab batching/LOD, solver-verified panel-zone, SVG sheet/revision/callout을 정리해야 한다.
 
@@ -85,7 +85,7 @@ P1 상용화 코어 순서는 `MIDAS exact roundtrip -> KDS load combination -> 
 1. 현재 feature branch를 promoted manifest commit 위로 정리하거나, `--promoted-manifest-json`로 published manifest evidence를 명시해서 stale local manifest가 P0를 다시 열지 않게 한다.
 2. `scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --p1-readiness-out <p1-readiness-status.json> --p1-benchmark-out <p1-benchmark-breadth-status.json> --json --out <clean-checkout-evidence-chain.json>`로 clean checkout P1 handoff를 한 커맨드로 재현한다.
 3. P1 quality/fallback/benchmark breadth 실행을 refresh하고 hardest 10-case, PEER/SPD, TPU/HFFB, Korean public structures submission queue와 one-page attestation을 최신 evidence로 갱신한다.
-4. `licensed_engineer_review_required`, `legacy_tool_cross_validation_required`, `legal_authority_signoff_required`를 owner/status/due evidence가 있는 residual holdout work queue로 운영한다.
+4. `licensed_engineer_review_required`, `legacy_tool_cross_validation_required`, `legal_authority_signoff_required`를 owner/status/work item/due evidence가 있는 residual holdout work queue로 운영한다.
 5. release package, committee package, README가 `Commercial` grade와 `full_commercial_replacement_ready=false`를 계속 같이 노출하는지 회귀 테스트로 고정한다.
 
 ## 참고 문서

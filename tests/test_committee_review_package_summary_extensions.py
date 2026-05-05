@@ -625,6 +625,70 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
             "evidence": "release_gap_report.json",
         }
     ]
+    holdout_buckets = [
+        {
+            "id": "licensed_engineer_review_required",
+            "label": "Licensed Engineer Review",
+            "owner": "기술사",
+            "work_item_id": "RH-001",
+            "queue_status": "pending_review",
+            "status": "open",
+            "relative_share_pct": 50,
+            "absolute_project_pct_range": [0.5, 2.5],
+            "scope": "final judgment",
+        },
+        {
+            "id": "legacy_tool_cross_validation_required",
+            "label": "Legacy Tool Cross-Validation",
+            "owner": "기존툴+기술사",
+            "work_item_id": "RH-002",
+            "queue_status": "pending_cross_validation",
+            "status": "open",
+            "relative_share_pct": 30,
+            "absolute_project_pct_range": [0.3, 1.5],
+            "scope": "cross-check",
+        },
+        {
+            "id": "legal_authority_signoff_required",
+            "label": "Legal Sign-Off",
+            "owner": "기술사/기존 승인 workflow",
+            "work_item_id": "RH-003",
+            "queue_status": "pending_signoff",
+            "status": "open",
+            "relative_share_pct": 20,
+            "absolute_project_pct_range": [0.2, 1.0],
+            "scope": "formal sign-off",
+        },
+    ]
+    holdout_detail_rows = [
+        {
+            "bucket_label": "Licensed Engineer Review",
+            "work_item_id": "RH-001",
+            "detail_axis": "review_story_zone",
+            "detail_value": "S02/perimeter",
+            "owner": "기술사",
+            "status": "open",
+            "why": "Top story-zone review pockets remain under engineer review.",
+        },
+        {
+            "bucket_label": "Legacy Tool Cross-Validation",
+            "work_item_id": "RH-002",
+            "detail_axis": "submodel_family",
+            "detail_value": "SCBF16B_shell_beam_mix",
+            "owner": "기존툴+기술사",
+            "status": "open",
+            "why": "Authority submodel families remain outside the accelerated envelope.",
+        },
+        {
+            "bucket_label": "Legal Sign-Off",
+            "work_item_id": "RH-003",
+            "detail_axis": "authority_catalog_track",
+            "detail_value": "sac (1)",
+            "owner": "기술사/기존 승인 workflow",
+            "status": "open",
+            "why": "Formal authority-facing responsibility stays outside automated scope.",
+        },
+    ]
     md = tmp_path / "committee_review_report.md"
     html = tmp_path / "committee_review_report.html"
     _write_markdown(
@@ -642,8 +706,8 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         [],
         [],
         [],
-        [],
-        [],
+        holdout_buckets,
+        holdout_detail_rows,
         [],
         {"baseline_seeded": False, "change_count": 0, "added_count": 0, "removed_count": 0, "unchanged_count": 0, "diff_rows": []},
     )
@@ -661,8 +725,8 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         [],
         [],
         [],
-        [],
-        [],
+        holdout_buckets,
+        holdout_detail_rows,
         [],
         {"baseline_seeded": False, "change_count": 0, "added_count": 0, "removed_count": 0, "unchanged_count": 0, "diff_rows": []},
     )
@@ -748,8 +812,15 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         "foundation=yes | interface=yes | ssi=yes | soil_tunnel=yes | support=contact:6,foundation:4,device:5 | "
         "support_search=9 | node_surface_proxy=5 | support_depth=21`"
     ) in markdown
-    assert "Commercial scope: grade=Commercial" in markdown
+    assert (
+        "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | "
+        "full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%"
+    ) in markdown
     assert "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True" in markdown
+    assert "| Work Item | Category | Owner | Queue Status | Status | Relative Share | Absolute Project % | Scope |" in markdown
+    assert "| Category | Work Item | Axis | Detail | Owner | Status | Why |" in markdown
+    assert "RH-001" in markdown
+    assert "pending_review" in markdown
     assert "midas_kds_row_provenance_exact_row_coverage_label" in markdown
     assert "`ndtha_step_series_depth`: `2400`" in markdown
     assert "constitutive_interaction_families" in markdown
@@ -788,8 +859,14 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
     assert "Element/material breadth: PASS | shell=yes(elems=5,cases=31) | wall=yes(rows=2,cases=14) | panel_cyclic=yes(sections=2,pinch=0.18,crush=1.00) | contact=full_structural_contact" in html_text
     assert "Support search: PASS | support_search=9 | node_surface_proxy=5 | support_depth=21" in html_text
     assert "General FE contact matrix: PASS | ready=10/10 | direct=6/6 | foundation=yes | interface=yes | ssi=yes | soil_tunnel=yes | support=contact:6,foundation:4,device:5 | support_search=9 | node_surface_proxy=5 | support_depth=21" in html_text
-    assert "Commercial scope: grade=Commercial" in html_text
+    assert (
+        "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | "
+        "full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%"
+    ) in html_text
     assert "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True" in html_text
+    assert "<th>Work Item</th>" in html_text
+    assert "RH-001" in html_text
+    assert "pending_review" in html_text
     assert "MIDAS KDS geometry full-crosswalk depth" in html_text
     assert "12 (min(load/semantic crosswalk))" in html_text
     assert "NDTHA step-series depth" in html_text

@@ -220,6 +220,41 @@ def test_p0_status_closes_when_release_and_core_evidence_pass(tmp_path: Path) ->
     assert status["next_action"] == "promote release manifest and proceed to P1/P2 breadth work"
 
 
+def test_p0_status_can_read_release_publication_evidence_index(tmp_path: Path) -> None:
+    manifest, artifact_root, assets_json = _release_fixture(tmp_path)
+    upload_plan_json = _upload_plan_json(tmp_path)
+    metadata_preflight_json = _metadata_preflight_json(tmp_path)
+    p0_status_json = _write_json(tmp_path / "p0-status.json", {"p0_closed": True})
+    evidence_index = _write_json(
+        tmp_path / "release-publication-evidence-index.json",
+        {
+            "schema_version": "release-publication-evidence-index.v1",
+            "tag_ref_present": True,
+            "paths": {
+                "manifest": str(manifest),
+                "release_assets_json": str(assets_json),
+                "artifact_root": str(artifact_root),
+                "upload_plan_json": str(upload_plan_json),
+                "metadata_preflight_json": str(metadata_preflight_json),
+                "p0_status_json": str(p0_status_json),
+            },
+        },
+    )
+
+    status = check_p0_closure_status.build_status(
+        manifest=tmp_path / "stale-local-manifest.json",
+        publication_evidence_index=evidence_index,
+        reports=_reports(tmp_path),
+    )
+
+    assert status["p0_closed"] is True
+    assert status["publication_evidence_index"] == str(evidence_index)
+    release_gate = status["gates"][0]
+    assert release_gate["manifest"] == str(manifest)
+    assert release_gate["release_assets_json"] == str(assets_json)
+    assert release_gate["details"]["tag_ref"]["present"] is True
+
+
 def test_p0_status_surfaces_upload_plan_and_metadata_preflight_evidence(tmp_path: Path) -> None:
     manifest, artifact_root, assets_json = _release_fixture(tmp_path)
     upload_plan_json = _upload_plan_json(tmp_path)

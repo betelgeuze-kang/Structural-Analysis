@@ -42,7 +42,30 @@ def test_generate_external_benchmark_kickoff_package_limited_start(tmp_path: Pat
                 "commercial_scope_summary_line": "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%",
                 "commercial_reliability_breadth_summary_line": "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True",
                 "midas_kds_row_provenance_exact_row_coverage_label": "144/144",
+                "submission_queue_count": 4,
+                "submission_queue_ready_count": 0,
+                "submission_queue_review_pending_count": 4,
+                "submission_queue_blocked_count": 0,
+                "onepage_attestation_status": "draft_ready_final_review_pending",
+                "onepage_attestation_required_count": 4,
+                "onepage_attestation_ready_count": 0,
             },
+            "submission_queue": [
+                {
+                    "queue_id": "hardest_external_10case",
+                    "submission_scope": "hardest_external_benchmark_program",
+                    "owner": "benchmark_program_owner",
+                    "status": "ready_for_benchmark_start_final_review_pending",
+                    "onepage_attestation": "hardest external 10-case one-page attestation",
+                },
+                {
+                    "queue_id": "tpu_hffb",
+                    "submission_scope": "component_wind_benchmark_submission",
+                    "owner": "wind_benchmark_owner",
+                    "status": "ready_for_benchmark_start_final_review_pending",
+                    "onepage_attestation": "TPU/HFFB component benchmark one-page attestation",
+                },
+            ],
         },
     )
     _write_json(
@@ -170,17 +193,23 @@ def test_generate_external_benchmark_kickoff_package_limited_start(tmp_path: Pat
     assert package["summary"]["wind_component_asset_count"] == 2
     assert package["summary"]["hinge_component_asset_count"] == 2
     assert package["summary"]["pending_packet_count"] == 2
+    assert package["summary"]["submission_queue_count"] == 4
+    assert package["summary"]["submission_queue_review_pending_count"] == 4
+    assert package["summary"]["onepage_attestation_status"] == "draft_ready_final_review_pending"
     assert package["summary"]["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")
     assert package["summary"]["commercial_reliability_breadth_summary_line"].startswith("Commercial reliability breadth: PASS")
     assert package["review_boundary"]["pending_packet_label"] == "connection_detailing=1, detailing=1"
     assert package["review_boundary"]["pending_packets"][0]["queue_status"] == "pending_review"
     assert package["benchmark_contracts"]["tpu_hffb_benchmark_gate_pass"] is True
     assert package["benchmark_contracts"]["peer_spd_hinge_benchmark_gate_pass"] is True
+    assert package["submission_queue"][0]["queue_id"] == "hardest_external_10case"
     assert "start_now_limited_external_benchmark" in markdown
     assert "component_and_system_performance_benchmark_with_review_boundary" in markdown
     assert "connection_detailing|connection_detailing_audit_after_material_patch|high" in markdown
     assert "Commercial scope" in markdown
     assert "Commercial reliability breadth" in markdown
+    assert "hardest_external_10case" in markdown
+    assert "onepage_attestation_status" in markdown
     assert "queue_status=pending_review" in markdown
 
 
@@ -215,7 +244,23 @@ def test_generate_external_benchmark_kickoff_package_full_start_ready_without_re
                 "commercial_scope_summary_line": "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%",
                 "commercial_reliability_breadth_summary_line": "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True",
                 "midas_kds_row_provenance_exact_row_coverage_label": "144/144",
+                "submission_queue_count": 4,
+                "submission_queue_ready_count": 4,
+                "submission_queue_review_pending_count": 0,
+                "submission_queue_blocked_count": 0,
+                "onepage_attestation_status": "ready_for_full_submission",
+                "onepage_attestation_required_count": 4,
+                "onepage_attestation_ready_count": 4,
             },
+            "submission_queue": [
+                {
+                    "queue_id": "hardest_external_10case",
+                    "submission_scope": "hardest_external_benchmark_program",
+                    "owner": "benchmark_program_owner",
+                    "status": "ready_for_full_submission",
+                    "onepage_attestation": "hardest external 10-case one-page attestation",
+                }
+            ],
         },
     )
     _write_json(
@@ -301,6 +346,8 @@ def test_generate_external_benchmark_kickoff_package_full_start_ready_without_re
     assert package["summary"]["ready_to_start_full_submission_now"] is True
     assert package["summary"]["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")
     assert package["summary"]["pending_packet_count"] == 0
+    assert package["summary"]["submission_queue_count"] == 4
+    assert package["summary"]["onepage_attestation_status"] == "ready_for_full_submission"
     assert package["review_boundary"]["pending_packet_count"] == 0
     assert package["review_boundary"]["pending_packet_label"] == "none"
     assert any("start TPU raw HFFB benchmark execution" in action for action in package["next_actions"])
@@ -310,3 +357,4 @@ def test_generate_external_benchmark_kickoff_package_full_start_ready_without_re
     assert "component_and_system_performance_benchmark_full_submission" in markdown
     assert "Commercial scope" in markdown
     assert "Commercial reliability breadth" in markdown
+    assert "ready_for_full_submission" in markdown

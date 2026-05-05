@@ -61,6 +61,7 @@ DEFAULT_REPORT_FALLBACKS = {
     ),
 }
 DEFAULT_MANIFEST = Path("implementation/phase1/release_artifacts_manifest.json")
+PUBLICATION_EVIDENCE_INDEX_SCHEMA = "release-publication-evidence-index.v1"
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -68,6 +69,37 @@ def _load_json(path: Path) -> dict[str, Any]:
         return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
+
+
+def _publication_index_paths(path: Path | None) -> dict[str, Any]:
+    if path is None:
+        return {}
+    payload = _load_json(path)
+    if payload.get("schema_version") != PUBLICATION_EVIDENCE_INDEX_SCHEMA:
+        raise ValueError(f"publication evidence index has unsupported schema: {path}")
+    paths = payload.get("paths")
+    if not isinstance(paths, dict):
+        raise ValueError(f"publication evidence index paths must be an object: {path}")
+
+    def resolve(value: object) -> Path | None:
+        if not value:
+            return None
+        candidate = Path(str(value))
+        if candidate.exists():
+            return candidate
+        sibling = path.parent / candidate.name
+        return sibling if sibling.exists() else candidate
+
+    return {
+        "manifest": resolve(paths.get("manifest")),
+        "promoted_manifest_json": resolve(paths.get("promoted_manifest_json")),
+        "release_assets_json": resolve(paths.get("release_assets_json")),
+        "artifact_root": resolve(paths.get("artifact_root")),
+        "upload_plan_json": resolve(paths.get("upload_plan_json")),
+        "metadata_preflight_json": resolve(paths.get("metadata_preflight_json")),
+        "p0_status_json": resolve(paths.get("p0_status_json")),
+        "tag_ref_present": bool(payload.get("tag_ref_present", False)),
+    }
 
 
 def _report_pass(payload: dict[str, Any]) -> bool:
@@ -179,7 +211,16 @@ def build_status(
     require_all: bool = True,
     require_exact: bool = True,
     reports: dict[str, Path] | None = None,
+    publication_evidence_index: Path | None = None,
 ) -> dict[str, Any]:
+    index_paths = _publication_index_paths(publication_evidence_index)
+    manifest = index_paths.get("manifest") or manifest
+    promoted_manifest_json = index_paths.get("promoted_manifest_json") or promoted_manifest_json
+    release_assets_json = index_paths.get("release_assets_json") or release_assets_json
+    artifact_root = index_paths.get("artifact_root") or artifact_root
+    upload_plan_json = index_paths.get("upload_plan_json") or upload_plan_json
+    metadata_preflight_json = index_paths.get("metadata_preflight_json") or metadata_preflight_json
+    tag_ref_present = bool(index_paths.get("tag_ref_present", tag_ref_present))
     report_paths = reports or DEFAULT_REPORTS
     report_fallbacks = {} if reports is not None else DEFAULT_REPORT_FALLBACKS
     release = _release_publication_status(
@@ -261,6 +302,7 @@ def build_status(
         "p0_closed": all(bool(gate.get("ok", False)) for gate in gates),
         "core_evidence_closed": all(bool(gate.get("ok", False)) for gate in core_gates),
         "release_publication_closed": bool(release.get("ok", False)),
+        "publication_evidence_index": str(publication_evidence_index) if publication_evidence_index else "",
         "gates": gates,
         "next_action": (
             "run Publish Release Assets workflow or provide release asset listing"
@@ -304,6 +346,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--artifact-root", type=Path)
     parser.add_argument("--upload-plan-json", type=Path)
     parser.add_argument("--metadata-preflight-json", type=Path)
+    parser.add_argument(
+        "--publication-evidence-index",
+        type=Path,
+        help="Compact release-publication-evidence artifact index that supplies P0 closure inputs.",
+    )
     parser.add_argument("--tag-ref-present", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--out", type=Path)
@@ -324,6 +371,7 @@ def main(argv: list[str] | None = None) -> int:
             upload_plan_json=args.upload_plan_json,
             metadata_preflight_json=args.metadata_preflight_json,
             tag_ref_present=bool(args.tag_ref_present),
+            publication_evidence_index=args.publication_evidence_index,
         )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"P0 closure status check failed: {exc}", file=sys.stderr)

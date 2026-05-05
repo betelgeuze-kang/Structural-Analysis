@@ -76,6 +76,8 @@ def test_release_publish_workflow_reuses_checked_in_gate_evidence_and_uploads_fa
     assert "implementation/phase1/release/nightly_release_gate_report.json" in text
     assert "structural-release-publication-report.json" in text
     assert "structural-release-publication-report.md" in text
+    assert "structural-release-publication-evidence-index.json" in text
+    assert "scripts/build_release_publication_evidence_index.py" in text
     assert "release-publication-report" in text
     assert '"failure_report_written": True' in text
 
@@ -95,6 +97,7 @@ def test_release_publish_workflow_uploads_evidence_artifact_even_on_failure() ->
     assert "uses: actions/upload-artifact@v7" in upload_step
     assert "${{ runner.temp }}/structural-release-publication-report.json" in upload_step
     assert "${{ runner.temp }}/structural-release-publication-report.md" in upload_step
+    assert "${{ runner.temp }}/structural-release-publication-evidence-index.json" in upload_step
     assert "${{ runner.temp }}/structural-release-metadata-preflight.json" in upload_step
     assert "if-no-files-found: error" in upload_step
 

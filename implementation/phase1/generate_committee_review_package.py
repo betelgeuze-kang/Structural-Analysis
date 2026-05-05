@@ -1150,98 +1150,101 @@ def _build_residual_holdout_detail_rows(
     top_authority_submodel_text = ", ".join(f"{name} ({count})" for name, count in authority_submodel_counts.most_common(4)) or "n/a"
 
     bucket_by_id = {str(row.get("id", "")): row for row in holdout_buckets if isinstance(row, dict)}
+    default_holdout_meta: dict[str, tuple[str, str, str, str]] = {
+        "licensed_engineer_review_required": ("RH-001", "pending_review", "open", "기술사"),
+        "legacy_tool_cross_validation_required": ("RH-002", "pending_cross_validation", "open", "기존툴+기술사"),
+        "legal_authority_signoff_required": ("RH-003", "pending_signoff", "open", "기술사/기존 승인 workflow"),
+    }
+
+    def _detail_row(bucket_id: str, detail_axis: str, detail_value: str, why: str) -> dict[str, str]:
+        bucket = bucket_by_id.get(bucket_id, {})
+        default_work_item_id, default_queue_status, default_status, default_owner = default_holdout_meta.get(
+            bucket_id,
+            (f"RH-{len(detail_rows) + 1:03d}", "pending_review", "open", ""),
+        )
+        return {
+            "bucket_id": bucket_id,
+            "bucket_label": str(bucket.get("label", bucket_id) or bucket_id),
+            "work_item_id": str(bucket.get("work_item_id", default_work_item_id) or default_work_item_id),
+            "detail_axis": detail_axis,
+            "detail_value": detail_value,
+            "owner": str(bucket.get("owner", default_owner) or default_owner),
+            "queue_status": str(bucket.get("queue_status", default_queue_status) or default_queue_status),
+            "status": str(bucket.get("status", default_status) or default_status),
+            "why": why,
+        }
+
     detail_rows: list[dict] = []
 
-    engineer_bucket = bucket_by_id.get("licensed_engineer_review_required", {})
     detail_rows.extend(
         [
-            {
-                "bucket_id": "licensed_engineer_review_required",
-                "bucket_label": str(engineer_bucket.get("label", "Licensed Engineer Review")),
-                "detail_axis": "review_story_zone",
-                "detail_value": top_story_zone_text,
-                "owner": str(engineer_bucket.get("owner", "기술사")),
-                "why": "Top story-zone review pockets are derived from actual accepted design-change rows so engineer holdout stays tied to the highest-touch parts of the structure.",
-            },
-            {
-                "bucket_id": "licensed_engineer_review_required",
-                "bucket_label": str(engineer_bucket.get("label", "Licensed Engineer Review")),
-                "detail_axis": "story_band",
-                "detail_value": top_story_text,
-                "owner": str(engineer_bucket.get("owner", "기술사")),
-                "why": "High-touch story bands remain under engineer review because they concentrate accepted design changes and irregular response checks.",
-            },
-            {
-                "bucket_id": "licensed_engineer_review_required",
-                "bucket_label": str(engineer_bucket.get("label", "Licensed Engineer Review")),
-                "detail_axis": "member_family",
-                "detail_value": top_member_text,
-                "owner": str(engineer_bucket.get("owner", "기술사")),
-                "why": "Dominant member families in accepted optimization changes still require engineer judgment on local edge cases and detailing intent.",
-            },
-            {
-                "bucket_id": "licensed_engineer_review_required",
-                "bucket_label": str(engineer_bucket.get("label", "Licensed Engineer Review")),
-                "detail_axis": "zone",
-                "detail_value": top_zone_text,
-                "owner": str(engineer_bucket.get("owner", "기술사")),
-                "why": "Zone concentration is used to focus manual review on the highest-touch portions of the structural layout.",
-            },
+            _detail_row(
+                "licensed_engineer_review_required",
+                "review_story_zone",
+                top_story_zone_text,
+                "Top story-zone review pockets are derived from actual accepted design-change rows so engineer holdout stays tied to the highest-touch parts of the structure.",
+            ),
+            _detail_row(
+                "licensed_engineer_review_required",
+                "story_band",
+                top_story_text,
+                "High-touch story bands remain under engineer review because they concentrate accepted design changes and irregular response checks.",
+            ),
+            _detail_row(
+                "licensed_engineer_review_required",
+                "member_family",
+                top_member_text,
+                "Dominant member families in accepted optimization changes still require engineer judgment on local edge cases and detailing intent.",
+            ),
+            _detail_row(
+                "licensed_engineer_review_required",
+                "zone",
+                top_zone_text,
+                "Zone concentration is used to focus manual review on the highest-touch portions of the structural layout.",
+            ),
         ]
     )
 
-    legacy_bucket = bucket_by_id.get("legacy_tool_cross_validation_required", {})
     detail_rows.append(
-        {
-            "bucket_id": "legacy_tool_cross_validation_required",
-            "bucket_label": str(legacy_bucket.get("label", "Legacy Tool Cross-Validation")),
-            "detail_axis": "submodel_family",
-            "detail_value": top_authority_submodel_text,
-            "owner": str(legacy_bucket.get("owner", "기존툴+기술사")),
-            "why": "Authority submodel families are derived from the active catalog paths so cross-validation follows the exact benchmark submodels still outside the accelerated envelope.",
-        }
+        _detail_row(
+            "legacy_tool_cross_validation_required",
+            "submodel_family",
+            top_authority_submodel_text,
+            "Authority submodel families are derived from the active catalog paths so cross-validation follows the exact benchmark submodels still outside the accelerated envelope.",
+        )
     )
     detail_rows.append(
-        {
-            "bucket_id": "legacy_tool_cross_validation_required",
-            "bucket_label": str(legacy_bucket.get("label", "Legacy Tool Cross-Validation")),
-            "detail_axis": "authority_critical_case",
-            "detail_value": top_authority_text,
-            "owner": str(legacy_bucket.get("owner", "기존툴+기술사")),
-            "why": "Authority-critical benchmark tracks remain the primary cross-validation target outside the accelerated envelope.",
-        }
+        _detail_row(
+            "legacy_tool_cross_validation_required",
+            "authority_critical_case",
+            top_authority_text,
+            "Authority-critical benchmark tracks remain the primary cross-validation target outside the accelerated envelope.",
+        )
     )
     detail_rows.append(
-        {
-            "bucket_id": "legacy_tool_cross_validation_required",
-            "bucket_label": str(legacy_bucket.get("label", "Legacy Tool Cross-Validation")),
-            "detail_axis": "authority_catalog_case_id",
-            "detail_value": top_authority_case_text,
-            "owner": str(legacy_bucket.get("owner", "기존툴+기술사")),
-            "why": "Authority catalog case ids are read directly so the holdout review list refreshes automatically when the benchmark catalog changes.",
-        }
+        _detail_row(
+            "legacy_tool_cross_validation_required",
+            "authority_catalog_case_id",
+            top_authority_case_text,
+            "Authority catalog case ids are read directly so the holdout review list refreshes automatically when the benchmark catalog changes.",
+        )
     )
 
-    legal_bucket = bucket_by_id.get("legal_authority_signoff_required", {})
     detail_rows.append(
-        {
-            "bucket_id": "legal_authority_signoff_required",
-            "bucket_label": str(legal_bucket.get("label", "Legal Sign-Off")),
-            "detail_axis": "authority_catalog_track",
-            "detail_value": top_authority_catalog_track_text,
-            "owner": str(legal_bucket.get("owner", "기술사/기존 승인 workflow")),
-            "why": "Formal authority-facing responsibility is anchored to the active authority catalog tracks and remains outside the automated responsibility boundary.",
-        }
+        _detail_row(
+            "legal_authority_signoff_required",
+            "authority_catalog_track",
+            top_authority_catalog_track_text,
+            "Formal authority-facing responsibility is anchored to the active authority catalog tracks and remains outside the automated responsibility boundary.",
+        )
     )
     detail_rows.append(
-        {
-            "bucket_id": "legal_authority_signoff_required",
-            "bucket_label": str(legal_bucket.get("label", "Legal Sign-Off")),
-            "detail_axis": "authority_critical_case",
-            "detail_value": "sealed submission pack, authority-facing variants, stamped final issue",
-            "owner": str(legal_bucket.get("owner", "기술사/기존 승인 workflow")),
-            "why": "Formal authority-facing deliverables remain outside the automated responsibility boundary.",
-        }
+        _detail_row(
+            "legal_authority_signoff_required",
+            "authority_critical_case",
+            "sealed submission pack, authority-facing variants, stamped final issue",
+            "Formal authority-facing deliverables remain outside the automated responsibility boundary.",
+        )
     )
     return detail_rows
 
@@ -4452,10 +4455,16 @@ def _write_markdown(
     )
     if holdout_buckets:
         lines.extend(["", "## Residual Holdout Boundary", ""])
-        lines.extend(["| Category | Owner | Relative Share | Absolute Project % | Scope |", "|---|---|---:|---|---|"])
+        lines.extend(
+            [
+                "| Work Item | Category | Owner | Queue Status | Status | Relative Share | Absolute Project % | Scope |",
+                "|---|---|---|---|---|---:|---|---|",
+            ]
+        )
         for row in holdout_buckets:
             lines.append(
-                f"| {row.get('label', row.get('id', ''))} | {row.get('owner', '')} | {int(row.get('relative_share_pct', 0))}% | "
+                f"| {row.get('work_item_id', '')} | {row.get('label', row.get('id', ''))} | {row.get('owner', '')} | "
+                f"{row.get('queue_status', '')} | {row.get('status', '')} | {int(row.get('relative_share_pct', 0))}% | "
                 f"{_coverage_range_label(row.get('absolute_project_pct_range'))} | {row.get('scope', '')} |"
             )
     advanced_holdout_status_rows = [
@@ -4481,11 +4490,11 @@ def _write_markdown(
             )
     if holdout_detail_rows:
         lines.extend(["", "## Residual Holdout Review Table", ""])
-        lines.extend(["| Category | Axis | Detail | Owner | Why |", "|---|---|---|---|---|"])
+        lines.extend(["| Category | Work Item | Axis | Detail | Owner | Status | Why |", "|---|---|---|---|---|---|---|"])
         for row in holdout_detail_rows:
             lines.append(
-                f"| {row.get('bucket_label', row.get('bucket_id', ''))} | {row.get('detail_axis', '')} | {row.get('detail_value', '')} | "
-                f"{row.get('owner', '')} | {row.get('why', '')} |"
+                f"| {row.get('bucket_label', row.get('bucket_id', ''))} | {row.get('work_item_id', '')} | {row.get('detail_axis', '')} | "
+                f"{row.get('detail_value', '')} | {row.get('owner', '')} | {row.get('status', '')} | {row.get('why', '')} |"
             )
     if holdout_matrix_rows:
         lines.extend(["", "## Residual Holdout Routing Matrix", ""])
@@ -5498,10 +5507,10 @@ def _write_html(
         <h2>Residual Holdout Boundary</h2>
         <table>
           <thead>
-            <tr><th>Category</th><th>Owner</th><th>Relative Share</th><th>Absolute Project %</th><th>Scope</th></tr>
+            <tr><th>Work Item</th><th>Category</th><th>Owner</th><th>Queue Status</th><th>Status</th><th>Relative Share</th><th>Absolute Project %</th><th>Scope</th></tr>
           </thead>
           <tbody>
-            {''.join(f"<tr><td>{row.get('label', row.get('id', ''))}</td><td>{row.get('owner', '')}</td><td>{int(row.get('relative_share_pct', 0))}%</td><td>{_coverage_range_label(row.get('absolute_project_pct_range'))}</td><td>{row.get('scope', '')}</td></tr>" for row in holdout_buckets)}
+            {''.join(f"<tr><td>{row.get('work_item_id', '')}</td><td>{row.get('label', row.get('id', ''))}</td><td>{row.get('owner', '')}</td><td>{row.get('queue_status', '')}</td><td>{row.get('status', '')}</td><td>{int(row.get('relative_share_pct', 0))}%</td><td>{_coverage_range_label(row.get('absolute_project_pct_range'))}</td><td>{row.get('scope', '')}</td></tr>" for row in holdout_buckets)}
           </tbody>
         </table>
       </div>
@@ -5686,10 +5695,10 @@ def _write_html(
         <h2>Residual Holdout Review Table</h2>
         <table>
           <thead>
-            <tr><th>Category</th><th>Axis</th><th>Detail</th><th>Owner</th><th>Why</th></tr>
+            <tr><th>Category</th><th>Work Item</th><th>Axis</th><th>Detail</th><th>Owner</th><th>Status</th><th>Why</th></tr>
           </thead>
           <tbody>
-            {''.join(f"<tr><td>{row.get('bucket_label', row.get('bucket_id', ''))}</td><td>{row.get('detail_axis', '')}</td><td>{row.get('detail_value', '')}</td><td>{row.get('owner', '')}</td><td>{row.get('why', '')}</td></tr>" for row in holdout_detail_rows)}
+            {''.join(f"<tr><td>{row.get('bucket_label', row.get('bucket_id', ''))}</td><td>{row.get('work_item_id', '')}</td><td>{row.get('detail_axis', '')}</td><td>{row.get('detail_value', '')}</td><td>{row.get('owner', '')}</td><td>{row.get('status', '')}</td><td>{row.get('why', '')}</td></tr>" for row in holdout_detail_rows)}
           </tbody>
         </table>
       </div>

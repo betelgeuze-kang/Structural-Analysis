@@ -66,6 +66,7 @@ def _build_markdown(payload: dict[str, Any]) -> str:
     wind_assets = payload.get("wind_component_assets", [])
     hinge_assets = payload.get("hinge_component_assets", [])
     system_tracks = payload.get("system_benchmarks", [])
+    submission_queue = payload.get("submission_queue", [])
     pending_packets = payload.get("review_boundary", {}).get("pending_packets", [])
     lines = [
         "# External Benchmark Kickoff Package",
@@ -86,6 +87,7 @@ def _build_markdown(payload: dict[str, Any]) -> str:
             "- MIDAS/KDS exact row coverage: "
             f"`{str(summary.get('midas_kds_row_provenance_exact_row_coverage_label', '') or '').strip()}`"
         ),
+        f"- `onepage_attestation_status`: `{summary.get('onepage_attestation_status', '') or 'unknown'}`",
         "",
         "## Component Benchmarks",
         "",
@@ -113,6 +115,13 @@ def _build_markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"- `{row.get('track_id', '')}` | pass=`{bool(row.get('contract_pass', False))}` | "
             f"cases=`{int(row.get('case_count', 0))}` | report=`{row.get('report_path', '')}`"
+        )
+    lines.extend(["", "## Submission Queue", ""])
+    for row in submission_queue:
+        lines.append(
+            f"- `{row.get('queue_id', '')}` | scope=`{row.get('submission_scope', '')}` | "
+            f"status=`{row.get('status', '')}` | owner=`{row.get('owner', '')}` | "
+            f"onepage=`{row.get('onepage_attestation', '')}`"
         )
     lines.extend(["", "## Review Boundary", ""])
     lines.append(
@@ -225,6 +234,12 @@ def build_kickoff_package(
             report_path=paths["ssi_report"],
         ),
     ]
+    submission_queue = [
+        row
+        for row in (readiness_report.get("submission_queue") or [])
+        if isinstance(row, dict)
+    ]
+    onepage_attestation_status = str(readiness_summary.get("onepage_attestation_status", "") or "")
     next_actions = list(readiness_summary.get("next_actions", []) or [])
     if wind_assets:
         next_actions.append("start TPU raw HFFB benchmark execution on isolated/interference official cases")
@@ -253,6 +268,25 @@ def build_kickoff_package(
             "system_benchmark_count": int(len(system_tracks)),
             "pending_packet_count": int(len(pending_packets)),
             "pending_packet_label": _format_label_counts(pending_family_counts),
+            "submission_queue_count": int(
+                readiness_summary.get("submission_queue_count", len(submission_queue)) or 0
+            ),
+            "submission_queue_ready_count": int(
+                readiness_summary.get("submission_queue_ready_count", 0) or 0
+            ),
+            "submission_queue_review_pending_count": int(
+                readiness_summary.get("submission_queue_review_pending_count", 0) or 0
+            ),
+            "submission_queue_blocked_count": int(
+                readiness_summary.get("submission_queue_blocked_count", 0) or 0
+            ),
+            "onepage_attestation_status": onepage_attestation_status,
+            "onepage_attestation_required_count": int(
+                readiness_summary.get("onepage_attestation_required_count", len(submission_queue)) or 0
+            ),
+            "onepage_attestation_ready_count": int(
+                readiness_summary.get("onepage_attestation_ready_count", 0) or 0
+            ),
             "commercial_scope_summary_line": str(readiness_summary.get("commercial_scope_summary_line", "") or ""),
             "commercial_reliability_breadth_summary_line": str(
                 readiness_summary.get("commercial_reliability_breadth_summary_line", "") or ""
@@ -267,6 +301,7 @@ def build_kickoff_package(
         "wind_component_assets": wind_assets,
         "hinge_component_assets": hinge_assets,
         "system_benchmarks": system_tracks,
+        "submission_queue": submission_queue,
         "review_boundary": {
             "pending_packet_count": int(len(pending_packets)),
             "pending_packet_label": _format_label_counts(pending_family_counts),

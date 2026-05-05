@@ -250,6 +250,7 @@ def test_release_gap_report_uses_engineer_in_loop_holdout_model(tmp_path: Path) 
     work_items = {row["work_item_id"]: row for row in payload["residual_holdout_work_items"]}
     assert set(work_items) == {"RH-001", "RH-002", "RH-003"}
     assert work_items["RH-001"]["queue_name"] == "licensed_engineer_review_queue"
+    assert work_items["RH-001"]["status"] == "open"
     assert work_items["RH-002"]["queue_status"] == "pending_cross_validation"
     assert work_items["RH-003"]["owner"] == "기술사/기존 승인 workflow"
     assert summary["residual_holdout_work_item_count"] == 3

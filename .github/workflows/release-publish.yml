@@ -50,6 +50,7 @@ jobs:
             echo "P0_STATUS_MD=$RUNNER_TEMP/structural-p0-closure-status.md"
             echo "PUBLICATION_REPORT_JSON=$RUNNER_TEMP/structural-release-publication-report.json"
             echo "PUBLICATION_REPORT_MD=$RUNNER_TEMP/structural-release-publication-report.md"
+            echo "PUBLICATION_EVIDENCE_INDEX=$RUNNER_TEMP/structural-release-publication-evidence-index.json"
           } >> "$GITHUB_ENV"
 
       - name: Checkout
@@ -337,6 +338,16 @@ jobs:
               encoding="utf-8",
           )
           PY
+          python3 scripts/build_release_publication_evidence_index.py \
+            --manifest "$p0_manifest" \
+            --release-assets-json "$RELEASE_ASSETS_JSON" \
+            --artifact-root "$RELEASE_ROOT" \
+            --upload-plan-json "$RELEASE_UPLOAD_PLAN" \
+            --metadata-preflight-json "$RELEASE_METADATA_PREFLIGHT" \
+            --p0-status-json "$P0_STATUS_JSON" \
+            --p0-status-md "$P0_STATUS_MD" \
+            --publication-report-json "$PUBLICATION_REPORT_JSON" \
+            --out "$PUBLICATION_EVIDENCE_INDEX" || true
 
       - name: Upload publication evidence
         if: always()
@@ -352,6 +363,7 @@ jobs:
             ${{ runner.temp }}/structural-p0-closure-status.md
             ${{ runner.temp }}/structural-release-publication-report.json
             ${{ runner.temp }}/structural-release-publication-report.md
+            ${{ runner.temp }}/structural-release-publication-evidence-index.json
             implementation/phase1/release/nightly_release_gate_report.json
           if-no-files-found: error
 

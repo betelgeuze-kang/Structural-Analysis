@@ -118,6 +118,7 @@ def _p0_status() -> dict:
 def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordered_reports(tmp_path: Path) -> None:
     manifest = tmp_path / "real_project_corpus_seed_manifest.json"
     p0_status = tmp_path / "published" / "p0-status.json"
+    evidence_index = tmp_path / "published" / "release-publication-evidence-index.json"
     midas_source = tmp_path / "release_evidence" / "midas" / "midas_kds_geometry_bridge_validation_report.json"
     commercial_source = tmp_path / "release_evidence" / "commercial" / "commercial_readiness_report.json"
     midas_target = tmp_path / "generated" / "midas_kds_geometry_bridge_validation_report.json"
@@ -131,6 +132,13 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
 
     _write_json(manifest, _manifest())
     _write_json(p0_status, _p0_status())
+    _write_json(
+        evidence_index,
+        {
+            "schema_version": "release-publication-evidence-index.v1",
+            "paths": {"p0_status_json": str(p0_status)},
+        },
+    )
     _write_json(midas_source, _midas_report())
     _write_json(commercial_source, _commercial_report())
 
@@ -139,8 +147,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
         str(SCRIPT),
         "--manifest",
         str(manifest),
-        "--p0-status",
-        str(p0_status),
+        "--publication-evidence-index",
+        str(evidence_index),
         "--coverage-matrix",
         str(coverage),
         "--peer-metric-records",
@@ -172,6 +180,7 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert payload["commercial_readiness"]["commercial_scope"]["full_commercial_replacement_ready"] is False
     assert payload["commercial_readiness"]["commercial_scope"]["engineer_in_loop_accelerated_coverage_ready"] is True
     assert payload["artifacts"]["p0_status"] == str(p0_status)
+    assert payload["artifacts"]["publication_evidence_index"] == str(evidence_index)
     assert payload["p0_release_blocker"] is False
     assert payload["p1_execution_unblocked"] is True
     assert payload["p1_benchmark_execution_unblocked"] is True

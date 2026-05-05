@@ -64,6 +64,71 @@ def _midas_kds_exact_row_coverage_label(summary: dict[str, Any]) -> str:
     return "0/0"
 
 
+def _submission_queue_status(*, contract_pass: bool, queue_closed: bool) -> str:
+    if not contract_pass:
+        return "blocked"
+    if queue_closed:
+        return "ready_for_full_submission"
+    return "ready_for_benchmark_start_final_review_pending"
+
+
+def _build_submission_queue(
+    *,
+    contract_pass: bool,
+    queue_closed: bool,
+    blockers: list[str],
+    cautions: list[str],
+    gap_summary: dict[str, Any],
+) -> list[dict[str, Any]]:
+    status = _submission_queue_status(contract_pass=contract_pass, queue_closed=queue_closed)
+    blocker_label = _label(blockers) if blockers else "none"
+    caution_label = _label(cautions) if cautions else "none"
+    commercial_scope = str(gap_summary.get("commercial_scope_summary_line", "") or "")
+    commercial_breadth = str(gap_summary.get("commercial_reliability_breadth_summary_line", "") or "")
+    exact_rows = _midas_kds_exact_row_coverage_label(gap_summary)
+    tracks = [
+        (
+            "hardest_external_10case",
+            "hardest_external_benchmark_program",
+            "benchmark_program_owner",
+            "hardest external 10-case one-page attestation",
+        ),
+        (
+            "tpu_hffb",
+            "component_wind_benchmark_submission",
+            "wind_benchmark_owner",
+            "TPU/HFFB component benchmark one-page attestation",
+        ),
+        (
+            "peer_spd_hinge",
+            "component_hinge_benchmark_submission",
+            "pbd_benchmark_owner",
+            "PEER/SPD hinge component one-page attestation",
+        ),
+        (
+            "korean_public_structures",
+            "korean_public_structure_release_review",
+            "korean_source_owner",
+            "Korean public structures provenance one-page attestation",
+        ),
+    ]
+    return [
+        {
+            "queue_id": queue_id,
+            "submission_scope": submission_scope,
+            "owner": owner,
+            "status": status,
+            "onepage_attestation": attestation,
+            "blocker_label": blocker_label,
+            "caution_label": caution_label,
+            "commercial_scope_summary_line": commercial_scope,
+            "commercial_reliability_breadth_summary_line": commercial_breadth,
+            "midas_kds_row_provenance_exact_row_coverage_label": exact_rows,
+        }
+        for queue_id, submission_scope, owner, attestation in tracks
+    ]
+
+
 def build_submission_readiness(
     release_gap_payload: dict[str, Any],
     commercial_readiness_payload: dict[str, Any],
@@ -160,6 +225,28 @@ def build_submission_readiness(
         recommended_submission_scope = "component_and_system_performance_benchmark_with_review_boundary"
         contract_pass = True
 
+    submission_queue = _build_submission_queue(
+        contract_pass=contract_pass,
+        queue_closed=queue_closed,
+        blockers=blockers,
+        cautions=cautions,
+        gap_summary=gap_summary,
+    )
+    submission_ready_count = sum(
+        1 for row in submission_queue if str(row.get("status", "") or "") == "ready_for_full_submission"
+    )
+    submission_review_pending_count = sum(
+        1
+        for row in submission_queue
+        if str(row.get("status", "") or "") == "ready_for_benchmark_start_final_review_pending"
+    )
+    onepage_attestation_status = (
+        "ready_for_full_submission"
+        if submission_ready_count == len(submission_queue)
+        else "draft_ready_final_review_pending"
+        if submission_review_pending_count == len(submission_queue)
+        else "blocked"
+    )
     evidence_parts = [
         f"core_holdouts_closed={core_holdouts_closed}",
         f"diversified_benchmarks={diversified_benchmark_gates_pass}",
@@ -236,9 +323,19 @@ def build_submission_readiness(
             "caution_count": int(len(cautions)),
             "cautions": cautions,
             "caution_label": _label(cautions) if cautions else "none",
+            "submission_queue_count": int(len(submission_queue)),
+            "submission_queue_ready_count": int(submission_ready_count),
+            "submission_queue_review_pending_count": int(submission_review_pending_count),
+            "submission_queue_blocked_count": int(
+                len(submission_queue) - submission_ready_count - submission_review_pending_count
+            ),
+            "onepage_attestation_status": onepage_attestation_status,
+            "onepage_attestation_required_count": int(len(submission_queue)),
+            "onepage_attestation_ready_count": int(submission_ready_count),
             "next_actions": next_actions,
             "evidence": ", ".join(evidence_parts),
         },
+        "submission_queue": submission_queue,
     }
 
 

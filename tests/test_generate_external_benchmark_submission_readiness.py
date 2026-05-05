@@ -116,6 +116,24 @@ def test_external_benchmark_submission_readiness_allows_limited_start_with_clean
     assert payload["summary"]["commercial_reliability_breadth_summary_line"].startswith("Commercial reliability breadth: PASS")
     assert payload["summary"]["midas_kds_row_provenance_exact_row_coverage_label"] == "144/144"
     assert payload["summary"]["midas_kds_row_provenance_preview_rows_present"] is True
+    assert payload["summary"]["submission_queue_count"] == 4
+    assert payload["summary"]["submission_queue_review_pending_count"] == 4
+    assert payload["summary"]["submission_queue_ready_count"] == 0
+    assert payload["summary"]["onepage_attestation_status"] == "draft_ready_final_review_pending"
+    assert {row["queue_id"] for row in payload["submission_queue"]} == {
+        "hardest_external_10case",
+        "tpu_hffb",
+        "peer_spd_hinge",
+        "korean_public_structures",
+    }
+    assert all(
+        row["status"] == "ready_for_benchmark_start_final_review_pending"
+        for row in payload["submission_queue"]
+    )
+    assert all(
+        row["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")
+        for row in payload["submission_queue"]
+    )
     assert payload["checks"]["panel_zone_validation_advisory_only"] is True
     assert payload["summary"]["panel_zone_validation_advisory_only"] is True
     assert payload["summary"]["panel_zone_validation_advisory_label"] == "panel_zone_external_validation_only_boundary"
@@ -130,6 +148,9 @@ def test_external_benchmark_submission_readiness_allows_full_start_when_queue_cl
     assert payload["summary"]["recommended_start_mode"] == "start_now_full_external_submission"
     assert payload["summary"]["ready_to_start_full_submission_now"] is True
     assert payload["summary"]["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")
+    assert payload["summary"]["submission_queue_ready_count"] == 4
+    assert payload["summary"]["onepage_attestation_status"] == "ready_for_full_submission"
+    assert all(row["status"] == "ready_for_full_submission" for row in payload["submission_queue"])
 
 
 def test_external_benchmark_submission_readiness_blocks_on_open_revision_cycle(tmp_path: Path) -> None:
@@ -151,3 +172,6 @@ def test_external_benchmark_submission_readiness_blocks_on_architecture_gaps(tmp
     assert "commercial_readiness_not_green" in blockers
     assert "audit_review_queue_has_overdue_items" in blockers
     assert payload["summary"]["recommended_start_mode"] == "wait_for_blockers"
+    assert payload["summary"]["submission_queue_blocked_count"] == 4
+    assert payload["summary"]["onepage_attestation_status"] == "blocked"
+    assert all(row["status"] == "blocked" for row in payload["submission_queue"])

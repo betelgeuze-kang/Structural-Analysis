@@ -14,6 +14,7 @@ from typing import Any
 
 
 SCHEMA_VERSION = "clean_checkout_evidence_chain.v1"
+PUBLICATION_EVIDENCE_INDEX_SCHEMA = "release-publication-evidence-index.v1"
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -23,6 +24,25 @@ def _load_json(path: Path) -> dict[str, Any]:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _publication_index_paths(path: Path | None) -> dict[str, Path]:
+    if path is None:
+        return {}
+    payload = _load_json(path)
+    if payload.get("schema_version") != PUBLICATION_EVIDENCE_INDEX_SCHEMA:
+        raise ValueError(f"publication evidence index has unsupported schema: {path}")
+    paths = payload.get("paths")
+    if not isinstance(paths, dict):
+        raise ValueError(f"publication evidence index paths must be an object: {path}")
+    p0_status = paths.get("p0_status_json")
+    if not p0_status:
+        return {}
+    candidate = Path(str(p0_status))
+    if candidate.exists():
+        return {"p0_status": candidate}
+    sibling = path.parent / candidate.name
+    return {"p0_status": sibling if sibling.exists() else candidate}
 
 
 def _compact_summary(summary: object) -> dict[str, Any]:
@@ -141,6 +161,8 @@ def _commercial_scope(path: Path) -> dict[str, Any]:
 
 def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     steps: list[dict[str, Any]] = []
+    index_paths = _publication_index_paths(args.publication_evidence_index)
+    p0_status_path = args.p0_status or index_paths.get("p0_status")
 
     midas_step = _materialize_evidence(
         label="MIDAS/KDS validation report",
@@ -213,8 +235,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         str(args.row_provenance),
         "--json",
     ]
-    if args.p0_status is not None:
-        p1_cmd.extend(["--p0-status", str(args.p0_status)])
+    if p0_status_path is not None:
+        p1_cmd.extend(["--p0-status", str(p0_status_path)])
     p1_step = _run_json_command(p1_cmd)
     p1_step.update({"label": "P1 readiness status"})
     steps.append(p1_step)
@@ -263,7 +285,10 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "reason_code": "PASS" if contract_pass else "ERR_CLEAN_CHECKOUT_EVIDENCE_CHAIN_INCOMPLETE",
         "artifacts": {
             "manifest": str(args.manifest),
-            "p0_status": str(args.p0_status) if args.p0_status else "",
+            "publication_evidence_index": (
+                str(args.publication_evidence_index) if args.publication_evidence_index else ""
+            ),
+            "p0_status": str(p0_status_path) if p0_status_path else "",
             "coverage_matrix": str(args.coverage_matrix),
             "peer_metric_records": str(args.peer_metric_records),
             "midas_kds_validation_report": str(args.midas_kds_validation_report),
@@ -314,6 +339,12 @@ def main() -> int:
         type=Path,
         default=None,
         help="Published P0 closure status JSON. When provided, P1 readiness is evaluated against the closed release gate.",
+    )
+    parser.add_argument(
+        "--publication-evidence-index",
+        type=Path,
+        default=None,
+        help="Release publication evidence index. Supplies --p0-status for P1 handoff when --p0-status is omitted.",
     )
     parser.add_argument("--p1-readiness-out", type=Path, default=None)
     parser.add_argument("--p1-benchmark-out", type=Path, default=None)

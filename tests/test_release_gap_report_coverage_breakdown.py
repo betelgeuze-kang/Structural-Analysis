@@ -185,6 +185,7 @@ def test_release_gap_report_emits_time_saved_and_holdout_split(tmp_path: Path) -
     assert summary["midas_kds_row_provenance_preview_rows_present"] is True
 
     buckets = payload["residual_holdout_buckets"]
+    assert [row["work_item_id"] for row in buckets] == ["RH-001", "RH-002", "RH-003"]
     assert [row["relative_share_pct"] for row in buckets] == [50, 30, 20]
     assert sum(int(row["relative_share_pct"]) for row in buckets) == 100
     assert buckets[0]["absolute_project_pct_range"] == [0.5, 2.5]
