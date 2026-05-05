@@ -11,23 +11,23 @@
     {
       "asset_name": "project_package.zip",
       "local_path": "implementation/phase1/release/project_package.zip",
-      "sha256": "4fd0922dae0cd6228520e05c387fd772ac49d15c7955683791580ec86511d788",
-      "bytes": 3141652,
+      "sha256": "87ce4ca939ce13e155f1b2a98278cd170ed4389a0f53058f9131407bfa709223",
+      "bytes": 3252187,
       "required": true,
       "description": "Regenerated project package with package_sha256 aligned to project_registry.json."
     },
     {
       "asset_name": "project_registry.json",
       "local_path": "implementation/phase1/release/project_registry.json",
-      "sha256": "907593a95e64a8cca516a280c267bcd05e9cf669c2ebebff63b6300b1f1bca1a",
-      "bytes": 13779,
+      "sha256": "83adb9c9c5322a1f8387125b864143a500aa1ec6a2dea114f28d3697560c5cd7",
+      "bytes": 28783,
       "required": true,
       "description": "Signed project registry metadata."
     },
     {
       "asset_name": "project_registry.signature.b64",
       "local_path": "implementation/phase1/release/signing/project_registry.signature.b64",
-      "sha256": "7850f5f62fe3a73625033f2e90cb0720386e88ed0233846248bc8966dd2e208e",
+      "sha256": "0bdf6b47060ab3c70bd5fcbee505f3f98f267592a2423c2f0e1214dcc2a3f354",
       "bytes": 89,
       "required": true,
       "description": "Base64 Ed25519 signature for the project registry body."
@@ -35,7 +35,7 @@
     {
       "asset_name": "project_registry_ed25519.pub.pem",
       "local_path": "implementation/phase1/release/signing/project_registry_ed25519.pub.pem",
-      "sha256": "f898107a2601a7a41deddedaa28f186433ba38ab47b6cfb10022a4b8ad0209d9",
+      "sha256": "66a4b0f4da0030d900d80359966f3761aa56029f7cdcbd8c466b433d6830296a",
       "bytes": 113,
       "required": true,
       "description": "Public verification key for project registry signatures."
@@ -43,15 +43,15 @@
     {
       "asset_name": "release_registry.json",
       "local_path": "implementation/phase1/release/release_registry.json",
-      "sha256": "b525c69a4159e899cb77dacffe149d8ce24ab5f1f6d342a943c1a960512565ce",
-      "bytes": 60824,
+      "sha256": "beee86f113e46d1aa3609109f81d81382ab846164dee02490eeb32f7027631de",
+      "bytes": 90905,
       "required": true,
       "description": "Signed release registry used as project registry input."
     },
     {
       "asset_name": "release_registry.signature.b64",
       "local_path": "implementation/phase1/release/signing/release_registry.signature.b64",
-      "sha256": "139e336cfaec4395896ed79485727f0890060cfadd6d1088a1c10b54fee0b985",
+      "sha256": "d476178835f5c6f8d739821b24826d634acc82e08113978d4ece28b3ce5c4bb5",
       "bytes": 89,
       "required": true,
       "description": "Base64 Ed25519 signature for the release registry body."
@@ -59,7 +59,7 @@
     {
       "asset_name": "release_registry_ed25519.pub.pem",
       "local_path": "implementation/phase1/release/signing/release_registry_ed25519.pub.pem",
-      "sha256": "e85672ef811601521f22ed2c560bbb848d9ba117f528abb7042e137c36b2bc3b",
+      "sha256": "110e24f3055d8d553106dfe8d2c950036b508c83438b55387d939aa2d88754cb",
       "bytes": 113,
       "required": true,
       "description": "Public verification key for release registry signatures."
@@ -83,7 +83,7 @@
     {
       "asset_name": "optimized_drawing_review_summary.json",
       "local_path": "implementation/phase1/release/visualization/optimized_drawing_review_summary.json",
-      "sha256": "952b6f1f35310d41fc91ba0765fe61fdcfd432de81df22943dcf41c22fac8b93",
+      "sha256": "7076a664d769d8ee711488dd1c73ac01aabcd29af765113a6e8f5e106cc77b65",
       "bytes": 18416104,
       "required": true,
       "description": "Generated optimized drawing review summary payload."
@@ -91,7 +91,7 @@
     {
       "asset_name": "optimized_drawing_expert_review.metadata.json",
       "local_path": "implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json",
-      "sha256": "694ae50fbab44ce7b6c751f55ee8063c2cf513361c2ce0d63bad831cba565609",
+      "sha256": "e2556fa749adbde04baa8cabe12cb8c9fbd0c51634c0773d75aafb2ea4268cc4",
       "bytes": 1300589,
       "required": true,
       "description": "Generated expert-review metadata sidecar."
@@ -107,23 +107,23 @@
     {
       "asset_name": "external_benchmark_kickoff_package.json",
       "local_path": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_kickoff_package.json",
-      "sha256": "6f9cebb4431be6567df412916ed0319cd42e1d2252992a7ded6d97b7a6d81897",
-      "bytes": 9943,
+      "sha256": "9f5c4508251a841441abce024e44b9a79216c44efab3b67190de9efa9530cedc",
+      "bytes": 15431,
       "required": true,
       "description": "External benchmark kickoff package manifest for submission readiness."
     },
     {
       "asset_name": "external_benchmark_kickoff_package.md",
       "local_path": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_kickoff_package.md",
-      "sha256": "32cf0b47ff988922cc2123a3fff0dfb4005e9e369398159e54f3da6f12698325",
-      "bytes": 2639,
+      "sha256": "b946b67b4071b0763bca22541c322756c2556890deddedd38c4c2a5730072b05",
+      "bytes": 5004,
       "required": true,
       "description": "Human-readable external benchmark kickoff package summary."
     },
     {
       "asset_name": "external_benchmark_submission_readiness_preview.approve_all.json",
       "local_path": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_submission_readiness_preview.approve_all.json",
-      "sha256": "387d24f7a335f037dbbfce81ae4b69a6b0106a2741ccd23c1ca49c00dc7f91d1",
+      "sha256": "d9119f0d455a7c3cdd17b09bb7bfbdda330e83f5d2bbae88ef10675f37fa4573",
       "bytes": 488,
       "required": true,
       "description": "Approve-all external benchmark submission readiness preview."
@@ -139,23 +139,23 @@
     {
       "asset_name": "case_onepage_attestation_index.json",
       "local_path": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_index.json",
-      "sha256": "0b1c0fe0a8f95770d5c3daac38b486b484ca2d2a38820e2761bdf4180825c54c",
-      "bytes": 13499,
+      "sha256": "889d18aed90cc8a9ebe43734a99077986a28ab21d138dc7cfd0406bf529245bf",
+      "bytes": 13495,
       "required": true,
       "description": "Onepage attestation manifest index for external benchmark cases."
     },
     {
       "asset_name": "case_onepage_attestation_index.md",
       "local_path": "implementation/phase1/release/external_benchmark_kickoff/case_onepage_attestation_index.md",
-      "sha256": "c37e13d0849bcf41634f2d615d8818cc5a4e4cf8cce780038ed10a5f631cdbb3",
-      "bytes": 3005,
+      "sha256": "e312de9701c6cf0cc94abd5c5f0248b99265d47400fa127799185a5bb90e7231",
+      "bytes": 3000,
       "required": true,
       "description": "Human-readable onepage attestation index for external benchmark cases."
     },
     {
       "asset_name": "audit_review_decision_batch_template.json",
       "local_path": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_template.json",
-      "sha256": "8d432f8c2920038c2bf1ead4918c7ee18470da6b7983e88713098172dc9e17bf",
+      "sha256": "4eb885bc4dfad72bb51190fb81a910269004b819493546e48320ffed9dd40992",
       "bytes": 688,
       "required": true,
       "description": "External benchmark audit review decision queue template."
@@ -163,7 +163,7 @@
     {
       "asset_name": "audit_review_decision_batch_template.md",
       "local_path": "implementation/phase1/release/external_benchmark_kickoff/audit_review_decision_batch_template.md",
-      "sha256": "cafb81c8c88d1c5fe693ed71181736a3bdf73d25c397ad8b7c037460c31088fa",
+      "sha256": "0afe71403261bf9315356d57fbfdf295ef62bc362ea7ce1bb004cd301877f34d",
       "bytes": 491,
       "required": true,
       "description": "Human-readable external benchmark audit review decision queue template."
@@ -171,15 +171,15 @@
     {
       "asset_name": "exact_topology_structural_preview_promotion_queue.json",
       "local_path": "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.json",
-      "sha256": "14dcafc3da92f02189cc5618c97633d8c7da275bcf7c52e25ca6325b6a3bc001",
-      "bytes": 394,
+      "sha256": "9e0e5a014ac81f0d25af871aca1a1e0343b887c652ba4dfc2d8dfd416b8bf84e",
+      "bytes": 395,
       "required": true,
       "description": "MIDAS native round-trip structural preview promotion queue evidence."
     },
     {
       "asset_name": "exact_topology_structural_preview_promotion_queue.md",
       "local_path": "implementation/phase1/release/midas_native_roundtrip/exact_topology_structural_preview_promotion_queue.md",
-      "sha256": "62709c39f6e269e1267bb37206b3e551a4b8fc8f82695f546810377b000476d6",
+      "sha256": "eb02a602ddd123b0b04a22ef8984676ff1823e66f8caf34439fa5cf89a42d43c",
       "bytes": 568,
       "required": true,
       "description": "Human-readable MIDAS native round-trip structural preview promotion queue evidence."
