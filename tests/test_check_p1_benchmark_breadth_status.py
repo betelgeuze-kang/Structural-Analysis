@@ -31,7 +31,14 @@ def _p1_status(path: Path, *, execution_unblocked: bool = False) -> Path:
     )
 
 
-def _commercial(path: Path, *, ok: bool = True) -> Path:
+def _commercial(
+    path: Path,
+    *,
+    ok: bool = True,
+    commercial_pass: bool = True,
+    engineer_in_loop_ready: bool = True,
+    full_replacement_ready: bool = False,
+) -> Path:
     checks = {
         "real_source_pass": True,
         "benchmark_breadth_pass": ok,
@@ -50,6 +57,21 @@ def _commercial(path: Path, *, ok: bool = True) -> Path:
             "contract_pass": ok,
             "reason_code": "PASS" if ok else "ERR_BREADTH",
             "checks": checks,
+            "grade": {
+                "label": "Commercial" if commercial_pass else "Pre-commercial",
+                "commercial_pass": commercial_pass,
+            },
+            "deployment_model": {
+                "mode": "engineer_in_the_loop_accelerated_coverage",
+                "engineer_in_loop_accelerated_coverage_ready": engineer_in_loop_ready,
+                "full_commercial_replacement_ready": full_replacement_ready,
+                "accelerated_coverage_target_pct_range": [95, 99],
+                "residual_holdout_target_pct_range": [1, 5],
+            },
+            "residual_holdout_categories": [
+                {"id": "licensed_engineer_review_required"},
+                {"id": "legacy_tool_cross_validation_required"},
+            ],
         },
     )
 
@@ -80,11 +102,34 @@ def _paths(tmp_path: Path) -> dict[str, object]:
 
 def test_benchmark_breadth_is_ready_but_blocked_by_p0_release(tmp_path: Path) -> None:
     status = check_p1_benchmark.build_status(**_paths(tmp_path))
+    commercial_gate = status["gates"][1]
 
     assert status["benchmark_breadth_inputs_ready"] is True
     assert status["p1_benchmark_execution_unblocked"] is False
     assert status["p0_release_blocker"] is True
     assert status["next_action"] == "close P0-1 release publication before running P1 benchmark breadth"
+    assert commercial_gate["commercial_grade_label"] == "Commercial"
+    assert commercial_gate["commercial_deployment_mode"] == "engineer_in_the_loop_accelerated_coverage"
+    assert commercial_gate["engineer_in_loop_accelerated_coverage_ready"] is True
+    assert commercial_gate["full_commercial_replacement_ready"] is False
+    assert commercial_gate["residual_holdout_category_count"] == 2
+    assert commercial_gate["residual_holdout_work_item_count"] == 2
+    work_items = {row["work_item_id"]: row for row in commercial_gate["residual_holdout_work_items"]}
+    assert set(work_items) == {"RH-001", "RH-002"}
+    assert work_items["RH-001"]["queue_name"] == "licensed_engineer_review_queue"
+    assert work_items["RH-002"]["queue_status"] == "pending_cross_validation"
+    assert commercial_gate["commercial_scope_ready"] is True
+    assert status["summary"]["commercialization_scope"] == {
+        "commercial_grade_label": "Commercial",
+        "commercial_deployment_mode": "engineer_in_the_loop_accelerated_coverage",
+        "engineer_in_loop_accelerated_coverage_ready": True,
+        "full_commercial_replacement_ready": False,
+        "accelerated_coverage_target_pct_range": [95, 99],
+        "residual_holdout_target_pct_range": [1, 5],
+        "residual_holdout_category_count": 2,
+        "residual_holdout_work_item_count": 2,
+        "commercial_scope_ready": True,
+    }
 
 
 def test_benchmark_breadth_unblocks_after_p1_execution_gate(tmp_path: Path) -> None:
@@ -113,6 +158,24 @@ def test_benchmark_breadth_blocks_on_failed_report(tmp_path: Path) -> None:
     assert failed_gate["reason_code"] == "ERR_BENCHMARK"
 
 
+def test_benchmark_breadth_blocks_when_commercial_scope_is_not_ready(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    paths["commercial_readiness"] = _commercial(
+        tmp_path / "commercial.json",
+        engineer_in_loop_ready=False,
+        full_replacement_ready=False,
+    )
+
+    status = check_p1_benchmark.build_status(**paths)
+    commercial_gate = status["gates"][1]
+
+    assert status["benchmark_breadth_inputs_ready"] is False
+    assert commercial_gate["status"] == "blocked"
+    assert commercial_gate["commercial_scope_ready"] is False
+    assert commercial_gate["engineer_in_loop_accelerated_coverage_ready"] is False
+    assert commercial_gate["full_commercial_replacement_ready"] is False
+
+
 def test_cli_writes_markdown_and_fails_when_blocked(tmp_path: Path, capsys) -> None:
     paths = _paths(tmp_path)
     out_md = tmp_path / "p1-benchmark.md"
@@ -136,6 +199,9 @@ def test_cli_writes_markdown_and_fails_when_blocked(tmp_path: Path, capsys) -> N
     )
 
     captured = capsys.readouterr()
+    markdown = out_md.read_text(encoding="utf-8")
     assert exit_code == 1
     assert "P1 Benchmark Breadth Status" in captured.out
-    assert "P1 Benchmark Breadth Status" in out_md.read_text(encoding="utf-8")
+    assert "P1 work slice: `quality/fallback/benchmark breadth`" in captured.out
+    assert "P1 Benchmark Breadth Status" in markdown
+    assert "P1 work slice: `quality/fallback/benchmark breadth`" in markdown

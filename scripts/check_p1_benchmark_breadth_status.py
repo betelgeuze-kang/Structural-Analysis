@@ -41,6 +41,27 @@ REQUIRED_COMMERCIAL_CHECKS = (
     "gpu_strict_pass",
 )
 
+RESIDUAL_HOLDOUT_QUEUE_DEFAULTS = {
+    "licensed_engineer_review_required": {
+        "work_item_id": "RH-001",
+        "queue_name": "licensed_engineer_review_queue",
+        "queue_status": "pending_review",
+        "status": "open",
+    },
+    "legacy_tool_cross_validation_required": {
+        "work_item_id": "RH-002",
+        "queue_name": "legacy_tool_cross_validation_queue",
+        "queue_status": "pending_cross_validation",
+        "status": "open",
+    },
+    "legal_authority_signoff_required": {
+        "work_item_id": "RH-003",
+        "queue_name": "legal_authority_signoff_queue",
+        "queue_status": "pending_signoff",
+        "status": "open",
+    },
+}
+
 
 def _load_json(path: Path) -> dict[str, Any]:
     if not path.exists():
@@ -75,9 +96,21 @@ def _summary_line(payload: dict[str, Any], path: Path) -> str:
 def _commercial_gate(path: Path) -> dict[str, Any]:
     payload = _load_json(path)
     checks = payload.get("checks") if isinstance(payload.get("checks"), dict) else {}
+    grade = payload.get("grade") if isinstance(payload.get("grade"), dict) else {}
+    deployment_model = payload.get("deployment_model") if isinstance(payload.get("deployment_model"), dict) else {}
+    residual_holdouts = (
+        payload.get("residual_holdout_categories")
+        if isinstance(payload.get("residual_holdout_categories"), list)
+        else []
+    )
+    residual_work_items = _residual_holdout_work_items(payload, residual_holdouts)
     missing_checks = [name for name in REQUIRED_COMMERCIAL_CHECKS if not bool(checks.get(name, False))]
+    commercial_grade_pass = bool(grade.get("commercial_pass", False))
+    engineer_in_loop_ready = bool(deployment_model.get("engineer_in_loop_accelerated_coverage_ready", False))
+    full_replacement_ready = bool(deployment_model.get("full_commercial_replacement_ready", False))
+    commercial_scope_ready = bool(commercial_grade_pass and (engineer_in_loop_ready or full_replacement_ready))
     exists = path.exists()
-    ok = bool(exists and _report_pass(payload) and not missing_checks)
+    ok = bool(exists and _report_pass(payload) and not missing_checks and commercial_scope_ready)
     return {
         "label": "Commercial readiness breadth",
         "path": str(path),
@@ -87,7 +120,45 @@ def _commercial_gate(path: Path) -> dict[str, Any]:
         "reason_code": str(payload.get("reason_code", "") or ""),
         "summary_line": _summary_line(payload, path),
         "missing_required_checks": missing_checks,
+        "commercial_grade_label": str(grade.get("label", "") or ""),
+        "commercial_grade_pass": commercial_grade_pass,
+        "commercial_deployment_mode": str(deployment_model.get("mode", "") or ""),
+        "engineer_in_loop_accelerated_coverage_ready": engineer_in_loop_ready,
+        "full_commercial_replacement_ready": full_replacement_ready,
+        "accelerated_coverage_target_pct_range": deployment_model.get("accelerated_coverage_target_pct_range", []),
+        "residual_holdout_target_pct_range": deployment_model.get("residual_holdout_target_pct_range", []),
+        "residual_holdout_category_count": len(residual_holdouts),
+        "residual_holdout_work_item_count": len(residual_work_items),
+        "residual_holdout_work_items": residual_work_items,
+        "commercial_scope_ready": commercial_scope_ready,
     }
+
+
+def _residual_holdout_work_items(
+    payload: dict[str, Any],
+    residual_holdouts: list[Any],
+) -> list[dict[str, Any]]:
+    explicit_items = payload.get("residual_holdout_work_items")
+    if isinstance(explicit_items, list) and explicit_items:
+        return [row for row in explicit_items if isinstance(row, dict)]
+
+    work_items: list[dict[str, Any]] = []
+    for row in residual_holdouts:
+        if not isinstance(row, dict):
+            continue
+        category_id = str(row.get("id", "") or "")
+        defaults = RESIDUAL_HOLDOUT_QUEUE_DEFAULTS.get(category_id, {})
+        work_items.append(
+            {
+                "work_item_id": str(row.get("work_item_id", "") or defaults.get("work_item_id", f"RH-{len(work_items) + 1:03d}")),
+                "category_id": category_id,
+                "owner": str(row.get("owner", "") or ""),
+                "queue_name": str(row.get("queue_name", "") or defaults.get("queue_name", "residual_holdout_queue")),
+                "queue_status": str(row.get("queue_status", "") or defaults.get("queue_status", "pending_review")),
+                "status": str(row.get("status", "") or defaults.get("status", "open")),
+            }
+        )
+    return work_items
 
 
 def _benchmark_gate(path: Path) -> dict[str, Any]:
@@ -131,7 +202,8 @@ def build_status(
 ) -> dict[str, Any]:
     p1_gate = _p1_gate(_read_or_build_p1(p1_readiness_status))
     reports = list(benchmark_reports if benchmark_reports is not None else DEFAULT_BENCHMARK_REPORTS)
-    evidence_gates = [_commercial_gate(commercial_readiness), *[_benchmark_gate(path) for path in reports]]
+    commercial_gate = _commercial_gate(commercial_readiness)
+    evidence_gates = [commercial_gate, *[_benchmark_gate(path) for path in reports]]
     benchmark_breadth_inputs_ready = all(bool(gate["ok"]) for gate in evidence_gates)
     p1_benchmark_execution_unblocked = bool(benchmark_breadth_inputs_ready and p1_gate["p1_execution_unblocked"])
     if not benchmark_breadth_inputs_ready:
@@ -154,6 +226,21 @@ def build_status(
             "evidence_gate_count": len(evidence_gates),
             "evidence_gate_pass_count": pass_count,
             "benchmark_report_count": len(reports),
+            "commercialization_scope": {
+                "commercial_grade_label": commercial_gate["commercial_grade_label"],
+                "commercial_deployment_mode": commercial_gate["commercial_deployment_mode"],
+                "engineer_in_loop_accelerated_coverage_ready": commercial_gate[
+                    "engineer_in_loop_accelerated_coverage_ready"
+                ],
+                "full_commercial_replacement_ready": commercial_gate["full_commercial_replacement_ready"],
+                "accelerated_coverage_target_pct_range": commercial_gate[
+                    "accelerated_coverage_target_pct_range"
+                ],
+                "residual_holdout_target_pct_range": commercial_gate["residual_holdout_target_pct_range"],
+                "residual_holdout_category_count": commercial_gate["residual_holdout_category_count"],
+                "residual_holdout_work_item_count": commercial_gate["residual_holdout_work_item_count"],
+                "commercial_scope_ready": commercial_gate["commercial_scope_ready"],
+            },
         },
         "gates": [p1_gate, *evidence_gates],
         "next_action": next_action,
@@ -167,6 +254,7 @@ def _markdown(status: dict[str, Any]) -> str:
         f"- Benchmark inputs ready: `{bool(status['benchmark_breadth_inputs_ready'])}`",
         f"- P1 benchmark execution unblocked: `{bool(status['p1_benchmark_execution_unblocked'])}`",
         f"- P0 release blocker: `{bool(status['p0_release_blocker'])}`",
+        "- P1 work slice: `quality/fallback/benchmark breadth`",
         f"- Next action: `{status['next_action']}`",
         "",
         "| Gate | Status | Evidence |",

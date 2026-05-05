@@ -5,18 +5,18 @@
 
 ## Current Commercialization Level
 
-현재 단계는 `상용 데모 / 파일럿 직전`이다.
+현재 단계는 `상용 파일럿 / engineer-in-loop deployment ready`다.
 
 - Source repo hygiene: `Green` (`--strict-source-boundary` pass, 25 MiB threshold cleanup 0 candidates)
 - Generated drift gate: `Green`
 - Frontend contract: `Green`
 - Targeted pytest smoke: `Green`
-- Release artifact integrity: `Yellow` (source-side manifest checks are green, but P0-1 publication is still open because the `structural-analysis-artifacts-2026-04-26` Git tag is present while the GitHub Release object/assets are not verified; local release is stale and must not be uploaded directly)
-- Structural analysis commercial trust: `Red`
+- Release artifact integrity: `Green` (`structural-analysis-artifacts-2026-04-26` is published with 12/12 manifest assets, metadata preflight, upload-plan evidence, and hydrated published-byte SHA/bytes verification)
+- Structural analysis commercial trust: `Yellow` (`Commercial` grade and engineer-in-loop 95-99% accelerated coverage are ready, but `full_commercial_replacement_ready=false`)
 - Viewer product polish: `Yellow`
 
-상용화 레벨은 대략 `0.6`으로 본다.  
-PoC, 기술제안 데모, 내부 파일럿은 가능하지만, 책임 해석 결과를 정식 납품하는 상용 해석기 단계는 아니다.
+상용화 레벨은 대략 `0.75`로 본다.  
+상용 파일럿과 engineer-in-loop 납품 보조는 가능하지만, 책임 해석 결과를 사람 검토 없이 대체하는 full commercial replacement 단계는 아니다.
 
 ## Operating Rules
 
@@ -39,11 +39,11 @@ row provenance는 geometry bridge보다 먼저 닫지 않고, load-combination c
 
 ## Immediate Cleanup State
 
-현재 worktree는 clean이다. source-boundary cleanup은 닫혔고 release P0-1만 아직 열려 있다.
+source-boundary cleanup과 release P0-1 publication은 닫혔다. 현재 feature branch는 promoted manifest commit보다 1 commit behind일 수 있으므로, release manifest는 remote promoted commit 위로 정리하거나 `--promoted-manifest-json` evidence로 명시한다.
 
 source-boundary cleanup은 닫혔다. `scripts/check_repo_hygiene.py --strict-source-boundary`는 통과했고, `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25`는 0 candidates를 보고했으며, `implementation/phase1/open_data_external_artifacts_manifest.json`는 8개의 externalized open-data assets를 기록한다.
 
-다음 P0는 release artifact refresh와 P0-1 close path다.
+다음 P0 작업은 재오픈 방지다. release asset listing, upload plan, metadata preflight, hydrated SHA/bytes evidence가 없으면 `check_p0_closure_status.py --json`가 P0-1 open을 보고하는 것이 정상이며, release evidence bundle을 넘기면 P0 closed가 재현되어야 한다.
 
 ```bash
 python3 scripts/check_repo_hygiene.py --strict-source-boundary
@@ -78,7 +78,7 @@ python3 scripts/check_repo_hygiene.py --json --strict-source-boundary --warn-lar
 
 목표: source repo/CI의 manifest 구조 검증, release asset listing preflight, fresh GitHub Release asset root의 12 manifest assets SHA/bytes 무결성을 분리하고, 정식 P0-1 close 기준을 후자로 고정한다. 이 항목은 source-boundary 갭이 아니라 release-publication 갭이다.
 
-현재 `structural-analysis-artifacts-2026-04-26`는 Git tag로 푸시됐지만, GitHub Release object와 12개 manifest asset 업로드는 아직 완료되지 않았다. 로컬 `implementation/phase1/release/`는 stale state이며, fresh candidate root가 아닌 이 경로를 업로드 소스로 쓰면 mismatched/missing asset에서 실패한다.
+현재 `structural-analysis-artifacts-2026-04-26`는 GitHub Release로 published 상태이며, 12개 manifest asset 업로드와 metadata/published-byte SHA 검증이 완료됐다. 로컬 `implementation/phase1/release/`는 stale state일 수 있으므로, fresh candidate root가 아닌 이 경로를 업로드 소스로 쓰면 mismatched/missing asset에서 실패한다.
 
 개선 내용:
 

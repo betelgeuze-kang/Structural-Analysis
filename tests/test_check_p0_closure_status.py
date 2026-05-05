@@ -67,6 +67,67 @@ def _release_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
     return manifest, artifact_root, assets_json
 
 
+def _upload_plan_json(tmp_path: Path) -> Path:
+    payload = b"release"
+    return _write_json(
+        tmp_path / "upload-plan.json",
+        {
+            "ok": True,
+            "release_tag": "test-release",
+            "artifact_root": str(tmp_path / "assets"),
+            "upload_assets": [
+                {
+                    "asset_name": "bundle.zip",
+                    "path": str(tmp_path / "assets" / "bundle.zip"),
+                    "bytes": len(payload),
+                    "sha256": _sha256(payload),
+                    "required": True,
+                }
+            ],
+            "extra_files": [],
+            "errors": [],
+            "totals": {
+                "manifest_assets": 1,
+                "selected_assets": 1,
+                "upload_assets": 1,
+                "extra_files": 0,
+                "errors": 0,
+            },
+        },
+    )
+
+
+def _metadata_preflight_json(tmp_path: Path) -> Path:
+    payload = b"release"
+    return _write_json(
+        tmp_path / "metadata-preflight.json",
+        {
+            "ok": True,
+            "mode": "artifact_root",
+            "manifest_errors": [],
+            "present": [
+                {
+                    "asset_name": "bundle.zip",
+                    "required": True,
+                    "hydrate_target": str(tmp_path / "assets" / "bundle.zip"),
+                    "expected_bytes": len(payload),
+                    "expected_sha256": _sha256(payload),
+                    "status": "present",
+                    "actual_bytes": len(payload),
+                }
+            ],
+            "required_missing": [],
+            "optional_missing": [],
+            "totals": {
+                "manifest_assets": 1,
+                "present": 1,
+                "required_missing": 0,
+                "optional_missing": 0,
+            },
+        },
+    )
+
+
 def _non_exact_release_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
     required_payload = b"release"
     optional_payload = b"datasheet"
@@ -157,6 +218,55 @@ def test_p0_status_closes_when_release_and_core_evidence_pass(tmp_path: Path) ->
     assert status["release_publication_closed"] is True
     assert status["core_evidence_closed"] is True
     assert status["next_action"] == "promote release manifest and proceed to P1/P2 breadth work"
+
+
+def test_p0_status_surfaces_upload_plan_and_metadata_preflight_evidence(tmp_path: Path) -> None:
+    manifest, artifact_root, assets_json = _release_fixture(tmp_path)
+    upload_plan_json = _upload_plan_json(tmp_path)
+    metadata_preflight_json = _metadata_preflight_json(tmp_path)
+
+    status = check_p0_closure_status.build_status(
+        manifest=manifest,
+        release_assets_json=assets_json,
+        artifact_root=artifact_root,
+        upload_plan_json=upload_plan_json,
+        metadata_preflight_json=metadata_preflight_json,
+        tag_ref_present=True,
+        reports=_reports(tmp_path),
+    )
+
+    release_gate = status["gates"][0]
+    assert status["p0_closed"] is True
+    assert release_gate["details"]["upload_plan"]["evidence_json"] == str(upload_plan_json)
+    assert release_gate["details"]["upload_plan"]["evidence_ok"] is True
+    assert release_gate["details"]["metadata_preflight"]["evidence_json"] == str(metadata_preflight_json)
+    assert release_gate["details"]["metadata_preflight"]["ok"] is True
+
+
+def test_p0_status_can_use_promoted_manifest_when_local_manifest_is_stale(tmp_path: Path) -> None:
+    local_manifest, artifact_root, assets_json = _release_fixture(tmp_path)
+    promoted_manifest = tmp_path / "promoted-manifest.json"
+    promoted_manifest.write_text(local_manifest.read_text(encoding="utf-8"), encoding="utf-8")
+    stale_payload = json.loads(local_manifest.read_text(encoding="utf-8"))
+    stale_payload["artifacts"][0]["bytes"] = 999
+    stale_payload["artifacts"][0]["sha256"] = "0" * 64
+    local_manifest.write_text(json.dumps(stale_payload), encoding="utf-8")
+
+    status = check_p0_closure_status.build_status(
+        manifest=local_manifest,
+        promoted_manifest_json=promoted_manifest,
+        release_assets_json=assets_json,
+        artifact_root=artifact_root,
+        upload_plan_json=_upload_plan_json(tmp_path),
+        metadata_preflight_json=_metadata_preflight_json(tmp_path),
+        tag_ref_present=True,
+        reports=_reports(tmp_path),
+    )
+
+    release_gate = status["gates"][0]
+    assert status["p0_closed"] is True
+    assert release_gate["promoted_manifest_json"] == str(promoted_manifest)
+    assert release_gate["details"]["publication_manifest_source"] == "promoted"
 
 
 def test_p0_status_keeps_release_open_when_listing_is_not_exact(tmp_path: Path) -> None:

@@ -70,6 +70,81 @@ def _assets_json(tmp_path: Path) -> Path:
     )
 
 
+def _upload_plan_json(tmp_path: Path) -> Path:
+    return _write_json(
+        tmp_path / "upload-plan.json",
+        {
+            "ok": True,
+            "release_tag": "structural-analysis-artifacts-test",
+            "artifact_root": str(tmp_path / "assets"),
+            "upload_assets": [
+                {
+                    "asset_name": "required.zip",
+                    "path": str(tmp_path / "assets" / "required.zip"),
+                    "bytes": len(b"required"),
+                    "sha256": _sha256(b"required"),
+                    "required": True,
+                },
+                {
+                    "asset_name": "optional.pdf",
+                    "path": str(tmp_path / "assets" / "optional.pdf"),
+                    "bytes": len(b"optional"),
+                    "sha256": _sha256(b"optional"),
+                    "required": False,
+                },
+            ],
+            "extra_files": [],
+            "errors": [],
+            "totals": {
+                "manifest_assets": 2,
+                "selected_assets": 2,
+                "upload_assets": 2,
+                "extra_files": 0,
+                "errors": 0,
+            },
+        },
+    )
+
+
+def _metadata_preflight_json(tmp_path: Path) -> Path:
+    return _write_json(
+        tmp_path / "metadata-preflight.json",
+        {
+            "ok": True,
+            "mode": "artifact_root",
+            "manifest_errors": [],
+            "present": [
+                {
+                    "asset_name": "required.zip",
+                    "required": True,
+                    "hydrate_target": str(tmp_path / "assets" / "required.zip"),
+                    "expected_bytes": len(b"required"),
+                    "expected_sha256": _sha256(b"required"),
+                    "status": "present",
+                    "actual_bytes": len(b"required"),
+                },
+                {
+                    "asset_name": "optional.pdf",
+                    "required": False,
+                    "hydrate_target": str(tmp_path / "assets" / "optional.pdf"),
+                    "expected_bytes": len(b"optional"),
+                    "expected_sha256": _sha256(b"optional"),
+                    "status": "present",
+                    "actual_bytes": len(b"optional"),
+                },
+            ],
+            "required_missing": [],
+            "optional_missing": [],
+            "totals": {
+                "manifest_assets": 2,
+                "present": 2,
+                "required_missing": 0,
+                "optional_missing": 0,
+            },
+        },
+    )
+
+
 def test_status_reports_closed_when_all_required_offline_checks_pass(tmp_path: Path) -> None:
     manifest_path = _manifest(tmp_path)
     artifact_root = _artifact_root(tmp_path)
@@ -92,6 +167,112 @@ def test_status_reports_closed_when_all_required_offline_checks_pass(tmp_path: P
     assert status["asset_listing"]["ok"] is True
     assert status["asset_listing"]["counts"]["matched"] == 2
     assert status["asset_listing"]["require_exact"] is True
+
+
+def test_status_validates_upload_plan_and_metadata_preflight_evidence(tmp_path: Path) -> None:
+    manifest_path = _manifest(tmp_path)
+    artifact_root = _artifact_root(tmp_path)
+    assets_path = _assets_json(tmp_path)
+    upload_plan_path = _upload_plan_json(tmp_path)
+    preflight_path = _metadata_preflight_json(tmp_path)
+
+    status = check_release_p0_closure.build_status(
+        manifest_path=manifest_path,
+        artifact_root=artifact_root,
+        assets_json=assets_path,
+        upload_plan_json=upload_plan_path,
+        metadata_preflight_json=preflight_path,
+        require_all=True,
+        require_exact=True,
+        tag_ref_present=True,
+    )
+
+    assert status["p0_closed"] is True
+    assert status["upload_plan"]["evidence_json"] == str(upload_plan_path)
+    assert status["upload_plan"]["evidence_ok"] is True
+    assert status["metadata_preflight"]["evidence_json"] == str(preflight_path)
+    assert status["metadata_preflight"]["ok"] is True
+    assert status["metadata_preflight"]["counts"]["present"] == 2
+
+
+def test_status_can_close_against_promoted_manifest_when_local_manifest_is_stale(tmp_path: Path) -> None:
+    local_manifest_path = _manifest(tmp_path)
+    promoted_manifest_path = tmp_path / "promoted-manifest.json"
+    promoted_manifest_path.write_text(local_manifest_path.read_text(encoding="utf-8"), encoding="utf-8")
+    local_manifest = json.loads(local_manifest_path.read_text(encoding="utf-8"))
+    local_manifest["artifacts"][0]["bytes"] = 999
+    local_manifest["artifacts"][0]["sha256"] = "0" * 64
+    local_manifest_path.write_text(json.dumps(local_manifest), encoding="utf-8")
+
+    status = check_release_p0_closure.build_status(
+        manifest_path=local_manifest_path,
+        promoted_manifest_json=promoted_manifest_path,
+        artifact_root=_artifact_root(tmp_path),
+        assets_json=_assets_json(tmp_path),
+        upload_plan_json=_upload_plan_json(tmp_path),
+        metadata_preflight_json=_metadata_preflight_json(tmp_path),
+        require_all=True,
+        require_exact=True,
+        tag_ref_present=True,
+    )
+
+    assert status["p0_closed"] is True
+    assert status["source_manifest"] == str(local_manifest_path)
+    assert status["publication_manifest"] == str(promoted_manifest_path)
+    assert status["publication_manifest_source"] == "promoted"
+
+
+def test_status_keeps_p0_open_when_upload_plan_evidence_sha_does_not_match_manifest(tmp_path: Path) -> None:
+    manifest_path = _manifest(tmp_path)
+    artifact_root = _artifact_root(tmp_path)
+    assets_path = _assets_json(tmp_path)
+    upload_plan_path = _upload_plan_json(tmp_path)
+    upload_plan = json.loads(upload_plan_path.read_text(encoding="utf-8"))
+    upload_plan["upload_assets"][0]["sha256"] = "0" * 64
+    upload_plan_path.write_text(json.dumps(upload_plan), encoding="utf-8")
+
+    status = check_release_p0_closure.build_status(
+        manifest_path=manifest_path,
+        artifact_root=artifact_root,
+        assets_json=assets_path,
+        upload_plan_json=upload_plan_path,
+        metadata_preflight_json=_metadata_preflight_json(tmp_path),
+        require_all=True,
+        require_exact=True,
+        tag_ref_present=True,
+    )
+
+    assert status["p0_closed"] is False
+    assert status["upload_plan"]["ok"] is False
+    assert any("upload plan sha256 mismatch for required.zip" in error for error in status["upload_plan"]["errors"])
+
+
+def test_status_keeps_p0_open_when_metadata_preflight_evidence_bytes_do_not_match_manifest(tmp_path: Path) -> None:
+    manifest_path = _manifest(tmp_path)
+    artifact_root = _artifact_root(tmp_path)
+    assets_path = _assets_json(tmp_path)
+    preflight_path = _metadata_preflight_json(tmp_path)
+    preflight = json.loads(preflight_path.read_text(encoding="utf-8"))
+    preflight["present"][1]["expected_bytes"] = 999
+    preflight_path.write_text(json.dumps(preflight), encoding="utf-8")
+
+    status = check_release_p0_closure.build_status(
+        manifest_path=manifest_path,
+        artifact_root=artifact_root,
+        assets_json=assets_path,
+        upload_plan_json=_upload_plan_json(tmp_path),
+        metadata_preflight_json=preflight_path,
+        require_all=True,
+        require_exact=True,
+        tag_ref_present=True,
+    )
+
+    assert status["p0_closed"] is False
+    assert status["metadata_preflight"]["ok"] is False
+    assert any(
+        "metadata preflight bytes mismatch for optional.pdf" in error
+        for error in status["metadata_preflight"]["errors"]
+    )
 
 
 def test_require_exact_keeps_p0_open_for_missing_optional_and_extra_assets(tmp_path: Path) -> None:

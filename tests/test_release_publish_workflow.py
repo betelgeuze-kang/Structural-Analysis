@@ -35,6 +35,11 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert '--artifact-root "$RELEASE_ROOT"' in text
     assert "structural-p0-closure-status.json" in text
     assert "structural-p0-closure-status.md" in text
+    assert "structural-release-metadata-preflight.json" in text
+    assert "--hydrate-preflight" in text
+    assert '--out "$RELEASE_METADATA_PREFLIGHT"' in text
+    assert '--upload-plan-json "$RELEASE_UPLOAD_PLAN"' in text
+    assert '--metadata-preflight-json "$RELEASE_METADATA_PREFLIGHT"' in text
     assert "structural-release-hydrated-assets" in text
     assert "scripts/hydrate_github_release_assets.py" in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text
@@ -90,6 +95,7 @@ def test_release_publish_workflow_uploads_evidence_artifact_even_on_failure() ->
     assert "uses: actions/upload-artifact@v7" in upload_step
     assert "${{ runner.temp }}/structural-release-publication-report.json" in upload_step
     assert "${{ runner.temp }}/structural-release-publication-report.md" in upload_step
+    assert "${{ runner.temp }}/structural-release-metadata-preflight.json" in upload_step
     assert "if-no-files-found: error" in upload_step
 
 

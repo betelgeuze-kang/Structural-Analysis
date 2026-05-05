@@ -45,6 +45,30 @@ REASONS = {
     "ERR_COMMERCIAL_FAIL": "commercial grade gate failed",
 }
 
+RESIDUAL_HOLDOUT_QUEUE_DEFAULTS = {
+    "licensed_engineer_review_required": {
+        "work_item_id": "RH-001",
+        "queue_name": "licensed_engineer_review_queue",
+        "queue_status": "pending_review",
+        "status": "open",
+        "next_action": "Assign the highest-touch irregular/member-edge cases to licensed engineer review before full-replacement claims.",
+    },
+    "legacy_tool_cross_validation_required": {
+        "work_item_id": "RH-002",
+        "queue_name": "legacy_tool_cross_validation_queue",
+        "queue_status": "pending_cross_validation",
+        "status": "open",
+        "next_action": "Queue novel load-path and authority-critical submodels for MIDAS/ETABS/SAP/OpenSees cross-validation.",
+    },
+    "legal_authority_signoff_required": {
+        "work_item_id": "RH-003",
+        "queue_name": "legal_authority_signoff_queue",
+        "queue_status": "pending_signoff",
+        "status": "open",
+        "next_action": "Route formal seal, legal submission, and authority-facing responsibility to the existing sign-off workflow.",
+    },
+}
+
 INPUT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
@@ -302,6 +326,28 @@ def _grade(*, commercial: bool, pre_commercial: bool, research: bool) -> str:
     if research:
         return "Research"
     return "Failing"
+
+
+def _residual_holdout_work_items(categories: list[dict]) -> list[dict]:
+    work_items: list[dict] = []
+    for category in categories:
+        category_id = str(category.get("id", "") or "")
+        defaults = RESIDUAL_HOLDOUT_QUEUE_DEFAULTS.get(category_id, {})
+        work_items.append(
+            {
+                "work_item_id": str(category.get("work_item_id", "") or defaults.get("work_item_id", "")),
+                "category_id": category_id,
+                "title": str(category.get("label", category_id) or category_id),
+                "owner": str(category.get("owner", "") or ""),
+                "queue_name": str(category.get("queue_name", "") or defaults.get("queue_name", "residual_holdout_queue")),
+                "queue_status": str(category.get("queue_status", "") or defaults.get("queue_status", "pending_review")),
+                "status": str(category.get("status", "") or defaults.get("status", "open")),
+                "scope": str(category.get("scope", "") or ""),
+                "next_action": str(category.get("next_action", "") or defaults.get("next_action", "")),
+                "full_commercial_replacement_blocker": True,
+            }
+        )
+    return work_items
 
 
 def _archive(paths: list[str]) -> str:
@@ -962,6 +1008,27 @@ def main() -> None:
         else:
             reason_code = "PASS"
 
+        residual_holdout_categories = [
+            {
+                "id": "licensed_engineer_review_required",
+                "owner": "기술사",
+                "label": "Licensed Engineer Review",
+                "scope": "non-standard interpretation, final judgment, exceptional irregularity, and member-level edge cases",
+            },
+            {
+                "id": "legacy_tool_cross_validation_required",
+                "owner": "기존툴+기술사",
+                "label": "Legacy Tool Cross-Validation",
+                "scope": "novel load paths, authority-critical submodels, and residual niche workflows outside the accelerated envelope",
+            },
+            {
+                "id": "legal_authority_signoff_required",
+                "owner": "기술사/기존 승인 workflow",
+                "label": "Legal Sign-Off",
+                "scope": "formal seal, legal submission, and authority-facing responsibility that remains outside automated scope",
+            },
+        ]
+
         payload = {
             "schema_version": "1.0",
             "run_id": "phase3-megastructure-commercial-readiness",
@@ -990,26 +1057,8 @@ def main() -> None:
                     "engineer review, legacy-tool cross-check, and formal sign-off workflows."
                 ),
             },
-            "residual_holdout_categories": [
-                {
-                    "id": "licensed_engineer_review_required",
-                    "owner": "기술사",
-                    "label": "Licensed Engineer Review",
-                    "scope": "non-standard interpretation, final judgment, exceptional irregularity, and member-level edge cases",
-                },
-                {
-                    "id": "legacy_tool_cross_validation_required",
-                    "owner": "기존툴+기술사",
-                    "label": "Legacy Tool Cross-Validation",
-                    "scope": "novel load paths, authority-critical submodels, and residual niche workflows outside the accelerated envelope",
-                },
-                {
-                    "id": "legal_authority_signoff_required",
-                    "owner": "기술사/기존 승인 workflow",
-                    "label": "Legal Sign-Off",
-                    "scope": "formal seal, legal submission, and authority-facing responsibility that remains outside automated scope",
-                },
-            ],
+            "residual_holdout_categories": residual_holdout_categories,
+            "residual_holdout_work_items": _residual_holdout_work_items(residual_holdout_categories),
             "model_rows": model_rows,
             "global_metrics": {
                 "source_family_count": len(all_source_families),

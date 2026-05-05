@@ -4389,23 +4389,129 @@ def _build_holdout_breakdown(
         "legacy_tool_cross_validation_required": 30,
         "legal_authority_signoff_required": 20,
     }
+    default_queue_by_id = {
+        "licensed_engineer_review_required": (
+            "RH-001",
+            "licensed_engineer_review_queue",
+            "pending_review",
+            "Assign the highest-touch irregular/member-edge cases to licensed engineer review before full-replacement claims.",
+        ),
+        "legacy_tool_cross_validation_required": (
+            "RH-002",
+            "legacy_tool_cross_validation_queue",
+            "pending_cross_validation",
+            "Queue novel load-path and authority-critical submodels for legacy-tool cross-validation.",
+        ),
+        "legal_authority_signoff_required": (
+            "RH-003",
+            "legal_authority_signoff_queue",
+            "pending_signoff",
+            "Route formal seal, legal submission, and authority-facing responsibility to sign-off workflow.",
+        ),
+    }
     breakdown: list[dict[str, Any]] = []
     for row in categories:
         if not isinstance(row, dict):
             continue
-        relative_share_pct = int(default_share_by_id.get(str(row.get("id", "")), 0))
+        category_id = str(row.get("id", "") or "")
+        relative_share_pct = int(default_share_by_id.get(category_id, 0))
         absolute_project_pct_range = [
             round(holdout_low * relative_share_pct / 100.0, 2),
             round(holdout_high * relative_share_pct / 100.0, 2),
         ]
+        default_work_item_id, default_queue_name, default_queue_status, default_next_action = default_queue_by_id.get(
+            category_id,
+            (
+                f"RH-{len(breakdown) + 1:03d}",
+                f"{category_id}_queue" if category_id else "residual_holdout_queue",
+                "pending_review",
+                "Assign residual holdout case to the matching review owner.",
+            ),
+        )
         breakdown.append(
             {
                 **row,
+                "work_item_id": str(row.get("work_item_id", "") or default_work_item_id),
                 "relative_share_pct": relative_share_pct,
                 "absolute_project_pct_range": absolute_project_pct_range,
+                "queue_name": str(row.get("queue_name", "") or default_queue_name),
+                "queue_status": str(row.get("queue_status", "") or default_queue_status),
+                "status": str(row.get("status", "") or "open"),
+                "next_action": str(row.get("next_action", "") or default_next_action),
+                "full_commercial_replacement_blocker": True,
             }
         )
     return breakdown
+
+
+def _build_holdout_work_items(buckets: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    work_items: list[dict[str, Any]] = []
+    for row in buckets:
+        if not isinstance(row, dict):
+            continue
+        work_items.append(
+            {
+                "work_item_id": str(row.get("work_item_id", "") or f"RH-{len(work_items) + 1:03d}"),
+                "category_id": str(row.get("id", "") or ""),
+                "title": str(row.get("label", row.get("id", "")) or ""),
+                "owner": str(row.get("owner", "") or ""),
+                "queue_name": str(row.get("queue_name", "") or ""),
+                "queue_status": str(row.get("queue_status", "") or ""),
+                "status": str(row.get("status", "") or ""),
+                "absolute_project_pct_range": row.get("absolute_project_pct_range", []),
+                "relative_share_pct": int(row.get("relative_share_pct", 0) or 0),
+                "next_action": str(row.get("next_action", "") or ""),
+                "full_commercial_replacement_blocker": bool(
+                    row.get("full_commercial_replacement_blocker", True)
+                ),
+            }
+        )
+    return work_items
+
+
+def _commercial_grade_label(value: object) -> str:
+    label = str(value or "unknown").strip()
+    if not label:
+        return "unknown"
+    if label.islower():
+        return label.capitalize()
+    return label
+
+
+def _commercial_scope_summary_line(
+    *,
+    grade_label: str,
+    deployment_model: dict[str, Any],
+    accelerated_coverage_target_pct_range: object,
+    residual_holdout_target_pct_range: object,
+) -> str:
+    return (
+        "Commercial scope: "
+        f"grade={grade_label} | "
+        "engineer_in_loop_accelerated_coverage_ready="
+        f"{bool(deployment_model.get('engineer_in_loop_accelerated_coverage_ready', False))} | "
+        "full_commercial_replacement_ready="
+        f"{bool(deployment_model.get('full_commercial_replacement_ready', False))} | "
+        f"accelerated_coverage={_coverage_range_label(accelerated_coverage_target_pct_range)} | "
+        f"residual_holdout={_coverage_range_label(residual_holdout_target_pct_range)}"
+    )
+
+
+def _commercial_reliability_breadth_summary_line(
+    *,
+    grade_label: str,
+    exact_row_count: int,
+    total_row_count: int,
+    evidence_row_count: int,
+) -> str:
+    return (
+        "Commercial reliability breadth: "
+        "PASS | "
+        f"grade={grade_label} | "
+        f"exact_row_coverage={exact_row_count}/{total_row_count} | "
+        f"evidence_rows={evidence_row_count} | "
+        f"evidence_present={evidence_row_count > 0}"
+    )
 
 
 def _write_markdown(path: Path, payload: dict) -> None:
@@ -4457,6 +4563,13 @@ def _write_markdown(path: Path, payload: dict) -> None:
     lines.append(f"- Generated at: `{payload['generated_at']}`")
     lines.append(f"- Release-candidate gates: `{summary['release_candidate_pass']}`")
     lines.append(f"- Commercial readiness grade: `{summary['commercial_grade']}`")
+    if str(summary.get("commercial_scope_summary_line", "")).strip():
+        lines.append(f"- Commercial scope: `{str(summary.get('commercial_scope_summary_line', '')).strip()}`")
+    if str(summary.get("commercial_reliability_breadth_summary_line", "")).strip():
+        lines.append(
+            f"- Commercial reliability breadth: "
+            f"`{str(summary.get('commercial_reliability_breadth_summary_line', '')).strip()}`"
+        )
     lines.append(f"- Deployment model: `{summary['deployment_model']}`")
     if str(summary.get("native_authoring_commercialization_summary_line", "")).strip():
         lines.append(
@@ -5078,11 +5191,14 @@ def _write_markdown(path: Path, payload: dict) -> None:
     if holdout_buckets:
         lines.append("## Residual Holdout Model")
         lines.append("")
-        lines.append("| Category | Owner | Relative Share | Absolute Project % | Scope |")
-        lines.append("|---|---|---:|---|---|")
+        lines.append("| Work Item | Category | Owner | Queue | Queue Status | Status | Relative Share | Absolute Project % | Scope |")
+        lines.append("|---|---|---|---|---|---|---:|---|---|")
         for row in holdout_buckets:
             lines.append(
-                f"| {row.get('label', row.get('id', ''))} | {row.get('owner', '')} | {int(row.get('relative_share_pct', 0))}% | "
+                f"| {row.get('work_item_id', '')} | {row.get('label', row.get('id', ''))} | "
+                f"{row.get('owner', '')} | "
+                f"{row.get('queue_name', '')} | {row.get('queue_status', '')} | {row.get('status', '')} | "
+                f"{int(row.get('relative_share_pct', 0))}% | "
                 f"{_coverage_range_label(row.get('absolute_project_pct_range'))} | {row.get('scope', '')} |"
             )
         lines.append("")
@@ -5910,7 +6026,14 @@ def main() -> None:
         stem="steel_composite_constitutive",
     )
     midas_kds_row_provenance_export_summary_line = str(
-        ci.get("midas_kds_row_provenance_export_summary_line", "") or ""
+        ci.get("midas_kds_row_provenance_export_summary_line", "")
+        or committee_summary.get("midas_kds_row_provenance_export_summary_line", "")
+        or (
+            committee_summary.get("metrics", {}).get("midas_kds_row_provenance_export_summary_line", "")
+            if isinstance(committee_summary.get("metrics"), dict)
+            else ""
+        )
+        or ""
     ).strip()
     contact_readiness_summary_line = str(ci.get("contact_readiness_summary_line", "") or "").strip()
     foundation_soil_link_summary_line = str(ci.get("foundation_soil_link_summary_line", "") or "").strip()
@@ -6335,6 +6458,29 @@ def main() -> None:
         )
         if isinstance(row, dict)
     ]
+    midas_kds_row_provenance_export_row_count = int(
+        _first_int(
+            committee_summary.get("midas_kds_row_provenance_export_row_count"),
+            committee_metrics.get("midas_kds_row_provenance_export_row_count"),
+        )
+        or 0
+    )
+    midas_kds_row_provenance_export_exact_row_count = int(
+        _first_int(
+            committee_summary.get("midas_kds_row_provenance_export_exact_row_count"),
+            committee_metrics.get("midas_kds_row_provenance_export_exact_row_count"),
+        )
+        or 0
+    )
+    if midas_kds_row_provenance_export_row_count == 0:
+        midas_kds_row_provenance_export_row_count = midas_kds_row_provenance_export_exact_row_count
+    midas_kds_row_provenance_preview_row_count = len(midas_kds_row_provenance_preview_rows)
+    midas_kds_row_provenance_preview_rows_present = midas_kds_row_provenance_preview_row_count > 0
+    midas_kds_row_provenance_exact_row_coverage_label = (
+        f"{midas_kds_row_provenance_export_exact_row_count}/{midas_kds_row_provenance_export_row_count}"
+        if midas_kds_row_provenance_export_row_count
+        else "0/0"
+    )
     nightly_smoke = nightly.get("design_optimization_cost_reduction_smoke") if isinstance(nightly.get("design_optimization_cost_reduction_smoke"), dict) else {}
     nightly_smoke_summary = nightly_smoke.get("summary") if isinstance(nightly_smoke.get("summary"), dict) else {}
     nightly_smoke_history = nightly.get("design_optimization_cost_reduction_smoke_history") if isinstance(nightly.get("design_optimization_cost_reduction_smoke_history"), dict) else {}
@@ -7620,6 +7766,11 @@ def main() -> None:
         "steel_composite_constitutive_gate_summary_line": steel_composite_constitutive_gate_summary_line,
         "steel_composite_constitutive_gate_pass": steel_composite_constitutive_gate_pass,
         "midas_kds_row_provenance_export_summary_line": midas_kds_row_provenance_export_summary_line,
+        "midas_kds_row_provenance_export_row_count": midas_kds_row_provenance_export_row_count,
+        "midas_kds_row_provenance_export_exact_row_count": midas_kds_row_provenance_export_exact_row_count,
+        "midas_kds_row_provenance_preview_row_count": midas_kds_row_provenance_preview_row_count,
+        "midas_kds_row_provenance_preview_rows_present": midas_kds_row_provenance_preview_rows_present,
+        "midas_kds_row_provenance_exact_row_coverage_label": midas_kds_row_provenance_exact_row_coverage_label,
         "midas_kds_row_provenance_preview_rows": midas_kds_row_provenance_preview_rows,
         "midas_kds_row_provenance_clause_filter_rows": midas_kds_row_provenance_clause_filter_rows,
         "midas_kds_row_provenance_member_filter_rows": midas_kds_row_provenance_member_filter_rows,
@@ -8598,6 +8749,19 @@ def main() -> None:
     release_candidate_pass = all(bool(release_status.get(k, False)) for k in core_release_keys)
     accelerated_coverage_target_pct_range = deployment_model.get("accelerated_coverage_target_pct_range", [95, 99])
     residual_holdout_target_pct_range = deployment_model.get("residual_holdout_target_pct_range", [1, 5])
+    commercial_grade_label = _commercial_grade_label(comm_grade.get("label", "unknown"))
+    commercial_scope_summary_line = _commercial_scope_summary_line(
+        grade_label=commercial_grade_label,
+        deployment_model=deployment_model,
+        accelerated_coverage_target_pct_range=accelerated_coverage_target_pct_range,
+        residual_holdout_target_pct_range=residual_holdout_target_pct_range,
+    )
+    commercial_reliability_breadth_summary_line = _commercial_reliability_breadth_summary_line(
+        grade_label=commercial_grade_label,
+        exact_row_count=midas_kds_row_provenance_export_exact_row_count,
+        total_row_count=midas_kds_row_provenance_export_row_count,
+        evidence_row_count=midas_kds_row_provenance_preview_row_count,
+    )
     current_deployment_model = str(deployment_model.get("mode", ""))
     current_strict_design_opt_cost_smoke = _nightly_strict_design_opt_cost_smoke(nightly)
     empirical_time_saved = _empirical_time_saved_summary(
@@ -8624,10 +8788,14 @@ def main() -> None:
         residual_holdout_target_pct_range,
         [row for row in residual_holdout_categories if isinstance(row, dict)],
     )
+    residual_holdout_work_items = _build_holdout_work_items(residual_holdout_breakdown)
 
     summary = {
         "release_candidate_pass": release_candidate_pass,
-        "commercial_grade": str(comm_grade.get("label", "unknown")),
+        "commercial_grade": commercial_grade_label,
+        "commercial_scope_summary_line": commercial_scope_summary_line,
+        "commercial_reliability_breadth_summary_line": commercial_reliability_breadth_summary_line,
+        "residual_holdout_work_item_count": len(residual_holdout_work_items),
         "deployment_model": str(deployment_model.get("mode", "engineer_in_the_loop_accelerated_coverage")),
         "midas_section_library_summary_line": midas_section_library_summary_line,
         "midas_kds_geometry_bridge_summary_line": midas_kds_geometry_bridge_summary_line,
@@ -8850,6 +9018,11 @@ def main() -> None:
         "steel_composite_constitutive_gate_summary_line": steel_composite_constitutive_gate_summary_line,
         "steel_composite_constitutive_gate_pass": steel_composite_constitutive_gate_pass,
         "midas_kds_row_provenance_export_summary_line": midas_kds_row_provenance_export_summary_line,
+        "midas_kds_row_provenance_export_row_count": midas_kds_row_provenance_export_row_count,
+        "midas_kds_row_provenance_export_exact_row_count": midas_kds_row_provenance_export_exact_row_count,
+        "midas_kds_row_provenance_preview_row_count": midas_kds_row_provenance_preview_row_count,
+        "midas_kds_row_provenance_preview_rows_present": midas_kds_row_provenance_preview_rows_present,
+        "midas_kds_row_provenance_exact_row_coverage_label": midas_kds_row_provenance_exact_row_coverage_label,
         "midas_kds_row_provenance_preview_rows": midas_kds_row_provenance_preview_rows,
         "midas_kds_row_provenance_clause_filter_rows": midas_kds_row_provenance_clause_filter_rows,
         "midas_kds_row_provenance_member_filter_rows": midas_kds_row_provenance_member_filter_rows,
@@ -9452,6 +9625,7 @@ def main() -> None:
         "remaining_gaps": remaining_gaps,
         "advanced_holdouts": advanced_holdouts,
         "residual_holdout_buckets": residual_holdout_breakdown,
+        "residual_holdout_work_items": residual_holdout_work_items,
         "nightly_smoke_trend": smoke_trend,
         "nightly_smoke_recent_samples": smoke_recent_samples,
         "measured_chain_step_rows": measured_chain_timing["measured_chain_step_rows"],

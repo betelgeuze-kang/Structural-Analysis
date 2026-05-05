@@ -2,16 +2,17 @@
 
 This runbook closes P0-1 release publication for `structural-analysis-artifacts-2026-04-26`.
 
-## Current Open State
+## Current Published State
 
-As of 2026-04-30, P0-1 is still open for one reason:
+As of 2026-05-05, P0-1 is closed for `structural-analysis-artifacts-2026-04-26` when the captured publication evidence is supplied:
 
-- The Git tag exists.
-- The GitHub Release object is not yet published.
-- The manifest lists 12 release assets, and those 12 assets are not yet visible on the release.
-- The repo-local `implementation/phase1/release/` tree is stale and is not a safe upload source.
+- The Git tag and GitHub Release object exist.
+- The release asset listing contains exactly the 12 manifest-listed assets.
+- The upload plan and metadata preflight validate SHA/bytes against the promoted manifest.
+- A hydrated download of the published GitHub Release assets verifies SHA/bytes cleanly.
+- The repo-local `implementation/phase1/release/` tree remains outside the safe upload path.
 
-This is a release-publication gap, not a source-boundary gap. P0-2 through P0-6 are already closed, and P0 stays open until release publication closes.
+This was a release-publication gap, not a source-boundary gap. P0-2 through P0-6 are already closed, and P0 now reports closed when `check_p0_closure_status.py` receives the publication evidence bundle.
 
 ## Guardrails
 
@@ -19,15 +20,17 @@ This is a release-publication gap, not a source-boundary gap. P0-2 through P0-6 
 - Never use the stale repo-local release tree as the publication source.
 - Only upload manifest-listed files from a freshly regenerated flat artifact root.
 - Do not promote `implementation/phase1/release_artifacts_manifest.json` until the release asset listing and SHA/bytes checks pass.
-- P0-1 must close before P1 breadth work starts.
+- P0-1 must close before P1 quality/fallback/benchmark breadth work starts.
 
 ## P0 Nightly Heavy Report Contract
 
 - `implementation/phase1/release/nightly_release_gate_report.json` is the canonical nightly heavy report for P0 publication runs.
 - `Nightly release gate summary:` is the triage contract for `Regenerate release viewer artifacts`; treat its `reason_code`, `reason`, first failed step, and captured tails as authoritative.
 - The `release-publication-evidence` artifact must include the nightly heavy report together with the candidate manifest, release asset listing, upload plan, and closure status.
+- The publication evidence must also include `structural-release-metadata-preflight.json`. P0-1 is not closed unless `check_release_p0_closure.py` receives and validates both the upload plan JSON and metadata preflight JSON against the candidate manifest SHA/bytes.
 - KDS/frontend compliance must not depend on stale repo-local `implementation/phase1/release/**` files. The nightly gate rebuilds `pbd_review_package_report.json` from checked-in NDTHA evidence and rebuilds `pbd_review_compliance_slice_report.json` from the small source evidence under `implementation/phase1/release_evidence/kds/` before running the KDS gate.
 - MIDAS KDS row-provenance export evidence is hydrated from `implementation/phase1/release_evidence/kds/midas_kds_row_provenance_table_report.json` on CPU-required release runners. The full row table/CSV can stay release-side, but the compact PASS report must be available before workflow productization and phase1 CI.
+- Clean checkout P1 evidence can be materialized with one command: `python3 scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --json --out <clean-checkout-evidence-chain.json>`. It hydrates MIDAS/KDS validation and commercial readiness evidence, regenerates parser coverage plus PEER metric records, rebuilds row provenance, and records P1 readiness/breadth status against the closed P0 release evidence.
 - Reused reports that publish sidecar evidence must verify those sidecars exist. For example, `commercial_csv_gate_report.json` is not reusable for release publication unless `implementation/phase1/member_force_soft_accept_report.json` has also been materialized in the same checkout.
 - CPU-required release runners materialize both `implementation/phase1/release_evidence/commercial/commercial_csv_gate_report.json` and `implementation/phase1/release_evidence/commercial/member_force_soft_accept_report.json` before the commercial CSV gate. This keeps the publication workflow on checked-in evidence instead of re-running the commercial CSV benchmark slice in a clean checkout.
 - Commercial readiness keeps the strict RWTH/from-csv/Atwood benchmark evidence, but release publication must not rerun torch-dependent benchmark training on GitHub-hosted CPU runners. Those runners materialize `implementation/phase1/release_evidence/commercial/commercial_readiness_report.json`; refreshing that evidence belongs in a torch-capable benchmark validation lane.
@@ -55,7 +58,7 @@ This is a release-publication gap, not a source-boundary gap. P0-2 through P0-6 
 
 1. Fetch release asset metadata with `fetch_github_release_assets.py` so the hydrate run starts from the published release state.
 2. Build a fresh candidate manifest and flat root with `build_release_publication_candidate.py`.
-3. Verify the hydrated root with `verify_release_artifacts_manifest.py --require-artifacts` and the upload plan with `prepare_release_upload_plan.py`.
+3. Verify the hydrated root with `verify_release_artifacts_manifest.py --require-artifacts`, write metadata preflight evidence with `verify_release_artifacts_manifest.py --hydrate-preflight --out <metadata-preflight.json>`, and validate the upload plan with `prepare_release_upload_plan.py`.
 4. Publish only manifest-listed files, then re-fetch the release assets and check metadata with `check_release_asset_listing.py`.
 5. Download the published assets with `hydrate_github_release_assets.py --write` into a separate root and run `verify_release_artifacts_manifest.py --artifact-root <hydrated-root>` so the release is byte-verified from GitHub, not just locally generated.
 6. Close P0 with `check_release_p0_closure.py` and `check_p0_closure_status.py`.
@@ -76,7 +79,7 @@ When a publication run fails, rerun the same publication path instead of changin
 2. Leave `replace_existing` as `false` unless the release already has same-named assets that you intend to replace.
 3. Set `promote_manifest=true` only when you want the workflow to commit the verified candidate manifest after its built-in closure checks pass.
 4. The workflow already performs source-boundary preflight, fresh candidate generation, upload-plan validation, publication, `fetch_github_release_assets.py`, `check_release_asset_listing.py`, `check_release_p0_closure.py`, `check_p0_closure_status.py`, published-asset hydration with SHA/bytes verification, evidence upload, and optional manifest promotion.
-5. Download the publication evidence artifact after the workflow finishes; it contains the candidate manifest, release asset listing, upload plan, and overall P0 closure status.
+5. Download the publication evidence artifact after the workflow finishes; it contains the candidate manifest, release asset listing, upload plan, metadata preflight, and overall P0 closure status.
 6. If the workflow fails, stop at the first failed gate and fix that gate before rerunning.
 
 ## Path A-CLI: Dispatch The Workflow
@@ -123,6 +126,7 @@ python3 scripts/build_release_publication_candidate.py --manifest implementation
 
 ```bash
 python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manifest.json> --artifact-root <fresh-root> --require-artifacts
+python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manifest.json> --artifact-root <fresh-root> --hydrate-preflight --out <metadata-preflight.json>
 ```
 
 4. Build the safe upload plan and stop if it reports extra files:
@@ -154,13 +158,13 @@ python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manif
 8. Close the P0-1 gate:
 
 ```bash
-python3 scripts/check_release_p0_closure.py --manifest <candidate-manifest.json> --assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present true --require-all --require-exact --fail-unclosed
+python3 scripts/check_release_p0_closure.py --manifest <candidate-manifest.json> --assets-json <release-assets.json> --artifact-root <fresh-root> --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --tag-ref-present true --require-all --require-exact --fail-unclosed
 ```
 
 9. Confirm overall P0 status:
 
 ```bash
-python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --fail-open
+python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --tag-ref-present --fail-open
 ```
 
 Note: `check_release_p0_closure.py` expects `--tag-ref-present true`, while `check_p0_closure_status.py` uses `--tag-ref-present` as a flag.
@@ -169,9 +173,10 @@ Note: `check_release_p0_closure.py` expects `--tag-ref-present true`, while `che
 
 After a successful publication rerun, capture the P0 status first and then check P1 in order:
 
-1. Run `python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-release-asset-root> --tag-ref-present --json --out <p0-status.json> --out-md <p0-status.md> --fail-open`.
-2. If that reports closed, run `python3 scripts/check_p1_readiness_status.py --p0-status <p0-status.json> --json --out <p1-readiness-status.json> --out-md <p1-readiness-status.md> --fail-blocked`.
-3. If P1 readiness is unblocked, run `python3 scripts/check_p1_benchmark_breadth_status.py --p1-readiness-status <p1-readiness-status.json> --json --out <p1-benchmark-breadth-status.json> --out-md <p1-benchmark-breadth-status.md> --fail-blocked`.
+1. Run `python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-release-asset-root> --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --tag-ref-present --json --out <p0-status.json> --out-md <p0-status.md> --fail-open`.
+2. If that reports closed, run `python3 scripts/check_p1_readiness_status.py --p0-status <p0-status.json> --json --out <p1-readiness-status.json> --out-md <p1-readiness-status.md> --fail-blocked` to confirm the P1 quality/fallback/benchmark breadth slice is unblocked.
+3. If P1 readiness is unblocked, run `python3 scripts/check_p1_benchmark_breadth_status.py --p1-readiness-status <p1-readiness-status.json> --json --out <p1-benchmark-breadth-status.json> --out-md <p1-benchmark-breadth-status.md> --fail-blocked` to execute the P1 quality/fallback/benchmark breadth slice.
+4. For clean-checkout reproduction, run `python3 scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --p1-readiness-out <p1-readiness-status.json> --p1-benchmark-out <p1-benchmark-breadth-status.json> --json --out <clean-checkout-evidence-chain.json>`.
 
 ## Completion Criteria
 
@@ -181,10 +186,10 @@ P0-1 is closed only when all of these are true:
 - `check_release_asset_listing.py --require-all --require-exact` reports no missing required assets, no missing optional assets, no size mismatches, and no extra assets.
 - `verify_release_artifacts_manifest.py --artifact-root <fresh-root> --require-artifacts` reports clean artifact-root SHA/bytes integrity.
 - `hydrate_github_release_assets.py --write` can download the published GitHub Release assets into a separate root, and `verify_release_artifacts_manifest.py --artifact-root <hydrated-root>` reports clean SHA/bytes integrity against the downloaded bytes.
-- `check_release_p0_closure.py --tag-ref-present true --require-all --require-exact --fail-unclosed` reports closed.
-- `check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --tag-ref-present --fail-open` reports overall P0 closed. The `Publish Release Assets` workflow also writes `structural-p0-closure-status.json` and `structural-p0-closure-status.md` into the publication evidence artifact.
+- `check_release_p0_closure.py --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --tag-ref-present true --require-all --require-exact --fail-unclosed` reports closed.
+- `check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --tag-ref-present --fail-open` reports overall P0 closed. The `Publish Release Assets` workflow also writes `structural-p0-closure-status.json` and `structural-p0-closure-status.md` into the publication evidence artifact.
 - The release contains exactly the 12 manifest-listed assets and no wildcard-uploaded extras.
-- Only after that may the candidate manifest be promoted and P1 breadth work begin.
+- Only after that may the candidate manifest be promoted and P1 quality/fallback/benchmark breadth work begin.
 
 ## Troubleshooting
 
@@ -196,4 +201,4 @@ P0-1 is closed only when all of these are true:
 
 ## After P0-1
 
-Do not start P1 breadth work until this runbook closes P0-1 and `check_p0_closure_status.py` reports closed. After that, the next order is P1 breadth, then later viewer/report polish.
+P0-1 is closed, so the next order is P1 quality/fallback/benchmark breadth, residual holdout queue ownership/status, and then viewer/report polish. Keep `check_p0_closure_status.py` in the loop whenever the release assets or promoted manifest change.

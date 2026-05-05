@@ -87,6 +87,269 @@ def _upload_plan_status(manifest_path: Path, artifact_root: Path | None) -> dict
     }
 
 
+def _manifest_artifact_index(manifest: Any) -> dict[str, dict[str, Any]]:
+    if not isinstance(manifest, dict):
+        return {}
+    artifacts = manifest.get("artifacts")
+    if not isinstance(artifacts, list):
+        return {}
+    rows: dict[str, dict[str, Any]] = {}
+    for row in artifacts:
+        if not isinstance(row, dict):
+            continue
+        asset_name = str(row.get("asset_name", "") or "").strip()
+        if asset_name:
+            rows[asset_name] = row
+    return rows
+
+
+def _json_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _upload_plan_evidence_status(
+    *,
+    upload_plan_json: Path | None,
+    manifest: Any,
+    release_tag: str,
+) -> dict[str, Any]:
+    if upload_plan_json is None:
+        return {
+            "checked": False,
+            "evidence_json": None,
+            "evidence_ok": None,
+            "errors": [],
+            "counts": {},
+        }
+
+    errors: list[str] = []
+    try:
+        payload = _load_json(upload_plan_json)
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "checked": True,
+            "evidence_json": str(upload_plan_json),
+            "evidence_ok": False,
+            "errors": [str(exc)],
+            "counts": {},
+        }
+    if not isinstance(payload, dict):
+        return {
+            "checked": True,
+            "evidence_json": str(upload_plan_json),
+            "evidence_ok": False,
+            "errors": ["upload plan evidence root must be an object"],
+            "counts": {},
+        }
+
+    if payload.get("ok") is not True:
+        errors.append("upload plan evidence ok must be true")
+    if release_tag and str(payload.get("release_tag", "") or "") != release_tag:
+        errors.append(
+            f"upload plan release_tag mismatch: manifest={release_tag} "
+            f"evidence={payload.get('release_tag', '')}"
+        )
+    for error in _json_list(payload.get("errors")):
+        errors.append(f"upload plan evidence error: {error}")
+
+    manifest_rows = _manifest_artifact_index(manifest)
+    upload_assets = payload.get("upload_assets")
+    if not isinstance(upload_assets, list):
+        errors.append("upload plan upload_assets must be a list")
+        upload_assets = []
+
+    seen: set[str] = set()
+    for index, row in enumerate(upload_assets):
+        if not isinstance(row, dict):
+            errors.append(f"upload plan upload_assets[{index}] must be an object")
+            continue
+        asset_name = str(row.get("asset_name", "") or "").strip()
+        if not asset_name:
+            errors.append(f"upload plan upload_assets[{index}].asset_name is required")
+            continue
+        if asset_name in seen:
+            errors.append(f"upload plan duplicate asset: {asset_name}")
+        seen.add(asset_name)
+        manifest_row = manifest_rows.get(asset_name)
+        if manifest_row is None:
+            errors.append(f"upload plan contains non-manifest asset: {asset_name}")
+            continue
+        expected_bytes = manifest_row.get("bytes")
+        actual_bytes = row.get("bytes")
+        if actual_bytes != expected_bytes:
+            errors.append(
+                f"upload plan bytes mismatch for {asset_name}: "
+                f"manifest={expected_bytes} evidence={actual_bytes}"
+            )
+        expected_sha = str(manifest_row.get("sha256", "") or "")
+        actual_sha = str(row.get("sha256", "") or "")
+        if actual_sha != expected_sha:
+            errors.append(
+                f"upload plan sha256 mismatch for {asset_name}: "
+                f"manifest={expected_sha} evidence={actual_sha}"
+            )
+        expected_required = bool(manifest_row.get("required", False))
+        if row.get("required") is not expected_required:
+            errors.append(
+                f"upload plan required mismatch for {asset_name}: "
+                f"manifest={expected_required} evidence={row.get('required')}"
+            )
+
+    for asset_name in sorted(set(manifest_rows) - seen):
+        errors.append(f"upload plan missing manifest asset: {asset_name}")
+
+    totals = payload.get("totals") if isinstance(payload.get("totals"), dict) else {}
+    return {
+        "checked": True,
+        "evidence_json": str(upload_plan_json),
+        "evidence_ok": not errors,
+        "errors": errors,
+        "counts": {
+            "manifest_assets": totals.get("manifest_assets", len(manifest_rows)),
+            "upload_assets": totals.get("upload_assets", len(upload_assets)),
+            "extra_files": totals.get("extra_files", len(_json_list(payload.get("extra_files")))),
+            "errors": len(errors),
+        },
+    }
+
+
+def _merge_upload_plan_status(
+    base_status: dict[str, Any],
+    evidence_status: dict[str, Any],
+) -> dict[str, Any]:
+    checked = bool(base_status.get("checked")) or bool(evidence_status.get("checked"))
+    errors = list(base_status.get("errors", [])) + list(evidence_status.get("errors", []))
+    if not checked:
+        ok: bool | None = None
+    else:
+        ok = not errors and (
+            not bool(base_status.get("checked")) or base_status.get("ok") is True
+        ) and (
+            not bool(evidence_status.get("checked")) or evidence_status.get("evidence_ok") is True
+        )
+    return {
+        **base_status,
+        "checked": checked,
+        "ok": ok,
+        "errors": errors,
+        "evidence_json": evidence_status.get("evidence_json"),
+        "evidence_ok": evidence_status.get("evidence_ok"),
+        "evidence_counts": evidence_status.get("counts", {}),
+    }
+
+
+def _metadata_preflight_status(metadata_preflight_json: Path | None, manifest: Any) -> dict[str, Any]:
+    if metadata_preflight_json is None:
+        return {
+            "checked": False,
+            "ok": None,
+            "evidence_json": None,
+            "errors": [],
+            "counts": {},
+        }
+
+    errors: list[str] = []
+    try:
+        payload = _load_json(metadata_preflight_json)
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "checked": True,
+            "ok": False,
+            "evidence_json": str(metadata_preflight_json),
+            "errors": [str(exc)],
+            "counts": {},
+        }
+    if not isinstance(payload, dict):
+        return {
+            "checked": True,
+            "ok": False,
+            "evidence_json": str(metadata_preflight_json),
+            "errors": ["metadata preflight evidence root must be an object"],
+            "counts": {},
+        }
+
+    if payload.get("ok") is not True:
+        errors.append("metadata preflight ok must be true")
+    for error in _json_list(payload.get("manifest_errors", payload.get("errors"))):
+        errors.append(f"metadata preflight manifest error: {error}")
+
+    manifest_rows = _manifest_artifact_index(manifest)
+    present = payload.get("present")
+    if not isinstance(present, list):
+        errors.append("metadata preflight present must be a list")
+        present = []
+
+    seen: set[str] = set()
+    for index, row in enumerate(present):
+        if not isinstance(row, dict):
+            errors.append(f"metadata preflight present[{index}] must be an object")
+            continue
+        asset_name = str(row.get("asset_name", "") or "").strip()
+        if not asset_name:
+            errors.append(f"metadata preflight present[{index}].asset_name is required")
+            continue
+        if asset_name in seen:
+            errors.append(f"metadata preflight duplicate asset: {asset_name}")
+        seen.add(asset_name)
+        manifest_row = manifest_rows.get(asset_name)
+        if manifest_row is None:
+            errors.append(f"metadata preflight contains non-manifest asset: {asset_name}")
+            continue
+        expected_bytes = manifest_row.get("bytes")
+        actual_expected_bytes = row.get("expected_bytes")
+        if actual_expected_bytes != expected_bytes:
+            errors.append(
+                f"metadata preflight bytes mismatch for {asset_name}: "
+                f"manifest={expected_bytes} evidence={actual_expected_bytes}"
+            )
+        actual_bytes = row.get("actual_bytes")
+        if actual_bytes is not None and actual_bytes != expected_bytes:
+            errors.append(
+                f"metadata preflight actual bytes mismatch for {asset_name}: "
+                f"manifest={expected_bytes} evidence={actual_bytes}"
+            )
+        expected_sha = str(manifest_row.get("sha256", "") or "")
+        actual_expected_sha = str(row.get("expected_sha256", "") or "")
+        if actual_expected_sha != expected_sha:
+            errors.append(
+                f"metadata preflight sha256 mismatch for {asset_name}: "
+                f"manifest={expected_sha} evidence={actual_expected_sha}"
+            )
+        expected_required = bool(manifest_row.get("required", False))
+        if row.get("required") is not expected_required:
+            errors.append(
+                f"metadata preflight required mismatch for {asset_name}: "
+                f"manifest={expected_required} evidence={row.get('required')}"
+            )
+        if str(row.get("status", "") or "") != "present":
+            errors.append(f"metadata preflight asset is not present: {asset_name}")
+
+    for asset_name in sorted(set(manifest_rows) - seen):
+        errors.append(f"metadata preflight missing manifest asset: {asset_name}")
+    for key in ("required_missing", "optional_missing"):
+        for row in _json_list(payload.get(key)):
+            if isinstance(row, dict):
+                name = str(row.get("asset_name", row.get("name", "")) or "")
+            else:
+                name = str(row)
+            errors.append(f"metadata preflight {key} contains {name or 'unknown asset'}")
+
+    totals = payload.get("totals") if isinstance(payload.get("totals"), dict) else {}
+    return {
+        "checked": True,
+        "ok": not errors,
+        "evidence_json": str(metadata_preflight_json),
+        "errors": errors,
+        "counts": {
+            "manifest_assets": totals.get("manifest_assets", len(manifest_rows)),
+            "present": totals.get("present", len(present)),
+            "required_missing": totals.get("required_missing", 0),
+            "optional_missing": totals.get("optional_missing", 0),
+            "errors": len(errors),
+        },
+    }
+
+
 def _asset_listing_status(
     manifest_path: Path,
     assets_json: Path | None,
@@ -162,28 +425,54 @@ def _split_error_message(message: str) -> list[str]:
 def build_status(
     *,
     manifest_path: Path = DEFAULT_MANIFEST,
+    promoted_manifest_json: Path | None = None,
     artifact_root: Path | None = None,
     assets_json: Path | None = None,
+    upload_plan_json: Path | None = None,
+    metadata_preflight_json: Path | None = None,
     require_all: bool = False,
     require_exact: bool = True,
     tag_ref_present: bool | None = None,
 ) -> dict[str, Any]:
     """Return a no-network P0 closure status composed from existing checks."""
 
-    manifest_status, manifest = _manifest_status(manifest_path)
+    publication_manifest_path = promoted_manifest_json or manifest_path
+    manifest_status, manifest = _manifest_status(publication_manifest_path)
     release_tag = ""
     if isinstance(manifest, dict):
         release_tag = str(manifest.get("release_tag", "") or "")
 
-    upload_status = _upload_plan_status(manifest_path, artifact_root) if manifest_status["ok"] else {
-        "checked": artifact_root is not None,
-        "ok": False if artifact_root is not None else None,
+    upload_checked = artifact_root is not None or upload_plan_json is not None
+    metadata_checked = metadata_preflight_json is not None
+    upload_status = _merge_upload_plan_status(
+        _upload_plan_status(publication_manifest_path, artifact_root),
+        _upload_plan_evidence_status(
+            upload_plan_json=upload_plan_json,
+            manifest=manifest,
+            release_tag=release_tag,
+        ),
+    ) if manifest_status["ok"] else {
+        "checked": upload_checked,
+        "ok": False if upload_checked else None,
         "artifact_root": str(artifact_root) if artifact_root is not None else None,
-        "errors": ["skipped because manifest structure is invalid"] if artifact_root is not None else [],
+        "errors": ["skipped because manifest structure is invalid"] if upload_checked else [],
+        "counts": {},
+        "evidence_json": str(upload_plan_json) if upload_plan_json is not None else None,
+        "evidence_ok": False if upload_plan_json is not None else None,
+        "evidence_counts": {},
+    }
+    metadata_status = _metadata_preflight_status(
+        metadata_preflight_json,
+        manifest,
+    ) if manifest_status["ok"] else {
+        "checked": metadata_checked,
+        "ok": False if metadata_checked else None,
+        "evidence_json": str(metadata_preflight_json) if metadata_preflight_json is not None else None,
+        "errors": ["skipped because manifest structure is invalid"] if metadata_checked else [],
         "counts": {},
     }
     asset_status = _asset_listing_status(
-        manifest_path,
+        publication_manifest_path,
         assets_json,
         require_all=require_all,
         require_exact=require_exact,
@@ -198,22 +487,28 @@ def build_status(
     }
     tag_status = _tag_ref_status(tag_ref_present)
 
-    upload_closed = artifact_root is None or upload_status["ok"] is True
+    upload_closed = not bool(upload_status.get("checked")) or upload_status["ok"] is True
+    metadata_closed = not bool(metadata_status.get("checked")) or metadata_status["ok"] is True
     p0_closed = (
         manifest_status["ok"] is True
         and tag_ref_present is True
         and asset_status["ok"] is True
         and upload_closed
+        and metadata_closed
     )
     return {
         "ok": p0_closed,
         "p0_closed": p0_closed,
         "status": "closed" if p0_closed else "unclosed",
         "release_tag": release_tag,
+        "source_manifest": str(manifest_path),
+        "publication_manifest": str(publication_manifest_path),
+        "publication_manifest_source": "promoted" if promoted_manifest_json is not None else "local",
         "manifest": manifest_status,
         "tag_ref": tag_status,
         "asset_listing": asset_status,
         "upload_plan": upload_status,
+        "metadata_preflight": metadata_status,
     }
 
 
@@ -258,6 +553,17 @@ def _print_text(status: dict[str, Any]) -> None:
         for error in upload["errors"]:
             print(f"  - {error}")
 
+    metadata = status["metadata_preflight"]
+    if not metadata["checked"]:
+        print("Metadata preflight: not checked")
+    else:
+        metadata_label = "ok" if metadata["ok"] else "error"
+        counts = _format_counts(metadata["counts"])
+        suffix = f" ({counts})" if counts else ""
+        print(f"Metadata preflight: {metadata_label}{suffix}")
+        for error in metadata["errors"]:
+            print(f"  - {error}")
+
 
 def _parse_tag_ref_present(value: str) -> bool:
     normalized = value.strip().lower()
@@ -277,8 +583,19 @@ def build_parser() -> argparse.ArgumentParser:
         )
     )
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    parser.add_argument(
+        "--promoted-manifest-json",
+        type=Path,
+        help=(
+            "Use this already-promoted release manifest as the publication evidence baseline. "
+            "This keeps stale repo-local manifests from reopening a release that is already "
+            "published and promoted elsewhere."
+        ),
+    )
     parser.add_argument("--artifact-root", type=Path)
     parser.add_argument("--assets-json", type=Path)
+    parser.add_argument("--upload-plan-json", type=Path)
+    parser.add_argument("--metadata-preflight-json", type=Path)
     parser.add_argument("--require-all", action="store_true")
     parser.set_defaults(require_exact=True)
     parser.add_argument(
@@ -304,8 +621,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     status = build_status(
         manifest_path=args.manifest,
+        promoted_manifest_json=args.promoted_manifest_json,
         artifact_root=args.artifact_root,
         assets_json=args.assets_json,
+        upload_plan_json=args.upload_plan_json,
+        metadata_preflight_json=args.metadata_preflight_json,
         require_all=args.require_all,
         require_exact=args.require_exact,
         tag_ref_present=args.tag_ref_present,

@@ -149,3 +149,33 @@ def test_hydration_preflight_cli_succeeds_when_clean_checkout_lacks_artifacts(
     assert "Hydrate required: bundle.zip" in captured.out
     assert "no local artifact bytes required" in captured.out
     assert captured.err == ""
+
+
+def test_hydration_preflight_cli_writes_json_evidence_for_clean_checkout(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    manifest_path = tmp_path / "manifest.json"
+    out_path = tmp_path / "release-metadata-preflight.json"
+    manifest_path.write_text(json.dumps(_manifest()), encoding="utf-8")
+
+    exit_code = verify_release_artifacts_manifest.main(
+        [
+            "--manifest",
+            str(manifest_path),
+            "--hydrate-preflight",
+            "--out",
+            str(out_path),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    payload = json.loads(out_path.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert captured.err == ""
+    assert payload["ok"] is True
+    assert payload["contract"] == "clean source checkout may lack generated release assets; hydrate before upload"
+    assert payload["required_missing"][0]["expected_bytes"] == len(b"fresh")
+    assert payload["required_missing"][0]["expected_sha256"] == _sha256(b"fresh")

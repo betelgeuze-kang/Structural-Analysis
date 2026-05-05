@@ -80,7 +80,47 @@ def _peer_records(path: Path) -> Path:
     )
 
 
-def _row_provenance(path: Path) -> Path:
+def _row_provenance(
+    path: Path,
+    *,
+    include_midas_kds: bool = True,
+    include_midas_kds_row: bool = True,
+    midas_kds_exact_geometry_bridge_pass_count: int = 3,
+) -> Path:
+    summary = {
+        "row_count": 3 if include_midas_kds else 2,
+        "required_source_families_present": True,
+        "all_rows_have_required_fields": True,
+        "release_surface_allowed_count": 0,
+    }
+    if include_midas_kds:
+        summary.update(
+            {
+                "midas_kds_validation_present": True,
+                "midas_kds_validation_artifact_count": 3,
+                "midas_kds_exact_geometry_bridge_pass_count": midas_kds_exact_geometry_bridge_pass_count,
+                "midas_kds_exact_row_provenance_count": 3168,
+                "midas_kds_review_row_count": 3168,
+            }
+        )
+    source_rows = [
+        {"source_id": "koneps_turnkey_design_docs", "release_surface_allowed": False},
+        {"source_id": "peer_tbi_tall_buildings", "release_surface_allowed": False},
+    ]
+    if include_midas_kds and include_midas_kds_row:
+        source_rows.append(
+            {
+                "source_id": "midas_kds_geometry_bridge_validation",
+                "release_surface_allowed": False,
+                "parser_contract": {
+                    "contract_pass": True,
+                    "artifact_count": 3,
+                    "exact_geometry_bridge_pass_count": midas_kds_exact_geometry_bridge_pass_count,
+                    "review_row_count_total": 3168,
+                    "exact_mapped_row_provenance_count_total": 3168,
+                },
+            }
+        )
     return _write_json(
         path,
         {
@@ -88,12 +128,8 @@ def _row_provenance(path: Path) -> Path:
             "contract_pass": True,
             "row_provenance_coverage": 1.0,
             "raw_redistribution_default_blocked": True,
-            "summary": {
-                "row_count": 2,
-                "required_source_families_present": True,
-                "all_rows_have_required_fields": True,
-                "release_surface_allowed_count": 0,
-            },
+            "summary": summary,
+            "source_provenance_rows": source_rows,
         },
     )
 
@@ -150,6 +186,62 @@ def test_p1_readiness_treats_missing_generated_report_as_blocked(tmp_path: Path)
     assert status["gates"][4]["status"] == "blocked"
 
 
+def test_p1_readiness_requires_midas_kds_row_provenance_evidence(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    paths["row_provenance"] = _row_provenance(tmp_path / "row.json", include_midas_kds=False)
+
+    status = check_p1_readiness.build_status(**paths)
+    row_gate = status["gates"][4]
+
+    assert status["p1_inputs_ready"] is False
+    assert row_gate["status"] == "blocked"
+    assert row_gate["midas_kds_validation_present"] is False
+    assert row_gate["midas_kds_exact_row_provenance_count"] == 0
+
+
+def test_p1_readiness_surfaces_midas_kds_row_provenance_breadth(tmp_path: Path) -> None:
+    status = check_p1_readiness.build_status(**_paths(tmp_path))
+    row_gate = status["gates"][4]
+
+    assert status["p1_inputs_ready"] is True
+    assert row_gate["midas_kds_validation_present"] is True
+    assert row_gate["midas_kds_validation_artifact_count"] == 3
+    assert row_gate["midas_kds_exact_geometry_bridge_pass_count"] == 3
+    assert row_gate["midas_kds_exact_row_provenance_count"] == 3168
+    assert row_gate["midas_kds_review_row_count"] == 3168
+
+
+def test_p1_readiness_blocks_when_midas_kds_exact_artifact_breadth_is_incomplete(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    paths["row_provenance"] = _row_provenance(
+        tmp_path / "row.json",
+        midas_kds_exact_geometry_bridge_pass_count=2,
+    )
+
+    status = check_p1_readiness.build_status(**paths)
+    row_gate = status["gates"][4]
+
+    assert status["p1_inputs_ready"] is False
+    assert row_gate["status"] == "blocked"
+    assert row_gate["midas_kds_exact_geometry_bridge_pass_count"] == 2
+
+
+def test_p1_readiness_rejects_summary_only_midas_kds_evidence_claim(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    paths["row_provenance"] = _row_provenance(
+        tmp_path / "row.json",
+        include_midas_kds=True,
+        include_midas_kds_row=False,
+    )
+
+    status = check_p1_readiness.build_status(**paths)
+    row_gate = status["gates"][4]
+
+    assert status["p1_inputs_ready"] is False
+    assert row_gate["status"] == "blocked"
+    assert row_gate["midas_kds_validation_row_present"] is False
+
+
 def test_cli_writes_markdown_and_fails_when_execution_blocked(tmp_path: Path, capsys) -> None:
     paths = _paths(tmp_path)
     out_md = tmp_path / "p1.md"
@@ -173,6 +265,9 @@ def test_cli_writes_markdown_and_fails_when_execution_blocked(tmp_path: Path, ca
     )
 
     captured = capsys.readouterr()
+    markdown = out_md.read_text(encoding="utf-8")
     assert exit_code == 1
     assert "P1 Readiness Status" in captured.out
-    assert "P1 Readiness Status" in out_md.read_text(encoding="utf-8")
+    assert "P1 work slice: `quality/fallback/benchmark breadth`" in captured.out
+    assert "P1 Readiness Status" in markdown
+    assert "P1 work slice: `quality/fallback/benchmark breadth`" in markdown

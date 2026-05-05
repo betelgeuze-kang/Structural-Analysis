@@ -45,6 +45,7 @@ jobs:
             echo "CANDIDATE_MANIFEST=$RUNNER_TEMP/structural-release-candidate-manifest.json"
             echo "RELEASE_ASSETS_JSON=$RUNNER_TEMP/structural-release-assets.json"
             echo "RELEASE_UPLOAD_PLAN=$RUNNER_TEMP/structural-release-upload-plan.json"
+            echo "RELEASE_METADATA_PREFLIGHT=$RUNNER_TEMP/structural-release-metadata-preflight.json"
             echo "P0_STATUS_JSON=$RUNNER_TEMP/structural-p0-closure-status.json"
             echo "P0_STATUS_MD=$RUNNER_TEMP/structural-p0-closure-status.md"
             echo "PUBLICATION_REPORT_JSON=$RUNNER_TEMP/structural-release-publication-report.json"
@@ -171,6 +172,11 @@ jobs:
             --manifest "$CANDIDATE_MANIFEST" \
             --artifact-root "$RELEASE_ROOT" \
             --require-artifacts
+          python scripts/verify_release_artifacts_manifest.py \
+            --manifest "$CANDIDATE_MANIFEST" \
+            --artifact-root "$RELEASE_ROOT" \
+            --hydrate-preflight \
+            --out "$RELEASE_METADATA_PREFLIGHT"
           python scripts/prepare_release_upload_plan.py \
             --manifest "$CANDIDATE_MANIFEST" \
             --artifact-root "$RELEASE_ROOT" \
@@ -205,6 +211,8 @@ jobs:
             --manifest "$CANDIDATE_MANIFEST" \
             --assets-json "$RELEASE_ASSETS_JSON" \
             --artifact-root "$RELEASE_ROOT" \
+            --upload-plan-json "$RELEASE_UPLOAD_PLAN" \
+            --metadata-preflight-json "$RELEASE_METADATA_PREFLIGHT" \
             --tag-ref-present true \
             --require-all \
             --require-exact \
@@ -213,6 +221,8 @@ jobs:
             --manifest "$CANDIDATE_MANIFEST" \
             --release-assets-json "$RELEASE_ASSETS_JSON" \
             --artifact-root "$RELEASE_ROOT" \
+            --upload-plan-json "$RELEASE_UPLOAD_PLAN" \
+            --metadata-preflight-json "$RELEASE_METADATA_PREFLIGHT" \
             --tag-ref-present \
             --out "$P0_STATUS_JSON" \
             --out-md "$P0_STATUS_MD" \
@@ -288,6 +298,7 @@ jobs:
                   "candidate_manifest": file_status(os.environ["CANDIDATE_MANIFEST"]),
                   "release_assets_json": file_status(os.environ["RELEASE_ASSETS_JSON"]),
                   "release_upload_plan": file_status(os.environ["RELEASE_UPLOAD_PLAN"]),
+                  "release_metadata_preflight": file_status(os.environ["RELEASE_METADATA_PREFLIGHT"]),
                   "hydrated_release_root": file_status(os.environ["HYDRATED_RELEASE_ROOT"]),
                   "p0_status_json": file_status(p0_status_json),
                   "p0_status_md": file_status(os.environ["P0_STATUS_MD"]),
@@ -336,6 +347,7 @@ jobs:
             ${{ runner.temp }}/structural-release-candidate-manifest.json
             ${{ runner.temp }}/structural-release-assets.json
             ${{ runner.temp }}/structural-release-upload-plan.json
+            ${{ runner.temp }}/structural-release-metadata-preflight.json
             ${{ runner.temp }}/structural-p0-closure-status.json
             ${{ runner.temp }}/structural-p0-closure-status.md
             ${{ runner.temp }}/structural-release-publication-report.json

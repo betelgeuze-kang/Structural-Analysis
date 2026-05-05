@@ -163,11 +163,8 @@ def build_hydration_preflight(manifest: Any, *, artifact_root: Path | None = Non
     return {
         "ok": not errors,
         "mode": "artifact_root" if artifact_root is not None else "source_checkout",
-        "contract": (
-            "Missing generated release artifacts are expected in a clean source checkout. "
-            "Validate structure in CI, then hydrate/reuse release assets and run full integrity "
-            "with --artifact-root or --require-artifacts."
-        ),
+        "contract": "clean source checkout may lack generated release assets; hydrate before upload",
+        "manifest_errors": errors,
         "errors": errors,
         "totals": {
             "manifest_assets": len(rows),
@@ -231,6 +228,7 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Require local_path artifacts to exist and match sha256/bytes when --artifact-root is not used.",
     )
+    parser.add_argument("--out", type=Path, help="Optional JSON evidence output path.")
     args = parser.parse_args(argv)
 
     artifact_root = Path(args.artifact_root) if str(args.artifact_root).strip() else None
@@ -241,6 +239,12 @@ def main(argv: list[str] | None = None) -> int:
     manifest = _load_json(Path(args.manifest))
     if args.hydrate_preflight:
         summary = build_hydration_preflight(manifest, artifact_root=artifact_root)
+        if args.out:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            args.out.write_text(
+                json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
         _print_hydration_preflight(summary)
         return 0 if summary["ok"] else 1
     errors = validate_manifest(
@@ -249,6 +253,27 @@ def main(argv: list[str] | None = None) -> int:
         structure_only=args.structure_only,
         require_artifacts=args.require_artifacts,
     )
+    if args.out:
+        payload = {
+            "ok": not errors,
+            "mode": (
+                "structure_only"
+                if args.structure_only
+                else "artifact_root"
+                if artifact_root is not None
+                else "require_artifacts"
+                if args.require_artifacts
+                else "opportunistic_local"
+            ),
+            "manifest": str(args.manifest),
+            "artifact_root": str(artifact_root) if artifact_root is not None else None,
+            "errors": errors,
+        }
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     if errors:
         print("Release artifact manifest check failed:", file=sys.stderr)
         for error in errors:

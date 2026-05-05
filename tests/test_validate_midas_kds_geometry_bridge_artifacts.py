@@ -881,3 +881,172 @@ def test_validate_midas_kds_geometry_bridge_artifacts_keeps_check_when_registry_
     assert report["full_section_crosswalk_basis"] == "artifact_sum"
     assert "full_member_crosswalk=2/8 CHECK" in report["summary_line"]
     assert "full_section_crosswalk=2/6 CHECK" in report["summary_line"]
+
+
+def test_validate_midas_kds_geometry_bridge_artifacts_reports_commercial_reliability_breadth(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+
+    def write_artifact(path: Path, *, exact: bool, registry_label: str) -> None:
+        baseline_id = "202" if exact else "303"
+        section_id = "11" if exact else "12"
+        confidence = "manual_verified" if exact else "heuristic_case_profile"
+        _write_json(
+            path,
+            {
+                "model": {
+                    "elements": [
+                        {"id": 202, "type": "BEAM", "family": "beam", "section_id": 11, "material_id": 1, "node_ids": [1, 2]},
+                        {"id": 303, "type": "COLUMN", "family": "column", "section_id": 12, "material_id": 2, "node_ids": [2, 3]},
+                    ],
+                    "nodes": [
+                        {"id": 1, "x": 0.0, "y": 0.0, "z": 0.0},
+                        {"id": 2, "x": 1.0, "y": 0.0, "z": 0.0},
+                        {"id": 3, "x": 1.0, "y": 2.0, "z": 0.0},
+                    ],
+                    "metadata": {
+                        "members": [
+                            {"id": 9001, "element_seed": 202, "element_ids": [202]},
+                            {"id": 9002, "element_seed": 303, "element_ids": [303]},
+                        ],
+                        "kds_geometry_bridge": {
+                            "provenance": "kds_codecheck_bridge_metadata",
+                            "registry_source_label": registry_label,
+                            "registry_contract_version": "0.5.0",
+                            "summary": {
+                                "review_id_count": 1,
+                                "mapped_review_id_count": 1,
+                                "exact_mapped_review_id_count": 1 if exact else 0,
+                                "heuristic_mapped_review_id_count": 0 if exact else 1,
+                                "review_row_count": 1,
+                                "mapped_row_provenance_count": 1,
+                                "exact_mapped_row_provenance_count": 1 if exact else 0,
+                                "heuristic_mapped_row_provenance_count": 0 if exact else 1,
+                                "strategy_counts": {"external_registry_manual" if exact else "heuristic_case_profile": 1},
+                                "confidence_counts": {confidence: 1},
+                                "external_registry_row_count": 1,
+                                "external_registry_usable_row_count": 1,
+                                "external_registry_exact_row_count": 1 if exact else 0,
+                                "external_registry_heuristic_row_count": 0 if exact else 1,
+                                "external_registry_source_counts": {registry_label: 1},
+                                "full_member_crosswalk_count": 1,
+                                "full_member_crosswalk_expected": 1,
+                                "full_member_crosswalk_status": "PASS",
+                                "full_member_crosswalk_handles": ["9001" if exact else "9002"],
+                                "full_section_crosswalk_count": 1,
+                                "full_section_crosswalk_expected": 1,
+                                "full_section_crosswalk_status": "PASS",
+                                "full_section_crosswalk_ids": [section_id],
+                                "full_load_crosswalk_count": 1,
+                                "full_load_crosswalk_expected": 1,
+                                "full_load_crosswalk_status": "PASS",
+                                "full_load_crosswalk_names": ["KDS_ULS_1"],
+                            },
+                            "bridge_rows": [
+                                {
+                                    "review_case_id": f"C-{baseline_id}",
+                                    "baseline_focus_member_id": baseline_id,
+                                    "full_crosswalk_target_member_handle": "9001" if exact else "9002",
+                                    "full_crosswalk_target_section_id": section_id,
+                                    "full_crosswalk_load_combination_names": ["KDS_ULS_1"],
+                                    "match_confidence": confidence,
+                                    "source_member_type": "beam" if exact else "column",
+                                    "source_hazard_type": "wind",
+                                    "source_topology_type": "rahmen",
+                                    "member_inventory_count": 1,
+                                    "member_inventory_member_type_names": ["beam" if exact else "column"],
+                                    "row_provenance_row_count": 1,
+                                    "row_provenance_combination_count": 1,
+                                    "row_provenance_clause_count": 1,
+                                    "row_provenance_component_count": 1,
+                                    "row_provenance_rule_family_count": 1,
+                                    "row_provenance_hazard_count": 1,
+                                    "row_provenance_topology_count": 1,
+                                    "row_provenance_combination_names": ["KDS_ULS_1"],
+                                    "row_provenance_clause_names": ["KDS-AXIAL-001"],
+                                    "row_provenance_component_names": ["axial_force_kN"],
+                                    "row_provenance_rule_family_names": ["strength"],
+                                    "row_provenance_hazard_names": ["wind"],
+                                    "row_provenance_topology_names": ["rahmen"],
+                                    "row_provenance_rows": [
+                                        {
+                                            "member_type": "beam" if exact else "column",
+                                            "hazard_type": "wind",
+                                            "topology_type": "rahmen",
+                                            "rule_family": "strength",
+                                            "combination": "KDS_ULS_1",
+                                            "component": "axial_force_kN",
+                                            "clause": "KDS-AXIAL-001",
+                                            "dcr": 0.42,
+                                        }
+                                    ],
+                                    "review_geometry_snapshot": {
+                                        "element_type": "BEAM" if exact else "COLUMN",
+                                        "family": "beam" if exact else "column",
+                                        "section_id": section_id,
+                                        "material_id": "1" if exact else "2",
+                                        "node_ids": ["1", "2"] if exact else ["2", "3"],
+                                        "node_coordinates": [
+                                            {"id": "1", "x": 0.0, "y": 0.0, "z": 0.0},
+                                            {"id": "2", "x": 1.0, "y": 0.0, "z": 0.0},
+                                        ] if exact else [
+                                            {"id": "2", "x": 1.0, "y": 0.0, "z": 0.0},
+                                            {"id": "3", "x": 1.0, "y": 2.0, "z": 0.0},
+                                        ],
+                                    },
+                                }
+                            ],
+                        },
+                    },
+                }
+            },
+        )
+
+    exact_artifact = tmp_path / "exact.json"
+    heuristic_artifact = tmp_path / "heuristic.json"
+    write_artifact(exact_artifact, exact=True, registry_label="reviewer_verified_exact_registry")
+    write_artifact(heuristic_artifact, exact=False, registry_label="heuristic_registry")
+
+    passing_report_path = tmp_path / "passing_report.json"
+    assert module.main(["--path", str(exact_artifact), "--out", str(passing_report_path)]) == 0
+    passing_report = json.loads(passing_report_path.read_text(encoding="utf-8"))
+
+    passing_breadth = passing_report["commercial_reliability_breadth"]
+    assert passing_breadth["artifact_count"] == 1
+    assert passing_breadth["exact_artifact_count"] == 1
+    assert passing_breadth["exact_artifact_coverage"] == 1.0
+    assert passing_breadth["exact_review_id_coverage"] == 1.0
+    assert passing_breadth["exact_row_provenance_coverage"] == 1.0
+    assert passing_breadth["source_labels"] == ["kds_codecheck_bridge_metadata"]
+    assert passing_breadth["registry_source_labels"] == ["reviewer_verified_exact_registry"]
+    assert passing_breadth["exact_bridge_pass"] is True
+    assert passing_breadth["full_crosswalk_pass"] is True
+    assert passing_breadth["breadth_pass"] is True
+    assert passing_report["summary"]["commercial_reliability_breadth"] == passing_breadth
+    assert "breadth=PASS" in passing_report["summary_line"]
+    assert "exact_artifacts=1/1" in passing_report["summary_line"]
+    assert "exact_row_coverage=1" in passing_report["summary_line"]
+
+    mixed_report_path = tmp_path / "mixed_report.json"
+    assert module.main(
+        ["--path", str(exact_artifact), "--path", str(heuristic_artifact), "--out", str(mixed_report_path)]
+    ) == 0
+    mixed_report = json.loads(mixed_report_path.read_text(encoding="utf-8"))
+
+    mixed_breadth = mixed_report["commercial_reliability_breadth"]
+    assert mixed_breadth["artifact_count"] == 2
+    assert mixed_breadth["exact_artifact_count"] == 1
+    assert mixed_breadth["exact_artifact_coverage"] == 0.5
+    assert mixed_breadth["review_id_count_total"] == 2
+    assert mixed_breadth["exact_review_id_coverage"] == 0.5
+    assert mixed_breadth["review_row_count_total"] == 2
+    assert mixed_breadth["exact_row_provenance_coverage"] == 0.5
+    assert mixed_breadth["source_labels"] == ["kds_codecheck_bridge_metadata"]
+    assert mixed_breadth["registry_source_labels"] == ["heuristic_registry", "reviewer_verified_exact_registry"]
+    assert mixed_breadth["exact_bridge_pass"] is False
+    assert mixed_breadth["full_crosswalk_pass"] is False
+    assert mixed_breadth["breadth_pass"] is False
+    assert "breadth=CHECK" in mixed_report["summary_line"]
+    assert "exact_artifacts=1/2" in mixed_report["summary_line"]
+    assert "exact_row_coverage=0.5" in mixed_report["summary_line"]

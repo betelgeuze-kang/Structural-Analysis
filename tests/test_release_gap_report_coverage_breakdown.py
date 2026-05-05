@@ -28,6 +28,7 @@ def test_release_gap_report_emits_time_saved_and_holdout_split(tmp_path: Path) -
     solver_hip = tmp_path / "solver_hip.json"
     rc = tmp_path / "rc.json"
     quality = tmp_path / "quality.json"
+    committee = tmp_path / "committee.json"
     out_json = tmp_path / "gap.json"
     out_md = tmp_path / "gap.md"
 
@@ -54,6 +55,25 @@ def test_release_gap_report_emits_time_saved_and_holdout_split(tmp_path: Path) -
         },
     )
     _write(static, {"pass": True})
+    _write(
+        committee,
+        {
+            "midas_kds_row_provenance_export_summary_line": "MIDAS KDS row provenance export: PASS | combos=6 | rows=144 | members=12 | clauses=6 | exact_rows=144",
+            "midas_kds_row_provenance_export_row_count": 144,
+            "midas_kds_row_provenance_export_exact_row_count": 144,
+            "midas_kds_row_provenance_preview_rows": [
+                {
+                    "combination_name": "gLCB1",
+                    "member_id": "C-TST-003",
+                    "clause_label": "KDS-MOMENT-Y-001",
+                    "baseline_focus_member_id": "27441",
+                    "bridge_row_provenance_mode_label": "exact row-level provenance",
+                    "clause_provenance_summary_label": "rows=12 | members=12 | rules=1 | hazards=3",
+                    "bridge_member_inventory_summary_label": "review=C-TST-003 | case=C-TST-003 | baseline=27441 | member_types=column",
+                }
+            ],
+        },
+    )
     _write(
         commercial,
         {
@@ -116,6 +136,8 @@ def test_release_gap_report_emits_time_saved_and_holdout_split(tmp_path: Path) -
             str(rc),
             "--quality-mgt-corpus",
             str(quality),
+            "--committee-summary",
+            str(committee),
             "--out-json",
             str(out_json),
             "--out-md",
@@ -148,6 +170,19 @@ def test_release_gap_report_emits_time_saved_and_holdout_split(tmp_path: Path) -
     }
     assert summary["workflow_contact_coupling_summary_line"] == "Workflow contact coupling: PASS | support families=2 | proxy families=2 | assembled depth=5"
     assert summary["general_fe_contact_matrix_summary_line"] == "General FE contact matrix: PASS | ready=10/10 | direct=6/6 | foundation=yes | interface=yes | ssi=yes | soil_tunnel=yes | support=contact:6,foundation:4,device:5 | support_search=9 | node_surface_proxy=5 | support_depth=21"
+    assert (
+        summary["commercial_scope_summary_line"]
+        == "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | "
+        "full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%"
+    )
+    assert (
+        summary["commercial_reliability_breadth_summary_line"]
+        == "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | "
+        "evidence_rows=1 | evidence_present=True"
+    )
+    assert summary["midas_kds_row_provenance_export_exact_row_count"] == 144
+    assert summary["midas_kds_row_provenance_preview_row_count"] == 1
+    assert summary["midas_kds_row_provenance_preview_rows_present"] is True
 
     buckets = payload["residual_holdout_buckets"]
     assert [row["relative_share_pct"] for row in buckets] == [50, 30, 20]
@@ -155,7 +190,20 @@ def test_release_gap_report_emits_time_saved_and_holdout_split(tmp_path: Path) -
     assert buckets[0]["absolute_project_pct_range"] == [0.5, 2.5]
     assert buckets[1]["absolute_project_pct_range"] == [0.3, 1.5]
     assert buckets[2]["absolute_project_pct_range"] == [0.2, 1.0]
+    assert [row["queue_name"] for row in buckets] == [
+        "licensed_engineer_review_queue",
+        "legacy_tool_cross_validation_queue",
+        "legal_authority_signoff_queue",
+    ]
+    assert [row["queue_status"] for row in buckets] == [
+        "pending_review",
+        "pending_cross_validation",
+        "pending_signoff",
+    ]
+    assert [row["status"] for row in buckets] == ["open", "open", "open"]
 
     markdown = out_md.read_text(encoding="utf-8")
     assert "Estimated time saved" in markdown
     assert "Relative Share" in markdown
+    assert "Commercial scope" in markdown
+    assert "Commercial reliability breadth" in markdown

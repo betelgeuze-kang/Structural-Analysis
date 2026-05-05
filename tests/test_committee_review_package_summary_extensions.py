@@ -539,6 +539,11 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         "support_search_count": 9,
         "surface_interaction_benchmark_summary_line": "Surface interaction benchmark: PASS | ready=7/7 | family_matrix=35/35 | source_families=3/3 | shell_surface=yes | interface_transfer=yes | interface_gap=yes | foundation=yes | ssi=yes | soil_tunnel=yes | direct_contact=6/6 | groups=shell-shell=4,shell-wall=4,footing-soil=4",
         "midas_kds_row_provenance_export_summary_line": "MIDAS KDS row provenance export: PASS | combos=6 | rows=144 | members=12 | clauses=6 | exact_rows=144",
+        "commercial_scope_summary_line": "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%",
+        "commercial_reliability_breadth_summary_line": "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True",
+        "midas_kds_row_provenance_exact_row_coverage_label": "144/144",
+        "midas_kds_row_provenance_preview_rows_present": True,
+        "midas_kds_row_provenance_preview_row_count": 1,
         "ndtha_step_series_depth": 2400,
         "korean_source_ingest_summary_line": (
             "KR ingest: PASS | src=4 | cls=4 | got=0 | fp=0 | meta=4 | rej=0 | dup=0 | "
@@ -743,6 +748,9 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
         "foundation=yes | interface=yes | ssi=yes | soil_tunnel=yes | support=contact:6,foundation:4,device:5 | "
         "support_search=9 | node_surface_proxy=5 | support_depth=21`"
     ) in markdown
+    assert "Commercial scope: grade=Commercial" in markdown
+    assert "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True" in markdown
+    assert "midas_kds_row_provenance_exact_row_coverage_label" in markdown
     assert "`ndtha_step_series_depth`: `2400`" in markdown
     assert "constitutive_interaction_families" in markdown
     assert "material and steel/composite constitutive gates are surfaced explicitly" in markdown
@@ -780,6 +788,8 @@ def test_committee_markdown_and_html_surface_fixture_panel_and_foundation_proven
     assert "Element/material breadth: PASS | shell=yes(elems=5,cases=31) | wall=yes(rows=2,cases=14) | panel_cyclic=yes(sections=2,pinch=0.18,crush=1.00) | contact=full_structural_contact" in html_text
     assert "Support search: PASS | support_search=9 | node_surface_proxy=5 | support_depth=21" in html_text
     assert "General FE contact matrix: PASS | ready=10/10 | direct=6/6 | foundation=yes | interface=yes | ssi=yes | soil_tunnel=yes | support=contact:6,foundation:4,device:5 | support_search=9 | node_surface_proxy=5 | support_depth=21" in html_text
+    assert "Commercial scope: grade=Commercial" in html_text
+    assert "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True" in html_text
     assert "MIDAS KDS geometry full-crosswalk depth" in html_text
     assert "12 (min(load/semantic crosswalk))" in html_text
     assert "NDTHA step-series depth" in html_text

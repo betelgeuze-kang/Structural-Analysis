@@ -77,6 +77,15 @@ def _build_markdown(payload: dict[str, Any]) -> str:
         f"- `ready_to_start_now`: `{bool(summary.get('ready_to_start_now', False))}`",
         f"- `ready_to_start_full_submission_now`: `{bool(summary.get('ready_to_start_full_submission_now', False))}`",
         f"- `caution_label`: `{summary.get('caution_label', '') or 'none'}`",
+        f"- Commercial scope: `{str(summary.get('commercial_scope_summary_line', '') or '').strip()}`",
+        (
+            "- Commercial reliability breadth: "
+            f"`{str(summary.get('commercial_reliability_breadth_summary_line', '') or '').strip()}`"
+        ),
+        (
+            "- MIDAS/KDS exact row coverage: "
+            f"`{str(summary.get('midas_kds_row_provenance_exact_row_coverage_label', '') or '').strip()}`"
+        ),
         "",
         "## Component Benchmarks",
         "",
@@ -115,7 +124,8 @@ def _build_markdown(payload: dict[str, Any]) -> str:
     for row in pending_packets:
         lines.append(
             f"- `{row.get('packet_id', '')}` | family=`{row.get('action_family', '')}` | "
-            f"priority=`{row.get('review_priority', '')}` | owner=`{row.get('review_owner', '')}`"
+            f"priority=`{row.get('review_priority', '')}` | owner=`{row.get('review_owner', '')}` | "
+            f"queue_status={row.get('queue_status', '')}"
         )
     lines.extend(["", "## Next Actions", ""])
     for row in payload.get("next_actions", []):
@@ -187,6 +197,7 @@ def build_kickoff_package(
                 "action_family": str(row.get("action_family", "") or ""),
                 "review_priority": str(row.get("review_priority", "") or ""),
                 "review_owner": str(row.get("review_owner", "licensed_engineer") or "licensed_engineer"),
+                "queue_status": str(row.get("queue_status", "") or ""),
                 "change_count": int(row.get("change_count", 0) or 0),
             }
         )
@@ -242,6 +253,16 @@ def build_kickoff_package(
             "system_benchmark_count": int(len(system_tracks)),
             "pending_packet_count": int(len(pending_packets)),
             "pending_packet_label": _format_label_counts(pending_family_counts),
+            "commercial_scope_summary_line": str(readiness_summary.get("commercial_scope_summary_line", "") or ""),
+            "commercial_reliability_breadth_summary_line": str(
+                readiness_summary.get("commercial_reliability_breadth_summary_line", "") or ""
+            ),
+            "midas_kds_row_provenance_exact_row_coverage_label": str(
+                readiness_summary.get("midas_kds_row_provenance_exact_row_coverage_label", "") or ""
+            ),
+            "midas_kds_row_provenance_preview_rows_present": bool(
+                readiness_summary.get("midas_kds_row_provenance_preview_rows_present", False)
+            ),
         },
         "wind_component_assets": wind_assets,
         "hinge_component_assets": hinge_assets,

@@ -274,6 +274,16 @@ def _aggregate_metric(
     }
 
 
+def _coverage_ratio(count: int, total: int) -> float:
+    if total <= 0:
+        return 1.0
+    return float(count) / float(total)
+
+
+def _sorted_unique(values: list[Any]) -> list[str]:
+    return sorted({str(value).strip() for value in values if str(value or "").strip()})
+
+
 def _set_map(value: Any) -> dict[str, set[str]]:
     if not isinstance(value, dict):
         return {}
@@ -720,6 +730,23 @@ def summarize_artifact(path: Path, *, min_mapped_review_ids: int = 0) -> dict[st
         heuristic_mapped_row_provenance_count=heuristic_mapped_row_provenance_count,
     )
     exact_bridge_status = "PASS" if exact_checks["exact_geometry_bridge_pass"] else "CHECK"
+    exact_review_id_coverage = _coverage_ratio(exact_mapped_review_id_count, review_id_count)
+    exact_row_provenance_coverage = _coverage_ratio(exact_mapped_row_provenance_count, review_row_count)
+    artifact_full_crosswalk_pass = bool(
+        full_member_crosswalk_status == "PASS"
+        and full_section_crosswalk_status == "PASS"
+        and full_load_crosswalk_status == "PASS"
+    )
+    artifact_breadth_pass = bool(
+        exact_checks["exact_geometry_bridge_pass"]
+        and exact_review_id_coverage >= 1.0
+        and exact_row_provenance_coverage >= 1.0
+        and exact_review_geometry_section_parity_status == "PASS"
+        and exact_review_load_crosswalk_status == "PASS"
+        and exact_review_semantic_crosswalk_status == "PASS"
+        and artifact_full_crosswalk_pass
+        and exact_geometry_diff_status == "PASS"
+    )
     summary_line = (
         f"MIDAS kds-geometry-bridge: {('ok' if pass_threshold else 'missing')} | "
         f"mapped_review_ids={mapped_review_id_count}/{review_id_count} | "
@@ -735,6 +762,9 @@ def summarize_artifact(path: Path, *, min_mapped_review_ids: int = 0) -> dict[st
         f"registry_heuristic={external_registry_heuristic_row_count} | "
         f"registry_sources={_strategy_label(external_registry_source_counts)} | "
         f"exact_bridge={exact_bridge_status} | "
+        f"breadth={'PASS' if artifact_breadth_pass else 'CHECK'} | "
+        f"exact_artifacts={int(exact_checks['exact_geometry_bridge_pass'])}/1 | "
+        f"exact_row_coverage={exact_row_provenance_coverage:.6g} | "
         f"exact_review_ids={exact_mapped_review_id_count}/{review_id_count} | "
         f"exact_rows={exact_mapped_row_provenance_count}/{review_row_count} | "
         f"snapshots={exact_review_geometry_snapshot_count}/{exact_review_geometry_snapshot_expected} {exact_review_geometry_snapshot_status} | "
@@ -809,6 +839,27 @@ def summarize_artifact(path: Path, *, min_mapped_review_ids: int = 0) -> dict[st
         "pass_threshold": pass_threshold,
         "exact_bridge_status": exact_bridge_status,
         "exact_geometry_bridge_pass": bool(exact_checks["exact_geometry_bridge_pass"]),
+        "commercial_reliability_breadth": {
+            "artifact_count": 1,
+            "exact_artifact_count": int(bool(exact_checks["exact_geometry_bridge_pass"])),
+            "exact_artifact_coverage": _coverage_ratio(
+                int(bool(exact_checks["exact_geometry_bridge_pass"])),
+                1,
+            ),
+            "review_id_count_total": review_id_count,
+            "exact_review_id_coverage": exact_review_id_coverage,
+            "review_row_count_total": review_row_count,
+            "exact_row_provenance_coverage": exact_row_provenance_coverage,
+            "source_labels": [source_label],
+            "registry_source_labels": [registry_source_label],
+            "full_crosswalk_pass": artifact_full_crosswalk_pass,
+            "exact_bridge_pass": bool(exact_checks["exact_geometry_bridge_pass"]),
+            "exact_section_parity_pass": bool(exact_review_geometry_section_parity_status == "PASS"),
+            "exact_load_crosswalk_pass": bool(exact_review_load_crosswalk_status == "PASS"),
+            "exact_semantic_crosswalk_pass": bool(exact_review_semantic_crosswalk_status == "PASS"),
+            "exact_geometry_diff_pass": bool(exact_geometry_diff_status == "PASS"),
+            "breadth_pass": artifact_breadth_pass,
+        },
         "review_ids_present": bool(exact_checks["review_ids_present"]),
         "review_rows_present": bool(exact_checks["review_rows_present"]),
         "review_ids_fully_mapped": bool(exact_checks["review_ids_fully_mapped"]),
@@ -915,6 +966,63 @@ def main(argv: list[str] | None = None) -> int:
             and bool(summaries)
         ),
     }
+    checks["full_crosswalk_pass"] = bool(
+        checks["full_member_crosswalk_pass"]
+        and checks["full_section_crosswalk_pass"]
+        and checks["full_load_crosswalk_pass"]
+    )
+    artifact_count = int(len(summaries))
+    exact_artifact_count = exact_pass_count
+    review_id_count_total = int(sum(int(row.get("review_id_count", 0) or 0) for row in summaries))
+    exact_mapped_review_id_count_total = int(
+        sum(int(row.get("exact_mapped_review_id_count", 0) or 0) for row in summaries)
+    )
+    review_row_count_total = int(sum(int(row.get("review_row_count", 0) or 0) for row in summaries))
+    exact_mapped_row_provenance_count_total = int(
+        sum(int(row.get("exact_mapped_row_provenance_count", 0) or 0) for row in summaries)
+    )
+    exact_artifact_coverage = _coverage_ratio(exact_artifact_count, artifact_count)
+    exact_review_id_coverage = _coverage_ratio(exact_mapped_review_id_count_total, review_id_count_total)
+    exact_row_provenance_coverage = _coverage_ratio(
+        exact_mapped_row_provenance_count_total,
+        review_row_count_total,
+    )
+    breadth_pass = bool(
+        bool(summaries)
+        and exact_artifact_count == artifact_count
+        and exact_review_id_coverage >= 1.0
+        and exact_row_provenance_coverage >= 1.0
+        and checks["exact_geometry_bridge_pass"]
+        and checks["exact_section_parity_pass"]
+        and checks["exact_load_crosswalk_pass"]
+        and checks["exact_semantic_crosswalk_pass"]
+        and checks["full_crosswalk_pass"]
+        and checks["exact_geometry_diff_pass"]
+    )
+    commercial_reliability_breadth = {
+        "artifact_count": artifact_count,
+        "exact_artifact_count": exact_artifact_count,
+        "exact_artifact_coverage": exact_artifact_coverage,
+        "review_id_count_total": review_id_count_total,
+        "exact_review_id_coverage": exact_review_id_coverage,
+        "review_row_count_total": review_row_count_total,
+        "exact_row_provenance_coverage": exact_row_provenance_coverage,
+        "source_labels": _sorted_unique([row.get("source_label") for row in summaries]),
+        "registry_source_labels": _sorted_unique([row.get("registry_source_label") for row in summaries]),
+        "canonical_artifacts": [str(path) for path in targets],
+        "canonical_artifact_count": artifact_count,
+        "full_crosswalk_pass": bool(checks["full_crosswalk_pass"]),
+        "full_member_crosswalk_pass": bool(checks["full_member_crosswalk_pass"]),
+        "full_section_crosswalk_pass": bool(checks["full_section_crosswalk_pass"]),
+        "full_load_crosswalk_pass": bool(checks["full_load_crosswalk_pass"]),
+        "exact_bridge_pass": bool(checks["exact_geometry_bridge_pass"]),
+        "exact_section_parity_pass": bool(checks["exact_section_parity_pass"]),
+        "exact_load_crosswalk_pass": bool(checks["exact_load_crosswalk_pass"]),
+        "exact_semantic_crosswalk_pass": bool(checks["exact_semantic_crosswalk_pass"]),
+        "exact_geometry_diff_pass": bool(checks["exact_geometry_diff_pass"]),
+        "breadth_pass": breadth_pass,
+    }
+    checks["commercial_reliability_breadth_pass"] = breadth_pass
     aggregate = {
         "exact_review_load_crosswalk": _aggregate_metric(
             summaries=summaries,
@@ -941,6 +1049,7 @@ def main(argv: list[str] | None = None) -> int:
         "reason_code": "PASS" if contract_pass else "ERR_MIDAS_KDS_GEOMETRY_BRIDGE_FAIL",
         "checks": checks,
         "aggregate": aggregate,
+        "commercial_reliability_breadth": commercial_reliability_breadth,
         "exact_review_load_crosswalk_count_total": int(aggregate["exact_review_load_crosswalk"]["count_total"]),
         "exact_review_load_crosswalk_expected_total": int(aggregate["exact_review_load_crosswalk"]["expected_total"]),
         "exact_review_load_crosswalk_status": str(aggregate["exact_review_load_crosswalk"]["status"]),
@@ -1011,13 +1120,18 @@ def main(argv: list[str] | None = None) -> int:
                 max((float(row.get("exact_geometry_diff_max_abs", 0.0) or 0.0) for row in summaries), default=0.0)
             ),
             "artifact_rows": summaries,
+            "commercial_reliability_breadth": commercial_reliability_breadth,
             "require_exact_active": bool(args.require_exact),
             "min_mapped_review_ids": int(args.min_mapped_review_ids),
         },
         "summary_line": (
             "MIDAS-KDS exact geometry bridge validator: "
             f"{'PASS' if exact_pass_count == len(summaries) and summaries else 'CHECK'} | "
+            f"breadth={'PASS' if breadth_pass else 'CHECK'} | "
             f"artifacts={exact_pass_count}/{len(summaries)} exact | "
+            f"exact_artifacts={exact_artifact_count}/{artifact_count} | "
+            f"exact_artifact_coverage={exact_artifact_coverage:.6g} | "
+            f"exact_row_coverage={exact_row_provenance_coverage:.6g} | "
             f"threshold={threshold_pass_count}/{len(summaries)} | "
             f"exact_review_ids={sum(int(row.get('exact_mapped_review_id_count', 0) or 0) for row in summaries)}/"
             f"{sum(int(row.get('review_id_count', 0) or 0) for row in summaries)} | "

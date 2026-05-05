@@ -39,6 +39,9 @@ def test_generate_external_benchmark_kickoff_package_limited_start(tmp_path: Pat
                 "blocker_label": "none",
                 "next_actions": ["close pending audit-review packets before final external submission package"],
                 "panel_zone_validation_boundary": "external_validation_only",
+                "commercial_scope_summary_line": "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%",
+                "commercial_reliability_breadth_summary_line": "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True",
+                "midas_kds_row_provenance_exact_row_coverage_label": "144/144",
             },
         },
     )
@@ -167,12 +170,18 @@ def test_generate_external_benchmark_kickoff_package_limited_start(tmp_path: Pat
     assert package["summary"]["wind_component_asset_count"] == 2
     assert package["summary"]["hinge_component_asset_count"] == 2
     assert package["summary"]["pending_packet_count"] == 2
+    assert package["summary"]["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")
+    assert package["summary"]["commercial_reliability_breadth_summary_line"].startswith("Commercial reliability breadth: PASS")
     assert package["review_boundary"]["pending_packet_label"] == "connection_detailing=1, detailing=1"
+    assert package["review_boundary"]["pending_packets"][0]["queue_status"] == "pending_review"
     assert package["benchmark_contracts"]["tpu_hffb_benchmark_gate_pass"] is True
     assert package["benchmark_contracts"]["peer_spd_hinge_benchmark_gate_pass"] is True
     assert "start_now_limited_external_benchmark" in markdown
     assert "component_and_system_performance_benchmark_with_review_boundary" in markdown
     assert "connection_detailing|connection_detailing_audit_after_material_patch|high" in markdown
+    assert "Commercial scope" in markdown
+    assert "Commercial reliability breadth" in markdown
+    assert "queue_status=pending_review" in markdown
 
 
 def test_generate_external_benchmark_kickoff_package_full_start_ready_without_review_boundary_packets(tmp_path: Path) -> None:
@@ -203,6 +212,9 @@ def test_generate_external_benchmark_kickoff_package_full_start_ready_without_re
                 "blocker_label": "none",
                 "next_actions": ["open external benchmark launch window"],
                 "panel_zone_validation_boundary": "external_validation_only",
+                "commercial_scope_summary_line": "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%",
+                "commercial_reliability_breadth_summary_line": "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True",
+                "midas_kds_row_provenance_exact_row_coverage_label": "144/144",
             },
         },
     )
@@ -287,6 +299,7 @@ def test_generate_external_benchmark_kickoff_package_full_start_ready_without_re
 
     assert package["summary"]["ready_to_start_now"] is True
     assert package["summary"]["ready_to_start_full_submission_now"] is True
+    assert package["summary"]["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")
     assert package["summary"]["pending_packet_count"] == 0
     assert package["review_boundary"]["pending_packet_count"] == 0
     assert package["review_boundary"]["pending_packet_label"] == "none"
@@ -295,3 +308,5 @@ def test_generate_external_benchmark_kickoff_package_full_start_ready_without_re
     assert not any("close pending audit-review packets" in action for action in package["next_actions"])
     assert "start_now_full_external_benchmark" in markdown
     assert "component_and_system_performance_benchmark_full_submission" in markdown
+    assert "Commercial scope" in markdown
+    assert "Commercial reliability breadth" in markdown

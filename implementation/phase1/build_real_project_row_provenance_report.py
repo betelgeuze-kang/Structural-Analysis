@@ -13,6 +13,10 @@ SCHEMA_VERSION = "real_project_row_provenance_report.v1"
 RUN_ID = "phase1-real-project-row-provenance-report"
 KONEPS_SOURCE_ID = "koneps_turnkey_design_docs"
 PEER_TBI_SOURCE_ID = "peer_tbi_tall_buildings"
+MIDAS_KDS_VALIDATION_SOURCE_ID = "midas_kds_geometry_bridge_validation"
+DEFAULT_MIDAS_KDS_VALIDATION_REPORT_PATH = Path(__file__).resolve().with_name(
+    "midas_kds_geometry_bridge_validation_report.json"
+)
 REQUIRED_SOURCE_IDS = {KONEPS_SOURCE_ID, PEER_TBI_SOURCE_ID}
 REQUIRED_ROW_FIELDS = {
     "row_id",
@@ -35,6 +39,12 @@ REQUIRED_ROW_FIELDS = {
 
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _load_optional_json(path: Path | None) -> dict[str, Any] | None:
+    if path is None or not path.exists():
+        return None
+    return _load_json(path)
 
 
 def _manifest_sources(manifest: dict[str, Any]) -> list[dict[str, Any]]:
@@ -79,6 +89,99 @@ def _peer_metric_groups(peer_metric_records: dict[str, Any]) -> list[str]:
         if isinstance(record, dict) and isinstance(record.get("metric_group"), str)
     }
     return sorted(groups)
+
+
+def _validation_report_summary(validation_report: dict[str, Any]) -> dict[str, Any]:
+    summary = validation_report.get("summary")
+    return summary if isinstance(summary, dict) else {}
+
+
+def _validation_report_contract(
+    validation_report: dict[str, Any],
+    validation_report_path: Path,
+) -> dict[str, Any]:
+    summary = _validation_report_summary(validation_report)
+    artifact_count = int(summary.get("artifact_count", validation_report.get("artifact_count", 0)) or 0)
+    exact_geometry_bridge_pass_count = int(
+        summary.get(
+            "exact_geometry_bridge_pass_count",
+            validation_report.get("exact_geometry_bridge_pass_count", 0),
+        )
+        or 0
+    )
+    review_row_count_total = int(summary.get("review_row_count_total", validation_report.get("review_row_count_total", 0)) or 0)
+    exact_mapped_row_provenance_count_total = int(
+        summary.get(
+            "exact_mapped_row_provenance_count_total",
+            validation_report.get("exact_mapped_row_provenance_count_total", 0),
+        )
+        or 0
+    )
+    full_member_crosswalk_count_total = int(
+        validation_report.get(
+            "full_member_crosswalk_count_total",
+            summary.get("full_member_crosswalk_count_total", 0),
+        )
+        or 0
+    )
+    full_section_crosswalk_count_total = int(
+        validation_report.get(
+            "full_section_crosswalk_count_total",
+            summary.get("full_section_crosswalk_count_total", 0),
+        )
+        or 0
+    )
+    full_load_crosswalk_count_total = int(
+        validation_report.get(
+            "full_load_crosswalk_count_total",
+            summary.get("full_load_crosswalk_count_total", 0),
+        )
+        or 0
+    )
+    return {
+        "source_file": validation_report_path.name,
+        "run_id": str(validation_report.get("run_id", "") or ""),
+        "contract_pass": bool(validation_report.get("contract_pass", False)),
+        "artifact_count": artifact_count,
+        "exact_geometry_bridge_pass_count": exact_geometry_bridge_pass_count,
+        "review_row_count_total": review_row_count_total,
+        "exact_mapped_row_provenance_count_total": exact_mapped_row_provenance_count_total,
+        "full_member_crosswalk_count_total": full_member_crosswalk_count_total,
+        "full_section_crosswalk_count_total": full_section_crosswalk_count_total,
+        "full_load_crosswalk_count_total": full_load_crosswalk_count_total,
+    }
+
+
+def _validation_report_row(
+    validation_report: dict[str, Any],
+    validation_report_path: Path,
+) -> dict[str, Any]:
+    validation_contract = _validation_report_contract(validation_report, validation_report_path)
+    return {
+        "row_id": f"real-project-row-provenance:{MIDAS_KDS_VALIDATION_SOURCE_ID}",
+        "source_id": MIDAS_KDS_VALIDATION_SOURCE_ID,
+        "source_label": "MIDAS/KDS geometry bridge validation evidence",
+        "source_kind": "validation_evidence",
+        "jurisdiction": "KR",
+        "official_url": validation_report_path.name,
+        "p0_upstream_hard_gate": True,
+        "access_policy": {
+            "classification": "internal_validation_evidence",
+            "redistribution_allowed": False,
+            "requires_manual_review": True,
+            "license_basis": "MIDAS/KDS validation evidence is trace-only; raw redistribution remains blocked.",
+        },
+        "artifact_status": "exact_geometry_bridge_row_provenance_validation_evidence",
+        "checksum_status_or_withheld_reason": "validation_report_only_no_raw_redistribution",
+        "file_inventory_status": validation_report_path.name,
+        "parser_contract": validation_contract,
+        "row_pointer": {
+            "source_file": validation_report_path.name,
+            "json_path": "$.summary",
+        },
+        "release_surface_allowed": False,
+        "blocked_reason": "MIDAS/KDS exact geometry bridge validation evidence is trace-only; raw redistribution remains blocked pending explicit review.",
+    }
 
 
 def _parser_contract(
@@ -202,7 +305,11 @@ def build_report(
     manifest: dict[str, Any],
     coverage_matrix: dict[str, Any],
     peer_metric_records: dict[str, Any],
+    midas_kds_validation_report: dict[str, Any] | None = None,
+    midas_kds_validation_report_path: Path | None = None,
 ) -> dict[str, Any]:
+    if midas_kds_validation_report_path is None:
+        midas_kds_validation_report_path = DEFAULT_MIDAS_KDS_VALIDATION_REPORT_PATH
     sources = _manifest_sources(manifest)
     indexed_sources = [(idx, source) for idx, source in enumerate(sources)]
     rows = [
@@ -210,6 +317,10 @@ def build_report(
         for idx, source in indexed_sources
         if source.get("source_id") in REQUIRED_SOURCE_IDS
     ]
+    validation_row = None
+    if isinstance(midas_kds_validation_report, dict) and bool(midas_kds_validation_report.get("contract_pass", False)):
+        validation_row = _validation_report_row(midas_kds_validation_report, midas_kds_validation_report_path)
+        rows.append(validation_row)
     source_ids = {row["source_id"] for row in rows}
     required_source_families_present = REQUIRED_SOURCE_IDS <= source_ids
     p0_hard_gate_represented = all(row["p0_upstream_hard_gate"] is True for row in rows)
@@ -217,6 +328,7 @@ def build_report(
     row_provenance_coverage = 1.0 if rows and all_rows_have_required_fields else 0.0
     raw_redistribution_default_blocked = _raw_redistribution_blocked(rows)
     peer_metric_group_count = len(_peer_metric_groups(peer_metric_records))
+    validation_contract = validation_row["parser_contract"] if validation_row is not None else {}
     peer_row_references_metric_records = any(
         row["source_id"] == PEER_TBI_SOURCE_ID
         and row["row_pointer"]["source_file"] == "peer_tbi_benchmark_metric_records.json"
@@ -257,6 +369,25 @@ def build_report(
             "row_provenance_coverage": row_provenance_coverage,
             "peer_tbi_metric_group_count": peer_metric_group_count,
             "raw_redistribution_default_blocked": raw_redistribution_default_blocked,
+            "midas_kds_validation_present": validation_row is not None,
+            "midas_kds_validation_artifact_count": int(validation_contract.get("artifact_count", 0) or 0),
+            "midas_kds_exact_geometry_bridge_pass_count": int(
+                validation_contract.get("exact_geometry_bridge_pass_count", 0) or 0
+            ),
+            "midas_kds_review_row_count": int(validation_contract.get("review_row_count_total", 0) or 0),
+            "midas_kds_exact_row_provenance_count": int(
+                validation_contract.get("exact_mapped_row_provenance_count_total", 0) or 0
+            ),
+            "midas_kds_full_member_crosswalk_count_total": int(
+                validation_contract.get("full_member_crosswalk_count_total", 0) or 0
+            ),
+            "midas_kds_full_section_crosswalk_count_total": int(
+                validation_contract.get("full_section_crosswalk_count_total", 0) or 0
+            ),
+            "midas_kds_full_load_crosswalk_count_total": int(
+                validation_contract.get("full_load_crosswalk_count_total", 0) or 0
+            ),
+            "midas_kds_validation_run_id": str(validation_contract.get("run_id", "") or ""),
         },
         "source_provenance_rows": rows,
         "promoted_row_provenance_rows": [],
@@ -268,11 +399,17 @@ def write_report(
     coverage_matrix_path: Path,
     peer_metric_records_path: Path,
     out_path: Path,
+    midas_kds_validation_report_path: Path | None = None,
 ) -> dict[str, Any]:
+    if midas_kds_validation_report_path is None:
+        midas_kds_validation_report_path = DEFAULT_MIDAS_KDS_VALIDATION_REPORT_PATH
+    midas_kds_validation_report = _load_optional_json(midas_kds_validation_report_path)
     payload = build_report(
         _load_json(manifest_path),
         _load_json(coverage_matrix_path),
         _load_json(peer_metric_records_path),
+        midas_kds_validation_report,
+        midas_kds_validation_report_path,
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -284,10 +421,17 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--coverage-matrix", type=Path, required=True)
     parser.add_argument("--peer-metric-records", type=Path, required=True)
+    parser.add_argument("--midas-kds-validation-report", type=Path, default=None)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
 
-    payload = write_report(args.manifest, args.coverage_matrix, args.peer_metric_records, args.out)
+    payload = write_report(
+        args.manifest,
+        args.coverage_matrix,
+        args.peer_metric_records,
+        args.out,
+        args.midas_kds_validation_report,
+    )
     return 0 if payload["contract_pass"] else 1
 
 

@@ -188,6 +188,12 @@ def test_commercial_readiness_enforces_measured_benchmark_breadth(tmp_path: Path
     assert payload["global_metrics"]["measured_source_family_count"] == 2
     assert payload["global_metrics"]["measured_case_count"] == 8
     assert payload["global_metrics"]["measured_shell_beam_mix_case_count"] >= 2
+    work_items = {row["work_item_id"]: row for row in payload["residual_holdout_work_items"]}
+    assert set(work_items) == {"RH-001", "RH-002", "RH-003"}
+    assert work_items["RH-001"]["queue_name"] == "licensed_engineer_review_queue"
+    assert work_items["RH-002"]["owner"] == "기존툴+기술사"
+    assert work_items["RH-003"]["status"] == "open"
+    assert all(row["full_commercial_replacement_blocker"] is True for row in work_items.values())
 
 
 def test_commercial_readiness_reruns_stale_benchmark_report_when_cases_hash_changes(tmp_path: Path) -> None:

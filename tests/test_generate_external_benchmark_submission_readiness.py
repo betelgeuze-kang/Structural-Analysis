@@ -42,6 +42,22 @@ def _run(
                 "mgt_export_audit_review_queue_pending_count": pending,
                 "mgt_export_audit_review_followup_overdue_item_count": overdue,
                 "mgt_export_audit_review_resolution_open_revision_count": open_revision,
+                "commercial_scope_summary_line": "Commercial scope: grade=Commercial | engineer_in_loop_accelerated_coverage_ready=True | full_commercial_replacement_ready=False | accelerated_coverage=95-99% | residual_holdout=1-5%",
+                "commercial_reliability_breadth_summary_line": "Commercial reliability breadth: PASS | grade=Commercial | exact_row_coverage=144/144 | evidence_rows=1 | evidence_present=True",
+                "midas_kds_row_provenance_export_summary_line": "MIDAS KDS row provenance export: PASS | combos=6 | rows=144 | members=12 | clauses=6 | exact_rows=144",
+                "midas_kds_row_provenance_export_row_count": 144,
+                "midas_kds_row_provenance_export_exact_row_count": 144,
+                "midas_kds_row_provenance_preview_rows": [
+                    {
+                        "combination_name": "gLCB1",
+                        "member_id": "C-TST-003",
+                        "clause_label": "KDS-MOMENT-Y-001",
+                        "baseline_focus_member_id": "27441",
+                        "bridge_row_provenance_mode_label": "exact row-level provenance",
+                        "clause_provenance_summary_label": "rows=12 | members=12 | rules=1 | hazards=3",
+                        "bridge_member_inventory_summary_label": "review=C-TST-003 | case=C-TST-003 | baseline=27441 | member_types=column",
+                    }
+                ],
             }
         },
     )
@@ -96,6 +112,10 @@ def test_external_benchmark_submission_readiness_allows_limited_start_with_clean
     assert payload["summary"]["audit_review_queue_pending_count"] == 2
     assert payload["summary"]["audit_review_queue_overdue_item_count"] == 0
     assert payload["summary"]["audit_review_resolution_open_revision_count"] == 0
+    assert payload["summary"]["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")
+    assert payload["summary"]["commercial_reliability_breadth_summary_line"].startswith("Commercial reliability breadth: PASS")
+    assert payload["summary"]["midas_kds_row_provenance_exact_row_coverage_label"] == "144/144"
+    assert payload["summary"]["midas_kds_row_provenance_preview_rows_present"] is True
     assert payload["checks"]["panel_zone_validation_advisory_only"] is True
     assert payload["summary"]["panel_zone_validation_advisory_only"] is True
     assert payload["summary"]["panel_zone_validation_advisory_label"] == "panel_zone_external_validation_only_boundary"
@@ -109,6 +129,7 @@ def test_external_benchmark_submission_readiness_allows_full_start_when_queue_cl
     assert payload["reason_code"] == "PASS_START_NOW_FULL"
     assert payload["summary"]["recommended_start_mode"] == "start_now_full_external_submission"
     assert payload["summary"]["ready_to_start_full_submission_now"] is True
+    assert payload["summary"]["commercial_scope_summary_line"].startswith("Commercial scope: grade=Commercial")
 
 
 def test_external_benchmark_submission_readiness_blocks_on_open_revision_cycle(tmp_path: Path) -> None:

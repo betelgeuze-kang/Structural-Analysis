@@ -127,8 +127,11 @@ def _group_status(label: str, children: list[dict[str, Any]]) -> dict[str, Any]:
 def _release_publication_status(
     *,
     manifest: Path,
+    promoted_manifest_json: Path | None,
     release_assets_json: Path | None,
     artifact_root: Path | None,
+    upload_plan_json: Path | None,
+    metadata_preflight_json: Path | None,
     tag_ref_present: bool,
     require_all: bool,
     require_exact: bool,
@@ -143,8 +146,11 @@ def _release_publication_status(
         }
     status = build_release_status(
         manifest_path=manifest,
+        promoted_manifest_json=promoted_manifest_json,
         artifact_root=artifact_root,
         assets_json=release_assets_json,
+        upload_plan_json=upload_plan_json,
+        metadata_preflight_json=metadata_preflight_json,
         require_all=require_all,
         require_exact=require_exact,
         tag_ref_present=tag_ref_present,
@@ -154,6 +160,7 @@ def _release_publication_status(
         "status": "closed" if bool(status.get("p0_closed", False)) else "open",
         "ok": bool(status.get("p0_closed", False)),
         "manifest": str(manifest),
+        "promoted_manifest_json": str(promoted_manifest_json) if promoted_manifest_json else "",
         "release_assets_json": str(release_assets_json),
         "artifact_root": str(artifact_root) if artifact_root else "",
         "details": status,
@@ -163,8 +170,11 @@ def _release_publication_status(
 def build_status(
     *,
     manifest: Path = DEFAULT_MANIFEST,
+    promoted_manifest_json: Path | None = None,
     release_assets_json: Path | None = None,
     artifact_root: Path | None = None,
+    upload_plan_json: Path | None = None,
+    metadata_preflight_json: Path | None = None,
     tag_ref_present: bool = False,
     require_all: bool = True,
     require_exact: bool = True,
@@ -174,8 +184,11 @@ def build_status(
     report_fallbacks = {} if reports is not None else DEFAULT_REPORT_FALLBACKS
     release = _release_publication_status(
         manifest=manifest,
+        promoted_manifest_json=promoted_manifest_json,
         release_assets_json=release_assets_json,
         artifact_root=artifact_root,
+        upload_plan_json=upload_plan_json,
+        metadata_preflight_json=metadata_preflight_json,
         tag_ref_present=tag_ref_present,
         require_all=require_all,
         require_exact=require_exact,
@@ -286,8 +299,11 @@ def _markdown(status: dict[str, Any]) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Summarize P0 closure state from local evidence.")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    parser.add_argument("--promoted-manifest-json", type=Path)
     parser.add_argument("--release-assets-json", type=Path)
     parser.add_argument("--artifact-root", type=Path)
+    parser.add_argument("--upload-plan-json", type=Path)
+    parser.add_argument("--metadata-preflight-json", type=Path)
     parser.add_argument("--tag-ref-present", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--out", type=Path)
@@ -302,8 +318,11 @@ def main(argv: list[str] | None = None) -> int:
     try:
         status = build_status(
             manifest=args.manifest,
+            promoted_manifest_json=args.promoted_manifest_json,
             release_assets_json=args.release_assets_json,
             artifact_root=args.artifact_root,
+            upload_plan_json=args.upload_plan_json,
+            metadata_preflight_json=args.metadata_preflight_json,
             tag_ref_present=bool(args.tag_ref_present),
         )
     except (OSError, ValueError, json.JSONDecodeError) as exc:

@@ -20,6 +20,7 @@ from plan_open_data_artifact_restore import build_restore_plan  # noqa: E402
 DEFAULT_COVERAGE_MATRIX = Path("implementation/phase1/real_project_parser_coverage_matrix.json")
 DEFAULT_PEER_METRIC_RECORDS = Path("implementation/phase1/peer_tbi_benchmark_metric_records.json")
 DEFAULT_ROW_PROVENANCE = Path("implementation/phase1/real_project_row_provenance_report.json")
+MIDAS_KDS_VALIDATION_SOURCE_ID = "midas_kds_geometry_bridge_validation"
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -104,16 +105,45 @@ def _peer_metric_gate(payload: dict[str, Any]) -> dict[str, Any]:
 
 def _row_provenance_gate(payload: dict[str, Any]) -> dict[str, Any]:
     summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
+    rows = payload.get("source_provenance_rows") if isinstance(payload.get("source_provenance_rows"), list) else []
+    midas_kds_rows = [
+        row
+        for row in rows
+        if isinstance(row, dict)
+        and str(row.get("source_id", "") or "") == MIDAS_KDS_VALIDATION_SOURCE_ID
+    ]
+    midas_kds_validation_row_present = any(
+        row.get("release_surface_allowed") is False
+        and isinstance(row.get("parser_contract"), dict)
+        and bool((row.get("parser_contract") or {}).get("contract_pass", False))
+        for row in midas_kds_rows
+    )
     row_count = int(summary.get("row_count", 0) or 0)
     release_surface_allowed_count = int(summary.get("release_surface_allowed_count", 0) or 0)
+    midas_kds_validation_present = bool(summary.get("midas_kds_validation_present", False))
+    midas_kds_validation_artifact_count = int(summary.get("midas_kds_validation_artifact_count", 0) or 0)
+    midas_kds_exact_geometry_bridge_pass_count = int(
+        summary.get("midas_kds_exact_geometry_bridge_pass_count", 0) or 0
+    )
+    midas_kds_exact_row_provenance_count = int(summary.get("midas_kds_exact_row_provenance_count", 0) or 0)
+    midas_kds_review_row_count = int(summary.get("midas_kds_review_row_count", 0) or 0)
+    midas_kds_row_provenance_complete = bool(
+        midas_kds_validation_present
+        and midas_kds_validation_row_present
+        and midas_kds_validation_artifact_count >= 1
+        and midas_kds_exact_geometry_bridge_pass_count >= midas_kds_validation_artifact_count
+        and midas_kds_review_row_count >= 1
+        and midas_kds_exact_row_provenance_count >= midas_kds_review_row_count
+    )
     ok = (
         bool(payload.get("contract_pass", False))
         and float(payload.get("row_provenance_coverage", 0.0) or 0.0) >= 1.0
         and bool(payload.get("raw_redistribution_default_blocked", False))
         and bool(summary.get("required_source_families_present", False))
         and bool(summary.get("all_rows_have_required_fields", False))
-        and row_count >= 2
+        and row_count >= 3
         and release_surface_allowed_count == 0
+        and midas_kds_row_provenance_complete
     )
     return {
         "label": "Real-project row provenance",
@@ -123,6 +153,13 @@ def _row_provenance_gate(payload: dict[str, Any]) -> dict[str, Any]:
         "release_surface_allowed_count": release_surface_allowed_count,
         "row_provenance_coverage": float(payload.get("row_provenance_coverage", 0.0) or 0.0),
         "raw_redistribution_default_blocked": bool(payload.get("raw_redistribution_default_blocked", False)),
+        "midas_kds_validation_present": midas_kds_validation_present,
+        "midas_kds_validation_row_present": midas_kds_validation_row_present,
+        "midas_kds_validation_artifact_count": midas_kds_validation_artifact_count,
+        "midas_kds_exact_geometry_bridge_pass_count": midas_kds_exact_geometry_bridge_pass_count,
+        "midas_kds_exact_row_provenance_count": midas_kds_exact_row_provenance_count,
+        "midas_kds_review_row_count": midas_kds_review_row_count,
+        "midas_kds_row_provenance_complete": midas_kds_row_provenance_complete,
     }
 
 
@@ -183,6 +220,7 @@ def _markdown(status: dict[str, Any]) -> str:
         f"- P1 inputs ready: `{bool(status['p1_inputs_ready'])}`",
         f"- P1 execution unblocked: `{bool(status['p1_execution_unblocked'])}`",
         f"- P0 release blocker: `{bool(status['p0_release_blocker'])}`",
+        "- P1 work slice: `quality/fallback/benchmark breadth`",
         f"- Next action: `{status['next_action']}`",
         "",
         "| Gate | Status |",

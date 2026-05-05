@@ -2853,6 +2853,19 @@ def _build_summary(
             if isinstance(ci.get("midas_native_roundtrip_report"), dict)
             else []
         ),
+        "commercial_scope_summary_line": str(gap_summary.get("commercial_scope_summary_line", "") or ""),
+        "commercial_reliability_breadth_summary_line": str(
+            gap_summary.get("commercial_reliability_breadth_summary_line", "") or ""
+        ),
+        "midas_kds_row_provenance_exact_row_coverage_label": str(
+            gap_summary.get("midas_kds_row_provenance_exact_row_coverage_label", "") or ""
+        ),
+        "midas_kds_row_provenance_preview_rows_present": bool(
+            gap_summary.get("midas_kds_row_provenance_preview_rows_present", False)
+        ),
+        "midas_kds_row_provenance_preview_row_count": int(
+            gap_summary.get("midas_kds_row_provenance_preview_row_count", 0) or 0
+        ),
         "commercial_readiness_summary_line": commercial_readiness_summary_line,
         "mgt_export_loadcomb_roundtrip_summary_line": str(gap_summary.get("mgt_export_loadcomb_roundtrip_summary_line", "") or ""),
         "mgt_export_loadcomb_roundtrip_pass": bool(gap_summary.get("mgt_export_loadcomb_roundtrip_pass", False)),
@@ -5521,6 +5534,9 @@ def _write_html(
           <tr><td>MIDAS KDS geometry-bridge full load crosswalk</td><td>{metrics.get('midas_kds_geometry_bridge_full_load_crosswalk_summary_line', '') or 'n/a'}</td></tr>
           <tr><td>MIDAS KDS geometry full-crosswalk depth</td><td>{int(metrics.get('midas_kds_geometry_bridge_full_crosswalk_depth', 0))} (min(load/semantic crosswalk))</td></tr>
           <tr><td>MIDAS LOADCOMB round-trip validator</td><td>{metrics.get('midas_loadcomb_roundtrip_summary_line', '') or 'n/a'}</td></tr>
+          <tr><td>Commercial scope</td><td>{metrics.get('commercial_scope_summary_line', '') or 'n/a'}</td></tr>
+          <tr><td>Commercial reliability breadth</td><td>{metrics.get('commercial_reliability_breadth_summary_line', '') or 'n/a'}</td></tr>
+          <tr><td>MIDAS KDS row provenance exact coverage</td><td>{metrics.get('midas_kds_row_provenance_exact_row_coverage_label', '') or 'n/a'}</td></tr>
           <tr><td>Commercial benchmark breadth</td><td>{metrics.get('commercial_benchmark_breadth_summary_line', '') or 'n/a'}</td></tr>
           <tr><td>Solver breadth</td><td>{metrics.get('solver_breadth_summary_line', '') or 'n/a'}</td></tr>
           <tr><td>Element/material breadth</td><td>{metrics.get('element_material_breadth_summary_line', '') or 'n/a'}</td></tr>
@@ -7615,6 +7631,17 @@ def main() -> None:
         "midas_kds_row_provenance_preview_rows": [
             row for row in (metrics.get("midas_kds_row_provenance_preview_rows", []) or []) if isinstance(row, dict)
         ],
+        "commercial_scope_summary_line": str(metrics.get("commercial_scope_summary_line", "")),
+        "commercial_reliability_breadth_summary_line": str(metrics.get("commercial_reliability_breadth_summary_line", "")),
+        "midas_kds_row_provenance_exact_row_coverage_label": str(
+            metrics.get("midas_kds_row_provenance_exact_row_coverage_label", "")
+        ),
+        "midas_kds_row_provenance_preview_rows_present": bool(
+            metrics.get("midas_kds_row_provenance_preview_rows_present", False)
+        ),
+        "midas_kds_row_provenance_preview_row_count": int(
+            metrics.get("midas_kds_row_provenance_preview_row_count", 0)
+        ),
         "midas_interoperability_summary_line": str(metrics.get("midas_interoperability_summary_line", "")),
         "midas_native_roundtrip_summary_line": str(metrics.get("midas_native_roundtrip_summary_line", "")),
         "steel_composite_constitutive_gate_summary_line": str(

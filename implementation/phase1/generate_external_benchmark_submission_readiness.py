@@ -53,6 +53,17 @@ def _truthy(report: dict[str, Any]) -> bool:
     return False
 
 
+def _midas_kds_exact_row_coverage_label(summary: dict[str, Any]) -> str:
+    direct = str(summary.get("midas_kds_row_provenance_exact_row_coverage_label", "") or "").strip()
+    if direct:
+        return direct
+    exact_rows = int(summary.get("midas_kds_row_provenance_export_exact_row_count", 0) or 0)
+    total_rows = int(summary.get("midas_kds_row_provenance_export_row_count", 0) or 0)
+    if total_rows:
+        return f"{exact_rows}/{total_rows}"
+    return "0/0"
+
+
 def build_submission_readiness(
     release_gap_payload: dict[str, Any],
     commercial_readiness_payload: dict[str, Any],
@@ -159,6 +170,9 @@ def build_submission_readiness(
         f"open_revision={open_revision_count}",
         f"panel_validation_boundary={panel_validation_boundary or 'n/a'}",
     ]
+    midas_kds_preview_rows = [
+        row for row in (gap_summary.get("midas_kds_row_provenance_preview_rows") or []) if isinstance(row, dict)
+    ]
 
     return {
         "schema_version": "1.0",
@@ -199,6 +213,23 @@ def build_submission_readiness(
             "external_validation_boundary_only": external_validation_boundary_only,
             "panel_zone_validation_advisory_only": panel_zone_validation_advisory_only,
             "panel_zone_validation_advisory_label": panel_zone_validation_advisory_label,
+            "commercial_scope_summary_line": str(gap_summary.get("commercial_scope_summary_line", "") or ""),
+            "commercial_reliability_breadth_summary_line": str(
+                gap_summary.get("commercial_reliability_breadth_summary_line", "") or ""
+            ),
+            "midas_kds_row_provenance_export_summary_line": str(
+                gap_summary.get("midas_kds_row_provenance_export_summary_line", "") or ""
+            ),
+            "midas_kds_row_provenance_export_row_count": int(
+                gap_summary.get("midas_kds_row_provenance_export_row_count", 0) or 0
+            ),
+            "midas_kds_row_provenance_export_exact_row_count": int(
+                gap_summary.get("midas_kds_row_provenance_export_exact_row_count", 0) or 0
+            ),
+            "midas_kds_row_provenance_exact_row_coverage_label": _midas_kds_exact_row_coverage_label(gap_summary),
+            "midas_kds_row_provenance_preview_row_count": len(midas_kds_preview_rows),
+            "midas_kds_row_provenance_preview_rows_present": bool(midas_kds_preview_rows),
+            "midas_kds_row_provenance_preview_rows": midas_kds_preview_rows,
             "blocker_count": int(len(blockers)),
             "blockers": blockers,
             "blocker_label": _label(blockers) if blockers else "none",
