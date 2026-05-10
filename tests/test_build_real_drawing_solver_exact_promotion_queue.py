@@ -143,6 +143,20 @@ def test_promotion_queue_blocks_when_quality_gate_is_missing(tmp_path: Path) -> 
     assert report["promotion_items"] == []
 
 
+def test_promotion_queue_closes_unlock_batch_when_solver_exact_target_is_reached(tmp_path: Path) -> None:
+    gate_path = _quality_gate(tmp_path / "quality_gate.json")
+
+    report = promotion_queue.build_promotion_queue(gate_path, target_solver_exact_asset_count=1)
+
+    assert report["contract_pass"] is True
+    assert report["reason_code"] == "PASS_SOLVER_EXACT_TARGET_REACHED"
+    assert report["summary"]["current_solver_exact_asset_count"] == 1
+    assert report["summary"]["target_solver_exact_asset_count"] == 1
+    assert report["summary"]["required_solver_exact_delta"] == 0
+    assert report["planned_unlock_batch"] == []
+    assert "already reached" in report["recommended_claim"]
+
+
 def test_promotion_queue_cli_writes_outputs_and_strict_exit(tmp_path: Path) -> None:
     gate_path = _quality_gate(tmp_path / "quality_gate.json")
     out_path = tmp_path / "promotion.json"

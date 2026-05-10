@@ -3485,6 +3485,7 @@ function buildViewerStatsSummary(data){
   const realDrawingPromotionUnlockBatch=getRealDrawingPlannedUnlockBatch(data);
   const realDrawingPromotionTarget=safeNumber(realDrawingPromotionSummary.target_solver_exact_asset_count,0);
   const realDrawingPromotionAfterBatch=safeNumber(realDrawingPromotionSummary.planned_solver_exact_asset_count_after_unlock_batch,0);
+  const realDrawingPromotionRequiredDelta=safeNumber(realDrawingPromotionSummary.required_solver_exact_delta,0);
   const realDrawingPromotionUnlockBatchCount=safeNumber(
     realDrawingPromotionSummary.planned_unlock_batch_count,
     realDrawingPromotionUnlockBatch.length
@@ -3522,11 +3523,14 @@ function buildViewerStatsSummary(data){
     realDrawingFullSolverExactLabel:realDrawingAssetCount?(realDrawingQualitySummary.fullSolverExactReady?'true':'false'):'--',
     realDrawingPromotionTargetCount:realDrawingPromotionTarget,
     realDrawingPromotionAfterBatchCount:realDrawingPromotionAfterBatch,
+    realDrawingPromotionRequiredDelta,
     realDrawingPromotionUnlockBatchCount,
     realDrawingPromotionTargetLabel:realDrawingAssetCount&&realDrawingPromotionTarget
       ?`${realDrawingSolverExactCount}/${realDrawingPromotionTarget}`
       :'--',
-    realDrawingPromotionUnlockBatchLabel:realDrawingPromotionUnlockBatchCount
+    realDrawingPromotionUnlockBatchLabel:realDrawingPromotionTarget&&realDrawingPromotionRequiredDelta===0
+      ?'target reached'
+      :realDrawingPromotionUnlockBatchCount
       ?`${realDrawingPromotionUnlockBatchCount} assets -> ${realDrawingPromotionAfterBatch||'--'} exact`
       :'--',
   };
@@ -3742,6 +3746,7 @@ function renderRealDrawingQualityPanel(data=modelData){
   const promotionTarget=safeNumber(promotionSummary.target_solver_exact_asset_count,0);
   const promotionAfterBatch=safeNumber(promotionSummary.planned_solver_exact_asset_count_after_unlock_batch,0);
   const promotionCurrent=safeNumber(promotionSummary.current_solver_exact_asset_count,quality.exactCount);
+  const promotionRequiredDelta=safeNumber(promotionSummary.required_solver_exact_delta,0);
   const filterButtons=REAL_DRAWING_QUALITY_FILTERS.map(filter=>{
     const count=quality.assets.filter(row=>realDrawingAssetMatchesQualityFilter(row,filter.key)).length;
     const selected=filter.key===activeRealDrawingQualityFilter;
@@ -3765,8 +3770,9 @@ function renderRealDrawingQualityPanel(data=modelData){
         </button>`;
     }).join('')
     :'<div class="panel-placeholder">No review queue assets in the active quality filter.</div>';
-  const promotionBlock=plannedUnlockBatch.length
-    ?`
+  let promotionBlock='';
+  if(plannedUnlockBatch.length){
+    promotionBlock=`
     <section class="real-drawing-promotion-panel" data-real-drawing-promotion-target="${escapeHtml(String(promotionTarget))}">
       <div class="real-drawing-promotion-header">
         <span>Next Unlock Batch</span>
@@ -3792,7 +3798,16 @@ function renderRealDrawingQualityPanel(data=modelData){
         }).join('')}
       </div>
     </section>`
-    :'';
+  }else if(promotionTarget&&promotionRequiredDelta===0){
+    promotionBlock=`
+    <section class="real-drawing-promotion-panel" data-real-drawing-promotion-state="target-reached" data-real-drawing-promotion-target="${escapeHtml(String(promotionTarget))}">
+      <div class="real-drawing-promotion-header">
+        <span>Solver-Exact Target Reached</span>
+        <strong>${escapeHtml(String(promotionCurrent))}/${escapeHtml(String(promotionTarget))}</strong>
+      </div>
+      <div class="panel-placeholder">Archive native write-back promotions are closed for this target.</div>
+    </section>`;
+  }
   panel.innerHTML=`
     <div class="real-drawing-quality-summary" data-real-drawing-quality-gate="${escapeHtml(quality.gateLabel)}">
       <div><span>Gate</span><strong>${escapeHtml(quality.gateLabel)}</strong></div>

@@ -209,15 +209,14 @@
       "geometry_mode": "solver_topology_xyz",
       "node_count": 6,
       "quality_flags": [
-        "sparse_preview",
-        "not_solver_exact"
+        "sparse_preview"
       ],
       "quality_tier": "sparse_preview_review",
       "renderable_segment_count": 3,
-      "route": "midas_binary_decoded_preview_bridge",
+      "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 3,
-      "solver_exact": false,
-      "status": "archive_decoded_preview_bridge_ready"
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready"
     },
     {
       "asset_ref": "RD-013",
@@ -227,15 +226,13 @@
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
       "node_count": 24,
-      "quality_flags": [
-        "not_solver_exact"
-      ],
-      "quality_tier": "proxy_preview_review",
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
       "renderable_segment_count": 23,
-      "route": "midas_binary_decoded_preview_bridge",
+      "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 23,
-      "solver_exact": false,
-      "status": "archive_decoded_preview_bridge_ready"
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready"
     },
     {
       "asset_ref": "RD-014",
@@ -245,15 +242,13 @@
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
       "node_count": 23,
-      "quality_flags": [
-        "not_solver_exact"
-      ],
-      "quality_tier": "proxy_preview_review",
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
       "renderable_segment_count": 22,
-      "route": "midas_binary_decoded_preview_bridge",
+      "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 22,
-      "solver_exact": false,
-      "status": "archive_decoded_preview_bridge_ready"
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready"
     },
     {
       "asset_ref": "RD-015",
@@ -296,15 +291,14 @@
       "geometry_mode": "solver_topology_xyz",
       "node_count": 5,
       "quality_flags": [
-        "sparse_preview",
-        "not_solver_exact"
+        "sparse_preview"
       ],
       "quality_tier": "sparse_preview_review",
       "renderable_segment_count": 4,
-      "route": "midas_binary_decoded_preview_bridge",
+      "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 4,
-      "solver_exact": false,
-      "status": "archive_decoded_preview_bridge_ready"
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready"
     },
     {
       "asset_ref": "RD-018",
@@ -328,7 +322,7 @@
   "full_solver_exact_ready": false,
   "hard_blockers": [],
   "quality_flag_counts": {
-    "not_solver_exact": 11,
+    "not_solver_exact": 7,
     "proxy_layout_not_true_geometry": 7,
     "proxy_node_glyph_fallback": 1,
     "sampled_dense_model": 1,
@@ -420,54 +414,32 @@
     {
       "asset_ref": "RD-012",
       "quality_flags": [
-        "sparse_preview",
-        "not_solver_exact"
+        "sparse_preview"
       ],
       "quality_tier": "sparse_preview_review",
       "recommended_action": "expand sparse preview into a complete solver-exact model",
       "review_id": "RQ-009"
     },
     {
-      "asset_ref": "RD-013",
-      "quality_flags": [
-        "not_solver_exact"
-      ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
-      "review_id": "RQ-010"
-    },
-    {
-      "asset_ref": "RD-014",
-      "quality_flags": [
-        "not_solver_exact"
-      ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
-      "review_id": "RQ-011"
-    },
-    {
       "asset_ref": "RD-017",
       "quality_flags": [
-        "sparse_preview",
-        "not_solver_exact"
+        "sparse_preview"
       ],
       "quality_tier": "sparse_preview_review",
       "recommended_action": "expand sparse preview into a complete solver-exact model",
-      "review_id": "RQ-012"
+      "review_id": "RQ-010"
     }
   ],
   "route_counts": {
     "ifc_to_structural_graph_adapter": 7,
-    "midas_binary_archive_exact_topology_promoted": 3,
-    "midas_binary_decoded_preview_bridge": 4,
+    "midas_binary_archive_exact_topology_promoted": 7,
     "midas_mgt_direct_parser": 4
   },
   "schema_version": "real-drawing-viewer-quality-gate.v1",
   "sensitive_key_findings": [],
   "source_viewer_manifest": "implementation/phase1/commercialization_status/real_drawing_private_3d_viewer_manifest.json",
   "status_counts": {
-    "archive_decoded_preview_bridge_ready": 4,
-    "archive_solver_graph_ready": 3,
+    "archive_solver_graph_ready": 7,
     "ifc_proxy_graph_ready": 7,
     "solver_graph_ready": 4
   },
@@ -477,10 +449,10 @@
     "asset_count": 18,
     "duplicate_asset_ref_count": 0,
     "hard_blocker_count": 0,
-    "proxy_or_preview_asset_count": 11,
+    "proxy_or_preview_asset_count": 7,
     "renderable_asset_count": 18,
-    "review_item_count": 22,
-    "review_queue_asset_count": 12,
-    "solver_exact_asset_count": 7
+    "review_item_count": 18,
+    "review_queue_asset_count": 10,
+    "solver_exact_asset_count": 11
   }
 }

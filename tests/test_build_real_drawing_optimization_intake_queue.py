@@ -424,6 +424,128 @@ def test_build_real_drawing_optimization_intake_queue_promotes_archive_exact_top
     assert row["archive_solver_graph_dataset_npz"] == "tmp/archive_zip/model.npz"
 
 
+def test_build_real_drawing_optimization_intake_queue_promotes_archive_native_writeback_stable_preview(
+    tmp_path: Path,
+) -> None:
+    manifest = tmp_path / "redacted_manifest.json"
+    archive_report = tmp_path / "midas_archive_adapter_report.json"
+    native_receipts = tmp_path / "midas_native_writeback_diff_receipts_report.json"
+    out = tmp_path / "queue.json"
+    _write_json(
+        manifest,
+        {
+            "schema_version": "real-drawing-redacted-corpus-manifest.v1",
+            "projects": [
+                {
+                    "project_id": "project_a",
+                    "project_title": "Project A",
+                    "source_family": "fixture",
+                    "files": [
+                        {
+                            "file_id": "archive_zip",
+                            "file_name": "archive.zip",
+                            "file_type": ".zip",
+                            "role": "midas_model_archive",
+                            "bytes": 789,
+                            "sha256": "ghi",
+                            "source_url": "https://example.invalid/archive.zip",
+                            "model_optimization_candidate": True,
+                            "zip_model_member_count": 1,
+                            "zip_member_count": 1,
+                            "raw_redistribution_allowed": False,
+                            "release_surface_allowed": False,
+                        }
+                    ],
+                }
+            ],
+        },
+    )
+    _write_json(
+        archive_report,
+        {
+            "contract_pass": True,
+            "reason_code": "PASS",
+            "archives": [
+                {
+                    "file_id": "archive_zip",
+                    "status": "decoded_preview_bridge_ready",
+                    "bridge_report": "tmp/archive_zip/decoded_preview_bridge_report.json",
+                    "model_json": "tmp/archive_zip/model.json",
+                    "dataset_npz": "tmp/archive_zip/model.npz",
+                    "viewer_ready": True,
+                    "node_count": 24,
+                    "element_count": 23,
+                    "preview_exactness_tier": "raw-preview",
+                    "preview_surface_bucket": "raw-preview",
+                    "topology_preview_ready": False,
+                    "exact_topology_candidate": False,
+                    "exact_topology_promoted": False,
+                    "topology_node_count": 0,
+                    "topology_edge_count": 0,
+                    "missing_member_path_count": 0,
+                    "missing_member_reference_count": 0,
+                }
+            ],
+        },
+    )
+    _write_json(
+        native_receipts,
+        {
+            "contract_pass": True,
+            "receipt_rows": [
+                {
+                    "case_id": "archive_zip__decoded_preview_native__identity_writeback",
+                    "writeback_mode": "public_archive_decoded_preview_identity_baseline",
+                    "contract_pass": True,
+                    "summary_line": "PASS | topology=8/8 stable | load=5/5 stable | loadcomb=exact",
+                    "receipt_json": "tmp/archive_zip/native_receipt.json",
+                    "receipt_md": "tmp/archive_zip/native_receipt.md",
+                    "topology_stability_pass": True,
+                    "load_contract_stability_pass": True,
+                    "loadcomb_exact_roundtrip_pass": True,
+                    "unknown_rows_zero_pass": True,
+                    "review_pending_count": 0,
+                    "taxonomy": {"labels": ["preserved_exact", "public_archive_preview"]},
+                }
+            ],
+        },
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--redacted-manifest",
+            str(manifest),
+            "--midas-archive-adapter-report",
+            str(archive_report),
+            "--midas-native-writeback-diff-receipts-report",
+            str(native_receipts),
+            "--out",
+            str(out),
+            "--json",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["summary"]["archive_solver_graph_ready_count"] == 1
+    assert payload["summary"]["archive_native_writeback_promoted_count"] == 1
+    assert payload["summary"]["solver_exact_ready_count"] == 1
+    row = payload["queue"][0]
+    assert row["optimization_status"] == "archive_solver_graph_ready"
+    assert row["optimization_route"] == "midas_binary_archive_exact_topology_promoted"
+    assert row["solver_exact"] is True
+    assert row["archive_hard_tier_ready"] is True
+    assert row["archive_hard_tier_reason_code"] == "PASS_ARCHIVE_NATIVE_WRITEBACK_STABLE_DECODED_PREVIEW"
+    assert row["archive_native_writeback_receipt_json"] == "tmp/archive_zip/native_receipt.json"
+    assert row["archive_solver_graph_model_json"] == "tmp/archive_zip/model.json"
+
+
 def test_build_real_drawing_optimization_intake_queue_blocks_unpromoted_archive_exact_topology_candidate(
     tmp_path: Path,
 ) -> None:

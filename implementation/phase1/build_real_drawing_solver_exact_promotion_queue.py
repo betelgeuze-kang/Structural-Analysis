@@ -215,7 +215,7 @@ def build_promotion_queue(
         if isinstance(row, dict) and str(row.get("asset_ref") or "")
     ]
     current_solver_exact_count = _safe_int(gate_summary.get("solver_exact_asset_count"), 0)
-    target_solver_exact_asset_count = max(int(target_solver_exact_asset_count), current_solver_exact_count)
+    target_solver_exact_asset_count = int(target_solver_exact_asset_count)
     required_delta = max(0, target_solver_exact_asset_count - current_solver_exact_count)
 
     candidate_rows = [
@@ -252,9 +252,12 @@ def build_promotion_queue(
     promotion_delta_available = sum(_safe_int(item.get("expected_solver_exact_delta"), 0) for item in items)
     planned_solver_exact_after = current_solver_exact_count + accumulated_delta
     sufficient_unlock_batch = accumulated_delta >= required_delta
-    contract_pass = bool(gate.get("contract_pass", False)) and bool(items)
+    contract_pass = bool(gate.get("contract_pass", False)) and (bool(items) or required_delta == 0)
     if not gate.get("contract_pass", False):
         reason_code = "ERR_SOURCE_QUALITY_GATE_NOT_PASSING"
+    elif required_delta == 0:
+        reason_code = "PASS_SOLVER_EXACT_TARGET_REACHED"
+        contract_pass = True
     elif not items:
         reason_code = "PASS_NO_PROMOTION_ITEMS"
         contract_pass = True
@@ -270,7 +273,9 @@ def build_promotion_queue(
         "quality_gate_reason_code": str(gate.get("reason_code") or ""),
         "structure_viewer_href": str(gate.get("structure_viewer_href") or ""),
         "recommended_claim": (
-            "Promote the planned unlock batch before claiming more than engineer-in-loop review readiness."
+            "Solver-exact target is already reached; continue closing review-only quality flags before full exact claims."
+            if required_delta == 0
+            else "Promote the planned unlock batch before claiming more than engineer-in-loop review readiness."
             if items
             else "No real drawing solver-exact promotion work is currently open."
         ),

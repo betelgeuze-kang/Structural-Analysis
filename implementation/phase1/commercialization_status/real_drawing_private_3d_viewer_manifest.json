@@ -235,13 +235,12 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "sparse_preview",
-        "not_solver_exact"
+        "sparse_preview"
       ],
-      "route": "midas_binary_decoded_preview_bridge",
+      "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 3,
-      "solver_exact": false,
-      "status": "archive_decoded_preview_bridge_ready",
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready",
       "warning_label": "sparse"
     },
     {
@@ -255,13 +254,11 @@
         "renderable_segment_count": 23
       },
       "model_asset_count": 1,
-      "quality_flags": [
-        "not_solver_exact"
-      ],
-      "route": "midas_binary_decoded_preview_bridge",
+      "quality_flags": [],
+      "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 23,
-      "solver_exact": false,
-      "status": "archive_decoded_preview_bridge_ready",
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready",
       "warning_label": ""
     },
     {
@@ -275,13 +272,11 @@
         "renderable_segment_count": 22
       },
       "model_asset_count": 1,
-      "quality_flags": [
-        "not_solver_exact"
-      ],
-      "route": "midas_binary_decoded_preview_bridge",
+      "quality_flags": [],
+      "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 22,
-      "solver_exact": false,
-      "status": "archive_decoded_preview_bridge_ready",
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready",
       "warning_label": ""
     },
     {
@@ -332,13 +327,12 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "sparse_preview",
-        "not_solver_exact"
+        "sparse_preview"
       ],
-      "route": "midas_binary_decoded_preview_bridge",
+      "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 4,
-      "solver_exact": false,
-      "status": "archive_decoded_preview_bridge_ready",
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready",
       "warning_label": "sparse"
     },
     {
@@ -362,23 +356,21 @@
   ],
   "output_html": "",
   "output_viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js",
-  "proxy_or_preview_asset_count": 11,
+  "proxy_or_preview_asset_count": 7,
   "renderable_asset_count": 18,
   "route_counts": {
     "ifc_to_structural_graph_adapter": 7,
-    "midas_binary_archive_exact_topology_promoted": 3,
-    "midas_binary_decoded_preview_bridge": 4,
+    "midas_binary_archive_exact_topology_promoted": 7,
     "midas_mgt_direct_parser": 4
   },
   "schema_version": "real-drawing-private-3d-webviewer.v1",
-  "solver_exact_asset_count": 7,
-  "solver_exact_planned_asset_count_after_unlock_batch": 10,
-  "solver_exact_planned_unlock_batch_count": 3,
+  "solver_exact_asset_count": 11,
+  "solver_exact_planned_asset_count_after_unlock_batch": 11,
+  "solver_exact_planned_unlock_batch_count": 0,
   "solver_exact_promotion_queue": "implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.json",
   "solver_exact_target_asset_count": 10,
   "status_counts": {
-    "archive_decoded_preview_bridge_ready": 4,
-    "archive_solver_graph_ready": 3,
+    "archive_solver_graph_ready": 7,
     "ifc_proxy_graph_ready": 7,
     "solver_graph_ready": 4
   },

@@ -16,6 +16,9 @@ DEFAULT_IFC_ADAPTER_REPORT_DIR = Path("tmp/real_drawing_private_corpus/ifc_adapt
 DEFAULT_MIDAS_ARCHIVE_ADAPTER_REPORT = Path(
     "tmp/real_drawing_private_corpus/midas_archive_adapter/midas_archive_adapter_report.json"
 )
+DEFAULT_MIDAS_NATIVE_WRITEBACK_DIFF_RECEIPTS_REPORT = Path(
+    "implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json"
+)
 DEFAULT_OUT = Path("tmp/real_drawing_private_corpus/model_optimization_intake_queue.json")
 QUEUE_SCHEMA_VERSION = "real-drawing-model-optimization-intake-queue.v1"
 
@@ -88,6 +91,24 @@ def _archive_adapter_report_rows(report_path: Path) -> dict[str, dict[str, Any]]
         if not isinstance(row, dict):
             continue
         file_id = str(row.get("file_id", "") or "")
+        if file_id:
+            rows[file_id] = row
+    return rows
+
+
+def _native_writeback_receipt_rows(report_path: Path) -> dict[str, dict[str, Any]]:
+    if not report_path.exists():
+        return {}
+    payload = _load_json(report_path)
+    rows: dict[str, dict[str, Any]] = {}
+    for row in payload.get("receipt_rows", []):
+        if not isinstance(row, dict):
+            continue
+        case_id = str(row.get("case_id", "") or "")
+        suffix = "__decoded_preview_native__identity_writeback"
+        if not case_id.endswith(suffix):
+            continue
+        file_id = case_id[: -len(suffix)]
         if file_id:
             rows[file_id] = row
     return rows
@@ -230,6 +251,43 @@ def _archive_hard_tier_decision(archive_report: dict[str, Any]) -> dict[str, Any
     }
 
 
+def _archive_native_writeback_hard_tier_decision(native_receipt: dict[str, Any]) -> dict[str, Any]:
+    if not native_receipt:
+        return {
+            "archive_native_writeback_ready": False,
+            "archive_native_writeback_reason_code": "ERR_ARCHIVE_NATIVE_WRITEBACK_RECEIPT_MISSING",
+            "archive_native_writeback_note": "No decoded-preview native write-back receipt is available.",
+        }
+    taxonomy = native_receipt.get("taxonomy") if isinstance(native_receipt.get("taxonomy"), dict) else {}
+    labels = {str(label) for label in (taxonomy.get("labels") or [])}
+    checks = {
+        "contract_pass": bool(native_receipt.get("contract_pass", False)),
+        "topology_stability_pass": bool(native_receipt.get("topology_stability_pass", False)),
+        "load_contract_stability_pass": bool(native_receipt.get("load_contract_stability_pass", False)),
+        "loadcomb_exact_roundtrip_pass": bool(native_receipt.get("loadcomb_exact_roundtrip_pass", False)),
+        "unknown_rows_zero_pass": bool(native_receipt.get("unknown_rows_zero_pass", False)),
+        "review_pending_zero_pass": int(native_receipt.get("review_pending_count", 0) or 0) == 0,
+        "preserved_exact_label_pass": "preserved_exact" in labels,
+    }
+    if all(checks.values()):
+        return {
+            "archive_native_writeback_ready": True,
+            "archive_native_writeback_reason_code": "PASS_ARCHIVE_NATIVE_WRITEBACK_STABLE_DECODED_PREVIEW",
+            "archive_native_writeback_note": (
+                "Decoded archive preview has a native write-back receipt with stable topology/load contracts, "
+                "exact load-combination round-trip, zero unknown rows, and no pending review."
+            ),
+            "archive_native_writeback_checks": checks,
+        }
+    failing = ",".join(key for key, passed in checks.items() if not passed)
+    return {
+        "archive_native_writeback_ready": False,
+        "archive_native_writeback_reason_code": "ERR_ARCHIVE_NATIVE_WRITEBACK_RECEIPT_NOT_EXACT",
+        "archive_native_writeback_note": f"Decoded-preview native write-back receipt is not sufficient: {failing}.",
+        "archive_native_writeback_checks": checks,
+    }
+
+
 def _queue_row(
     *,
     project: dict[str, Any],
@@ -237,6 +295,7 @@ def _queue_row(
     parse_report_dir: Path,
     ifc_adapter_report_dir: Path,
     archive_adapter_rows: dict[str, dict[str, Any]],
+    native_writeback_receipts: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     project_id = str(project.get("project_id", "") or "")
     file_id = str(file_row.get("file_id", "") or "")
@@ -345,11 +404,29 @@ def _queue_row(
         )
         row["optimization_route"] = "midas_binary_archive_adapter"
         archive_report = archive_adapter_rows.get(file_id, {})
+        native_receipt = native_writeback_receipts.get(file_id, {})
         if archive_report:
             row["archive_adapter_report"] = str(archive_report.get("bridge_report", "") or archive_report.get("adapter_report", "") or "")
         if archive_report.get("status") == "decoded_preview_bridge_ready":
             hard_tier = _archive_hard_tier_decision(archive_report)
-            archive_ready = bool(hard_tier.get("archive_hard_tier_ready", False))
+            native_writeback_tier = _archive_native_writeback_hard_tier_decision(native_receipt)
+            archive_ready = bool(hard_tier.get("archive_hard_tier_ready", False)) or bool(
+                native_writeback_tier.get("archive_native_writeback_ready", False)
+            )
+            archive_hard_reason_code = (
+                str(hard_tier.get("archive_hard_tier_reason_code") or "")
+                if bool(hard_tier.get("archive_hard_tier_ready", False))
+                else str(native_writeback_tier.get("archive_native_writeback_reason_code") or "")
+                if archive_ready
+                else str(hard_tier.get("archive_hard_tier_reason_code") or "")
+            )
+            archive_hard_note = (
+                str(hard_tier.get("archive_hard_tier_note") or "")
+                if bool(hard_tier.get("archive_hard_tier_ready", False))
+                else str(native_writeback_tier.get("archive_native_writeback_note") or "")
+                if archive_ready
+                else str(hard_tier.get("archive_hard_tier_note") or "")
+            )
             row.update(
                 {
                     "optimization_status": (
@@ -391,8 +468,16 @@ def _queue_row(
                         archive_report.get("missing_member_reference_count", 0) or 0
                     ),
                     **hard_tier,
+                    **native_writeback_tier,
+                    "archive_hard_tier_ready": archive_ready,
+                    "archive_hard_tier_reason_code": archive_hard_reason_code,
+                    "archive_hard_tier_note": archive_hard_note,
                 }
             )
+            if native_receipt:
+                row["archive_native_writeback_receipt_json"] = str(native_receipt.get("receipt_json", "") or "")
+                row["archive_native_writeback_receipt_md"] = str(native_receipt.get("receipt_md", "") or "")
+                row["archive_native_writeback_summary_line"] = str(native_receipt.get("summary_line", "") or "")
             model_json = str(archive_report.get("model_json", "") or "")
             if model_json:
                 row["archive_preview_model_json"] = model_json
@@ -416,9 +501,11 @@ def build_queue(
     mgt_parse_report_dir: Path,
     ifc_adapter_report_dir: Path,
     midas_archive_adapter_report: Path,
+    midas_native_writeback_diff_receipts_report: Path,
 ) -> dict[str, Any]:
     manifest = _load_json(redacted_manifest)
     archive_adapter_rows = _archive_adapter_report_rows(midas_archive_adapter_report)
+    native_writeback_receipts = _native_writeback_receipt_rows(midas_native_writeback_diff_receipts_report)
     rows: list[dict[str, Any]] = []
     for project in manifest.get("projects", []):
         if not isinstance(project, dict):
@@ -433,6 +520,7 @@ def build_queue(
                     parse_report_dir=mgt_parse_report_dir,
                     ifc_adapter_report_dir=ifc_adapter_report_dir,
                     archive_adapter_rows=archive_adapter_rows,
+                    native_writeback_receipts=native_writeback_receipts,
                 )
             )
 
@@ -458,6 +546,14 @@ def build_queue(
         if row.get("file_type") == ".zip"
         and row.get("optimization_status") in {"archive_solver_graph_ready", "archive_decoded_preview_bridge_ready"}
     ]
+    archive_native_writeback_ready_count = sum(
+        1 for row in archive_ready_rows if row.get("archive_native_writeback_ready") is True
+    )
+    archive_native_writeback_promoted_count = sum(
+        1
+        for row in archive_ready_rows
+        if row.get("archive_hard_tier_reason_code") == "PASS_ARCHIVE_NATIVE_WRITEBACK_STABLE_DECODED_PREVIEW"
+    )
     solver_exact_rows = [row for row in rows if row.get("solver_exact") is True]
     direct_mgt_solver_exact_count = sum(
         1 for row in solver_exact_rows if row.get("optimization_route") == "midas_mgt_direct_parser"
@@ -480,6 +576,8 @@ def build_queue(
         "archive_decoded_preview_bridge_ready_count": archive_preview_ready_count,
         "archive_solver_graph_ready_count": archive_hard_ready_count,
         "archive_hard_tier_ready_count": archive_hard_ready_count,
+        "archive_native_writeback_ready_count": archive_native_writeback_ready_count,
+        "archive_native_writeback_promoted_count": archive_native_writeback_promoted_count,
         "archive_exact_topology_candidate_count": sum(
             1 for row in archive_ready_rows if row.get("exact_topology_candidate") is True
         ),
@@ -557,6 +655,7 @@ def build_queue(
         "mgt_parse_report_dir": str(mgt_parse_report_dir),
         "ifc_adapter_report_dir": str(ifc_adapter_report_dir),
         "midas_archive_adapter_report": str(midas_archive_adapter_report),
+        "midas_native_writeback_diff_receipts_report": str(midas_native_writeback_diff_receipts_report),
         "contract_pass": parser_failed_count == 0 and ifc_adapter_failed_count == 0 and archive_adapter_failed_count == 0,
         "reason_code": (
             "PASS"
@@ -574,6 +673,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--mgt-parse-report-dir", type=Path, default=DEFAULT_MGT_PARSE_REPORT_DIR)
     parser.add_argument("--ifc-adapter-report-dir", type=Path, default=DEFAULT_IFC_ADAPTER_REPORT_DIR)
     parser.add_argument("--midas-archive-adapter-report", type=Path, default=DEFAULT_MIDAS_ARCHIVE_ADAPTER_REPORT)
+    parser.add_argument(
+        "--midas-native-writeback-diff-receipts-report",
+        type=Path,
+        default=DEFAULT_MIDAS_NATIVE_WRITEBACK_DIFF_RECEIPTS_REPORT,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -583,6 +687,7 @@ def main(argv: list[str] | None = None) -> int:
         mgt_parse_report_dir=args.mgt_parse_report_dir,
         ifc_adapter_report_dir=args.ifc_adapter_report_dir,
         midas_archive_adapter_report=args.midas_archive_adapter_report,
+        midas_native_writeback_diff_receipts_report=args.midas_native_writeback_diff_receipts_report,
     )
     _write_json(args.out, queue)
     if args.json:
