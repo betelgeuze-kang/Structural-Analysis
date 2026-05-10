@@ -3,6 +3,7 @@ from pathlib import Path
 
 def test_index_html_uses_instanced_mesh_pipeline_for_large_line_models() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    mesh_builder_text = Path("src/structure-viewer/viewer-render-mesh-builders.js").read_text(encoding="utf-8")
 
     assert "const INSTANCED_LINE_ELEMENT_THRESHOLD=" in text
     assert "const INSTANCED_SURFACE_ELEMENT_THRESHOLD=" in text
@@ -15,21 +16,26 @@ def test_index_html_uses_instanced_mesh_pipeline_for_large_line_models() -> None
     assert "const LARGE_MODEL_PICK_SPATIAL_INDEX_SURFACE_FACET_BVH_THRESHOLD=1024;" in text
     assert "function buildInstancedLineElements(" in text
     assert "function buildInstancedSurfaceElements(" in text
-    assert "function createInstancedSurfaceWireframe(" in text
-    assert "new THREE.InstancedMesh(" in text
+    assert "from './viewer-render-mesh-builders.js';" in text
+    assert "const renderMeshBuilderToolkit=createViewerRenderMeshBuilderToolkit(THREE,{colors:COLORS});" in text
+    assert "function createInstancedSurfaceWireframe(" in mesh_builder_text
+    assert "function createInstancedLineGroupObjects(" in mesh_builder_text
+    assert "function createInstancedSurfaceGroupObjects(" in mesh_builder_text
+    assert "new T.InstancedMesh(" in mesh_builder_text
     assert "mesh.setMatrixAt(" in text
     assert "mesh.setColorAt(" in text
     assert "registerPickAnalyticRecord(record);" in text
-    assert "geometryKind:'surface'" in text
-    assert "_surfaceDirectFallback:isInstancedSurface" in text
+    assert "geometryKind: 'surface'" in mesh_builder_text
+    assert "_surfaceDirectFallback: isInstancedSurface" in mesh_builder_text
     assert "mesh.isInstancedMesh&&Number.isInteger(hit.instanceId)" in text
 
 
 def test_index_html_keeps_instanced_wireframe_and_selection_refresh_hooks() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    mesh_builder_text = Path("src/structure-viewer/viewer-render-mesh-builders.js").read_text(encoding="utf-8")
 
     assert "function refreshInstancedVisuals()" in text
-    assert "createInstancedWireframe(" in text
+    assert "function createInstancedWireframe(" in mesh_builder_text
     assert "instancedElementRecordsByMemberId" in text
     assert "resolveDisplayColorHex(record.data,record.baseColorHex)" in text
     assert "let selectedElementKeys=new Set(),selectedElementRecords=new Map();" in text
@@ -64,13 +70,19 @@ def test_index_html_exposes_bounded_loadcomb_authoring_draft_contract() -> None:
 
 def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_models() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
+    compact_geometry_text = "".join(geometry_text.split())
 
     assert "let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;" in text
     assert "const SURFACE_LOD_MEDIUM_ELEMENT_THRESHOLD=" in text
     assert "const SURFACE_LOD_COARSE_ELEMENT_THRESHOLD=" in text
-    assert "function buildSurfaceLodProfile(" in text
-    assert "function computeSurfaceLodSubdivisions(" in text
-    assert "function buildLodSurfaceContourGeometry(" in text
+    assert "from './viewer-render-picking-geometry.js';" in text
+    assert "const renderPickingGeometryToolkit=createViewerRenderPickingGeometryToolkit(THREE,{" in text
+    assert "export function createViewerRenderPickingGeometryToolkit(" in geometry_text
+    assert "function buildSurfaceLodProfile(" in geometry_text
+    assert "function computeSurfaceLodSubdivisions(" in geometry_text
+    assert "function buildLodSurfaceContourGeometry(" in geometry_text
+    assert "function buildSurfaceLodProfile(" not in text
     assert "surfaceRenderLodProfile=buildSurfaceLodProfile(surfaceElements.length,instancableSurfaceElements.length);" in text
     assert "surfaceLodLabel:surfaceRenderLodProfile?.label||'full'" in text
     assert "surfaceContourSubdivisions:computeSurfaceLodSubdivisions(verts,surfaceRenderLodProfile,{isInstancedSurface})" in text
@@ -78,31 +90,31 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "function rebuildPickTargetMeshes(" in text
     assert "function getPickableMeshes(" in text
     assert "function buildPickSpatialIndex(" in text
-    assert "function buildPickBoundsBvh(" in text
-    assert "function buildPickSpatialIndexOverflowBvh(" in text
+    assert "function buildPickBoundsBvh(" in geometry_text
+    assert "function buildPickSpatialIndexOverflowBvh(" in geometry_text
     assert "async function buildPickMeshTriangleEntries(" in text
-    assert "function buildPickMeshTriangleBvh(" in text
-    assert "function buildLocalGeometryTriangleEntries(" in text
+    assert "function buildPickMeshTriangleBvh(" in geometry_text
+    assert "function buildLocalGeometryTriangleEntries(" in geometry_text
     assert "async function buildPickMeshLocalTriangleCatalogs(" in text
-    assert "function resolvePickRecordWorldMatrix(" in text
-    assert "function createLocalRayFromWorldRay(" in text
-    assert "function intersectPickTriangleBvhClosest(" in text
-    assert "function intersectLargeModelMeshLocalCatalog(" in text
-    assert "function appendPickMeshTrianglesFromGeometry(" in text
-    assert "mesh?.isInstancedMesh&&Number.isInteger(record?.instanceId)" in text
-    assert "mesh.getMatrixAt(record.instanceId,instanceMatrix);" in text
-    assert "function buildPickSurfaceFacetEntries(" in text
-    assert "function buildPickSurfaceFacetBvh(" in text
-    assert "function queryPickTriangleEntriesBvh(" in text
-    assert "function queryPickMeshTriangleBvh(" in text
+    assert "function resolvePickRecordWorldMatrix(" in geometry_text
+    assert "function createLocalRayFromWorldRay(" in geometry_text
+    assert "function intersectPickTriangleBvhClosest(" in geometry_text
+    assert "function intersectLargeModelMeshLocalCatalog(" in geometry_text
+    assert "function appendPickMeshTrianglesFromGeometry(" in geometry_text
+    assert "mesh?.isInstancedMesh&&Number.isInteger(record?.instanceId)" in compact_geometry_text
+    assert "mesh.getMatrixAt(record.instanceId,instanceMatrix);" in compact_geometry_text
+    assert "function buildPickSurfaceFacetEntries(" in geometry_text
+    assert "function buildPickSurfaceFacetBvh(" in geometry_text
+    assert "function queryPickTriangleEntriesBvh(" in geometry_text
+    assert "function queryPickMeshTriangleBvh(" in geometry_text
     assert "function refreshDeformedPickMeshTriangleBvh()" in text
-    assert "function shouldIncludePickSpatialIndexOverflowRecord(" in text
-    assert "function estimatePickRecordEntryDistance(" in text
-    assert "function queryPickSpatialIndexOverflowBvh(" in text
-    assert "function queryPickSurfaceFacetBvh(" in text
+    assert "function shouldIncludePickSpatialIndexOverflowRecord(" in geometry_text
+    assert "function estimatePickRecordEntryDistance(" in geometry_text
+    assert "function queryPickSpatialIndexOverflowBvh(" in geometry_text
+    assert "function queryPickSurfaceFacetBvh(" in geometry_text
     assert "function queryPickSpatialIndexCandidates(" in text
-    assert "function intersectRayBoxDistances(" in text
-    assert "function getPickSpatialIndexCellCoords(" in text
+    assert "function intersectRayBoxDistances(" in geometry_text
+    assert "function getPickSpatialIndexCellCoords(" in geometry_text
     assert "function pickLargeModelRecord(" in text
     assert "function intersectLargeModelLineRecord(" in text
     assert "function intersectLargeModelSurfaceRecord(" in text
@@ -171,13 +183,15 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
 
 def test_index_html_uses_anisotropic_pick_spatial_index_cell_sizes_end_to_end() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
+    compact_geometry_text = "".join(geometry_text.split())
 
-    assert "function getPickSpatialIndexAxisCellSize(index,axis){" in text
-    assert "safeNumber(index?.[`cellSize${axis.toUpperCase()}`],0)," in text
-    assert "safeNumber(index?.cellSize,0)," in text
-    assert "ix:clampPickSpatialIndexCoord((point.x-index.boundsMin.x)/getPickSpatialIndexAxisCellSize(index,'x'),index.dimX)," in text
-    assert "iy:clampPickSpatialIndexCoord((point.y-index.boundsMin.y)/getPickSpatialIndexAxisCellSize(index,'y'),index.dimY)," in text
-    assert "iz:clampPickSpatialIndexCoord((point.z-index.boundsMin.z)/getPickSpatialIndexAxisCellSize(index,'z'),index.dimZ)," in text
+    assert "function getPickSpatialIndexAxisCellSize(index, axis) {" in geometry_text
+    assert "safeNumber(index?.[`cellSize${axis.toUpperCase()}`],0)," in compact_geometry_text
+    assert "safeNumber(index?.cellSize,0)," in compact_geometry_text
+    assert "ix:clampPickSpatialIndexCoord((point.x-index.boundsMin.x)/getPickSpatialIndexAxisCellSize(index,'x'),index.dimX)," in compact_geometry_text
+    assert "iy:clampPickSpatialIndexCoord((point.y-index.boundsMin.y)/getPickSpatialIndexAxisCellSize(index,'y'),index.dimY)," in compact_geometry_text
+    assert "iz:clampPickSpatialIndexCoord((point.z-index.boundsMin.z)/getPickSpatialIndexAxisCellSize(index,'z'),index.dimZ)," in compact_geometry_text
     assert "const cellSizeX=axisExtentToCellSize(extent.x);" in text
     assert "const cellSizeY=axisExtentToCellSize(extent.y);" in text
     assert "const cellSizeZ=axisExtentToCellSize(extent.z);" in text
@@ -222,23 +236,40 @@ def test_index_html_uses_anisotropic_pick_spatial_index_cell_sizes_end_to_end() 
 
 def test_index_html_chunk_normalizes_large_payloads_off_main_slice() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    normalizer_text = Path("src/structure-viewer/viewer-model-normalizer.js").read_text(encoding="utf-8")
+    direct_normalizer_text = Path("src/structure-viewer/viewer-direct-model-normalizer.js").read_text(encoding="utf-8")
+    compact_text = "".join(text.split())
 
     assert "const NORMALIZATION_CHUNK_SIZE=" in text
     assert "async function yieldToMainThread(" in text
     assert "async function processInChunks(" in text
-    assert "async function chunkMap(" in text
+    assert "const mapRows = async" in direct_normalizer_text
     assert "requestIdleCallback" in text
     assert "requestAnimationFrame" in text
-    assert "async function sanitizeModelPayloadAsync(" in text
-    assert "async function buildModelFromInteractivePayloadAsync(" in text
+    assert "export async function sanitizeModelPayloadAsync(" in direct_normalizer_text
+    assert "returnsanitizeModelPayloadAsync(payload,sourceMeta,{processInChunks,chunkSize:NORMALIZATION_CHUNK_SIZE});" in compact_text
+    assert ":buildModelFromInteractivePayload(payload,sourceMeta);" in compact_text
+    assert "constinteractiveModelAsync=awaitbuildModelFromInteractivePayloadAsync(payload,sourceMeta,{" in compact_text
+    assert "viewer-model-normalizer.js" in text
+    assert "viewer-direct-model-normalizer.js" in text
+    assert "const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {" in text
+    assert "export async function buildModelFromInteractivePayloadAsync(" in normalizer_text
     assert "function createViewerOptimizationWorkerSource(" in text
     assert "function runViewerOptimizationWorker(" in text
     assert "async function sanitizeModelPayloadWithWorker(" in text
     assert "async function buildModelFromInteractivePayloadWithWorker(" in text
+    assert "import {buildModelFromInteractivePayload} from ${JSON.stringify(modelNormalizerModuleUrl)};" in text
+    assert "import {sanitizeModelPayload} from ${JSON.stringify(directModelNormalizerModuleUrl)};" in text
+    assert "new Worker(url,{name:'structure-viewer-optimizer',type:'module'});" in text
+    assert "viewerOptimizationWorkerMain" not in text
+    assert "const safeNumber=(value,fallback=0)=>" not in text
+    assert "const buildDirectModelMeta=(rootPayload" not in text
     assert "Normalizing payload in worker..." in text
-    assert "forceChunking:totalSegments>NORMALIZATION_CHUNK_SIZE" in text
-    assert "await processInChunks(baselineSegments" in text
-    assert "await processInChunks(afterSegments" in text
+    assert "processInChunks," in text
+    assert "chunkSize:NORMALIZATION_CHUNK_SIZE" in text
+    assert "forceChunking: totalSegments > chunkSize" in normalizer_text
+    assert "await chunker(baselineSegments" in normalizer_text
+    assert "await chunker(afterSegments" in normalizer_text
     assert "await yieldToMainThread({message:'Building render geometry...',ensurePaint:true});" in text
     assert "await normalizeLoadedPayload(" in text
     assert "await buildModel(initial.data,initial.sourceMeta);" in text
@@ -263,18 +294,34 @@ def test_index_html_streams_large_model_geometry_builds() -> None:
 
 def test_index_html_supports_midas33_preset_and_nested_model_payloads() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    loader_text = Path("src/structure-viewer/viewer-data-loader.js").read_text(encoding="utf-8")
+    normalizer_text = Path("src/structure-viewer/viewer-model-normalizer.js").read_text(encoding="utf-8")
+    direct_normalizer_text = Path("src/structure-viewer/viewer-direct-model-normalizer.js").read_text(encoding="utf-8")
 
-    assert "ARTIFACT_PRESET_CANDIDATES" in text
-    assert "midas_generator_33.json" in text
-    assert "midas_generator_33.pr_recheck.json" in text
-    assert "midas_generator_33.optimized.roundtrip.json" in text
-    assert "PRESET_SIDECAR_FILES" in text
-    assert "./index.midas33.data.js" in text
-    assert "function extractModelPayload(" in text
-    assert "payload.model&&typeof payload.model==='object'" in text
-    assert "buildDirectModelMeta(" in text
-    assert "load_case_inventory" in text
-    assert "geometry_bridge_review_count" in text
+    assert "viewer-data-loader.js" in text
+    assert "buildArtifactCandidates" in text
+    assert "loadPresetSidecarIfNeeded" in text
+    assert "readEmbeddedPayload" in text
+    assert "getPresetSidecarPath" in loader_text
+    assert "normalizePresetToken" in loader_text
+    assert "export async function loadPresetSidecarIfNeeded" in loader_text
+    assert "ARTIFACT_PRESET_CANDIDATES" in loader_text
+    assert "midas_generator_33.json" in loader_text
+    assert "midas_generator_33.pr_recheck.json" in loader_text
+    assert "midas_generator_33.optimized.roundtrip.json" in loader_text
+    assert "PRESET_SIDECAR_FILES" in loader_text
+    assert "./index.midas33.data.js" in loader_text
+    assert "./index.real_drawing_private.data.js" in loader_text
+    assert "real_drawing_private_3d: './index.real_drawing_private.data.js'" in loader_text
+    assert "./index.html?preset=real_drawing_private_3d" in text
+    assert "function updateSuiteRouteTabs()" in text
+    assert "from './viewer-model-normalizer.js';" in text
+    assert "from './viewer-direct-model-normalizer.js';" in text
+    assert "export function extractModelPayload(" in normalizer_text
+    assert "Array.isArray(payload.model.nodes)" in normalizer_text
+    assert "export function buildDirectModelMeta(" in direct_normalizer_text
+    assert "load_case_inventory" in direct_normalizer_text
+    assert "geometry_bridge_review_count" in direct_normalizer_text
 
 
 def test_index_html_surfaces_drawing_review_metadata() -> None:
@@ -330,6 +377,7 @@ def test_index_html_adds_story_clip_search_and_png_export() -> None:
 
 def test_index_html_adds_non_destructive_section_edit_preview_export() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    direct_normalizer_text = Path("src/structure-viewer/viewer-direct-model-normalizer.js").read_text(encoding="utf-8")
 
     assert 'id="edit-preview-section-input"' in text
     assert 'id="edit-preview-note-input"' in text
@@ -356,7 +404,7 @@ def test_index_html_adds_non_destructive_section_edit_preview_export() -> None:
     assert "element_section_pairs:entry.element_section_pairs||[]" in text
     assert "applied_at:entry.applied_at||sectionEditApplyState.appliedAt||''" in text
     assert "function resolveSectionEditTargetSectionCatalogMatch(" in text
-    assert "function buildSectionCatalogSummary(" in text
+    assert "export function buildSectionCatalogSummary(" in direct_normalizer_text
     assert "Applied Section" in text
     assert "Edit Apply" in text
     assert "No draft staged. Preview entries will summarize current and target sections for the active member scope." in text
@@ -364,28 +412,33 @@ def test_index_html_adds_non_destructive_section_edit_preview_export() -> None:
 
 def test_index_html_uses_vertex_color_contour_interpolation() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
+    mesh_builder_text = Path("src/structure-viewer/viewer-render-mesh-builders.js").read_text(encoding="utf-8")
+    contour_text = Path("src/structure-viewer/viewer-contour-materials.js").read_text(encoding="utf-8")
 
     assert "const NODE_CONTOUR_FIELDS=new Set(['disp_mag','stress_vm']);" in text
     assert "const CONTOUR_LUT_SIZE=256;" in text
+    assert "from './viewer-contour-materials.js';" in text
+    assert "const contourMaterialToolkit=createViewerContourMaterialToolkit(THREE,{" in text
     assert "const CONTOUR_SURFACE_TESSELLATION_MIN=10;" in text
     assert "const CONTOUR_SURFACE_TESSELLATION_MAX=20;" in text
-    assert "function computeAdaptiveContourSubdivisions(" in text
-    assert "function buildHighResolutionContourSurfaceGeometry(" in text
-    assert "function buildContourLutTexture(" in text
-    assert "function applySurfaceContourScalars(" in text
-    assert "function createSurfaceContourShaderMaterial(" in text
+    assert "function computeAdaptiveContourSubdivisions(" in geometry_text
+    assert "function buildHighResolutionContourSurfaceGeometry(" in geometry_text
+    assert "function buildContourLutTexture(" in contour_text
+    assert "function applySurfaceContourScalars(" in contour_text
+    assert "function createSurfaceContourShaderMaterial(" in contour_text
     assert "function applySurfaceContourShaderMaterial(" in text
-    assert "function buildContourSurfaceGeometry(" in text
-    assert "function sampleBilinearColor(" in text
-    assert "function sampleBilinearScalar(" in text
-    assert "function applyLineTubeContourColors(" in text
-    assert "function applySurfaceContourColors(" in text
-    assert "function updateDirectMeshContourGeometry(" in text
-    assert "new THREE.DataTexture(" in text
-    assert "new THREE.ShaderMaterial(" in text
-    assert "contourScalar" in text
-    assert "geometry?.getAttribute?.('uv')" in text
+    assert "function buildContourSurfaceGeometry(" in geometry_text
+    assert "function sampleBilinearColor(" in geometry_text
+    assert "function sampleBilinearScalar(" in contour_text
+    assert "function applyLineTubeContourColors(" in contour_text
+    assert "function applySurfaceContourColors(" in contour_text
+    assert "function updateDirectMeshContourGeometry(" in contour_text
+    assert "new T.DataTexture(" in contour_text
+    assert "new T.ShaderMaterial(" in contour_text
+    assert "contourScalar" in contour_text
+    assert "geometry?.getAttribute?.('uv')" in contour_text
     assert "buildLodSurfaceContourGeometry(verts,surfaceRenderLodProfile,{isInstancedSurface})" in text
-    assert "vertexColors:true" in text
+    assert "vertexColors: true" in mesh_builder_text
     assert "renderMode==='wireframe'||renderMode==='contour'" in text
     assert "resolveNodeContourColor(" in text

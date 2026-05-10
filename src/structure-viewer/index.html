@@ -63,6 +63,7 @@
     </nav>
     <nav class="suite-route-tabs" aria-label="Structural insight suite">
       <a class="suite-route-tab is-active" href="./index.html">Model Workspace</a>
+      <a class="suite-route-tab" href="./index.html?preset=real_drawing_private_3d">Real Drawings</a>
       <a class="suite-route-tab" href="./charts.html">Analysis Charts</a>
       <a class="suite-route-tab" href="./optimization_history.html">Optimization History</a>
       <a class="suite-route-tab" href="./panel_zone.html">Panel Zone</a>
@@ -344,6 +345,37 @@
 <script type="module">
 import * as THREE from './vendor/three.module.js';
 import {OrbitControls} from './vendor/OrbitControls.js';
+import {
+  buildArtifactCandidates,
+  getRequestedPreset,
+  loadPresetSidecarIfNeeded,
+  readEmbeddedPayload,
+} from './viewer-data-loader.js';
+import {
+  buildModelFromInteractivePayload,
+  buildModelFromInteractivePayloadAsync,
+  extractInteractivePayload,
+  extractModelPayload,
+  isModelPayload,
+} from './viewer-model-normalizer.js';
+import {
+  sanitizeModelPayload,
+  sanitizeModelPayloadAsync,
+} from './viewer-direct-model-normalizer.js';
+import {
+  createViewerRenderPickingGeometryToolkit,
+} from './viewer-render-picking-geometry.js';
+import {
+  createViewerRenderMeshBuilderToolkit,
+} from './viewer-render-mesh-builders.js';
+import {
+  createViewerContourMaterialToolkit,
+} from './viewer-contour-materials.js';
+
+const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
+  modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,
+  directModelNormalizer: new URL('./viewer-direct-model-normalizer.js', import.meta.url).href,
+};
 
 /* ── State ── */
 let scene,camera,renderer,controls,raycaster,mouse;
@@ -394,6 +426,79 @@ const SELECTION_HIGHLIGHT_HEX=0x224488;
 const TYPE_HIGHLIGHT_HEX=0x223355;
 const APPLIED_OVERRIDE_HEX=0xf59e0b;
 const NODE_CONTOUR_FIELDS=new Set(['disp_mag','stress_vm']);
+const contourMaterialToolkit=createViewerContourMaterialToolkit(THREE,{
+  contourLutSize:CONTOUR_LUT_SIZE,
+  nodeContourFields:NODE_CONTOUR_FIELDS,
+});
+const {
+  applyLineTubeContourColors,
+  applySurfaceContourColors,
+  applySurfaceContourScalars,
+  applySurfaceContourShaderMaterial:applySurfaceContourShaderMaterialWithTint,
+  buildConstantColorAttribute,
+  buildConstantScalarAttribute,
+  buildContourLutTexture,
+  createSurfaceContourShaderMaterial,
+  ensureSurfaceContourShaderMaterial,
+  isNodeContourField,
+  resolveContourColor,
+  resolveContourT,
+  resolveContourValue,
+  resolveNodeContourColor,
+  sampleBilinearScalar,
+  updateDirectMeshContourGeometry,
+}=contourMaterialToolkit;
+const renderMeshBuilderToolkit=createViewerRenderMeshBuilderToolkit(THREE,{colors:COLORS});
+const {
+  createInstancedLineGroupObjects,
+  createInstancedSurfaceGroupObjects,
+  createLineElementRenderObjects,
+  createSurfaceElementRenderObjects,
+}=renderMeshBuilderToolkit;
+const renderPickingGeometryToolkit=createViewerRenderPickingGeometryToolkit(THREE,{
+  contourSurfaceTessellationMin:CONTOUR_SURFACE_TESSELLATION_MIN,
+  contourSurfaceTessellationMax:CONTOUR_SURFACE_TESSELLATION_MAX,
+  instancedSurfaceElementThreshold:INSTANCED_SURFACE_ELEMENT_THRESHOLD,
+  surfaceLodMediumElementThreshold:SURFACE_LOD_MEDIUM_ELEMENT_THRESHOLD,
+  surfaceLodCoarseElementThreshold:SURFACE_LOD_COARSE_ELEMENT_THRESHOLD,
+  surfaceLodMediumDirectSubdivisions:SURFACE_LOD_MEDIUM_DIRECT_SUBDIVISIONS,
+  surfaceLodCoarseDirectSubdivisions:SURFACE_LOD_COARSE_DIRECT_SUBDIVISIONS,
+  surfaceLodMediumInstancedSubdivisions:SURFACE_LOD_MEDIUM_INSTANCED_SUBDIVISIONS,
+  surfaceLodCoarseInstancedSubdivisions:SURFACE_LOD_COARSE_INSTANCED_SUBDIVISIONS,
+  pickOverflowBvhLeafSize:LARGE_MODEL_PICK_SPATIAL_INDEX_OVERFLOW_BVH_LEAF_SIZE,
+});
+const {
+  appendPickMeshTrianglesFromGeometry,
+  buildContourSurfaceGeometry,
+  buildHighResolutionContourSurfaceGeometry,
+  buildLocalGeometryTriangleEntries,
+  buildLodSurfaceContourGeometry,
+  buildPickBoundsBvh,
+  buildPickMeshTriangleBvh,
+  buildPickSpatialIndexOverflowBvh,
+  buildPickSurfaceFacetBvh,
+  buildPickSurfaceFacetEntries,
+  buildSurfaceLodProfile,
+  computeAdaptiveContourSubdivisions,
+  computeLineElementMatrix,
+  computePickBoundingSphere,
+  computeSurfaceElementMatrix,
+  computeSurfaceLodSubdivisions,
+  createLocalRayFromWorldRay,
+  estimatePickRecordEntryDistance,
+  getPickSpatialIndexAxisCellSize,
+  getPickSpatialIndexCellCoords,
+  getPickSpatialIndexKey,
+  intersectLargeModelMeshLocalCatalog,
+  intersectPickTriangleBvhClosest,
+  intersectRayBoxDistances,
+  queryPickMeshTriangleBvh,
+  queryPickSpatialIndexOverflowBvh,
+  queryPickSurfaceFacetBvh,
+  sampleBilinearColor,
+  sampleBilinearPoint,
+  shouldIncludePickSpatialIndexOverflowRecord,
+}=renderPickingGeometryToolkit;
 const layerVisibility=new Map();
 let activeIsolation={kind:'',value:'',label:''};
 let storyClipBands=[],activeStoryClipLabel='',activeClipPlanes=[],storyClipPadding=.35;
@@ -404,21 +509,6 @@ const COLORMAPS={
   coolwarm:t=>{if(t<.5)return new THREE.Color(.2+t*.2,.2+t*1.2,.8);return new THREE.Color(.8+(t-.5)*.4,1.2-t*1.2,.2)},
   plasma:t=>new THREE.Color().setHSL(.83-t*.65,.95,.25+t*.45)
 };
-const DEFAULT_ARTIFACT_CANDIDATES=[
-  '../../implementation/phase1/release/visualization/optimized_drawing_review_summary.json',
-  '../../implementation/phase1/release/visualization/structural_optimization_viewer.json'
-];
-const ARTIFACT_PRESET_CANDIDATES={
-  midas33:['../../implementation/phase1/open_data/midas/midas_generator_33.json'],
-  midas33_pr:['../../implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json'],
-  midas33_optimized:['../../implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json']
-};
-const PRESET_SIDECAR_FILES={
-  midas33:'./index.midas33.data.js'
-};
-const EMBEDDED_DATA_IDS=['embedded-model-data','structure-model-data','model-data','interactive-3d-data'];
-const GLOBAL_EMBEDDED_KEYS=['__STRUCTURE_VIEWER_PAYLOAD__','__STRUCTURE_MODEL__','__EMBEDDED_MODEL__','__STRUCTURE_VIEWER_DATA__'];
-const GLOBAL_PRESET_PAYLOAD_KEYS=['__STRUCTURE_VIEWER_PRESET_PAYLOADS__'];
 
 /* ── Data Loading Helpers ── */
 function safeNumber(v,fallback=0){
@@ -505,24 +595,18 @@ function normalizeSelectionValues(values){
   });
   return unique;
 }
-function normalizePresetToken(value){
-  const raw=String(value||'').trim().toLowerCase();
-  if(!raw)return'';
-  const normalized=raw.replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
-  const aliasMap={
-    midas_33:'midas33',
-    midas33:'midas33',
-    midas33_pr:'midas33_pr',
-    midas33_precheck:'midas33_pr',
-    midas33_pr_recheck:'midas33_pr',
-    midas33_optimized:'midas33_optimized',
-    midas33_optimized_roundtrip:'midas33_optimized'
-  };
-  return aliasMap[normalized]||normalized;
-}
-function getRequestedPreset(){
-  const params=new URLSearchParams(window.location.search);
-  return normalizePresetToken(params.get('preset')||params.get('model_preset')||'');
+function updateSuiteRouteTabs(){
+  const preset=getRequestedPreset();
+  document.querySelectorAll('.suite-route-tab').forEach(link=>{
+    if(!(link instanceof HTMLAnchorElement))return;
+    const href=String(link.getAttribute('href')||'');
+    const isRealDrawingTab=href.includes('preset=real_drawing_private_3d');
+    const isModelWorkspaceTab=href.endsWith('./index.html')||href==='index.html';
+    link.classList.toggle(
+      'is-active',
+      preset==='real_drawing_private_3d'?isRealDrawingTab:isModelWorkspaceTab
+    );
+  });
 }
 function readSharedSelection(){
   const params=new URLSearchParams(window.location.search);
@@ -1949,170 +2033,9 @@ function clearIsolation(){
   if(modelData)buildUI(modelData);
   if(modelData)applyVisibilityFilters();
 }
-function computeLineElementMatrix(start,end){
-  const midpoint=start.clone().add(end).multiplyScalar(.5);
-  const direction=end.clone().sub(start);
-  const length=Math.max(direction.length(),1e-6);
-  const quaternion=new THREE.Quaternion().setFromUnitVectors(
-    new THREE.Vector3(0,1,0),
-    direction.normalize()
-  );
-  return new THREE.Matrix4().compose(
-    midpoint,
-    quaternion,
-    new THREE.Vector3(1,length,1)
-  );
-}
 function isSurfaceElementInstancable(el,ns){
   const type=normalizeElementType(el?.type);
   return (type==='wall'||type==='slab')&&Array.isArray(ns)&&ns.length===4;
-}
-function computeSurfaceElementMatrix(points){
-  if(!Array.isArray(points)||points.length<4)return null;
-  const center=points.reduce((sum,point)=>sum.add(point.clone()),new THREE.Vector3()).multiplyScalar(1/points.length);
-  const xAxis=points[1].clone().sub(points[0]).add(points[2].clone().sub(points[3])).multiplyScalar(.5);
-  const yAxis=points[3].clone().sub(points[0]).add(points[2].clone().sub(points[1])).multiplyScalar(.5);
-  if(xAxis.lengthSq()<1e-10||yAxis.lengthSq()<1e-10)return null;
-  const normal=new THREE.Vector3().crossVectors(xAxis,yAxis);
-  if(normal.lengthSq()<1e-10)return null;
-  normal.normalize().multiplyScalar(Math.max(Math.min(xAxis.length(),yAxis.length())*.001,1e-4));
-  const matrix=new THREE.Matrix4().makeBasis(xAxis,yAxis,normal);
-  matrix.setPosition(center);
-  return matrix;
-}
-function sampleBilinearPoint(points,u,v){
-  if(!Array.isArray(points)||points.length<4)return new THREE.Vector3();
-  const p00=points[0].clone().multiplyScalar((1-u)*(1-v));
-  const p10=points[1].clone().multiplyScalar(u*(1-v));
-  const p11=points[2].clone().multiplyScalar(u*v);
-  const p01=points[3].clone().multiplyScalar((1-u)*v);
-  return p00.add(p10).add(p11).add(p01);
-}
-function sampleBilinearColor(c00,c10,c11,c01,u,v){
-  const top=c00.clone().lerp(c10,u);
-  const bottom=c01.clone().lerp(c11,u);
-  return top.lerp(bottom,v);
-}
-function computeAdaptiveContourSubdivisions(points){
-  if(!Array.isArray(points)||points.length<4)return CONTOUR_SURFACE_TESSELLATION_MIN;
-  const edges=[
-    points[1].clone().sub(points[0]).length(),
-    points[2].clone().sub(points[1]).length(),
-    points[3].clone().sub(points[2]).length(),
-    points[0].clone().sub(points[3]).length()
-  ].filter(length=>Number.isFinite(length)&&length>0);
-  if(!edges.length)return CONTOUR_SURFACE_TESSELLATION_MIN;
-  const longest=Math.max(...edges);
-  const shortest=Math.max(Math.min(...edges),1e-6);
-  const area=new THREE.Triangle(points[0],points[1],points[2]).getArea()+new THREE.Triangle(points[0],points[2],points[3]).getArea();
-  const aspectBoost=Math.max(1,longest/shortest);
-  const densityBoost=Math.max(1,Math.sqrt(Math.max(area,1e-6))*1.8);
-  return Math.max(
-    CONTOUR_SURFACE_TESSELLATION_MIN,
-    Math.min(CONTOUR_SURFACE_TESSELLATION_MAX,Math.round(Math.max(aspectBoost*4,densityBoost)))
-  );
-}
-function buildContourSurfaceGeometry(points,subdivisions=CONTOUR_SURFACE_TESSELLATION_MIN){
-  if(!Array.isArray(points)||points.length<4)return null;
-  const segments=Math.max(1,Math.round(Number(subdivisions)||1));
-  const verticesPerSide=segments+1;
-  const vertexCount=verticesPerSide*verticesPerSide;
-  const positions=new Float32Array(vertexCount*3);
-  const uvs=new Float32Array(vertexCount*2);
-  const indices=[];
-  let vertexIndex=0;
-  for(let row=0;row<=segments;row+=1){
-    const v=row/segments;
-    for(let column=0;column<=segments;column+=1){
-      const u=column/segments;
-      const point=sampleBilinearPoint(points,u,v);
-      positions[vertexIndex*3]=point.x;
-      positions[vertexIndex*3+1]=point.y;
-      positions[vertexIndex*3+2]=point.z;
-      uvs[vertexIndex*2]=u;
-      uvs[vertexIndex*2+1]=v;
-      vertexIndex+=1;
-    }
-  }
-  for(let row=0;row<segments;row+=1){
-    for(let column=0;column<segments;column+=1){
-      const a=row*verticesPerSide+column;
-      const b=a+1;
-      const d=(row+1)*verticesPerSide+column;
-      const c=d+1;
-      indices.push(a,b,c,a,c,d);
-    }
-  }
-  const geometry=new THREE.BufferGeometry();
-  geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
-  geometry.setAttribute('uv',new THREE.BufferAttribute(uvs,2));
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-  return geometry;
-}
-function buildHighResolutionContourSurfaceGeometry(points){
-  return buildContourSurfaceGeometry(points,computeAdaptiveContourSubdivisions(points));
-}
-function buildSurfaceLodProfile(surfaceElementCount,instancedSurfaceCount){
-  const totalSurfaceCount=Math.max(0,safeNumber(surfaceElementCount,0));
-  const totalInstancedCount=Math.max(0,safeNumber(instancedSurfaceCount,0));
-  if(totalSurfaceCount>=SURFACE_LOD_COARSE_ELEMENT_THRESHOLD){
-    return{
-      label:'coarse',
-      directSurfaceMaxSubdivisions:SURFACE_LOD_COARSE_DIRECT_SUBDIVISIONS,
-      instancedSurfaceMaxSubdivisions:SURFACE_LOD_COARSE_INSTANCED_SUBDIVISIONS,
-      pickFromInstancedSurfaces:totalInstancedCount>=INSTANCED_SURFACE_ELEMENT_THRESHOLD
-    };
-  }
-  if(totalSurfaceCount>=SURFACE_LOD_MEDIUM_ELEMENT_THRESHOLD){
-    return{
-      label:'medium',
-      directSurfaceMaxSubdivisions:SURFACE_LOD_MEDIUM_DIRECT_SUBDIVISIONS,
-      instancedSurfaceMaxSubdivisions:SURFACE_LOD_MEDIUM_INSTANCED_SUBDIVISIONS,
-      pickFromInstancedSurfaces:totalInstancedCount>=INSTANCED_SURFACE_ELEMENT_THRESHOLD
-    };
-  }
-  return{
-    label:'full',
-    directSurfaceMaxSubdivisions:CONTOUR_SURFACE_TESSELLATION_MAX,
-    instancedSurfaceMaxSubdivisions:CONTOUR_SURFACE_TESSELLATION_MAX,
-    pickFromInstancedSurfaces:false
-  };
-}
-function computeSurfaceLodSubdivisions(points,lodProfile,{isInstancedSurface=false}={}){
-  const adaptive=computeAdaptiveContourSubdivisions(points);
-  const maxSubdivisions=Math.max(
-    1,
-    Math.round(
-      isInstancedSurface
-        ?safeNumber(lodProfile?.instancedSurfaceMaxSubdivisions,CONTOUR_SURFACE_TESSELLATION_MAX)
-        :safeNumber(lodProfile?.directSurfaceMaxSubdivisions,CONTOUR_SURFACE_TESSELLATION_MAX)
-    )
-  );
-  const floorSubdivisions=isInstancedSurface&&normalizeSelectionValue(lodProfile?.label)!=='full'
-    ?1
-    :Math.min(CONTOUR_SURFACE_TESSELLATION_MIN,maxSubdivisions);
-  return Math.max(floorSubdivisions,Math.min(maxSubdivisions,adaptive));
-}
-function buildLodSurfaceContourGeometry(points,lodProfile,{isInstancedSurface=false}={}){
-  if(!lodProfile||normalizeSelectionValue(lodProfile.label)==='full'){
-    return buildHighResolutionContourSurfaceGeometry(points);
-  }
-  return buildContourSurfaceGeometry(
-    points,
-    computeSurfaceLodSubdivisions(points,lodProfile,{isInstancedSurface})
-  );
-}
-function computePickBoundingSphere(points){
-  if(!Array.isArray(points)||points.length<2)return null;
-  const center=points
-    .reduce((sum,point)=>sum.add(point.clone()),new THREE.Vector3())
-    .multiplyScalar(1/points.length);
-  const radius=Math.max(
-    ...points.map(point=>center.distanceTo(point)),
-    1e-3
-  );
-  return{center,radius};
 }
 function isLargeModelPickAccelerationEnabled(){
   return Boolean(
@@ -2129,229 +2052,6 @@ function registerPickAnalyticRecord(record){
   record.pickKind=record.points.length===2?'line':'surface';
   pickAnalyticRecords.push(record);
   return record;
-}
-function getPickSpatialIndexKey(index,ix,iy,iz){
-  return ix+index.dimX*(iy+index.dimY*iz);
-}
-function clampPickSpatialIndexCoord(rawCoord,maxCount){
-  return Math.max(0,Math.min(maxCount-1,Math.floor(rawCoord)));
-}
-function getPickSpatialIndexAxisCellSize(index,axis){
-  return Math.max(
-    safeNumber(index?.[`cellSize${axis.toUpperCase()}`],0),
-    safeNumber(index?.cellSize,0),
-    1e-3
-  );
-}
-function getPickSpatialIndexCellCoords(index,point){
-  return{
-    ix:clampPickSpatialIndexCoord((point.x-index.boundsMin.x)/getPickSpatialIndexAxisCellSize(index,'x'),index.dimX),
-    iy:clampPickSpatialIndexCoord((point.y-index.boundsMin.y)/getPickSpatialIndexAxisCellSize(index,'y'),index.dimY),
-    iz:clampPickSpatialIndexCoord((point.z-index.boundsMin.z)/getPickSpatialIndexAxisCellSize(index,'z'),index.dimZ),
-  };
-}
-function buildPickBoundsBvh(entryIndices,entries,leafSize=LARGE_MODEL_PICK_SPATIAL_INDEX_OVERFLOW_BVH_LEAF_SIZE){
-  const indices=Array.isArray(entryIndices)?entryIndices.filter(Number.isInteger):[];
-  if(!indices.length)return null;
-  const boundsMin=new THREE.Vector3(Infinity,Infinity,Infinity);
-  const boundsMax=new THREE.Vector3(-Infinity,-Infinity,-Infinity);
-  const centerMin=new THREE.Vector3(Infinity,Infinity,Infinity);
-  const centerMax=new THREE.Vector3(-Infinity,-Infinity,-Infinity);
-  const validIndices=[];
-  indices.forEach(entryIndex=>{
-    const entry=Array.isArray(entries)?entries[entryIndex]:null;
-    if(
-      !(entry?.boundsMin instanceof THREE.Vector3)
-      ||!(entry?.boundsMax instanceof THREE.Vector3)
-      ||!(entry?.center instanceof THREE.Vector3)
-    )return;
-    validIndices.push(entryIndex);
-    boundsMin.min(entry.boundsMin);
-    boundsMax.max(entry.boundsMax);
-    centerMin.min(entry.center);
-    centerMax.max(entry.center);
-  });
-  if(!validIndices.length)return null;
-  const node={boundsMin,boundsMax};
-  if(validIndices.length<=leafSize){
-    node.entryIndices=validIndices;
-    return node;
-  }
-  const centerExtent=centerMax.clone().sub(centerMin);
-  const splitAxis=
-    centerExtent.y>centerExtent.x&&centerExtent.y>=centerExtent.z
-      ?'y'
-      :centerExtent.z>centerExtent.x&&centerExtent.z>=centerExtent.y
-        ?'z'
-        :'x';
-  validIndices.sort((left,right)=>{
-    const leftCenter=entries[left]?.center;
-    const rightCenter=entries[right]?.center;
-    return safeNumber(leftCenter?.[splitAxis],0)-safeNumber(rightCenter?.[splitAxis],0);
-  });
-  const splitIndex=Math.floor(validIndices.length/2);
-  if(splitIndex<=0||splitIndex>=validIndices.length){
-    node.entryIndices=validIndices;
-    return node;
-  }
-  const leftNode=buildPickBoundsBvh(validIndices.slice(0,splitIndex),entries,leafSize);
-  const rightNode=buildPickBoundsBvh(validIndices.slice(splitIndex),entries,leafSize);
-  if(!leftNode||!rightNode){
-    node.entryIndices=validIndices;
-    return node;
-  }
-  node.left=leftNode;
-  node.right=rightNode;
-  return node;
-}
-function normalizePickBoundsBvhNode(node){
-  if(!node)return null;
-  if(Array.isArray(node.entryIndices)){
-    node.recordIndices=node.entryIndices;
-    delete node.entryIndices;
-  }
-  if(node.left)node.left=normalizePickBoundsBvhNode(node.left);
-  if(node.right)node.right=normalizePickBoundsBvhNode(node.right);
-  return node;
-}
-function buildPickSpatialIndexOverflowBvh(recordIndices,records,leafSize=LARGE_MODEL_PICK_SPATIAL_INDEX_OVERFLOW_BVH_LEAF_SIZE){
-  const boundsEntries=(Array.isArray(recordIndices)?recordIndices:[]).map(recordIndex=>{
-    const record=Array.isArray(records)?records[recordIndex]:null;
-    const center=record?.pickCenter;
-    if(!(center instanceof THREE.Vector3))return null;
-    const radius=Math.max(safeNumber(record?.pickRadius,0),1e-3);
-    return{
-      center,
-      boundsMin:new THREE.Vector3(center.x-radius,center.y-radius,center.z-radius),
-      boundsMax:new THREE.Vector3(center.x+radius,center.y+radius,center.z+radius),
-    };
-  });
-  return normalizePickBoundsBvhNode(buildPickBoundsBvh(recordIndices,boundsEntries,leafSize));
-}
-function buildPickSurfaceFacetEntries(records){
-  const facets=[];
-  (Array.isArray(records)?records:[]).forEach((record,recordIndex)=>{
-    if(record?.pickKind!=='surface'||!Array.isArray(record.points)||record.points.length<4)return;
-    const points=record.points.filter(point=>point instanceof THREE.Vector3);
-    if(points.length<4)return;
-    for(let pointIndex=1;pointIndex<points.length-1;pointIndex+=1){
-      const a=points[0];
-      const b=points[pointIndex];
-      const c=points[pointIndex+1];
-      const normal=new THREE.Vector3().crossVectors(
-        b.clone().sub(a),
-        c.clone().sub(a)
-      );
-      if(normal.lengthSq()<1e-12)continue;
-      facets.push({
-        recordIndex,
-        triangle:[a,b,c],
-        center:a.clone().add(b).add(c).multiplyScalar(1/3),
-        boundsMin:new THREE.Vector3(
-          Math.min(a.x,b.x,c.x),
-          Math.min(a.y,b.y,c.y),
-          Math.min(a.z,b.z,c.z),
-        ),
-        boundsMax:new THREE.Vector3(
-          Math.max(a.x,b.x,c.x),
-          Math.max(a.y,b.y,c.y),
-          Math.max(a.z,b.z,c.z),
-        ),
-      });
-    }
-  });
-  return facets;
-}
-function buildPickSurfaceFacetBvh(surfaceFacetEntries,leafSize=LARGE_MODEL_PICK_SPATIAL_INDEX_OVERFLOW_BVH_LEAF_SIZE){
-  const facetIndices=(Array.isArray(surfaceFacetEntries)?surfaceFacetEntries:[]).map((_,facetIndex)=>facetIndex);
-  return buildPickBoundsBvh(facetIndices,surfaceFacetEntries,leafSize);
-}
-function appendPickMeshTrianglesFromGeometry(geometry,matrixWorld,recordIndex,triangleEntries){
-  if(!(geometry instanceof THREE.BufferGeometry)||!(matrixWorld instanceof THREE.Matrix4)||!Array.isArray(triangleEntries))return;
-  const positionAttr=geometry.getAttribute?.('position');
-  if(!(positionAttr instanceof THREE.BufferAttribute)||positionAttr.itemSize<3||positionAttr.count<3)return;
-  const indexArray=geometry.index?.array||null;
-  const triangleCount=indexArray
-    ?Math.floor(indexArray.length/3)
-    :Math.floor(positionAttr.count/3);
-  for(let triangleIndex=0;triangleIndex<triangleCount;triangleIndex+=1){
-    const aIndex=indexArray?indexArray[triangleIndex*3]:triangleIndex*3;
-    const bIndex=indexArray?indexArray[triangleIndex*3+1]:triangleIndex*3+1;
-    const cIndex=indexArray?indexArray[triangleIndex*3+2]:triangleIndex*3+2;
-    const a=new THREE.Vector3().fromBufferAttribute(positionAttr,aIndex).applyMatrix4(matrixWorld);
-    const b=new THREE.Vector3().fromBufferAttribute(positionAttr,bIndex).applyMatrix4(matrixWorld);
-    const c=new THREE.Vector3().fromBufferAttribute(positionAttr,cIndex).applyMatrix4(matrixWorld);
-    const normal=new THREE.Vector3().crossVectors(
-      b.clone().sub(a),
-      c.clone().sub(a)
-    );
-    if(normal.lengthSq()<1e-12)continue;
-    triangleEntries.push({
-      recordIndex,
-      triangle:[a,b,c],
-      center:a.clone().add(b).add(c).multiplyScalar(1/3),
-      boundsMin:new THREE.Vector3(
-        Math.min(a.x,b.x,c.x),
-        Math.min(a.y,b.y,c.y),
-        Math.min(a.z,b.z,c.z),
-      ),
-      boundsMax:new THREE.Vector3(
-        Math.max(a.x,b.x,c.x),
-        Math.max(a.y,b.y,c.y),
-        Math.max(a.z,b.z,c.z),
-      ),
-    });
-  }
-}
-function buildLocalGeometryTriangleEntries(geometry){
-  const triangleEntries=[];
-  if(!(geometry instanceof THREE.BufferGeometry))return triangleEntries;
-  const positionAttr=geometry.getAttribute?.('position');
-  if(!(positionAttr instanceof THREE.BufferAttribute)||positionAttr.itemSize<3||positionAttr.count<3)return triangleEntries;
-  const indexArray=geometry.index?.array||null;
-  const triangleCount=indexArray
-    ?Math.floor(indexArray.length/3)
-    :Math.floor(positionAttr.count/3);
-  for(let triangleIndex=0;triangleIndex<triangleCount;triangleIndex+=1){
-    const aIndex=indexArray?indexArray[triangleIndex*3]:triangleIndex*3;
-    const bIndex=indexArray?indexArray[triangleIndex*3+1]:triangleIndex*3+1;
-    const cIndex=indexArray?indexArray[triangleIndex*3+2]:triangleIndex*3+2;
-    const a=new THREE.Vector3().fromBufferAttribute(positionAttr,aIndex);
-    const b=new THREE.Vector3().fromBufferAttribute(positionAttr,bIndex);
-    const c=new THREE.Vector3().fromBufferAttribute(positionAttr,cIndex);
-    const normal=new THREE.Vector3().crossVectors(
-      b.clone().sub(a),
-      c.clone().sub(a)
-    );
-    if(normal.lengthSq()<1e-12)continue;
-    triangleEntries.push({
-      recordIndex:triangleEntries.length,
-      triangle:[a,b,c],
-      center:a.clone().add(b).add(c).multiplyScalar(1/3),
-      boundsMin:new THREE.Vector3(
-        Math.min(a.x,b.x,c.x),
-        Math.min(a.y,b.y,c.y),
-        Math.min(a.z,b.z,c.z),
-      ),
-      boundsMax:new THREE.Vector3(
-        Math.max(a.x,b.x,c.x),
-        Math.max(a.y,b.y,c.y),
-        Math.max(a.z,b.z,c.z),
-      ),
-    });
-  }
-  return triangleEntries;
-}
-function resolvePickRecordWorldMatrix(record){
-  const mesh=record?.mesh;
-  if(!(mesh?.isMesh)&&!(mesh?.isInstancedMesh))return null;
-  mesh.updateMatrixWorld?.(true);
-  if(mesh?.isInstancedMesh&&Number.isInteger(record?.instanceId)){
-    const instanceMatrix=new THREE.Matrix4();
-    mesh.getMatrixAt(record.instanceId,instanceMatrix);
-    return mesh.matrixWorld.clone().multiply(instanceMatrix);
-  }
-  return mesh.matrixWorld.clone();
 }
 async function buildPickMeshTriangleEntries(records,{forceChunking=false}={}){
   const triangleEntries=[];
@@ -2640,119 +2340,10 @@ function refreshDeformedPickMeshTriangleBvh(){
     largeModelBuildProfile.pickSpatialDeformedMeshLocalCatalogCount=localCatalogs.length;
   }
 }
-function createLocalRayFromWorldRay(ray,inverseWorldMatrix){
-  if(!(ray instanceof THREE.Ray)||!(inverseWorldMatrix instanceof THREE.Matrix4))return null;
-  return new THREE.Ray(
-    ray.origin.clone().applyMatrix4(inverseWorldMatrix),
-    ray.direction.clone().transformDirection(inverseWorldMatrix).normalize()
-  );
-}
-function intersectPickTriangleBvhClosest(node,entries,ray){
-  if(!node||!Array.isArray(entries)||!(ray instanceof THREE.Ray))return null;
-  const stack=[node];
-  let bestHit=null;
-  while(stack.length){
-    const current=stack.pop();
-    if(!current)continue;
-    const hitRange=intersectRayBoxDistances(ray,current.boundsMin,current.boundsMax);
-    if(!hitRange)continue;
-    if(bestHit&&hitRange.entry>bestHit.distance)continue;
-    if(Array.isArray(current.recordIndices)){
-      current.recordIndices.forEach(entryIndex=>{
-        const entry=entries[entryIndex];
-        if(!entry||!Array.isArray(entry.triangle)||entry.triangle.length!==3)return;
-        const hitPoint=ray.intersectTriangle(entry.triangle[0],entry.triangle[1],entry.triangle[2],false,new THREE.Vector3());
-        if(!hitPoint)return;
-        const distance=hitPoint.distanceTo(ray.origin);
-        if(distance<0)return;
-        if(!bestHit||distance<bestHit.distance){
-          bestHit={distance,point:hitPoint.clone(),entryIndex};
-        }
-      });
-      continue;
-    }
-    if(current.left)stack.push(current.left);
-    if(current.right)stack.push(current.right);
-  }
-  return bestHit;
-}
-function intersectLargeModelMeshLocalCatalog(ray,record,{preferDeformed=false}={}){
-  const catalog=preferDeformed&&record?.deformedPickMeshLocalCatalog
-    ?record.deformedPickMeshLocalCatalog
-    :record?.pickMeshLocalCatalog;
-  if(!catalog?.triangleBvh||!(catalog.inverseWorldMatrix instanceof THREE.Matrix4)||!(catalog.worldMatrix instanceof THREE.Matrix4))return null;
-  const localRay=createLocalRayFromWorldRay(ray,catalog.inverseWorldMatrix);
-  if(!(localRay instanceof THREE.Ray))return null;
-  const localHit=intersectPickTriangleBvhClosest(catalog.triangleBvh,catalog.triangleEntries,localRay);
-  if(!localHit?.point)return null;
-  const worldHitPoint=localHit.point.clone().applyMatrix4(catalog.worldMatrix);
-  const distanceAlongRay=worldHitPoint.clone().sub(ray.origin).dot(ray.direction);
-  if(distanceAlongRay<0)return null;
-  return{distance:distanceAlongRay,mesh:record?.mesh||null,data:record?.data};
-}
 function indexFromMap(primaryMap,primaryKey,fallbackMap,fallbackKey){
   if(primaryMap instanceof Map&&primaryKey&&primaryMap.has(primaryKey))return primaryMap.get(primaryKey);
   if(fallbackMap instanceof Map&&fallbackKey&&fallbackMap.has(fallbackKey))return fallbackMap.get(fallbackKey);
   return null;
-}
-function createInstancedWireframe(records,type){
-  const positions=new Float32Array(records.length*2*3);
-  const colors=new Float32Array(records.length*2*3);
-  records.forEach((record,index)=>{
-    positions.set(record.points[0].toArray(),index*6);
-    positions.set(record.points[1].toArray(),index*6+3);
-    const baseColor=new THREE.Color(record.baseColorHex);
-    colors.set([baseColor.r,baseColor.g,baseColor.b,baseColor.r,baseColor.g,baseColor.b],index*6);
-  });
-  const basePositions=new Float32Array(positions);
-  const geometry=new THREE.BufferGeometry();
-  geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
-  geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
-  const material=new THREE.LineBasicMaterial({
-    color:new THREE.Color(COLORS[type]||COLORS.other),
-    vertexColors:true,
-    transparent:true,
-    opacity:.85
-  });
-  const wireframe=new THREE.LineSegments(geometry,material);
-  wireframe.userData={_wireframe:true,_instancedWireframe:true,type,basePositions};
-  return wireframe;
-}
-function createInstancedSurfaceWireframe(records,type){
-  const positions=new Float32Array(records.length*8*3);
-  const colors=new Float32Array(records.length*8*3);
-  records.forEach((record,index)=>{
-    const offset=index*24;
-    const corners=record.points;
-    const path=[
-      corners[0],corners[1],
-      corners[1],corners[2],
-      corners[2],corners[3],
-      corners[3],corners[0]
-    ];
-    path.forEach((point,vertexIndex)=>{
-      positions.set(point.toArray(),offset+vertexIndex*3);
-    });
-    const baseColor=new THREE.Color(record.baseColorHex);
-    for(let vertexIndex=0;vertexIndex<8;vertexIndex+=1){
-      colors[offset+vertexIndex*3]=baseColor.r;
-      colors[offset+vertexIndex*3+1]=baseColor.g;
-      colors[offset+vertexIndex*3+2]=baseColor.b;
-    }
-  });
-  const basePositions=new Float32Array(positions);
-  const geometry=new THREE.BufferGeometry();
-  geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
-  geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
-  const material=new THREE.LineBasicMaterial({
-    color:new THREE.Color(COLORS[type]||COLORS.other),
-    vertexColors:true,
-    transparent:true,
-    opacity:.65
-  });
-  const wireframe=new THREE.LineSegments(geometry,material);
-  wireframe.userData={_wireframe:true,_instancedWireframe:true,_surfaceWireframe:true,type,basePositions};
-  return wireframe;
 }
 async function buildInstancedLineElements(lineElements,nodeMap,{forceChunking=false}={}){
   const grouped=new Map();
@@ -2783,44 +2374,17 @@ async function buildInstancedLineElements(lineElements,nodeMap,{forceChunking=fa
   const nextGroups=[];
   grouped.forEach((records,type)=>{
     if(!records.length)return;
-    const radius=getLineElementRadius(type);
-    const geometry=new THREE.CylinderGeometry(radius,radius,1,8,1,false);
-    const material=new THREE.MeshPhongMaterial({
-      color:0xffffff,
-      transparent:true,
-      opacity:.85
-    });
-    const mesh=new THREE.InstancedMesh(geometry,material,records.length);
-    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    mesh.castShadow=true;
-    mesh.receiveShadow=true;
-    mesh.userData={_instancedGroup:true,type};
-    records.forEach((record,index)=>{
-      record.instanceId=index;
-      record.groupType=type;
-      record.mesh=mesh;
-      mesh.setMatrixAt(index,record.baseMatrix);
-      mesh.setColorAt(index,new THREE.Color(record.baseColorHex));
+    const group=createInstancedLineGroupObjects(records,type,{radius:getLineElementRadius(type)});
+    if(!group)return;
+    records.forEach(record=>{
       registerPickAnalyticRecord(record);
       if(record.memberId&&!instancedElementRecordsByMemberId.has(record.memberId)){
         instancedElementRecordsByMemberId.set(record.memberId,record);
       }
     });
-    mesh.userData.instanceRecords=records;
-    mesh.instanceMatrix.needsUpdate=true;
-    if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
-    mesh.computeBoundingBox?.();
-    mesh.computeBoundingSphere?.();
-    modelGroup.add(mesh);
-    const wireframe=createInstancedWireframe(records,type);
-    modelGroup.add(wireframe);
-    nextGroups.push({
-      type,
-      mesh,
-      wireframe,
-      records,
-      defaultOpacity:.85
-    });
+    modelGroup.add(group.mesh);
+    modelGroup.add(group.wireframe);
+    nextGroups.push(group);
   });
   return nextGroups;
 }
@@ -2854,43 +2418,17 @@ async function buildInstancedSurfaceElements(surfaceElements,nodeMap,{forceChunk
   const nextGroups=[];
   grouped.forEach((records,type)=>{
     if(!records.length)return;
-    const geometry=new THREE.PlaneGeometry(1,1,1,1);
-    const material=new THREE.MeshPhongMaterial({
-      color:0xffffff,
-      transparent:true,
-      opacity:type==='slab'?.25:.45,
-      side:THREE.DoubleSide
-    });
-    const mesh=new THREE.InstancedMesh(geometry,material,records.length);
-    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    mesh.userData={_instancedGroup:true,_instancedSurfaceGroup:true,geometryKind:'surface',type};
-    records.forEach((record,index)=>{
-      record.instanceId=index;
-      record.groupType=type;
-      record.mesh=mesh;
-      mesh.setMatrixAt(index,record.baseMatrix);
-      mesh.setColorAt(index,new THREE.Color(record.baseColorHex));
+    const group=createInstancedSurfaceGroupObjects(records,type);
+    if(!group)return;
+    records.forEach(record=>{
       registerPickAnalyticRecord(record);
       if(record.memberId&&!instancedElementRecordsByMemberId.has(record.memberId)){
         instancedElementRecordsByMemberId.set(record.memberId,record);
       }
     });
-    mesh.userData.instanceRecords=records;
-    mesh.instanceMatrix.needsUpdate=true;
-    if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
-    mesh.computeBoundingBox?.();
-    mesh.computeBoundingSphere?.();
-    modelGroup.add(mesh);
-    const wireframe=createInstancedSurfaceWireframe(records,type);
-    modelGroup.add(wireframe);
-    nextGroups.push({
-      type,
-      geometryKind:'surface',
-      mesh,
-      wireframe,
-      records,
-      defaultOpacity:type==='slab'?.25:.45
-    });
+    modelGroup.add(group.mesh);
+    modelGroup.add(group.wireframe);
+    nextGroups.push(group);
   });
   return nextGroups;
 }
@@ -2913,205 +2451,6 @@ function computeContourContext(){
   document.getElementById('legend-bar').style.background=`linear-gradient(to right,${stops.join(',')})`;
   return{field,mn,mx,cmapFn};
 }
-function isNodeContourField(field){
-  return NODE_CONTOUR_FIELDS.has(String(field||'').trim());
-}
-function resolveContourT(value,context){
-  if(!context||context.mx<=context.mn)return 0;
-  return Math.max(0,Math.min(1,(safeNumber(value,0)-context.mn)/(context.mx-context.mn)));
-}
-function resolveContourColor(value,context){
-  return context.cmapFn(resolveContourT(value,context));
-}
-function resolveNodeContourColor(node,context){
-  return resolveContourColor(node?.[context.field]||0,context);
-}
-function buildContourLutTexture(context){
-  const data=new Uint8Array(CONTOUR_LUT_SIZE*4);
-  for(let index=0;index<CONTOUR_LUT_SIZE;index+=1){
-    const color=context.cmapFn(index/Math.max(CONTOUR_LUT_SIZE-1,1));
-    data[index*4]=Math.round(color.r*255);
-    data[index*4+1]=Math.round(color.g*255);
-    data[index*4+2]=Math.round(color.b*255);
-    data[index*4+3]=255;
-  }
-  const texture=new THREE.DataTexture(data,CONTOUR_LUT_SIZE,1,THREE.RGBAFormat);
-  texture.magFilter=THREE.LinearFilter;
-  texture.minFilter=THREE.LinearFilter;
-  texture.wrapS=THREE.ClampToEdgeWrapping;
-  texture.wrapT=THREE.ClampToEdgeWrapping;
-  texture.needsUpdate=true;
-  return texture;
-}
-function buildConstantColorAttribute(length,color){
-  const attr=new Float32Array(length*3);
-  for(let index=0;index<length;index+=1){
-    attr[index*3]=color.r;
-    attr[index*3+1]=color.g;
-    attr[index*3+2]=color.b;
-  }
-  return attr;
-}
-function buildConstantScalarAttribute(length,value){
-  const attr=new Float32Array(length);
-  for(let index=0;index<length;index+=1)attr[index]=value;
-  return attr;
-}
-function sampleBilinearScalar(s00,s10,s11,s01,u,v){
-  return s00*(1-u)*(1-v)+s10*u*(1-v)+s11*u*v+s01*(1-u)*v;
-}
-function applyLineTubeContourColors(geometry,nodeData,el,context){
-  const positionAttr=geometry?.getAttribute?.('position');
-  if(!positionAttr)return;
-  const vertexCount=positionAttr.count;
-  const colors=new Float32Array(vertexCount*3);
-  if(isNodeContourField(context.field)&&Array.isArray(nodeData)&&nodeData.length>=2){
-    const start=new THREE.Vector3(nodeData[0].x,nodeData[0].z,nodeData[0].y);
-    const end=new THREE.Vector3(nodeData[1].x,nodeData[1].z,nodeData[1].y);
-    const axis=end.clone().sub(start);
-    const axisLengthSq=Math.max(axis.lengthSq(),1e-12);
-    const startColor=resolveNodeContourColor(nodeData[0],context);
-    const endColor=resolveNodeContourColor(nodeData[1],context);
-    for(let index=0;index<vertexCount;index+=1){
-      const vertex=new THREE.Vector3().fromBufferAttribute(positionAttr,index);
-      const t=Math.max(0,Math.min(1,vertex.clone().sub(start).dot(axis)/axisLengthSq));
-      const color=startColor.clone().lerp(endColor,t);
-      colors[index*3]=color.r;
-      colors[index*3+1]=color.g;
-      colors[index*3+2]=color.b;
-    }
-  }else{
-    const color=resolveContourColor(resolveContourValue(el,context.field),context);
-    colors.set(buildConstantColorAttribute(vertexCount,color));
-  }
-  geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
-}
-function applySurfaceContourColors(geometry,nodeData,el,context){
-  const vertexCount=geometry?.getAttribute?.('position')?.count||0;
-  if(!vertexCount)return;
-  if(isNodeContourField(context.field)&&Array.isArray(nodeData)&&nodeData.length>=4){
-    const colorTriples=nodeData.slice(0,4).map(node=>resolveNodeContourColor(node,context));
-    const uvAttr=geometry?.getAttribute?.('uv');
-    const colors=new Float32Array(vertexCount*3);
-    for(let index=0;index<vertexCount;index+=1){
-      const u=uvAttr?Number(uvAttr.getX(index)||0):0;
-      const v=uvAttr?Number(uvAttr.getY(index)||0):0;
-      const color=sampleBilinearColor(
-        colorTriples[0],
-        colorTriples[1],
-        colorTriples[2],
-        colorTriples[3],
-        u,
-        v,
-      );
-      colors[index*3]=color.r;
-      colors[index*3+1]=color.g;
-      colors[index*3+2]=color.b;
-    }
-    geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
-    return;
-  }
-  const color=resolveContourColor(resolveContourValue(el,context.field),context);
-  geometry.setAttribute('color',new THREE.BufferAttribute(buildConstantColorAttribute(vertexCount,color),3));
-}
-function applySurfaceContourScalars(geometry,nodeData,el,context){
-  const vertexCount=geometry?.getAttribute?.('position')?.count||0;
-  if(!vertexCount)return;
-  if(isNodeContourField(context.field)&&Array.isArray(nodeData)&&nodeData.length>=4){
-    const uvAttr=geometry?.getAttribute?.('uv');
-    const scalarCorners=nodeData.slice(0,4).map(node=>resolveContourT(node?.[context.field]||0,context));
-    const scalars=new Float32Array(vertexCount);
-    for(let index=0;index<vertexCount;index+=1){
-      const u=uvAttr?Number(uvAttr.getX(index)||0):0;
-      const v=uvAttr?Number(uvAttr.getY(index)||0):0;
-      scalars[index]=sampleBilinearScalar(
-        scalarCorners[0],
-        scalarCorners[1],
-        scalarCorners[2],
-        scalarCorners[3],
-        u,
-        v,
-      );
-    }
-    geometry.setAttribute('contourScalar',new THREE.BufferAttribute(scalars,1));
-    return;
-  }
-  geometry.setAttribute(
-    'contourScalar',
-    new THREE.BufferAttribute(
-      buildConstantScalarAttribute(vertexCount,resolveContourT(resolveContourValue(el,context.field),context)),
-      1,
-    ),
-  );
-}
-function updateDirectMeshContourGeometry(mesh,context){
-  if(!(mesh?.geometry&&mesh?.material))return;
-  if(mesh.userData?.contourGeometryKind==='line_tube'){
-    applyLineTubeContourColors(mesh.geometry,mesh.userData.nodeData,mesh.userData,context);
-  }else if(mesh.userData?.contourGeometryKind==='surface'){
-    applySurfaceContourScalars(mesh.geometry,mesh.userData.nodeData,mesh.userData,context);
-  }else{
-    const vertexCount=mesh.geometry.getAttribute?.('position')?.count||0;
-    const color=resolveContourColor(resolveContourValue(mesh.userData,context.field),context);
-    mesh.geometry.setAttribute('color',new THREE.BufferAttribute(buildConstantColorAttribute(vertexCount,color),3));
-  }
-  if(mesh.userData?.contourGeometryKind==='surface'){
-    const scalarAttr=mesh.geometry.getAttribute('contourScalar');
-    if(scalarAttr)scalarAttr.needsUpdate=true;
-    return;
-  }
-  mesh.material.vertexColors=true;
-  mesh.material.color.setHex(0xffffff);
-  mesh.material.needsUpdate=true;
-  mesh.geometry.getAttribute('color').needsUpdate=true;
-}
-function createSurfaceContourShaderMaterial(baseOpacity){
-  return new THREE.ShaderMaterial({
-    uniforms:{
-      uOpacity:{value:baseOpacity},
-      uContourLut:{value:null},
-      uTint:{value:new THREE.Vector3(1,1,1)},
-      uTintMix:{value:0},
-      uLightDir:{value:new THREE.Vector3(.45,.9,.35).normalize()},
-    },
-    vertexShader:`
-      attribute float contourScalar;
-      varying float vContourScalar;
-      varying vec3 vNormalView;
-      void main(){
-        vContourScalar=contourScalar;
-        vNormalView=normalize(normalMatrix*normal);
-        gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);
-      }
-    `,
-    fragmentShader:`
-      uniform float uOpacity;
-      uniform sampler2D uContourLut;
-      uniform vec3 uTint;
-      uniform float uTintMix;
-      uniform vec3 uLightDir;
-      varying float vContourScalar;
-      varying vec3 vNormalView;
-      void main(){
-        float t=clamp(vContourScalar,0.0,1.0);
-        vec3 contourColor=texture2D(uContourLut,vec2(t,0.5)).rgb;
-        float light=0.58+0.42*abs(dot(normalize(vNormalView),normalize(uLightDir)));
-        vec3 shaded=contourColor*light;
-        vec3 tinted=mix(shaded,uTint,uTintMix);
-        gl_FragColor=vec4(tinted,uOpacity);
-      }
-    `,
-    transparent:true,
-    side:THREE.DoubleSide,
-  });
-}
-function ensureSurfaceContourShaderMaterial(mesh){
-  if(mesh.userData?.surfaceContourShaderMaterial)return mesh.userData.surfaceContourShaderMaterial;
-  const baseOpacity=mesh.userData.type?.toLowerCase()==='slab'?.72:.92;
-  const material=createSurfaceContourShaderMaterial(baseOpacity);
-  mesh.userData.surfaceContourShaderMaterial=material;
-  return material;
-}
 function getSurfaceContourTint(mesh){
   const type=normalizeElementType(mesh.userData.type);
   if(isSelectedElement(mesh.userData))return{color:new THREE.Color(SELECTION_HIGHLIGHT_HEX),mix:.26};
@@ -3119,15 +2458,7 @@ function getSurfaceContourTint(mesh){
   return{color:new THREE.Color(1,1,1),mix:0};
 }
 function applySurfaceContourShaderMaterial(mesh,context){
-  if(!(mesh?.isMesh&&mesh.userData?.contourGeometryKind==='surface'))return;
-  const material=ensureSurfaceContourShaderMaterial(mesh);
-  if(mesh.material!==material)mesh.material=material;
-  material.uniforms.uContourLut.value=buildContourLutTexture(context);
-  material.uniforms.uOpacity.value=mesh.userData.type?.toLowerCase()==='slab'?.72:.92;
-  const tint=getSurfaceContourTint(mesh);
-  material.uniforms.uTint.value.set(tint.color.r,tint.color.g,tint.color.b);
-  material.uniforms.uTintMix.value=tint.mix;
-  material.needsUpdate=true;
+  applySurfaceContourShaderMaterialWithTint(mesh,context,{tint:getSurfaceContourTint(mesh)});
 }
 function restoreSurfaceBaseMaterial(mesh){
   if(mesh?.userData?.baseMaterial&&mesh.material!==mesh.userData.baseMaterial){
@@ -3336,136 +2667,6 @@ function getPickableMeshes(ray=null){
     .slice(0,1600)
     .map(record=>record.mesh);
   return candidates.length?candidates:pickTargetMeshes;
-}
-function intersectRayBoxDistances(ray,boundsMin,boundsMax){
-  if(!(ray instanceof THREE.Ray)||!(boundsMin instanceof THREE.Vector3)||!(boundsMax instanceof THREE.Vector3)){
-    return null;
-  }
-  let entry=0;
-  let exit=Infinity;
-  for(const axis of['x','y','z']){
-    const origin=ray.origin[axis];
-    const direction=ray.direction[axis];
-    const minValue=boundsMin[axis];
-    const maxValue=boundsMax[axis];
-    if(Math.abs(direction)<1e-9){
-      if(origin<minValue||origin>maxValue)return null;
-      continue;
-    }
-    let t0=(minValue-origin)/direction;
-    let t1=(maxValue-origin)/direction;
-    if(t0>t1)[t0,t1]=[t1,t0];
-    entry=Math.max(entry,t0);
-    exit=Math.min(exit,t1);
-    if(exit<entry)return null;
-  }
-  return Number.isFinite(exit)?{entry,exit}:null;
-}
-function shouldIncludePickSpatialIndexOverflowRecord(record,ray,tolerance){
-  if(!record||!(ray instanceof THREE.Ray))return false;
-  const center=record.pickCenter instanceof THREE.Vector3?record.pickCenter:null;
-  if(!center)return true;
-  const radius=Math.max(safeNumber(record.pickRadius,0),1e-3);
-  const expandedRadius=Math.max(radius+tolerance+(record.pickKind==='surface'?1.2:0),tolerance);
-  return ray.distanceSqToPoint(center)<=expandedRadius*expandedRadius;
-}
-function estimatePickRecordEntryDistance(ray,record,tolerance=0){
-  if(!record||!(ray instanceof THREE.Ray))return Infinity;
-  const center=record.pickCenter instanceof THREE.Vector3?record.pickCenter:null;
-  if(!center)return 0;
-  const radius=Math.max(safeNumber(record.pickRadius,0),1e-3);
-  const expandedRadius=Math.max(radius+tolerance+(record.pickKind==='surface'?1.2:0),tolerance);
-  const offset=center.clone().sub(ray.origin);
-  const projected=offset.dot(ray.direction);
-  const perpendicularSq=Math.max(offset.lengthSq()-projected*projected,0);
-  const radiusSq=expandedRadius*expandedRadius;
-  if(perpendicularSq>radiusSq)return Infinity;
-  const halfChord=Math.sqrt(Math.max(radiusSq-perpendicularSq,0));
-  return Math.max(projected-halfChord,0);
-}
-function queryPickSpatialIndexOverflowBvh(node,ray,visitRecordIndex){
-  if(!node||!(ray instanceof THREE.Ray)||typeof visitRecordIndex!=='function')return;
-  const rootHit=intersectRayBoxDistances(ray,node.boundsMin,node.boundsMax);
-  if(!rootHit)return;
-  const stack=[{node,entryDistance:Math.max(rootHit.entry,0)}];
-  while(stack.length){
-    const current=stack.pop();
-    const currentNode=current.node;
-    if(Array.isArray(currentNode?.recordIndices)&&currentNode.recordIndices.length){
-      currentNode.recordIndices.forEach(recordIndex=>visitRecordIndex(recordIndex,current.entryDistance));
-      continue;
-    }
-    const leftNode=currentNode?.left||null;
-    const rightNode=currentNode?.right||null;
-    const leftHit=leftNode?intersectRayBoxDistances(ray,leftNode.boundsMin,leftNode.boundsMax):null;
-    const rightHit=rightNode?intersectRayBoxDistances(ray,rightNode.boundsMin,rightNode.boundsMax):null;
-    if(leftHit&&rightHit){
-      if(leftHit.entry<=rightHit.entry){
-        stack.push({node:rightNode,entryDistance:Math.max(rightHit.entry,0)});
-        stack.push({node:leftNode,entryDistance:Math.max(leftHit.entry,0)});
-      }else{
-        stack.push({node:leftNode,entryDistance:Math.max(leftHit.entry,0)});
-        stack.push({node:rightNode,entryDistance:Math.max(rightHit.entry,0)});
-      }
-      continue;
-    }
-    if(leftHit){
-      stack.push({node:leftNode,entryDistance:Math.max(leftHit.entry,0)});
-    }
-    if(rightHit){
-      stack.push({node:rightNode,entryDistance:Math.max(rightHit.entry,0)});
-    }
-  }
-}
-function queryPickTriangleEntriesBvh(node,entries,ray,visitRecordIndex){
-  if(!node||!(ray instanceof THREE.Ray)||typeof visitRecordIndex!=='function')return;
-  const rootHit=intersectRayBoxDistances(ray,node.boundsMin,node.boundsMax);
-  if(!rootHit)return;
-  const stack=[{node,entryDistance:Math.max(rootHit.entry,0)}];
-  while(stack.length){
-    const current=stack.pop();
-    const currentNode=current.node;
-    if(Array.isArray(currentNode?.entryIndices)&&currentNode.entryIndices.length){
-      currentNode.entryIndices.forEach(entryIndex=>{
-        const facet=Array.isArray(entries)?entries[entryIndex]:null;
-        if(!facet||!Array.isArray(facet.triangle)||facet.triangle.length!==3)return;
-        const hitPoint=ray.intersectTriangle(
-          facet.triangle[0],
-          facet.triangle[1],
-          facet.triangle[2],
-          false,
-          new THREE.Vector3(),
-        );
-        if(!hitPoint)return;
-        const entryDistance=hitPoint.clone().sub(ray.origin).dot(ray.direction);
-        if(entryDistance<0)return;
-        visitRecordIndex(facet.recordIndex,entryDistance);
-      });
-      continue;
-    }
-    const leftNode=currentNode?.left||null;
-    const rightNode=currentNode?.right||null;
-    const leftHit=leftNode?intersectRayBoxDistances(ray,leftNode.boundsMin,leftNode.boundsMax):null;
-    const rightHit=rightNode?intersectRayBoxDistances(ray,rightNode.boundsMin,rightNode.boundsMax):null;
-    if(leftHit&&rightHit){
-      if(leftHit.entry<=rightHit.entry){
-        stack.push({node:rightNode,entryDistance:Math.max(rightHit.entry,0)});
-        stack.push({node:leftNode,entryDistance:Math.max(leftHit.entry,0)});
-      }else{
-        stack.push({node:leftNode,entryDistance:Math.max(leftHit.entry,0)});
-        stack.push({node:rightNode,entryDistance:Math.max(rightHit.entry,0)});
-      }
-      continue;
-    }
-    if(leftHit)stack.push({node:leftNode,entryDistance:Math.max(leftHit.entry,0)});
-    if(rightHit)stack.push({node:rightNode,entryDistance:Math.max(rightHit.entry,0)});
-  }
-}
-function queryPickSurfaceFacetBvh(node,entries,ray,visitRecordIndex){
-  queryPickTriangleEntriesBvh(node,entries,ray,visitRecordIndex);
-}
-function queryPickMeshTriangleBvh(node,entries,ray,visitRecordIndex){
-  queryPickTriangleEntriesBvh(node,entries,ray,visitRecordIndex);
 }
 function queryPickSpatialIndexCandidates(index,ray){
   if(!index||!(ray instanceof THREE.Ray))return[];
@@ -3700,26 +2901,6 @@ function parseJsonText(text,label){
     return null;
   }
 }
-function isModelPayload(payload){
-  return Boolean(extractModelPayload(payload));
-}
-function extractModelPayload(payload){
-  if(!payload||typeof payload!=='object')return null;
-  if(Array.isArray(payload.nodes)&&Array.isArray(payload.elements)){
-    return{model:payload,root:payload};
-  }
-  if(payload.model&&typeof payload.model==='object'&&Array.isArray(payload.model.nodes)&&Array.isArray(payload.model.elements)){
-    return{model:payload.model,root:payload};
-  }
-  return null;
-}
-function extractInteractivePayload(payload){
-  if(!payload||typeof payload!=='object')return null;
-  if(payload.interactive_3d&&typeof payload.interactive_3d==='object')return payload.interactive_3d;
-  if(payload.interactive_3d_payload&&typeof payload.interactive_3d_payload==='object')return payload.interactive_3d_payload;
-  if(Array.isArray(payload.baseline_segments)||Array.isArray(payload.after_segments))return payload;
-  return null;
-}
 function parseColorHex(value,fallback){
   const raw=String(value||'').trim();
   if(!/^#?[0-9a-f]{6}$/i.test(raw))return fallback;
@@ -3775,698 +2956,6 @@ async function processInChunks(rows,handler,{
     setLoadingMessage(`${progressLabel} ${Math.min(startOffset+items.length,overallTotal)}/${overallTotal}`);
   }
 }
-async function chunkMap(rows,mapper,options={}){
-  const out=[];
-  await processInChunks(
-    rows,
-    (item,index,globalIndex)=>{
-      const mapped=mapper(item,index,globalIndex);
-      if(mapped!==null&&mapped!==undefined)out.push(mapped);
-    },
-    options
-  );
-  return out;
-}
-function buildArtifactCandidates(){
-  const params=new URLSearchParams(window.location.search);
-  const preset=getRequestedPreset();
-  const presetCandidates=Array.isArray(ARTIFACT_PRESET_CANDIDATES[preset])?ARTIFACT_PRESET_CANDIDATES[preset]:[];
-  const custom=[...params.getAll('artifact'),...params.getAll('data')]
-    .map(v=>String(v||'').trim())
-    .filter(Boolean);
-  return [...custom,...presetCandidates,...DEFAULT_ARTIFACT_CANDIDATES];
-}
-function readEmbeddedPayload(){
-  for(const key of GLOBAL_EMBEDDED_KEYS){
-    const payload=window[key];
-    if(payload&&typeof payload==='object'){
-      return{payload,label:`window.${key}`};
-    }
-  }
-  for(const id of EMBEDDED_DATA_IDS){
-    const el=document.getElementById(id);
-    if(!el)continue;
-    const payload=parseJsonText(el.textContent||'',`#${id}`);
-    if(payload)return{payload,label:`#${id}`};
-  }
-  return null;
-}
-function readEmbeddedPresetPayload(preset){
-  const normalized=normalizePresetToken(preset);
-  if(!normalized)return null;
-  for(const key of GLOBAL_PRESET_PAYLOAD_KEYS){
-    const registry=window[key];
-    if(!registry||typeof registry!=='object')continue;
-    const entry=registry[normalized];
-    if(entry&&typeof entry==='object'&&entry.payload&&typeof entry.payload==='object'){
-      return{
-        payload:entry.payload,
-        label:String(entry.label||`preset ${normalized}`),
-        reportName:String(entry.report_name||entry.label||normalized),
-        sourcePath:String(entry.path||'')
-      };
-    }
-  }
-  return null;
-}
-async function loadPresetSidecarIfNeeded(preset){
-  const normalized=normalizePresetToken(preset);
-  if(!normalized)return null;
-  const embedded=readEmbeddedPresetPayload(normalized);
-  if(embedded)return embedded;
-  const sidecarPath=PRESET_SIDECAR_FILES[normalized];
-  if(!sidecarPath)return null;
-  const existing=document.querySelector(`script[data-viewer-preset="${normalized}"]`);
-  if(!existing){
-    await new Promise((resolve,reject)=>{
-      const script=document.createElement('script');
-      script.src=sidecarPath;
-      script.dataset.viewerPreset=normalized;
-      script.onload=()=>resolve();
-      script.onerror=()=>reject(new Error(`failed to load preset sidecar ${sidecarPath}`));
-      document.head.appendChild(script);
-    });
-  }
-  return readEmbeddedPresetPayload(normalized);
-}
-function normalizePoint(point){
-  if(!Array.isArray(point)||point.length<3)return null;
-  return[
-    safeNumber(point[0],0),
-    safeNumber(point[1],0),
-    safeNumber(point[2],0)
-  ];
-}
-function registerSegmentNode(point,nodeIndexByKey,nodes){
-  const normalized=normalizePoint(point);
-  if(!normalized)return null;
-  const key=normalized.map(v=>v.toFixed(4)).join('|');
-  if(nodeIndexByKey.has(key))return nodeIndexByKey.get(key);
-  const id=nodes.length;
-  const node={
-    id,
-    x:normalized[0],
-    y:normalized[2],
-    z:normalized[1],
-    dx:0,dy:0,dz:0,disp_mag:0,stress_vm:0,dcr:0,axial:0,moment:0,shear:0
-  };
-  nodes.push(node);
-  nodeIndexByKey.set(key,id);
-  return id;
-}
-function rgbArrayToHex(value){
-  if(!Array.isArray(value)||value.length<3)return'';
-  const channels=value.slice(0,3).map(entry=>Math.max(0,Math.min(255,Math.round(safeNumber(entry,0)))));
-  return `#${channels.map(entry=>entry.toString(16).padStart(2,'0')).join('')}`;
-}
-function estimateStoryCount(nodes,axisRefs={}){
-  const axisStoryCount=Array.isArray(axisRefs?.z)?axisRefs.z.length:0;
-  const levels=new Set();
-  (Array.isArray(nodes)?nodes:[]).forEach(node=>{
-    const z=safeNumber(node?.z,NaN);
-    if(Number.isFinite(z))levels.add(z.toFixed(3));
-  });
-  const nodeStoryCount=levels.size>1?Math.max(levels.size-1,0):0;
-  return Math.max(axisStoryCount,nodeStoryCount,0);
-}
-function buildSectionFamilySummary(sectionUsageRows){
-  const summaryByFamily=new Map();
-  (Array.isArray(sectionUsageRows)?sectionUsageRows:[]).forEach(row=>{
-    const family=normalizeSelectionValue(row?.inferred_family)||'unclassified';
-    const shape=normalizeSelectionValue(row?.inferred_shape)||'--';
-    const next=summaryByFamily.get(family)||{
-      family,
-      shapeMix:new Set(),
-      sectionCount:0,
-      usageCount:0,
-      representativeSectionName:''
-    };
-    next.sectionCount+=1;
-    next.usageCount+=safeNumber(row?.usage_count,0);
-    if(shape&&shape!=='--')next.shapeMix.add(shape);
-    if(!next.representativeSectionName)next.representativeSectionName=normalizeSelectionValue(row?.name);
-    summaryByFamily.set(family,next);
-  });
-  return [...summaryByFamily.values()]
-    .map(row=>({
-      family:row.family,
-      section_count:row.sectionCount,
-      usage_count:row.usageCount,
-      shape_mix_label:[...row.shapeMix].sort().join(', ')||'--',
-      representative_section_name:row.representativeSectionName||'--'
-    }))
-    .sort((a,b)=>b.usage_count-a.usage_count||b.section_count-a.section_count||a.family.localeCompare(b.family))
-    .slice(0,12);
-}
-function buildGroupSummary(groupRows){
-  return (Array.isArray(groupRows)?groupRows:[])
-    .map(row=>({
-      group_name:normalizeSelectionValue(row?.name)||'--',
-      element_count:safeNumber(row?.element_count,0),
-      node_count:safeNumber(row?.node_count,0),
-      physical_line_span:safeNumber(row?.physical_line_span,0),
-      representative_element_id:Array.isArray(row?.element_ids_head)&&row.element_ids_head.length?row.element_ids_head[0]:null
-    }))
-    .sort((a,b)=>b.element_count-a.element_count||b.node_count-a.node_count||a.group_name.localeCompare(b.group_name))
-    .slice(0,12);
-}
-function buildSectionCatalogSummary(sectionRows,sectionUsageRows){
-  const usageById=new Map(
-    (Array.isArray(sectionUsageRows)?sectionUsageRows:[])
-      .map(row=>[normalizeSelectionValue(row?.section_id),row])
-      .filter(([sectionId])=>Boolean(sectionId))
-  );
-  return (Array.isArray(sectionRows)?sectionRows:[])
-    .map(row=>{
-      const sectionId=normalizeSelectionValue(row?.id);
-      if(!sectionId)return null;
-      const rawTokens=(Array.isArray(row?.raw_tokens)?row.raw_tokens:[])
-        .map(value=>normalizeSelectionValue(value))
-        .filter(Boolean);
-      const usageRow=usageById.get(sectionId)||{};
-      return{
-        section_id:sectionId,
-        section_name:normalizeSelectionValue(row?.section_name||row?.label||row?.name),
-        display_label:normalizeSelectionValue(rawTokens[0]||row?.section_name||row?.label||row?.name||sectionId),
-        raw_tokens_head:rawTokens.slice(0,4),
-        inferred_family:normalizeSelectionValue(usageRow?.inferred_family),
-        inferred_shape:normalizeSelectionValue(usageRow?.inferred_shape)
-      };
-    })
-    .filter(Boolean)
-    .sort((a,b)=>a.display_label.localeCompare(b.display_label)||a.section_id.localeCompare(b.section_id));
-}
-function buildReviewRowSummary(bridgeRows){
-  return (Array.isArray(bridgeRows)?bridgeRows:[])
-    .map(row=>({
-      review_case_id:normalizeSelectionValue(row?.review_case_id)||'--',
-      member_id:normalizeSelectionValue(row?.baseline_focus_member_id||row?.review_member_id)||'',
-      target_element_id:normalizeSelectionValue(row?.full_crosswalk_target_element_id),
-      review_row_label:normalizeSelectionValue(row?.row_provenance_top_row_label)||'--',
-      review_summary_label:normalizeSelectionValue(row?.row_provenance_summary_label)||'--',
-      combination_names:Array.isArray(row?.full_crosswalk_load_combination_names)?row.full_crosswalk_load_combination_names.slice(0,6):[],
-      group_names:Array.isArray(row?.full_crosswalk_member_groups)?row.full_crosswalk_member_groups.slice(0,6):[],
-      isolation_token:buildReviewRowIsolationToken({
-        review_case_id:row?.review_case_id,
-        review_row_label:row?.row_provenance_top_row_label,
-        member_id:row?.baseline_focus_member_id||row?.review_member_id,
-        target_element_id:row?.full_crosswalk_target_element_id
-      })
-    }))
-    .slice(0,12);
-}
-function extractLoadCaseInventory(modelPayload,metadata){
-  const labels=[];
-  const pushLabel=value=>{
-    const label=normalizeSelectionValue(value);
-    if(label&&!labels.includes(label))labels.push(label);
-  };
-  const loadPatternLibrary=metadata?.load_pattern_library&&typeof metadata.load_pattern_library==='object'
-    ?metadata.load_pattern_library
-    :{};
-  const semanticRows=Array.isArray(loadPatternLibrary.case_semantic_rows)?loadPatternLibrary.case_semantic_rows:[];
-  semanticRows.forEach(row=>pushLabel(row?.label||row?.case_name||row?.case_id||row?.pattern_id));
-  const patternRows=Array.isArray(loadPatternLibrary.pattern_summary?.patterns)?loadPatternLibrary.pattern_summary.patterns:[];
-  patternRows.forEach(row=>pushLabel(row?.label||row?.case_name||row?.pattern_id));
-  const loads=Array.isArray(modelPayload?.loads)?modelPayload.loads:[];
-  loads.forEach(row=>pushLabel(row?.case_name||row?.load_case_name||row?.name||row?.case_id));
-  return labels;
-}
-function extractLoadCombinationInventory(modelPayload,metadata){
-  const rows=[];
-  const pushRow=row=>{
-    const name=normalizeSelectionValue(row?.name||row?.combination_name||row?.id);
-    if(!name||rows.some(item=>item.name===name))return;
-    const entryRows=Array.isArray(row?.entry_rows)
-      ?row.entry_rows
-      :Array.isArray(row?.entries)
-        ?row.entries
-        :[];
-    const factorMap=row?.factor_map&&typeof row.factor_map==='object'
-      ?row.factor_map
-      :row?.expanded_factor_map&&typeof row.expanded_factor_map==='object'
-        ?row.expanded_factor_map
-        :{};
-    rows.push({
-      name,
-      combination_type:normalizeSelectionValue(row?.combination_type)||'GEN',
-      limit_state:normalizeSelectionValue(row?.limit_state)||'ACTIVE',
-      expression:normalizeSelectionValue(row?.expression)||'expression n/a',
-      entry_count:safeNumber(row?.entry_count,entryRows.length),
-      factor_map:{...factorMap},
-      referenced_combinations:Array.isArray(row?.referenced_combinations)?row.referenced_combinations.filter(Boolean):[],
-      referenced_leaf_cases:Array.isArray(row?.referenced_leaf_cases)?row.referenced_leaf_cases.filter(Boolean):[],
-      entry_rows:entryRows
-        .filter(entry=>entry&&typeof entry==='object')
-        .map(entry=>({
-          reference_kind:normalizeSelectionValue(entry?.reference_kind).toUpperCase()||'ST',
-          reference_name:normalizeSelectionValue(entry?.reference_name),
-          factor:safeNumber(entry?.factor,0)
-        }))
-        .filter(entry=>entry.reference_name)
-    });
-  };
-  const loadRows=Array.isArray(modelPayload?.loads?.load_combinations)?modelPayload.loads.load_combinations:[];
-  loadRows.forEach(pushRow);
-  const editorSeed=metadata?.load_combination_editor_seed&&typeof metadata.load_combination_editor_seed==='object'
-    ?metadata.load_combination_editor_seed
-    :{};
-  const seedRows=Array.isArray(editorSeed.combination_nodes)?editorSeed.combination_nodes:[];
-  seedRows.forEach(pushRow);
-  return rows;
-}
-function buildDirectModelMeta(rootPayload,modelPayload,sourceMeta={}){
-  const metadata=modelPayload?.metadata&&typeof modelPayload.metadata==='object'?modelPayload.metadata:{};
-  const sourceInfo=rootPayload?.source&&typeof rootPayload.source==='object'
-    ?rootPayload.source
-    :{};
-  const axisBridge=metadata.kds_geometry_bridge&&typeof metadata.kds_geometry_bridge==='object'
-    ?metadata.kds_geometry_bridge
-    :{};
-  const axisRefs=axisBridge.axis_refs&&typeof axisBridge.axis_refs==='object'?axisBridge.axis_refs:{};
-  const sectionLibrary=metadata.section_library&&typeof metadata.section_library==='object'
-    ?metadata.section_library
-    :{};
-  const sectionSummary=sectionLibrary.summary&&typeof sectionLibrary.summary==='object'?sectionLibrary.summary:{};
-  const loadPatternLibrary=metadata.load_pattern_library&&typeof metadata.load_pattern_library==='object'
-    ?metadata.load_pattern_library
-    :{};
-  const loadPatternSummary=loadPatternLibrary.summary&&typeof loadPatternLibrary.summary==='object'
-    ?loadPatternLibrary.summary
-    :(loadPatternLibrary.pattern_summary&&typeof loadPatternLibrary.pattern_summary==='object'
-      ?loadPatternLibrary.pattern_summary
-      :{});
-  const storySlices=Array.isArray(axisRefs.z)
-    ?axisRefs.z.map(row=>normalizeSelectionValue(row?.label||row?.name||row?.axis_label||row?.id)).filter(Boolean)
-    :[];
-  const reviewSummary=axisBridge.summary&&typeof axisBridge.summary==='object'?axisBridge.summary:{};
-  const sectionUsageRows=Array.isArray(sectionLibrary.usage_summary)?sectionLibrary.usage_summary:[];
-  const sectionCatalogSummary=buildSectionCatalogSummary(modelPayload?.sections,sectionUsageRows);
-  const bridgeRows=Array.isArray(axisBridge.bridge_rows)?axisBridge.bridge_rows:[];
-  const groupRows=Array.isArray(metadata.groups)?metadata.groups:[];
-  const sectionCount=safeNumber(
-    sectionSummary.section_row_count,
-    Array.isArray(modelPayload?.sections)?modelPayload.sections.length:0
-  );
-  const usedSectionCount=safeNumber(sectionSummary.used_section_count,0);
-  const axisLabelCount=
-    (Array.isArray(axisRefs.x)?axisRefs.x.length:0)+
-    (Array.isArray(axisRefs.y)?axisRefs.y.length:0)+
-    (Array.isArray(axisRefs.z)?axisRefs.z.length:0);
-  const structureTypeLabel=normalizeSelectionValue(
-    Array.isArray(metadata.structure_type)&&metadata.structure_type[0]?.raw
-      ?metadata.structure_type[0].raw
-      :(rootPayload?.source||rootPayload?.parser||'MIDAS parsed model')
-  );
-  const lengthUnitsLabel=normalizeSelectionValue(
-    Array.isArray(metadata.length_units)&&metadata.length_units[0]?.raw
-      ?metadata.length_units[0].raw
-      :''
-  );
-  return{
-    name:String(
-      rootPayload?.run_id||
-      rootPayload?.source||
-      sourceMeta.label||
-      'MIDAS parsed model'
-    ),
-    stories:estimateStoryCount(modelPayload?.nodes,axisRefs)||'--',
-    story_slices:storySlices,
-    load_case_inventory:extractLoadCaseInventory(modelPayload,metadata),
-    load_combination_inventory:extractLoadCombinationInventory(modelPayload,metadata),
-    source_mode:String(sourceMeta.mode||'direct_payload'),
-    source_label:String(sourceMeta.label||sourceInfo.path||rootPayload?.source||'MIDAS parsed model'),
-    source_path:String(sourceMeta.resolvedPath||sourceInfo.path||''),
-    source_artifact_sha256:String(sourceInfo.sha256||''),
-    source_artifact_size_bytes:safeNumber(sourceInfo.size_bytes,0),
-    source_artifact_format:String(sourceInfo.format||''),
-    source_artifact_family:String(sourceInfo.source_family||''),
-    loaded_at:String(sourceMeta.loadedAt||''),
-    generated_at:String(rootPayload?.generated_at||''),
-    parser_label:String(rootPayload?.parser||''),
-    structure_type_label:structureTypeLabel||'--',
-    length_units_label:lengthUnitsLabel||'--',
-    group_count:Array.isArray(metadata.groups)?metadata.groups.length:0,
-    member_count:Array.isArray(metadata.members)?metadata.members.length:0,
-    section_count:sectionCount,
-    used_section_count:usedSectionCount,
-    geometry_bridge_review_count:safeNumber(reviewSummary.review_id_count,0),
-    geometry_bridge_mapped_review_count:safeNumber(reviewSummary.mapped_review_id_count,0),
-    geometry_bridge_full_member_crosswalk_count:safeNumber(reviewSummary.full_member_crosswalk_count,0),
-    load_pattern_count:safeNumber(
-      loadPatternSummary.pattern_count,
-      Array.isArray(loadPatternLibrary.case_semantic_rows)?loadPatternLibrary.case_semantic_rows.length:0
-    ),
-    load_pattern_primitive_count:safeNumber(loadPatternSummary.primitive_count,0),
-    axis_label_count:axisLabelCount,
-    axis_ref_source_mode:String(axisBridge.axis_ref_source_mode||'none'),
-    axis_ref_note:String(axisBridge.axis_ref_note||''),
-    section_catalog_summary:sectionCatalogSummary,
-    section_family_summary:buildSectionFamilySummary(sectionUsageRows),
-    group_summary:buildGroupSummary(groupRows),
-    review_row_summary:buildReviewRowSummary(bridgeRows)
-  };
-}
-function sanitizeModelPayload(payload,sourceMeta={}){
-  const extracted=extractModelPayload(payload);
-  const modelPayload=extracted?.model||{};
-  const rootPayload=extracted?.root||payload||{};
-  const metadata=modelPayload.metadata&&typeof modelPayload.metadata==='object'?modelPayload.metadata:{};
-  const sectionRows=Array.isArray(modelPayload.sections)?modelPayload.sections:[];
-  const sectionById=new Map(sectionRows.map(row=>[String(row?.id),String(row?.name||row?.label||row?.section_name||`Section ${row?.id??'--'}`)]));
-  const sectionUsageById=new Map(
-    (Array.isArray(metadata.section_library?.usage_summary)?metadata.section_library.usage_summary:[])
-      .map(row=>[String(row?.section_id),row])
-  );
-  const sectionColorById=new Map(
-    (Array.isArray(metadata.section_colors)?metadata.section_colors:[])
-      .map(row=>[String(row?.section_id),rgbArrayToHex(row?.fill_rgb||row?.wire_rgb)])
-      .filter(([,hex])=>Boolean(hex))
-  );
-  const memberByElementId=new Map();
-  (Array.isArray(metadata.members)?metadata.members:[]).forEach(member=>{
-    const memberId=normalizeSelectionValue(member?.id);
-    const elementIds=Array.isArray(member?.element_ids)?member.element_ids:[];
-    elementIds.forEach(elementId=>memberByElementId.set(String(elementId),memberId));
-  });
-  const groupsByElementId=new Map();
-  (Array.isArray(metadata.groups)?metadata.groups:[]).forEach(group=>{
-    const groupName=normalizeSelectionValue(group?.name);
-    if(!groupName)return;
-    const elementIds=Array.isArray(group?.element_ids)?group.element_ids:[];
-    elementIds.forEach(elementId=>{
-      const key=String(elementId);
-      const current=groupsByElementId.get(key)||[];
-      if(!current.includes(groupName))current.push(groupName);
-      groupsByElementId.set(key,current);
-    });
-  });
-  const reviewByMemberId=new Map();
-  const reviewByElementId=new Map();
-  (Array.isArray(metadata.kds_geometry_bridge?.bridge_rows)?metadata.kds_geometry_bridge.bridge_rows:[]).forEach(row=>{
-    const memberId=normalizeSelectionValue(row?.baseline_focus_member_id||row?.review_member_id);
-    if(!memberId||reviewByMemberId.has(memberId))return;
-    reviewByMemberId.set(memberId,row);
-  });
-  (Array.isArray(metadata.kds_geometry_bridge?.bridge_rows)?metadata.kds_geometry_bridge.bridge_rows:[]).forEach(row=>{
-    const elementId=normalizeSelectionValue(row?.full_crosswalk_target_element_id);
-    if(!elementId||reviewByElementId.has(elementId))return;
-    reviewByElementId.set(elementId,row);
-  });
-  const nodes=(modelPayload.nodes||[]).map((node,idx)=>({
-    id:node?.id??idx,
-    x:safeNumber(node?.x,0),
-    y:safeNumber(node?.y,0),
-    z:safeNumber(node?.z,0),
-    dx:safeNumber(node?.dx,0),
-    dy:safeNumber(node?.dy,0),
-    dz:safeNumber(node?.dz,0),
-    disp_mag:safeNumber(node?.disp_mag,0),
-    stress_vm:safeNumber(node?.stress_vm,0),
-    dcr:safeNumber(node?.dcr,0),
-    axial:safeNumber(node?.axial,0),
-    moment:safeNumber(node?.moment,0),
-    shear:safeNumber(node?.shear,0)
-  }));
-  const elements=(modelPayload.elements||[]).map((el,idx)=>{
-    const memberId=normalizeSelectionValue(el?.member_id)||memberByElementId.get(String(el?.id??idx))||'';
-    const reviewRow=reviewByMemberId.get(memberId)||reviewByElementId.get(normalizeSelectionValue(el?.id??idx))||null;
-    const groupNames=groupsByElementId.get(String(el?.id??idx))||[];
-    return ({
-    ...el,
-    id:el?.id??idx,
-    type:normalizeElementType(el?.family||el?.type),
-    node_ids:Array.isArray(el?.node_ids)?el.node_ids:[],
-    member_id:memberId,
-    section:String(el?.section||sectionById.get(String(el?.section_id))||'--'),
-    section_family:normalizeSelectionValue(sectionUsageById.get(String(el?.section_id))?.inferred_family)||'--',
-    section_shape:normalizeSelectionValue(sectionUsageById.get(String(el?.section_id))?.inferred_shape)||'--',
-    group_names:groupNames,
-    group_label:groupNames.join(', ')||'--',
-    review_case_id:normalizeSelectionValue(reviewRow?.review_case_id)||'--',
-    review_row_label:normalizeSelectionValue(reviewRow?.row_provenance_top_row_label)||'--',
-    review_summary_label:normalizeSelectionValue(reviewRow?.row_provenance_summary_label)||'--',
-    review_combination_label:Array.isArray(reviewRow?.full_crosswalk_load_combination_names)
-      ?reviewRow.full_crosswalk_load_combination_names.slice(0,4).join(', ')
-      :'--',
-    dcr:safeNumber(el?.dcr,safeNumber(el?.max_dcr_after,safeNumber(el?.max_dcr_before,0))),
-    axial:safeNumber(el?.axial,0),
-    moment:safeNumber(el?.moment,0),
-    shear:safeNumber(el?.shear,0),
-    color:String(el?.color||sectionColorById.get(String(el?.section_id))||'').trim()
-  })});
-  const meta={
-    ...(rootPayload.meta&&typeof rootPayload.meta==='object'?rootPayload.meta:{}),
-    ...buildDirectModelMeta(rootPayload,modelPayload,sourceMeta),
-    normalization_mode:'direct'
-  };
-  return{nodes,elements,meta};
-}
-async function sanitizeModelPayloadAsync(payload,sourceMeta={}){
-  const extracted=extractModelPayload(payload);
-  const modelPayload=extracted?.model||{};
-  const rootPayload=extracted?.root||payload||{};
-  const metadata=modelPayload.metadata&&typeof modelPayload.metadata==='object'?modelPayload.metadata:{};
-  const sectionRows=Array.isArray(modelPayload.sections)?modelPayload.sections:[];
-  const sectionById=new Map(sectionRows.map(row=>[String(row?.id),String(row?.name||row?.label||row?.section_name||`Section ${row?.id??'--'}`)]));
-  const sectionUsageById=new Map(
-    (Array.isArray(metadata.section_library?.usage_summary)?metadata.section_library.usage_summary:[])
-      .map(row=>[String(row?.section_id),row])
-  );
-  const sectionColorById=new Map(
-    (Array.isArray(metadata.section_colors)?metadata.section_colors:[])
-      .map(row=>[String(row?.section_id),rgbArrayToHex(row?.fill_rgb||row?.wire_rgb)])
-      .filter(([,hex])=>Boolean(hex))
-  );
-  const memberByElementId=new Map();
-  (Array.isArray(metadata.members)?metadata.members:[]).forEach(member=>{
-    const memberId=normalizeSelectionValue(member?.id);
-    const elementIds=Array.isArray(member?.element_ids)?member.element_ids:[];
-    elementIds.forEach(elementId=>memberByElementId.set(String(elementId),memberId));
-  });
-  const groupsByElementId=new Map();
-  (Array.isArray(metadata.groups)?metadata.groups:[]).forEach(group=>{
-    const groupName=normalizeSelectionValue(group?.name);
-    if(!groupName)return;
-    const elementIds=Array.isArray(group?.element_ids)?group.element_ids:[];
-    elementIds.forEach(elementId=>{
-      const key=String(elementId);
-      const current=groupsByElementId.get(key)||[];
-      if(!current.includes(groupName))current.push(groupName);
-      groupsByElementId.set(key,current);
-    });
-  });
-  const reviewByMemberId=new Map();
-  const reviewByElementId=new Map();
-  (Array.isArray(metadata.kds_geometry_bridge?.bridge_rows)?metadata.kds_geometry_bridge.bridge_rows:[]).forEach(row=>{
-    const memberId=normalizeSelectionValue(row?.baseline_focus_member_id||row?.review_member_id);
-    if(!memberId||reviewByMemberId.has(memberId))return;
-    reviewByMemberId.set(memberId,row);
-  });
-  (Array.isArray(metadata.kds_geometry_bridge?.bridge_rows)?metadata.kds_geometry_bridge.bridge_rows:[]).forEach(row=>{
-    const elementId=normalizeSelectionValue(row?.full_crosswalk_target_element_id);
-    if(!elementId||reviewByElementId.has(elementId))return;
-    reviewByElementId.set(elementId,row);
-  });
-  const nodes=await chunkMap(modelPayload.nodes||[],(node,idx)=>({
-    id:node?.id??idx,
-    x:safeNumber(node?.x,0),
-    y:safeNumber(node?.y,0),
-    z:safeNumber(node?.z,0),
-    dx:safeNumber(node?.dx,0),
-    dy:safeNumber(node?.dy,0),
-    dz:safeNumber(node?.dz,0),
-    disp_mag:safeNumber(node?.disp_mag,0),
-    stress_vm:safeNumber(node?.stress_vm,0),
-    dcr:safeNumber(node?.dcr,0),
-    axial:safeNumber(node?.axial,0),
-    moment:safeNumber(node?.moment,0),
-    shear:safeNumber(node?.shear,0)
-  }),{progressLabel:'Normalizing nodes'});
-  const elements=await chunkMap(modelPayload.elements||[],(el,idx)=>{
-    const memberId=normalizeSelectionValue(el?.member_id)||memberByElementId.get(String(el?.id??idx))||'';
-    const reviewRow=reviewByMemberId.get(memberId)||reviewByElementId.get(normalizeSelectionValue(el?.id??idx))||null;
-    const groupNames=groupsByElementId.get(String(el?.id??idx))||[];
-    return ({
-    ...el,
-    id:el?.id??idx,
-    type:normalizeElementType(el?.family||el?.type),
-    node_ids:Array.isArray(el?.node_ids)?el.node_ids:[],
-    member_id:memberId,
-    section:String(el?.section||sectionById.get(String(el?.section_id))||'--'),
-    section_family:normalizeSelectionValue(sectionUsageById.get(String(el?.section_id))?.inferred_family)||'--',
-    section_shape:normalizeSelectionValue(sectionUsageById.get(String(el?.section_id))?.inferred_shape)||'--',
-    group_names:groupNames,
-    group_label:groupNames.join(', ')||'--',
-    review_case_id:normalizeSelectionValue(reviewRow?.review_case_id)||'--',
-    review_row_label:normalizeSelectionValue(reviewRow?.row_provenance_top_row_label)||'--',
-    review_summary_label:normalizeSelectionValue(reviewRow?.row_provenance_summary_label)||'--',
-    review_combination_label:Array.isArray(reviewRow?.full_crosswalk_load_combination_names)
-      ?reviewRow.full_crosswalk_load_combination_names.slice(0,4).join(', ')
-      :'--',
-    dcr:safeNumber(el?.dcr,safeNumber(el?.max_dcr_after,safeNumber(el?.max_dcr_before,0))),
-    axial:safeNumber(el?.axial,0),
-    moment:safeNumber(el?.moment,0),
-    shear:safeNumber(el?.shear,0),
-    color:String(el?.color||sectionColorById.get(String(el?.section_id))||'').trim()
-  })},{progressLabel:'Normalizing elements'});
-  const meta={
-    ...(rootPayload.meta&&typeof rootPayload.meta==='object'?rootPayload.meta:{}),
-    ...buildDirectModelMeta(rootPayload,modelPayload,sourceMeta),
-    normalization_mode:'chunked'
-  };
-  return{nodes,elements,meta};
-}
-function buildModelFromInteractivePayload(payload,sourceMeta={}){
-  const interactive=extractInteractivePayload(payload);
-  if(!interactive)return null;
-  const baselineSegments=Array.isArray(interactive.baseline_segments)?interactive.baseline_segments.filter(Boolean):[];
-  const afterSegments=Array.isArray(interactive.after_segments)?interactive.after_segments.filter(Boolean):[];
-  if(!baselineSegments.length&&!afterSegments.length)return null;
-
-  const nodeIndexByKey=new Map();
-  const nodes=[];
-  const elements=[];
-  const addSegment=(row,scope,index)=>{
-    const p0=normalizePoint(row?.p0);
-    const p1=normalizePoint(row?.p1);
-    if(!p0||!p1)return;
-    const n0=registerSegmentNode(p0,nodeIndexByKey,nodes);
-    const n1=registerSegmentNode(p1,nodeIndexByKey,nodes);
-    const type=normalizeElementType(row?.member_type||row?.category||row?.type);
-    elements.push({
-      ...row,
-      id:`${scope}:${row?.member_id||index}:${index}`,
-      type,
-      node_ids:[n0,n1],
-      section:row?.after_section||row?.before_section||row?.section_name||'--',
-      color:String(row?.color||'').trim(),
-      dcr:safeNumber(row?.dcr,safeNumber(row?.max_dcr_after,safeNumber(row?.max_dcr_before,0))),
-      axial:safeNumber(row?.axial,0),
-      moment:safeNumber(row?.moment,0),
-      shear:safeNumber(row?.shear,0),
-      overlay_scope:scope,
-      story_band_label:String(row?.story_band_label||'').trim(),
-      zone_label:String(row?.zone_label||'').trim(),
-      action_name:String(row?.action_name||'').trim(),
-      optimization_meaning_label:String(row?.optimization_meaning_label||'').trim(),
-      before_after_snapshot_note:String(row?.before_after_snapshot_note||'').trim()
-    });
-  };
-
-  baselineSegments.forEach((row,index)=>addSegment(row,'baseline',index));
-  afterSegments.forEach((row,index)=>addSegment(row,'optimized',index));
-
-  const metaSource=payload.case_context&&typeof payload.case_context==='object'?payload.case_context:{};
-  const storyOptions=Array.isArray(interactive.story_slice_options)?interactive.story_slice_options:[];
-  const axisRefs=interactive.axis_refs&&typeof interactive.axis_refs==='object'?interactive.axis_refs:{};
-  return{
-    nodes,
-    elements,
-    meta:{
-      name:String(
-        metaSource.case_id||
-        metaSource.case_label||
-        payload?.meta?.name||
-        payload?.viewer_mode||
-        'Repo interactive 3D artifact'
-      ),
-      stories:Math.max(
-        Array.isArray(axisRefs.z)?axisRefs.z.length:0,
-        storyOptions.length
-      )||'--',
-      source_mode:String(sourceMeta.mode||'artifact_interactive_3d'),
-      source_label:String(sourceMeta.label||'interactive_3d'),
-      source_path:String(sourceMeta.resolvedPath||''),
-      loaded_at:String(sourceMeta.loadedAt||payload?.generated_at||payload?.meta?.generated_at||''),
-      generated_at:String(payload?.generated_at||payload?.meta?.generated_at||''),
-      normalization_mode:'direct',
-      comparison_availability:String(interactive.comparison_availability||'baseline_vs_changed'),
-      story_slices:storyOptions.map(opt=>String(opt?.label||opt?.value||'').trim()).filter(Boolean),
-      baseline_segment_count:baselineSegments.length,
-      optimized_segment_count:afterSegments.length
-    }
-  };
-}
-async function buildModelFromInteractivePayloadAsync(payload,sourceMeta={}){
-  const interactive=extractInteractivePayload(payload);
-  if(!interactive)return null;
-  const baselineSegments=Array.isArray(interactive.baseline_segments)?interactive.baseline_segments.filter(Boolean):[];
-  const afterSegments=Array.isArray(interactive.after_segments)?interactive.after_segments.filter(Boolean):[];
-  if(!baselineSegments.length&&!afterSegments.length)return null;
-
-  const nodeIndexByKey=new Map();
-  const nodes=[];
-  const elements=[];
-  const addSegment=(row,scope,index)=>{
-    const p0=normalizePoint(row?.p0);
-    const p1=normalizePoint(row?.p1);
-    if(!p0||!p1)return;
-    const n0=registerSegmentNode(p0,nodeIndexByKey,nodes);
-    const n1=registerSegmentNode(p1,nodeIndexByKey,nodes);
-    const type=normalizeElementType(row?.member_type||row?.category||row?.type);
-    elements.push({
-      ...row,
-      id:`${scope}:${row?.member_id||index}:${index}`,
-      type,
-      node_ids:[n0,n1],
-      section:row?.after_section||row?.before_section||row?.section_name||'--',
-      color:String(row?.color||'').trim(),
-      dcr:safeNumber(row?.dcr,safeNumber(row?.max_dcr_after,safeNumber(row?.max_dcr_before,0))),
-      axial:safeNumber(row?.axial,0),
-      moment:safeNumber(row?.moment,0),
-      shear:safeNumber(row?.shear,0),
-      overlay_scope:scope,
-      story_band_label:String(row?.story_band_label||'').trim(),
-      zone_label:String(row?.zone_label||'').trim(),
-      action_name:String(row?.action_name||'').trim(),
-      optimization_meaning_label:String(row?.optimization_meaning_label||'').trim(),
-      before_after_snapshot_note:String(row?.before_after_snapshot_note||'').trim()
-    });
-  };
-  const totalSegments=baselineSegments.length+afterSegments.length;
-  await processInChunks(baselineSegments,(row,index)=>addSegment(row,'baseline',index),{
-    progressLabel:'Normalizing interactive_3d segments',
-    totalCount:totalSegments,
-    forceChunking:totalSegments>NORMALIZATION_CHUNK_SIZE
-  });
-  await processInChunks(afterSegments,(row,index)=>addSegment(row,'optimized',index),{
-    progressLabel:'Normalizing interactive_3d segments',
-    startOffset:baselineSegments.length,
-    totalCount:totalSegments,
-    forceChunking:totalSegments>NORMALIZATION_CHUNK_SIZE
-  });
-  const metaSource=payload.case_context&&typeof payload.case_context==='object'?payload.case_context:{};
-  const storyOptions=Array.isArray(interactive.story_slice_options)?interactive.story_slice_options:[];
-  const axisRefs=interactive.axis_refs&&typeof interactive.axis_refs==='object'?interactive.axis_refs:{};
-  return{
-    nodes,
-    elements,
-    meta:{
-      name:String(
-        metaSource.case_id||
-        metaSource.case_label||
-        payload?.meta?.name||
-        payload?.viewer_mode||
-        'Repo interactive 3D artifact'
-      ),
-      stories:Math.max(
-        Array.isArray(axisRefs.z)?axisRefs.z.length:0,
-        storyOptions.length
-      )||'--',
-      source_mode:String(sourceMeta.mode||'artifact_interactive_3d'),
-      source_label:String(sourceMeta.label||'interactive_3d'),
-      source_path:String(sourceMeta.resolvedPath||''),
-      loaded_at:String(sourceMeta.loadedAt||payload?.generated_at||payload?.meta?.generated_at||''),
-      generated_at:String(payload?.generated_at||payload?.meta?.generated_at||''),
-      normalization_mode:'chunked',
-      comparison_availability:String(interactive.comparison_availability||'baseline_vs_changed'),
-      story_slices:storyOptions.map(opt=>String(opt?.label||opt?.value||'').trim()).filter(Boolean),
-      baseline_segment_count:baselineSegments.length,
-      optimized_segment_count:afterSegments.length
-    }
-  };
-}
 async function normalizeLoadedPayload(payload,sourceMeta={}){
   const directModel=extractModelPayload(payload);
   if(directModel){
@@ -4480,7 +2969,10 @@ async function normalizeLoadedPayload(payload,sourceMeta={}){
       }
     }
     if(nodeCount>NORMALIZATION_CHUNK_SIZE||elementCount>NORMALIZATION_CHUNK_SIZE){
-      return sanitizeModelPayloadAsync(payload,sourceMeta);
+      return sanitizeModelPayloadAsync(payload,sourceMeta,{
+        processInChunks,
+        chunkSize:NORMALIZATION_CHUNK_SIZE
+      });
     }
     return sanitizeModelPayload(payload,sourceMeta);
   }
@@ -4500,7 +2992,10 @@ async function normalizeLoadedPayload(payload,sourceMeta={}){
     ?null
     :buildModelFromInteractivePayload(payload,sourceMeta);
   if(interactiveModel)return interactiveModel;
-  const interactiveModelAsync=await buildModelFromInteractivePayloadAsync(payload,sourceMeta);
+  const interactiveModelAsync=await buildModelFromInteractivePayloadAsync(payload,sourceMeta,{
+    processInChunks,
+    chunkSize:NORMALIZATION_CHUNK_SIZE
+  });
   if(interactiveModelAsync)return interactiveModelAsync;
   return null;
 }
@@ -4510,473 +3005,34 @@ function getModelRecordCount(data){
 function shouldUseLargeModelOptimization(elementCount=0){
   return safeNumber(elementCount,0)>=LARGE_MODEL_ELEMENT_THRESHOLD;
 }
-function createViewerOptimizationWorkerSource(){
-  return `(${function viewerOptimizationWorkerMain(){
-    const safeNumber=(value,fallback=0)=>{
-      const n=Number(value);
-      return Number.isFinite(n)?n:fallback;
-    };
-    const normalizeSelectionValue=value=>{
-      const text=String(value??'').trim();
-      return text||'';
-    };
-    const normalizeElementType=value=>{
-      const type=String(value||'beam').trim().toLowerCase();
-      return type||'beam';
-    };
-    const extractModelPayload=payload=>{
-      if(!payload||typeof payload!=='object')return null;
-      if(payload.model&&typeof payload.model==='object')return{root:payload,model:payload.model};
-      if(Array.isArray(payload.nodes)||Array.isArray(payload.elements))return{root:payload,model:payload};
-      return null;
-    };
-    const extractInteractivePayload=payload=>{
-      if(!payload||typeof payload!=='object')return null;
-      if(payload.interactive_3d&&typeof payload.interactive_3d==='object')return payload.interactive_3d;
-      if(payload.interactive_3d_payload&&typeof payload.interactive_3d_payload==='object')return payload.interactive_3d_payload;
-      if(Array.isArray(payload.baseline_segments)||Array.isArray(payload.after_segments))return payload;
-      return null;
-    };
-    const normalizePoint=point=>{
-      if(!Array.isArray(point)||point.length<3)return null;
-      return[
-        safeNumber(point[0],0),
-        safeNumber(point[1],0),
-        safeNumber(point[2],0)
-      ];
-    };
-    const registerSegmentNode=(point,nodeIndexByKey,nodes)=>{
-      const normalized=normalizePoint(point);
-      if(!normalized)return null;
-      const key=normalized.map(value=>value.toFixed(4)).join('|');
-      if(nodeIndexByKey.has(key))return nodeIndexByKey.get(key);
-      const id=nodes.length;
-      nodes.push({
-        id,
-        x:normalized[0],
-        y:normalized[2],
-        z:normalized[1],
-        dx:0,dy:0,dz:0,disp_mag:0,stress_vm:0,dcr:0,axial:0,moment:0,shear:0
-      });
-      nodeIndexByKey.set(key,id);
-      return id;
-    };
-    const rgbArrayToHex=value=>{
-      if(!Array.isArray(value)||value.length<3)return'';
-      const channels=value
-        .slice(0,3)
-        .map(entry=>Math.max(0,Math.min(255,Math.round(safeNumber(entry,0)))));
-      return `#${channels.map(entry=>entry.toString(16).padStart(2,'0')).join('')}`;
-    };
-    const estimateStoryCount=(nodes,axisRefs={})=>{
-      const axisStoryCount=Array.isArray(axisRefs?.z)?axisRefs.z.length:0;
-      const levels=new Set();
-      (Array.isArray(nodes)?nodes:[]).forEach(node=>{
-        const z=safeNumber(node?.z,NaN);
-        if(Number.isFinite(z))levels.add(z.toFixed(3));
-      });
-      const nodeStoryCount=levels.size>1?Math.max(levels.size-1,0):0;
-      return Math.max(axisStoryCount,nodeStoryCount,0);
-    };
-    const buildSectionFamilySummary=sectionUsageRows=>{
-      const summaryByFamily=new Map();
-      (Array.isArray(sectionUsageRows)?sectionUsageRows:[]).forEach(row=>{
-        const family=normalizeSelectionValue(row?.inferred_family)||'unclassified';
-        const shape=normalizeSelectionValue(row?.inferred_shape)||'--';
-        const next=summaryByFamily.get(family)||{
-          family,
-          shapeMix:new Set(),
-          sectionCount:0,
-          usageCount:0,
-          representativeSectionName:''
-        };
-        next.sectionCount+=1;
-        next.usageCount+=safeNumber(row?.usage_count,0);
-        if(shape&&shape!=='--')next.shapeMix.add(shape);
-        if(!next.representativeSectionName)next.representativeSectionName=normalizeSelectionValue(row?.name);
-        summaryByFamily.set(family,next);
-      });
-      return [...summaryByFamily.values()]
-        .map(row=>({
-          family:row.family,
-          section_count:row.sectionCount,
-          usage_count:row.usageCount,
-          shape_mix_label:[...row.shapeMix].sort().join(', ')||'--',
-          representative_section_name:row.representativeSectionName||'--'
-        }))
-        .sort((a,b)=>b.usage_count-a.usage_count||b.section_count-a.section_count||a.family.localeCompare(b.family))
-        .slice(0,12);
-    };
-    const buildGroupSummary=groupRows=>{
-      return (Array.isArray(groupRows)?groupRows:[])
-        .map(row=>({
-          group_name:normalizeSelectionValue(row?.name)||'--',
-          element_count:safeNumber(row?.element_count,0),
-          node_count:safeNumber(row?.node_count,0),
-          physical_line_span:safeNumber(row?.physical_line_span,0),
-          representative_element_id:Array.isArray(row?.element_ids_head)&&row.element_ids_head.length?row.element_ids_head[0]:null
-        }))
-        .sort((a,b)=>b.element_count-a.element_count||b.node_count-a.node_count||a.group_name.localeCompare(b.group_name))
-        .slice(0,12);
-    };
-    const buildReviewRowIsolationToken=data=>{
-      return [
-        normalizeSelectionValue(data?.review_case_id)||'--',
-        normalizeSelectionValue(data?.review_row_label)||'--',
-        normalizeSelectionValue(data?.member_id)||'--',
-        normalizeSelectionValue(data?.target_element_id??data?.id)||'--'
-      ].join('::');
-    };
-    const buildReviewRowSummary=bridgeRows=>{
-      return (Array.isArray(bridgeRows)?bridgeRows:[])
-        .map(row=>({
-          review_case_id:normalizeSelectionValue(row?.review_case_id)||'--',
-          member_id:normalizeSelectionValue(row?.baseline_focus_member_id||row?.review_member_id)||'',
-          target_element_id:normalizeSelectionValue(row?.full_crosswalk_target_element_id),
-          review_row_label:normalizeSelectionValue(row?.row_provenance_top_row_label)||'--',
-          review_summary_label:normalizeSelectionValue(row?.row_provenance_summary_label)||'--',
-          combination_names:Array.isArray(row?.full_crosswalk_load_combination_names)?row.full_crosswalk_load_combination_names.slice(0,6):[],
-          group_names:Array.isArray(row?.full_crosswalk_member_groups)?row.full_crosswalk_member_groups.slice(0,6):[],
-          isolation_token:buildReviewRowIsolationToken({
-            review_case_id:row?.review_case_id,
-            review_row_label:row?.row_provenance_top_row_label,
-            member_id:row?.baseline_focus_member_id||row?.review_member_id,
-            target_element_id:row?.full_crosswalk_target_element_id
-          })
-        }))
-        .slice(0,12);
-    };
-    const extractLoadCaseInventory=(modelPayload,metadata)=>{
-      const labels=[];
-      const pushLabel=value=>{
-        const label=normalizeSelectionValue(value);
-        if(label&&!labels.includes(label))labels.push(label);
-      };
-      const loadPatternLibrary=metadata?.load_pattern_library&&typeof metadata.load_pattern_library==='object'
-        ?metadata.load_pattern_library
-        :{};
-      const semanticRows=Array.isArray(loadPatternLibrary.case_semantic_rows)?loadPatternLibrary.case_semantic_rows:[];
-      semanticRows.forEach(row=>pushLabel(row?.label||row?.case_name||row?.case_id||row?.pattern_id));
-      const patternRows=Array.isArray(loadPatternLibrary.pattern_summary?.patterns)?loadPatternLibrary.pattern_summary.patterns:[];
-      patternRows.forEach(row=>pushLabel(row?.label||row?.case_name||row?.pattern_id));
-      const loads=Array.isArray(modelPayload?.loads)?modelPayload.loads:[];
-      loads.forEach(row=>pushLabel(row?.case_name||row?.load_case_name||row?.name||row?.case_id));
-      return labels;
-    };
-    const extractLoadCombinationInventory=(modelPayload,metadata)=>{
-      const rows=[];
-      const pushRow=row=>{
-        const name=normalizeSelectionValue(row?.name||row?.combination_name||row?.id);
-        if(!name||rows.some(item=>item.name===name))return;
-        const entryRows=Array.isArray(row?.entry_rows)
-          ?row.entry_rows
-          :Array.isArray(row?.entries)
-            ?row.entries
-            :[];
-        const factorMap=row?.factor_map&&typeof row.factor_map==='object'
-          ?row.factor_map
-          :row?.expanded_factor_map&&typeof row.expanded_factor_map==='object'
-            ?row.expanded_factor_map
-            :{};
-        rows.push({
-          name,
-          combination_type:normalizeSelectionValue(row?.combination_type)||'GEN',
-          limit_state:normalizeSelectionValue(row?.limit_state)||'ACTIVE',
-          expression:normalizeSelectionValue(row?.expression)||'expression n/a',
-          entry_count:safeNumber(row?.entry_count,entryRows.length),
-          factor_map:{...factorMap},
-          referenced_combinations:Array.isArray(row?.referenced_combinations)?row.referenced_combinations.filter(Boolean):[],
-          referenced_leaf_cases:Array.isArray(row?.referenced_leaf_cases)?row.referenced_leaf_cases.filter(Boolean):[],
-          entry_rows:entryRows
-            .filter(entry=>entry&&typeof entry==='object')
-            .map(entry=>({
-              reference_kind:normalizeSelectionValue(entry?.reference_kind).toUpperCase()||'ST',
-              reference_name:normalizeSelectionValue(entry?.reference_name),
-              factor:safeNumber(entry?.factor,0)
-            }))
-            .filter(entry=>entry.reference_name)
-        });
-      };
-      const loadRows=Array.isArray(modelPayload?.loads?.load_combinations)?modelPayload.loads.load_combinations:[];
-      loadRows.forEach(pushRow);
-      const editorSeed=metadata?.load_combination_editor_seed&&typeof metadata.load_combination_editor_seed==='object'
-        ?metadata.load_combination_editor_seed
-        :{};
-      const seedRows=Array.isArray(editorSeed.combination_nodes)?editorSeed.combination_nodes:[];
-      seedRows.forEach(pushRow);
-      return rows;
-    };
-    const buildDirectModelMeta=(rootPayload,modelPayload,sourceMeta={})=>{
-      const metadata=modelPayload?.metadata&&typeof modelPayload.metadata==='object'?modelPayload.metadata:{};
-      const sourceInfo=rootPayload?.source&&typeof rootPayload.source==='object'
-        ?rootPayload.source
-        :{};
-      const axisBridge=metadata.kds_geometry_bridge&&typeof metadata.kds_geometry_bridge==='object'
-        ?metadata.kds_geometry_bridge
-        :{};
-      const axisRefs=axisBridge.axis_refs&&typeof axisBridge.axis_refs==='object'?axisBridge.axis_refs:{};
-      const sectionLibrary=metadata.section_library&&typeof metadata.section_library==='object'
-        ?metadata.section_library
-        :{};
-      const sectionSummary=sectionLibrary.summary&&typeof sectionLibrary.summary==='object'?sectionLibrary.summary:{};
-      const loadPatternLibrary=metadata.load_pattern_library&&typeof metadata.load_pattern_library==='object'
-        ?metadata.load_pattern_library
-        :{};
-      const loadPatternSummary=loadPatternLibrary.summary&&typeof loadPatternLibrary.summary==='object'
-        ?loadPatternLibrary.summary
-        :(loadPatternLibrary.pattern_summary&&typeof loadPatternLibrary.pattern_summary==='object'
-          ?loadPatternLibrary.pattern_summary
-          :{});
-      const storySlices=Array.isArray(axisRefs.z)
-        ?axisRefs.z.map(row=>normalizeSelectionValue(row?.label||row?.name||row?.axis_label||row?.id)).filter(Boolean)
-        :[];
-      const reviewSummary=axisBridge.summary&&typeof axisBridge.summary==='object'?axisBridge.summary:{};
-      const sectionUsageRows=Array.isArray(sectionLibrary.usage_summary)?sectionLibrary.usage_summary:[];
-      const sectionCatalogSummary=buildSectionCatalogSummary(modelPayload?.sections,sectionUsageRows);
-      const bridgeRows=Array.isArray(axisBridge.bridge_rows)?axisBridge.bridge_rows:[];
-      const groupRows=Array.isArray(metadata.groups)?metadata.groups:[];
-      const sectionCount=safeNumber(
-        sectionSummary.section_row_count,
-        Array.isArray(modelPayload?.sections)?modelPayload.sections.length:0
-      );
-      const usedSectionCount=safeNumber(sectionSummary.used_section_count,0);
-      const axisLabelCount=
-        (Array.isArray(axisRefs.x)?axisRefs.x.length:0)+
-        (Array.isArray(axisRefs.y)?axisRefs.y.length:0)+
-        (Array.isArray(axisRefs.z)?axisRefs.z.length:0);
-      const structureTypeLabel=normalizeSelectionValue(
-        Array.isArray(metadata.structure_type)&&metadata.structure_type[0]?.raw
-          ?metadata.structure_type[0].raw
-          :(rootPayload?.source||rootPayload?.parser||'MIDAS parsed model')
-      );
-      const lengthUnitsLabel=normalizeSelectionValue(
-        Array.isArray(metadata.length_units)&&metadata.length_units[0]?.raw
-          ?metadata.length_units[0].raw
-          :''
-      );
-      return{
-        name:String(
-          rootPayload?.run_id||
-          rootPayload?.source||
-          sourceMeta.label||
-          'MIDAS parsed model'
-        ),
-        stories:estimateStoryCount(modelPayload?.nodes,axisRefs)||'--',
-        story_slices:storySlices,
-        load_case_inventory:extractLoadCaseInventory(modelPayload,metadata),
-        load_combination_inventory:extractLoadCombinationInventory(modelPayload,metadata),
-        source_mode:String(sourceMeta.mode||'direct_payload'),
-        source_label:String(sourceMeta.label||sourceInfo.path||rootPayload?.source||'MIDAS parsed model'),
-        source_path:String(sourceMeta.resolvedPath||sourceInfo.path||''),
-        source_artifact_sha256:String(sourceInfo.sha256||''),
-        source_artifact_size_bytes:safeNumber(sourceInfo.size_bytes,0),
-        source_artifact_format:String(sourceInfo.format||''),
-        source_artifact_family:String(sourceInfo.source_family||''),
-        loaded_at:String(sourceMeta.loadedAt||''),
-        generated_at:String(rootPayload?.generated_at||''),
-        parser_label:String(rootPayload?.parser||''),
-        structure_type_label:structureTypeLabel||'--',
-        length_units_label:lengthUnitsLabel||'--',
-        group_count:Array.isArray(metadata.groups)?metadata.groups.length:0,
-        member_count:Array.isArray(metadata.members)?metadata.members.length:0,
-        section_count:sectionCount,
-        used_section_count:usedSectionCount,
-        geometry_bridge_review_count:safeNumber(reviewSummary.review_id_count,0),
-        geometry_bridge_mapped_review_count:safeNumber(reviewSummary.mapped_review_id_count,0),
-        geometry_bridge_full_member_crosswalk_count:safeNumber(reviewSummary.full_member_crosswalk_count,0),
-        load_pattern_count:safeNumber(
-          loadPatternSummary.pattern_count,
-          Array.isArray(loadPatternLibrary.case_semantic_rows)?loadPatternLibrary.case_semantic_rows.length:0
-        ),
-        load_pattern_primitive_count:safeNumber(loadPatternSummary.primitive_count,0),
-        axis_label_count:axisLabelCount,
-        axis_ref_source_mode:String(axisBridge.axis_ref_source_mode||'none'),
-        axis_ref_note:String(axisBridge.axis_ref_note||''),
-        section_catalog_summary:sectionCatalogSummary,
-        section_family_summary:buildSectionFamilySummary(sectionUsageRows),
-        group_summary:buildGroupSummary(groupRows),
-        review_row_summary:buildReviewRowSummary(bridgeRows)
-      };
-    };
-    const sanitizeModelPayload=(payload,sourceMeta={})=>{
-      const extracted=extractModelPayload(payload);
-      const modelPayload=extracted?.model||{};
-      const rootPayload=extracted?.root||payload||{};
-      const metadata=modelPayload.metadata&&typeof modelPayload.metadata==='object'?modelPayload.metadata:{};
-      const sectionRows=Array.isArray(modelPayload.sections)?modelPayload.sections:[];
-      const sectionById=new Map(sectionRows.map(row=>[String(row?.id),String(row?.name||row?.label||row?.section_name||`Section ${row?.id??'--'}`)]));
-      const sectionUsageById=new Map(
-        (Array.isArray(metadata.section_library?.usage_summary)?metadata.section_library.usage_summary:[])
-          .map(row=>[String(row?.section_id),row])
-      );
-      const sectionColorById=new Map(
-        (Array.isArray(metadata.section_colors)?metadata.section_colors:[])
-          .map(row=>[String(row?.section_id),rgbArrayToHex(row?.fill_rgb||row?.wire_rgb)])
-          .filter(([,hex])=>Boolean(hex))
-      );
-      const memberByElementId=new Map();
-      (Array.isArray(metadata.members)?metadata.members:[]).forEach(member=>{
-        const memberId=normalizeSelectionValue(member?.id);
-        const elementIds=Array.isArray(member?.element_ids)?member.element_ids:[];
-        elementIds.forEach(elementId=>memberByElementId.set(String(elementId),memberId));
-      });
-      const groupsByElementId=new Map();
-      (Array.isArray(metadata.groups)?metadata.groups:[]).forEach(group=>{
-        const groupName=normalizeSelectionValue(group?.name);
-        if(!groupName)return;
-        const elementIds=Array.isArray(group?.element_ids)?group.element_ids:[];
-        elementIds.forEach(elementId=>{
-          const key=String(elementId);
-          const current=groupsByElementId.get(key)||[];
-          if(!current.includes(groupName))current.push(groupName);
-          groupsByElementId.set(key,current);
-        });
-      });
-      const reviewByMemberId=new Map();
-      const reviewByElementId=new Map();
-      (Array.isArray(metadata.kds_geometry_bridge?.bridge_rows)?metadata.kds_geometry_bridge.bridge_rows:[]).forEach(row=>{
-        const memberId=normalizeSelectionValue(row?.baseline_focus_member_id||row?.review_member_id);
-        if(!memberId||reviewByMemberId.has(memberId))return;
-        reviewByMemberId.set(memberId,row);
-      });
-      (Array.isArray(metadata.kds_geometry_bridge?.bridge_rows)?metadata.kds_geometry_bridge.bridge_rows:[]).forEach(row=>{
-        const elementId=normalizeSelectionValue(row?.full_crosswalk_target_element_id);
-        if(!elementId||reviewByElementId.has(elementId))return;
-        reviewByElementId.set(elementId,row);
-      });
-      const nodes=(modelPayload.nodes||[]).map((node,idx)=>({
-        id:node?.id??idx,
-        x:safeNumber(node?.x,0),
-        y:safeNumber(node?.y,0),
-        z:safeNumber(node?.z,0),
-        dx:safeNumber(node?.dx,0),
-        dy:safeNumber(node?.dy,0),
-        dz:safeNumber(node?.dz,0),
-        disp_mag:safeNumber(node?.disp_mag,0),
-        stress_vm:safeNumber(node?.stress_vm,0),
-        dcr:safeNumber(node?.dcr,0),
-        axial:safeNumber(node?.axial,0),
-        moment:safeNumber(node?.moment,0),
-        shear:safeNumber(node?.shear,0)
-      }));
-      const elements=(modelPayload.elements||[]).map((element,idx)=>{
-        const memberId=normalizeSelectionValue(element?.member_id)||memberByElementId.get(String(element?.id??idx))||'';
-        const reviewRow=reviewByMemberId.get(memberId)||reviewByElementId.get(normalizeSelectionValue(element?.id??idx))||null;
-        const groupNames=groupsByElementId.get(String(element?.id??idx))||[];
-        return{
-          ...element,
-          id:element?.id??idx,
-          type:normalizeElementType(element?.family||element?.type),
-          node_ids:Array.isArray(element?.node_ids)?element.node_ids:[],
-          member_id:memberId,
-          section:String(element?.section||sectionById.get(String(element?.section_id))||'--'),
-          section_family:normalizeSelectionValue(sectionUsageById.get(String(element?.section_id))?.inferred_family)||'--',
-          section_shape:normalizeSelectionValue(sectionUsageById.get(String(element?.section_id))?.inferred_shape)||'--',
-          group_names:groupNames,
-          group_label:groupNames.join(', ')||'--',
-          review_case_id:normalizeSelectionValue(reviewRow?.review_case_id)||'--',
-          review_row_label:normalizeSelectionValue(reviewRow?.row_provenance_top_row_label)||'--',
-          review_summary_label:normalizeSelectionValue(reviewRow?.row_provenance_summary_label)||'--',
-          review_combination_label:Array.isArray(reviewRow?.full_crosswalk_load_combination_names)
-            ?reviewRow.full_crosswalk_load_combination_names.slice(0,4).join(', ')
-            :'--',
-          dcr:safeNumber(element?.dcr,safeNumber(element?.max_dcr_after,safeNumber(element?.max_dcr_before,0))),
-          axial:safeNumber(element?.axial,0),
-          moment:safeNumber(element?.moment,0),
-          shear:safeNumber(element?.shear,0),
-          color:String(element?.color||sectionColorById.get(String(element?.section_id))||'').trim()
-        };
-      });
-      const meta={
-        ...(rootPayload.meta&&typeof rootPayload.meta==='object'?rootPayload.meta:{}),
-        ...buildDirectModelMeta(rootPayload,modelPayload,sourceMeta)
-      };
-      return{nodes,elements,meta};
-    };
-    const buildModelFromInteractivePayload=(payload,sourceMeta={})=>{
-      const interactive=extractInteractivePayload(payload);
-      if(!interactive)return null;
-      const baselineSegments=Array.isArray(interactive.baseline_segments)?interactive.baseline_segments.filter(Boolean):[];
-      const afterSegments=Array.isArray(interactive.after_segments)?interactive.after_segments.filter(Boolean):[];
-      if(!baselineSegments.length&&!afterSegments.length)return null;
-      const nodeIndexByKey=new Map();
-      const nodes=[];
-      const elements=[];
-      const addSegment=(row,scope,index)=>{
-        const p0=normalizePoint(row?.p0);
-        const p1=normalizePoint(row?.p1);
-        if(!p0||!p1)return;
-        const n0=registerSegmentNode(p0,nodeIndexByKey,nodes);
-        const n1=registerSegmentNode(p1,nodeIndexByKey,nodes);
-        elements.push({
-          ...row,
-          id:`${scope}:${row?.member_id||index}:${index}`,
-          type:normalizeElementType(row?.member_type||row?.category||row?.type),
-          node_ids:[n0,n1],
-          section:row?.after_section||row?.before_section||row?.section_name||'--',
-          color:String(row?.color||'').trim(),
-          dcr:safeNumber(row?.dcr,safeNumber(row?.max_dcr_after,safeNumber(row?.max_dcr_before,0))),
-          axial:safeNumber(row?.axial,0),
-          moment:safeNumber(row?.moment,0),
-          shear:safeNumber(row?.shear,0),
-          overlay_scope:scope,
-          story_band_label:String(row?.story_band_label||'').trim(),
-          zone_label:String(row?.zone_label||'').trim(),
-          action_name:String(row?.action_name||'').trim(),
-          optimization_meaning_label:String(row?.optimization_meaning_label||'').trim(),
-          before_after_snapshot_note:String(row?.before_after_snapshot_note||'').trim()
-        });
-      };
-      baselineSegments.forEach((row,index)=>addSegment(row,'baseline',index));
-      afterSegments.forEach((row,index)=>addSegment(row,'optimized',index));
-      const metaSource=payload.case_context&&typeof payload.case_context==='object'?payload.case_context:{};
-      const storyOptions=Array.isArray(interactive.story_slice_options)?interactive.story_slice_options:[];
-      const axisRefs=interactive.axis_refs&&typeof interactive.axis_refs==='object'?interactive.axis_refs:{};
-      return{
-        nodes,
-        elements,
-        meta:{
-          name:String(
-            metaSource.case_id||
-            metaSource.case_label||
-            payload?.meta?.name||
-            payload?.viewer_mode||
-            'Repo interactive 3D artifact'
-          ),
-          stories:Math.max(
-            Array.isArray(axisRefs.z)?axisRefs.z.length:0,
-            storyOptions.length
-          )||'--',
-          source_mode:String(sourceMeta.mode||'artifact_interactive_3d'),
-          source_label:String(sourceMeta.label||'interactive_3d'),
-          source_path:String(sourceMeta.resolvedPath||''),
-          loaded_at:String(sourceMeta.loadedAt||payload?.generated_at||payload?.meta?.generated_at||''),
-          generated_at:String(payload?.generated_at||payload?.meta?.generated_at||''),
-          comparison_availability:String(interactive.comparison_availability||'baseline_vs_changed'),
-          story_slices:storyOptions.map(option=>String(option?.label||option?.value||'').trim()).filter(Boolean),
-          baseline_segment_count:baselineSegments.length,
-          optimized_segment_count:afterSegments.length
-        }
-      };
-    };
-    self.onmessage=event=>{
-      const data=event?.data&&typeof event.data==='object'?event.data:{};
-      const id=data.id;
-      try{
-        let result=null;
-        if(data.task==='sanitize-model'){
-          result=sanitizeModelPayload(data.payload,data.sourceMeta||{});
-        }else if(data.task==='build-interactive-model'){
-          result=buildModelFromInteractivePayload(data.payload,data.sourceMeta||{});
-        }else{
-          throw new Error(`unsupported worker task: ${data.task}`);
-        }
-        self.postMessage({id,ok:true,result});
-      }catch(err){
-        self.postMessage({id,ok:false,error:String(err?.message||err||'worker task failed')});
-      }
-    };
-  }.toString()})();`;
+function createViewerOptimizationWorkerSource(moduleUrls=VIEWER_OPTIMIZATION_WORKER_MODULE_URLS){
+  const modelNormalizerModuleUrl=String(moduleUrls?.modelNormalizer||'').trim();
+  const directModelNormalizerModuleUrl=String(moduleUrls?.directModelNormalizer||'').trim();
+  if(!modelNormalizerModuleUrl||!directModelNormalizerModuleUrl){
+    throw new Error('viewer optimization worker module URLs unavailable');
+  }
+  return `
+import {buildModelFromInteractivePayload} from ${JSON.stringify(modelNormalizerModuleUrl)};
+import {sanitizeModelPayload} from ${JSON.stringify(directModelNormalizerModuleUrl)};
+
+self.onmessage=event=>{
+  const data=event?.data&&typeof event.data==='object'?event.data:{};
+  const id=data.id;
+  try{
+    let result=null;
+    if(data.task==='sanitize-model'){
+      result=sanitizeModelPayload(data.payload,data.sourceMeta||{});
+    }else if(data.task==='build-interactive-model'){
+      result=buildModelFromInteractivePayload(data.payload,data.sourceMeta||{});
+    }else{
+      throw new Error(\`unsupported worker task: ${data.task}\`);
+    }
+    self.postMessage({id,ok:true,result});
+  }catch(err){
+    self.postMessage({id,ok:false,error:String(err?.message||err||'worker task failed')});
+  }
+};
+`;
 }
 function resetViewerOptimizationWorker(){
   if(!viewerOptimizationWorker)return;
@@ -4991,7 +3047,7 @@ function ensureViewerOptimizationWorker(){
   const blob=new Blob([createViewerOptimizationWorkerSource()],{type:'text/javascript'});
   const url=window.URL.createObjectURL(blob);
   try{
-    viewerOptimizationWorker=new Worker(url,{name:'structure-viewer-optimizer'});
+    viewerOptimizationWorker=new Worker(url,{name:'structure-viewer-optimizer',type:'module'});
   }finally{
     window.URL.revokeObjectURL(url);
   }
@@ -5203,6 +3259,7 @@ function generateDemoModel(){
 function init(){
   const vp=document.getElementById('viewport');
   applySavedThemeMode();
+  updateSuiteRouteTabs();
   activeIsolation=readIsolationStateFromQuery();
   const clipState=readStoryClipStateFromQuery();
   activeStoryClipLabel=clipState.label;
@@ -5271,69 +3328,53 @@ function buildDirectElementMesh(el,ns,{useSurfaceInstancing=false,instancedSurfa
   if(!Array.isArray(ns)||ns.length<2)return;
   const type=normalizeElementType(el.type);
   const color=resolveElementColor(el,type);
-  const baseColor=new THREE.Color(color);
   if(ns.length===2){
-    const pts=ns.map(node=>new THREE.Vector3(node.x,node.z,node.y));
-    const geo=new THREE.BufferGeometry().setFromPoints(pts);
-    geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array([
-      baseColor.r,baseColor.g,baseColor.b,
-      baseColor.r,baseColor.g,baseColor.b,
-    ]),3));
-    const curve=new THREE.LineCurve3(pts[0],pts[1]);
-    const rad=getLineElementRadius(type);
-    const tubeGeo=new THREE.TubeGeometry(curve,1,rad,8,false);
-    const mat=new THREE.MeshPhongMaterial({color:baseColor.clone(),transparent:true,opacity:.85,vertexColors:false});
-    const mesh=new THREE.Mesh(tubeGeo,mat);
-    const meshData={...el,nodeData:ns,baseColor:baseColor.getHex(),contourGeometryKind:'line_tube'};
-    mesh.userData=meshData;
-    modelGroup.add(mesh);
-    elementMeshes.set(el.id,mesh);
-    const lineMat=new THREE.LineBasicMaterial({color:baseColor.clone(),linewidth:type==='column'?2:1,vertexColors:true});
-    const line=new THREE.Line(geo,lineMat);
-    line.userData={_wireframe:true,elemId:el.id,type};
-    modelGroup.add(line);
-    const dpts=ns.map(node=>new THREE.Vector3(node.x+node.dx*deformScale,node.z+node.dz*deformScale,node.y+node.dy*deformScale));
-    const dcurve=new THREE.LineCurve3(dpts[0],dpts[1]);
-    const dtGeo=new THREE.TubeGeometry(dcurve,1,rad,8,false);
-    const dmat=new THREE.MeshPhongMaterial({color:0xff6b6b,transparent:true,opacity:.7});
-    const dmesh=new THREE.Mesh(dtGeo,dmat);
-    dmesh.userData={...el,_deformed:true};
-    deformedGroup.add(dmesh);
-    registerPickAnalyticRecord({data:meshData,points:pts,mesh,pickKind:'line'});
+    const renderObjects=createLineElementRenderObjects({
+      element:el,
+      nodes:ns,
+      type,
+      baseColorHex:color,
+      radius:getLineElementRadius(type),
+      deformScale,
+    });
+    if(!renderObjects)return;
+    modelGroup.add(renderObjects.mesh);
+    elementMeshes.set(el.id,renderObjects.mesh);
+    modelGroup.add(renderObjects.wireframe);
+    deformedGroup.add(renderObjects.deformedMesh);
+    registerPickAnalyticRecord({
+      data:renderObjects.meshData,
+      points:renderObjects.pickPoints,
+      mesh:renderObjects.mesh,
+      pickKind:'line'
+    });
     return;
   }
   if((type==='wall'||type==='slab')&&ns.length>=4){
     const isInstancedSurface=useSurfaceInstancing&&instancedSurfaceElementIds.has(normalizeSelectionValue(el.id));
     const verts=ns.map(node=>new THREE.Vector3(node.x,node.z,node.y));
     const geo=buildLodSurfaceContourGeometry(verts,surfaceRenderLodProfile,{isInstancedSurface})||new THREE.BufferGeometry();
-    const vertexCount=geo.getAttribute('position')?.count||0;
-    if(vertexCount>0){
-      geo.setAttribute('color',new THREE.BufferAttribute(buildConstantColorAttribute(vertexCount,baseColor),3));
-    }
-    const opacity=type==='slab'?.25:.45;
-    const mat=new THREE.MeshPhongMaterial({color:baseColor.clone(),transparent:true,opacity,side:THREE.DoubleSide,vertexColors:false});
-    const mesh=new THREE.Mesh(geo,mat);
-    const meshData={
-      ...el,
-      nodeData:ns,
-      baseColor:baseColor.getHex(),
-      contourGeometryKind:'surface',
-      _surfaceDirectFallback:isInstancedSurface,
+    const renderObjects=createSurfaceElementRenderObjects({
+      element:el,
+      nodes:ns,
+      type,
+      baseColorHex:color,
+      vertices:verts,
+      geometry:geo,
+      isInstancedSurface,
       surfaceLodLabel:surfaceRenderLodProfile?.label||'full',
       surfaceContourSubdivisions:computeSurfaceLodSubdivisions(verts,surfaceRenderLodProfile,{isInstancedSurface}),
-      baseMaterial:mat,
-    };
-    mesh.userData=meshData;
-    modelGroup.add(mesh);
-    elementMeshes.set(el.id,mesh);
-    if(!isInstancedSurface){
-      const edgeGeo=new THREE.BufferGeometry().setFromPoints([...verts,verts[0]]);
-      const edgeMat=new THREE.LineBasicMaterial({color:baseColor.clone(),opacity:.5,transparent:true});
-      const edgeLine=new THREE.Line(edgeGeo,edgeMat);
-      edgeLine.userData={_wireframe:true,elemId:el.id,type};
-      modelGroup.add(edgeLine);
-    }
-    registerPickAnalyticRecord({data:meshData,points:verts,mesh,pickKind:'surface'});
+    });
+    if(!renderObjects)return;
+    modelGroup.add(renderObjects.mesh);
+    elementMeshes.set(el.id,renderObjects.mesh);
+    if(renderObjects.edgeLine)modelGroup.add(renderObjects.edgeLine);
+    registerPickAnalyticRecord({
+      data:renderObjects.meshData,
+      points:renderObjects.pickPoints,
+      mesh:renderObjects.mesh,
+      pickKind:'surface'
+    });
   }
 }
 async function buildDirectRenderableElements(elements,nodeMap,{useSurfaceInstancing=false,instancedSurfaceElementIds=new Set(),forceChunking=false}={}){

@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_VIEWERS = [
+    ROOT / "implementation" / "phase1" / "release" / "visualization" / "structural_viewer_singlefile.html",
     ROOT / "implementation" / "phase1" / "release" / "visualization" / "charts_viewer_singlefile.html",
     ROOT / "implementation" / "phase1" / "release" / "visualization" / "optimization_history_viewer_singlefile.html",
     ROOT / "implementation" / "phase1" / "release" / "visualization" / "panel_zone_viewer_singlefile.html",
@@ -20,6 +21,13 @@ def test_release_singlefile_viewers_do_not_depend_on_remote_or_sidecar_assets() 
         "./charts.data.js",
         "./optimization_history.data.js",
         "./panel_zone.data.js",
+        "./index.data.js",
+        "./viewer-data-loader.js",
+        "./viewer-model-normalizer.js",
+        "./viewer-direct-model-normalizer.js",
+        "./viewer-render-picking-geometry.js",
+        "./viewer-render-mesh-builders.js",
+        "./viewer-contour-materials.js",
         "./vendor/three.module.js",
         "./vendor/OrbitControls.js",
         "cdn.jsdelivr.net",

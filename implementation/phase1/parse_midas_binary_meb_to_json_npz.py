@@ -572,6 +572,20 @@ def _build_table_local_ascii_preview(
         "candidate_segments_xy": projected.get("candidate_segments_xy", []),
         "candidate_points_xy": projected.get("candidate_points_xy", []),
         "candidate_points_xyz": candidate_points_xyz,
+        "topology_nodes_xyz": [
+            {
+                "id": int(point_id),
+                "x": float(points_by_id[point_id][0]),
+                "y": float(points_by_id[point_id][1]),
+                "z": float(points_by_id[point_id][2]),
+            }
+            for point_id in sorted(participating_point_ids)
+            if point_id in points_by_id
+        ],
+        "topology_edges_node_ids": [
+            {"start": int(start_id), "end": int(end_id)}
+            for start_id, end_id in sorted(topology_edges)
+        ],
         "candidate_segment_count": int(len(projected.get("candidate_segments_xy", []))),
         "candidate_point_count": int(len(projected.get("candidate_points_xy", []))),
         "bounds": projected.get("bounds", {}) if isinstance(projected.get("bounds"), dict) else {},

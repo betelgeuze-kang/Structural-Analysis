@@ -36,7 +36,14 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def _write_delivery_contract_fixture(tmp_path: Path, module) -> tuple[Path, Path]:
+def _write_delivery_contract_fixture(
+    tmp_path: Path,
+    module,
+    *,
+    real_drawing_corpus_report_path: Path | None = None,
+    model_optimization_intake_queue_path: Path | None = None,
+    redacted_manifest_path: Path | None = None,
+) -> tuple[Path, Path]:
     release_dir = tmp_path / "release"
     visualization_dir = release_dir / "visualization"
     signing_dir = release_dir / "signing"
@@ -187,6 +194,9 @@ def _write_delivery_contract_fixture(tmp_path: Path, module) -> tuple[Path, Path
         out_html=out_html,
         out_summary=out_summary,
         expert_metadata_json_path=tmp_path / "missing_expert_review_issue_metadata.json",
+        real_drawing_corpus_report_path=real_drawing_corpus_report_path,
+        model_optimization_intake_queue_path=model_optimization_intake_queue_path,
+        redacted_manifest_path=redacted_manifest_path,
     )
     return out_summary, out_summary.with_name("optimized_drawing_expert_review.metadata.json")
 
@@ -232,6 +242,185 @@ def _assert_delivery_contract_core(payload: dict) -> None:
         "linked_diff_row_count",
     }
     assert all(isinstance(count, int) for count in evidence_summary["missing_evidence_field_counts"].values())
+
+
+def test_real_drawing_private_corpus_registers_release_safe_webviewer_summary(tmp_path: Path) -> None:
+    module = _load_module()
+    corpus_dir = tmp_path / "real_drawing_fixture"
+    report_path = corpus_dir / "real_drawing_private_corpus_report.json"
+    queue_path = corpus_dir / "model_optimization_intake_queue.json"
+    manifest_path = corpus_dir / "redacted_manifest.json"
+    forbidden_tokens = [
+        "SHOULD_NOT_LEAK",
+        "source_url",
+        "private_path",
+        "source_private_manifest",
+        "source_intake_queue",
+        "source_redacted_manifest",
+        "zip_model_member_names_sample",
+        "release_rows",
+        "derived_hrefs",
+        "tmp/real_drawing_private_corpus",
+    ]
+
+    _write_json(
+        report_path,
+        {
+            "schema_version": "real_drawing_private_corpus_report.v1",
+            "contract_pass": True,
+            "reason_code": "PASS",
+            "generated_at": "2026-05-06T00:00:00+00:00",
+            "source_intake_queue": "SHOULD_NOT_LEAK_QUEUE_PATH",
+            "source_redacted_manifest": "SHOULD_NOT_LEAK_MANIFEST_PATH",
+            "manifest_summary": {
+                "project_count": 2,
+                "file_count": 4,
+                "total_mb": 12.5,
+                "drawing_review_candidate_count": 2,
+                "drawing_sheet_candidate_count": 9,
+                "model_optimization_candidate_count": 3,
+                "model_optimization_asset_count": 3,
+                "private_only": True,
+                "raw_redistribution_allowed": False,
+                "raw_redistribution_allowed_count": 0,
+                "release_surface_allowed": False,
+                "release_surface_allowed_count": 0,
+                "file_type_counts": {".ifc": 1, ".mgt": 1, ".zip": 1, ".pdf": 1},
+                "license_basis": "Redacted metadata only.",
+                "storage_boundary": "private_corpus_only",
+            },
+            "queue_summary": {
+                "candidate_file_count": 3,
+                "optimized_drawing_generation_ready_count": 2,
+                "optimized_drawing_generation_ready_model_asset_count": 3,
+                "solver_exact_ready_count": 1,
+                "solver_graph_ready_count": 1,
+                "proxy_or_preview_ready_count": 1,
+                "ifc_proxy_graph_ready_count": 1,
+                "archive_hard_tier_ready_count": 0,
+                "archive_hard_tier_blocked_count": 1,
+                "ready_node_count_total": 12,
+                "ready_element_count_total": 10,
+                "route_counts": {"midas_mgt_direct_parser": 1, "ifc_to_structural_graph_adapter": 1},
+                "status_counts": {"solver_graph_ready": 1, "ifc_proxy_graph_ready": 1},
+            },
+            "summary": {"remaining_blocker_count": 1},
+            "consistency": {
+                "counts_consistent": True,
+                "surface_safe": True,
+                "tier_acceptance_all_pass": True,
+                "release_surface_allowed_count_zero": True,
+                "raw_redistribution_allowed_false": True,
+                "input_artifact_freshness_pass": True,
+            },
+        },
+    )
+    _write_json(
+        queue_path,
+        {
+            "contract_pass": True,
+            "summary": {
+                "candidate_file_count": 3,
+                "optimized_drawing_generation_ready_count": 2,
+                "optimized_drawing_generation_ready_model_asset_count": 3,
+                "solver_exact_ready_count": 1,
+                "proxy_or_preview_ready_count": 1,
+            },
+            "queue": [
+                {
+                    "file_id": "SHOULD_NOT_LEAK_FILE_ID",
+                    "file_name": "SHOULD_NOT_LEAK_MODEL.mgt",
+                    "source_url": "https://SHOULD_NOT_LEAK.example/model.mgt",
+                    "private_path": "/home/SHOULD_NOT_LEAK/private/model.mgt",
+                    "source_private_manifest": "SHOULD_NOT_LEAK_PRIVATE_MANIFEST",
+                    "zip_model_member_names_sample": ["SHOULD_NOT_LEAK_MEMBER.mgb"],
+                    "solver_graph_model_json": "tmp/real_drawing_private_corpus/SHOULD_NOT_LEAK/model.json",
+                    "optimization_route": "midas_mgt_direct_parser",
+                    "optimization_status": "solver_graph_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": True,
+                    "model_asset_count": 1,
+                    "node_count": 7,
+                    "element_count": 6,
+                },
+                {
+                    "file_id": "SHOULD_NOT_LEAK_IFC_ID",
+                    "file_name": "SHOULD_NOT_LEAK.ifc",
+                    "source_url": "https://SHOULD_NOT_LEAK.example/model.ifc",
+                    "ifc_proxy_graph_json": "tmp/real_drawing_private_corpus/SHOULD_NOT_LEAK/ifc.graph.json",
+                    "optimization_route": "ifc_to_structural_graph_adapter",
+                    "optimization_status": "ifc_proxy_graph_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": False,
+                    "model_asset_count": 2,
+                    "proxy_node_count": 5,
+                    "proxy_edge_count": 4,
+                },
+            ],
+        },
+    )
+    _write_json(
+        manifest_path,
+        {
+            "contract_pass": True,
+            "policy": {
+                "license_basis": "Redacted metadata only.",
+                "raw_redistribution_allowed": False,
+                "release_surface_allowed": False,
+                "storage_boundary": "private_corpus_only",
+            },
+            "summary": {
+                "project_count": 2,
+                "file_count": 4,
+                "drawing_sheet_candidate_count": 9,
+                "model_optimization_candidate_count": 3,
+                "private_only": True,
+                "raw_redistribution_allowed_count": 0,
+                "release_surface_allowed_count": 0,
+            },
+            "projects": [
+                {
+                    "project_id": "SHOULD_NOT_LEAK_PROJECT",
+                    "files": [
+                        {
+                            "file_name": "SHOULD_NOT_LEAK.pdf",
+                            "source_url": "https://SHOULD_NOT_LEAK.example/drawing.pdf",
+                            "private_path": "/home/SHOULD_NOT_LEAK/private/drawing.pdf",
+                        }
+                    ],
+                }
+            ],
+        },
+    )
+
+    summary_path, _ = _write_delivery_contract_fixture(
+        tmp_path,
+        module,
+        real_drawing_corpus_report_path=report_path,
+        model_optimization_intake_queue_path=queue_path,
+        redacted_manifest_path=manifest_path,
+    )
+    summary_payload = json.loads(summary_path.read_text(encoding="utf-8"))
+    corpus_payload = summary_payload["real_drawing_private_corpus"]
+    assert corpus_payload["registered"] is True
+    assert corpus_payload["release_surface"] == "release_safe_metadata_only"
+    assert corpus_payload["summary"]["optimized_drawing_generation_ready_count"] == 2
+    assert corpus_payload["summary"]["ready_model_asset_count"] == 3
+    assert corpus_payload["summary"]["solver_exact_ready_count"] == 1
+    assert corpus_payload["policy"]["surface_safe"] is True
+    assert corpus_payload["policy"]["release_surface_allowed_count"] == 0
+    assert corpus_payload["policy"]["raw_redistribution_allowed_count"] == 0
+
+    html_text = summary_path.with_name("optimized_drawing_review.html").read_text(encoding="utf-8")
+    expert_html_text = summary_path.with_name("optimized_drawing_expert_review.html").read_text(encoding="utf-8")
+    assert "Real drawing corpus" in html_text
+    assert "Corpus R00" in html_text
+    assert "2/3" in html_text
+    assert "Real drawing corpus" in expert_html_text
+
+    combined_output = "\n".join([summary_path.read_text(encoding="utf-8"), html_text, expert_html_text])
+    for token in forbidden_tokens:
+        assert token not in combined_output
 
 
 def _flatten_dicts(value):

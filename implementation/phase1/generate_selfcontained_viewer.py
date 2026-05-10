@@ -22,6 +22,8 @@ import shutil
 from pathlib import Path
 from typing import Any
 
+from implementation.phase1.singlefile_viewer_support import inline_design_theme_stylesheet
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 VIEWER_ROOT = REPO_ROOT / "src" / "structure-viewer"
 VENDOR_ROOT = VIEWER_ROOT / "vendor"
@@ -161,11 +163,15 @@ def generate_selfcontained_html(model_data: dict) -> str:
         html_content = viewer_html_path.read_text(encoding="utf-8")
         html_content = _remove_sidecar_data_bootstrap(html_content)
         html_content = _remove_importmap_bootstrap(html_content)
+        html_content = inline_design_theme_stylesheet(html_content)
         html_content = _inline_vendor_module_imports(
             html_content,
             three_import_url=three_import_url,
             orbit_controls_import_url=orbit_controls_import_url,
         )
+        viewer_module_import_urls = _build_inline_viewer_module_import_urls()
+        html_content = _inline_local_viewer_module_imports(html_content, viewer_module_import_urls)
+        html_content = _inline_viewer_worker_module_urls(html_content, viewer_module_import_urls)
         embedded_json = json.dumps(model_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
         # Inline JSON is preferred by the viewer when opened over file://
@@ -175,13 +181,13 @@ def generate_selfcontained_html(model_data: dict) -> str:
 </script>
 """
         html_content = html_content.replace("</body>", f"{injection}\n</body>")
-        return html_content
+        return _mark_structural_singlefile_html(html_content)
 
-    return _render_premium_dark_fallback_viewer_html(
+    return _mark_structural_singlefile_html(_render_premium_dark_fallback_viewer_html(
         model_data,
         three_import_url=three_import_url,
         orbit_controls_import_url=orbit_controls_import_url,
-    )
+    ))
 
 
 def _render_premium_dark_fallback_viewer_html(
@@ -485,6 +491,45 @@ def _encode_js_module_data_url(module_source: str) -> str:
     return f"data:text/javascript;base64,{encoded}"
 
 
+def _mark_structural_singlefile_html(html_content: str) -> str:
+    marker = "window.__STRUCTURAL_SINGLEFILE__=true;"
+    if marker in html_content:
+        return html_content
+    return html_content.replace("</head>", f"<script>{marker}</script>\n</head>", 1)
+
+
+def _build_inline_viewer_module_import_urls() -> dict[str, str]:
+    """Return data-URL module imports for local viewer helpers used by index.html."""
+
+    data_loader_url = _encode_js_module_data_url((VIEWER_ROOT / "viewer-data-loader.js").read_text(encoding="utf-8"))
+    model_normalizer_url = _encode_js_module_data_url(
+        (VIEWER_ROOT / "viewer-model-normalizer.js").read_text(encoding="utf-8")
+    )
+    direct_normalizer_source = (VIEWER_ROOT / "viewer-direct-model-normalizer.js").read_text(encoding="utf-8")
+    direct_normalizer_source = direct_normalizer_source.replace(
+        "from './viewer-model-normalizer.js';",
+        f"from '{model_normalizer_url}';",
+    )
+    direct_normalizer_url = _encode_js_module_data_url(direct_normalizer_source)
+    render_picking_geometry_url = _encode_js_module_data_url(
+        (VIEWER_ROOT / "viewer-render-picking-geometry.js").read_text(encoding="utf-8")
+    )
+    render_mesh_builders_url = _encode_js_module_data_url(
+        (VIEWER_ROOT / "viewer-render-mesh-builders.js").read_text(encoding="utf-8")
+    )
+    contour_materials_url = _encode_js_module_data_url(
+        (VIEWER_ROOT / "viewer-contour-materials.js").read_text(encoding="utf-8")
+    )
+    return {
+        "./viewer-data-loader.js": data_loader_url,
+        "./viewer-model-normalizer.js": model_normalizer_url,
+        "./viewer-direct-model-normalizer.js": direct_normalizer_url,
+        "./viewer-render-picking-geometry.js": render_picking_geometry_url,
+        "./viewer-render-mesh-builders.js": render_mesh_builders_url,
+        "./viewer-contour-materials.js": contour_materials_url,
+    }
+
+
 def build_inline_vendor_import_urls() -> tuple[str, str]:
     """Return data-URL module imports for Three.js and OrbitControls."""
 
@@ -520,6 +565,39 @@ def _inline_vendor_module_imports(
     )
     if three_count != 1 or orbit_count != 1:
         raise RuntimeError("Failed to inline viewer vendor module imports from the template HTML")
+    return html_content
+
+
+def _inline_local_viewer_module_imports(html_content: str, module_import_urls: dict[str, str]) -> str:
+    """Inline local helper ESM imports so generated viewer HTML remains single-file."""
+
+    for module_path, module_url in module_import_urls.items():
+        html_content, replacement_count = re.subn(
+            rf"from\s+['\"]{re.escape(module_path)}['\"];",
+            f"from '{module_url}';",
+            html_content,
+            count=1,
+        )
+        if replacement_count != 1:
+            raise RuntimeError(f"Failed to inline viewer module import: {module_path}")
+    return html_content
+
+
+def _inline_viewer_worker_module_urls(html_content: str, module_import_urls: dict[str, str]) -> str:
+    """Inline module URLs consumed by the Blob module worker in single-file output."""
+
+    replacements = {
+        "modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,": (
+            f"modelNormalizer: {json.dumps(module_import_urls['./viewer-model-normalizer.js'])},"
+        ),
+        "directModelNormalizer: new URL('./viewer-direct-model-normalizer.js', import.meta.url).href,": (
+            f"directModelNormalizer: {json.dumps(module_import_urls['./viewer-direct-model-normalizer.js'])},"
+        ),
+    }
+    for needle, replacement in replacements.items():
+        if needle not in html_content:
+            raise RuntimeError(f"Failed to inline viewer worker module URL: {needle}")
+        html_content = html_content.replace(needle, replacement, 1)
     return html_content
 
 

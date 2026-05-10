@@ -1,0 +1,244 @@
+{
+  "schema_version": "real-drawing-private-corpus-catalog.v1",
+  "generated_at": "2026-05-06T22:10:00+09:00",
+  "policy": {
+    "raw_redistribution_allowed": false,
+    "release_surface_allowed": false,
+    "storage_boundary": "private_corpus_only",
+    "license_basis": "Public tender attachments, public MIDAS attachments, and open IFC datasets are treated as private corpus inputs unless a document-level redistribution review explicitly allows release. Redacted metadata may be published without raw files."
+  },
+  "projects": [
+    {
+      "project_id": "cbist_digital_innovation_center_interior_20241013484",
+      "project_title": "CBIST Digital Innovation Center interior work tender drawing seed",
+      "source_family": "public_institution_bid_drawing_docs",
+      "jurisdiction": "KR",
+      "notice_id": "20241013484-00",
+      "source_page_url": "https://www.cbist.or.kr/home/sub.do?mncd=118&mode=view&no=54786267",
+      "source_page_title": "Chungbuk Institute of Science and Technology Innovation interior work tender notice",
+      "retrieval_note": "Public tender notice page lists architectural drawings, mechanical drawings, and cost workbooks. Treat downloaded files as private corpus inputs only.",
+      "files": [
+        {
+          "file_id": "architectural_drawings_pdf",
+          "file_name": "architectural_drawings.pdf",
+          "file_type": ".pdf",
+          "role": "architectural_drawing_pdf",
+          "source_url": "https://www.cbist.or.kr/home/board/download.do?mncd=118&fno=7537&bid=00000285&did=00005478"
+        },
+        {
+          "file_id": "mechanical_drawings_pdf",
+          "file_name": "mechanical_drawings.pdf",
+          "file_type": ".pdf",
+          "role": "mechanical_drawing_pdf",
+          "source_url": "https://www.cbist.or.kr/home/board/download.do?mncd=118&fno=7538&bid=00000285&did=00005478"
+        },
+        {
+          "file_id": "architectural_bill_xlsx",
+          "file_name": "architectural_bill.xlsx",
+          "file_type": ".xlsx",
+          "role": "architectural_cost_workbook",
+          "source_url": "https://www.cbist.or.kr/home/board/download.do?mncd=118&fno=7530&bid=00000285&did=00005478"
+        },
+        {
+          "file_id": "mechanical_bill_xlsx",
+          "file_name": "mechanical_bill.xlsx",
+          "file_type": ".xlsx",
+          "role": "mechanical_cost_workbook",
+          "source_url": "https://www.cbist.or.kr/home/board/download.do?mncd=118&fno=7531&bid=00000285&did=00005478"
+        }
+      ]
+    },
+    {
+      "project_id": "zenodo_smartlivingepc_taltech_ifc_15782433",
+      "project_title": "SmartlivingEPC public building BIM model and measurements",
+      "source_family": "open_bim_ifc_dataset",
+      "jurisdiction": "EU",
+      "notice_id": "10.5281/zenodo.15782433",
+      "source_page_url": "https://zenodo.org/records/15782433",
+      "source_page_title": "SmartlivingEPC public building BIM model and measurements",
+      "retrieval_note": "Open Zenodo dataset with CC-BY-4.0 license. Raw IFC remains private until redistribution review; redacted metadata only is release-safe.",
+      "files": [
+        {
+          "file_id": "ds3_taltech_v4_ifc",
+          "file_name": "DS3_TalTech_V4.ifc",
+          "file_type": ".ifc",
+          "role": "bim_ifc_model",
+          "source_url": "https://zenodo.org/records/15782433/files/DS3_TalTech_V4.ifc?download=1",
+          "expected_md5": "c1b4a6df891a1ae8f311eea6a149ed2a"
+        }
+      ]
+    },
+    {
+      "project_id": "zenodo_balcony_ifc_models_5047709",
+      "project_title": "IFC building models for automated extraction of balcony data",
+      "source_family": "open_bim_ifc_dataset",
+      "jurisdiction": "NL",
+      "notice_id": "10.5281/zenodo.5047709",
+      "source_page_url": "https://zenodo.org/records/5047709",
+      "source_page_title": "IFC Building Models for Automated Extraction of Data from Balconies",
+      "retrieval_note": "Open Zenodo dataset with CC-BY-4.0 license. a2.ifc and a6.ifc are intentionally deferred because each is larger than the default private-corpus single-file cap.",
+      "files": [
+        {
+          "file_id": "a1_ifc",
+          "file_name": "a1.ifc",
+          "file_type": ".ifc",
+          "role": "bim_ifc_model",
+          "source_url": "https://zenodo.org/records/5047709/files/a1.ifc?download=1",
+          "expected_md5": "cbee94a86684bc537ad4e8f5f61fcbb6"
+        },
+        {
+          "file_id": "a3_ifc",
+          "file_name": "a3.ifc",
+          "file_type": ".ifc",
+          "role": "bim_ifc_model",
+          "source_url": "https://zenodo.org/records/5047709/files/a3.ifc?download=1",
+          "expected_md5": "5c7d385e47fd8c11173d243ca63e975d"
+        },
+        {
+          "file_id": "a4_ifc",
+          "file_name": "a4.ifc",
+          "file_type": ".ifc",
+          "role": "bim_ifc_model",
+          "source_url": "https://zenodo.org/records/5047709/files/a4.ifc?download=1",
+          "expected_md5": "0edf654aa5d852b5fe23198c33b1fab6"
+        },
+        {
+          "file_id": "a5_ifc",
+          "file_name": "a5.ifc",
+          "file_type": ".ifc",
+          "role": "bim_ifc_model",
+          "source_url": "https://zenodo.org/records/5047709/files/a5.ifc?download=1",
+          "expected_md5": "800e8d92f4b19ccf9dc23bd5d15f1c02"
+        },
+        {
+          "file_id": "a7_ifc",
+          "file_name": "a7.ifc",
+          "file_type": ".ifc",
+          "role": "bim_ifc_model",
+          "source_url": "https://zenodo.org/records/5047709/files/a7.ifc?download=1",
+          "expected_md5": "788a50de219f6cedc092ac18af8abee9"
+        },
+        {
+          "file_id": "a8_ifc",
+          "file_name": "a8.ifc",
+          "file_type": ".ifc",
+          "role": "bim_ifc_model",
+          "source_url": "https://zenodo.org/records/5047709/files/a8.ifc?download=1",
+          "expected_md5": "8155738721c4cf19c6b2a01644805ab4"
+        }
+      ]
+    },
+    {
+      "project_id": "midas_public_native_mgt_sources",
+      "project_title": "Public native MIDAS text model seeds",
+      "source_family": "public_midas_mgt_model",
+      "jurisdiction": "GLOBAL",
+      "notice_id": "midas-public-native-mgt",
+      "source_page_url": "implementation/phase1/open_data/midas/public_native_mgt_source_catalog.json",
+      "source_page_title": "Repo-curated public native MIDAS MGT source catalog",
+      "retrieval_note": "Known public raw MIDAS text-model candidates already used by the native roundtrip gate. Raw files remain private in this corpus output.",
+      "files": [
+        {
+          "file_id": "midas_generator_33_github",
+          "file_name": "midas_generator_33_github.mgt",
+          "file_type": ".mgt",
+          "role": "midas_mgt_model",
+          "source_url": "https://raw.githubusercontent.com/chen39137112/MidasMgtGenerator/f704e6300795f35d7d7d2c05bce2b9b6a15ccbb1/33.mgt",
+          "expected_sha256": "269419de4b0ae9aacbfd2aeed05766d2c8bb065f7b64e81fee8c295129bbf2cc"
+        },
+        {
+          "file_id": "gtc_public_bridge_bearing_c04",
+          "file_name": "gtc_public_bridge_bearing_c04.mgt",
+          "file_type": ".mgt",
+          "role": "midas_mgt_model",
+          "source_url": "https://gtc.midasuser.com/helpdesk/File/Get/10390266",
+          "expected_sha256": "a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610"
+        },
+        {
+          "file_id": "gtc_public_bridge_section_a3",
+          "file_name": "gtc_public_bridge_section_a3.mgt",
+          "file_type": ".mgt",
+          "role": "midas_mgt_model",
+          "source_url": "https://gtc.midasuser.com/helpdesk/File/Get/10427297",
+          "expected_sha256": "dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6"
+        },
+        {
+          "file_id": "gtc_public_bridge_section_e1_03",
+          "file_name": "gtc_public_bridge_section_e1_03.mgt",
+          "file_type": ".mgt",
+          "role": "midas_mgt_model",
+          "source_url": "https://gtc.midasuser.com/helpdesk/File/Get/10429383",
+          "expected_sha256": "07b32b0cf376d0eb81174e53873e79a92c36b54a770996d2b4d068b8f585c14e"
+        }
+      ]
+    },
+    {
+      "project_id": "midas_public_support_model_archives",
+      "project_title": "Public MIDAS support model archive seeds",
+      "source_family": "public_midas_support_model_archive",
+      "jurisdiction": "GLOBAL",
+      "notice_id": "midas-public-support-archives",
+      "source_page_url": "implementation/phase1/open_data/midas/quality_mgt_source_catalog.json",
+      "source_page_title": "Repo-curated MIDAS support attachment quality source catalog",
+      "retrieval_note": "Small public MIDAS support archives used as private model corpus inputs. Zip members are counted for model asset breadth when model files are present.",
+      "files": [
+        {
+          "file_id": "midas_support_rc_house_archive",
+          "file_name": "midas_support_rc_house_archive.zip",
+          "file_type": ".zip",
+          "role": "midas_model_archive",
+          "source_url": "https://support.midasuser.com/hc/article_attachments/51948310654745",
+          "expected_sha256": "872556284de8cccd439ef67a158593163e68a9f410e389fd0e62ee61a2d89f21"
+        },
+        {
+          "file_id": "midas_support_multifamily_building_archive",
+          "file_name": "midas_support_multifamily_building_archive.zip",
+          "file_type": ".zip",
+          "role": "midas_model_archive",
+          "source_url": "https://support.midasuser.com/hc/article_attachments/51945266735897",
+          "expected_sha256": "eed5b5f99fca712ad210353e24c37d7ab01a895017e3a7235a488b671ad81263"
+        },
+        {
+          "file_id": "midas_support_neighborhood_facility_archive",
+          "file_name": "midas_support_neighborhood_facility_archive.zip",
+          "file_type": ".zip",
+          "role": "midas_model_archive",
+          "source_url": "https://support.midasuser.com/hc/article_attachments/51947938880409",
+          "expected_sha256": "2989658f47baa7f79daad39f0b75592b757bb44fb6b44b2abb93a64ad9dbd994"
+        },
+        {
+          "file_id": "midas_support_fcm_bridge_archive",
+          "file_name": "midas_support_fcm_bridge_archive.zip",
+          "file_type": ".zip",
+          "role": "midas_model_archive",
+          "source_url": "https://support.midasuser.com/hc/article_attachments/46324296262553",
+          "expected_sha256": "e8a692cc70339c6658f9af3842827168782378c3ebeec9ff5bebead537a2f093"
+        },
+        {
+          "file_id": "midas_support_ramp_archive",
+          "file_name": "midas_support_ramp_archive.zip",
+          "file_type": ".zip",
+          "role": "midas_model_archive",
+          "source_url": "https://support.midasuser.com/hc/article_attachments/43508439849369",
+          "expected_sha256": "13fe31819d22cb610f02ed9b0f65b24ca9df57a9f29dc09b995cc153f576343c"
+        },
+        {
+          "file_id": "midas_support_beam_archive",
+          "file_name": "midas_support_beam_archive.zip",
+          "file_type": ".zip",
+          "role": "midas_model_archive",
+          "source_url": "https://support.midasuser.com/hc/article_attachments/42143050548889",
+          "expected_sha256": "2b4040808120e46208515305ed7a66c951b0f3cbb07dbfaa66911a2025f0a5b7"
+        },
+        {
+          "file_id": "midas_support_stair_archive",
+          "file_name": "midas_support_stair_archive.zip",
+          "file_type": ".zip",
+          "role": "midas_model_archive",
+          "source_url": "https://support.midasuser.com/hc/article_attachments/42120558247065",
+          "expected_sha256": "ba3fa8bba97d1f6f6038974eeb3e42529ecc1b53ddb87d6e51e7fb09d3a9ee29"
+        }
+      ]
+    }
+  ]
+}

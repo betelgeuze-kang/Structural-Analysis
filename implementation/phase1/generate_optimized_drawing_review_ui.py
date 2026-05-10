@@ -46,6 +46,13 @@ DEFAULT_OUT_EXPERT_METADATA_JSON = Path(
     "implementation/phase1/release/visualization/optimized_drawing_expert_review.metadata.json"
 )
 DEFAULT_OUT_SUMMARY = Path("implementation/phase1/release/visualization/optimized_drawing_review_summary.json")
+DEFAULT_REAL_DRAWING_PRIVATE_CORPUS_REPORT = Path(
+    "tmp/real_drawing_private_corpus/real_drawing_private_corpus_report.json"
+)
+DEFAULT_MODEL_OPTIMIZATION_INTAKE_QUEUE = Path(
+    "tmp/real_drawing_private_corpus/model_optimization_intake_queue.json"
+)
+DEFAULT_REDACTED_MANIFEST = Path("tmp/real_drawing_private_corpus/redacted_manifest.json")
 
 
 def _effective_expert_metadata_template_dir(template_dir: Path) -> Path:
@@ -2408,6 +2415,41 @@ def build_review_payload(
     }
 
 
+def _real_drawing_corpus_view(payload: dict[str, Any]) -> dict[str, Any]:
+    corpus = payload.get("real_drawing_private_corpus") if isinstance(payload.get("real_drawing_private_corpus"), dict) else {}
+    summary = corpus.get("summary") if isinstance(corpus.get("summary"), dict) else {}
+    policy = corpus.get("policy") if isinstance(corpus.get("policy"), dict) else {}
+    ready_count = _safe_int(summary.get("optimized_drawing_generation_ready_count", summary.get("ready_asset_count", 0)))
+    candidate_count = _safe_int(summary.get("candidate_file_count", summary.get("model_optimization_candidate_count", 0)))
+    if candidate_count <= 0:
+        candidate_count = ready_count
+    ready_model_asset_count = _safe_int(summary.get("ready_model_asset_count", summary.get("model_asset_count", 0)))
+    solver_exact_ready_count = _safe_int(summary.get("solver_exact_ready_count", 0))
+    proxy_or_preview_ready_count = _safe_int(summary.get("proxy_or_preview_ready_count", 0))
+    drawing_sheet_candidate_count = _safe_int(summary.get("drawing_sheet_candidate_count", 0))
+    project_count = _safe_int(summary.get("project_count", 0))
+    release_surface_allowed_count = _safe_int(policy.get("release_surface_allowed_count", 0))
+    raw_redistribution_allowed_count = _safe_int(policy.get("raw_redistribution_allowed_count", 0))
+    surface_safe = bool(policy.get("surface_safe", False))
+    metadata_only = surface_safe and release_surface_allowed_count == 0 and raw_redistribution_allowed_count == 0
+    return {
+        "available": bool(corpus.get("available", False)),
+        "registered": bool(corpus.get("registered", False)) and ready_count > 0,
+        "summary_line": str(corpus.get("summary_line", "") or ""),
+        "ready_count": ready_count,
+        "candidate_count": candidate_count,
+        "ready_model_asset_count": ready_model_asset_count,
+        "solver_exact_ready_count": solver_exact_ready_count,
+        "proxy_or_preview_ready_count": proxy_or_preview_ready_count,
+        "drawing_sheet_candidate_count": drawing_sheet_candidate_count,
+        "project_count": project_count,
+        "release_surface_allowed_count": release_surface_allowed_count,
+        "raw_redistribution_allowed_count": raw_redistribution_allowed_count,
+        "metadata_only": metadata_only,
+        "surface_label": "metadata-only" if metadata_only else "review required",
+    }
+
+
 def render_review_html(payload: dict[str, Any]) -> str:
     case_id = html.escape(str(payload.get("case_id", "") or "optimized_drawing_review"))
     case_title = html.escape(str(payload.get("case_title", "") or "Optimized Drawing Review"))
@@ -2419,6 +2461,7 @@ def render_review_html(payload: dict[str, Any]) -> str:
     zone_rows = [row for row in (payload.get("zone_rows") or []) if isinstance(row, dict)]
     top_members = [row for row in (payload.get("top_members") or []) if isinstance(row, dict)]
     projection_rows = [row for row in (payload.get("projection_rows") or []) if isinstance(row, dict)]
+    real_drawing_corpus = _real_drawing_corpus_view(payload)
     interactive_3d_payload = payload.get("interactive_3d_payload") if isinstance(payload.get("interactive_3d_payload"), dict) else {}
     baseline_segment_count = int(interactive_3d_payload.get("baseline_segment_count", 0) or 0)
     after_segment_count = int(interactive_3d_payload.get("after_segment_count", 0) or 0)
@@ -3598,6 +3641,36 @@ def render_review_html(payload: dict[str, Any]) -> str:
         _projection_sheet_card(index, row)
         for index, row in enumerate(projection_rows)
     ) or "<div class='drawing-sheet-empty'>No projection sheets were provided for this review package.</div>"
+    real_drawing_registry_sheet_html = ""
+    real_drawing_summary_card_html = ""
+    if real_drawing_corpus["registered"]:
+        ready_count = _safe_int(real_drawing_corpus["ready_count"])
+        candidate_count = _safe_int(real_drawing_corpus["candidate_count"])
+        ready_model_asset_count = _safe_int(real_drawing_corpus["ready_model_asset_count"])
+        solver_exact_ready_count = _safe_int(real_drawing_corpus["solver_exact_ready_count"])
+        proxy_or_preview_ready_count = _safe_int(real_drawing_corpus["proxy_or_preview_ready_count"])
+        drawing_sheet_candidate_count = _safe_int(real_drawing_corpus["drawing_sheet_candidate_count"])
+        project_count = _safe_int(real_drawing_corpus["project_count"])
+        surface_label = html.escape(str(real_drawing_corpus["surface_label"] or "metadata-only"))
+        real_drawing_registry_sheet_html = (
+            "<article class='drawing-sheet-mini'>"
+            "<div class='drawing-sheet-mini-head'>"
+            "<span class='drawing-sheet-mini-index'>Corpus R00</span>"
+            "<span class='drawing-sheet-mini-label'>Real drawing corpus</span>"
+            "</div>"
+            f"<div class='drawing-sheet-mini-note'>{ready_count}/{candidate_count or max(ready_count, 1)} intake-ready model files across {project_count} projects; "
+            f"{drawing_sheet_candidate_count} drawing-sheet candidates are registered on a {surface_label} release surface.</div>"
+            "<div class='drawing-sheet-mini-links'>"
+            f"<span class='drawing-sheet-empty'>derived assets {ready_model_asset_count} | solver-exact {solver_exact_ready_count} | proxy/preview {proxy_or_preview_ready_count}</span>"
+            "</div>"
+            "</article>"
+        )
+        real_drawing_summary_card_html = f"""
+    <article class='card'>
+      <div class='card-label'>Real drawing corpus</div>
+      <div class='card-value'>{ready_count}/{candidate_count or max(ready_count, 1)}</div>
+      <div class='card-note'>{ready_model_asset_count} derived assets | solver-exact {solver_exact_ready_count} | {surface_label}</div>
+    </article>"""
 
     external_expert_mode_html = f"""
     <section class='external-expert-mode'>
@@ -3666,6 +3739,7 @@ def render_review_html(payload: dict[str, Any]) -> str:
           <p>The sheet set below exposes the plan, elevation, and isometric assets that correspond to the review package.</p>
           <div class='drawing-sheet-mini-grid'>
             {projection_sheet_cards_html}
+            {real_drawing_registry_sheet_html}
           </div>
         </article>
       </div>
@@ -6879,6 +6953,7 @@ tbody tr:hover {{
       <div class='card-value'>{_safe_float(payload.get("max_dcr_after_max", 0.0)):.3f}</div>
       <div class='card-note'>변경 이후 최대 governing DCR</div>
     </article>
+    {real_drawing_summary_card_html}
   </section>
 
   <section class='section' id='drawing-3d-workspace'>
@@ -9985,6 +10060,7 @@ def render_expert_review_html(payload: dict[str, Any]) -> str:
     story_rows = [row for row in (payload.get("story_band_rows") or []) if isinstance(row, dict)]
     top_members = [row for row in (payload.get("top_members") or []) if isinstance(row, dict)]
     projection_rows = [row for row in (payload.get("projection_rows") or []) if isinstance(row, dict)]
+    real_drawing_corpus = _real_drawing_corpus_view(payload)
     changed_group_count = _safe_int(payload.get("changed_group_count", 0))
     changed_member_count = _safe_int(payload.get("changed_member_count", 0))
     total_element_count = _safe_int(payload.get("total_element_count", 0))
@@ -10049,6 +10125,23 @@ def render_expert_review_html(payload: dict[str, Any]) -> str:
     midas_roundtrip_gate_taxonomy_canonical_count = _safe_int(
         payload.get("midas_roundtrip_gate_taxonomy_canonical_count", 0)
     )
+    real_drawing_corpus_evidence_line = ""
+    if real_drawing_corpus["registered"]:
+        ready_count = _safe_int(real_drawing_corpus["ready_count"])
+        candidate_count = _safe_int(real_drawing_corpus["candidate_count"])
+        ready_model_asset_count = _safe_int(real_drawing_corpus["ready_model_asset_count"])
+        solver_exact_ready_count = _safe_int(real_drawing_corpus["solver_exact_ready_count"])
+        proxy_or_preview_ready_count = _safe_int(real_drawing_corpus["proxy_or_preview_ready_count"])
+        drawing_sheet_candidate_count = _safe_int(real_drawing_corpus["drawing_sheet_candidate_count"])
+        project_count = _safe_int(real_drawing_corpus["project_count"])
+        surface_label = html.escape(str(real_drawing_corpus["surface_label"] or "metadata-only"))
+        real_drawing_corpus_evidence_line = (
+            "<div class='sheet-receipt-line'><strong>Real drawing corpus</strong>: "
+            f"{ready_count}/{candidate_count or max(ready_count, 1)} intake-ready model files, "
+            f"{ready_model_asset_count} derived assets, {solver_exact_ready_count} solver-exact and "
+            f"{proxy_or_preview_ready_count} proxy/preview rows across {project_count} projects; "
+            f"{drawing_sheet_candidate_count} drawing-sheet candidates are registered as {surface_label}.</div>"
+        )
 
     executive_cards_html = "".join(
         [
@@ -11651,6 +11744,7 @@ tbody tr:nth-child(even) {{
         <div class='sheet-receipt'>
           <div class='sheet-receipt-line'><strong>Validation comment</strong>: The current package is appropriate for external engineering review because native export completed, the load combination roundtrip remained {('exact' if mgt_export_loadcomb_roundtrip_pass else 'under review')}, unsupported changes remained at {mgt_export_unsupported_change_count}, and pending review remained at {midas_roundtrip_gate_pending_review_total}.</div>
           <div class='sheet-receipt-line'><strong>Corpus evidence</strong>: {midas_roundtrip_gate_ready_count} ready cases inside a {midas_roundtrip_gate_corpus_case_count or max(midas_roundtrip_gate_ready_count, 1)}-case roundtrip corpus, with {midas_roundtrip_gate_public_native_ready_count} public native-ready references.</div>
+          {real_drawing_corpus_evidence_line}
           <div class='sheet-receipt-line'><strong>Follow-up path</strong>: Use the linked technical workspace for exact line diff, member click-through, and interactive 3D inspection if the reviewer wants to audit an individual callout.</div>
         </div>
       </div>
@@ -11671,6 +11765,9 @@ def prepare_review_payload(
     expert_metadata_json_path: Path = DEFAULT_EXPERT_METADATA_JSON,
     expert_metadata_template: str = DEFAULT_EXPERT_METADATA_TEMPLATE_NAME,
     expert_metadata_template_dir: Path = DEFAULT_EXPERT_METADATA_TEMPLATE_DIR,
+    real_drawing_corpus_report_path: Path | None = DEFAULT_REAL_DRAWING_PRIVATE_CORPUS_REPORT,
+    model_optimization_intake_queue_path: Path | None = DEFAULT_MODEL_OPTIMIZATION_INTAKE_QUEUE,
+    redacted_manifest_path: Path | None = DEFAULT_REDACTED_MANIFEST,
 ) -> dict[str, Any]:
     expert_metadata_template_dir = _effective_expert_metadata_template_dir(expert_metadata_template_dir)
     viewer_payload = _load_json(viewer_json_path)
@@ -11726,11 +11823,209 @@ def prepare_review_payload(
     payload["expert_issue_metadata"] = expert_review_metadata
     payload["expert_issue_metadata_source_mode"] = expert_review_metadata_source_mode
     payload["expert_issue_metadata_path"] = str(expert_metadata_json_path)
+    payload["real_drawing_private_corpus"] = _build_real_drawing_private_corpus_payload(
+        corpus_report_path=real_drawing_corpus_report_path,
+        intake_queue_path=model_optimization_intake_queue_path,
+        redacted_manifest_path=redacted_manifest_path,
+        out_html_path=out_html_path,
+    )
     return payload
 
 
 def _review_artifact_href(target: Path | str, *, base_dir: Path) -> str:
     return _rel_href(target, base_dir=base_dir)
+
+
+def _real_corpus_public_count_map(value: Any) -> dict[str, int]:
+    if not isinstance(value, dict):
+        return {}
+    return {str(key): _safe_int(count, 0) for key, count in value.items() if str(key).strip()}
+
+
+def _real_corpus_path(path: Path | None) -> Path | None:
+    if path is None:
+        return None
+    return path if path.exists() and path.is_file() else None
+
+
+def _build_real_drawing_private_corpus_payload(
+    *,
+    corpus_report_path: Path | None = DEFAULT_REAL_DRAWING_PRIVATE_CORPUS_REPORT,
+    intake_queue_path: Path | None = DEFAULT_MODEL_OPTIMIZATION_INTAKE_QUEUE,
+    redacted_manifest_path: Path | None = DEFAULT_REDACTED_MANIFEST,
+    out_html_path: Path = DEFAULT_OUT_HTML,
+) -> dict[str, Any]:
+    report_path = _real_corpus_path(corpus_report_path)
+    queue_path = _real_corpus_path(intake_queue_path)
+    manifest_path = _real_corpus_path(redacted_manifest_path)
+    if not any((report_path, queue_path, manifest_path)):
+        return {
+            "available": False,
+            "release_surface": "not_registered",
+            "summary_line": "No real drawing private corpus intake artifacts were found.",
+        }
+
+    report_payload = _load_json(report_path) if report_path else {}
+    queue_payload = _load_json(queue_path) if queue_path else {}
+    manifest_payload = _load_json(manifest_path) if manifest_path else {}
+    report_summary = report_payload.get("summary") if isinstance(report_payload.get("summary"), dict) else {}
+    manifest_summary = (
+        report_payload.get("manifest_summary")
+        if isinstance(report_payload.get("manifest_summary"), dict)
+        else manifest_payload.get("summary")
+        if isinstance(manifest_payload.get("summary"), dict)
+        else {}
+    )
+    queue_summary = (
+        report_payload.get("queue_summary")
+        if isinstance(report_payload.get("queue_summary"), dict)
+        else queue_payload.get("summary")
+        if isinstance(queue_payload.get("summary"), dict)
+        else {}
+    )
+    consistency = report_payload.get("consistency") if isinstance(report_payload.get("consistency"), dict) else {}
+    policy = manifest_payload.get("policy") if isinstance(manifest_payload.get("policy"), dict) else {}
+    projects = [row for row in (manifest_payload.get("projects") or []) if isinstance(row, dict)]
+    files = [
+        file_row
+        for project in projects
+        for file_row in (project.get("files") or [])
+        if isinstance(file_row, dict)
+    ]
+    queue_rows = [row for row in (queue_payload.get("queue") or []) if isinstance(row, dict)]
+    source_status = {
+        "corpus_report_loaded": bool(report_path),
+        "model_optimization_intake_queue_loaded": bool(queue_path),
+        "redacted_manifest_loaded": bool(manifest_path),
+    }
+    contract_pass = bool(
+        report_payload.get("contract_pass", False)
+        or queue_payload.get("contract_pass", False)
+        or manifest_payload.get("contract_pass", False)
+    )
+    manifest_file_type_counts = _real_corpus_public_count_map(
+        manifest_summary.get("file_type_counts")
+        or {
+            file_type: sum(1 for file_row in files if str(file_row.get("file_type", "") or "") == file_type)
+            for file_type in sorted({str(file_row.get("file_type", "") or "") for file_row in files if str(file_row.get("file_type", "") or "")})
+        }
+    )
+    route_counts = _real_corpus_public_count_map(queue_summary.get("route_counts"))
+    status_counts = _real_corpus_public_count_map(queue_summary.get("status_counts"))
+    ready_count = _safe_int(
+        queue_summary.get(
+            "optimized_drawing_generation_ready_count",
+            sum(1 for row in queue_rows if bool(row.get("ready_for_optimized_drawing_generation", False))),
+        )
+    )
+    candidate_count = _safe_int(queue_summary.get("candidate_file_count", len(queue_rows)))
+    ready_model_asset_count = _safe_int(
+        queue_summary.get(
+            "optimized_drawing_generation_ready_model_asset_count",
+            sum(_safe_int(row.get("model_asset_count", 0)) for row in queue_rows if row.get("ready_for_optimized_drawing_generation")),
+        )
+    )
+    project_count = _safe_int(manifest_summary.get("project_count", len(projects)))
+    file_count = _safe_int(manifest_summary.get("file_count", len(files)))
+    drawing_sheet_candidate_count = _safe_int(
+        manifest_summary.get(
+            "drawing_sheet_candidate_count",
+            sum(_safe_int(file_row.get("pdf_page_count", 0)) for file_row in files if file_row.get("drawing_review_candidate")),
+        )
+    )
+    release_surface_allowed = bool(
+        policy.get("release_surface_allowed", manifest_summary.get("release_surface_allowed", False))
+    )
+    raw_redistribution_allowed = bool(
+        policy.get("raw_redistribution_allowed", manifest_summary.get("raw_redistribution_allowed", False))
+    )
+    raw_redistribution_allowed_count = _safe_int(manifest_summary.get("raw_redistribution_allowed_count", 0))
+    release_surface_allowed_count = _safe_int(manifest_summary.get("release_surface_allowed_count", 0))
+    surface_safe = bool(
+        consistency.get("surface_safe", False)
+        or (
+            not release_surface_allowed
+            and not raw_redistribution_allowed
+            and raw_redistribution_allowed_count == 0
+            and release_surface_allowed_count == 0
+        )
+    )
+    release_surface = "release_safe_metadata_only" if surface_safe else "review_required"
+    summary_line = (
+        f"real drawing corpus: {ready_count}/{candidate_count or max(ready_count, 1)} intake-ready assets, "
+        f"{project_count} projects, {drawing_sheet_candidate_count} drawing-sheet candidates; "
+        f"raw redistribution={'allowed' if raw_redistribution_allowed else 'blocked'}."
+    )
+    return {
+        "available": True,
+        "registered": ready_count > 0,
+        "schema_version": "real-drawing-private-corpus-release-surface.v1",
+        "generated_at": str(report_payload.get("generated_at") or queue_payload.get("generated_at") or manifest_payload.get("generated_at") or ""),
+        "contract_pass": contract_pass,
+        "reason_code": str(report_payload.get("reason_code") or queue_payload.get("reason_code") or ""),
+        "release_surface": release_surface,
+        "source_status": source_status,
+        "summary_line": summary_line,
+        "policy": {
+            "private_only": bool(manifest_summary.get("private_only", True)),
+            "raw_redistribution_allowed": raw_redistribution_allowed,
+            "raw_redistribution_allowed_count": raw_redistribution_allowed_count,
+            "release_surface_allowed": release_surface_allowed,
+            "release_surface_allowed_count": release_surface_allowed_count,
+            "surface_safe": surface_safe,
+            "storage_boundary": str(
+                policy.get("storage_boundary", manifest_summary.get("storage_boundary", "private_corpus_only")) or ""
+            ),
+            "license_basis": str(policy.get("license_basis", manifest_summary.get("license_basis", "")) or ""),
+        },
+        "summary": {
+            "project_count": project_count,
+            "file_count": file_count,
+            "total_mb": round(_safe_float(manifest_summary.get("total_mb", 0.0)), 3),
+            "drawing_review_candidate_count": _safe_int(manifest_summary.get("drawing_review_candidate_count", 0)),
+            "drawing_sheet_candidate_count": drawing_sheet_candidate_count,
+            "candidate_file_count": candidate_count,
+            "model_optimization_candidate_count": _safe_int(
+                manifest_summary.get("model_optimization_candidate_count", candidate_count)
+            ),
+            "model_asset_count": _safe_int(
+                manifest_summary.get(
+                    "model_optimization_asset_count",
+                    ready_model_asset_count,
+                )
+            ),
+            "optimized_drawing_generation_ready_count": ready_count,
+            "ready_asset_count": ready_count,
+            "ready_model_asset_count": ready_model_asset_count,
+            "solver_exact_ready_count": _safe_int(queue_summary.get("solver_exact_ready_count", 0)),
+            "solver_graph_ready_count": _safe_int(queue_summary.get("solver_graph_ready_count", 0)),
+            "proxy_or_preview_ready_count": _safe_int(queue_summary.get("proxy_or_preview_ready_count", 0)),
+            "direct_mgt_ready_count": _safe_int(
+                report_payload.get("queue_breakdown", {}).get("direct_mgt_ready_count", 0)
+                if isinstance(report_payload.get("queue_breakdown"), dict)
+                else queue_summary.get("direct_mgt_solver_exact_count", 0)
+            ),
+            "ifc_proxy_graph_ready_count": _safe_int(queue_summary.get("ifc_proxy_graph_ready_count", 0)),
+            "archive_hard_tier_ready_count": _safe_int(queue_summary.get("archive_hard_tier_ready_count", 0)),
+            "archive_hard_tier_blocked_count": _safe_int(queue_summary.get("archive_hard_tier_blocked_count", 0)),
+            "ready_node_count_total": _safe_int(queue_summary.get("ready_node_count_total", 0)),
+            "ready_element_count_total": _safe_int(queue_summary.get("ready_element_count_total", 0)),
+            "remaining_blocker_count": _safe_int(report_summary.get("remaining_blocker_count", 0)),
+        },
+        "file_type_counts": manifest_file_type_counts,
+        "route_counts": route_counts,
+        "status_counts": status_counts,
+        "consistency": {
+            "counts_consistent": bool(consistency.get("counts_consistent", False)),
+            "surface_safe": bool(consistency.get("surface_safe", False)),
+            "tier_acceptance_all_pass": bool(consistency.get("tier_acceptance_all_pass", False)),
+            "release_surface_allowed_count_zero": bool(
+                consistency.get("release_surface_allowed_count_zero", False)
+            ),
+            "raw_redistribution_allowed_false": bool(consistency.get("raw_redistribution_allowed_false", False)),
+            "input_artifact_freshness_pass": bool(consistency.get("input_artifact_freshness_pass", False)),
+        },
+    }
 
 
 def _build_artifact_href_validation(
@@ -12611,6 +12906,9 @@ def write_review_artifacts(
     expert_metadata_template_dir: Path = DEFAULT_EXPERT_METADATA_TEMPLATE_DIR,
     out_expert_metadata_json: Path | None = None,
     out_summary: Path = DEFAULT_OUT_SUMMARY,
+    real_drawing_corpus_report_path: Path | None = DEFAULT_REAL_DRAWING_PRIVATE_CORPUS_REPORT,
+    model_optimization_intake_queue_path: Path | None = DEFAULT_MODEL_OPTIMIZATION_INTAKE_QUEUE,
+    redacted_manifest_path: Path | None = DEFAULT_REDACTED_MANIFEST,
 ) -> dict[str, Any]:
     expert_html_path = out_expert_html or out_html.with_name("optimized_drawing_expert_review.html")
     expert_metadata_out_path = out_expert_metadata_json or expert_html_path.with_suffix(".metadata.json")
@@ -12620,6 +12918,9 @@ def write_review_artifacts(
         expert_metadata_json_path=expert_metadata_json_path,
         expert_metadata_template=expert_metadata_template,
         expert_metadata_template_dir=expert_metadata_template_dir,
+        real_drawing_corpus_report_path=real_drawing_corpus_report_path,
+        model_optimization_intake_queue_path=model_optimization_intake_queue_path,
+        redacted_manifest_path=redacted_manifest_path,
     )
     payload["archive_handoff_base_dir"] = str(out_html.parent)
     payload["optimized_review_html_href"] = os.path.relpath(out_html, out_html.parent)
@@ -12846,7 +13147,15 @@ def main() -> None:
     parser.add_argument("--expert-metadata-template-dir", default=str(DEFAULT_EXPERT_METADATA_TEMPLATE_DIR))
     parser.add_argument("--out-expert-metadata-json", default="")
     parser.add_argument("--out-summary", default=str(DEFAULT_OUT_SUMMARY))
+    parser.add_argument("--real-drawing-corpus-report", default=str(DEFAULT_REAL_DRAWING_PRIVATE_CORPUS_REPORT))
+    parser.add_argument("--model-optimization-intake-queue", default=str(DEFAULT_MODEL_OPTIMIZATION_INTAKE_QUEUE))
+    parser.add_argument("--redacted-manifest", default=str(DEFAULT_REDACTED_MANIFEST))
     args = parser.parse_args()
+
+    def _optional_path(value: str) -> Path | None:
+        text = str(value or "").strip()
+        return Path(text) if text else None
+
     write_review_artifacts(
         viewer_json_path=Path(args.viewer_json),
         out_html=Path(args.out_html),
@@ -12858,6 +13167,9 @@ def main() -> None:
             Path(args.out_expert_metadata_json) if str(args.out_expert_metadata_json).strip() else None
         ),
         out_summary=Path(args.out_summary),
+        real_drawing_corpus_report_path=_optional_path(args.real_drawing_corpus_report),
+        model_optimization_intake_queue_path=_optional_path(args.model_optimization_intake_queue),
+        redacted_manifest_path=_optional_path(args.redacted_manifest),
     )
 
 

@@ -53,6 +53,7 @@ implementation/phase1/experiments/real_accuracy_*/
 
 # Working/output trees
 tmp/
+private_corpus/
 implementation/phase1/workspace/
 implementation/phase1/stress/
 implementation/phase1/output/

@@ -676,3 +676,125 @@ def test_prepare_midas_binary_decoded_preview_bridge_propagates_summary_probe_ex
     assert metadata["preview_exactness_tier"] == "exact-topology-candidate"
     assert metadata["preview_exactness_signal_source"] == "inventory_summary.table_local_preview_probe"
     assert metadata["topology_signal_field_sources"]["exact_topology_candidate"] == "inventory_summary.table_local_preview_probe"
+
+
+def test_prepare_midas_binary_decoded_preview_bridge_promotes_payload_exact_topology_graph(tmp_path: Path) -> None:
+    inventory_json = tmp_path / "meb_decoded_inventory.json"
+    inventory_report = tmp_path / "meb_decoded_inventory_report.json"
+    refresh_report = tmp_path / "meb_inventory_refresh_report.json"
+    out_dir = tmp_path / "out"
+    model_json = out_dir / "model.json"
+    dataset_npz = out_dir / "dataset.npz"
+    bridge_report = out_dir / "bridge_report.json"
+
+    _write_json(
+        inventory_json,
+        {
+            "geometry_preview": {
+                "mode": "table_local_ascii_preview",
+                "projection_label": "XY",
+                "source_table": "ASCII:*POINT/*MEMBER_ADD",
+                "anchor_table_names": ["*POINT", "*MEMBER_ADD"],
+                "candidate_segments_xy": [
+                    {"x1": 0.0, "y1": 0.0, "x2": 4.0, "y2": 0.0},
+                ],
+                "candidate_points_xy": [
+                    [0.0, 0.0],
+                    [4.0, 0.0],
+                    [4.0, 3.0],
+                    [0.0, 3.0],
+                ],
+                "topology_nodes_xyz": [
+                    {"id": 101, "x": 0.0, "y": 0.0, "z": 0.0},
+                    {"id": 102, "x": 4.0, "y": 0.0, "z": 0.0},
+                    {"id": 103, "x": 4.0, "y": 3.0, "z": 2.0},
+                    {"id": 104, "x": 0.0, "y": 3.0, "z": 2.0},
+                ],
+                "topology_edges_node_ids": [
+                    {"start": 101, "end": 102},
+                    {"start": 102, "end": 103},
+                    {"start": 103, "end": 104},
+                    {"start": 104, "end": 101},
+                ],
+                "topology_node_count": 4,
+                "topology_edge_count": 4,
+                "missing_member_path_count": 0,
+                "missing_member_reference_count": 0,
+                "payload_exact_topology_ready": True,
+                "topology_preview_ready": True,
+                "topology_readiness_label": "payload-exact member-add topology preview",
+                "exact_topology_candidate": True,
+                "exact_topology_promoted": False,
+            },
+            "summary": {
+                "geometry_preview_point_count": 4,
+                "geometry_preview_segment_count": 1,
+                "geometry_preview_source_table": "ASCII:*POINT/*MEMBER_ADD",
+                "geometry_preview_mode": "table_local_ascii_preview",
+            },
+        },
+    )
+    _write_json(
+        inventory_report,
+        {
+            "reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+            "summary": {
+                "geometry_preview_ready": False,
+                "geometry_preview_point_count": 4,
+                "geometry_preview_segment_count": 1,
+                "geometry_preview_source_table": "ASCII:*POINT/*MEMBER_ADD",
+                "geometry_preview_mode": "table_local_ascii_preview",
+            },
+        },
+    )
+    _write_json(
+        refresh_report,
+        {
+            "selected_member_name": "sample_promoted.mmbx",
+            "selected_reason_code": "PASS_TABLE_DIRECTORY_ONLY",
+        },
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "implementation/phase1/prepare_midas_binary_decoded_preview_bridge.py",
+            "--source-id",
+            "sample_promoted",
+            "--decoded-inventory-json",
+            str(inventory_json),
+            "--decoded-inventory-report",
+            str(inventory_report),
+            "--refresh-report",
+            str(refresh_report),
+            "--model-json-out",
+            str(model_json),
+            "--npz-out",
+            str(dataset_npz),
+            "--report-out",
+            str(bridge_report),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+    report_payload = json.loads(bridge_report.read_text(encoding="utf-8"))
+    assert report_payload["summary"]["preview_segment_count"] == 4
+    assert report_payload["summary"]["preview_point_count"] == 4
+    assert report_payload["summary"]["exact_topology_candidate"] is True
+    assert report_payload["summary"]["exact_topology_promoted"] is True
+    assert report_payload["summary"]["preview_exactness_tier"] == "exact-topology-promoted"
+    assert report_payload["summary"]["bridge_mode"] == "payload_exact_topology_graph"
+    assert report_payload["summary"]["accepted_type_label"] == "exact_topology_edge=4"
+
+    model_payload = json.loads(model_json.read_text(encoding="utf-8"))
+    assert model_payload["topology_metrics"]["node_count"] == 4
+    assert model_payload["topology_metrics"]["element_count"] == 4
+    assert model_payload["model"]["metadata"]["exact_topology_promoted"] is True
+    assert model_payload["model"]["elements"][0]["node_ids"] == [101, 102]
+
+    dataset = np.load(dataset_npz, allow_pickle=True)
+    assert dataset["node_id"].tolist() == [101, 102, 103, 104]
+    assert dataset["member_ids"].shape[0] == 4

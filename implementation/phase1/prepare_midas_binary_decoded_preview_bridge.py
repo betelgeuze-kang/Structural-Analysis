@@ -425,6 +425,75 @@ def _preview_topology_fields(
     return fields
 
 
+def _topology_graph_payload(
+    preview: dict[str, Any],
+    topology_fields: dict[str, Any],
+) -> dict[str, Any]:
+    if not bool(topology_fields.get("exact_topology_candidate", False)):
+        return {}
+    if int(topology_fields.get("missing_member_path_count", 0) or 0) != 0:
+        return {}
+    if int(topology_fields.get("missing_member_reference_count", 0) or 0) != 0:
+        return {}
+
+    raw_nodes = preview.get("topology_nodes_xyz")
+    raw_edges = preview.get("topology_edges_node_ids")
+    if not isinstance(raw_nodes, list) or not isinstance(raw_edges, list):
+        return {}
+
+    nodes: dict[int, tuple[float, float, float]] = {}
+    for row in raw_nodes:
+        if not isinstance(row, dict):
+            continue
+        try:
+            node_id = int(row.get("id", 0))
+            coord = (
+                float(row.get("x", 0.0)),
+                float(row.get("y", 0.0)),
+                float(row.get("z", 0.0)),
+            )
+        except (TypeError, ValueError):
+            continue
+        if node_id <= 0:
+            continue
+        nodes[node_id] = coord
+
+    edges: set[tuple[int, int]] = set()
+    missing_refs = 0
+    for row in raw_edges:
+        if not isinstance(row, dict):
+            continue
+        try:
+            start_id = int(row.get("start", 0))
+            end_id = int(row.get("end", 0))
+        except (TypeError, ValueError):
+            continue
+        if start_id == end_id:
+            continue
+        if start_id not in nodes or end_id not in nodes:
+            missing_refs += 1
+            continue
+        edges.add((min(start_id, end_id), max(start_id, end_id)))
+
+    expected_node_count = int(topology_fields.get("topology_node_count", 0) or 0)
+    expected_edge_count = int(topology_fields.get("topology_edge_count", 0) or 0)
+    graph_matches_topology = (
+        expected_node_count > 0
+        and expected_edge_count > 0
+        and len(nodes) == expected_node_count
+        and len(edges) == expected_edge_count
+        and missing_refs == 0
+    )
+    if not graph_matches_topology:
+        return {}
+
+    return {
+        "nodes": nodes,
+        "edges": sorted(edges),
+        "graph_matches_topology": True,
+    }
+
+
 def _make_npz_payload(
     npz_out: Path,
     nodes: dict[int, tuple[float, float, float]],
@@ -558,6 +627,17 @@ def main() -> int:
         _write_json(report_out, report)
         return 1
     preview_topology_fields = _preview_topology_fields(preview, preview_summary, report_summary)
+    topology_graph = _topology_graph_payload(preview, preview_topology_fields)
+    if topology_graph:
+        preview_topology_fields["exact_topology_promoted"] = True
+        preview_topology_fields["topology_node_count"] = len(topology_graph["nodes"])
+        preview_topology_fields["topology_edge_count"] = len(topology_graph["edges"])
+        source_map = preview_topology_fields.get("topology_signal_field_sources")
+        if not isinstance(source_map, dict):
+            source_map = {}
+        source_map["exact_topology_promoted"] = "bridge.topology_graph_payload"
+        preview_topology_fields["topology_signal_field_sources"] = source_map
+
     preview_exactness_fields = _resolve_preview_exactness_fields(preview_state_label, preview_topology_fields)
     surface_fields = _preview_surface_fields(
         preview_state_label,
@@ -567,6 +647,10 @@ def main() -> int:
         exact_topology_candidate=bool(preview_topology_fields.get("exact_topology_candidate", False)),
         exact_topology_promoted=bool(preview_topology_fields.get("exact_topology_promoted", False)),
     )
+    if topology_graph:
+        bridge_mode = "payload_exact_topology_graph"
+        family_assumption = "payload_exact_topology"
+        accepted_type_label = f"exact_topology_edge={len(topology_graph['edges'])}"
 
     nodes: dict[int, tuple[float, float, float]] = {}
     node_lookup: dict[tuple[float, float, float], int] = {}
@@ -574,42 +658,63 @@ def main() -> int:
     edges: list[tuple[int, int]] = []
     node_id = 1
 
-    bbox_min = [float("inf"), float("inf"), 0.0]
-    bbox_max = [float("-inf"), float("-inf"), 0.0]
+    bbox_min = [float("inf"), float("inf"), float("inf")]
+    bbox_max = [float("-inf"), float("-inf"), float("-inf")]
 
-    for element_id, row in enumerate(segment_rows, start=1):
-        point_keys = [
-            _point_key(row["x1"], row["y1"], 0.0),
-            _point_key(row["x2"], row["y2"], 0.0),
-        ]
-        node_ids: list[int] = []
-        for key in point_keys:
-            bbox_min[0] = min(bbox_min[0], key[0])
-            bbox_min[1] = min(bbox_min[1], key[1])
-            bbox_max[0] = max(bbox_max[0], key[0])
-            bbox_max[1] = max(bbox_max[1], key[1])
-            if key not in node_lookup:
-                node_lookup[key] = node_id
-                nodes[node_id] = key
-                node_id += 1
-            node_ids.append(node_lookup[key])
-        if node_ids[0] == node_ids[1]:
-            continue
-        edge = (min(node_ids[0], node_ids[1]), max(node_ids[0], node_ids[1]))
-        edges.append(edge)
-        elements.append(
-            {
-                "id": int(element_id),
-                "type": "BEAM",
-                "family": family_assumption,
-                "node_ids": node_ids,
-                "section_id": -1,
-                "material_id": -1,
-                "source_table": str(preview.get("source_table", "") or report_summary.get("geometry_preview_source_table", "")),
-                "preview_mode": str(preview.get("mode", "") or "heuristic_xy_segment_preview"),
-                "bridge_mode": bridge_mode,
-            }
-        )
+    if topology_graph:
+        nodes = dict(topology_graph["nodes"])
+        for coord in nodes.values():
+            for axis in range(3):
+                bbox_min[axis] = min(bbox_min[axis], float(coord[axis]))
+                bbox_max[axis] = max(bbox_max[axis], float(coord[axis]))
+        for element_id, (start_id, end_id) in enumerate(topology_graph["edges"], start=1):
+            edges.append((int(start_id), int(end_id)))
+            elements.append(
+                {
+                    "id": int(element_id),
+                    "type": "BEAM",
+                    "family": family_assumption,
+                    "node_ids": [int(start_id), int(end_id)],
+                    "section_id": -1,
+                    "material_id": -1,
+                    "source_table": str(preview.get("source_table", "") or report_summary.get("geometry_preview_source_table", "")),
+                    "preview_mode": str(preview.get("mode", "") or "heuristic_xy_segment_preview"),
+                    "bridge_mode": bridge_mode,
+                }
+            )
+    else:
+        for element_id, row in enumerate(segment_rows, start=1):
+            point_keys = [
+                _point_key(row["x1"], row["y1"], 0.0),
+                _point_key(row["x2"], row["y2"], 0.0),
+            ]
+            node_ids: list[int] = []
+            for key in point_keys:
+                for axis in range(3):
+                    bbox_min[axis] = min(bbox_min[axis], key[axis])
+                    bbox_max[axis] = max(bbox_max[axis], key[axis])
+                if key not in node_lookup:
+                    node_lookup[key] = node_id
+                    nodes[node_id] = key
+                    node_id += 1
+                node_ids.append(node_lookup[key])
+            if node_ids[0] == node_ids[1]:
+                continue
+            edge = (min(node_ids[0], node_ids[1]), max(node_ids[0], node_ids[1]))
+            edges.append(edge)
+            elements.append(
+                {
+                    "id": int(element_id),
+                    "type": "BEAM",
+                    "family": family_assumption,
+                    "node_ids": node_ids,
+                    "section_id": -1,
+                    "material_id": -1,
+                    "source_table": str(preview.get("source_table", "") or report_summary.get("geometry_preview_source_table", "")),
+                    "preview_mode": str(preview.get("mode", "") or "heuristic_xy_segment_preview"),
+                    "bridge_mode": bridge_mode,
+                }
+            )
 
     if not elements:
         report.update({"contract_pass": False, "reason_code": "ERR_NO_VIEWABLE_SEGMENTS"})

@@ -17,11 +17,26 @@ def test_generate_selfcontained_html_uses_full_index_template() -> None:
 
     assert '<div id="app">' in html
     assert 'id="embedded-model-data"' in html
+    assert "window.__STRUCTURAL_SINGLEFILE__=true;" in html
     assert 'loadInitialModelData' in html
     assert 'id="loading-message"' in html
     assert html.index('id="embedded-model-data"') < html.rindex("</body>")
     assert "<script type=\"application/json\" id=\"embedded-model-data\">" in html
     assert "./index.data.js" not in html
+    assert "./viewer-data-loader.js" not in html
+    assert "./viewer-model-normalizer.js" not in html
+    assert "./viewer-direct-model-normalizer.js" not in html
+    assert "./viewer-render-picking-geometry.js" not in html
+    assert "./viewer-render-mesh-builders.js" not in html
+    assert "./viewer-contour-materials.js" not in html
+    assert "./viewer-optimization-worker.js" not in html
+    assert "new URL('./viewer-model-normalizer.js'" not in html
+    assert "new URL('./viewer-direct-model-normalizer.js'" not in html
+    assert "new URL('./viewer-render-picking-geometry.js'" not in html
+    assert "new URL('./viewer-render-mesh-builders.js'" not in html
+    assert "new URL('./viewer-contour-materials.js'" not in html
+    assert "./design-theme.css" not in html
+    assert "inlined from src/structure-viewer/design-theme.css" in html
     assert "cdn.jsdelivr.net" not in html
     assert "unpkg.com" not in html
     assert "https://" not in html
@@ -41,6 +56,7 @@ def test_generate_selfcontained_html_uses_only_inline_module_bootstrap() -> None
     html = generate_selfcontained_html(generate_demo_model())
 
     assert "data:text/javascript;base64," in html
+    assert html.count("data:text/javascript;base64,") >= 5
     assert "./vendor/three.module.js" not in html
     assert "./vendor/OrbitControls.js" not in html
     assert 'type="importmap"' not in html

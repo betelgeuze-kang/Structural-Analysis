@@ -3,7 +3,7 @@ import { type ChangeEvent, startTransition, useEffect, useState } from 'react'
 type StatusTone = 'ok' | 'warn' | 'missing'
 type ResourceStatus = 'loading' | 'ready' | 'missing' | 'error'
 type JsonRecord = Record<string, unknown>
-type ReviewSurfaceId = 'viewer' | 'drawing-review' | 'benchmark-review' | 'committee'
+type ReviewSurfaceId = 'viewer' | 'drawing-review' | 'real-drawing-3d' | 'benchmark-review' | 'committee'
 type GovernanceArtifactId = 'gap' | 'registry' | 'registry-index' | 'package' | 'signature' | 'batch'
 
 type Surface = {
@@ -230,6 +230,14 @@ const reviewSurfaces: ReviewSurface[] = [
     kind: 'html',
   },
   {
+    id: 'real-drawing-3d',
+    title: 'Real Drawing 3D Viewer',
+    description: '구한 도면의 파생 topology를 기존 구조 웹뷰어 preset으로 통합해 확인합니다.',
+    href: './src/structure-viewer/index.html?preset=real_drawing_private_3d',
+    badge: 'Private 3D',
+    kind: 'html',
+  },
+  {
     id: 'benchmark-review',
     title: 'Benchmark Review',
     description: 'Canton Tower와 PEER blind benchmark를 baseline / AI optimized 비교로 엽니다.',
@@ -267,6 +275,12 @@ const reviewSurfaceIdentity: Record<
     mode: 'AI drawing desk',
     track: 'Sheet-level evidence',
     cue: 'Optimized drawing sheets, review notes, and SVG handoff stay audit-ready.',
+  },
+  'real-drawing-3d': {
+    family: 'Private topology review',
+    mode: 'Integrated real drawing preset',
+    track: 'Derived geometry',
+    cue: 'Anonymized derived topology opens in the shared structure viewer without raw drawing URLs or private source paths.',
   },
   'benchmark-review': {
     family: 'Validation light review',
@@ -3029,6 +3043,12 @@ const routeSurfaceFocusMap: Record<ReviewSurfaceId, Record<string, string>> = {
     benchmark_validation_route: 'drawing-3d-workspace',
     submission_and_authority_route: 'drawing-hero',
   },
+  'real-drawing-3d': {
+    interactive_evidence_route: 'viewer',
+    drawing_first_review_route: 'viewer',
+    benchmark_validation_route: 'viewer',
+    submission_and_authority_route: 'viewer',
+  },
   'benchmark-review': {
     interactive_evidence_route: 'canton-review',
     drawing_first_review_route: 'canton-review',
@@ -3612,6 +3632,17 @@ function App() {
   const surfaceSnapshots: Record<ReviewSurfaceId, Snapshot> = {
     viewer: buildViewerSnapshot(resources.viewer),
     'drawing-review': buildDrawingSnapshot(resources.drawing),
+    'real-drawing-3d': {
+      statusLabel: 'Private local',
+      tone: 'ok',
+      metrics: [
+        { label: 'Assets', value: '18' },
+        { label: 'Renderable', value: '18' },
+        { label: 'Solver exact', value: '7' },
+      ],
+      note: '구한 도면의 파생 topology를 기존 구조 웹뷰어 preset으로 엽니다.',
+      sourceLabel: 'src/structure-viewer/index.real_drawing_private.data.js',
+    },
     'benchmark-review': buildBenchmarkSnapshot(resources.benchmark),
     committee: buildCommitteeSnapshot(resources.committeeSummary, resources.committeeReport),
   }
@@ -3946,6 +3977,7 @@ function App() {
     const selectionParamsBySurface: Record<ReviewSurfaceId, DeepLinkParams> = {
       viewer: buildViewerSelectionParams(resources.viewer),
       'drawing-review': buildDrawingSelectionParams(resources.drawing, resources.viewer),
+      'real-drawing-3d': {},
       'benchmark-review': buildBenchmarkSelectionParams(routeTitle, resources.benchmark),
       committee: buildCommitteeSelectionParams(
         routeTitle,
