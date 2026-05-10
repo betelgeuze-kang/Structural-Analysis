@@ -26,6 +26,7 @@ def test_release_singlefile_viewers_do_not_depend_on_remote_or_sidecar_assets() 
         "./viewer-model-normalizer.js",
         "./viewer-direct-model-normalizer.js",
         "./viewer-render-picking-geometry.js",
+        "./viewer-large-model-picking.js",
         "./viewer-render-mesh-builders.js",
         "./viewer-deformed-rendering.js",
         "./viewer-contour-materials.js",

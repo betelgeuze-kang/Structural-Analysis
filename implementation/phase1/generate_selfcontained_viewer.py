@@ -514,6 +514,9 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
     render_picking_geometry_url = _encode_js_module_data_url(
         (VIEWER_ROOT / "viewer-render-picking-geometry.js").read_text(encoding="utf-8")
     )
+    large_model_picking_url = _encode_js_module_data_url(
+        (VIEWER_ROOT / "viewer-large-model-picking.js").read_text(encoding="utf-8")
+    )
     render_mesh_builders_url = _encode_js_module_data_url(
         (VIEWER_ROOT / "viewer-render-mesh-builders.js").read_text(encoding="utf-8")
     )
@@ -528,6 +531,7 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
         "./viewer-model-normalizer.js": model_normalizer_url,
         "./viewer-direct-model-normalizer.js": direct_normalizer_url,
         "./viewer-render-picking-geometry.js": render_picking_geometry_url,
+        "./viewer-large-model-picking.js": large_model_picking_url,
         "./viewer-render-mesh-builders.js": render_mesh_builders_url,
         "./viewer-contour-materials.js": contour_materials_url,
         "./viewer-deformed-rendering.js": deformed_rendering_url,

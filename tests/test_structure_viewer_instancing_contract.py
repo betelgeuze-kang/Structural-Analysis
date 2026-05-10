@@ -72,14 +72,18 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
     geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
     deformed_text = Path("src/structure-viewer/viewer-deformed-rendering.js").read_text(encoding="utf-8")
+    picking_text = Path("src/structure-viewer/viewer-large-model-picking.js").read_text(encoding="utf-8")
     compact_deformed_text = "".join(deformed_text.split())
     compact_geometry_text = "".join(geometry_text.split())
+    compact_picking_text = "".join(picking_text.split())
 
     assert "let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;" in text
     assert "const SURFACE_LOD_MEDIUM_ELEMENT_THRESHOLD=" in text
     assert "const SURFACE_LOD_COARSE_ELEMENT_THRESHOLD=" in text
     assert "from './viewer-render-picking-geometry.js';" in text
+    assert "from './viewer-large-model-picking.js';" in text
     assert "const renderPickingGeometryToolkit=createViewerRenderPickingGeometryToolkit(THREE,{" in text
+    assert "const largeModelPickingToolkit=createViewerLargeModelPickingToolkit(THREE,{" in text
     assert "export function createViewerRenderPickingGeometryToolkit(" in geometry_text
     assert "function buildSurfaceLodProfile(" in geometry_text
     assert "function computeSurfaceLodSubdivisions(" in geometry_text
@@ -115,12 +119,12 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "function estimatePickRecordEntryDistance(" in geometry_text
     assert "function queryPickSpatialIndexOverflowBvh(" in geometry_text
     assert "function queryPickSurfaceFacetBvh(" in geometry_text
-    assert "function queryPickSpatialIndexCandidates(" in text
+    assert "function queryPickSpatialIndexCandidates(" in picking_text
     assert "function intersectRayBoxDistances(" in geometry_text
     assert "function getPickSpatialIndexCellCoords(" in geometry_text
-    assert "function pickLargeModelRecord(" in text
-    assert "function intersectLargeModelLineRecord(" in text
-    assert "function intersectLargeModelSurfaceRecord(" in text
+    assert "function pickLargeModelRecord(" in picking_text
+    assert "function intersectLargeModelLineRecord(" in picking_text
+    assert "function intersectLargeModelSurfaceRecord(" in picking_text
     assert "pickTargetMeshes=[...modelGroup.children].filter(child=>" in text
     assert "child.userData?._surfaceDirectFallback" in text
     assert "denseBucketRecordIndices:[]" in text
@@ -153,19 +157,19 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "index.nonSurfaceRecordBvh=buildPickSpatialIndexOverflowBvh(index.nonSurfaceRecordIndices,index.records);" in text
     assert "index.meshTriangleBvh=buildPickMeshTriangleBvh(index.meshTriangleEntries);" in text
     assert "index.surfaceFacetBvh=buildPickSurfaceFacetBvh(index.surfaceFacetEntries);" in text
-    assert "const candidateEntries=queryPickSpatialIndexCandidates(pickAnalyticSpatialIndex,ray);" in text
-    assert "if(index.meshTriangleBvh){" in text
-    assert "queryPickMeshTriangleBvh(index.meshTriangleBvh,index.meshTriangleEntries,ray,pushCandidateEntry);" in text
-    assert "if(showDeformed&&index.deformedMeshTriangleBvh){" in text
-    assert "queryPickMeshTriangleBvh(index.deformedMeshTriangleBvh,index.deformedMeshTriangleEntries,ray,pushCandidateEntry);" in text
-    assert "if(index.surfaceFacetBvh){" in text
-    assert "queryPickSurfaceFacetBvh(index.surfaceFacetBvh,index.surfaceFacetEntries,ray,pushCandidateEntry);" in text
-    assert "if(index.nonSurfaceRecordBvh){" in text
-    assert "queryPickSpatialIndexOverflowBvh(index.nonSurfaceRecordBvh,ray,pushCandidateEntry);" in text
-    assert "if(index.fullRecordBvh&&!index.meshTriangleBvh&&!index.surfaceFacetBvh&&!index.nonSurfaceRecordBvh){" in text
-    assert "queryPickSpatialIndexOverflowBvh(index.fullRecordBvh,ray,pushCandidateEntry);" in text
-    assert "if(index.denseBucketBvh){" in text
-    assert "candidateEntries.sort((left,right)=>left.entryDistance-right.entryDistance)" in text
+    assert "constcandidateEntries=queryPickSpatialIndexCandidates(pickAnalyticSpatialIndex,ray);" in compact_picking_text
+    assert "if(index.meshTriangleBvh){" in compact_picking_text
+    assert "queryPickMeshTriangleBvh(index.meshTriangleBvh,index.meshTriangleEntries,ray,pushCandidateEntry);" in compact_picking_text
+    assert "if(getShowDeformed()&&index.deformedMeshTriangleBvh){" in compact_picking_text
+    assert "queryPickMeshTriangleBvh(index.deformedMeshTriangleBvh,index.deformedMeshTriangleEntries,ray,pushCandidateEntry" in compact_picking_text
+    assert "if(index.surfaceFacetBvh){" in compact_picking_text
+    assert "queryPickSurfaceFacetBvh(index.surfaceFacetBvh,index.surfaceFacetEntries,ray,pushCandidateEntry);" in compact_picking_text
+    assert "if(index.nonSurfaceRecordBvh){" in compact_picking_text
+    assert "queryPickSpatialIndexOverflowBvh(index.nonSurfaceRecordBvh,ray,pushCandidateEntry);" in compact_picking_text
+    assert "if(index.fullRecordBvh&&!index.meshTriangleBvh&&!index.surfaceFacetBvh&&!index.nonSurfaceRecordBvh){" in compact_picking_text
+    assert "queryPickSpatialIndexOverflowBvh(index.fullRecordBvh,ray,pushCandidateEntry);" in compact_picking_text
+    assert "if(index.denseBucketBvh){" in compact_picking_text
+    assert "candidateEntries.sort((left,right)=>left.entryDistance-right.entryDistance)" in compact_picking_text
     assert "const acceleratedHit=pickLargeModelRecord(raycaster.ray);" in text
     assert "Pick Mesh Triangles" in text
     assert "Pick Mesh Local" in text
@@ -195,8 +199,10 @@ def test_index_html_uses_anisotropic_pick_spatial_index_cell_sizes_end_to_end() 
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
     geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
     deformed_text = Path("src/structure-viewer/viewer-deformed-rendering.js").read_text(encoding="utf-8")
+    picking_text = Path("src/structure-viewer/viewer-large-model-picking.js").read_text(encoding="utf-8")
     compact_geometry_text = "".join(geometry_text.split())
     compact_deformed_text = "".join(deformed_text.split())
+    compact_picking_text = "".join(picking_text.split())
 
     assert "function getPickSpatialIndexAxisCellSize(index, axis) {" in geometry_text
     assert "safeNumber(index?.[`cellSize${axis.toUpperCase()}`],0)," in compact_geometry_text
@@ -211,19 +217,19 @@ def test_index_html_uses_anisotropic_pick_spatial_index_cell_sizes_end_to_end() 
     assert "cellSizeX," in text
     assert "cellSizeY," in text
     assert "cellSizeZ," in text
-    assert "const cellSizeX=getPickSpatialIndexAxisCellSize(index,'x');" in text
-    assert "const cellSizeY=getPickSpatialIndexAxisCellSize(index,'y');" in text
-    assert "const cellSizeZ=getPickSpatialIndexAxisCellSize(index,'z');" in text
-    assert "?index.boundsMin.x+(ix+1)*cellSizeX" in text
-    assert "?index.boundsMin.y+(iy+1)*cellSizeY" in text
-    assert "?index.boundsMin.z+(iz+1)*cellSizeZ" in text
-    assert "let tDeltaX=stepX!==0?Math.abs(cellSizeX/ray.direction.x):Infinity;" in text
-    assert "let tDeltaY=stepY!==0?Math.abs(cellSizeY/ray.direction.y):Infinity;" in text
-    assert "let tDeltaZ=stepZ!==0?Math.abs(cellSizeZ/ray.direction.z):Infinity;" in text
-    assert "const pushCandidateEntry=(recordIndex,cellEntryDistance=0)=>{" in text
-    assert "const entryDistance=Math.max(" in text
-    assert "estimatePickRecordEntryDistance(ray,record,tolerance)" in text
-    assert "pushBucketRecords(ix,iy,iz,traveled);" in text
+    assert "constcellSizeX=getPickSpatialIndexAxisCellSize(index,'x');" in compact_picking_text
+    assert "constcellSizeY=getPickSpatialIndexAxisCellSize(index,'y');" in compact_picking_text
+    assert "constcellSizeZ=getPickSpatialIndexAxisCellSize(index,'z');" in compact_picking_text
+    assert "?index.boundsMin.x+(ix+1)*cellSizeX" in compact_picking_text
+    assert "?index.boundsMin.y+(iy+1)*cellSizeY" in compact_picking_text
+    assert "?index.boundsMin.z+(iz+1)*cellSizeZ" in compact_picking_text
+    assert "consttDeltaX=stepX!==0?Math.abs(cellSizeX/ray.direction.x):Infinity;" in compact_picking_text
+    assert "consttDeltaY=stepY!==0?Math.abs(cellSizeY/ray.direction.y):Infinity;" in compact_picking_text
+    assert "consttDeltaZ=stepZ!==0?Math.abs(cellSizeZ/ray.direction.z):Infinity;" in compact_picking_text
+    assert "constpushCandidateEntry=(recordIndex,cellEntryDistance=0)=>{" in compact_picking_text
+    assert "constentryDistance=Math.max(" in compact_picking_text
+    assert "estimatePickRecordEntryDistance(ray,record,tolerance)" in compact_picking_text
+    assert "pushBucketRecords(ix,iy,iz,traveled);" in compact_picking_text
     assert "overflowBvh:null," in text
     assert "denseBucketBvh:null," in text
     assert "fullRecordBvh:null," in text
@@ -232,14 +238,14 @@ def test_index_html_uses_anisotropic_pick_spatial_index_cell_sizes_end_to_end() 
     assert "deformedMeshTriangleBvh:null," in text
     assert "surfaceFacetBvh:null," in text
     assert "index.overflowBvh=buildPickSpatialIndexOverflowBvh(index.overflowIndices,index.records);" in text
-    assert "queryPickMeshTriangleBvh(index.meshTriangleBvh,index.meshTriangleEntries,ray,pushCandidateEntry);" in text
-    assert "queryPickMeshTriangleBvh(index.deformedMeshTriangleBvh,index.deformedMeshTriangleEntries,ray,pushCandidateEntry);" in text
-    assert "queryPickSurfaceFacetBvh(index.surfaceFacetBvh,index.surfaceFacetEntries,ray,pushCandidateEntry);" in text
-    assert "queryPickSpatialIndexOverflowBvh(index.nonSurfaceRecordBvh,ray,pushCandidateEntry);" in text
-    assert "queryPickSpatialIndexOverflowBvh(index.fullRecordBvh,ray,pushCandidateEntry);" in text
-    assert "queryPickSpatialIndexOverflowBvh(index.overflowBvh,ray,pushCandidateEntry);" in text
-    assert "queryPickSpatialIndexOverflowBvh(index.denseBucketBvh,ray,pushCandidateEntry);" in text
-    assert "if(bestHit&&candidate.entryDistance>bestHit.distance)break;" in text
+    assert "queryPickMeshTriangleBvh(index.meshTriangleBvh,index.meshTriangleEntries,ray,pushCandidateEntry);" in compact_picking_text
+    assert "queryPickMeshTriangleBvh(index.deformedMeshTriangleBvh,index.deformedMeshTriangleEntries,ray,pushCandidateEntry" in compact_picking_text
+    assert "queryPickSurfaceFacetBvh(index.surfaceFacetBvh,index.surfaceFacetEntries,ray,pushCandidateEntry);" in compact_picking_text
+    assert "queryPickSpatialIndexOverflowBvh(index.nonSurfaceRecordBvh,ray,pushCandidateEntry);" in compact_picking_text
+    assert "queryPickSpatialIndexOverflowBvh(index.fullRecordBvh,ray,pushCandidateEntry);" in compact_picking_text
+    assert "queryPickSpatialIndexOverflowBvh(index.overflowBvh,ray,pushCandidateEntry);" in compact_picking_text
+    assert "queryPickSpatialIndexOverflowBvh(index.denseBucketBvh,ray,pushCandidateEntry);" in compact_picking_text
+    assert "if(bestHit&&candidate.entryDistance>bestHit.distance)break;" in compact_picking_text
     assert "record.pickMeshLocalCatalog=catalog;" in text
     assert "record.deformedPickMeshLocalCatalog=localCatalogByRecordIndex.get(recordIndex)||null;" in compact_deformed_text
     assert "largeModelBuildProfile.pickSpatialMeshLocalCatalogCount=pickAnalyticSpatialIndex.meshLocalTriangleCatalogs.length;" in text
