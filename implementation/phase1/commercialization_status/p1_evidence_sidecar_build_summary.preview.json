@@ -1,0 +1,19 @@
+{
+  "artifacts": {
+    "external_benchmark_submission_updates": "implementation/phase1/commercialization_status/external_benchmark_submission_updates.preview.json",
+    "intake_manifest": "implementation/phase1/commercialization_status/p1_evidence_intake.template.json",
+    "repo_root": "/home/betelgeuze/건축구조분석",
+    "residual_holdout_closure_updates": "implementation/phase1/commercialization_status/residual_holdout_closure_updates.preview.json"
+  },
+  "blockers": [
+    "hardest_external_10case evidence reference is missing or does not exist: pending"
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_P1_EVIDENCE_SIDECAR_BUILD_FAILED",
+  "schema_version": "p1-evidence-sidecar-intake.v1",
+  "summary": {
+    "error": "hardest_external_10case evidence reference is missing or does not exist: pending",
+    "external_expected_queue_count": 4,
+    "residual_expected_work_item_count": 3
+  }
+}

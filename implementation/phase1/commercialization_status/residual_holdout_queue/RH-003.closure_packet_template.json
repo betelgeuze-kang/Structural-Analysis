@@ -1,0 +1,18 @@
+{
+  "category_id": "legal_authority_signoff_required",
+  "closed_at_utc": "",
+  "closure_evidence_path": "",
+  "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
+  "closure_evidence_status": "pending",
+  "due_date": "authority_submission_window",
+  "generated_at": "2026-05-10T10:00:48.787792+00:00",
+  "last_checked_at_utc": "2026-05-05T05:05:53Z",
+  "owner": "authority_workflow_owner",
+  "owner_action": "collect_authority_signoff_or_formal_hold_receipt",
+  "queue_status": "pending_signoff",
+  "schema_version": "residual_holdout_closure_packet_template.v1",
+  "sla_hours": 168,
+  "sla_label": "168h",
+  "status": "open",
+  "work_item_id": "RH-003"
+}

@@ -112,6 +112,8 @@ class NlFrameNdthaResult(ctypes.Structure):
 
 
 _LIB: ctypes.CDLL | None = None
+_GPU_TORCH_PROBED = False
+_GPU_TORCH_RUNTIME: Any | None = None
 
 
 def _load_lib() -> ctypes.CDLL:
@@ -198,6 +200,7 @@ def _as_f64(arr: np.ndarray | list[float]) -> np.ndarray:
 
 
 def _load_gpu_torch():
+    global _GPU_TORCH_PROBED, _GPU_TORCH_RUNTIME
     if str(os.environ.get("PHASE1_FORCE_CPU_RUNTIME", "")).strip().lower() in {
         "1",
         "true",
@@ -205,16 +208,33 @@ def _load_gpu_torch():
         "on",
     }:
         return None
+    if _GPU_TORCH_PROBED:
+        return _GPU_TORCH_RUNTIME
     try:
         import torch  # type: ignore
     except Exception:
+        _GPU_TORCH_PROBED = True
+        _GPU_TORCH_RUNTIME = None
         return None
     try:
-        if bool(torch.cuda.is_available()):
-            return torch
+        if not bool(torch.cuda.is_available()):
+            _GPU_TORCH_PROBED = True
+            _GPU_TORCH_RUNTIME = None
+            return None
+        device = torch.device("cuda:0")
+        with torch.no_grad():
+            probe = torch.ones((2,), dtype=torch.float32, device=device)
+            probe = (probe + 1.0).sum()
+            _ = float(probe.item())
+        if hasattr(torch.cuda, "synchronize"):
+            torch.cuda.synchronize()
     except Exception:
+        _GPU_TORCH_PROBED = True
+        _GPU_TORCH_RUNTIME = None
         return None
-    return None
+    _GPU_TORCH_PROBED = True
+    _GPU_TORCH_RUNTIME = torch
+    return torch
 
 
 def _cpu_fallback_forbidden() -> bool:

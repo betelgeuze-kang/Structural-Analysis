@@ -1,0 +1,19 @@
+{
+  "closed_at_utc": "",
+  "closure_evidence_path": "",
+  "closure_evidence_required": "peer_spd_hinge_submission_receipt",
+  "closure_evidence_status": "pending",
+  "generated_at": "2026-05-10T10:00:48.787463+00:00",
+  "last_checked_at_utc": "2026-05-05T05:05:53Z",
+  "owner": "pbd_benchmark_owner",
+  "owner_action": "submit_external_benchmark_package_and_attach_receipt",
+  "queue_id": "peer_spd_hinge",
+  "queue_status": "ready_for_full_submission",
+  "receipt_status": "pending_external_submission_receipt",
+  "receipt_url": "",
+  "schema_version": "external_benchmark_submission_receipt_template.v1",
+  "status": "ready_for_full_submission",
+  "submission_id": "p1-peer-spd-hinge",
+  "submitted_at_utc": "",
+  "work_item_id": "EB-003"
+}

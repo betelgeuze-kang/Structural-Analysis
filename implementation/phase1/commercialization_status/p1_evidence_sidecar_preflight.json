@@ -1,0 +1,177 @@
+{
+  "artifacts": {
+    "external_benchmark_submission_updates": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
+    "external_benchmark_submission_updates_present": true,
+    "repo_root": "/home/betelgeuze/건축구조분석",
+    "residual_holdout_closure_updates": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
+    "residual_holdout_closure_updates_present": true
+  },
+  "blockers": [
+    "external_receipt_or_closure_pending:hardest_external_10case",
+    "external_receipt_or_closure_pending:tpu_hffb",
+    "external_receipt_or_closure_pending:peer_spd_hinge",
+    "external_receipt_or_closure_pending:korean_public_structures",
+    "residual_closure_pending:RH-001",
+    "residual_closure_pending:RH-002",
+    "residual_closure_pending:RH-003"
+  ],
+  "contract_pass": false,
+  "external_benchmark_submission": [
+    {
+      "closure_evidence_attached": false,
+      "closure_evidence_reference": "",
+      "closure_evidence_reference_exists": false,
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "missing_requirements": [
+        "receipt_status_attached",
+        "receipt_url_or_evidence_path",
+        "closure_evidence_status_attached"
+      ],
+      "queue_id": "hardest_external_10case",
+      "receipt_attached": false,
+      "receipt_reference": "",
+      "receipt_reference_exists": false,
+      "receipt_status": "pending_external_submission_receipt",
+      "submission_id": "p1-hardest-external-10case",
+      "submitted_at_utc": "",
+      "work_item_id": "EB-001"
+    },
+    {
+      "closure_evidence_attached": false,
+      "closure_evidence_reference": "",
+      "closure_evidence_reference_exists": false,
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "missing_requirements": [
+        "receipt_status_attached",
+        "receipt_url_or_evidence_path",
+        "closure_evidence_status_attached"
+      ],
+      "queue_id": "tpu_hffb",
+      "receipt_attached": false,
+      "receipt_reference": "",
+      "receipt_reference_exists": false,
+      "receipt_status": "pending_external_submission_receipt",
+      "submission_id": "p1-tpu-hffb",
+      "submitted_at_utc": "",
+      "work_item_id": "EB-002"
+    },
+    {
+      "closure_evidence_attached": false,
+      "closure_evidence_reference": "",
+      "closure_evidence_reference_exists": false,
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "missing_requirements": [
+        "receipt_status_attached",
+        "receipt_url_or_evidence_path",
+        "closure_evidence_status_attached"
+      ],
+      "queue_id": "peer_spd_hinge",
+      "receipt_attached": false,
+      "receipt_reference": "",
+      "receipt_reference_exists": false,
+      "receipt_status": "pending_external_submission_receipt",
+      "submission_id": "p1-peer-spd-hinge",
+      "submitted_at_utc": "",
+      "work_item_id": "EB-003"
+    },
+    {
+      "closure_evidence_attached": false,
+      "closure_evidence_reference": "",
+      "closure_evidence_reference_exists": false,
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "missing_requirements": [
+        "receipt_status_attached",
+        "receipt_url_or_evidence_path",
+        "closure_evidence_status_attached"
+      ],
+      "queue_id": "korean_public_structures",
+      "receipt_attached": false,
+      "receipt_reference": "",
+      "receipt_reference_exists": false,
+      "receipt_status": "pending_external_submission_receipt",
+      "submission_id": "p1-korean-public-structures",
+      "submitted_at_utc": "",
+      "work_item_id": "EB-004"
+    }
+  ],
+  "generated_at": "2026-05-10T10:01:33.039265+00:00",
+  "reason_code": "ERR_P1_EVIDENCE_SIDECAR_INTAKE_PENDING",
+  "residual_holdout": [
+    {
+      "closed": false,
+      "closed_at_utc": "",
+      "closure_evidence_attached": false,
+      "closure_evidence_reference": "",
+      "closure_evidence_reference_exists": false,
+      "closure_evidence_required": "signed_engineer_review_packet",
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "missing_requirements": [
+        "status_closed",
+        "closure_evidence_status_attached",
+        "closure_evidence_path_exists"
+      ],
+      "owner": "licensed_engineer",
+      "queue_status": "pending_review",
+      "status": "open",
+      "work_item_id": "RH-001"
+    },
+    {
+      "closed": false,
+      "closed_at_utc": "",
+      "closure_evidence_attached": false,
+      "closure_evidence_reference": "",
+      "closure_evidence_reference_exists": false,
+      "closure_evidence_required": "legacy_tool_cross_validation_report",
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "missing_requirements": [
+        "status_closed",
+        "closure_evidence_status_attached",
+        "closure_evidence_path_exists"
+      ],
+      "owner": "legacy_tool_owner",
+      "queue_status": "pending_cross_validation",
+      "status": "open",
+      "work_item_id": "RH-002"
+    },
+    {
+      "closed": false,
+      "closed_at_utc": "",
+      "closure_evidence_attached": false,
+      "closure_evidence_reference": "",
+      "closure_evidence_reference_exists": false,
+      "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
+      "closure_evidence_status": "pending",
+      "last_checked_at_utc": "2026-05-05T05:05:53Z",
+      "missing_requirements": [
+        "status_closed",
+        "closure_evidence_status_attached",
+        "closure_evidence_path_exists"
+      ],
+      "owner": "authority_workflow_owner",
+      "queue_status": "pending_signoff",
+      "status": "open",
+      "work_item_id": "RH-003"
+    }
+  ],
+  "schema_version": "p1-evidence-sidecar-intake-preflight.v1",
+  "summary": {
+    "external_closure_evidence_attached_count": 0,
+    "external_expected_queue_count": 4,
+    "external_expected_rows_present": true,
+    "external_receipt_attached_count": 0,
+    "external_receipt_pending_count": 4,
+    "external_update_row_count": 4,
+    "residual_closed_count": 0,
+    "residual_closure_evidence_attached_count": 0,
+    "residual_closure_pending_count": 3,
+    "residual_expected_rows_present": true,
+    "residual_expected_work_item_count": 3,
+    "residual_update_row_count": 3
+  }
+}

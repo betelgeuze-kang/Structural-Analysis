@@ -1,0 +1,18 @@
+{
+  "category_id": "legacy_tool_cross_validation_required",
+  "closed_at_utc": "",
+  "closure_evidence_path": "",
+  "closure_evidence_required": "legacy_tool_cross_validation_report",
+  "closure_evidence_status": "pending",
+  "due_date": "assignment_plus_5_business_days",
+  "generated_at": "2026-05-10T10:00:48.787712+00:00",
+  "last_checked_at_utc": "2026-05-05T05:05:53Z",
+  "owner": "legacy_tool_owner",
+  "owner_action": "run_legacy_tool_cross_validation_and_attach_report",
+  "queue_status": "pending_cross_validation",
+  "schema_version": "residual_holdout_closure_packet_template.v1",
+  "sla_hours": 120,
+  "sla_label": "120h",
+  "status": "open",
+  "work_item_id": "RH-002"
+}

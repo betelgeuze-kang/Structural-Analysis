@@ -135,6 +135,7 @@ def test_ssi_gate_pass_reports_section_family_beam_demand(tmp_path: Path) -> Non
         "1",
         "--max-case-count",
         "1",
+        "--allow-cpu-required",
         "--out",
         str(out),
     ]

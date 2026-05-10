@@ -43,8 +43,14 @@ def _gpu_preprocess_strict() -> bool:
     return str(os.environ.get("PHASE1_GPU_PREPROCESS_STRICT", "")).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _truthy_env(name: str) -> bool:
+    return str(os.environ.get(name, "")).strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _load_gpu_torch():
-    if str(os.environ.get("PHASE1_GPU_PREPROCESS", "")).strip().lower() not in {"1", "true", "yes", "on"}:
+    if _truthy_env("PHASE1_FORCE_CPU_RUNTIME"):
+        return None
+    if not _truthy_env("PHASE1_GPU_PREPROCESS"):
         return None
     try:
         import torch  # type: ignore
@@ -384,6 +390,8 @@ def main() -> None:
     p.add_argument("--case-metrics-npz-out", default="")
     p.add_argument("--out", default="implementation/phase1/ssi_boundary_gate_report.json")
     args = p.parse_args()
+    if bool(args.allow_cpu_required) and not _truthy_env("PHASE1_DISABLE_CPU_FALLBACK"):
+        os.environ.setdefault("PHASE1_FORCE_CPU_RUNTIME", "1")
     case_metrics_npz_out = Path(str(args.case_metrics_npz_out)) if str(args.case_metrics_npz_out).strip() else _default_case_metrics_npz_out(Path(args.out))
 
     input_payload = {

@@ -1,0 +1,129 @@
+{
+  "external_benchmark_receipts": {
+    "hardest_external_10case": {
+      "closure_evidence_path": "",
+      "last_checked_at_utc": "",
+      "owner": "benchmark_program_owner",
+      "queue_id": "hardest_external_10case",
+      "receipt_path": "",
+      "receipt_url": "",
+      "required_evidence": "hardest_external_10case_submission_receipt",
+      "source_owner_action": "submit_external_benchmark_package_and_attach_receipt",
+      "source_receipt_status": "pending_external_submission_receipt",
+      "source_receipt_template_path": "implementation/phase1/commercialization_status/external_benchmark_submission_queue/EB-001.receipt_template.json",
+      "source_status": "ready_for_full_submission",
+      "submission_id": "p1-hardest-external-10case",
+      "submitted_at_utc": "",
+      "work_item_id": "EB-001"
+    },
+    "korean_public_structures": {
+      "closure_evidence_path": "",
+      "last_checked_at_utc": "",
+      "owner": "korean_source_owner",
+      "queue_id": "korean_public_structures",
+      "receipt_path": "",
+      "receipt_url": "",
+      "required_evidence": "korean_public_structures_submission_receipt_or_authority_review_hold",
+      "source_owner_action": "submit_external_benchmark_package_and_attach_receipt",
+      "source_receipt_status": "pending_external_submission_receipt",
+      "source_receipt_template_path": "implementation/phase1/commercialization_status/external_benchmark_submission_queue/EB-004.receipt_template.json",
+      "source_status": "ready_for_full_submission",
+      "submission_id": "p1-korean-public-structures",
+      "submitted_at_utc": "",
+      "work_item_id": "EB-004"
+    },
+    "peer_spd_hinge": {
+      "closure_evidence_path": "",
+      "last_checked_at_utc": "",
+      "owner": "pbd_benchmark_owner",
+      "queue_id": "peer_spd_hinge",
+      "receipt_path": "",
+      "receipt_url": "",
+      "required_evidence": "peer_spd_hinge_submission_receipt",
+      "source_owner_action": "submit_external_benchmark_package_and_attach_receipt",
+      "source_receipt_status": "pending_external_submission_receipt",
+      "source_receipt_template_path": "implementation/phase1/commercialization_status/external_benchmark_submission_queue/EB-003.receipt_template.json",
+      "source_status": "ready_for_full_submission",
+      "submission_id": "p1-peer-spd-hinge",
+      "submitted_at_utc": "",
+      "work_item_id": "EB-003"
+    },
+    "tpu_hffb": {
+      "closure_evidence_path": "",
+      "last_checked_at_utc": "",
+      "owner": "wind_benchmark_owner",
+      "queue_id": "tpu_hffb",
+      "receipt_path": "",
+      "receipt_url": "",
+      "required_evidence": "tpu_hffb_submission_receipt",
+      "source_owner_action": "submit_external_benchmark_package_and_attach_receipt",
+      "source_receipt_status": "pending_external_submission_receipt",
+      "source_receipt_template_path": "implementation/phase1/commercialization_status/external_benchmark_submission_queue/EB-002.receipt_template.json",
+      "source_status": "ready_for_full_submission",
+      "submission_id": "p1-tpu-hffb",
+      "submitted_at_utc": "",
+      "work_item_id": "EB-002"
+    }
+  },
+  "generated_at": "2026-05-10T10:01:33.012172+00:00",
+  "instructions": {
+    "external_benchmark_receipts": "Fill receipt_url or receipt_path for every EB row. Use closure_evidence_path when the closure artifact differs from the receipt reference.",
+    "promotion_gate": "Run build_p1_evidence_sidecar_updates.py --require-complete, then preflight_p1_evidence_sidecar_intake.py --fail-open.",
+    "residual_holdout_closures": "Fill closure_evidence_path for RH-001..RH-003. Local paths must exist before sidecar build."
+  },
+  "residual_holdout_closures": {
+    "RH-001": {
+      "category_id": "licensed_engineer_review_required",
+      "closed_at_utc": "",
+      "closure_evidence_path": "",
+      "due_date": "assignment_plus_3_business_days",
+      "last_checked_at_utc": "",
+      "owner": "licensed_engineer",
+      "required_evidence": "signed_engineer_review_packet",
+      "sla_label": "72h",
+      "source_closure_packet_template_path": "implementation/phase1/commercialization_status/residual_holdout_queue/RH-001.closure_packet_template.json",
+      "source_owner_action": "complete_engineer_review_and_attach_signed_packet",
+      "source_queue_status": "pending_review",
+      "source_status": "open",
+      "work_item_id": "RH-001"
+    },
+    "RH-002": {
+      "category_id": "legacy_tool_cross_validation_required",
+      "closed_at_utc": "",
+      "closure_evidence_path": "",
+      "due_date": "assignment_plus_5_business_days",
+      "last_checked_at_utc": "",
+      "owner": "legacy_tool_owner",
+      "required_evidence": "legacy_tool_cross_validation_report",
+      "sla_label": "120h",
+      "source_closure_packet_template_path": "implementation/phase1/commercialization_status/residual_holdout_queue/RH-002.closure_packet_template.json",
+      "source_owner_action": "run_legacy_tool_cross_validation_and_attach_report",
+      "source_queue_status": "pending_cross_validation",
+      "source_status": "open",
+      "work_item_id": "RH-002"
+    },
+    "RH-003": {
+      "category_id": "legal_authority_signoff_required",
+      "closed_at_utc": "",
+      "closure_evidence_path": "",
+      "due_date": "authority_submission_window",
+      "last_checked_at_utc": "",
+      "owner": "authority_workflow_owner",
+      "required_evidence": "authority_signoff_receipt_or_formal_hold",
+      "sla_label": "168h",
+      "source_closure_packet_template_path": "implementation/phase1/commercialization_status/residual_holdout_queue/RH-003.closure_packet_template.json",
+      "source_owner_action": "collect_authority_signoff_or_formal_hold_receipt",
+      "source_queue_status": "pending_signoff",
+      "source_status": "open",
+      "work_item_id": "RH-003"
+    }
+  },
+  "schema_version": "p1-evidence-sidecar-intake.v1",
+  "source_p1_operational_queues": "implementation/phase1/commercialization_status/p1_operational_queues.json",
+  "summary": {
+    "empty_required_field_count": 15,
+    "external_expected_queue_count": 4,
+    "residual_expected_work_item_count": 3
+  },
+  "template_kind": "p1_evidence_intake_fill_in"
+}
