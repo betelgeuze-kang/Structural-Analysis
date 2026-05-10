@@ -48,6 +48,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert 'id="shell-meta-source"' in text
     assert "Real Drawing Assets" in text
     assert "getRealDrawingAssetRegistry" in text
+    assert 'id="real-drawing-quality-panel"' in text
+    assert "setRealDrawingQualityFilter" in text
+    assert "Drawing Review Queue" in text
+    assert "quality-badge--exact" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
     assert "Structural Insight Viewer" in text
     assert "Structural Model Workspace" in text
 

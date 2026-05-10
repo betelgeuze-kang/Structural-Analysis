@@ -267,6 +267,12 @@
     <div class="section-title">Statistics</div>
     <div id="stats-panel" class="panel-field"></div>
   </section>
+  <section class="panel-section" id="real-drawing-quality-section">
+    <div class="section-title">Drawing Quality</div>
+    <div id="real-drawing-quality-panel" class="panel-field">
+      <div class="panel-placeholder">Real drawing quality data appears when a drawing preset is loaded.</div>
+    </div>
+  </section>
   <section class="panel-section" id="edit-preview-section">
     <div class="section-title">Edit Preview</div>
     <div class="panel-field">
@@ -403,6 +409,21 @@ let loadcombEditState=createEmptyLoadcombEditState();
 let viewerOptimizationWorker=null,viewerOptimizationWorkerRequestId=0;
 const SHARED_SELECTION_KEY='structural-viewer-selection-v1';
 const VIEWER_THEME_KEY='structural-viewer-theme-v1';
+const REAL_DRAWING_REVIEW_FLAG_KEYS=new Set([
+  'not_solver_exact',
+  'proxy_layout_not_true_geometry',
+  'proxy_node_glyph_fallback',
+  'sampled_dense_model',
+  'sparse_preview'
+]);
+const REAL_DRAWING_QUALITY_FILTERS=[
+  {key:'all',label:'All'},
+  {key:'solver_exact',label:'Solver Exact'},
+  {key:'review',label:'Review Queue'},
+  {key:'proxy',label:'Proxy'},
+  {key:'sparse',label:'Sparse'},
+  {key:'sampled',label:'Sampled'}
+];
 const selectionChannel=(()=>{
   try{return typeof BroadcastChannel==='function'?new BroadcastChannel(SHARED_SELECTION_KEY):null}catch(_err){return null}
 })();
@@ -556,6 +577,7 @@ const {
 }=pickBroadphaseToolkit;
 const layerVisibility=new Map();
 let activeIsolation={kind:'',value:'',label:''};
+let activeRealDrawingQualityFilter='all';
 let storyClipBands=[],activeStoryClipLabel='',activeClipPlanes=[],storyClipPadding=.35;
 let contourContext=null;
 const COLORMAPS={
@@ -3320,6 +3342,7 @@ async function buildModel(data,sourceMeta=null){
 const VIEWER_STATS_PANEL_KEYS=[
   'maxDcr','avgDcr','ngCount','stories','model','source','members','groups','sections',
   'realDrawingAssets','realDrawingSolverExact','realDrawingProxyPreview',
+  'realDrawingReviewQueue','realDrawingFullSolverExact',
   'buildPath','surfaceLod','picking','pickMeshTriangles','pickMeshLocal','pickDeformedTriangles',
   'pickDeformedLocal','pickSurfaceFacets','pickFullBvh','pickNonSurfaceBvh','pickDenseBuckets',
   'reviewIds','loadPatterns'
@@ -3336,6 +3359,80 @@ const VIEWER_KPI_CARD_CONFIGS=[
 ];
 function getPropValueClass(tone=''){
   return tone?`prop-value prop-value--${tone}`:'prop-value';
+}
+function getRealDrawingQualityFlags(row){
+  return Array.isArray(row?.quality_flags)
+    ?row.quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean)
+    :[];
+}
+function getRealDrawingQualityTier(row){
+  const flags=new Set(getRealDrawingQualityFlags(row));
+  if(!row?.geometry_available||safeNumber(row?.segment_count,0)<=0)return'blocked';
+  if(flags.has('sparse_preview'))return'sparse_preview';
+  if(Boolean(row?.solver_exact)&&flags.has('sampled_dense_model'))return'solver_exact_sampled';
+  if(!Boolean(row?.solver_exact)||flags.has('not_solver_exact')||flags.has('proxy_layout_not_true_geometry'))return'proxy_preview';
+  return'solver_exact_ready';
+}
+function getRealDrawingQualityBadge(row){
+  const tier=getRealDrawingQualityTier(row);
+  if(tier==='blocked')return{label:'blocked',tone:'blocked'};
+  if(tier==='sparse_preview')return{label:'sparse',tone:'sparse'};
+  if(tier==='solver_exact_sampled')return{label:'sampled',tone:'sampled'};
+  if(tier==='proxy_preview')return{label:'proxy',tone:'proxy'};
+  return{label:'solver exact',tone:'exact'};
+}
+function isRealDrawingReviewAsset(row){
+  const flags=getRealDrawingQualityFlags(row);
+  return !Boolean(row?.solver_exact)||flags.some(flag=>REAL_DRAWING_REVIEW_FLAG_KEYS.has(flag));
+}
+function realDrawingAssetMatchesQualityFilter(row,filterKey=activeRealDrawingQualityFilter){
+  const tier=getRealDrawingQualityTier(row);
+  if(filterKey==='solver_exact')return tier==='solver_exact_ready'||tier==='solver_exact_sampled';
+  if(filterKey==='review')return isRealDrawingReviewAsset(row);
+  if(filterKey==='proxy')return tier==='proxy_preview';
+  if(filterKey==='sparse')return tier==='sparse_preview';
+  if(filterKey==='sampled')return tier==='solver_exact_sampled';
+  return true;
+}
+function getRealDrawingReviewAction(row){
+  const flags=new Set(getRealDrawingQualityFlags(row));
+  if(flags.has('sparse_preview'))return'Expand sparse archive preview';
+  if(flags.has('sampled_dense_model'))return'Inspect sampled dense model';
+  if(flags.has('proxy_node_glyph_fallback'))return'Replace node glyph fallback';
+  if(flags.has('proxy_layout_not_true_geometry')||flags.has('not_solver_exact')||!Boolean(row?.solver_exact)){
+    return'Promote to solver-exact topology';
+  }
+  return'Engineer review';
+}
+function buildRealDrawingQualitySummary(data=modelData){
+  const assets=getRealDrawingAssetRegistry(data);
+  const reviewAssets=assets.filter(isRealDrawingReviewAsset);
+  const exactAssets=assets.filter(row=>Boolean(row?.solver_exact));
+  const blockedAssets=assets.filter(row=>getRealDrawingQualityTier(row)==='blocked');
+  const sampledAssets=assets.filter(row=>getRealDrawingQualityTier(row)==='solver_exact_sampled');
+  const sparseAssets=assets.filter(row=>getRealDrawingQualityTier(row)==='sparse_preview');
+  const proxyAssets=assets.filter(row=>getRealDrawingQualityTier(row)==='proxy_preview');
+  const fullSolverExactReady=assets.length>0&&exactAssets.length===assets.length&&reviewAssets.length===0&&blockedAssets.length===0;
+  return{
+    assets,
+    reviewAssets,
+    exactAssets,
+    blockedAssets,
+    sampledAssets,
+    sparseAssets,
+    proxyAssets,
+    assetCount:assets.length,
+    reviewQueueCount:reviewAssets.length,
+    exactCount:exactAssets.length,
+    proxyCount:proxyAssets.length,
+    sparseCount:sparseAssets.length,
+    sampledCount:sampledAssets.length,
+    blockedCount:blockedAssets.length,
+    fullSolverExactReady,
+    gateLabel:assets.length
+      ?(blockedAssets.length?'Blocked':fullSolverExactReady?'Full solver-exact':'Pass with review queue')
+      :'--'
+  };
 }
 function buildViewerStatsSummary(data){
   const elements=Array.isArray(data?.elements)?data.elements:[];
@@ -3379,6 +3476,7 @@ function buildViewerStatsSummary(data){
   const realDrawingRenderableCount=safeNumber(data?.meta?.real_drawing_renderable_asset_count,0);
   const realDrawingSolverExactCount=safeNumber(data?.meta?.real_drawing_solver_exact_asset_count,0);
   const realDrawingProxyPreviewCount=safeNumber(data?.meta?.real_drawing_proxy_or_preview_asset_count,0);
+  const realDrawingQualitySummary=buildRealDrawingQualitySummary(data);
   return{
     maxDcrValue,
     avgDcrValue,
@@ -3402,9 +3500,14 @@ function buildViewerStatsSummary(data){
     realDrawingRenderableCount,
     realDrawingSolverExactCount,
     realDrawingProxyPreviewCount,
+    realDrawingReviewQueueCount:realDrawingQualitySummary.reviewQueueCount,
+    realDrawingFullSolverExactReady:realDrawingQualitySummary.fullSolverExactReady,
+    realDrawingGateLabel:realDrawingQualitySummary.gateLabel,
     realDrawingAssetCountLabel:realDrawingAssetCount?String(realDrawingAssetCount):'--',
     realDrawingSolverExactLabel:realDrawingAssetCount?String(realDrawingSolverExactCount):'--',
     realDrawingProxyPreviewLabel:realDrawingAssetCount?String(realDrawingProxyPreviewCount):'--',
+    realDrawingReviewQueueLabel:realDrawingAssetCount?String(realDrawingQualitySummary.reviewQueueCount):'--',
+    realDrawingFullSolverExactLabel:realDrawingAssetCount?(realDrawingQualitySummary.fullSolverExactReady?'true':'false'):'--',
   };
 }
 function buildViewerStatEntries(summary){
@@ -3444,6 +3547,16 @@ function buildViewerStatEntries(summary){
     },
     realDrawingSolverExact:{label:'Solver-Exact Assets',value:summary.realDrawingSolverExactLabel},
     realDrawingProxyPreview:{label:'Proxy / Preview Assets',value:summary.realDrawingProxyPreviewLabel},
+    realDrawingReviewQueue:{
+      label:'Drawing Review Queue',
+      value:summary.realDrawingReviewQueueLabel,
+      statsTone:summary.realDrawingReviewQueueCount>0?'accent':'success'
+    },
+    realDrawingFullSolverExact:{
+      label:'Full Solver-Exact Ready',
+      value:summary.realDrawingFullSolverExactLabel,
+      statsTone:summary.realDrawingFullSolverExactReady?'success':summary.realDrawingAssetCount?'danger':'neutral'
+    },
     buildPath:{label:'Build Path',value:summary.buildPathLabel},
     surfaceLod:{label:'Surface LOD',value:summary.surfaceLodLabel},
     picking:{label:'Picking',value:summary.surfacePickLabel},
@@ -3498,12 +3611,22 @@ function renderShellSummary(summary){
   const sourceChip=document.getElementById('shell-source-chip');
   if(sourceChip)sourceChip.textContent=`Source ${summary.sourceLabel}`;
   const storyChip=document.getElementById('shell-story-chip');
-  if(storyChip)storyChip.textContent=`Stories ${summary.storiesLabel} · Members ${summary.memberCountLabel}`;
+  if(storyChip){
+    storyChip.textContent=summary.realDrawingAssetCount>0
+      ?`Drawings ${summary.realDrawingAssetCountLabel} · Review ${summary.realDrawingReviewQueueLabel}`
+      :`Stories ${summary.storiesLabel} · Members ${summary.memberCountLabel}`;
+  }
   const projectPill=document.getElementById('shell-project-pill');
   if(projectPill)projectPill.textContent=summary.modelLabel==='--'?'Project --':`${summary.modelLabel} — Optimized`;
   const statusPill=document.getElementById('shell-status-pill');
   if(statusPill){
-    if(summary.maxDcrValue>1){
+    if(summary.realDrawingAssetCount>0&&summary.realDrawingFullSolverExactReady){
+      statusPill.textContent='Real Drawings · Full solver-exact';
+      setStatusPillTone(statusPill,'success');
+    }else if(summary.realDrawingAssetCount>0){
+      statusPill.textContent=`Real Drawings · ${summary.realDrawingReviewQueueLabel} review queue`;
+      setStatusPillTone(statusPill,summary.realDrawingReviewQueueCount>0?'warn':'success');
+    }else if(summary.maxDcrValue>1){
       statusPill.textContent=`Attention Required · Max D/C ${summary.maxDcr}`;
       setStatusPillTone(statusPill,'danger');
     }else if(summary.ngCount>0){
@@ -3555,6 +3678,68 @@ function renderStatsPanel(entries){
     if(!entry)return'';
     return `<div class="prop-row"><span class="prop-label">${escapeHtml(entry.label)}</span><span class="${escapeHtml(getPropValueClass(entry.statsTone))}">${escapeHtml(entry.value)}</span></div>`;
   }).join('');
+}
+function setRealDrawingQualityFilter(filterKey='all'){
+  const valid=REAL_DRAWING_QUALITY_FILTERS.some(filter=>filter.key===filterKey);
+  activeRealDrawingQualityFilter=valid?filterKey:'all';
+  if(modelData)buildUI(modelData);
+}
+function renderRealDrawingQualityPanel(data=modelData){
+  const panel=document.getElementById('real-drawing-quality-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const quality=buildRealDrawingQualitySummary(data);
+  if(!quality.assetCount){
+    panel.innerHTML='<div class="panel-placeholder">Real drawing quality data appears when a drawing preset is loaded.</div>';
+    return;
+  }
+  const filteredAssets=quality.assets.filter(row=>realDrawingAssetMatchesQualityFilter(row,activeRealDrawingQualityFilter));
+  const reviewRows=filteredAssets.filter(isRealDrawingReviewAsset).slice(0,16);
+  const filterButtons=REAL_DRAWING_QUALITY_FILTERS.map(filter=>{
+    const count=quality.assets.filter(row=>realDrawingAssetMatchesQualityFilter(row,filter.key)).length;
+    const selected=filter.key===activeRealDrawingQualityFilter;
+    return `<button type="button" class="quality-filter-button${selected?' is-active':''}" data-real-drawing-quality-filter="${escapeHtml(filter.key)}">${escapeHtml(filter.label)} <span>${count}</span></button>`;
+  }).join('');
+  const reviewList=reviewRows.length
+    ?reviewRows.map(row=>{
+      const badge=getRealDrawingQualityBadge(row);
+      const assetRef=normalizeSelectionValue(row.asset_ref);
+      const flags=getRealDrawingQualityFlags(row);
+      const notice=normalizeSelectionValue(row.quality_notice)||normalizeSelectionValue(row.geometry_mode)||normalizeSelectionValue(row.status);
+      return `
+        <button type="button" class="real-drawing-review-item" data-real-drawing-review-asset="${escapeHtml(assetRef)}">
+          <span class="quality-badge quality-badge--${escapeHtml(badge.tone)}">${escapeHtml(badge.label)}</span>
+          <span class="real-drawing-review-item__body">
+            <strong>${escapeHtml(assetRef)}</strong>
+            <span>${escapeHtml(getRealDrawingReviewAction(row))}</span>
+            <small>${escapeHtml(flags.join(', ')||notice||'solver-exact')}</small>
+          </span>
+          <span class="real-drawing-review-item__segments">${escapeHtml(String(safeNumber(row.segment_count,0)))}</span>
+        </button>`;
+    }).join('')
+    :'<div class="panel-placeholder">No review queue assets in the active quality filter.</div>';
+  panel.innerHTML=`
+    <div class="real-drawing-quality-summary" data-real-drawing-quality-gate="${escapeHtml(quality.gateLabel)}">
+      <div><span>Gate</span><strong>${escapeHtml(quality.gateLabel)}</strong></div>
+      <div><span>Renderable</span><strong>${escapeHtml(String(safeNumber(data?.meta?.real_drawing_renderable_asset_count,quality.assetCount)))}/${escapeHtml(String(quality.assetCount))}</strong></div>
+      <div><span>Solver Exact</span><strong>${escapeHtml(String(quality.exactCount))}</strong></div>
+      <div><span>Review Queue</span><strong>${escapeHtml(String(quality.reviewQueueCount))}</strong></div>
+      <div><span>Full Exact</span><strong>${quality.fullSolverExactReady?'true':'false'}</strong></div>
+    </div>
+    <div class="quality-filter-bar" aria-label="Real drawing quality filters">${filterButtons}</div>
+    <div class="real-drawing-review-list" data-real-drawing-review-count="${escapeHtml(String(quality.reviewQueueCount))}">
+      ${reviewList}
+    </div>`;
+  panel.querySelectorAll('[data-real-drawing-quality-filter]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      setRealDrawingQualityFilter(normalizeSelectionValue(button.getAttribute('data-real-drawing-quality-filter')));
+    });
+  });
+  panel.querySelectorAll('[data-real-drawing-review-asset]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-review-asset'));
+      focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===assetRef);
+    });
+  });
 }
 function buildUI(data){
   // Model tree
@@ -3635,17 +3820,24 @@ function buildUI(data){
   }
   const realDrawingAssets=getRealDrawingAssetRegistry(data);
   if(realDrawingAssets.length){
-    appendTreeHeading('Real Drawing Assets');
-    realDrawingAssets.slice(0,32).forEach(row=>{
+    const filteredRealDrawingAssets=realDrawingAssets.filter(row=>realDrawingAssetMatchesQualityFilter(row,activeRealDrawingQualityFilter));
+    appendTreeHeading(`Real Drawing Assets · ${filteredRealDrawingAssets.length}/${realDrawingAssets.length}`);
+    if(!filteredRealDrawingAssets.length){
+      const empty=document.createElement('div');
+      empty.className='panel-placeholder';
+      empty.textContent='No assets match the active drawing quality filter.';
+      tree.appendChild(empty);
+    }
+    filteredRealDrawingAssets.slice(0,32).forEach(row=>{
       const assetRef=normalizeSelectionValue(row.asset_ref);
       const status=normalizeSelectionValue(row.status)||'ready';
-      const badge=row.solver_exact?'exact':'proxy';
+      const badgeInfo=getRealDrawingQualityBadge(row);
       const flags=Array.isArray(row.quality_flags)?row.quality_flags.filter(Boolean):[];
       const warning=normalizeSelectionValue(row.warning_label);
       const label=`${assetRef} · ${warning||normalizeSelectionValue(row.geometry_mode)||status}`;
       appendTreeItem(
         label,
-        `${badge} · ${safeNumber(row.segment_count,0)}`,
+        `${badgeInfo.label} · ${safeNumber(row.segment_count,0)}`,
         ()=>focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===assetRef),
         '',
         {isolateKind:'member',isolateValue:assetRef,isolateLabel:label}
@@ -3653,6 +3845,7 @@ function buildUI(data){
       const last=tree.lastElementChild;
       const badgeNode=last?.querySelector?.('.badge');
       if(badgeNode instanceof HTMLElement){
+        badgeNode.classList.add(`badge-real-drawing-${badgeInfo.tone}`);
         badgeNode.title=`${status}${flags.length?` | ${flags.join(', ')}`:''}`;
       }
     });
@@ -3694,6 +3887,7 @@ function buildUI(data){
   renderShellSummary(summary);
   renderKpiSummary(statEntries);
   renderStatsPanel(statEntries);
+  renderRealDrawingQualityPanel(data);
 }
 function renderLoadCaseList(data=modelData){
   const loadCaseList=document.getElementById('load-case-list');
@@ -4042,6 +4236,7 @@ window.clearSectionEditPreview=clearSectionEditPreview;
 window.stageLoadcombEditPreview=stageLoadcombEditPreview;
 window.exportLoadcombEditPreview=exportLoadcombEditPreview;
 window.clearLoadcombEditPreview=clearLoadcombEditPreview;
+window.setRealDrawingQualityFilter=setRealDrawingQualityFilter;
 window.runSearchFocus=runSearchFocus;
 window.runSearchIsolate=runSearchIsolate;
 window.clearSearch=clearSearch;

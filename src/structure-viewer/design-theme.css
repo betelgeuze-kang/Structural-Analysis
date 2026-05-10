@@ -906,6 +906,180 @@ body.structural-surface .badge-slab {
   color:#e6a95d;
 }
 
+body.structural-surface .badge-real-drawing-exact,
+body.structural-surface .quality-badge--exact {
+  background:rgba(99,199,161,.16);
+  color:var(--success);
+}
+
+body.structural-surface .badge-real-drawing-proxy,
+body.structural-surface .quality-badge--proxy {
+  background:rgba(79,183,173,.12);
+  color:var(--accent);
+}
+
+body.structural-surface .badge-real-drawing-sparse,
+body.structural-surface .quality-badge--sparse {
+  background:rgba(230,169,93,.16);
+  color:var(--warn);
+}
+
+body.structural-surface .badge-real-drawing-sampled,
+body.structural-surface .quality-badge--sampled {
+  background:rgba(125,211,252,.14);
+  color:#7dd3fc;
+}
+
+body.structural-surface .badge-real-drawing-blocked,
+body.structural-surface .quality-badge--blocked {
+  background:rgba(239,125,115,.16);
+  color:var(--danger);
+}
+
+body.structural-surface .real-drawing-quality-summary {
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:8px;
+}
+
+body.structural-surface .real-drawing-quality-summary > div {
+  min-width:0;
+  padding:10px;
+  border-radius:12px;
+  background:rgba(2,6,23,.22);
+  border:1px solid rgba(148,168,190,.12);
+}
+
+body.structural-surface.light-mode .real-drawing-quality-summary > div {
+  background:rgba(255,255,255,.62);
+  border-color:rgba(133,102,70,.14);
+}
+
+body.structural-surface .real-drawing-quality-summary span {
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+body.structural-surface .real-drawing-quality-summary strong {
+  display:block;
+  margin-top:3px;
+  color:var(--text);
+  font-size:13px;
+  line-height:1.2;
+  overflow-wrap:anywhere;
+}
+
+body.structural-surface .quality-filter-bar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+body.structural-surface .quality-filter-button {
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  min-height:28px;
+  padding:5px 8px;
+  border-radius:999px;
+  border:1px solid rgba(148,168,190,.18);
+  background:rgba(15,23,42,.42);
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+body.structural-surface .quality-filter-button span {
+  color:var(--text);
+}
+
+body.structural-surface .quality-filter-button.is-active {
+  border-color:rgba(79,183,173,.46);
+  background:rgba(79,183,173,.14);
+  color:var(--accent);
+}
+
+body.structural-surface.light-mode .quality-filter-button {
+  background:rgba(255,255,255,.68);
+  border-color:rgba(133,102,70,.14);
+}
+
+body.structural-surface .real-drawing-review-list {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+body.structural-surface .real-drawing-review-item {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  padding:8px;
+  border-radius:12px;
+  border:1px solid rgba(148,168,190,.14);
+  background:rgba(2,6,23,.24);
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface .real-drawing-review-item:hover {
+  border-color:rgba(79,183,173,.42);
+  background:rgba(79,183,173,.08);
+}
+
+body.structural-surface.light-mode .real-drawing-review-item {
+  background:rgba(255,255,255,.66);
+  border-color:rgba(133,102,70,.14);
+}
+
+body.structural-surface .quality-badge {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:22px;
+  padding:3px 7px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+body.structural-surface .real-drawing-review-item__body {
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+body.structural-surface .real-drawing-review-item__body strong,
+body.structural-surface .real-drawing-review-item__body span,
+body.structural-surface .real-drawing-review-item__body small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .real-drawing-review-item__body span,
+body.structural-surface .real-drawing-review-item__body small {
+  color:var(--muted);
+  font-size:11px;
+}
+
+body.structural-surface .real-drawing-review-item__segments {
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+}
+
 body.structural-surface .panel-actions {
   margin-top:2px;
 }
@@ -3923,6 +4097,30 @@ body.structural-surface.panel-inspection-shell canvas {
     color:var(--success);
   }
 
+  body.structural-surface.command-center-shell .status-pill--warn {
+    border-color:rgba(230,169,93,.30);
+    background:
+      linear-gradient(180deg, rgba(230,169,93,.16), rgba(255,255,255,.02)),
+      rgba(10,18,29,.56);
+    color:var(--warn);
+  }
+
+  body.structural-surface.command-center-shell .status-pill--danger {
+    border-color:rgba(239,125,115,.30);
+    background:
+      linear-gradient(180deg, rgba(239,125,115,.16), rgba(255,255,255,.02)),
+      rgba(10,18,29,.56);
+    color:var(--danger);
+  }
+
+  body.structural-surface.command-center-shell .status-pill--accent {
+    border-color:rgba(79,183,173,.30);
+    background:
+      linear-gradient(180deg, rgba(79,183,173,.16), rgba(255,255,255,.02)),
+      rgba(10,18,29,.56);
+    color:var(--accent);
+  }
+
   body.structural-surface.command-center-shell .top-toolbar {
     margin-left:0;
     justify-content:flex-end;
@@ -4480,6 +4678,24 @@ body.structural-surface.panel-inspection-shell canvas {
   body.structural-surface.command-center-shell.light-mode .status-pill--success {
     background:
       linear-gradient(180deg, rgba(47,125,90,.10), rgba(255,255,255,.92)),
+      rgba(255,250,242,.94);
+  }
+
+  body.structural-surface.command-center-shell.light-mode .status-pill--warn {
+    background:
+      linear-gradient(180deg, rgba(155,96,36,.12), rgba(255,255,255,.92)),
+      rgba(255,250,242,.94);
+  }
+
+  body.structural-surface.command-center-shell.light-mode .status-pill--danger {
+    background:
+      linear-gradient(180deg, rgba(185,65,55,.12), rgba(255,255,255,.92)),
+      rgba(255,250,242,.94);
+  }
+
+  body.structural-surface.command-center-shell.light-mode .status-pill--accent {
+    background:
+      linear-gradient(180deg, rgba(15,106,115,.12), rgba(255,255,255,.92)),
       rgba(255,250,242,.94);
   }
 
