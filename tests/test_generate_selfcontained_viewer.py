@@ -28,6 +28,7 @@ def test_generate_selfcontained_html_uses_full_index_template() -> None:
     assert "./viewer-direct-model-normalizer.js" not in html
     assert "./viewer-render-picking-geometry.js" not in html
     assert "./viewer-large-model-picking.js" not in html
+    assert "./viewer-pick-broadphase.js" not in html
     assert "./viewer-render-mesh-builders.js" not in html
     assert "./viewer-deformed-rendering.js" not in html
     assert "./viewer-contour-materials.js" not in html
@@ -36,6 +37,7 @@ def test_generate_selfcontained_html_uses_full_index_template() -> None:
     assert "new URL('./viewer-direct-model-normalizer.js'" not in html
     assert "new URL('./viewer-render-picking-geometry.js'" not in html
     assert "new URL('./viewer-large-model-picking.js'" not in html
+    assert "new URL('./viewer-pick-broadphase.js'" not in html
     assert "new URL('./viewer-render-mesh-builders.js'" not in html
     assert "new URL('./viewer-deformed-rendering.js'" not in html
     assert "new URL('./viewer-contour-materials.js'" not in html

@@ -369,6 +369,9 @@ import {
   createViewerLargeModelPickingToolkit,
 } from './viewer-large-model-picking.js';
 import {
+  createViewerPickBroadphaseToolkit,
+} from './viewer-pick-broadphase.js';
+import {
   createViewerRenderMeshBuilderToolkit,
 } from './viewer-render-mesh-builders.js';
 import {
@@ -539,6 +542,18 @@ const {
   intersectLargeModelSurfaceRecord,
   pickLargeModelRecord,
 }=largeModelPickingToolkit;
+const pickBroadphaseToolkit=createViewerPickBroadphaseToolkit(THREE,{
+  accelerationThreshold:LARGE_MODEL_PICK_ACCELERATION_THRESHOLD,
+  lineScreenTolerancePx:LARGE_MODEL_PICK_LINE_SCREEN_TOLERANCE_PX,
+  getBoundingDiagonal:()=>largeModelBuildProfile?.boundingDiagonal||0,
+  getSurfaceRenderLodProfile:()=>surfaceRenderLodProfile,
+  isElementVisible,
+});
+const {
+  buildPickTargetMeshCache,
+  getPickableMeshesFromCache,
+  shouldPreferInstancedSurfacePicking,
+}=pickBroadphaseToolkit;
 const layerVisibility=new Map();
 let activeIsolation={kind:'',value:'',label:''};
 let storyClipBands=[],activeStoryClipLabel='',activeClipPlanes=[],storyClipPadding=.35;
@@ -2591,15 +2606,6 @@ function refreshInstancedVisuals(){
     if(group.mesh.instanceColor)group.mesh.instanceColor.needsUpdate=true;
   });
 }
-function shouldPreferInstancedSurfacePicking(){
-  return Boolean(surfaceRenderLodProfile?.pickFromInstancedSurfaces);
-}
-function hasVisibleInstancedRecords(mesh){
-  if(!(mesh?.userData?._instancedGroup))return false;
-  if(typeof mesh.userData.hasVisibleInstances==='boolean')return mesh.userData.hasVisibleInstances;
-  const records=Array.isArray(mesh.userData.instanceRecords)?mesh.userData.instanceRecords:[];
-  return records.some(record=>isElementVisible(record.data));
-}
 function rebuildPickTargetMeshes(){
   if(!modelGroup){
     pickTargetMeshes=[];
@@ -2608,58 +2614,13 @@ function rebuildPickTargetMeshes(){
     pickAnalyticSpatialIndex=null;
     return;
   }
-  const preferInstancedSurfacePicking=shouldPreferInstancedSurfacePicking();
-  pickTargetMeshes=[...modelGroup.children].filter(child=>{
-    if(!(child?.isMesh)||child.userData?._wireframe)return false;
-    if(child.userData?._instancedSurfaceGroup){
-      return preferInstancedSurfacePicking?hasVisibleInstancedRecords(child):child.visible!==false;
-    }
-    if(child.userData?._instancedGroup){
-      return child.visible!==false;
-    }
-    if(child.visible===false)return false;
-    if(preferInstancedSurfacePicking&&child.userData?._surfaceDirectFallback)return false;
-    return true;
-  });
-  pickAccelerationRecords=pickTargetMeshes.map(mesh=>{
-    const geometry=mesh?.geometry;
-    if(!(geometry instanceof THREE.BufferGeometry))return null;
-    if(!geometry.boundingSphere)geometry.computeBoundingSphere();
-    const sphere=geometry.boundingSphere;
-    if(!(sphere instanceof THREE.Sphere))return null;
-    const center=sphere.center.clone();
-    mesh.updateMatrixWorld?.(true);
-    center.applyMatrix4(mesh.matrixWorld);
-    const scaleVector=new THREE.Vector3();
-    mesh.matrixWorld.decompose(new THREE.Vector3(),new THREE.Quaternion(),scaleVector);
-    const maxScale=Math.max(Math.abs(scaleVector.x)||1,Math.abs(scaleVector.y)||1,Math.abs(scaleVector.z)||1,1);
-    return{
-      mesh,
-      center,
-      radius:Math.max(safeNumber(sphere.radius,1)*maxScale,.25),
-      isInstanced:Boolean(mesh.userData?._instancedGroup||mesh.userData?._instancedSurfaceGroup),
-      isSurface:Boolean(mesh.userData?._surfaceDirectFallback||mesh.userData?._instancedSurfaceGroup),
-    };
-  }).filter(Boolean);
+  const cache=buildPickTargetMeshCache(modelGroup);
+  pickTargetMeshes=cache.pickTargetMeshes;
+  pickAccelerationRecords=cache.pickAccelerationRecords;
 }
 function getPickableMeshes(ray=null){
   if(!pickTargetMeshes.length&&modelGroup?.children?.length)rebuildPickTargetMeshes();
-  if(!(ray instanceof THREE.Ray)||pickAccelerationRecords.length<LARGE_MODEL_PICK_ACCELERATION_THRESHOLD)return pickTargetMeshes;
-  const tolerance=Math.max(.5,(largeModelBuildProfile?.boundingDiagonal||0)*0.0025,LARGE_MODEL_PICK_LINE_SCREEN_TOLERANCE_PX*0.05);
-  const candidates=pickAccelerationRecords
-    .filter(record=>{
-      if(record.mesh?.visible===false)return false;
-      const expandedRadius=record.radius+tolerance+(record.isSurface?1.2:0);
-      return ray.distanceSqToPoint(record.center)<=expandedRadius*expandedRadius;
-    })
-    .sort((left,right)=>{
-      const leftDistance=ray.distanceSqToPoint(left.center);
-      const rightDistance=ray.distanceSqToPoint(right.center);
-      return leftDistance-rightDistance;
-    })
-    .slice(0,1600)
-    .map(record=>record.mesh);
-  return candidates.length?candidates:pickTargetMeshes;
+  return getPickableMeshesFromCache(ray,{pickTargetMeshes,pickAccelerationRecords});
 }
 function worldUnitsPerPixelAtPoint(point){
   if(!renderer?.domElement||!camera||!(point instanceof THREE.Vector3))return Infinity;

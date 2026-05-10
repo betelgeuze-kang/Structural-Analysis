@@ -73,18 +73,24 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
     deformed_text = Path("src/structure-viewer/viewer-deformed-rendering.js").read_text(encoding="utf-8")
     picking_text = Path("src/structure-viewer/viewer-large-model-picking.js").read_text(encoding="utf-8")
+    broadphase_text = Path("src/structure-viewer/viewer-pick-broadphase.js").read_text(encoding="utf-8")
     compact_deformed_text = "".join(deformed_text.split())
+    compact_text = "".join(text.split())
     compact_geometry_text = "".join(geometry_text.split())
     compact_picking_text = "".join(picking_text.split())
+    compact_broadphase_text = "".join(broadphase_text.split())
 
     assert "let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;" in text
     assert "const SURFACE_LOD_MEDIUM_ELEMENT_THRESHOLD=" in text
     assert "const SURFACE_LOD_COARSE_ELEMENT_THRESHOLD=" in text
     assert "from './viewer-render-picking-geometry.js';" in text
     assert "from './viewer-large-model-picking.js';" in text
+    assert "from './viewer-pick-broadphase.js';" in text
     assert "const renderPickingGeometryToolkit=createViewerRenderPickingGeometryToolkit(THREE,{" in text
     assert "const largeModelPickingToolkit=createViewerLargeModelPickingToolkit(THREE,{" in text
+    assert "const pickBroadphaseToolkit=createViewerPickBroadphaseToolkit(THREE,{" in text
     assert "export function createViewerRenderPickingGeometryToolkit(" in geometry_text
+    assert "export function createViewerPickBroadphaseToolkit(" in broadphase_text
     assert "function buildSurfaceLodProfile(" in geometry_text
     assert "function computeSurfaceLodSubdivisions(" in geometry_text
     assert "function buildLodSurfaceContourGeometry(" in geometry_text
@@ -92,9 +98,11 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "surfaceRenderLodProfile=buildSurfaceLodProfile(surfaceElements.length,instancableSurfaceElements.length);" in text
     assert "surfaceLodLabel:surfaceRenderLodProfile?.label||'full'" in text
     assert "surfaceContourSubdivisions:computeSurfaceLodSubdivisions(verts,surfaceRenderLodProfile,{isInstancedSurface})" in text
-    assert "function shouldPreferInstancedSurfacePicking(" in text
+    assert "function shouldPreferInstancedSurfacePicking(" in broadphase_text
     assert "function rebuildPickTargetMeshes(" in text
     assert "function getPickableMeshes(" in text
+    assert "function buildPickTargetMeshCache(" in broadphase_text
+    assert "function getPickableMeshesFromCache(" in broadphase_text
     assert "function buildPickSpatialIndex(" in text
     assert "function buildPickBoundsBvh(" in geometry_text
     assert "function buildPickSpatialIndexOverflowBvh(" in geometry_text
@@ -125,8 +133,8 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "function pickLargeModelRecord(" in picking_text
     assert "function intersectLargeModelLineRecord(" in picking_text
     assert "function intersectLargeModelSurfaceRecord(" in picking_text
-    assert "pickTargetMeshes=[...modelGroup.children].filter(child=>" in text
-    assert "child.userData?._surfaceDirectFallback" in text
+    assert "constcache=buildPickTargetMeshCache(modelGroup);" in compact_text
+    assert "child.userData?._surfaceDirectFallback" in broadphase_text
     assert "denseBucketRecordIndices:[]" in text
     assert "fullRecordIndices:[]" in text
     assert "nonSurfaceRecordIndices:[]" in text
@@ -200,9 +208,11 @@ def test_index_html_uses_anisotropic_pick_spatial_index_cell_sizes_end_to_end() 
     geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
     deformed_text = Path("src/structure-viewer/viewer-deformed-rendering.js").read_text(encoding="utf-8")
     picking_text = Path("src/structure-viewer/viewer-large-model-picking.js").read_text(encoding="utf-8")
+    broadphase_text = Path("src/structure-viewer/viewer-pick-broadphase.js").read_text(encoding="utf-8")
     compact_geometry_text = "".join(geometry_text.split())
     compact_deformed_text = "".join(deformed_text.split())
     compact_picking_text = "".join(picking_text.split())
+    compact_broadphase_text = "".join(broadphase_text.split())
 
     assert "function getPickSpatialIndexAxisCellSize(index, axis) {" in geometry_text
     assert "safeNumber(index?.[`cellSize${axis.toUpperCase()}`],0)," in compact_geometry_text
@@ -250,6 +260,8 @@ def test_index_html_uses_anisotropic_pick_spatial_index_cell_sizes_end_to_end() 
     assert "record.deformedPickMeshLocalCatalog=localCatalogByRecordIndex.get(recordIndex)||null;" in compact_deformed_text
     assert "largeModelBuildProfile.pickSpatialMeshLocalCatalogCount=pickAnalyticSpatialIndex.meshLocalTriangleCatalogs.length;" in text
     assert "largeModelBuildProfile.pickSpatialDeformedMeshLocalCatalogCount=localCatalogs.length;" in compact_deformed_text
+    assert "pickAccelerationRecords.length<accelerationThreshold" in compact_broadphase_text
+    assert "record.radius+tolerance+(record.isSurface?1.2:0)" in compact_broadphase_text
 
 
 def test_index_html_chunk_normalizes_large_payloads_off_main_slice() -> None:
