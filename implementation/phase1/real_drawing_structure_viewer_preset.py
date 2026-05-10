@@ -96,6 +96,43 @@ def asset_bounds(asset: dict[str, Any]) -> tuple[list[float], list[float]]:
     return mins, maxs
 
 
+def asset_registry_row(asset: dict[str, Any]) -> dict[str, Any]:
+    metrics = asset.get("metrics") if isinstance(asset.get("metrics"), dict) else {}
+    quality_flags = [str(flag) for flag in (asset.get("quality_flags") or [])]
+    return {
+        "asset_ref": str(asset.get("asset_ref") or ""),
+        "file_type": str(asset.get("file_type") or ""),
+        "route": str(asset.get("route") or ""),
+        "status": str(asset.get("status") or ""),
+        "solver_exact": bool(asset.get("solver_exact", False)),
+        "geometry_mode": str(asset.get("geometry_mode") or ""),
+        "geometry_available": bool(asset.get("geometry_available", False)),
+        "segment_count": _safe_int(asset.get("segment_count", 0)),
+        "model_asset_count": _safe_int(asset.get("model_asset_count", 0)),
+        "warning_label": str(asset.get("warning_label") or ""),
+        "quality_flags": quality_flags,
+        "quality_notice": quality_notice(asset),
+        "node_count": _safe_int(metrics.get("node_count", metrics.get("proxy_node_count", 0))),
+        "element_count": _safe_int(metrics.get("element_count", metrics.get("edge_count", 0))),
+        "renderable_segment_count": _safe_int(metrics.get("renderable_segment_count", asset.get("segment_count", 0))),
+    }
+
+
+def registry_summary(registry: dict[str, Any], asset_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "asset_count": _safe_int(registry.get("asset_count", len(asset_rows))),
+        "renderable_asset_count": _safe_int(registry.get("renderable_asset_count", 0)),
+        "solver_exact_asset_count": _safe_int(registry.get("solver_exact_asset_count", 0)),
+        "proxy_or_preview_asset_count": _safe_int(registry.get("proxy_or_preview_asset_count", 0)),
+        "route_counts": registry.get("route_counts") if isinstance(registry.get("route_counts"), dict) else {},
+        "status_counts": registry.get("status_counts") if isinstance(registry.get("status_counts"), dict) else {},
+        "quality_flag_counts": {
+            flag: sum(1 for row in asset_rows if flag in set(row.get("quality_flags") or []))
+            for flag in sorted({flag for row in asset_rows for flag in (row.get("quality_flags") or [])})
+        },
+    }
+
+
 def transform_point(point: Any, *, center: list[float], scale: float, offset_x: float, offset_y: float) -> list[float]:
     normalized = point if isinstance(point, list) and len(point) >= 3 else [0.0, 0.0, 0.0]
     return [
@@ -139,6 +176,7 @@ def register_viewer_node(
 
 def build_structure_viewer_preset_payload(registry: dict[str, Any]) -> dict[str, Any]:
     assets = [asset for asset in (registry.get("assets") or []) if isinstance(asset, dict)]
+    asset_rows = [asset_registry_row(asset) for asset in assets]
     columns = max(1, math.ceil(math.sqrt(max(len(assets), 1))))
     tile_spacing = 48.0
     nodes: list[dict[str, Any]] = []
@@ -243,6 +281,8 @@ def build_structure_viewer_preset_payload(registry: dict[str, Any]) -> dict[str,
             "real_drawing_renderable_asset_count": _safe_int(registry.get("renderable_asset_count", 0)),
             "real_drawing_solver_exact_asset_count": _safe_int(registry.get("solver_exact_asset_count", 0)),
             "real_drawing_proxy_or_preview_asset_count": _safe_int(registry.get("proxy_or_preview_asset_count", 0)),
+            "real_drawing_registry_summary": registry_summary(registry, asset_rows),
+            "real_drawing_asset_registry": asset_rows,
         },
         "model": {
             "nodes": nodes,

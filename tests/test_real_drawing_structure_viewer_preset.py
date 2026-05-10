@@ -62,6 +62,10 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
     assert STRUCTURE_VIEWER_HREF == "src/structure-viewer/index.html?preset=real_drawing_private_3d"
     assert payload["schema_version"] == "real-drawing-private-3d-viewer-preset.v1"
     assert payload["meta"]["real_drawing_asset_count"] == 2
+    assert payload["meta"]["real_drawing_registry_summary"]["solver_exact_asset_count"] == 1
+    assert payload["meta"]["real_drawing_registry_summary"]["quality_flag_counts"]["not_solver_exact"] == 1
+    assert payload["meta"]["real_drawing_asset_registry"][0]["asset_ref"] == "RD-001"
+    assert payload["meta"]["real_drawing_asset_registry"][1]["warning_label"] == "proxy layout"
     assert len(model["elements"]) == 3
     assert len(model["metadata"]["groups"]) == 2
     assert model["metadata"]["groups"][0]["name"] == "RD-001 · solver_topology_xyz"

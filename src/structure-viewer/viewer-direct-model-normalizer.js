@@ -174,8 +174,51 @@ export function extractLoadCombinationInventory(modelPayload, metadata) {
   return rows;
 }
 
+export function buildRealDrawingAssetRegistry(rootMeta) {
+  return (Array.isArray(rootMeta?.real_drawing_asset_registry) ? rootMeta.real_drawing_asset_registry : [])
+    .map(row => ({
+      asset_ref: normalizeSelectionValue(row?.asset_ref),
+      file_type: normalizeSelectionValue(row?.file_type),
+      route: normalizeSelectionValue(row?.route),
+      status: normalizeSelectionValue(row?.status),
+      solver_exact: Boolean(row?.solver_exact),
+      geometry_mode: normalizeSelectionValue(row?.geometry_mode),
+      geometry_available: Boolean(row?.geometry_available),
+      segment_count: safeNumber(row?.segment_count, 0),
+      model_asset_count: safeNumber(row?.model_asset_count, 0),
+      warning_label: normalizeSelectionValue(row?.warning_label),
+      quality_flags: Array.isArray(row?.quality_flags)
+        ? row.quality_flags.map(value => normalizeSelectionValue(value)).filter(Boolean)
+        : [],
+      quality_notice: normalizeSelectionValue(row?.quality_notice),
+      node_count: safeNumber(row?.node_count, 0),
+      element_count: safeNumber(row?.element_count, 0),
+      renderable_segment_count: safeNumber(row?.renderable_segment_count, row?.segment_count ?? 0),
+    }))
+    .filter(row => row.asset_ref)
+    .slice(0, 128);
+}
+
+export function buildRealDrawingRegistrySummary(rootMeta, assetRegistry) {
+  const summary = rootMeta?.real_drawing_registry_summary && typeof rootMeta.real_drawing_registry_summary === 'object'
+    ? rootMeta.real_drawing_registry_summary
+    : {};
+  return {
+    asset_count: safeNumber(summary.asset_count, rootMeta?.real_drawing_asset_count ?? assetRegistry.length),
+    renderable_asset_count: safeNumber(summary.renderable_asset_count, rootMeta?.real_drawing_renderable_asset_count ?? 0),
+    solver_exact_asset_count: safeNumber(summary.solver_exact_asset_count, rootMeta?.real_drawing_solver_exact_asset_count ?? 0),
+    proxy_or_preview_asset_count: safeNumber(summary.proxy_or_preview_asset_count, rootMeta?.real_drawing_proxy_or_preview_asset_count ?? 0),
+    route_counts: summary.route_counts && typeof summary.route_counts === 'object' ? { ...summary.route_counts } : {},
+    status_counts: summary.status_counts && typeof summary.status_counts === 'object' ? { ...summary.status_counts } : {},
+    quality_flag_counts: summary.quality_flag_counts && typeof summary.quality_flag_counts === 'object'
+      ? { ...summary.quality_flag_counts }
+      : {},
+  };
+}
+
 export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {}) {
   const metadata = modelPayload?.metadata && typeof modelPayload.metadata === 'object' ? modelPayload.metadata : {};
+  const rootMeta = rootPayload?.meta && typeof rootPayload.meta === 'object' ? rootPayload.meta : {};
   const sourceInfo = rootPayload?.source && typeof rootPayload.source === 'object' ? rootPayload.source : {};
   const axisBridge = metadata.kds_geometry_bridge && typeof metadata.kds_geometry_bridge === 'object' ? metadata.kds_geometry_bridge : {};
   const axisRefs = axisBridge.axis_refs && typeof axisBridge.axis_refs === 'object' ? axisBridge.axis_refs : {};
@@ -193,6 +236,8 @@ export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {})
   const sectionCatalogSummary = buildSectionCatalogSummary(modelPayload?.sections, sectionUsageRows);
   const bridgeRows = Array.isArray(axisBridge.bridge_rows) ? axisBridge.bridge_rows : [];
   const groupRows = Array.isArray(metadata.groups) ? metadata.groups : [];
+  const realDrawingAssetRegistry = buildRealDrawingAssetRegistry(rootMeta);
+  const realDrawingRegistrySummary = buildRealDrawingRegistrySummary(rootMeta, realDrawingAssetRegistry);
   const sectionCount = safeNumber(sectionSummary.section_row_count, Array.isArray(modelPayload?.sections) ? modelPayload.sections.length : 0);
   const usedSectionCount = safeNumber(sectionSummary.used_section_count, 0);
   const axisLabelCount =
@@ -244,6 +289,12 @@ export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {})
     section_family_summary: buildSectionFamilySummary(sectionUsageRows),
     group_summary: buildGroupSummary(groupRows),
     review_row_summary: buildReviewRowSummary(bridgeRows),
+    real_drawing_asset_count: realDrawingRegistrySummary.asset_count,
+    real_drawing_renderable_asset_count: realDrawingRegistrySummary.renderable_asset_count,
+    real_drawing_solver_exact_asset_count: realDrawingRegistrySummary.solver_exact_asset_count,
+    real_drawing_proxy_or_preview_asset_count: realDrawingRegistrySummary.proxy_or_preview_asset_count,
+    real_drawing_registry_summary: realDrawingRegistrySummary,
+    real_drawing_asset_registry: realDrawingAssetRegistry,
   };
 }
 

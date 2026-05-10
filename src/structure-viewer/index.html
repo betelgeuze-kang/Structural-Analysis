@@ -3319,6 +3319,7 @@ async function buildModel(data,sourceMeta=null){
 /* ── UI Builders ── */
 const VIEWER_STATS_PANEL_KEYS=[
   'maxDcr','avgDcr','ngCount','stories','model','source','members','groups','sections',
+  'realDrawingAssets','realDrawingSolverExact','realDrawingProxyPreview',
   'buildPath','surfaceLod','picking','pickMeshTriangles','pickMeshLocal','pickDeformedTriangles',
   'pickDeformedLocal','pickSurfaceFacets','pickFullBvh','pickNonSurfaceBvh','pickDenseBuckets',
   'reviewIds','loadPatterns'
@@ -3374,6 +3375,10 @@ function buildViewerStatsSummary(data){
     :0;
   const nodeCount=Array.isArray(data?.nodes)?data.nodes.length:safeNumber(data?.meta?.node_count,0);
   const elementCount=elements.length;
+  const realDrawingAssetCount=safeNumber(data?.meta?.real_drawing_asset_count,0);
+  const realDrawingRenderableCount=safeNumber(data?.meta?.real_drawing_renderable_asset_count,0);
+  const realDrawingSolverExactCount=safeNumber(data?.meta?.real_drawing_solver_exact_asset_count,0);
+  const realDrawingProxyPreviewCount=safeNumber(data?.meta?.real_drawing_proxy_or_preview_asset_count,0);
   return{
     maxDcrValue,
     avgDcrValue,
@@ -3392,7 +3397,14 @@ function buildViewerStatsSummary(data){
     groupCountLabel:String(groupCount),
     nodeCountLabel:String(nodeCount),
     elementCountLabel:String(elementCount),
-    loadPatternCountLabel:String(data?.meta?.load_pattern_count??'--')
+    loadPatternCountLabel:String(data?.meta?.load_pattern_count??'--'),
+    realDrawingAssetCount,
+    realDrawingRenderableCount,
+    realDrawingSolverExactCount,
+    realDrawingProxyPreviewCount,
+    realDrawingAssetCountLabel:realDrawingAssetCount?String(realDrawingAssetCount):'--',
+    realDrawingSolverExactLabel:realDrawingAssetCount?String(realDrawingSolverExactCount):'--',
+    realDrawingProxyPreviewLabel:realDrawingAssetCount?String(realDrawingProxyPreviewCount):'--',
   };
 }
 function buildViewerStatEntries(summary){
@@ -3425,6 +3437,13 @@ function buildViewerStatEntries(summary){
     members:{label:'Members',value:summary.memberCountLabel},
     groups:{label:'Groups',value:summary.groupCountLabel},
     sections:{label:'Sections',value:summary.sectionCoverage},
+    realDrawingAssets:{
+      label:'Real Drawing Assets',
+      value:summary.realDrawingAssetCountLabel,
+      statsTone:summary.realDrawingRenderableCount===summary.realDrawingAssetCount&&summary.realDrawingAssetCount>0?'success':'neutral'
+    },
+    realDrawingSolverExact:{label:'Solver-Exact Assets',value:summary.realDrawingSolverExactLabel},
+    realDrawingProxyPreview:{label:'Proxy / Preview Assets',value:summary.realDrawingProxyPreviewLabel},
     buildPath:{label:'Build Path',value:summary.buildPathLabel},
     surfaceLod:{label:'Surface LOD',value:summary.surfaceLodLabel},
     picking:{label:'Picking',value:summary.surfacePickLabel},
@@ -3463,6 +3482,10 @@ function buildViewerStatEntries(summary){
     reviewIds:{label:'Review IDs',value:summary.reviewCoverage},
     loadPatterns:{label:'Load Patterns',value:summary.loadPatternCountLabel}
   };
+}
+function getRealDrawingAssetRegistry(data=modelData){
+  return(Array.isArray(data?.meta?.real_drawing_asset_registry)?data.meta.real_drawing_asset_registry:[])
+    .filter(row=>row&&typeof row==='object'&&normalizeSelectionValue(row.asset_ref));
 }
 function setStatusPillTone(node,tone='success'){
   if(!(node instanceof HTMLElement))return;
@@ -3608,6 +3631,30 @@ function buildUI(data){
         '',
         {isolateKind:'group',isolateValue:row.group_name,isolateLabel:row.group_name}
       );
+    });
+  }
+  const realDrawingAssets=getRealDrawingAssetRegistry(data);
+  if(realDrawingAssets.length){
+    appendTreeHeading('Real Drawing Assets');
+    realDrawingAssets.slice(0,32).forEach(row=>{
+      const assetRef=normalizeSelectionValue(row.asset_ref);
+      const status=normalizeSelectionValue(row.status)||'ready';
+      const badge=row.solver_exact?'exact':'proxy';
+      const flags=Array.isArray(row.quality_flags)?row.quality_flags.filter(Boolean):[];
+      const warning=normalizeSelectionValue(row.warning_label);
+      const label=`${assetRef} · ${warning||normalizeSelectionValue(row.geometry_mode)||status}`;
+      appendTreeItem(
+        label,
+        `${badge} · ${safeNumber(row.segment_count,0)}`,
+        ()=>focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===assetRef),
+        '',
+        {isolateKind:'member',isolateValue:assetRef,isolateLabel:label}
+      );
+      const last=tree.lastElementChild;
+      const badgeNode=last?.querySelector?.('.badge');
+      if(badgeNode instanceof HTMLElement){
+        badgeNode.title=`${status}${flags.length?` | ${flags.join(', ')}`:''}`;
+      }
     });
   }
   const reviewRowSummary=Array.isArray(data.meta?.review_row_summary)?data.meta.review_row_summary:[];

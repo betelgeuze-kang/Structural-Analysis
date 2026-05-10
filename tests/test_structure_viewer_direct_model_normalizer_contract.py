@@ -17,6 +17,45 @@ const artifact = {
   run_id: 'fixture-run',
   generated_at: '2026-05-08T00:00:00Z',
   source: {path: 'fixture.json', sha256: 'abc123', format: 'midas-json', source_family: 'midas'},
+  meta: {
+    real_drawing_asset_count: 2,
+    real_drawing_renderable_asset_count: 2,
+    real_drawing_solver_exact_asset_count: 1,
+    real_drawing_proxy_or_preview_asset_count: 1,
+    real_drawing_registry_summary: {
+      asset_count: 2,
+      renderable_asset_count: 2,
+      solver_exact_asset_count: 1,
+      proxy_or_preview_asset_count: 1,
+      route_counts: {midas_mgt_direct_parser: 1, ifc_to_structural_graph_adapter: 1},
+      status_counts: {solver_graph_ready: 1, ifc_proxy_graph_ready: 1},
+      quality_flag_counts: {not_solver_exact: 1}
+    },
+    real_drawing_asset_registry: [
+      {
+        asset_ref: 'RD-001',
+        file_type: '.mgt',
+        route: 'midas_mgt_direct_parser',
+        status: 'solver_graph_ready',
+        solver_exact: true,
+        geometry_mode: 'solver_topology_xyz',
+        geometry_available: true,
+        segment_count: 2,
+        quality_flags: []
+      },
+      {
+        asset_ref: 'RD-002',
+        file_type: '.ifc',
+        route: 'ifc_to_structural_graph_adapter',
+        status: 'ifc_proxy_graph_ready',
+        solver_exact: false,
+        geometry_mode: 'ifc_proxy_topology_3d_layout',
+        geometry_available: true,
+        segment_count: 1,
+        quality_flags: ['not_solver_exact']
+      }
+    ]
+  },
   model: {
     nodes: [
       {id: 10, x: '1', y: '2', z: '0'},
@@ -127,4 +166,10 @@ console.log(JSON.stringify({
     assert meta["section_family_summary"][0]["family"] == "steel"
     assert meta["group_summary"][0]["group_name"] == "Core A"
     assert meta["review_row_summary"][0]["isolation_token"] == "R1::row-1::M1::E1"
+    assert meta["real_drawing_asset_count"] == 2
+    assert meta["real_drawing_solver_exact_asset_count"] == 1
+    assert meta["real_drawing_proxy_or_preview_asset_count"] == 1
+    assert meta["real_drawing_registry_summary"]["quality_flag_counts"]["not_solver_exact"] == 1
+    assert meta["real_drawing_asset_registry"][1]["asset_ref"] == "RD-002"
+    assert meta["real_drawing_asset_registry"][1]["quality_flags"] == ["not_solver_exact"]
     assert payload["catalog"][0]["raw_tokens_head"] == ["H-400x200", "SM355"]

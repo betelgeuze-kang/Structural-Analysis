@@ -46,6 +46,8 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert 'id="shell-meta-stories"' in text
     assert 'id="shell-meta-review"' in text
     assert 'id="shell-meta-source"' in text
+    assert "Real Drawing Assets" in text
+    assert "getRealDrawingAssetRegistry" in text
     assert "Structural Insight Viewer" in text
     assert "Structural Model Workspace" in text
 
