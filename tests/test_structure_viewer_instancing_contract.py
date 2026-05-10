@@ -71,6 +71,8 @@ def test_index_html_exposes_bounded_loadcomb_authoring_draft_contract() -> None:
 def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_models() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
     geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
+    deformed_text = Path("src/structure-viewer/viewer-deformed-rendering.js").read_text(encoding="utf-8")
+    compact_deformed_text = "".join(deformed_text.split())
     compact_geometry_text = "".join(geometry_text.split())
 
     assert "let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;" in text
@@ -96,6 +98,7 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "function buildPickMeshTriangleBvh(" in geometry_text
     assert "function buildLocalGeometryTriangleEntries(" in geometry_text
     assert "async function buildPickMeshLocalTriangleCatalogs(" in text
+    assert "from './viewer-deformed-rendering.js';" in text
     assert "function resolvePickRecordWorldMatrix(" in geometry_text
     assert "function createLocalRayFromWorldRay(" in geometry_text
     assert "function intersectPickTriangleBvhClosest(" in geometry_text
@@ -179,12 +182,21 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "Pick Full BVH" in text
     assert " + full BVH" in text
     assert "dense-bucket BVH" in text
+    assert "pickSpatialIndex.deformedMeshTriangleEntries=triangleEntries;" in compact_deformed_text
+    assert "pickSpatialIndex.deformedMeshLocalTriangleCatalogs=localCatalogs;" in compact_deformed_text
+    assert "pickSpatialIndex.deformedMeshTriangleBvh=acceleration.triangleBvh||null;" in compact_deformed_text
+    assert "record.deformedPickMeshLocalCatalog=localCatalogByRecordIndex.get(recordIndex)||null;" in compact_deformed_text
+    assert "largeModelBuildProfile.pickSpatialDeformedMeshTriangleCount=triangleEntries.length;" in compact_deformed_text
+    assert "largeModelBuildProfile.pickSpatialDeformedMeshTriangleBvhEnabled=Boolean(pickSpatialIndex.deformedMeshTriangleBvh);" in compact_deformed_text
+    assert "largeModelBuildProfile.pickSpatialDeformedMeshLocalCatalogCount=localCatalogs.length;" in compact_deformed_text
 
 
 def test_index_html_uses_anisotropic_pick_spatial_index_cell_sizes_end_to_end() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
     geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
+    deformed_text = Path("src/structure-viewer/viewer-deformed-rendering.js").read_text(encoding="utf-8")
     compact_geometry_text = "".join(geometry_text.split())
+    compact_deformed_text = "".join(deformed_text.split())
 
     assert "function getPickSpatialIndexAxisCellSize(index, axis) {" in geometry_text
     assert "safeNumber(index?.[`cellSize${axis.toUpperCase()}`],0)," in compact_geometry_text
@@ -229,9 +241,9 @@ def test_index_html_uses_anisotropic_pick_spatial_index_cell_sizes_end_to_end() 
     assert "queryPickSpatialIndexOverflowBvh(index.denseBucketBvh,ray,pushCandidateEntry);" in text
     assert "if(bestHit&&candidate.entryDistance>bestHit.distance)break;" in text
     assert "record.pickMeshLocalCatalog=catalog;" in text
-    assert "record.deformedPickMeshLocalCatalog=localCatalogByRecordIndex.get(recordIndex)||null;" in text
+    assert "record.deformedPickMeshLocalCatalog=localCatalogByRecordIndex.get(recordIndex)||null;" in compact_deformed_text
     assert "largeModelBuildProfile.pickSpatialMeshLocalCatalogCount=pickAnalyticSpatialIndex.meshLocalTriangleCatalogs.length;" in text
-    assert "largeModelBuildProfile.pickSpatialDeformedMeshLocalCatalogCount=localCatalogs.length;" in text
+    assert "largeModelBuildProfile.pickSpatialDeformedMeshLocalCatalogCount=localCatalogs.length;" in compact_deformed_text
 
 
 def test_index_html_chunk_normalizes_large_payloads_off_main_slice() -> None:

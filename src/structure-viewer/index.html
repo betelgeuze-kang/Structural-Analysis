@@ -371,6 +371,9 @@ import {
 import {
   createViewerContourMaterialToolkit,
 } from './viewer-contour-materials.js';
+import {
+  createViewerDeformedRenderingToolkit,
+} from './viewer-deformed-rendering.js';
 
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
   modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,
@@ -426,6 +429,13 @@ const SELECTION_HIGHLIGHT_HEX=0x224488;
 const TYPE_HIGHLIGHT_HEX=0x223355;
 const APPLIED_OVERRIDE_HEX=0xf59e0b;
 const NODE_CONTOUR_FIELDS=new Set(['disp_mag','stress_vm']);
+const deformedRenderingToolkit=createViewerDeformedRenderingToolkit(THREE,{meshTriangleBvhThreshold:LARGE_MODEL_PICK_SPATIAL_INDEX_MESH_TRIANGLE_BVH_THRESHOLD});
+const {
+  applyDeformedPickAcceleration,
+  buildDeformedPickAcceleration,
+  clearDeformedPickAcceleration,
+  createDeformedLineRenderObjects,
+}=deformedRenderingToolkit;
 const contourMaterialToolkit=createViewerContourMaterialToolkit(THREE,{
   contourLutSize:CONTOUR_LUT_SIZE,
   nodeContourFields:NODE_CONTOUR_FIELDS,
@@ -2291,59 +2301,12 @@ function refreshDeformedPickMeshTriangleBvh(){
   if(!pickAnalyticSpatialIndex){
     return;
   }
-  const triangleEntries=[];
-  const localCatalogs=[];
-  const localCatalogByRecordIndex=new Map();
-  [...deformedGroup.children].forEach(child=>{
-    if(!(child?.isMesh)&&!child?.isInstancedMesh)return;
-    const mesh=child;
-    const elementId=normalizeSelectionValue(mesh?.userData?.id||mesh?.userData?.elementId);
-    const memberId=normalizeSelectionValue(mesh?.userData?.member_id||mesh?.userData?.memberId);
-    const recordIndex=indexFromMap(pickAnalyticSpatialIndex.recordIndexByElementId,elementId,pickAnalyticSpatialIndex.recordIndexByMemberId,memberId);
-    if(!Number.isInteger(recordIndex))return;
-    mesh.updateMatrixWorld?.(true);
-    appendPickMeshTrianglesFromGeometry(mesh.geometry,mesh.matrixWorld.clone(),recordIndex,triangleEntries);
-    if(mesh.geometry instanceof THREE.BufferGeometry){
-      const localEntries=buildLocalGeometryTriangleEntries(mesh.geometry);
-      if(localEntries.length){
-        const worldMatrix=mesh.matrixWorld.clone();
-        const catalog={
-          key:`deformed::${normalizeSelectionValue(elementId||memberId||recordIndex)}`,
-          recordIndex,
-          triangleEntries:localEntries,
-          triangleBvh:localEntries.length>=LARGE_MODEL_PICK_SPATIAL_INDEX_MESH_TRIANGLE_BVH_THRESHOLD
-            ?buildPickMeshTriangleBvh(localEntries)
-            :null,
-          worldMatrix,
-          inverseWorldMatrix:worldMatrix.clone().invert(),
-          meshUuid:String(mesh.uuid||''),
-          instanceId:null,
-        };
-        localCatalogs.push(catalog);
-        localCatalogByRecordIndex.set(recordIndex,catalog);
-      }
-    }
+  const acceleration=buildDeformedPickAcceleration([...deformedGroup.children],pickAnalyticSpatialIndex,{
+    appendPickMeshTrianglesFromGeometry,
+    buildLocalGeometryTriangleEntries,
+    buildPickMeshTriangleBvh,
   });
-  pickAnalyticSpatialIndex.deformedMeshTriangleEntries=triangleEntries;
-  pickAnalyticSpatialIndex.deformedMeshLocalTriangleCatalogs=localCatalogs;
-  pickAnalyticSpatialIndex.deformedMeshTriangleBvh=triangleEntries.length>=LARGE_MODEL_PICK_SPATIAL_INDEX_MESH_TRIANGLE_BVH_THRESHOLD
-    ?buildPickMeshTriangleBvh(triangleEntries)
-    :null;
-  pickAnalyticSpatialIndex.records.forEach((record,recordIndex)=>{
-    if(record&&typeof record==='object'){
-      record.deformedPickMeshLocalCatalog=localCatalogByRecordIndex.get(recordIndex)||null;
-    }
-  });
-  if(largeModelBuildProfile){
-    largeModelBuildProfile.pickSpatialDeformedMeshTriangleCount=triangleEntries.length;
-    largeModelBuildProfile.pickSpatialDeformedMeshTriangleBvhEnabled=Boolean(pickAnalyticSpatialIndex.deformedMeshTriangleBvh);
-    largeModelBuildProfile.pickSpatialDeformedMeshLocalCatalogCount=localCatalogs.length;
-  }
-}
-function indexFromMap(primaryMap,primaryKey,fallbackMap,fallbackKey){
-  if(primaryMap instanceof Map&&primaryKey&&primaryMap.has(primaryKey))return primaryMap.get(primaryKey);
-  if(fallbackMap instanceof Map&&fallbackKey&&fallbackMap.has(fallbackKey))return fallbackMap.get(fallbackKey);
-  return null;
+  applyDeformedPickAcceleration(pickAnalyticSpatialIndex,largeModelBuildProfile,acceleration);
 }
 async function buildInstancedLineElements(lineElements,nodeMap,{forceChunking=false}={}){
   const grouped=new Map();
@@ -4105,17 +4068,7 @@ function toggleDeformed(){
   if(showDeformed){
     rebuildDeformed();
   }else if(pickAnalyticSpatialIndex){
-    pickAnalyticSpatialIndex.deformedMeshTriangleEntries=[];
-    pickAnalyticSpatialIndex.deformedMeshLocalTriangleCatalogs=[];
-    pickAnalyticSpatialIndex.deformedMeshTriangleBvh=null;
-    pickAnalyticSpatialIndex.records.forEach(record=>{
-      if(record&&typeof record==='object')record.deformedPickMeshLocalCatalog=null;
-    });
-    if(largeModelBuildProfile){
-      largeModelBuildProfile.pickSpatialDeformedMeshTriangleCount=0;
-      largeModelBuildProfile.pickSpatialDeformedMeshTriangleBvhEnabled=false;
-      largeModelBuildProfile.pickSpatialDeformedMeshLocalCatalogCount=0;
-    }
+    clearDeformedPickAcceleration(pickAnalyticSpatialIndex,largeModelBuildProfile);
   }
 }
 function updateDeformScale(v){
@@ -4131,18 +4084,12 @@ function rebuildDeformed(){
   modelData.elements.forEach(el=>{
     const ns=el.node_ids.map(id=>nodeMap.get(id)).filter(Boolean);
     if(ns.length<2)return;
-    const type=el.type.toLowerCase();
     if(ns.length===2){
-      const factor = isAnimating ? Math.sin(animTime * 5) * deformScale : deformScale;
-      const pts=ns.map(n=>new THREE.Vector3(n.x+n.dx*factor,n.z+n.dz*factor,n.y+n.dy*factor));
-      const curve=new THREE.LineCurve3(pts[0],pts[1]);
-      const geo=new THREE.TubeGeometry(curve,1,type==='column'?.3:(type==='wall'||type==='slab'?.12:.15),6,false);
-      const mat=new THREE.MeshPhongMaterial({color:0xff6b6b,transparent:true,opacity:.55,wireframe:false});
-      const dmesh=new THREE.Mesh(geo,mat);
-      dmesh.userData={...el,_deformed:true};
-      deformedGroup.add(dmesh);
-      const lineGeo=new THREE.BufferGeometry().setFromPoints(pts);
-      deformedGroup.add(new THREE.Line(lineGeo,new THREE.LineBasicMaterial({color:0xff6b6b,opacity:.8,transparent:true})));
+      const factor=isAnimating?Math.sin(animTime*5)*deformScale:deformScale;
+      const renderObjects=createDeformedLineRenderObjects(el,ns,{factor});
+      if(!renderObjects)return;
+      deformedGroup.add(renderObjects.mesh);
+      deformedGroup.add(renderObjects.line);
     }
   });
   refreshDeformedPickMeshTriangleBvh();

@@ -520,6 +520,9 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
     contour_materials_url = _encode_js_module_data_url(
         (VIEWER_ROOT / "viewer-contour-materials.js").read_text(encoding="utf-8")
     )
+    deformed_rendering_url = _encode_js_module_data_url(
+        (VIEWER_ROOT / "viewer-deformed-rendering.js").read_text(encoding="utf-8")
+    )
     return {
         "./viewer-data-loader.js": data_loader_url,
         "./viewer-model-normalizer.js": model_normalizer_url,
@@ -527,6 +530,7 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
         "./viewer-render-picking-geometry.js": render_picking_geometry_url,
         "./viewer-render-mesh-builders.js": render_mesh_builders_url,
         "./viewer-contour-materials.js": contour_materials_url,
+        "./viewer-deformed-rendering.js": deformed_rendering_url,
     }
 
 

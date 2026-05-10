@@ -28,12 +28,14 @@ def test_generate_selfcontained_html_uses_full_index_template() -> None:
     assert "./viewer-direct-model-normalizer.js" not in html
     assert "./viewer-render-picking-geometry.js" not in html
     assert "./viewer-render-mesh-builders.js" not in html
+    assert "./viewer-deformed-rendering.js" not in html
     assert "./viewer-contour-materials.js" not in html
     assert "./viewer-optimization-worker.js" not in html
     assert "new URL('./viewer-model-normalizer.js'" not in html
     assert "new URL('./viewer-direct-model-normalizer.js'" not in html
     assert "new URL('./viewer-render-picking-geometry.js'" not in html
     assert "new URL('./viewer-render-mesh-builders.js'" not in html
+    assert "new URL('./viewer-deformed-rendering.js'" not in html
     assert "new URL('./viewer-contour-materials.js'" not in html
     assert "./design-theme.css" not in html
     assert "inlined from src/structure-viewer/design-theme.css" in html
