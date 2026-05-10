@@ -1,0 +1,486 @@
+{
+  "asset_quality_rows": [
+    {
+      "asset_ref": "RD-001",
+      "edge_count": 534,
+      "element_count": 0,
+      "file_type": ".ifc",
+      "geometry_available": true,
+      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "node_count": 666,
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "renderable_segment_count": 534,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 534,
+      "solver_exact": false,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-002",
+      "edge_count": 77,
+      "element_count": 0,
+      "file_type": ".ifc",
+      "geometry_available": true,
+      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "node_count": 81,
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "renderable_segment_count": 77,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 77,
+      "solver_exact": false,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-003",
+      "edge_count": 1170,
+      "element_count": 0,
+      "file_type": ".ifc",
+      "geometry_available": true,
+      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "node_count": 1174,
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "renderable_segment_count": 898,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 898,
+      "solver_exact": false,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-004",
+      "edge_count": 238,
+      "element_count": 0,
+      "file_type": ".ifc",
+      "geometry_available": true,
+      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "node_count": 248,
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "renderable_segment_count": 238,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 238,
+      "solver_exact": false,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-005",
+      "edge_count": 6772,
+      "element_count": 0,
+      "file_type": ".ifc",
+      "geometry_available": true,
+      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "node_count": 6779,
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "renderable_segment_count": 898,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 898,
+      "solver_exact": false,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-006",
+      "edge_count": 843,
+      "element_count": 0,
+      "file_type": ".ifc",
+      "geometry_available": true,
+      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "node_count": 856,
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "renderable_segment_count": 843,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 843,
+      "solver_exact": false,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-007",
+      "edge_count": 0,
+      "element_count": 0,
+      "file_type": ".ifc",
+      "geometry_available": true,
+      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "node_count": 836,
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "proxy_node_glyph_fallback",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "renderable_segment_count": 836,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 836,
+      "solver_exact": false,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-008",
+      "edge_count": 0,
+      "element_count": 12728,
+      "file_type": ".mgt",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 11355,
+      "quality_flags": [
+        "sampled_dense_model"
+      ],
+      "quality_tier": "solver_exact_sampled_review",
+      "renderable_segment_count": 34000,
+      "route": "midas_mgt_direct_parser",
+      "segment_count": 1800,
+      "solver_exact": true,
+      "status": "solver_graph_ready"
+    },
+    {
+      "asset_ref": "RD-009",
+      "edge_count": 0,
+      "element_count": 15,
+      "file_type": ".mgt",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 16,
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
+      "renderable_segment_count": 15,
+      "route": "midas_mgt_direct_parser",
+      "segment_count": 15,
+      "solver_exact": true,
+      "status": "solver_graph_ready"
+    },
+    {
+      "asset_ref": "RD-010",
+      "edge_count": 0,
+      "element_count": 147,
+      "file_type": ".mgt",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 150,
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
+      "renderable_segment_count": 147,
+      "route": "midas_mgt_direct_parser",
+      "segment_count": 147,
+      "solver_exact": true,
+      "status": "solver_graph_ready"
+    },
+    {
+      "asset_ref": "RD-011",
+      "edge_count": 0,
+      "element_count": 369,
+      "file_type": ".mgt",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 366,
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
+      "renderable_segment_count": 369,
+      "route": "midas_mgt_direct_parser",
+      "segment_count": 369,
+      "solver_exact": true,
+      "status": "solver_graph_ready"
+    },
+    {
+      "asset_ref": "RD-012",
+      "edge_count": 0,
+      "element_count": 3,
+      "file_type": ".zip",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 6,
+      "quality_flags": [
+        "sparse_preview",
+        "not_solver_exact"
+      ],
+      "quality_tier": "sparse_preview_review",
+      "renderable_segment_count": 3,
+      "route": "midas_binary_decoded_preview_bridge",
+      "segment_count": 3,
+      "solver_exact": false,
+      "status": "archive_decoded_preview_bridge_ready"
+    },
+    {
+      "asset_ref": "RD-013",
+      "edge_count": 0,
+      "element_count": 23,
+      "file_type": ".zip",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 24,
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "renderable_segment_count": 23,
+      "route": "midas_binary_decoded_preview_bridge",
+      "segment_count": 23,
+      "solver_exact": false,
+      "status": "archive_decoded_preview_bridge_ready"
+    },
+    {
+      "asset_ref": "RD-014",
+      "edge_count": 0,
+      "element_count": 22,
+      "file_type": ".zip",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 23,
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "renderable_segment_count": 22,
+      "route": "midas_binary_decoded_preview_bridge",
+      "segment_count": 22,
+      "solver_exact": false,
+      "status": "archive_decoded_preview_bridge_ready"
+    },
+    {
+      "asset_ref": "RD-015",
+      "edge_count": 0,
+      "element_count": 52,
+      "file_type": ".zip",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 54,
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
+      "renderable_segment_count": 52,
+      "route": "midas_binary_archive_exact_topology_promoted",
+      "segment_count": 52,
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready"
+    },
+    {
+      "asset_ref": "RD-016",
+      "edge_count": 0,
+      "element_count": 52,
+      "file_type": ".zip",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 54,
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
+      "renderable_segment_count": 52,
+      "route": "midas_binary_archive_exact_topology_promoted",
+      "segment_count": 52,
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready"
+    },
+    {
+      "asset_ref": "RD-017",
+      "edge_count": 0,
+      "element_count": 4,
+      "file_type": ".zip",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 5,
+      "quality_flags": [
+        "sparse_preview",
+        "not_solver_exact"
+      ],
+      "quality_tier": "sparse_preview_review",
+      "renderable_segment_count": 4,
+      "route": "midas_binary_decoded_preview_bridge",
+      "segment_count": 4,
+      "solver_exact": false,
+      "status": "archive_decoded_preview_bridge_ready"
+    },
+    {
+      "asset_ref": "RD-018",
+      "edge_count": 0,
+      "element_count": 44,
+      "file_type": ".zip",
+      "geometry_available": true,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 34,
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
+      "renderable_segment_count": 44,
+      "route": "midas_binary_archive_exact_topology_promoted",
+      "segment_count": 44,
+      "solver_exact": true,
+      "status": "archive_solver_graph_ready"
+    }
+  ],
+  "commercial_viewer_ready": true,
+  "contract_pass": true,
+  "full_solver_exact_ready": false,
+  "hard_blockers": [],
+  "quality_flag_counts": {
+    "not_solver_exact": 11,
+    "proxy_layout_not_true_geometry": 7,
+    "proxy_node_glyph_fallback": 1,
+    "sampled_dense_model": 1,
+    "sparse_preview": 2
+  },
+  "reason_code": "PASS_WITH_REVIEW_QUEUE",
+  "recommended_claim": "Integrated real-drawing viewer is ready for engineer-in-loop review; proxy/preview assets are labeled and are not full solver-exact replacements.",
+  "review_queue": [
+    {
+      "asset_ref": "RD-001",
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "review_id": "RQ-001"
+    },
+    {
+      "asset_ref": "RD-002",
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "review_id": "RQ-002"
+    },
+    {
+      "asset_ref": "RD-003",
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "review_id": "RQ-003"
+    },
+    {
+      "asset_ref": "RD-004",
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "review_id": "RQ-004"
+    },
+    {
+      "asset_ref": "RD-005",
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "review_id": "RQ-005"
+    },
+    {
+      "asset_ref": "RD-006",
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "review_id": "RQ-006"
+    },
+    {
+      "asset_ref": "RD-007",
+      "quality_flags": [
+        "proxy_layout_not_true_geometry",
+        "proxy_node_glyph_fallback",
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "replace node glyph fallback with edge-backed topology",
+      "review_id": "RQ-007"
+    },
+    {
+      "asset_ref": "RD-008",
+      "quality_flags": [
+        "sampled_dense_model"
+      ],
+      "quality_tier": "solver_exact_sampled_review",
+      "recommended_action": "inspect sampled dense model before using it as a full-detail design claim",
+      "review_id": "RQ-008"
+    },
+    {
+      "asset_ref": "RD-012",
+      "quality_flags": [
+        "sparse_preview",
+        "not_solver_exact"
+      ],
+      "quality_tier": "sparse_preview_review",
+      "recommended_action": "expand sparse preview into a complete solver-exact model",
+      "review_id": "RQ-009"
+    },
+    {
+      "asset_ref": "RD-013",
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "review_id": "RQ-010"
+    },
+    {
+      "asset_ref": "RD-014",
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "review_id": "RQ-011"
+    },
+    {
+      "asset_ref": "RD-017",
+      "quality_flags": [
+        "sparse_preview",
+        "not_solver_exact"
+      ],
+      "quality_tier": "sparse_preview_review",
+      "recommended_action": "expand sparse preview into a complete solver-exact model",
+      "review_id": "RQ-012"
+    }
+  ],
+  "route_counts": {
+    "ifc_to_structural_graph_adapter": 7,
+    "midas_binary_archive_exact_topology_promoted": 3,
+    "midas_binary_decoded_preview_bridge": 4,
+    "midas_mgt_direct_parser": 4
+  },
+  "schema_version": "real-drawing-viewer-quality-gate.v1",
+  "sensitive_key_findings": [],
+  "source_viewer_manifest": "implementation/phase1/commercialization_status/real_drawing_private_3d_viewer_manifest.json",
+  "status_counts": {
+    "archive_decoded_preview_bridge_ready": 4,
+    "archive_solver_graph_ready": 3,
+    "ifc_proxy_graph_ready": 7,
+    "solver_graph_ready": 4
+  },
+  "structure_viewer_href": "src/structure-viewer/index.html?preset=real_drawing_private_3d",
+  "structure_viewer_preset": "real_drawing_private_3d",
+  "summary": {
+    "asset_count": 18,
+    "duplicate_asset_ref_count": 0,
+    "hard_blocker_count": 0,
+    "proxy_or_preview_asset_count": 11,
+    "renderable_asset_count": 18,
+    "review_item_count": 22,
+    "review_queue_asset_count": 12,
+    "solver_exact_asset_count": 7
+  }
+}
