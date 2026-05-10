@@ -19,6 +19,9 @@ DEFAULT_INTAKE_QUEUE = Path("tmp/real_drawing_private_corpus/model_optimization_
 DEFAULT_OUT_HTML = Path("tmp/real_drawing_private_corpus/webviewer/real_drawing_3d_registry.html")
 DEFAULT_OUT_SUMMARY = Path("tmp/real_drawing_private_corpus/webviewer/real_drawing_3d_registry_summary.json")
 DEFAULT_OUT_VIEWER_SIDECAR = Path("src/structure-viewer/index.real_drawing_private.data.js")
+DEFAULT_SOLVER_EXACT_PROMOTION_QUEUE = Path(
+    "implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.json"
+)
 DEFAULT_MAX_SEGMENTS_PER_ASSET = 1800
 DEFAULT_MAX_PROXY_NODES = 900
 DEFAULT_MAX_PROXY_EDGES = 1800
@@ -358,18 +361,33 @@ def _summary_payload(
     *,
     out_html: Path | None,
     out_viewer_sidecar: Path | None,
+    promotion_queue_path: Path | None = None,
+    promotion_queue: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    promotion_summary = (
+        promotion_queue.get("summary")
+        if isinstance(promotion_queue, dict) and isinstance(promotion_queue.get("summary"), dict)
+        else {}
+    )
     return {
         "schema_version": registry["schema_version"],
         "surface": registry["surface"],
         "output_html": str(out_html) if out_html is not None else "",
         "output_viewer_sidecar": str(out_viewer_sidecar) if out_viewer_sidecar is not None else "",
+        "solver_exact_promotion_queue": str(promotion_queue_path) if promotion_queue_path is not None else "",
         "structure_viewer_preset": STRUCTURE_VIEWER_PRESET_KEY,
         "structure_viewer_href": STRUCTURE_VIEWER_HREF,
         "asset_count": _safe_int(registry.get("asset_count", 0)),
         "renderable_asset_count": _safe_int(registry.get("renderable_asset_count", 0)),
         "solver_exact_asset_count": _safe_int(registry.get("solver_exact_asset_count", 0)),
         "proxy_or_preview_asset_count": _safe_int(registry.get("proxy_or_preview_asset_count", 0)),
+        "solver_exact_target_asset_count": _safe_int(promotion_summary.get("target_solver_exact_asset_count", 0)),
+        "solver_exact_planned_unlock_batch_count": _safe_int(
+            promotion_summary.get("planned_unlock_batch_count", 0)
+        ),
+        "solver_exact_planned_asset_count_after_unlock_batch": _safe_int(
+            promotion_summary.get("planned_solver_exact_asset_count_after_unlock_batch", 0)
+        ),
         "route_counts": registry.get("route_counts") if isinstance(registry.get("route_counts"), dict) else {},
         "status_counts": registry.get("status_counts") if isinstance(registry.get("status_counts"), dict) else {},
         "assets": [
@@ -857,6 +875,7 @@ def build_webviewer(
     out_html: Path | None = None,
     out_summary: Path = DEFAULT_OUT_SUMMARY,
     out_viewer_sidecar: Path | None = DEFAULT_OUT_VIEWER_SIDECAR,
+    promotion_queue_path: Path | None = None,
     max_segments_per_asset: int = DEFAULT_MAX_SEGMENTS_PER_ASSET,
     max_proxy_nodes: int = DEFAULT_MAX_PROXY_NODES,
     max_proxy_edges: int = DEFAULT_MAX_PROXY_EDGES,
@@ -867,11 +886,18 @@ def build_webviewer(
         max_proxy_nodes=max_proxy_nodes,
         max_proxy_edges=max_proxy_edges,
     )
+    promotion_queue = _load_json(promotion_queue_path) if promotion_queue_path is not None else {}
     if out_html is not None:
         _write_text(out_html, _render_html(registry))
     if out_viewer_sidecar is not None:
-        write_structure_viewer_sidecar(out_viewer_sidecar, registry)
-    summary = _summary_payload(registry, out_html=out_html, out_viewer_sidecar=out_viewer_sidecar)
+        write_structure_viewer_sidecar(out_viewer_sidecar, registry, promotion_queue=promotion_queue)
+    summary = _summary_payload(
+        registry,
+        out_html=out_html,
+        out_viewer_sidecar=out_viewer_sidecar,
+        promotion_queue_path=promotion_queue_path,
+        promotion_queue=promotion_queue,
+    )
     _write_text(out_summary, json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
     return summary
 
@@ -888,6 +914,11 @@ def main() -> None:
     )
     parser.add_argument("--out-summary", default=str(DEFAULT_OUT_SUMMARY))
     parser.add_argument("--out-viewer-sidecar", default=str(DEFAULT_OUT_VIEWER_SIDECAR))
+    parser.add_argument(
+        "--promotion-queue",
+        default="",
+        help="Optional solver-exact promotion queue JSON to embed as sanitized viewer metadata.",
+    )
     parser.add_argument("--max-segments-per-asset", type=int, default=DEFAULT_MAX_SEGMENTS_PER_ASSET)
     parser.add_argument("--max-proxy-nodes", type=int, default=DEFAULT_MAX_PROXY_NODES)
     parser.add_argument("--max-proxy-edges", type=int, default=DEFAULT_MAX_PROXY_EDGES)
@@ -897,6 +928,7 @@ def main() -> None:
         out_html=Path(args.out_html) if str(args.out_html).strip() else None,
         out_summary=Path(args.out_summary),
         out_viewer_sidecar=Path(args.out_viewer_sidecar) if str(args.out_viewer_sidecar).strip() else None,
+        promotion_queue_path=Path(args.promotion_queue) if str(args.promotion_queue).strip() else None,
         max_segments_per_asset=args.max_segments_per_asset,
         max_proxy_nodes=args.max_proxy_nodes,
         max_proxy_edges=args.max_proxy_edges,

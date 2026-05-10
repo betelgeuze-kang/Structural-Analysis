@@ -51,6 +51,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert 'id="real-drawing-quality-panel"' in text
     assert "setRealDrawingQualityFilter" in text
     assert "Drawing Review Queue" in text
+    assert "Next Unlock Batch" in text
+    assert "getRealDrawingPromotionQueue" in text
+    assert "data-real-drawing-promotion-asset" in text
     assert "quality-badge--exact" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
         encoding="utf-8"
     )

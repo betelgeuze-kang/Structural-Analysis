@@ -31,6 +31,35 @@ const artifact = {
       status_counts: {solver_graph_ready: 1, ifc_proxy_graph_ready: 1},
       quality_flag_counts: {not_solver_exact: 1}
     },
+    real_drawing_solver_exact_promotion_queue: {
+      schema_version: 'fixture-promotion.v1',
+      contract_pass: true,
+      reason_code: 'PASS_PROMOTION_QUEUE_OPEN',
+      summary: {
+        current_solver_exact_asset_count: 1,
+        target_solver_exact_asset_count: 2,
+        required_solver_exact_delta: 1,
+        planned_unlock_batch_count: 1,
+        planned_unlock_batch_expected_delta: 1,
+        planned_solver_exact_asset_count_after_unlock_batch: 2,
+        promotion_candidate_count: 1,
+        promotion_delta_available: 1,
+        sufficient_unlock_batch_for_target: true,
+        family_counts: {ifc_coordinate_geometry_reconstruction: 1},
+        effort_counts: {high: 1}
+      },
+      planned_unlock_batch: [{
+        promotion_id: 'RP-001',
+        asset_ref: 'RD-002',
+        promotion_family: 'ifc_coordinate_geometry_reconstruction',
+        effort_label: 'high',
+        quality_tier: 'proxy_preview_review',
+        expected_solver_exact_delta: 1,
+        quality_flags: ['not_solver_exact'],
+        closure_evidence_required: ['proxy_layout_flag_removed'],
+        recommended_action: 'replace proxy layout with recovered structural geometry'
+      }]
+    },
     real_drawing_asset_registry: [
       {
         asset_ref: 'RD-001',
@@ -172,4 +201,9 @@ console.log(JSON.stringify({
     assert meta["real_drawing_registry_summary"]["quality_flag_counts"]["not_solver_exact"] == 1
     assert meta["real_drawing_asset_registry"][1]["asset_ref"] == "RD-002"
     assert meta["real_drawing_asset_registry"][1]["quality_flags"] == ["not_solver_exact"]
+    assert meta["real_drawing_solver_exact_promotion_queue"]["summary"]["target_solver_exact_asset_count"] == 2
+    assert meta["real_drawing_solver_exact_promotion_queue"]["planned_unlock_batch"][0]["asset_ref"] == "RD-002"
+    assert meta["real_drawing_solver_exact_promotion_queue"]["planned_unlock_batch"][0][
+        "closure_evidence_required"
+    ] == ["proxy_layout_flag_removed"]
     assert payload["catalog"][0]["raw_tokens_head"] == ["H-400x200", "SM355"]

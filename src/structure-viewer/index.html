@@ -3342,7 +3342,8 @@ async function buildModel(data,sourceMeta=null){
 const VIEWER_STATS_PANEL_KEYS=[
   'maxDcr','avgDcr','ngCount','stories','model','source','members','groups','sections',
   'realDrawingAssets','realDrawingSolverExact','realDrawingProxyPreview',
-  'realDrawingReviewQueue','realDrawingFullSolverExact',
+  'realDrawingReviewQueue','realDrawingFullSolverExact','realDrawingPromotionTarget',
+  'realDrawingPromotionUnlockBatch',
   'buildPath','surfaceLod','picking','pickMeshTriangles','pickMeshLocal','pickDeformedTriangles',
   'pickDeformedLocal','pickSurfaceFacets','pickFullBvh','pickNonSurfaceBvh','pickDenseBuckets',
   'reviewIds','loadPatterns'
@@ -3477,6 +3478,17 @@ function buildViewerStatsSummary(data){
   const realDrawingSolverExactCount=safeNumber(data?.meta?.real_drawing_solver_exact_asset_count,0);
   const realDrawingProxyPreviewCount=safeNumber(data?.meta?.real_drawing_proxy_or_preview_asset_count,0);
   const realDrawingQualitySummary=buildRealDrawingQualitySummary(data);
+  const realDrawingPromotionQueue=getRealDrawingPromotionQueue(data);
+  const realDrawingPromotionSummary=realDrawingPromotionQueue.summary&&typeof realDrawingPromotionQueue.summary==='object'
+    ?realDrawingPromotionQueue.summary
+    :{};
+  const realDrawingPromotionUnlockBatch=getRealDrawingPlannedUnlockBatch(data);
+  const realDrawingPromotionTarget=safeNumber(realDrawingPromotionSummary.target_solver_exact_asset_count,0);
+  const realDrawingPromotionAfterBatch=safeNumber(realDrawingPromotionSummary.planned_solver_exact_asset_count_after_unlock_batch,0);
+  const realDrawingPromotionUnlockBatchCount=safeNumber(
+    realDrawingPromotionSummary.planned_unlock_batch_count,
+    realDrawingPromotionUnlockBatch.length
+  );
   return{
     maxDcrValue,
     avgDcrValue,
@@ -3508,6 +3520,15 @@ function buildViewerStatsSummary(data){
     realDrawingProxyPreviewLabel:realDrawingAssetCount?String(realDrawingProxyPreviewCount):'--',
     realDrawingReviewQueueLabel:realDrawingAssetCount?String(realDrawingQualitySummary.reviewQueueCount):'--',
     realDrawingFullSolverExactLabel:realDrawingAssetCount?(realDrawingQualitySummary.fullSolverExactReady?'true':'false'):'--',
+    realDrawingPromotionTargetCount:realDrawingPromotionTarget,
+    realDrawingPromotionAfterBatchCount:realDrawingPromotionAfterBatch,
+    realDrawingPromotionUnlockBatchCount,
+    realDrawingPromotionTargetLabel:realDrawingAssetCount&&realDrawingPromotionTarget
+      ?`${realDrawingSolverExactCount}/${realDrawingPromotionTarget}`
+      :'--',
+    realDrawingPromotionUnlockBatchLabel:realDrawingPromotionUnlockBatchCount
+      ?`${realDrawingPromotionUnlockBatchCount} assets -> ${realDrawingPromotionAfterBatch||'--'} exact`
+      :'--',
   };
 }
 function buildViewerStatEntries(summary){
@@ -3557,6 +3578,18 @@ function buildViewerStatEntries(summary){
       value:summary.realDrawingFullSolverExactLabel,
       statsTone:summary.realDrawingFullSolverExactReady?'success':summary.realDrawingAssetCount?'danger':'neutral'
     },
+    realDrawingPromotionTarget:{
+      label:'Solver-Exact Target',
+      value:summary.realDrawingPromotionTargetLabel,
+      statsTone:summary.realDrawingPromotionAfterBatchCount>=summary.realDrawingPromotionTargetCount&&summary.realDrawingPromotionTargetCount>0
+        ?'success'
+        :'accent'
+    },
+    realDrawingPromotionUnlockBatch:{
+      label:'Next Unlock Batch',
+      value:summary.realDrawingPromotionUnlockBatchLabel,
+      statsTone:summary.realDrawingPromotionUnlockBatchCount>0?'accent':'neutral'
+    },
     buildPath:{label:'Build Path',value:summary.buildPathLabel},
     surfaceLod:{label:'Surface LOD',value:summary.surfaceLodLabel},
     picking:{label:'Picking',value:summary.surfacePickLabel},
@@ -3598,6 +3631,15 @@ function buildViewerStatEntries(summary){
 }
 function getRealDrawingAssetRegistry(data=modelData){
   return(Array.isArray(data?.meta?.real_drawing_asset_registry)?data.meta.real_drawing_asset_registry:[])
+    .filter(row=>row&&typeof row==='object'&&normalizeSelectionValue(row.asset_ref));
+}
+function getRealDrawingPromotionQueue(data=modelData){
+  const queue=data?.meta?.real_drawing_solver_exact_promotion_queue;
+  return queue&&typeof queue==='object'?queue:{};
+}
+function getRealDrawingPlannedUnlockBatch(data=modelData){
+  const queue=getRealDrawingPromotionQueue(data);
+  return(Array.isArray(queue.planned_unlock_batch)?queue.planned_unlock_batch:[])
     .filter(row=>row&&typeof row==='object'&&normalizeSelectionValue(row.asset_ref));
 }
 function setStatusPillTone(node,tone='success'){
@@ -3694,6 +3736,12 @@ function renderRealDrawingQualityPanel(data=modelData){
   }
   const filteredAssets=quality.assets.filter(row=>realDrawingAssetMatchesQualityFilter(row,activeRealDrawingQualityFilter));
   const reviewRows=filteredAssets.filter(isRealDrawingReviewAsset).slice(0,16);
+  const promotionQueue=getRealDrawingPromotionQueue(data);
+  const promotionSummary=promotionQueue.summary&&typeof promotionQueue.summary==='object'?promotionQueue.summary:{};
+  const plannedUnlockBatch=getRealDrawingPlannedUnlockBatch(data).slice(0,8);
+  const promotionTarget=safeNumber(promotionSummary.target_solver_exact_asset_count,0);
+  const promotionAfterBatch=safeNumber(promotionSummary.planned_solver_exact_asset_count_after_unlock_batch,0);
+  const promotionCurrent=safeNumber(promotionSummary.current_solver_exact_asset_count,quality.exactCount);
   const filterButtons=REAL_DRAWING_QUALITY_FILTERS.map(filter=>{
     const count=quality.assets.filter(row=>realDrawingAssetMatchesQualityFilter(row,filter.key)).length;
     const selected=filter.key===activeRealDrawingQualityFilter;
@@ -3717,6 +3765,34 @@ function renderRealDrawingQualityPanel(data=modelData){
         </button>`;
     }).join('')
     :'<div class="panel-placeholder">No review queue assets in the active quality filter.</div>';
+  const promotionBlock=plannedUnlockBatch.length
+    ?`
+    <section class="real-drawing-promotion-panel" data-real-drawing-promotion-target="${escapeHtml(String(promotionTarget))}">
+      <div class="real-drawing-promotion-header">
+        <span>Next Unlock Batch</span>
+        <strong>${escapeHtml(String(promotionCurrent))} -> ${escapeHtml(String(promotionAfterBatch||promotionCurrent))}/${escapeHtml(String(promotionTarget||'--'))}</strong>
+      </div>
+      <div class="real-drawing-review-list real-drawing-unlock-list" data-real-drawing-promotion-count="${escapeHtml(String(plannedUnlockBatch.length))}">
+        ${plannedUnlockBatch.map(row=>{
+          const assetRef=normalizeSelectionValue(row.asset_ref);
+          const family=normalizeSelectionValue(row.promotion_family)||'solver-exact promotion';
+          const action=normalizeSelectionValue(row.recommended_action)||family;
+          const delta=safeNumber(row.expected_solver_exact_delta,1);
+          const flags=Array.isArray(row.quality_flags)?row.quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean):[];
+          return `
+            <button type="button" class="real-drawing-review-item real-drawing-promotion-item" data-real-drawing-promotion-asset="${escapeHtml(assetRef)}">
+              <span class="quality-badge quality-badge--review">${escapeHtml(normalizeSelectionValue(row.promotion_id)||'unlock')}</span>
+              <span class="real-drawing-review-item__body">
+                <strong>${escapeHtml(assetRef)} · ${escapeHtml(family)}</strong>
+                <span>${escapeHtml(action)}</span>
+                <small>${escapeHtml(flags.join(', ')||normalizeSelectionValue(row.status)||'pending')}</small>
+              </span>
+              <span class="real-drawing-review-item__segments">+${escapeHtml(String(delta))}</span>
+            </button>`;
+        }).join('')}
+      </div>
+    </section>`
+    :'';
   panel.innerHTML=`
     <div class="real-drawing-quality-summary" data-real-drawing-quality-gate="${escapeHtml(quality.gateLabel)}">
       <div><span>Gate</span><strong>${escapeHtml(quality.gateLabel)}</strong></div>
@@ -3725,6 +3801,7 @@ function renderRealDrawingQualityPanel(data=modelData){
       <div><span>Review Queue</span><strong>${escapeHtml(String(quality.reviewQueueCount))}</strong></div>
       <div><span>Full Exact</span><strong>${quality.fullSolverExactReady?'true':'false'}</strong></div>
     </div>
+    ${promotionBlock}
     <div class="quality-filter-bar" aria-label="Real drawing quality filters">${filterButtons}</div>
     <div class="real-drawing-review-list" data-real-drawing-review-count="${escapeHtml(String(quality.reviewQueueCount))}">
       ${reviewList}
@@ -3737,6 +3814,12 @@ function renderRealDrawingQualityPanel(data=modelData){
   panel.querySelectorAll('[data-real-drawing-review-asset]').forEach(button=>{
     button.addEventListener('click',()=>{
       const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-review-asset'));
+      focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===assetRef);
+    });
+  });
+  panel.querySelectorAll('[data-real-drawing-promotion-asset]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-promotion-asset'));
       focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===assetRef);
     });
   });

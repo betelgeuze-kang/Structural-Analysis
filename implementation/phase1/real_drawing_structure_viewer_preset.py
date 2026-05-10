@@ -133,6 +133,96 @@ def registry_summary(registry: dict[str, Any], asset_rows: list[dict[str, Any]])
     }
 
 
+def _compact_count_map(value: Any) -> dict[str, int]:
+    if not isinstance(value, dict):
+        return {}
+    return {
+        str(key): _safe_int(count, 0)
+        for key, count in sorted(value.items(), key=lambda item: str(item[0]))
+        if str(key)
+    }
+
+
+def _compact_text_list(value: Any, *, limit: int = 8) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if str(item).strip()][:limit]
+
+
+def promotion_queue_summary(promotion_queue: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(promotion_queue, dict) or not promotion_queue:
+        return {}
+    source_summary = (
+        promotion_queue.get("summary") if isinstance(promotion_queue.get("summary"), dict) else {}
+    )
+    summary = {
+        "current_solver_exact_asset_count": _safe_int(source_summary.get("current_solver_exact_asset_count", 0)),
+        "target_solver_exact_asset_count": _safe_int(source_summary.get("target_solver_exact_asset_count", 0)),
+        "required_solver_exact_delta": _safe_int(source_summary.get("required_solver_exact_delta", 0)),
+        "planned_unlock_batch_count": _safe_int(source_summary.get("planned_unlock_batch_count", 0)),
+        "planned_unlock_batch_expected_delta": _safe_int(
+            source_summary.get("planned_unlock_batch_expected_delta", 0)
+        ),
+        "planned_solver_exact_asset_count_after_unlock_batch": _safe_int(
+            source_summary.get("planned_solver_exact_asset_count_after_unlock_batch", 0)
+        ),
+        "promotion_candidate_count": _safe_int(source_summary.get("promotion_candidate_count", 0)),
+        "promotion_delta_available": _safe_int(source_summary.get("promotion_delta_available", 0)),
+        "sufficient_unlock_batch_for_target": bool(source_summary.get("sufficient_unlock_batch_for_target", False)),
+        "family_counts": _compact_count_map(source_summary.get("family_counts")),
+        "effort_counts": _compact_count_map(source_summary.get("effort_counts")),
+    }
+    promotion_item_by_key: dict[str, dict[str, Any]] = {}
+    for item in promotion_queue.get("promotion_items") or []:
+        if not isinstance(item, dict):
+            continue
+        for key in (str(item.get("asset_ref") or ""), str(item.get("promotion_id") or "")):
+            if key:
+                promotion_item_by_key[key] = item
+
+    planned_unlock_batch: list[dict[str, Any]] = []
+    for item in (promotion_queue.get("planned_unlock_batch") or [])[:16]:
+        if not isinstance(item, dict):
+            continue
+        detailed_item = (
+            promotion_item_by_key.get(str(item.get("asset_ref") or ""))
+            or promotion_item_by_key.get(str(item.get("promotion_id") or ""))
+            or {}
+        )
+        source_item = {**detailed_item, **item}
+        planned_unlock_batch.append(
+            {
+                "promotion_id": str(source_item.get("promotion_id") or ""),
+                "asset_ref": str(source_item.get("asset_ref") or ""),
+                "promotion_family": str(source_item.get("promotion_family") or ""),
+                "effort_label": str(source_item.get("effort_label") or ""),
+                "quality_tier": str(source_item.get("quality_tier") or ""),
+                "file_type": str(source_item.get("file_type") or ""),
+                "route": str(source_item.get("route") or ""),
+                "status": str(source_item.get("status") or ""),
+                "priority_rank": _safe_int(source_item.get("priority_rank", 0)),
+                "expected_solver_exact_delta": _safe_int(source_item.get("expected_solver_exact_delta", 0)),
+                "node_count": _safe_int(source_item.get("node_count", 0)),
+                "element_count": _safe_int(source_item.get("element_count", 0)),
+                "segment_count": _safe_int(source_item.get("segment_count", 0)),
+                "renderable_segment_count": _safe_int(source_item.get("renderable_segment_count", 0)),
+                "quality_flags": _compact_text_list(source_item.get("quality_flags")),
+                "closure_evidence_required": _compact_text_list(source_item.get("closure_evidence_required")),
+                "recommended_action": str(source_item.get("recommended_action") or ""),
+            }
+        )
+    return {
+        "schema_version": str(promotion_queue.get("schema_version") or ""),
+        "contract_pass": bool(promotion_queue.get("contract_pass", False)),
+        "reason_code": str(promotion_queue.get("reason_code") or ""),
+        "quality_gate_reason_code": str(promotion_queue.get("quality_gate_reason_code") or ""),
+        "structure_viewer_href": str(promotion_queue.get("structure_viewer_href") or STRUCTURE_VIEWER_HREF),
+        "recommended_claim": str(promotion_queue.get("recommended_claim") or ""),
+        "summary": summary,
+        "planned_unlock_batch": planned_unlock_batch,
+    }
+
+
 def transform_point(point: Any, *, center: list[float], scale: float, offset_x: float, offset_y: float) -> list[float]:
     normalized = point if isinstance(point, list) and len(point) >= 3 else [0.0, 0.0, 0.0]
     return [
@@ -174,7 +264,11 @@ def register_viewer_node(
     return node_id
 
 
-def build_structure_viewer_preset_payload(registry: dict[str, Any]) -> dict[str, Any]:
+def build_structure_viewer_preset_payload(
+    registry: dict[str, Any],
+    *,
+    promotion_queue: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     assets = [asset for asset in (registry.get("assets") or []) if isinstance(asset, dict)]
     asset_rows = [asset_registry_row(asset) for asset in assets]
     columns = max(1, math.ceil(math.sqrt(max(len(assets), 1))))
@@ -265,6 +359,21 @@ def build_structure_viewer_preset_payload(registry: dict[str, Any]) -> dict[str,
             }
         )
 
+    meta_payload = {
+        "name": "Real Drawing Private 3D Gallery",
+        "source_label": "private real drawing derived topology",
+        "source_mode": "private_derived_topology",
+        "real_drawing_asset_count": _safe_int(registry.get("asset_count", 0)),
+        "real_drawing_renderable_asset_count": _safe_int(registry.get("renderable_asset_count", 0)),
+        "real_drawing_solver_exact_asset_count": _safe_int(registry.get("solver_exact_asset_count", 0)),
+        "real_drawing_proxy_or_preview_asset_count": _safe_int(registry.get("proxy_or_preview_asset_count", 0)),
+        "real_drawing_registry_summary": registry_summary(registry, asset_rows),
+        "real_drawing_asset_registry": asset_rows,
+    }
+    promotion_payload = promotion_queue_summary(promotion_queue)
+    if promotion_payload:
+        meta_payload["real_drawing_solver_exact_promotion_queue"] = promotion_payload
+
     root_payload = {
         "schema_version": "real-drawing-private-3d-viewer-preset.v1",
         "run_id": "real_drawing_private_3d_gallery",
@@ -273,17 +382,7 @@ def build_structure_viewer_preset_payload(registry: dict[str, Any]) -> dict[str,
             "source_family": "real_drawing_private_corpus",
             "format": "derived_segment_gallery",
         },
-        "meta": {
-            "name": "Real Drawing Private 3D Gallery",
-            "source_label": "private real drawing derived topology",
-            "source_mode": "private_derived_topology",
-            "real_drawing_asset_count": _safe_int(registry.get("asset_count", 0)),
-            "real_drawing_renderable_asset_count": _safe_int(registry.get("renderable_asset_count", 0)),
-            "real_drawing_solver_exact_asset_count": _safe_int(registry.get("solver_exact_asset_count", 0)),
-            "real_drawing_proxy_or_preview_asset_count": _safe_int(registry.get("proxy_or_preview_asset_count", 0)),
-            "real_drawing_registry_summary": registry_summary(registry, asset_rows),
-            "real_drawing_asset_registry": asset_rows,
-        },
+        "meta": meta_payload,
         "model": {
             "nodes": nodes,
             "elements": elements,
@@ -305,11 +404,20 @@ def build_structure_viewer_preset_payload(registry: dict[str, Any]) -> dict[str,
     }
 
 
-def serialize_structure_viewer_sidecar(registry: dict[str, Any]) -> str:
-    payload = build_structure_viewer_preset_payload(registry)
+def serialize_structure_viewer_sidecar(
+    registry: dict[str, Any],
+    *,
+    promotion_queue: dict[str, Any] | None = None,
+) -> str:
+    payload = build_structure_viewer_preset_payload(registry, promotion_queue=promotion_queue)
     serialized = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
     return f"window.{STRUCTURE_VIEWER_SIDECAR_GLOBAL}={serialized};\n"
 
 
-def write_structure_viewer_sidecar(path: Path, registry: dict[str, Any]) -> None:
-    _write_text(path, serialize_structure_viewer_sidecar(registry))
+def write_structure_viewer_sidecar(
+    path: Path,
+    registry: dict[str, Any],
+    *,
+    promotion_queue: dict[str, Any] | None = None,
+) -> None:
+    _write_text(path, serialize_structure_viewer_sidecar(registry, promotion_queue=promotion_queue))

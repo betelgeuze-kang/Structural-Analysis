@@ -216,6 +216,68 @@ export function buildRealDrawingRegistrySummary(rootMeta, assetRegistry) {
   };
 }
 
+function compactStringList(value, limit = 8) {
+  return (Array.isArray(value) ? value : [])
+    .map(item => normalizeSelectionValue(item))
+    .filter(Boolean)
+    .slice(0, limit);
+}
+
+export function buildRealDrawingSolverExactPromotionQueue(rootMeta) {
+  const queue = rootMeta?.real_drawing_solver_exact_promotion_queue && typeof rootMeta.real_drawing_solver_exact_promotion_queue === 'object'
+    ? rootMeta.real_drawing_solver_exact_promotion_queue
+    : {};
+  const summary = queue.summary && typeof queue.summary === 'object' ? queue.summary : {};
+  const plannedUnlockBatch = (Array.isArray(queue.planned_unlock_batch) ? queue.planned_unlock_batch : [])
+    .map(row => ({
+      promotion_id: normalizeSelectionValue(row?.promotion_id),
+      asset_ref: normalizeSelectionValue(row?.asset_ref),
+      promotion_family: normalizeSelectionValue(row?.promotion_family),
+      effort_label: normalizeSelectionValue(row?.effort_label),
+      quality_tier: normalizeSelectionValue(row?.quality_tier),
+      file_type: normalizeSelectionValue(row?.file_type),
+      route: normalizeSelectionValue(row?.route),
+      status: normalizeSelectionValue(row?.status),
+      priority_rank: safeNumber(row?.priority_rank, 0),
+      expected_solver_exact_delta: safeNumber(row?.expected_solver_exact_delta, 0),
+      node_count: safeNumber(row?.node_count, 0),
+      element_count: safeNumber(row?.element_count, 0),
+      segment_count: safeNumber(row?.segment_count, 0),
+      renderable_segment_count: safeNumber(row?.renderable_segment_count, 0),
+      quality_flags: compactStringList(row?.quality_flags),
+      closure_evidence_required: compactStringList(row?.closure_evidence_required),
+      recommended_action: normalizeSelectionValue(row?.recommended_action),
+    }))
+    .filter(row => row.asset_ref)
+    .slice(0, 32);
+  if (!Object.keys(queue).length && !plannedUnlockBatch.length) return {};
+  return {
+    schema_version: normalizeSelectionValue(queue.schema_version),
+    contract_pass: Boolean(queue.contract_pass),
+    reason_code: normalizeSelectionValue(queue.reason_code),
+    quality_gate_reason_code: normalizeSelectionValue(queue.quality_gate_reason_code),
+    structure_viewer_href: normalizeSelectionValue(queue.structure_viewer_href),
+    recommended_claim: normalizeSelectionValue(queue.recommended_claim),
+    summary: {
+      current_solver_exact_asset_count: safeNumber(summary.current_solver_exact_asset_count, 0),
+      target_solver_exact_asset_count: safeNumber(summary.target_solver_exact_asset_count, 0),
+      required_solver_exact_delta: safeNumber(summary.required_solver_exact_delta, 0),
+      planned_unlock_batch_count: safeNumber(summary.planned_unlock_batch_count, plannedUnlockBatch.length),
+      planned_unlock_batch_expected_delta: safeNumber(summary.planned_unlock_batch_expected_delta, 0),
+      planned_solver_exact_asset_count_after_unlock_batch: safeNumber(
+        summary.planned_solver_exact_asset_count_after_unlock_batch,
+        0
+      ),
+      promotion_candidate_count: safeNumber(summary.promotion_candidate_count, plannedUnlockBatch.length),
+      promotion_delta_available: safeNumber(summary.promotion_delta_available, 0),
+      sufficient_unlock_batch_for_target: Boolean(summary.sufficient_unlock_batch_for_target),
+      family_counts: summary.family_counts && typeof summary.family_counts === 'object' ? { ...summary.family_counts } : {},
+      effort_counts: summary.effort_counts && typeof summary.effort_counts === 'object' ? { ...summary.effort_counts } : {},
+    },
+    planned_unlock_batch: plannedUnlockBatch,
+  };
+}
+
 export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {}) {
   const metadata = modelPayload?.metadata && typeof modelPayload.metadata === 'object' ? modelPayload.metadata : {};
   const rootMeta = rootPayload?.meta && typeof rootPayload.meta === 'object' ? rootPayload.meta : {};
@@ -238,6 +300,7 @@ export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {})
   const groupRows = Array.isArray(metadata.groups) ? metadata.groups : [];
   const realDrawingAssetRegistry = buildRealDrawingAssetRegistry(rootMeta);
   const realDrawingRegistrySummary = buildRealDrawingRegistrySummary(rootMeta, realDrawingAssetRegistry);
+  const realDrawingSolverExactPromotionQueue = buildRealDrawingSolverExactPromotionQueue(rootMeta);
   const sectionCount = safeNumber(sectionSummary.section_row_count, Array.isArray(modelPayload?.sections) ? modelPayload.sections.length : 0);
   const usedSectionCount = safeNumber(sectionSummary.used_section_count, 0);
   const axisLabelCount =
@@ -295,6 +358,7 @@ export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {})
     real_drawing_proxy_or_preview_asset_count: realDrawingRegistrySummary.proxy_or_preview_asset_count,
     real_drawing_registry_summary: realDrawingRegistrySummary,
     real_drawing_asset_registry: realDrawingAssetRegistry,
+    real_drawing_solver_exact_promotion_queue: realDrawingSolverExactPromotionQueue,
   };
 }
 

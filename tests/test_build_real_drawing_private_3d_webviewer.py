@@ -28,6 +28,7 @@ def test_private_3d_webviewer_builds_sanitized_asset_registry(tmp_path: Path) ->
     mgt_graph = graph_dir / "solver.json"
     ifc_graph = graph_dir / "proxy.graph.json"
     queue_path = tmp_path / "model_optimization_intake_queue.json"
+    promotion_queue_path = tmp_path / "solver_exact_promotion_queue.json"
     out_html = tmp_path / "webviewer" / "real_drawing_3d_registry.html"
     out_summary = tmp_path / "webviewer" / "real_drawing_3d_registry_summary.json"
     out_sidecar = tmp_path / "structure-viewer" / "index.real_drawing_private.data.js"
@@ -96,12 +97,36 @@ def test_private_3d_webviewer_builds_sanitized_asset_registry(tmp_path: Path) ->
             ],
         },
     )
+    _write_json(
+        promotion_queue_path,
+        {
+            "contract_pass": True,
+            "summary": {
+                "current_solver_exact_asset_count": 1,
+                "target_solver_exact_asset_count": 2,
+                "required_solver_exact_delta": 1,
+                "planned_unlock_batch_count": 1,
+                "planned_solver_exact_asset_count_after_unlock_batch": 2,
+            },
+            "planned_unlock_batch": [
+                {
+                    "promotion_id": "RP-001",
+                    "asset_ref": "RD-002",
+                    "promotion_family": "ifc_coordinate_geometry_reconstruction",
+                    "expected_solver_exact_delta": 1,
+                    "recommended_action": "replace proxy layout with recovered structural geometry",
+                    "source_url": "https://SHOULD_NOT_LEAK.example/promotion",
+                }
+            ],
+        },
+    )
 
     summary = module.build_webviewer(
         intake_queue_path=queue_path,
         out_html=out_html,
         out_summary=out_summary,
         out_viewer_sidecar=out_sidecar,
+        promotion_queue_path=promotion_queue_path,
         max_segments_per_asset=20,
         max_proxy_nodes=20,
         max_proxy_edges=20,
@@ -114,6 +139,9 @@ def test_private_3d_webviewer_builds_sanitized_asset_registry(tmp_path: Path) ->
     assert summary["proxy_or_preview_asset_count"] == 1
     assert summary["structure_viewer_preset"] == "real_drawing_private_3d"
     assert summary["structure_viewer_href"] == "src/structure-viewer/index.html?preset=real_drawing_private_3d"
+    assert summary["solver_exact_promotion_queue"] == str(promotion_queue_path)
+    assert summary["solver_exact_target_asset_count"] == 2
+    assert summary["solver_exact_planned_unlock_batch_count"] == 1
     assert out_html.exists()
     assert out_summary.exists()
     assert out_sidecar.exists()
@@ -127,6 +155,8 @@ def test_private_3d_webviewer_builds_sanitized_asset_registry(tmp_path: Path) ->
     assert "window.__STRUCTURE_VIEWER_PRESET_PAYLOADS__=" in sidecar_text
     assert "real_drawing_private_3d" in sidecar_text
     assert "Real Drawing Private 3D Gallery" in sidecar_text
+    assert "real_drawing_solver_exact_promotion_queue" in sidecar_text
+    assert "RP-001" in sidecar_text
     assert "IFC proxy topology layout" in sidecar_text
     assert "private local derived topology sidecar" in sidecar_text
     for token in (

@@ -372,6 +372,10 @@
   },
   "schema_version": "real-drawing-private-3d-webviewer.v1",
   "solver_exact_asset_count": 7,
+  "solver_exact_planned_asset_count_after_unlock_batch": 10,
+  "solver_exact_planned_unlock_batch_count": 3,
+  "solver_exact_promotion_queue": "implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.json",
+  "solver_exact_target_asset_count": 10,
   "status_counts": {
     "archive_decoded_preview_bridge_ready": 4,
     "archive_solver_graph_ready": 3,

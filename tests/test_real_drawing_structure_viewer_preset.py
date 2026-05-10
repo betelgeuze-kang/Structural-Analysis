@@ -53,8 +53,46 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
             },
         ],
     }
+    promotion_queue = {
+        "schema_version": "real-drawing-solver-exact-promotion-queue.v1",
+        "contract_pass": True,
+        "reason_code": "PASS_PROMOTION_QUEUE_OPEN",
+        "summary": {
+            "current_solver_exact_asset_count": 1,
+            "target_solver_exact_asset_count": 2,
+            "required_solver_exact_delta": 1,
+            "planned_unlock_batch_count": 1,
+            "planned_unlock_batch_expected_delta": 1,
+            "planned_solver_exact_asset_count_after_unlock_batch": 2,
+            "promotion_candidate_count": 1,
+            "promotion_delta_available": 1,
+            "sufficient_unlock_batch_for_target": True,
+            "family_counts": {"ifc_coordinate_geometry_reconstruction": 1},
+            "effort_counts": {"high": 1},
+        },
+        "planned_unlock_batch": [
+            {
+                "promotion_id": "RP-001",
+                "asset_ref": "RD-002",
+                "promotion_family": "ifc_coordinate_geometry_reconstruction",
+                "expected_solver_exact_delta": 1,
+                "recommended_action": "replace proxy layout with recovered structural geometry",
+            }
+        ],
+        "promotion_items": [
+            {
+                "promotion_id": "RP-001",
+                "asset_ref": "RD-002",
+                "effort_label": "high",
+                "quality_tier": "proxy_preview_review",
+                "file_type": ".ifc",
+                "priority_rank": 40,
+                "closure_evidence_required": ["proxy_layout_flag_removed"],
+            }
+        ],
+    }
 
-    presets = build_structure_viewer_preset_payload(registry)
+    presets = build_structure_viewer_preset_payload(registry, promotion_queue=promotion_queue)
     entry = presets[STRUCTURE_VIEWER_PRESET_KEY]
     payload = entry["payload"]
     model = payload["model"]
@@ -66,6 +104,17 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
     assert payload["meta"]["real_drawing_registry_summary"]["quality_flag_counts"]["not_solver_exact"] == 1
     assert payload["meta"]["real_drawing_asset_registry"][0]["asset_ref"] == "RD-001"
     assert payload["meta"]["real_drawing_asset_registry"][1]["warning_label"] == "proxy layout"
+    assert (
+        payload["meta"]["real_drawing_solver_exact_promotion_queue"]["summary"][
+            "target_solver_exact_asset_count"
+        ]
+        == 2
+    )
+    assert payload["meta"]["real_drawing_solver_exact_promotion_queue"]["planned_unlock_batch"][0]["asset_ref"] == "RD-002"
+    assert payload["meta"]["real_drawing_solver_exact_promotion_queue"]["planned_unlock_batch"][0]["effort_label"] == "high"
+    assert payload["meta"]["real_drawing_solver_exact_promotion_queue"]["planned_unlock_batch"][0][
+        "closure_evidence_required"
+    ] == ["proxy_layout_flag_removed"]
     assert len(model["elements"]) == 3
     assert len(model["metadata"]["groups"]) == 2
     assert model["metadata"]["groups"][0]["name"] == "RD-001 · solver_topology_xyz"
@@ -98,7 +147,21 @@ def test_real_drawing_structure_viewer_sidecar_is_parseable_and_sanitized() -> N
         ],
     }
 
-    sidecar = serialize_structure_viewer_sidecar(registry)
+    sidecar = serialize_structure_viewer_sidecar(
+        registry,
+        promotion_queue={
+            "contract_pass": True,
+            "summary": {"target_solver_exact_asset_count": 2},
+            "planned_unlock_batch": [
+                {
+                    "promotion_id": "RP-001",
+                    "asset_ref": "RD-001",
+                    "source_url": "SHOULD_NOT_LEAK",
+                    "private_path": "SHOULD_NOT_LEAK",
+                }
+            ],
+        },
+    )
     assert sidecar.startswith("window.__STRUCTURE_VIEWER_PRESET_PAYLOADS__=")
     assert "SHOULD_NOT_LEAK" not in sidecar
 
@@ -110,6 +173,7 @@ def test_real_drawing_structure_viewer_sidecar_is_parseable_and_sanitized() -> N
 def test_export_real_drawing_structure_viewer_preset_is_canonical_non_html_cli_path(tmp_path: Path) -> None:
     graph_path = tmp_path / "graphs" / "solver.json"
     queue_path = tmp_path / "model_optimization_intake_queue.json"
+    promotion_queue_path = tmp_path / "solver_exact_promotion_queue.json"
     out_summary = tmp_path / "summary.json"
     out_sidecar = tmp_path / "index.real_drawing_private.data.js"
     _write_json(
@@ -137,15 +201,30 @@ def test_export_real_drawing_structure_viewer_preset_is_canonical_non_html_cli_p
             ]
         },
     )
+    _write_json(
+        promotion_queue_path,
+        {
+            "contract_pass": True,
+            "summary": {
+                "current_solver_exact_asset_count": 1,
+                "target_solver_exact_asset_count": 1,
+                "planned_unlock_batch_count": 0,
+            },
+            "planned_unlock_batch": [],
+        },
+    )
 
     summary = export_structure_viewer_preset(
         intake_queue_path=queue_path,
         out_summary=out_summary,
         out_viewer_sidecar=out_sidecar,
+        promotion_queue_path=promotion_queue_path,
     )
 
     assert summary["output_html"] == ""
     assert summary["output_viewer_sidecar"] == str(out_sidecar)
     assert summary["structure_viewer_href"] == STRUCTURE_VIEWER_HREF
+    assert summary["solver_exact_promotion_queue"] == str(promotion_queue_path)
     assert out_summary.exists()
     assert out_sidecar.exists()
+    assert "real_drawing_solver_exact_promotion_queue" in out_sidecar.read_text(encoding="utf-8")
