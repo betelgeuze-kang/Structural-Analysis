@@ -1,0 +1,405 @@
+{
+  "contract_pass": true,
+  "planned_unlock_batch": [
+    {
+      "asset_ref": "RD-013",
+      "expected_solver_exact_delta": 1,
+      "promotion_family": "archive_preview_exactness_verification",
+      "promotion_id": "RP-001",
+      "recommended_action": "verify decoded archive preview against native solver topology and flip solver_exact when topology is complete"
+    },
+    {
+      "asset_ref": "RD-014",
+      "expected_solver_exact_delta": 1,
+      "promotion_family": "archive_preview_exactness_verification",
+      "promotion_id": "RP-002",
+      "recommended_action": "verify decoded archive preview against native solver topology and flip solver_exact when topology is complete"
+    },
+    {
+      "asset_ref": "RD-012",
+      "expected_solver_exact_delta": 1,
+      "promotion_family": "archive_sparse_preview_expansion",
+      "promotion_id": "RP-003",
+      "recommended_action": "expand sparse decoded archive preview into complete solver topology before solver_exact promotion"
+    }
+  ],
+  "promotion_items": [
+    {
+      "asset_ref": "RD-013",
+      "closure_evidence_required": [
+        "native_archive_decode_manifest",
+        "node_element_count_match",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "low",
+      "element_count": 23,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".zip",
+      "node_count": 24,
+      "owner_lane": "archive_decoder_owner",
+      "priority_rank": 10,
+      "promotion_family": "archive_preview_exactness_verification",
+      "promotion_id": "RP-001",
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "verify decoded archive preview against native solver topology and flip solver_exact when topology is complete",
+      "renderable_segment_count": 23,
+      "route": "midas_binary_decoded_preview_bridge",
+      "segment_count": 23,
+      "status": "archive_decoded_preview_bridge_ready"
+    },
+    {
+      "asset_ref": "RD-014",
+      "closure_evidence_required": [
+        "native_archive_decode_manifest",
+        "node_element_count_match",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "low",
+      "element_count": 22,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".zip",
+      "node_count": 23,
+      "owner_lane": "archive_decoder_owner",
+      "priority_rank": 10,
+      "promotion_family": "archive_preview_exactness_verification",
+      "promotion_id": "RP-002",
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "verify decoded archive preview against native solver topology and flip solver_exact when topology is complete",
+      "renderable_segment_count": 22,
+      "route": "midas_binary_decoded_preview_bridge",
+      "segment_count": 22,
+      "status": "archive_decoded_preview_bridge_ready"
+    },
+    {
+      "asset_ref": "RD-012",
+      "closure_evidence_required": [
+        "expanded_archive_decode_manifest",
+        "non_sparse_segment_count_delta",
+        "solver_exact_regression_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "medium",
+      "element_count": 3,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".zip",
+      "node_count": 6,
+      "owner_lane": "archive_decoder_owner",
+      "priority_rank": 20,
+      "promotion_family": "archive_sparse_preview_expansion",
+      "promotion_id": "RP-003",
+      "quality_flags": [
+        "not_solver_exact",
+        "sparse_preview"
+      ],
+      "quality_tier": "sparse_preview_review",
+      "recommended_action": "expand sparse decoded archive preview into complete solver topology before solver_exact promotion",
+      "renderable_segment_count": 3,
+      "route": "midas_binary_decoded_preview_bridge",
+      "segment_count": 3,
+      "status": "archive_decoded_preview_bridge_ready"
+    },
+    {
+      "asset_ref": "RD-017",
+      "closure_evidence_required": [
+        "expanded_archive_decode_manifest",
+        "non_sparse_segment_count_delta",
+        "solver_exact_regression_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "medium",
+      "element_count": 4,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".zip",
+      "node_count": 5,
+      "owner_lane": "archive_decoder_owner",
+      "priority_rank": 20,
+      "promotion_family": "archive_sparse_preview_expansion",
+      "promotion_id": "RP-004",
+      "quality_flags": [
+        "not_solver_exact",
+        "sparse_preview"
+      ],
+      "quality_tier": "sparse_preview_review",
+      "recommended_action": "expand sparse decoded archive preview into complete solver topology before solver_exact promotion",
+      "renderable_segment_count": 4,
+      "route": "midas_binary_decoded_preview_bridge",
+      "segment_count": 4,
+      "status": "archive_decoded_preview_bridge_ready"
+    },
+    {
+      "asset_ref": "RD-007",
+      "closure_evidence_required": [
+        "ifc_relationship_edge_extraction_receipt",
+        "node_glyph_fallback_removed",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "medium_high",
+      "element_count": 0,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".ifc",
+      "node_count": 836,
+      "owner_lane": "ifc_geometry_owner",
+      "priority_rank": 35,
+      "promotion_family": "ifc_node_glyph_topology_rebuild",
+      "promotion_id": "RP-005",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry",
+        "proxy_node_glyph_fallback"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "rebuild IFC fallback node glyph layout into edge-backed structural topology",
+      "renderable_segment_count": 836,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 836,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-001",
+      "closure_evidence_required": [
+        "ifc_placement_coordinate_extraction_receipt",
+        "proxy_layout_flag_removed",
+        "solver_exact_or_engineer_signed_geometry_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "high",
+      "element_count": 0,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".ifc",
+      "node_count": 666,
+      "owner_lane": "ifc_geometry_owner",
+      "priority_rank": 40,
+      "promotion_family": "ifc_coordinate_geometry_reconstruction",
+      "promotion_id": "RP-006",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "renderable_segment_count": 534,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 534,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-002",
+      "closure_evidence_required": [
+        "ifc_placement_coordinate_extraction_receipt",
+        "proxy_layout_flag_removed",
+        "solver_exact_or_engineer_signed_geometry_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "high",
+      "element_count": 0,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".ifc",
+      "node_count": 81,
+      "owner_lane": "ifc_geometry_owner",
+      "priority_rank": 40,
+      "promotion_family": "ifc_coordinate_geometry_reconstruction",
+      "promotion_id": "RP-007",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "renderable_segment_count": 77,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 77,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-003",
+      "closure_evidence_required": [
+        "ifc_placement_coordinate_extraction_receipt",
+        "proxy_layout_flag_removed",
+        "solver_exact_or_engineer_signed_geometry_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "high",
+      "element_count": 0,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".ifc",
+      "node_count": 1174,
+      "owner_lane": "ifc_geometry_owner",
+      "priority_rank": 40,
+      "promotion_family": "ifc_coordinate_geometry_reconstruction",
+      "promotion_id": "RP-008",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "renderable_segment_count": 898,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 898,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-004",
+      "closure_evidence_required": [
+        "ifc_placement_coordinate_extraction_receipt",
+        "proxy_layout_flag_removed",
+        "solver_exact_or_engineer_signed_geometry_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "high",
+      "element_count": 0,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".ifc",
+      "node_count": 248,
+      "owner_lane": "ifc_geometry_owner",
+      "priority_rank": 40,
+      "promotion_family": "ifc_coordinate_geometry_reconstruction",
+      "promotion_id": "RP-009",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "renderable_segment_count": 238,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 238,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-005",
+      "closure_evidence_required": [
+        "ifc_placement_coordinate_extraction_receipt",
+        "proxy_layout_flag_removed",
+        "solver_exact_or_engineer_signed_geometry_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "high",
+      "element_count": 0,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".ifc",
+      "node_count": 6779,
+      "owner_lane": "ifc_geometry_owner",
+      "priority_rank": 40,
+      "promotion_family": "ifc_coordinate_geometry_reconstruction",
+      "promotion_id": "RP-010",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "renderable_segment_count": 898,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 898,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-006",
+      "closure_evidence_required": [
+        "ifc_placement_coordinate_extraction_receipt",
+        "proxy_layout_flag_removed",
+        "solver_exact_or_engineer_signed_geometry_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": false,
+      "effort_label": "high",
+      "element_count": 0,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".ifc",
+      "node_count": 856,
+      "owner_lane": "ifc_geometry_owner",
+      "priority_rank": 40,
+      "promotion_family": "ifc_coordinate_geometry_reconstruction",
+      "promotion_id": "RP-011",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "renderable_segment_count": 843,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 843,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-008",
+      "closure_evidence_required": [
+        "full_detail_lod_manifest",
+        "sampled_dense_model_flag_removed_or_explained",
+        "viewer_performance_regression_receipt"
+      ],
+      "closure_status": "pending",
+      "current_solver_exact": true,
+      "effort_label": "medium",
+      "element_count": 12728,
+      "expected_solver_exact_delta": 0,
+      "file_type": ".mgt",
+      "node_count": 11355,
+      "owner_lane": "viewer_performance_owner",
+      "priority_rank": 50,
+      "promotion_family": "solver_exact_lod_completion",
+      "promotion_id": "RP-012",
+      "quality_flags": [
+        "sampled_dense_model"
+      ],
+      "quality_tier": "solver_exact_sampled_review",
+      "recommended_action": "add full-detail paging or LOD evidence so sampled solver-exact asset can support full-detail claims",
+      "renderable_segment_count": 34000,
+      "route": "midas_mgt_direct_parser",
+      "segment_count": 1800,
+      "status": "solver_graph_ready"
+    }
+  ],
+  "quality_gate_reason_code": "PASS_WITH_REVIEW_QUEUE",
+  "reason_code": "PASS_PROMOTION_QUEUE_OPEN",
+  "recommended_claim": "Promote the planned unlock batch before claiming more than engineer-in-loop review readiness.",
+  "schema_version": "real-drawing-solver-exact-promotion-queue.v1",
+  "source_quality_gate": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json",
+  "structure_viewer_href": "src/structure-viewer/index.html?preset=real_drawing_private_3d",
+  "summary": {
+    "asset_count": 18,
+    "current_solver_exact_asset_count": 7,
+    "effort_counts": {
+      "high": 6,
+      "low": 2,
+      "medium": 3,
+      "medium_high": 1
+    },
+    "family_counts": {
+      "archive_preview_exactness_verification": 2,
+      "archive_sparse_preview_expansion": 2,
+      "ifc_coordinate_geometry_reconstruction": 6,
+      "ifc_node_glyph_topology_rebuild": 1,
+      "solver_exact_lod_completion": 1
+    },
+    "planned_solver_exact_asset_count_after_unlock_batch": 10,
+    "planned_unlock_batch_count": 3,
+    "planned_unlock_batch_expected_delta": 3,
+    "promotion_candidate_count": 12,
+    "promotion_delta_available": 11,
+    "required_solver_exact_delta": 3,
+    "sufficient_unlock_batch_for_target": true,
+    "target_solver_exact_asset_count": 10
+  }
+}

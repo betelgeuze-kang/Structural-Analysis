@@ -1,0 +1,372 @@
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from collections import Counter
+from pathlib import Path
+from typing import Any
+
+
+DEFAULT_QUALITY_GATE = Path("implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json")
+DEFAULT_OUT = Path("implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.json")
+DEFAULT_OUT_MD = Path("implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.md")
+DEFAULT_TARGET_SOLVER_EXACT_ASSET_COUNT = 10
+
+
+def _safe_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except Exception:
+        return default
+
+
+def _load_json(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"expected a JSON object at {path}")
+    return payload
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n", encoding="utf-8")
+
+
+def _flags(row: dict[str, Any]) -> set[str]:
+    return {str(flag) for flag in (row.get("quality_flags") or []) if str(flag)}
+
+
+def _promotion_family(row: dict[str, Any]) -> str:
+    route = str(row.get("route") or "")
+    quality_tier = str(row.get("quality_tier") or "")
+    flags = _flags(row)
+    file_type = str(row.get("file_type") or "")
+    if bool(row.get("solver_exact", False)) and "sampled_dense_model" in flags:
+        return "solver_exact_lod_completion"
+    if "proxy_node_glyph_fallback" in flags:
+        return "ifc_node_glyph_topology_rebuild"
+    if "sparse_preview" in flags:
+        return "archive_sparse_preview_expansion"
+    if route == "midas_binary_decoded_preview_bridge" and file_type == ".zip":
+        return "archive_preview_exactness_verification"
+    if "ifc_proxy" in route or "proxy_layout_not_true_geometry" in flags or quality_tier == "proxy_preview_review":
+        return "ifc_coordinate_geometry_reconstruction"
+    return "manual_solver_exact_review"
+
+
+def _family_priority(family: str) -> int:
+    return {
+        "archive_preview_exactness_verification": 10,
+        "archive_sparse_preview_expansion": 20,
+        "ifc_node_glyph_topology_rebuild": 35,
+        "ifc_coordinate_geometry_reconstruction": 40,
+        "solver_exact_lod_completion": 50,
+        "manual_solver_exact_review": 60,
+    }.get(family, 90)
+
+
+def _family_action(family: str) -> str:
+    return {
+        "archive_preview_exactness_verification": "verify decoded archive preview against native solver topology and flip solver_exact when topology is complete",
+        "archive_sparse_preview_expansion": "expand sparse decoded archive preview into complete solver topology before solver_exact promotion",
+        "ifc_node_glyph_topology_rebuild": "rebuild IFC fallback node glyph layout into edge-backed structural topology",
+        "ifc_coordinate_geometry_reconstruction": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+        "solver_exact_lod_completion": "add full-detail paging or LOD evidence so sampled solver-exact asset can support full-detail claims",
+        "manual_solver_exact_review": "perform manual engineer review and map the asset to a solver-exact conversion route",
+    }.get(family, "perform manual solver-exact promotion review")
+
+
+def _family_evidence(family: str) -> list[str]:
+    if family == "archive_preview_exactness_verification":
+        return [
+            "native_archive_decode_manifest",
+            "node_element_count_match",
+            "viewer_sidecar_rebuild_receipt",
+        ]
+    if family == "archive_sparse_preview_expansion":
+        return [
+            "expanded_archive_decode_manifest",
+            "non_sparse_segment_count_delta",
+            "solver_exact_regression_receipt",
+        ]
+    if family == "ifc_node_glyph_topology_rebuild":
+        return [
+            "ifc_relationship_edge_extraction_receipt",
+            "node_glyph_fallback_removed",
+            "viewer_sidecar_rebuild_receipt",
+        ]
+    if family == "ifc_coordinate_geometry_reconstruction":
+        return [
+            "ifc_placement_coordinate_extraction_receipt",
+            "proxy_layout_flag_removed",
+            "solver_exact_or_engineer_signed_geometry_receipt",
+        ]
+    if family == "solver_exact_lod_completion":
+        return [
+            "full_detail_lod_manifest",
+            "sampled_dense_model_flag_removed_or_explained",
+            "viewer_performance_regression_receipt",
+        ]
+    return ["manual_solver_exact_review_receipt"]
+
+
+def _promotion_delta(row: dict[str, Any], family: str) -> int:
+    if bool(row.get("solver_exact", False)):
+        return 0
+    if family in {
+        "archive_preview_exactness_verification",
+        "archive_sparse_preview_expansion",
+        "ifc_node_glyph_topology_rebuild",
+        "ifc_coordinate_geometry_reconstruction",
+        "manual_solver_exact_review",
+    }:
+        return 1
+    return 0
+
+
+def _effort_label(family: str) -> str:
+    if family == "archive_preview_exactness_verification":
+        return "low"
+    if family == "archive_sparse_preview_expansion":
+        return "medium"
+    if family == "ifc_node_glyph_topology_rebuild":
+        return "medium_high"
+    if family == "ifc_coordinate_geometry_reconstruction":
+        return "high"
+    if family == "solver_exact_lod_completion":
+        return "medium"
+    return "unknown"
+
+
+def _asset_sort_key(row: dict[str, Any]) -> tuple[int, int, str]:
+    family = str(row.get("promotion_family") or "")
+    delta_sort = 0 if _safe_int(row.get("expected_solver_exact_delta"), 0) > 0 else 1
+    return (_family_priority(family), delta_sort, str(row.get("asset_ref") or ""))
+
+
+def _promotion_item(row: dict[str, Any], index: int) -> dict[str, Any]:
+    family = _promotion_family(row)
+    return {
+        "promotion_id": f"RP-{index:03d}",
+        "asset_ref": str(row.get("asset_ref") or ""),
+        "file_type": str(row.get("file_type") or ""),
+        "route": str(row.get("route") or ""),
+        "status": str(row.get("status") or ""),
+        "quality_tier": str(row.get("quality_tier") or ""),
+        "quality_flags": sorted(_flags(row)),
+        "segment_count": _safe_int(row.get("segment_count"), 0),
+        "renderable_segment_count": _safe_int(row.get("renderable_segment_count"), 0),
+        "node_count": _safe_int(row.get("node_count"), 0),
+        "element_count": _safe_int(row.get("element_count"), 0),
+        "current_solver_exact": bool(row.get("solver_exact", False)),
+        "promotion_family": family,
+        "priority_rank": _family_priority(family),
+        "effort_label": _effort_label(family),
+        "expected_solver_exact_delta": _promotion_delta(row, family),
+        "owner_lane": (
+            "archive_decoder_owner"
+            if family.startswith("archive_")
+            else "ifc_geometry_owner"
+            if family.startswith("ifc_")
+            else "viewer_performance_owner"
+            if family == "solver_exact_lod_completion"
+            else "structural_review_owner"
+        ),
+        "recommended_action": _family_action(family),
+        "closure_evidence_required": _family_evidence(family),
+        "closure_status": "pending",
+    }
+
+
+def build_promotion_queue(
+    quality_gate_path: Path = DEFAULT_QUALITY_GATE,
+    *,
+    target_solver_exact_asset_count: int = DEFAULT_TARGET_SOLVER_EXACT_ASSET_COUNT,
+) -> dict[str, Any]:
+    if not quality_gate_path.exists():
+        return {
+            "schema_version": "real-drawing-solver-exact-promotion-queue.v1",
+            "source_quality_gate": str(quality_gate_path),
+            "contract_pass": False,
+            "reason_code": "ERR_REAL_DRAWING_QUALITY_GATE_MISSING",
+            "summary": {
+                "target_solver_exact_asset_count": int(target_solver_exact_asset_count),
+                "current_solver_exact_asset_count": 0,
+                "planned_unlock_batch_count": 0,
+                "planned_solver_exact_asset_count_after_unlock_batch": 0,
+                "promotion_candidate_count": 0,
+                "promotion_delta_available": 0,
+            },
+            "promotion_items": [],
+            "planned_unlock_batch": [],
+        }
+
+    gate = _load_json(quality_gate_path)
+    gate_summary = gate.get("summary") if isinstance(gate.get("summary"), dict) else {}
+    asset_rows = [
+        row
+        for row in (gate.get("asset_quality_rows") or [])
+        if isinstance(row, dict) and str(row.get("asset_ref") or "")
+    ]
+    current_solver_exact_count = _safe_int(gate_summary.get("solver_exact_asset_count"), 0)
+    target_solver_exact_asset_count = max(int(target_solver_exact_asset_count), current_solver_exact_count)
+    required_delta = max(0, target_solver_exact_asset_count - current_solver_exact_count)
+
+    candidate_rows = [
+        row
+        for row in asset_rows
+        if str(row.get("quality_tier") or "") != "solver_exact_ready"
+    ]
+    items = [_promotion_item(row, index) for index, row in enumerate(candidate_rows, start=1)]
+    items = sorted(items, key=_asset_sort_key)
+    for index, item in enumerate(items, start=1):
+        item["promotion_id"] = f"RP-{index:03d}"
+
+    unlock_batch: list[dict[str, Any]] = []
+    accumulated_delta = 0
+    for item in items:
+        delta = _safe_int(item.get("expected_solver_exact_delta"), 0)
+        if accumulated_delta >= required_delta:
+            break
+        if delta <= 0:
+            continue
+        unlock_batch.append(
+            {
+                "promotion_id": item["promotion_id"],
+                "asset_ref": item["asset_ref"],
+                "promotion_family": item["promotion_family"],
+                "expected_solver_exact_delta": delta,
+                "recommended_action": item["recommended_action"],
+            }
+        )
+        accumulated_delta += delta
+
+    family_counts = Counter(str(item.get("promotion_family") or "") for item in items)
+    effort_counts = Counter(str(item.get("effort_label") or "") for item in items)
+    promotion_delta_available = sum(_safe_int(item.get("expected_solver_exact_delta"), 0) for item in items)
+    planned_solver_exact_after = current_solver_exact_count + accumulated_delta
+    sufficient_unlock_batch = accumulated_delta >= required_delta
+    contract_pass = bool(gate.get("contract_pass", False)) and bool(items)
+    if not gate.get("contract_pass", False):
+        reason_code = "ERR_SOURCE_QUALITY_GATE_NOT_PASSING"
+    elif not items:
+        reason_code = "PASS_NO_PROMOTION_ITEMS"
+        contract_pass = True
+    elif not sufficient_unlock_batch:
+        reason_code = "PASS_PROMOTION_QUEUE_OPEN_TARGET_NOT_YET_COVERED"
+    else:
+        reason_code = "PASS_PROMOTION_QUEUE_OPEN"
+    return {
+        "schema_version": "real-drawing-solver-exact-promotion-queue.v1",
+        "source_quality_gate": str(quality_gate_path),
+        "contract_pass": contract_pass,
+        "reason_code": reason_code,
+        "quality_gate_reason_code": str(gate.get("reason_code") or ""),
+        "structure_viewer_href": str(gate.get("structure_viewer_href") or ""),
+        "recommended_claim": (
+            "Promote the planned unlock batch before claiming more than engineer-in-loop review readiness."
+            if items
+            else "No real drawing solver-exact promotion work is currently open."
+        ),
+        "summary": {
+            "asset_count": _safe_int(gate_summary.get("asset_count"), len(asset_rows)),
+            "current_solver_exact_asset_count": current_solver_exact_count,
+            "target_solver_exact_asset_count": target_solver_exact_asset_count,
+            "required_solver_exact_delta": required_delta,
+            "promotion_candidate_count": len(items),
+            "promotion_delta_available": promotion_delta_available,
+            "planned_unlock_batch_count": len(unlock_batch),
+            "planned_unlock_batch_expected_delta": accumulated_delta,
+            "planned_solver_exact_asset_count_after_unlock_batch": planned_solver_exact_after,
+            "sufficient_unlock_batch_for_target": sufficient_unlock_batch,
+            "family_counts": dict(sorted(family_counts.items())),
+            "effort_counts": dict(sorted(effort_counts.items())),
+        },
+        "planned_unlock_batch": unlock_batch,
+        "promotion_items": items,
+    }
+
+
+def render_markdown(report: dict[str, Any]) -> str:
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    planned = report.get("planned_unlock_batch") if isinstance(report.get("planned_unlock_batch"), list) else []
+    items = report.get("promotion_items") if isinstance(report.get("promotion_items"), list) else []
+    lines = [
+        "# Real Drawing Solver-Exact Promotion Queue",
+        "",
+        f"- Contract: {report.get('reason_code')}",
+        f"- Viewer: `{report.get('structure_viewer_href', '')}`",
+        f"- Current solver-exact assets: {summary.get('current_solver_exact_asset_count', 0)}",
+        f"- Target solver-exact assets: {summary.get('target_solver_exact_asset_count', 0)}",
+        f"- Planned unlock batch: {summary.get('planned_unlock_batch_count', 0)} assets",
+        f"- Planned solver-exact after batch: {summary.get('planned_solver_exact_asset_count_after_unlock_batch', 0)}",
+        "",
+        "## Planned Unlock Batch",
+        "",
+    ]
+    if planned:
+        lines.extend(["| ID | Asset | Family | Delta | Action |", "| --- | --- | --- | ---: | --- |"])
+        for item in planned:
+            lines.append(
+                "| {pid} | {asset} | {family} | {delta} | {action} |".format(
+                    pid=item.get("promotion_id", ""),
+                    asset=item.get("asset_ref", ""),
+                    family=item.get("promotion_family", ""),
+                    delta=item.get("expected_solver_exact_delta", 0),
+                    action=str(item.get("recommended_action", "")).replace("|", "/"),
+                )
+            )
+    else:
+        lines.append("No planned unlock batch is available.")
+    lines.extend(["", "## Full Queue", "", "| ID | Asset | Family | Effort | Delta | Flags |", "| --- | --- | --- | --- | ---: | --- |"])
+    for item in items:
+        lines.append(
+            "| {pid} | {asset} | {family} | {effort} | {delta} | {flags} |".format(
+                pid=item.get("promotion_id", ""),
+                asset=item.get("asset_ref", ""),
+                family=item.get("promotion_family", ""),
+                effort=item.get("effort_label", ""),
+                delta=item.get("expected_solver_exact_delta", 0),
+                flags=", ".join(str(flag) for flag in item.get("quality_flags", [])),
+            )
+        )
+    return "\n".join(lines)
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--quality-gate", type=Path, default=DEFAULT_QUALITY_GATE)
+    parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument("--target-solver-exact-assets", type=int, default=DEFAULT_TARGET_SOLVER_EXACT_ASSET_COUNT)
+    parser.add_argument("--json", action="store_true", help="Print the promotion queue JSON to stdout.")
+    parser.add_argument(
+        "--fail-on-uncovered-target",
+        action="store_true",
+        help="Return exit code 2 when the planned unlock batch cannot cover the target delta.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    report = build_promotion_queue(args.quality_gate, target_solver_exact_asset_count=args.target_solver_exact_assets)
+    _write_json(args.out, report)
+    _write_text(args.out_md, render_markdown(report))
+    if args.json:
+        print(json.dumps(report, ensure_ascii=True, indent=2, sort_keys=True))
+    if args.fail_on_uncovered_target and not bool(
+        report.get("summary", {}).get("sufficient_unlock_batch_for_target", False)
+    ):
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
