@@ -361,7 +361,7 @@
     }
   ],
   "full_detail_lod_manifest": "implementation/phase1/commercialization_status/real_drawing_full_detail_lod_manifest.json",
-  "output_html": "tmp/real_drawing_private_corpus/webviewer/real_drawing_3d_registry.html",
+  "output_html": "",
   "output_viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js",
   "proxy_or_preview_asset_count": 7,
   "renderable_asset_count": 18,

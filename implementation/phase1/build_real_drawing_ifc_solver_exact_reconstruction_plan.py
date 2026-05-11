@@ -294,6 +294,11 @@ def build_reconstruction_plan(
         for item in items
         if "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt" in set(item.get("attached_evidence") or [])
     )
+    solver_graph_json_npz_receipt_count = sum(
+        1
+        for item in items
+        if "solver_graph_json_npz_receipt" in set(item.get("attached_evidence") or [])
+    )
     zero_load_signature_required_count = sum(
         1
         for item in items
@@ -326,6 +331,7 @@ def build_reconstruction_plan(
             "shape_axis_receipt_count": shape_axis_receipt_count,
             "material_section_receipt_count": material_section_receipt_count,
             "load_case_receipt_count": load_case_receipt_count,
+            "solver_graph_json_npz_receipt_count": solver_graph_json_npz_receipt_count,
             "zero_load_signature_required_count": zero_load_signature_required_count,
             "blocker_family_counts": dict(sorted(blocker_counts.items())),
             "blocker_reason_counts": dict(sorted(reason_counts.items())),
@@ -349,6 +355,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Shape/axis receipts: {summary.get('shape_axis_receipt_count', 0)}",
         f"- Material/section receipts: {summary.get('material_section_receipt_count', 0)}",
         f"- Load-case receipts: {summary.get('load_case_receipt_count', 0)}",
+        f"- Solver graph JSON/NPZ receipts: {summary.get('solver_graph_json_npz_receipt_count', 0)}",
         f"- Zero-load signatures required: {summary.get('zero_load_signature_required_count', 0)}",
         "",
         "## Reconstruction Queue",

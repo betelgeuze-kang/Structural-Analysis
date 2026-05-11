@@ -1,6 +1,6 @@
 {
   "contract_pass": true,
-  "generated_at": "2026-05-11T14:17:39.115282+00:00",
+  "generated_at": "2026-05-11T14:44:56.325298+00:00",
   "ifc_reconstruction_items": [
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.report.json",
@@ -8,7 +8,8 @@
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
-        "ifc_material_section_binding_receipt"
+        "ifc_material_section_binding_receipt",
+        "solver_graph_json_npz_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -117,6 +118,30 @@
           "shape_product_coverage_ratio": 0.9939,
           "shape_product_structural_count": 657,
           "structural_entity_count": 661
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 661,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.solver_graph.json",
+          "model_node_count": 1322,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 661,
+          "structural_entity_count": 661,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "file_id": "ds3_taltech_v4_ifc",
@@ -251,11 +276,34 @@
           "shape_product_coverage_ratio": 0.9939,
           "shape_product_structural_count": 657,
           "structural_entity_count": 661
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 661,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.solver_graph.json",
+          "model_node_count": 1322,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 661,
+          "structural_entity_count": 661,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.graph.json",
@@ -288,7 +336,8 @@
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
-        "ifc_material_section_binding_receipt"
+        "ifc_material_section_binding_receipt",
+        "solver_graph_json_npz_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -379,6 +428,30 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 77,
           "structural_entity_count": 77
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 77,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.solver_graph.json",
+          "model_node_count": 154,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 77,
+          "structural_entity_count": 77,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "file_id": "a1_ifc",
@@ -494,11 +567,34 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 77,
           "structural_entity_count": 77
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 77,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.solver_graph.json",
+          "model_node_count": 154,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 77,
+          "structural_entity_count": 77,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.graph.json",
@@ -531,7 +627,8 @@
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
-        "ifc_material_section_binding_receipt"
+        "ifc_material_section_binding_receipt",
+        "solver_graph_json_npz_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -627,6 +724,30 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 1170,
           "structural_entity_count": 1170
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 1170,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.solver_graph.json",
+          "model_node_count": 2340,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 1170,
+          "structural_entity_count": 1170,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "file_id": "a3_ifc",
@@ -747,11 +868,34 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 1170,
           "structural_entity_count": 1170
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 1170,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.solver_graph.json",
+          "model_node_count": 2340,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 1170,
+          "structural_entity_count": 1170,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.graph.json",
@@ -784,7 +928,8 @@
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
-        "ifc_material_section_binding_receipt"
+        "ifc_material_section_binding_receipt",
+        "solver_graph_json_npz_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -875,6 +1020,30 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 238,
           "structural_entity_count": 238
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 238,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.solver_graph.json",
+          "model_node_count": 476,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 238,
+          "structural_entity_count": 238,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "file_id": "a4_ifc",
@@ -990,11 +1159,34 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 238,
           "structural_entity_count": 238
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 238,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.solver_graph.json",
+          "model_node_count": 476,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 238,
+          "structural_entity_count": 238,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.graph.json",
@@ -1027,7 +1219,8 @@
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
-        "ifc_material_section_binding_receipt"
+        "ifc_material_section_binding_receipt",
+        "solver_graph_json_npz_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -1121,6 +1314,30 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 6772,
           "structural_entity_count": 6772
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 6772,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.solver_graph.json",
+          "model_node_count": 13544,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 6772,
+          "structural_entity_count": 6772,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "file_id": "a5_ifc",
@@ -1239,11 +1456,34 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 6772,
           "structural_entity_count": 6772
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 6772,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.solver_graph.json",
+          "model_node_count": 13544,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 6772,
+          "structural_entity_count": 6772,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.graph.json",
@@ -1276,7 +1516,8 @@
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
-        "ifc_material_section_binding_receipt"
+        "ifc_material_section_binding_receipt",
+        "solver_graph_json_npz_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -1373,6 +1614,30 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 843,
           "structural_entity_count": 843
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 843,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.solver_graph.json",
+          "model_node_count": 1686,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 843,
+          "structural_entity_count": 843,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "file_id": "a7_ifc",
@@ -1494,11 +1759,34 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 843,
           "structural_entity_count": 843
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 843,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.solver_graph.json",
+          "model_node_count": 1686,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 843,
+          "structural_entity_count": 843,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.graph.json",
@@ -1531,7 +1819,8 @@
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
-        "ifc_material_section_binding_receipt"
+        "ifc_material_section_binding_receipt",
+        "solver_graph_json_npz_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -1621,6 +1910,30 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 829,
           "structural_entity_count": 829
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 829,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.solver_graph.json",
+          "model_node_count": 1658,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 829,
+          "structural_entity_count": 829,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "file_id": "a8_ifc",
@@ -1735,11 +2048,34 @@
           "shape_product_coverage_ratio": 1.0,
           "shape_product_structural_count": 829,
           "structural_entity_count": 829
+        },
+        "solver_graph_json_npz_receipt": {
+          "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "basis_receipts_attached": [
+            "ifc_local_placement_coordinate_extraction_receipt",
+            "ifc_representation_shape_axis_receipt",
+            "ifc_material_section_binding_receipt"
+          ],
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "element_count": 829,
+          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.solver_graph.json",
+          "model_node_count": 1658,
+          "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.solver_graph.npz",
+          "open_dependencies": [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "viewer_sidecar_rebuild_receipt"
+          ],
+          "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+          "solver_exact": false,
+          "source_structural_node_count": 829,
+          "structural_entity_count": 829,
+          "zero_load_substitution_requires_engineer_signature": true
         }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.graph.json",
@@ -1790,6 +2126,7 @@
     "relationship_coverage_gap_count": 0,
     "shape_axis_receipt_count": 7,
     "solver_exact_ready_count": 0,
+    "solver_graph_json_npz_receipt_count": 7,
     "structural_entity_count_total": 10590,
     "zero_load_signature_required_count": 7
   }

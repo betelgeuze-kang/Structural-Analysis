@@ -18,6 +18,7 @@ DEFAULT_REDACTED_MANIFEST = Path("tmp/real_drawing_private_corpus/redacted_manif
 DEFAULT_OUT_DIR = Path("tmp/real_drawing_private_corpus/ifc_adapter")
 ADAPTER_SCHEMA_VERSION = "real-drawing-ifc-structural-proxy-graph.v1"
 ADAPTER_MODE = "entity_proxy_graph"
+SOLVER_GRAPH_SCHEMA_VERSION = "real-drawing-ifc-solver-graph-draft.v1"
 AGGREGATE_RELATIONSHIP = "aggregates_decomposition"
 CONTAINED_RELATIONSHIP = "contained_in_spatial_structure"
 
@@ -406,6 +407,229 @@ def _placement_bounds(points: list[list[float]]) -> dict[str, list[float]]:
         "min": _round_point([min(point[index] for point in points) for index in range(3)]),
         "max": _round_point([max(point[index] for point in points) for index in range(3)]),
     }
+
+
+def _node_xyz(node: dict[str, Any]) -> list[float] | None:
+    try:
+        return [float(node["x"]), float(node["y"]), float(node["z"])]
+    except Exception:
+        return None
+
+
+def _axis_marker_direction(ifc_entity_type: str) -> list[float]:
+    entity_type = str(ifc_entity_type or "").upper()
+    if entity_type in {"IFCCOLUMN", "IFCPILE"}:
+        return [0.0, 0.0, 1.0]
+    if entity_type in {"IFCWALL", "IFCWALLSTANDARDCASE"}:
+        return [0.0, 1.0, 0.0]
+    return [1.0, 0.0, 0.0]
+
+
+def _axis_marker_length(points: list[list[float]]) -> float:
+    if len(points) < 2:
+        return 1.0
+    bounds = _placement_bounds(points)
+    min_point = bounds.get("min") or [0.0, 0.0, 0.0]
+    max_point = bounds.get("max") or [0.0, 0.0, 0.0]
+    diagonal = math.sqrt(sum((float(max_point[index]) - float(min_point[index])) ** 2 for index in range(3)))
+    if diagonal <= 1e-9:
+        return 1.0
+    return round(max(0.5, min(6.0, diagonal * 0.015)), 6)
+
+
+def _family_for_ifc_entity_type(ifc_entity_type: str) -> str:
+    entity_type = str(ifc_entity_type or "").upper()
+    if entity_type in {"IFCCOLUMN", "IFCPILE"}:
+        return "vertical_member"
+    if entity_type in {"IFCBEAM", "IFCMEMBER"}:
+        return "linear_member"
+    if entity_type in {"IFCSLAB", "IFCPLATE", "IFCFOOTING"}:
+        return "surface_member"
+    if entity_type in {"IFCWALL", "IFCWALLSTANDARDCASE"}:
+        return "wall_member"
+    return "structural_member"
+
+
+def _solver_artifact_receipt(
+    *,
+    graph: dict[str, Any],
+    model_node_count: int,
+    element_count: int,
+    source_structural_node_count: int,
+    json_path: Path,
+    npz_path: Path,
+) -> dict[str, Any]:
+    receipts = graph.get("evidence_receipts") if isinstance(graph.get("evidence_receipts"), dict) else {}
+    basis_receipt_ids = [
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+    ]
+    attached_basis = [
+        receipt_id
+        for receipt_id in basis_receipt_ids
+        if bool(receipts.get(receipt_id, {}).get("contract_pass", False))
+    ]
+    load_receipt = receipts.get("ifc_load_case_extraction_or_engineer_signed_zero_load_receipt", {})
+    load_pass = bool(load_receipt.get("contract_pass", False))
+    contract_pass = (
+        len(attached_basis) == len(basis_receipt_ids)
+        and model_node_count > 0
+        and element_count > 0
+    )
+    open_dependencies: list[str] = []
+    if not load_pass:
+        open_dependencies.append("ifc_load_case_extraction_or_engineer_signed_zero_load_receipt")
+    open_dependencies.append("viewer_sidecar_rebuild_receipt")
+    return {
+        "contract_pass": contract_pass,
+        "reason_code": (
+            "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED"
+            if contract_pass
+            else "ERR_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_INCOMPLETE"
+        ),
+        "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+        "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+        "solver_exact": False,
+        "commercial_claim_blocked": True,
+        "json_path": str(json_path),
+        "npz_path": str(npz_path),
+        "model_node_count": model_node_count,
+        "element_count": element_count,
+        "source_structural_node_count": source_structural_node_count,
+        "structural_entity_count": int(graph.get("metrics", {}).get("structural_entity_count", 0) or 0),
+        "basis_receipts_attached": attached_basis,
+        "open_dependencies": open_dependencies,
+        "zero_load_substitution_requires_engineer_signature": bool(
+            load_receipt.get("zero_load_substitution_requires_engineer_signature", False)
+        ),
+    }
+
+
+def _write_solver_graph_artifacts(
+    *,
+    graph: dict[str, Any],
+    json_path: Path,
+    npz_path: Path,
+) -> dict[str, Any]:
+    import numpy as np
+
+    source_nodes = [
+        node
+        for node in graph.get("nodes", [])
+        if isinstance(node, dict)
+        and node.get("proxy_node_kind") == "structural_element"
+        and _node_xyz(node) is not None
+    ]
+    points = [_node_xyz(node) for node in source_nodes]
+    clean_points = [point for point in points if point is not None]
+    marker_length = _axis_marker_length(clean_points)
+    model_nodes: list[dict[str, Any]] = []
+    elements: list[dict[str, Any]] = []
+    node_index_by_id: dict[str, int] = {}
+    element_node_indices: list[list[int]] = []
+
+    for source_node in source_nodes:
+        origin = _node_xyz(source_node)
+        if origin is None:
+            continue
+        source_ifc_id = str(source_node.get("id") or "")
+        entity_type = str(source_node.get("ifc_entity_type") or "")
+        base_id = source_ifc_id.lstrip("#") or str(len(elements) + 1)
+        direction = _axis_marker_direction(entity_type)
+        end = _round_point(
+            [
+                origin[index] + direction[index] * marker_length
+                for index in range(3)
+            ]
+        )
+        start_id = f"ifc:{base_id}:i"
+        end_id = f"ifc:{base_id}:j"
+        start_node = {
+            "id": start_id,
+            "x": origin[0],
+            "y": origin[1],
+            "z": origin[2],
+            "source_ifc_id": source_ifc_id,
+        }
+        end_node = {
+            "id": end_id,
+            "x": end[0],
+            "y": end[1],
+            "z": end[2],
+            "source_ifc_id": source_ifc_id,
+        }
+        node_index_by_id[start_id] = len(model_nodes)
+        model_nodes.append(start_node)
+        node_index_by_id[end_id] = len(model_nodes)
+        model_nodes.append(end_node)
+        element = {
+            "id": f"ifc:{base_id}",
+            "node_ids": [start_id, end_id],
+            "ifc_entity_id": source_ifc_id,
+            "ifc_entity_type": entity_type,
+            "family": _family_for_ifc_entity_type(entity_type),
+            "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+        }
+        if source_node.get("material_binding_source"):
+            element["material_binding_source"] = source_node.get("material_binding_source")
+        if source_node.get("section_source"):
+            element["section_source"] = source_node.get("section_source")
+        elements.append(element)
+        element_node_indices.append([node_index_by_id[start_id], node_index_by_id[end_id]])
+
+    receipt = _solver_artifact_receipt(
+        graph=graph,
+        model_node_count=len(model_nodes),
+        element_count=len(elements),
+        source_structural_node_count=len(source_nodes),
+        json_path=json_path,
+        npz_path=npz_path,
+    )
+    payload = {
+        "schema_version": SOLVER_GRAPH_SCHEMA_VERSION,
+        "generated_at": graph.get("generated_at"),
+        "contract_pass": bool(receipt.get("contract_pass", False)),
+        "reason_code": receipt.get("reason_code"),
+        "source": graph.get("source", {}),
+        "adapter_mode": ADAPTER_MODE,
+        "solver_exact": False,
+        "commercial_claim_blocked": True,
+        "model": {
+            "units": {"length": "ifc_model_units_unscaled"},
+            "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+            "nodes": model_nodes,
+            "elements": elements,
+        },
+        "metrics": {
+            "model_node_count": len(model_nodes),
+            "element_count": len(elements),
+            "source_structural_node_count": len(source_nodes),
+            "axis_marker_length": marker_length,
+        },
+        "evidence_receipts": {"solver_graph_json_npz_receipt": receipt},
+        "limitations": [
+            "IFC placement-origin axis markers are emitted for downstream topology receipts.",
+            "Member extents, meshing, boundary conditions, and loads are not asserted as solver-exact.",
+        ],
+    }
+    _write_json(json_path, payload)
+    npz_path.parent.mkdir(parents=True, exist_ok=True)
+    node_ids = [str(node["id"]) for node in model_nodes]
+    element_ids = [str(element["id"]) for element in elements]
+    np.savez_compressed(
+        npz_path,
+        node_ids=np.asarray(node_ids, dtype=str),
+        node_xyz=np.asarray(
+            [[float(node["x"]), float(node["y"]), float(node["z"])] for node in model_nodes],
+            dtype=np.float64,
+        ).reshape((-1, 3)),
+        element_ids=np.asarray(element_ids, dtype=str),
+        element_node_indices=np.asarray(element_node_indices, dtype=np.int64).reshape((-1, 2)),
+        element_family=np.asarray([str(element["family"]) for element in elements], dtype=str),
+        source_ifc_ids=np.asarray([str(element["ifc_entity_id"]) for element in elements], dtype=str),
+    )
+    return receipt
 
 
 def _placement_receipt(
@@ -972,6 +1196,8 @@ def convert_ifc_corpus(
         stem = _safe_report_stem(file_id, file_name)
         report_path = out_dir / f"{stem}.report.json"
         graph_path = out_dir / f"{stem}.graph.json"
+        solver_graph_path = out_dir / f"{stem}.solver_graph.json"
+        solver_npz_path = out_dir / f"{stem}.solver_graph.npz"
         source = _release_safe_source(project, file_row)
         if not private_entry:
             report = {
@@ -1003,6 +1229,16 @@ def convert_ifc_corpus(
                     "source": source,
                     **parse_ifc_proxy_graph(raw_path),
                 }
+                solver_receipt = _write_solver_graph_artifacts(
+                    graph=graph,
+                    json_path=solver_graph_path,
+                    npz_path=solver_npz_path,
+                )
+                graph.setdefault("evidence_receipts", {})["solver_graph_json_npz_receipt"] = solver_receipt
+                graph["solver_graph_artifacts"] = {
+                    "solver_graph_json": str(solver_graph_path),
+                    "solver_graph_npz": str(solver_npz_path),
+                }
                 _write_json(graph_path, graph)
                 metrics = graph["metrics"]
                 report = {
@@ -1013,6 +1249,8 @@ def convert_ifc_corpus(
                     "adapter_mode": ADAPTER_MODE,
                     "source": source,
                     "graph_json": str(graph_path),
+                    "solver_graph_json": str(solver_graph_path),
+                    "solver_graph_npz": str(solver_npz_path),
                     "metrics": metrics,
                     "entity_counts": graph["entity_counts"],
                     "evidence_receipts": graph.get("evidence_receipts", {}),
@@ -1065,6 +1303,33 @@ def convert_ifc_corpus(
                 .get("contract_pass", False)
             )
         ),
+        "solver_graph_json_npz_receipt_count": sum(
+            1
+            for report in ready_reports
+            if bool(
+                report.get("evidence_receipts", {})
+                .get("solver_graph_json_npz_receipt", {})
+                .get("contract_pass", False)
+            )
+        ),
+        "solver_graph_model_node_count_total": sum(
+            int(
+                report.get("evidence_receipts", {})
+                .get("solver_graph_json_npz_receipt", {})
+                .get("model_node_count", 0)
+                or 0
+            )
+            for report in ready_reports
+        ),
+        "solver_graph_element_count_total": sum(
+            int(
+                report.get("evidence_receipts", {})
+                .get("solver_graph_json_npz_receipt", {})
+                .get("element_count", 0)
+                or 0
+            )
+            for report in ready_reports
+        ),
         "load_case_receipt_count": sum(
             1
             for report in ready_reports
@@ -1102,6 +1367,8 @@ def convert_ifc_corpus(
                 "reason_code": str(report.get("reason_code", "") or ""),
                 "report_json": report["report_json"],
                 "graph_json": str(report.get("graph_json", "") or ""),
+                "solver_graph_json": str(report.get("solver_graph_json", "") or ""),
+                "solver_graph_npz": str(report.get("solver_graph_npz", "") or ""),
                 "adapter_mode": ADAPTER_MODE,
                 "solver_exact": False,
                 "metrics": report.get("metrics", {}),

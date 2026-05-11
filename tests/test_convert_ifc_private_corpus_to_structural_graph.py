@@ -6,6 +6,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import numpy as np
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 IFC_SCRIPT = REPO_ROOT / "implementation/phase1/convert_ifc_private_corpus_to_structural_graph.py"
@@ -59,10 +61,34 @@ FILE_SCHEMA(('IFC2X3'));
 ENDSEC;
 DATA;
 #10= IFCBUILDINGSTOREY('storey-guid',$,'Level 1',$,$,$,$,$,$);
-#20= IFCCOLUMN('column-guid',$,'C1',$,$,$,$,$);
-#21= IFCBEAM('beam-guid',$,'B1',$,$,$,$,$);
-#22= IFCSLAB('slab-guid',$,'S1',$,$,$,$,$);
+#11= IFCCARTESIANPOINT((0.,0.,0.));
+#12= IFCAXIS2PLACEMENT3D(#11,$,$);
+#13= IFCLOCALPLACEMENT($,#12);
+#14= IFCCARTESIANPOINT((4.,0.,0.));
+#15= IFCAXIS2PLACEMENT3D(#14,$,$);
+#16= IFCLOCALPLACEMENT($,#15);
+#17= IFCCARTESIANPOINT((0.,4.,0.));
+#18= IFCAXIS2PLACEMENT3D(#17,$,$);
+#19= IFCLOCALPLACEMENT($,#18);
+#20= IFCCOLUMN('column-guid',$,'C1',$,$,#13,#40,$);
+#21= IFCBEAM('beam-guid',$,'B1',$,$,#16,#43,$);
+#22= IFCSLAB('slab-guid',$,'S1',$,$,#19,#46,$);
 #30= IFCRELCONTAINEDINSPATIALSTRUCTURE('rel-guid',$,$,$,(#20,#21,#22),#10);
+#40= IFCPRODUCTDEFINITIONSHAPE($,$,(#41));
+#41= IFCSHAPEREPRESENTATION($,'Body','SweptSolid',(#42));
+#42= IFCEXTRUDEDAREASOLID(#50,$,$,3.);
+#43= IFCPRODUCTDEFINITIONSHAPE($,$,(#44));
+#44= IFCSHAPEREPRESENTATION($,'Body','SweptSolid',(#45));
+#45= IFCEXTRUDEDAREASOLID(#50,$,$,4.);
+#46= IFCPRODUCTDEFINITIONSHAPE($,$,(#47));
+#47= IFCSHAPEREPRESENTATION($,'Body','SweptSolid',(#48));
+#48= IFCEXTRUDEDAREASOLID(#50,$,$,0.25);
+#50= IFCRECTANGLEPROFILEDEF(.AREA.,$,$,1.,2.);
+#51= IFCMATERIAL('Concrete');
+#52= IFCMATERIALLAYER(#51,250.,$);
+#53= IFCMATERIALLAYERSET((#52),'LayerSet');
+#54= IFCMATERIALLAYERSETUSAGE(#53,.AXIS2.,.POSITIVE.,0.);
+#55= IFCRELASSOCIATESMATERIAL('mat-guid',$,$,$,(#20,#21,#22),#54);
 ENDSEC;
 END-ISO-10303-21;
 """,
@@ -93,6 +119,9 @@ END-ISO-10303-21;
     )
 
     assert proc.returncode == 0, proc.stderr
+    manifest = json.loads(proc.stdout)
+    assert manifest["summary"]["solver_graph_json_npz_receipt_count"] == 1
+    assert manifest["summary"]["solver_graph_element_count_total"] == 3
     report_text = (out_dir / "fixture_ifc.report.json").read_text(encoding="utf-8")
     graph = json.loads((out_dir / "fixture_ifc.graph.json").read_text(encoding="utf-8"))
     report = json.loads(report_text)
@@ -102,11 +131,28 @@ END-ISO-10303-21;
     assert report["contract_pass"] is True
     assert report["solver_exact"] is False
     assert "material/section binding" in report["readiness_note"]
+    assert report["solver_graph_json"] == str(out_dir / "fixture_ifc.solver_graph.json")
+    assert report["solver_graph_npz"] == str(out_dir / "fixture_ifc.solver_graph.npz")
     assert report["metrics"]["structural_entity_count"] == 3
     assert report["entity_counts"]["IFCBUILDINGSTOREY"] == 1
     assert report["entity_counts"]["IFCCOLUMN"] == 1
     assert graph["metrics"]["proxy_node_count"] == 4
     assert graph["metrics"]["proxy_edge_count"] == 3
+    solver_receipt = report["evidence_receipts"]["solver_graph_json_npz_receipt"]
+    assert solver_receipt["contract_pass"] is True
+    assert solver_receipt["solver_exact"] is False
+    assert solver_receipt["reason_code"] == "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED"
+    assert solver_receipt["geometry_scope"] == "placement_origin_axis_marker_not_member_extents"
+    assert solver_receipt["element_count"] == 3
+    assert "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt" in solver_receipt["open_dependencies"]
+    solver_payload = json.loads((out_dir / "fixture_ifc.solver_graph.json").read_text(encoding="utf-8"))
+    assert solver_payload["solver_exact"] is False
+    assert solver_payload["model"]["geometry_scope"] == "placement_origin_axis_marker_not_member_extents"
+    assert len(solver_payload["model"]["nodes"]) == 6
+    assert len(solver_payload["model"]["elements"]) == 3
+    with np.load(out_dir / "fixture_ifc.solver_graph.npz") as dataset:
+        assert dataset["node_xyz"].shape == (6, 3)
+        assert dataset["element_node_indices"].shape == (3, 2)
     load_receipt = graph["evidence_receipts"]["ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"]
     assert load_receipt["contract_pass"] is False
     assert load_receipt["reason_code"] == "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED"
