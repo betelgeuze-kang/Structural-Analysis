@@ -8,6 +8,8 @@
 - Local placement receipts: 7
 - Shape/axis receipts: 7
 - Material/section receipts: 7
+- Load-case receipts: 0
+- Zero-load signatures required: 7
 
 ## Reconstruction Queue
 

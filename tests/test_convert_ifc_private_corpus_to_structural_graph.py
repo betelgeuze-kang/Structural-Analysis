@@ -107,6 +107,10 @@ END-ISO-10303-21;
     assert report["entity_counts"]["IFCCOLUMN"] == 1
     assert graph["metrics"]["proxy_node_count"] == 4
     assert graph["metrics"]["proxy_edge_count"] == 3
+    load_receipt = graph["evidence_receipts"]["ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"]
+    assert load_receipt["contract_pass"] is False
+    assert load_receipt["reason_code"] == "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED"
+    assert load_receipt["zero_load_substitution_requires_engineer_signature"] is True
 
 
 def test_ifc_adapter_uses_release_safe_aggregate_group_edges(tmp_path: Path) -> None:
@@ -145,6 +149,11 @@ DATA;
 #29= IFCRELASSOCIATESMATERIAL('mat-column',$,$,$,(#20),#27);
 #30= IFCRELASSOCIATESMATERIAL('mat-beam',$,$,$,(#21),#28);
 #40= IFCRELAGGREGATES('rel-guid',$,$,$,#5,(#20,#21));
+#50= IFCSTRUCTURALLOADGROUP('load-case-guid',$,'DL',$,$,.LOAD_CASE.,.ACTION.,$);
+#51= IFCSTRUCTURALLOADLINEARFORCE('dead-line',0.,0.,-10.,0.,0.,0.);
+#52= IFCSTRUCTURALCURVEACTION('action-guid',$,'Dead line',$,$,$,$,.CONST.,.GLOBAL_COORDS.,#51);
+#53= IFCRELCONNECTSSTRUCTURALACTIVITY('activity-guid',$,$,$,#20,#52);
+#54= IFCRELASSIGNSTOGROUP('assign-guid',$,$,$,(#52),$,#50);
 ENDSEC;
 END-ISO-10303-21;
 """,
@@ -165,6 +174,10 @@ END-ISO-10303-21;
     assert payload["metrics"]["axis_representation_structural_count"] == 1
     assert payload["metrics"]["material_bound_structural_count"] == 2
     assert payload["metrics"]["section_source_structural_count"] == 2
+    assert payload["metrics"]["load_related_record_count"] == 5
+    assert payload["metrics"]["load_case_group_count"] == 1
+    assert payload["metrics"]["structural_load_count"] == 1
+    assert payload["metrics"]["structural_action_count"] == 1
     assert payload["evidence_receipts"]["ifc_local_placement_coordinate_extraction_receipt"]["contract_pass"] is True
     representation_receipt = payload["evidence_receipts"]["ifc_representation_shape_axis_receipt"]
     assert representation_receipt["contract_pass"] is True
@@ -187,6 +200,15 @@ END-ISO-10303-21;
         "IFCMATERIALLAYERSETUSAGE": 1,
         "IFCRECTANGLEPROFILEDEF": 2,
     }
+    load_receipt = payload["evidence_receipts"]["ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"]
+    assert load_receipt["contract_pass"] is True
+    assert load_receipt["reason_code"] == "PASS_IFC_LOAD_CASES_EXTRACTED"
+    assert load_receipt["load_case_group_count"] == 1
+    assert load_receipt["structural_load_count"] == 1
+    assert load_receipt["structural_action_count"] == 1
+    assert load_receipt["connected_structural_action_count"] == 1
+    assert load_receipt["load_group_assignment_count"] == 1
+    assert load_receipt["zero_load_substitution_requires_engineer_signature"] is False
     assert payload["proxy_relationship_counts"] == {"aggregates_decomposition": 2}
     assert "release_safe_aggregate_group_edges" in payload["relationship_extraction_modes"]
     assert next(node for node in payload["nodes"] if node["id"] == "#20")["x"] == 10.0

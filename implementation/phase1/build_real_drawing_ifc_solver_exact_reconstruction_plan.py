@@ -235,6 +235,11 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
             for evidence_id in attached_evidence
             if evidence_id in receipts
         },
+        "observed_evidence_receipts": {
+            evidence_id: receipts[evidence_id]
+            for evidence_id in required_evidence
+            if evidence_id in receipts
+        },
         "reconstruction_steps": _reconstruction_steps(blocker_family),
         "commercialization_recommendation": (
             "Keep this asset in proxy_preview_review until placement, shape, section/material, load, "
@@ -284,6 +289,20 @@ def build_reconstruction_plan(
         for item in items
         if "ifc_material_section_binding_receipt" in set(item.get("attached_evidence") or [])
     )
+    load_case_receipt_count = sum(
+        1
+        for item in items
+        if "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt" in set(item.get("attached_evidence") or [])
+    )
+    zero_load_signature_required_count = sum(
+        1
+        for item in items
+        if bool(
+            item.get("observed_evidence_receipts", {})
+            .get("ifc_load_case_extraction_or_engineer_signed_zero_load_receipt", {})
+            .get("zero_load_substitution_requires_engineer_signature", False)
+        )
+    )
     return {
         "schema_version": "real-drawing-ifc-solver-exact-reconstruction-plan.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -306,6 +325,8 @@ def build_reconstruction_plan(
             "local_placement_receipt_count": local_placement_receipt_count,
             "shape_axis_receipt_count": shape_axis_receipt_count,
             "material_section_receipt_count": material_section_receipt_count,
+            "load_case_receipt_count": load_case_receipt_count,
+            "zero_load_signature_required_count": zero_load_signature_required_count,
             "blocker_family_counts": dict(sorted(blocker_counts.items())),
             "blocker_reason_counts": dict(sorted(reason_counts.items())),
         },
@@ -327,6 +348,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Local placement receipts: {summary.get('local_placement_receipt_count', 0)}",
         f"- Shape/axis receipts: {summary.get('shape_axis_receipt_count', 0)}",
         f"- Material/section receipts: {summary.get('material_section_receipt_count', 0)}",
+        f"- Load-case receipts: {summary.get('load_case_receipt_count', 0)}",
+        f"- Zero-load signatures required: {summary.get('zero_load_signature_required_count', 0)}",
         "",
         "## Reconstruction Queue",
         "",

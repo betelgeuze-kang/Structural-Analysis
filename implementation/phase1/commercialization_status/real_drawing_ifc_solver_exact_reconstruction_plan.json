@@ -1,6 +1,6 @@
 {
   "contract_pass": true,
-  "generated_at": "2026-05-11T14:02:02.595978+00:00",
+  "generated_at": "2026-05-11T14:17:39.115282+00:00",
   "ifc_reconstruction_items": [
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.report.json",
@@ -131,6 +131,127 @@
         ],
         "storey_count": 5,
         "structural_entity_count": 661
+      },
+      "observed_evidence_receipts": {
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt": {
+          "connected_structural_action_count": 0,
+          "contract_pass": false,
+          "engineer_zero_load_signature_attached": false,
+          "load_case_group_count": 0,
+          "load_group_assignment_count": 0,
+          "load_group_count": 0,
+          "load_related_entity_type_counts": {},
+          "load_related_record_count": 0,
+          "load_scope": "release_safe_ifc_structural_load_inventory",
+          "reason_code": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+          "structural_action_count": 0,
+          "structural_entity_count": 661,
+          "structural_load_count": 0,
+          "zero_load_attestation_scope": "not_attested",
+          "zero_load_substitution_requires_engineer_signature": true
+        },
+        "ifc_local_placement_coordinate_extraction_receipt": {
+          "contract_pass": true,
+          "coordinate_scope": "release_safe_product_origin",
+          "coordinate_units": "ifc_model_units_unscaled",
+          "placement_bounds": {
+            "max": [
+              24.33252,
+              56.167475,
+              -12.384992
+            ],
+            "min": [
+              -25.046878,
+              -23.503741,
+              -34.249992
+            ]
+          },
+          "placement_coordinate_node_count": 674,
+          "placement_coordinate_structural_count": 661,
+          "placement_coverage_ratio": 1.0,
+          "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 661
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 1515,
+          "material_binding_coverage_ratio": 0.9939,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 657,
+          "material_direct_structural_count": 369,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 166,
+            "IFCMATERIALCONSTITUENT": 699,
+            "IFCMATERIALCONSTITUENTSET": 285,
+            "IFCMATERIALLAYER": 271,
+            "IFCMATERIALLAYERSET": 111,
+            "IFCMATERIALLAYERSETUSAGE": 1082,
+            "IFCMATERIALPROFILE": 61,
+            "IFCMATERIALPROFILESET": 22
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 26,
+            "IFCMATERIALCONSTITUENTSET": 285,
+            "IFCMATERIALLAYERSET": 100,
+            "IFCMATERIALLAYERSETUSAGE": 1082,
+            "IFCMATERIALPROFILESET": 22
+          },
+          "material_type_structural_count": 622,
+          "missing_material_binding_count": 4,
+          "missing_section_source_count": 6,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9909,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 655,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 130,
+            "IFCMATERIALCONSTITUENT": 699,
+            "IFCMATERIALCONSTITUENTSET": 285,
+            "IFCMATERIALLAYER": 271,
+            "IFCMATERIALLAYERSET": 111,
+            "IFCMATERIALLAYERSETUSAGE": 1082,
+            "IFCMATERIALPROFILE": 61,
+            "IFCMATERIALPROFILESET": 22,
+            "IFCRECTANGLEPROFILEDEF": 483
+          },
+          "structural_entity_count": 661
+        },
+        "ifc_representation_shape_axis_receipt": {
+          "axis_representation_coverage_ratio": 0.6384,
+          "axis_representation_structural_count": 422,
+          "body_representation_coverage_ratio": 0.9939,
+          "body_representation_structural_count": 657,
+          "contract_pass": true,
+          "geometry_item_type_counts": {
+            "IFCADVANCEDBREP": 91,
+            "IFCBOOLEANCLIPPINGRESULT": 72,
+            "IFCBOOLEANRESULT": 3,
+            "IFCEXTRUDEDAREASOLID": 289,
+            "IFCFACETEDBREP": 8,
+            "IFCMAPPEDITEM": 202,
+            "IFCPOLYLINE": 420
+          },
+          "missing_shape_product_count": 4,
+          "reason_code": "PASS_IFC_REPRESENTATION_SHAPE_AXIS_EXTRACTED",
+          "representation_identifier_counts": {
+            "Axis": 398,
+            "Body": 657,
+            "FootPrint": 26
+          },
+          "representation_scope": "release_safe_shape_axis_inventory",
+          "representation_type_counts": {
+            "AdvancedBrep": 87,
+            "Brep": 8,
+            "Clipping": 64,
+            "Curve2D": 420,
+            "MappedRepresentation": 202,
+            "SweptSolid": 300
+          },
+          "shape_product_coverage_ratio": 0.9939,
+          "shape_product_structural_count": 657,
+          "structural_entity_count": 661
+        }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -271,6 +392,109 @@
         ],
         "storey_count": 4,
         "structural_entity_count": 77
+      },
+      "observed_evidence_receipts": {
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt": {
+          "connected_structural_action_count": 0,
+          "contract_pass": false,
+          "engineer_zero_load_signature_attached": false,
+          "load_case_group_count": 0,
+          "load_group_assignment_count": 0,
+          "load_group_count": 0,
+          "load_related_entity_type_counts": {},
+          "load_related_record_count": 0,
+          "load_scope": "release_safe_ifc_structural_load_inventory",
+          "reason_code": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+          "structural_action_count": 0,
+          "structural_entity_count": 77,
+          "structural_load_count": 0,
+          "zero_load_attestation_scope": "not_attested",
+          "zero_load_substitution_requires_engineer_signature": true
+        },
+        "ifc_local_placement_coordinate_extraction_receipt": {
+          "contract_pass": true,
+          "coordinate_scope": "release_safe_product_origin",
+          "coordinate_units": "ifc_model_units_unscaled",
+          "placement_bounds": {
+            "max": [
+              75600.0,
+              99879.999716,
+              12000.0
+            ],
+            "min": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "placement_coordinate_node_count": 81,
+          "placement_coordinate_structural_count": 77,
+          "placement_coverage_ratio": 1.0,
+          "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 77
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 70,
+          "material_binding_coverage_ratio": 1.0,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 77,
+          "material_direct_structural_count": 77,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 2,
+            "IFCMATERIALLAYER": 7,
+            "IFCMATERIALLAYERSET": 7,
+            "IFCMATERIALLAYERSETUSAGE": 65
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 1,
+            "IFCMATERIALLAYERSET": 4,
+            "IFCMATERIALLAYERSETUSAGE": 65
+          },
+          "material_type_structural_count": 57,
+          "missing_material_binding_count": 0,
+          "missing_section_source_count": 0,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 1.0,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 77,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 19,
+            "IFCMATERIALLAYER": 7,
+            "IFCMATERIALLAYERSET": 7,
+            "IFCMATERIALLAYERSETUSAGE": 65,
+            "IFCRECTANGLEPROFILEDEF": 58
+          },
+          "structural_entity_count": 77
+        },
+        "ifc_representation_shape_axis_receipt": {
+          "axis_representation_coverage_ratio": 0.5844,
+          "axis_representation_structural_count": 45,
+          "body_representation_coverage_ratio": 1.0,
+          "body_representation_structural_count": 77,
+          "contract_pass": true,
+          "geometry_item_type_counts": {
+            "IFCEXTRUDEDAREASOLID": 65,
+            "IFCMAPPEDITEM": 12,
+            "IFCPOLYLINE": 45
+          },
+          "missing_shape_product_count": 0,
+          "reason_code": "PASS_IFC_REPRESENTATION_SHAPE_AXIS_EXTRACTED",
+          "representation_identifier_counts": {
+            "Axis": 45,
+            "Body": 77
+          },
+          "representation_scope": "release_safe_shape_axis_inventory",
+          "representation_type_counts": {
+            "Curve2D": 45,
+            "MappedRepresentation": 12,
+            "SweptSolid": 65
+          },
+          "shape_product_coverage_ratio": 1.0,
+          "shape_product_structural_count": 77,
+          "structural_entity_count": 77
+        }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -417,6 +641,114 @@
         "storey_count": 4,
         "structural_entity_count": 1170
       },
+      "observed_evidence_receipts": {
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt": {
+          "connected_structural_action_count": 0,
+          "contract_pass": false,
+          "engineer_zero_load_signature_attached": false,
+          "load_case_group_count": 0,
+          "load_group_assignment_count": 0,
+          "load_group_count": 0,
+          "load_related_entity_type_counts": {},
+          "load_related_record_count": 0,
+          "load_scope": "release_safe_ifc_structural_load_inventory",
+          "reason_code": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+          "structural_action_count": 0,
+          "structural_entity_count": 1170,
+          "structural_load_count": 0,
+          "zero_load_attestation_scope": "not_attested",
+          "zero_load_substitution_requires_engineer_signature": true
+        },
+        "ifc_local_placement_coordinate_extraction_receipt": {
+          "contract_pass": true,
+          "coordinate_scope": "release_safe_product_origin",
+          "coordinate_units": "ifc_model_units_unscaled",
+          "placement_bounds": {
+            "max": [
+              120765.0,
+              26440.0,
+              9110.0
+            ],
+            "min": [
+              -3165.0,
+              -22546.0,
+              -4400.0
+            ]
+          },
+          "placement_coordinate_node_count": 1174,
+          "placement_coordinate_structural_count": 1170,
+          "placement_coverage_ratio": 1.0,
+          "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 1170
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 918,
+          "material_binding_coverage_ratio": 0.9932,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 1162,
+          "material_direct_structural_count": 1133,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 12,
+            "IFCMATERIALLAYER": 22,
+            "IFCMATERIALLAYERSET": 20,
+            "IFCMATERIALLAYERSETUSAGE": 892
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 6,
+            "IFCMATERIALLAYERSET": 20,
+            "IFCMATERIALLAYERSETUSAGE": 892
+          },
+          "material_type_structural_count": 925,
+          "missing_material_binding_count": 8,
+          "missing_section_source_count": 69,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.941,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 1101,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 90,
+            "IFCISHAPEPROFILEDEF": 24,
+            "IFCMATERIALLAYER": 22,
+            "IFCMATERIALLAYERSET": 20,
+            "IFCMATERIALLAYERSETUSAGE": 892,
+            "IFCRECTANGLEPROFILEDEF": 953
+          },
+          "structural_entity_count": 1170
+        },
+        "ifc_representation_shape_axis_receipt": {
+          "axis_representation_coverage_ratio": 0.7641,
+          "axis_representation_structural_count": 894,
+          "body_representation_coverage_ratio": 1.0,
+          "body_representation_structural_count": 1170,
+          "contract_pass": true,
+          "geometry_item_type_counts": {
+            "IFCBOOLEANCLIPPINGRESULT": 25,
+            "IFCEXTRUDEDAREASOLID": 1044,
+            "IFCFACETEDBREP": 38,
+            "IFCMAPPEDITEM": 72,
+            "IFCPOLYLINE": 890
+          },
+          "missing_shape_product_count": 0,
+          "reason_code": "PASS_IFC_REPRESENTATION_SHAPE_AXIS_EXTRACTED",
+          "representation_identifier_counts": {
+            "Axis": 894,
+            "Body": 1170
+          },
+          "representation_scope": "release_safe_shape_axis_inventory",
+          "representation_type_counts": {
+            "Brep": 35,
+            "Clipping": 25,
+            "Curve2D": 890,
+            "MappedRepresentation": 72,
+            "SweptSolid": 1042
+          },
+          "shape_product_coverage_ratio": 1.0,
+          "shape_product_structural_count": 1170,
+          "structural_entity_count": 1170
+        }
+      },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
@@ -556,6 +888,109 @@
         ],
         "storey_count": 10,
         "structural_entity_count": 238
+      },
+      "observed_evidence_receipts": {
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt": {
+          "connected_structural_action_count": 0,
+          "contract_pass": false,
+          "engineer_zero_load_signature_attached": false,
+          "load_case_group_count": 0,
+          "load_group_assignment_count": 0,
+          "load_group_count": 0,
+          "load_related_entity_type_counts": {},
+          "load_related_record_count": 0,
+          "load_scope": "release_safe_ifc_structural_load_inventory",
+          "reason_code": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+          "structural_action_count": 0,
+          "structural_entity_count": 238,
+          "structural_load_count": 0,
+          "zero_load_attestation_scope": "not_attested",
+          "zero_load_substitution_requires_engineer_signature": true
+        },
+        "ifc_local_placement_coordinate_extraction_receipt": {
+          "contract_pass": true,
+          "coordinate_scope": "release_safe_product_origin",
+          "coordinate_units": "ifc_model_units_unscaled",
+          "placement_bounds": {
+            "max": [
+              61300.0,
+              32480.0,
+              30640.0
+            ],
+            "min": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "placement_coordinate_node_count": 248,
+          "placement_coordinate_structural_count": 238,
+          "placement_coverage_ratio": 1.0,
+          "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 238
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 207,
+          "material_binding_coverage_ratio": 1.0,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 238,
+          "material_direct_structural_count": 238,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 3,
+            "IFCMATERIALLAYER": 6,
+            "IFCMATERIALLAYERSET": 6,
+            "IFCMATERIALLAYERSETUSAGE": 201
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 2,
+            "IFCMATERIALLAYERSET": 4,
+            "IFCMATERIALLAYERSETUSAGE": 201
+          },
+          "material_type_structural_count": 191,
+          "missing_material_binding_count": 0,
+          "missing_section_source_count": 1,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9958,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 237,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 46,
+            "IFCMATERIALLAYER": 6,
+            "IFCMATERIALLAYERSET": 6,
+            "IFCMATERIALLAYERSETUSAGE": 201,
+            "IFCRECTANGLEPROFILEDEF": 175
+          },
+          "structural_entity_count": 238
+        },
+        "ifc_representation_shape_axis_receipt": {
+          "axis_representation_coverage_ratio": 0.6555,
+          "axis_representation_structural_count": 156,
+          "body_representation_coverage_ratio": 1.0,
+          "body_representation_structural_count": 238,
+          "contract_pass": true,
+          "geometry_item_type_counts": {
+            "IFCEXTRUDEDAREASOLID": 202,
+            "IFCMAPPEDITEM": 36,
+            "IFCPOLYLINE": 156
+          },
+          "missing_shape_product_count": 0,
+          "reason_code": "PASS_IFC_REPRESENTATION_SHAPE_AXIS_EXTRACTED",
+          "representation_identifier_counts": {
+            "Axis": 156,
+            "Body": 238
+          },
+          "representation_scope": "release_safe_shape_axis_inventory",
+          "representation_type_counts": {
+            "Curve2D": 156,
+            "MappedRepresentation": 36,
+            "SweptSolid": 202
+          },
+          "shape_product_coverage_ratio": 1.0,
+          "shape_product_structural_count": 238,
+          "structural_entity_count": 238
+        }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -699,6 +1134,112 @@
         ],
         "storey_count": 7,
         "structural_entity_count": 6772
+      },
+      "observed_evidence_receipts": {
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt": {
+          "connected_structural_action_count": 0,
+          "contract_pass": false,
+          "engineer_zero_load_signature_attached": false,
+          "load_case_group_count": 0,
+          "load_group_assignment_count": 0,
+          "load_group_count": 0,
+          "load_related_entity_type_counts": {},
+          "load_related_record_count": 0,
+          "load_scope": "release_safe_ifc_structural_load_inventory",
+          "reason_code": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+          "structural_action_count": 0,
+          "structural_entity_count": 6772,
+          "structural_load_count": 0,
+          "zero_load_attestation_scope": "not_attested",
+          "zero_load_substitution_requires_engineer_signature": true
+        },
+        "ifc_local_placement_coordinate_extraction_receipt": {
+          "contract_pass": true,
+          "coordinate_scope": "release_safe_product_origin",
+          "coordinate_units": "ifc_model_units_unscaled",
+          "placement_bounds": {
+            "max": [
+              -3365081.305709,
+              6403.823065,
+              17025.0
+            ],
+            "min": [
+              -3478067.262771,
+              -129633.706144,
+              -1050.0
+            ]
+          },
+          "placement_coordinate_node_count": 6779,
+          "placement_coordinate_structural_count": 6772,
+          "placement_coverage_ratio": 1.0,
+          "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 6772
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 7354,
+          "material_binding_coverage_ratio": 0.9978,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 6757,
+          "material_direct_structural_count": 6757,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 34,
+            "IFCMATERIALLAYER": 142,
+            "IFCMATERIALLAYERSET": 111,
+            "IFCMATERIALLAYERSETUSAGE": 6684
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 670,
+            "IFCMATERIALLAYERSETUSAGE": 6684
+          },
+          "material_type_structural_count": 0,
+          "missing_material_binding_count": 15,
+          "missing_section_source_count": 57,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9916,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 6715,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 6709,
+            "IFCCIRCLEPROFILEDEF": 9,
+            "IFCCOMPOSITEPROFILEDEF": 5,
+            "IFCMATERIALLAYER": 142,
+            "IFCMATERIALLAYERSET": 111,
+            "IFCMATERIALLAYERSETUSAGE": 6684
+          },
+          "structural_entity_count": 6772
+        },
+        "ifc_representation_shape_axis_receipt": {
+          "axis_representation_coverage_ratio": 0.6257,
+          "axis_representation_structural_count": 4237,
+          "body_representation_coverage_ratio": 0.9978,
+          "body_representation_structural_count": 6757,
+          "contract_pass": true,
+          "geometry_item_type_counts": {
+            "IFCEXTRUDEDAREASOLID": 6721,
+            "IFCFACETEDBREP": 14,
+            "IFCMAPPEDITEM": 22,
+            "IFCPOLYLINE": 4233,
+            "IFCTRIMMEDCURVE": 4
+          },
+          "missing_shape_product_count": 0,
+          "reason_code": "PASS_IFC_REPRESENTATION_SHAPE_AXIS_EXTRACTED",
+          "representation_identifier_counts": {
+            "Axis": 4237,
+            "Body": 6757
+          },
+          "representation_scope": "release_safe_shape_axis_inventory",
+          "representation_type_counts": {
+            "Brep": 14,
+            "Curve2D": 4237,
+            "MappedRepresentation": 22,
+            "SweptSolid": 6721
+          },
+          "shape_product_coverage_ratio": 1.0,
+          "shape_product_structural_count": 6772,
+          "structural_entity_count": 6772
+        }
       },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -846,6 +1387,115 @@
         "storey_count": 13,
         "structural_entity_count": 843
       },
+      "observed_evidence_receipts": {
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt": {
+          "connected_structural_action_count": 0,
+          "contract_pass": false,
+          "engineer_zero_load_signature_attached": false,
+          "load_case_group_count": 0,
+          "load_group_assignment_count": 0,
+          "load_group_count": 0,
+          "load_related_entity_type_counts": {},
+          "load_related_record_count": 0,
+          "load_scope": "release_safe_ifc_structural_load_inventory",
+          "reason_code": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+          "structural_action_count": 0,
+          "structural_entity_count": 843,
+          "structural_load_count": 0,
+          "zero_load_attestation_scope": "not_attested",
+          "zero_load_substitution_requires_engineer_signature": true
+        },
+        "ifc_local_placement_coordinate_extraction_receipt": {
+          "contract_pass": true,
+          "coordinate_scope": "release_safe_product_origin",
+          "coordinate_units": "ifc_model_units_unscaled",
+          "placement_bounds": {
+            "max": [
+              76369.911766,
+              57625.0,
+              29910.0
+            ],
+            "min": [
+              -5117.102509,
+              -300.0,
+              -4850.0
+            ]
+          },
+          "placement_coordinate_node_count": 856,
+          "placement_coordinate_structural_count": 843,
+          "placement_coverage_ratio": 1.0,
+          "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 843
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 797,
+          "material_binding_coverage_ratio": 0.9988,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 842,
+          "material_direct_structural_count": 842,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 4,
+            "IFCMATERIALLAYER": 13,
+            "IFCMATERIALLAYERSET": 13,
+            "IFCMATERIALLAYERSETUSAGE": 789
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 2,
+            "IFCMATERIALLAYERSET": 6,
+            "IFCMATERIALLAYERSETUSAGE": 789
+          },
+          "material_type_structural_count": 748,
+          "missing_material_binding_count": 1,
+          "missing_section_source_count": 30,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9644,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 813,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 73,
+            "IFCCIRCLEPROFILEDEF": 9,
+            "IFCISHAPEPROFILEDEF": 2,
+            "IFCMATERIALLAYER": 13,
+            "IFCMATERIALLAYERSET": 13,
+            "IFCMATERIALLAYERSETUSAGE": 789,
+            "IFCRECTANGLEPROFILEDEF": 725
+          },
+          "structural_entity_count": 843
+        },
+        "ifc_representation_shape_axis_receipt": {
+          "axis_representation_coverage_ratio": 0.8351,
+          "axis_representation_structural_count": 704,
+          "body_representation_coverage_ratio": 1.0,
+          "body_representation_structural_count": 843,
+          "contract_pass": true,
+          "geometry_item_type_counts": {
+            "IFCBOOLEANCLIPPINGRESULT": 5,
+            "IFCEXTRUDEDAREASOLID": 791,
+            "IFCFACETEDBREP": 1,
+            "IFCMAPPEDITEM": 46,
+            "IFCPOLYLINE": 704
+          },
+          "missing_shape_product_count": 0,
+          "reason_code": "PASS_IFC_REPRESENTATION_SHAPE_AXIS_EXTRACTED",
+          "representation_identifier_counts": {
+            "Axis": 704,
+            "Body": 843
+          },
+          "representation_scope": "release_safe_shape_axis_inventory",
+          "representation_type_counts": {
+            "Brep": 1,
+            "Clipping": 5,
+            "Curve2D": 704,
+            "MappedRepresentation": 46,
+            "SweptSolid": 791
+          },
+          "shape_product_coverage_ratio": 1.0,
+          "shape_product_structural_count": 843,
+          "structural_entity_count": 843
+        }
+      },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
@@ -985,6 +1635,108 @@
         "storey_count": 7,
         "structural_entity_count": 829
       },
+      "observed_evidence_receipts": {
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt": {
+          "connected_structural_action_count": 0,
+          "contract_pass": false,
+          "engineer_zero_load_signature_attached": false,
+          "load_case_group_count": 0,
+          "load_group_assignment_count": 0,
+          "load_group_count": 0,
+          "load_related_entity_type_counts": {},
+          "load_related_record_count": 0,
+          "load_scope": "release_safe_ifc_structural_load_inventory",
+          "reason_code": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+          "structural_action_count": 0,
+          "structural_entity_count": 829,
+          "structural_load_count": 0,
+          "zero_load_attestation_scope": "not_attested",
+          "zero_load_substitution_requires_engineer_signature": true
+        },
+        "ifc_local_placement_coordinate_extraction_receipt": {
+          "contract_pass": true,
+          "coordinate_scope": "release_safe_product_origin",
+          "coordinate_units": "ifc_model_units_unscaled",
+          "placement_bounds": {
+            "max": [
+              45875.0,
+              586.401434,
+              16705.0
+            ],
+            "min": [
+              -1355.00021,
+              -31726.82079,
+              -1710.0
+            ]
+          },
+          "placement_coordinate_node_count": 1662,
+          "placement_coordinate_structural_count": 829,
+          "placement_coverage_ratio": 1.0,
+          "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 829
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 10,
+          "material_binding_coverage_ratio": 1.0,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 829,
+          "material_direct_structural_count": 829,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 10
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 10
+          },
+          "material_type_structural_count": 0,
+          "missing_material_binding_count": 0,
+          "missing_section_source_count": 30,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9638,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 799,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 126,
+            "IFCCIRCLEPROFILEDEF": 3,
+            "IFCISHAPEPROFILEDEF": 3,
+            "IFCLSHAPEPROFILEDEF": 4,
+            "IFCRECTANGLEPROFILEDEF": 142
+          },
+          "structural_entity_count": 829
+        },
+        "ifc_representation_shape_axis_receipt": {
+          "axis_representation_coverage_ratio": 0.1496,
+          "axis_representation_structural_count": 124,
+          "body_representation_coverage_ratio": 1.0,
+          "body_representation_structural_count": 829,
+          "contract_pass": true,
+          "geometry_item_type_counts": {
+            "IFCBOOLEANCLIPPINGRESULT": 105,
+            "IFCBOOLEANRESULT": 114,
+            "IFCEXTRUDEDAREASOLID": 580,
+            "IFCFACETEDBREP": 30,
+            "IFCPOLYLINE": 124
+          },
+          "missing_shape_product_count": 0,
+          "reason_code": "PASS_IFC_REPRESENTATION_SHAPE_AXIS_EXTRACTED",
+          "representation_identifier_counts": {
+            "Axis": 124,
+            "Body": 829
+          },
+          "representation_scope": "release_safe_shape_axis_inventory",
+          "representation_type_counts": {
+            "Brep": 30,
+            "CSG": 114,
+            "Clipping": 105,
+            "Curve2D": 124,
+            "SweptSolid": 580
+          },
+          "shape_product_coverage_ratio": 1.0,
+          "shape_product_structural_count": 829,
+          "structural_entity_count": 829
+        }
+      },
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
@@ -1029,6 +1781,7 @@
     },
     "geometry_material_load_adapter_required_count": 7,
     "ifc_asset_count": 7,
+    "load_case_receipt_count": 0,
     "local_placement_receipt_count": 7,
     "material_section_receipt_count": 7,
     "node_glyph_fallback_count": 0,
@@ -1037,6 +1790,7 @@
     "relationship_coverage_gap_count": 0,
     "shape_axis_receipt_count": 7,
     "solver_exact_ready_count": 0,
-    "structural_entity_count_total": 10590
+    "structural_entity_count_total": 10590,
+    "zero_load_signature_required_count": 7
   }
 }

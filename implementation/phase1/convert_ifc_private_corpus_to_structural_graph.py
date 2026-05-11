@@ -42,6 +42,8 @@ MATERIAL_SECTION_SOURCE_TYPES = {
     "IFCMATERIALCONSTITUENT",
     "IFCMATERIALCONSTITUENTSET",
 }
+LOAD_GROUP_ENTITY_TYPES = {"IFCLOADGROUP", "IFCSTRUCTURALLOADGROUP"}
+LOAD_RELATIONSHIP_ENTITY_TYPES = {"IFCRELCONNECTSSTRUCTURALACTIVITY", "IFCRELASSIGNSTOGROUP"}
 SPATIAL_ENTITY_TYPES = {"IFCBUILDINGSTOREY"}
 COUNTED_ENTITY_TYPES = STRUCTURAL_ENTITY_TYPES | SPATIAL_ENTITY_TYPES
 ENTITY_RE = re.compile(r"^\s*#(?P<id>\d+)\s*=\s*(?P<type>[A-Z0-9_]+)\s*\((?P<args>.*)\)\s*;\s*$", re.I | re.S)
@@ -176,6 +178,30 @@ def _step_label(text: str) -> str:
 
 def _is_section_source_type(entity_type: str) -> bool:
     return entity_type in MATERIAL_SECTION_SOURCE_TYPES or entity_type.endswith("PROFILEDEF")
+
+
+def _is_load_group_type(entity_type: str) -> bool:
+    return entity_type in LOAD_GROUP_ENTITY_TYPES or entity_type.endswith("LOADGROUP")
+
+
+def _is_structural_load_type(entity_type: str) -> bool:
+    return entity_type.startswith("IFCSTRUCTURALLOAD") and not _is_load_group_type(entity_type)
+
+
+def _is_structural_action_type(entity_type: str) -> bool:
+    return entity_type.startswith("IFCSTRUCTURAL") and "ACTION" in entity_type
+
+
+def _is_load_related_type(entity_type: str) -> bool:
+    return (
+        _is_load_group_type(entity_type)
+        or _is_structural_load_type(entity_type)
+        or _is_structural_action_type(entity_type)
+    )
+
+
+def _is_load_case_group(args: list[str]) -> bool:
+    return any("LOAD_CASE" in str(arg).upper() or "LOADCASE" in str(arg).upper() for arg in args)
 
 
 def _ref_closure(
@@ -500,6 +526,47 @@ def _material_section_receipt(
     }
 
 
+def _load_case_receipt(
+    *,
+    structural_entity_count: int,
+    load_related_counts: Counter[str],
+    load_group_count: int,
+    load_case_count: int,
+    structural_load_count: int,
+    structural_action_count: int,
+    connected_structural_action_count: int,
+    load_group_assignment_count: int,
+) -> dict[str, Any]:
+    load_related_record_count = sum(load_related_counts.values())
+    contract_pass = (
+        load_case_count > 0
+        or structural_load_count > 0
+        or structural_action_count > 0
+        or connected_structural_action_count > 0
+    )
+    return {
+        "contract_pass": contract_pass,
+        "reason_code": (
+            "PASS_IFC_LOAD_CASES_EXTRACTED"
+            if contract_pass
+            else "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED"
+        ),
+        "load_scope": "release_safe_ifc_structural_load_inventory",
+        "structural_entity_count": structural_entity_count,
+        "load_related_record_count": load_related_record_count,
+        "load_group_count": load_group_count,
+        "load_case_group_count": load_case_count,
+        "structural_load_count": structural_load_count,
+        "structural_action_count": structural_action_count,
+        "connected_structural_action_count": connected_structural_action_count,
+        "load_group_assignment_count": load_group_assignment_count,
+        "load_related_entity_type_counts": dict(sorted(load_related_counts.items())),
+        "engineer_zero_load_signature_attached": False,
+        "zero_load_substitution_requires_engineer_signature": not contract_pass,
+        "zero_load_attestation_scope": "not_attested" if not contract_pass else "not_required_loads_extracted",
+    }
+
+
 def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
     entity_counts: Counter[str] = Counter()
     nodes: dict[str, dict[str, Any]] = {}
@@ -786,6 +853,48 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
         material_entity_type_counts=material_entity_type_counts,
         section_source_type_counts=section_source_type_counts,
     )
+    load_related_counts: Counter[str] = Counter()
+    load_group_ids: set[str] = set()
+    load_case_ids: set[str] = set()
+    structural_load_ids: set[str] = set()
+    structural_action_ids: set[str] = set()
+    for entity_id, entity_type, args in parsed_records:
+        if _is_load_related_type(entity_type):
+            load_related_counts[entity_type] += 1
+        if _is_load_group_type(entity_type):
+            load_group_ids.add(entity_id)
+            if _is_load_case_group(args):
+                load_case_ids.add(entity_id)
+        if _is_structural_load_type(entity_type):
+            structural_load_ids.add(entity_id)
+        if _is_structural_action_type(entity_type):
+            structural_action_ids.add(entity_id)
+
+    connected_structural_action_ids: set[str] = set()
+    load_group_assignment_count = 0
+    for _entity_id, entity_type, args in parsed_records:
+        if entity_type not in LOAD_RELATIONSHIP_ENTITY_TYPES:
+            continue
+        refs = {ref for arg in args for ref in _refs(arg)}
+        if entity_type == "IFCRELCONNECTSSTRUCTURALACTIVITY":
+            if refs & structural_ids:
+                connected_structural_action_ids.update(refs & structural_action_ids)
+            if refs & structural_action_ids:
+                load_related_counts[entity_type] += 1
+        if refs & load_group_ids and (refs & structural_action_ids or refs & structural_load_ids):
+            load_group_assignment_count += 1
+            load_related_counts[entity_type] += 1
+
+    load_case_receipt = _load_case_receipt(
+        structural_entity_count=int(structural_entity_count),
+        load_related_counts=load_related_counts,
+        load_group_count=len(load_group_ids),
+        load_case_count=len(load_case_ids),
+        structural_load_count=len(structural_load_ids),
+        structural_action_count=len(structural_action_ids),
+        connected_structural_action_count=len(connected_structural_action_ids),
+        load_group_assignment_count=load_group_assignment_count,
+    )
     return {
         "adapter_mode": ADAPTER_MODE,
         "entity_counts": {entity_type: int(entity_counts[entity_type]) for entity_type in sorted(COUNTED_ENTITY_TYPES)},
@@ -806,6 +915,10 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
             "material_binding_coverage_ratio": material_section_receipt["material_binding_coverage_ratio"],
             "section_source_structural_count": len(section_sources_by_id),
             "section_source_coverage_ratio": material_section_receipt["section_source_coverage_ratio"],
+            "load_related_record_count": load_case_receipt["load_related_record_count"],
+            "load_case_group_count": len(load_case_ids),
+            "structural_load_count": len(structural_load_ids),
+            "structural_action_count": len(structural_action_ids),
             "structural_entity_count": int(structural_entity_count),
             "storey_count": int(storey_count),
         },
@@ -813,6 +926,7 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
             "ifc_local_placement_coordinate_extraction_receipt": placement_receipt,
             "ifc_representation_shape_axis_receipt": representation_receipt,
             "ifc_material_section_binding_receipt": material_section_receipt,
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt": load_case_receipt,
         },
         "proxy_relationship_counts": dict(sorted(relationship_counts.items())),
         "relationship_extraction_modes": relationship_extraction_modes,
@@ -949,6 +1063,24 @@ def convert_ifc_corpus(
                 report.get("evidence_receipts", {})
                 .get("ifc_material_section_binding_receipt", {})
                 .get("contract_pass", False)
+            )
+        ),
+        "load_case_receipt_count": sum(
+            1
+            for report in ready_reports
+            if bool(
+                report.get("evidence_receipts", {})
+                .get("ifc_load_case_extraction_or_engineer_signed_zero_load_receipt", {})
+                .get("contract_pass", False)
+            )
+        ),
+        "zero_load_signature_required_count": sum(
+            1
+            for report in ready_reports
+            if bool(
+                report.get("evidence_receipts", {})
+                .get("ifc_load_case_extraction_or_engineer_signed_zero_load_receipt", {})
+                .get("zero_load_substitution_requires_engineer_signature", False)
             )
         ),
     }
