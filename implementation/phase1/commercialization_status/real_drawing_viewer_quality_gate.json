@@ -208,10 +208,8 @@
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
       "node_count": 6,
-      "quality_flags": [
-        "sparse_preview"
-      ],
-      "quality_tier": "sparse_preview_review",
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
       "renderable_segment_count": 3,
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 3,
@@ -290,10 +288,8 @@
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
       "node_count": 5,
-      "quality_flags": [
-        "sparse_preview"
-      ],
-      "quality_tier": "sparse_preview_review",
+      "quality_flags": [],
+      "quality_tier": "solver_exact_ready",
       "renderable_segment_count": 4,
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 4,
@@ -325,8 +321,7 @@
     "not_solver_exact": 7,
     "proxy_layout_not_true_geometry": 7,
     "proxy_node_glyph_fallback": 1,
-    "sampled_dense_model": 1,
-    "sparse_preview": 2
+    "sampled_dense_model": 1
   },
   "reason_code": "PASS_WITH_REVIEW_QUEUE",
   "recommended_claim": "Integrated real-drawing viewer is ready for engineer-in-loop review; proxy/preview assets are labeled and are not full solver-exact replacements.",
@@ -410,24 +405,6 @@
       "quality_tier": "solver_exact_sampled_review",
       "recommended_action": "inspect sampled dense model before using it as a full-detail design claim",
       "review_id": "RQ-008"
-    },
-    {
-      "asset_ref": "RD-012",
-      "quality_flags": [
-        "sparse_preview"
-      ],
-      "quality_tier": "sparse_preview_review",
-      "recommended_action": "expand sparse preview into a complete solver-exact model",
-      "review_id": "RQ-009"
-    },
-    {
-      "asset_ref": "RD-017",
-      "quality_flags": [
-        "sparse_preview"
-      ],
-      "quality_tier": "sparse_preview_review",
-      "recommended_action": "expand sparse preview into a complete solver-exact model",
-      "review_id": "RQ-010"
     }
   ],
   "route_counts": {
@@ -451,8 +428,8 @@
     "hard_blocker_count": 0,
     "proxy_or_preview_asset_count": 7,
     "renderable_asset_count": 18,
-    "review_item_count": 18,
-    "review_queue_asset_count": 10,
+    "review_item_count": 16,
+    "review_queue_asset_count": 8,
     "solver_exact_asset_count": 11
   }
 }

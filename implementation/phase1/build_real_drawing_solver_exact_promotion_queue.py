@@ -60,7 +60,7 @@ def _promotion_family(row: dict[str, Any]) -> str:
         return "solver_exact_lod_completion"
     if "proxy_node_glyph_fallback" in flags:
         return "ifc_node_glyph_topology_rebuild"
-    if "sparse_preview" in flags:
+    if "sparse_preview" in flags and not bool(row.get("solver_exact", False)):
         return "archive_sparse_preview_expansion"
     if route == "midas_binary_decoded_preview_bridge" and file_type == ".zip":
         return "archive_preview_exactness_verification"

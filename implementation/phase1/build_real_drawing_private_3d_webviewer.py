@@ -277,6 +277,7 @@ def _build_asset_payload(
             geometry_mode = "proxy_topology_3d_layout"
     route = str(row.get("optimization_route", "") or "")
     status = str(row.get("optimization_status", "") or "")
+    solver_exact = bool(row.get("solver_exact", False))
     raw_renderable_count = _safe_int(metrics.get("renderable_segment_count", len(segments)))
     quality_flags: list[str] = []
     if is_proxy_graph:
@@ -285,9 +286,9 @@ def _build_asset_payload(
             quality_flags.append("proxy_node_glyph_fallback")
     if raw_renderable_count > len(segments):
         quality_flags.append("sampled_dense_model")
-    if len(segments) < 10:
+    if len(segments) < 10 and not solver_exact:
         quality_flags.append("sparse_preview")
-    if not bool(row.get("solver_exact", False)):
+    if not solver_exact:
         quality_flags.append("not_solver_exact")
     warning_label = ""
     if "proxy_layout_not_true_geometry" in quality_flags:
@@ -301,7 +302,7 @@ def _build_asset_payload(
         "file_type": str(row.get("file_type", "") or ""),
         "route": route,
         "status": status,
-        "solver_exact": bool(row.get("solver_exact", False)),
+        "solver_exact": solver_exact,
         "model_asset_count": _safe_int(row.get("model_asset_count", 0)),
         "geometry_mode": geometry_mode,
         "geometry_available": bool(segments),

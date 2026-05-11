@@ -3368,10 +3368,11 @@ function getRealDrawingQualityFlags(row){
 }
 function getRealDrawingQualityTier(row){
   const flags=new Set(getRealDrawingQualityFlags(row));
+  const solverExact=Boolean(row?.solver_exact);
   if(!row?.geometry_available||safeNumber(row?.segment_count,0)<=0)return'blocked';
-  if(flags.has('sparse_preview'))return'sparse_preview';
-  if(Boolean(row?.solver_exact)&&flags.has('sampled_dense_model'))return'solver_exact_sampled';
-  if(!Boolean(row?.solver_exact)||flags.has('not_solver_exact')||flags.has('proxy_layout_not_true_geometry'))return'proxy_preview';
+  if(flags.has('sparse_preview')&&!solverExact)return'sparse_preview';
+  if(solverExact&&flags.has('sampled_dense_model'))return'solver_exact_sampled';
+  if(!solverExact||flags.has('not_solver_exact')||flags.has('proxy_layout_not_true_geometry'))return'proxy_preview';
   return'solver_exact_ready';
 }
 function getRealDrawingQualityBadge(row){
@@ -3384,7 +3385,8 @@ function getRealDrawingQualityBadge(row){
 }
 function isRealDrawingReviewAsset(row){
   const flags=getRealDrawingQualityFlags(row);
-  return !Boolean(row?.solver_exact)||flags.some(flag=>REAL_DRAWING_REVIEW_FLAG_KEYS.has(flag));
+  const solverExact=Boolean(row?.solver_exact);
+  return !solverExact||flags.some(flag=>REAL_DRAWING_REVIEW_FLAG_KEYS.has(flag)&&!(solverExact&&flag==='sparse_preview'));
 }
 function realDrawingAssetMatchesQualityFilter(row,filterKey=activeRealDrawingQualityFilter){
   const tier=getRealDrawingQualityTier(row);
@@ -3397,7 +3399,7 @@ function realDrawingAssetMatchesQualityFilter(row,filterKey=activeRealDrawingQua
 }
 function getRealDrawingReviewAction(row){
   const flags=new Set(getRealDrawingQualityFlags(row));
-  if(flags.has('sparse_preview'))return'Expand sparse archive preview';
+  if(flags.has('sparse_preview')&&!Boolean(row?.solver_exact))return'Expand sparse archive preview';
   if(flags.has('sampled_dense_model'))return'Inspect sampled dense model';
   if(flags.has('proxy_node_glyph_fallback'))return'Replace node glyph fallback';
   if(flags.has('proxy_layout_not_true_geometry')||flags.has('not_solver_exact')||!Boolean(row?.solver_exact)){

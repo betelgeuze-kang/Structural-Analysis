@@ -234,14 +234,12 @@
         "renderable_segment_count": 3
       },
       "model_asset_count": 1,
-      "quality_flags": [
-        "sparse_preview"
-      ],
+      "quality_flags": [],
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 3,
       "solver_exact": true,
       "status": "archive_solver_graph_ready",
-      "warning_label": "sparse"
+      "warning_label": ""
     },
     {
       "asset_ref": "RD-013",
@@ -326,14 +324,12 @@
         "renderable_segment_count": 4
       },
       "model_asset_count": 1,
-      "quality_flags": [
-        "sparse_preview"
-      ],
+      "quality_flags": [],
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 4,
       "solver_exact": true,
       "status": "archive_solver_graph_ready",
-      "warning_label": "sparse"
+      "warning_label": ""
     },
     {
       "asset_ref": "RD-018",
@@ -365,7 +361,7 @@
   },
   "schema_version": "real-drawing-private-3d-webviewer.v1",
   "solver_exact_asset_count": 11,
-  "solver_exact_open_promotion_item_count": 10,
+  "solver_exact_open_promotion_item_count": 8,
   "solver_exact_planned_asset_count_after_unlock_batch": 11,
   "solver_exact_planned_unlock_batch_count": 0,
   "solver_exact_promotion_queue": "implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.json",

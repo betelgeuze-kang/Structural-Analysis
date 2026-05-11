@@ -103,7 +103,7 @@ def _asset_quality_tier(asset: dict[str, Any], *, has_hard_blocker: bool) -> str
     solver_exact = bool(asset.get("solver_exact", False))
     if has_hard_blocker:
         return "hard_blocker"
-    if "sparse_preview" in flags:
+    if "sparse_preview" in flags and not solver_exact:
         return "sparse_preview_review"
     if solver_exact and "sampled_dense_model" in flags:
         return "solver_exact_sampled_review"
@@ -116,7 +116,7 @@ def _asset_quality_tier(asset: dict[str, Any], *, has_hard_blocker: bool) -> str
 
 def _review_action(row: dict[str, Any]) -> str:
     flags = set(row["quality_flags"])
-    if "sparse_preview" in flags:
+    if "sparse_preview" in flags and not bool(row.get("solver_exact", False)):
         return "expand sparse preview into a complete solver-exact model"
     if "sampled_dense_model" in flags:
         return "inspect sampled dense model before using it as a full-detail design claim"
@@ -152,7 +152,12 @@ def _asset_quality_rows(assets: list[dict[str, Any]], asset_blockers: dict[str, 
 def _review_queue(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     queue: list[dict[str, Any]] = []
     for row in rows:
-        review_flags = [flag for flag in row["quality_flags"] if flag in REVIEW_FLAGS]
+        solver_exact = bool(row.get("solver_exact", False))
+        review_flags = [
+            flag
+            for flag in row["quality_flags"]
+            if flag in REVIEW_FLAGS and not (solver_exact and flag == "sparse_preview")
+        ]
         if not review_flags:
             continue
         queue.append(

@@ -60,7 +60,7 @@ def quality_notice(asset: dict[str, Any]) -> str:
         return "IFC proxy topology layout; not recovered architectural/structural coordinates."
     if "sampled_dense_model" in flags:
         return "Dense solver model sampled for browser performance."
-    if "sparse_preview" in flags:
+    if "sparse_preview" in flags and not bool(asset.get("solver_exact", False)):
         return "Sparse archive preview; shape may look like a small skeleton."
     return "Solver-derived topology segment."
 

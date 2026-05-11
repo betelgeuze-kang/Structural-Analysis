@@ -170,3 +170,49 @@ def test_private_3d_webviewer_builds_sanitized_asset_registry(tmp_path: Path) ->
         assert token not in html_text
         assert token not in summary_text
         assert token not in sidecar_text
+
+
+def test_private_3d_webviewer_keeps_solver_exact_compact_archive_out_of_sparse_review(tmp_path: Path) -> None:
+    module = _load_module()
+    graph_path = tmp_path / "graphs" / "compact_archive.json"
+    queue_path = tmp_path / "model_optimization_intake_queue.json"
+    _write_json(
+        graph_path,
+        {
+            "model": {
+                "nodes": [
+                    {"id": 1, "x": 0, "y": 0, "z": 0},
+                    {"id": 2, "x": 1, "y": 0, "z": 0},
+                    {"id": 3, "x": 1, "y": 1, "z": 0},
+                ],
+                "elements": [{"id": 1, "family": "beam", "node_ids": [1, 2, 3]}],
+            }
+        },
+    )
+    _write_json(
+        queue_path,
+        {
+            "queue": [
+                {
+                    "solver_graph_model_json": str(graph_path),
+                    "file_type": ".zip",
+                    "optimization_route": "midas_binary_archive_exact_topology_promoted",
+                    "optimization_status": "archive_solver_graph_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": True,
+                    "model_asset_count": 1,
+                }
+            ]
+        },
+    )
+
+    registry = module.build_registry_payload(
+        intake_queue_path=queue_path,
+        max_segments_per_asset=20,
+    )
+
+    asset = registry["assets"][0]
+    assert asset["solver_exact"] is True
+    assert asset["segment_count"] == 3
+    assert "sparse_preview" not in asset["quality_flags"]
+    assert asset["warning_label"] == ""

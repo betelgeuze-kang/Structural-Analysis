@@ -117,6 +117,35 @@ def test_quality_gate_passes_with_review_queue_for_proxy_assets(tmp_path: Path) 
     assert report["asset_quality_rows"][1]["quality_tier"] == "sparse_preview_review"
 
 
+def test_quality_gate_treats_solver_exact_sparse_archive_as_compact_ready(tmp_path: Path) -> None:
+    manifest_path = _write_json(
+        tmp_path / "manifest.json",
+        _manifest(
+            [
+                _asset(
+                    "RD-001",
+                    solver_exact=True,
+                    segment_count=3,
+                    quality_flags=["sparse_preview"],
+                    route="midas_binary_archive_exact_topology_promoted",
+                    status="archive_solver_graph_ready",
+                ),
+            ],
+            route_counts={"midas_binary_archive_exact_topology_promoted": 1},
+            status_counts={"archive_solver_graph_ready": 1},
+        ),
+    )
+
+    report = quality_gate.build_quality_gate(manifest_path)
+
+    assert report["contract_pass"] is True
+    assert report["reason_code"] == "PASS"
+    assert report["full_solver_exact_ready"] is True
+    assert report["summary"]["review_queue_asset_count"] == 0
+    assert report["review_queue"] == []
+    assert report["asset_quality_rows"][0]["quality_tier"] == "solver_exact_ready"
+
+
 def test_quality_gate_blocks_nonrenderable_and_sensitive_manifest(tmp_path: Path) -> None:
     manifest_path = _write_json(
         tmp_path / "manifest.json",
