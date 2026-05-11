@@ -98,14 +98,27 @@ def _asset_counts(asset: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def _has_full_detail_lod_evidence(asset: dict[str, Any]) -> bool:
+    lod_evidence = asset.get("lod_evidence") if isinstance(asset.get("lod_evidence"), dict) else {}
+    metrics = asset.get("metrics") if isinstance(asset.get("metrics"), dict) else {}
+    full_detail_segment_count = _safe_int(lod_evidence.get("full_detail_segment_count"), 0)
+    renderable_segment_count = _safe_int(metrics.get("renderable_segment_count"), _safe_int(asset.get("segment_count"), 0))
+    return (
+        bool(lod_evidence.get("contract_pass", False))
+        and str(lod_evidence.get("reason_code") or "") == "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED"
+        and full_detail_segment_count >= renderable_segment_count
+    )
+
+
 def _asset_quality_tier(asset: dict[str, Any], *, has_hard_blocker: bool) -> str:
     flags = {str(flag) for flag in (asset.get("quality_flags") or [])}
     solver_exact = bool(asset.get("solver_exact", False))
+    full_detail_lod_ready = _has_full_detail_lod_evidence(asset)
     if has_hard_blocker:
         return "hard_blocker"
     if "sparse_preview" in flags and not solver_exact:
         return "sparse_preview_review"
-    if solver_exact and "sampled_dense_model" in flags:
+    if solver_exact and "sampled_dense_model" in flags and not full_detail_lod_ready:
         return "solver_exact_sampled_review"
     if "proxy_layout_not_true_geometry" in flags or "not_solver_exact" in flags:
         return "proxy_preview_review"
@@ -118,7 +131,7 @@ def _review_action(row: dict[str, Any]) -> str:
     flags = set(row["quality_flags"])
     if "sparse_preview" in flags and not bool(row.get("solver_exact", False)):
         return "expand sparse preview into a complete solver-exact model"
-    if "sampled_dense_model" in flags:
+    if "sampled_dense_model" in flags and not bool(row.get("full_detail_lod_ready", False)):
         return "inspect sampled dense model before using it as a full-detail design claim"
     if "proxy_node_glyph_fallback" in flags:
         return "replace node glyph fallback with edge-backed topology"
@@ -143,6 +156,7 @@ def _asset_quality_rows(assets: list[dict[str, Any]], asset_blockers: dict[str, 
             "route": str(asset.get("route") or ""),
             "solver_exact": bool(asset.get("solver_exact", False)),
             "status": str(asset.get("status") or ""),
+            "full_detail_lod_ready": _has_full_detail_lod_evidence(asset),
         }
         row.update(counts)
         rows.append(row)
@@ -153,10 +167,13 @@ def _review_queue(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     queue: list[dict[str, Any]] = []
     for row in rows:
         solver_exact = bool(row.get("solver_exact", False))
+        full_detail_lod_ready = bool(row.get("full_detail_lod_ready", False))
         review_flags = [
             flag
             for flag in row["quality_flags"]
-            if flag in REVIEW_FLAGS and not (solver_exact and flag == "sparse_preview")
+            if flag in REVIEW_FLAGS
+            and not (solver_exact and flag == "sparse_preview")
+            and not (solver_exact and full_detail_lod_ready and flag == "sampled_dense_model")
         ]
         if not review_flags:
             continue

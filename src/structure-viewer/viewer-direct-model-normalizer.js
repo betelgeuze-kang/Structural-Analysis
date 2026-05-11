@@ -194,6 +194,10 @@ export function buildRealDrawingAssetRegistry(rootMeta) {
       node_count: safeNumber(row?.node_count, 0),
       element_count: safeNumber(row?.element_count, 0),
       renderable_segment_count: safeNumber(row?.renderable_segment_count, row?.segment_count ?? 0),
+      lod_evidence_status: normalizeSelectionValue(row?.lod_evidence_status),
+      full_detail_segment_count: safeNumber(row?.full_detail_segment_count, 0),
+      viewer_sample_segment_count: safeNumber(row?.viewer_sample_segment_count, 0),
+      lod_sample_ratio: safeNumber(row?.lod_sample_ratio, 0),
     }))
     .filter(row => row.asset_ref)
     .slice(0, 128);

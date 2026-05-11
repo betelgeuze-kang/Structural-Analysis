@@ -3383,6 +3383,12 @@ function getRealDrawingQualityBadge(row){
   if(tier==='proxy_preview')return{label:'proxy',tone:'proxy'};
   return{label:'solver exact',tone:'exact'};
 }
+function getRealDrawingSegmentLabel(row){
+  const sampleCount=safeNumber(row?.segment_count,0);
+  const fullCount=safeNumber(row?.full_detail_segment_count,0);
+  if(fullCount>sampleCount&&sampleCount>0)return`${sampleCount}/${fullCount}`;
+  return String(sampleCount);
+}
 function isRealDrawingReviewAsset(row){
   const flags=getRealDrawingQualityFlags(row);
   const solverExact=Boolean(row?.solver_exact);
@@ -3784,7 +3790,7 @@ function renderRealDrawingQualityPanel(data=modelData){
             <span>${escapeHtml(getRealDrawingReviewAction(row))}</span>
             <small>${escapeHtml(flags.join(', ')||notice||'solver-exact')}</small>
           </span>
-          <span class="real-drawing-review-item__segments">${escapeHtml(String(safeNumber(row.segment_count,0)))}</span>
+          <span class="real-drawing-review-item__segments">${escapeHtml(getRealDrawingSegmentLabel(row))}</span>
         </button>`;
     }).join('')
     :'<div class="panel-placeholder">No review queue assets in the active quality filter.</div>';
@@ -3982,7 +3988,7 @@ function buildUI(data){
       const label=`${assetRef} · ${warning||normalizeSelectionValue(row.geometry_mode)||status}`;
       appendTreeItem(
         label,
-        `${badgeInfo.label} · ${safeNumber(row.segment_count,0)}`,
+        `${badgeInfo.label} · ${getRealDrawingSegmentLabel(row)}`,
         ()=>focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===assetRef),
         '',
         {isolateKind:'member',isolateValue:assetRef,isolateLabel:label}

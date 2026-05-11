@@ -22,4 +22,3 @@ No planned unlock batch is available.
 | RP-005 | RD-004 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, proxy_layout_not_true_geometry |
 | RP-006 | RD-005 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, proxy_layout_not_true_geometry |
 | RP-007 | RD-006 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, proxy_layout_not_true_geometry |
-| RP-008 | RD-008 | solver_exact_lod_completion | medium | 0 |  | sampled_dense_model |

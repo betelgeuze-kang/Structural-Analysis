@@ -1,0 +1,35 @@
+{
+  "contract_pass": true,
+  "generated_at": "2026-05-11T12:03:21.513620+00:00",
+  "lod_items": [
+    {
+      "asset_ref": "RD-008",
+      "closure_evidence": [
+        "source_solver_graph_json_receipt",
+        "full_detail_segment_count_receipt",
+        "viewer_sample_lod_policy_receipt"
+      ],
+      "contract_pass": true,
+      "element_count": 12728,
+      "file_type": ".mgt",
+      "full_detail_lod_ready": true,
+      "full_detail_segment_count": 34000,
+      "lod_policy": "sampled_viewport_with_full_detail_source_receipt",
+      "node_count": 11355,
+      "reason_code": "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED",
+      "route": "midas_mgt_direct_parser",
+      "sample_ratio": 0.052941,
+      "status": "solver_graph_ready",
+      "viewer_sample_segment_count": 1800
+    }
+  ],
+  "reason_code": "PASS_FULL_DETAIL_LOD_MANIFEST_READY",
+  "schema_version": "real-drawing-full-detail-lod-manifest.v1",
+  "source_intake_queue": "tmp/real_drawing_private_corpus/model_optimization_intake_queue.json",
+  "summary": {
+    "full_detail_segment_count_total": 34000,
+    "max_segments_per_asset": 1800,
+    "sampled_solver_exact_asset_count": 1,
+    "viewer_sample_segment_count_total": 1800
+  }
+}

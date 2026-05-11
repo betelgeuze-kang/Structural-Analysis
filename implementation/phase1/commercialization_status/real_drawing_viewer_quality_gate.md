@@ -14,11 +14,11 @@
 | Renderable assets | 18 |
 | Solver-exact assets | 11 |
 | Proxy or preview assets | 7 |
-| Review queue assets | 8 |
-| Review items | 16 |
+| Review queue assets | 7 |
+| Review items | 15 |
 | Hard blockers | 0 |
 
-- Quality flags: not_solver_exact=7, proxy_layout_not_true_geometry=7, proxy_node_glyph_fallback=1, sampled_dense_model=1
+- Quality flags: not_solver_exact=7, proxy_layout_not_true_geometry=7, proxy_node_glyph_fallback=1
 
 ## Review Queue
 
@@ -31,4 +31,3 @@
 | RD-005 | proxy_preview_review | proxy_layout_not_true_geometry, not_solver_exact | replace proxy or preview topology with solver-exact structural geometry |
 | RD-006 | proxy_preview_review | proxy_layout_not_true_geometry, not_solver_exact | replace proxy or preview topology with solver-exact structural geometry |
 | RD-007 | proxy_preview_review | proxy_layout_not_true_geometry, proxy_node_glyph_fallback, not_solver_exact | replace node glyph fallback with edge-backed topology |
-| RD-008 | solver_exact_sampled_review | sampled_dense_model | inspect sampled dense model before using it as a full-detail design claim |

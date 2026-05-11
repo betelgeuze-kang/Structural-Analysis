@@ -33,6 +33,13 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
                 "geometry_mode": "solver_topology_xyz",
                 "quality_flags": [],
                 "warning_label": "",
+                "lod_evidence": {
+                    "contract_pass": True,
+                    "reason_code": "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED",
+                    "full_detail_segment_count": 12,
+                    "viewer_sample_segment_count": 2,
+                    "sample_ratio": 0.166667,
+                },
                 "segments": [
                     {"p0": [0, 0, 0], "p1": [10, 0, 0], "family": "beam", "color": "#2563eb"},
                     {"p0": [10, 0, 0], "p1": [10, 5, 0], "family": "column", "color": "#be123c"},
@@ -106,6 +113,10 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
     assert payload["meta"]["real_drawing_registry_summary"]["solver_exact_asset_count"] == 1
     assert payload["meta"]["real_drawing_registry_summary"]["quality_flag_counts"]["not_solver_exact"] == 1
     assert payload["meta"]["real_drawing_asset_registry"][0]["asset_ref"] == "RD-001"
+    assert payload["meta"]["real_drawing_asset_registry"][0]["lod_evidence_status"] == (
+        "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED"
+    )
+    assert payload["meta"]["real_drawing_asset_registry"][0]["full_detail_segment_count"] == 12
     assert payload["meta"]["real_drawing_asset_registry"][1]["warning_label"] == "proxy layout"
     assert (
         payload["meta"]["real_drawing_solver_exact_promotion_queue"]["summary"][

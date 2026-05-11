@@ -50,6 +50,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "getRealDrawingAssetRegistry" in text
     assert 'id="real-drawing-quality-panel"' in text
     assert "setRealDrawingQualityFilter" in text
+    assert "getRealDrawingSegmentLabel" in text
     assert "Drawing Review Queue" in text
     assert "Next Unlock Batch" in text
     assert "Solver-Exact Target Reached" in text

@@ -146,6 +146,32 @@ def test_quality_gate_treats_solver_exact_sparse_archive_as_compact_ready(tmp_pa
     assert report["asset_quality_rows"][0]["quality_tier"] == "solver_exact_ready"
 
 
+def test_quality_gate_accepts_sampled_solver_exact_with_full_detail_lod_evidence(tmp_path: Path) -> None:
+    asset = _asset(
+        "RD-001",
+        solver_exact=True,
+        segment_count=3,
+        quality_flags=["sampled_dense_model"],
+    )
+    asset["metrics"]["renderable_segment_count"] = 7
+    asset["lod_evidence"] = {
+        "contract_pass": True,
+        "reason_code": "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED",
+        "full_detail_segment_count": 7,
+        "viewer_sample_segment_count": 3,
+    }
+    manifest_path = _write_json(tmp_path / "manifest.json", _manifest([asset]))
+
+    report = quality_gate.build_quality_gate(manifest_path)
+
+    assert report["contract_pass"] is True
+    assert report["reason_code"] == "PASS"
+    assert report["summary"]["review_queue_asset_count"] == 0
+    assert report["review_queue"] == []
+    assert report["asset_quality_rows"][0]["quality_tier"] == "solver_exact_ready"
+    assert report["asset_quality_rows"][0]["full_detail_lod_ready"] is True
+
+
 def test_quality_gate_blocks_nonrenderable_and_sensitive_manifest(tmp_path: Path) -> None:
     manifest_path = _write_json(
         tmp_path / "manifest.json",

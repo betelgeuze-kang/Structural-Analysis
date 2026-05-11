@@ -263,34 +263,6 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 843,
       "status": "ifc_proxy_graph_ready"
-    },
-    {
-      "asset_ref": "RD-008",
-      "closure_evidence_required": [
-        "full_detail_lod_manifest",
-        "sampled_dense_model_flag_removed_or_explained",
-        "viewer_performance_regression_receipt"
-      ],
-      "closure_status": "pending",
-      "current_solver_exact": true,
-      "effort_label": "medium",
-      "element_count": 12728,
-      "expected_solver_exact_delta": 0,
-      "file_type": ".mgt",
-      "node_count": 11355,
-      "owner_lane": "viewer_performance_owner",
-      "priority_rank": 50,
-      "promotion_family": "solver_exact_lod_completion",
-      "promotion_id": "RP-008",
-      "quality_flags": [
-        "sampled_dense_model"
-      ],
-      "quality_tier": "solver_exact_sampled_review",
-      "recommended_action": "add full-detail paging or LOD evidence so sampled solver-exact asset can support full-detail claims",
-      "renderable_segment_count": 34000,
-      "route": "midas_mgt_direct_parser",
-      "segment_count": 1800,
-      "status": "solver_graph_ready"
     }
   ],
   "quality_gate_reason_code": "PASS_WITH_REVIEW_QUEUE",
@@ -305,18 +277,16 @@
     "current_solver_exact_asset_count": 11,
     "effort_counts": {
       "high": 6,
-      "medium": 1,
       "medium_high": 1
     },
     "family_counts": {
       "ifc_coordinate_geometry_reconstruction": 6,
-      "ifc_node_glyph_topology_rebuild": 1,
-      "solver_exact_lod_completion": 1
+      "ifc_node_glyph_topology_rebuild": 1
     },
     "planned_solver_exact_asset_count_after_unlock_batch": 11,
     "planned_unlock_batch_count": 0,
     "planned_unlock_batch_expected_delta": 0,
-    "promotion_candidate_count": 8,
+    "promotion_candidate_count": 7,
     "promotion_delta_available": 7,
     "required_solver_exact_delta": 0,
     "sufficient_unlock_batch_for_target": true,

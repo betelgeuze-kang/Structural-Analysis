@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 
 from implementation.phase1.build_real_drawing_private_3d_webviewer import (
+    DEFAULT_FULL_DETAIL_LOD_MANIFEST,
     DEFAULT_INTAKE_QUEUE,
     DEFAULT_MAX_PROXY_EDGES,
     DEFAULT_MAX_PROXY_NODES,
@@ -21,6 +22,7 @@ def export_structure_viewer_preset(
     out_summary: Path = DEFAULT_OUT_SUMMARY,
     out_viewer_sidecar: Path = DEFAULT_OUT_VIEWER_SIDECAR,
     promotion_queue_path: Path | None = None,
+    full_detail_lod_manifest_path: Path | None = None,
     max_segments_per_asset: int = DEFAULT_MAX_SEGMENTS_PER_ASSET,
     max_proxy_nodes: int = DEFAULT_MAX_PROXY_NODES,
     max_proxy_edges: int = DEFAULT_MAX_PROXY_EDGES,
@@ -31,6 +33,7 @@ def export_structure_viewer_preset(
         out_summary=out_summary,
         out_viewer_sidecar=out_viewer_sidecar,
         promotion_queue_path=promotion_queue_path,
+        full_detail_lod_manifest_path=full_detail_lod_manifest_path,
         max_segments_per_asset=max_segments_per_asset,
         max_proxy_nodes=max_proxy_nodes,
         max_proxy_edges=max_proxy_edges,
@@ -52,6 +55,14 @@ def main() -> None:
             f"Canonical path: {DEFAULT_SOLVER_EXACT_PROMOTION_QUEUE}"
         ),
     )
+    parser.add_argument(
+        "--full-detail-lod-manifest",
+        default="",
+        help=(
+            "Optional full-detail LOD evidence manifest. "
+            f"Canonical path: {DEFAULT_FULL_DETAIL_LOD_MANIFEST}"
+        ),
+    )
     parser.add_argument("--max-segments-per-asset", type=int, default=DEFAULT_MAX_SEGMENTS_PER_ASSET)
     parser.add_argument("--max-proxy-nodes", type=int, default=DEFAULT_MAX_PROXY_NODES)
     parser.add_argument("--max-proxy-edges", type=int, default=DEFAULT_MAX_PROXY_EDGES)
@@ -61,6 +72,9 @@ def main() -> None:
         out_summary=Path(args.out_summary),
         out_viewer_sidecar=Path(args.out_viewer_sidecar),
         promotion_queue_path=Path(args.promotion_queue) if str(args.promotion_queue).strip() else None,
+        full_detail_lod_manifest_path=(
+            Path(args.full_detail_lod_manifest) if str(args.full_detail_lod_manifest).strip() else None
+        ),
         max_segments_per_asset=args.max_segments_per_asset,
         max_proxy_nodes=args.max_proxy_nodes,
         max_proxy_edges=args.max_proxy_edges,

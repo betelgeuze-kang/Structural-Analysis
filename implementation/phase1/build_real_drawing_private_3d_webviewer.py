@@ -22,6 +22,9 @@ DEFAULT_OUT_VIEWER_SIDECAR = Path("src/structure-viewer/index.real_drawing_priva
 DEFAULT_SOLVER_EXACT_PROMOTION_QUEUE = Path(
     "implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.json"
 )
+DEFAULT_FULL_DETAIL_LOD_MANIFEST = Path(
+    "implementation/phase1/commercialization_status/real_drawing_full_detail_lod_manifest.json"
+)
 DEFAULT_MAX_SEGMENTS_PER_ASSET = 1800
 DEFAULT_MAX_PROXY_NODES = 900
 DEFAULT_MAX_PROXY_EDGES = 1800
@@ -102,6 +105,45 @@ def _graph_reference(row: dict[str, Any]) -> str:
             return value
     artifacts = row.get("hard_evidence_artifacts") if isinstance(row.get("hard_evidence_artifacts"), dict) else {}
     return str(artifacts.get("model_json", "") or "").strip()
+
+
+def _full_detail_lod_by_asset(manifest_path: Path | None) -> dict[str, dict[str, Any]]:
+    if manifest_path is None:
+        return {}
+    manifest = _load_json(manifest_path)
+    items = manifest.get("lod_items") if isinstance(manifest.get("lod_items"), list) else []
+    return {
+        str(item.get("asset_ref") or ""): item
+        for item in items
+        if isinstance(item, dict) and str(item.get("asset_ref") or "")
+    }
+
+
+def _compact_lod_evidence(item: dict[str, Any], *, expected_full_detail_segment_count: int) -> dict[str, Any]:
+    full_detail_segment_count = _safe_int(item.get("full_detail_segment_count"), 0)
+    viewer_sample_segment_count = _safe_int(item.get("viewer_sample_segment_count"), 0)
+    contract_pass = (
+        bool(item.get("contract_pass", False))
+        and bool(item.get("full_detail_lod_ready", False))
+        and full_detail_segment_count >= expected_full_detail_segment_count
+        and viewer_sample_segment_count > 0
+    )
+    return {
+        "contract_pass": contract_pass,
+        "reason_code": str(
+            item.get("reason_code")
+            or ("PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED" if contract_pass else "ERR_FULL_DETAIL_LOD_EVIDENCE_INCOMPLETE")
+        ),
+        "lod_policy": str(item.get("lod_policy") or ""),
+        "full_detail_segment_count": full_detail_segment_count,
+        "viewer_sample_segment_count": viewer_sample_segment_count,
+        "sample_ratio": _safe_float(item.get("sample_ratio"), 0.0),
+        "closure_evidence": [
+            str(value)
+            for value in (item.get("closure_evidence") or [])
+            if str(value)
+        ][:8],
+    }
 
 
 def _point_from_node(row: dict[str, Any]) -> list[float] | None:
@@ -259,10 +301,12 @@ def _build_asset_payload(
     *,
     index: int,
     base_dir: Path,
+    full_detail_lod_by_asset: dict[str, dict[str, Any]],
     max_segments_per_asset: int,
     max_proxy_nodes: int,
     max_proxy_edges: int,
 ) -> dict[str, Any]:
+    asset_ref = f"RD-{index:03d}"
     graph_path = _candidate_path(_graph_reference(row), base_dir=base_dir)
     payload = _load_json(graph_path) if graph_path else {}
     is_proxy_graph = bool(isinstance(payload.get("nodes"), list) and isinstance(payload.get("edges"), list) and not payload.get("model"))
@@ -279,12 +323,21 @@ def _build_asset_payload(
     status = str(row.get("optimization_status", "") or "")
     solver_exact = bool(row.get("solver_exact", False))
     raw_renderable_count = _safe_int(metrics.get("renderable_segment_count", len(segments)))
+    lod_evidence = (
+        _compact_lod_evidence(
+            full_detail_lod_by_asset.get(asset_ref, {}),
+            expected_full_detail_segment_count=raw_renderable_count,
+        )
+        if solver_exact and raw_renderable_count > len(segments)
+        else {}
+    )
+    lod_evidence_ready = bool(lod_evidence.get("contract_pass", False))
     quality_flags: list[str] = []
     if is_proxy_graph:
         quality_flags.append("proxy_layout_not_true_geometry")
         if _safe_int(metrics.get("edge_count", 0)) <= 0 and segments:
             quality_flags.append("proxy_node_glyph_fallback")
-    if raw_renderable_count > len(segments):
+    if raw_renderable_count > len(segments) and not lod_evidence_ready:
         quality_flags.append("sampled_dense_model")
     if len(segments) < 10 and not solver_exact:
         quality_flags.append("sparse_preview")
@@ -298,7 +351,7 @@ def _build_asset_payload(
     elif "sparse_preview" in quality_flags:
         warning_label = "sparse"
     return {
-        "asset_ref": f"RD-{index:03d}",
+        "asset_ref": asset_ref,
         "file_type": str(row.get("file_type", "") or ""),
         "route": route,
         "status": status,
@@ -311,12 +364,14 @@ def _build_asset_payload(
         "quality_flags": quality_flags,
         "warning_label": warning_label,
         "segments": segments,
+        **({"lod_evidence": lod_evidence} if lod_evidence_ready else {}),
     }
 
 
 def build_registry_payload(
     *,
     intake_queue_path: Path = DEFAULT_INTAKE_QUEUE,
+    full_detail_lod_manifest_path: Path | None = None,
     max_segments_per_asset: int = DEFAULT_MAX_SEGMENTS_PER_ASSET,
     max_proxy_nodes: int = DEFAULT_MAX_PROXY_NODES,
     max_proxy_edges: int = DEFAULT_MAX_PROXY_EDGES,
@@ -327,11 +382,13 @@ def build_registry_payload(
         for row in (queue_payload.get("queue") or [])
         if isinstance(row, dict) and bool(row.get("ready_for_optimized_drawing_generation", False))
     ]
+    lod_by_asset = _full_detail_lod_by_asset(full_detail_lod_manifest_path)
     assets = [
         _build_asset_payload(
             row,
             index=index,
             base_dir=intake_queue_path.parent.parent.parent if intake_queue_path.parent.name == "real_drawing_private_corpus" else Path("."),
+            full_detail_lod_by_asset=lod_by_asset,
             max_segments_per_asset=max_segments_per_asset,
             max_proxy_nodes=max_proxy_nodes,
             max_proxy_edges=max_proxy_edges,
@@ -364,6 +421,7 @@ def _summary_payload(
     out_viewer_sidecar: Path | None,
     promotion_queue_path: Path | None = None,
     promotion_queue: dict[str, Any] | None = None,
+    full_detail_lod_manifest_path: Path | None = None,
 ) -> dict[str, Any]:
     promotion_summary = (
         promotion_queue.get("summary")
@@ -376,6 +434,7 @@ def _summary_payload(
         "output_html": str(out_html) if out_html is not None else "",
         "output_viewer_sidecar": str(out_viewer_sidecar) if out_viewer_sidecar is not None else "",
         "solver_exact_promotion_queue": str(promotion_queue_path) if promotion_queue_path is not None else "",
+        "full_detail_lod_manifest": str(full_detail_lod_manifest_path) if full_detail_lod_manifest_path is not None else "",
         "structure_viewer_preset": STRUCTURE_VIEWER_PRESET_KEY,
         "structure_viewer_href": STRUCTURE_VIEWER_HREF,
         "asset_count": _safe_int(registry.get("asset_count", 0)),
@@ -880,12 +939,14 @@ def build_webviewer(
     out_summary: Path = DEFAULT_OUT_SUMMARY,
     out_viewer_sidecar: Path | None = DEFAULT_OUT_VIEWER_SIDECAR,
     promotion_queue_path: Path | None = None,
+    full_detail_lod_manifest_path: Path | None = None,
     max_segments_per_asset: int = DEFAULT_MAX_SEGMENTS_PER_ASSET,
     max_proxy_nodes: int = DEFAULT_MAX_PROXY_NODES,
     max_proxy_edges: int = DEFAULT_MAX_PROXY_EDGES,
 ) -> dict[str, Any]:
     registry = build_registry_payload(
         intake_queue_path=intake_queue_path,
+        full_detail_lod_manifest_path=full_detail_lod_manifest_path,
         max_segments_per_asset=max_segments_per_asset,
         max_proxy_nodes=max_proxy_nodes,
         max_proxy_edges=max_proxy_edges,
@@ -901,6 +962,7 @@ def build_webviewer(
         out_viewer_sidecar=out_viewer_sidecar,
         promotion_queue_path=promotion_queue_path,
         promotion_queue=promotion_queue,
+        full_detail_lod_manifest_path=full_detail_lod_manifest_path,
     )
     _write_text(out_summary, json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
     return summary
@@ -923,6 +985,14 @@ def main() -> None:
         default="",
         help="Optional solver-exact promotion queue JSON to embed as sanitized viewer metadata.",
     )
+    parser.add_argument(
+        "--full-detail-lod-manifest",
+        default="",
+        help=(
+            "Optional full-detail LOD evidence manifest for sampled solver-exact assets. "
+            f"Canonical path: {DEFAULT_FULL_DETAIL_LOD_MANIFEST}"
+        ),
+    )
     parser.add_argument("--max-segments-per-asset", type=int, default=DEFAULT_MAX_SEGMENTS_PER_ASSET)
     parser.add_argument("--max-proxy-nodes", type=int, default=DEFAULT_MAX_PROXY_NODES)
     parser.add_argument("--max-proxy-edges", type=int, default=DEFAULT_MAX_PROXY_EDGES)
@@ -933,6 +1003,9 @@ def main() -> None:
         out_summary=Path(args.out_summary),
         out_viewer_sidecar=Path(args.out_viewer_sidecar) if str(args.out_viewer_sidecar).strip() else None,
         promotion_queue_path=Path(args.promotion_queue) if str(args.promotion_queue).strip() else None,
+        full_detail_lod_manifest_path=(
+            Path(args.full_detail_lod_manifest) if str(args.full_detail_lod_manifest).strip() else None
+        ),
         max_segments_per_asset=args.max_segments_per_asset,
         max_proxy_nodes=args.max_proxy_nodes,
         max_proxy_edges=args.max_proxy_edges,

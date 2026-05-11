@@ -154,20 +154,31 @@
       "file_type": ".mgt",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "lod_evidence": {
+        "closure_evidence": [
+          "source_solver_graph_json_receipt",
+          "full_detail_segment_count_receipt",
+          "viewer_sample_lod_policy_receipt"
+        ],
+        "contract_pass": true,
+        "full_detail_segment_count": 34000,
+        "lod_policy": "sampled_viewport_with_full_detail_source_receipt",
+        "reason_code": "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED",
+        "sample_ratio": 0.052941,
+        "viewer_sample_segment_count": 1800
+      },
       "metrics": {
         "element_count": 12728,
         "node_count": 11355,
         "renderable_segment_count": 34000
       },
       "model_asset_count": 1,
-      "quality_flags": [
-        "sampled_dense_model"
-      ],
+      "quality_flags": [],
       "route": "midas_mgt_direct_parser",
       "segment_count": 1800,
       "solver_exact": true,
       "status": "solver_graph_ready",
-      "warning_label": "sampled"
+      "warning_label": ""
     },
     {
       "asset_ref": "RD-009",
@@ -350,6 +361,7 @@
       "warning_label": ""
     }
   ],
+  "full_detail_lod_manifest": "implementation/phase1/commercialization_status/real_drawing_full_detail_lod_manifest.json",
   "output_html": "",
   "output_viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js",
   "proxy_or_preview_asset_count": 7,
@@ -361,7 +373,7 @@
   },
   "schema_version": "real-drawing-private-3d-webviewer.v1",
   "solver_exact_asset_count": 11,
-  "solver_exact_open_promotion_item_count": 8,
+  "solver_exact_open_promotion_item_count": 7,
   "solver_exact_planned_asset_count_after_unlock_batch": 11,
   "solver_exact_planned_unlock_batch_count": 0,
   "solver_exact_promotion_queue": "implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.json",

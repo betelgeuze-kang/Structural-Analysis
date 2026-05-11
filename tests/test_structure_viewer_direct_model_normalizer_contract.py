@@ -80,7 +80,11 @@ const artifact = {
         geometry_mode: 'solver_topology_xyz',
         geometry_available: true,
         segment_count: 2,
-        quality_flags: []
+        quality_flags: [],
+        lod_evidence_status: 'PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED',
+        full_detail_segment_count: 7,
+        viewer_sample_segment_count: 2,
+        lod_sample_ratio: 0.285714
       },
       {
         asset_ref: 'RD-002',
@@ -209,6 +213,8 @@ console.log(JSON.stringify({
     assert meta["real_drawing_solver_exact_asset_count"] == 1
     assert meta["real_drawing_proxy_or_preview_asset_count"] == 1
     assert meta["real_drawing_registry_summary"]["quality_flag_counts"]["not_solver_exact"] == 1
+    assert meta["real_drawing_asset_registry"][0]["lod_evidence_status"] == "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED"
+    assert meta["real_drawing_asset_registry"][0]["full_detail_segment_count"] == 7
     assert meta["real_drawing_asset_registry"][1]["asset_ref"] == "RD-002"
     assert meta["real_drawing_asset_registry"][1]["quality_flags"] == ["not_solver_exact"]
     assert meta["real_drawing_solver_exact_promotion_queue"]["summary"]["target_solver_exact_asset_count"] == 2

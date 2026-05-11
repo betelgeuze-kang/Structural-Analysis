@@ -216,3 +216,72 @@ def test_private_3d_webviewer_keeps_solver_exact_compact_archive_out_of_sparse_r
     assert asset["segment_count"] == 3
     assert "sparse_preview" not in asset["quality_flags"]
     assert asset["warning_label"] == ""
+
+
+def test_private_3d_webviewer_attaches_lod_evidence_for_sampled_solver_exact(tmp_path: Path) -> None:
+    module = _load_module()
+    graph_path = tmp_path / "graphs" / "dense_solver.json"
+    queue_path = tmp_path / "model_optimization_intake_queue.json"
+    lod_manifest_path = tmp_path / "lod.json"
+    _write_json(
+        graph_path,
+        {
+            "model": {
+                "nodes": [{"id": index, "x": index, "y": 0, "z": 0} for index in range(1, 9)],
+                "elements": [
+                    {"id": index, "family": "beam", "node_ids": [index, index + 1]}
+                    for index in range(1, 8)
+                ],
+            }
+        },
+    )
+    _write_json(
+        queue_path,
+        {
+            "queue": [
+                {
+                    "solver_graph_model_json": str(graph_path),
+                    "file_type": ".mgt",
+                    "optimization_route": "midas_mgt_direct_parser",
+                    "optimization_status": "solver_graph_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": True,
+                    "model_asset_count": 1,
+                }
+            ]
+        },
+    )
+    _write_json(
+        lod_manifest_path,
+        {
+            "contract_pass": True,
+            "lod_items": [
+                {
+                    "asset_ref": "RD-001",
+                    "contract_pass": True,
+                    "reason_code": "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED",
+                    "full_detail_lod_ready": True,
+                    "lod_policy": "sampled_viewport_with_full_detail_source_receipt",
+                    "full_detail_segment_count": 7,
+                    "viewer_sample_segment_count": 3,
+                    "sample_ratio": 3 / 7,
+                    "closure_evidence": ["full_detail_segment_count_receipt"],
+                    "source_url": "SHOULD_NOT_LEAK",
+                }
+            ],
+        },
+    )
+
+    registry = module.build_registry_payload(
+        intake_queue_path=queue_path,
+        full_detail_lod_manifest_path=lod_manifest_path,
+        max_segments_per_asset=3,
+    )
+
+    asset = registry["assets"][0]
+    assert asset["segment_count"] == 3
+    assert asset["metrics"]["renderable_segment_count"] == 7
+    assert "sampled_dense_model" not in asset["quality_flags"]
+    assert asset["lod_evidence"]["contract_pass"] is True
+    assert asset["lod_evidence"]["full_detail_segment_count"] == 7
+    assert "SHOULD_NOT_LEAK" not in json.dumps(asset)

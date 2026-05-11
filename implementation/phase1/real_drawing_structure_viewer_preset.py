@@ -56,8 +56,11 @@ def _write_text(path: Path, text: str) -> None:
 
 def quality_notice(asset: dict[str, Any]) -> str:
     flags = {str(flag) for flag in (asset.get("quality_flags") or [])}
+    lod_evidence = asset.get("lod_evidence") if isinstance(asset.get("lod_evidence"), dict) else {}
     if "proxy_layout_not_true_geometry" in flags:
         return "IFC proxy topology layout; not recovered architectural/structural coordinates."
+    if bool(lod_evidence.get("contract_pass", False)):
+        return "Dense solver model uses a sampled viewport with full-detail LOD evidence."
     if "sampled_dense_model" in flags:
         return "Dense solver model sampled for browser performance."
     if "sparse_preview" in flags and not bool(asset.get("solver_exact", False)):
@@ -98,6 +101,7 @@ def asset_bounds(asset: dict[str, Any]) -> tuple[list[float], list[float]]:
 
 def asset_registry_row(asset: dict[str, Any]) -> dict[str, Any]:
     metrics = asset.get("metrics") if isinstance(asset.get("metrics"), dict) else {}
+    lod_evidence = asset.get("lod_evidence") if isinstance(asset.get("lod_evidence"), dict) else {}
     quality_flags = [str(flag) for flag in (asset.get("quality_flags") or [])]
     return {
         "asset_ref": str(asset.get("asset_ref") or ""),
@@ -115,6 +119,10 @@ def asset_registry_row(asset: dict[str, Any]) -> dict[str, Any]:
         "node_count": _safe_int(metrics.get("node_count", metrics.get("proxy_node_count", 0))),
         "element_count": _safe_int(metrics.get("element_count", metrics.get("edge_count", 0))),
         "renderable_segment_count": _safe_int(metrics.get("renderable_segment_count", asset.get("segment_count", 0))),
+        "lod_evidence_status": str(lod_evidence.get("reason_code") or ""),
+        "full_detail_segment_count": _safe_int(lod_evidence.get("full_detail_segment_count", 0)),
+        "viewer_sample_segment_count": _safe_int(lod_evidence.get("viewer_sample_segment_count", 0)),
+        "lod_sample_ratio": _safe_float(lod_evidence.get("sample_ratio", 0.0)),
     }
 
 
