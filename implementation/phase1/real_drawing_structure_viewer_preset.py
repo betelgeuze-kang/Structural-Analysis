@@ -149,6 +149,33 @@ def _compact_text_list(value: Any, *, limit: int = 8) -> list[str]:
     return [str(item) for item in value if str(item).strip()][:limit]
 
 
+def _compact_promotion_queue_item(item: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "promotion_id": str(item.get("promotion_id") or ""),
+        "asset_ref": str(item.get("asset_ref") or ""),
+        "promotion_family": str(item.get("promotion_family") or ""),
+        "effort_label": str(item.get("effort_label") or ""),
+        "quality_tier": str(item.get("quality_tier") or ""),
+        "file_type": str(item.get("file_type") or ""),
+        "route": str(item.get("route") or ""),
+        "status": str(item.get("status") or ""),
+        "priority_rank": _safe_int(item.get("priority_rank", 0)),
+        "expected_solver_exact_delta": _safe_int(item.get("expected_solver_exact_delta", 0)),
+        "node_count": _safe_int(item.get("node_count", 0)),
+        "element_count": _safe_int(item.get("element_count", 0)),
+        "segment_count": _safe_int(item.get("segment_count", 0)),
+        "renderable_segment_count": _safe_int(item.get("renderable_segment_count", 0)),
+        "quality_flags": _compact_text_list(item.get("quality_flags")),
+        "closure_evidence_required": _compact_text_list(item.get("closure_evidence_required")),
+        "recommended_action": str(item.get("recommended_action") or ""),
+        "blocker_family": str(item.get("blocker_family") or ""),
+        "blocker_reason_code": str(item.get("blocker_reason_code") or ""),
+        "reconstruction_plan_status": str(item.get("reconstruction_plan_status") or ""),
+        "commercial_claim_blocked": bool(item.get("commercial_claim_blocked", False)),
+        "edge_coverage_ratio": _safe_float(item.get("edge_coverage_ratio", 0.0)),
+    }
+
+
 def promotion_queue_summary(promotion_queue: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(promotion_queue, dict) or not promotion_queue:
         return {}
@@ -190,27 +217,12 @@ def promotion_queue_summary(promotion_queue: dict[str, Any] | None) -> dict[str,
             or {}
         )
         source_item = {**detailed_item, **item}
-        planned_unlock_batch.append(
-            {
-                "promotion_id": str(source_item.get("promotion_id") or ""),
-                "asset_ref": str(source_item.get("asset_ref") or ""),
-                "promotion_family": str(source_item.get("promotion_family") or ""),
-                "effort_label": str(source_item.get("effort_label") or ""),
-                "quality_tier": str(source_item.get("quality_tier") or ""),
-                "file_type": str(source_item.get("file_type") or ""),
-                "route": str(source_item.get("route") or ""),
-                "status": str(source_item.get("status") or ""),
-                "priority_rank": _safe_int(source_item.get("priority_rank", 0)),
-                "expected_solver_exact_delta": _safe_int(source_item.get("expected_solver_exact_delta", 0)),
-                "node_count": _safe_int(source_item.get("node_count", 0)),
-                "element_count": _safe_int(source_item.get("element_count", 0)),
-                "segment_count": _safe_int(source_item.get("segment_count", 0)),
-                "renderable_segment_count": _safe_int(source_item.get("renderable_segment_count", 0)),
-                "quality_flags": _compact_text_list(source_item.get("quality_flags")),
-                "closure_evidence_required": _compact_text_list(source_item.get("closure_evidence_required")),
-                "recommended_action": str(source_item.get("recommended_action") or ""),
-            }
-        )
+        planned_unlock_batch.append(_compact_promotion_queue_item(source_item))
+    open_promotion_items = [
+        _compact_promotion_queue_item(item)
+        for item in (promotion_queue.get("promotion_items") or [])[:16]
+        if isinstance(item, dict) and str(item.get("asset_ref") or "")
+    ]
     return {
         "schema_version": str(promotion_queue.get("schema_version") or ""),
         "contract_pass": bool(promotion_queue.get("contract_pass", False)),
@@ -220,6 +232,7 @@ def promotion_queue_summary(promotion_queue: dict[str, Any] | None) -> dict[str,
         "recommended_claim": str(promotion_queue.get("recommended_claim") or ""),
         "summary": summary,
         "planned_unlock_batch": planned_unlock_batch,
+        "open_promotion_items": open_promotion_items,
     }
 
 

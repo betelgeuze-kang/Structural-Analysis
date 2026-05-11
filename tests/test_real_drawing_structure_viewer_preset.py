@@ -83,11 +83,14 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
             {
                 "promotion_id": "RP-001",
                 "asset_ref": "RD-002",
+                "promotion_family": "ifc_coordinate_geometry_reconstruction",
                 "effort_label": "high",
                 "quality_tier": "proxy_preview_review",
                 "file_type": ".ifc",
                 "priority_rank": 40,
                 "closure_evidence_required": ["proxy_layout_flag_removed"],
+                "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+                "commercial_claim_blocked": True,
             }
         ],
     }
@@ -115,6 +118,15 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
     assert payload["meta"]["real_drawing_solver_exact_promotion_queue"]["planned_unlock_batch"][0][
         "closure_evidence_required"
     ] == ["proxy_layout_flag_removed"]
+    assert payload["meta"]["real_drawing_solver_exact_promotion_queue"]["open_promotion_items"][0][
+        "blocker_reason_code"
+    ] == "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY"
+    assert (
+        payload["meta"]["real_drawing_solver_exact_promotion_queue"]["open_promotion_items"][0][
+            "commercial_claim_blocked"
+        ]
+        is True
+    )
     assert len(model["elements"]) == 3
     assert len(model["metadata"]["groups"]) == 2
     assert model["metadata"]["groups"][0]["name"] == "RD-001 · solver_topology_xyz"

@@ -365,6 +365,7 @@
   },
   "schema_version": "real-drawing-private-3d-webviewer.v1",
   "solver_exact_asset_count": 11,
+  "solver_exact_open_promotion_item_count": 10,
   "solver_exact_planned_asset_count_after_unlock_batch": 11,
   "solver_exact_planned_unlock_batch_count": 0,
   "solver_exact_promotion_queue": "implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.json",

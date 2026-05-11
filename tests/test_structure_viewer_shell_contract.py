@@ -53,6 +53,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "Drawing Review Queue" in text
     assert "Next Unlock Batch" in text
     assert "Solver-Exact Target Reached" in text
+    assert "IFC Reconstruction Queue" in text
+    assert "getRealDrawingOpenPromotionItems" in text
+    assert "data-real-drawing-open-promotion-count" in text
     assert "getRealDrawingPromotionQueue" in text
     assert "data-real-drawing-promotion-asset" in text
     assert "quality-badge--exact" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(

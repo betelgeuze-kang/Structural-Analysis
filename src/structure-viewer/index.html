@@ -3646,6 +3646,13 @@ function getRealDrawingPlannedUnlockBatch(data=modelData){
   return(Array.isArray(queue.planned_unlock_batch)?queue.planned_unlock_batch:[])
     .filter(row=>row&&typeof row==='object'&&normalizeSelectionValue(row.asset_ref));
 }
+function getRealDrawingOpenPromotionItems(data=modelData){
+  const queue=getRealDrawingPromotionQueue(data);
+  const rows=Array.isArray(queue.open_promotion_items)
+    ?queue.open_promotion_items
+    :(Array.isArray(queue.promotion_items)?queue.promotion_items:[]);
+  return rows.filter(row=>row&&typeof row==='object'&&normalizeSelectionValue(row.asset_ref));
+}
 function setStatusPillTone(node,tone='success'){
   if(!(node instanceof HTMLElement))return;
   node.classList.remove('status-pill--success','status-pill--warn','status-pill--danger','status-pill--accent');
@@ -3743,6 +3750,15 @@ function renderRealDrawingQualityPanel(data=modelData){
   const promotionQueue=getRealDrawingPromotionQueue(data);
   const promotionSummary=promotionQueue.summary&&typeof promotionQueue.summary==='object'?promotionQueue.summary:{};
   const plannedUnlockBatch=getRealDrawingPlannedUnlockBatch(data).slice(0,8);
+  const allOpenPromotionItems=getRealDrawingOpenPromotionItems(data)
+    .sort((a,b)=>{
+      const aIsIfc=normalizeSelectionValue(a.promotion_family).startsWith('ifc_')?0:1;
+      const bIsIfc=normalizeSelectionValue(b.promotion_family).startsWith('ifc_')?0:1;
+      return aIsIfc-bIsIfc||safeNumber(a.priority_rank,99)-safeNumber(b.priority_rank,99);
+    });
+  const ifcOpenPromotionItems=allOpenPromotionItems
+    .filter(row=>normalizeSelectionValue(row.promotion_family).startsWith('ifc_'));
+  const openPromotionItems=(ifcOpenPromotionItems.length?ifcOpenPromotionItems:allOpenPromotionItems).slice(0,8);
   const promotionTarget=safeNumber(promotionSummary.target_solver_exact_asset_count,0);
   const promotionAfterBatch=safeNumber(promotionSummary.planned_solver_exact_asset_count_after_unlock_batch,0);
   const promotionCurrent=safeNumber(promotionSummary.current_solver_exact_asset_count,quality.exactCount);
@@ -3799,13 +3815,42 @@ function renderRealDrawingQualityPanel(data=modelData){
       </div>
     </section>`
   }else if(promotionTarget&&promotionRequiredDelta===0){
+    const nextQueueTitle=ifcOpenPromotionItems.length
+      ?'IFC Reconstruction Queue'
+      :'Next Quality Closure';
+    const nextQueueList=openPromotionItems.length
+      ?`<div class="real-drawing-review-list real-drawing-unlock-list" data-real-drawing-open-promotion-count="${escapeHtml(String(openPromotionItems.length))}">
+        ${openPromotionItems.map(row=>{
+          const assetRef=normalizeSelectionValue(row.asset_ref);
+          const family=normalizeSelectionValue(row.promotion_family)||'quality closure';
+          const action=normalizeSelectionValue(row.recommended_action)||family;
+          const blocker=normalizeSelectionValue(row.blocker_reason_code);
+          const effort=normalizeSelectionValue(row.effort_label)||'review';
+          const flags=Array.isArray(row.quality_flags)?row.quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean):[];
+          return `
+            <button type="button" class="real-drawing-review-item real-drawing-promotion-item" data-real-drawing-promotion-asset="${escapeHtml(assetRef)}">
+              <span class="quality-badge quality-badge--review">${escapeHtml(normalizeSelectionValue(row.promotion_id)||'open')}</span>
+              <span class="real-drawing-review-item__body">
+                <strong>${escapeHtml(assetRef)} · ${escapeHtml(family)}</strong>
+                <span>${escapeHtml(action)}</span>
+                <small>${escapeHtml(blocker||flags.join(', ')||normalizeSelectionValue(row.status)||'pending')}</small>
+              </span>
+              <span class="real-drawing-review-item__segments">${escapeHtml(effort)}</span>
+            </button>`;
+        }).join('')}
+      </div>`
+      :'<div class="panel-placeholder">Archive native write-back promotions are closed for this target.</div>';
     promotionBlock=`
     <section class="real-drawing-promotion-panel" data-real-drawing-promotion-state="target-reached" data-real-drawing-promotion-target="${escapeHtml(String(promotionTarget))}">
       <div class="real-drawing-promotion-header">
         <span>Solver-Exact Target Reached</span>
         <strong>${escapeHtml(String(promotionCurrent))}/${escapeHtml(String(promotionTarget))}</strong>
       </div>
-      <div class="panel-placeholder">Archive native write-back promotions are closed for this target.</div>
+      <div class="real-drawing-promotion-header real-drawing-promotion-header--subtle">
+        <span>${escapeHtml(nextQueueTitle)}</span>
+        <strong>${escapeHtml(String(openPromotionItems.length))}</strong>
+      </div>
+      ${nextQueueList}
     </section>`;
   }
   panel.innerHTML=`

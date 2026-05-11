@@ -223,34 +223,52 @@ function compactStringList(value, limit = 8) {
     .slice(0, limit);
 }
 
+function normalizeRealDrawingPromotionItem(row) {
+  return {
+    promotion_id: normalizeSelectionValue(row?.promotion_id),
+    asset_ref: normalizeSelectionValue(row?.asset_ref),
+    promotion_family: normalizeSelectionValue(row?.promotion_family),
+    effort_label: normalizeSelectionValue(row?.effort_label),
+    quality_tier: normalizeSelectionValue(row?.quality_tier),
+    file_type: normalizeSelectionValue(row?.file_type),
+    route: normalizeSelectionValue(row?.route),
+    status: normalizeSelectionValue(row?.status),
+    priority_rank: safeNumber(row?.priority_rank, 0),
+    expected_solver_exact_delta: safeNumber(row?.expected_solver_exact_delta, 0),
+    node_count: safeNumber(row?.node_count, 0),
+    element_count: safeNumber(row?.element_count, 0),
+    segment_count: safeNumber(row?.segment_count, 0),
+    renderable_segment_count: safeNumber(row?.renderable_segment_count, 0),
+    quality_flags: compactStringList(row?.quality_flags),
+    closure_evidence_required: compactStringList(row?.closure_evidence_required),
+    recommended_action: normalizeSelectionValue(row?.recommended_action),
+    blocker_family: normalizeSelectionValue(row?.blocker_family),
+    blocker_reason_code: normalizeSelectionValue(row?.blocker_reason_code),
+    reconstruction_plan_status: normalizeSelectionValue(row?.reconstruction_plan_status),
+    commercial_claim_blocked: Boolean(row?.commercial_claim_blocked),
+    edge_coverage_ratio: safeNumber(row?.edge_coverage_ratio, 0),
+  };
+}
+
 export function buildRealDrawingSolverExactPromotionQueue(rootMeta) {
   const queue = rootMeta?.real_drawing_solver_exact_promotion_queue && typeof rootMeta.real_drawing_solver_exact_promotion_queue === 'object'
     ? rootMeta.real_drawing_solver_exact_promotion_queue
     : {};
   const summary = queue.summary && typeof queue.summary === 'object' ? queue.summary : {};
   const plannedUnlockBatch = (Array.isArray(queue.planned_unlock_batch) ? queue.planned_unlock_batch : [])
-    .map(row => ({
-      promotion_id: normalizeSelectionValue(row?.promotion_id),
-      asset_ref: normalizeSelectionValue(row?.asset_ref),
-      promotion_family: normalizeSelectionValue(row?.promotion_family),
-      effort_label: normalizeSelectionValue(row?.effort_label),
-      quality_tier: normalizeSelectionValue(row?.quality_tier),
-      file_type: normalizeSelectionValue(row?.file_type),
-      route: normalizeSelectionValue(row?.route),
-      status: normalizeSelectionValue(row?.status),
-      priority_rank: safeNumber(row?.priority_rank, 0),
-      expected_solver_exact_delta: safeNumber(row?.expected_solver_exact_delta, 0),
-      node_count: safeNumber(row?.node_count, 0),
-      element_count: safeNumber(row?.element_count, 0),
-      segment_count: safeNumber(row?.segment_count, 0),
-      renderable_segment_count: safeNumber(row?.renderable_segment_count, 0),
-      quality_flags: compactStringList(row?.quality_flags),
-      closure_evidence_required: compactStringList(row?.closure_evidence_required),
-      recommended_action: normalizeSelectionValue(row?.recommended_action),
-    }))
+    .map(normalizeRealDrawingPromotionItem)
     .filter(row => row.asset_ref)
     .slice(0, 32);
-  if (!Object.keys(queue).length && !plannedUnlockBatch.length) return {};
+  const openPromotionItemsSource = Array.isArray(queue.open_promotion_items)
+    ? queue.open_promotion_items
+    : Array.isArray(queue.promotion_items)
+      ? queue.promotion_items
+      : [];
+  const openPromotionItems = openPromotionItemsSource
+    .map(normalizeRealDrawingPromotionItem)
+    .filter(row => row.asset_ref)
+    .slice(0, 32);
+  if (!Object.keys(queue).length && !plannedUnlockBatch.length && !openPromotionItems.length) return {};
   return {
     schema_version: normalizeSelectionValue(queue.schema_version),
     contract_pass: Boolean(queue.contract_pass),
@@ -275,6 +293,7 @@ export function buildRealDrawingSolverExactPromotionQueue(rootMeta) {
       effort_counts: summary.effort_counts && typeof summary.effort_counts === 'object' ? { ...summary.effort_counts } : {},
     },
     planned_unlock_batch: plannedUnlockBatch,
+    open_promotion_items: openPromotionItems,
   };
 }
 

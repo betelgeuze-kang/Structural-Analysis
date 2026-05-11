@@ -60,13 +60,21 @@
     },
     {
       "asset_ref": "RD-007",
+      "blocker_family": "ifc_relationship_edge_extraction_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_NODE_GLYPH_FALLBACK",
       "closure_evidence_required": [
         "ifc_relationship_edge_extraction_receipt",
-        "node_glyph_fallback_removed",
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
       ],
       "closure_status": "pending",
+      "commercial_claim_blocked": true,
       "current_solver_exact": false,
+      "edge_coverage_ratio": 0.0,
       "effort_label": "medium_high",
       "element_count": 0,
       "expected_solver_exact_delta": 1,
@@ -82,7 +90,8 @@
         "proxy_node_glyph_fallback"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "rebuild IFC fallback node glyph layout into edge-backed structural topology",
+      "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "reconstruction_plan_status": "open",
       "renderable_segment_count": 836,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 836,
@@ -90,13 +99,21 @@
     },
     {
       "asset_ref": "RD-001",
+      "blocker_family": "ifc_relationship_coverage_gap",
+      "blocker_reason_code": "ERR_IFC_PROXY_RELATIONSHIP_COVERAGE_GAP",
       "closure_evidence_required": [
-        "ifc_placement_coordinate_extraction_receipt",
-        "proxy_layout_flag_removed",
-        "solver_exact_or_engineer_signed_geometry_receipt"
+        "ifc_relationship_edge_extraction_receipt",
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "closure_status": "pending",
+      "commercial_claim_blocked": true,
       "current_solver_exact": false,
+      "edge_coverage_ratio": 0.8079,
       "effort_label": "high",
       "element_count": 0,
       "expected_solver_exact_delta": 1,
@@ -111,7 +128,8 @@
         "proxy_layout_not_true_geometry"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "reconstruction_plan_status": "open",
       "renderable_segment_count": 534,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 534,
@@ -119,13 +137,20 @@
     },
     {
       "asset_ref": "RD-002",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_placement_coordinate_extraction_receipt",
-        "proxy_layout_flag_removed",
-        "solver_exact_or_engineer_signed_geometry_receipt"
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "closure_status": "pending",
+      "commercial_claim_blocked": true,
       "current_solver_exact": false,
+      "edge_coverage_ratio": 1.0,
       "effort_label": "high",
       "element_count": 0,
       "expected_solver_exact_delta": 1,
@@ -140,7 +165,8 @@
         "proxy_layout_not_true_geometry"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "reconstruction_plan_status": "open",
       "renderable_segment_count": 77,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 77,
@@ -148,13 +174,20 @@
     },
     {
       "asset_ref": "RD-003",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_placement_coordinate_extraction_receipt",
-        "proxy_layout_flag_removed",
-        "solver_exact_or_engineer_signed_geometry_receipt"
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "closure_status": "pending",
+      "commercial_claim_blocked": true,
       "current_solver_exact": false,
+      "edge_coverage_ratio": 1.0,
       "effort_label": "high",
       "element_count": 0,
       "expected_solver_exact_delta": 1,
@@ -169,7 +202,8 @@
         "proxy_layout_not_true_geometry"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "reconstruction_plan_status": "open",
       "renderable_segment_count": 898,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 898,
@@ -177,13 +211,20 @@
     },
     {
       "asset_ref": "RD-004",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_placement_coordinate_extraction_receipt",
-        "proxy_layout_flag_removed",
-        "solver_exact_or_engineer_signed_geometry_receipt"
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "closure_status": "pending",
+      "commercial_claim_blocked": true,
       "current_solver_exact": false,
+      "edge_coverage_ratio": 1.0,
       "effort_label": "high",
       "element_count": 0,
       "expected_solver_exact_delta": 1,
@@ -198,7 +239,8 @@
         "proxy_layout_not_true_geometry"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "reconstruction_plan_status": "open",
       "renderable_segment_count": 238,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 238,
@@ -206,13 +248,20 @@
     },
     {
       "asset_ref": "RD-005",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_placement_coordinate_extraction_receipt",
-        "proxy_layout_flag_removed",
-        "solver_exact_or_engineer_signed_geometry_receipt"
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "closure_status": "pending",
+      "commercial_claim_blocked": true,
       "current_solver_exact": false,
+      "edge_coverage_ratio": 1.0,
       "effort_label": "high",
       "element_count": 0,
       "expected_solver_exact_delta": 1,
@@ -227,7 +276,8 @@
         "proxy_layout_not_true_geometry"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "reconstruction_plan_status": "open",
       "renderable_segment_count": 898,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 898,
@@ -235,13 +285,20 @@
     },
     {
       "asset_ref": "RD-006",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_placement_coordinate_extraction_receipt",
-        "proxy_layout_flag_removed",
-        "solver_exact_or_engineer_signed_geometry_receipt"
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "closure_status": "pending",
+      "commercial_claim_blocked": true,
       "current_solver_exact": false,
+      "edge_coverage_ratio": 1.0,
       "effort_label": "high",
       "element_count": 0,
       "expected_solver_exact_delta": 1,
@@ -256,7 +313,8 @@
         "proxy_layout_not_true_geometry"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
+      "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "reconstruction_plan_status": "open",
       "renderable_segment_count": 843,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 843,
@@ -295,6 +353,7 @@
   "reason_code": "PASS_SOLVER_EXACT_TARGET_REACHED",
   "recommended_claim": "Solver-exact target is already reached; continue closing review-only quality flags before full exact claims.",
   "schema_version": "real-drawing-solver-exact-promotion-queue.v1",
+  "source_ifc_reconstruction_plan": "implementation/phase1/commercialization_status/real_drawing_ifc_solver_exact_reconstruction_plan.json",
   "source_quality_gate": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json",
   "structure_viewer_href": "src/structure-viewer/index.html?preset=real_drawing_private_3d",
   "summary": {

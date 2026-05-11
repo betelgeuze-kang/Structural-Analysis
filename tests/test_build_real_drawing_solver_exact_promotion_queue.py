@@ -133,6 +133,45 @@ def test_promotion_queue_prioritizes_archive_quick_wins_before_ifc(tmp_path: Pat
     assert report["promotion_items"][-1]["expected_solver_exact_delta"] == 0
 
 
+def test_promotion_queue_attaches_ifc_reconstruction_blocker_evidence(tmp_path: Path) -> None:
+    gate_path = _quality_gate(tmp_path / "quality_gate.json")
+    plan_path = _write_json(
+        tmp_path / "ifc_reconstruction_plan.json",
+        {
+            "ifc_reconstruction_items": [
+                {
+                    "asset_ref": "RD-002",
+                    "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+                    "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+                    "commercial_claim_blocked": True,
+                    "metrics": {"edge_coverage_ratio": 1.0},
+                    "required_evidence": [
+                        "ifc_local_placement_coordinate_extraction_receipt",
+                        "solver_graph_json_npz_receipt",
+                    ],
+                    "commercialization_recommendation": "keep proxy claim until IFC solver-exact receipts are attached",
+                }
+            ]
+        },
+    )
+
+    report = promotion_queue.build_promotion_queue(
+        gate_path,
+        target_solver_exact_asset_count=3,
+        ifc_reconstruction_plan_path=plan_path,
+    )
+
+    ifc_item = next(item for item in report["promotion_items"] if item["asset_ref"] == "RD-002")
+    assert ifc_item["blocker_reason_code"] == "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY"
+    assert ifc_item["commercial_claim_blocked"] is True
+    assert ifc_item["reconstruction_plan_status"] == "open"
+    assert ifc_item["closure_evidence_required"] == [
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "solver_graph_json_npz_receipt",
+    ]
+    assert "IFC solver-exact receipts" in ifc_item["recommended_action"]
+
+
 def test_promotion_queue_blocks_when_quality_gate_is_missing(tmp_path: Path) -> None:
     missing_path = tmp_path / "missing.json"
 

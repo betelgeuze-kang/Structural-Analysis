@@ -11,6 +11,9 @@ from typing import Any
 DEFAULT_QUALITY_GATE = Path("implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json")
 DEFAULT_OUT = Path("implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.json")
 DEFAULT_OUT_MD = Path("implementation/phase1/commercialization_status/real_drawing_solver_exact_promotion_queue.md")
+DEFAULT_IFC_RECONSTRUCTION_PLAN = Path(
+    "implementation/phase1/commercialization_status/real_drawing_ifc_solver_exact_reconstruction_plan.json"
+)
 DEFAULT_TARGET_SOLVER_EXACT_ASSET_COUNT = 10
 
 
@@ -26,6 +29,12 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"expected a JSON object at {path}")
     return payload
+
+
+def _load_json_if_exists(path: Path | None) -> dict[str, Any]:
+    if path is None or not path.exists():
+        return {}
+    return _load_json(path)
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -116,6 +125,16 @@ def _family_evidence(family: str) -> list[str]:
     return ["manual_solver_exact_review_receipt"]
 
 
+def _ifc_reconstruction_plan_by_asset(plan_path: Path | None) -> dict[str, dict[str, Any]]:
+    plan = _load_json_if_exists(plan_path)
+    items = plan.get("ifc_reconstruction_items") if isinstance(plan.get("ifc_reconstruction_items"), list) else []
+    return {
+        str(item.get("asset_ref") or ""): item
+        for item in items
+        if isinstance(item, dict) and str(item.get("asset_ref") or "")
+    }
+
+
 def _promotion_delta(row: dict[str, Any], family: str) -> int:
     if bool(row.get("solver_exact", False)):
         return 0
@@ -150,11 +169,17 @@ def _asset_sort_key(row: dict[str, Any]) -> tuple[int, int, str]:
     return (_family_priority(family), delta_sort, str(row.get("asset_ref") or ""))
 
 
-def _promotion_item(row: dict[str, Any], index: int) -> dict[str, Any]:
+def _promotion_item(
+    row: dict[str, Any],
+    index: int,
+    *,
+    ifc_reconstruction_plan_by_asset: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     family = _promotion_family(row)
-    return {
+    asset_ref = str(row.get("asset_ref") or "")
+    item = {
         "promotion_id": f"RP-{index:03d}",
-        "asset_ref": str(row.get("asset_ref") or ""),
+        "asset_ref": asset_ref,
         "file_type": str(row.get("file_type") or ""),
         "route": str(row.get("route") or ""),
         "status": str(row.get("status") or ""),
@@ -182,17 +207,40 @@ def _promotion_item(row: dict[str, Any], index: int) -> dict[str, Any]:
         "closure_evidence_required": _family_evidence(family),
         "closure_status": "pending",
     }
+    plan_item = (ifc_reconstruction_plan_by_asset or {}).get(asset_ref)
+    if isinstance(plan_item, dict):
+        required_evidence = [
+            str(value)
+            for value in (plan_item.get("required_evidence") or [])
+            if str(value)
+        ]
+        metrics = plan_item.get("metrics") if isinstance(plan_item.get("metrics"), dict) else {}
+        item.update(
+            {
+                "blocker_family": str(plan_item.get("blocker_family") or ""),
+                "blocker_reason_code": str(plan_item.get("blocker_reason_code") or ""),
+                "reconstruction_plan_status": "open",
+                "commercial_claim_blocked": bool(plan_item.get("commercial_claim_blocked", False)),
+                "edge_coverage_ratio": metrics.get("edge_coverage_ratio", 0),
+            }
+        )
+        if required_evidence:
+            item["closure_evidence_required"] = required_evidence
+            item["recommended_action"] = str(plan_item.get("commercialization_recommendation") or item["recommended_action"])
+    return item
 
 
 def build_promotion_queue(
     quality_gate_path: Path = DEFAULT_QUALITY_GATE,
     *,
     target_solver_exact_asset_count: int = DEFAULT_TARGET_SOLVER_EXACT_ASSET_COUNT,
+    ifc_reconstruction_plan_path: Path | None = DEFAULT_IFC_RECONSTRUCTION_PLAN,
 ) -> dict[str, Any]:
     if not quality_gate_path.exists():
         return {
             "schema_version": "real-drawing-solver-exact-promotion-queue.v1",
             "source_quality_gate": str(quality_gate_path),
+            "source_ifc_reconstruction_plan": str(ifc_reconstruction_plan_path or ""),
             "contract_pass": False,
             "reason_code": "ERR_REAL_DRAWING_QUALITY_GATE_MISSING",
             "summary": {
@@ -217,13 +265,17 @@ def build_promotion_queue(
     current_solver_exact_count = _safe_int(gate_summary.get("solver_exact_asset_count"), 0)
     target_solver_exact_asset_count = int(target_solver_exact_asset_count)
     required_delta = max(0, target_solver_exact_asset_count - current_solver_exact_count)
+    ifc_plan_by_asset = _ifc_reconstruction_plan_by_asset(ifc_reconstruction_plan_path)
 
     candidate_rows = [
         row
         for row in asset_rows
         if str(row.get("quality_tier") or "") != "solver_exact_ready"
     ]
-    items = [_promotion_item(row, index) for index, row in enumerate(candidate_rows, start=1)]
+    items = [
+        _promotion_item(row, index, ifc_reconstruction_plan_by_asset=ifc_plan_by_asset)
+        for index, row in enumerate(candidate_rows, start=1)
+    ]
     items = sorted(items, key=_asset_sort_key)
     for index, item in enumerate(items, start=1):
         item["promotion_id"] = f"RP-{index:03d}"
@@ -243,6 +295,8 @@ def build_promotion_queue(
                 "promotion_family": item["promotion_family"],
                 "expected_solver_exact_delta": delta,
                 "recommended_action": item["recommended_action"],
+                "blocker_reason_code": str(item.get("blocker_reason_code") or ""),
+                "closure_evidence_required": item.get("closure_evidence_required", []),
             }
         )
         accumulated_delta += delta
@@ -268,6 +322,7 @@ def build_promotion_queue(
     return {
         "schema_version": "real-drawing-solver-exact-promotion-queue.v1",
         "source_quality_gate": str(quality_gate_path),
+        "source_ifc_reconstruction_plan": str(ifc_reconstruction_plan_path or ""),
         "contract_pass": contract_pass,
         "reason_code": reason_code,
         "quality_gate_reason_code": str(gate.get("reason_code") or ""),
@@ -329,15 +384,24 @@ def render_markdown(report: dict[str, Any]) -> str:
             )
     else:
         lines.append("No planned unlock batch is available.")
-    lines.extend(["", "## Full Queue", "", "| ID | Asset | Family | Effort | Delta | Flags |", "| --- | --- | --- | --- | ---: | --- |"])
+    lines.extend(
+        [
+            "",
+            "## Full Queue",
+            "",
+            "| ID | Asset | Family | Effort | Delta | Blocker | Flags |",
+            "| --- | --- | --- | --- | ---: | --- | --- |",
+        ]
+    )
     for item in items:
         lines.append(
-            "| {pid} | {asset} | {family} | {effort} | {delta} | {flags} |".format(
+            "| {pid} | {asset} | {family} | {effort} | {delta} | {blocker} | {flags} |".format(
                 pid=item.get("promotion_id", ""),
                 asset=item.get("asset_ref", ""),
                 family=item.get("promotion_family", ""),
                 effort=item.get("effort_label", ""),
                 delta=item.get("expected_solver_exact_delta", 0),
+                blocker=str(item.get("blocker_reason_code", "")).replace("|", "/"),
                 flags=", ".join(str(flag) for flag in item.get("quality_flags", [])),
             )
         )
@@ -349,6 +413,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--quality-gate", type=Path, default=DEFAULT_QUALITY_GATE)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument("--ifc-reconstruction-plan", type=Path, default=DEFAULT_IFC_RECONSTRUCTION_PLAN)
     parser.add_argument("--target-solver-exact-assets", type=int, default=DEFAULT_TARGET_SOLVER_EXACT_ASSET_COUNT)
     parser.add_argument("--json", action="store_true", help="Print the promotion queue JSON to stdout.")
     parser.add_argument(
@@ -361,7 +426,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    report = build_promotion_queue(args.quality_gate, target_solver_exact_asset_count=args.target_solver_exact_assets)
+    report = build_promotion_queue(
+        args.quality_gate,
+        target_solver_exact_asset_count=args.target_solver_exact_assets,
+        ifc_reconstruction_plan_path=args.ifc_reconstruction_plan,
+    )
     _write_json(args.out, report)
     _write_text(args.out_md, render_markdown(report))
     if args.json:

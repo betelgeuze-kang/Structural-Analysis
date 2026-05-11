@@ -58,6 +58,16 @@ const artifact = {
         quality_flags: ['not_solver_exact'],
         closure_evidence_required: ['proxy_layout_flag_removed'],
         recommended_action: 'replace proxy layout with recovered structural geometry'
+      }],
+      open_promotion_items: [{
+        promotion_id: 'RP-001',
+        asset_ref: 'RD-002',
+        promotion_family: 'ifc_coordinate_geometry_reconstruction',
+        effort_label: 'high',
+        blocker_reason_code: 'ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY',
+        commercial_claim_blocked: true,
+        edge_coverage_ratio: 1,
+        closure_evidence_required: ['ifc_local_placement_coordinate_extraction_receipt']
       }]
     },
     real_drawing_asset_registry: [
@@ -206,4 +216,10 @@ console.log(JSON.stringify({
     assert meta["real_drawing_solver_exact_promotion_queue"]["planned_unlock_batch"][0][
         "closure_evidence_required"
     ] == ["proxy_layout_flag_removed"]
+    assert meta["real_drawing_solver_exact_promotion_queue"]["open_promotion_items"][0][
+        "blocker_reason_code"
+    ] == "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY"
+    assert meta["real_drawing_solver_exact_promotion_queue"]["open_promotion_items"][0][
+        "commercial_claim_blocked"
+    ] is True
     assert payload["catalog"][0]["raw_tokens_head"] == ["H-400x200", "SM355"]

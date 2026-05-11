@@ -1,0 +1,342 @@
+{
+  "contract_pass": true,
+  "generated_at": "2026-05-11T11:30:54.895729+00:00",
+  "ifc_reconstruction_items": [
+    {
+      "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.report.json",
+      "asset_ref": "RD-001",
+      "blocker_family": "ifc_relationship_coverage_gap",
+      "blocker_reason_code": "ERR_IFC_PROXY_RELATIONSHIP_COVERAGE_GAP",
+      "commercial_claim_blocked": true,
+      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "current_solver_exact": false,
+      "file_id": "ds3_taltech_v4_ifc",
+      "file_type": ".ifc",
+      "metrics": {
+        "edge_coverage_ratio": 0.8079,
+        "proxy_edge_count": 534,
+        "proxy_node_count": 666,
+        "proxy_relationship_types": [
+          "contained_in_spatial_structure"
+        ],
+        "storey_count": 5,
+        "structural_entity_count": 661
+      },
+      "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.graph.json",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "reconstruction_ready": false,
+      "reconstruction_steps": [
+        "recover_structural_relationship_edges",
+        "extract_ifc_local_placement_coordinate_graph",
+        "bind_shape_representation_to_member_axis_or_surface",
+        "map_material_profile_and_section_assignments",
+        "extract_load_cases_or_attach_engineer_signed_zero_load_receipt",
+        "emit_solver_exact_graph_and_viewer_sidecar"
+      ],
+      "required_evidence": [
+        "ifc_relationship_edge_extraction_receipt",
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "route": "ifc_to_structural_graph_adapter",
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.report.json",
+      "asset_ref": "RD-002",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "commercial_claim_blocked": true,
+      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "current_solver_exact": false,
+      "file_id": "a1_ifc",
+      "file_type": ".ifc",
+      "metrics": {
+        "edge_coverage_ratio": 1.0,
+        "proxy_edge_count": 77,
+        "proxy_node_count": 81,
+        "proxy_relationship_types": [
+          "contained_in_spatial_structure"
+        ],
+        "storey_count": 4,
+        "structural_entity_count": 77
+      },
+      "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.graph.json",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "reconstruction_ready": false,
+      "reconstruction_steps": [
+        "extract_ifc_local_placement_coordinate_graph",
+        "bind_shape_representation_to_member_axis_or_surface",
+        "map_material_profile_and_section_assignments",
+        "extract_load_cases_or_attach_engineer_signed_zero_load_receipt",
+        "emit_solver_exact_graph_and_viewer_sidecar"
+      ],
+      "required_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "route": "ifc_to_structural_graph_adapter",
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.report.json",
+      "asset_ref": "RD-003",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "commercial_claim_blocked": true,
+      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "current_solver_exact": false,
+      "file_id": "a3_ifc",
+      "file_type": ".ifc",
+      "metrics": {
+        "edge_coverage_ratio": 1.0,
+        "proxy_edge_count": 1170,
+        "proxy_node_count": 1174,
+        "proxy_relationship_types": [
+          "contained_in_spatial_structure"
+        ],
+        "storey_count": 4,
+        "structural_entity_count": 1170
+      },
+      "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.graph.json",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "reconstruction_ready": false,
+      "reconstruction_steps": [
+        "extract_ifc_local_placement_coordinate_graph",
+        "bind_shape_representation_to_member_axis_or_surface",
+        "map_material_profile_and_section_assignments",
+        "extract_load_cases_or_attach_engineer_signed_zero_load_receipt",
+        "emit_solver_exact_graph_and_viewer_sidecar"
+      ],
+      "required_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "route": "ifc_to_structural_graph_adapter",
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.report.json",
+      "asset_ref": "RD-004",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "commercial_claim_blocked": true,
+      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "current_solver_exact": false,
+      "file_id": "a4_ifc",
+      "file_type": ".ifc",
+      "metrics": {
+        "edge_coverage_ratio": 1.0,
+        "proxy_edge_count": 238,
+        "proxy_node_count": 248,
+        "proxy_relationship_types": [
+          "contained_in_spatial_structure"
+        ],
+        "storey_count": 10,
+        "structural_entity_count": 238
+      },
+      "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.graph.json",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "reconstruction_ready": false,
+      "reconstruction_steps": [
+        "extract_ifc_local_placement_coordinate_graph",
+        "bind_shape_representation_to_member_axis_or_surface",
+        "map_material_profile_and_section_assignments",
+        "extract_load_cases_or_attach_engineer_signed_zero_load_receipt",
+        "emit_solver_exact_graph_and_viewer_sidecar"
+      ],
+      "required_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "route": "ifc_to_structural_graph_adapter",
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.report.json",
+      "asset_ref": "RD-005",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "commercial_claim_blocked": true,
+      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "current_solver_exact": false,
+      "file_id": "a5_ifc",
+      "file_type": ".ifc",
+      "metrics": {
+        "edge_coverage_ratio": 1.0,
+        "proxy_edge_count": 6772,
+        "proxy_node_count": 6779,
+        "proxy_relationship_types": [
+          "contained_in_spatial_structure"
+        ],
+        "storey_count": 7,
+        "structural_entity_count": 6772
+      },
+      "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.graph.json",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "reconstruction_ready": false,
+      "reconstruction_steps": [
+        "extract_ifc_local_placement_coordinate_graph",
+        "bind_shape_representation_to_member_axis_or_surface",
+        "map_material_profile_and_section_assignments",
+        "extract_load_cases_or_attach_engineer_signed_zero_load_receipt",
+        "emit_solver_exact_graph_and_viewer_sidecar"
+      ],
+      "required_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "route": "ifc_to_structural_graph_adapter",
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.report.json",
+      "asset_ref": "RD-006",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "commercial_claim_blocked": true,
+      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "current_solver_exact": false,
+      "file_id": "a7_ifc",
+      "file_type": ".ifc",
+      "metrics": {
+        "edge_coverage_ratio": 1.0,
+        "proxy_edge_count": 843,
+        "proxy_node_count": 856,
+        "proxy_relationship_types": [
+          "contained_in_spatial_structure"
+        ],
+        "storey_count": 13,
+        "structural_entity_count": 843
+      },
+      "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.graph.json",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "reconstruction_ready": false,
+      "reconstruction_steps": [
+        "extract_ifc_local_placement_coordinate_graph",
+        "bind_shape_representation_to_member_axis_or_surface",
+        "map_material_profile_and_section_assignments",
+        "extract_load_cases_or_attach_engineer_signed_zero_load_receipt",
+        "emit_solver_exact_graph_and_viewer_sidecar"
+      ],
+      "required_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "route": "ifc_to_structural_graph_adapter",
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.report.json",
+      "asset_ref": "RD-007",
+      "blocker_family": "ifc_relationship_edge_extraction_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_NODE_GLYPH_FALLBACK",
+      "commercial_claim_blocked": true,
+      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "current_solver_exact": false,
+      "file_id": "a8_ifc",
+      "file_type": ".ifc",
+      "metrics": {
+        "edge_coverage_ratio": 0.0,
+        "proxy_edge_count": 0,
+        "proxy_node_count": 836,
+        "proxy_relationship_types": [],
+        "storey_count": 7,
+        "structural_entity_count": 829
+      },
+      "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.graph.json",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry",
+        "proxy_node_glyph_fallback"
+      ],
+      "reconstruction_ready": false,
+      "reconstruction_steps": [
+        "recover_structural_relationship_edges",
+        "extract_ifc_local_placement_coordinate_graph",
+        "bind_shape_representation_to_member_axis_or_surface",
+        "map_material_profile_and_section_assignments",
+        "extract_load_cases_or_attach_engineer_signed_zero_load_receipt",
+        "emit_solver_exact_graph_and_viewer_sidecar"
+      ],
+      "required_evidence": [
+        "ifc_relationship_edge_extraction_receipt",
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "route": "ifc_to_structural_graph_adapter",
+      "status": "ifc_proxy_graph_ready"
+    }
+  ],
+  "reason_code": "PASS_IFC_RECONSTRUCTION_PLAN_OPEN",
+  "schema_version": "real-drawing-ifc-solver-exact-reconstruction-plan.v1",
+  "source_intake_queue": "tmp/real_drawing_private_corpus/model_optimization_intake_queue.json",
+  "source_viewer_manifest": "implementation/phase1/commercialization_status/real_drawing_private_3d_viewer_manifest.json",
+  "summary": {
+    "blocked_count": 7,
+    "blocker_family_counts": {
+      "ifc_geometry_material_load_solver_exact_adapter_required": 5,
+      "ifc_relationship_coverage_gap": 1,
+      "ifc_relationship_edge_extraction_required": 1
+    },
+    "blocker_reason_counts": {
+      "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY": 5,
+      "ERR_IFC_PROXY_NODE_GLYPH_FALLBACK": 1,
+      "ERR_IFC_PROXY_RELATIONSHIP_COVERAGE_GAP": 1
+    },
+    "geometry_material_load_adapter_required_count": 5,
+    "ifc_asset_count": 7,
+    "node_glyph_fallback_count": 1,
+    "proxy_edge_count_total": 9634,
+    "proxy_node_count_total": 10640,
+    "relationship_coverage_gap_count": 1,
+    "solver_exact_ready_count": 0,
+    "structural_entity_count_total": 10590
+  }
+}

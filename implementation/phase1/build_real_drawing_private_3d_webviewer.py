@@ -388,6 +388,9 @@ def _summary_payload(
         "solver_exact_planned_asset_count_after_unlock_batch": _safe_int(
             promotion_summary.get("planned_solver_exact_asset_count_after_unlock_batch", 0)
         ),
+        "solver_exact_open_promotion_item_count": _safe_int(
+            promotion_summary.get("promotion_candidate_count", 0)
+        ),
         "route_counts": registry.get("route_counts") if isinstance(registry.get("route_counts"), dict) else {},
         "status_counts": registry.get("status_counts") if isinstance(registry.get("status_counts"), dict) else {},
         "assets": [

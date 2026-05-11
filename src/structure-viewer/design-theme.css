@@ -1048,6 +1048,15 @@ body.structural-surface .real-drawing-promotion-header strong {
   overflow-wrap:anywhere;
 }
 
+body.structural-surface .real-drawing-promotion-header--subtle {
+  padding-top:4px;
+  border-top:1px solid rgba(79,183,173,.18);
+}
+
+body.structural-surface .real-drawing-promotion-header--subtle span {
+  color:var(--muted);
+}
+
 body.structural-surface .real-drawing-review-list {
   display:flex;
   flex-direction:column;
