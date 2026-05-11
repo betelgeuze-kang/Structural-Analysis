@@ -1,13 +1,14 @@
 {
   "contract_pass": true,
-  "generated_at": "2026-05-11T13:27:53.675077+00:00",
+  "generated_at": "2026-05-11T14:02:02.595978+00:00",
   "ifc_reconstruction_items": [
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.report.json",
       "asset_ref": "RD-001",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
-        "ifc_representation_shape_axis_receipt"
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -35,6 +36,51 @@
           "placement_coordinate_structural_count": 661,
           "placement_coverage_ratio": 1.0,
           "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 661
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 1515,
+          "material_binding_coverage_ratio": 0.9939,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 657,
+          "material_direct_structural_count": 369,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 166,
+            "IFCMATERIALCONSTITUENT": 699,
+            "IFCMATERIALCONSTITUENTSET": 285,
+            "IFCMATERIALLAYER": 271,
+            "IFCMATERIALLAYERSET": 111,
+            "IFCMATERIALLAYERSETUSAGE": 1082,
+            "IFCMATERIALPROFILE": 61,
+            "IFCMATERIALPROFILESET": 22
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 26,
+            "IFCMATERIALCONSTITUENTSET": 285,
+            "IFCMATERIALLAYERSET": 100,
+            "IFCMATERIALLAYERSETUSAGE": 1082,
+            "IFCMATERIALPROFILESET": 22
+          },
+          "material_type_structural_count": 622,
+          "missing_material_binding_count": 4,
+          "missing_section_source_count": 6,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9909,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 655,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 130,
+            "IFCMATERIALCONSTITUENT": 699,
+            "IFCMATERIALCONSTITUENTSET": 285,
+            "IFCMATERIALLAYER": 271,
+            "IFCMATERIALLAYERSET": 111,
+            "IFCMATERIALLAYERSETUSAGE": 1082,
+            "IFCMATERIALPROFILE": 61,
+            "IFCMATERIALPROFILESET": 22,
+            "IFCRECTANGLEPROFILEDEF": 483
+          },
           "structural_entity_count": 661
         },
         "ifc_representation_shape_axis_receipt": {
@@ -87,7 +133,6 @@
         "structural_entity_count": 661
       },
       "open_evidence": [
-        "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
@@ -121,7 +166,8 @@
       "asset_ref": "RD-002",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
-        "ifc_representation_shape_axis_receipt"
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -149,6 +195,41 @@
           "placement_coordinate_structural_count": 77,
           "placement_coverage_ratio": 1.0,
           "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 77
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 70,
+          "material_binding_coverage_ratio": 1.0,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 77,
+          "material_direct_structural_count": 77,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 2,
+            "IFCMATERIALLAYER": 7,
+            "IFCMATERIALLAYERSET": 7,
+            "IFCMATERIALLAYERSETUSAGE": 65
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 1,
+            "IFCMATERIALLAYERSET": 4,
+            "IFCMATERIALLAYERSETUSAGE": 65
+          },
+          "material_type_structural_count": 57,
+          "missing_material_binding_count": 0,
+          "missing_section_source_count": 0,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 1.0,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 77,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 19,
+            "IFCMATERIALLAYER": 7,
+            "IFCMATERIALLAYERSET": 7,
+            "IFCMATERIALLAYERSETUSAGE": 65,
+            "IFCRECTANGLEPROFILEDEF": 58
+          },
           "structural_entity_count": 77
         },
         "ifc_representation_shape_axis_receipt": {
@@ -192,7 +273,6 @@
         "structural_entity_count": 77
       },
       "open_evidence": [
-        "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
@@ -226,7 +306,8 @@
       "asset_ref": "RD-003",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
-        "ifc_representation_shape_axis_receipt"
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -254,6 +335,42 @@
           "placement_coordinate_structural_count": 1170,
           "placement_coverage_ratio": 1.0,
           "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 1170
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 918,
+          "material_binding_coverage_ratio": 0.9932,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 1162,
+          "material_direct_structural_count": 1133,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 12,
+            "IFCMATERIALLAYER": 22,
+            "IFCMATERIALLAYERSET": 20,
+            "IFCMATERIALLAYERSETUSAGE": 892
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 6,
+            "IFCMATERIALLAYERSET": 20,
+            "IFCMATERIALLAYERSETUSAGE": 892
+          },
+          "material_type_structural_count": 925,
+          "missing_material_binding_count": 8,
+          "missing_section_source_count": 69,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.941,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 1101,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 90,
+            "IFCISHAPEPROFILEDEF": 24,
+            "IFCMATERIALLAYER": 22,
+            "IFCMATERIALLAYERSET": 20,
+            "IFCMATERIALLAYERSETUSAGE": 892,
+            "IFCRECTANGLEPROFILEDEF": 953
+          },
           "structural_entity_count": 1170
         },
         "ifc_representation_shape_axis_receipt": {
@@ -301,7 +418,6 @@
         "structural_entity_count": 1170
       },
       "open_evidence": [
-        "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
@@ -335,7 +451,8 @@
       "asset_ref": "RD-004",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
-        "ifc_representation_shape_axis_receipt"
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -363,6 +480,41 @@
           "placement_coordinate_structural_count": 238,
           "placement_coverage_ratio": 1.0,
           "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 238
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 207,
+          "material_binding_coverage_ratio": 1.0,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 238,
+          "material_direct_structural_count": 238,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 3,
+            "IFCMATERIALLAYER": 6,
+            "IFCMATERIALLAYERSET": 6,
+            "IFCMATERIALLAYERSETUSAGE": 201
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 2,
+            "IFCMATERIALLAYERSET": 4,
+            "IFCMATERIALLAYERSETUSAGE": 201
+          },
+          "material_type_structural_count": 191,
+          "missing_material_binding_count": 0,
+          "missing_section_source_count": 1,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9958,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 237,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 46,
+            "IFCMATERIALLAYER": 6,
+            "IFCMATERIALLAYERSET": 6,
+            "IFCMATERIALLAYERSETUSAGE": 201,
+            "IFCRECTANGLEPROFILEDEF": 175
+          },
           "structural_entity_count": 238
         },
         "ifc_representation_shape_axis_receipt": {
@@ -406,7 +558,6 @@
         "structural_entity_count": 238
       },
       "open_evidence": [
-        "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
@@ -440,7 +591,8 @@
       "asset_ref": "RD-005",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
-        "ifc_representation_shape_axis_receipt"
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -468,6 +620,41 @@
           "placement_coordinate_structural_count": 6772,
           "placement_coverage_ratio": 1.0,
           "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 6772
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 7354,
+          "material_binding_coverage_ratio": 0.9978,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 6757,
+          "material_direct_structural_count": 6757,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 34,
+            "IFCMATERIALLAYER": 142,
+            "IFCMATERIALLAYERSET": 111,
+            "IFCMATERIALLAYERSETUSAGE": 6684
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 670,
+            "IFCMATERIALLAYERSETUSAGE": 6684
+          },
+          "material_type_structural_count": 0,
+          "missing_material_binding_count": 15,
+          "missing_section_source_count": 57,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9916,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 6715,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 6709,
+            "IFCCIRCLEPROFILEDEF": 9,
+            "IFCCOMPOSITEPROFILEDEF": 5,
+            "IFCMATERIALLAYER": 142,
+            "IFCMATERIALLAYERSET": 111,
+            "IFCMATERIALLAYERSETUSAGE": 6684
+          },
           "structural_entity_count": 6772
         },
         "ifc_representation_shape_axis_receipt": {
@@ -514,7 +701,6 @@
         "structural_entity_count": 6772
       },
       "open_evidence": [
-        "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
@@ -548,7 +734,8 @@
       "asset_ref": "RD-006",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
-        "ifc_representation_shape_axis_receipt"
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -576,6 +763,43 @@
           "placement_coordinate_structural_count": 843,
           "placement_coverage_ratio": 1.0,
           "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 843
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 797,
+          "material_binding_coverage_ratio": 0.9988,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 842,
+          "material_direct_structural_count": 842,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 4,
+            "IFCMATERIALLAYER": 13,
+            "IFCMATERIALLAYERSET": 13,
+            "IFCMATERIALLAYERSETUSAGE": 789
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 2,
+            "IFCMATERIALLAYERSET": 6,
+            "IFCMATERIALLAYERSETUSAGE": 789
+          },
+          "material_type_structural_count": 748,
+          "missing_material_binding_count": 1,
+          "missing_section_source_count": 30,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9644,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 813,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 73,
+            "IFCCIRCLEPROFILEDEF": 9,
+            "IFCISHAPEPROFILEDEF": 2,
+            "IFCMATERIALLAYER": 13,
+            "IFCMATERIALLAYERSET": 13,
+            "IFCMATERIALLAYERSETUSAGE": 789,
+            "IFCRECTANGLEPROFILEDEF": 725
+          },
           "structural_entity_count": 843
         },
         "ifc_representation_shape_axis_receipt": {
@@ -623,7 +847,6 @@
         "structural_entity_count": 843
       },
       "open_evidence": [
-        "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
@@ -657,7 +880,8 @@
       "asset_ref": "RD-007",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
-        "ifc_representation_shape_axis_receipt"
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
@@ -685,6 +909,36 @@
           "placement_coordinate_structural_count": 829,
           "placement_coverage_ratio": 1.0,
           "reason_code": "PASS_IFC_LOCAL_PLACEMENT_COORDINATES_EXTRACTED",
+          "structural_entity_count": 829
+        },
+        "ifc_material_section_binding_receipt": {
+          "binding_scope": "release_safe_material_association_and_section_source_inventory",
+          "contract_pass": true,
+          "material_association_count": 10,
+          "material_binding_coverage_ratio": 1.0,
+          "material_binding_coverage_threshold": 0.95,
+          "material_bound_structural_count": 829,
+          "material_direct_structural_count": 829,
+          "material_entity_type_counts": {
+            "IFCMATERIAL": 10
+          },
+          "material_root_type_counts": {
+            "IFCMATERIAL": 10
+          },
+          "material_type_structural_count": 0,
+          "missing_material_binding_count": 0,
+          "missing_section_source_count": 30,
+          "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+          "section_source_coverage_ratio": 0.9638,
+          "section_source_coverage_threshold": 0.9,
+          "section_source_structural_count": 799,
+          "section_source_type_counts": {
+            "IFCARBITRARYCLOSEDPROFILEDEF": 126,
+            "IFCCIRCLEPROFILEDEF": 3,
+            "IFCISHAPEPROFILEDEF": 3,
+            "IFCLSHAPEPROFILEDEF": 4,
+            "IFCRECTANGLEPROFILEDEF": 142
+          },
           "structural_entity_count": 829
         },
         "ifc_representation_shape_axis_receipt": {
@@ -732,7 +986,6 @@
         "structural_entity_count": 829
       },
       "open_evidence": [
-        "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt"
@@ -777,6 +1030,7 @@
     "geometry_material_load_adapter_required_count": 7,
     "ifc_asset_count": 7,
     "local_placement_receipt_count": 7,
+    "material_section_receipt_count": 7,
     "node_glyph_fallback_count": 0,
     "proxy_edge_count_total": 10602,
     "proxy_node_count_total": 11474,

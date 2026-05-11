@@ -58,7 +58,13 @@ def _fixture_inputs(tmp_path: Path) -> tuple[Path, Path]:
                             "contract_pass": True,
                             "reason_code": "PASS_IFC_REPRESENTATION_SHAPE_AXIS_EXTRACTED",
                             "shape_product_coverage_ratio": 1.0,
-                        }
+                        },
+                        "ifc_material_section_binding_receipt": {
+                            "contract_pass": True,
+                            "reason_code": "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED",
+                            "material_binding_coverage_ratio": 1.0,
+                            "section_source_coverage_ratio": 1.0,
+                        },
                     }
                     if stem == "fixture_c"
                     else {}
@@ -122,6 +128,7 @@ def test_ifc_reconstruction_plan_classifies_proxy_blockers_and_omits_source_urls
     assert report["summary"]["geometry_material_load_adapter_required_count"] == 1
     assert report["summary"]["local_placement_receipt_count"] == 1
     assert report["summary"]["shape_axis_receipt_count"] == 1
+    assert report["summary"]["material_section_receipt_count"] == 1
     assert report["ifc_reconstruction_items"][0]["blocker_reason_code"] == "ERR_IFC_PROXY_NODE_GLYPH_FALLBACK"
     assert report["ifc_reconstruction_items"][1]["blocker_reason_code"] == "ERR_IFC_PROXY_RELATIONSHIP_COVERAGE_GAP"
     assert report["ifc_reconstruction_items"][2]["blocker_reason_code"] == "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY"
@@ -129,9 +136,11 @@ def test_ifc_reconstruction_plan_classifies_proxy_blockers_and_omits_source_urls
     assert report["ifc_reconstruction_items"][2]["attached_evidence"] == [
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
     ]
     assert "ifc_local_placement_coordinate_extraction_receipt" not in report["ifc_reconstruction_items"][2]["open_evidence"]
     assert "ifc_representation_shape_axis_receipt" not in report["ifc_reconstruction_items"][2]["open_evidence"]
+    assert "ifc_material_section_binding_receipt" not in report["ifc_reconstruction_items"][2]["open_evidence"]
     assert "ifc_relationship_edge_extraction_receipt" in report["ifc_reconstruction_items"][0]["required_evidence"]
     assert "SHOULD_NOT_LEAK" not in json.dumps(report)
 

@@ -127,15 +127,24 @@ DATA;
 #11= IFCLOCALPLACEMENT($,#10);
 #12= IFCPRODUCTDEFINITIONSHAPE($,$,(#13,#15));
 #13= IFCSHAPEREPRESENTATION($,'Body','SweptSolid',(#14));
-#14= IFCEXTRUDEDAREASOLID($,$,$,3.);
+#14= IFCEXTRUDEDAREASOLID(#22,$,$,3.);
 #15= IFCSHAPEREPRESENTATION($,'Axis','Curve2D',(#16));
 #16= IFCPOLYLINE((#6,#9));
 #17= IFCPRODUCTDEFINITIONSHAPE($,$,(#18));
 #18= IFCSHAPEREPRESENTATION($,'Body','SweptSolid',(#19));
-#19= IFCEXTRUDEDAREASOLID($,$,$,4.);
+#19= IFCEXTRUDEDAREASOLID(#23,$,$,4.);
 #20= IFCCOLUMN('column-guid',$,'C1',$,$,#8,#12,$);
 #21= IFCBEAM('beam-guid',$,'B1',$,$,#11,#17,$);
-#30= IFCRELAGGREGATES('rel-guid',$,$,$,#5,(#20,#21));
+#22= IFCRECTANGLEPROFILEDEF(.AREA.,$,$,1.,2.);
+#23= IFCRECTANGLEPROFILEDEF(.AREA.,$,$,1.,3.);
+#24= IFCMATERIAL('Concrete');
+#25= IFCMATERIALLAYER(#24,250.,$);
+#26= IFCMATERIALLAYERSET((#25),'LayerSet');
+#27= IFCMATERIALLAYERSETUSAGE(#26,.AXIS2.,.POSITIVE.,0.);
+#28= IFCMATERIAL('Steel');
+#29= IFCRELASSOCIATESMATERIAL('mat-column',$,$,$,(#20),#27);
+#30= IFCRELASSOCIATESMATERIAL('mat-beam',$,$,$,(#21),#28);
+#40= IFCRELAGGREGATES('rel-guid',$,$,$,#5,(#20,#21));
 ENDSEC;
 END-ISO-10303-21;
 """,
@@ -154,6 +163,8 @@ END-ISO-10303-21;
     assert payload["metrics"]["shape_product_structural_count"] == 2
     assert payload["metrics"]["body_representation_structural_count"] == 2
     assert payload["metrics"]["axis_representation_structural_count"] == 1
+    assert payload["metrics"]["material_bound_structural_count"] == 2
+    assert payload["metrics"]["section_source_structural_count"] == 2
     assert payload["evidence_receipts"]["ifc_local_placement_coordinate_extraction_receipt"]["contract_pass"] is True
     representation_receipt = payload["evidence_receipts"]["ifc_representation_shape_axis_receipt"]
     assert representation_receipt["contract_pass"] is True
@@ -162,14 +173,28 @@ END-ISO-10303-21;
         "IFCEXTRUDEDAREASOLID": 2,
         "IFCPOLYLINE": 1,
     }
+    material_receipt = payload["evidence_receipts"]["ifc_material_section_binding_receipt"]
+    assert material_receipt["contract_pass"] is True
+    assert material_receipt["material_bound_structural_count"] == 2
+    assert material_receipt["section_source_structural_count"] == 2
+    assert material_receipt["material_root_type_counts"] == {
+        "IFCMATERIAL": 1,
+        "IFCMATERIALLAYERSETUSAGE": 1,
+    }
+    assert material_receipt["section_source_type_counts"] == {
+        "IFCMATERIALLAYER": 1,
+        "IFCMATERIALLAYERSET": 1,
+        "IFCMATERIALLAYERSETUSAGE": 1,
+        "IFCRECTANGLEPROFILEDEF": 2,
+    }
     assert payload["proxy_relationship_counts"] == {"aggregates_decomposition": 2}
     assert "release_safe_aggregate_group_edges" in payload["relationship_extraction_modes"]
     assert next(node for node in payload["nodes"] if node["id"] == "#20")["x"] == 10.0
     assert next(node for node in payload["nodes"] if node["id"] == "#21")["y"] == 22.0
-    group_node = next(node for node in payload["nodes"] if node["id"] == "relationship:IFCRELAGGREGATES:#30")
+    group_node = next(node for node in payload["nodes"] if node["id"] == "relationship:IFCRELAGGREGATES:#40")
     assert group_node["x"] == 12.0
     assert group_node["y"] == 21.0
-    assert all(edge["target"] == "relationship:IFCRELAGGREGATES:#30" for edge in payload["edges"])
+    assert all(edge["target"] == "relationship:IFCRELAGGREGATES:#40" for edge in payload["edges"])
 
 
 def test_queue_promotes_ifc_adapter_report_to_proxy_ready(tmp_path: Path) -> None:

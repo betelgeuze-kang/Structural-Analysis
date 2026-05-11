@@ -32,6 +32,16 @@ STRUCTURAL_ENTITY_TYPES = {
     "IFCFOOTING",
     "IFCPILE",
 }
+MATERIAL_SECTION_SOURCE_TYPES = {
+    "IFCMATERIALLAYER",
+    "IFCMATERIALLAYERSET",
+    "IFCMATERIALLAYERSETUSAGE",
+    "IFCMATERIALPROFILE",
+    "IFCMATERIALPROFILESET",
+    "IFCMATERIALPROFILESETUSAGE",
+    "IFCMATERIALCONSTITUENT",
+    "IFCMATERIALCONSTITUENTSET",
+}
 SPATIAL_ENTITY_TYPES = {"IFCBUILDINGSTOREY"}
 COUNTED_ENTITY_TYPES = STRUCTURAL_ENTITY_TYPES | SPATIAL_ENTITY_TYPES
 ENTITY_RE = re.compile(r"^\s*#(?P<id>\d+)\s*=\s*(?P<type>[A-Z0-9_]+)\s*\((?P<args>.*)\)\s*;\s*$", re.I | re.S)
@@ -162,6 +172,40 @@ def _step_label(text: str) -> str:
     if cleaned.startswith(".") and cleaned.endswith(".") and len(cleaned) >= 2:
         cleaned = cleaned[1:-1]
     return cleaned
+
+
+def _is_section_source_type(entity_type: str) -> bool:
+    return entity_type in MATERIAL_SECTION_SOURCE_TYPES or entity_type.endswith("PROFILEDEF")
+
+
+def _ref_closure(
+    root: str | None,
+    record_by_id: dict[str, tuple[str, list[str]]],
+    memo: dict[str, set[str]],
+    *,
+    max_nodes: int = 800,
+) -> set[str]:
+    if not root:
+        return set()
+    if root in memo:
+        return memo[root]
+    seen: set[str] = set()
+    stack = [root]
+    while stack and len(seen) < max_nodes:
+        entity_id = stack.pop()
+        if entity_id in seen:
+            continue
+        seen.add(entity_id)
+        row = record_by_id.get(entity_id)
+        if row is None:
+            continue
+        _entity_type, args = row
+        for arg in args:
+            for ref in _refs(arg):
+                if ref not in seen:
+                    stack.append(ref)
+    memo[root] = seen
+    return seen
 
 
 def _relationship_group_id(entity_type: str, entity_id: str) -> str:
@@ -400,6 +444,62 @@ def _representation_receipt(
     }
 
 
+def _material_section_receipt(
+    *,
+    structural_entity_count: int,
+    material_association_count: int,
+    material_bound_structural_count: int,
+    material_direct_structural_count: int,
+    material_type_structural_count: int,
+    section_source_structural_count: int,
+    material_root_type_counts: Counter[str],
+    material_entity_type_counts: Counter[str],
+    section_source_type_counts: Counter[str],
+) -> dict[str, Any]:
+    material_coverage = (
+        round(material_bound_structural_count / structural_entity_count, 4)
+        if structural_entity_count > 0
+        else 0.0
+    )
+    section_coverage = (
+        round(section_source_structural_count / structural_entity_count, 4)
+        if structural_entity_count > 0
+        else 0.0
+    )
+    material_threshold = 0.95
+    section_threshold = 0.9
+    contract_pass = (
+        structural_entity_count > 0
+        and material_association_count > 0
+        and material_coverage >= material_threshold
+        and section_coverage >= section_threshold
+    )
+    return {
+        "contract_pass": contract_pass,
+        "reason_code": (
+            "PASS_IFC_MATERIAL_SECTION_BINDINGS_EXTRACTED"
+            if contract_pass
+            else "ERR_IFC_MATERIAL_SECTION_BINDINGS_INCOMPLETE"
+        ),
+        "binding_scope": "release_safe_material_association_and_section_source_inventory",
+        "structural_entity_count": structural_entity_count,
+        "material_association_count": material_association_count,
+        "material_bound_structural_count": material_bound_structural_count,
+        "material_direct_structural_count": material_direct_structural_count,
+        "material_type_structural_count": material_type_structural_count,
+        "section_source_structural_count": section_source_structural_count,
+        "material_binding_coverage_ratio": material_coverage,
+        "section_source_coverage_ratio": section_coverage,
+        "material_binding_coverage_threshold": material_threshold,
+        "section_source_coverage_threshold": section_threshold,
+        "missing_material_binding_count": max(0, structural_entity_count - material_bound_structural_count),
+        "missing_section_source_count": max(0, structural_entity_count - section_source_structural_count),
+        "material_root_type_counts": dict(sorted(material_root_type_counts.items())),
+        "material_entity_type_counts": dict(sorted(material_entity_type_counts.items())),
+        "section_source_type_counts": dict(sorted(section_source_type_counts.items())),
+    }
+
+
 def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
     entity_counts: Counter[str] = Counter()
     nodes: dict[str, dict[str, Any]] = {}
@@ -584,6 +684,108 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
         representation_type_counts=representation_type_counts,
         geometry_item_counts=geometry_item_counts,
     )
+    structural_ids = {
+        entity_id
+        for entity_id, entity_type, _args in parsed_records
+        if entity_type in STRUCTURAL_ENTITY_TYPES
+    }
+    type_to_structural_ids: dict[str, set[str]] = {}
+    for _entity_id, entity_type, args in parsed_records:
+        if entity_type != "IFCRELDEFINESBYTYPE" or len(args) <= 5:
+            continue
+        type_id = _first_ref(args[5])
+        related_structural_ids = {ref for ref in _refs(args[4]) if ref in structural_ids}
+        if type_id and related_structural_ids:
+            type_to_structural_ids.setdefault(type_id, set()).update(related_structural_ids)
+
+    closure_memo: dict[str, set[str]] = {}
+    material_sources_by_id: dict[str, set[str]] = {}
+    section_sources_by_id: dict[str, set[str]] = {}
+    material_root_type_counts: Counter[str] = Counter()
+    material_entity_type_refs: dict[str, set[str]] = {}
+    section_source_type_refs: dict[str, set[str]] = {}
+    material_association_count = 0
+
+    def add_source(target: str, source: str, source_map: dict[str, set[str]]) -> None:
+        if target in structural_ids:
+            source_map.setdefault(target, set()).add(source)
+
+    def add_type_ref(entity_type: str, entity_id: str, groups: dict[str, set[str]]) -> None:
+        groups.setdefault(entity_type, set()).add(entity_id)
+
+    for _entity_id, entity_type, args in parsed_records:
+        if entity_type != "IFCRELASSOCIATESMATERIAL" or len(args) <= 5:
+            continue
+        material_association_count += 1
+        related_ids = _refs(args[4])
+        direct_targets = {ref for ref in related_ids if ref in structural_ids}
+        typed_targets: set[str] = set()
+        for related_id in related_ids:
+            typed_targets.update(type_to_structural_ids.get(related_id, set()))
+        for target in direct_targets:
+            add_source(target, "direct", material_sources_by_id)
+        for target in typed_targets:
+            add_source(target, "type", material_sources_by_id)
+
+        material_root_id = _first_ref(args[5])
+        material_root = record_by_id.get(material_root_id or "")
+        if material_root is not None:
+            material_root_type_counts[material_root[0]] += 1
+        material_graph_ids = _ref_closure(material_root_id, record_by_id, closure_memo)
+        has_section_source = False
+        for ref in material_graph_ids:
+            material_row = record_by_id.get(ref)
+            if material_row is None:
+                continue
+            ref_type = material_row[0]
+            if ref_type.startswith("IFCMATERIAL"):
+                add_type_ref(ref_type, ref, material_entity_type_refs)
+            if _is_section_source_type(ref_type):
+                has_section_source = True
+                add_type_ref(ref_type, ref, section_source_type_refs)
+        if has_section_source:
+            for target in direct_targets | typed_targets:
+                add_source(target, "material_definition", section_sources_by_id)
+
+    for entity_id, entity_type, args in parsed_records:
+        if entity_type not in STRUCTURAL_ENTITY_TYPES or len(args) <= 6:
+            continue
+        product_shape_id = _first_ref(args[6])
+        for ref in _ref_closure(product_shape_id, record_by_id, closure_memo):
+            shape_row = record_by_id.get(ref)
+            if shape_row is None:
+                continue
+            ref_type = shape_row[0]
+            if ref_type.endswith("PROFILEDEF"):
+                add_source(entity_id, "shape_profile", section_sources_by_id)
+                add_type_ref(ref_type, ref, section_source_type_refs)
+
+    for entity_id, sources in material_sources_by_id.items():
+        node = nodes.get(entity_id)
+        if node is not None:
+            node["material_binding_source"] = "+".join(sorted(sources))
+    for entity_id, sources in section_sources_by_id.items():
+        node = nodes.get(entity_id)
+        if node is not None:
+            node["section_source"] = "+".join(sorted(sources))
+
+    material_entity_type_counts = Counter(
+        {entity_type: len(refs) for entity_type, refs in material_entity_type_refs.items()}
+    )
+    section_source_type_counts = Counter(
+        {entity_type: len(refs) for entity_type, refs in section_source_type_refs.items()}
+    )
+    material_section_receipt = _material_section_receipt(
+        structural_entity_count=int(structural_entity_count),
+        material_association_count=material_association_count,
+        material_bound_structural_count=len(material_sources_by_id),
+        material_direct_structural_count=sum(1 for sources in material_sources_by_id.values() if "direct" in sources),
+        material_type_structural_count=sum(1 for sources in material_sources_by_id.values() if "type" in sources),
+        section_source_structural_count=len(section_sources_by_id),
+        material_root_type_counts=material_root_type_counts,
+        material_entity_type_counts=material_entity_type_counts,
+        section_source_type_counts=section_source_type_counts,
+    )
     return {
         "adapter_mode": ADAPTER_MODE,
         "entity_counts": {entity_type: int(entity_counts[entity_type]) for entity_type in sorted(COUNTED_ENTITY_TYPES)},
@@ -600,12 +802,17 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
             "body_representation_structural_count": len(body_representation_ids),
             "axis_representation_structural_count": len(axis_representation_ids),
             "shape_product_coverage_ratio": representation_receipt["shape_product_coverage_ratio"],
+            "material_bound_structural_count": len(material_sources_by_id),
+            "material_binding_coverage_ratio": material_section_receipt["material_binding_coverage_ratio"],
+            "section_source_structural_count": len(section_sources_by_id),
+            "section_source_coverage_ratio": material_section_receipt["section_source_coverage_ratio"],
             "structural_entity_count": int(structural_entity_count),
             "storey_count": int(storey_count),
         },
         "evidence_receipts": {
             "ifc_local_placement_coordinate_extraction_receipt": placement_receipt,
             "ifc_representation_shape_axis_receipt": representation_receipt,
+            "ifc_material_section_binding_receipt": material_section_receipt,
         },
         "proxy_relationship_counts": dict(sorted(relationship_counts.items())),
         "relationship_extraction_modes": relationship_extraction_modes,
@@ -732,6 +939,15 @@ def convert_ifc_corpus(
             if bool(
                 report.get("evidence_receipts", {})
                 .get("ifc_representation_shape_axis_receipt", {})
+                .get("contract_pass", False)
+            )
+        ),
+        "material_section_receipt_count": sum(
+            1
+            for report in ready_reports
+            if bool(
+                report.get("evidence_receipts", {})
+                .get("ifc_material_section_binding_receipt", {})
                 .get("contract_pass", False)
             )
         ),
