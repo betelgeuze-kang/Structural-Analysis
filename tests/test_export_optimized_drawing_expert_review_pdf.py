@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import warnings
 
 
 def _load_module(module_relative_path: str, module_name: str):
@@ -10,7 +11,13 @@ def _load_module(module_relative_path: str, module_name: str):
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=r"the load_module\(\) method is deprecated.*",
+            category=DeprecationWarning,
+        )
+        spec.loader.exec_module(module)
     return module
 
 

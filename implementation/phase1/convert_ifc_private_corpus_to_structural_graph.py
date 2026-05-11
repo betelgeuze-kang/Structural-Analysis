@@ -149,6 +149,21 @@ def _first_ref(text: str) -> str | None:
     return f"#{refs[0]}" if refs else None
 
 
+def _refs(text: str) -> list[str]:
+    return [f"#{ref}" for ref in REF_RE.findall(text or "")]
+
+
+def _step_label(text: str) -> str:
+    cleaned = str(text or "").strip()
+    if cleaned in {"", "$", "*"}:
+        return ""
+    if cleaned.startswith("'") and cleaned.endswith("'") and len(cleaned) >= 2:
+        cleaned = cleaned[1:-1].replace("''", "'")
+    if cleaned.startswith(".") and cleaned.endswith(".") and len(cleaned) >= 2:
+        cleaned = cleaned[1:-1]
+    return cleaned
+
+
 def _relationship_group_id(entity_type: str, entity_id: str) -> str:
     return f"relationship:{entity_type}:{entity_id}"
 
@@ -349,6 +364,42 @@ def _placement_receipt(
     }
 
 
+def _representation_receipt(
+    *,
+    structural_entity_count: int,
+    shape_product_count: int,
+    body_representation_count: int,
+    axis_representation_count: int,
+    representation_counts: Counter[str],
+    representation_type_counts: Counter[str],
+    geometry_item_counts: Counter[str],
+) -> dict[str, Any]:
+    coverage = round(shape_product_count / structural_entity_count, 4) if structural_entity_count > 0 else 0.0
+    body_coverage = round(body_representation_count / structural_entity_count, 4) if structural_entity_count > 0 else 0.0
+    axis_coverage = round(axis_representation_count / structural_entity_count, 4) if structural_entity_count > 0 else 0.0
+    contract_pass = structural_entity_count > 0 and coverage >= 0.95 and body_representation_count > 0
+    return {
+        "contract_pass": contract_pass,
+        "reason_code": (
+            "PASS_IFC_REPRESENTATION_SHAPE_AXIS_EXTRACTED"
+            if contract_pass
+            else "ERR_IFC_REPRESENTATION_SHAPE_AXIS_INCOMPLETE"
+        ),
+        "representation_scope": "release_safe_shape_axis_inventory",
+        "structural_entity_count": structural_entity_count,
+        "shape_product_structural_count": shape_product_count,
+        "body_representation_structural_count": body_representation_count,
+        "axis_representation_structural_count": axis_representation_count,
+        "shape_product_coverage_ratio": coverage,
+        "body_representation_coverage_ratio": body_coverage,
+        "axis_representation_coverage_ratio": axis_coverage,
+        "missing_shape_product_count": max(0, structural_entity_count - shape_product_count),
+        "representation_identifier_counts": dict(sorted(representation_counts.items())),
+        "representation_type_counts": dict(sorted(representation_type_counts.items())),
+        "geometry_item_type_counts": dict(sorted(geometry_item_counts.items())),
+    }
+
+
 def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
     entity_counts: Counter[str] = Counter()
     nodes: dict[str, dict[str, Any]] = {}
@@ -488,6 +539,51 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
         node_placement_count=len(placement_points),
         points=list(placement_points.values()),
     )
+    representation_counts: Counter[str] = Counter()
+    representation_type_counts: Counter[str] = Counter()
+    geometry_item_counts: Counter[str] = Counter()
+    shape_product_ids: set[str] = set()
+    body_representation_ids: set[str] = set()
+    axis_representation_ids: set[str] = set()
+    for entity_id, entity_type, args in parsed_records:
+        if entity_type not in STRUCTURAL_ENTITY_TYPES or len(args) <= 6:
+            continue
+        product_shape_id = _first_ref(args[6])
+        product_shape = record_by_id.get(product_shape_id or "")
+        if product_shape is None or product_shape[0] != "IFCPRODUCTDEFINITIONSHAPE" or len(product_shape[1]) <= 2:
+            continue
+        shape_product_ids.add(entity_id)
+        has_body = False
+        has_axis = False
+        for representation_id in _refs(product_shape[1][2]):
+            representation = record_by_id.get(representation_id)
+            if representation is None or representation[0] != "IFCSHAPEREPRESENTATION" or len(representation[1]) <= 3:
+                continue
+            representation_identifier = _step_label(representation[1][1]) or "UNSPECIFIED"
+            representation_type = _step_label(representation[1][2]) or "UNSPECIFIED"
+            representation_counts[representation_identifier] += 1
+            representation_type_counts[representation_type] += 1
+            if representation_identifier.upper() == "BODY":
+                has_body = True
+            if representation_identifier.upper() == "AXIS" or "CURVE" in representation_type.upper():
+                has_axis = True
+            for item_id in _refs(representation[1][3]):
+                item = record_by_id.get(item_id)
+                if item is not None:
+                    geometry_item_counts[item[0]] += 1
+        if has_body:
+            body_representation_ids.add(entity_id)
+        if has_axis:
+            axis_representation_ids.add(entity_id)
+    representation_receipt = _representation_receipt(
+        structural_entity_count=int(structural_entity_count),
+        shape_product_count=len(shape_product_ids),
+        body_representation_count=len(body_representation_ids),
+        axis_representation_count=len(axis_representation_ids),
+        representation_counts=representation_counts,
+        representation_type_counts=representation_type_counts,
+        geometry_item_counts=geometry_item_counts,
+    )
     return {
         "adapter_mode": ADAPTER_MODE,
         "entity_counts": {entity_type: int(entity_counts[entity_type]) for entity_type in sorted(COUNTED_ENTITY_TYPES)},
@@ -500,11 +596,16 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
             "placement_coordinate_node_count": len(placement_points),
             "placement_coordinate_structural_count": structural_placement_count,
             "placement_coverage_ratio": placement_receipt["placement_coverage_ratio"],
+            "shape_product_structural_count": len(shape_product_ids),
+            "body_representation_structural_count": len(body_representation_ids),
+            "axis_representation_structural_count": len(axis_representation_ids),
+            "shape_product_coverage_ratio": representation_receipt["shape_product_coverage_ratio"],
             "structural_entity_count": int(structural_entity_count),
             "storey_count": int(storey_count),
         },
         "evidence_receipts": {
             "ifc_local_placement_coordinate_extraction_receipt": placement_receipt,
+            "ifc_representation_shape_axis_receipt": representation_receipt,
         },
         "proxy_relationship_counts": dict(sorted(relationship_counts.items())),
         "relationship_extraction_modes": relationship_extraction_modes,
@@ -622,6 +723,15 @@ def convert_ifc_corpus(
             if bool(
                 report.get("evidence_receipts", {})
                 .get("ifc_local_placement_coordinate_extraction_receipt", {})
+                .get("contract_pass", False)
+            )
+        ),
+        "shape_axis_receipt_count": sum(
+            1
+            for report in ready_reports
+            if bool(
+                report.get("evidence_receipts", {})
+                .get("ifc_representation_shape_axis_receipt", {})
                 .get("contract_pass", False)
             )
         ),

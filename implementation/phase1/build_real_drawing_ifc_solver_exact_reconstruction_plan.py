@@ -274,6 +274,11 @@ def build_reconstruction_plan(
         for item in items
         if "ifc_local_placement_coordinate_extraction_receipt" in set(item.get("attached_evidence") or [])
     )
+    shape_axis_receipt_count = sum(
+        1
+        for item in items
+        if "ifc_representation_shape_axis_receipt" in set(item.get("attached_evidence") or [])
+    )
     return {
         "schema_version": "real-drawing-ifc-solver-exact-reconstruction-plan.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -294,6 +299,7 @@ def build_reconstruction_plan(
             "proxy_edge_count_total": proxy_edge_total,
             "structural_entity_count_total": structural_total,
             "local_placement_receipt_count": local_placement_receipt_count,
+            "shape_axis_receipt_count": shape_axis_receipt_count,
             "blocker_family_counts": dict(sorted(blocker_counts.items())),
             "blocker_reason_counts": dict(sorted(reason_counts.items())),
         },
@@ -313,6 +319,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Node-glyph fallback: {summary.get('node_glyph_fallback_count', 0)}",
         f"- Relationship coverage gaps: {summary.get('relationship_coverage_gap_count', 0)}",
         f"- Local placement receipts: {summary.get('local_placement_receipt_count', 0)}",
+        f"- Shape/axis receipts: {summary.get('shape_axis_receipt_count', 0)}",
         "",
         "## Reconstruction Queue",
         "",

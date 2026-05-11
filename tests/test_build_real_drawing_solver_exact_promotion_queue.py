@@ -149,7 +149,10 @@ def test_promotion_queue_attaches_ifc_reconstruction_blocker_evidence(tmp_path: 
                         "ifc_local_placement_coordinate_extraction_receipt",
                         "solver_graph_json_npz_receipt",
                     ],
-                    "attached_evidence": ["ifc_local_placement_coordinate_extraction_receipt"],
+                    "attached_evidence": [
+                        "ifc_local_placement_coordinate_extraction_receipt",
+                        "ifc_representation_shape_axis_receipt",
+                    ],
                     "open_evidence": ["solver_graph_json_npz_receipt"],
                     "commercialization_recommendation": "keep proxy claim until IFC solver-exact receipts are attached",
                 }
@@ -167,7 +170,10 @@ def test_promotion_queue_attaches_ifc_reconstruction_blocker_evidence(tmp_path: 
     assert ifc_item["blocker_reason_code"] == "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY"
     assert ifc_item["commercial_claim_blocked"] is True
     assert ifc_item["reconstruction_plan_status"] == "open"
-    assert ifc_item["attached_evidence"] == ["ifc_local_placement_coordinate_extraction_receipt"]
+    assert ifc_item["attached_evidence"] == [
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+    ]
     assert ifc_item["closure_evidence_required"] == ["solver_graph_json_npz_receipt"]
     assert "IFC solver-exact receipts" in ifc_item["recommended_action"]
 
