@@ -138,6 +138,25 @@ def _reconstruction_steps(blocker_family: str) -> list[str]:
     return steps
 
 
+def _evidence_receipts(report: dict[str, Any], graph: dict[str, Any]) -> dict[str, Any]:
+    receipts: dict[str, Any] = {}
+    for source in (graph.get("evidence_receipts"), report.get("evidence_receipts")):
+        if isinstance(source, dict):
+            for key, value in source.items():
+                if isinstance(value, dict):
+                    receipts[str(key)] = value
+    return receipts
+
+
+def _attached_evidence(required_evidence: list[str], receipts: dict[str, Any]) -> list[str]:
+    attached: list[str] = []
+    for evidence_id in required_evidence:
+        receipt = receipts.get(evidence_id)
+        if isinstance(receipt, dict) and bool(receipt.get("contract_pass", False)):
+            attached.append(evidence_id)
+    return attached
+
+
 def _build_asset_ref_rows(
     viewer_manifest: dict[str, Any],
     intake_queue: dict[str, Any],
@@ -185,6 +204,10 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
         if structural_entity_count > 0
         else 0.0
     )
+    required_evidence = _required_evidence(blocker_family)
+    receipts = _evidence_receipts(report, graph)
+    attached_evidence = _attached_evidence(required_evidence, receipts)
+    open_evidence = [evidence_id for evidence_id in required_evidence if evidence_id not in set(attached_evidence)]
     return {
         "asset_ref": asset_ref,
         "file_id": str(intake_row.get("file_id") or ""),
@@ -204,7 +227,14 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
             "edge_coverage_ratio": edge_coverage_ratio,
             "proxy_relationship_types": _relationship_types(graph),
         },
-        "required_evidence": _required_evidence(blocker_family),
+        "attached_evidence": attached_evidence,
+        "open_evidence": open_evidence,
+        "required_evidence": required_evidence,
+        "evidence_receipts": {
+            evidence_id: receipts[evidence_id]
+            for evidence_id in attached_evidence
+            if evidence_id in receipts
+        },
         "reconstruction_steps": _reconstruction_steps(blocker_family),
         "commercialization_recommendation": (
             "Keep this asset in proxy_preview_review until placement, shape, section/material, load, "
@@ -239,6 +269,11 @@ def build_reconstruction_plan(
     proxy_node_total = sum(_safe_int(item.get("metrics", {}).get("proxy_node_count", 0)) for item in items)
     proxy_edge_total = sum(_safe_int(item.get("metrics", {}).get("proxy_edge_count", 0)) for item in items)
     structural_total = sum(_safe_int(item.get("metrics", {}).get("structural_entity_count", 0)) for item in items)
+    local_placement_receipt_count = sum(
+        1
+        for item in items
+        if "ifc_local_placement_coordinate_extraction_receipt" in set(item.get("attached_evidence") or [])
+    )
     return {
         "schema_version": "real-drawing-ifc-solver-exact-reconstruction-plan.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -258,6 +293,7 @@ def build_reconstruction_plan(
             "proxy_node_count_total": proxy_node_total,
             "proxy_edge_count_total": proxy_edge_total,
             "structural_entity_count_total": structural_total,
+            "local_placement_receipt_count": local_placement_receipt_count,
             "blocker_family_counts": dict(sorted(blocker_counts.items())),
             "blocker_reason_counts": dict(sorted(reason_counts.items())),
         },
@@ -276,6 +312,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Blocked assets: {summary.get('blocked_count', 0)}",
         f"- Node-glyph fallback: {summary.get('node_glyph_fallback_count', 0)}",
         f"- Relationship coverage gaps: {summary.get('relationship_coverage_gap_count', 0)}",
+        f"- Local placement receipts: {summary.get('local_placement_receipt_count', 0)}",
         "",
         "## Reconstruction Queue",
         "",
@@ -285,13 +322,14 @@ def render_markdown(report: dict[str, Any]) -> str:
         return "\n".join(lines)
     lines.extend(
         [
-            "| Asset | Blocker | Edges / Structural | Edge Coverage | Required Evidence |",
+            "| Asset | Blocker | Edges / Structural | Edge Coverage | Open Evidence |",
             "| --- | --- | ---: | ---: | --- |",
         ]
     )
     for item in items:
         metrics = item.get("metrics") if isinstance(item.get("metrics"), dict) else {}
-        evidence = ", ".join(str(value) for value in (item.get("required_evidence") or [])[:3])
+        evidence_source = item.get("open_evidence") or item.get("required_evidence") or []
+        evidence = ", ".join(str(value) for value in evidence_source[:3])
         lines.append(
             "| {asset} | {reason} | {edges}/{structural} | {ratio} | {evidence} |".format(
                 asset=item.get("asset_ref", ""),

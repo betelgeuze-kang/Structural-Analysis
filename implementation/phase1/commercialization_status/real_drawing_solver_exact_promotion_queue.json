@@ -4,10 +4,12 @@
   "promotion_items": [
     {
       "asset_ref": "RD-001",
+      "attached_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt"
+      ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -23,6 +25,13 @@
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
       "node_count": 674,
+      "open_evidence": [
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
@@ -41,10 +50,12 @@
     },
     {
       "asset_ref": "RD-002",
+      "attached_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt"
+      ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -60,6 +71,13 @@
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
       "node_count": 81,
+      "open_evidence": [
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
@@ -78,10 +96,12 @@
     },
     {
       "asset_ref": "RD-003",
+      "attached_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt"
+      ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -97,6 +117,13 @@
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
       "node_count": 1174,
+      "open_evidence": [
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
@@ -115,10 +142,12 @@
     },
     {
       "asset_ref": "RD-004",
+      "attached_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt"
+      ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -134,6 +163,13 @@
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
       "node_count": 248,
+      "open_evidence": [
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
@@ -152,10 +188,12 @@
     },
     {
       "asset_ref": "RD-005",
+      "attached_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt"
+      ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -171,6 +209,13 @@
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
       "node_count": 6779,
+      "open_evidence": [
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
@@ -189,10 +234,12 @@
     },
     {
       "asset_ref": "RD-006",
+      "attached_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt"
+      ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -208,6 +255,13 @@
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
       "node_count": 856,
+      "open_evidence": [
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
@@ -226,10 +280,12 @@
     },
     {
       "asset_ref": "RD-007",
+      "attached_evidence": [
+        "ifc_local_placement_coordinate_extraction_receipt"
+      ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
@@ -245,6 +301,13 @@
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
       "node_count": 1662,
+      "open_evidence": [
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",

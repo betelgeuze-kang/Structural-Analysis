@@ -174,6 +174,8 @@ def _compact_promotion_queue_item(item: dict[str, Any]) -> dict[str, Any]:
         "segment_count": _safe_int(item.get("segment_count", 0)),
         "renderable_segment_count": _safe_int(item.get("renderable_segment_count", 0)),
         "quality_flags": _compact_text_list(item.get("quality_flags")),
+        "attached_evidence": _compact_text_list(item.get("attached_evidence")),
+        "open_evidence": _compact_text_list(item.get("open_evidence")),
         "closure_evidence_required": _compact_text_list(item.get("closure_evidence_required")),
         "recommended_action": str(item.get("recommended_action") or ""),
         "blocker_family": str(item.get("blocker_family") or ""),

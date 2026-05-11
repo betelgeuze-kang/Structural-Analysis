@@ -218,6 +218,13 @@ def _proxy_node_point(node_id: str, index: int, kind: str) -> list[float]:
     ]
 
 
+def _proxy_node_model_point(node: dict[str, Any]) -> list[float] | None:
+    point = _point_from_node(node)
+    if point is None:
+        return None
+    return point
+
+
 def _extract_proxy_segments(
     payload: dict[str, Any],
     *,
@@ -251,7 +258,7 @@ def _extract_proxy_segments(
     for index, node_id in enumerate(selected_ids):
         node = node_by_id.get(node_id, {})
         kind = str(node.get("proxy_node_kind") or node.get("ifc_entity_type") or "node")
-        coords[node_id] = _proxy_node_point(node_id, index, kind)
+        coords[node_id] = _proxy_node_model_point(node) or _proxy_node_point(node_id, index, kind)
     segments: list[dict[str, Any]] = []
     for edge in edges:
         source = str(edge.get("source", "") or "").strip()

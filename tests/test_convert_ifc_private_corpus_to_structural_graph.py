@@ -119,8 +119,14 @@ FILE_SCHEMA(('IFC2X3'));
 ENDSEC;
 DATA;
 #5= IFCBUILDING('building-guid',$,'Building',$,$,$,$,$,$,$,$,$);
-#20= IFCCOLUMN('column-guid',$,'C1',$,$,$,$,$);
-#21= IFCBEAM('beam-guid',$,'B1',$,$,$,$,$);
+#6= IFCCARTESIANPOINT((10.,20.,0.));
+#7= IFCAXIS2PLACEMENT3D(#6,$,$);
+#8= IFCLOCALPLACEMENT($,#7);
+#9= IFCCARTESIANPOINT((14.,22.,0.));
+#10= IFCAXIS2PLACEMENT3D(#9,$,$);
+#11= IFCLOCALPLACEMENT($,#10);
+#20= IFCCOLUMN('column-guid',$,'C1',$,$,#8,$,$);
+#21= IFCBEAM('beam-guid',$,'B1',$,$,#11,$,$);
 #30= IFCRELAGGREGATES('rel-guid',$,$,$,#5,(#20,#21));
 ENDSEC;
 END-ISO-10303-21;
@@ -135,8 +141,16 @@ END-ISO-10303-21;
     assert payload["metrics"]["relationship_group_node_count"] == 1
     assert payload["metrics"]["proxy_node_count"] == 3
     assert payload["metrics"]["proxy_edge_count"] == 2
+    assert payload["metrics"]["placement_coordinate_structural_count"] == 2
+    assert payload["metrics"]["placement_coordinate_node_count"] == 3
+    assert payload["evidence_receipts"]["ifc_local_placement_coordinate_extraction_receipt"]["contract_pass"] is True
     assert payload["proxy_relationship_counts"] == {"aggregates_decomposition": 2}
     assert "release_safe_aggregate_group_edges" in payload["relationship_extraction_modes"]
+    assert next(node for node in payload["nodes"] if node["id"] == "#20")["x"] == 10.0
+    assert next(node for node in payload["nodes"] if node["id"] == "#21")["y"] == 22.0
+    group_node = next(node for node in payload["nodes"] if node["id"] == "relationship:IFCRELAGGREGATES:#30")
+    assert group_node["x"] == 12.0
+    assert group_node["y"] == 21.0
     assert all(edge["target"] == "relationship:IFCRELAGGREGATES:#30" for edge in payload["edges"])
 
 

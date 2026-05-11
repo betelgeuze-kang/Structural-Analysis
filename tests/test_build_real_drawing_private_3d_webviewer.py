@@ -218,6 +218,46 @@ def test_private_3d_webviewer_keeps_solver_exact_compact_archive_out_of_sparse_r
     assert asset["warning_label"] == ""
 
 
+def test_private_3d_webviewer_uses_ifc_proxy_node_coordinates(tmp_path: Path) -> None:
+    module = _load_module()
+    graph_path = tmp_path / "graphs" / "ifc_proxy.graph.json"
+    queue_path = tmp_path / "model_optimization_intake_queue.json"
+    _write_json(
+        graph_path,
+        {
+            "nodes": [
+                {"id": "#1", "ifc_entity_type": "IFCBEAM", "proxy_node_kind": "structural_element", "x": 10, "y": 20, "z": 0},
+                {"id": "#2", "ifc_entity_type": "IFCCOLUMN", "proxy_node_kind": "structural_element", "x": 14, "y": 22, "z": 3},
+            ],
+            "edges": [{"source": "#1", "target": "#2", "relationship": "aggregates_decomposition"}],
+        },
+    )
+    _write_json(
+        queue_path,
+        {
+            "queue": [
+                {
+                    "ifc_proxy_graph_json": str(graph_path),
+                    "file_type": ".ifc",
+                    "optimization_route": "ifc_to_structural_graph_adapter",
+                    "optimization_status": "ifc_proxy_graph_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": False,
+                    "model_asset_count": 1,
+                }
+            ]
+        },
+    )
+
+    registry = module.build_registry_payload(intake_queue_path=queue_path)
+
+    asset = registry["assets"][0]
+    assert asset["segments"][0]["p0"] == [10.0, 20.0, 0.0]
+    assert asset["segments"][0]["p1"] == [14.0, 22.0, 3.0]
+    assert asset["metrics"]["edge_count"] == 1
+    assert "proxy_node_glyph_fallback" not in asset["quality_flags"]
+
+
 def test_private_3d_webviewer_attaches_lod_evidence_for_sampled_solver_exact(tmp_path: Path) -> None:
     module = _load_module()
     graph_path = tmp_path / "graphs" / "dense_solver.json"

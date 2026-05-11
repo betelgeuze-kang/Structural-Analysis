@@ -214,6 +214,16 @@ def _promotion_item(
             for value in (plan_item.get("required_evidence") or [])
             if str(value)
         ]
+        open_evidence = [
+            str(value)
+            for value in (plan_item.get("open_evidence") or [])
+            if str(value)
+        ]
+        attached_evidence = [
+            str(value)
+            for value in (plan_item.get("attached_evidence") or [])
+            if str(value)
+        ]
         metrics = plan_item.get("metrics") if isinstance(plan_item.get("metrics"), dict) else {}
         item.update(
             {
@@ -222,10 +232,15 @@ def _promotion_item(
                 "reconstruction_plan_status": "open",
                 "commercial_claim_blocked": bool(plan_item.get("commercial_claim_blocked", False)),
                 "edge_coverage_ratio": metrics.get("edge_coverage_ratio", 0),
+                "attached_evidence": attached_evidence,
+                "open_evidence": open_evidence,
             }
         )
-        if required_evidence:
+        if open_evidence:
+            item["closure_evidence_required"] = open_evidence
+        elif required_evidence:
             item["closure_evidence_required"] = required_evidence
+        if open_evidence or required_evidence:
             item["recommended_action"] = str(plan_item.get("commercialization_recommendation") or item["recommended_action"])
     return item
 
