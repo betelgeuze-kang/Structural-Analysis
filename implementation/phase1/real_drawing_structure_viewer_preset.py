@@ -59,6 +59,8 @@ def quality_notice(asset: dict[str, Any]) -> str:
     lod_evidence = asset.get("lod_evidence") if isinstance(asset.get("lod_evidence"), dict) else {}
     if "proxy_layout_not_true_geometry" in flags:
         return "IFC proxy topology layout; not recovered architectural/structural coordinates."
+    if "ifc_solver_graph_draft_not_member_extents" in flags:
+        return "IFC solver graph draft; member extents and loads are still review items."
     if bool(lod_evidence.get("contract_pass", False)):
         return "Dense solver model uses a sampled viewport with full-detail LOD evidence."
     if "sampled_dense_model" in flags:

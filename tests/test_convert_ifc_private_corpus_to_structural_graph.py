@@ -305,11 +305,21 @@ def test_queue_promotes_ifc_adapter_report_to_proxy_ready(tmp_path: Path) -> Non
             "adapter_mode": "entity_proxy_graph",
             "solver_exact": False,
             "graph_json": str(ifc_adapter_dir / "fixture_ifc.graph.json"),
+            "solver_graph_json": str(ifc_adapter_dir / "fixture_ifc.solver_graph.json"),
+            "solver_graph_npz": str(ifc_adapter_dir / "fixture_ifc.solver_graph.npz"),
             "metrics": {
                 "proxy_node_count": 4,
                 "proxy_edge_count": 3,
                 "structural_entity_count": 3,
                 "storey_count": 1,
+            },
+            "evidence_receipts": {
+                "solver_graph_json_npz_receipt": {
+                    "contract_pass": True,
+                    "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+                    "json_path": str(ifc_adapter_dir / "fixture_ifc.solver_graph.json"),
+                    "npz_path": str(ifc_adapter_dir / "fixture_ifc.solver_graph.npz"),
+                }
             },
         },
     )
@@ -344,5 +354,7 @@ def test_queue_promotes_ifc_adapter_report_to_proxy_ready(tmp_path: Path) -> Non
     assert row["optimization_status"] == "ifc_proxy_graph_ready"
     assert row["ready_for_optimized_drawing_generation"] is True
     assert row["solver_exact"] is False
+    assert row["solver_graph_model_json"] == str(ifc_adapter_dir / "fixture_ifc.solver_graph.json")
+    assert row["solver_graph_dataset_npz"] == str(ifc_adapter_dir / "fixture_ifc.solver_graph.npz")
     assert "not solver-exact" in row["readiness_note"]
-    assert "load extraction" in row["readiness_note"]
+    assert "load/zero-load attestation" in row["readiness_note"]

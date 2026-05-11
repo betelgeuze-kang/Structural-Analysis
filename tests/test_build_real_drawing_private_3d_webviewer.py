@@ -258,6 +258,68 @@ def test_private_3d_webviewer_uses_ifc_proxy_node_coordinates(tmp_path: Path) ->
     assert "proxy_node_glyph_fallback" not in asset["quality_flags"]
 
 
+def test_private_3d_webviewer_attaches_ifc_solver_graph_sidecar_receipt(tmp_path: Path) -> None:
+    module = _load_module()
+    graph_path = tmp_path / "graphs" / "ifc_solver_graph.json"
+    queue_path = tmp_path / "model_optimization_intake_queue.json"
+    out_summary = tmp_path / "webviewer" / "real_drawing_3d_registry_summary.json"
+    out_sidecar = tmp_path / "structure-viewer" / "index.real_drawing_private.data.js"
+    _write_json(
+        graph_path,
+        {
+            "schema_version": "real-drawing-ifc-solver-graph-draft.v1",
+            "solver_exact": False,
+            "model": {
+                "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+                "nodes": [
+                    {"id": "ifc:1:i", "x": 0, "y": 0, "z": 0},
+                    {"id": "ifc:1:j", "x": 1, "y": 0, "z": 0},
+                ],
+                "elements": [
+                    {
+                        "id": "ifc:1",
+                        "family": "linear_member",
+                        "node_ids": ["ifc:1:i", "ifc:1:j"],
+                    }
+                ],
+            },
+        },
+    )
+    _write_json(
+        queue_path,
+        {
+            "queue": [
+                {
+                    "solver_graph_model_json": str(graph_path),
+                    "file_type": ".ifc",
+                    "optimization_route": "ifc_to_structural_graph_adapter",
+                    "optimization_status": "ifc_proxy_graph_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": False,
+                    "model_asset_count": 1,
+                }
+            ]
+        },
+    )
+
+    summary = module.build_webviewer(
+        intake_queue_path=queue_path,
+        out_summary=out_summary,
+        out_viewer_sidecar=out_sidecar,
+    )
+
+    asset = summary["assets"][0]
+    assert asset["geometry_mode"] == "solver_topology_xyz"
+    assert asset["graph_source_kind"] == "ifc_solver_graph_draft"
+    assert "ifc_solver_graph_draft_not_member_extents" in asset["quality_flags"]
+    assert "not_solver_exact" in asset["quality_flags"]
+    receipt = asset["evidence_receipts"]["viewer_sidecar_rebuild_receipt"]
+    assert receipt["contract_pass"] is True
+    assert receipt["reason_code"] == "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT"
+    assert receipt["viewer_sidecar"] == str(out_sidecar)
+    assert out_sidecar.exists()
+
+
 def test_private_3d_webviewer_attaches_lod_evidence_for_sampled_solver_exact(tmp_path: Path) -> None:
     module = _load_module()
     graph_path = tmp_path / "graphs" / "dense_solver.json"

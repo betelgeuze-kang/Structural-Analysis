@@ -138,9 +138,9 @@ def _reconstruction_steps(blocker_family: str) -> list[str]:
     return steps
 
 
-def _evidence_receipts(report: dict[str, Any], graph: dict[str, Any]) -> dict[str, Any]:
+def _evidence_receipts(report: dict[str, Any], graph: dict[str, Any], viewer_asset: dict[str, Any]) -> dict[str, Any]:
     receipts: dict[str, Any] = {}
-    for source in (graph.get("evidence_receipts"), report.get("evidence_receipts")):
+    for source in (graph.get("evidence_receipts"), report.get("evidence_receipts"), viewer_asset.get("evidence_receipts")):
         if isinstance(source, dict):
             for key, value in source.items():
                 if isinstance(value, dict):
@@ -205,7 +205,7 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
         else 0.0
     )
     required_evidence = _required_evidence(blocker_family)
-    receipts = _evidence_receipts(report, graph)
+    receipts = _evidence_receipts(report, graph, viewer_asset)
     attached_evidence = _attached_evidence(required_evidence, receipts)
     open_evidence = [evidence_id for evidence_id in required_evidence if evidence_id not in set(attached_evidence)]
     return {
@@ -299,6 +299,11 @@ def build_reconstruction_plan(
         for item in items
         if "solver_graph_json_npz_receipt" in set(item.get("attached_evidence") or [])
     )
+    viewer_sidecar_rebuild_receipt_count = sum(
+        1
+        for item in items
+        if "viewer_sidecar_rebuild_receipt" in set(item.get("attached_evidence") or [])
+    )
     zero_load_signature_required_count = sum(
         1
         for item in items
@@ -332,6 +337,7 @@ def build_reconstruction_plan(
             "material_section_receipt_count": material_section_receipt_count,
             "load_case_receipt_count": load_case_receipt_count,
             "solver_graph_json_npz_receipt_count": solver_graph_json_npz_receipt_count,
+            "viewer_sidecar_rebuild_receipt_count": viewer_sidecar_rebuild_receipt_count,
             "zero_load_signature_required_count": zero_load_signature_required_count,
             "blocker_family_counts": dict(sorted(blocker_counts.items())),
             "blocker_reason_counts": dict(sorted(reason_counts.items())),
@@ -356,6 +362,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Material/section receipts: {summary.get('material_section_receipt_count', 0)}",
         f"- Load-case receipts: {summary.get('load_case_receipt_count', 0)}",
         f"- Solver graph JSON/NPZ receipts: {summary.get('solver_graph_json_npz_receipt_count', 0)}",
+        f"- Viewer sidecar rebuild receipts: {summary.get('viewer_sidecar_rebuild_receipt_count', 0)}",
         f"- Zero-load signatures required: {summary.get('zero_load_signature_required_count', 0)}",
         "",
         "## Reconstruction Queue",

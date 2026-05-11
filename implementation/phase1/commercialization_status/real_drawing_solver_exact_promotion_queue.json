@@ -8,41 +8,40 @@
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
-        "solver_graph_json_npz_receipt"
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "closure_status": "pending",
       "commercial_claim_blocked": true,
       "current_solver_exact": false,
       "edge_coverage_ratio": 1.0,
       "effort_label": "high",
-      "element_count": 0,
+      "element_count": 661,
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
-      "node_count": 674,
+      "node_count": 1322,
       "open_evidence": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-001",
       "quality_flags": [
-        "not_solver_exact",
-        "proxy_layout_not_true_geometry"
+        "ifc_solver_graph_draft_not_member_extents",
+        "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
       "reconstruction_plan_status": "open",
-      "renderable_segment_count": 666,
+      "renderable_segment_count": 661,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 666,
+      "segment_count": 661,
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -51,34 +50,33 @@
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
-        "solver_graph_json_npz_receipt"
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "closure_status": "pending",
       "commercial_claim_blocked": true,
       "current_solver_exact": false,
       "edge_coverage_ratio": 1.0,
       "effort_label": "high",
-      "element_count": 0,
+      "element_count": 77,
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
-      "node_count": 81,
+      "node_count": 154,
       "open_evidence": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-002",
       "quality_flags": [
-        "not_solver_exact",
-        "proxy_layout_not_true_geometry"
+        "ifc_solver_graph_draft_not_member_extents",
+        "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
@@ -94,41 +92,40 @@
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
-        "solver_graph_json_npz_receipt"
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "closure_status": "pending",
       "commercial_claim_blocked": true,
       "current_solver_exact": false,
       "edge_coverage_ratio": 1.0,
       "effort_label": "high",
-      "element_count": 0,
+      "element_count": 1170,
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
-      "node_count": 1174,
+      "node_count": 2340,
       "open_evidence": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-003",
       "quality_flags": [
-        "not_solver_exact",
-        "proxy_layout_not_true_geometry"
+        "ifc_solver_graph_draft_not_member_extents",
+        "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
       "reconstruction_plan_status": "open",
-      "renderable_segment_count": 898,
+      "renderable_segment_count": 1170,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 898,
+      "segment_count": 1170,
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -137,34 +134,33 @@
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
-        "solver_graph_json_npz_receipt"
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "closure_status": "pending",
       "commercial_claim_blocked": true,
       "current_solver_exact": false,
       "edge_coverage_ratio": 1.0,
       "effort_label": "high",
-      "element_count": 0,
+      "element_count": 238,
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
-      "node_count": 248,
+      "node_count": 476,
       "open_evidence": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-004",
       "quality_flags": [
-        "not_solver_exact",
-        "proxy_layout_not_true_geometry"
+        "ifc_solver_graph_draft_not_member_extents",
+        "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
@@ -180,41 +176,41 @@
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
-        "solver_graph_json_npz_receipt"
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "closure_status": "pending",
       "commercial_claim_blocked": true,
       "current_solver_exact": false,
       "edge_coverage_ratio": 1.0,
       "effort_label": "high",
-      "element_count": 0,
+      "element_count": 6772,
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
-      "node_count": 6779,
+      "node_count": 13544,
       "open_evidence": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-005",
       "quality_flags": [
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact",
-        "proxy_layout_not_true_geometry"
+        "sampled_dense_model"
       ],
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
       "reconstruction_plan_status": "open",
-      "renderable_segment_count": 898,
+      "renderable_segment_count": 6772,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 898,
+      "segment_count": 1800,
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -223,34 +219,33 @@
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
-        "solver_graph_json_npz_receipt"
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "closure_status": "pending",
       "commercial_claim_blocked": true,
       "current_solver_exact": false,
       "edge_coverage_ratio": 1.0,
       "effort_label": "high",
-      "element_count": 0,
+      "element_count": 843,
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
-      "node_count": 856,
+      "node_count": 1686,
       "open_evidence": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-006",
       "quality_flags": [
-        "not_solver_exact",
-        "proxy_layout_not_true_geometry"
+        "ifc_solver_graph_draft_not_member_extents",
+        "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
@@ -266,41 +261,40 @@
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
-        "solver_graph_json_npz_receipt"
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "closure_status": "pending",
       "commercial_claim_blocked": true,
       "current_solver_exact": false,
       "edge_coverage_ratio": 1.0,
       "effort_label": "high",
-      "element_count": 0,
+      "element_count": 829,
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
-      "node_count": 1662,
+      "node_count": 1658,
       "open_evidence": [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "viewer_sidecar_rebuild_receipt"
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-007",
       "quality_flags": [
-        "not_solver_exact",
-        "proxy_layout_not_true_geometry"
+        "ifc_solver_graph_draft_not_member_extents",
+        "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
       "reconstruction_plan_status": "open",
-      "renderable_segment_count": 455,
+      "renderable_segment_count": 829,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 455,
+      "segment_count": 829,
       "status": "ifc_proxy_graph_ready"
     }
   ],

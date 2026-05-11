@@ -120,6 +120,17 @@ def _fixture_inputs(tmp_path: Path) -> tuple[Path, Path]:
                 "status": "ifc_proxy_graph_ready",
                 "solver_exact": False,
                 "quality_flags": flags,
+                "evidence_receipts": (
+                    {
+                        "viewer_sidecar_rebuild_receipt": {
+                            "contract_pass": True,
+                            "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
+                            "graph_source_kind": "ifc_solver_graph_draft",
+                        }
+                    }
+                    if stem == "fixture_c"
+                    else {}
+                ),
             }
         )
     viewer_manifest = _write_json(tmp_path / "viewer_manifest.json", {"assets": viewer_assets})
@@ -144,6 +155,7 @@ def test_ifc_reconstruction_plan_classifies_proxy_blockers_and_omits_source_urls
     assert report["summary"]["material_section_receipt_count"] == 1
     assert report["summary"]["load_case_receipt_count"] == 1
     assert report["summary"]["solver_graph_json_npz_receipt_count"] == 1
+    assert report["summary"]["viewer_sidecar_rebuild_receipt_count"] == 1
     assert report["summary"]["zero_load_signature_required_count"] == 0
     assert report["ifc_reconstruction_items"][0]["blocker_reason_code"] == "ERR_IFC_PROXY_NODE_GLYPH_FALLBACK"
     assert report["ifc_reconstruction_items"][1]["blocker_reason_code"] == "ERR_IFC_PROXY_RELATIONSHIP_COVERAGE_GAP"
@@ -155,14 +167,17 @@ def test_ifc_reconstruction_plan_classifies_proxy_blockers_and_omits_source_urls
         "ifc_material_section_binding_receipt",
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt",
     ]
     assert "ifc_local_placement_coordinate_extraction_receipt" not in report["ifc_reconstruction_items"][2]["open_evidence"]
     assert "ifc_representation_shape_axis_receipt" not in report["ifc_reconstruction_items"][2]["open_evidence"]
     assert "ifc_material_section_binding_receipt" not in report["ifc_reconstruction_items"][2]["open_evidence"]
     assert "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt" not in report["ifc_reconstruction_items"][2]["open_evidence"]
     assert "solver_graph_json_npz_receipt" not in report["ifc_reconstruction_items"][2]["open_evidence"]
+    assert "viewer_sidecar_rebuild_receipt" not in report["ifc_reconstruction_items"][2]["open_evidence"]
     assert "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt" in report["ifc_reconstruction_items"][2]["observed_evidence_receipts"]
     assert "solver_graph_json_npz_receipt" in report["ifc_reconstruction_items"][2]["observed_evidence_receipts"]
+    assert "viewer_sidecar_rebuild_receipt" in report["ifc_reconstruction_items"][2]["observed_evidence_receipts"]
     assert "ifc_relationship_edge_extraction_receipt" in report["ifc_reconstruction_items"][0]["required_evidence"]
     assert "SHOULD_NOT_LEAK" not in json.dumps(report)
 

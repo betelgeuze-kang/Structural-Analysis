@@ -167,6 +167,14 @@ def _model_payload(payload: dict[str, Any]) -> dict[str, Any]:
     return model if isinstance(model, dict) else payload
 
 
+def _is_ifc_solver_graph_draft(payload: dict[str, Any]) -> bool:
+    model = payload.get("model") if isinstance(payload.get("model"), dict) else {}
+    return (
+        str(payload.get("schema_version") or "") == "real-drawing-ifc-solver-graph-draft.v1"
+        or str(model.get("geometry_scope") or "") == "placement_origin_axis_marker_not_member_extents"
+    )
+
+
 def _extract_xyz_segments(payload: dict[str, Any], *, max_segments: int) -> tuple[list[dict[str, Any]], dict[str, int]]:
     model = _model_payload(payload)
     nodes = [row for row in (model.get("nodes") or []) if isinstance(row, dict)]
@@ -317,15 +325,19 @@ def _build_asset_payload(
     graph_path = _candidate_path(_graph_reference(row), base_dir=base_dir)
     payload = _load_json(graph_path) if graph_path else {}
     is_proxy_graph = bool(isinstance(payload.get("nodes"), list) and isinstance(payload.get("edges"), list) and not payload.get("model"))
+    is_ifc_solver_graph_draft = _is_ifc_solver_graph_draft(payload)
     if is_proxy_graph:
         segments, metrics = _extract_proxy_segments(payload, max_nodes=max_proxy_nodes, max_edges=max_proxy_edges)
         geometry_mode = "ifc_proxy_topology_3d_layout"
+        graph_source_kind = "ifc_proxy_graph"
     else:
         segments, metrics = _extract_xyz_segments(payload, max_segments=max_segments_per_asset)
         geometry_mode = "solver_topology_xyz"
+        graph_source_kind = "ifc_solver_graph_draft" if is_ifc_solver_graph_draft else "solver_graph"
         if not segments and payload.get("edges"):
             segments, metrics = _extract_proxy_segments(payload, max_nodes=max_proxy_nodes, max_edges=max_proxy_edges)
             geometry_mode = "proxy_topology_3d_layout"
+            graph_source_kind = "proxy_graph_fallback"
     route = str(row.get("optimization_route", "") or "")
     status = str(row.get("optimization_status", "") or "")
     solver_exact = bool(row.get("solver_exact", False))
@@ -344,6 +356,8 @@ def _build_asset_payload(
         quality_flags.append("proxy_layout_not_true_geometry")
         if _safe_int(metrics.get("edge_count", 0)) <= 0 and segments:
             quality_flags.append("proxy_node_glyph_fallback")
+    if is_ifc_solver_graph_draft:
+        quality_flags.append("ifc_solver_graph_draft_not_member_extents")
     if raw_renderable_count > len(segments) and not lod_evidence_ready:
         quality_flags.append("sampled_dense_model")
     if len(segments) < 10 and not solver_exact:
@@ -353,6 +367,8 @@ def _build_asset_payload(
     warning_label = ""
     if "proxy_layout_not_true_geometry" in quality_flags:
         warning_label = "proxy layout"
+    elif "ifc_solver_graph_draft_not_member_extents" in quality_flags:
+        warning_label = "IFC draft"
     elif "sampled_dense_model" in quality_flags:
         warning_label = "sampled"
     elif "sparse_preview" in quality_flags:
@@ -365,6 +381,7 @@ def _build_asset_payload(
         "solver_exact": solver_exact,
         "model_asset_count": _safe_int(row.get("model_asset_count", 0)),
         "geometry_mode": geometry_mode,
+        "graph_source_kind": graph_source_kind,
         "geometry_available": bool(segments),
         "segment_count": len(segments),
         "metrics": metrics,
@@ -373,6 +390,44 @@ def _build_asset_payload(
         "segments": segments,
         **({"lod_evidence": lod_evidence} if lod_evidence_ready else {}),
     }
+
+
+def _attach_viewer_sidecar_rebuild_receipts(
+    registry: dict[str, Any],
+    *,
+    out_viewer_sidecar: Path | None,
+) -> None:
+    sidecar_ready = bool(out_viewer_sidecar and out_viewer_sidecar.exists() and out_viewer_sidecar.stat().st_size > 0)
+    sidecar_path = str(out_viewer_sidecar) if out_viewer_sidecar is not None else ""
+    for asset in registry.get("assets") or []:
+        if not isinstance(asset, dict) or str(asset.get("file_type") or "").lower() != ".ifc":
+            continue
+        contract_pass = (
+            sidecar_ready
+            and bool(asset.get("geometry_available", False))
+            and str(asset.get("graph_source_kind") or "") == "ifc_solver_graph_draft"
+            and _safe_int(asset.get("segment_count", 0)) > 0
+        )
+        receipts = asset.setdefault("evidence_receipts", {})
+        if not isinstance(receipts, dict):
+            receipts = {}
+            asset["evidence_receipts"] = receipts
+        receipts["viewer_sidecar_rebuild_receipt"] = {
+            "contract_pass": contract_pass,
+            "reason_code": (
+                "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT"
+                if contract_pass
+                else "ERR_VIEWER_SIDECAR_REBUILD_MISSING_IFC_SOLVER_GRAPH_DRAFT"
+            ),
+            "viewer_sidecar": sidecar_path,
+            "structure_viewer_preset": STRUCTURE_VIEWER_PRESET_KEY,
+            "asset_ref": str(asset.get("asset_ref") or ""),
+            "geometry_mode": str(asset.get("geometry_mode") or ""),
+            "graph_source_kind": str(asset.get("graph_source_kind") or ""),
+            "segment_count": _safe_int(asset.get("segment_count", 0)),
+            "solver_exact": bool(asset.get("solver_exact", False)),
+            "commercial_claim_blocked": not bool(asset.get("solver_exact", False)),
+        }
 
 
 def build_registry_payload(
@@ -962,6 +1017,8 @@ def build_webviewer(
     if out_html is not None:
         _write_text(out_html, _render_html(registry))
     if out_viewer_sidecar is not None:
+        write_structure_viewer_sidecar(out_viewer_sidecar, registry, promotion_queue=promotion_queue)
+        _attach_viewer_sidecar_rebuild_receipts(registry, out_viewer_sidecar=out_viewer_sidecar)
         write_structure_viewer_sidecar(out_viewer_sidecar, registry, promotion_queue=promotion_queue)
     summary = _summary_payload(
         registry,

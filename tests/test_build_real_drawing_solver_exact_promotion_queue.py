@@ -154,11 +154,9 @@ def test_promotion_queue_attaches_ifc_reconstruction_blocker_evidence(tmp_path: 
                         "ifc_representation_shape_axis_receipt",
                         "ifc_material_section_binding_receipt",
                         "solver_graph_json_npz_receipt",
-                    ],
-                    "open_evidence": [
-                        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
                         "viewer_sidecar_rebuild_receipt",
                     ],
+                    "open_evidence": ["ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"],
                     "commercialization_recommendation": "keep proxy claim until IFC solver-exact receipts are attached",
                 }
             ]
@@ -180,11 +178,9 @@ def test_promotion_queue_attaches_ifc_reconstruction_blocker_evidence(tmp_path: 
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
         "solver_graph_json_npz_receipt",
-    ]
-    assert ifc_item["closure_evidence_required"] == [
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
         "viewer_sidecar_rebuild_receipt",
     ]
+    assert ifc_item["closure_evidence_required"] == ["ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"]
     assert "IFC solver-exact receipts" in ifc_item["recommended_action"]
 
 

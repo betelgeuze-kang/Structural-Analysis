@@ -411,6 +411,7 @@ const SHARED_SELECTION_KEY='structural-viewer-selection-v1';
 const VIEWER_THEME_KEY='structural-viewer-theme-v1';
 const REAL_DRAWING_REVIEW_FLAG_KEYS=new Set([
   'not_solver_exact',
+  'ifc_solver_graph_draft_not_member_extents',
   'proxy_layout_not_true_geometry',
   'proxy_node_glyph_fallback',
   'sampled_dense_model',
@@ -3408,6 +3409,7 @@ function getRealDrawingReviewAction(row){
   if(flags.has('sparse_preview')&&!Boolean(row?.solver_exact))return'Expand sparse archive preview';
   if(flags.has('sampled_dense_model'))return'Inspect sampled dense model';
   if(flags.has('proxy_node_glyph_fallback'))return'Replace node glyph fallback';
+  if(flags.has('ifc_solver_graph_draft_not_member_extents'))return'Recover member extents and loads';
   if(flags.has('proxy_layout_not_true_geometry')||flags.has('not_solver_exact')||!Boolean(row?.solver_exact)){
     return'Promote to solver-exact topology';
   }

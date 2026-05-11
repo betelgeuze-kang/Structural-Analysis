@@ -3,156 +3,263 @@
   "assets": [
     {
       "asset_ref": "RD-001",
+      "evidence_receipts": {
+        "viewer_sidecar_rebuild_receipt": {
+          "asset_ref": "RD-001",
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "geometry_mode": "solver_topology_xyz",
+          "graph_source_kind": "ifc_solver_graph_draft",
+          "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
+          "segment_count": 661,
+          "solver_exact": false,
+          "structure_viewer_preset": "real_drawing_private_3d",
+          "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
+        }
+      },
       "file_type": ".ifc",
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "ifc_solver_graph_draft",
       "metrics": {
-        "edge_count": 666,
-        "node_count": 674,
-        "renderable_segment_count": 666
+        "element_count": 661,
+        "node_count": 1322,
+        "renderable_segment_count": 661
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 666,
+      "segment_count": 661,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "proxy layout"
+      "warning_label": "IFC draft"
     },
     {
       "asset_ref": "RD-002",
+      "evidence_receipts": {
+        "viewer_sidecar_rebuild_receipt": {
+          "asset_ref": "RD-002",
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "geometry_mode": "solver_topology_xyz",
+          "graph_source_kind": "ifc_solver_graph_draft",
+          "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
+          "segment_count": 77,
+          "solver_exact": false,
+          "structure_viewer_preset": "real_drawing_private_3d",
+          "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
+        }
+      },
       "file_type": ".ifc",
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "ifc_solver_graph_draft",
       "metrics": {
-        "edge_count": 77,
-        "node_count": 81,
+        "element_count": 77,
+        "node_count": 154,
         "renderable_segment_count": 77
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 77,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "proxy layout"
+      "warning_label": "IFC draft"
     },
     {
       "asset_ref": "RD-003",
+      "evidence_receipts": {
+        "viewer_sidecar_rebuild_receipt": {
+          "asset_ref": "RD-003",
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "geometry_mode": "solver_topology_xyz",
+          "graph_source_kind": "ifc_solver_graph_draft",
+          "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
+          "segment_count": 1170,
+          "solver_exact": false,
+          "structure_viewer_preset": "real_drawing_private_3d",
+          "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
+        }
+      },
       "file_type": ".ifc",
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "ifc_solver_graph_draft",
       "metrics": {
-        "edge_count": 1170,
-        "node_count": 1174,
-        "renderable_segment_count": 898
+        "element_count": 1170,
+        "node_count": 2340,
+        "renderable_segment_count": 1170
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 898,
+      "segment_count": 1170,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "proxy layout"
+      "warning_label": "IFC draft"
     },
     {
       "asset_ref": "RD-004",
+      "evidence_receipts": {
+        "viewer_sidecar_rebuild_receipt": {
+          "asset_ref": "RD-004",
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "geometry_mode": "solver_topology_xyz",
+          "graph_source_kind": "ifc_solver_graph_draft",
+          "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
+          "segment_count": 238,
+          "solver_exact": false,
+          "structure_viewer_preset": "real_drawing_private_3d",
+          "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
+        }
+      },
       "file_type": ".ifc",
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "ifc_solver_graph_draft",
       "metrics": {
-        "edge_count": 238,
-        "node_count": 248,
+        "element_count": 238,
+        "node_count": 476,
         "renderable_segment_count": 238
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 238,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "proxy layout"
+      "warning_label": "IFC draft"
     },
     {
       "asset_ref": "RD-005",
+      "evidence_receipts": {
+        "viewer_sidecar_rebuild_receipt": {
+          "asset_ref": "RD-005",
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "geometry_mode": "solver_topology_xyz",
+          "graph_source_kind": "ifc_solver_graph_draft",
+          "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
+          "segment_count": 1800,
+          "solver_exact": false,
+          "structure_viewer_preset": "real_drawing_private_3d",
+          "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
+        }
+      },
       "file_type": ".ifc",
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "ifc_solver_graph_draft",
       "metrics": {
-        "edge_count": 6772,
-        "node_count": 6779,
-        "renderable_segment_count": 898
+        "element_count": 6772,
+        "node_count": 13544,
+        "renderable_segment_count": 6772
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
+        "sampled_dense_model",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 898,
+      "segment_count": 1800,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "proxy layout"
+      "warning_label": "IFC draft"
     },
     {
       "asset_ref": "RD-006",
+      "evidence_receipts": {
+        "viewer_sidecar_rebuild_receipt": {
+          "asset_ref": "RD-006",
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "geometry_mode": "solver_topology_xyz",
+          "graph_source_kind": "ifc_solver_graph_draft",
+          "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
+          "segment_count": 843,
+          "solver_exact": false,
+          "structure_viewer_preset": "real_drawing_private_3d",
+          "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
+        }
+      },
       "file_type": ".ifc",
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "ifc_solver_graph_draft",
       "metrics": {
-        "edge_count": 843,
-        "node_count": 856,
+        "element_count": 843,
+        "node_count": 1686,
         "renderable_segment_count": 843
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 843,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "proxy layout"
+      "warning_label": "IFC draft"
     },
     {
       "asset_ref": "RD-007",
+      "evidence_receipts": {
+        "viewer_sidecar_rebuild_receipt": {
+          "asset_ref": "RD-007",
+          "commercial_claim_blocked": true,
+          "contract_pass": true,
+          "geometry_mode": "solver_topology_xyz",
+          "graph_source_kind": "ifc_solver_graph_draft",
+          "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
+          "segment_count": 829,
+          "solver_exact": false,
+          "structure_viewer_preset": "real_drawing_private_3d",
+          "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
+        }
+      },
       "file_type": ".ifc",
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
+      "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "ifc_solver_graph_draft",
       "metrics": {
-        "edge_count": 836,
-        "node_count": 1662,
-        "renderable_segment_count": 455
+        "element_count": 829,
+        "node_count": 1658,
+        "renderable_segment_count": 829
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 455,
+      "segment_count": 829,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "proxy layout"
+      "warning_label": "IFC draft"
     },
     {
       "asset_ref": "RD-008",
       "file_type": ".mgt",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "lod_evidence": {
         "closure_evidence": [
           "source_solver_graph_json_receipt",
@@ -184,6 +291,7 @@
       "file_type": ".mgt",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 15,
         "node_count": 16,
@@ -202,6 +310,7 @@
       "file_type": ".mgt",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 147,
         "node_count": 150,
@@ -220,6 +329,7 @@
       "file_type": ".mgt",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 369,
         "node_count": 366,
@@ -238,6 +348,7 @@
       "file_type": ".zip",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 3,
         "node_count": 6,
@@ -256,6 +367,7 @@
       "file_type": ".zip",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 23,
         "node_count": 24,
@@ -274,6 +386,7 @@
       "file_type": ".zip",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 22,
         "node_count": 23,
@@ -292,6 +405,7 @@
       "file_type": ".zip",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 52,
         "node_count": 54,
@@ -310,6 +424,7 @@
       "file_type": ".zip",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 52,
         "node_count": 54,
@@ -328,6 +443,7 @@
       "file_type": ".zip",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 4,
         "node_count": 5,
@@ -346,6 +462,7 @@
       "file_type": ".zip",
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
+      "graph_source_kind": "solver_graph",
       "metrics": {
         "element_count": 44,
         "node_count": 34,

@@ -2,35 +2,35 @@
   "asset_quality_rows": [
     {
       "asset_ref": "RD-001",
-      "edge_count": 666,
-      "element_count": 0,
+      "edge_count": 0,
+      "element_count": 661,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
-      "node_count": 674,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 1322,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "renderable_segment_count": 666,
+      "renderable_segment_count": 661,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 666,
+      "segment_count": 661,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready"
     },
     {
       "asset_ref": "RD-002",
-      "edge_count": 77,
-      "element_count": 0,
+      "edge_count": 0,
+      "element_count": 77,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
-      "node_count": 81,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 154,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -42,35 +42,35 @@
     },
     {
       "asset_ref": "RD-003",
-      "edge_count": 1170,
-      "element_count": 0,
+      "edge_count": 0,
+      "element_count": 1170,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
-      "node_count": 1174,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 2340,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "renderable_segment_count": 898,
+      "renderable_segment_count": 1170,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 898,
+      "segment_count": 1170,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready"
     },
     {
       "asset_ref": "RD-004",
-      "edge_count": 238,
-      "element_count": 0,
+      "edge_count": 0,
+      "element_count": 238,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
-      "node_count": 248,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 476,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -82,35 +82,36 @@
     },
     {
       "asset_ref": "RD-005",
-      "edge_count": 6772,
-      "element_count": 0,
+      "edge_count": 0,
+      "element_count": 6772,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
-      "node_count": 6779,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 13544,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
+        "sampled_dense_model",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "renderable_segment_count": 898,
+      "renderable_segment_count": 6772,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 898,
+      "segment_count": 1800,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready"
     },
     {
       "asset_ref": "RD-006",
-      "edge_count": 843,
-      "element_count": 0,
+      "edge_count": 0,
+      "element_count": 843,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
-      "node_count": 856,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 1686,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -122,21 +123,21 @@
     },
     {
       "asset_ref": "RD-007",
-      "edge_count": 836,
-      "element_count": 0,
+      "edge_count": 0,
+      "element_count": 829,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
-      "geometry_mode": "ifc_proxy_topology_3d_layout",
-      "node_count": 1662,
+      "geometry_mode": "solver_topology_xyz",
+      "node_count": 1658,
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "renderable_segment_count": 455,
+      "renderable_segment_count": 829,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 455,
+      "segment_count": 829,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready"
     },
@@ -333,8 +334,9 @@
   "full_solver_exact_ready": false,
   "hard_blockers": [],
   "quality_flag_counts": {
+    "ifc_solver_graph_draft_not_member_extents": 7,
     "not_solver_exact": 7,
-    "proxy_layout_not_true_geometry": 7
+    "sampled_dense_model": 1
   },
   "reason_code": "PASS_WITH_REVIEW_QUEUE",
   "recommended_claim": "Integrated real-drawing viewer is ready for engineer-in-loop review; proxy/preview assets are labeled and are not full solver-exact replacements.",
@@ -342,71 +344,65 @@
     {
       "asset_ref": "RD-001",
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
       "review_id": "RQ-001"
     },
     {
       "asset_ref": "RD-002",
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
       "review_id": "RQ-002"
     },
     {
       "asset_ref": "RD-003",
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
       "review_id": "RQ-003"
     },
     {
       "asset_ref": "RD-004",
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
       "review_id": "RQ-004"
     },
     {
       "asset_ref": "RD-005",
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
+        "sampled_dense_model",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "recommended_action": "inspect sampled dense model before using it as a full-detail design claim",
       "review_id": "RQ-005"
     },
     {
       "asset_ref": "RD-006",
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
       "review_id": "RQ-006"
     },
     {
       "asset_ref": "RD-007",
       "quality_flags": [
-        "proxy_layout_not_true_geometry",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
+      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
       "review_id": "RQ-007"
     }
   ],
@@ -431,7 +427,7 @@
     "hard_blocker_count": 0,
     "proxy_or_preview_asset_count": 7,
     "renderable_asset_count": 18,
-    "review_item_count": 14,
+    "review_item_count": 8,
     "review_queue_asset_count": 7,
     "solver_exact_asset_count": 11
   }

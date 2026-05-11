@@ -371,6 +371,19 @@ def _queue_row(
             row["ifc_adapter_report"] = str(report_path)
         if report.get("contract_pass") is True and report.get("adapter_mode") == "entity_proxy_graph":
             metrics = report.get("metrics") if isinstance(report.get("metrics"), dict) else {}
+            evidence_receipts = (
+                report.get("evidence_receipts") if isinstance(report.get("evidence_receipts"), dict) else {}
+            )
+            solver_graph_receipt = (
+                evidence_receipts.get("solver_graph_json_npz_receipt")
+                if isinstance(evidence_receipts.get("solver_graph_json_npz_receipt"), dict)
+                else {}
+            )
+            solver_graph_json = str(report.get("solver_graph_json") or solver_graph_receipt.get("json_path") or "")
+            solver_graph_npz = str(report.get("solver_graph_npz") or solver_graph_receipt.get("npz_path") or "")
+            solver_graph_draft_ready = bool(solver_graph_receipt.get("contract_pass", False)) and bool(
+                solver_graph_json
+            )
             row.update(
                 {
                     "optimization_status": "ifc_proxy_graph_ready",
@@ -379,8 +392,13 @@ def _queue_row(
                     "adapter_mode": "entity_proxy_graph",
                     "solver_exact": False,
                     "readiness_note": (
-                        "IFC entity proxy graph is intake-ready for optimization triage, not solver-exact native topology; "
-                        "exact member geometry, material/section binding, load extraction, and solver connectivity remain adapter gaps."
+                        "IFC solver graph draft is registered for viewer triage, not solver-exact native topology; "
+                        "exact member extents and load/zero-load attestation remain adapter gaps."
+                        if solver_graph_draft_ready
+                        else (
+                            "IFC entity proxy graph is intake-ready for optimization triage, not solver-exact native topology; "
+                            "exact member geometry, material/section binding, load extraction, and solver connectivity remain adapter gaps."
+                        )
                     ),
                     "proxy_node_count": int(metrics.get("proxy_node_count", 0) or 0),
                     "proxy_edge_count": int(metrics.get("proxy_edge_count", 0) or 0),
@@ -388,6 +406,10 @@ def _queue_row(
                     "storey_count": int(metrics.get("storey_count", 0) or 0),
                 }
             )
+            if solver_graph_draft_ready:
+                row["solver_graph_model_json"] = solver_graph_json
+                if solver_graph_npz:
+                    row["solver_graph_dataset_npz"] = solver_graph_npz
             graph_json = str(report.get("graph_json", "") or "")
             if graph_json:
                 row["ifc_proxy_graph_json"] = graph_json

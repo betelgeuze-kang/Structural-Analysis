@@ -135,6 +135,8 @@ def _review_action(row: dict[str, Any]) -> str:
         return "inspect sampled dense model before using it as a full-detail design claim"
     if "proxy_node_glyph_fallback" in flags:
         return "replace node glyph fallback with edge-backed topology"
+    if "ifc_solver_graph_draft_not_member_extents" in flags:
+        return "recover member extents and close IFC load/zero-load evidence"
     if "proxy_layout_not_true_geometry" in flags or "not_solver_exact" in flags:
         return "replace proxy or preview topology with solver-exact structural geometry"
     return "engineer review"
