@@ -15,10 +15,10 @@
 | Solver-exact assets | 11 |
 | Proxy or preview assets | 7 |
 | Review queue assets | 7 |
-| Review items | 15 |
+| Review items | 14 |
 | Hard blockers | 0 |
 
-- Quality flags: not_solver_exact=7, proxy_layout_not_true_geometry=7, proxy_node_glyph_fallback=1
+- Quality flags: not_solver_exact=7, proxy_layout_not_true_geometry=7
 
 ## Review Queue
 
@@ -30,4 +30,4 @@
 | RD-004 | proxy_preview_review | proxy_layout_not_true_geometry, not_solver_exact | replace proxy or preview topology with solver-exact structural geometry |
 | RD-005 | proxy_preview_review | proxy_layout_not_true_geometry, not_solver_exact | replace proxy or preview topology with solver-exact structural geometry |
 | RD-006 | proxy_preview_review | proxy_layout_not_true_geometry, not_solver_exact | replace proxy or preview topology with solver-exact structural geometry |
-| RD-007 | proxy_preview_review | proxy_layout_not_true_geometry, proxy_node_glyph_fallback, not_solver_exact | replace node glyph fallback with edge-backed topology |
+| RD-007 | proxy_preview_review | proxy_layout_not_true_geometry, not_solver_exact | replace proxy or preview topology with solver-exact structural geometry |

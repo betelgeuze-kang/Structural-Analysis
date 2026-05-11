@@ -180,7 +180,11 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
     blocker_family, blocker_reason_code = _blocker(metrics, flags)
     structural_entity_count = _safe_int(metrics.get("structural_entity_count", 0))
     proxy_edge_count = _safe_int(metrics.get("proxy_edge_count", 0))
-    edge_coverage_ratio = round(proxy_edge_count / structural_entity_count, 4) if structural_entity_count > 0 else 0.0
+    edge_coverage_ratio = (
+        round(min(1.0, proxy_edge_count / structural_entity_count), 4)
+        if structural_entity_count > 0
+        else 0.0
+    )
     return {
         "asset_ref": asset_ref,
         "file_id": str(intake_row.get("file_id") or ""),

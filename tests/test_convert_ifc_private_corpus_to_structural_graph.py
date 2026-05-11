@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 import subprocess
@@ -9,6 +10,10 @@ import sys
 REPO_ROOT = Path(__file__).resolve().parents[1]
 IFC_SCRIPT = REPO_ROOT / "implementation/phase1/convert_ifc_private_corpus_to_structural_graph.py"
 QUEUE_SCRIPT = REPO_ROOT / "implementation/phase1/build_real_drawing_optimization_intake_queue.py"
+IFC_SPEC = importlib.util.spec_from_file_location("convert_ifc_private_corpus_to_structural_graph", IFC_SCRIPT)
+assert IFC_SPEC is not None and IFC_SPEC.loader is not None
+ifc_adapter = importlib.util.module_from_spec(IFC_SPEC)
+IFC_SPEC.loader.exec_module(ifc_adapter)
 
 
 def _write_json(path: Path, payload: dict) -> None:
@@ -102,6 +107,37 @@ END-ISO-10303-21;
     assert report["entity_counts"]["IFCCOLUMN"] == 1
     assert graph["metrics"]["proxy_node_count"] == 4
     assert graph["metrics"]["proxy_edge_count"] == 3
+
+
+def test_ifc_adapter_uses_release_safe_aggregate_group_edges(tmp_path: Path) -> None:
+    ifc_path = tmp_path / "private" / "aggregate_only.ifc"
+    ifc_path.parent.mkdir(parents=True)
+    ifc_path.write_text(
+        """ISO-10303-21;
+HEADER;
+FILE_SCHEMA(('IFC2X3'));
+ENDSEC;
+DATA;
+#5= IFCBUILDING('building-guid',$,'Building',$,$,$,$,$,$,$,$,$);
+#20= IFCCOLUMN('column-guid',$,'C1',$,$,$,$,$);
+#21= IFCBEAM('beam-guid',$,'B1',$,$,$,$,$);
+#30= IFCRELAGGREGATES('rel-guid',$,$,$,#5,(#20,#21));
+ENDSEC;
+END-ISO-10303-21;
+""",
+        encoding="utf-8",
+    )
+
+    payload = ifc_adapter.parse_ifc_proxy_graph(ifc_path)
+
+    assert payload["metrics"]["structural_entity_count"] == 2
+    assert payload["metrics"]["direct_relationship_edge_count"] == 0
+    assert payload["metrics"]["relationship_group_node_count"] == 1
+    assert payload["metrics"]["proxy_node_count"] == 3
+    assert payload["metrics"]["proxy_edge_count"] == 2
+    assert payload["proxy_relationship_counts"] == {"aggregates_decomposition": 2}
+    assert "release_safe_aggregate_group_edges" in payload["relationship_extraction_modes"]
+    assert all(edge["target"] == "relationship:IFCRELAGGREGATES:#30" for edge in payload["edges"])
 
 
 def test_queue_promotes_ifc_adapter_report_to_proxy_ready(tmp_path: Path) -> None:

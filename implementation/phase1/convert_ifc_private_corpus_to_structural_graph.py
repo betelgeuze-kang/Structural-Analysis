@@ -17,6 +17,8 @@ DEFAULT_REDACTED_MANIFEST = Path("tmp/real_drawing_private_corpus/redacted_manif
 DEFAULT_OUT_DIR = Path("tmp/real_drawing_private_corpus/ifc_adapter")
 ADAPTER_SCHEMA_VERSION = "real-drawing-ifc-structural-proxy-graph.v1"
 ADAPTER_MODE = "entity_proxy_graph"
+AGGREGATE_RELATIONSHIP = "aggregates_decomposition"
+CONTAINED_RELATIONSHIP = "contained_in_spatial_structure"
 
 STRUCTURAL_ENTITY_TYPES = {
     "IFCBEAM",
@@ -140,17 +142,40 @@ def _entity_label(entity_type: str, _args: list[str], entity_id: str) -> str:
     return f"{entity_type}:{entity_id}"
 
 
+def _relationship_group_id(entity_type: str, entity_id: str) -> str:
+    return f"relationship:{entity_type}:{entity_id}"
+
+
+def _append_unique_edge(
+    edges: list[dict[str, str]],
+    seen_edges: set[tuple[str, str, str]],
+    *,
+    source: str,
+    target: str,
+    relationship: str,
+) -> bool:
+    if not source or not target or source == target:
+        return False
+    key = (source, target, relationship)
+    if key in seen_edges:
+        return False
+    seen_edges.add(key)
+    edges.append({"source": source, "target": target, "relationship": relationship})
+    return True
+
+
 def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
     entity_counts: Counter[str] = Counter()
     nodes: dict[str, dict[str, Any]] = {}
     records = _records(path)
-    contained_edges: list[dict[str, str]] = []
+    parsed_records: list[tuple[str, str, list[str]]] = []
 
     for record in records:
         parsed = _record_args(record)
         if parsed is None:
             continue
         entity_id, entity_type, args = parsed
+        parsed_records.append(parsed)
         entity_counts[entity_type] += 1
         if entity_type in COUNTED_ENTITY_TYPES:
             nodes[entity_id] = {
@@ -159,27 +184,75 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
                 "label": _entity_label(entity_type, args, entity_id),
                 "proxy_node_kind": "storey" if entity_type in SPATIAL_ENTITY_TYPES else "structural_element",
             }
-        elif entity_type == "IFCRELCONTAINEDINSPATIALSTRUCTURE" and len(args) >= 6:
-            container_refs = REF_RE.findall(args[5])
-            related_refs = REF_RE.findall(args[4])
-            if container_refs:
-                container_id = f"#{container_refs[-1]}"
-                for related_ref in related_refs:
-                    contained_edges.append(
-                        {
-                            "source": f"#{related_ref}",
-                            "target": container_id,
-                            "relationship": "contained_in_spatial_structure",
-                        }
-                    )
 
-    edges = [
-        edge
-        for edge in contained_edges
-        if edge["source"] in nodes and edge["target"] in nodes
-    ]
     structural_entity_count = sum(entity_counts[entity_type] for entity_type in STRUCTURAL_ENTITY_TYPES)
     storey_count = entity_counts["IFCBUILDINGSTOREY"]
+    edges: list[dict[str, str]] = []
+    seen_edges: set[tuple[str, str, str]] = set()
+    aggregate_group_candidates: list[tuple[str, list[str]]] = []
+
+    for entity_id, entity_type, args in parsed_records:
+        if len(args) < 6:
+            continue
+        if entity_type == "IFCRELCONTAINEDINSPATIALSTRUCTURE":
+            related_ids = [f"#{ref}" for ref in REF_RE.findall(args[4])]
+            container_ids = [f"#{ref}" for ref in REF_RE.findall(args[5])]
+            for source in related_ids:
+                for target in container_ids:
+                    if source in nodes and target in nodes:
+                        _append_unique_edge(
+                            edges,
+                            seen_edges,
+                            source=source,
+                            target=target,
+                            relationship=CONTAINED_RELATIONSHIP,
+                        )
+        elif entity_type == "IFCRELAGGREGATES":
+            parent_ids = [f"#{ref}" for ref in REF_RE.findall(args[4])]
+            child_ids = [f"#{ref}" for ref in REF_RE.findall(args[5])]
+            counted_children = [child_id for child_id in child_ids if child_id in nodes]
+            counted_parents = [parent_id for parent_id in parent_ids if parent_id in nodes]
+            for source in counted_children:
+                for target in counted_parents:
+                    _append_unique_edge(
+                        edges,
+                        seen_edges,
+                        source=source,
+                        target=target,
+                        relationship=AGGREGATE_RELATIONSHIP,
+                    )
+            if counted_children and not counted_parents:
+                aggregate_group_candidates.append((entity_id, counted_children))
+
+    direct_edge_count = len(edges)
+    if structural_entity_count > 0 and direct_edge_count < structural_entity_count:
+        for entity_id, counted_children in aggregate_group_candidates:
+            group_id = _relationship_group_id("IFCRELAGGREGATES", entity_id)
+            nodes[group_id] = {
+                "id": group_id,
+                "ifc_entity_type": "IFCRELAGGREGATES",
+                "label": f"IFCRELAGGREGATES:{entity_id}",
+                "proxy_node_kind": "relationship_group",
+                "relationship": AGGREGATE_RELATIONSHIP,
+            }
+            for source in counted_children:
+                _append_unique_edge(
+                    edges,
+                    seen_edges,
+                    source=source,
+                    target=group_id,
+                    relationship=AGGREGATE_RELATIONSHIP,
+                )
+
+    relationship_counts = Counter(edge["relationship"] for edge in edges)
+    relationship_group_node_count = sum(
+        1 for node in nodes.values() if node.get("proxy_node_kind") == "relationship_group"
+    )
+    relationship_extraction_modes = []
+    if direct_edge_count > 0:
+        relationship_extraction_modes.append("direct_counted_entity_edges")
+    if relationship_group_node_count > 0:
+        relationship_extraction_modes.append("release_safe_aggregate_group_edges")
     return {
         "adapter_mode": ADAPTER_MODE,
         "entity_counts": {entity_type: int(entity_counts[entity_type]) for entity_type in sorted(COUNTED_ENTITY_TYPES)},
@@ -187,9 +260,13 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
             "record_count": len(records),
             "proxy_node_count": len(nodes),
             "proxy_edge_count": len(edges),
+            "direct_relationship_edge_count": direct_edge_count,
+            "relationship_group_node_count": relationship_group_node_count,
             "structural_entity_count": int(structural_entity_count),
             "storey_count": int(storey_count),
         },
+        "proxy_relationship_counts": dict(sorted(relationship_counts.items())),
+        "relationship_extraction_modes": relationship_extraction_modes,
         "nodes": list(nodes.values()),
         "edges": edges,
     }

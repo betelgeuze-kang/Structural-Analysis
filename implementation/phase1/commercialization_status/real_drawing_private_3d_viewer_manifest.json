@@ -7,9 +7,9 @@
       "geometry_available": true,
       "geometry_mode": "ifc_proxy_topology_3d_layout",
       "metrics": {
-        "edge_count": 534,
-        "node_count": 666,
-        "renderable_segment_count": 534
+        "edge_count": 666,
+        "node_count": 674,
+        "renderable_segment_count": 666
       },
       "model_asset_count": 1,
       "quality_flags": [
@@ -17,7 +17,7 @@
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 534,
+      "segment_count": 666,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
       "warning_label": "proxy layout"
@@ -133,18 +133,17 @@
       "geometry_available": true,
       "geometry_mode": "ifc_proxy_topology_3d_layout",
       "metrics": {
-        "edge_count": 0,
-        "node_count": 836,
-        "renderable_segment_count": 836
+        "edge_count": 836,
+        "node_count": 1662,
+        "renderable_segment_count": 455
       },
       "model_asset_count": 1,
       "quality_flags": [
         "proxy_layout_not_true_geometry",
-        "proxy_node_glyph_fallback",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 836,
+      "segment_count": 455,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
       "warning_label": "proxy layout"
@@ -362,7 +361,7 @@
     }
   ],
   "full_detail_lod_manifest": "implementation/phase1/commercialization_status/real_drawing_full_detail_lod_manifest.json",
-  "output_html": "",
+  "output_html": "tmp/real_drawing_private_corpus/webviewer/real_drawing_3d_registry.html",
   "output_viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js",
   "proxy_or_preview_asset_count": 7,
   "renderable_asset_count": 18,

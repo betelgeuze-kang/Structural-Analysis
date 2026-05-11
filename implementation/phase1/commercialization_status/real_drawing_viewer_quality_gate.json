@@ -2,21 +2,21 @@
   "asset_quality_rows": [
     {
       "asset_ref": "RD-001",
-      "edge_count": 534,
+      "edge_count": 666,
       "element_count": 0,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
       "geometry_mode": "ifc_proxy_topology_3d_layout",
-      "node_count": 666,
+      "node_count": 674,
       "quality_flags": [
         "proxy_layout_not_true_geometry",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "renderable_segment_count": 534,
+      "renderable_segment_count": 666,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 534,
+      "segment_count": 666,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready"
     },
@@ -122,22 +122,21 @@
     },
     {
       "asset_ref": "RD-007",
-      "edge_count": 0,
+      "edge_count": 836,
       "element_count": 0,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
       "geometry_mode": "ifc_proxy_topology_3d_layout",
-      "node_count": 836,
+      "node_count": 1662,
       "quality_flags": [
         "proxy_layout_not_true_geometry",
-        "proxy_node_glyph_fallback",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "renderable_segment_count": 836,
+      "renderable_segment_count": 455,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 836,
+      "segment_count": 455,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready"
     },
@@ -335,8 +334,7 @@
   "hard_blockers": [],
   "quality_flag_counts": {
     "not_solver_exact": 7,
-    "proxy_layout_not_true_geometry": 7,
-    "proxy_node_glyph_fallback": 1
+    "proxy_layout_not_true_geometry": 7
   },
   "reason_code": "PASS_WITH_REVIEW_QUEUE",
   "recommended_claim": "Integrated real-drawing viewer is ready for engineer-in-loop review; proxy/preview assets are labeled and are not full solver-exact replacements.",
@@ -405,11 +403,10 @@
       "asset_ref": "RD-007",
       "quality_flags": [
         "proxy_layout_not_true_geometry",
-        "proxy_node_glyph_fallback",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "replace node glyph fallback with edge-backed topology",
+      "recommended_action": "replace proxy or preview topology with solver-exact structural geometry",
       "review_id": "RQ-007"
     }
   ],
@@ -434,7 +431,7 @@
     "hard_blocker_count": 0,
     "proxy_or_preview_asset_count": 7,
     "renderable_asset_count": 18,
-    "review_item_count": 15,
+    "review_item_count": 14,
     "review_queue_asset_count": 7,
     "solver_exact_asset_count": 11
   }

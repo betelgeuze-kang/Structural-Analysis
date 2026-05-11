@@ -3,50 +3,10 @@
   "planned_unlock_batch": [],
   "promotion_items": [
     {
-      "asset_ref": "RD-007",
-      "blocker_family": "ifc_relationship_edge_extraction_required",
-      "blocker_reason_code": "ERR_IFC_PROXY_NODE_GLYPH_FALLBACK",
-      "closure_evidence_required": [
-        "ifc_relationship_edge_extraction_receipt",
-        "ifc_local_placement_coordinate_extraction_receipt",
-        "ifc_representation_shape_axis_receipt",
-        "ifc_material_section_binding_receipt",
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
-        "solver_graph_json_npz_receipt",
-        "viewer_sidecar_rebuild_receipt"
-      ],
-      "closure_status": "pending",
-      "commercial_claim_blocked": true,
-      "current_solver_exact": false,
-      "edge_coverage_ratio": 0.0,
-      "effort_label": "medium_high",
-      "element_count": 0,
-      "expected_solver_exact_delta": 1,
-      "file_type": ".ifc",
-      "node_count": 836,
-      "owner_lane": "ifc_geometry_owner",
-      "priority_rank": 35,
-      "promotion_family": "ifc_node_glyph_topology_rebuild",
-      "promotion_id": "RP-001",
-      "quality_flags": [
-        "not_solver_exact",
-        "proxy_layout_not_true_geometry",
-        "proxy_node_glyph_fallback"
-      ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
-      "reconstruction_plan_status": "open",
-      "renderable_segment_count": 836,
-      "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 836,
-      "status": "ifc_proxy_graph_ready"
-    },
-    {
       "asset_ref": "RD-001",
-      "blocker_family": "ifc_relationship_coverage_gap",
-      "blocker_reason_code": "ERR_IFC_PROXY_RELATIONSHIP_COVERAGE_GAP",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
       "closure_evidence_required": [
-        "ifc_relationship_edge_extraction_receipt",
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
@@ -57,16 +17,16 @@
       "closure_status": "pending",
       "commercial_claim_blocked": true,
       "current_solver_exact": false,
-      "edge_coverage_ratio": 0.8079,
+      "edge_coverage_ratio": 1.0,
       "effort_label": "high",
       "element_count": 0,
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
-      "node_count": 666,
+      "node_count": 674,
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
-      "promotion_id": "RP-002",
+      "promotion_id": "RP-001",
       "quality_flags": [
         "not_solver_exact",
         "proxy_layout_not_true_geometry"
@@ -74,9 +34,9 @@
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
       "reconstruction_plan_status": "open",
-      "renderable_segment_count": 534,
+      "renderable_segment_count": 666,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 534,
+      "segment_count": 666,
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -103,7 +63,7 @@
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
-      "promotion_id": "RP-003",
+      "promotion_id": "RP-002",
       "quality_flags": [
         "not_solver_exact",
         "proxy_layout_not_true_geometry"
@@ -140,7 +100,7 @@
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
-      "promotion_id": "RP-004",
+      "promotion_id": "RP-003",
       "quality_flags": [
         "not_solver_exact",
         "proxy_layout_not_true_geometry"
@@ -177,7 +137,7 @@
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
-      "promotion_id": "RP-005",
+      "promotion_id": "RP-004",
       "quality_flags": [
         "not_solver_exact",
         "proxy_layout_not_true_geometry"
@@ -214,7 +174,7 @@
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
-      "promotion_id": "RP-006",
+      "promotion_id": "RP-005",
       "quality_flags": [
         "not_solver_exact",
         "proxy_layout_not_true_geometry"
@@ -251,7 +211,7 @@
       "owner_lane": "ifc_geometry_owner",
       "priority_rank": 40,
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
-      "promotion_id": "RP-007",
+      "promotion_id": "RP-006",
       "quality_flags": [
         "not_solver_exact",
         "proxy_layout_not_true_geometry"
@@ -262,6 +222,43 @@
       "renderable_segment_count": 843,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 843,
+      "status": "ifc_proxy_graph_ready"
+    },
+    {
+      "asset_ref": "RD-007",
+      "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
+      "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "closure_evidence_required": [
+        "ifc_local_placement_coordinate_extraction_receipt",
+        "ifc_representation_shape_axis_receipt",
+        "ifc_material_section_binding_receipt",
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt"
+      ],
+      "closure_status": "pending",
+      "commercial_claim_blocked": true,
+      "current_solver_exact": false,
+      "edge_coverage_ratio": 1.0,
+      "effort_label": "high",
+      "element_count": 0,
+      "expected_solver_exact_delta": 1,
+      "file_type": ".ifc",
+      "node_count": 1662,
+      "owner_lane": "ifc_geometry_owner",
+      "priority_rank": 40,
+      "promotion_family": "ifc_coordinate_geometry_reconstruction",
+      "promotion_id": "RP-007",
+      "quality_flags": [
+        "not_solver_exact",
+        "proxy_layout_not_true_geometry"
+      ],
+      "quality_tier": "proxy_preview_review",
+      "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "reconstruction_plan_status": "open",
+      "renderable_segment_count": 455,
+      "route": "ifc_to_structural_graph_adapter",
+      "segment_count": 455,
       "status": "ifc_proxy_graph_ready"
     }
   ],
@@ -276,12 +273,10 @@
     "asset_count": 18,
     "current_solver_exact_asset_count": 11,
     "effort_counts": {
-      "high": 6,
-      "medium_high": 1
+      "high": 7
     },
     "family_counts": {
-      "ifc_coordinate_geometry_reconstruction": 6,
-      "ifc_node_glyph_topology_rebuild": 1
+      "ifc_coordinate_geometry_reconstruction": 7
     },
     "planned_solver_exact_asset_count_after_unlock_batch": 11,
     "planned_unlock_batch_count": 0,
