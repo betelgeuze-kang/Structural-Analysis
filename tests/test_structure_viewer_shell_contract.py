@@ -58,7 +58,11 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-real-drawing-active-inspector" in text
     assert "getRealDrawingInspectorRows" in text
     assert "data-real-drawing-browser-query" in text
+    assert "data-real-drawing-browser-sort" in text
+    assert "data-real-drawing-next-review" in text
     assert "setRealDrawingAssetQuery" in text
+    assert "setRealDrawingBrowserSort" in text
+    assert "sortRealDrawingBrowserAssets" in text
     assert "realDrawingAssetMatchesBrowserQuery" in text
     assert "real-drawing-inspector-cell" in (
         ROOT / "src" / "structure-viewer" / "design-theme.css"

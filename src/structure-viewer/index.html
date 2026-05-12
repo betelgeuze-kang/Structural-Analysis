@@ -426,6 +426,12 @@ const REAL_DRAWING_QUALITY_FILTERS=[
   {key:'sparse',label:'Sparse'},
   {key:'sampled',label:'Sampled'}
 ];
+const REAL_DRAWING_BROWSER_SORT_OPTIONS=[
+  {key:'priority',label:'Priority'},
+  {key:'asset',label:'Asset ID'},
+  {key:'segments',label:'Segments'},
+  {key:'status',label:'Status'}
+];
 const selectionChannel=(()=>{
   try{return typeof BroadcastChannel==='function'?new BroadcastChannel(SHARED_SELECTION_KEY):null}catch(_err){return null}
 })();
@@ -579,7 +585,7 @@ const {
 }=pickBroadphaseToolkit;
 const layerVisibility=new Map();
 let activeIsolation={kind:'',value:'',label:''};
-let activeRealDrawingQualityFilter='all',activeRealDrawingAssetQuery='';
+let activeRealDrawingQualityFilter='all',activeRealDrawingAssetQuery='',activeRealDrawingBrowserSort='priority';
 let storyClipBands=[],activeStoryClipLabel='',activeClipPlanes=[],storyClipPadding=.35;
 let contourContext=null;
 const COLORMAPS={
@@ -3924,8 +3930,56 @@ function setRealDrawingAssetQuery(query='',{preserveFocus=false}={}){
   activeRealDrawingAssetQuery=normalizeSelectionValue(query);
   if(modelData)renderRealDrawingQualityPanel(modelData,{focusQuery:preserveFocus});
 }
+function getRealDrawingAssetSortId(row){
+  return normalizeSelectionValue(row?.asset_ref).replace(/\d+/g,value=>value.padStart(8,'0'));
+}
+function getRealDrawingBrowserPriorityScore(row){
+  const flags=getRealDrawingQualityFlags(row);
+  const sourceFlags=getRealDrawingSourceQualityFlags(row);
+  const claimFlags=getRealDrawingClaimQualityFlags(row);
+  let score=0;
+  if(getRealDrawingQualityTier(row)==='blocked')score-=120;
+  if(isRealDrawingReviewAsset(row))score-=80;
+  if(claimFlags.length)score-=50;
+  if(sourceFlags.length)score-=35;
+  if(Boolean(row?.zero_load_signature_required)&&!Boolean(row?.engineer_zero_load_signature_attached))score-=30;
+  if(flags.includes('sampled_dense_model'))score-=16;
+  if(flags.includes('sparse_preview'))score-=14;
+  if(!Boolean(row?.solver_exact))score-=10;
+  score-=Math.min(safeNumber(row?.segment_count,0),2000)/10000;
+  return score;
+}
+function sortRealDrawingBrowserAssets(assets,sortKey=activeRealDrawingBrowserSort){
+  const normalized=REAL_DRAWING_BROWSER_SORT_OPTIONS.some(option=>option.key===sortKey)?sortKey:'priority';
+  return [...assets].sort((a,b)=>{
+    if(normalized==='segments'){
+      return safeNumber(b?.segment_count,0)-safeNumber(a?.segment_count,0)
+        ||safeNumber(b?.renderable_segment_count,0)-safeNumber(a?.renderable_segment_count,0)
+        ||getRealDrawingAssetSortId(a).localeCompare(getRealDrawingAssetSortId(b));
+    }
+    if(normalized==='status'){
+      return getRealDrawingQualityTier(a).localeCompare(getRealDrawingQualityTier(b))
+        ||normalizeSelectionValue(a?.status).localeCompare(normalizeSelectionValue(b?.status))
+        ||getRealDrawingAssetSortId(a).localeCompare(getRealDrawingAssetSortId(b));
+    }
+    if(normalized==='asset'){
+      return getRealDrawingAssetSortId(a).localeCompare(getRealDrawingAssetSortId(b));
+    }
+    return getRealDrawingBrowserPriorityScore(a)-getRealDrawingBrowserPriorityScore(b)
+      ||getRealDrawingAssetSortId(a).localeCompare(getRealDrawingAssetSortId(b));
+  });
+}
+function setRealDrawingBrowserSort(sortKey='priority'){
+  const valid=REAL_DRAWING_BROWSER_SORT_OPTIONS.some(option=>option.key===sortKey);
+  activeRealDrawingBrowserSort=valid?sortKey:'priority';
+  if(modelData)renderRealDrawingQualityPanel(modelData);
+}
 function renderRealDrawingBrowserBlock({assets,browserAssets,activeAssetRef}){
   const query=activeRealDrawingAssetQuery;
+  const nextReviewRef=normalizeSelectionValue((browserAssets.find(isRealDrawingReviewAsset)||browserAssets[0]||{}).asset_ref);
+  const sortOptions=REAL_DRAWING_BROWSER_SORT_OPTIONS.map(option=>
+    `<option value="${escapeHtml(option.key)}"${option.key===activeRealDrawingBrowserSort?' selected':''}>${escapeHtml(option.label)}</option>`
+  ).join('');
   const visibleAssets=browserAssets.slice(0,32);
   const overflowCount=Math.max(browserAssets.length-visibleAssets.length,0);
   const list=visibleAssets.length
@@ -3964,6 +4018,12 @@ function renderRealDrawingBrowserBlock({assets,browserAssets,activeAssetRef}){
         <input type="search" id="real-drawing-browser-query" data-real-drawing-browser-query="true" value="${escapeHtml(query)}" placeholder="RD-001 / ifc / load" aria-label="Search optimized drawings">
         <button type="button" data-real-drawing-browser-clear="true" aria-label="Clear drawing search"${query?'':' disabled'}>×</button>
       </div>
+      <div class="real-drawing-browser__toolbar">
+        <label class="real-drawing-browser__sort" for="real-drawing-browser-sort">
+          <select id="real-drawing-browser-sort" data-real-drawing-browser-sort="true" aria-label="Sort optimized drawings">${sortOptions}</select>
+        </label>
+        <button type="button" data-real-drawing-next-review="${escapeHtml(nextReviewRef)}"${nextReviewRef?'':' disabled'}>Next Review</button>
+      </div>
       <div class="real-drawing-browser__list" data-real-drawing-browser-count="${escapeHtml(String(browserAssets.length))}">
         ${list}
       </div>
@@ -3979,7 +4039,7 @@ function renderRealDrawingQualityPanel(data=modelData,{focusQuery=false}={}){
     return;
   }
   const filteredAssets=quality.assets.filter(row=>realDrawingAssetMatchesQualityFilter(row,activeRealDrawingQualityFilter));
-  const browserAssets=filteredAssets.filter(row=>realDrawingAssetMatchesBrowserQuery(row));
+  const browserAssets=sortRealDrawingBrowserAssets(filteredAssets.filter(row=>realDrawingAssetMatchesBrowserQuery(row)));
   const reviewRows=browserAssets.filter(isRealDrawingReviewAsset).slice(0,16);
   const promotionQueue=getRealDrawingPromotionQueue(data);
   const promotionSummary=promotionQueue.summary&&typeof promotionQueue.summary==='object'?promotionQueue.summary:{};
@@ -4197,6 +4257,19 @@ function renderRealDrawingQualityPanel(data=modelData,{focusQuery=false}={}){
   if(browserClear instanceof HTMLButtonElement){
     browserClear.addEventListener('click',()=>{
       setRealDrawingAssetQuery('',{preserveFocus:true});
+    });
+  }
+  const browserSort=panel.querySelector('[data-real-drawing-browser-sort]');
+  if(browserSort instanceof HTMLSelectElement){
+    browserSort.addEventListener('change',()=>{
+      setRealDrawingBrowserSort(browserSort.value);
+    });
+  }
+  const nextReviewButton=panel.querySelector('[data-real-drawing-next-review]');
+  if(nextReviewButton instanceof HTMLButtonElement){
+    nextReviewButton.addEventListener('click',()=>{
+      const assetRef=normalizeSelectionValue(nextReviewButton.getAttribute('data-real-drawing-next-review'));
+      if(assetRef)focusRealDrawingAssetRef(assetRef);
     });
   }
   panel.querySelectorAll('[data-real-drawing-browser-asset]').forEach(button=>{
