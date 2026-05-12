@@ -579,7 +579,7 @@ const {
 }=pickBroadphaseToolkit;
 const layerVisibility=new Map();
 let activeIsolation={kind:'',value:'',label:''};
-let activeRealDrawingQualityFilter='all';
+let activeRealDrawingQualityFilter='all',activeRealDrawingAssetQuery='';
 let storyClipBands=[],activeStoryClipLabel='',activeClipPlanes=[],storyClipPadding=.35;
 let contourContext=null;
 const COLORMAPS={
@@ -3904,7 +3904,73 @@ function setRealDrawingQualityFilter(filterKey='all'){
   activeRealDrawingQualityFilter=valid?filterKey:'all';
   if(modelData)buildUI(modelData);
 }
-function renderRealDrawingQualityPanel(data=modelData){
+function getRealDrawingBrowserSearchText(row){
+  return[
+    row?.asset_ref,row?.file_type,row?.route,row?.status,row?.geometry_mode,row?.graph_source_kind,
+    row?.geometry_claim_status,row?.load_model_status,row?.warning_label,row?.quality_notice,
+    getRealDrawingQualityBadge(row).label,getRealDrawingReviewAction(row),getRealDrawingSegmentLabel(row),
+    ...getRealDrawingQualityFlags(row),
+    ...getRealDrawingSourceQualityFlags(row),
+    ...getRealDrawingClaimQualityFlags(row)
+  ].map(value=>normalizeSelectionValue(value).toLowerCase()).filter(Boolean).join(' ');
+}
+function realDrawingAssetMatchesBrowserQuery(row,query=activeRealDrawingAssetQuery){
+  const tokens=normalizeSelectionValue(query).toLowerCase().split(/\s+/).filter(Boolean);
+  if(!tokens.length)return true;
+  const haystack=getRealDrawingBrowserSearchText(row);
+  return tokens.every(token=>haystack.includes(token));
+}
+function setRealDrawingAssetQuery(query='',{preserveFocus=false}={}){
+  activeRealDrawingAssetQuery=normalizeSelectionValue(query);
+  if(modelData)renderRealDrawingQualityPanel(modelData,{focusQuery:preserveFocus});
+}
+function renderRealDrawingBrowserBlock({assets,browserAssets,activeAssetRef}){
+  const query=activeRealDrawingAssetQuery;
+  const visibleAssets=browserAssets.slice(0,32);
+  const overflowCount=Math.max(browserAssets.length-visibleAssets.length,0);
+  const list=visibleAssets.length
+    ?visibleAssets.map(row=>{
+      const assetRef=normalizeSelectionValue(row.asset_ref);
+      const badge=getRealDrawingQualityBadge(row);
+      const route=normalizeSelectionValue(row.file_type)||normalizeSelectionValue(row.route)||normalizeSelectionValue(row.status)||'--';
+      const flags=[
+        ...getRealDrawingQualityFlags(row),
+        ...getRealDrawingSourceQualityFlags(row).map(flag=>`source:${flag}`),
+        ...getRealDrawingClaimQualityFlags(row).map(flag=>`claim:${flag}`)
+      ].filter(Boolean);
+      const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
+      const detail=loadEvidence||flags.slice(0,3).join(', ')||normalizeSelectionValue(row.quality_notice)||normalizeSelectionValue(row.status)||'ready';
+      return `
+        <button type="button" class="real-drawing-browser-item${assetRef===activeAssetRef?' is-active':''}" data-real-drawing-browser-asset="${escapeHtml(assetRef)}">
+          <span class="quality-badge quality-badge--${escapeHtml(badge.tone)}">${escapeHtml(badge.label)}</span>
+          <span class="real-drawing-browser-item__body">
+            <strong>${escapeHtml(assetRef)}</strong>
+            <small>${escapeHtml(route)}</small>
+          </span>
+          <span class="real-drawing-browser-item__meta">
+            <span>${escapeHtml(getRealDrawingSegmentLabel(row))}</span>
+            <small>${escapeHtml(detail)}</small>
+          </span>
+        </button>`;
+    }).join('')
+    :'<div class="panel-placeholder">No drawings match the active browser filters.</div>';
+  return `
+    <section class="real-drawing-browser" data-real-drawing-browser="true">
+      <div class="real-drawing-browser__header">
+        <span>Drawing Browser</span>
+        <strong>${escapeHtml(String(browserAssets.length))}/${escapeHtml(String(assets.length))}</strong>
+      </div>
+      <div class="real-drawing-browser__search">
+        <input type="search" id="real-drawing-browser-query" data-real-drawing-browser-query="true" value="${escapeHtml(query)}" placeholder="RD-001 / ifc / load" aria-label="Search optimized drawings">
+        <button type="button" data-real-drawing-browser-clear="true" aria-label="Clear drawing search"${query?'':' disabled'}>×</button>
+      </div>
+      <div class="real-drawing-browser__list" data-real-drawing-browser-count="${escapeHtml(String(browserAssets.length))}">
+        ${list}
+      </div>
+      ${overflowCount?`<div class="real-drawing-browser__overflow">+${escapeHtml(String(overflowCount))} more</div>`:''}
+    </section>`;
+}
+function renderRealDrawingQualityPanel(data=modelData,{focusQuery=false}={}){
   const panel=document.getElementById('real-drawing-quality-panel');
   if(!(panel instanceof HTMLElement))return;
   const quality=buildRealDrawingQualitySummary(data);
@@ -3913,7 +3979,8 @@ function renderRealDrawingQualityPanel(data=modelData){
     return;
   }
   const filteredAssets=quality.assets.filter(row=>realDrawingAssetMatchesQualityFilter(row,activeRealDrawingQualityFilter));
-  const reviewRows=filteredAssets.filter(isRealDrawingReviewAsset).slice(0,16);
+  const browserAssets=filteredAssets.filter(row=>realDrawingAssetMatchesBrowserQuery(row));
+  const reviewRows=browserAssets.filter(isRealDrawingReviewAsset).slice(0,16);
   const promotionQueue=getRealDrawingPromotionQueue(data);
   const promotionSummary=promotionQueue.summary&&typeof promotionQueue.summary==='object'?promotionQueue.summary:{};
   const plannedUnlockBatch=getRealDrawingPlannedUnlockBatch(data).slice(0,8);
@@ -3937,6 +4004,7 @@ function renderRealDrawingQualityPanel(data=modelData){
   const activeBadge=getRealDrawingQualityBadge(activeAsset);
   const activeLoadEvidence=getRealDrawingLoadEvidenceLabel(activeAsset);
   const activeInspectorBlock=renderRealDrawingActiveInspector(activeAsset);
+  const browserBlock=renderRealDrawingBrowserBlock({assets:filteredAssets,browserAssets,activeAssetRef});
   const switcherOptions=quality.assets.map(row=>{
     const assetRef=normalizeSelectionValue(row.asset_ref);
     return `<option value="${escapeHtml(assetRef)}"${assetRef===activeAssetRef?' selected':''}>${escapeHtml(getRealDrawingAssetOptionLabel(row))}</option>`;
@@ -3969,6 +4037,9 @@ function renderRealDrawingQualityPanel(data=modelData){
     const selected=filter.key===activeRealDrawingQualityFilter;
     return `<button type="button" class="quality-filter-button${selected?' is-active':''}" data-real-drawing-quality-filter="${escapeHtml(filter.key)}">${escapeHtml(filter.label)} <span>${count}</span></button>`;
   }).join('');
+  const emptyReviewText=activeRealDrawingAssetQuery
+    ?'No review queue assets match the drawing browser filters.'
+    :'No review queue assets in the active quality filter.';
   const reviewList=reviewRows.length
     ?reviewRows.map(row=>{
       const badge=getRealDrawingQualityBadge(row);
@@ -3989,7 +4060,7 @@ function renderRealDrawingQualityPanel(data=modelData){
           <span class="real-drawing-review-item__segments">${escapeHtml(getRealDrawingSegmentLabel(row))}</span>
         </button>`;
     }).join('')
-    :'<div class="panel-placeholder">No review queue assets in the active quality filter.</div>';
+    :`<div class="panel-placeholder">${escapeHtml(emptyReviewText)}</div>`;
   let promotionBlock='';
   if(plannedUnlockBatch.length){
     promotionBlock=`
@@ -4075,6 +4146,7 @@ function renderRealDrawingQualityPanel(data=modelData){
     </div>
     ${promotionBlock}
     <div class="quality-filter-bar" aria-label="Real drawing quality filters">${filterButtons}</div>
+    ${browserBlock}
     <div class="real-drawing-review-list" data-real-drawing-review-count="${escapeHtml(String(quality.reviewQueueCount))}">
       ${reviewList}
     </div>`;
@@ -4102,6 +4174,35 @@ function renderRealDrawingQualityPanel(data=modelData){
   panel.querySelectorAll('[data-real-drawing-quality-filter]').forEach(button=>{
     button.addEventListener('click',()=>{
       setRealDrawingQualityFilter(normalizeSelectionValue(button.getAttribute('data-real-drawing-quality-filter')));
+    });
+  });
+  const browserQuery=panel.querySelector('[data-real-drawing-browser-query]');
+  if(browserQuery instanceof HTMLInputElement){
+    browserQuery.addEventListener('input',()=>{
+      setRealDrawingAssetQuery(browserQuery.value,{preserveFocus:true});
+    });
+    browserQuery.addEventListener('keydown',event=>{
+      if(event.key!=='Enter')return;
+      const firstAsset=panel.querySelector('[data-real-drawing-browser-asset]');
+      const assetRef=normalizeSelectionValue(firstAsset?.getAttribute('data-real-drawing-browser-asset'));
+      if(assetRef)focusRealDrawingAssetRef(assetRef);
+    });
+    if(focusQuery){
+      browserQuery.focus({preventScroll:true});
+      const cursor=browserQuery.value.length;
+      browserQuery.setSelectionRange(cursor,cursor);
+    }
+  }
+  const browserClear=panel.querySelector('[data-real-drawing-browser-clear]');
+  if(browserClear instanceof HTMLButtonElement){
+    browserClear.addEventListener('click',()=>{
+      setRealDrawingAssetQuery('',{preserveFocus:true});
+    });
+  }
+  panel.querySelectorAll('[data-real-drawing-browser-asset]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-browser-asset'));
+      focusRealDrawingAssetRef(assetRef);
     });
   });
   panel.querySelectorAll('[data-real-drawing-review-asset]').forEach(button=>{

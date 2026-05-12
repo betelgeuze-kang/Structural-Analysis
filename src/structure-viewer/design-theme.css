@@ -1194,6 +1194,168 @@ body.structural-surface .real-drawing-active-inspector__notice {
   overflow:hidden;
 }
 
+body.structural-surface .real-drawing-browser {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:9px;
+  border-radius:8px;
+  border:1px solid rgba(148,168,190,.16);
+  background:rgba(2,6,23,.20);
+}
+
+body.structural-surface.light-mode .real-drawing-browser {
+  background:rgba(255,255,255,.62);
+  border-color:rgba(133,102,70,.14);
+}
+
+body.structural-surface .real-drawing-browser__header,
+body.structural-surface .real-drawing-browser__search {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+body.structural-surface .real-drawing-browser__header {
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+
+body.structural-surface .real-drawing-browser__header strong {
+  color:var(--text);
+  font-size:12px;
+}
+
+body.structural-surface .real-drawing-browser__search input {
+  width:100%;
+  min-width:0;
+  min-height:32px;
+  border-radius:8px;
+  border:1px solid rgba(148,168,190,.20);
+  background:rgba(15,23,42,.42);
+  color:var(--text);
+  padding:7px 9px;
+  font-size:12px;
+}
+
+body.structural-surface.light-mode .real-drawing-browser__search input {
+  background:rgba(255,255,255,.78);
+  border-color:rgba(133,102,70,.16);
+}
+
+body.structural-surface .real-drawing-browser__search button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  min-width:30px;
+  padding:0;
+  border-radius:8px;
+  border:1px solid rgba(148,168,190,.18);
+  background:rgba(15,23,42,.46);
+  color:var(--muted);
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+body.structural-surface .real-drawing-browser__search button:disabled {
+  opacity:.42;
+  cursor:not-allowed;
+}
+
+body.structural-surface.light-mode .real-drawing-browser__search button {
+  background:rgba(255,255,255,.72);
+  border-color:rgba(133,102,70,.14);
+}
+
+body.structural-surface .real-drawing-browser__list {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:310px;
+  overflow:auto;
+  padding-right:2px;
+}
+
+body.structural-surface .real-drawing-browser-item {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) minmax(70px,.72fr);
+  align-items:center;
+  gap:8px;
+  width:100%;
+  min-width:0;
+  padding:7px;
+  border-radius:8px;
+  border:1px solid rgba(148,168,190,.13);
+  background:rgba(2,6,23,.22);
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface .real-drawing-browser-item:hover,
+body.structural-surface .real-drawing-browser-item.is-active {
+  border-color:rgba(79,183,173,.46);
+  background:rgba(79,183,173,.10);
+}
+
+body.structural-surface.light-mode .real-drawing-browser-item {
+  background:rgba(255,255,255,.62);
+  border-color:rgba(133,102,70,.12);
+}
+
+body.structural-surface .real-drawing-browser-item__body,
+body.structural-surface .real-drawing-browser-item__meta {
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+body.structural-surface .real-drawing-browser-item__body strong,
+body.structural-surface .real-drawing-browser-item__body small,
+body.structural-surface .real-drawing-browser-item__meta span,
+body.structural-surface .real-drawing-browser-item__meta small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .real-drawing-browser-item__body strong {
+  color:var(--text);
+  font-size:12px;
+  line-height:1.2;
+}
+
+body.structural-surface .real-drawing-browser-item__body small,
+body.structural-surface .real-drawing-browser-item__meta small {
+  color:var(--muted);
+  font-size:10px;
+}
+
+body.structural-surface .real-drawing-browser-item__meta {
+  text-align:right;
+}
+
+body.structural-surface .real-drawing-browser-item__meta span {
+  color:var(--text);
+  font-size:11px;
+  font-weight:800;
+}
+
+body.structural-surface .real-drawing-browser__overflow {
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  text-align:right;
+}
+
 body.structural-surface .quality-filter-bar {
   display:flex;
   flex-wrap:wrap;
