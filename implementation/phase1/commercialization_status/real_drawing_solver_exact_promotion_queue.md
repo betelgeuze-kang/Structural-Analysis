@@ -15,10 +15,10 @@ No planned unlock batch is available.
 
 | ID | Asset | Family | Effort | Delta | Blocker | Flags |
 | --- | --- | --- | --- | ---: | --- | --- |
-| RP-001 | RD-001 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact |
-| RP-002 | RD-002 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact |
-| RP-003 | RD-003 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact |
-| RP-004 | RD-004 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact |
-| RP-005 | RD-005 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact |
-| RP-006 | RD-006 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact |
-| RP-007 | RD-007 | ifc_coordinate_geometry_reconstruction | high | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact |
+| RP-001 | RD-001 | ifc_load_model_evidence_closure | low | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, claim:ifc_load_model_missing |
+| RP-002 | RD-002 | ifc_load_model_evidence_closure | low | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, claim:ifc_load_model_missing |
+| RP-003 | RD-003 | ifc_load_model_evidence_closure | low | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, claim:ifc_load_model_missing |
+| RP-004 | RD-004 | ifc_load_model_evidence_closure | low | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, claim:ifc_load_model_missing |
+| RP-005 | RD-005 | ifc_load_model_evidence_closure | low | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, claim:ifc_load_model_missing |
+| RP-006 | RD-006 | ifc_load_model_evidence_closure | low | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, claim:ifc_load_model_missing |
+| RP-007 | RD-007 | ifc_load_model_evidence_closure | low | 1 | ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY | not_solver_exact, claim:ifc_load_model_missing |

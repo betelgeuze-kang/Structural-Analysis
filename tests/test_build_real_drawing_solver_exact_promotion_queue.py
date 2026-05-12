@@ -184,6 +184,77 @@ def test_promotion_queue_attaches_ifc_reconstruction_blocker_evidence(tmp_path: 
     assert "IFC solver-exact receipts" in ifc_item["recommended_action"]
 
 
+def test_promotion_queue_classifies_ifc_geometry_ready_load_gap(tmp_path: Path) -> None:
+    gate_path = _write_json(
+        tmp_path / "quality_gate.json",
+        {
+            "schema_version": "real-drawing-viewer-quality-gate.v1",
+            "contract_pass": True,
+            "reason_code": "PASS_WITH_REVIEW_QUEUE",
+            "structure_viewer_href": "src/structure-viewer/index.html?preset=real_drawing_private_3d",
+            "summary": {
+                "asset_count": 2,
+                "solver_exact_asset_count": 1,
+                "review_queue_asset_count": 1,
+            },
+            "asset_quality_rows": [
+                {
+                    "asset_ref": "RD-001",
+                    "file_type": ".mgt",
+                    "route": "midas_mgt_direct_parser",
+                    "status": "solver_graph_ready",
+                    "quality_tier": "solver_exact_ready",
+                    "quality_flags": [],
+                    "segment_count": 12,
+                    "renderable_segment_count": 12,
+                    "node_count": 13,
+                    "element_count": 12,
+                    "solver_exact": True,
+                    "geometry_available": True,
+                },
+                {
+                    "asset_ref": "RD-IFC",
+                    "file_type": ".ifc",
+                    "route": "ifc_to_structural_graph_adapter",
+                    "status": "ifc_solver_graph_draft_ready",
+                    "quality_tier": "ifc_geometry_ready_load_review",
+                    "quality_flags": ["not_solver_exact"],
+                    "claim_quality_flags": ["ifc_load_model_missing"],
+                    "geometry_exact_ready": True,
+                    "ifc_geometry_exact_ready": True,
+                    "geometry_claim_status": "ifc_geometry_exact_ready",
+                    "load_model_status": "source_ifc_load_model_missing",
+                    "load_model_ready": False,
+                    "analysis_claim_ready": False,
+                    "segment_count": 90,
+                    "renderable_segment_count": 90,
+                    "node_count": 100,
+                    "element_count": 90,
+                    "solver_exact": False,
+                    "geometry_available": True,
+                },
+            ],
+        },
+    )
+
+    report = promotion_queue.build_promotion_queue(
+        gate_path,
+        target_solver_exact_asset_count=2,
+        ifc_reconstruction_plan_path=None,
+    )
+
+    ifc_item = next(item for item in report["promotion_items"] if item["asset_ref"] == "RD-IFC")
+    assert ifc_item["promotion_family"] == "ifc_load_model_evidence_closure"
+    assert ifc_item["effort_label"] == "low"
+    assert ifc_item["expected_solver_exact_delta"] == 1
+    assert ifc_item["closure_evidence_required"] == [
+        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        "solver_graph_json_npz_receipt",
+        "viewer_sidecar_rebuild_receipt",
+    ]
+    assert ifc_item["claim_quality_flags"] == ["ifc_load_model_missing"]
+
+
 def test_promotion_queue_blocks_when_quality_gate_is_missing(tmp_path: Path) -> None:
     missing_path = tmp_path / "missing.json"
 

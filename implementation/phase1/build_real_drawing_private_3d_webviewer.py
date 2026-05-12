@@ -28,6 +28,7 @@ DEFAULT_FULL_DETAIL_LOD_MANIFEST = Path(
 DEFAULT_MAX_SEGMENTS_PER_ASSET = 1800
 DEFAULT_MAX_PROXY_NODES = 900
 DEFAULT_MAX_PROXY_EDGES = 1800
+IFC_LOAD_RECEIPT_ID = "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -211,6 +212,58 @@ def _ifc_source_quality_flags(payload: dict[str, Any]) -> list[str]:
     return []
 
 
+def _solver_graph_receipt(payload: dict[str, Any]) -> dict[str, Any]:
+    receipts = payload.get("evidence_receipts") if isinstance(payload.get("evidence_receipts"), dict) else {}
+    receipt = receipts.get("solver_graph_json_npz_receipt")
+    return receipt if isinstance(receipt, dict) else {}
+
+
+def _ifc_geometry_exact_ready(
+    payload: dict[str, Any],
+    *,
+    metrics: dict[str, Any],
+    geometry_available: bool,
+) -> bool:
+    if not geometry_available or not _is_ifc_solver_graph_draft(payload):
+        return False
+    if _ifc_solver_graph_missing_member_extents(payload):
+        return False
+    member_extent_count = _safe_int(metrics.get("member_extent_element_count"), 0)
+    coverage_ratio = _safe_float(metrics.get("member_extent_coverage_ratio"), 0.0)
+    unresolved_count = _safe_int(metrics.get("placement_marker_fallback_unresolved_count"), 0)
+    return member_extent_count > 0 and coverage_ratio >= 0.99 and unresolved_count <= 0
+
+
+def _ifc_load_model_status(payload: dict[str, Any]) -> str:
+    if not _is_ifc_solver_graph_draft(payload):
+        return "not_applicable"
+    receipt = _solver_graph_receipt(payload)
+    open_dependencies = [str(value) for value in (receipt.get("open_dependencies") or []) if str(value)]
+    if IFC_LOAD_RECEIPT_ID in set(open_dependencies):
+        return "source_ifc_load_model_missing"
+    if receipt:
+        return "ifc_load_model_ready"
+    return "ifc_load_model_unknown"
+
+
+def _geometry_claim_status(
+    *,
+    solver_exact: bool,
+    is_ifc_solver_graph_draft: bool,
+    ifc_geometry_exact_ready: bool,
+    is_proxy_graph: bool,
+) -> str:
+    if solver_exact:
+        return "solver_exact"
+    if ifc_geometry_exact_ready:
+        return "ifc_geometry_exact_ready"
+    if is_ifc_solver_graph_draft:
+        return "ifc_geometry_draft_incomplete"
+    if is_proxy_graph:
+        return "proxy_preview"
+    return "preview"
+
+
 def _extract_xyz_segments(payload: dict[str, Any], *, max_segments: int) -> tuple[list[dict[str, Any]], dict[str, int]]:
     model = _model_payload(payload)
     nodes = [row for row in (model.get("nodes") or []) if isinstance(row, dict)]
@@ -374,10 +427,37 @@ def _build_asset_payload(
             segments, metrics = _extract_proxy_segments(payload, max_nodes=max_proxy_nodes, max_edges=max_proxy_edges)
             geometry_mode = "proxy_topology_3d_layout"
             graph_source_kind = "proxy_graph_fallback"
+    source_metrics = payload.get("metrics") if isinstance(payload.get("metrics"), dict) else {}
+    metrics = {**source_metrics, **metrics}
     route = str(row.get("optimization_route", "") or "")
     status = str(row.get("optimization_status", "") or "")
     solver_exact = bool(row.get("solver_exact", False))
     raw_renderable_count = _safe_int(metrics.get("renderable_segment_count", len(segments)))
+    ifc_geometry_exact_ready = _ifc_geometry_exact_ready(
+        payload,
+        metrics=metrics,
+        geometry_available=bool(segments),
+    )
+    geometry_claim_status = _geometry_claim_status(
+        solver_exact=solver_exact,
+        is_ifc_solver_graph_draft=is_ifc_solver_graph_draft,
+        ifc_geometry_exact_ready=ifc_geometry_exact_ready,
+        is_proxy_graph=is_proxy_graph,
+    )
+    load_model_status = (
+        _ifc_load_model_status(payload)
+        if is_ifc_solver_graph_draft
+        else "solver_exact_source_model"
+        if solver_exact
+        else "not_applicable"
+    )
+    load_model_ready = load_model_status in {"ifc_load_model_ready", "solver_exact_source_model"}
+    analysis_claim_ready = bool(solver_exact or (ifc_geometry_exact_ready and load_model_ready))
+    claim_quality_flags = (
+        ["ifc_load_model_missing"]
+        if ifc_geometry_exact_ready and load_model_status == "source_ifc_load_model_missing"
+        else []
+    )
     source_quality_flags = _ifc_source_quality_flags(payload) if is_ifc_solver_graph_draft else []
     lod_evidence = (
         _compact_lod_evidence(
@@ -406,6 +486,8 @@ def _build_asset_payload(
         warning_label = "proxy layout"
     elif "ifc_solver_graph_draft_not_member_extents" in quality_flags:
         warning_label = "IFC draft"
+    elif "ifc_load_model_missing" in claim_quality_flags:
+        warning_label = "load missing"
     elif source_quality_flags:
         warning_label = "IFC source"
     elif "sampled_dense_model" in quality_flags:
@@ -422,10 +504,17 @@ def _build_asset_payload(
         "geometry_mode": geometry_mode,
         "graph_source_kind": graph_source_kind,
         "geometry_available": bool(segments),
+        "geometry_exact_ready": bool(solver_exact or ifc_geometry_exact_ready),
+        "ifc_geometry_exact_ready": ifc_geometry_exact_ready,
+        "geometry_claim_status": geometry_claim_status,
+        "load_model_status": load_model_status,
+        "load_model_ready": load_model_ready,
+        "analysis_claim_ready": analysis_claim_ready,
         "segment_count": len(segments),
         "metrics": metrics,
         "quality_flags": quality_flags,
         "source_quality_flags": source_quality_flags,
+        "claim_quality_flags": claim_quality_flags,
         "warning_label": warning_label,
         "segments": segments,
         **({"lod_evidence": lod_evidence} if lod_evidence_ready else {}),
@@ -466,7 +555,10 @@ def _attach_viewer_sidecar_rebuild_receipts(
             "graph_source_kind": str(asset.get("graph_source_kind") or ""),
             "segment_count": _safe_int(asset.get("segment_count", 0)),
             "solver_exact": bool(asset.get("solver_exact", False)),
-            "commercial_claim_blocked": not bool(asset.get("solver_exact", False)),
+            "geometry_claim_status": str(asset.get("geometry_claim_status") or ""),
+            "load_model_status": str(asset.get("load_model_status") or ""),
+            "analysis_claim_ready": bool(asset.get("analysis_claim_ready", False)),
+            "commercial_claim_blocked": not bool(asset.get("analysis_claim_ready", asset.get("solver_exact", False))),
         }
 
 
@@ -857,10 +949,12 @@ function buildList() {{
     button.className = 'asset-button' + (index === state.activeIndex ? ' is-active' : '');
     button.type = 'button';
     const flags = asset.quality_flags || [];
+    const claimFlags = (asset.claim_quality_flags || []).map(flag => `claim:${{flag}}`);
+    const tierLabel = asset.solver_exact ? 'exact' : asset.geometry_claim_status === 'ifc_geometry_exact_ready' ? 'geometry' : 'proxy';
     const warning = asset.warning_label ? ` · ${{asset.warning_label}}` : '';
     button.innerHTML = `
-      <div class="asset-title"><span>${{asset.asset_ref}}</span><span>${{asset.solver_exact ? 'exact' : 'proxy'}}${{warning}}</span></div>
-      <div class="asset-detail">${{asset.file_type || 'model'}} | ${{asset.status || 'ready'}}<br />segments=${{asset.segment_count || 0}} | mode=${{asset.geometry_mode || 'n/a'}}${{flags.length ? `<br />flags=${{flags.join(', ')}}` : ''}}</div>
+      <div class="asset-title"><span>${{asset.asset_ref}}</span><span>${{tierLabel}}${{warning}}</span></div>
+      <div class="asset-detail">${{asset.file_type || 'model'}} | ${{asset.status || 'ready'}}<br />segments=${{asset.segment_count || 0}} | mode=${{asset.geometry_mode || 'n/a'}}${{flags.length || claimFlags.length ? `<br />flags=${{[...flags, ...claimFlags].join(', ')}}` : ''}}</div>
     `;
     button.addEventListener('click', () => {{
       state.activeIndex = index;
@@ -949,20 +1043,24 @@ function draw() {{
   ctx.clearRect(0, 0, rect.width, rect.height);
   const asset = activeAsset();
   if (!asset) return;
-  activeTitle.textContent = `${{asset.asset_ref}} | ${{asset.solver_exact ? 'solver-exact' : 'proxy/preview'}}`;
+  const activeTierLabel = asset.solver_exact ? 'solver-exact' : asset.geometry_claim_status === 'ifc_geometry_exact_ready' ? 'geometry ready' : 'proxy/preview';
+  activeTitle.textContent = `${{asset.asset_ref}} | ${{activeTierLabel}}`;
   activeSubtitle.textContent = `${{asset.file_type || 'model'}} | ${{asset.route || 'route'}} | ${{asset.geometry_mode || 'geometry'}}`;
   const flags = asset.quality_flags || [];
+  const claimFlags = (asset.claim_quality_flags || []).map(flag => `claim:${{flag}}`);
   hud.innerHTML = `
     <span class="chip">segments ${{asset.segment_count || 0}}</span>
     <span class="chip">status ${{asset.status || 'ready'}}</span>
-    ${{flags.length ? `<span class="chip">flags ${{flags.join(', ')}}</span>` : ''}}
+    ${{flags.length || claimFlags.length ? `<span class="chip">flags ${{[...flags, ...claimFlags].join(', ')}}</span>` : ''}}
     <span class="chip">drag rotate | wheel zoom</span>
   `;
-  if (flags.includes('proxy_layout_not_true_geometry') || flags.includes('sampled_dense_model') || flags.includes('sparse_preview')) {{
+  if (flags.includes('proxy_layout_not_true_geometry') || flags.includes('sampled_dense_model') || flags.includes('sparse_preview') || claimFlags.includes('claim:ifc_load_model_missing')) {{
     const notice = document.createElement('div');
     notice.className = 'notice';
     if (flags.includes('proxy_layout_not_true_geometry')) {{
       notice.textContent = 'This asset is an IFC proxy topology layout, not recovered architectural/structural coordinates.';
+    }} else if (claimFlags.includes('claim:ifc_load_model_missing')) {{
+      notice.textContent = 'IFC geometry is ready, but source load-model evidence is missing; analysis claims stay blocked.';
     }} else if (flags.includes('sampled_dense_model')) {{
       notice.textContent = 'This dense solver model is sampled for browser performance; use it for shape inspection, not element-by-element completeness.';
     }} else {{

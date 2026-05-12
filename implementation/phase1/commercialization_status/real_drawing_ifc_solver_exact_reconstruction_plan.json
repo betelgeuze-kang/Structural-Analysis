@@ -1,9 +1,10 @@
 {
   "contract_pass": true,
-  "generated_at": "2026-05-12T13:02:00.880272+00:00",
+  "generated_at": "2026-05-12T13:38:26.716033+00:00",
   "ifc_reconstruction_items": [
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.report.json",
+      "analysis_claim_ready": false,
       "asset_ref": "RD-001",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
@@ -14,8 +15,11 @@
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "commercial_claim_blocked": true,
-      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
       "current_solver_exact": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
@@ -155,11 +159,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-001",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 1052,
           "solver_exact": false,
@@ -169,6 +176,11 @@
       },
       "file_id": "ds3_taltech_v4_ifc",
       "file_type": ".ifc",
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
         "edge_coverage_ratio": 1.0,
         "proxy_edge_count": 666,
@@ -335,11 +347,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-001",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 1052,
           "solver_exact": false,
@@ -375,6 +390,7 @@
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.report.json",
+      "analysis_claim_ready": false,
       "asset_ref": "RD-002",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
@@ -385,8 +401,11 @@
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "commercial_claim_blocked": true,
-      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
       "current_solver_exact": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
@@ -506,11 +525,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-002",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 77,
           "solver_exact": false,
@@ -520,6 +542,11 @@
       },
       "file_id": "a1_ifc",
       "file_type": ".ifc",
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
         "edge_coverage_ratio": 1.0,
         "proxy_edge_count": 77,
@@ -665,11 +692,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-002",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 77,
           "solver_exact": false,
@@ -705,6 +735,7 @@
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.report.json",
+      "analysis_claim_ready": false,
       "asset_ref": "RD-003",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
@@ -715,8 +746,11 @@
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "commercial_claim_blocked": true,
-      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
       "current_solver_exact": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
@@ -841,11 +875,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-003",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 1170,
           "solver_exact": false,
@@ -855,6 +892,11 @@
       },
       "file_id": "a3_ifc",
       "file_type": ".ifc",
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
         "edge_coverage_ratio": 1.0,
         "proxy_edge_count": 1170,
@@ -1005,11 +1047,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-003",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 1170,
           "solver_exact": false,
@@ -1045,6 +1090,7 @@
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.report.json",
+      "analysis_claim_ready": false,
       "asset_ref": "RD-004",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
@@ -1055,8 +1101,11 @@
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "commercial_claim_blocked": true,
-      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
       "current_solver_exact": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
@@ -1176,11 +1225,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-004",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 238,
           "solver_exact": false,
@@ -1190,6 +1242,11 @@
       },
       "file_id": "a4_ifc",
       "file_type": ".ifc",
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
         "edge_coverage_ratio": 1.0,
         "proxy_edge_count": 238,
@@ -1335,11 +1392,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-004",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 238,
           "solver_exact": false,
@@ -1375,6 +1435,7 @@
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.report.json",
+      "analysis_claim_ready": false,
       "asset_ref": "RD-005",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
@@ -1385,8 +1446,11 @@
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "commercial_claim_blocked": true,
-      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
       "current_solver_exact": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
@@ -1509,11 +1573,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-005",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 1800,
           "solver_exact": false,
@@ -1523,6 +1590,11 @@
       },
       "file_id": "a5_ifc",
       "file_type": ".ifc",
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
         "edge_coverage_ratio": 1.0,
         "proxy_edge_count": 6772,
@@ -1671,11 +1743,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-005",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 1800,
           "solver_exact": false,
@@ -1711,6 +1786,7 @@
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.report.json",
+      "analysis_claim_ready": false,
       "asset_ref": "RD-006",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
@@ -1721,8 +1797,11 @@
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "commercial_claim_blocked": true,
-      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
       "current_solver_exact": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
@@ -1848,11 +1927,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-006",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 843,
           "solver_exact": false,
@@ -1862,6 +1944,11 @@
       },
       "file_id": "a7_ifc",
       "file_type": ".ifc",
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
         "edge_coverage_ratio": 1.0,
         "proxy_edge_count": 843,
@@ -2013,11 +2100,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-006",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 843,
           "solver_exact": false,
@@ -2053,6 +2143,7 @@
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.report.json",
+      "analysis_claim_ready": false,
       "asset_ref": "RD-007",
       "attached_evidence": [
         "ifc_local_placement_coordinate_extraction_receipt",
@@ -2063,8 +2154,11 @@
       ],
       "blocker_family": "ifc_geometry_material_load_solver_exact_adapter_required",
       "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "commercial_claim_blocked": true,
-      "commercialization_recommendation": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
+      "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
       "current_solver_exact": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
@@ -2183,11 +2277,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-007",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 829,
           "solver_exact": false,
@@ -2197,6 +2294,11 @@
       },
       "file_id": "a8_ifc",
       "file_type": ".ifc",
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
         "edge_coverage_ratio": 1.0,
         "proxy_edge_count": 836,
@@ -2341,11 +2443,14 @@
           "zero_load_substitution_requires_engineer_signature": true
         },
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-007",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 829,
           "solver_exact": false,
@@ -2385,6 +2490,7 @@
   "source_intake_queue": "tmp/real_drawing_private_corpus/model_optimization_intake_queue.json",
   "source_viewer_manifest": "implementation/phase1/commercialization_status/real_drawing_private_3d_viewer_manifest.json",
   "summary": {
+    "analysis_claim_ready_count": 0,
     "blocked_count": 7,
     "blocker_family_counts": {
       "ifc_geometry_material_load_solver_exact_adapter_required": 7
@@ -2392,9 +2498,12 @@
     "blocker_reason_counts": {
       "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY": 7
     },
+    "geometry_exact_ready_count": 7,
     "geometry_material_load_adapter_required_count": 7,
     "ifc_asset_count": 7,
+    "ifc_geometry_exact_ready_count": 7,
     "load_case_receipt_count": 0,
+    "load_model_missing_count": 7,
     "local_placement_receipt_count": 7,
     "material_section_receipt_count": 7,
     "node_glyph_fallback_count": 0,

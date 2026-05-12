@@ -208,6 +208,17 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
     receipts = _evidence_receipts(report, graph, viewer_asset)
     attached_evidence = _attached_evidence(required_evidence, receipts)
     open_evidence = [evidence_id for evidence_id in required_evidence if evidence_id not in set(attached_evidence)]
+    geometry_claim_status = str(viewer_asset.get("geometry_claim_status") or "")
+    load_model_status = str(viewer_asset.get("load_model_status") or "")
+    analysis_claim_ready = bool(viewer_asset.get("analysis_claim_ready", False))
+    commercialization_recommendation = (
+        "Keep this asset in proxy_preview_review until placement, shape, section/material, load, "
+        "and solver graph receipts are attached."
+    )
+    if geometry_claim_status == "ifc_geometry_exact_ready" and load_model_status == "source_ifc_load_model_missing":
+        commercialization_recommendation = (
+            "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready."
+        )
     return {
         "asset_ref": asset_ref,
         "file_id": str(intake_row.get("file_id") or ""),
@@ -215,11 +226,22 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
         "route": str(viewer_asset.get("route") or intake_row.get("optimization_route") or "ifc_to_structural_graph_adapter"),
         "status": str(viewer_asset.get("status") or intake_row.get("optimization_status") or "ifc_proxy_graph_ready"),
         "current_solver_exact": bool(viewer_asset.get("solver_exact", intake_row.get("solver_exact", False))),
+        "geometry_exact_ready": bool(viewer_asset.get("geometry_exact_ready", False)),
+        "ifc_geometry_exact_ready": bool(viewer_asset.get("ifc_geometry_exact_ready", False)),
+        "geometry_claim_status": geometry_claim_status,
+        "load_model_status": load_model_status,
+        "load_model_ready": bool(viewer_asset.get("load_model_ready", False)),
+        "analysis_claim_ready": analysis_claim_ready,
         "reconstruction_ready": False,
         "commercial_claim_blocked": True,
         "blocker_family": blocker_family,
         "blocker_reason_code": blocker_reason_code,
         "quality_flags": flags,
+        "claim_quality_flags": [
+            str(flag)
+            for flag in (viewer_asset.get("claim_quality_flags") or [])
+            if str(flag)
+        ],
         "adapter_report": str(report_path) if report_path is not None else "",
         "proxy_graph_json": str(graph_path) if graph_path is not None else "",
         "metrics": {
@@ -241,10 +263,7 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
             if evidence_id in receipts
         },
         "reconstruction_steps": _reconstruction_steps(blocker_family),
-        "commercialization_recommendation": (
-            "Keep this asset in proxy_preview_review until placement, shape, section/material, load, "
-            "and solver graph receipts are attached."
-        ),
+        "commercialization_recommendation": commercialization_recommendation,
     }
 
 
@@ -339,6 +358,14 @@ def build_reconstruction_plan(
             "solver_graph_json_npz_receipt_count": solver_graph_json_npz_receipt_count,
             "viewer_sidecar_rebuild_receipt_count": viewer_sidecar_rebuild_receipt_count,
             "zero_load_signature_required_count": zero_load_signature_required_count,
+            "geometry_exact_ready_count": sum(1 for item in items if bool(item.get("geometry_exact_ready", False))),
+            "ifc_geometry_exact_ready_count": sum(1 for item in items if bool(item.get("ifc_geometry_exact_ready", False))),
+            "load_model_missing_count": sum(
+                1
+                for item in items
+                if str(item.get("load_model_status") or "") == "source_ifc_load_model_missing"
+            ),
+            "analysis_claim_ready_count": sum(1 for item in items if bool(item.get("analysis_claim_ready", False))),
             "blocker_family_counts": dict(sorted(blocker_counts.items())),
             "blocker_reason_counts": dict(sorted(reason_counts.items())),
         },
@@ -364,6 +391,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Solver graph JSON/NPZ receipts: {summary.get('solver_graph_json_npz_receipt_count', 0)}",
         f"- Viewer sidecar rebuild receipts: {summary.get('viewer_sidecar_rebuild_receipt_count', 0)}",
         f"- Zero-load signatures required: {summary.get('zero_load_signature_required_count', 0)}",
+        f"- IFC geometry-ready assets: {summary.get('ifc_geometry_exact_ready_count', 0)}",
+        f"- Load-model missing assets: {summary.get('load_model_missing_count', 0)}",
+        f"- Analysis-claim ready assets: {summary.get('analysis_claim_ready_count', 0)}",
         "",
         "## Reconstruction Queue",
         "",
@@ -373,8 +403,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         return "\n".join(lines)
     lines.extend(
         [
-            "| Asset | Blocker | Edges / Structural | Edge Coverage | Open Evidence |",
-            "| --- | --- | ---: | ---: | --- |",
+            "| Asset | Blocker | Geometry | Load Model | Edges / Structural | Edge Coverage | Open Evidence |",
+            "| --- | --- | --- | --- | ---: | ---: | --- |",
         ]
     )
     for item in items:
@@ -382,9 +412,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         evidence_source = item.get("open_evidence") or item.get("required_evidence") or []
         evidence = ", ".join(str(value) for value in evidence_source[:3])
         lines.append(
-            "| {asset} | {reason} | {edges}/{structural} | {ratio} | {evidence} |".format(
+            "| {asset} | {reason} | {geometry} | {load} | {edges}/{structural} | {ratio} | {evidence} |".format(
                 asset=item.get("asset_ref", ""),
                 reason=item.get("blocker_reason_code", ""),
+                geometry=item.get("geometry_claim_status", ""),
+                load=item.get("load_model_status", ""),
                 edges=metrics.get("proxy_edge_count", 0),
                 structural=metrics.get("structural_entity_count", 0),
                 ratio=metrics.get("edge_coverage_ratio", 0),

@@ -59,10 +59,20 @@ def quality_notice(asset: dict[str, Any]) -> str:
     source_flags = {str(flag) for flag in (asset.get("source_quality_flags") or [])}
     metrics = asset.get("metrics") if isinstance(asset.get("metrics"), dict) else {}
     lod_evidence = asset.get("lod_evidence") if isinstance(asset.get("lod_evidence"), dict) else {}
+    geometry_claim_status = str(asset.get("geometry_claim_status") or "")
+    load_model_status = str(asset.get("load_model_status") or "")
     if "proxy_layout_not_true_geometry" in flags:
         return "IFC proxy topology layout; not recovered architectural/structural coordinates."
     if "ifc_solver_graph_draft_not_member_extents" in flags:
         return "IFC solver graph draft; member extents and loads are still review items."
+    if geometry_claim_status == "ifc_geometry_exact_ready" and load_model_status == "source_ifc_load_model_missing":
+        missing_count = _safe_int(metrics.get("placement_marker_fallback_source_shape_missing_count", 0))
+        source_note = (
+            f" {missing_count} source products lack shape definitions."
+            if "ifc_source_shape_missing_partial" in source_flags and missing_count > 0
+            else ""
+        )
+        return f"IFC geometry is ready; source IFC load model is missing, so analysis claim is blocked.{source_note}"
     if "ifc_source_shape_missing_partial" in source_flags:
         missing_count = _safe_int(metrics.get("placement_marker_fallback_source_shape_missing_count", 0))
         return (
@@ -116,6 +126,7 @@ def asset_registry_row(asset: dict[str, Any]) -> dict[str, Any]:
     lod_evidence = asset.get("lod_evidence") if isinstance(asset.get("lod_evidence"), dict) else {}
     quality_flags = [str(flag) for flag in (asset.get("quality_flags") or [])]
     source_quality_flags = [str(flag) for flag in (asset.get("source_quality_flags") or [])]
+    claim_quality_flags = [str(flag) for flag in (asset.get("claim_quality_flags") or [])]
     return {
         "asset_ref": str(asset.get("asset_ref") or ""),
         "file_type": str(asset.get("file_type") or ""),
@@ -125,11 +136,18 @@ def asset_registry_row(asset: dict[str, Any]) -> dict[str, Any]:
         "geometry_mode": str(asset.get("geometry_mode") or ""),
         "graph_source_kind": str(asset.get("graph_source_kind") or ""),
         "geometry_available": bool(asset.get("geometry_available", False)),
+        "geometry_exact_ready": bool(asset.get("geometry_exact_ready", False)),
+        "ifc_geometry_exact_ready": bool(asset.get("ifc_geometry_exact_ready", False)),
+        "geometry_claim_status": str(asset.get("geometry_claim_status") or ""),
+        "load_model_status": str(asset.get("load_model_status") or ""),
+        "load_model_ready": bool(asset.get("load_model_ready", False)),
+        "analysis_claim_ready": bool(asset.get("analysis_claim_ready", False)),
         "segment_count": _safe_int(asset.get("segment_count", 0)),
         "model_asset_count": _safe_int(asset.get("model_asset_count", 0)),
         "warning_label": str(asset.get("warning_label") or ""),
         "quality_flags": quality_flags,
         "source_quality_flags": source_quality_flags,
+        "claim_quality_flags": claim_quality_flags,
         "quality_notice": quality_notice(asset),
         "node_count": _safe_int(metrics.get("node_count", metrics.get("proxy_node_count", 0))),
         "element_count": _safe_int(metrics.get("element_count", metrics.get("edge_count", 0))),
@@ -157,6 +175,16 @@ def registry_summary(registry: dict[str, Any], asset_rows: list[dict[str, Any]])
             flag: sum(1 for row in asset_rows if flag in set(row.get("source_quality_flags") or []))
             for flag in sorted({flag for row in asset_rows for flag in (row.get("source_quality_flags") or [])})
         },
+        "claim_quality_flag_counts": {
+            flag: sum(1 for row in asset_rows if flag in set(row.get("claim_quality_flags") or []))
+            for flag in sorted({flag for row in asset_rows for flag in (row.get("claim_quality_flags") or [])})
+        },
+        "geometry_exact_asset_count": sum(1 for row in asset_rows if bool(row.get("geometry_exact_ready", False))),
+        "ifc_geometry_exact_asset_count": sum(1 for row in asset_rows if bool(row.get("ifc_geometry_exact_ready", False))),
+        "load_model_missing_asset_count": sum(
+            1 for row in asset_rows if str(row.get("load_model_status") or "") == "source_ifc_load_model_missing"
+        ),
+        "analysis_claim_ready_asset_count": sum(1 for row in asset_rows if bool(row.get("analysis_claim_ready", False))),
     }
 
 
@@ -193,6 +221,13 @@ def _compact_promotion_queue_item(item: dict[str, Any]) -> dict[str, Any]:
         "segment_count": _safe_int(item.get("segment_count", 0)),
         "renderable_segment_count": _safe_int(item.get("renderable_segment_count", 0)),
         "quality_flags": _compact_text_list(item.get("quality_flags")),
+        "claim_quality_flags": _compact_text_list(item.get("claim_quality_flags")),
+        "geometry_exact_ready": bool(item.get("geometry_exact_ready", False)),
+        "ifc_geometry_exact_ready": bool(item.get("ifc_geometry_exact_ready", False)),
+        "geometry_claim_status": str(item.get("geometry_claim_status") or ""),
+        "load_model_status": str(item.get("load_model_status") or ""),
+        "load_model_ready": bool(item.get("load_model_ready", False)),
+        "analysis_claim_ready": bool(item.get("analysis_claim_ready", False)),
         "attached_evidence": _compact_text_list(item.get("attached_evidence")),
         "open_evidence": _compact_text_list(item.get("open_evidence")),
         "closure_evidence_required": _compact_text_list(item.get("closure_evidence_required")),

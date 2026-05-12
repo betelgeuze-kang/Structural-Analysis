@@ -1,19 +1,28 @@
 {
   "asset_quality_rows": [
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-001",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "edge_count": 0,
       "element_count": 661,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "node_count": 1689,
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
+      "quality_tier": "ifc_geometry_ready_load_review",
       "renderable_segment_count": 1052,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1052,
@@ -24,19 +33,28 @@
       "status": "ifc_proxy_graph_ready"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-002",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "edge_count": 0,
       "element_count": 77,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "node_count": 154,
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
+      "quality_tier": "ifc_geometry_ready_load_review",
       "renderable_segment_count": 77,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 77,
@@ -45,19 +63,28 @@
       "status": "ifc_proxy_graph_ready"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-003",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "edge_count": 0,
       "element_count": 1170,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "node_count": 2340,
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
+      "quality_tier": "ifc_geometry_ready_load_review",
       "renderable_segment_count": 1170,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1170,
@@ -66,19 +93,28 @@
       "status": "ifc_proxy_graph_ready"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-004",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "edge_count": 0,
       "element_count": 238,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "node_count": 476,
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
+      "quality_tier": "ifc_geometry_ready_load_review",
       "renderable_segment_count": 238,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 238,
@@ -87,19 +123,28 @@
       "status": "ifc_proxy_graph_ready"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-005",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "edge_count": 0,
       "element_count": 6772,
       "file_type": ".ifc",
       "full_detail_lod_ready": true,
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "node_count": 13544,
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
+      "quality_tier": "ifc_geometry_ready_load_review",
       "renderable_segment_count": 6772,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1800,
@@ -108,19 +153,28 @@
       "status": "ifc_proxy_graph_ready"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-006",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "edge_count": 0,
       "element_count": 843,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "node_count": 1686,
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
+      "quality_tier": "ifc_geometry_ready_load_review",
       "renderable_segment_count": 843,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 843,
@@ -129,19 +183,28 @@
       "status": "ifc_proxy_graph_ready"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-007",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "edge_count": 0,
       "element_count": 829,
       "file_type": ".ifc",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "node_count": 1658,
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
+      "quality_tier": "ifc_geometry_ready_load_review",
       "renderable_segment_count": 829,
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 829,
@@ -150,14 +213,21 @@
       "status": "ifc_proxy_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-008",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 12728,
       "file_type": ".mgt",
       "full_detail_lod_ready": true,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 11355,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -169,14 +239,21 @@
       "status": "solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-009",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 15,
       "file_type": ".mgt",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 16,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -188,14 +265,21 @@
       "status": "solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-010",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 147,
       "file_type": ".mgt",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 150,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -207,14 +291,21 @@
       "status": "solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-011",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 369,
       "file_type": ".mgt",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 366,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -226,14 +317,21 @@
       "status": "solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-012",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 3,
       "file_type": ".zip",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 6,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -245,14 +343,21 @@
       "status": "archive_solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-013",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 23,
       "file_type": ".zip",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 24,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -264,14 +369,21 @@
       "status": "archive_solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-014",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 22,
       "file_type": ".zip",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 23,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -283,14 +395,21 @@
       "status": "archive_solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-015",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 52,
       "file_type": ".zip",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 54,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -302,14 +421,21 @@
       "status": "archive_solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-016",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 52,
       "file_type": ".zip",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 54,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -321,14 +447,21 @@
       "status": "archive_solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-017",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 4,
       "file_type": ".zip",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 5,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -340,14 +473,21 @@
       "status": "archive_solver_graph_ready"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-018",
+      "claim_quality_flags": [],
       "edge_count": 0,
       "element_count": 44,
       "file_type": ".zip",
       "full_detail_lod_ready": false,
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "node_count": 34,
       "quality_flags": [],
       "quality_tier": "solver_exact_ready",
@@ -359,6 +499,9 @@
       "status": "archive_solver_graph_ready"
     }
   ],
+  "claim_quality_flag_counts": {
+    "ifc_load_model_missing": 7
+  },
   "commercial_viewer_ready": true,
   "contract_pass": true,
   "full_solver_exact_ready": false,
@@ -367,69 +510,90 @@
     "not_solver_exact": 7
   },
   "reason_code": "PASS_WITH_REVIEW_QUEUE",
-  "recommended_claim": "Integrated real-drawing viewer is ready for engineer-in-loop review; proxy/preview assets are labeled and are not full solver-exact replacements.",
+  "recommended_claim": "Integrated real-drawing viewer is ready for engineer-in-loop review; IFC geometry-ready drafts are separated from load-model/analysis claim gaps.",
   "review_queue": [
     {
       "asset_ref": "RD-001",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
       "review_id": "RQ-001"
     },
     {
       "asset_ref": "RD-002",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
       "review_id": "RQ-002"
     },
     {
       "asset_ref": "RD-003",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
       "review_id": "RQ-003"
     },
     {
       "asset_ref": "RD-004",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
       "review_id": "RQ-004"
     },
     {
       "asset_ref": "RD-005",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
       "review_id": "RQ-005"
     },
     {
       "asset_ref": "RD-006",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
       "review_id": "RQ-006"
     },
     {
       "asset_ref": "RD-007",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "quality_flags": [
         "not_solver_exact"
       ],
-      "quality_tier": "proxy_preview_review",
-      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
       "review_id": "RQ-007"
     }
   ],
@@ -452,9 +616,13 @@
   "structure_viewer_href": "src/structure-viewer/index.html?preset=real_drawing_private_3d",
   "structure_viewer_preset": "real_drawing_private_3d",
   "summary": {
+    "analysis_claim_ready_asset_count": 11,
     "asset_count": 18,
     "duplicate_asset_ref_count": 0,
+    "geometry_exact_asset_count": 18,
     "hard_blocker_count": 0,
+    "ifc_geometry_exact_asset_count": 7,
+    "load_model_missing_asset_count": 7,
     "proxy_or_preview_asset_count": 7,
     "renderable_asset_count": 18,
     "review_item_count": 7,

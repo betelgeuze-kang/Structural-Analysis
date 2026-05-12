@@ -115,12 +115,15 @@ def _asset_quality_tier(asset: dict[str, Any], *, has_hard_blocker: bool) -> str
     flags = {str(flag) for flag in (asset.get("quality_flags") or [])}
     solver_exact = bool(asset.get("solver_exact", False))
     full_detail_lod_ready = _has_full_detail_lod_evidence(asset)
+    geometry_exact_ready = bool(asset.get("geometry_exact_ready", False))
     if has_hard_blocker:
         return "hard_blocker"
     if "sparse_preview" in flags and not solver_exact:
         return "sparse_preview_review"
     if solver_exact and "sampled_dense_model" in flags and not full_detail_lod_ready:
         return "solver_exact_sampled_review"
+    if geometry_exact_ready and not solver_exact:
+        return "ifc_geometry_ready_load_review"
     if "proxy_layout_not_true_geometry" in flags or "not_solver_exact" in flags:
         return "proxy_preview_review"
     if solver_exact:
@@ -134,6 +137,11 @@ def _review_action(row: dict[str, Any]) -> str:
         return "expand sparse preview into a complete solver-exact model"
     if "ifc_solver_graph_draft_not_member_extents" in flags:
         return "recover member extents and close IFC load/zero-load evidence"
+    if (
+        str(row.get("geometry_claim_status") or "") == "ifc_geometry_exact_ready"
+        and str(row.get("load_model_status") or "") == "source_ifc_load_model_missing"
+    ):
+        return "attach IFC load-model evidence before analysis claim"
     if str(row.get("graph_source_kind") or "") == "ifc_solver_graph_draft" and not bool(row.get("solver_exact", False)):
         return "close IFC load/zero-load evidence and promote draft to solver-exact topology"
     if "sampled_dense_model" in flags and not bool(row.get("full_detail_lod_ready", False)):
@@ -151,6 +159,11 @@ def _asset_quality_rows(assets: list[dict[str, Any]], asset_blockers: dict[str, 
         asset_ref = str(asset.get("asset_ref") or f"asset-{index}")
         counts = _asset_counts(asset)
         flags = [str(flag) for flag in (asset.get("quality_flags") or [])]
+        claim_flags = [
+            str(flag)
+            for flag in (asset.get("claim_quality_flags") or [])
+            if str(flag)
+        ]
         row = {
             "asset_ref": asset_ref,
             "file_type": str(asset.get("file_type") or ""),
@@ -163,6 +176,13 @@ def _asset_quality_rows(assets: list[dict[str, Any]], asset_blockers: dict[str, 
                 for flag in (asset.get("source_quality_flags") or [])
                 if str(flag)
             ],
+            "claim_quality_flags": claim_flags,
+            "geometry_exact_ready": bool(asset.get("geometry_exact_ready", False)),
+            "ifc_geometry_exact_ready": bool(asset.get("ifc_geometry_exact_ready", False)),
+            "geometry_claim_status": str(asset.get("geometry_claim_status") or ""),
+            "load_model_status": str(asset.get("load_model_status") or ""),
+            "load_model_ready": bool(asset.get("load_model_ready", False)),
+            "analysis_claim_ready": bool(asset.get("analysis_claim_ready", False)),
             "quality_tier": _asset_quality_tier(asset, has_hard_blocker=bool(asset_blockers.get(asset_ref))),
             "route": str(asset.get("route") or ""),
             "solver_exact": bool(asset.get("solver_exact", False)),
@@ -194,6 +214,11 @@ def _review_queue(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "asset_ref": row["asset_ref"],
                 "quality_tier": row["quality_tier"],
                 "quality_flags": review_flags,
+                "claim_quality_flags": [
+                    flag
+                    for flag in row.get("claim_quality_flags", [])
+                    if str(flag)
+                ],
                 "recommended_action": _review_action(row),
             }
         )
@@ -288,6 +313,7 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
     solver_exact_count = 0
     flag_counter: Counter[str] = Counter()
     source_flag_counter: Counter[str] = Counter()
+    claim_flag_counter: Counter[str] = Counter()
     for index, asset in enumerate(assets, start=1):
         asset_ref = str(asset.get("asset_ref") or "").strip()
         display_ref = asset_ref or f"asset-{index}"
@@ -296,6 +322,7 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
         quality_flags = [str(flag) for flag in (asset.get("quality_flags") or [])]
         flag_counter.update(quality_flags)
         source_flag_counter.update(str(flag) for flag in (asset.get("source_quality_flags") or []) if str(flag))
+        claim_flag_counter.update(str(flag) for flag in (asset.get("claim_quality_flags") or []) if str(flag))
         if not asset_ref:
             _append_blocker(blockers, "ERR_REAL_DRAWING_VIEWER_ASSET_REF_MISSING", "Asset is missing asset_ref.")
             local_blockers.append(blockers[-1])
@@ -371,6 +398,12 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
 
     rows = _asset_quality_rows(assets, asset_blockers)
     review_queue = _review_queue(rows)
+    geometry_exact_count = sum(1 for row in rows if bool(row.get("geometry_exact_ready", False)))
+    ifc_geometry_exact_count = sum(1 for row in rows if bool(row.get("ifc_geometry_exact_ready", False)))
+    load_model_missing_count = sum(
+        1 for row in rows if str(row.get("load_model_status") or "") == "source_ifc_load_model_missing"
+    )
+    analysis_claim_ready_count = sum(1 for row in rows if bool(row.get("analysis_claim_ready", False)))
     contract_pass = not blockers
     commercial_viewer_ready = (
         contract_pass
@@ -389,14 +422,20 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
 
     route_counts = manifest.get("route_counts") if isinstance(manifest.get("route_counts"), dict) else {}
     status_counts = manifest.get("status_counts") if isinstance(manifest.get("status_counts"), dict) else {}
-    recommended_claim = (
-        "Integrated real-drawing viewer is ready for engineer-in-loop review; proxy/preview assets are labeled "
-        "and are not full solver-exact replacements."
-        if commercial_viewer_ready and not full_solver_exact_ready
-        else "Integrated real-drawing viewer is ready for full solver-exact review claims."
-        if full_solver_exact_ready
-        else "Do not use the real-drawing viewer for commercial review until hard blockers are closed."
-    )
+    if commercial_viewer_ready and not full_solver_exact_ready and ifc_geometry_exact_count:
+        recommended_claim = (
+            "Integrated real-drawing viewer is ready for engineer-in-loop review; IFC geometry-ready drafts are "
+            "separated from load-model/analysis claim gaps."
+        )
+    elif commercial_viewer_ready and not full_solver_exact_ready:
+        recommended_claim = (
+            "Integrated real-drawing viewer is ready for engineer-in-loop review; proxy/preview assets are labeled "
+            "and are not full solver-exact replacements."
+        )
+    elif full_solver_exact_ready:
+        recommended_claim = "Integrated real-drawing viewer is ready for full solver-exact review claims."
+    else:
+        recommended_claim = "Do not use the real-drawing viewer for commercial review until hard blockers are closed."
     return {
         "schema_version": "real-drawing-viewer-quality-gate.v1",
         "source_viewer_manifest": str(viewer_manifest_path),
@@ -416,12 +455,17 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
             "review_item_count": sum(len(item["quality_flags"]) for item in review_queue),
             "review_queue_asset_count": len(review_queue),
             "solver_exact_asset_count": solver_exact_count,
+            "geometry_exact_asset_count": geometry_exact_count,
+            "ifc_geometry_exact_asset_count": ifc_geometry_exact_count,
+            "load_model_missing_asset_count": load_model_missing_count,
+            "analysis_claim_ready_asset_count": analysis_claim_ready_count,
         },
         "hard_blockers": blockers,
         "review_queue": review_queue,
         "asset_quality_rows": rows,
         "quality_flag_counts": dict(sorted(flag_counter.items())),
         "source_quality_flag_counts": dict(sorted(source_flag_counter.items())),
+        "claim_quality_flag_counts": dict(sorted(claim_flag_counter.items())),
         "route_counts": dict(sorted((str(key), value) for key, value in route_counts.items())),
         "status_counts": dict(sorted((str(key), value) for key, value in status_counts.items())),
         "sensitive_key_findings": sensitive_findings,
@@ -436,10 +480,16 @@ def render_markdown(report: dict[str, Any]) -> str:
         if isinstance(report.get("source_quality_flag_counts"), dict)
         else {}
     )
+    claim_flag_counts = (
+        report.get("claim_quality_flag_counts")
+        if isinstance(report.get("claim_quality_flag_counts"), dict)
+        else {}
+    )
     review_queue = report.get("review_queue") if isinstance(report.get("review_queue"), list) else []
     blockers = report.get("hard_blockers") if isinstance(report.get("hard_blockers"), list) else []
     flag_text = ", ".join(f"{key}={value}" for key, value in flag_counts.items()) or "none"
     source_flag_text = ", ".join(f"{key}={value}" for key, value in source_flag_counts.items()) or "none"
+    claim_flag_text = ", ".join(f"{key}={value}" for key, value in claim_flag_counts.items()) or "none"
     lines = [
         "# Real Drawing Viewer Quality Gate",
         "",
@@ -456,6 +506,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"| Asset count | {summary.get('asset_count', 0)} |",
         f"| Renderable assets | {summary.get('renderable_asset_count', 0)} |",
         f"| Solver-exact assets | {summary.get('solver_exact_asset_count', 0)} |",
+        f"| Geometry-exact assets | {summary.get('geometry_exact_asset_count', 0)} |",
+        f"| IFC geometry-exact assets | {summary.get('ifc_geometry_exact_asset_count', 0)} |",
+        f"| Load-model missing assets | {summary.get('load_model_missing_asset_count', 0)} |",
+        f"| Analysis-claim ready assets | {summary.get('analysis_claim_ready_asset_count', 0)} |",
         f"| Proxy or preview assets | {summary.get('proxy_or_preview_asset_count', 0)} |",
         f"| Review queue assets | {summary.get('review_queue_asset_count', 0)} |",
         f"| Review items | {summary.get('review_item_count', 0)} |",
@@ -463,6 +517,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         f"- Quality flags: {flag_text}",
         f"- Source quality flags: {source_flag_text}",
+        f"- Claim quality flags: {claim_flag_text}",
         "",
     ]
     if blockers:
@@ -480,11 +535,15 @@ def render_markdown(report: dict[str, Any]) -> str:
     if review_queue:
         lines.extend(["## Review Queue", "", "| Asset | Tier | Flags | Action |", "| --- | --- | --- | --- |"])
         for item in review_queue:
+            flags = [
+                *[str(flag) for flag in item.get("quality_flags", [])],
+                *[f"claim:{flag}" for flag in item.get("claim_quality_flags", [])],
+            ]
             lines.append(
                 "| {asset} | {tier} | {flags} | {action} |".format(
                     asset=item.get("asset_ref", ""),
                     tier=item.get("quality_tier", ""),
-                    flags=", ".join(str(flag) for flag in item.get("quality_flags", [])),
+                    flags=", ".join(flags),
                     action=str(item.get("recommended_action", "")).replace("|", "/"),
                 )
             )

@@ -2,14 +2,21 @@
   "asset_count": 18,
   "assets": [
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-001",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-001",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 1052,
           "solver_exact": false,
@@ -19,12 +26,30 @@
       },
       "file_type": ".ifc",
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
+        "axis_marker_length": 1.443738,
+        "axis_polyline_element_count": 420,
+        "body_extrusion_element_count": 237,
         "element_count": 661,
+        "member_extent_coverage_ratio": 0.9939,
+        "member_extent_element_count": 657,
+        "model_node_count": 1689,
         "node_count": 1689,
-        "renderable_segment_count": 1052
+        "placement_marker_fallback_count": 4,
+        "placement_marker_fallback_reason_counts": {
+          "source_ifc_product_shape_missing": 4
+        },
+        "placement_marker_fallback_source_shape_missing_count": 4,
+        "placement_marker_fallback_unresolved_count": 0,
+        "renderable_segment_count": 1052,
+        "source_structural_node_count": 661
       },
       "model_asset_count": 1,
       "quality_flags": [
@@ -37,17 +62,24 @@
         "ifc_source_shape_missing_partial"
       ],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "IFC source"
+      "warning_label": "load missing"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-002",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-002",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 77,
           "solver_exact": false,
@@ -57,12 +89,28 @@
       },
       "file_type": ".ifc",
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
+        "axis_marker_length": 6.0,
+        "axis_polyline_element_count": 45,
+        "body_extrusion_element_count": 32,
         "element_count": 77,
+        "member_extent_coverage_ratio": 1.0,
+        "member_extent_element_count": 77,
+        "model_node_count": 154,
         "node_count": 154,
-        "renderable_segment_count": 77
+        "placement_marker_fallback_count": 0,
+        "placement_marker_fallback_reason_counts": {},
+        "placement_marker_fallback_source_shape_missing_count": 0,
+        "placement_marker_fallback_unresolved_count": 0,
+        "renderable_segment_count": 77,
+        "source_structural_node_count": 77
       },
       "model_asset_count": 1,
       "quality_flags": [
@@ -73,17 +121,24 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": ""
+      "warning_label": "load missing"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-003",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-003",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 1170,
           "solver_exact": false,
@@ -93,12 +148,28 @@
       },
       "file_type": ".ifc",
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
+        "axis_marker_length": 6.0,
+        "axis_polyline_element_count": 890,
+        "body_extrusion_element_count": 280,
         "element_count": 1170,
+        "member_extent_coverage_ratio": 1.0,
+        "member_extent_element_count": 1170,
+        "model_node_count": 2340,
         "node_count": 2340,
-        "renderable_segment_count": 1170
+        "placement_marker_fallback_count": 0,
+        "placement_marker_fallback_reason_counts": {},
+        "placement_marker_fallback_source_shape_missing_count": 0,
+        "placement_marker_fallback_unresolved_count": 0,
+        "renderable_segment_count": 1170,
+        "source_structural_node_count": 1170
       },
       "model_asset_count": 1,
       "quality_flags": [
@@ -109,17 +180,24 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": ""
+      "warning_label": "load missing"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-004",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-004",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 238,
           "solver_exact": false,
@@ -129,12 +207,28 @@
       },
       "file_type": ".ifc",
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
+        "axis_marker_length": 6.0,
+        "axis_polyline_element_count": 156,
+        "body_extrusion_element_count": 82,
         "element_count": 238,
+        "member_extent_coverage_ratio": 1.0,
+        "member_extent_element_count": 238,
+        "model_node_count": 476,
         "node_count": 476,
-        "renderable_segment_count": 238
+        "placement_marker_fallback_count": 0,
+        "placement_marker_fallback_reason_counts": {},
+        "placement_marker_fallback_source_shape_missing_count": 0,
+        "placement_marker_fallback_unresolved_count": 0,
+        "renderable_segment_count": 238,
+        "source_structural_node_count": 238
       },
       "model_asset_count": 1,
       "quality_flags": [
@@ -145,17 +239,24 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": ""
+      "warning_label": "load missing"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-005",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-005",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 1800,
           "solver_exact": false,
@@ -165,8 +266,13 @@
       },
       "file_type": ".ifc",
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "lod_evidence": {
         "closure_evidence": [
           "source_solver_graph_json_receipt",
@@ -181,9 +287,20 @@
         "viewer_sample_segment_count": 1800
       },
       "metrics": {
+        "axis_marker_length": 6.0,
+        "axis_polyline_element_count": 4233,
+        "body_extrusion_element_count": 2539,
         "element_count": 6772,
+        "member_extent_coverage_ratio": 1.0,
+        "member_extent_element_count": 6772,
+        "model_node_count": 13544,
         "node_count": 13544,
-        "renderable_segment_count": 6772
+        "placement_marker_fallback_count": 0,
+        "placement_marker_fallback_reason_counts": {},
+        "placement_marker_fallback_source_shape_missing_count": 0,
+        "placement_marker_fallback_unresolved_count": 0,
+        "renderable_segment_count": 6772,
+        "source_structural_node_count": 6772
       },
       "model_asset_count": 1,
       "quality_flags": [
@@ -194,17 +311,24 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": ""
+      "warning_label": "load missing"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-006",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-006",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 843,
           "solver_exact": false,
@@ -214,12 +338,28 @@
       },
       "file_type": ".ifc",
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
+        "axis_marker_length": 6.0,
+        "axis_polyline_element_count": 704,
+        "body_extrusion_element_count": 139,
         "element_count": 843,
+        "member_extent_coverage_ratio": 1.0,
+        "member_extent_element_count": 843,
+        "model_node_count": 1686,
         "node_count": 1686,
-        "renderable_segment_count": 843
+        "placement_marker_fallback_count": 0,
+        "placement_marker_fallback_reason_counts": {},
+        "placement_marker_fallback_source_shape_missing_count": 0,
+        "placement_marker_fallback_unresolved_count": 0,
+        "renderable_segment_count": 843,
+        "source_structural_node_count": 843
       },
       "model_asset_count": 1,
       "quality_flags": [
@@ -230,17 +370,24 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": ""
+      "warning_label": "load missing"
     },
     {
+      "analysis_claim_ready": false,
       "asset_ref": "RD-007",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
+          "analysis_claim_ready": false,
           "asset_ref": "RD-007",
           "commercial_claim_blocked": true,
           "contract_pass": true,
+          "geometry_claim_status": "ifc_geometry_exact_ready",
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
+          "load_model_status": "source_ifc_load_model_missing",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
           "segment_count": 829,
           "solver_exact": false,
@@ -250,12 +397,28 @@
       },
       "file_type": ".ifc",
       "geometry_available": true,
+      "geometry_claim_status": "ifc_geometry_exact_ready",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "ifc_geometry_exact_ready": true,
+      "load_model_ready": false,
+      "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
+        "axis_marker_length": 6.0,
+        "axis_polyline_element_count": 124,
+        "body_extrusion_element_count": 705,
         "element_count": 829,
+        "member_extent_coverage_ratio": 1.0,
+        "member_extent_element_count": 829,
+        "model_node_count": 1658,
         "node_count": 1658,
-        "renderable_segment_count": 829
+        "placement_marker_fallback_count": 0,
+        "placement_marker_fallback_reason_counts": {},
+        "placement_marker_fallback_source_shape_missing_count": 0,
+        "placement_marker_fallback_unresolved_count": 0,
+        "renderable_segment_count": 829,
+        "source_structural_node_count": 829
       },
       "model_asset_count": 1,
       "quality_flags": [
@@ -266,14 +429,21 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": ""
+      "warning_label": "load missing"
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-008",
+      "claim_quality_flags": [],
       "file_type": ".mgt",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "lod_evidence": {
         "closure_evidence": [
           "source_solver_graph_json_receipt",
@@ -302,11 +472,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-009",
+      "claim_quality_flags": [],
       "file_type": ".mgt",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 15,
         "node_count": 16,
@@ -322,11 +499,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-010",
+      "claim_quality_flags": [],
       "file_type": ".mgt",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 147,
         "node_count": 150,
@@ -342,11 +526,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-011",
+      "claim_quality_flags": [],
       "file_type": ".mgt",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 369,
         "node_count": 366,
@@ -362,11 +553,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-012",
+      "claim_quality_flags": [],
       "file_type": ".zip",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 3,
         "node_count": 6,
@@ -382,11 +580,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-013",
+      "claim_quality_flags": [],
       "file_type": ".zip",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 23,
         "node_count": 24,
@@ -402,11 +607,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-014",
+      "claim_quality_flags": [],
       "file_type": ".zip",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 22,
         "node_count": 23,
@@ -422,11 +634,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-015",
+      "claim_quality_flags": [],
       "file_type": ".zip",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 52,
         "node_count": 54,
@@ -442,11 +661,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-016",
+      "claim_quality_flags": [],
       "file_type": ".zip",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 52,
         "node_count": 54,
@@ -462,11 +688,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-017",
+      "claim_quality_flags": [],
       "file_type": ".zip",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 4,
         "node_count": 5,
@@ -482,11 +715,18 @@
       "warning_label": ""
     },
     {
+      "analysis_claim_ready": true,
       "asset_ref": "RD-018",
+      "claim_quality_flags": [],
       "file_type": ".zip",
       "geometry_available": true,
+      "geometry_claim_status": "solver_exact",
+      "geometry_exact_ready": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "solver_graph",
+      "ifc_geometry_exact_ready": false,
+      "load_model_ready": true,
+      "load_model_status": "solver_exact_source_model",
       "metrics": {
         "element_count": 44,
         "node_count": 34,

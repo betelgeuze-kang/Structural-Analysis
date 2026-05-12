@@ -930,6 +930,12 @@ body.structural-surface .quality-badge--sampled {
   color:#7dd3fc;
 }
 
+body.structural-surface .badge-real-drawing-geometry,
+body.structural-surface .quality-badge--geometry {
+  background:rgba(159,232,207,.14);
+  color:#9fe8cf;
+}
+
 body.structural-surface .quality-badge--review {
   background:rgba(79,183,173,.14);
   color:var(--accent);

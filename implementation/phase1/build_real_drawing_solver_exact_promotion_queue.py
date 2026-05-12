@@ -51,13 +51,21 @@ def _flags(row: dict[str, Any]) -> set[str]:
     return {str(flag) for flag in (row.get("quality_flags") or []) if str(flag)}
 
 
+def _claim_flags(row: dict[str, Any]) -> list[str]:
+    return sorted(str(flag) for flag in (row.get("claim_quality_flags") or []) if str(flag))
+
+
 def _promotion_family(row: dict[str, Any]) -> str:
     route = str(row.get("route") or "")
     quality_tier = str(row.get("quality_tier") or "")
     flags = _flags(row)
     file_type = str(row.get("file_type") or "")
+    geometry_claim_status = str(row.get("geometry_claim_status") or "")
+    load_model_status = str(row.get("load_model_status") or "")
     if bool(row.get("solver_exact", False)) and "sampled_dense_model" in flags:
         return "solver_exact_lod_completion"
+    if geometry_claim_status == "ifc_geometry_exact_ready" and load_model_status == "source_ifc_load_model_missing":
+        return "ifc_load_model_evidence_closure"
     if "proxy_node_glyph_fallback" in flags:
         return "ifc_node_glyph_topology_rebuild"
     if "sparse_preview" in flags and not bool(row.get("solver_exact", False)):
@@ -73,6 +81,7 @@ def _family_priority(family: str) -> int:
     return {
         "archive_preview_exactness_verification": 10,
         "archive_sparse_preview_expansion": 20,
+        "ifc_load_model_evidence_closure": 30,
         "ifc_node_glyph_topology_rebuild": 35,
         "ifc_coordinate_geometry_reconstruction": 40,
         "solver_exact_lod_completion": 50,
@@ -84,6 +93,7 @@ def _family_action(family: str) -> str:
     return {
         "archive_preview_exactness_verification": "verify decoded archive preview against native solver topology and flip solver_exact when topology is complete",
         "archive_sparse_preview_expansion": "expand sparse decoded archive preview into complete solver topology before solver_exact promotion",
+        "ifc_load_model_evidence_closure": "attach IFC load-case extraction or engineer-signed zero-load evidence before analysis claims",
         "ifc_node_glyph_topology_rebuild": "rebuild IFC fallback node glyph layout into edge-backed structural topology",
         "ifc_coordinate_geometry_reconstruction": "extract IFC placement/shape coordinates and replace proxy layout with recovered structural geometry",
         "solver_exact_lod_completion": "add full-detail paging or LOD evidence so sampled solver-exact asset can support full-detail claims",
@@ -103,6 +113,12 @@ def _family_evidence(family: str) -> list[str]:
             "expanded_archive_decode_manifest",
             "non_sparse_segment_count_delta",
             "solver_exact_regression_receipt",
+        ]
+    if family == "ifc_load_model_evidence_closure":
+        return [
+            "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+            "solver_graph_json_npz_receipt",
+            "viewer_sidecar_rebuild_receipt",
         ]
     if family == "ifc_node_glyph_topology_rebuild":
         return [
@@ -141,6 +157,7 @@ def _promotion_delta(row: dict[str, Any], family: str) -> int:
     if family in {
         "archive_preview_exactness_verification",
         "archive_sparse_preview_expansion",
+        "ifc_load_model_evidence_closure",
         "ifc_node_glyph_topology_rebuild",
         "ifc_coordinate_geometry_reconstruction",
         "manual_solver_exact_review",
@@ -154,6 +171,8 @@ def _effort_label(family: str) -> str:
         return "low"
     if family == "archive_sparse_preview_expansion":
         return "medium"
+    if family == "ifc_load_model_evidence_closure":
+        return "low"
     if family == "ifc_node_glyph_topology_rebuild":
         return "medium_high"
     if family == "ifc_coordinate_geometry_reconstruction":
@@ -185,6 +204,13 @@ def _promotion_item(
         "status": str(row.get("status") or ""),
         "quality_tier": str(row.get("quality_tier") or ""),
         "quality_flags": sorted(_flags(row)),
+        "claim_quality_flags": _claim_flags(row),
+        "geometry_exact_ready": bool(row.get("geometry_exact_ready", False)),
+        "ifc_geometry_exact_ready": bool(row.get("ifc_geometry_exact_ready", False)),
+        "geometry_claim_status": str(row.get("geometry_claim_status") or ""),
+        "load_model_status": str(row.get("load_model_status") or ""),
+        "load_model_ready": bool(row.get("load_model_ready", False)),
+        "analysis_claim_ready": bool(row.get("analysis_claim_ready", False)),
         "segment_count": _safe_int(row.get("segment_count"), 0),
         "renderable_segment_count": _safe_int(row.get("renderable_segment_count"), 0),
         "node_count": _safe_int(row.get("node_count"), 0),
@@ -197,6 +223,8 @@ def _promotion_item(
         "owner_lane": (
             "archive_decoder_owner"
             if family.startswith("archive_")
+            else "ifc_load_owner"
+            if family == "ifc_load_model_evidence_closure"
             else "ifc_geometry_owner"
             if family.startswith("ifc_")
             else "viewer_performance_owner"
@@ -231,6 +259,13 @@ def _promotion_item(
                 "blocker_reason_code": str(plan_item.get("blocker_reason_code") or ""),
                 "reconstruction_plan_status": "open",
                 "commercial_claim_blocked": bool(plan_item.get("commercial_claim_blocked", False)),
+                "geometry_claim_status": str(
+                    plan_item.get("geometry_claim_status") or item.get("geometry_claim_status") or ""
+                ),
+                "load_model_status": str(plan_item.get("load_model_status") or item.get("load_model_status") or ""),
+                "analysis_claim_ready": bool(
+                    plan_item.get("analysis_claim_ready", item.get("analysis_claim_ready", False))
+                ),
                 "edge_coverage_ratio": metrics.get("edge_coverage_ratio", 0),
                 "attached_evidence": attached_evidence,
                 "open_evidence": open_evidence,
@@ -409,6 +444,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         ]
     )
     for item in items:
+        flags = [
+            *[str(flag) for flag in item.get("quality_flags", [])],
+            *[f"claim:{flag}" for flag in item.get("claim_quality_flags", [])],
+        ]
         lines.append(
             "| {pid} | {asset} | {family} | {effort} | {delta} | {blocker} | {flags} |".format(
                 pid=item.get("promotion_id", ""),
@@ -417,7 +456,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 effort=item.get("effort_label", ""),
                 delta=item.get("expected_solver_exact_delta", 0),
                 blocker=str(item.get("blocker_reason_code", "")).replace("|", "/"),
-                flags=", ".join(str(flag) for flag in item.get("quality_flags", [])),
+                flags=", ".join(flags),
             )
         )
     return "\n".join(lines)

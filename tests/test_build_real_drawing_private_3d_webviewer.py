@@ -360,6 +360,15 @@ def test_private_3d_webviewer_treats_source_shape_missing_as_source_quality_note
                 "placement_marker_fallback_unresolved_count": 0,
                 "member_extent_coverage_ratio": 0.9901,
             },
+            "evidence_receipts": {
+                "solver_graph_json_npz_receipt": {
+                    "contract_pass": True,
+                    "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
+                    "open_dependencies": [
+                        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
+                    ],
+                }
+            },
         },
     )
     _write_json(
@@ -384,7 +393,13 @@ def test_private_3d_webviewer_treats_source_shape_missing_as_source_quality_note
     asset = registry["assets"][0]
     assert "ifc_solver_graph_draft_not_member_extents" not in asset["quality_flags"]
     assert asset["source_quality_flags"] == ["ifc_source_shape_missing_partial"]
-    assert asset["warning_label"] == "IFC source"
+    assert asset["claim_quality_flags"] == ["ifc_load_model_missing"]
+    assert asset["geometry_exact_ready"] is True
+    assert asset["ifc_geometry_exact_ready"] is True
+    assert asset["geometry_claim_status"] == "ifc_geometry_exact_ready"
+    assert asset["load_model_status"] == "source_ifc_load_model_missing"
+    assert asset["analysis_claim_ready"] is False
+    assert asset["warning_label"] == "load missing"
     assert "not_solver_exact" in asset["quality_flags"]
 
 
