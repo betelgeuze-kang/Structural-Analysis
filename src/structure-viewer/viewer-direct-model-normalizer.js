@@ -183,12 +183,34 @@ export function buildRealDrawingAssetRegistry(rootMeta) {
       status: normalizeSelectionValue(row?.status),
       solver_exact: Boolean(row?.solver_exact),
       geometry_mode: normalizeSelectionValue(row?.geometry_mode),
+      graph_source_kind: normalizeSelectionValue(row?.graph_source_kind),
       geometry_available: Boolean(row?.geometry_available),
+      geometry_exact_ready: Boolean(row?.geometry_exact_ready),
+      ifc_geometry_exact_ready: Boolean(row?.ifc_geometry_exact_ready),
+      geometry_claim_status: normalizeSelectionValue(row?.geometry_claim_status),
+      load_model_status: normalizeSelectionValue(row?.load_model_status),
+      load_model_ready: Boolean(row?.load_model_ready),
+      analysis_claim_ready: Boolean(row?.analysis_claim_ready),
+      load_evidence_status: normalizeSelectionValue(row?.load_evidence_status),
+      load_evidence_contract_pass: Boolean(row?.load_evidence_contract_pass),
+      load_case_group_count: safeNumber(row?.load_case_group_count, 0),
+      structural_load_count: safeNumber(row?.structural_load_count, 0),
+      structural_action_count: safeNumber(row?.structural_action_count, 0),
+      connected_structural_action_count: safeNumber(row?.connected_structural_action_count, 0),
+      zero_load_signature_required: Boolean(row?.zero_load_signature_required),
+      engineer_zero_load_signature_attached: Boolean(row?.engineer_zero_load_signature_attached),
+      zero_load_attestation_scope: normalizeSelectionValue(row?.zero_load_attestation_scope),
       segment_count: safeNumber(row?.segment_count, 0),
       model_asset_count: safeNumber(row?.model_asset_count, 0),
       warning_label: normalizeSelectionValue(row?.warning_label),
       quality_flags: Array.isArray(row?.quality_flags)
         ? row.quality_flags.map(value => normalizeSelectionValue(value)).filter(Boolean)
+        : [],
+      source_quality_flags: Array.isArray(row?.source_quality_flags)
+        ? row.source_quality_flags.map(value => normalizeSelectionValue(value)).filter(Boolean)
+        : [],
+      claim_quality_flags: Array.isArray(row?.claim_quality_flags)
+        ? row.claim_quality_flags.map(value => normalizeSelectionValue(value)).filter(Boolean)
         : [],
       quality_notice: normalizeSelectionValue(row?.quality_notice),
       node_count: safeNumber(row?.node_count, 0),

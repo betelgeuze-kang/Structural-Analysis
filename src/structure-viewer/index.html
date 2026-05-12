@@ -3421,6 +3421,82 @@ function getRealDrawingSegmentLabel(row){
   if(fullCount>sampleCount&&sampleCount>0)return`${sampleCount}/${fullCount}`;
   return String(sampleCount);
 }
+function getRealDrawingInspectorRows(row){
+  const sourceFlags=getRealDrawingSourceQualityFlags(row);
+  const claimFlags=getRealDrawingClaimQualityFlags(row);
+  const qualityFlags=getRealDrawingQualityFlags(row);
+  const segmentCount=safeNumber(row?.segment_count,0);
+  const renderableCount=safeNumber(row?.renderable_segment_count,segmentCount);
+  const sampleCount=safeNumber(row?.viewer_sample_segment_count,0);
+  const fullCount=safeNumber(row?.full_detail_segment_count,0);
+  const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
+  const geometryReady=Boolean(row?.geometry_available)&&segmentCount>0;
+  const loadReady=Boolean(row?.load_model_ready)||Boolean(row?.solver_exact);
+  const claimReady=Boolean(row?.analysis_claim_ready)||Boolean(row?.solver_exact);
+  const lodStatus=normalizeSelectionValue(row?.lod_evidence_status);
+  return[
+    {
+      label:'Geometry',
+      value:normalizeSelectionValue(row?.geometry_claim_status)||normalizeSelectionValue(row?.geometry_mode)||(geometryReady?'available':'missing'),
+      detail:`${renderableCount||segmentCount} renderable segments`,
+      tone:geometryReady?'success':'danger'
+    },
+    {
+      label:'Load Model',
+      value:normalizeSelectionValue(row?.load_model_status)||(loadReady?'solver exact source':'not attached'),
+      detail:loadEvidence||`loads ${safeNumber(row?.structural_load_count,0)} / cases ${safeNumber(row?.load_case_group_count,0)}`,
+      tone:loadReady?'success':Boolean(row?.zero_load_signature_required)?'warn':'neutral'
+    },
+    {
+      label:'Analysis Claim',
+      value:claimReady?'ready':'blocked',
+      detail:claimFlags.length?claimFlags.join(', '):'claim flags clear',
+      tone:claimReady&&!claimFlags.length?'success':'warn'
+    },
+    {
+      label:'Source',
+      value:normalizeSelectionValue(row?.graph_source_kind)||normalizeSelectionValue(row?.route)||normalizeSelectionValue(row?.file_type)||'--',
+      detail:sourceFlags.length?sourceFlags.join(', '):(normalizeSelectionValue(row?.status)||'source clear'),
+      tone:sourceFlags.length?'warn':'neutral'
+    },
+    {
+      label:'LOD',
+      value:lodStatus||(fullCount>sampleCount&&sampleCount?'sampled viewport':'viewport'),
+      detail:fullCount>0&&sampleCount>0?`${sampleCount}/${fullCount} segments`:`${segmentCount} segments`,
+      tone:lodStatus?'success':fullCount>sampleCount&&sampleCount?'warn':'neutral'
+    },
+    {
+      label:'Review',
+      value:getRealDrawingReviewAction(row),
+      detail:qualityFlags.length?qualityFlags.join(', '):'no review flags',
+      tone:isRealDrawingReviewAsset(row)?'warn':'success'
+    }
+  ];
+}
+function renderRealDrawingActiveInspector(row){
+  const assetRef=normalizeSelectionValue(row?.asset_ref);
+  if(!assetRef)return'';
+  const badge=getRealDrawingQualityBadge(row);
+  const notice=normalizeSelectionValue(row?.quality_notice)||normalizeSelectionValue(row?.warning_label)||normalizeSelectionValue(row?.status)||'ready';
+  const rows=getRealDrawingInspectorRows(row);
+  return `
+    <section class="real-drawing-active-inspector" data-real-drawing-active-inspector="true" data-real-drawing-active-ref="${escapeHtml(assetRef)}">
+      <div class="real-drawing-active-inspector__header">
+        <span>Active Drawing</span>
+        <strong>${escapeHtml(assetRef)}</strong>
+        <span class="quality-badge quality-badge--${escapeHtml(badge.tone)}">${escapeHtml(badge.label)}</span>
+      </div>
+      <div class="real-drawing-active-inspector__grid">
+        ${rows.map(item=>`
+          <div class="real-drawing-inspector-cell real-drawing-inspector-cell--${escapeHtml(item.tone)}" data-real-drawing-inspector-row="${escapeHtml(item.label)}">
+            <span>${escapeHtml(item.label)}</span>
+            <strong>${escapeHtml(item.value)}</strong>
+            <small>${escapeHtml(item.detail)}</small>
+          </div>`).join('')}
+      </div>
+      <div class="real-drawing-active-inspector__notice">${escapeHtml(notice)}</div>
+    </section>`;
+}
 function isRealDrawingReviewAsset(row){
   const flags=getRealDrawingQualityFlags(row);
   const solverExact=Boolean(row?.solver_exact);
@@ -3860,6 +3936,7 @@ function renderRealDrawingQualityPanel(data=modelData){
   const activeAsset=quality.assets.find(row=>normalizeSelectionValue(row.asset_ref)===activeAssetRef)||quality.assets[0]||{};
   const activeBadge=getRealDrawingQualityBadge(activeAsset);
   const activeLoadEvidence=getRealDrawingLoadEvidenceLabel(activeAsset);
+  const activeInspectorBlock=renderRealDrawingActiveInspector(activeAsset);
   const switcherOptions=quality.assets.map(row=>{
     const assetRef=normalizeSelectionValue(row.asset_ref);
     return `<option value="${escapeHtml(assetRef)}"${assetRef===activeAssetRef?' selected':''}>${escapeHtml(getRealDrawingAssetOptionLabel(row))}</option>`;
@@ -3988,6 +4065,7 @@ function renderRealDrawingQualityPanel(data=modelData){
   }
   panel.innerHTML=`
     ${switcherBlock}
+    ${activeInspectorBlock}
     <div class="real-drawing-quality-summary" data-real-drawing-quality-gate="${escapeHtml(quality.gateLabel)}">
       <div><span>Gate</span><strong>${escapeHtml(quality.gateLabel)}</strong></div>
       <div><span>Renderable</span><strong>${escapeHtml(String(safeNumber(data?.meta?.real_drawing_renderable_asset_count,quality.assetCount)))}/${escapeHtml(String(quality.assetCount))}</strong></div>
@@ -4029,13 +4107,13 @@ function renderRealDrawingQualityPanel(data=modelData){
   panel.querySelectorAll('[data-real-drawing-review-asset]').forEach(button=>{
     button.addEventListener('click',()=>{
       const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-review-asset'));
-      focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===assetRef);
+      focusRealDrawingAssetRef(assetRef);
     });
   });
   panel.querySelectorAll('[data-real-drawing-promotion-asset]').forEach(button=>{
     button.addEventListener('click',()=>{
       const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-promotion-asset'));
-      focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===assetRef);
+      focusRealDrawingAssetRef(assetRef);
     });
   });
 }

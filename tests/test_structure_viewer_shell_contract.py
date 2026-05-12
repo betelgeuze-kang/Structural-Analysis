@@ -55,6 +55,11 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-real-drawing-asset-select" in text
     assert "stepRealDrawingAsset" in text
     assert "focusRealDrawingAssetRef" in text
+    assert "data-real-drawing-active-inspector" in text
+    assert "getRealDrawingInspectorRows" in text
+    assert "real-drawing-inspector-cell" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
     assert "Drawing Review Queue" in text
     assert "Next Unlock Batch" in text
     assert "Solver-Exact Target Reached" in text

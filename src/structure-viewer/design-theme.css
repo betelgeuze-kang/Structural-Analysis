@@ -1085,6 +1085,115 @@ body.structural-surface .real-drawing-switcher__meta small {
   white-space:nowrap;
 }
 
+body.structural-surface .real-drawing-active-inspector {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:9px;
+  border-radius:8px;
+  border:1px solid rgba(79,183,173,.2);
+  background:rgba(7,18,28,.26);
+}
+
+body.structural-surface.light-mode .real-drawing-active-inspector {
+  background:rgba(255,255,255,.68);
+  border-color:rgba(15,106,115,.18);
+}
+
+body.structural-surface .real-drawing-active-inspector__header {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+body.structural-surface .real-drawing-active-inspector__header > span:first-child {
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+body.structural-surface .real-drawing-active-inspector__header strong {
+  min-width:0;
+  color:var(--text);
+  font-size:13px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .real-drawing-active-inspector__grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  gap:6px;
+}
+
+body.structural-surface .real-drawing-inspector-cell {
+  min-width:0;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid rgba(148,168,190,.14);
+  background:rgba(2,6,23,.22);
+}
+
+body.structural-surface.light-mode .real-drawing-inspector-cell {
+  background:rgba(255,255,255,.56);
+  border-color:rgba(133,102,70,.12);
+}
+
+body.structural-surface .real-drawing-inspector-cell--success {
+  border-color:rgba(99,199,161,.28);
+}
+
+body.structural-surface .real-drawing-inspector-cell--warn {
+  border-color:rgba(230,169,93,.34);
+}
+
+body.structural-surface .real-drawing-inspector-cell--danger {
+  border-color:rgba(239,125,115,.36);
+}
+
+body.structural-surface .real-drawing-inspector-cell span,
+body.structural-surface .real-drawing-inspector-cell strong,
+body.structural-surface .real-drawing-inspector-cell small {
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .real-drawing-inspector-cell span {
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+}
+
+body.structural-surface .real-drawing-inspector-cell strong {
+  margin-top:3px;
+  color:var(--text);
+  font-size:12px;
+  line-height:1.2;
+}
+
+body.structural-surface .real-drawing-inspector-cell small {
+  margin-top:3px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+body.structural-surface .real-drawing-active-inspector__notice {
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.35;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
 body.structural-surface .quality-filter-bar {
   display:flex;
   flex-wrap:wrap;

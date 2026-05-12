@@ -93,9 +93,24 @@ const artifact = {
         status: 'ifc_proxy_graph_ready',
         solver_exact: false,
         geometry_mode: 'ifc_proxy_topology_3d_layout',
+        graph_source_kind: 'ifc_solver_graph_draft',
         geometry_available: true,
+        geometry_exact_ready: true,
+        ifc_geometry_exact_ready: true,
+        geometry_claim_status: 'ifc_geometry_exact_ready',
+        load_model_status: 'source_ifc_load_model_missing',
+        load_model_ready: false,
+        analysis_claim_ready: false,
+        load_evidence_status: 'ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED',
+        load_evidence_contract_pass: false,
+        load_case_group_count: 0,
+        structural_load_count: 0,
+        zero_load_signature_required: true,
+        engineer_zero_load_signature_attached: false,
         segment_count: 1,
-        quality_flags: ['not_solver_exact']
+        quality_flags: ['not_solver_exact'],
+        source_quality_flags: ['ifc_source_shape_missing_partial'],
+        claim_quality_flags: ['ifc_load_model_missing']
       }
     ]
   },
@@ -217,6 +232,18 @@ console.log(JSON.stringify({
     assert meta["real_drawing_asset_registry"][0]["full_detail_segment_count"] == 7
     assert meta["real_drawing_asset_registry"][1]["asset_ref"] == "RD-002"
     assert meta["real_drawing_asset_registry"][1]["quality_flags"] == ["not_solver_exact"]
+    assert meta["real_drawing_asset_registry"][1]["graph_source_kind"] == "ifc_solver_graph_draft"
+    assert meta["real_drawing_asset_registry"][1]["geometry_claim_status"] == "ifc_geometry_exact_ready"
+    assert meta["real_drawing_asset_registry"][1]["load_model_status"] == "source_ifc_load_model_missing"
+    assert (
+        meta["real_drawing_asset_registry"][1]["load_evidence_status"]
+        == "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED"
+    )
+    assert meta["real_drawing_asset_registry"][1]["zero_load_signature_required"] is True
+    assert meta["real_drawing_asset_registry"][1]["source_quality_flags"] == [
+        "ifc_source_shape_missing_partial"
+    ]
+    assert meta["real_drawing_asset_registry"][1]["claim_quality_flags"] == ["ifc_load_model_missing"]
     assert meta["real_drawing_solver_exact_promotion_queue"]["summary"]["target_solver_exact_asset_count"] == 2
     assert meta["real_drawing_solver_exact_promotion_queue"]["planned_unlock_batch"][0]["asset_ref"] == "RD-002"
     assert meta["real_drawing_solver_exact_promotion_queue"]["planned_unlock_batch"][0][
