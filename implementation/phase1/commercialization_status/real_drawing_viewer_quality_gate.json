@@ -11,7 +11,6 @@
       "graph_source_kind": "ifc_solver_graph_draft",
       "node_count": 1689,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -19,6 +18,9 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1052,
       "solver_exact": false,
+      "source_quality_flags": [
+        "ifc_source_shape_missing_partial"
+      ],
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -39,6 +41,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 77,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -59,6 +62,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1170,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -79,6 +83,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 238,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -99,6 +104,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1800,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -119,6 +125,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 843,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -139,6 +146,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 829,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -157,6 +165,7 @@
       "route": "midas_mgt_direct_parser",
       "segment_count": 1800,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "solver_graph_ready"
     },
     {
@@ -175,6 +184,7 @@
       "route": "midas_mgt_direct_parser",
       "segment_count": 15,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "solver_graph_ready"
     },
     {
@@ -193,6 +203,7 @@
       "route": "midas_mgt_direct_parser",
       "segment_count": 147,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "solver_graph_ready"
     },
     {
@@ -211,6 +222,7 @@
       "route": "midas_mgt_direct_parser",
       "segment_count": 369,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "solver_graph_ready"
     },
     {
@@ -229,6 +241,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 3,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready"
     },
     {
@@ -247,6 +260,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 23,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready"
     },
     {
@@ -265,6 +279,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 22,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready"
     },
     {
@@ -283,6 +298,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 52,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready"
     },
     {
@@ -301,6 +317,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 52,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready"
     },
     {
@@ -319,6 +336,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 4,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready"
     },
     {
@@ -337,6 +355,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 44,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready"
     }
   ],
@@ -345,7 +364,6 @@
   "full_solver_exact_ready": false,
   "hard_blockers": [],
   "quality_flag_counts": {
-    "ifc_solver_graph_draft_not_member_extents": 1,
     "not_solver_exact": 7
   },
   "reason_code": "PASS_WITH_REVIEW_QUEUE",
@@ -354,11 +372,10 @@
     {
       "asset_ref": "RD-001",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
+      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
       "review_id": "RQ-001"
     },
     {
@@ -423,6 +440,9 @@
   },
   "schema_version": "real-drawing-viewer-quality-gate.v1",
   "sensitive_key_findings": [],
+  "source_quality_flag_counts": {
+    "ifc_source_shape_missing_partial": 1
+  },
   "source_viewer_manifest": "implementation/phase1/commercialization_status/real_drawing_private_3d_viewer_manifest.json",
   "status_counts": {
     "archive_solver_graph_ready": 7,
@@ -437,7 +457,7 @@
     "hard_blocker_count": 0,
     "proxy_or_preview_asset_count": 7,
     "renderable_asset_count": 18,
-    "review_item_count": 8,
+    "review_item_count": 7,
     "review_queue_asset_count": 7,
     "solver_exact_asset_count": 11
   }

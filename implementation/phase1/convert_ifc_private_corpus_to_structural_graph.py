@@ -754,6 +754,7 @@ def _solver_artifact_receipt(
     axis_polyline_element_count: int,
     body_extrusion_element_count: int,
     placement_marker_fallback_count: int,
+    placement_marker_fallback_reason_counts: Counter[str],
     geometry_scope: str,
     json_path: Path,
     npz_path: Path,
@@ -799,6 +800,14 @@ def _solver_artifact_receipt(
         "axis_polyline_element_count": axis_polyline_element_count,
         "body_extrusion_element_count": body_extrusion_element_count,
         "placement_marker_fallback_count": placement_marker_fallback_count,
+        "placement_marker_fallback_reason_counts": dict(sorted(placement_marker_fallback_reason_counts.items())),
+        "placement_marker_fallback_source_shape_missing_count": int(
+            placement_marker_fallback_reason_counts.get("source_ifc_product_shape_missing", 0)
+        ),
+        "placement_marker_fallback_unresolved_count": int(
+            placement_marker_fallback_count
+            - placement_marker_fallback_reason_counts.get("source_ifc_product_shape_missing", 0)
+        ),
         "member_extent_coverage_ratio": (
             round(member_extent_element_count / element_count, 4)
             if element_count > 0
@@ -840,6 +849,7 @@ def _write_solver_graph_artifacts(
     axis_polyline_element_count = 0
     body_extrusion_element_count = 0
     placement_marker_fallback_count = 0
+    placement_marker_fallback_reason_counts: Counter[str] = Counter()
 
     for source_node in source_nodes:
         origin = _node_xyz(source_node)
@@ -873,6 +883,11 @@ def _write_solver_graph_artifacts(
             segment_points = [origin, end]
             geometry_scope = "placement_origin_axis_marker_not_member_extents"
             placement_marker_fallback_count += 1
+            fallback_reason = str(
+                source_node.get("member_extent_missing_reason")
+                or "member_extent_geometry_unresolved"
+            )
+            placement_marker_fallback_reason_counts[fallback_reason] += 1
 
         node_ids: list[str] = []
         node_indices: list[int] = []
@@ -897,6 +912,8 @@ def _write_solver_graph_artifacts(
             "family": _family_for_ifc_entity_type(entity_type),
             "geometry_scope": geometry_scope,
         }
+        if geometry_scope == "placement_origin_axis_marker_not_member_extents":
+            element["geometry_fallback_reason"] = fallback_reason
         if source_node.get("material_binding_source"):
             element["material_binding_source"] = source_node.get("material_binding_source")
         if source_node.get("section_source"):
@@ -921,6 +938,7 @@ def _write_solver_graph_artifacts(
         axis_polyline_element_count=axis_polyline_element_count,
         body_extrusion_element_count=body_extrusion_element_count,
         placement_marker_fallback_count=placement_marker_fallback_count,
+        placement_marker_fallback_reason_counts=placement_marker_fallback_reason_counts,
         geometry_scope=model_geometry_scope,
         json_path=json_path,
         npz_path=npz_path,
@@ -948,6 +966,14 @@ def _write_solver_graph_artifacts(
             "axis_polyline_element_count": axis_polyline_element_count,
             "body_extrusion_element_count": body_extrusion_element_count,
             "placement_marker_fallback_count": placement_marker_fallback_count,
+            "placement_marker_fallback_reason_counts": dict(sorted(placement_marker_fallback_reason_counts.items())),
+            "placement_marker_fallback_source_shape_missing_count": int(
+                placement_marker_fallback_reason_counts.get("source_ifc_product_shape_missing", 0)
+            ),
+            "placement_marker_fallback_unresolved_count": int(
+                placement_marker_fallback_count
+                - placement_marker_fallback_reason_counts.get("source_ifc_product_shape_missing", 0)
+            ),
             "member_extent_coverage_ratio": (
                 round(member_extent_element_count / len(elements), 4)
                 if elements
@@ -1295,6 +1321,9 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
         product_shape_id = _first_ref(args[6])
         product_shape = record_by_id.get(product_shape_id or "")
         if product_shape is None or product_shape[0] != "IFCPRODUCTDEFINITIONSHAPE" or len(product_shape[1]) <= 2:
+            node = nodes.get(entity_id)
+            if node is not None:
+                node["member_extent_missing_reason"] = "source_ifc_product_shape_missing"
             continue
         shape_product_ids.add(entity_id)
         has_body = False
@@ -1333,6 +1362,8 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
                 body_extrusion_extent_ids.add(entity_id)
             nodes[entity_id]["member_axis_world_points"] = extent_points
             nodes[entity_id]["member_extent_source"] = extent_source
+        else:
+            nodes[entity_id]["member_extent_missing_reason"] = "member_extent_geometry_unresolved"
     representation_receipt = _representation_receipt(
         structural_entity_count=int(structural_entity_count),
         shape_product_count=len(shape_product_ids),

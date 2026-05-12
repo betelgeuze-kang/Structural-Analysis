@@ -162,6 +162,56 @@ END-ISO-10303-21;
     assert load_receipt["zero_load_substitution_requires_engineer_signature"] is True
 
 
+def test_ifc_adapter_marks_source_shape_missing_fallback_reason(tmp_path: Path) -> None:
+    ifc_path = tmp_path / "private" / "shape_missing.ifc"
+    ifc_path.parent.mkdir(parents=True)
+    ifc_path.write_text(
+        """ISO-10303-21;
+HEADER;
+FILE_SCHEMA(('IFC2X3'));
+ENDSEC;
+DATA;
+#1= IFCCARTESIANPOINT((0.,0.,0.));
+#2= IFCCARTESIANPOINT((5.,0.,0.));
+#3= IFCAXIS2PLACEMENT3D(#1,$,$);
+#4= IFCAXIS2PLACEMENT3D(#2,$,$);
+#5= IFCLOCALPLACEMENT($,#3);
+#6= IFCLOCALPLACEMENT($,#4);
+#7= IFCRECTANGLEPROFILEDEF(.AREA.,$,$,1.,2.);
+#8= IFCEXTRUDEDAREASOLID(#7,$,$,3.);
+#9= IFCSHAPEREPRESENTATION($,'Body','SweptSolid',(#8));
+#10= IFCPRODUCTDEFINITIONSHAPE($,$,(#9));
+#11= IFCCOLUMN('column-guid',$,'C1',$,$,#5,#10,$);
+#12= IFCSLAB('slab-guid',$,'S1',$,$,#6,$,$);
+ENDSEC;
+END-ISO-10303-21;
+""",
+        encoding="utf-8",
+    )
+
+    graph = ifc_adapter.parse_ifc_proxy_graph(ifc_path)
+    missing_node = next(node for node in graph["nodes"] if node.get("id") == "#12")
+    assert missing_node["member_extent_missing_reason"] == "source_ifc_product_shape_missing"
+    json_path = tmp_path / "solver" / "shape_missing.solver_graph.json"
+    npz_path = tmp_path / "solver" / "shape_missing.solver_graph.npz"
+
+    receipt = ifc_adapter._write_solver_graph_artifacts(graph=graph, json_path=json_path, npz_path=npz_path)
+    payload = json.loads(json_path.read_text(encoding="utf-8"))
+
+    assert receipt["placement_marker_fallback_count"] == 1
+    assert receipt["placement_marker_fallback_source_shape_missing_count"] == 1
+    assert receipt["placement_marker_fallback_unresolved_count"] == 0
+    assert payload["metrics"]["placement_marker_fallback_reason_counts"] == {
+        "source_ifc_product_shape_missing": 1
+    }
+    fallback_element = next(
+        element
+        for element in payload["model"]["elements"]
+        if element["geometry_scope"] == "placement_origin_axis_marker_not_member_extents"
+    )
+    assert fallback_element["geometry_fallback_reason"] == "source_ifc_product_shape_missing"
+
+
 def test_ifc_adapter_uses_release_safe_aggregate_group_edges(tmp_path: Path) -> None:
     ifc_path = tmp_path / "private" / "aggregate_only.ifc"
     ifc_path.parent.mkdir(parents=True)

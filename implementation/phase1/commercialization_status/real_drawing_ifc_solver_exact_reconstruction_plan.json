@@ -1,6 +1,6 @@
 {
   "contract_pass": true,
-  "generated_at": "2026-05-12T12:27:54.760915+00:00",
+  "generated_at": "2026-05-12T13:02:00.880272+00:00",
   "ifc_reconstruction_items": [
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.report.json",
@@ -143,6 +143,11 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 4,
+          "placement_marker_fallback_reason_counts": {
+            "source_ifc_product_shape_missing": 4
+          },
+          "placement_marker_fallback_source_shape_missing_count": 4,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 661,
@@ -318,6 +323,11 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 4,
+          "placement_marker_fallback_reason_counts": {
+            "source_ifc_product_shape_missing": 4
+          },
+          "placement_marker_fallback_source_shape_missing_count": 4,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 661,
@@ -342,7 +352,6 @@
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.graph.json",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "reconstruction_ready": false,
@@ -487,6 +496,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 77,
@@ -643,6 +655,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 77,
@@ -816,6 +831,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 1170,
@@ -977,6 +995,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 1170,
@@ -1145,6 +1166,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 238,
@@ -1301,6 +1325,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 238,
@@ -1472,6 +1499,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 6772,
@@ -1631,6 +1661,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 6772,
@@ -1655,8 +1688,7 @@
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.graph.json",
       "quality_flags": [
-        "not_solver_exact",
-        "sampled_dense_model"
+        "not_solver_exact"
       ],
       "reconstruction_ready": false,
       "reconstruction_steps": [
@@ -1806,6 +1838,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 843,
@@ -1968,6 +2003,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 843,
@@ -2135,6 +2173,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 829,
@@ -2290,6 +2331,9 @@
             "viewer_sidecar_rebuild_receipt"
           ],
           "placement_marker_fallback_count": 0,
+          "placement_marker_fallback_reason_counts": {},
+          "placement_marker_fallback_source_shape_missing_count": 0,
+          "placement_marker_fallback_unresolved_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 829,

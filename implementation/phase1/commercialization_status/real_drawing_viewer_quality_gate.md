@@ -15,16 +15,17 @@
 | Solver-exact assets | 11 |
 | Proxy or preview assets | 7 |
 | Review queue assets | 7 |
-| Review items | 8 |
+| Review items | 7 |
 | Hard blockers | 0 |
 
-- Quality flags: ifc_solver_graph_draft_not_member_extents=1, not_solver_exact=7
+- Quality flags: not_solver_exact=7
+- Source quality flags: ifc_source_shape_missing_partial=1
 
 ## Review Queue
 
 | Asset | Tier | Flags | Action |
 | --- | --- | --- | --- |
-| RD-001 | proxy_preview_review | ifc_solver_graph_draft_not_member_extents, not_solver_exact | recover member extents and close IFC load/zero-load evidence |
+| RD-001 | proxy_preview_review | not_solver_exact | close IFC load/zero-load evidence and promote draft to solver-exact topology |
 | RD-002 | proxy_preview_review | not_solver_exact | close IFC load/zero-load evidence and promote draft to solver-exact topology |
 | RD-003 | proxy_preview_review | not_solver_exact | close IFC load/zero-load evidence and promote draft to solver-exact topology |
 | RD-004 | proxy_preview_review | not_solver_exact | close IFC load/zero-load evidence and promote draft to solver-exact topology |

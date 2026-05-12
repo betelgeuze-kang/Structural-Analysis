@@ -184,7 +184,31 @@ def _ifc_solver_graph_missing_member_extents(payload: dict[str, Any]) -> bool:
         return True
     fallback_count = _safe_int(metrics.get("placement_marker_fallback_count"), 0)
     member_extent_count = _safe_int(metrics.get("member_extent_element_count"), 0)
-    return fallback_count > 0 or member_extent_count <= 0
+    if member_extent_count <= 0:
+        return True
+    if fallback_count <= 0:
+        return False
+    source_shape_missing_count = _safe_int(metrics.get("placement_marker_fallback_source_shape_missing_count"), 0)
+    unresolved_count = _safe_int(
+        metrics.get(
+            "placement_marker_fallback_unresolved_count",
+            max(0, fallback_count - source_shape_missing_count),
+        ),
+        max(0, fallback_count - source_shape_missing_count),
+    )
+    coverage_ratio = _safe_float(metrics.get("member_extent_coverage_ratio"), 0.0)
+    return not (
+        unresolved_count <= 0
+        and source_shape_missing_count == fallback_count
+        and coverage_ratio >= 0.99
+    )
+
+
+def _ifc_source_quality_flags(payload: dict[str, Any]) -> list[str]:
+    metrics = payload.get("metrics") if isinstance(payload.get("metrics"), dict) else {}
+    if _safe_int(metrics.get("placement_marker_fallback_source_shape_missing_count"), 0) > 0:
+        return ["ifc_source_shape_missing_partial"]
+    return []
 
 
 def _extract_xyz_segments(payload: dict[str, Any], *, max_segments: int) -> tuple[list[dict[str, Any]], dict[str, int]]:
@@ -354,6 +378,7 @@ def _build_asset_payload(
     status = str(row.get("optimization_status", "") or "")
     solver_exact = bool(row.get("solver_exact", False))
     raw_renderable_count = _safe_int(metrics.get("renderable_segment_count", len(segments)))
+    source_quality_flags = _ifc_source_quality_flags(payload) if is_ifc_solver_graph_draft else []
     lod_evidence = (
         _compact_lod_evidence(
             full_detail_lod_by_asset.get(asset_ref, {}),
@@ -381,6 +406,8 @@ def _build_asset_payload(
         warning_label = "proxy layout"
     elif "ifc_solver_graph_draft_not_member_extents" in quality_flags:
         warning_label = "IFC draft"
+    elif source_quality_flags:
+        warning_label = "IFC source"
     elif "sampled_dense_model" in quality_flags:
         warning_label = "sampled"
     elif "sparse_preview" in quality_flags:
@@ -398,6 +425,7 @@ def _build_asset_payload(
         "segment_count": len(segments),
         "metrics": metrics,
         "quality_flags": quality_flags,
+        "source_quality_flags": source_quality_flags,
         "warning_label": warning_label,
         "segments": segments,
         **({"lod_evidence": lod_evidence} if lod_evidence_ready else {}),

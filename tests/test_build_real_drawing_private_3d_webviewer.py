@@ -320,6 +320,74 @@ def test_private_3d_webviewer_attaches_ifc_solver_graph_sidecar_receipt(tmp_path
     assert out_sidecar.exists()
 
 
+def test_private_3d_webviewer_treats_source_shape_missing_as_source_quality_note(tmp_path: Path) -> None:
+    module = _load_module()
+    graph_path = tmp_path / "graphs" / "ifc_solver_graph.json"
+    queue_path = tmp_path / "model_optimization_intake_queue.json"
+    _write_json(
+        graph_path,
+        {
+            "schema_version": "real-drawing-ifc-solver-graph-draft.v1",
+            "solver_exact": False,
+            "model": {
+                "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
+                "nodes": [
+                    {"id": "ifc:1:i", "x": 0, "y": 0, "z": 0},
+                    {"id": "ifc:1:j", "x": 1, "y": 0, "z": 0},
+                    {"id": "ifc:2:i", "x": 0, "y": 1, "z": 0},
+                    {"id": "ifc:2:j", "x": 1, "y": 1, "z": 0},
+                ],
+                "elements": [
+                    {
+                        "id": "ifc:1",
+                        "family": "linear_member",
+                        "geometry_scope": "ifc_axis_polyline_world",
+                        "node_ids": ["ifc:1:i", "ifc:1:j"],
+                    },
+                    {
+                        "id": "ifc:2",
+                        "family": "surface_member",
+                        "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+                        "geometry_fallback_reason": "source_ifc_product_shape_missing",
+                        "node_ids": ["ifc:2:i", "ifc:2:j"],
+                    },
+                ],
+            },
+            "metrics": {
+                "member_extent_element_count": 100,
+                "placement_marker_fallback_count": 1,
+                "placement_marker_fallback_source_shape_missing_count": 1,
+                "placement_marker_fallback_unresolved_count": 0,
+                "member_extent_coverage_ratio": 0.9901,
+            },
+        },
+    )
+    _write_json(
+        queue_path,
+        {
+            "queue": [
+                {
+                    "solver_graph_model_json": str(graph_path),
+                    "file_type": ".ifc",
+                    "optimization_route": "ifc_to_structural_graph_adapter",
+                    "optimization_status": "ifc_proxy_graph_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": False,
+                    "model_asset_count": 1,
+                }
+            ]
+        },
+    )
+
+    registry = module.build_registry_payload(intake_queue_path=queue_path)
+
+    asset = registry["assets"][0]
+    assert "ifc_solver_graph_draft_not_member_extents" not in asset["quality_flags"]
+    assert asset["source_quality_flags"] == ["ifc_source_shape_missing_partial"]
+    assert asset["warning_label"] == "IFC source"
+    assert "not_solver_exact" in asset["quality_flags"]
+
+
 def test_private_3d_webviewer_attaches_lod_evidence_for_sampled_solver_exact(tmp_path: Path) -> None:
     module = _load_module()
     graph_path = tmp_path / "graphs" / "dense_solver.json"

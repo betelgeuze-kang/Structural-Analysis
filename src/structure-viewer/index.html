@@ -3367,6 +3367,11 @@ function getRealDrawingQualityFlags(row){
     ?row.quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean)
     :[];
 }
+function getRealDrawingSourceQualityFlags(row){
+  return Array.isArray(row?.source_quality_flags)
+    ?row.source_quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean)
+    :[];
+}
 function getRealDrawingQualityTier(row){
   const flags=new Set(getRealDrawingQualityFlags(row));
   const solverExact=Boolean(row?.solver_exact);
@@ -3786,6 +3791,7 @@ function renderRealDrawingQualityPanel(data=modelData){
       const badge=getRealDrawingQualityBadge(row);
       const assetRef=normalizeSelectionValue(row.asset_ref);
       const flags=getRealDrawingQualityFlags(row);
+      const sourceFlags=getRealDrawingSourceQualityFlags(row).map(flag=>`source:${flag}`);
       const notice=normalizeSelectionValue(row.quality_notice)||normalizeSelectionValue(row.geometry_mode)||normalizeSelectionValue(row.status);
       return `
         <button type="button" class="real-drawing-review-item" data-real-drawing-review-asset="${escapeHtml(assetRef)}">
@@ -3793,7 +3799,7 @@ function renderRealDrawingQualityPanel(data=modelData){
           <span class="real-drawing-review-item__body">
             <strong>${escapeHtml(assetRef)}</strong>
             <span>${escapeHtml(getRealDrawingReviewAction(row))}</span>
-            <small>${escapeHtml(flags.join(', ')||notice||'solver-exact')}</small>
+            <small>${escapeHtml([...flags,...sourceFlags].join(', ')||notice||'solver-exact')}</small>
           </span>
           <span class="real-drawing-review-item__segments">${escapeHtml(getRealDrawingSegmentLabel(row))}</span>
         </button>`;
@@ -3989,6 +3995,7 @@ function buildUI(data){
       const status=normalizeSelectionValue(row.status)||'ready';
       const badgeInfo=getRealDrawingQualityBadge(row);
       const flags=Array.isArray(row.quality_flags)?row.quality_flags.filter(Boolean):[];
+      const sourceFlags=getRealDrawingSourceQualityFlags(row).map(flag=>`source:${flag}`);
       const warning=normalizeSelectionValue(row.warning_label);
       const label=`${assetRef} · ${warning||normalizeSelectionValue(row.geometry_mode)||status}`;
       appendTreeItem(
@@ -4002,7 +4009,7 @@ function buildUI(data){
       const badgeNode=last?.querySelector?.('.badge');
       if(badgeNode instanceof HTMLElement){
         badgeNode.classList.add(`badge-real-drawing-${badgeInfo.tone}`);
-        badgeNode.title=`${status}${flags.length?` | ${flags.join(', ')}`:''}`;
+        badgeNode.title=`${status}${flags.length||sourceFlags.length?` | ${[...flags,...sourceFlags].join(', ')}`:''}`;
       }
     });
   }

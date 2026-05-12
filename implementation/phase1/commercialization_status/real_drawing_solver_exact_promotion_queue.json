@@ -33,7 +33,6 @@
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-001",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",

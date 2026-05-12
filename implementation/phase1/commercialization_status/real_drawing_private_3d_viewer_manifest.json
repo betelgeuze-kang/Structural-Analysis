@@ -28,14 +28,16 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1052,
       "solver_exact": false,
+      "source_quality_flags": [
+        "ifc_source_shape_missing_partial"
+      ],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "IFC draft"
+      "warning_label": "IFC source"
     },
     {
       "asset_ref": "RD-002",
@@ -69,6 +71,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 77,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
       "warning_label": ""
     },
@@ -104,6 +107,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1170,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
       "warning_label": ""
     },
@@ -139,6 +143,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 238,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
       "warning_label": ""
     },
@@ -187,6 +192,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1800,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
       "warning_label": ""
     },
@@ -222,6 +228,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 843,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
       "warning_label": ""
     },
@@ -257,6 +264,7 @@
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 829,
       "solver_exact": false,
+      "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
       "warning_label": ""
     },
@@ -289,6 +297,7 @@
       "route": "midas_mgt_direct_parser",
       "segment_count": 1800,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "solver_graph_ready",
       "warning_label": ""
     },
@@ -308,6 +317,7 @@
       "route": "midas_mgt_direct_parser",
       "segment_count": 15,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "solver_graph_ready",
       "warning_label": ""
     },
@@ -327,6 +337,7 @@
       "route": "midas_mgt_direct_parser",
       "segment_count": 147,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "solver_graph_ready",
       "warning_label": ""
     },
@@ -346,6 +357,7 @@
       "route": "midas_mgt_direct_parser",
       "segment_count": 369,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "solver_graph_ready",
       "warning_label": ""
     },
@@ -365,6 +377,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 3,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready",
       "warning_label": ""
     },
@@ -384,6 +397,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 23,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready",
       "warning_label": ""
     },
@@ -403,6 +417,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 22,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready",
       "warning_label": ""
     },
@@ -422,6 +437,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 52,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready",
       "warning_label": ""
     },
@@ -441,6 +457,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 52,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready",
       "warning_label": ""
     },
@@ -460,6 +477,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 4,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready",
       "warning_label": ""
     },
@@ -479,6 +497,7 @@
       "route": "midas_binary_archive_exact_topology_promoted",
       "segment_count": 44,
       "solver_exact": true,
+      "source_quality_flags": [],
       "status": "archive_solver_graph_ready",
       "warning_label": ""
     }

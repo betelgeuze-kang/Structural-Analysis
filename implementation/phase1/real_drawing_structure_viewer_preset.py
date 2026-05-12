@@ -56,11 +56,19 @@ def _write_text(path: Path, text: str) -> None:
 
 def quality_notice(asset: dict[str, Any]) -> str:
     flags = {str(flag) for flag in (asset.get("quality_flags") or [])}
+    source_flags = {str(flag) for flag in (asset.get("source_quality_flags") or [])}
+    metrics = asset.get("metrics") if isinstance(asset.get("metrics"), dict) else {}
     lod_evidence = asset.get("lod_evidence") if isinstance(asset.get("lod_evidence"), dict) else {}
     if "proxy_layout_not_true_geometry" in flags:
         return "IFC proxy topology layout; not recovered architectural/structural coordinates."
     if "ifc_solver_graph_draft_not_member_extents" in flags:
         return "IFC solver graph draft; member extents and loads are still review items."
+    if "ifc_source_shape_missing_partial" in source_flags:
+        missing_count = _safe_int(metrics.get("placement_marker_fallback_source_shape_missing_count", 0))
+        return (
+            f"IFC solver graph draft; {missing_count} source products lack shape definitions, "
+            "loads remain review items."
+        )
     if str(asset.get("graph_source_kind") or "") == "ifc_solver_graph_draft":
         return "IFC solver graph draft with IFC-derived member extents; loads remain review items."
     if bool(lod_evidence.get("contract_pass", False)):
@@ -107,6 +115,7 @@ def asset_registry_row(asset: dict[str, Any]) -> dict[str, Any]:
     metrics = asset.get("metrics") if isinstance(asset.get("metrics"), dict) else {}
     lod_evidence = asset.get("lod_evidence") if isinstance(asset.get("lod_evidence"), dict) else {}
     quality_flags = [str(flag) for flag in (asset.get("quality_flags") or [])]
+    source_quality_flags = [str(flag) for flag in (asset.get("source_quality_flags") or [])]
     return {
         "asset_ref": str(asset.get("asset_ref") or ""),
         "file_type": str(asset.get("file_type") or ""),
@@ -120,6 +129,7 @@ def asset_registry_row(asset: dict[str, Any]) -> dict[str, Any]:
         "model_asset_count": _safe_int(asset.get("model_asset_count", 0)),
         "warning_label": str(asset.get("warning_label") or ""),
         "quality_flags": quality_flags,
+        "source_quality_flags": source_quality_flags,
         "quality_notice": quality_notice(asset),
         "node_count": _safe_int(metrics.get("node_count", metrics.get("proxy_node_count", 0))),
         "element_count": _safe_int(metrics.get("element_count", metrics.get("edge_count", 0))),
@@ -142,6 +152,10 @@ def registry_summary(registry: dict[str, Any], asset_rows: list[dict[str, Any]])
         "quality_flag_counts": {
             flag: sum(1 for row in asset_rows if flag in set(row.get("quality_flags") or []))
             for flag in sorted({flag for row in asset_rows for flag in (row.get("quality_flags") or [])})
+        },
+        "source_quality_flag_counts": {
+            flag: sum(1 for row in asset_rows if flag in set(row.get("source_quality_flags") or []))
+            for flag in sorted({flag for row in asset_rows for flag in (row.get("source_quality_flags") or [])})
         },
     }
 

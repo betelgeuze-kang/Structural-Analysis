@@ -149,6 +149,16 @@ def test_quality_gate_treats_solver_exact_sparse_archive_as_compact_ready(tmp_pa
 
 
 def test_quality_gate_reports_ifc_solver_graph_draft_review_action(tmp_path: Path) -> None:
+    source_note_asset = _asset(
+        "RD-IFC-SOURCE-NOTE",
+        solver_exact=False,
+        segment_count=6,
+        graph_source_kind="ifc_solver_graph_draft",
+        quality_flags=["not_solver_exact"],
+        route="ifc_to_structural_graph_adapter",
+        status="ifc_solver_graph_draft_ready",
+    )
+    source_note_asset["source_quality_flags"] = ["ifc_source_shape_missing_partial"]
     manifest_path = _write_json(
         tmp_path / "manifest.json",
         _manifest(
@@ -163,6 +173,7 @@ def test_quality_gate_reports_ifc_solver_graph_draft_review_action(tmp_path: Pat
                     route="ifc_to_structural_graph_adapter",
                     status="ifc_solver_graph_draft_ready",
                 ),
+                source_note_asset,
                 _asset(
                     "RD-IFC-MISSING-EXTENTS",
                     solver_exact=False,
@@ -173,8 +184,8 @@ def test_quality_gate_reports_ifc_solver_graph_draft_review_action(tmp_path: Pat
                     status="ifc_solver_graph_draft_ready",
                 ),
             ],
-            route_counts={"midas_mgt_direct_parser": 1, "ifc_to_structural_graph_adapter": 2},
-            status_counts={"solver_graph_ready": 1, "ifc_solver_graph_draft_ready": 2},
+            route_counts={"midas_mgt_direct_parser": 1, "ifc_to_structural_graph_adapter": 3},
+            status_counts={"solver_graph_ready": 1, "ifc_solver_graph_draft_ready": 3},
         ),
     )
 
@@ -184,11 +195,16 @@ def test_quality_gate_reports_ifc_solver_graph_draft_review_action(tmp_path: Pat
     assert report["reason_code"] == "PASS_WITH_REVIEW_QUEUE"
     assert report["quality_flag_counts"] == {
         "ifc_solver_graph_draft_not_member_extents": 1,
-        "not_solver_exact": 2,
+        "not_solver_exact": 3,
+    }
+    assert report["source_quality_flag_counts"] == {
+        "ifc_source_shape_missing_partial": 1,
     }
     assert report["asset_quality_rows"][1]["graph_source_kind"] == "ifc_solver_graph_draft"
+    assert report["asset_quality_rows"][2]["source_quality_flags"] == ["ifc_source_shape_missing_partial"]
     actions = {item["asset_ref"]: item["recommended_action"] for item in report["review_queue"]}
     assert actions["RD-IFC"] == "close IFC load/zero-load evidence and promote draft to solver-exact topology"
+    assert actions["RD-IFC-SOURCE-NOTE"] == "close IFC load/zero-load evidence and promote draft to solver-exact topology"
     assert actions["RD-IFC-MISSING-EXTENTS"] == "recover member extents and close IFC load/zero-load evidence"
 
 

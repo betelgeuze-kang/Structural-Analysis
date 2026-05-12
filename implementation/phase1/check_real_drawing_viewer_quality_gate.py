@@ -158,6 +158,11 @@ def _asset_quality_rows(assets: list[dict[str, Any]], asset_blockers: dict[str, 
             "geometry_available": bool(asset.get("geometry_available", False)),
             "geometry_mode": str(asset.get("geometry_mode") or ""),
             "quality_flags": flags,
+            "source_quality_flags": [
+                str(flag)
+                for flag in (asset.get("source_quality_flags") or [])
+                if str(flag)
+            ],
             "quality_tier": _asset_quality_tier(asset, has_hard_blocker=bool(asset_blockers.get(asset_ref))),
             "route": str(asset.get("route") or ""),
             "solver_exact": bool(asset.get("solver_exact", False)),
@@ -282,6 +287,7 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
     renderable_count = 0
     solver_exact_count = 0
     flag_counter: Counter[str] = Counter()
+    source_flag_counter: Counter[str] = Counter()
     for index, asset in enumerate(assets, start=1):
         asset_ref = str(asset.get("asset_ref") or "").strip()
         display_ref = asset_ref or f"asset-{index}"
@@ -289,6 +295,7 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
         counts = _asset_counts(asset)
         quality_flags = [str(flag) for flag in (asset.get("quality_flags") or [])]
         flag_counter.update(quality_flags)
+        source_flag_counter.update(str(flag) for flag in (asset.get("source_quality_flags") or []) if str(flag))
         if not asset_ref:
             _append_blocker(blockers, "ERR_REAL_DRAWING_VIEWER_ASSET_REF_MISSING", "Asset is missing asset_ref.")
             local_blockers.append(blockers[-1])
@@ -414,6 +421,7 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
         "review_queue": review_queue,
         "asset_quality_rows": rows,
         "quality_flag_counts": dict(sorted(flag_counter.items())),
+        "source_quality_flag_counts": dict(sorted(source_flag_counter.items())),
         "route_counts": dict(sorted((str(key), value) for key, value in route_counts.items())),
         "status_counts": dict(sorted((str(key), value) for key, value in status_counts.items())),
         "sensitive_key_findings": sensitive_findings,
@@ -423,9 +431,15 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
 def render_markdown(report: dict[str, Any]) -> str:
     summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
     flag_counts = report.get("quality_flag_counts") if isinstance(report.get("quality_flag_counts"), dict) else {}
+    source_flag_counts = (
+        report.get("source_quality_flag_counts")
+        if isinstance(report.get("source_quality_flag_counts"), dict)
+        else {}
+    )
     review_queue = report.get("review_queue") if isinstance(report.get("review_queue"), list) else []
     blockers = report.get("hard_blockers") if isinstance(report.get("hard_blockers"), list) else []
     flag_text = ", ".join(f"{key}={value}" for key, value in flag_counts.items()) or "none"
+    source_flag_text = ", ".join(f"{key}={value}" for key, value in source_flag_counts.items()) or "none"
     lines = [
         "# Real Drawing Viewer Quality Gate",
         "",
@@ -448,6 +462,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"| Hard blockers | {summary.get('hard_blocker_count', 0)} |",
         "",
         f"- Quality flags: {flag_text}",
+        f"- Source quality flags: {source_flag_text}",
         "",
     ]
     if blockers:
