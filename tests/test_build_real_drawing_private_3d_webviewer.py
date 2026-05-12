@@ -387,3 +387,78 @@ def test_private_3d_webviewer_attaches_lod_evidence_for_sampled_solver_exact(tmp
     assert asset["lod_evidence"]["contract_pass"] is True
     assert asset["lod_evidence"]["full_detail_segment_count"] == 7
     assert "SHOULD_NOT_LEAK" not in json.dumps(asset)
+
+
+def test_private_3d_webviewer_attaches_lod_evidence_for_sampled_ifc_draft(tmp_path: Path) -> None:
+    module = _load_module()
+    graph_path = tmp_path / "graphs" / "dense_ifc_draft.json"
+    queue_path = tmp_path / "model_optimization_intake_queue.json"
+    lod_manifest_path = tmp_path / "lod.json"
+    _write_json(
+        graph_path,
+        {
+            "schema_version": "real-drawing-ifc-solver-graph-draft.v1",
+            "model": {
+                "geometry_scope": "ifc_axis_or_body_member_extents",
+                "nodes": [{"id": index, "x": index, "y": 0, "z": 0} for index in range(1, 9)],
+                "elements": [
+                    {"id": index, "family": "ifc-beam", "node_ids": [index, index + 1]}
+                    for index in range(1, 8)
+                ],
+            },
+            "metrics": {
+                "placement_marker_fallback_count": 0,
+                "member_extent_element_count": 7,
+            },
+        },
+    )
+    _write_json(
+        queue_path,
+        {
+            "queue": [
+                {
+                    "solver_graph_model_json": str(graph_path),
+                    "file_type": ".ifc",
+                    "optimization_route": "ifc_to_structural_graph_adapter",
+                    "optimization_status": "ifc_solver_graph_draft_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": False,
+                    "model_asset_count": 1,
+                }
+            ]
+        },
+    )
+    _write_json(
+        lod_manifest_path,
+        {
+            "contract_pass": True,
+            "lod_items": [
+                {
+                    "asset_ref": "RD-001",
+                    "contract_pass": True,
+                    "reason_code": "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED",
+                    "full_detail_lod_ready": True,
+                    "lod_policy": "sampled_viewport_with_full_detail_source_receipt",
+                    "full_detail_segment_count": 7,
+                    "viewer_sample_segment_count": 3,
+                    "sample_ratio": 3 / 7,
+                    "closure_evidence": ["full_detail_segment_count_receipt"],
+                }
+            ],
+        },
+    )
+
+    registry = module.build_registry_payload(
+        intake_queue_path=queue_path,
+        full_detail_lod_manifest_path=lod_manifest_path,
+        max_segments_per_asset=3,
+    )
+
+    asset = registry["assets"][0]
+    assert asset["solver_exact"] is False
+    assert asset["graph_source_kind"] == "ifc_solver_graph_draft"
+    assert asset["segment_count"] == 3
+    assert asset["metrics"]["renderable_segment_count"] == 7
+    assert "sampled_dense_model" not in asset["quality_flags"]
+    assert "not_solver_exact" in asset["quality_flags"]
+    assert asset["lod_evidence"]["contract_pass"] is True

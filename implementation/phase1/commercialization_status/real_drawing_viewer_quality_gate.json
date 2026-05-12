@@ -86,13 +86,12 @@
       "edge_count": 0,
       "element_count": 6772,
       "file_type": ".ifc",
-      "full_detail_lod_ready": false,
+      "full_detail_lod_ready": true,
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
       "node_count": 13544,
       "quality_flags": [
-        "sampled_dense_model",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -347,8 +346,7 @@
   "hard_blockers": [],
   "quality_flag_counts": {
     "ifc_solver_graph_draft_not_member_extents": 1,
-    "not_solver_exact": 7,
-    "sampled_dense_model": 1
+    "not_solver_exact": 7
   },
   "reason_code": "PASS_WITH_REVIEW_QUEUE",
   "recommended_claim": "Integrated real-drawing viewer is ready for engineer-in-loop review; proxy/preview assets are labeled and are not full solver-exact replacements.",
@@ -393,7 +391,6 @@
     {
       "asset_ref": "RD-005",
       "quality_flags": [
-        "sampled_dense_model",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -440,7 +437,7 @@
     "hard_blocker_count": 0,
     "proxy_or_preview_asset_count": 7,
     "renderable_asset_count": 18,
-    "review_item_count": 9,
+    "review_item_count": 8,
     "review_queue_asset_count": 7,
     "solver_exact_asset_count": 11
   }

@@ -68,6 +68,49 @@ def test_full_detail_lod_manifest_builds_sample_receipt_without_source_leak(tmp_
     assert "SHOULD_NOT_LEAK" not in json.dumps(report)
 
 
+def test_full_detail_lod_manifest_includes_sampled_preview_assets(tmp_path: Path) -> None:
+    exact_graph_path = tmp_path / "graphs" / "dense_solver.json"
+    preview_graph_path = tmp_path / "graphs" / "dense_ifc_preview.json"
+    nodes = [{"id": index, "x": index, "y": 0, "z": 0} for index in range(1, 9)]
+    elements = [
+        {"id": index, "family": "beam", "node_ids": [index, index + 1]}
+        for index in range(1, 8)
+    ]
+    _write_json(exact_graph_path, {"model": {"nodes": nodes, "elements": elements}})
+    _write_json(preview_graph_path, {"model": {"nodes": nodes, "elements": elements}})
+    intake_queue = _write_json(
+        tmp_path / "model_optimization_intake_queue.json",
+        {
+            "queue": [
+                {
+                    "solver_graph_model_json": str(exact_graph_path),
+                    "file_type": ".mgt",
+                    "optimization_route": "midas_mgt_direct_parser",
+                    "optimization_status": "solver_graph_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": True,
+                },
+                {
+                    "solver_graph_model_json": str(preview_graph_path),
+                    "file_type": ".ifc",
+                    "optimization_route": "ifc_to_structural_graph_adapter",
+                    "optimization_status": "ifc_solver_graph_draft_ready",
+                    "ready_for_optimized_drawing_generation": True,
+                    "solver_exact": False,
+                },
+            ]
+        },
+    )
+
+    report = lod_manifest.build_full_detail_lod_manifest(intake_queue, max_segments_per_asset=3)
+
+    assert report["summary"]["sampled_asset_count"] == 2
+    assert report["summary"]["sampled_solver_exact_asset_count"] == 1
+    assert report["summary"]["sampled_preview_asset_count"] == 1
+    assert [item["asset_ref"] for item in report["lod_items"]] == ["RD-001", "RD-002"]
+    assert report["lod_items"][1]["solver_exact"] is False
+
+
 def test_full_detail_lod_manifest_cli_writes_outputs(tmp_path: Path) -> None:
     intake_queue = _fixture_inputs(tmp_path)
     out_path = tmp_path / "lod.json"

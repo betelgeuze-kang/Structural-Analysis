@@ -359,7 +359,7 @@ def _build_asset_payload(
             full_detail_lod_by_asset.get(asset_ref, {}),
             expected_full_detail_segment_count=raw_renderable_count,
         )
-        if solver_exact and raw_renderable_count > len(segments)
+        if raw_renderable_count > len(segments)
         else {}
     )
     lod_evidence_ready = bool(lod_evidence.get("contract_pass", False))

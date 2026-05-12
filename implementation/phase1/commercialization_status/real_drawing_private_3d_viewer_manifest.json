@@ -162,6 +162,19 @@
       "geometry_available": true,
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
+      "lod_evidence": {
+        "closure_evidence": [
+          "source_solver_graph_json_receipt",
+          "full_detail_segment_count_receipt",
+          "viewer_sample_lod_policy_receipt"
+        ],
+        "contract_pass": true,
+        "full_detail_segment_count": 6772,
+        "lod_policy": "sampled_viewport_with_full_detail_source_receipt",
+        "reason_code": "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED",
+        "sample_ratio": 0.2658,
+        "viewer_sample_segment_count": 1800
+      },
       "metrics": {
         "element_count": 6772,
         "node_count": 13544,
@@ -169,14 +182,13 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "sampled_dense_model",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1800,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "sampled"
+      "warning_label": ""
     },
     {
       "asset_ref": "RD-006",

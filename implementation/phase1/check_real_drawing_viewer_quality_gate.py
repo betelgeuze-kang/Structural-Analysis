@@ -179,7 +179,7 @@ def _review_queue(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             for flag in row["quality_flags"]
             if flag in REVIEW_FLAGS
             and not (solver_exact and flag == "sparse_preview")
-            and not (solver_exact and full_detail_lod_ready and flag == "sampled_dense_model")
+            and not (full_detail_lod_ready and flag == "sampled_dense_model")
         ]
         if not review_flags:
             continue

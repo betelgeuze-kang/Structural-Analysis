@@ -198,8 +198,7 @@
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-005",
       "quality_flags": [
-        "not_solver_exact",
-        "sampled_dense_model"
+        "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",

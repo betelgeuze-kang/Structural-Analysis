@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build full-detail LOD evidence for sampled solver-exact real drawing assets."""
+"""Build full-detail LOD evidence for sampled real drawing assets."""
 
 from __future__ import annotations
 
@@ -61,8 +61,6 @@ def _lod_item(
     base_dir: Path,
     max_segments_per_asset: int,
 ) -> dict[str, Any] | None:
-    if not bool(row.get("solver_exact", False)):
-        return None
     graph_path = _candidate_path(_graph_reference(row), base_dir=base_dir)
     if graph_path is None:
         return None
@@ -78,6 +76,7 @@ def _lod_item(
         "file_type": str(row.get("file_type") or ""),
         "route": str(row.get("optimization_route") or ""),
         "status": str(row.get("optimization_status") or ""),
+        "solver_exact": bool(row.get("solver_exact", False)),
         "contract_pass": True,
         "reason_code": "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED",
         "full_detail_lod_ready": True,
@@ -129,6 +128,8 @@ def build_full_detail_lod_manifest(
         ]
         if item is not None
     ]
+    sampled_solver_exact_count = sum(1 for item in items if bool(item.get("solver_exact", False)))
+    sampled_preview_count = len(items) - sampled_solver_exact_count
     return {
         "schema_version": "real-drawing-full-detail-lod-manifest.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -136,7 +137,9 @@ def build_full_detail_lod_manifest(
         "contract_pass": True,
         "reason_code": "PASS_FULL_DETAIL_LOD_MANIFEST_READY",
         "summary": {
-            "sampled_solver_exact_asset_count": len(items),
+            "sampled_asset_count": len(items),
+            "sampled_solver_exact_asset_count": sampled_solver_exact_count,
+            "sampled_preview_asset_count": sampled_preview_count,
             "full_detail_segment_count_total": sum(
                 _safe_int(item.get("full_detail_segment_count"), 0) for item in items
             ),
@@ -156,7 +159,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         "# Real Drawing Full-Detail LOD Manifest",
         "",
         f"- Contract: {report.get('reason_code')}",
+        f"- Sampled assets: {summary.get('sampled_asset_count', 0)}",
         f"- Sampled solver-exact assets: {summary.get('sampled_solver_exact_asset_count', 0)}",
+        f"- Sampled preview/draft assets: {summary.get('sampled_preview_asset_count', 0)}",
         f"- Full-detail segments: {summary.get('full_detail_segment_count_total', 0)}",
         f"- Viewer sample segments: {summary.get('viewer_sample_segment_count_total', 0)}",
         "",

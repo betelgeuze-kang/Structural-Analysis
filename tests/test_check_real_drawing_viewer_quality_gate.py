@@ -218,6 +218,37 @@ def test_quality_gate_accepts_sampled_solver_exact_with_full_detail_lod_evidence
     assert report["asset_quality_rows"][0]["full_detail_lod_ready"] is True
 
 
+def test_quality_gate_excludes_sampled_review_for_preview_with_lod_evidence(tmp_path: Path) -> None:
+    asset = _asset(
+        "RD-IFC",
+        solver_exact=False,
+        segment_count=3,
+        graph_source_kind="ifc_solver_graph_draft",
+        quality_flags=["sampled_dense_model", "not_solver_exact"],
+        route="ifc_to_structural_graph_adapter",
+        status="ifc_solver_graph_draft_ready",
+    )
+    asset["metrics"]["renderable_segment_count"] = 7
+    asset["lod_evidence"] = {
+        "contract_pass": True,
+        "reason_code": "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED",
+        "full_detail_segment_count": 7,
+        "viewer_sample_segment_count": 3,
+    }
+    manifest_path = _write_json(
+        tmp_path / "manifest.json",
+        _manifest([_asset("RD-001", solver_exact=True, segment_count=12), asset]),
+    )
+
+    report = quality_gate.build_quality_gate(manifest_path)
+
+    assert report["contract_pass"] is True
+    assert report["reason_code"] == "PASS_WITH_REVIEW_QUEUE"
+    assert report["review_queue"][0]["asset_ref"] == "RD-IFC"
+    assert report["review_queue"][0]["quality_flags"] == ["not_solver_exact"]
+    assert report["asset_quality_rows"][1]["full_detail_lod_ready"] is True
+
+
 def test_quality_gate_blocks_nonrenderable_and_sensitive_manifest(tmp_path: Path) -> None:
     manifest_path = _write_json(
         tmp_path / "manifest.json",
