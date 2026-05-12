@@ -52,7 +52,6 @@
       "graph_source_kind": "ifc_solver_graph_draft",
       "node_count": 2340,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -93,7 +92,6 @@
       "graph_source_kind": "ifc_solver_graph_draft",
       "node_count": 13544,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "sampled_dense_model",
         "not_solver_exact"
       ],
@@ -115,7 +113,6 @@
       "graph_source_kind": "ifc_solver_graph_draft",
       "node_count": 1686,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -136,7 +133,6 @@
       "graph_source_kind": "ifc_solver_graph_draft",
       "node_count": 1658,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -350,7 +346,7 @@
   "full_solver_exact_ready": false,
   "hard_blockers": [],
   "quality_flag_counts": {
-    "ifc_solver_graph_draft_not_member_extents": 5,
+    "ifc_solver_graph_draft_not_member_extents": 1,
     "not_solver_exact": 7,
     "sampled_dense_model": 1
   },
@@ -379,11 +375,10 @@
     {
       "asset_ref": "RD-003",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
+      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
       "review_id": "RQ-003"
     },
     {
@@ -398,32 +393,29 @@
     {
       "asset_ref": "RD-005",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "sampled_dense_model",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
+      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
       "review_id": "RQ-005"
     },
     {
       "asset_ref": "RD-006",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
+      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
       "review_id": "RQ-006"
     },
     {
       "asset_ref": "RD-007",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
-      "recommended_action": "recover member extents and close IFC load/zero-load evidence",
+      "recommended_action": "close IFC load/zero-load evidence and promote draft to solver-exact topology",
       "review_id": "RQ-007"
     }
   ],
@@ -448,7 +440,7 @@
     "hard_blocker_count": 0,
     "proxy_or_preview_asset_count": 7,
     "renderable_asset_count": 18,
-    "review_item_count": 13,
+    "review_item_count": 9,
     "review_queue_asset_count": 7,
     "solver_exact_asset_count": 11
   }

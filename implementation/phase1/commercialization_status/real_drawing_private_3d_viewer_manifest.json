@@ -99,14 +99,13 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 1170,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "IFC draft"
+      "warning_label": ""
     },
     {
       "asset_ref": "RD-004",
@@ -170,7 +169,6 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "sampled_dense_model",
         "not_solver_exact"
       ],
@@ -178,7 +176,7 @@
       "segment_count": 1800,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "IFC draft"
+      "warning_label": "sampled"
     },
     {
       "asset_ref": "RD-006",
@@ -207,14 +205,13 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 843,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "IFC draft"
+      "warning_label": ""
     },
     {
       "asset_ref": "RD-007",
@@ -243,14 +240,13 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 829,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "IFC draft"
+      "warning_label": ""
     },
     {
       "asset_ref": "RD-008",

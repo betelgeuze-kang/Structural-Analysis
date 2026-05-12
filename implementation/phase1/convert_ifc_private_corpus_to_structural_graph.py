@@ -318,8 +318,12 @@ def _identity_transform() -> tuple[list[float], list[list[float]]]:
 
 
 BODY_MEMBER_EXTENT_SOURCES = {
+    "ifc_body_advanced_brep_bounds_world",
+    "ifc_body_brep_bounds_world",
     "ifc_body_extrusion_depth_world",
     "ifc_body_boolean_operand_extent_world",
+    "ifc_mapped_body_advanced_brep_bounds_world",
+    "ifc_mapped_body_brep_bounds_world",
     "ifc_mapped_body_extrusion_depth_world",
     "ifc_mapped_body_boolean_operand_extent_world",
 }
@@ -557,6 +561,63 @@ def _extruded_body_world_points(
     return [_transform_point(combined_transform, [0.0, 0.0, 0.0]), end]
 
 
+def _cartesian_points_reachable_from_item(
+    item_id: str,
+    record_by_id: dict[str, tuple[str, list[str]]],
+    *,
+    visited_items: set[str] | None = None,
+) -> list[list[float]]:
+    visited = visited_items if visited_items is not None else set()
+    if item_id in visited:
+        return []
+    visited.add(item_id)
+    row = record_by_id.get(item_id)
+    if row is None:
+        return []
+    entity_type, args = row
+    if entity_type == "IFCCARTESIANPOINT":
+        point = _cartesian_point(item_id, record_by_id)
+        return [point] if point is not None else []
+    points: list[list[float]] = []
+    for ref_id in _refs(" ".join(args)):
+        points.extend(
+            _cartesian_points_reachable_from_item(
+                ref_id,
+                record_by_id,
+                visited_items=visited,
+            )
+        )
+    return points
+
+
+def _extent_points_from_world_points(points: list[list[float]]) -> list[list[float]]:
+    if len(points) < 2:
+        return []
+    mins = [min(point[index] for point in points) for index in range(3)]
+    maxs = [max(point[index] for point in points) for index in range(3)]
+    spans = [maxs[index] - mins[index] for index in range(3)]
+    max_span = max(spans)
+    if max_span <= 1e-9:
+        return []
+    axis_index = spans.index(max_span)
+    center = [(mins[index] + maxs[index]) / 2.0 for index in range(3)]
+    start = center[:]
+    end = center[:]
+    start[axis_index] = mins[axis_index]
+    end[axis_index] = maxs[axis_index]
+    return [_round_point(start), _round_point(end)]
+
+
+def _brep_body_world_points(
+    item_id: str,
+    record_by_id: dict[str, tuple[str, list[str]]],
+    product_transform: tuple[list[float], list[list[float]]],
+) -> list[list[float]]:
+    local_points = _cartesian_points_reachable_from_item(item_id, record_by_id)
+    world_points = [_transform_point(product_transform, point) for point in local_points]
+    return _extent_points_from_world_points(world_points)
+
+
 def _body_item_world_extent(
     item_id: str,
     record_by_id: dict[str, tuple[str, list[str]]],
@@ -575,6 +636,12 @@ def _body_item_world_extent(
     if entity_type == "IFCEXTRUDEDAREASOLID":
         points = _extruded_body_world_points(item_id, record_by_id, product_transform)
         return ("ifc_body_extrusion_depth_world", points) if points else ("", [])
+    if entity_type == "IFCFACETEDBREP":
+        points = _brep_body_world_points(item_id, record_by_id, product_transform)
+        return ("ifc_body_brep_bounds_world", points) if points else ("", [])
+    if entity_type == "IFCADVANCEDBREP":
+        points = _brep_body_world_points(item_id, record_by_id, product_transform)
+        return ("ifc_body_advanced_brep_bounds_world", points) if points else ("", [])
     if entity_type == "IFCMAPPEDITEM" and len(args) > 1:
         source, points = _mapped_item_world_extent(
             item_id,
@@ -890,7 +957,7 @@ def _write_solver_graph_artifacts(
         },
         "evidence_receipts": {"solver_graph_json_npz_receipt": receipt},
         "limitations": [
-            "IFC Axis polylines, Body extrusion depths, mapped bodies, or boolean first operands are preferred when available; placement-origin axis markers are only fallback geometry.",
+            "IFC Axis polylines, Body extrusion depths, mapped bodies, boolean first operands, or BREP point-bound extents are preferred when available; placement-origin axis markers are only fallback geometry.",
             "Member extents, meshing, boundary conditions, and loads are not asserted as solver-exact.",
         ],
     }

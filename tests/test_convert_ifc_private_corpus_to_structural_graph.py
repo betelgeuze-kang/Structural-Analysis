@@ -325,6 +325,55 @@ END-ISO-10303-21;
     assert extent_sources["#20"] == "ifc_body_boolean_operand_extent_world"
 
 
+def test_ifc_adapter_recovers_brep_body_bounds_as_member_extents(tmp_path: Path) -> None:
+    ifc_path = tmp_path / "private" / "brep.ifc"
+    ifc_path.parent.mkdir(parents=True)
+    ifc_path.write_text(
+        """ISO-10303-21;
+HEADER;
+FILE_SCHEMA(('IFC2X3'));
+ENDSEC;
+DATA;
+#1= IFCCARTESIANPOINT((0.,0.,0.));
+#2= IFCAXIS2PLACEMENT3D(#1,$,$);
+#3= IFCLOCALPLACEMENT($,#2);
+#4= IFCCARTESIANPOINT((0.,0.,0.));
+#5= IFCCARTESIANPOINT((2.,0.,0.));
+#6= IFCCARTESIANPOINT((2.,1.,12.));
+#7= IFCCARTESIANPOINT((0.,1.,12.));
+#8= IFCPOLYLOOP((#4,#5,#6,#7));
+#9= IFCFACEOUTERBOUND(#8,.T.);
+#10= IFCFACE((#9));
+#11= IFCCLOSEDSHELL((#10));
+#12= IFCFACETEDBREP(#11);
+#13= IFCADVANCEDBREP(#11);
+#14= IFCSHAPEREPRESENTATION($,'Body','Brep',(#12));
+#15= IFCSHAPEREPRESENTATION($,'Body','AdvancedBrep',(#13));
+#16= IFCPRODUCTDEFINITIONSHAPE($,$,(#14));
+#17= IFCPRODUCTDEFINITIONSHAPE($,$,(#15));
+#18= IFCSLAB('brep-guid',$,'Brep slab',$,$,#3,#16,$);
+#19= IFCWALL('advanced-guid',$,'Advanced wall',$,$,#3,#17,$);
+ENDSEC;
+END-ISO-10303-21;
+""",
+        encoding="utf-8",
+    )
+
+    payload = ifc_adapter.parse_ifc_proxy_graph(ifc_path)
+
+    assert payload["metrics"]["structural_entity_count"] == 2
+    assert payload["metrics"]["member_extent_structural_count"] == 2
+    assert payload["metrics"]["body_extrusion_extent_structural_count"] == 2
+    assert payload["metrics"]["member_extent_coverage_ratio"] == 1.0
+    extent_sources = {
+        node["id"]: node.get("member_extent_source")
+        for node in payload["nodes"]
+        if node.get("proxy_node_kind") == "structural_element"
+    }
+    assert extent_sources["#18"] == "ifc_body_brep_bounds_world"
+    assert extent_sources["#19"] == "ifc_body_advanced_brep_bounds_world"
+
+
 def test_queue_promotes_ifc_adapter_report_to_proxy_ready(tmp_path: Path) -> None:
     manifest = tmp_path / "redacted_manifest.json"
     mgt_parse_dir = tmp_path / "mgt_parse"
