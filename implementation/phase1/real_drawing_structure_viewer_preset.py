@@ -61,6 +61,8 @@ def quality_notice(asset: dict[str, Any]) -> str:
         return "IFC proxy topology layout; not recovered architectural/structural coordinates."
     if "ifc_solver_graph_draft_not_member_extents" in flags:
         return "IFC solver graph draft; member extents and loads are still review items."
+    if str(asset.get("graph_source_kind") or "") == "ifc_solver_graph_draft":
+        return "IFC solver graph draft with IFC-derived member extents; loads remain review items."
     if bool(lod_evidence.get("contract_pass", False)):
         return "Dense solver model uses a sampled viewport with full-detail LOD evidence."
     if "sampled_dense_model" in flags:
@@ -112,6 +114,7 @@ def asset_registry_row(asset: dict[str, Any]) -> dict[str, Any]:
         "status": str(asset.get("status") or ""),
         "solver_exact": bool(asset.get("solver_exact", False)),
         "geometry_mode": str(asset.get("geometry_mode") or ""),
+        "graph_source_kind": str(asset.get("graph_source_kind") or ""),
         "geometry_available": bool(asset.get("geometry_available", False)),
         "segment_count": _safe_int(asset.get("segment_count", 0)),
         "model_asset_count": _safe_int(asset.get("model_asset_count", 0)),

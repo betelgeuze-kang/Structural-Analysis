@@ -26,6 +26,7 @@ SENSITIVE_KEYS = (
 )
 REVIEW_FLAGS = (
     "not_solver_exact",
+    "ifc_solver_graph_draft_not_member_extents",
     "proxy_layout_not_true_geometry",
     "proxy_node_glyph_fallback",
     "sampled_dense_model",
@@ -131,12 +132,14 @@ def _review_action(row: dict[str, Any]) -> str:
     flags = set(row["quality_flags"])
     if "sparse_preview" in flags and not bool(row.get("solver_exact", False)):
         return "expand sparse preview into a complete solver-exact model"
+    if "ifc_solver_graph_draft_not_member_extents" in flags:
+        return "recover member extents and close IFC load/zero-load evidence"
+    if str(row.get("graph_source_kind") or "") == "ifc_solver_graph_draft" and not bool(row.get("solver_exact", False)):
+        return "close IFC load/zero-load evidence and promote draft to solver-exact topology"
     if "sampled_dense_model" in flags and not bool(row.get("full_detail_lod_ready", False)):
         return "inspect sampled dense model before using it as a full-detail design claim"
     if "proxy_node_glyph_fallback" in flags:
         return "replace node glyph fallback with edge-backed topology"
-    if "ifc_solver_graph_draft_not_member_extents" in flags:
-        return "recover member extents and close IFC load/zero-load evidence"
     if "proxy_layout_not_true_geometry" in flags or "not_solver_exact" in flags:
         return "replace proxy or preview topology with solver-exact structural geometry"
     return "engineer review"
@@ -151,6 +154,7 @@ def _asset_quality_rows(assets: list[dict[str, Any]], asset_blockers: dict[str, 
         row = {
             "asset_ref": asset_ref,
             "file_type": str(asset.get("file_type") or ""),
+            "graph_source_kind": str(asset.get("graph_source_kind") or ""),
             "geometry_available": bool(asset.get("geometry_available", False)),
             "geometry_mode": str(asset.get("geometry_mode") or ""),
             "quality_flags": flags,

@@ -1,6 +1,6 @@
 {
   "contract_pass": true,
-  "generated_at": "2026-05-11T14:58:56.628581+00:00",
+  "generated_at": "2026-05-12T12:08:00.471745+00:00",
   "ifc_reconstruction_items": [
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.report.json",
@@ -122,22 +122,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 420,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 234,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 661,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.solver_graph.json",
-          "model_node_count": 1322,
+          "member_extent_coverage_ratio": 0.9894,
+          "member_extent_element_count": 654,
+          "model_node_count": 1689,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 7,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 661,
@@ -151,7 +156,7 @@
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
-          "segment_count": 661,
+          "segment_count": 1052,
           "solver_exact": false,
           "structure_viewer_preset": "real_drawing_private_3d",
           "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
@@ -292,22 +297,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 420,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 234,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 661,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.solver_graph.json",
-          "model_node_count": 1322,
+          "member_extent_coverage_ratio": 0.9894,
+          "member_extent_element_count": 654,
+          "model_node_count": 1689,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 7,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 661,
@@ -321,7 +331,7 @@
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
-          "segment_count": 661,
+          "segment_count": 1052,
           "solver_exact": false,
           "structure_viewer_preset": "real_drawing_private_3d",
           "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
@@ -456,22 +466,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 45,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 32,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 77,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 1.0,
+          "member_extent_element_count": 77,
           "model_node_count": 154,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 77,
@@ -607,22 +622,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 45,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 32,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 77,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 1.0,
+          "member_extent_element_count": 77,
           "model_node_count": 154,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 77,
@@ -647,7 +667,6 @@
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.graph.json",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "reconstruction_ready": false,
@@ -776,22 +795,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 890,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 270,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 1170,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 0.9915,
+          "member_extent_element_count": 1160,
           "model_node_count": 2340,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 10,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 1170,
@@ -932,22 +956,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 890,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 270,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 1170,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 0.9915,
+          "member_extent_element_count": 1160,
           "model_node_count": 2340,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 10,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 1170,
@@ -1096,22 +1125,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 156,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 82,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 238,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 1.0,
+          "member_extent_element_count": 238,
           "model_node_count": 476,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 238,
@@ -1247,22 +1281,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 156,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 82,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 238,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 1.0,
+          "member_extent_element_count": 238,
           "model_node_count": 476,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 0,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 238,
@@ -1287,7 +1326,6 @@
       ],
       "proxy_graph_json": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.graph.json",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "reconstruction_ready": false,
@@ -1414,22 +1452,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 4233,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 2503,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 6772,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 0.9947,
+          "member_extent_element_count": 6736,
           "model_node_count": 13544,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 36,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 6772,
@@ -1568,22 +1611,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 4233,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 2503,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 6772,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 0.9947,
+          "member_extent_element_count": 6736,
           "model_node_count": 13544,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 36,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 6772,
@@ -1739,22 +1787,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 704,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 138,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 843,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 0.9988,
+          "member_extent_element_count": 842,
           "model_node_count": 1686,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 1,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 843,
@@ -1896,22 +1949,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 704,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 138,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 843,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 0.9988,
+          "member_extent_element_count": 842,
           "model_node_count": 1686,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 1,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 843,
@@ -2059,22 +2117,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 124,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 675,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 829,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 0.9638,
+          "member_extent_element_count": 799,
           "model_node_count": 1658,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 30,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 829,
@@ -2209,22 +2272,27 @@
         },
         "solver_graph_json_npz_receipt": {
           "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
+          "axis_polyline_element_count": 124,
           "basis_receipts_attached": [
             "ifc_local_placement_coordinate_extraction_receipt",
             "ifc_representation_shape_axis_receipt",
             "ifc_material_section_binding_receipt"
           ],
+          "body_extrusion_element_count": 675,
           "commercial_claim_blocked": true,
           "contract_pass": true,
           "element_count": 829,
-          "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+          "geometry_scope": "ifc_axis_or_body_member_extents_with_placement_marker_fallback",
           "json_path": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.solver_graph.json",
+          "member_extent_coverage_ratio": 0.9638,
+          "member_extent_element_count": 799,
           "model_node_count": 1658,
           "npz_path": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.solver_graph.npz",
           "open_dependencies": [
             "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
             "viewer_sidecar_rebuild_receipt"
           ],
+          "placement_marker_fallback_count": 30,
           "reason_code": "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED",
           "solver_exact": false,
           "source_structural_node_count": 829,

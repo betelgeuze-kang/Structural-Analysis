@@ -3407,9 +3407,12 @@ function realDrawingAssetMatchesQualityFilter(row,filterKey=activeRealDrawingQua
 function getRealDrawingReviewAction(row){
   const flags=new Set(getRealDrawingQualityFlags(row));
   if(flags.has('sparse_preview')&&!Boolean(row?.solver_exact))return'Expand sparse archive preview';
+  if(flags.has('ifc_solver_graph_draft_not_member_extents'))return'Recover member extents and loads';
+  if(normalizeSelectionValue(row?.graph_source_kind)==='ifc_solver_graph_draft'&&!Boolean(row?.solver_exact)){
+    return'Close IFC loads and promote';
+  }
   if(flags.has('sampled_dense_model'))return'Inspect sampled dense model';
   if(flags.has('proxy_node_glyph_fallback'))return'Replace node glyph fallback';
-  if(flags.has('ifc_solver_graph_draft_not_member_extents'))return'Recover member extents and loads';
   if(flags.has('proxy_layout_not_true_geometry')||flags.has('not_solver_exact')||!Boolean(row?.solver_exact)){
     return'Promote to solver-exact topology';
   }

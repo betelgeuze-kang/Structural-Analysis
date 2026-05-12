@@ -142,12 +142,15 @@ END-ISO-10303-21;
     assert solver_receipt["contract_pass"] is True
     assert solver_receipt["solver_exact"] is False
     assert solver_receipt["reason_code"] == "PASS_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_EMITTED"
-    assert solver_receipt["geometry_scope"] == "placement_origin_axis_marker_not_member_extents"
+    assert solver_receipt["geometry_scope"] == "ifc_axis_or_body_member_extents"
     assert solver_receipt["element_count"] == 3
+    assert solver_receipt["body_extrusion_element_count"] == 3
+    assert solver_receipt["placement_marker_fallback_count"] == 0
+    assert solver_receipt["member_extent_coverage_ratio"] == 1.0
     assert "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt" in solver_receipt["open_dependencies"]
     solver_payload = json.loads((out_dir / "fixture_ifc.solver_graph.json").read_text(encoding="utf-8"))
     assert solver_payload["solver_exact"] is False
-    assert solver_payload["model"]["geometry_scope"] == "placement_origin_axis_marker_not_member_extents"
+    assert solver_payload["model"]["geometry_scope"] == "ifc_axis_or_body_member_extents"
     assert len(solver_payload["model"]["nodes"]) == 6
     assert len(solver_payload["model"]["elements"]) == 3
     with np.load(out_dir / "fixture_ifc.solver_graph.npz") as dataset:
@@ -218,6 +221,10 @@ END-ISO-10303-21;
     assert payload["metrics"]["shape_product_structural_count"] == 2
     assert payload["metrics"]["body_representation_structural_count"] == 2
     assert payload["metrics"]["axis_representation_structural_count"] == 1
+    assert payload["metrics"]["member_extent_structural_count"] == 2
+    assert payload["metrics"]["axis_polyline_extent_structural_count"] == 1
+    assert payload["metrics"]["body_extrusion_extent_structural_count"] == 1
+    assert payload["metrics"]["member_extent_coverage_ratio"] == 1.0
     assert payload["metrics"]["material_bound_structural_count"] == 2
     assert payload["metrics"]["section_source_structural_count"] == 2
     assert payload["metrics"]["load_related_record_count"] == 5
@@ -259,10 +266,63 @@ END-ISO-10303-21;
     assert "release_safe_aggregate_group_edges" in payload["relationship_extraction_modes"]
     assert next(node for node in payload["nodes"] if node["id"] == "#20")["x"] == 10.0
     assert next(node for node in payload["nodes"] if node["id"] == "#21")["y"] == 22.0
+    axis_node = next(node for node in payload["nodes"] if node["id"] == "#20")
+    assert axis_node["member_extent_source"] == "ifc_axis_polyline_world"
+    assert len(axis_node["member_axis_world_points"]) == 2
     group_node = next(node for node in payload["nodes"] if node["id"] == "relationship:IFCRELAGGREGATES:#40")
     assert group_node["x"] == 12.0
     assert group_node["y"] == 21.0
     assert all(edge["target"] == "relationship:IFCRELAGGREGATES:#40" for edge in payload["edges"])
+
+
+def test_ifc_adapter_recovers_mapped_and_boolean_body_extents(tmp_path: Path) -> None:
+    ifc_path = tmp_path / "private" / "mapped_boolean.ifc"
+    ifc_path.parent.mkdir(parents=True)
+    ifc_path.write_text(
+        """ISO-10303-21;
+HEADER;
+FILE_SCHEMA(('IFC2X3'));
+ENDSEC;
+DATA;
+#1= IFCCARTESIANPOINT((0.,0.,0.));
+#2= IFCCARTESIANPOINT((4.,0.,0.));
+#3= IFCAXIS2PLACEMENT3D(#1,$,$);
+#4= IFCAXIS2PLACEMENT3D(#2,$,$);
+#5= IFCLOCALPLACEMENT($,#3);
+#6= IFCLOCALPLACEMENT($,#4);
+#7= IFCDIRECTION((0.,0.,1.));
+#8= IFCRECTANGLEPROFILEDEF(.AREA.,$,$,1.,2.);
+#9= IFCEXTRUDEDAREASOLID(#8,#3,#7,5.);
+#10= IFCSHAPEREPRESENTATION($,'Body','SweptSolid',(#9));
+#11= IFCREPRESENTATIONMAP(#3,#10);
+#12= IFCCARTESIANTRANSFORMATIONOPERATOR3D($,$,#1,1.,$);
+#13= IFCMAPPEDITEM(#11,#12);
+#14= IFCSHAPEREPRESENTATION($,'Body','MappedRepresentation',(#13));
+#15= IFCPRODUCTDEFINITIONSHAPE($,$,(#14));
+#16= IFCBOOLEANCLIPPINGRESULT(.DIFFERENCE.,#9,#99);
+#17= IFCSHAPEREPRESENTATION($,'Body','Clipping',(#16));
+#18= IFCPRODUCTDEFINITIONSHAPE($,$,(#17));
+#19= IFCCOLUMN('mapped-guid',$,'Mapped column',$,$,#5,#15,$);
+#20= IFCBEAM('boolean-guid',$,'Boolean beam',$,$,#6,#18,$);
+ENDSEC;
+END-ISO-10303-21;
+""",
+        encoding="utf-8",
+    )
+
+    payload = ifc_adapter.parse_ifc_proxy_graph(ifc_path)
+
+    assert payload["metrics"]["structural_entity_count"] == 2
+    assert payload["metrics"]["member_extent_structural_count"] == 2
+    assert payload["metrics"]["body_extrusion_extent_structural_count"] == 2
+    assert payload["metrics"]["member_extent_coverage_ratio"] == 1.0
+    extent_sources = {
+        node["id"]: node.get("member_extent_source")
+        for node in payload["nodes"]
+        if node.get("proxy_node_kind") == "structural_element"
+    }
+    assert extent_sources["#19"] == "ifc_mapped_body_extrusion_depth_world"
+    assert extent_sources["#20"] == "ifc_body_boolean_operand_extent_world"
 
 
 def test_queue_promotes_ifc_adapter_report_to_proxy_ready(tmp_path: Path) -> None:

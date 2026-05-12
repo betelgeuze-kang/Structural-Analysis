@@ -266,6 +266,11 @@ def _number_tuple(text: str, *, dimensions: int = 3) -> list[float] | None:
     return values[:dimensions]
 
 
+def _first_number(text: str) -> float | None:
+    match = NUMBER_RE.search(text or "")
+    return float(match.group(0)) if match else None
+
+
 def _vector_add(left: list[float], right: list[float]) -> list[float]:
     return [left[0] + right[0], left[1] + right[1], left[2] + right[2]]
 
@@ -310,6 +315,63 @@ def _combine_transform(
 
 def _identity_transform() -> tuple[list[float], list[list[float]]]:
     return [0.0, 0.0, 0.0], [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+
+
+BODY_MEMBER_EXTENT_SOURCES = {
+    "ifc_body_extrusion_depth_world",
+    "ifc_body_boolean_operand_extent_world",
+    "ifc_mapped_body_extrusion_depth_world",
+    "ifc_mapped_body_boolean_operand_extent_world",
+}
+
+
+def _direction_from_ref(
+    direction_id: str | None,
+    record_by_id: dict[str, tuple[str, list[str]]],
+    fallback: list[float],
+) -> list[float]:
+    row = record_by_id.get(direction_id or "")
+    if row is None or row[0] != "IFCDIRECTION" or not row[1]:
+        return fallback[:]
+    return _normalize(_number_tuple(row[1][0], dimensions=3) or fallback, fallback)
+
+
+def _cartesian_transformation_operator_transform(
+    operator_id: str | None,
+    record_by_id: dict[str, tuple[str, list[str]]],
+) -> tuple[list[float], list[list[float]]] | None:
+    row = record_by_id.get(operator_id or "")
+    if row is None or not row[0].startswith("IFCCARTESIANTRANSFORMATIONOPERATOR"):
+        return None
+    entity_type, args = row
+    if len(args) <= 2:
+        return None
+    scale1 = _first_number(args[3]) if len(args) > 3 else None
+    scale1 = 1.0 if scale1 is None else scale1
+    scale2 = scale1
+    scale3 = scale1
+    if "NONUNIFORM" in entity_type:
+        scale2 = _first_number(args[5]) if len(args) > 5 else None
+        scale3 = _first_number(args[6]) if len(args) > 6 else None
+        scale2 = scale1 if scale2 is None else scale2
+        scale3 = scale1 if scale3 is None else scale3
+
+    origin = _cartesian_point(_first_ref(args[2]), record_by_id) or [0.0, 0.0, 0.0]
+    x_axis = _direction_from_ref(_first_ref(args[0]), record_by_id, [1.0, 0.0, 0.0])
+    y_axis = _direction_from_ref(_first_ref(args[1]), record_by_id, [0.0, 1.0, 0.0])
+    if "2D" in entity_type:
+        z_axis = [0.0, 0.0, 1.0]
+    else:
+        z_axis = _direction_from_ref(_first_ref(args[4]) if len(args) > 4 else None, record_by_id, _cross(x_axis, y_axis))
+    z_axis = _normalize(z_axis, [0.0, 0.0, 1.0])
+    x_axis = _normalize([x_axis[index] - z_axis[index] * _dot(x_axis, z_axis) for index in range(3)], [1.0, 0.0, 0.0])
+    y_axis = _normalize(_cross(z_axis, x_axis), [0.0, 1.0, 0.0])
+    x_axis = _normalize(_cross(y_axis, z_axis), [1.0, 0.0, 0.0])
+    return origin, [
+        [value * scale1 for value in x_axis],
+        [value * scale2 for value in y_axis],
+        [value * scale3 for value in z_axis],
+    ]
 
 
 def _axis_placement_transform(
@@ -400,6 +462,14 @@ def _round_point(point: list[float]) -> list[float]:
     return [round(value, 6) for value in point]
 
 
+def _transform_point(
+    transform: tuple[list[float], list[list[float]]],
+    point: list[float],
+) -> list[float]:
+    origin, basis = transform
+    return _round_point(_vector_add(origin, _basis_vector(basis, point)))
+
+
 def _placement_bounds(points: list[list[float]]) -> dict[str, list[float]]:
     if not points:
         return {"min": [], "max": []}
@@ -437,6 +507,163 @@ def _axis_marker_length(points: list[list[float]]) -> float:
     return round(max(0.5, min(6.0, diagonal * 0.015)), 6)
 
 
+def _cartesian_point(
+    point_id: str | None,
+    record_by_id: dict[str, tuple[str, list[str]]],
+) -> list[float] | None:
+    row = record_by_id.get(point_id or "")
+    if row is None or row[0] != "IFCCARTESIANPOINT" or not row[1]:
+        return None
+    return _number_tuple(row[1][0], dimensions=3)
+
+
+def _axis_polyline_world_points(
+    item_id: str,
+    record_by_id: dict[str, tuple[str, list[str]]],
+    product_transform: tuple[list[float], list[list[float]]],
+) -> list[list[float]]:
+    item = record_by_id.get(item_id)
+    if item is None or item[0] != "IFCPOLYLINE" or not item[1]:
+        return []
+    points = [
+        _cartesian_point(point_id, record_by_id)
+        for point_id in _refs(item[1][0])
+    ]
+    world_points = [_transform_point(product_transform, point) for point in points if point is not None]
+    return world_points if len(world_points) >= 2 else []
+
+
+def _extruded_body_world_points(
+    item_id: str,
+    record_by_id: dict[str, tuple[str, list[str]]],
+    product_transform: tuple[list[float], list[list[float]]],
+) -> list[list[float]]:
+    item = record_by_id.get(item_id)
+    if item is None or item[0] != "IFCEXTRUDEDAREASOLID" or len(item[1]) <= 3:
+        return []
+    position_transform = _axis_placement_transform(_first_ref(item[1][1]), record_by_id)
+    combined_transform = _combine_transform(product_transform, position_transform or _identity_transform())
+    direction_row = record_by_id.get(_first_ref(item[1][2]) or "")
+    direction = (
+        _number_tuple(direction_row[1][0], dimensions=3)
+        if direction_row is not None and direction_row[0] == "IFCDIRECTION" and direction_row[1]
+        else [0.0, 0.0, 1.0]
+    )
+    depth = _first_number(item[1][3])
+    if depth is None or abs(depth) <= 1e-9:
+        return []
+    local_direction = _normalize(direction, [0.0, 0.0, 1.0])
+    end = _transform_point(combined_transform, [local_direction[index] * depth for index in range(3)])
+    return [_transform_point(combined_transform, [0.0, 0.0, 0.0]), end]
+
+
+def _body_item_world_extent(
+    item_id: str,
+    record_by_id: dict[str, tuple[str, list[str]]],
+    product_transform: tuple[list[float], list[list[float]]],
+    *,
+    visited_items: set[str] | None = None,
+) -> tuple[str, list[list[float]]]:
+    visited = visited_items if visited_items is not None else set()
+    if item_id in visited:
+        return "", []
+    visited.add(item_id)
+    item = record_by_id.get(item_id)
+    if item is None:
+        return "", []
+    entity_type, args = item
+    if entity_type == "IFCEXTRUDEDAREASOLID":
+        points = _extruded_body_world_points(item_id, record_by_id, product_transform)
+        return ("ifc_body_extrusion_depth_world", points) if points else ("", [])
+    if entity_type == "IFCMAPPEDITEM" and len(args) > 1:
+        source, points = _mapped_item_world_extent(
+            item_id,
+            record_by_id,
+            product_transform,
+            visited_items=visited,
+        )
+        return source, points
+    if entity_type in {"IFCBOOLEANCLIPPINGRESULT", "IFCBOOLEANRESULT"}:
+        for operand_id in _refs(" ".join(args[1:])):
+            source, points = _body_item_world_extent(
+                operand_id,
+                record_by_id,
+                product_transform,
+                visited_items=visited,
+            )
+            if points:
+                return "ifc_body_boolean_operand_extent_world", points
+    return "", []
+
+
+def _mapped_item_world_extent(
+    item_id: str,
+    record_by_id: dict[str, tuple[str, list[str]]],
+    product_transform: tuple[list[float], list[list[float]]],
+    *,
+    visited_items: set[str] | None = None,
+) -> tuple[str, list[list[float]]]:
+    item = record_by_id.get(item_id)
+    if item is None or item[0] != "IFCMAPPEDITEM" or len(item[1]) <= 1:
+        return "", []
+    representation_map = record_by_id.get(_first_ref(item[1][0]) or "")
+    if representation_map is None or representation_map[0] != "IFCREPRESENTATIONMAP" or len(representation_map[1]) <= 1:
+        return "", []
+    mapped_representation = record_by_id.get(_first_ref(representation_map[1][1]) or "")
+    if mapped_representation is None or mapped_representation[0] != "IFCSHAPEREPRESENTATION" or len(mapped_representation[1]) <= 3:
+        return "", []
+    origin_transform = _axis_placement_transform(_first_ref(representation_map[1][0]), record_by_id) or _identity_transform()
+    target_transform = _cartesian_transformation_operator_transform(_first_ref(item[1][1]), record_by_id) or _identity_transform()
+    mapped_transform = _combine_transform(_combine_transform(product_transform, target_transform), origin_transform)
+    for mapped_item_id in _refs(mapped_representation[1][3]):
+        source, points = _body_item_world_extent(
+            mapped_item_id,
+            record_by_id,
+            mapped_transform,
+            visited_items=visited_items,
+        )
+        if points:
+            mapped_source = source.replace("ifc_body_", "ifc_mapped_body_", 1)
+            return mapped_source, points
+    return "", []
+
+
+def _member_extent_from_representations(
+    *,
+    product_shape_id: str | None,
+    record_by_id: dict[str, tuple[str, list[str]]],
+    product_transform: tuple[list[float], list[list[float]]],
+) -> tuple[str, list[list[float]]]:
+    product_shape = record_by_id.get(product_shape_id or "")
+    if product_shape is None or product_shape[0] != "IFCPRODUCTDEFINITIONSHAPE" or len(product_shape[1]) <= 2:
+        return "", []
+
+    best_body_points: list[list[float]] = []
+    best_body_source = ""
+    for representation_id in _refs(product_shape[1][2]):
+        representation = record_by_id.get(representation_id)
+        if representation is None or representation[0] != "IFCSHAPEREPRESENTATION" or len(representation[1]) <= 3:
+            continue
+        representation_identifier = _step_label(representation[1][1]).upper()
+        representation_type = _step_label(representation[1][2]).upper()
+        item_ids = _refs(representation[1][3])
+        if representation_identifier == "AXIS" or "CURVE" in representation_type:
+            for item_id in item_ids:
+                axis_points = _axis_polyline_world_points(item_id, record_by_id, product_transform)
+                if axis_points:
+                    return "ifc_axis_polyline_world", axis_points
+        if representation_identifier == "BODY" and not best_body_points:
+            for item_id in item_ids:
+                body_source, body_points = _body_item_world_extent(item_id, record_by_id, product_transform)
+                if body_points:
+                    best_body_source = body_source
+                    best_body_points = body_points
+                    break
+    if best_body_points:
+        return best_body_source or "ifc_body_extrusion_depth_world", best_body_points
+    return "", []
+
+
 def _family_for_ifc_entity_type(ifc_entity_type: str) -> str:
     entity_type = str(ifc_entity_type or "").upper()
     if entity_type in {"IFCCOLUMN", "IFCPILE"}:
@@ -456,6 +683,11 @@ def _solver_artifact_receipt(
     model_node_count: int,
     element_count: int,
     source_structural_node_count: int,
+    member_extent_element_count: int,
+    axis_polyline_element_count: int,
+    body_extrusion_element_count: int,
+    placement_marker_fallback_count: int,
+    geometry_scope: str,
     json_path: Path,
     npz_path: Path,
 ) -> dict[str, Any]:
@@ -489,13 +721,22 @@ def _solver_artifact_receipt(
             else "ERR_IFC_SOLVER_GRAPH_JSON_NPZ_DRAFT_INCOMPLETE"
         ),
         "artifact_scope": "release_safe_solver_graph_draft_from_ifc_placement_shape_material_receipts",
-        "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+        "geometry_scope": geometry_scope,
         "solver_exact": False,
         "commercial_claim_blocked": True,
         "json_path": str(json_path),
         "npz_path": str(npz_path),
         "model_node_count": model_node_count,
         "element_count": element_count,
+        "member_extent_element_count": member_extent_element_count,
+        "axis_polyline_element_count": axis_polyline_element_count,
+        "body_extrusion_element_count": body_extrusion_element_count,
+        "placement_marker_fallback_count": placement_marker_fallback_count,
+        "member_extent_coverage_ratio": (
+            round(member_extent_element_count / element_count, 4)
+            if element_count > 0
+            else 0.0
+        ),
         "source_structural_node_count": source_structural_node_count,
         "structural_entity_count": int(graph.get("metrics", {}).get("structural_entity_count", 0) or 0),
         "basis_receipts_attached": attached_basis,
@@ -528,6 +769,10 @@ def _write_solver_graph_artifacts(
     elements: list[dict[str, Any]] = []
     node_index_by_id: dict[str, int] = {}
     element_node_indices: list[list[int]] = []
+    member_extent_element_count = 0
+    axis_polyline_element_count = 0
+    body_extrusion_element_count = 0
+    placement_marker_fallback_count = 0
 
     for source_node in source_nodes:
         origin = _node_xyz(source_node)
@@ -536,53 +781,80 @@ def _write_solver_graph_artifacts(
         source_ifc_id = str(source_node.get("id") or "")
         entity_type = str(source_node.get("ifc_entity_type") or "")
         base_id = source_ifc_id.lstrip("#") or str(len(elements) + 1)
-        direction = _axis_marker_direction(entity_type)
-        end = _round_point(
-            [
-                origin[index] + direction[index] * marker_length
-                for index in range(3)
-            ]
-        )
-        start_id = f"ifc:{base_id}:i"
-        end_id = f"ifc:{base_id}:j"
-        start_node = {
-            "id": start_id,
-            "x": origin[0],
-            "y": origin[1],
-            "z": origin[2],
-            "source_ifc_id": source_ifc_id,
-        }
-        end_node = {
-            "id": end_id,
-            "x": end[0],
-            "y": end[1],
-            "z": end[2],
-            "source_ifc_id": source_ifc_id,
-        }
-        node_index_by_id[start_id] = len(model_nodes)
-        model_nodes.append(start_node)
-        node_index_by_id[end_id] = len(model_nodes)
-        model_nodes.append(end_node)
+        extent_points = [
+            point
+            for point in (source_node.get("member_axis_world_points") or [])
+            if isinstance(point, list) and len(point) >= 3
+        ]
+        extent_source = str(source_node.get("member_extent_source") or "")
+        if len(extent_points) >= 2:
+            segment_points = [_round_point([float(point[0]), float(point[1]), float(point[2])]) for point in extent_points]
+            geometry_scope = extent_source
+            member_extent_element_count += 1
+            if extent_source == "ifc_axis_polyline_world":
+                axis_polyline_element_count += 1
+            elif extent_source in BODY_MEMBER_EXTENT_SOURCES:
+                body_extrusion_element_count += 1
+        else:
+            direction = _axis_marker_direction(entity_type)
+            end = _round_point(
+                [
+                    origin[index] + direction[index] * marker_length
+                    for index in range(3)
+                ]
+            )
+            segment_points = [origin, end]
+            geometry_scope = "placement_origin_axis_marker_not_member_extents"
+            placement_marker_fallback_count += 1
+
+        node_ids: list[str] = []
+        node_indices: list[int] = []
+        for point_index, point in enumerate(segment_points, start=1):
+            node_id = f"ifc:{base_id}:n{point_index}"
+            node = {
+                "id": node_id,
+                "x": point[0],
+                "y": point[1],
+                "z": point[2],
+                "source_ifc_id": source_ifc_id,
+            }
+            node_index_by_id[node_id] = len(model_nodes)
+            node_indices.append(len(model_nodes))
+            node_ids.append(node_id)
+            model_nodes.append(node)
         element = {
             "id": f"ifc:{base_id}",
-            "node_ids": [start_id, end_id],
+            "node_ids": node_ids,
             "ifc_entity_id": source_ifc_id,
             "ifc_entity_type": entity_type,
             "family": _family_for_ifc_entity_type(entity_type),
-            "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+            "geometry_scope": geometry_scope,
         }
         if source_node.get("material_binding_source"):
             element["material_binding_source"] = source_node.get("material_binding_source")
         if source_node.get("section_source"):
             element["section_source"] = source_node.get("section_source")
         elements.append(element)
-        element_node_indices.append([node_index_by_id[start_id], node_index_by_id[end_id]])
+        element_node_indices.append([node_indices[0], node_indices[-1]])
+
+    model_geometry_scope = (
+        "ifc_axis_or_body_member_extents"
+        if elements and placement_marker_fallback_count == 0
+        else "ifc_axis_or_body_member_extents_with_placement_marker_fallback"
+        if member_extent_element_count > 0
+        else "placement_origin_axis_marker_not_member_extents"
+    )
 
     receipt = _solver_artifact_receipt(
         graph=graph,
         model_node_count=len(model_nodes),
         element_count=len(elements),
         source_structural_node_count=len(source_nodes),
+        member_extent_element_count=member_extent_element_count,
+        axis_polyline_element_count=axis_polyline_element_count,
+        body_extrusion_element_count=body_extrusion_element_count,
+        placement_marker_fallback_count=placement_marker_fallback_count,
+        geometry_scope=model_geometry_scope,
         json_path=json_path,
         npz_path=npz_path,
     )
@@ -597,7 +869,7 @@ def _write_solver_graph_artifacts(
         "commercial_claim_blocked": True,
         "model": {
             "units": {"length": "ifc_model_units_unscaled"},
-            "geometry_scope": "placement_origin_axis_marker_not_member_extents",
+            "geometry_scope": model_geometry_scope,
             "nodes": model_nodes,
             "elements": elements,
         },
@@ -605,11 +877,20 @@ def _write_solver_graph_artifacts(
             "model_node_count": len(model_nodes),
             "element_count": len(elements),
             "source_structural_node_count": len(source_nodes),
+            "member_extent_element_count": member_extent_element_count,
+            "axis_polyline_element_count": axis_polyline_element_count,
+            "body_extrusion_element_count": body_extrusion_element_count,
+            "placement_marker_fallback_count": placement_marker_fallback_count,
+            "member_extent_coverage_ratio": (
+                round(member_extent_element_count / len(elements), 4)
+                if elements
+                else 0.0
+            ),
             "axis_marker_length": marker_length,
         },
         "evidence_receipts": {"solver_graph_json_npz_receipt": receipt},
         "limitations": [
-            "IFC placement-origin axis markers are emitted for downstream topology receipts.",
+            "IFC Axis polylines, Body extrusion depths, mapped bodies, or boolean first operands are preferred when available; placement-origin axis markers are only fallback geometry.",
             "Member extents, meshing, boundary conditions, and loads are not asserted as solver-exact.",
         ],
     }
@@ -818,6 +1099,7 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
     storey_count = entity_counts["IFCBUILDINGSTOREY"]
     placement_memo: dict[str, tuple[list[float], list[list[float]]] | None] = {}
     placement_points: dict[str, list[float]] = {}
+    placement_transforms: dict[str, tuple[list[float], list[list[float]]]] = {}
     for entity_id, entity_type, args in parsed_records:
         if entity_id not in nodes or len(args) <= 5:
             continue
@@ -828,6 +1110,7 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
         origin, _basis = transform
         point = _round_point(origin)
         placement_points[entity_id] = point
+        placement_transforms[entity_id] = transform
         nodes[entity_id].update(
             {
                 "x": point[0],
@@ -936,6 +1219,9 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
     shape_product_ids: set[str] = set()
     body_representation_ids: set[str] = set()
     axis_representation_ids: set[str] = set()
+    member_extent_ids: set[str] = set()
+    axis_polyline_extent_ids: set[str] = set()
+    body_extrusion_extent_ids: set[str] = set()
     for entity_id, entity_type, args in parsed_records:
         if entity_type not in STRUCTURAL_ENTITY_TYPES or len(args) <= 6:
             continue
@@ -966,6 +1252,20 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
             body_representation_ids.add(entity_id)
         if has_axis:
             axis_representation_ids.add(entity_id)
+        product_transform = placement_transforms.get(entity_id) or _identity_transform()
+        extent_source, extent_points = _member_extent_from_representations(
+            product_shape_id=product_shape_id,
+            record_by_id=record_by_id,
+            product_transform=product_transform,
+        )
+        if extent_points:
+            member_extent_ids.add(entity_id)
+            if extent_source == "ifc_axis_polyline_world":
+                axis_polyline_extent_ids.add(entity_id)
+            elif extent_source in BODY_MEMBER_EXTENT_SOURCES:
+                body_extrusion_extent_ids.add(entity_id)
+            nodes[entity_id]["member_axis_world_points"] = extent_points
+            nodes[entity_id]["member_extent_source"] = extent_source
     representation_receipt = _representation_receipt(
         structural_entity_count=int(structural_entity_count),
         shape_product_count=len(shape_product_ids),
@@ -1134,6 +1434,14 @@ def parse_ifc_proxy_graph(path: Path) -> dict[str, Any]:
             "shape_product_structural_count": len(shape_product_ids),
             "body_representation_structural_count": len(body_representation_ids),
             "axis_representation_structural_count": len(axis_representation_ids),
+            "axis_polyline_extent_structural_count": len(axis_polyline_extent_ids),
+            "body_extrusion_extent_structural_count": len(body_extrusion_extent_ids),
+            "member_extent_structural_count": len(member_extent_ids),
+            "member_extent_coverage_ratio": (
+                round(len(member_extent_ids) / structural_entity_count, 4)
+                if structural_entity_count > 0
+                else 0.0
+            ),
             "shape_product_coverage_ratio": representation_receipt["shape_product_coverage_ratio"],
             "material_bound_structural_count": len(material_sources_by_id),
             "material_binding_coverage_ratio": material_section_receipt["material_binding_coverage_ratio"],

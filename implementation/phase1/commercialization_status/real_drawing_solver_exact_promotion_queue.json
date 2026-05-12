@@ -24,7 +24,7 @@
       "element_count": 661,
       "expected_solver_exact_delta": 1,
       "file_type": ".ifc",
-      "node_count": 1322,
+      "node_count": 1689,
       "open_evidence": [
         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
       ],
@@ -39,9 +39,9 @@
       "quality_tier": "proxy_preview_review",
       "recommended_action": "Keep this asset in proxy_preview_review until placement, shape, section/material, load, and solver graph receipts are attached.",
       "reconstruction_plan_status": "open",
-      "renderable_segment_count": 661,
+      "renderable_segment_count": 1052,
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 661,
+      "segment_count": 1052,
       "status": "ifc_proxy_graph_ready"
     },
     {
@@ -75,7 +75,6 @@
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-002",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",
@@ -159,7 +158,6 @@
       "promotion_family": "ifc_coordinate_geometry_reconstruction",
       "promotion_id": "RP-004",
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "quality_tier": "proxy_preview_review",

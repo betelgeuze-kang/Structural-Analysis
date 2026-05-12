@@ -28,6 +28,7 @@ def _asset(
     solver_exact: bool,
     segment_count: int,
     geometry_available: bool = True,
+    graph_source_kind: str = "",
     quality_flags: list[str] | None = None,
     route: str = "midas_mgt_direct_parser",
     status: str = "solver_graph_ready",
@@ -35,6 +36,7 @@ def _asset(
     return {
         "asset_ref": asset_ref,
         "file_type": ".mgt" if solver_exact else ".ifc",
+        "graph_source_kind": graph_source_kind,
         "geometry_available": geometry_available,
         "geometry_mode": "solver_topology_xyz" if solver_exact else "ifc_proxy_topology_3d_layout",
         "metrics": {
@@ -144,6 +146,50 @@ def test_quality_gate_treats_solver_exact_sparse_archive_as_compact_ready(tmp_pa
     assert report["summary"]["review_queue_asset_count"] == 0
     assert report["review_queue"] == []
     assert report["asset_quality_rows"][0]["quality_tier"] == "solver_exact_ready"
+
+
+def test_quality_gate_reports_ifc_solver_graph_draft_review_action(tmp_path: Path) -> None:
+    manifest_path = _write_json(
+        tmp_path / "manifest.json",
+        _manifest(
+            [
+                _asset("RD-001", solver_exact=True, segment_count=12),
+                _asset(
+                    "RD-IFC",
+                    solver_exact=False,
+                    segment_count=6,
+                    graph_source_kind="ifc_solver_graph_draft",
+                    quality_flags=["not_solver_exact"],
+                    route="ifc_to_structural_graph_adapter",
+                    status="ifc_solver_graph_draft_ready",
+                ),
+                _asset(
+                    "RD-IFC-MISSING-EXTENTS",
+                    solver_exact=False,
+                    segment_count=6,
+                    graph_source_kind="ifc_solver_graph_draft",
+                    quality_flags=["not_solver_exact", "ifc_solver_graph_draft_not_member_extents"],
+                    route="ifc_to_structural_graph_adapter",
+                    status="ifc_solver_graph_draft_ready",
+                ),
+            ],
+            route_counts={"midas_mgt_direct_parser": 1, "ifc_to_structural_graph_adapter": 2},
+            status_counts={"solver_graph_ready": 1, "ifc_solver_graph_draft_ready": 2},
+        ),
+    )
+
+    report = quality_gate.build_quality_gate(manifest_path)
+
+    assert report["contract_pass"] is True
+    assert report["reason_code"] == "PASS_WITH_REVIEW_QUEUE"
+    assert report["quality_flag_counts"] == {
+        "ifc_solver_graph_draft_not_member_extents": 1,
+        "not_solver_exact": 2,
+    }
+    assert report["asset_quality_rows"][1]["graph_source_kind"] == "ifc_solver_graph_draft"
+    actions = {item["asset_ref"]: item["recommended_action"] for item in report["review_queue"]}
+    assert actions["RD-IFC"] == "close IFC load/zero-load evidence and promote draft to solver-exact topology"
+    assert actions["RD-IFC-MISSING-EXTENTS"] == "recover member extents and close IFC load/zero-load evidence"
 
 
 def test_quality_gate_accepts_sampled_solver_exact_with_full_detail_lod_evidence(tmp_path: Path) -> None:

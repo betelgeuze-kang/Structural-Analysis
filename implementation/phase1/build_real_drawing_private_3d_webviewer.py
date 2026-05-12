@@ -171,8 +171,20 @@ def _is_ifc_solver_graph_draft(payload: dict[str, Any]) -> bool:
     model = payload.get("model") if isinstance(payload.get("model"), dict) else {}
     return (
         str(payload.get("schema_version") or "") == "real-drawing-ifc-solver-graph-draft.v1"
+        or str(model.get("geometry_scope") or "").startswith("ifc_axis_or_body_member_extents")
         or str(model.get("geometry_scope") or "") == "placement_origin_axis_marker_not_member_extents"
     )
+
+
+def _ifc_solver_graph_missing_member_extents(payload: dict[str, Any]) -> bool:
+    model = payload.get("model") if isinstance(payload.get("model"), dict) else {}
+    metrics = payload.get("metrics") if isinstance(payload.get("metrics"), dict) else {}
+    geometry_scope = str(model.get("geometry_scope") or "")
+    if geometry_scope == "placement_origin_axis_marker_not_member_extents":
+        return True
+    fallback_count = _safe_int(metrics.get("placement_marker_fallback_count"), 0)
+    member_extent_count = _safe_int(metrics.get("member_extent_element_count"), 0)
+    return fallback_count > 0 or member_extent_count <= 0
 
 
 def _extract_xyz_segments(payload: dict[str, Any], *, max_segments: int) -> tuple[list[dict[str, Any]], dict[str, int]]:
@@ -356,7 +368,7 @@ def _build_asset_payload(
         quality_flags.append("proxy_layout_not_true_geometry")
         if _safe_int(metrics.get("edge_count", 0)) <= 0 and segments:
             quality_flags.append("proxy_node_glyph_fallback")
-    if is_ifc_solver_graph_draft:
+    if is_ifc_solver_graph_draft and _ifc_solver_graph_missing_member_extents(payload):
         quality_flags.append("ifc_solver_graph_draft_not_member_extents")
     if raw_renderable_count > len(segments) and not lod_evidence_ready:
         quality_flags.append("sampled_dense_model")

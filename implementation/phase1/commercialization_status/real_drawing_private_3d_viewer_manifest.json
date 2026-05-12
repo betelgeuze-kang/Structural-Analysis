@@ -11,7 +11,7 @@
           "geometry_mode": "solver_topology_xyz",
           "graph_source_kind": "ifc_solver_graph_draft",
           "reason_code": "PASS_VIEWER_SIDECAR_REBUILT_WITH_IFC_SOLVER_GRAPH_DRAFT",
-          "segment_count": 661,
+          "segment_count": 1052,
           "solver_exact": false,
           "structure_viewer_preset": "real_drawing_private_3d",
           "viewer_sidecar": "src/structure-viewer/index.real_drawing_private.data.js"
@@ -23,8 +23,8 @@
       "graph_source_kind": "ifc_solver_graph_draft",
       "metrics": {
         "element_count": 661,
-        "node_count": 1322,
-        "renderable_segment_count": 661
+        "node_count": 1689,
+        "renderable_segment_count": 1052
       },
       "model_asset_count": 1,
       "quality_flags": [
@@ -32,7 +32,7 @@
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "segment_count": 661,
+      "segment_count": 1052,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
       "warning_label": "IFC draft"
@@ -64,14 +64,13 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 77,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "IFC draft"
+      "warning_label": ""
     },
     {
       "asset_ref": "RD-003",
@@ -136,14 +135,13 @@
       },
       "model_asset_count": 1,
       "quality_flags": [
-        "ifc_solver_graph_draft_not_member_extents",
         "not_solver_exact"
       ],
       "route": "ifc_to_structural_graph_adapter",
       "segment_count": 238,
       "solver_exact": false,
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "IFC draft"
+      "warning_label": ""
     },
     {
       "asset_ref": "RD-005",
