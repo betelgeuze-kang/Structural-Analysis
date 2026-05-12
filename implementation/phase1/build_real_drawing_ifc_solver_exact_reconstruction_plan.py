@@ -21,6 +21,7 @@ DEFAULT_OUT = Path(
 DEFAULT_OUT_MD = Path(
     "implementation/phase1/commercialization_status/real_drawing_ifc_solver_exact_reconstruction_plan.md"
 )
+IFC_LOAD_RECEIPT_ID = "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
 
 
 def _safe_int(value: Any, default: int = 0) -> int:
@@ -116,7 +117,7 @@ def _required_evidence(blocker_family: str) -> list[str]:
         "ifc_local_placement_coordinate_extraction_receipt",
         "ifc_representation_shape_axis_receipt",
         "ifc_material_section_binding_receipt",
-        "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt",
+        IFC_LOAD_RECEIPT_ID,
         "solver_graph_json_npz_receipt",
         "viewer_sidecar_rebuild_receipt",
     ]
@@ -146,6 +147,37 @@ def _evidence_receipts(report: dict[str, Any], graph: dict[str, Any], viewer_ass
                 if isinstance(value, dict):
                     receipts[str(key)] = value
     return receipts
+
+
+def _load_evidence_fields(receipts: dict[str, Any], viewer_asset: dict[str, Any]) -> dict[str, Any]:
+    receipt = receipts.get(IFC_LOAD_RECEIPT_ID)
+    if not isinstance(receipt, dict):
+        return {
+            "load_evidence_status": str(viewer_asset.get("load_evidence_status") or "ERR_IFC_LOAD_EVIDENCE_MISSING"),
+            "load_evidence_contract_pass": bool(viewer_asset.get("load_evidence_contract_pass", False)),
+            "load_case_group_count": _safe_int(viewer_asset.get("load_case_group_count", 0)),
+            "structural_load_count": _safe_int(viewer_asset.get("structural_load_count", 0)),
+            "structural_action_count": _safe_int(viewer_asset.get("structural_action_count", 0)),
+            "connected_structural_action_count": _safe_int(
+                viewer_asset.get("connected_structural_action_count", 0)
+            ),
+            "zero_load_signature_required": bool(viewer_asset.get("zero_load_signature_required", False)),
+            "engineer_zero_load_signature_attached": bool(
+                viewer_asset.get("engineer_zero_load_signature_attached", False)
+            ),
+            "zero_load_attestation_scope": str(viewer_asset.get("zero_load_attestation_scope") or ""),
+        }
+    return {
+        "load_evidence_status": str(receipt.get("reason_code") or ""),
+        "load_evidence_contract_pass": bool(receipt.get("contract_pass", False)),
+        "load_case_group_count": _safe_int(receipt.get("load_case_group_count", 0)),
+        "structural_load_count": _safe_int(receipt.get("structural_load_count", 0)),
+        "structural_action_count": _safe_int(receipt.get("structural_action_count", 0)),
+        "connected_structural_action_count": _safe_int(receipt.get("connected_structural_action_count", 0)),
+        "zero_load_signature_required": bool(receipt.get("zero_load_substitution_requires_engineer_signature", False)),
+        "engineer_zero_load_signature_attached": bool(receipt.get("engineer_zero_load_signature_attached", False)),
+        "zero_load_attestation_scope": str(receipt.get("zero_load_attestation_scope") or ""),
+    }
 
 
 def _attached_evidence(required_evidence: list[str], receipts: dict[str, Any]) -> list[str]:
@@ -208,6 +240,7 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
     receipts = _evidence_receipts(report, graph, viewer_asset)
     attached_evidence = _attached_evidence(required_evidence, receipts)
     open_evidence = [evidence_id for evidence_id in required_evidence if evidence_id not in set(attached_evidence)]
+    load_evidence_fields = _load_evidence_fields(receipts, viewer_asset)
     geometry_claim_status = str(viewer_asset.get("geometry_claim_status") or "")
     load_model_status = str(viewer_asset.get("load_model_status") or "")
     analysis_claim_ready = bool(viewer_asset.get("analysis_claim_ready", False))
@@ -232,6 +265,7 @@ def _plan_row(asset_ref: str, intake_row: dict[str, Any], viewer_asset: dict[str
         "load_model_status": load_model_status,
         "load_model_ready": bool(viewer_asset.get("load_model_ready", False)),
         "analysis_claim_ready": analysis_claim_ready,
+        **load_evidence_fields,
         "reconstruction_ready": False,
         "commercial_claim_blocked": True,
         "blocker_family": blocker_family,
@@ -311,7 +345,7 @@ def build_reconstruction_plan(
     load_case_receipt_count = sum(
         1
         for item in items
-        if "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt" in set(item.get("attached_evidence") or [])
+        if IFC_LOAD_RECEIPT_ID in set(item.get("attached_evidence") or [])
     )
     solver_graph_json_npz_receipt_count = sum(
         1
@@ -326,12 +360,12 @@ def build_reconstruction_plan(
     zero_load_signature_required_count = sum(
         1
         for item in items
-        if bool(
-            item.get("observed_evidence_receipts", {})
-            .get("ifc_load_case_extraction_or_engineer_signed_zero_load_receipt", {})
-            .get("zero_load_substitution_requires_engineer_signature", False)
-        )
+        if bool(item.get("zero_load_signature_required", False))
     )
+    zero_load_signature_attached_count = sum(
+        1 for item in items if bool(item.get("engineer_zero_load_signature_attached", False))
+    )
+    load_evidence_ready_count = sum(1 for item in items if bool(item.get("load_evidence_contract_pass", False)))
     return {
         "schema_version": "real-drawing-ifc-solver-exact-reconstruction-plan.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -357,7 +391,9 @@ def build_reconstruction_plan(
             "load_case_receipt_count": load_case_receipt_count,
             "solver_graph_json_npz_receipt_count": solver_graph_json_npz_receipt_count,
             "viewer_sidecar_rebuild_receipt_count": viewer_sidecar_rebuild_receipt_count,
+            "load_evidence_ready_count": load_evidence_ready_count,
             "zero_load_signature_required_count": zero_load_signature_required_count,
+            "zero_load_signature_attached_count": zero_load_signature_attached_count,
             "geometry_exact_ready_count": sum(1 for item in items if bool(item.get("geometry_exact_ready", False))),
             "ifc_geometry_exact_ready_count": sum(1 for item in items if bool(item.get("ifc_geometry_exact_ready", False))),
             "load_model_missing_count": sum(
@@ -390,7 +426,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Load-case receipts: {summary.get('load_case_receipt_count', 0)}",
         f"- Solver graph JSON/NPZ receipts: {summary.get('solver_graph_json_npz_receipt_count', 0)}",
         f"- Viewer sidecar rebuild receipts: {summary.get('viewer_sidecar_rebuild_receipt_count', 0)}",
+        f"- Load-evidence ready assets: {summary.get('load_evidence_ready_count', 0)}",
         f"- Zero-load signatures required: {summary.get('zero_load_signature_required_count', 0)}",
+        f"- Zero-load signatures attached: {summary.get('zero_load_signature_attached_count', 0)}",
         f"- IFC geometry-ready assets: {summary.get('ifc_geometry_exact_ready_count', 0)}",
         f"- Load-model missing assets: {summary.get('load_model_missing_count', 0)}",
         f"- Analysis-claim ready assets: {summary.get('analysis_claim_ready_count', 0)}",
@@ -403,8 +441,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         return "\n".join(lines)
     lines.extend(
         [
-            "| Asset | Blocker | Geometry | Load Model | Edges / Structural | Edge Coverage | Open Evidence |",
-            "| --- | --- | --- | --- | ---: | ---: | --- |",
+            "| Asset | Blocker | Geometry | Load Model | Load Evidence | Edges / Structural | Edge Coverage | Open Evidence |",
+            "| --- | --- | --- | --- | --- | ---: | ---: | --- |",
         ]
     )
     for item in items:
@@ -412,11 +450,12 @@ def render_markdown(report: dict[str, Any]) -> str:
         evidence_source = item.get("open_evidence") or item.get("required_evidence") or []
         evidence = ", ".join(str(value) for value in evidence_source[:3])
         lines.append(
-            "| {asset} | {reason} | {geometry} | {load} | {edges}/{structural} | {ratio} | {evidence} |".format(
+            "| {asset} | {reason} | {geometry} | {load} | {load_evidence} | {edges}/{structural} | {ratio} | {evidence} |".format(
                 asset=item.get("asset_ref", ""),
                 reason=item.get("blocker_reason_code", ""),
                 geometry=item.get("geometry_claim_status", ""),
                 load=item.get("load_model_status", ""),
+                load_evidence=item.get("load_evidence_status", ""),
                 edges=metrics.get("proxy_edge_count", 0),
                 structural=metrics.get("structural_entity_count", 0),
                 ratio=metrics.get("edge_coverage_ratio", 0),

@@ -56,10 +56,19 @@ def _asset(
         "geometry_exact_ready": solver_exact,
         "ifc_geometry_exact_ready": False,
         "geometry_claim_status": "solver_exact" if solver_exact else "",
-        "load_model_status": "solver_exact_source_model" if solver_exact else "",
-        "load_model_ready": solver_exact,
-        "analysis_claim_ready": solver_exact,
-    }
+            "load_model_status": "solver_exact_source_model" if solver_exact else "",
+            "load_model_ready": solver_exact,
+            "analysis_claim_ready": solver_exact,
+            "load_evidence_status": "",
+            "load_evidence_contract_pass": False,
+            "load_case_group_count": 0,
+            "structural_load_count": 0,
+            "structural_action_count": 0,
+            "connected_structural_action_count": 0,
+            "zero_load_signature_required": False,
+            "engineer_zero_load_signature_attached": False,
+            "zero_load_attestation_scope": "",
+        }
 
 
 def _manifest(assets: list[dict[str, object]], **overrides: object) -> dict[str, object]:
@@ -175,6 +184,15 @@ def test_quality_gate_reports_ifc_solver_graph_draft_review_action(tmp_path: Pat
             "load_model_status": "source_ifc_load_model_missing",
             "load_model_ready": False,
             "analysis_claim_ready": False,
+            "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+            "load_evidence_contract_pass": False,
+            "load_case_group_count": 0,
+            "structural_load_count": 0,
+            "structural_action_count": 0,
+            "connected_structural_action_count": 0,
+            "zero_load_signature_required": True,
+            "engineer_zero_load_signature_attached": False,
+            "zero_load_attestation_scope": "not_attested",
         }
     )
     manifest_path = _write_json(
@@ -225,9 +243,13 @@ def test_quality_gate_reports_ifc_solver_graph_draft_review_action(tmp_path: Pat
     assert report["summary"]["ifc_geometry_exact_asset_count"] == 1
     assert report["summary"]["load_model_missing_asset_count"] == 1
     assert report["summary"]["analysis_claim_ready_asset_count"] == 1
+    assert report["summary"]["load_evidence_ready_asset_count"] == 0
+    assert report["summary"]["zero_load_signature_required_asset_count"] == 1
+    assert report["summary"]["zero_load_signature_attached_asset_count"] == 0
     assert report["asset_quality_rows"][1]["graph_source_kind"] == "ifc_solver_graph_draft"
     assert report["asset_quality_rows"][2]["source_quality_flags"] == ["ifc_source_shape_missing_partial"]
     assert report["asset_quality_rows"][2]["quality_tier"] == "ifc_geometry_ready_load_review"
+    assert report["asset_quality_rows"][2]["zero_load_signature_required"] is True
     actions = {item["asset_ref"]: item["recommended_action"] for item in report["review_queue"]}
     assert actions["RD-IFC"] == "close IFC load/zero-load evidence and promote draft to solver-exact topology"
     assert actions["RD-IFC-SOURCE-NOTE"] == "attach IFC load-model evidence before analysis claim"

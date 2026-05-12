@@ -53,6 +53,10 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
                 "solver_exact": False,
                 "geometry_mode": "ifc_proxy_topology_3d_layout",
                 "quality_flags": ["proxy_layout_not_true_geometry", "not_solver_exact"],
+                "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+                "load_case_group_count": 0,
+                "structural_load_count": 0,
+                "zero_load_signature_required": True,
                 "warning_label": "proxy layout",
                 "segments": [
                     {"p0": [0, 0, 0], "p1": [0, 3, 2], "family": "contained_in_spatial_structure"},
@@ -97,6 +101,8 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
                 "priority_rank": 40,
                 "closure_evidence_required": ["proxy_layout_flag_removed"],
                 "blocker_reason_code": "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY",
+                "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+                "zero_load_signature_required": True,
                 "commercial_claim_blocked": True,
             }
         ],
@@ -112,12 +118,14 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
     assert payload["meta"]["real_drawing_asset_count"] == 2
     assert payload["meta"]["real_drawing_registry_summary"]["solver_exact_asset_count"] == 1
     assert payload["meta"]["real_drawing_registry_summary"]["quality_flag_counts"]["not_solver_exact"] == 1
+    assert payload["meta"]["real_drawing_registry_summary"]["zero_load_signature_required_asset_count"] == 1
     assert payload["meta"]["real_drawing_asset_registry"][0]["asset_ref"] == "RD-001"
     assert payload["meta"]["real_drawing_asset_registry"][0]["lod_evidence_status"] == (
         "PASS_FULL_DETAIL_LOD_EVIDENCE_ATTACHED"
     )
     assert payload["meta"]["real_drawing_asset_registry"][0]["full_detail_segment_count"] == 12
     assert payload["meta"]["real_drawing_asset_registry"][1]["warning_label"] == "proxy layout"
+    assert payload["meta"]["real_drawing_asset_registry"][1]["zero_load_signature_required"] is True
     assert (
         payload["meta"]["real_drawing_solver_exact_promotion_queue"]["summary"][
             "target_solver_exact_asset_count"
@@ -132,6 +140,9 @@ def test_real_drawing_structure_viewer_preset_contract_tiles_assets_as_groups() 
     assert payload["meta"]["real_drawing_solver_exact_promotion_queue"]["open_promotion_items"][0][
         "blocker_reason_code"
     ] == "ERR_IFC_PROXY_LAYOUT_NOT_TRUE_GEOMETRY"
+    assert payload["meta"]["real_drawing_solver_exact_promotion_queue"]["open_promotion_items"][0][
+        "zero_load_signature_required"
+    ] is True
     assert (
         payload["meta"]["real_drawing_solver_exact_promotion_queue"]["open_promotion_items"][0][
             "commercial_claim_blocked"

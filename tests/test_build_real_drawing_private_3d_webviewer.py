@@ -367,7 +367,18 @@ def test_private_3d_webviewer_treats_source_shape_missing_as_source_quality_note
                     "open_dependencies": [
                         "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt"
                     ],
-                }
+                },
+                "ifc_load_case_extraction_or_engineer_signed_zero_load_receipt": {
+                    "contract_pass": False,
+                    "reason_code": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+                    "load_case_group_count": 0,
+                    "structural_load_count": 0,
+                    "structural_action_count": 0,
+                    "connected_structural_action_count": 0,
+                    "zero_load_substitution_requires_engineer_signature": True,
+                    "engineer_zero_load_signature_attached": False,
+                    "zero_load_attestation_scope": "not_attested",
+                },
             },
         },
     )
@@ -399,6 +410,10 @@ def test_private_3d_webviewer_treats_source_shape_missing_as_source_quality_note
     assert asset["geometry_claim_status"] == "ifc_geometry_exact_ready"
     assert asset["load_model_status"] == "source_ifc_load_model_missing"
     assert asset["analysis_claim_ready"] is False
+    assert asset["load_evidence_status"] == "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED"
+    assert asset["load_evidence_contract_pass"] is False
+    assert asset["zero_load_signature_required"] is True
+    assert asset["engineer_zero_load_signature_attached"] is False
     assert asset["warning_label"] == "load missing"
     assert "not_solver_exact" in asset["quality_flags"]
 

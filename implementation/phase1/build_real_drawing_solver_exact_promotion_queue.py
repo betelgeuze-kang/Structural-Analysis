@@ -211,6 +211,15 @@ def _promotion_item(
         "load_model_status": str(row.get("load_model_status") or ""),
         "load_model_ready": bool(row.get("load_model_ready", False)),
         "analysis_claim_ready": bool(row.get("analysis_claim_ready", False)),
+        "load_evidence_status": str(row.get("load_evidence_status") or ""),
+        "load_evidence_contract_pass": bool(row.get("load_evidence_contract_pass", False)),
+        "load_case_group_count": _safe_int(row.get("load_case_group_count"), 0),
+        "structural_load_count": _safe_int(row.get("structural_load_count"), 0),
+        "structural_action_count": _safe_int(row.get("structural_action_count"), 0),
+        "connected_structural_action_count": _safe_int(row.get("connected_structural_action_count"), 0),
+        "zero_load_signature_required": bool(row.get("zero_load_signature_required", False)),
+        "engineer_zero_load_signature_attached": bool(row.get("engineer_zero_load_signature_attached", False)),
+        "zero_load_attestation_scope": str(row.get("zero_load_attestation_scope") or ""),
         "segment_count": _safe_int(row.get("segment_count"), 0),
         "renderable_segment_count": _safe_int(row.get("renderable_segment_count"), 0),
         "node_count": _safe_int(row.get("node_count"), 0),
@@ -265,6 +274,43 @@ def _promotion_item(
                 "load_model_status": str(plan_item.get("load_model_status") or item.get("load_model_status") or ""),
                 "analysis_claim_ready": bool(
                     plan_item.get("analysis_claim_ready", item.get("analysis_claim_ready", False))
+                ),
+                "load_evidence_status": str(
+                    plan_item.get("load_evidence_status") or item.get("load_evidence_status") or ""
+                ),
+                "load_evidence_contract_pass": bool(
+                    plan_item.get("load_evidence_contract_pass", item.get("load_evidence_contract_pass", False))
+                ),
+                "load_case_group_count": _safe_int(
+                    plan_item.get("load_case_group_count", item.get("load_case_group_count", 0)),
+                    0,
+                ),
+                "structural_load_count": _safe_int(
+                    plan_item.get("structural_load_count", item.get("structural_load_count", 0)),
+                    0,
+                ),
+                "structural_action_count": _safe_int(
+                    plan_item.get("structural_action_count", item.get("structural_action_count", 0)),
+                    0,
+                ),
+                "connected_structural_action_count": _safe_int(
+                    plan_item.get(
+                        "connected_structural_action_count",
+                        item.get("connected_structural_action_count", 0),
+                    ),
+                    0,
+                ),
+                "zero_load_signature_required": bool(
+                    plan_item.get("zero_load_signature_required", item.get("zero_load_signature_required", False))
+                ),
+                "engineer_zero_load_signature_attached": bool(
+                    plan_item.get(
+                        "engineer_zero_load_signature_attached",
+                        item.get("engineer_zero_load_signature_attached", False),
+                    )
+                ),
+                "zero_load_attestation_scope": str(
+                    plan_item.get("zero_load_attestation_scope") or item.get("zero_load_attestation_scope") or ""
                 ),
                 "edge_coverage_ratio": metrics.get("edge_coverage_ratio", 0),
                 "attached_evidence": attached_evidence,

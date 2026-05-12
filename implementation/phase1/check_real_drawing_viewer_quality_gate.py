@@ -183,6 +183,17 @@ def _asset_quality_rows(assets: list[dict[str, Any]], asset_blockers: dict[str, 
             "load_model_status": str(asset.get("load_model_status") or ""),
             "load_model_ready": bool(asset.get("load_model_ready", False)),
             "analysis_claim_ready": bool(asset.get("analysis_claim_ready", False)),
+            "load_evidence_status": str(asset.get("load_evidence_status") or ""),
+            "load_evidence_contract_pass": bool(asset.get("load_evidence_contract_pass", False)),
+            "load_case_group_count": _safe_int(asset.get("load_case_group_count", 0)),
+            "structural_load_count": _safe_int(asset.get("structural_load_count", 0)),
+            "structural_action_count": _safe_int(asset.get("structural_action_count", 0)),
+            "connected_structural_action_count": _safe_int(asset.get("connected_structural_action_count", 0)),
+            "zero_load_signature_required": bool(asset.get("zero_load_signature_required", False)),
+            "engineer_zero_load_signature_attached": bool(
+                asset.get("engineer_zero_load_signature_attached", False)
+            ),
+            "zero_load_attestation_scope": str(asset.get("zero_load_attestation_scope") or ""),
             "quality_tier": _asset_quality_tier(asset, has_hard_blocker=bool(asset_blockers.get(asset_ref))),
             "route": str(asset.get("route") or ""),
             "solver_exact": bool(asset.get("solver_exact", False)),
@@ -404,6 +415,11 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
         1 for row in rows if str(row.get("load_model_status") or "") == "source_ifc_load_model_missing"
     )
     analysis_claim_ready_count = sum(1 for row in rows if bool(row.get("analysis_claim_ready", False)))
+    load_evidence_ready_count = sum(1 for row in rows if bool(row.get("load_evidence_contract_pass", False)))
+    zero_load_signature_required_count = sum(1 for row in rows if bool(row.get("zero_load_signature_required", False)))
+    zero_load_signature_attached_count = sum(
+        1 for row in rows if bool(row.get("engineer_zero_load_signature_attached", False))
+    )
     contract_pass = not blockers
     commercial_viewer_ready = (
         contract_pass
@@ -459,6 +475,9 @@ def build_quality_gate(viewer_manifest_path: Path = DEFAULT_VIEWER_MANIFEST) -> 
             "ifc_geometry_exact_asset_count": ifc_geometry_exact_count,
             "load_model_missing_asset_count": load_model_missing_count,
             "analysis_claim_ready_asset_count": analysis_claim_ready_count,
+            "load_evidence_ready_asset_count": load_evidence_ready_count,
+            "zero_load_signature_required_asset_count": zero_load_signature_required_count,
+            "zero_load_signature_attached_asset_count": zero_load_signature_attached_count,
         },
         "hard_blockers": blockers,
         "review_queue": review_queue,
@@ -510,6 +529,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"| IFC geometry-exact assets | {summary.get('ifc_geometry_exact_asset_count', 0)} |",
         f"| Load-model missing assets | {summary.get('load_model_missing_asset_count', 0)} |",
         f"| Analysis-claim ready assets | {summary.get('analysis_claim_ready_asset_count', 0)} |",
+        f"| Load-evidence ready assets | {summary.get('load_evidence_ready_asset_count', 0)} |",
+        f"| Zero-load signature required assets | {summary.get('zero_load_signature_required_asset_count', 0)} |",
+        f"| Zero-load signature attached assets | {summary.get('zero_load_signature_attached_asset_count', 0)} |",
         f"| Proxy or preview assets | {summary.get('proxy_or_preview_asset_count', 0)} |",
         f"| Review queue assets | {summary.get('review_queue_asset_count', 0)} |",
         f"| Review items | {summary.get('review_item_count', 0)} |",

@@ -212,10 +212,75 @@ def _ifc_source_quality_flags(payload: dict[str, Any]) -> list[str]:
     return []
 
 
-def _solver_graph_receipt(payload: dict[str, Any]) -> dict[str, Any]:
+def _evidence_receipts(payload: dict[str, Any]) -> dict[str, Any]:
     receipts = payload.get("evidence_receipts") if isinstance(payload.get("evidence_receipts"), dict) else {}
+    return receipts
+
+
+def _with_related_ifc_evidence(payload: dict[str, Any], row: dict[str, Any], *, base_dir: Path) -> dict[str, Any]:
+    if str(row.get("file_type") or "").lower() != ".ifc":
+        return payload
+    merged_receipts: dict[str, Any] = {}
+    for key in ("ifc_adapter_report", "ifc_proxy_graph_json"):
+        related_path = _candidate_path(str(row.get(key) or ""), base_dir=base_dir)
+        if related_path is None or not related_path.exists():
+            continue
+        related_payload = _load_json(related_path)
+        for receipt_id, receipt in _evidence_receipts(related_payload).items():
+            if isinstance(receipt, dict):
+                merged_receipts[str(receipt_id)] = receipt
+    for receipt_id, receipt in _evidence_receipts(payload).items():
+        if isinstance(receipt, dict):
+            merged_receipts[str(receipt_id)] = receipt
+    if not merged_receipts:
+        return payload
+    return {**payload, "evidence_receipts": merged_receipts}
+
+
+def _solver_graph_receipt(payload: dict[str, Any]) -> dict[str, Any]:
+    receipts = _evidence_receipts(payload)
     receipt = receipts.get("solver_graph_json_npz_receipt")
     return receipt if isinstance(receipt, dict) else {}
+
+
+def _ifc_load_receipt(payload: dict[str, Any]) -> dict[str, Any]:
+    receipt = _evidence_receipts(payload).get(IFC_LOAD_RECEIPT_ID)
+    return receipt if isinstance(receipt, dict) else {}
+
+
+def _ifc_load_evidence_fields(payload: dict[str, Any]) -> dict[str, Any]:
+    receipt = _ifc_load_receipt(payload)
+    if not receipt:
+        return {
+            "load_evidence_status": "ERR_IFC_LOAD_EVIDENCE_MISSING",
+            "load_evidence_contract_pass": False,
+            "load_related_record_count": 0,
+            "load_group_count": 0,
+            "load_case_group_count": 0,
+            "structural_load_count": 0,
+            "structural_action_count": 0,
+            "connected_structural_action_count": 0,
+            "load_group_assignment_count": 0,
+            "zero_load_signature_required": False,
+            "engineer_zero_load_signature_attached": False,
+            "zero_load_attestation_scope": "missing_load_evidence_receipt",
+        }
+    return {
+        "load_evidence_status": str(receipt.get("reason_code") or ""),
+        "load_evidence_contract_pass": bool(receipt.get("contract_pass", False)),
+        "load_related_record_count": _safe_int(receipt.get("load_related_record_count", 0)),
+        "load_group_count": _safe_int(receipt.get("load_group_count", 0)),
+        "load_case_group_count": _safe_int(receipt.get("load_case_group_count", 0)),
+        "structural_load_count": _safe_int(receipt.get("structural_load_count", 0)),
+        "structural_action_count": _safe_int(receipt.get("structural_action_count", 0)),
+        "connected_structural_action_count": _safe_int(receipt.get("connected_structural_action_count", 0)),
+        "load_group_assignment_count": _safe_int(receipt.get("load_group_assignment_count", 0)),
+        "zero_load_signature_required": bool(
+            receipt.get("zero_load_substitution_requires_engineer_signature", False)
+        ),
+        "engineer_zero_load_signature_attached": bool(receipt.get("engineer_zero_load_signature_attached", False)),
+        "zero_load_attestation_scope": str(receipt.get("zero_load_attestation_scope") or ""),
+    }
 
 
 def _ifc_geometry_exact_ready(
@@ -413,6 +478,7 @@ def _build_asset_payload(
     asset_ref = f"RD-{index:03d}"
     graph_path = _candidate_path(_graph_reference(row), base_dir=base_dir)
     payload = _load_json(graph_path) if graph_path else {}
+    payload = _with_related_ifc_evidence(payload, row, base_dir=base_dir)
     is_proxy_graph = bool(isinstance(payload.get("nodes"), list) and isinstance(payload.get("edges"), list) and not payload.get("model"))
     is_ifc_solver_graph_draft = _is_ifc_solver_graph_draft(payload)
     if is_proxy_graph:
@@ -458,6 +524,7 @@ def _build_asset_payload(
         if ifc_geometry_exact_ready and load_model_status == "source_ifc_load_model_missing"
         else []
     )
+    load_evidence_fields = _ifc_load_evidence_fields(payload) if is_ifc_solver_graph_draft else {}
     source_quality_flags = _ifc_source_quality_flags(payload) if is_ifc_solver_graph_draft else []
     lod_evidence = (
         _compact_lod_evidence(
@@ -510,6 +577,7 @@ def _build_asset_payload(
         "load_model_status": load_model_status,
         "load_model_ready": load_model_ready,
         "analysis_claim_ready": analysis_claim_ready,
+        **load_evidence_fields,
         "segment_count": len(segments),
         "metrics": metrics,
         "quality_flags": quality_flags,

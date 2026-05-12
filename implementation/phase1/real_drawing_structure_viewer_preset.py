@@ -67,12 +67,22 @@ def quality_notice(asset: dict[str, Any]) -> str:
         return "IFC solver graph draft; member extents and loads are still review items."
     if geometry_claim_status == "ifc_geometry_exact_ready" and load_model_status == "source_ifc_load_model_missing":
         missing_count = _safe_int(metrics.get("placement_marker_fallback_source_shape_missing_count", 0))
+        load_case_count = _safe_int(asset.get("load_case_group_count", 0))
+        structural_load_count = _safe_int(asset.get("structural_load_count", 0))
+        zero_load_note = (
+            " Zero-load engineer signature is required."
+            if bool(asset.get("zero_load_signature_required", False))
+            else ""
+        )
         source_note = (
             f" {missing_count} source products lack shape definitions."
             if "ifc_source_shape_missing_partial" in source_flags and missing_count > 0
             else ""
         )
-        return f"IFC geometry is ready; source IFC load model is missing, so analysis claim is blocked.{source_note}"
+        return (
+            "IFC geometry is ready; source IFC load model is missing, so analysis claim is blocked. "
+            f"Loads={structural_load_count}, load cases={load_case_count}.{zero_load_note}{source_note}"
+        )
     if "ifc_source_shape_missing_partial" in source_flags:
         missing_count = _safe_int(metrics.get("placement_marker_fallback_source_shape_missing_count", 0))
         return (
@@ -142,6 +152,15 @@ def asset_registry_row(asset: dict[str, Any]) -> dict[str, Any]:
         "load_model_status": str(asset.get("load_model_status") or ""),
         "load_model_ready": bool(asset.get("load_model_ready", False)),
         "analysis_claim_ready": bool(asset.get("analysis_claim_ready", False)),
+        "load_evidence_status": str(asset.get("load_evidence_status") or ""),
+        "load_evidence_contract_pass": bool(asset.get("load_evidence_contract_pass", False)),
+        "load_case_group_count": _safe_int(asset.get("load_case_group_count", 0)),
+        "structural_load_count": _safe_int(asset.get("structural_load_count", 0)),
+        "structural_action_count": _safe_int(asset.get("structural_action_count", 0)),
+        "connected_structural_action_count": _safe_int(asset.get("connected_structural_action_count", 0)),
+        "zero_load_signature_required": bool(asset.get("zero_load_signature_required", False)),
+        "engineer_zero_load_signature_attached": bool(asset.get("engineer_zero_load_signature_attached", False)),
+        "zero_load_attestation_scope": str(asset.get("zero_load_attestation_scope") or ""),
         "segment_count": _safe_int(asset.get("segment_count", 0)),
         "model_asset_count": _safe_int(asset.get("model_asset_count", 0)),
         "warning_label": str(asset.get("warning_label") or ""),
@@ -185,6 +204,15 @@ def registry_summary(registry: dict[str, Any], asset_rows: list[dict[str, Any]])
             1 for row in asset_rows if str(row.get("load_model_status") or "") == "source_ifc_load_model_missing"
         ),
         "analysis_claim_ready_asset_count": sum(1 for row in asset_rows if bool(row.get("analysis_claim_ready", False))),
+        "load_evidence_ready_asset_count": sum(
+            1 for row in asset_rows if bool(row.get("load_evidence_contract_pass", False))
+        ),
+        "zero_load_signature_required_asset_count": sum(
+            1 for row in asset_rows if bool(row.get("zero_load_signature_required", False))
+        ),
+        "zero_load_signature_attached_asset_count": sum(
+            1 for row in asset_rows if bool(row.get("engineer_zero_load_signature_attached", False))
+        ),
     }
 
 
@@ -228,6 +256,15 @@ def _compact_promotion_queue_item(item: dict[str, Any]) -> dict[str, Any]:
         "load_model_status": str(item.get("load_model_status") or ""),
         "load_model_ready": bool(item.get("load_model_ready", False)),
         "analysis_claim_ready": bool(item.get("analysis_claim_ready", False)),
+        "load_evidence_status": str(item.get("load_evidence_status") or ""),
+        "load_evidence_contract_pass": bool(item.get("load_evidence_contract_pass", False)),
+        "load_case_group_count": _safe_int(item.get("load_case_group_count", 0)),
+        "structural_load_count": _safe_int(item.get("structural_load_count", 0)),
+        "structural_action_count": _safe_int(item.get("structural_action_count", 0)),
+        "connected_structural_action_count": _safe_int(item.get("connected_structural_action_count", 0)),
+        "zero_load_signature_required": bool(item.get("zero_load_signature_required", False)),
+        "engineer_zero_load_signature_attached": bool(item.get("engineer_zero_load_signature_attached", False)),
+        "zero_load_attestation_scope": str(item.get("zero_load_attestation_scope") or ""),
         "attached_evidence": _compact_text_list(item.get("attached_evidence")),
         "open_evidence": _compact_text_list(item.get("open_evidence")),
         "closure_evidence_required": _compact_text_list(item.get("closure_evidence_required")),

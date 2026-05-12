@@ -3344,7 +3344,7 @@ async function buildModel(data,sourceMeta=null){
 const VIEWER_STATS_PANEL_KEYS=[
   'maxDcr','avgDcr','ngCount','stories','model','source','members','groups','sections',
   'realDrawingAssets','realDrawingSolverExact','realDrawingGeometryReady','realDrawingProxyPreview',
-  'realDrawingReviewQueue','realDrawingFullSolverExact','realDrawingPromotionTarget',
+  'realDrawingReviewQueue','realDrawingZeroLoadRequired','realDrawingFullSolverExact','realDrawingPromotionTarget',
   'realDrawingPromotionUnlockBatch',
   'buildPath','surfaceLod','picking','pickMeshTriangles','pickMeshLocal','pickDeformedTriangles',
   'pickDeformedLocal','pickSurfaceFacets','pickFullBvh','pickNonSurfaceBvh','pickDenseBuckets',
@@ -3377,6 +3377,17 @@ function getRealDrawingClaimQualityFlags(row){
   return Array.isArray(row?.claim_quality_flags)
     ?row.claim_quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean)
     :[];
+}
+function getRealDrawingLoadEvidenceLabel(row){
+  const status=normalizeSelectionValue(row?.load_evidence_status);
+  const loads=safeNumber(row?.structural_load_count,0);
+  const loadCases=safeNumber(row?.load_case_group_count,0);
+  const zeroLoadRequired=Boolean(row?.zero_load_signature_required);
+  if(!status&&!loads&&!loadCases&&!zeroLoadRequired)return'';
+  if(zeroLoadRequired&&!loads&&!loadCases)return'zero-load signature required';
+  const parts=[`loads ${loads}`,`cases ${loadCases}`];
+  if(zeroLoadRequired)parts.push('zero-load signature required');
+  return `${status||'load evidence'} · ${parts.join(' · ')}`;
 }
 function getRealDrawingQualityTier(row){
   const flags=new Set(getRealDrawingQualityFlags(row));
@@ -3447,6 +3458,7 @@ function buildRealDrawingQualitySummary(data=modelData){
   const sparseAssets=assets.filter(row=>getRealDrawingQualityTier(row)==='sparse_preview');
   const geometryReadyAssets=assets.filter(row=>getRealDrawingQualityTier(row)==='ifc_geometry_ready');
   const proxyAssets=assets.filter(row=>getRealDrawingQualityTier(row)==='proxy_preview');
+  const zeroLoadSignatureRequiredAssets=assets.filter(row=>Boolean(row?.zero_load_signature_required));
   const fullSolverExactReady=assets.length>0&&exactAssets.length===assets.length&&reviewAssets.length===0&&blockedAssets.length===0;
   return{
     assets,
@@ -3457,11 +3469,13 @@ function buildRealDrawingQualitySummary(data=modelData){
     sparseAssets,
     geometryReadyAssets,
     proxyAssets,
+    zeroLoadSignatureRequiredAssets,
     assetCount:assets.length,
     reviewQueueCount:reviewAssets.length,
     exactCount:exactAssets.length,
     geometryReadyCount:geometryReadyAssets.length,
     proxyCount:proxyAssets.length,
+    zeroLoadSignatureRequiredCount:zeroLoadSignatureRequiredAssets.length,
     sparseCount:sparseAssets.length,
     sampledCount:sampledAssets.length,
     blockedCount:blockedAssets.length,
@@ -3551,6 +3565,7 @@ function buildViewerStatsSummary(data){
     realDrawingGeometryReadyCount:realDrawingQualitySummary.geometryReadyCount,
     realDrawingProxyPreviewCount,
     realDrawingReviewQueueCount:realDrawingQualitySummary.reviewQueueCount,
+    realDrawingZeroLoadRequiredCount:realDrawingQualitySummary.zeroLoadSignatureRequiredCount,
     realDrawingFullSolverExactReady:realDrawingQualitySummary.fullSolverExactReady,
     realDrawingGateLabel:realDrawingQualitySummary.gateLabel,
     realDrawingAssetCountLabel:realDrawingAssetCount?String(realDrawingAssetCount):'--',
@@ -3558,6 +3573,7 @@ function buildViewerStatsSummary(data){
     realDrawingGeometryReadyLabel:realDrawingAssetCount?String(realDrawingQualitySummary.geometryReadyCount):'--',
     realDrawingProxyPreviewLabel:realDrawingAssetCount?String(realDrawingProxyPreviewCount):'--',
     realDrawingReviewQueueLabel:realDrawingAssetCount?String(realDrawingQualitySummary.reviewQueueCount):'--',
+    realDrawingZeroLoadRequiredLabel:realDrawingAssetCount?String(realDrawingQualitySummary.zeroLoadSignatureRequiredCount):'--',
     realDrawingFullSolverExactLabel:realDrawingAssetCount?(realDrawingQualitySummary.fullSolverExactReady?'true':'false'):'--',
     realDrawingPromotionTargetCount:realDrawingPromotionTarget,
     realDrawingPromotionAfterBatchCount:realDrawingPromotionAfterBatch,
@@ -3615,6 +3631,11 @@ function buildViewerStatEntries(summary){
       label:'Drawing Review Queue',
       value:summary.realDrawingReviewQueueLabel,
       statsTone:summary.realDrawingReviewQueueCount>0?'accent':'success'
+    },
+    realDrawingZeroLoadRequired:{
+      label:'Zero-Load Signatures',
+      value:summary.realDrawingZeroLoadRequiredLabel,
+      statsTone:summary.realDrawingZeroLoadRequiredCount>0?'accent':'success'
     },
     realDrawingFullSolverExact:{
       label:'Full Solver-Exact Ready',
@@ -3797,7 +3818,9 @@ function renderRealDrawingQualityPanel(data=modelData){
     });
   const ifcOpenPromotionItems=allOpenPromotionItems
     .filter(row=>normalizeSelectionValue(row.promotion_family).startsWith('ifc_'));
-  const openPromotionItems=(ifcOpenPromotionItems.length?ifcOpenPromotionItems:allOpenPromotionItems).slice(0,8);
+  const ifcLoadPromotionItems=ifcOpenPromotionItems
+    .filter(row=>normalizeSelectionValue(row.promotion_family)==='ifc_load_model_evidence_closure');
+  const openPromotionItems=(ifcLoadPromotionItems.length?ifcLoadPromotionItems:ifcOpenPromotionItems.length?ifcOpenPromotionItems:allOpenPromotionItems).slice(0,8);
   const promotionTarget=safeNumber(promotionSummary.target_solver_exact_asset_count,0);
   const promotionAfterBatch=safeNumber(promotionSummary.planned_solver_exact_asset_count_after_unlock_batch,0);
   const promotionCurrent=safeNumber(promotionSummary.current_solver_exact_asset_count,quality.exactCount);
@@ -3814,6 +3837,7 @@ function renderRealDrawingQualityPanel(data=modelData){
       const flags=getRealDrawingQualityFlags(row);
       const claimFlags=getRealDrawingClaimQualityFlags(row).map(flag=>`claim:${flag}`);
       const sourceFlags=getRealDrawingSourceQualityFlags(row).map(flag=>`source:${flag}`);
+      const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
       const notice=normalizeSelectionValue(row.quality_notice)||normalizeSelectionValue(row.geometry_mode)||normalizeSelectionValue(row.status);
       return `
         <button type="button" class="real-drawing-review-item" data-real-drawing-review-asset="${escapeHtml(assetRef)}">
@@ -3821,7 +3845,7 @@ function renderRealDrawingQualityPanel(data=modelData){
           <span class="real-drawing-review-item__body">
             <strong>${escapeHtml(assetRef)}</strong>
             <span>${escapeHtml(getRealDrawingReviewAction(row))}</span>
-            <small>${escapeHtml([...flags,...claimFlags,...sourceFlags].join(', ')||notice||'solver-exact')}</small>
+            <small>${escapeHtml([...flags,...claimFlags,...sourceFlags,loadEvidence].filter(Boolean).join(', ')||notice||'solver-exact')}</small>
           </span>
           <span class="real-drawing-review-item__segments">${escapeHtml(getRealDrawingSegmentLabel(row))}</span>
         </button>`;
@@ -3842,13 +3866,15 @@ function renderRealDrawingQualityPanel(data=modelData){
           const action=normalizeSelectionValue(row.recommended_action)||family;
           const delta=safeNumber(row.expected_solver_exact_delta,1);
           const flags=Array.isArray(row.quality_flags)?row.quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean):[];
+          const claimFlags=Array.isArray(row.claim_quality_flags)?row.claim_quality_flags.map(flag=>`claim:${normalizeSelectionValue(flag)}`).filter(Boolean):[];
+          const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
           return `
             <button type="button" class="real-drawing-review-item real-drawing-promotion-item" data-real-drawing-promotion-asset="${escapeHtml(assetRef)}">
               <span class="quality-badge quality-badge--review">${escapeHtml(normalizeSelectionValue(row.promotion_id)||'unlock')}</span>
               <span class="real-drawing-review-item__body">
                 <strong>${escapeHtml(assetRef)} · ${escapeHtml(family)}</strong>
                 <span>${escapeHtml(action)}</span>
-                <small>${escapeHtml(flags.join(', ')||normalizeSelectionValue(row.status)||'pending')}</small>
+                <small>${escapeHtml([...flags,...claimFlags,loadEvidence].filter(Boolean).join(', ')||normalizeSelectionValue(row.status)||'pending')}</small>
               </span>
               <span class="real-drawing-review-item__segments">+${escapeHtml(String(delta))}</span>
             </button>`;
@@ -3856,7 +3882,9 @@ function renderRealDrawingQualityPanel(data=modelData){
       </div>
     </section>`
   }else if(promotionTarget&&promotionRequiredDelta===0){
-    const nextQueueTitle=ifcOpenPromotionItems.length
+    const nextQueueTitle=ifcLoadPromotionItems.length
+      ?'IFC Load Evidence Queue'
+      :ifcOpenPromotionItems.length
       ?'IFC Reconstruction Queue'
       :'Next Quality Closure';
     const nextQueueList=openPromotionItems.length
@@ -3868,13 +3896,15 @@ function renderRealDrawingQualityPanel(data=modelData){
           const blocker=normalizeSelectionValue(row.blocker_reason_code);
           const effort=normalizeSelectionValue(row.effort_label)||'review';
           const flags=Array.isArray(row.quality_flags)?row.quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean):[];
+          const claimFlags=Array.isArray(row.claim_quality_flags)?row.claim_quality_flags.map(flag=>`claim:${normalizeSelectionValue(flag)}`).filter(Boolean):[];
+          const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
           return `
             <button type="button" class="real-drawing-review-item real-drawing-promotion-item" data-real-drawing-promotion-asset="${escapeHtml(assetRef)}">
               <span class="quality-badge quality-badge--review">${escapeHtml(normalizeSelectionValue(row.promotion_id)||'open')}</span>
               <span class="real-drawing-review-item__body">
                 <strong>${escapeHtml(assetRef)} · ${escapeHtml(family)}</strong>
                 <span>${escapeHtml(action)}</span>
-                <small>${escapeHtml(blocker||flags.join(', ')||normalizeSelectionValue(row.status)||'pending')}</small>
+                <small>${escapeHtml(loadEvidence||blocker||[...flags,...claimFlags].filter(Boolean).join(', ')||normalizeSelectionValue(row.status)||'pending')}</small>
               </span>
               <span class="real-drawing-review-item__segments">${escapeHtml(effort)}</span>
             </button>`;
@@ -4019,6 +4049,7 @@ function buildUI(data){
       const flags=Array.isArray(row.quality_flags)?row.quality_flags.filter(Boolean):[];
       const claimFlags=getRealDrawingClaimQualityFlags(row).map(flag=>`claim:${flag}`);
       const sourceFlags=getRealDrawingSourceQualityFlags(row).map(flag=>`source:${flag}`);
+      const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
       const warning=normalizeSelectionValue(row.warning_label);
       const label=`${assetRef} · ${warning||normalizeSelectionValue(row.geometry_mode)||status}`;
       appendTreeItem(
@@ -4032,7 +4063,8 @@ function buildUI(data){
       const badgeNode=last?.querySelector?.('.badge');
       if(badgeNode instanceof HTMLElement){
         badgeNode.classList.add(`badge-real-drawing-${badgeInfo.tone}`);
-        badgeNode.title=`${status}${flags.length||claimFlags.length||sourceFlags.length?` | ${[...flags,...claimFlags,...sourceFlags].join(', ')}`:''}`;
+        const tooltipFlags=[...flags,...claimFlags,...sourceFlags,loadEvidence].filter(Boolean);
+        badgeNode.title=`${status}${tooltipFlags.length?` | ${tooltipFlags.join(', ')}`:''}`;
       }
     });
   }

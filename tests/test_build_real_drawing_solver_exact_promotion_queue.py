@@ -226,6 +226,15 @@ def test_promotion_queue_classifies_ifc_geometry_ready_load_gap(tmp_path: Path) 
                     "load_model_status": "source_ifc_load_model_missing",
                     "load_model_ready": False,
                     "analysis_claim_ready": False,
+                    "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+                    "load_evidence_contract_pass": False,
+                    "load_case_group_count": 0,
+                    "structural_load_count": 0,
+                    "structural_action_count": 0,
+                    "connected_structural_action_count": 0,
+                    "zero_load_signature_required": True,
+                    "engineer_zero_load_signature_attached": False,
+                    "zero_load_attestation_scope": "not_attested",
                     "segment_count": 90,
                     "renderable_segment_count": 90,
                     "node_count": 100,
@@ -253,6 +262,8 @@ def test_promotion_queue_classifies_ifc_geometry_ready_load_gap(tmp_path: Path) 
         "viewer_sidecar_rebuild_receipt",
     ]
     assert ifc_item["claim_quality_flags"] == ["ifc_load_model_missing"]
+    assert ifc_item["load_evidence_status"] == "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED"
+    assert ifc_item["zero_load_signature_required"] is True
 
 
 def test_promotion_queue_blocks_when_quality_gate_is_missing(tmp_path: Path) -> None:

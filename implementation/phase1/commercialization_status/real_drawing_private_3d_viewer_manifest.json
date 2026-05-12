@@ -7,6 +7,8 @@
       "claim_quality_flags": [
         "ifc_load_model_missing"
       ],
+      "connected_structural_action_count": 0,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
           "analysis_claim_ready": false,
@@ -31,8 +33,14 @@
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+      "load_group_assignment_count": 0,
+      "load_group_count": 0,
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
+      "load_related_record_count": 0,
       "metrics": {
         "axis_marker_length": 1.443738,
         "axis_polyline_element_count": 420,
@@ -62,7 +70,11 @@
         "ifc_source_shape_missing_partial"
       ],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "load missing"
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "warning_label": "load missing",
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "analysis_claim_ready": false,
@@ -70,6 +82,8 @@
       "claim_quality_flags": [
         "ifc_load_model_missing"
       ],
+      "connected_structural_action_count": 0,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
           "analysis_claim_ready": false,
@@ -94,8 +108,14 @@
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+      "load_group_assignment_count": 0,
+      "load_group_count": 0,
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
+      "load_related_record_count": 0,
       "metrics": {
         "axis_marker_length": 6.0,
         "axis_polyline_element_count": 45,
@@ -121,7 +141,11 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "load missing"
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "warning_label": "load missing",
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "analysis_claim_ready": false,
@@ -129,6 +153,8 @@
       "claim_quality_flags": [
         "ifc_load_model_missing"
       ],
+      "connected_structural_action_count": 0,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
           "analysis_claim_ready": false,
@@ -153,8 +179,14 @@
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+      "load_group_assignment_count": 0,
+      "load_group_count": 0,
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
+      "load_related_record_count": 0,
       "metrics": {
         "axis_marker_length": 6.0,
         "axis_polyline_element_count": 890,
@@ -180,7 +212,11 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "load missing"
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "warning_label": "load missing",
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "analysis_claim_ready": false,
@@ -188,6 +224,8 @@
       "claim_quality_flags": [
         "ifc_load_model_missing"
       ],
+      "connected_structural_action_count": 0,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
           "analysis_claim_ready": false,
@@ -212,8 +250,14 @@
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+      "load_group_assignment_count": 0,
+      "load_group_count": 0,
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
+      "load_related_record_count": 0,
       "metrics": {
         "axis_marker_length": 6.0,
         "axis_polyline_element_count": 156,
@@ -239,7 +283,11 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "load missing"
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "warning_label": "load missing",
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "analysis_claim_ready": false,
@@ -247,6 +295,8 @@
       "claim_quality_flags": [
         "ifc_load_model_missing"
       ],
+      "connected_structural_action_count": 0,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
           "analysis_claim_ready": false,
@@ -271,8 +321,14 @@
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+      "load_group_assignment_count": 0,
+      "load_group_count": 0,
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
+      "load_related_record_count": 0,
       "lod_evidence": {
         "closure_evidence": [
           "source_solver_graph_json_receipt",
@@ -311,7 +367,11 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "load missing"
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "warning_label": "load missing",
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "analysis_claim_ready": false,
@@ -319,6 +379,8 @@
       "claim_quality_flags": [
         "ifc_load_model_missing"
       ],
+      "connected_structural_action_count": 0,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
           "analysis_claim_ready": false,
@@ -343,8 +405,14 @@
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+      "load_group_assignment_count": 0,
+      "load_group_count": 0,
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
+      "load_related_record_count": 0,
       "metrics": {
         "axis_marker_length": 6.0,
         "axis_polyline_element_count": 704,
@@ -370,7 +438,11 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "load missing"
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "warning_label": "load missing",
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "analysis_claim_ready": false,
@@ -378,6 +450,8 @@
       "claim_quality_flags": [
         "ifc_load_model_missing"
       ],
+      "connected_structural_action_count": 0,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "viewer_sidecar_rebuild_receipt": {
           "analysis_claim_ready": false,
@@ -402,8 +476,14 @@
       "geometry_mode": "solver_topology_xyz",
       "graph_source_kind": "ifc_solver_graph_draft",
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
+      "load_group_assignment_count": 0,
+      "load_group_count": 0,
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
+      "load_related_record_count": 0,
       "metrics": {
         "axis_marker_length": 6.0,
         "axis_polyline_element_count": 124,
@@ -429,7 +509,11 @@
       "solver_exact": false,
       "source_quality_flags": [],
       "status": "ifc_proxy_graph_ready",
-      "warning_label": "load missing"
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "warning_label": "load missing",
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "analysis_claim_ready": true,

@@ -1,6 +1,6 @@
 {
   "contract_pass": true,
-  "generated_at": "2026-05-12T13:38:26.716033+00:00",
+  "generated_at": "2026-05-12T14:01:44.273534+00:00",
   "ifc_reconstruction_items": [
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/ds3_taltech_v4_ifc.report.json",
@@ -20,7 +20,9 @@
       ],
       "commercial_claim_blocked": true,
       "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
+      "connected_structural_action_count": 0,
       "current_solver_exact": false,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
           "contract_pass": true,
@@ -179,6 +181,9 @@
       "geometry_claim_status": "ifc_geometry_exact_ready",
       "geometry_exact_ready": true,
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
@@ -386,7 +391,11 @@
         "viewer_sidecar_rebuild_receipt"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "status": "ifc_proxy_graph_ready"
+      "status": "ifc_proxy_graph_ready",
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a1_ifc.report.json",
@@ -406,7 +415,9 @@
       ],
       "commercial_claim_blocked": true,
       "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
+      "connected_structural_action_count": 0,
       "current_solver_exact": false,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
           "contract_pass": true,
@@ -545,6 +556,9 @@
       "geometry_claim_status": "ifc_geometry_exact_ready",
       "geometry_exact_ready": true,
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
@@ -731,7 +745,11 @@
         "viewer_sidecar_rebuild_receipt"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "status": "ifc_proxy_graph_ready"
+      "status": "ifc_proxy_graph_ready",
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a3_ifc.report.json",
@@ -751,7 +769,9 @@
       ],
       "commercial_claim_blocked": true,
       "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
+      "connected_structural_action_count": 0,
       "current_solver_exact": false,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
           "contract_pass": true,
@@ -895,6 +915,9 @@
       "geometry_claim_status": "ifc_geometry_exact_ready",
       "geometry_exact_ready": true,
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
@@ -1086,7 +1109,11 @@
         "viewer_sidecar_rebuild_receipt"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "status": "ifc_proxy_graph_ready"
+      "status": "ifc_proxy_graph_ready",
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a4_ifc.report.json",
@@ -1106,7 +1133,9 @@
       ],
       "commercial_claim_blocked": true,
       "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
+      "connected_structural_action_count": 0,
       "current_solver_exact": false,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
           "contract_pass": true,
@@ -1245,6 +1274,9 @@
       "geometry_claim_status": "ifc_geometry_exact_ready",
       "geometry_exact_ready": true,
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
@@ -1431,7 +1463,11 @@
         "viewer_sidecar_rebuild_receipt"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "status": "ifc_proxy_graph_ready"
+      "status": "ifc_proxy_graph_ready",
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a5_ifc.report.json",
@@ -1451,7 +1487,9 @@
       ],
       "commercial_claim_blocked": true,
       "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
+      "connected_structural_action_count": 0,
       "current_solver_exact": false,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
           "contract_pass": true,
@@ -1593,6 +1631,9 @@
       "geometry_claim_status": "ifc_geometry_exact_ready",
       "geometry_exact_ready": true,
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
@@ -1782,7 +1823,11 @@
         "viewer_sidecar_rebuild_receipt"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "status": "ifc_proxy_graph_ready"
+      "status": "ifc_proxy_graph_ready",
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a7_ifc.report.json",
@@ -1802,7 +1847,9 @@
       ],
       "commercial_claim_blocked": true,
       "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
+      "connected_structural_action_count": 0,
       "current_solver_exact": false,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
           "contract_pass": true,
@@ -1947,6 +1994,9 @@
       "geometry_claim_status": "ifc_geometry_exact_ready",
       "geometry_exact_ready": true,
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
@@ -2139,7 +2189,11 @@
         "viewer_sidecar_rebuild_receipt"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "status": "ifc_proxy_graph_ready"
+      "status": "ifc_proxy_graph_ready",
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     },
     {
       "adapter_report": "tmp/real_drawing_private_corpus/ifc_adapter/a8_ifc.report.json",
@@ -2159,7 +2213,9 @@
       ],
       "commercial_claim_blocked": true,
       "commercialization_recommendation": "Attach IFC load-model evidence before making an analysis claim; geometry is already separated as ready.",
+      "connected_structural_action_count": 0,
       "current_solver_exact": false,
+      "engineer_zero_load_signature_attached": false,
       "evidence_receipts": {
         "ifc_local_placement_coordinate_extraction_receipt": {
           "contract_pass": true,
@@ -2297,6 +2353,9 @@
       "geometry_claim_status": "ifc_geometry_exact_ready",
       "geometry_exact_ready": true,
       "ifc_geometry_exact_ready": true,
+      "load_case_group_count": 0,
+      "load_evidence_contract_pass": false,
+      "load_evidence_status": "ERR_IFC_LOAD_CASES_MISSING_ENGINEER_ZERO_LOAD_SIGNATURE_REQUIRED",
       "load_model_ready": false,
       "load_model_status": "source_ifc_load_model_missing",
       "metrics": {
@@ -2482,7 +2541,11 @@
         "viewer_sidecar_rebuild_receipt"
       ],
       "route": "ifc_to_structural_graph_adapter",
-      "status": "ifc_proxy_graph_ready"
+      "status": "ifc_proxy_graph_ready",
+      "structural_action_count": 0,
+      "structural_load_count": 0,
+      "zero_load_attestation_scope": "not_attested",
+      "zero_load_signature_required": true
     }
   ],
   "reason_code": "PASS_IFC_RECONSTRUCTION_PLAN_OPEN",
@@ -2503,6 +2566,7 @@
     "ifc_asset_count": 7,
     "ifc_geometry_exact_ready_count": 7,
     "load_case_receipt_count": 0,
+    "load_evidence_ready_count": 0,
     "load_model_missing_count": 7,
     "local_placement_receipt_count": 7,
     "material_section_receipt_count": 7,
@@ -2515,6 +2579,7 @@
     "solver_graph_json_npz_receipt_count": 7,
     "structural_entity_count_total": 10590,
     "viewer_sidecar_rebuild_receipt_count": 7,
+    "zero_load_signature_attached_count": 0,
     "zero_load_signature_required_count": 7
   }
 }

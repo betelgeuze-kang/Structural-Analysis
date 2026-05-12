@@ -17,6 +17,9 @@
 | IFC geometry-exact assets | 7 |
 | Load-model missing assets | 7 |
 | Analysis-claim ready assets | 11 |
+| Load-evidence ready assets | 0 |
+| Zero-load signature required assets | 7 |
+| Zero-load signature attached assets | 0 |
 | Proxy or preview assets | 7 |
 | Review queue assets | 7 |
 | Review items | 7 |
