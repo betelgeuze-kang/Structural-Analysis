@@ -176,6 +176,7 @@ def build_preflight(
     external_benchmark_submission_updates: Path,
     residual_holdout_closure_updates: Path,
     repo_root: Path,
+    structure_only: bool = False,
 ) -> dict[str, Any]:
     external_updates = _updates(_load_json(external_benchmark_submission_updates))
     residual_updates = _updates(_load_json(residual_holdout_closure_updates))
@@ -190,6 +191,12 @@ def build_preflight(
     ]
     external_missing = [row["queue_id"] for row in external_rows if row["missing_requirements"]]
     residual_missing = [row["work_item_id"] for row in residual_rows if row["missing_requirements"]]
+    external_structure_missing = [
+        queue_id for queue_id in EXTERNAL_EXPECTED_QUEUE_IDS if queue_id not in external_updates
+    ]
+    residual_structure_missing = [
+        work_item_id for work_item_id in RESIDUAL_EXPECTED_WORK_ITEM_IDS if work_item_id not in residual_updates
+    ]
     summary = {
         "external_expected_queue_count": len(EXTERNAL_EXPECTED_QUEUE_IDS),
         "external_update_row_count": len(external_updates),
@@ -208,24 +215,50 @@ def build_preflight(
         "residual_closed_count": sum(1 for row in residual_rows if row["closed"]),
         "residual_closure_pending_count": sum(1 for row in residual_rows if not row["closed"]),
     }
-    contract_pass = bool(
+    evidence_contract_pass = bool(
         summary["external_expected_rows_present"]
         and summary["residual_expected_rows_present"]
         and summary["external_receipt_attached_count"] == summary["external_expected_queue_count"]
         and summary["external_closure_evidence_attached_count"] == summary["external_expected_queue_count"]
         and summary["residual_closed_count"] == summary["residual_expected_work_item_count"]
     )
-    blockers = [
+    structure_contract_pass = bool(
+        external_benchmark_submission_updates.exists()
+        and residual_holdout_closure_updates.exists()
+        and summary["external_expected_rows_present"]
+        and summary["residual_expected_rows_present"]
+    )
+    summary["evidence_contract_pass"] = evidence_contract_pass
+    summary["structure_only_contract_pass"] = structure_contract_pass
+    evidence_blockers = [
         *(f"external_receipt_or_closure_pending:{queue_id}" for queue_id in external_missing),
         *(f"residual_closure_pending:{work_item_id}" for work_item_id in residual_missing),
     ]
+    structure_blockers = [
+        *(["external_sidecar_missing"] if not external_benchmark_submission_updates.exists() else []),
+        *(["residual_sidecar_missing"] if not residual_holdout_closure_updates.exists() else []),
+        *(f"external_expected_row_missing:{queue_id}" for queue_id in external_structure_missing),
+        *(f"residual_expected_row_missing:{work_item_id}" for work_item_id in residual_structure_missing),
+    ]
+    contract_pass = structure_contract_pass if structure_only else evidence_contract_pass
+    if evidence_contract_pass:
+        reason_code = "PASS"
+    elif structure_only and structure_contract_pass:
+        reason_code = "PASS_STRUCTURE_ONLY_PENDING_EVIDENCE"
+    elif structure_only:
+        reason_code = "ERR_P1_EVIDENCE_SIDECAR_STRUCTURE_PENDING"
+    else:
+        reason_code = "ERR_P1_EVIDENCE_SIDECAR_INTAKE_PENDING"
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "contract_mode": "structure_only" if structure_only else "strict_evidence",
         "contract_pass": contract_pass,
-        "reason_code": "PASS" if contract_pass else "ERR_P1_EVIDENCE_SIDECAR_INTAKE_PENDING",
+        "reason_code": reason_code,
         "summary": summary,
-        "blockers": blockers,
+        "blockers": structure_blockers if structure_only else evidence_blockers,
+        "pending_evidence_blockers": evidence_blockers,
+        "structure_blockers": structure_blockers,
         "external_benchmark_submission": external_rows,
         "residual_holdout": residual_rows,
         "artifacts": {
@@ -243,13 +276,17 @@ def _markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# P1 Evidence Sidecar Intake Preflight",
         "",
+        f"- `contract_mode`: `{payload.get('contract_mode', 'strict_evidence')}`",
         f"- `contract_pass`: `{bool(payload['contract_pass'])}`",
         f"- `reason_code`: `{payload['reason_code']}`",
+        f"- `evidence_contract_pass`: `{bool(summary.get('evidence_contract_pass', payload['contract_pass']))}`",
+        f"- `structure_only_contract_pass`: `{bool(summary.get('structure_only_contract_pass', payload['contract_pass']))}`",
         f"- `external_receipt_attached_count`: `{summary['external_receipt_attached_count']}/{summary['external_expected_queue_count']}`",
         f"- `external_closure_evidence_attached_count`: `{summary['external_closure_evidence_attached_count']}/{summary['external_expected_queue_count']}`",
         f"- `residual_closed_count`: `{summary['residual_closed_count']}/{summary['residual_expected_work_item_count']}`",
         f"- `residual_closure_evidence_attached_count`: `{summary['residual_closure_evidence_attached_count']}/{summary['residual_expected_work_item_count']}`",
         f"- `blockers`: `{', '.join(payload['blockers']) or 'none'}`",
+        f"- `pending_evidence_blockers`: `{', '.join(payload.get('pending_evidence_blockers', [])) or 'none'}`",
         "",
         "## External Benchmark Submission",
         "",
@@ -295,6 +332,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out-md", type=Path)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-open", action="store_true")
+    parser.add_argument(
+        "--structure-only",
+        action="store_true",
+        help="Pass when the expected EB/RH sidecar rows exist, while still reporting pending evidence blockers.",
+    )
     return parser
 
 
@@ -304,6 +346,7 @@ def main(argv: list[str] | None = None) -> int:
         external_benchmark_submission_updates=args.external_benchmark_submission_updates,
         residual_holdout_closure_updates=args.residual_holdout_closure_updates,
         repo_root=args.repo_root,
+        structure_only=args.structure_only,
     )
     text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
     if args.out:

@@ -96,6 +96,27 @@ def test_preflight_reports_pending_current_sidecars(tmp_path: Path) -> None:
     assert "residual_closure_pending:RH-001" in payload["blockers"]
 
 
+def test_preflight_structure_only_passes_when_expected_rows_exist(tmp_path: Path) -> None:
+    payload = preflight.build_preflight(
+        external_benchmark_submission_updates=_external_updates(tmp_path / "eb.json", attached=False),
+        residual_holdout_closure_updates=_residual_updates(tmp_path / "rh.json", repo_root=tmp_path, closed=False),
+        repo_root=tmp_path,
+        structure_only=True,
+    )
+
+    assert payload["contract_mode"] == "structure_only"
+    assert payload["contract_pass"] is True
+    assert payload["reason_code"] == "PASS_STRUCTURE_ONLY_PENDING_EVIDENCE"
+    assert payload["summary"]["structure_only_contract_pass"] is True
+    assert payload["summary"]["evidence_contract_pass"] is False
+    assert payload["summary"]["external_receipt_attached_count"] == 0
+    assert payload["summary"]["residual_closed_count"] == 0
+    assert payload["blockers"] == []
+    assert payload["structure_blockers"] == []
+    assert "external_receipt_or_closure_pending:hardest_external_10case" in payload["pending_evidence_blockers"]
+    assert "residual_closure_pending:RH-001" in payload["pending_evidence_blockers"]
+
+
 def test_preflight_passes_only_with_real_receipts_and_closure_files(tmp_path: Path) -> None:
     payload = preflight.build_preflight(
         external_benchmark_submission_updates=_external_updates(tmp_path / "eb.json", attached=True),
@@ -163,3 +184,30 @@ def test_preflight_cli_writes_json_and_markdown(tmp_path: Path) -> None:
     assert "P1 Evidence Sidecar Intake Preflight" in markdown
     assert "external_receipt_attached_count" in markdown
     assert "residual_closure_pending:RH-001" in markdown
+
+
+def test_preflight_cli_structure_only_fail_open_allows_pending_evidence(tmp_path: Path) -> None:
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--external-benchmark-submission-updates",
+            str(_external_updates(tmp_path / "eb.json", attached=False)),
+            "--residual-holdout-closure-updates",
+            str(_residual_updates(tmp_path / "rh.json", repo_root=tmp_path, closed=False)),
+            "--repo-root",
+            str(tmp_path),
+            "--json",
+            "--fail-open",
+            "--structure-only",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert proc.returncode == 0
+    payload = json.loads(proc.stdout)
+    assert payload["contract_pass"] is True
+    assert payload["reason_code"] == "PASS_STRUCTURE_ONLY_PENDING_EVIDENCE"
+    assert payload["pending_evidence_blockers"]

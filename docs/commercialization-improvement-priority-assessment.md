@@ -6,10 +6,10 @@
 
 ## 결론
 
-현재 단계는 **상용 보조툴 L3, 약 75%**로 본다.
+현재 단계는 **상용 보조툴 L3, 약 76%**로 본다.
 
-- 게이트 기반 공식 점수: **75/100**
-- 실무자 검토 전제 상용 보조툴 readiness: **75-80%**
+- 게이트 기반 공식 점수: **76/100**
+- 실무자 검토 전제 상용 보조툴 readiness: **76-80%**
 - 완전자율 상용 구조툴 대체 readiness: **55-60%**
 
 즉, 지금 상태는 "구조 엔지니어가 검토하면서 반복 업무를 크게 줄이는 상용 보조툴"에는 가까워졌지만, "검증/배포/운영/외부 벤치마크까지 닫힌 독립 상용 구조해석 제품"으로는 아직 부족하다.
@@ -22,15 +22,16 @@
 | P0 overall | closed with publication evidence | `publication_evidence/current` 묶음을 명시하면 P0-1까지 closed |
 | P1 inputs | ready | P1 입력 재료는 준비됨 |
 | P1 execution | ready | publication evidence 기반 P1 readiness와 benchmark breadth가 unblocked |
+| P1 evidence sidecar structure | pass | `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open` 통과. EB/RH row 구조는 준비됨 |
 | 상용화 레벨 | L3 | `engineer_in_loop_commercial_assist_ready` |
-| 상용화 점수 | 7.5/10 | 게이트 기반 환산 75% |
-| 외부 benchmark receipt | 0/4 attached | 외부 검증은 아직 claim 승격 근거로 쓰면 안 됨 |
-| residual holdout closure | 3건 pending | 구조기술사/레거시툴/인허가성 검토 대기 영역 |
+| 상용화 점수 | 7.6/10 | 게이트 기반 환산 76% |
+| 외부 benchmark receipt | 0/4 attached | strict evidence gate는 아직 pending. 외부 검증은 아직 claim 승격 근거로 쓰면 안 됨 |
+| residual holdout closure | 0/3 closed | strict evidence gate 기준 구조기술사/레거시툴/인허가성 검토 대기 영역 |
 | frontend build | pass | `npm run build`, frontend build contract 통과 |
 | repo hygiene | pass | repo hygiene, generated artifact drift 통과 |
 | critical static lint | pass | `ruff --select F821,F601,F401,F841` 통과 |
 | full static lint | pass | 전체 `ruff check .` 통과, CI gate를 full ruff로 승격 |
-| full pytest | pass | `1367 passed`, 테스트 후 tracked generated artifact drift 없음 |
+| full pytest | pass | `1369 passed`, 테스트 후 tracked generated artifact drift 없음 |
 
 ## 2026-05-13 실행 결과
 
@@ -44,10 +45,12 @@
 - `python -m ruff check . --select F821,F601,F401,F841`는 0건이며, 전체 ruff 잔여는 **147건에서 30건**으로 줄었다.
 - 이어서 `E402/E741/E731/E701/F811` 잔여 30건을 정리해 전체 `python -m ruff check .` 통과 상태로 만들고 CI static check를 full ruff로 승격했다.
 - 풀 테스트 후 `panel_zone_solver_verified_export_bundle.json`이 fixture 샘플로 덮이는 테스트 격리 누락을 수정했고, 재실행 후 `check_generated_worktree_clean.py --show-ok` 통과를 확인했다.
-- `python -m pytest -q`는 **1367 passed**로 통과했다.
-- 상용화 레포트는 `7.0/10`에서 **`7.5/10`**으로 상승했다.
+- `python -m pytest -q`는 **1369 passed**로 통과했다.
+- P1 EB/RH evidence sidecar preflight에 `--structure-only` 모드를 추가해, 외부 증거가 없는 현재 상황에서도 "준비 구조 통과"와 "strict 증거 pending"을 분리했다.
+- `python3 scripts/preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open --json`은 통과하며, 같은 preflight의 기본 strict evidence 모드는 receipt/closure evidence 7건 pending을 계속 blocker로 보고한다.
+- 상용화 레포트는 `7.0/10`에서 **`7.6/10`**으로 상승했다.
 
-남은 blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
+남은 strict blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
 
 ## 우선순위 0. P0 릴리즈 증거 게이트 닫기
 
@@ -119,11 +122,13 @@
 - P1 benchmark breadth ready
 - P1 operational queues materialized
 - EB/RH evidence intake template generated
+- EB/RH sidecar row 구조 preflight 통과 모드 추가
+- `--structure-only --fail-open`은 준비 구조를 통과시키고, strict evidence 미수집은 `pending_evidence_blockers`로 분리 보고
 
 남은 부분:
 
 - external benchmark submission receipt `0/4`
-- residual holdout closure evidence 3건 pending
+- residual holdout closure evidence `0/3 closed`
 
 완료 기준:
 
@@ -134,10 +139,11 @@
 
 다음 작업:
 
-1. EB receipt 4개에 실제 receipt URL/path 또는 formal hold evidence 연결
-2. RH 3개에 closure evidence path 연결
-3. `build_p1_evidence_sidecar_updates.py --require-complete` 실행
-4. `preflight_p1_evidence_sidecar_intake.py --fail-open` 통과
+1. 제품 개발 중에는 `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open`을 내부 준비도 gate로 사용
+2. EB receipt 4개에 실제 receipt URL/path 또는 formal hold evidence 연결
+3. RH 3개에 closure evidence path 연결
+4. `build_p1_evidence_sidecar_updates.py --require-complete` 실행
+5. `preflight_p1_evidence_sidecar_intake.py --fail-open` strict evidence gate 통과
 
 ## 우선순위 3. 소스와 대형 산출물 경계 재정리
 
