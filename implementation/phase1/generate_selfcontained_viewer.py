@@ -528,6 +528,9 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
     deformed_rendering_url = _encode_js_module_data_url(
         (VIEWER_ROOT / "viewer-deformed-rendering.js").read_text(encoding="utf-8")
     )
+    real_drawing_browser_state_url = _encode_js_module_data_url(
+        (VIEWER_ROOT / "viewer-real-drawing-browser-state.js").read_text(encoding="utf-8")
+    )
     return {
         "./viewer-data-loader.js": data_loader_url,
         "./viewer-model-normalizer.js": model_normalizer_url,
@@ -538,6 +541,7 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
         "./viewer-render-mesh-builders.js": render_mesh_builders_url,
         "./viewer-contour-materials.js": contour_materials_url,
         "./viewer-deformed-rendering.js": deformed_rendering_url,
+        "./viewer-real-drawing-browser-state.js": real_drawing_browser_state_url,
     }
 
 

@@ -386,6 +386,16 @@ import {
 import {
   createViewerDeformedRenderingToolkit,
 } from './viewer-deformed-rendering.js';
+import {
+  REAL_DRAWING_BROWSER_STATE_KEY,
+  REAL_DRAWING_BROWSER_SORT_OPTIONS,
+  REAL_DRAWING_QUALITY_FILTERS,
+  applyRealDrawingBrowserQueryParams as applyRealDrawingBrowserQueryParamsWithState,
+  normalizeRealDrawingBrowserSort,
+  normalizeRealDrawingQualityFilter,
+  persistRealDrawingBrowserState as persistRealDrawingBrowserStateToStorage,
+  readInitialRealDrawingBrowserState as readInitialRealDrawingBrowserStateFromStorage,
+} from './viewer-real-drawing-browser-state.js';
 
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
   modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,
@@ -409,7 +419,6 @@ let loadcombEditState=createEmptyLoadcombEditState();
 let viewerOptimizationWorker=null,viewerOptimizationWorkerRequestId=0;
 const SHARED_SELECTION_KEY='structural-viewer-selection-v1';
 const VIEWER_THEME_KEY='structural-viewer-theme-v1';
-const REAL_DRAWING_BROWSER_STATE_KEY='structural-viewer-real-drawing-browser-v1';
 const REAL_DRAWING_REVIEW_FLAG_KEYS=new Set([
   'not_solver_exact',
   'ifc_solver_graph_draft_not_member_extents',
@@ -418,21 +427,6 @@ const REAL_DRAWING_REVIEW_FLAG_KEYS=new Set([
   'sampled_dense_model',
   'sparse_preview'
 ]);
-const REAL_DRAWING_QUALITY_FILTERS=[
-  {key:'all',label:'All'},
-  {key:'solver_exact',label:'Solver Exact'},
-  {key:'geometry_ready',label:'Geometry Ready'},
-  {key:'review',label:'Review Queue'},
-  {key:'proxy',label:'Proxy'},
-  {key:'sparse',label:'Sparse'},
-  {key:'sampled',label:'Sampled'}
-];
-const REAL_DRAWING_BROWSER_SORT_OPTIONS=[
-  {key:'priority',label:'Priority'},
-  {key:'asset',label:'Asset ID'},
-  {key:'segments',label:'Segments'},
-  {key:'status',label:'Status'}
-];
 const selectionChannel=(()=>{
   try{return typeof BroadcastChannel==='function'?new BroadcastChannel(SHARED_SELECTION_KEY):null}catch(_err){return null}
 })();
@@ -685,33 +679,11 @@ function normalizeSelectionValues(values){
   });
   return unique;
 }
-function normalizeRealDrawingQualityFilter(filterKey='all'){
-  const normalized=normalizeSelectionValue(filterKey)||'all';
-  return REAL_DRAWING_QUALITY_FILTERS.some(filter=>filter.key===normalized)?normalized:'all';
-}
-function normalizeRealDrawingBrowserSort(sortKey='priority'){
-  const normalized=normalizeSelectionValue(sortKey)||'priority';
-  return REAL_DRAWING_BROWSER_SORT_OPTIONS.some(option=>option.key===normalized)?normalized:'priority';
-}
-function readRealDrawingBrowserStateFromStorage(){
-  const raw=safeStorageGet(REAL_DRAWING_BROWSER_STATE_KEY);
-  if(!raw)return{};
-  try{
-    const parsed=JSON.parse(raw);
-    return parsed&&typeof parsed==='object'?parsed:{};
-  }catch(_err){
-    return{};
-  }
-}
 function readInitialRealDrawingBrowserState(){
-  const stored=readRealDrawingBrowserStateFromStorage();
-  const params=typeof window!=='undefined'?new URLSearchParams(window.location.search):new URLSearchParams();
-  return{
-    filter:normalizeRealDrawingQualityFilter(params.get('drawing_filter')||stored.filter),
-    query:normalizeSelectionValue(params.get('drawing_query')??stored.query),
-    sort:normalizeRealDrawingBrowserSort(params.get('drawing_sort')||stored.sort),
-    recentAssetRefs:normalizeSelectionValues(stored.recentAssetRefs||stored.recentAssets||[])
-  };
+  return readInitialRealDrawingBrowserStateFromStorage({
+    storageGet:safeStorageGet,
+    storageKey:REAL_DRAWING_BROWSER_STATE_KEY,
+  });
 }
 function getQueryRealDrawingAssetRef(){
   if(typeof window==='undefined')return'';
@@ -719,26 +691,19 @@ function getQueryRealDrawingAssetRef(){
   return normalizeSelectionValue(params.get('drawing_asset')||params.get('asset_ref'));
 }
 function persistRealDrawingBrowserState(){
-  safeStorageSet(REAL_DRAWING_BROWSER_STATE_KEY,JSON.stringify({
+  persistRealDrawingBrowserStateToStorage({
     filter:normalizeRealDrawingQualityFilter(activeRealDrawingQualityFilter),
     query:normalizeSelectionValue(activeRealDrawingAssetQuery),
     sort:normalizeRealDrawingBrowserSort(activeRealDrawingBrowserSort),
     recentAssetRefs:normalizeSelectionValues(recentRealDrawingAssetRefs).slice(0,8),
-    updated_at:new Date().toISOString()
-  }));
+  },{storageSet:safeStorageSet,storageKey:REAL_DRAWING_BROWSER_STATE_KEY});
 }
 function applyRealDrawingBrowserQueryParams(url,{assetRef=''}={}){
-  if(!(url instanceof URL))return url;
-  const normalizedAssetRef=normalizeSelectionValue(assetRef);
-  if(normalizedAssetRef)url.searchParams.set('drawing_asset',normalizedAssetRef);
-  else url.searchParams.delete('drawing_asset');
-  const filter=normalizeRealDrawingQualityFilter(activeRealDrawingQualityFilter);
-  if(filter&&filter!=='all')url.searchParams.set('drawing_filter',filter);else url.searchParams.delete('drawing_filter');
-  const query=normalizeSelectionValue(activeRealDrawingAssetQuery);
-  if(query)url.searchParams.set('drawing_query',query);else url.searchParams.delete('drawing_query');
-  const sort=normalizeRealDrawingBrowserSort(activeRealDrawingBrowserSort);
-  if(sort&&sort!=='priority')url.searchParams.set('drawing_sort',sort);else url.searchParams.delete('drawing_sort');
-  return url;
+  return applyRealDrawingBrowserQueryParamsWithState(url,{
+    filter:activeRealDrawingQualityFilter,
+    query:activeRealDrawingAssetQuery,
+    sort:activeRealDrawingBrowserSort,
+  },{assetRef});
 }
 function updateSuiteRouteTabs(){
   const preset=getRequestedPreset();

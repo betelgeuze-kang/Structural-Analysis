@@ -61,6 +61,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-real-drawing-browser-sort" in text
     assert "data-real-drawing-next-review" in text
     assert "REAL_DRAWING_BROWSER_STATE_KEY" in text
+    assert "viewer-real-drawing-browser-state.js" in text
     assert "drawing_asset" in text
     assert "data-real-drawing-copy-link" in text
     assert "data-real-drawing-recent-asset" in text

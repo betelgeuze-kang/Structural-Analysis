@@ -6,10 +6,10 @@
 
 ## 결론
 
-현재 단계는 **상용 보조툴 L3, 약 76%**로 본다.
+현재 단계는 **상용 보조툴 L3, 약 77%**로 본다.
 
-- 게이트 기반 공식 점수: **76/100**
-- 실무자 검토 전제 상용 보조툴 readiness: **76-80%**
+- 게이트 기반 공식 점수: **77/100**
+- 실무자 검토 전제 상용 보조툴 readiness: **77-80%**
 - 완전자율 상용 구조툴 대체 readiness: **55-60%**
 
 즉, 지금 상태는 "구조 엔지니어가 검토하면서 반복 업무를 크게 줄이는 상용 보조툴"에는 가까워졌지만, "검증/배포/운영/외부 벤치마크까지 닫힌 독립 상용 구조해석 제품"으로는 아직 부족하다.
@@ -24,7 +24,7 @@
 | P1 execution | ready | publication evidence 기반 P1 readiness와 benchmark breadth가 unblocked |
 | P1 evidence sidecar structure | pass | `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open` 통과. EB/RH row 구조는 준비됨 |
 | 상용화 레벨 | L3 | `engineer_in_loop_commercial_assist_ready` |
-| 상용화 점수 | 7.6/10 | 게이트 기반 환산 76% |
+| 상용화 점수 | 7.7/10 | 게이트 기반 환산 77% |
 | 외부 benchmark receipt | 0/4 attached | strict evidence gate는 아직 pending. 외부 검증은 아직 claim 승격 근거로 쓰면 안 됨 |
 | residual holdout closure | 0/3 closed | strict evidence gate 기준 구조기술사/레거시툴/인허가성 검토 대기 영역 |
 | frontend build | pass | `npm run build`, frontend build contract 통과 |
@@ -49,7 +49,8 @@
 - P1 EB/RH evidence sidecar preflight에 `--structure-only` 모드를 추가해, 외부 증거가 없는 현재 상황에서도 "준비 구조 통과"와 "strict 증거 pending"을 분리했다.
 - `python3 scripts/preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open --json`은 통과하며, 같은 preflight의 기본 strict evidence 모드는 receipt/closure evidence 7건 pending을 계속 blocker로 보고한다.
 - clean-checkout evidence chain도 `p1_evidence_sidecar_structure_preflight`와 strict `p1_evidence_sidecar_preflight`를 함께 기록하므로, release reviewer가 내부 준비도와 실제 승격 evidence를 한 payload에서 구분할 수 있다.
-- 상용화 레포트는 `7.0/10`에서 **`7.6/10`**으로 상승했다.
+- 구조 웹뷰어의 real drawing browser state를 `viewer-real-drawing-browser-state.js` 모듈로 분리했고, single-file viewer generator가 이 모듈을 data URL로 inline하도록 연결했다.
+- 상용화 레포트는 `7.0/10`에서 **`7.7/10`**으로 상승했다.
 
 남은 strict blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
 
@@ -183,6 +184,12 @@
 - source viewer와 generated single-file viewer의 차이를 사용자가 체감하기 어려울 수 있음
 - 최적화 도면 선택/전환, provenance, cross-view selection이 더 제품형이어야 함
 - 3D wall/slab batching, LOD, hit-test 비용 제어가 더 필요함
+
+진행된 부분:
+
+- real drawing browser state/query/storage 정규화를 `viewer-real-drawing-browser-state.js`로 분리
+- source viewer와 generated single-file viewer 모두 새 browser-state 모듈을 계약 테스트로 검증
+- single-file viewer generator가 browser-state 모듈을 외부 sidecar 없이 data URL로 inline하도록 연결
 
 완료 기준:
 

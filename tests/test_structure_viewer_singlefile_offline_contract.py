@@ -31,6 +31,7 @@ def test_release_singlefile_viewers_do_not_depend_on_remote_or_sidecar_assets() 
         "./viewer-render-mesh-builders.js",
         "./viewer-deformed-rendering.js",
         "./viewer-contour-materials.js",
+        "./viewer-real-drawing-browser-state.js",
         "./vendor/three.module.js",
         "./vendor/OrbitControls.js",
         "cdn.jsdelivr.net",
