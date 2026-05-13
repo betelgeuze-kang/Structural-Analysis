@@ -531,6 +531,9 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
     real_drawing_browser_state_url = _encode_js_module_data_url(
         (VIEWER_ROOT / "viewer-real-drawing-browser-state.js").read_text(encoding="utf-8")
     )
+    real_drawing_quality_url = _encode_js_module_data_url(
+        (VIEWER_ROOT / "viewer-real-drawing-quality.js").read_text(encoding="utf-8")
+    )
     shared_selection_state_url = _encode_js_module_data_url(
         (VIEWER_ROOT / "viewer-shared-selection-state.js").read_text(encoding="utf-8")
     )
@@ -545,6 +548,7 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
         "./viewer-contour-materials.js": contour_materials_url,
         "./viewer-deformed-rendering.js": deformed_rendering_url,
         "./viewer-real-drawing-browser-state.js": real_drawing_browser_state_url,
+        "./viewer-real-drawing-quality.js": real_drawing_quality_url,
         "./viewer-shared-selection-state.js": shared_selection_state_url,
     }
 
