@@ -6,10 +6,10 @@
 
 ## 결론
 
-현재 단계는 **상용 보조툴 L3, 약 81%**로 본다.
+현재 단계는 **상용 보조툴 L3, 약 82%**로 본다.
 
-- 게이트 기반 공식 점수: **81/100**
-- 실무자 검토 전제 상용 보조툴 readiness: **81-84%**
+- 게이트 기반 공식 점수: **82/100**
+- 실무자 검토 전제 상용 보조툴 readiness: **82-85%**
 - 완전자율 상용 구조툴 대체 readiness: **55-60%**
 
 즉, 지금 상태는 "구조 엔지니어가 검토하면서 반복 업무를 크게 줄이는 상용 보조툴"에는 가까워졌지만, "검증/배포/운영/외부 벤치마크까지 닫힌 독립 상용 구조해석 제품"으로는 아직 부족하다.
@@ -25,7 +25,7 @@
 | P1 evidence sidecar structure | pass | `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open` 통과. EB/RH row 구조는 준비됨 |
 | source boundary inventory | pass | CI에서 `plan_source_boundary_cleanup.py --large-file-threshold-mib 25 --fail-on-candidates` 실행, 현재 후보 0건 |
 | 상용화 레벨 | L3 | `engineer_in_loop_commercial_assist_ready` |
-| 상용화 점수 | 8.1/10 | 게이트 기반 환산 81% |
+| 상용화 점수 | 8.2/10 | 게이트 기반 환산 82% |
 | 외부 benchmark receipt | 0/4 attached | strict evidence gate는 아직 pending. 외부 검증은 아직 claim 승격 근거로 쓰면 안 됨 |
 | residual holdout closure | 0/3 closed | strict evidence gate 기준 구조기술사/레거시툴/인허가성 검토 대기 영역 |
 | frontend build | pass | `npm run build`, frontend build contract 통과 |
@@ -56,7 +56,8 @@
 - 구조 웹뷰어의 shared selection 정규화/query/storage payload를 `viewer-shared-selection-state.js`로 분리했고, single-file viewer generator inline 계약까지 검증했다.
 - 구조 웹뷰어의 real drawing 품질 tier/search/sort/review queue 계산을 `viewer-real-drawing-quality.js`로 분리했고, 도면 검색이 zero-load/load evidence 상태까지 잡도록 계약 테스트를 추가했다.
 - CI에 `Structure viewer contracts` 단계를 추가해 3D viewer 모듈/도면 품질/공유 선택/single-file inline 계약을 frontend smoke 전에 강제 검증하도록 했다.
-- 상용화 레포트는 `7.0/10`에서 **`8.1/10`**으로 상승했다.
+- `scripts/verify_structure_viewer_contracts.py`를 추가해 CI와 로컬이 같은 structure viewer 계약 suite를 실행하도록 했다.
+- 상용화 레포트는 `7.0/10`에서 **`8.2/10`**으로 상승했다.
 
 남은 strict blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
 
@@ -206,6 +207,7 @@
 - source viewer와 generated single-file viewer 모두 새 browser-state 모듈을 계약 테스트로 검증
 - single-file viewer generator가 browser/selection/quality 모듈을 외부 sidecar 없이 data URL로 inline하도록 연결
 - CI에서 structure viewer contract suite를 frontend smoke 전 필수 단계로 실행
+- `scripts/verify_structure_viewer_contracts.py --dry-run`으로 CI와 로컬 viewer gate 범위를 한 곳에서 확인 가능
 
 완료 기준:
 

@@ -97,27 +97,7 @@ jobs:
         run: npm run verify:frontend-contract
 
       - name: Structure viewer contracts
-        run: |
-          python -m pytest -q \
-            tests/test_structure_viewer_instancing_contract.py \
-            tests/test_structure_viewer_data_loader_contract.py \
-            tests/test_structure_viewer_model_normalizer_contract.py \
-            tests/test_structure_viewer_direct_model_normalizer_contract.py \
-            tests/test_structure_viewer_contour_materials_contract.py \
-            tests/test_structure_viewer_render_mesh_builders_contract.py \
-            tests/test_structure_viewer_render_picking_geometry_contract.py \
-            tests/test_structure_viewer_large_model_picking_contract.py \
-            tests/test_structure_viewer_pick_broadphase_contract.py \
-            tests/test_structure_viewer_deformed_rendering_contract.py \
-            tests/test_structure_viewer_offline_vendor_contract.py \
-            tests/test_structure_viewer_local_vendor_contract.py \
-            tests/test_structure_viewer_suite_shell_contract.py \
-            tests/test_structure_viewer_real_drawing_browser_state_contract.py \
-            tests/test_structure_viewer_real_drawing_quality_contract.py \
-            tests/test_structure_viewer_shared_selection_state_contract.py \
-            tests/test_viewer_shared_selection_contract.py \
-            tests/test_generate_selfcontained_viewer.py \
-            tests/test_structure_viewer_singlefile_offline_contract.py
+        run: python scripts/verify_structure_viewer_contracts.py
 
       - name: Frontend smoke
         run: npm run verify:frontend-smoke
