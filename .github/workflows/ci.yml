@@ -35,6 +35,9 @@ jobs:
       - name: Git remote safety
         run: python scripts/check_git_remote_safety.py --show-ok
 
+      - name: Critical Python static checks
+        run: python -m ruff check . --select F821,F601,F401,F841
+
       - name: Release artifact manifest
         run: python scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
 

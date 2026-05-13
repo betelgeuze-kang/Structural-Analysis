@@ -1660,7 +1660,6 @@ def build_manifest(
         sum(1 for row in korean_catalog_rows if bool(row.get("native_writeback_candidate", False)))
     )
     export_summary = export_report.get("summary") if isinstance(export_report.get("summary"), dict) else {}
-    source_manifest_out = _resolve_repo_path(str(source_manifest.get("out", "") or "")) if source_manifest else source_mgt
     source_manifest_sha = str(source_manifest.get("sha256", "") or "").strip()
     source_mgt_sha = _sha256(source_mgt)
 

@@ -1,7 +1,6 @@
 """Phase-E tests: Substructuring, vibration attenuation, compliance checker."""
 from __future__ import annotations
 
-import math
 import json
 import tempfile
 from pathlib import Path

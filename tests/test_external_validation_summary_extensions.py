@@ -657,8 +657,6 @@ def test_write_external_benchmark_case_onepages_inherits_native_roundtrip_append
         "metrics": {
             "midas_native_roundtrip_summary_line": "MIDAS native roundtrip: PASS | corpus=51 | native_text=22 | public_native=4 | public_raw_native=3 | public_bridge_native=1 | public_preview_native=7 | fixture_native=4 | repo_native=3 | experiment_native=3 | archives=7 | ready=21 | public_ready=12 | public_native_ready=4 | public_raw_ready=3 | public_bridge_ready=1 | public_preview_ready=7 | fixture_ready=4 | repo_ready=2 | experiment_ready=3 | receipts=21/21 | topology=21/21 | load=21/21 | loadcomb=21/21 exact | types=8 | taxonomy=exact:20,canonical:1,lossy:0,unsupported:0,manual:1 | pending_review=2",
             "midas_native_roundtrip_writeback_diff_summary_line": "MIDAS native write-back diff receipts: PASS | ready=21 | receipts=21/21 | topology=21/21 | load=21/21 | loadcomb=21/21 exact | types=8 | taxonomy=exact:20,canonical:1,lossy:0,unsupported:0,manual:1 | pending_review=2",
-            "midas_native_roundtrip_taxonomy_case_counts": {"preserved_exact": 4, "canonical_rewrite": 1},
-            "midas_native_roundtrip_taxonomy_card_family_histogram": {"supported_action_families": {"beam_section": 1}},
             "midas_native_roundtrip_structure_type_batch_markdowns": [
                 "implementation/phase1/release/midas_native_roundtrip/stair.diff_batch.md"
             ],

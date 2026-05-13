@@ -188,7 +188,6 @@ def _build_report(
 
     manifest_summary = _manifest_payload(manifest)
     queue_summary = _queue_payload(queue)
-    route_counts = _as_dict(queue_summary.get("route_counts"))
     status_counts = _as_dict(queue_summary.get("status_counts"))
     direct_mgt_ready_count = _coerce_int(
         queue_summary.get("direct_solver_graph_ready_count", status_counts.get("solver_graph_ready", 0))
@@ -668,11 +667,6 @@ def _markdown(report: dict[str, Any]) -> str:
     tier_acceptance = [row for row in (summary.get("tier_acceptance") or []) if isinstance(row, dict)]
     evidence_checklist = [row for row in (summary.get("evidence_checklist") or []) if isinstance(row, dict)]
     readiness_lanes = [row for row in (summary.get("readiness_lanes") or []) if isinstance(row, dict)]
-    remaining_blockers = [
-        str(blocker).strip()
-        for blocker in (summary.get("remaining_blockers") or [])
-        if str(blocker).strip()
-    ]
     remaining_blocker_details = [row for row in (summary.get("remaining_blocker_details") or []) if isinstance(row, dict)]
     blocker_register = [row for row in (summary.get("blocker_register") or []) if isinstance(row, dict)]
     tier_acceptance_rows = [

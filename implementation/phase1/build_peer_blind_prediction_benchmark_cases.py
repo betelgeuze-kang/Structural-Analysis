@@ -40,7 +40,6 @@ def build_cases(
     measured_normalized: dict[str, Any],
     scaffold: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    readiness = input_contract.get("readiness") if isinstance(input_contract.get("readiness"), dict) else {}
     candidate_cases = scaffold.get("candidate_cases") if isinstance(scaffold.get("candidate_cases"), list) else []
     measured_summary = measured_normalized.get("summary") if isinstance(measured_normalized.get("summary"), dict) else {}
     acceleration_summary = (

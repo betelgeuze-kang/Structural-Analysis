@@ -1,14 +1,12 @@
 """Phase-B tests: Track LF solver, moving-load integrator, CG solver."""
 from __future__ import annotations
 
-import math
 
 import numpy as np
 import pytest
 
 from track_lf_solver import (
     TrackLFConfig,
-    SolveResult,
     _validate_config,
     apply_euler_beam_operator,
     cg_solve_matrix_free,

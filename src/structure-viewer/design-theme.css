@@ -1085,6 +1085,43 @@ body.structural-surface .real-drawing-switcher__meta small {
   white-space:nowrap;
 }
 
+body.structural-surface .real-drawing-action-row {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+body.structural-surface .real-drawing-action-row button {
+  min-height:30px;
+  padding:6px 9px;
+  border-radius:8px;
+  border:1px solid rgba(79,183,173,.28);
+  background:rgba(79,183,173,.12);
+  color:var(--accent);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+  cursor:pointer;
+}
+
+body.structural-surface.light-mode .real-drawing-action-row button {
+  border-color:rgba(15,106,115,.22);
+  background:rgba(15,106,115,.08);
+}
+
+body.structural-surface .real-drawing-action-row span {
+  min-width:0;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-align:right;
+}
+
 body.structural-surface .real-drawing-active-inspector {
   display:flex;
   flex-direction:column;
@@ -1311,6 +1348,57 @@ body.structural-surface .real-drawing-browser__toolbar button:disabled {
 body.structural-surface.light-mode .real-drawing-browser__toolbar button {
   border-color:rgba(15,106,115,.22);
   background:rgba(15,106,115,.08);
+}
+
+body.structural-surface .real-drawing-recent-rail {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+body.structural-surface .real-drawing-recent-rail > span {
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+body.structural-surface .real-drawing-recent-rail__items {
+  display:flex;
+  gap:5px;
+  min-width:0;
+  overflow:auto;
+  padding-bottom:1px;
+}
+
+body.structural-surface .real-drawing-recent-chip {
+  max-width:92px;
+  min-height:26px;
+  padding:4px 7px;
+  border-radius:8px;
+  border:1px solid rgba(148,168,190,.16);
+  background:rgba(15,23,42,.36);
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  cursor:pointer;
+}
+
+body.structural-surface .real-drawing-recent-chip:hover,
+body.structural-surface .real-drawing-recent-chip.is-active {
+  border-color:rgba(79,183,173,.42);
+  background:rgba(79,183,173,.12);
+  color:var(--accent);
+}
+
+body.structural-surface.light-mode .real-drawing-recent-chip {
+  background:rgba(255,255,255,.72);
+  border-color:rgba(133,102,70,.14);
 }
 
 body.structural-surface .real-drawing-browser__list {

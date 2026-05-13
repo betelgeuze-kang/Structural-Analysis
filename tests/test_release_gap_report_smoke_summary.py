@@ -2279,7 +2279,6 @@ def test_native_authoring_default_portfolio_surface_tracks_commercialization_art
     portfolio_summary = portfolio_report["summary"]
     family_tracks_summary = family_tracks_report["summary"]
     runtime_submission_summary = runtime_submission_report["summary"]
-    project_ops_service_summary = project_ops_service_snapshot_report["summary"]
 
     assert DEFAULT_NATIVE_AUTHORING_OPS_PORTFOLIO == Path(
         "implementation/phase1/release/authoring/portfolio/native_authoring_ops_portfolio.json"

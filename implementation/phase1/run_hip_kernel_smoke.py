@@ -11,7 +11,6 @@ from pathlib import Path
 import shlex
 import shutil
 import subprocess
-import sys
 import time
 
 from runtime_contracts import InputContractError, get_logger, log_event, validate_input_contract

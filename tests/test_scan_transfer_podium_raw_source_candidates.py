@@ -1,4 +1,3 @@
-import json
 
 from implementation.phase1.scan_transfer_podium_raw_source_candidates import (
     build_transfer_podium_raw_source_scan_payload,

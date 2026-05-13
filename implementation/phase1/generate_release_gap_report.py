@@ -6457,9 +6457,7 @@ def main() -> None:
     release_registry_artifacts = (
         release_registry.get("artifacts") if isinstance(release_registry.get("artifacts"), dict) else {}
     )
-    kds_frontend = kds.get("frontend_payload") if isinstance(kds.get("frontend_payload"), dict) else {}
     kds_summary = kds.get("summary") if isinstance(kds.get("summary"), dict) else {}
-    solver_hip_checks = solver_hip.get("checks") if isinstance(solver_hip.get("checks"), dict) else {}
     solver_hip_summary = solver_hip.get("summary") if isinstance(solver_hip.get("summary"), dict) else {}
     rc_summary = rc_benchmark.get("summary") if isinstance(rc_benchmark.get("summary"), dict) else {}
     quality_summary = quality_mgt_corpus.get("summary") if isinstance(quality_mgt_corpus.get("summary"), dict) else {}
@@ -6720,7 +6718,6 @@ def main() -> None:
         else "0/0"
     )
     nightly_smoke = nightly.get("design_optimization_cost_reduction_smoke") if isinstance(nightly.get("design_optimization_cost_reduction_smoke"), dict) else {}
-    nightly_smoke_summary = nightly_smoke.get("summary") if isinstance(nightly_smoke.get("summary"), dict) else {}
     nightly_smoke_history = nightly.get("design_optimization_cost_reduction_smoke_history") if isinstance(nightly.get("design_optimization_cost_reduction_smoke_history"), dict) else {}
     nightly_smoke_history_summary = nightly_smoke_history.get("summary") if isinstance(nightly_smoke_history.get("summary"), dict) else {}
     nightly_smoke_recommendation = nightly.get("design_optimization_cost_reduction_smoke_strict_recommendation") if isinstance(nightly.get("design_optimization_cost_reduction_smoke_strict_recommendation"), dict) else {}

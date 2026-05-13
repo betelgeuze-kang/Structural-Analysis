@@ -125,12 +125,6 @@ def test_validate_midas_kds_geometry_bridge_artifacts_detects_threshold_gap(tmp_
                     {"id": 202, "type": "BEAM", "family": "beam", "section_id": 11, "material_id": 1, "node_ids": [2, 3]},
                     {"id": 303, "type": "COLUMN", "family": "column", "section_id": 12, "material_id": 2, "node_ids": [3, 4]},
                 ],
-                "metadata": {
-                    "members": [
-                        {"id": 9001, "element_seed": 202, "element_ids": [202]},
-                        {"id": 9002, "element_seed": 303, "element_ids": [303]},
-                    ]
-                },
                 "nodes": [
                     {"id": 2, "x": 1.0, "y": 0.0, "z": 0.0},
                     {"id": 3, "x": 2.0, "y": 0.0, "z": 0.0},

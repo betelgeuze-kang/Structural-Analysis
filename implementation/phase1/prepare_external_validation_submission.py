@@ -11,6 +11,7 @@ import html
 import json
 from pathlib import Path
 import shutil
+from typing import Any
 import zipfile
 
 import matplotlib.pyplot as plt
@@ -20,28 +21,11 @@ from matplotlib.patches import FancyBboxPatch
 from design_optimization.artifacts import (
     ABLATION_REPORT_JSON,
     BUDGETED_REPORT_JSON,
-    CANDIDATE_EXPLAIN_V2_CSV,
-    CANDIDATE_EXPLAIN_V2_JSON,
-    COST_REDUCTION_BLOCKED_ACTIONS_CSV,
-    COST_REDUCTION_BLOCKED_ACTIONS_JSON,
-    COST_REDUCTION_CHANGES_CSV,
-    COST_REDUCTION_CHANGES_JSON,
-    COST_REDUCTION_NO_GAIN_EXPLAIN_CSV,
-    COST_REDUCTION_NO_GAIN_EXPLAIN_JSON,
-    COST_REDUCTION_NO_GAIN_GROUPS_CSV,
-    COST_REDUCTION_NO_GAIN_GROUPS_JSON,
     COST_REDUCTION_REPORT_JSON,
     EXTERNAL_FULL_ARTIFACTS_DESIGN_OPT,
     EXTERNAL_LIGHT_ARTIFACTS_DESIGN_OPT,
     OBJECTIVE_PROFILE_REPORT_JSON,
-    PBD_REVIEW_DIR,
-    REJECTED_CANDIDATE_EXPLAIN_V2_CSV,
-    REJECTED_CANDIDATE_EXPLAIN_V2_JSON,
     SOLVER_LOOP_LONG_REPORT_JSON,
-    SOLVER_LOOP_LONG_STATE_NPZ,
-    STAGE_A_REPORT_JSON,
-    STAGE_B_REPORT_JSON,
-    STAGE_C_REPORT_JSON,
 )
 from design_optimization.entrypoint_appendix import (
     annotate_entrypoint_groups,
@@ -1379,15 +1363,12 @@ def _midas_native_roundtrip_appendix_html(source: dict, artifacts: dict) -> str:
     )
     if not summary_line and not writeback_summary_line and not receipt_rows and not batch_rows and not taxonomy_case_counts and not taxonomy_card_family_histogram:
         return ""
-    public_native_ready = metrics.get("midas_native_roundtrip_public_native_writeback_ready_count", metrics.get("midas_native_roundtrip_public_native_ready_case_count", 0))
     public_raw_ready = metrics.get("midas_native_roundtrip_public_raw_native_writeback_ready_count", metrics.get("midas_native_roundtrip_public_raw_native_ready_case_count", 0))
     public_bridge_ready = metrics.get("midas_native_roundtrip_public_bridge_writeback_ready_count", metrics.get("midas_native_roundtrip_public_bridge_ready_case_count", 0))
-    public_archive_preview_ready = metrics.get("midas_native_roundtrip_public_archive_preview_writeback_ready_count", metrics.get("midas_native_roundtrip_public_archive_preview_ready_case_count", 0))
     public_structural_preview_ready = metrics.get(
         "midas_native_roundtrip_public_archive_structural_preview_writeback_ready_count",
         metrics.get("midas_native_roundtrip_public_archive_structural_preview_ready_case_count", 0),
     )
-    public_source_ready = metrics.get("midas_native_roundtrip_public_source_writeback_ready_count", metrics.get("midas_native_roundtrip_public_source_ready_case_count", 0))
     exact_topology_candidate_rows = [
         row
         for row in (metrics.get("midas_native_roundtrip_exact_topology_archive_candidate_rows") or [])
@@ -1644,7 +1625,6 @@ def _write_summary_markdown(path: Path, summary: dict) -> None:
     derived = summary["derived"]
     entrypoints = list(summary.get("design_optimization_entrypoints", []))
     entrypoint_groups = list(summary.get("design_optimization_entrypoint_groups", []))
-    annotated_groups = annotate_entrypoint_groups(entrypoint_groups)
     artifacts = summary.get("artifacts") if isinstance(summary.get("artifacts"), dict) else {}
     smoke_history_png = str(artifacts.get("nightly_smoke_history_png", "") or "")
     measured_chain_category_png = str(artifacts.get("measured_chain_category_png", "") or "")
@@ -1680,14 +1660,12 @@ def _write_summary_markdown(path: Path, summary: dict) -> None:
     opensees_canonical_breadth_summary_line = str(
         metrics.get("opensees_canonical_breadth_summary_line", "") or "n/a"
     )
-    korean_native_roundtrip_representative_rows = _korean_native_roundtrip_representative_rows(summary)
     korean_structural_preview_queue_summary_line = str(
         metrics.get("korean_structural_preview_queue_summary_line", "") or "n/a"
     )
     korean_structural_preview_queue_summary_line = _compact_korean_structural_preview_queue_summary_line(
         korean_structural_preview_queue_summary_line
     )
-    korean_native_roundtrip_representative_rows = _korean_native_roundtrip_representative_rows(summary)
     irregular_structure_summary_line = str(
         metrics.get("irregular_structure_summary_line", "") or metrics.get("irregular_structure_track_summary_line", "") or "n/a"
     )
@@ -1720,20 +1698,6 @@ def _write_summary_markdown(path: Path, summary: dict) -> None:
     irregular_receipt_summary_lines = _render_irregular_benchmark_summary_receipt_markdown(
         summary, artifacts, "artifacts"
     )
-    row_provenance_summary_line = str(metrics.get("midas_kds_row_provenance_export_summary_line", "") or "n/a")
-    row_provenance_preview_rows = _midas_row_provenance_preview_rows(metrics)
-    row_provenance_json = str(artifacts.get("midas_kds_row_provenance_export_json", "") or "n/a")
-    row_provenance_csv = str(artifacts.get("midas_kds_row_provenance_export_csv", "") or "n/a")
-    row_provenance_report = str(artifacts.get("midas_kds_row_provenance_export_report", "") or "n/a")
-    public_raw_ready = metrics.get(
-        "midas_native_roundtrip_public_raw_native_writeback_ready_count",
-        metrics.get("midas_native_roundtrip_public_raw_native_ready_case_count", 0),
-    )
-    public_bridge_ready = metrics.get(
-        "midas_native_roundtrip_public_bridge_writeback_ready_count",
-        metrics.get("midas_native_roundtrip_public_bridge_ready_case_count", 0),
-    )
-    import html as html_module
     midas_section_library_status_label = (
         "embedded metadata validated" if midas_section_library_summary_line != "n/a" else "validator unavailable"
     )
@@ -5037,7 +5001,6 @@ def _write_summary_html(path: Path, summary: dict) -> None:
     opensees_canonical_breadth_summary_line = str(
         metrics.get("opensees_canonical_breadth_summary_line", "") or "n/a"
     )
-    korean_native_roundtrip_representative_rows = _korean_native_roundtrip_representative_rows(summary)
     korean_structural_preview_queue_summary_line = str(
         metrics.get("korean_structural_preview_queue_summary_line", "") or "n/a"
     )
@@ -5045,11 +5008,6 @@ def _write_summary_html(path: Path, summary: dict) -> None:
         korean_structural_preview_queue_summary_line
     )
     korean_native_roundtrip_representatives_html = _render_korean_native_roundtrip_representatives_html(summary)
-    row_provenance_summary_line = str(metrics.get("midas_kds_row_provenance_export_summary_line", "") or "n/a")
-    row_provenance_preview_rows = _midas_row_provenance_preview_rows(metrics)
-    row_provenance_json = str(artifacts.get("midas_kds_row_provenance_export_json", "") or "n/a")
-    row_provenance_csv = str(artifacts.get("midas_kds_row_provenance_export_csv", "") or "n/a")
-    row_provenance_report = str(artifacts.get("midas_kds_row_provenance_export_report", "") or "n/a")
     public_raw_ready = metrics.get(
         "midas_native_roundtrip_public_raw_native_writeback_ready_count",
         metrics.get("midas_native_roundtrip_public_raw_native_ready_case_count", 0),
@@ -5817,10 +5775,6 @@ def _write_summary_pdf(path: Path, summary: dict) -> None:
     surface_interaction_benchmark_summary_line = str(
         metrics.get("surface_interaction_benchmark_summary_line", "") or "n/a"
     )
-    midas_native_roundtrip_summary_line = str(metrics.get("midas_native_roundtrip_summary_line", "") or "n/a")
-    midas_native_roundtrip_writeback_diff_summary_line = str(
-        metrics.get("midas_native_roundtrip_writeback_diff_summary_line", "") or "n/a"
-    )
     korean_source_ingest_summary_line = _compact_korean_source_ingest_summary_line(
         str(metrics.get("korean_source_ingest_summary_line", "") or "n/a")
     )
@@ -6347,7 +6301,7 @@ def _write_summary_pdf(path: Path, summary: dict) -> None:
         )
         _save_text_page(fig)
         plt.close(fig)
-        if case_onepage_appendix_html:
+        if artifacts.get("external_benchmark_case_onepage_index_html"):
             fig = plt.figure(figsize=(11, 8.5))
             ax = fig.add_subplot(111)
             ax.axis("off")
@@ -6792,23 +6746,6 @@ def main() -> None:
         else {}
     )
     irregular_structure_source_catalog = _load_optional_json(Path(args.irregular_structure_source_catalog))
-    irregular_structure_source_catalog_summary = (
-        irregular_structure_source_catalog.get("summary")
-        if isinstance(irregular_structure_source_catalog.get("summary"), dict)
-        else {}
-    )
-    irregular_structure_triage_report = _load_optional_json(Path(args.irregular_structure_triage_report))
-    irregular_structure_triage_summary = (
-        irregular_structure_triage_report.get("summary")
-        if isinstance(irregular_structure_triage_report.get("summary"), dict)
-        else {}
-    )
-    irregular_structure_collection_report = _load_optional_json(Path(args.irregular_structure_collection_report))
-    irregular_structure_collection_summary = (
-        irregular_structure_collection_report.get("summary")
-        if isinstance(irregular_structure_collection_report.get("summary"), dict)
-        else {}
-    )
     irregular_top5_execution_manifest = _load_optional_json(Path(args.irregular_top5_execution_manifest))
     irregular_top5_summary = (
         irregular_top5_execution_manifest.get("summary")
@@ -6836,11 +6773,6 @@ def main() -> None:
         row for row in (irregular_top5_execution_manifest.get("top5_families") or []) if isinstance(row, dict)
     ]
     irregular_benchmark_execution_manifest = _load_optional_json(Path(args.irregular_benchmark_execution_manifest))
-    irregular_benchmark_execution_summary = (
-        irregular_benchmark_execution_manifest.get("summary")
-        if isinstance(irregular_benchmark_execution_manifest.get("summary"), dict)
-        else {}
-    )
     irregular_benchmark_execution_artifacts = (
         irregular_benchmark_execution_manifest.get("artifacts")
         if isinstance(irregular_benchmark_execution_manifest.get("artifacts"), dict)
@@ -7258,22 +7190,6 @@ def main() -> None:
         irregular_structure_gate_report.get("summary_line", "") or irregular_structure_gate_report.get("reason", "") or ""
     ).strip()
     irregular_structure_track_summary_line = irregular_structure_summary_line
-    irregular_structure_source_catalog_summary_line = (
-        f"Irregular source catalog: PASS | families={int(irregular_structure_source_catalog_summary.get('family_count', 0))} | "
-        f"sources={int(irregular_structure_source_catalog_summary.get('source_record_count', 0))} | "
-        f"local_ready={int(irregular_structure_source_catalog_summary.get('local_ready_count', 0))} | "
-        f"remote_candidates={int(irregular_structure_source_catalog_summary.get('remote_candidate_count', 0))}"
-    )
-    irregular_structure_triage_summary_line = (
-        f"Irregular triage: PASS | native_candidates={int(irregular_structure_triage_summary.get('native_roundtrip_candidate_count', 0))} | "
-        f"solver_candidates={int(irregular_structure_triage_summary.get('solver_benchmark_candidate_count', 0))} | "
-        f"ai_candidates={int(irregular_structure_triage_summary.get('ai_learning_candidate_count', 0))}"
-    )
-    irregular_structure_collection_summary_line = (
-        f"Irregular collection: PASS | collected={int(irregular_structure_collection_summary.get('collected_count', 0))} | "
-        f"metadata_only_remote_candidate={int(irregular_structure_collection_summary.get('metadata_only_remote_candidate_count', 0))} | "
-        f"rejected={int(irregular_structure_collection_summary.get('rejected_count', 0))}"
-    )
     irregular_top5_local_ready_count = sum(
         1 for row in irregular_top5_families if str(row.get("execution_mode", "") or "").startswith("ready_local")
     )
@@ -8699,12 +8615,6 @@ def main() -> None:
         "authority_catalog_diff_removed_count": int(authority_catalog_routing_diff.get("removed_count", 0)),
         "authority_catalog_diff_baseline_seeded": bool(authority_catalog_routing_diff.get("baseline_seeded", False)),
         "authority_catalog_routing_warning_active": bool(int(authority_catalog_routing_diff.get("change_count", 0) or 0) > 0),
-        "promotion_reason_code": promotion_reason_code,
-        "promotion_hold_for_review": promotion_hold_for_review,
-        "hold_review_manifest": hold_review_manifest,
-        "hold_review_packet_md": hold_review_packet_md,
-        "hold_review_packet_pdf": hold_review_packet_pdf,
-        "hold_review_ack_json": hold_review_ack_json,
         "nightly_smoke_recent_samples": smoke_recent_samples,
         "nightly_smoke_trend": smoke_trend,
     }

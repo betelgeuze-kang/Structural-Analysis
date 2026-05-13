@@ -42,7 +42,6 @@ def run(strict_probe_path: str, winning_ticket_path: str, require_inputs: bool) 
     host_copy_bytes = int(probe.get("host_copy_bytes", 1)) if isinstance(probe, dict) else 1
 
     selection = winning.get("selection", {}) if isinstance(winning, dict) else {}
-    targeted = winning.get("targeted_backprop", {}) if isinstance(winning, dict) else {}
     top_k = int(selection.get("top_k", 0)) if isinstance(selection, dict) else 0
 
     checks = {

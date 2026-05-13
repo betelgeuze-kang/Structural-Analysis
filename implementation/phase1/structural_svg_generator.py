@@ -21,7 +21,6 @@ Usage:
 from __future__ import annotations
 
 import html
-import json
 import math
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -739,7 +738,6 @@ class StructuralSVGGenerator:
             member_id = str(entry["member_id"])
             href = self._build_viewer_href(member_id, sheet_key=sheet_key, view_label=view_label)
             box_y = entry["box_y"]
-            box_mid_y = box_y + entry["box_height"] / 2
             line_end_x = box_x
             line_end_y = min(max(entry["anchor_y"], box_y + 12.0), box_y + entry["box_height"] - 12.0)
             meta_text = f"#{member_id}"
@@ -1426,7 +1424,6 @@ class StructuralSVGGenerator:
 
 # ─── Standalone execution ───
 if __name__ == "__main__":
-    import sys
 
     # Generate demo model and output SVGs
     print("Generating demo structural SVG drawings...")

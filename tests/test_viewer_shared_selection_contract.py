@@ -9,6 +9,8 @@ def test_index_viewer_publishes_shared_selection_contract() -> None:
     assert "BroadcastChannel" in text
     assert "window.addEventListener('storage'" in text
     assert "focus_member" in text
+    assert "drawing_asset" in text
+    assert "asset_ref" in text
     assert "member_set" in text
     assert "memberIds" in text
     assert 'id="review-row-link"' in text

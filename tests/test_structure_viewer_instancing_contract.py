@@ -78,7 +78,6 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     compact_text = "".join(text.split())
     compact_geometry_text = "".join(geometry_text.split())
     compact_picking_text = "".join(picking_text.split())
-    compact_broadphase_text = "".join(broadphase_text.split())
 
     assert "let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;" in text
     assert "const SURFACE_LOD_MEDIUM_ELEMENT_THRESHOLD=" in text

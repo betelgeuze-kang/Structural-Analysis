@@ -204,15 +204,11 @@ def _instruction_sidecar_summary(candidate_rows: list[dict[str, Any]], *, midas_
     if not summary:
         summary = export_report.get("summary") if isinstance(export_report.get("summary"), dict) else {}
 
-    candidate_member_ids = {str(row.get("member_id", "") or "").strip() for row in candidate_rows if str(row.get("member_id", "") or "").strip()}
     candidate_group_ids = {str(row.get("group_id", "") or "").strip() for row in candidate_rows if str(row.get("group_id", "") or "").strip()}
     candidate_scopes = {_canonical_group_scope(group_id) for group_id in candidate_group_ids if _canonical_group_scope(group_id)}
     candidate_sections = {str(row.get("section_signature", "") or "").strip() for row in candidate_rows if str(row.get("section_signature", "") or "").strip()}
 
     sidecar_group_rows = [row for row in sidecar_rows if str(row.get("group_id", "") or "").strip()]
-    sidecar_group_ids = {str(row.get("group_id", "") or "").strip() for row in sidecar_group_rows}
-    sidecar_scopes = {_canonical_group_scope(row.get("group_id", "")) for row in sidecar_group_rows if _canonical_group_scope(row.get("group_id", ""))}
-    sidecar_sections = {_derive_section_signature(row) for row in sidecar_rows if _derive_section_signature(row)}
 
     direct_group_overlap_rows = [row for row in sidecar_group_rows if str(row.get("group_id", "") or "").strip() in candidate_group_ids]
     canonical_group_overlap_rows = [row for row in sidecar_group_rows if _canonical_group_scope(row.get("group_id", "")) in candidate_scopes]

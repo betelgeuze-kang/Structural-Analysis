@@ -26,7 +26,6 @@ from special_link_library import (
     GapLink,
     PoundingLink,
     UpliftLink,
-    build_default_special_link_library,
     describe_special_link_library,
 )
 

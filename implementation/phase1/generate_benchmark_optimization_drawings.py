@@ -1271,7 +1271,6 @@ def _build_peer_bridge_proxy_model(
 
     foundation_length = dims["foundation_length_in"]
     foundation_width = dims["foundation_width_in"]
-    foundation_height = dims["foundation_height_in"]
     column_spacing = dims["column_center_spacing_in"]
     column_height = dims["column_length_in"]
     cap_beam_length = dims["cap_beam_length_in"]
@@ -1421,9 +1420,9 @@ def _build_peer_bridge_proxy_model(
         next_element_id += 1
         return member_id
 
-    foundation_id = add_element("slab", foundation_nodes, "FOOTING", 0.34, "foundation-mat")
+    add_element("slab", foundation_nodes, "FOOTING", 0.34, "foundation-mat")
     north_column_id = add_element("column", [column_bottom_nodes[0], column_top_nodes[0]], "SLV01", 0.91, "north-column", "strengthen")
-    south_column_id = add_element("column", [column_bottom_nodes[1], column_top_nodes[1]], "SLV01", 0.88, "south-column", "strengthen")
+    add_element("column", [column_bottom_nodes[1], column_top_nodes[1]], "SLV01", 0.88, "south-column", "strengthen")
     cap_beam_id = add_element("beam", [cap_beam_nodes[0], cap_beam_nodes[1]], "CMP01", 0.86, "bent-cap", "tune")
     pt_tendon_ids = [
         add_element("brace", [column_top_nodes[0], cap_beam_nodes[1]], "PT-BAR", 0.63, "post-tension-link", "tune"),

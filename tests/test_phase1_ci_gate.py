@@ -274,7 +274,6 @@ def _passing_gate_payload(tmp_path: Path) -> dict:
             "surrogate_runtime_markers": [],
             "contract_pass": True,
         },
-        "checks": checks,
         "summary": {
             "fail_count": 0,
             "case_count": 3,

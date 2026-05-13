@@ -1651,9 +1651,6 @@ def _build_summary(
     registry_summary = release_registry.get("summary") if isinstance(release_registry.get("summary"), dict) else {}
     registry_checks = release_registry.get("checks") if isinstance(release_registry.get("checks"), dict) else {}
     registry_sig = release_registry.get("signature") if isinstance(release_registry.get("signature"), dict) else {}
-    registry_artifacts = (
-        release_registry.get("artifacts") if isinstance(release_registry.get("artifacts"), dict) else {}
-    )
     kds_frontend = kds.get("frontend_payload") if isinstance(kds.get("frontend_payload"), dict) else {}
     gap_summary = gap.get("summary") if isinstance(gap.get("summary"), dict) else {}
     performance_profiling_summary = (
@@ -3359,12 +3356,6 @@ def _build_summary(
         "mgt_export_instruction_sidecar_action_family_label": str(gap_summary.get("mgt_export_instruction_sidecar_action_family_label", "")),
         "mgt_export_rebar_delivery_mode": str(gap_summary.get("mgt_export_rebar_delivery_mode", "")),
         "mgt_export_evidence_model": str(gap_summary.get("mgt_export_evidence_model", "")),
-        "mgt_export_direct_patch_action_family_label": str(
-            gap_summary.get("mgt_export_direct_patch_action_family_label", "")
-        ),
-        "mgt_export_instruction_sidecar_action_family_label": str(
-            gap_summary.get("mgt_export_instruction_sidecar_action_family_label", "")
-        ),
         "mgt_export_instruction_sidecar_audit_only_change_count": int(
             gap_summary.get("mgt_export_instruction_sidecar_audit_only_change_count", 0)
         ),
@@ -4114,14 +4105,8 @@ def _write_markdown(
     authority_catalog_diff: dict,
 ) -> None:
     story_change_rows, zone_change_rows = _aggregate_design_change_rows(design_change_rows)
-    panel_zone_external_validation_surface = _panel_zone_external_validation_surface(metrics)
     selected_candidate_rows, unselected_candidate_rows = _split_accepted_candidate_rows(accepted_candidate_rows)
     smoke_history_png = Path(str(artifacts.get("smoke_history_png", "") or ""))
-    smoke_history_panel_html = (
-        f'<div class="panel"><h2>Nightly Smoke Trend</h2><img src="../{smoke_history_png.name}" alt="Nightly Smoke Trend"></div>'
-        if smoke_history_png.exists()
-        else ""
-    )
     advanced_holdout_status_rows = [
         row for row in (metrics.get("advanced_holdout_status_rows", []) or []) if isinstance(row, dict)
     ]
@@ -7009,20 +6994,12 @@ def main() -> None:
     solver_truthfulness_report = _load_json(Path(args.solver_truthfulness_report)) if Path(args.solver_truthfulness_report).exists() else {}
     nonlinear_generalization_report = _load_json(Path(args.nonlinear_generalization_report))
     workflow_productization_report = _load_json(Path(args.workflow_productization_report))
-    workflow_productization_summary = (
-        workflow_productization_report.get("summary") if isinstance(workflow_productization_report.get("summary"), dict) else {}
-    )
     workflow_productization_artifacts = (
         workflow_productization_report.get("generated_artifacts")
         if isinstance(workflow_productization_report.get("generated_artifacts"), dict)
         else {}
     )
     gap_summary = gap.get("summary") if isinstance(gap.get("summary"), dict) else {}
-    performance_profiling_summary = (
-        performance_profiling_report.get("summary")
-        if isinstance(performance_profiling_report.get("summary"), dict)
-        else {}
-    )
     external_benchmark_submission_readiness = _load_json(Path(args.external_benchmark_submission_readiness_report))
     external_benchmark_submission_summary = (
         external_benchmark_submission_readiness.get("summary")
@@ -7100,11 +7077,6 @@ def main() -> None:
     external_benchmark_submission_preview_approve_all = _load_json(
         external_benchmark_submission_preview_approve_all_json
     )
-    external_benchmark_submission_preview_approve_all_summary = (
-        external_benchmark_submission_preview_approve_all.get("summary")
-        if isinstance(external_benchmark_submission_preview_approve_all.get("summary"), dict)
-        else {}
-    )
     external_benchmark_submission_preview_approve_all_readiness_summary = (
         external_benchmark_submission_preview_approve_all.get("readiness_preview", {}).get("summary")
         if isinstance(external_benchmark_submission_preview_approve_all.get("readiness_preview"), dict)
@@ -7116,11 +7088,6 @@ def main() -> None:
     )
     external_benchmark_submission_preview_reject_one = _load_json(
         external_benchmark_submission_preview_reject_one_json
-    )
-    external_benchmark_submission_preview_reject_one_summary = (
-        external_benchmark_submission_preview_reject_one.get("summary")
-        if isinstance(external_benchmark_submission_preview_reject_one.get("summary"), dict)
-        else {}
     )
     external_benchmark_submission_preview_reject_one_readiness_summary = (
         external_benchmark_submission_preview_reject_one.get("readiness_preview", {}).get("summary")

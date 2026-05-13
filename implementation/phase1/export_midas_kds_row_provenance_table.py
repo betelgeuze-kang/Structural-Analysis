@@ -1249,14 +1249,6 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
             _int_or_default(top_row.get("viewer_results_companion_item_index", DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX), DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX)
             if isinstance(top_row, dict) else DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX
         )
-        top_viewer_results_companion_focus_key = (
-            str(top_row.get("viewer_results_companion_focus_key", DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY) or DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY
-        )
-        top_viewer_results_companion_selection_key = (
-            str(top_row.get("viewer_results_companion_selection_key", DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY) or DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY
-        )
         top_viewer_results_detail_focus_key = (
             str(top_row.get("viewer_results_detail_focus_key", DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY) or DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY)
             if isinstance(top_row, dict) else DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY
@@ -1294,14 +1286,6 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
             _int_or_default(top_row.get("viewer_codecheck_companion_item_index", DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX)
             if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX
         )
-        top_viewer_codecheck_companion_focus_key = (
-            str(top_row.get("viewer_codecheck_companion_focus_key", DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY
-        )
-        top_viewer_codecheck_companion_selection_key = (
-            str(top_row.get("viewer_codecheck_companion_selection_key", DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY) or DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY
-        )
         top_viewer_codecheck_detail_block = (
             str(top_row.get("viewer_codecheck_detail_block", "") or "") if isinstance(top_row, dict) else ""
         )
@@ -1330,10 +1314,6 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
         top_viewer_codecheck_appendix_focus_key = (
             str(top_row.get("viewer_codecheck_appendix_focus_key", DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY)
             if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY
-        )
-        top_viewer_codecheck_appendix_selection_key = (
-            str(top_row.get("viewer_codecheck_appendix_selection_key", DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY) or DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY
         )
         top_viewer_interactive_detail_more = (
             str(top_row.get("viewer_interactive_detail_more", "") or "") if isinstance(top_row, dict) else ""

@@ -1268,11 +1268,6 @@ def main() -> None:
             corpus_manifest=corpus_manifest,
             korean_source_catalog=korean_source_catalog,
         )
-        base_exact_topology_queue_summary = (
-            base_exact_topology_queue.get("summary")
-            if isinstance(base_exact_topology_queue.get("summary"), dict)
-            else {}
-        )
         pending_source_ids = {
             str(row.get("source_id", "") or "").strip()
             for row in (base_exact_topology_queue.get("pending_candidate_rows") or [])

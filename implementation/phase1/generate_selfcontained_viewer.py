@@ -20,7 +20,6 @@ import random
 import re
 import shutil
 from pathlib import Path
-from typing import Any
 
 from implementation.phase1.singlefile_viewer_support import inline_design_theme_stylesheet
 

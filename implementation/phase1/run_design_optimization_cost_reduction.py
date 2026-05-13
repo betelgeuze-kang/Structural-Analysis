@@ -61,8 +61,6 @@ from design_optimization_env import (
     ACTION_INDEX_V2,
     DesignOptimizationConfig,
     aggregate_group_state,
-    apply_group_action,
-    project_group_cost_proxy,
 )
 from run_design_optimization_solver_loop import (
     _load_npz,
@@ -211,7 +209,6 @@ def _build_cost_reduction_viewer_enrichment(
     story_band_values = np.asarray(dataset.get("story_band_index", np.zeros(group_index_per_member.shape[0], dtype=np.int32)), dtype=np.int32)
 
     focus_member_ids = _first_string_per_group(member_ids, group_index_per_member, group_count)
-    review_member_ids = _first_string_per_group(member_ids, group_index_per_member, group_count)
     member_type_per_group = _first_string_per_group(member_types, group_index_per_member, group_count)
     zone_label_per_group = _first_string_per_group(zone_labels, group_index_per_member, group_count)
     semantic_group_per_group = _first_string_per_group(semantic_groups, group_index_per_member, group_count)

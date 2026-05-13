@@ -614,7 +614,6 @@ def _build_action_mask_row(row: dict[str, object]) -> np.ndarray:
     max_dcr = float(row.get("max_dcr", 0.0) or 0.0)
     detail_ratio = float(row.get("detailing_violation_ratio", 0.0) or 0.0)
     robustness_margin = float(row.get("robustness_margin", 0.0) or 0.0)
-    multi_hazard_margin = float(row.get("multi_hazard_margin", 0.0) or 0.0)
     combo_risk = float(row.get("combination_risk_scale", 1.0) or 1.0)
 
     if member_type == "connection":

@@ -11,7 +11,6 @@ import shlex
 import zipfile
 from pathlib import Path
 from typing import Any, Callable, Mapping
-from urllib.parse import urlencode
 
 import numpy as np
 try:

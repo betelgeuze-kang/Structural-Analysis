@@ -60,6 +60,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-real-drawing-browser-query" in text
     assert "data-real-drawing-browser-sort" in text
     assert "data-real-drawing-next-review" in text
+    assert "REAL_DRAWING_BROWSER_STATE_KEY" in text
+    assert "drawing_asset" in text
+    assert "data-real-drawing-copy-link" in text
+    assert "data-real-drawing-recent-asset" in text
+    assert "rememberRealDrawingAssetRef" in text
+    assert "copyRealDrawingDeepLink" in text
     assert "setRealDrawingAssetQuery" in text
     assert "setRealDrawingBrowserSort" in text
     assert "sortRealDrawingBrowserAssets" in text
@@ -68,6 +74,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")
     assert "real-drawing-browser-item" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "real-drawing-recent-rail" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "real-drawing-action-row" in (
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")
     assert "Drawing Review Queue" in text

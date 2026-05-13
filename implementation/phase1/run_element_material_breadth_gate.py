@@ -870,11 +870,6 @@ def main() -> None:
             if isinstance(structural_contact_gate.get("checks"), dict)
             else {}
         )
-        structural_contact_support_surface = (
-            structural_contact_gate.get("support_surface_evidence")
-            if isinstance(structural_contact_gate.get("support_surface_evidence"), dict)
-            else {}
-        )
         structural_contact_validation_checks = (
             structural_contact_validation.get("checks")
             if isinstance(structural_contact_validation.get("checks"), dict)

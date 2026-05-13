@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import argparse
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -456,7 +456,6 @@ def _build_case_payloads(case_row: dict[str, Any]) -> dict[str, Any]:
             continue
         probe = probe_by_story.get(story, {})
         stiffness_scale = _safe_float(probe.get("stiffness_scale"), 1.0)
-        yield_scale = _safe_float(probe.get("yield_scale"), 1.0)
         beam_tangent_scale = _safe_float(probe.get("beam_tangent_scale"), 1.0)
         section_moment = _safe_float(probe.get("section_moment_kNm"), 0.0)
         drift_before = _safe_float(drift_envelope[story - 1] if story - 1 < len(drift_envelope) else max_drift * (1.0 - 0.03 * (story - 1)))
@@ -680,12 +679,6 @@ def main() -> int:
     ndtha_report_path = Path(args.ndtha_report)
     out_dir = Path(args.out_dir)
     report_path = out_dir / "bridge_report.json"
-    model_json_path = out_dir / "model.json"
-    dataset_npz_path = out_dir / "dataset.npz"
-    changes_json_path = out_dir / "synthetic_changes.json"
-    change_summary_json_path = out_dir / "synthetic_change_summary.json"
-    release_gap_json_path = out_dir / "synthetic_release_gap_report.json"
-    export_report_json_path = out_dir / "synthetic_export_report.json"
 
     report_payload: dict[str, Any] = {
         "schema_version": "1.0",

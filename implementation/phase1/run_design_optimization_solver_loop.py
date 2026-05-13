@@ -708,7 +708,6 @@ def run_solver_constrained_loop(
     return {
         "baseline_solver": baseline_solver,
         "final_solver": current_solver,
-        "final_state": current_state,
         "accepted_stage1": accepted_stage1,
         "accepted_stage1_extra": extra_stage1,
         "accepted_stage1_dcr": dcr_stage1,

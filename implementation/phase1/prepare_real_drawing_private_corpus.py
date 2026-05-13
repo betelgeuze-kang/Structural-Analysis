@@ -10,7 +10,6 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 from typing import Any
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen

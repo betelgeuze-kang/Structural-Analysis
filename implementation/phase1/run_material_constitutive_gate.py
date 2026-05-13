@@ -4254,7 +4254,6 @@ def main() -> None:
         multiscale_streaming_metrics = multiscale_streaming.get("metrics") if isinstance(multiscale_streaming.get("metrics"), dict) else {}
         phasee_integrated_checks = phasee_integrated.get("checks") if isinstance(phasee_integrated.get("checks"), dict) else {}
         phasef_resilience_checks = phasef_resilience.get("checks") if isinstance(phasef_resilience.get("checks"), dict) else {}
-        dynamics_boundary_summary = _summary_dict(dynamics_boundary)
         dynamics_boundary_supports_summary = dynamics_boundary.get("supports_summary") if isinstance(dynamics_boundary.get("supports_summary"), dict) else {}
         dynamics_boundary_damping_summary = dynamics_boundary.get("damping_summary") if isinstance(dynamics_boundary.get("damping_summary"), dict) else {}
         moving_load_attention_checks = moving_load_attention.get("checks") if isinstance(moving_load_attention.get("checks"), dict) else {}

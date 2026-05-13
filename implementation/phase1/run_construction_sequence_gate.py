@@ -305,7 +305,6 @@ def main() -> None:
 
                 k_mod = np.asarray(rc_mod["story_k_n_per_m"], dtype=np.float64)
                 y_mod = np.asarray(rc_mod["story_yield_drift_m"], dtype=np.float64)
-                m_mod = np.asarray(rc_mod["story_mass_kg"], dtype=np.float64)
                 idx = rc_mod.get("indices") if isinstance(rc_mod.get("indices"), dict) else {}
                 creep_idx = float(idx.get("creep_index_mean", 0.0))
                 creep_indices.append(creep_idx)

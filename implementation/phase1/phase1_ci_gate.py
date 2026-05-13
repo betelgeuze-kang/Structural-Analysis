@@ -17,6 +17,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from typing import Any
 
 
 REASON_CODES = {
@@ -2081,7 +2082,6 @@ def main(argv: list[str] | None = None) -> int:
         surface_interaction_benchmark_report=surface_interaction_benchmark,
         surface_interaction_benchmark_pass=surface_interaction_benchmark_ok,
     )
-    core_engine_surface_ok = bool(core_engine_surface_summary.get("contract_pass", False))
     foundation_soil_link_checks = (
         foundation_soil_link.get("checks") if isinstance(foundation_soil_link.get("checks"), dict) else {}
     )
@@ -3076,7 +3076,6 @@ def main(argv: list[str] | None = None) -> int:
         "panel_zone_status_label": panel_zone_status_label,
         "panel_zone_advisory_only": panel_zone_advisory_only,
         "panel_zone_release_blocking": panel_zone_release_blocking,
-        "panel_zone_external_validation_pending": panel_zone_external_validation_pending,
         "panel_zone_external_validation_status_label": panel_zone_external_validation_status_label,
         "steel_composite_constitutive_gate_available": steel_composite_constitutive_gate_available,
         "steel_composite_constitutive_gate_summary_line": steel_composite_constitutive_gate_summary_line,

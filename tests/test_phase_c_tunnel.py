@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from soil_tunnel_ssi import SOIL_PRESETS, _impedance_curve, _transfer_amp
 

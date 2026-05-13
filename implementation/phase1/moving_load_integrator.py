@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
 import logging
-import math
 from pathlib import Path
 import time
 from typing import Callable

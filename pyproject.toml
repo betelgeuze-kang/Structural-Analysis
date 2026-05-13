@@ -27,6 +27,17 @@ dev = [
 [tool.setuptools]
 py-modules = []
 
+[tool.ruff]
+extend-exclude = [
+  "implementation/phase1/_vendor/**",
+  "implementation/phase1/open_data/demo/**",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# This legacy monolithic HTML generator is tracked for a dedicated module split.
+# Keep F841 scoped here while smaller source/report scripts are actively cleaned.
+"implementation/phase1/generate_structural_optimization_visualization_viewer.py" = ["F841"]
+
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = "-q"

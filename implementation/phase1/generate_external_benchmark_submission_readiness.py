@@ -457,7 +457,6 @@ def build_submission_readiness(
     submission_updates: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     gap_summary = _summary(release_gap_payload)
-    commercial_summary = _summary(commercial_readiness_payload)
     commercial_checks = commercial_readiness_payload.get("checks") if isinstance(commercial_readiness_payload.get("checks"), dict) else {}
 
     core_holdouts_closed = bool(

@@ -11,7 +11,6 @@ import logging
 import math
 from pathlib import Path
 
-import numpy as np
 
 from runtime_contracts import InputContractError, get_logger, log_event, validate_input_contract
 

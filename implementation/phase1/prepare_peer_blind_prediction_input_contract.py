@@ -126,7 +126,7 @@ def build_contract(
         "source_manifest": str(DEFAULT_SOURCE_MANIFEST),
         "bundle_report": str(DEFAULT_BUNDLE_REPORT),
         "measured_response_status": str(DEFAULT_MEASURED_STATUS),
-        "measured_response_landing_manifest": str(DEFAULT_MEASURED_LANDING_MANIFEST),
+        "measured_response_landing_manifest_path": str(DEFAULT_MEASURED_LANDING_MANIFEST),
         "input_root": str(source_manifest.get("local_input_root", "") or measured_status.get("input_root", "")),
         "contract_pass": public_input_ready,
         "reason_code": reason_code,

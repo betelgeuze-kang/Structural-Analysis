@@ -48,7 +48,6 @@ def run_gate(*, source_catalog: dict[str, Any], triage_report: dict[str, Any], c
     catalog_summary = source_catalog.get("summary") if isinstance(source_catalog.get("summary"), dict) else {}
     triage_summary = triage_report.get("summary") if isinstance(triage_report.get("summary"), dict) else {}
     collection_summary = collection_report.get("summary") if isinstance(collection_report.get("summary"), dict) else {}
-    top5_summary = top5_manifest.get("summary") if isinstance(top5_manifest.get("summary"), dict) else {}
     top5_rows = top5_manifest.get("top5_families") if isinstance(top5_manifest.get("top5_families"), list) else []
 
     local_ready_count = int(catalog_summary.get("local_ready_count", 0) or 0)

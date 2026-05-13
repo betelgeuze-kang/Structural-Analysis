@@ -2636,22 +2636,9 @@ def render_review_html(payload: dict[str, Any]) -> str:
     mgt_export_source_output_mgt_diff_preview_text = html.escape(
         str(payload.get("mgt_export_source_output_mgt_diff_preview_text", "") or "")
     )
-    mgt_export_source_output_mgt_diff_window_preview_text = html.escape(
-        str(payload.get("mgt_export_source_output_mgt_diff_window_preview_text", "") or "")
-    )
     mgt_export_source_output_mgt_diff_sample_lines = [
         str(value)
         for value in (payload.get("mgt_export_source_output_mgt_diff_sample_lines") or [])
-        if str(value).strip()
-    ]
-    mgt_export_source_output_mgt_diff_search_tokens = [
-        str(value)
-        for value in (payload.get("mgt_export_source_output_mgt_diff_search_tokens") or [])
-        if str(value).strip()
-    ]
-    mgt_export_source_output_mgt_diff_member_ids = [
-        str(value)
-        for value in (payload.get("mgt_export_source_output_mgt_diff_member_ids") or [])
         if str(value).strip()
     ]
     mgt_export_source_output_mgt_diff_member_row_indices = {
@@ -2659,31 +2646,11 @@ def render_review_html(payload: dict[str, Any]) -> str:
         for key, values in (payload.get("mgt_export_source_output_mgt_diff_member_row_indices") or {}).items()
         if str(key).strip()
     }
-    mgt_export_source_output_mgt_diff_section_ids = [
-        str(value)
-        for value in (payload.get("mgt_export_source_output_mgt_diff_section_ids") or [])
-        if str(value).strip()
-    ]
-    mgt_export_source_output_mgt_diff_window_search_tokens = [
-        str(value)
-        for value in (payload.get("mgt_export_source_output_mgt_diff_window_search_tokens") or [])
-        if str(value).strip()
-    ]
-    mgt_export_source_output_mgt_diff_window_member_ids = [
-        str(value)
-        for value in (payload.get("mgt_export_source_output_mgt_diff_window_member_ids") or [])
-        if str(value).strip()
-    ]
     mgt_export_source_output_mgt_diff_window_member_row_indices = {
         str(key): [int(value) for value in values]
         for key, values in (payload.get("mgt_export_source_output_mgt_diff_window_member_row_indices") or {}).items()
         if str(key).strip()
     }
-    mgt_export_source_output_mgt_diff_window_section_ids = [
-        str(value)
-        for value in (payload.get("mgt_export_source_output_mgt_diff_window_section_ids") or [])
-        if str(value).strip()
-    ]
     mgt_compare_window_json_href = html.escape(str(payload.get("mgt_compare_window_json_href", "") or ""))
     mgt_compare_window_txt_href = html.escape(str(payload.get("mgt_compare_window_txt_href", "") or ""))
     mgt_compare_window_summary_line = html.escape(str(payload.get("mgt_compare_window_summary_line", "") or ""))
@@ -2738,14 +2705,9 @@ def render_review_html(payload: dict[str, Any]) -> str:
     )
     mgt_export_total_change_count = _safe_int(payload.get("mgt_export_total_change_count", 0))
     mgt_export_supported_change_count = _safe_int(payload.get("mgt_export_supported_change_count", 0))
-    mgt_export_supported_change_ratio = _safe_float(payload.get("mgt_export_supported_change_ratio", 0.0))
     mgt_export_direct_patch_change_count = _safe_int(payload.get("mgt_export_direct_patch_change_count", 0))
     mgt_export_direct_patch_change_ratio = _safe_float(payload.get("mgt_export_direct_patch_change_ratio", 0.0))
     mgt_export_patched_supported_change_count = _safe_int(payload.get("mgt_export_patched_supported_change_count", 0))
-    mgt_export_instruction_sidecar_change_count = _safe_int(payload.get("mgt_export_instruction_sidecar_change_count", 0))
-    mgt_export_instruction_sidecar_change_ratio = _safe_float(
-        payload.get("mgt_export_instruction_sidecar_change_ratio", 0.0)
-    )
     mgt_export_instruction_sidecar_zero_touch_verified_change_count = _safe_int(
         payload.get("mgt_export_instruction_sidecar_zero_touch_verified_change_count", 0)
     )
@@ -2753,14 +2715,11 @@ def render_review_html(payload: dict[str, Any]) -> str:
         payload.get("mgt_export_instruction_sidecar_zero_touch_verified_change_ratio", 0.0)
     )
     mgt_export_unsupported_change_count = _safe_int(payload.get("mgt_export_unsupported_change_count", 0))
-    mgt_export_unsupported_change_ratio = _safe_float(payload.get("mgt_export_unsupported_change_ratio", 0.0))
     mgt_export_loadcomb_combo_count = _safe_int(payload.get("mgt_export_loadcomb_combo_count", 0))
-    mgt_export_audit_review_queue_item_count = _safe_int(payload.get("mgt_export_audit_review_queue_item_count", 0))
     mgt_export_audit_review_queue_pending_count = _safe_int(payload.get("mgt_export_audit_review_queue_pending_count", 0))
     mgt_export_diff_summary_line = html.escape(str(payload.get("mgt_export_diff_summary_line", "") or ""))
     mgt_export_diff_rows = [row for row in (payload.get("mgt_export_diff_rows") or []) if isinstance(row, dict)]
     midas_roundtrip_gate_report_href = html.escape(str(payload.get("midas_roundtrip_gate_report_href", "") or ""))
-    midas_roundtrip_gate_contract_pass = bool(payload.get("midas_roundtrip_gate_contract_pass", False))
     midas_roundtrip_gate_summary_line = html.escape(str(payload.get("midas_roundtrip_gate_summary_line", "") or "n/a"))
     midas_roundtrip_gate_ready_count = _safe_int(payload.get("midas_roundtrip_gate_ready_count", 0))
     midas_roundtrip_gate_corpus_case_count = _safe_int(payload.get("midas_roundtrip_gate_corpus_case_count", 0))
@@ -2774,9 +2733,6 @@ def render_review_html(payload: dict[str, Any]) -> str:
         payload.get("midas_roundtrip_gate_public_structural_preview_ready_count", 0)
     )
     midas_roundtrip_gate_pending_review_total = _safe_int(payload.get("midas_roundtrip_gate_pending_review_total", 0))
-    midas_roundtrip_gate_loadcomb_exact_case_count = _safe_int(
-        payload.get("midas_roundtrip_gate_loadcomb_exact_case_count", 0)
-    )
     midas_roundtrip_gate_taxonomy_exact_count = _safe_int(payload.get("midas_roundtrip_gate_taxonomy_exact_count", 0))
     midas_roundtrip_gate_taxonomy_canonical_count = _safe_int(
         payload.get("midas_roundtrip_gate_taxonomy_canonical_count", 0)
@@ -7425,7 +7381,7 @@ function parseDataList(value = '') {{
   return Array.from(
     new Set(
       String(value || '')
-        .split(/[|,\s]+/)
+        .split(/[|,\\s]+/)
         .map((token) => token.trim())
         .filter(Boolean)
     )
@@ -7433,8 +7389,8 @@ function parseDataList(value = '') {{
 }}
 function normalizeStoryBandKey(value = '') {{
   const key = String(value || '').trim().toLowerCase();
-  const storyMatch = key.match(/^s0*(\d+)$/);
-  return storyMatch ? storyMatch[1].replace(/^0+(?=\d)/, '') : key.replace(/^0+(?=\d)/, '');
+  const storyMatch = key.match(/^s0*(\\d+)$/);
+  return storyMatch ? storyMatch[1].replace(/^0+(?=\\d)/, '') : key.replace(/^0+(?=\\d)/, '');
 }}
 function diffNodeSearchText(node) {{
   return [
@@ -10063,7 +10019,6 @@ def render_expert_review_html(payload: dict[str, Any]) -> str:
     real_drawing_corpus = _real_drawing_corpus_view(payload)
     changed_group_count = _safe_int(payload.get("changed_group_count", 0))
     changed_member_count = _safe_int(payload.get("changed_member_count", 0))
-    total_element_count = _safe_int(payload.get("total_element_count", 0))
     signed_cost_proxy_delta_total = _safe_float(payload.get("signed_cost_proxy_delta_total", 0.0))
     constructability_delta_total = _safe_float(payload.get("constructability_delta_total", 0.0))
     max_dcr_after_max = _safe_float(payload.get("max_dcr_after_max", 0.0))
@@ -10077,9 +10032,6 @@ def render_expert_review_html(payload: dict[str, Any]) -> str:
     mgt_export_report_href = html.escape(str(payload.get("mgt_export_report_href", "") or ""))
     mgt_source_mgt_href = html.escape(str(payload.get("mgt_source_mgt_href", "") or ""))
     mgt_output_mgt_href = html.escape(str(payload.get("mgt_output_mgt_href", "") or ""))
-    mgt_loadcomb_roundtrip_report_href = html.escape(
-        str(payload.get("mgt_loadcomb_roundtrip_report_href", "") or "")
-    )
     expert_pdf_href = html.escape(str(payload.get("expert_pdf_href", "") or ""))
     internal_workspace_href = html.escape(str(payload.get("internal_review_href", "") or viewer_html_href or ""))
 

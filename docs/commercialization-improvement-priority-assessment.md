@@ -1,0 +1,327 @@
+# 상용화 개선 우선순위 및 단계 평가
+
+- 기준일: 2026-05-13
+- 대상: 전체 repo, `implementation/phase1`, `src/structure-viewer`, 릴리즈/검증 문서와 게이트 스크립트
+- 평가 방식: 현재 로컬 게이트 결과, 기존 상용화 gap 문서, 프론트엔드/viewer 계약 문서, 빌드/품질 체크 결과를 함께 반영한다.
+
+## 결론
+
+현재 단계는 **상용 보조툴 L3, 약 75%**로 본다.
+
+- 게이트 기반 공식 점수: **75/100**
+- 실무자 검토 전제 상용 보조툴 readiness: **75-80%**
+- 완전자율 상용 구조툴 대체 readiness: **55-60%**
+
+즉, 지금 상태는 "구조 엔지니어가 검토하면서 반복 업무를 크게 줄이는 상용 보조툴"에는 가까워졌지만, "검증/배포/운영/외부 벤치마크까지 닫힌 독립 상용 구조해석 제품"으로는 아직 부족하다.
+
+## 현재 확인값
+
+| 항목 | 현재 상태 | 의미 |
+| --- | --- | --- |
+| P0 core evidence | closed | MIDAS roundtrip, KDS load combination, geometry identity, constitutive, solver/element 핵심 증거는 닫힘 |
+| P0 overall | closed with publication evidence | `publication_evidence/current` 묶음을 명시하면 P0-1까지 closed |
+| P1 inputs | ready | P1 입력 재료는 준비됨 |
+| P1 execution | ready | publication evidence 기반 P1 readiness와 benchmark breadth가 unblocked |
+| 상용화 레벨 | L3 | `engineer_in_loop_commercial_assist_ready` |
+| 상용화 점수 | 7.5/10 | 게이트 기반 환산 75% |
+| 외부 benchmark receipt | 0/4 attached | 외부 검증은 아직 claim 승격 근거로 쓰면 안 됨 |
+| residual holdout closure | 3건 pending | 구조기술사/레거시툴/인허가성 검토 대기 영역 |
+| frontend build | pass | `npm run build`, frontend build contract 통과 |
+| repo hygiene | pass | repo hygiene, generated artifact drift 통과 |
+| critical static lint | pass | `ruff --select F821,F601,F401,F841` 통과, CI gate 추가 |
+| full static lint | fail | 전체 ruff 잔여 30건, `E402/E741/E731/E701/F811`만 남음 |
+| full pytest | pass | `1366 passed`, 테스트 후 tracked generated artifact drift 없음 |
+
+## 2026-05-13 실행 결과
+
+문서 작성 후 실제로 아래 항목을 진행했다.
+
+- `publication_evidence/current` bundle을 `check_p0_closure_status.py`에 명시해 P0 전체를 closed로 재판정했다.
+- P1 readiness와 P1 benchmark breadth를 같은 P0 evidence 기준으로 재실행해 둘 다 `ready` 상태로 만들었다.
+- P1 operational queues와 evidence intake template를 materialize했다.
+- `F821`, `F601`, `F401` lint를 0건으로 정리하고 CI에 `python -m ruff check . --select F821,F601,F401` gate를 추가했다.
+- 이어서 `F841`을 작은 source/report/test 파일에서 제거하고, 레거시 단일 대형 HTML generator 1개는 전용 리팩터링 전까지 per-file ignore로 명시했다.
+- `python -m ruff check . --select F821,F601,F401,F841`는 0건이며, 전체 ruff 잔여는 **147건에서 30건**으로 줄었다.
+- 풀 테스트 후 `panel_zone_solver_verified_export_bundle.json`이 fixture 샘플로 덮이는 테스트 격리 누락을 수정했고, 재실행 후 `check_generated_worktree_clean.py --show-ok` 통과를 확인했다.
+- `python -m pytest -q`는 **1366 passed**로 통과했다.
+- 상용화 레포트는 `7.0/10`에서 **`7.5/10`**으로 상승했다.
+
+남은 blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
+
+## 우선순위 0. P0 릴리즈 증거 게이트 닫기
+
+가장 먼저 해야 한다. 핵심 엔진 증거가 닫혀 있어도, release asset listing과 published-byte verification이 없으면 문서상 P0 전체는 open이다.
+
+완료된 부분:
+
+- release asset listing, upload plan, metadata preflight, post-publish roundtrip, hydrated SHA-bytes verification evidence bundle 확인
+- 22/22 release asset listing 일치
+- evidence bundle 기반 `p0_closed=true` 확인
+
+주의할 부분:
+
+- release tree는 `.gitignore` 대상이므로, 기본 실행이 아니라 publication evidence bundle을 명시해야 같은 판정이 재현됨
+- README/상용화 문서/릴리즈 문서가 같은 evidence path를 가리키도록 계속 동기화해야 함
+
+완료 기준:
+
+- `scripts/check_p0_closure_status.py`가 release publication까지 포함해 `p0_closed=true`를 보고
+- 해당 결과가 md/json evidence로 남고
+- README, 상용화 gap 문서, 릴리즈 문서가 같은 상태를 가리킴
+
+다음 작업:
+
+1. P0 status md/json을 release evidence bundle 기준으로 유지
+2. README와 상용화 문서의 P0/P1 상태 표현 동기화
+3. release evidence가 바뀔 때마다 같은 명령으로 재판정
+
+## 우선순위 1. 정적 품질 게이트 정리
+
+상용툴 수준에서는 "빌드는 된다"보다 "정적 품질 게이트가 깨끗하다"가 중요하다. 현재 ruff 기준 잔여 오류는 30개다.
+
+완료된 부분:
+
+- source/test 영역의 `F821`, `F601` 0건
+- source/test 영역의 `F401` 0건
+- source/test 영역의 `F841` 0건 또는 명시적 generator-scoped ignore 처리
+- vendored `implementation/phase1/_vendor/**` ruff 제외
+- generated open-data demo path를 ruff 제외해 generated artifact drift와 lint 대상 경계를 분리
+- CI에 critical static check 추가
+- 풀 테스트가 tracked generated artifact를 오염시키던 handoff 테스트 격리 누락 수정
+
+남은 부분:
+
+- `E402`: 모듈 import 위치 정리 17건
+- `E741`: 모호한 변수명 정리 7건
+- `E731`: lambda assignment 정리 3건
+- `E701`: 한 줄 colon statement 정리 2건
+- `F811`: unused redefinition 정리 1건
+- 대형 HTML generator는 `F841` per-file ignore를 제거할 수 있도록 별도 모듈 분리 필요
+
+완료 기준:
+
+- vendored/generated 제외 정책을 명확히 한 `ruff` 설정 추가
+- source 영역의 `F821`, `F601` 0건
+- 이후 `F841`와 style/safety rule을 단계적 정리
+- CI에 최소 `ruff check` 또는 critical rule subset 추가
+
+다음 작업:
+
+1. `E402` import 위치 문제를 파일별로 정리
+2. `E741`, `E731`, `E701`, `F811`을 작은 묶음으로 정리
+3. 대형 HTML generator를 모듈 분리한 뒤 per-file `F841` ignore 제거
+4. 전체 ruff fail 수를 0에 가깝게 낮춤
+
+## 우선순위 2. P1 evidence intake와 운영 queue 완성
+
+외부 검증은 지금 당장 실제로 모으기 어렵더라도, 상용 claim을 올리려면 evidence intake와 queue는 제품처럼 닫혀 있어야 한다.
+
+완료된 부분:
+
+- P1 readiness unblocked
+- P1 benchmark breadth ready
+- P1 operational queues materialized
+- EB/RH evidence intake template generated
+
+남은 부분:
+
+- external benchmark submission receipt `0/4`
+- residual holdout closure evidence 3건 pending
+
+완료 기준:
+
+- P1 operational queues materialized
+- EB 4개 lane에 receipt/status/update sidecar 구조 존재
+- RH 3건에 owner/status/SLA/closure packet template 존재
+- 외부 증거가 없는 상태와 내부 준비 완료 상태가 명확히 분리됨
+
+다음 작업:
+
+1. EB receipt 4개에 실제 receipt URL/path 또는 formal hold evidence 연결
+2. RH 3개에 closure evidence path 연결
+3. `build_p1_evidence_sidecar_updates.py --require-complete` 실행
+4. `preflight_p1_evidence_sidecar_intake.py --fail-open` 통과
+
+## 우선순위 3. 소스와 대형 산출물 경계 재정리
+
+현재 `implementation/phase1`은 로컬 기준 매우 크고, open-data/generator/report 산출물이 source와 강하게 섞여 있다. 상용 배포와 협업에는 큰 리스크다.
+
+현재 부족한 부분:
+
+- 대형 JSON/open-data artifact가 repo 운용 비용을 키움
+- generated artifact와 source artifact의 경계가 일부 흐림
+- clone, CI, review, storage 비용 증가
+- 파일명/경로에 공백과 non-ASCII가 있어 일부 도구는 NUL-safe 처리가 필요함
+
+완료 기준:
+
+- source repo에는 작은 manifest와 deterministic generator만 유지
+- 대형 data/artifact는 release asset, cache, external artifact manifest로 이동
+- restore runbook으로 clean checkout 재현 가능
+- path-safe/NUL-safe 검증 스크립트 확보
+
+다음 작업:
+
+1. tracked large artifact inventory 재생성
+2. source로 남길 파일과 release/cache로 보낼 파일 분류
+3. open-data artifact restore runbook과 manifest 업데이트
+4. CI가 대형 artifact 없이도 핵심 계약을 재현하도록 유지
+
+## 우선순위 4. 구조 3D 웹뷰어 제품화
+
+웹뷰어는 기능이 많이 붙었지만, 아직 상용 프론트엔드처럼 모듈 경계와 회귀 검증이 충분히 깔끔하지 않다.
+
+현재 부족한 부분:
+
+- `src/structure-viewer/index.html`가 여전히 큼
+- `design-theme.css`도 장기 유지보수에는 큰 편
+- source viewer와 generated single-file viewer의 차이를 사용자가 체감하기 어려울 수 있음
+- 최적화 도면 선택/전환, provenance, cross-view selection이 더 제품형이어야 함
+- 3D wall/slab batching, LOD, hit-test 비용 제어가 더 필요함
+
+완료 기준:
+
+- viewer shell, data loading, selection, camera, render layer, drawing selector가 모듈화됨
+- 도면 선택/전환 UX가 현재 등록 도면 수가 늘어나도 빠르고 명확함
+- 3D/charts/panel-zone/optimization-history 간 shared selection 계약 통일
+- Playwright 또는 동등한 smoke/visual regression으로 blank canvas, layout overlap, 주요 interaction 검증
+- single-file export와 repo-local source viewer의 의존성이 문서와 테스트에서 분리됨
+
+다음 작업:
+
+1. `index.html`에서 viewer state, drawing registry, selection controller를 추가 분리
+2. 도면 목록 검색/필터/최근 선택/품질 상태 badge 강화
+3. panel-zone proxy/verified 상태를 UI에서 명확히 표시
+4. large model 성능 측정과 LOD/batching 회귀 테스트 추가
+5. SVG sheet/revision/callout과 viewer deep-link 연결
+
+## 우선순위 5. 하드 런타임 productization
+
+문서와 contract는 많지만, 일부 hard implementation은 아직 stub/contract/probe 성격이 남아 있다.
+
+현재 부족한 부분:
+
+- zero-copy bridge가 실제 device producer 경로보다 fallback/contract 성격이 강함
+- Rust/HIP/ONNX native runtime이 상용 통합 런타임 수준으로 완전히 제품화됐다고 보기 어려움
+- 성능, 장애 복구, fallback 정책, runtime packaging evidence가 더 필요함
+
+완료 기준:
+
+- 실제 producer -> runtime -> verifier 경로가 end-to-end로 고정
+- CPU fallback, GPU path, failure mode가 명시적이고 테스트됨
+- 성능 budget과 regression threshold가 release gate에 포함됨
+- native runtime artifact packaging과 version compatibility가 문서화됨
+
+다음 작업:
+
+1. zero-copy/Rust/HIP path에서 stub 명칭과 실제 구현 범위 분리
+2. end-to-end smoke를 CPU/GPU lane으로 분리
+3. fallback 발생 시 viewer/report에 provenance로 남기기
+4. runtime packaging manifest 추가
+
+## 우선순위 6. 운영 API와 보안/권한 모델
+
+현재 project ops API는 로컬 운영 도구에 가깝다. 상용툴로 보려면 인증, 권한, 감사, 동시성, 저장소 전략이 필요하다.
+
+현재 부족한 부분:
+
+- local `http.server` 기반 API
+- 인증/권한/rate limit 없음
+- multi-user나 tenant 경계 없음
+- 감사로그, 변경 이력, 실패 복구 정책 부족
+
+완료 기준:
+
+- 상용 배포 대상 API와 local helper API 분리
+- authn/authz, audit log, request validation, rate limit 정책 정의
+- 프로젝트/도면/검토 evidence의 저장소 수명주기 정의
+- 최소 보안 smoke와 threat model 문서화
+
+다음 작업:
+
+1. local ops API와 production API 책임 분리 문서화
+2. auth/audit/storage 요구사항 작성
+3. 위험한 write endpoint에 validation과 audit trail 추가
+4. 보안 체크를 release checklist에 포함
+
+## 우선순위 7. 대형 generator 리팩터링
+
+상용툴은 기능 추가보다 장기 유지보수가 중요하다. 현재 일부 generator/report script는 너무 커져서 회귀 위험이 크다.
+
+현재 부족한 부분:
+
+- 수천~수만 라인 단일 script 존재
+- report 생성, evidence 판정, HTML 렌더링, 데이터 변환이 한 파일에 섞임
+- 테스트 단위가 커지고 변경 영향 파악이 어려움
+
+완료 기준:
+
+- domain별 module 분리
+- pure data transform, gate decision, renderer, CLI entrypoint 분리
+- shared schema와 writer helper 재사용
+- 기존 산출물 byte/contract regression 유지
+
+다음 작업:
+
+1. 가장 큰 viewer/report generator부터 module boundary 설계
+2. public CLI는 유지하고 내부만 분리
+3. golden output 또는 contract test로 기존 산출물 호환성 고정
+4. 신규 기능은 분리된 module에만 추가
+
+## 상용화 퍼센트 산정
+
+현재 공식 게이트 기반 평가는 **75%**로 둔다. 이유는 아래와 같다.
+
+| 평가 축 | 가중치 | 현재 점수 | 가중 기여 |
+| --- | ---: | ---: | ---: |
+| core structural evidence | 25 | 88 | 22.0 |
+| release/evidence closure | 15 | 85 | 12.8 |
+| P1 validation/holdout readiness | 15 | 70 | 10.5 |
+| frontend/viewer productization | 15 | 70 | 10.5 |
+| code quality/CI maintainability | 15 | 65 | 9.8 |
+| runtime/ops/security productization | 15 | 55 | 8.3 |
+| 합계 | 100 | - | **73.9** |
+
+보수적 제품화 관점으로는 약 **74%**가 더 맞다. repo의 공식 상용화 리포트도 `commercialization_score=7.5/10`을 보고하므로 대외/내부 보고의 대표값은 **75%**로 잡는다.
+
+따라서 현재 판정은 다음처럼 구분한다.
+
+- **75%**: 게이트 기반 상용 보조툴 readiness
+- **74%**: 유지보수/운영/배포 리스크까지 감안한 보수적 제품화 readiness
+- **55-60%**: 완전자율 상용 구조툴 대체 readiness
+
+## 단계 목표
+
+| 단계 | 목표 퍼센트 | 승격 조건 |
+| --- | ---: | --- |
+| 현재 | 75% | L3, P0/P1 execution unblocked, engineer-in-loop 상용 보조툴 |
+| 다음 목표 | 80-83% | EB/RH intake preflight 구조 완성, full ruff fail 수 축소, viewer regression 강화 |
+| L4 후보 | 85%+ | EB/RH evidence intake closed, viewer regression 안정화, runtime fallback/provenance 명확화 |
+| L5 후보 | 92%+ | 외부 benchmark receipt/closure, 운영 API/보안/배포 체계, 장기 regression lane 완료 |
+
+## 바로 실행할 작업 순서
+
+1. EB/RH evidence intake template를 실제 sidecar preflight까지 연결
+2. `src/structure-viewer` 도면 선택/전환, shared selection, provenance UX 강화
+3. source/generated viewer 계약 테스트와 browser smoke/visual regression 추가
+4. full ruff cleanup을 `F841` -> `E402/E741/E731/E701/F811` 순서로 진행
+5. 대형 open-data/generated artifact 경계 재정리
+6. zero-copy/native runtime path를 stub/contract와 실제 product path로 분리
+7. local ops API와 production API 요구사항 분리
+8. 대형 generator를 renderer/decision/data transform/CLI로 분리
+9. README와 상용화 문서의 claim을 L3/75% 기준으로 동기화
+
+## claim 가이드
+
+현재 쓸 수 있는 표현:
+
+- "Engineer-in-loop commercial assist ready"
+- "반복 구조 검토/최적화 업무의 95-99% 가속을 목표로 하는 상용 보조툴"
+- "핵심 P0 엔진 증거는 닫혔고, release/P1/evidence gate가 남아 있음"
+
+아직 쓰면 안 되는 표현:
+
+- "완전 자율 상용 구조설계툴"
+- "구조기술사 검토 대체"
+- "외부 benchmark로 검증 완료"
+- "모든 실도면/인허가 상황에서 production ready"

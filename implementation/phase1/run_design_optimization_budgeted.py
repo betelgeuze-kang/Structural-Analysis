@@ -31,8 +31,6 @@ from design_objective_calibration import (
 )
 from design_optimization_env import (
     ACTION_FAMILY_BY_NAME,
-    ACTION_INDEX_V2,
-    ACTION_STAGE_BY_NAME,
     LEGACY_ACTION_NAMES,
     DesignOptimizationConfig,
     aggregate_group_state,
