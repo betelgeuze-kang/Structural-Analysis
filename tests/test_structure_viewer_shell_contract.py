@@ -18,6 +18,7 @@ def _read_viewer_html(page_name: str) -> str:
 
 def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None:
     text = (ROOT / "src" / "structure-viewer" / "index.html").read_text(encoding="utf-8")
+    stats_text = (ROOT / "src" / "structure-viewer" / "viewer-stats-summary.js").read_text(encoding="utf-8")
 
     expected_shell_primitives = {
         "top search shell": 'class="top-search-shell"',
@@ -63,6 +64,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "REAL_DRAWING_BROWSER_STATE_KEY" in text
     assert "viewer-real-drawing-browser-state.js" in text
     assert "viewer-real-drawing-quality.js" in text
+    assert "viewer-stats-summary.js" in text
     assert "drawing_asset" in text
     assert "data-real-drawing-copy-link" in text
     assert "data-real-drawing-recent-asset" in text
@@ -84,7 +86,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "real-drawing-action-row" in (
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")
-    assert "Drawing Review Queue" in text
+    assert "Drawing Review Queue" in stats_text
     assert "Next Unlock Batch" in text
     assert "Solver-Exact Target Reached" in text
     assert "IFC Reconstruction Queue" in text

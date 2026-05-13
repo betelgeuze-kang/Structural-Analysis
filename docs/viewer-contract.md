@@ -8,7 +8,7 @@ Source viewers live under `src/structure-viewer/` and are intended for local dev
 
 - They may depend on repo-local vendor files such as `src/structure-viewer/vendor/three.module.js`.
 - They may read committed `.data.js` sidecars that travel with the source viewer shell.
-- The 3D source viewer keeps reusable browser/selection/real-drawing quality helpers in ESM sidecars such as `viewer-real-drawing-browser-state.js`, `viewer-real-drawing-quality.js`, and `viewer-shared-selection-state.js`; release generators must inline those helpers for single-file delivery.
+- The 3D source viewer keeps reusable browser/selection/real-drawing quality/stat summary helpers in ESM sidecars such as `viewer-real-drawing-browser-state.js`, `viewer-real-drawing-quality.js`, `viewer-stats-summary.js`, and `viewer-shared-selection-state.js`; release generators must inline those helpers for single-file delivery.
 - They should remain runnable without downloading GitHub Release assets.
 - They are validated by `python scripts/verify_structure_viewer_contracts.py`, the CI `Structure viewer contracts` step, `npm run verify:frontend-contract`, `npm run verify:frontend-smoke`, and the frontend build.
 

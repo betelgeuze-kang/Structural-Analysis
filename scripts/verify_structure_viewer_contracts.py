@@ -25,6 +25,7 @@ STRUCTURE_VIEWER_CONTRACT_TESTS = [
     "tests/test_structure_viewer_real_drawing_browser_state_contract.py",
     "tests/test_structure_viewer_real_drawing_quality_contract.py",
     "tests/test_structure_viewer_shared_selection_state_contract.py",
+    "tests/test_structure_viewer_stats_summary_contract.py",
     "tests/test_viewer_shared_selection_contract.py",
     "tests/test_generate_selfcontained_viewer.py",
     "tests/test_structure_viewer_singlefile_offline_contract.py",

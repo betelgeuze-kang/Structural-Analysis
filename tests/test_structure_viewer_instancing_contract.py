@@ -77,6 +77,7 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     deformed_text = Path("src/structure-viewer/viewer-deformed-rendering.js").read_text(encoding="utf-8")
     picking_text = Path("src/structure-viewer/viewer-large-model-picking.js").read_text(encoding="utf-8")
     broadphase_text = Path("src/structure-viewer/viewer-pick-broadphase.js").read_text(encoding="utf-8")
+    stats_text = Path("src/structure-viewer/viewer-stats-summary.js").read_text(encoding="utf-8")
     compact_deformed_text = "".join(deformed_text.split())
     compact_text = "".join(text.split())
     compact_geometry_text = "".join(geometry_text.split())
@@ -181,21 +182,21 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "if(index.denseBucketBvh){" in compact_picking_text
     assert "candidateEntries.sort((left,right)=>left.entryDistance-right.entryDistance)" in compact_picking_text
     assert "const acceleratedHit=pickLargeModelRecord(raycaster.ray);" in text
-    assert "Pick Mesh Triangles" in text
-    assert "Pick Mesh Local" in text
-    assert "Pick Deformed Triangles" in text
-    assert "Pick Deformed Local" in text
-    assert "Pick Surface Facets" in text
-    assert "Pick Non-Surface BVH" in text
-    assert " + mesh triangle BVH" in text
-    assert " + mesh-local BVH" in text
-    assert " + deformed-local BVH" in text
-    assert " + surface facet BVH" in text
+    assert "Pick Mesh Triangles" in stats_text
+    assert "Pick Mesh Local" in stats_text
+    assert "Pick Deformed Triangles" in stats_text
+    assert "Pick Deformed Local" in stats_text
+    assert "Pick Surface Facets" in stats_text
+    assert "Pick Non-Surface BVH" in stats_text
+    assert " + mesh triangle BVH" in stats_text
+    assert " + mesh-local BVH" in stats_text
+    assert " + deformed-local BVH" in stats_text
+    assert " + surface facet BVH" in stats_text
     assert "const meshes=getPickableMeshes(raycaster.ray);" in text
     assert "rebuildPickTargetMeshes();" in text
-    assert "Pick Full BVH" in text
-    assert " + full BVH" in text
-    assert "dense-bucket BVH" in text
+    assert "Pick Full BVH" in stats_text
+    assert " + full BVH" in stats_text
+    assert "dense-bucket BVH" in stats_text
     assert "pickSpatialIndex.deformedMeshTriangleEntries=triangleEntries;" in compact_deformed_text
     assert "pickSpatialIndex.deformedMeshLocalTriangleCatalogs=localCatalogs;" in compact_deformed_text
     assert "pickSpatialIndex.deformedMeshTriangleBvh=acceleration.triangleBvh||null;" in compact_deformed_text
