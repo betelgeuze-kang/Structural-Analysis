@@ -48,6 +48,7 @@
 - `python -m pytest -q`는 **1369 passed**로 통과했다.
 - P1 EB/RH evidence sidecar preflight에 `--structure-only` 모드를 추가해, 외부 증거가 없는 현재 상황에서도 "준비 구조 통과"와 "strict 증거 pending"을 분리했다.
 - `python3 scripts/preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open --json`은 통과하며, 같은 preflight의 기본 strict evidence 모드는 receipt/closure evidence 7건 pending을 계속 blocker로 보고한다.
+- clean-checkout evidence chain도 `p1_evidence_sidecar_structure_preflight`와 strict `p1_evidence_sidecar_preflight`를 함께 기록하므로, release reviewer가 내부 준비도와 실제 승격 evidence를 한 payload에서 구분할 수 있다.
 - 상용화 레포트는 `7.0/10`에서 **`7.6/10`**으로 상승했다.
 
 남은 strict blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
@@ -124,6 +125,7 @@
 - EB/RH evidence intake template generated
 - EB/RH sidecar row 구조 preflight 통과 모드 추가
 - `--structure-only --fail-open`은 준비 구조를 통과시키고, strict evidence 미수집은 `pending_evidence_blockers`로 분리 보고
+- clean-checkout materializer가 structure preflight와 strict preflight를 모두 payload에 기록
 
 남은 부분:
 

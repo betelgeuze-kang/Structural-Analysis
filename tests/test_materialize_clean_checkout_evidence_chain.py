@@ -389,7 +389,15 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     assert payload["p1_benchmark_execution_unblocked"] is True
     assert payload["publication_sidecars_pass"] is True
     assert payload["p1_evidence_intake_ready"] is False
+    assert payload["p1_evidence_sidecar_structure_ready"] is True
     assert payload["p1_evidence_sidecar_preflight"]["contract_pass"] is False
+    assert payload["p1_evidence_sidecar_preflight"]["contract_mode"] == "strict_evidence"
+    assert payload["p1_evidence_sidecar_structure_preflight"]["contract_pass"] is True
+    assert (
+        payload["p1_evidence_sidecar_structure_preflight"]["reason_code"]
+        == "PASS_STRUCTURE_ONLY_PENDING_EVIDENCE"
+    )
+    assert payload["p1_evidence_sidecar_structure_preflight"]["pending_evidence_blockers"]
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_pending_count"] == 4
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 0
     assert payload["external_benchmark_submission_updates"]["all_expected_updates_present"] is True
@@ -525,7 +533,10 @@ def test_materialize_clean_checkout_evidence_chain_builds_sidecars_from_complete
     assert payload["p1_evidence_sidecar_build_pass"] is True
     assert payload["p1_evidence_sidecar_build"]["contract_pass"] is True
     assert payload["p1_evidence_intake_ready"] is True
+    assert payload["p1_evidence_sidecar_structure_ready"] is True
     assert payload["p1_evidence_sidecar_preflight"]["contract_pass"] is True
+    assert payload["p1_evidence_sidecar_structure_preflight"]["contract_pass"] is True
+    assert payload["p1_evidence_sidecar_structure_preflight"]["reason_code"] == "PASS"
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_attached_count"] == 4
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_closure_evidence_attached_count"] == 4
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 3
@@ -643,6 +654,12 @@ def test_materialize_clean_checkout_evidence_chain_reports_incomplete_intake_bui
     assert "tpu_hffb" in payload["p1_evidence_sidecar_build"]["blockers"][0]
     assert "RH-002" in payload["p1_evidence_sidecar_build"]["blockers"][0]
     assert payload["p1_evidence_intake_ready"] is False
+    assert payload["p1_evidence_sidecar_structure_ready"] is True
+    assert payload["p1_evidence_sidecar_structure_preflight"]["contract_pass"] is True
+    assert (
+        payload["p1_evidence_sidecar_structure_preflight"]["reason_code"]
+        == "PASS_STRUCTURE_ONLY_PENDING_EVIDENCE"
+    )
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_attached_count"] == 0
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 0
     assert payload["external_benchmark_submission_updates_final"]["updated_by_p1_evidence_intake"] is False
@@ -816,7 +833,13 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
     assert residual_updates_step["hydrated_from_source"] is True
     assert payload["publication_sidecars_pass"] is True
     assert payload["p1_evidence_intake_ready"] is False
+    assert payload["p1_evidence_sidecar_structure_ready"] is True
     assert payload["p1_evidence_sidecar_preflight"]["contract_pass"] is False
+    assert payload["p1_evidence_sidecar_structure_preflight"]["contract_pass"] is True
+    assert (
+        payload["p1_evidence_sidecar_structure_preflight"]["reason_code"]
+        == "PASS_STRUCTURE_ONLY_PENDING_EVIDENCE"
+    )
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_attached_count"] == 1
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["external_receipt_pending_count"] == 3
     assert payload["p1_evidence_sidecar_preflight"]["summary"]["residual_closed_count"] == 0

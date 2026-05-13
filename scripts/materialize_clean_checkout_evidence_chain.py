@@ -514,6 +514,24 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     )
     evidence_sidecar_preflight_step.update({"label": "P1 evidence sidecar intake preflight"})
     steps.append(evidence_sidecar_preflight_step)
+    evidence_sidecar_structure_preflight_step = _run_json_command(
+        [
+            sys.executable,
+            "scripts/preflight_p1_evidence_sidecar_intake.py",
+            "--external-benchmark-submission-updates",
+            str(args.external_benchmark_submission_updates),
+            "--residual-holdout-closure-updates",
+            str(args.residual_holdout_closure_updates),
+            "--repo-root",
+            str(Path.cwd()),
+            "--structure-only",
+            "--json",
+        ]
+    )
+    evidence_sidecar_structure_preflight_step.update(
+        {"label": "P1 evidence sidecar structure preflight"}
+    )
+    steps.append(evidence_sidecar_structure_preflight_step)
 
     coverage_cmd = [
         sys.executable,
@@ -712,6 +730,11 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         if isinstance(evidence_sidecar_preflight_step.get("json"), dict)
         else {}
     )
+    p1_evidence_sidecar_structure_preflight = (
+        evidence_sidecar_structure_preflight_step.get("json")
+        if isinstance(evidence_sidecar_structure_preflight_step.get("json"), dict)
+        else {}
+    )
     p1_evidence_sidecar_preflight_summary = (
         p1_evidence_sidecar_preflight.get("summary")
         if isinstance(p1_evidence_sidecar_preflight.get("summary"), dict)
@@ -798,6 +821,9 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "p0_closure_evidence_consumed": p0_closure_evidence_consumed,
         "publication_sidecars_pass": publication_sidecars_pass,
         "p1_evidence_intake_ready": bool(p1_evidence_sidecar_preflight.get("contract_pass", False)),
+        "p1_evidence_sidecar_structure_ready": bool(
+            p1_evidence_sidecar_structure_preflight.get("contract_pass", False)
+        ),
         "artifacts": {
             "manifest": str(args.manifest),
             "publication_evidence_index": (
@@ -842,6 +868,7 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "p1_evidence_sidecar_build": p1_evidence_sidecar_build_payload,
         "p1_evidence_sidecar_build_pass": p1_evidence_sidecar_build_pass,
         "p1_evidence_sidecar_preflight": p1_evidence_sidecar_preflight,
+        "p1_evidence_sidecar_structure_preflight": p1_evidence_sidecar_structure_preflight,
         "p1_readiness_status": p1_readiness,
         "p1_benchmark_breadth_status": p1_benchmark,
         "p1_operational_queues": operational_payload,
