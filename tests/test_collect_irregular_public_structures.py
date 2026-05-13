@@ -10,7 +10,7 @@ import threading
 import zipfile
 
 collector_module = importlib.import_module("implementation.phase1.open_data.irregular.collect_irregular_public_structures")
-from implementation.phase1.open_data.irregular import collect_irregular_public_structures
+collect_irregular_public_structures = collector_module.collect_irregular_public_structures
 
 
 def _write_json(path: Path, payload: dict) -> None:

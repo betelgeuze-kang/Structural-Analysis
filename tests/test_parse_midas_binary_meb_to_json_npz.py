@@ -112,7 +112,7 @@ def test_parse_midas_binary_meb_to_json_npz_mcvl_directory(tmp_path: Path) -> No
     assert payload["summary"]["mcvl_node_elem_probe"]["likely_stride_bytes"] == 32
 
 
-def test_parse_midas_binary_meb_to_json_npz_mcvl_node_hint_preview(tmp_path: Path) -> None:
+def test_parse_midas_binary_meb_to_json_npz_mcvl_node_hint_probe_points(tmp_path: Path) -> None:
     mcb = tmp_path / "hint_preview.mcb"
     data = bytearray(b"\x00" * 262144)
     data[:4] = b"MCVL"

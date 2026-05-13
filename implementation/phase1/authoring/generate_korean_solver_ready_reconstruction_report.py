@@ -7,6 +7,8 @@ exact-topology candidate is present, and otherwise leaves the candidate pending 
 emitting no prepared row.
 """
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import argparse

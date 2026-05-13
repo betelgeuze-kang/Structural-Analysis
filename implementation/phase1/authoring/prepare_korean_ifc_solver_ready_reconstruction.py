@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Prepare honest solver-ready reconstruction artifacts for Korean IFC exact-topology candidates."""
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import argparse

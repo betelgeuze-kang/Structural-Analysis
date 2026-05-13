@@ -28,9 +28,9 @@
 | residual holdout closure | 3건 pending | 구조기술사/레거시툴/인허가성 검토 대기 영역 |
 | frontend build | pass | `npm run build`, frontend build contract 통과 |
 | repo hygiene | pass | repo hygiene, generated artifact drift 통과 |
-| critical static lint | pass | `ruff --select F821,F601,F401,F841` 통과, CI gate 추가 |
-| full static lint | fail | 전체 ruff 잔여 30건, `E402/E741/E731/E701/F811`만 남음 |
-| full pytest | pass | `1366 passed`, 테스트 후 tracked generated artifact drift 없음 |
+| critical static lint | pass | `ruff --select F821,F601,F401,F841` 통과 |
+| full static lint | pass | 전체 `ruff check .` 통과, CI gate를 full ruff로 승격 |
+| full pytest | pass | `1367 passed`, 테스트 후 tracked generated artifact drift 없음 |
 
 ## 2026-05-13 실행 결과
 
@@ -42,8 +42,9 @@
 - `F821`, `F601`, `F401` lint를 0건으로 정리하고 CI에 `python -m ruff check . --select F821,F601,F401` gate를 추가했다.
 - 이어서 `F841`을 작은 source/report/test 파일에서 제거하고, 레거시 단일 대형 HTML generator 1개는 전용 리팩터링 전까지 per-file ignore로 명시했다.
 - `python -m ruff check . --select F821,F601,F401,F841`는 0건이며, 전체 ruff 잔여는 **147건에서 30건**으로 줄었다.
+- 이어서 `E402/E741/E731/E701/F811` 잔여 30건을 정리해 전체 `python -m ruff check .` 통과 상태로 만들고 CI static check를 full ruff로 승격했다.
 - 풀 테스트 후 `panel_zone_solver_verified_export_bundle.json`이 fixture 샘플로 덮이는 테스트 격리 누락을 수정했고, 재실행 후 `check_generated_worktree_clean.py --show-ok` 통과를 확인했다.
-- `python -m pytest -q`는 **1366 passed**로 통과했다.
+- `python -m pytest -q`는 **1367 passed**로 통과했다.
 - 상용화 레포트는 `7.0/10`에서 **`7.5/10`**으로 상승했다.
 
 남은 blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
@@ -77,40 +78,35 @@
 
 ## 우선순위 1. 정적 품질 게이트 정리
 
-상용툴 수준에서는 "빌드는 된다"보다 "정적 품질 게이트가 깨끗하다"가 중요하다. 현재 ruff 기준 잔여 오류는 30개다.
+상용툴 수준에서는 "빌드는 된다"보다 "정적 품질 게이트가 깨끗하다"가 중요하다. 현재 ruff 기준 잔여 오류는 0개다.
 
 완료된 부분:
 
 - source/test 영역의 `F821`, `F601` 0건
 - source/test 영역의 `F401` 0건
 - source/test 영역의 `F841` 0건 또는 명시적 generator-scoped ignore 처리
+- source/test 영역의 `E402`, `E741`, `E731`, `E701`, `F811` 0건
 - vendored `implementation/phase1/_vendor/**` ruff 제외
 - generated open-data demo path를 ruff 제외해 generated artifact drift와 lint 대상 경계를 분리
-- CI에 critical static check 추가
+- CI에 full ruff static check 추가
 - 풀 테스트가 tracked generated artifact를 오염시키던 handoff 테스트 격리 누락 수정
 
 남은 부분:
 
-- `E402`: 모듈 import 위치 정리 17건
-- `E741`: 모호한 변수명 정리 7건
-- `E731`: lambda assignment 정리 3건
-- `E701`: 한 줄 colon statement 정리 2건
-- `F811`: unused redefinition 정리 1건
 - 대형 HTML generator는 `F841` per-file ignore를 제거할 수 있도록 별도 모듈 분리 필요
 
 완료 기준:
 
 - vendored/generated 제외 정책을 명확히 한 `ruff` 설정 추가
 - source 영역의 `F821`, `F601` 0건
-- 이후 `F841`와 style/safety rule을 단계적 정리
-- CI에 최소 `ruff check` 또는 critical rule subset 추가
+- `F841`와 style/safety rule 정리
+- CI에 full `ruff check` 추가
 
 다음 작업:
 
-1. `E402` import 위치 문제를 파일별로 정리
-2. `E741`, `E731`, `E701`, `F811`을 작은 묶음으로 정리
-3. 대형 HTML generator를 모듈 분리한 뒤 per-file `F841` ignore 제거
-4. 전체 ruff fail 수를 0에 가깝게 낮춤
+1. 대형 HTML generator를 모듈 분리한 뒤 per-file `F841` ignore 제거
+2. ruff full pass를 CI 필수 게이트로 유지
+3. 새 generator/test 추가 시 generated/source 경계와 import bootstrap 예외를 문서화
 
 ## 우선순위 2. P1 evidence intake와 운영 queue 완성
 

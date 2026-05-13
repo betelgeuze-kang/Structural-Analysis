@@ -205,23 +205,23 @@ def _build_cases(hf: dict[str, dict], lf: dict[str, dict], metric_source: str) -
     cases: list[dict] = []
     for case_id in sorted(hf.keys()):
         h = hf[case_id]
-        l = lf[case_id]
+        low_fidelity_case = lf[case_id]
         for key in ("split", "ood_tag", "topology_type", "hazard_type", "source_family", "element_mix"):
-            if str(h[key]) != str(l[key]):
-                raise SystemExit(f"[{case_id}] metadata mismatch for '{key}': hf={h[key]} lf={l[key]}")
+            if str(h[key]) != str(low_fidelity_case[key]):
+                raise SystemExit(f"[{case_id}] metadata mismatch for '{key}': hf={h[key]} lf={low_fidelity_case[key]}")
 
         # load/residual are taken from HF side but also validated against LF closeness.
-        if abs(float(h["load_scale"]) - float(l["load_scale"])) > 1e-9:
+        if abs(float(h["load_scale"]) - float(low_fidelity_case["load_scale"])) > 1e-9:
             raise SystemExit(f"[{case_id}] load_scale mismatch between HF and LF")
-        if abs(float(h["residual_norm"]) - float(l["residual_norm"])) > 1e-9:
+        if abs(float(h["residual_norm"]) - float(low_fidelity_case["residual_norm"])) > 1e-9:
             raise SystemExit(f"[{case_id}] residual_norm mismatch between HF and LF")
 
         metrics = {}
         for m in METRICS:
-            metrics[m] = {"hf": float(h["metrics"][m]), "lf": float(l["metrics"][m])}
+            metrics[m] = {"hf": float(h["metrics"][m]), "lf": float(low_fidelity_case["metrics"][m])}
         for m in OPTIONAL_METRICS:
-            if m in h["metrics"] and m in l["metrics"]:
-                metrics[m] = {"hf": float(h["metrics"][m]), "lf": float(l["metrics"][m])}
+            if m in h["metrics"] and m in low_fidelity_case["metrics"]:
+                metrics[m] = {"hf": float(h["metrics"][m]), "lf": float(low_fidelity_case["metrics"][m])}
 
         cases.append(
             {

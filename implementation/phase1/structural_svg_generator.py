@@ -84,8 +84,8 @@ def _jet(t: float) -> str:
 def _viridis(t: float) -> str:
     t = _clamp(t)
     h = 0.75 - t * 0.75
-    s, l = 0.85, 0.15 + t * 0.55
-    return _hsl_to_rgb_str(h, s, l)
+    saturation, lightness = 0.85, 0.15 + t * 0.55
+    return _hsl_to_rgb_str(h, saturation, lightness)
 
 
 def _coolwarm(t: float) -> str:
@@ -98,13 +98,13 @@ def _coolwarm(t: float) -> str:
     return f"rgb({int(r*255)},{int(g*255)},{int(b*255)})"
 
 
-def _hsl_to_rgb_str(h: float, s: float, l: float) -> str:
+def _hsl_to_rgb_str(h: float, s: float, lightness: float) -> str:
     """HSL (0-1 range) to rgb() string."""
     if s == 0:
-        v = int(l * 255)
+        v = int(lightness * 255)
         return f"rgb({v},{v},{v})"
-    q = l * (1 + s) if l < 0.5 else l + s - l * s
-    p = 2 * l - q
+    q = lightness * (1 + s) if lightness < 0.5 else lightness + s - lightness * s
+    p = 2 * lightness - q
 
     def hue2rgb(p_, q_, t_):
         if t_ < 0:
@@ -981,7 +981,8 @@ class StructuralSVGGenerator:
                         self._wrap_member_link(el.id, element_markup, sheet_key=sheet_key, view_label=view_label)
                     )
             else:
-                if etype not in layer_groups: layer_groups[etype] = []
+                if etype not in layer_groups:
+                    layer_groups[etype] = []
 
         # Add groups to parts
         for l_type, l_parts in layer_groups.items():
@@ -1292,8 +1293,9 @@ class StructuralSVGGenerator:
                 continue
 
             etype = el.type.lower()
-            if etype not in layer_groups: layer_groups[etype] = []
-            
+            if etype not in layer_groups:
+                layer_groups[etype] = []
+
             color = self._dcr_color(el.dcr) if show_dcr else TYPE_COLORS.get(etype, "#94a3b8")
             sw = TYPE_STROKE_WIDTH.get(etype, 1.5)
 

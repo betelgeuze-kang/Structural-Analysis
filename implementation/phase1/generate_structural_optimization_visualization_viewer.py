@@ -23743,25 +23743,28 @@ def build_html(payload: dict[str, Any]) -> str:
         if is_opensees_planar_baseline_case and baseline_primary_view_key == 'elevation'
         else ''
     )
-    baseline_static_callout_markup = lambda view_key: (
-        "<div class='overlay-selection-callout' "
-        f"data-baseline-static-callout='{view_key}' hidden>"
-        "<div class='overlay-selection-callout-kicker'>baseline member</div>"
-        "<div class='overlay-selection-callout-title' data-baseline-static-callout-role='title'></div>"
-        "<div class='overlay-selection-callout-copy' data-baseline-static-callout-role='copy'></div>"
-        "<div class='overlay-selection-callout-meta' data-baseline-static-callout-role='meta'></div>"
-        "<div class='overlay-selection-callout-pills' data-baseline-static-callout-role='pills'></div>"
-        "</div>"
-    )
-    baseline_static_summary_markup = lambda view_key: (
-        "<div class='baseline-static-summary' "
-        f"data-baseline-static-summary='{view_key}' hidden>"
-        "<div class='baseline-static-summary-kicker'>selected baseline</div>"
-        "<div class='baseline-static-summary-title' data-baseline-static-summary-role='title'></div>"
-        "<div class='baseline-static-summary-copy' data-baseline-static-summary-role='copy'></div>"
-        "<div class='baseline-static-summary-metrics' data-baseline-static-summary-role='metrics' hidden></div>"
-        "</div>"
-    )
+    def baseline_static_callout_markup(view_key: str) -> str:
+        return (
+            "<div class='overlay-selection-callout' "
+            f"data-baseline-static-callout='{view_key}' hidden>"
+            "<div class='overlay-selection-callout-kicker'>baseline member</div>"
+            "<div class='overlay-selection-callout-title' data-baseline-static-callout-role='title'></div>"
+            "<div class='overlay-selection-callout-copy' data-baseline-static-callout-role='copy'></div>"
+            "<div class='overlay-selection-callout-meta' data-baseline-static-callout-role='meta'></div>"
+            "<div class='overlay-selection-callout-pills' data-baseline-static-callout-role='pills'></div>"
+            "</div>"
+        )
+
+    def baseline_static_summary_markup(view_key: str) -> str:
+        return (
+            "<div class='baseline-static-summary' "
+            f"data-baseline-static-summary='{view_key}' hidden>"
+            "<div class='baseline-static-summary-kicker'>selected baseline</div>"
+            "<div class='baseline-static-summary-title' data-baseline-static-summary-role='title'></div>"
+            "<div class='baseline-static-summary-copy' data-baseline-static-summary-role='copy'></div>"
+            "<div class='baseline-static-summary-metrics' data-baseline-static-summary-role='metrics' hidden></div>"
+            "</div>"
+        )
     baseline_primary_svg_shell_markup = (
         f"<div class='baseline-static-viewport' data-baseline-static-view='{baseline_primary_view_key}' "
         f"data-scale-mode='{'readable' if is_opensees_planar_baseline_case and baseline_primary_view_key == 'elevation' else 'true-scale'}'>"

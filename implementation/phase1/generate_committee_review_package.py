@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Assemble a single committee-ready package from existing release artifacts."""
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import argparse

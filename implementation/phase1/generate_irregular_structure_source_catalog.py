@@ -869,7 +869,10 @@ def _triage_rows(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
             solver_candidates.append(base_row)
         if ai_hit:
             ai_candidates.append(base_row)
-    sort_key = lambda row: (row["priority"], row["family_id"], row["source_id"])
+
+    def sort_key(row: dict[str, Any]) -> tuple[Any, Any, Any]:
+        return (row["priority"], row["family_id"], row["source_id"])
+
     return {
         "native_roundtrip_candidates": sorted(native_candidates, key=sort_key),
         "solver_benchmark_candidates": sorted(solver_candidates, key=sort_key),

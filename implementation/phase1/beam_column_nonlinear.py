@@ -61,17 +61,17 @@ class BeamColumnSupportedResponse:
 
 
 def elastic_local_stiffness(props: BeamColumnProperties) -> np.ndarray:
-    l = max(float(props.length_m), 1e-9)
+    length = max(float(props.length_m), 1e-9)
     ea = float(props.e_mpa) * MPA_TO_PA * float(props.area_m2)
     ei = float(props.e_mpa) * MPA_TO_PA * float(props.iy_m4)
     k = np.array(
         [
-            [ea / l, 0.0, 0.0, -ea / l, 0.0, 0.0],
-            [0.0, 12.0 * ei / l**3, 6.0 * ei / l**2, 0.0, -12.0 * ei / l**3, 6.0 * ei / l**2],
-            [0.0, 6.0 * ei / l**2, 4.0 * ei / l, 0.0, -6.0 * ei / l**2, 2.0 * ei / l],
-            [-ea / l, 0.0, 0.0, ea / l, 0.0, 0.0],
-            [0.0, -12.0 * ei / l**3, -6.0 * ei / l**2, 0.0, 12.0 * ei / l**3, -6.0 * ei / l**2],
-            [0.0, 6.0 * ei / l**2, 2.0 * ei / l, 0.0, -6.0 * ei / l**2, 4.0 * ei / l],
+            [ea / length, 0.0, 0.0, -ea / length, 0.0, 0.0],
+            [0.0, 12.0 * ei / length**3, 6.0 * ei / length**2, 0.0, -12.0 * ei / length**3, 6.0 * ei / length**2],
+            [0.0, 6.0 * ei / length**2, 4.0 * ei / length, 0.0, -6.0 * ei / length**2, 2.0 * ei / length],
+            [-ea / length, 0.0, 0.0, ea / length, 0.0, 0.0],
+            [0.0, -12.0 * ei / length**3, -6.0 * ei / length**2, 0.0, 12.0 * ei / length**3, -6.0 * ei / length**2],
+            [0.0, 6.0 * ei / length**2, 2.0 * ei / length, 0.0, -6.0 * ei / length**2, 4.0 * ei / length],
         ],
         dtype=np.float64,
     )
@@ -108,19 +108,19 @@ def frame_2d_transformation_from_nodes(
 
 
 def geometric_local_stiffness(props: BeamColumnProperties, axial_force_n: float) -> np.ndarray:
-    l = max(float(props.length_m), 1e-9)
+    length = max(float(props.length_m), 1e-9)
     p = max(float(axial_force_n), 0.0)
     if p <= 0.0:
         return np.zeros((6, 6), dtype=np.float64)
-    coeff = p / (30.0 * l)
+    coeff = p / (30.0 * length)
     kg = coeff * np.array(
         [
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.0, 36.0, 3.0 * l, 0.0, -36.0, 3.0 * l],
-            [0.0, 3.0 * l, 4.0 * l**2, 0.0, -3.0 * l, -1.0 * l**2],
+            [0.0, 36.0, 3.0 * length, 0.0, -36.0, 3.0 * length],
+            [0.0, 3.0 * length, 4.0 * length**2, 0.0, -3.0 * length, -1.0 * length**2],
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [0.0, -36.0, -3.0 * l, 0.0, 36.0, -3.0 * l],
-            [0.0, 3.0 * l, -1.0 * l**2, 0.0, -3.0 * l, 4.0 * l**2],
+            [0.0, -36.0, -3.0 * length, 0.0, 36.0, -3.0 * length],
+            [0.0, 3.0 * length, -1.0 * length**2, 0.0, -3.0 * length, 4.0 * length**2],
         ],
         dtype=np.float64,
     )
@@ -132,16 +132,16 @@ def _elastic_flexural_rigidity_n_m2(props: BeamColumnProperties) -> float:
 
 
 def _elastic_critical_axial_force_n(props: BeamColumnProperties) -> float:
-    l = max(float(props.length_m), 1e-9)
+    length = max(float(props.length_m), 1e-9)
     ei = max(_elastic_flexural_rigidity_n_m2(props), 1e-9)
-    return float(np.pi**2 * ei / l**2)
+    return float(np.pi**2 * ei / length**2)
 
 
 def _yield_rotation_proxy_rad(props: BeamColumnProperties) -> float:
-    l = max(float(props.length_m), 1e-9)
+    length = max(float(props.length_m), 1e-9)
     ei = max(_elastic_flexural_rigidity_n_m2(props), 1e-9)
     yield_moment_n_m = max(float(props.yield_moment_kNm), 1e-9) * 1000.0
-    return float(yield_moment_n_m * l / (4.0 * ei))
+    return float(yield_moment_n_m * length / (4.0 * ei))
 
 
 def solve_beam_column_response(

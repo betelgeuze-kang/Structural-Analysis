@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Generate release-based commercialization gap report."""
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import argparse
