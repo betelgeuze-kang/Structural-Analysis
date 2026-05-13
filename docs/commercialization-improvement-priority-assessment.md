@@ -6,10 +6,10 @@
 
 ## 결론
 
-현재 단계는 **상용 보조툴 L3, 약 77%**로 본다.
+현재 단계는 **상용 보조툴 L3, 약 78%**로 본다.
 
-- 게이트 기반 공식 점수: **77/100**
-- 실무자 검토 전제 상용 보조툴 readiness: **77-80%**
+- 게이트 기반 공식 점수: **78/100**
+- 실무자 검토 전제 상용 보조툴 readiness: **78-81%**
 - 완전자율 상용 구조툴 대체 readiness: **55-60%**
 
 즉, 지금 상태는 "구조 엔지니어가 검토하면서 반복 업무를 크게 줄이는 상용 보조툴"에는 가까워졌지만, "검증/배포/운영/외부 벤치마크까지 닫힌 독립 상용 구조해석 제품"으로는 아직 부족하다.
@@ -23,8 +23,9 @@
 | P1 inputs | ready | P1 입력 재료는 준비됨 |
 | P1 execution | ready | publication evidence 기반 P1 readiness와 benchmark breadth가 unblocked |
 | P1 evidence sidecar structure | pass | `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open` 통과. EB/RH row 구조는 준비됨 |
+| source boundary inventory | pass | CI에서 `plan_source_boundary_cleanup.py --large-file-threshold-mib 25 --fail-on-candidates` 실행, 현재 후보 0건 |
 | 상용화 레벨 | L3 | `engineer_in_loop_commercial_assist_ready` |
-| 상용화 점수 | 7.7/10 | 게이트 기반 환산 77% |
+| 상용화 점수 | 7.8/10 | 게이트 기반 환산 78% |
 | 외부 benchmark receipt | 0/4 attached | strict evidence gate는 아직 pending. 외부 검증은 아직 claim 승격 근거로 쓰면 안 됨 |
 | residual holdout closure | 0/3 closed | strict evidence gate 기준 구조기술사/레거시툴/인허가성 검토 대기 영역 |
 | frontend build | pass | `npm run build`, frontend build contract 통과 |
@@ -50,7 +51,9 @@
 - `python3 scripts/preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open --json`은 통과하며, 같은 preflight의 기본 strict evidence 모드는 receipt/closure evidence 7건 pending을 계속 blocker로 보고한다.
 - clean-checkout evidence chain도 `p1_evidence_sidecar_structure_preflight`와 strict `p1_evidence_sidecar_preflight`를 함께 기록하므로, release reviewer가 내부 준비도와 실제 승격 evidence를 한 payload에서 구분할 수 있다.
 - 구조 웹뷰어의 real drawing browser state를 `viewer-real-drawing-browser-state.js` 모듈로 분리했고, single-file viewer generator가 이 모듈을 data URL로 inline하도록 연결했다.
-- 상용화 레포트는 `7.0/10`에서 **`7.7/10`**으로 상승했다.
+- source-boundary cleanup plan에 JSON/Markdown 산출물, NUL-safe tracked file fixture, `--fail-on-candidates` 게이트를 추가했고 현재 repo 기준 후보 0건 통과를 확인했다.
+- CI에 source-boundary inventory gate를 추가해 새 대형 산출물/경계 후보가 들어오면 pre-merge에서 차단되도록 했다.
+- 상용화 레포트는 `7.0/10`에서 **`7.8/10`**으로 상승했다.
 
 남은 strict blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
 
@@ -159,6 +162,13 @@
 - clone, CI, review, storage 비용 증가
 - 파일명/경로에 공백과 non-ASCII가 있어 일부 도구는 NUL-safe 처리가 필요함
 
+진행된 부분:
+
+- `plan_source_boundary_cleanup.py`가 JSON/Markdown inventory를 산출하고 `--fail-on-candidates`로 게이트화 가능
+- tracked file fixture가 NUL 구분자를 지원해 공백/non-ASCII 경로가 섞여도 안전하게 검증 가능
+- `.github/workflows/ci.yml`에서 source-boundary inventory를 필수 gate로 실행
+- 현재 repo 기준 `--large-file-threshold-mib 25 --fail-on-candidates` 통과, cleanup candidate 0건
+
 완료 기준:
 
 - source repo에는 작은 manifest와 deterministic generator만 유지
@@ -168,10 +178,10 @@
 
 다음 작업:
 
-1. tracked large artifact inventory 재생성
-2. source로 남길 파일과 release/cache로 보낼 파일 분류
-3. open-data artifact restore runbook과 manifest 업데이트
-4. CI가 대형 artifact 없이도 핵심 계약을 재현하도록 유지
+1. source로 남길 파일과 release/cache로 보낼 파일 분류 기준을 CI 문서에 더 강하게 연결
+2. open-data artifact restore runbook과 manifest 업데이트
+3. CI가 대형 artifact 없이도 핵심 계약을 재현하도록 유지
+4. 새 대형 산출물 추가 시 `--fail-on-candidates`를 pre-merge gate로 사용
 
 ## 우선순위 4. 구조 3D 웹뷰어 제품화
 

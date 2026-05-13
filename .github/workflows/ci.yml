@@ -32,6 +32,14 @@ jobs:
       - name: Repository hygiene
         run: python scripts/check_repo_hygiene.py --show-ok
 
+      - name: Source boundary inventory
+        run: |
+          python scripts/plan_source_boundary_cleanup.py \
+            --large-file-threshold-mib 25 \
+            --out /tmp/source-boundary-cleanup-plan.json \
+            --out-md /tmp/source-boundary-cleanup-plan.md \
+            --fail-on-candidates
+
       - name: Git remote safety
         run: python scripts/check_git_remote_safety.py --show-ok
 

@@ -33,6 +33,7 @@ BUCKETS = (
 )
 DEFAULT_LARGE_FILE_THRESHOLD_MIB = 25.0
 BYTES_PER_MIB = 1024 * 1024
+SCHEMA_VERSION = "source-boundary-cleanup-plan.v1"
 
 
 def _git_files() -> list[str]:
@@ -41,7 +42,9 @@ def _git_files() -> list[str]:
 
 
 def _read_tracked_files(path: Path) -> list[str]:
-    return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    text = path.read_text(encoding="utf-8")
+    separator = "\0" if "\0" in text else "\n"
+    return [item.strip() for item in text.split(separator) if item.strip()]
 
 
 def _path_size(path: str) -> int | None:
@@ -115,6 +118,9 @@ def build_plan(files: list[str], *, large_file_threshold_mib: float = DEFAULT_LA
         )
 
     return {
+        "schema_version": SCHEMA_VERSION,
+        "contract_pass": not records,
+        "reason_code": "PASS" if not records else "ERR_SOURCE_BOUNDARY_CLEANUP_CANDIDATES",
         "counts_by_bucket": {
             bucket: count
             for bucket, count in counts_by_bucket.items()
@@ -126,6 +132,66 @@ def build_plan(files: list[str], *, large_file_threshold_mib: float = DEFAULT_LA
         "total_candidate_files": len(records),
         "total_tracked_files": len(files),
     }
+
+
+def _format_bytes(value: object) -> str:
+    if value is None:
+        return "missing"
+    size = int(value)
+    if size >= BYTES_PER_MIB:
+        return f"{size / BYTES_PER_MIB:.2f} MiB"
+    if size >= 1024:
+        return f"{size / 1024:.1f} KiB"
+    return f"{size} B"
+
+
+def build_markdown(plan: dict[str, object]) -> str:
+    records = plan.get("records")
+    candidate_records = records if isinstance(records, list) else []
+    lines = [
+        "# Source Boundary Cleanup Plan",
+        "",
+        f"- `contract_pass`: `{bool(plan.get('contract_pass'))}`",
+        f"- `reason_code`: `{plan.get('reason_code', '')}`",
+        f"- `total_tracked_files`: `{plan.get('total_tracked_files', 0)}`",
+        f"- `total_candidate_files`: `{plan.get('total_candidate_files', 0)}`",
+        f"- `total_candidate_bytes`: `{_format_bytes(plan.get('total_candidate_bytes', 0))}`",
+        f"- `large_file_threshold_bytes`: `{plan.get('large_file_threshold_bytes', 0)}`",
+        "",
+        "## Counts By Bucket",
+        "",
+    ]
+    counts = plan.get("counts_by_bucket")
+    if isinstance(counts, dict) and counts:
+        for bucket, count in sorted(counts.items()):
+            lines.append(f"- `{bucket}`: `{count}`")
+    else:
+        lines.append("- none")
+    lines.extend(
+        [
+            "",
+            "## Candidates",
+            "",
+            "| Path | Bytes | Buckets | Recommended Action |",
+            "|---|---:|---|---|",
+        ]
+    )
+    if candidate_records:
+        for record in candidate_records:
+            if not isinstance(record, dict):
+                continue
+            buckets = record.get("buckets")
+            bucket_label = ", ".join(str(item) for item in buckets) if isinstance(buckets, list) else ""
+            lines.append(
+                "| "
+                f"{record.get('path', '')} | "
+                f"{_format_bytes(record.get('bytes'))} | "
+                f"{bucket_label or 'none'} | "
+                f"{record.get('recommended_action', '')} |"
+            )
+    else:
+        lines.append("| none | 0 B | none | none |")
+    return "\n".join(lines) + "\n"
 
 
 def _write_pathspec(path: Path, records: list[dict[str, object]]) -> None:
@@ -157,14 +223,28 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help="write remove_from_git paths for git rm --cached --pathspec-from-file",
     )
+    parser.add_argument("--out", type=Path, help="write JSON diagnostics to a file")
+    parser.add_argument("--out-md", type=Path, help="write Markdown diagnostics to a file")
+    parser.add_argument(
+        "--fail-on-candidates",
+        action="store_true",
+        help="return non-zero when any cleanup candidates are present",
+    )
     args = parser.parse_args(argv)
 
     files = _read_tracked_files(args.tracked_files) if args.tracked_files else _git_files()
     plan = build_plan(files, large_file_threshold_mib=args.large_file_threshold_mib)
     if args.write_pathspec:
         _write_pathspec(args.write_pathspec, plan["records"])
-    print(json.dumps(plan, indent=2, sort_keys=True))
-    return 0
+    text = json.dumps(plan, indent=2, sort_keys=True)
+    if args.out:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(text + "\n", encoding="utf-8")
+    if args.out_md:
+        args.out_md.parent.mkdir(parents=True, exist_ok=True)
+        args.out_md.write_text(build_markdown(plan), encoding="utf-8")
+    print(text)
+    return 1 if args.fail_on_candidates and not bool(plan["contract_pass"]) else 0
 
 
 if __name__ == "__main__":

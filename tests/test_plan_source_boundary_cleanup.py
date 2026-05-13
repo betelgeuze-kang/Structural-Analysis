@@ -171,6 +171,82 @@ def test_write_pathspec_includes_remove_from_git_candidates_only(tmp_path: Path,
     assert pathspec_file.read_text(encoding="utf-8") == "implementation/phase1/output/report.json\n"
 
 
+def test_cli_writes_json_and_markdown_inventory_and_can_fail_on_candidates(tmp_path: Path) -> None:
+    tracked_file = tmp_path / "tracked-files.txt"
+    tracked_file.write_text(
+        "\0".join(["implementation/phase1/output/report.json", "src/app.py"]) + "\0",
+        encoding="utf-8",
+    )
+    candidate = tmp_path / "implementation" / "phase1" / "output" / "report.json"
+    candidate.parent.mkdir(parents=True)
+    candidate.write_text("generated", encoding="utf-8")
+    source = tmp_path / "src" / "app.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("print('ok')\n", encoding="utf-8")
+    out_json = tmp_path / "inventory.json"
+    out_md = tmp_path / "inventory.md"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--tracked-files",
+            str(tracked_file),
+            "--out",
+            str(out_json),
+            "--out-md",
+            str(out_md),
+            "--fail-on-candidates",
+        ],
+        check=False,
+        cwd=tmp_path,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    payload = json.loads(out_json.read_text(encoding="utf-8"))
+    markdown = out_md.read_text(encoding="utf-8")
+    assert payload["schema_version"] == "source-boundary-cleanup-plan.v1"
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_SOURCE_BOUNDARY_CLEANUP_CANDIDATES"
+    assert payload["total_candidate_files"] == 1
+    assert "Source Boundary Cleanup Plan" in markdown
+    assert "implementation/phase1/output/report.json" in markdown
+    assert "remove_from_git" in markdown
+    assert result.stderr == ""
+
+
+def test_cli_fail_on_candidates_passes_when_inventory_is_clean(tmp_path: Path) -> None:
+    tracked_file = tmp_path / "tracked-files.txt"
+    tracked_file.write_text("src/app.py\n", encoding="utf-8")
+    source = tmp_path / "src" / "app.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("print('ok')\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--tracked-files",
+            str(tracked_file),
+            "--fail-on-candidates",
+        ],
+        check=False,
+        cwd=tmp_path,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    payload = json.loads(result.stdout)
+    assert result.returncode == 0
+    assert payload["contract_pass"] is True
+    assert payload["reason_code"] == "PASS"
+    assert payload["records"] == []
+
+
 def test_cli_uses_fixture_and_does_not_run_mutating_git_commands(tmp_path: Path) -> None:
     tracked_file = tmp_path / "tracked-files.txt"
     tracked_file.write_text("implementation/phase1/output/report.json\n", encoding="utf-8")
