@@ -40,7 +40,7 @@
 - P1 readiness와 P1 benchmark breadth를 같은 P0 evidence 기준으로 재실행해 둘 다 `ready` 상태로 만들었다.
 - P1 operational queues와 evidence intake template를 materialize했다.
 - `F821`, `F601`, `F401` lint를 0건으로 정리하고 CI에 `python -m ruff check . --select F821,F601,F401` gate를 추가했다.
-- 이어서 `F841`을 작은 source/report/test 파일에서 제거하고, 레거시 단일 대형 HTML generator 1개는 전용 리팩터링 전까지 per-file ignore로 명시했다.
+- 이어서 `F841`을 작은 source/report/test 파일과 대형 HTML generator에서 제거했고, 임시 per-file ignore도 제거했다.
 - `python -m ruff check . --select F821,F601,F401,F841`는 0건이며, 전체 ruff 잔여는 **147건에서 30건**으로 줄었다.
 - 이어서 `E402/E741/E731/E701/F811` 잔여 30건을 정리해 전체 `python -m ruff check .` 통과 상태로 만들고 CI static check를 full ruff로 승격했다.
 - 풀 테스트 후 `panel_zone_solver_verified_export_bundle.json`이 fixture 샘플로 덮이는 테스트 격리 누락을 수정했고, 재실행 후 `check_generated_worktree_clean.py --show-ok` 통과를 확인했다.
@@ -84,7 +84,7 @@
 
 - source/test 영역의 `F821`, `F601` 0건
 - source/test 영역의 `F401` 0건
-- source/test 영역의 `F841` 0건 또는 명시적 generator-scoped ignore 처리
+- source/test/generator 영역의 `F841` 0건, generator-scoped ignore 제거 완료
 - source/test 영역의 `E402`, `E741`, `E731`, `E701`, `F811` 0건
 - vendored `implementation/phase1/_vendor/**` ruff 제외
 - generated open-data demo path를 ruff 제외해 generated artifact drift와 lint 대상 경계를 분리
@@ -93,7 +93,8 @@
 
 남은 부분:
 
-- 대형 HTML generator는 `F841` per-file ignore를 제거할 수 있도록 별도 모듈 분리 필요
+- 정적 lint blocker는 없음
+- 대형 HTML generator는 lint 때문이 아니라 유지보수성 때문에 별도 모듈 분리 필요
 
 완료 기준:
 
@@ -104,9 +105,9 @@
 
 다음 작업:
 
-1. 대형 HTML generator를 모듈 분리한 뒤 per-file `F841` ignore 제거
-2. ruff full pass를 CI 필수 게이트로 유지
-3. 새 generator/test 추가 시 generated/source 경계와 import bootstrap 예외를 문서화
+1. ruff full pass를 CI 필수 게이트로 유지
+2. 새 generator/test 추가 시 generated/source 경계와 import bootstrap 예외를 문서화
+3. 대형 HTML generator를 renderer/decision/data transform/CLI로 분리
 
 ## 우선순위 2. P1 evidence intake와 운영 queue 완성
 
@@ -291,7 +292,7 @@
 | 단계 | 목표 퍼센트 | 승격 조건 |
 | --- | ---: | --- |
 | 현재 | 75% | L3, P0/P1 execution unblocked, engineer-in-loop 상용 보조툴 |
-| 다음 목표 | 80-83% | EB/RH intake preflight 구조 완성, full ruff fail 수 축소, viewer regression 강화 |
+| 다음 목표 | 80-83% | EB/RH intake preflight 구조 완성, viewer regression 강화, generator 모듈 분리 |
 | L4 후보 | 85%+ | EB/RH evidence intake closed, viewer regression 안정화, runtime fallback/provenance 명확화 |
 | L5 후보 | 92%+ | 외부 benchmark receipt/closure, 운영 API/보안/배포 체계, 장기 regression lane 완료 |
 
@@ -300,12 +301,11 @@
 1. EB/RH evidence intake template를 실제 sidecar preflight까지 연결
 2. `src/structure-viewer` 도면 선택/전환, shared selection, provenance UX 강화
 3. source/generated viewer 계약 테스트와 browser smoke/visual regression 추가
-4. full ruff cleanup을 `F841` -> `E402/E741/E731/E701/F811` 순서로 진행
-5. 대형 open-data/generated artifact 경계 재정리
-6. zero-copy/native runtime path를 stub/contract와 실제 product path로 분리
-7. local ops API와 production API 요구사항 분리
-8. 대형 generator를 renderer/decision/data transform/CLI로 분리
-9. README와 상용화 문서의 claim을 L3/75% 기준으로 동기화
+4. 대형 open-data/generated artifact 경계 재정리
+5. zero-copy/native runtime path를 stub/contract와 실제 product path로 분리
+6. local ops API와 production API 요구사항 분리
+7. 대형 generator를 renderer/decision/data transform/CLI로 분리
+8. README와 상용화 문서의 claim을 L3/75% 기준으로 동기화
 
 ## claim 가이드
 

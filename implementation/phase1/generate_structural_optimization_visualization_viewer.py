@@ -2156,7 +2156,6 @@ def _preview_confidence_guardrail(
 ) -> dict[str, str]:
     state = str(preview_state_label or '').strip()
     readiness = str(preview_readiness_stage_label or '').strip()
-    crosscheck = str(crosscheck_quality_label or '').strip()
     next_unlock = str(next_unlock_label or '').strip()
     if state == 'verified preview':
         return {
@@ -12598,10 +12597,6 @@ def _native_authoring_solver_ops_evidence() -> dict[str, Any]:
     runtime_submission_runtime_ready_count = int(runtime_submission_summary.get('runtime_ready_count', 0) or 0)
     runtime_submission_writeback_ready_count = int(runtime_submission_summary.get('writeback_ready_count', 0) or 0)
     runtime_submission_full_ready_count = int(runtime_submission_summary.get('full_ready_count', 0) or 0)
-    runtime_submission_release_ready_count = int(runtime_submission_summary.get('release_ready_count', 0) or 0)
-    runtime_submission_job_ready_count = int(runtime_submission_summary.get('job_ready_count', 0) or 0)
-    runtime_submission_registry_ready_count = int(runtime_submission_summary.get('registry_ready_count', 0) or 0)
-    runtime_submission_signature_verified_count = int(runtime_submission_summary.get('signature_verified_count', 0) or 0)
     runtime_submission_queued_count = int(
         runtime_submission_summary.get('queued_submission_count', 0)
         or max(runtime_submission_family_count - runtime_submission_full_ready_count, 0)
@@ -16018,8 +16013,6 @@ def _benchmark_expansion_summary() -> dict[str, Any]:
         opstool_synthetic_export_report,
         opstool_synthetic_change_summary,
     )
-    opensees_report = _load_json(REPO_ROOT / 'implementation/phase1/opensees_topology_report.json')
-    opensees_metrics = opensees_report.get('metrics', {}) if isinstance(opensees_report, dict) else {}
     opensees_bridge_dir = REPO_ROOT / 'implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b_shell_beam_mix'
     opensees_bridge_report_path = opensees_bridge_dir / 'bridge_report.json'
     opensees_bridge_model = opensees_bridge_dir / 'model.json'
@@ -16027,8 +16020,6 @@ def _benchmark_expansion_summary() -> dict[str, Any]:
     opensees_bridge_ready = opensees_bridge_report_path.exists() and opensees_bridge_model.exists() and opensees_bridge_dataset.exists()
     opensees_bridge_report = _load_json(opensees_bridge_report_path) if opensees_bridge_ready else {}
     opensees_bridge_summary = opensees_bridge_report.get('summary', {}) if isinstance(opensees_bridge_report.get('summary'), dict) else {}
-    opensees_frame_report = _load_json(REPO_ROOT / 'implementation/phase1/open_data/global_authority/run_artifacts/opensees/SCBF16B_topology_report.json')
-    opensees_frame_metrics = opensees_frame_report.get('metrics', {}) if isinstance(opensees_frame_report, dict) else {}
     opensees_frame_bridge_dir = REPO_ROOT / 'implementation/phase1/open_data/megastructure/bridged/opensees_scbf16b'
     opensees_frame_bridge_report_path = opensees_frame_bridge_dir / 'bridge_report.json'
     opensees_frame_bridge_model = opensees_frame_bridge_dir / 'model.json'
@@ -19391,7 +19382,6 @@ def _placeholder_entry_html(
         )
         if isinstance(row, dict)
     ]
-    direct_5pack_story_band_impact_row_count = int(metadata.get('synthetic_story_band_impact_row_count', 0) or 0)
     direct_5pack_story_band_impact_summary_label = str(
         metadata.get('synthetic_story_band_impact_summary_label', '') or 'n/a'
     )
@@ -23308,37 +23298,6 @@ def build_html(payload: dict[str, Any]) -> str:
         and changed_member_count == 0
         and change_row_count == 0
     )
-    compare_section_class = 'section is-hidden-for-baseline' if suppress_compare_sections else 'section'
-    opensees_profile_label = (
-        'shell-beam mix baseline'
-        if case_family_value == 'opensees_shell_beam_mix'
-        else 'frame-brace baseline'
-    )
-    baseline_scope_notice_markup = ''
-    if suppress_compare_sections:
-        baseline_scope_notice_markup = (
-            "<section class='section' id='viewer-opensees-baseline-guide' data-viewer-tier='core' data-viewer-preset-key='opensees-guide'>"
-            "<div class='panel span-12 baseline-mode-panel'>"
-            "<h2>OpenSees Baseline Reading Mode</h2>"
-            "<p class='lead'>이 페이지는 `baseline vs changed compare`가 아니라 `baseline-only frame inspection`으로 읽는 것이 맞습니다. "
-            "SCBF16B 계열은 `y=0` 평면 X/Z frame 모델이라 `Elevation XZ`와 `baseline-only 3D frame camera`가 메인이고, `Plan XY`는 겹침 확인용 보조 뷰입니다.</p>"
-            "<div class='kpi-line'>"
-            f"<span class='pill'>profile={html.escape(opensees_profile_label, quote=True)}</span>"
-            f"<span class='pill'>nodes={html.escape(str(case_context.get('node_count_label', 'n/a') or 'n/a'), quote=True)}</span>"
-            f"<span class='pill'>elements={html.escape(str(case_context.get('element_count_label', 'n/a') or 'n/a'), quote=True)}</span>"
-            f"<span class='pill'>after_segments={interactive_after_segment_count}</span>"
-            "<span class='pill'>planar x/z frame</span>"
-            "</div>"
-            "<div class='note'>Changed Member Overlay, Story-Zone Structural Map, Delivery Boundary 같은 compare 전용 섹션은 이 baseline 페이지에서는 숨겼습니다. "
-            "shell slab 추가분 비교가 필요하면 아래 `OpenSees SCBF Family Compare Surface`로 가는 편이 맞습니다.</div>"
-            "<div class='footer-links'>"
-            "<a href='opensees_scbf_family_compare.html'>Open OpenSees SCBF Family Compare Surface</a>"
-            "<a href='opensees_scbf16b_shell_beam_mix_baseline.html'>Open shell-beam mix baseline</a>"
-            "<a href='opensees_scbf16b_baseline.html'>Open frame-brace baseline</a>"
-            "</div>"
-            "</div>"
-            "</section>"
-        )
     core_workflow_steps: list[dict[str, str]] = [
         {
             'title': 'Interactive 3D',
@@ -23416,9 +23375,6 @@ def build_html(payload: dict[str, Any]) -> str:
     baseline_launch_note = (
         '정적 `Isometric XYZ`는 방향 미리보기입니다. 실제 회전/줌/팬으로 baseline 골조를 보려면 아래 interactive 3D를 baseline-only 상태로 바로 열 수 있습니다.'
     )
-    baseline_summary_note = (
-        'viewer는 frame focus로 시작해 beam/column 골조를 먼저 읽게 합니다. 보조 뷰는 기본 축소 상태로 두고, 필요할 때만 펼쳐서 수직 계통이나 공간감을 확인하도록 정리했습니다.'
-    )
     baseline_reading_order_markup = (
         "<div class='baseline-reading-order'>"
         "<div class='baseline-reading-chip'><strong>1</strong><span>Plan XY로 골조 흐름 먼저 확인</span></div>"
@@ -23429,91 +23385,12 @@ def build_html(payload: dict[str, Any]) -> str:
     baseline_compare_button_markup = (
         "<button type='button' class='overlay-view-button' id='baseline-open-3d-compare'>Open baseline+after 3D</button>"
     )
-    baseline_unavailable_markup = "<div class='note'>baseline unavailable</div>"
-    baseline_primary_markup = (
-        "<div class='overlay-frame baseline-frame-primary'>"
-        "<div class='overlay-view-header'><h3>Baseline Plan XY</h3></div>"
-        "<div class='overlay-view-note'>가장 먼저 보는 메인 뷰입니다. 기본은 frame focus라서 beam/column 골조를 먼저 읽고, slab/wall은 더 옅은 ghost 수준으로 뒤에 둡니다.</div>"
-        f"{baseline.get('plan_xy_svg', baseline_unavailable_markup)}"
-        "</div>"
-    )
-    baseline_secondary_markup = (
-        "<div class='baseline-side-stack'>"
-        "<div class='overlay-frame baseline-frame-secondary is-collapsed' data-baseline-secondary-view='elevation'>"
-        "<div class='overlay-view-header baseline-secondary-header'><h3>Baseline Elevation XZ</h3><button type='button' class='overlay-view-button baseline-secondary-toggle' data-baseline-secondary-toggle='elevation' aria-expanded='false'>Expand view</button></div>"
-        "<div class='baseline-secondary-preview'>보조 뷰입니다. 기본은 접혀 있고, 필요할 때 펼쳐 수직 골조와 층간 형상을 확인합니다.</div>"
-        "<div class='baseline-secondary-body'>"
-        "<div class='overlay-view-note'>보조 뷰입니다. 기본은 접혀 있고, 필요할 때 펼쳐 수직 골조와 층간 형상을 확인합니다.</div>"
-        f"{baseline.get('elevation_xz_svg', baseline_unavailable_markup)}"
-        "</div></div>"
-        "<div class='overlay-frame baseline-frame-secondary is-collapsed' data-baseline-secondary-view='isometric'>"
-        "<div class='overlay-view-header baseline-secondary-header'><h3>Baseline Isometric XYZ</h3><button type='button' class='overlay-view-button baseline-secondary-toggle' data-baseline-secondary-toggle='isometric' aria-expanded='false'>Expand view</button></div>"
-        "<div class='baseline-secondary-preview'>정적 3D 보조 뷰입니다. 실제 orbit/zoom은 위 `Open baseline only in 3D` 버튼으로 여는 interactive viewer에서 확인합니다.</div>"
-        "<div class='baseline-secondary-body'>"
-        "<div class='overlay-view-note'>정적 3D 보조 뷰입니다. 실제 orbit/zoom은 위 `Open baseline only in 3D` 버튼으로 여는 interactive viewer에서 확인합니다.</div>"
-        f"{baseline.get('isometric_xyz_svg', baseline_unavailable_markup)}"
-        "</div></div></div>"
-    )
-    interactive_section_lead = (
-        '정적 isometric 대신, baseline 구조와 AI 최적화 후 changed overlay를 회전/줌/팬으로 직접 읽는 실제 3D canvas viewer입니다.'
-    )
-    interactive_overlay_note = (
-        '현재 3D overlay는 geometry link가 있는 changed group만 직접 그립니다. 그래서 live change set에 wall이 있어도 dataset group mapping이 없으면 `unmapped_live_types`로 먼저 표시됩니다. '
-        '또 이 뷰는 부재를 어디로 옮겼는지보다, 같은 자리 부재 중 어떤 member/group가 최적화 대상으로 선택됐고 어떤 속성이 조정됐는지를 읽는 3D overlay에 가깝습니다.'
-    )
-    interactive_layer_toggle_markup = (
-        "<div class='filter-block' data-filter-block='interactive-3d-layer'>"
-        "<div class='filter-title'>3D Layer Toggle</div>"
-        "<div class='filter-row'>"
-        "<button type='button' class='filter-chip is-active' data-filter-group='interactive-3d-layer' data-filter-value='before'>before<span>baseline</span></button>"
-        "<button type='button' class='filter-chip is-active' data-filter-group='interactive-3d-layer' data-filter-value='after'>after<span>changed</span></button>"
-        "</div></div>"
-    )
-    changed_family_filter_markup = (
-        "<div class='filter-block' data-filter-block='after-3d-family'>"
-        "<div class='filter-title'>Changed Family Filter</div>"
-        f"<div class='filter-row'>{_overlay_filter_chips(interactive_3d.get('after_family_options', []), group='after-3d-family')}</div>"
-        "</div>"
-    )
-    interactive_status_seed_markup = (
-        "<div class='interactive-3d-status'>"
-        f"<span class='pill'>{interactive_3d.get('story_slice_label', 'n/a')}</span>"
-        f"<span class='pill'>{interactive_3d.get('baseline_category_label', 'n/a')}</span>"
-        f"<span class='pill'>{interactive_3d.get('after_family_label', 'n/a')}</span>"
-        "</div>"
-    )
-    interactive_legend_markup = (
-        "<div class='interactive-3d-legend'>"
-        "<div class='interactive-3d-legend-chip'><span class='interactive-3d-legend-line is-ghost' style='color:#8aa4d6'></span><span>baseline ghost</span></div>"
-        "<div class='interactive-3d-legend-chip'><span class='interactive-3d-legend-line' style='color:#0f6a73'></span><span>changed overlay</span></div>"
-        "<div class='interactive-3d-legend-chip'><span class='interactive-3d-legend-line is-selected' style='color:#0c3656'></span><span>selected member</span></div>"
-        "<div class='interactive-3d-legend-chip'><span class='interactive-3d-legend-line is-group' style='color:#0f6a73'></span><span>same group cluster</span></div>"
-        "<div class='interactive-3d-legend-chip'><span class='interactive-3d-legend-line is-family' style='color:#685499'></span><span>same action family</span></div>"
-        "<div class='interactive-3d-legend-chip'><span>X/Y/Z orientation axis</span></div>"
-        "</div>"
-    )
-    interactive_note_copy = (
-        'drag로 orbit, shift+drag로 pan, wheel은 커서 기준으로 확대/축소됩니다. Zoom In/Out, Fit Selected, Full Screen도 함께 쓸 수 있습니다. '
-        'hover로 inspect, click changed member로 기존 detail panel과 동기화합니다. 더블클릭하면 해당 부재 쪽으로 바로 들어갑니다.'
-    )
-    interactive_change_reading_title = '3D Change Reading'
-    interactive_change_reading_copy = (
-        '여기서 보이는 많은 변경은 `부재를 다른 위치로 이동`했다기보다, 같은 자리 부재의 단면·두께·배근·디테일 같은 속성을 조정한 최적화입니다. '
-        'changed member를 클릭하면 아래에서 `어떤 최적화가 들어갔는지`, `어떻게 수정했는지`, `위치 이동인지 속성 조정인지`를 바로 읽을 수 있습니다.'
-    )
-    interactive_detail_empty_copy = (
-        '3D 구조에서 hover하면 layer와 member를 빠르게 읽을 수 있고, changed member를 클릭하면 `어떤 최적화가 들어갔는지`, `같은 자리 속성 조정인지`, `어느 story/zone인지`까지 아래 패널과 같이 열립니다.'
-    )
-    interactive_mode_banner_default = 'baseline vs changed compare'
     if suppress_compare_sections:
         baseline_section_lead = (
             '이 OpenSees 케이스는 `y=0` 평면 X/Z frame baseline이라 `Elevation XZ`를 먼저 보는 편이 맞습니다. `Plan XY`는 선이 겹쳐 보일 수 있어서 보조 collapsed check 용도로 두고, 실제 읽기는 baseline-only 3D와 elevation 중심으로 진행합니다.'
         )
         baseline_launch_note = (
             '정적 `Isometric XYZ`는 방향 미리보기입니다. OpenSees planar frame은 실제 읽기를 `baseline-only 3D`의 frame/elevation camera에서 하는 편이 맞습니다.'
-        )
-        baseline_summary_note = (
-            '이 baseline은 compare용이 아니라 frame inspection용입니다. `Elevation XZ`를 메인으로 보고, `Plan XY`는 y=0 겹침 확인용으로만 보조적으로 확인하면 덜 헷갈립니다.'
         )
         baseline_reading_order_markup = (
             "<div class='baseline-reading-order'>"
@@ -23523,69 +23400,6 @@ def build_html(payload: dict[str, Any]) -> str:
             "</div>"
         )
         baseline_compare_button_markup = ''
-        baseline_primary_markup = (
-            "<div class='overlay-frame baseline-frame-primary'>"
-            "<div class='overlay-view-header'><h3>Baseline Elevation XZ</h3></div>"
-            "<div class='overlay-view-note'>이 케이스의 메인 뷰입니다. OpenSees planar frame은 X/Z elevation에서 story band와 frame/bracing 윤곽이 가장 잘 보입니다.</div>"
-            f"{baseline.get('elevation_xz_svg', baseline_unavailable_markup)}"
-            "</div>"
-        )
-        baseline_secondary_markup = (
-            "<div class='baseline-side-stack'>"
-            "<div class='overlay-frame baseline-frame-secondary is-collapsed' data-baseline-secondary-view='plan'>"
-            "<div class='overlay-view-header baseline-secondary-header'><h3>Baseline Plan XY</h3><button type='button' class='overlay-view-button baseline-secondary-toggle' data-baseline-secondary-toggle='plan' aria-expanded='false'>Expand view</button></div>"
-            "<div class='baseline-secondary-preview'>보조 뷰입니다. y=0 평면 frame이라 선이 겹쳐 보일 수 있어서 footprint/check 용도로만 확인합니다.</div>"
-            "<div class='baseline-secondary-body'>"
-            "<div class='overlay-view-note'>보조 뷰입니다. y=0 평면 frame이라 선이 겹쳐 보일 수 있어서 footprint/check 용도로만 확인합니다.</div>"
-            f"{baseline.get('plan_xy_svg', baseline_unavailable_markup)}"
-            "</div></div>"
-            "<div class='overlay-frame baseline-frame-secondary is-collapsed' data-baseline-secondary-view='isometric'>"
-            "<div class='overlay-view-header baseline-secondary-header'><h3>Baseline Isometric XYZ</h3><button type='button' class='overlay-view-button baseline-secondary-toggle' data-baseline-secondary-toggle='isometric' aria-expanded='false'>Expand view</button></div>"
-            "<div class='baseline-secondary-preview'>정적 3D 보조 뷰입니다. 실제 inspect는 위 `Open baseline only in 3D`와 아래 interactive frame camera에서 이어집니다.</div>"
-            "<div class='baseline-secondary-body'>"
-            "<div class='overlay-view-note'>정적 3D 보조 뷰입니다. 실제 inspect는 위 `Open baseline only in 3D`와 아래 interactive frame camera에서 이어집니다.</div>"
-            f"{baseline.get('isometric_xyz_svg', baseline_unavailable_markup)}"
-            "</div></div></div>"
-        )
-        interactive_section_lead = (
-            '이 케이스는 `baseline vs changed compare`가 아니라 `baseline-only OpenSees frame inspection`입니다. y=0 planar frame이라 auto camera도 frame/elevation 쪽으로 맞춰 두고, baseline member를 직접 클릭해서 inspect하는 흐름이 맞습니다.'
-        )
-        interactive_overlay_note = (
-            '현재 after overlay는 없습니다. 이 3D는 baseline frame을 직접 inspect하는 surface이고, shell slab 추가분 비교는 `OpenSees SCBF Family Compare Surface`에서 보는 편이 맞습니다.'
-        )
-        interactive_layer_toggle_markup = (
-            "<div class='filter-block' data-filter-block='interactive-3d-layer'>"
-            "<div class='filter-title'>3D Layer Toggle</div>"
-            "<div class='filter-row'>"
-            "<button type='button' class='filter-chip is-active' data-filter-group='interactive-3d-layer' data-filter-value='before'>before<span>baseline frame</span></button>"
-            "</div></div>"
-        )
-        changed_family_filter_markup = ''
-        interactive_status_seed_markup = (
-            "<div class='interactive-3d-status'>"
-            f"<span class='pill'>{interactive_3d.get('story_slice_label', 'n/a')}</span>"
-            f"<span class='pill'>{interactive_3d.get('baseline_category_label', 'n/a')}</span>"
-            "<span class='pill'>planar x/z frame</span>"
-            "</div>"
-        )
-        interactive_legend_markup = (
-            "<div class='interactive-3d-legend'>"
-            "<div class='interactive-3d-legend-chip'><span class='interactive-3d-legend-line is-ghost' style='color:#8aa4d6'></span><span>baseline frame</span></div>"
-            "<div class='interactive-3d-legend-chip'><span class='interactive-3d-legend-line is-selected' style='color:#0c3656'></span><span>selected baseline member</span></div>"
-            "<div class='interactive-3d-legend-chip'><span>X/Y/Z orientation axis</span></div>"
-            "</div>"
-        )
-        interactive_note_copy = (
-            'drag로 orbit, shift+drag로 pan, wheel은 커서 기준 확대/축소입니다. 이 페이지에서는 changed member가 아니라 baseline member를 hover/click해서 inspect하고, 더블클릭으로 해당 부재 주변으로 바로 들어갑니다.'
-        )
-        interactive_change_reading_title = '3D Baseline Reading'
-        interactive_change_reading_copy = (
-            '이 페이지는 optimization delta viewer가 아니라 baseline frame inspection surface입니다. baseline member를 클릭하면 `story band`, `member/category`, `planar frame에서 어디에 놓인 부재인지`를 바로 읽을 수 있습니다.'
-        )
-        interactive_detail_empty_copy = (
-            '3D 구조에서 hover하면 baseline member를 빠르게 읽을 수 있고, 클릭하면 `member/category`, `story band`, `planar frame에서의 위치 해석`이 아래에 고정됩니다.'
-        )
-        interactive_mode_banner_default = 'baseline-only frame inspect'
     interactive_3d_title = 'Interactive XZ Frame Viewer' if is_opensees_planar_baseline_case else 'Interactive XYZ Structure Viewer'
     interactive_3d_lead = (
         '이 케이스는 AI changed overlay가 없는 OpenSees baseline-only 평면 프레임입니다. `y=0`인 x/z frame이라 Elevation XZ와 frame camera가 주 뷰이고, Plan XY는 구조가 납작하게 겹치는지 확인하는 보조 뷰로 내립니다.'
@@ -23805,23 +23619,6 @@ def build_html(payload: dict[str, Any]) -> str:
         if is_opensees_planar_baseline_case
         else "<button type='button' class='overlay-view-button' id='baseline-open-3d-compare'>Open baseline+after 3D</button>"
     )
-    opensees_baseline_focus_markup = (
-        "<section class='section' data-viewer-section='opensees-baseline-focus'>"
-        "<div class='panel span-12'>"
-        "<h2>OpenSees Baseline Focus</h2>"
-        "<p class='lead'>이 케이스는 changed overlay가 없는 baseline-only OpenSees frame입니다. 그래서 compare용 섹션은 내리고, 실제 구조 판독에 필요한 Elevation XZ와 frame camera 쪽을 앞에 둡니다.</p>"
-        "<div class='kpi-line'>"
-        "<span class='pill ok'>planar_xz=y=0</span>"
-        "<span class='pill'>main_view=Elevation XZ</span>"
-        "<span class='pill'>3d_auto=elevation-first</span>"
-        "<span class='pill warn'>changed_overlay=n/a</span>"
-        "</div>"
-        "<div class='note'>Plan XY가 거의 안 보이는 건 데이터 누락이 아니라 평면 frame 성격 때문입니다. 먼저 Elevation XZ와 baseline-only 3D를 보는 흐름이 맞습니다.</div>"
-        "</div>"
-        "</section>"
-        if is_opensees_planar_baseline_case
-        else ''
-    )
     baseline_reading_order_markup = (
         "<div class='baseline-reading-order'>"
         "<div class='baseline-reading-chip'><strong>1</strong><span>Plan XY로 골조 흐름 먼저 확인</span></div>"
@@ -23838,41 +23635,8 @@ def build_html(payload: dict[str, Any]) -> str:
         "</div>"
         "</div>"
     )
-    baseline_launch_compare_button_markup = (
-        "<button type='button' class='overlay-view-button' id='baseline-open-3d-compare'>Open baseline+after 3D</button>"
-    )
-    baseline_grid_markup = f"""
-      <div class='baseline-grid'>
-        <div class='overlay-frame baseline-frame-primary'>
-          <div class='overlay-view-header'><h3>Baseline Plan XY</h3></div>
-          <div class='overlay-view-note'>가장 먼저 보는 메인 뷰입니다. 기본은 frame focus라서 beam/column 골조를 먼저 읽고, slab/wall은 더 옅은 ghost 수준으로 뒤에 둡니다.</div>
-          {baseline.get('plan_xy_svg', "<div class='note'>baseline unavailable</div>")}
-        </div>
-        <div class='baseline-side-stack'>
-          <div class='overlay-frame baseline-frame-secondary is-collapsed' data-baseline-secondary-view='elevation'>
-            <div class='overlay-view-header baseline-secondary-header'><h3>Baseline Elevation XZ</h3><button type='button' class='overlay-view-button baseline-secondary-toggle' data-baseline-secondary-toggle='elevation' aria-expanded='false'>Expand view</button></div>
-            <div class='baseline-secondary-preview'>보조 뷰입니다. 기본은 접혀 있고, 필요할 때 펼쳐 수직 골조와 층간 형상을 확인합니다.</div>
-            <div class='baseline-secondary-body'>
-              <div class='overlay-view-note'>보조 뷰입니다. 기본은 접혀 있고, 필요할 때 펼쳐 수직 골조와 층간 형상을 확인합니다.</div>
-              {baseline.get('elevation_xz_svg', "<div class='note'>baseline unavailable</div>")}
-            </div>
-          </div>
-          <div class='overlay-frame baseline-frame-secondary is-collapsed' data-baseline-secondary-view='isometric'>
-            <div class='overlay-view-header baseline-secondary-header'><h3>Baseline Isometric XYZ</h3><button type='button' class='overlay-view-button baseline-secondary-toggle' data-baseline-secondary-toggle='isometric' aria-expanded='false'>Expand view</button></div>
-            <div class='baseline-secondary-preview'>정적 3D 보조 뷰입니다. 실제 orbit/zoom은 위 `Open baseline only in 3D` 버튼으로 여는 interactive viewer에서 확인합니다.</div>
-            <div class='baseline-secondary-body'>
-              <div class='overlay-view-note'>정적 3D 보조 뷰입니다. 실제 orbit/zoom은 위 `Open baseline only in 3D` 버튼으로 여는 interactive viewer에서 확인합니다.</div>
-              {baseline.get('isometric_xyz_svg', "<div class='note'>baseline unavailable</div>")}
-            </div>
-          </div>
-        </div>
-      </div>
-    """
-    baseline_lead = 'AI 최적화 전 원래 구조를 보여주되, 처음 화면은 골조를 먼저 읽기 쉬운 `beam+column frame focus`로 시작합니다. slab와 wall은 필요할 때만 단계적으로 열어보는 흐름으로 정리했습니다.'
     baseline_launch_note = '정적 `Isometric XYZ`는 방향 미리보기입니다. 실제 회전/줌/팬으로 baseline 골조를 보려면 아래 interactive 3D를 baseline-only 상태로 바로 열 수 있습니다.'
-    baseline_tail_note = 'viewer는 frame focus로 시작해 beam/column 골조를 먼저 읽게 합니다. 보조 뷰는 기본 축소 상태로 두고, 필요할 때만 펼쳐서 수직 계통이나 공간감을 확인하도록 정리했습니다.'
     interactive_3d_lead = '정적 isometric 대신, baseline 구조와 AI 최적화 후 changed overlay를 회전/줌/팬으로 직접 읽는 실제 3D canvas viewer입니다.'
-    interactive_3d_mode_banner_text = 'baseline vs changed compare'
     interactive_3d_change_reading_title = '3D Change Reading'
     interactive_3d_change_reading_copy = '여기서 보이는 많은 변경은 `부재를 다른 위치로 이동`했다기보다, 같은 자리 부재의 단면·두께·배근·디테일 같은 속성을 조정한 최적화입니다. changed member를 클릭하면 아래에서 `어떤 최적화가 들어갔는지`, `어떻게 수정했는지`, `위치 이동인지 속성 조정인지`를 바로 읽을 수 있습니다.'
     interactive_3d_detail_empty_copy = '3D 구조에서 hover하면 layer와 member를 빠르게 읽을 수 있고, changed member를 클릭하면 `어떤 최적화가 들어갔는지`, `같은 자리 속성 조정인지`, `어느 story/zone인지`까지 아래 패널과 같이 열립니다.'
@@ -23883,12 +23647,6 @@ def build_html(payload: dict[str, Any]) -> str:
         "<button type='button' class='filter-chip is-active' data-filter-group='interactive-3d-layer' data-filter-value='before'>before<span>baseline</span></button>"
         "<button type='button' class='filter-chip is-active' data-filter-group='interactive-3d-layer' data-filter-value='after'>after<span>changed</span></button>"
         "</div>"
-        "</div>"
-    )
-    interactive_3d_after_family_markup = (
-        "<div class='filter-block' data-filter-block='after-3d-family'>"
-        "<div class='filter-title'>Changed Family Filter</div>"
-        f"<div class='filter-row'>{_overlay_filter_chips(interactive_3d.get('after_family_options', []), group='after-3d-family')}</div>"
         "</div>"
     )
     coverage_section_markup = f"""
@@ -24256,9 +24014,7 @@ def build_html(payload: dict[str, Any]) -> str:
         story_zone_section_markup = ''
         changed_overlay_section_markup = ''
         top_story_review_section_markup = ''
-        baseline_lead = '이 케이스는 AI changed overlay가 없는 baseline-only OpenSees 평면 프레임 모델입니다. 먼저 `Elevation XZ`로 프레임/브레이싱을 읽고, `Interactive 3D`는 frame camera 기준으로 보며, `Plan XY`는 y=0 평면이라 납작하게 보인다는 점을 먼저 알려줍니다. 이제 정적 도면 선을 직접 클릭해도 아래 3D Pick Detail과 동기화됩니다.'
         baseline_launch_note = '이 모델은 y=0 planar x/z frame이라 정적 `Plan XY`는 사실상 납작한 확인용입니다. 실제 읽기는 아래 interactive 3D의 frame camera와 `Elevation XZ`를 먼저 보는 편이 맞고, 정적 Elevation/Plan 선을 클릭해도 baseline member detail이 같이 따라옵니다.'
-        baseline_tail_note = 'OpenSees baseline-only 케이스는 compare surface가 아니라 source geometry 확인용입니다. 먼저 Elevation XZ와 baseline-only 3D를 보고, family 차이는 OpenSees family compare에서 이어서 읽는 흐름이 가장 자연스럽습니다.'
         baseline_reading_order_markup = (
             "<div class='baseline-reading-order'>"
             "<div class='baseline-reading-chip'><strong>1</strong><span>Elevation XZ로 프레임/브레이싱 먼저 확인</span></div>"
@@ -24275,36 +24031,7 @@ def build_html(payload: dict[str, Any]) -> str:
             "<div class='note' style='margin-top:8px'>이 케이스는 changed overlay가 없어 baseline story sync는 3D slice만 유지합니다.</div>"
             "</div>"
         )
-        baseline_launch_compare_button_markup = ''
-        baseline_grid_markup = f"""
-      <div class='baseline-grid'>
-        <div class='overlay-frame baseline-frame-primary'>
-          <div class='overlay-view-header'><h3>Baseline Elevation XZ</h3></div>
-          <div class='overlay-view-note'>이 케이스의 메인 뷰입니다. OpenSees SCBF16B는 y=0 planar x/z frame이라 elevation이 실제 프레임/브레이싱 읽기에 가장 직접적입니다. 정적 선을 클릭하면 아래 3D Pick Detail과 3D 포커스가 같이 맞춰집니다.</div>
-          {baseline.get('elevation_xz_svg', "<div class='note'>baseline unavailable</div>")}
-        </div>
-        <div class='baseline-side-stack'>
-          <div class='overlay-frame baseline-frame-secondary is-collapsed' data-baseline-secondary-view='elevation'>
-            <div class='overlay-view-header baseline-secondary-header'><h3>Baseline Plan XY</h3><button type='button' class='overlay-view-button baseline-secondary-toggle' data-baseline-secondary-toggle='elevation' aria-expanded='false'>Expand view</button></div>
-            <div class='baseline-secondary-preview'>보조 확인용입니다. 이 모델은 y=0이라 plan view가 납작하게 겹쳐 보일 수 있습니다.</div>
-            <div class='baseline-secondary-body'>
-              <div class='overlay-view-note'>보조 확인용입니다. 이 모델은 y=0이라 plan view가 납작하게 겹쳐 보일 수 있습니다. 위치가 없는 게 아니라 평면 모델이라 그렇게 보입니다. 여기 선을 클릭해도 같은 baseline member detail로 연결됩니다.</div>
-              {baseline.get('plan_xy_svg', "<div class='note'>baseline unavailable</div>")}
-            </div>
-          </div>
-          <div class='overlay-frame baseline-frame-secondary is-collapsed' data-baseline-secondary-view='isometric'>
-            <div class='overlay-view-header baseline-secondary-header'><h3>Baseline Isometric XYZ</h3><button type='button' class='overlay-view-button baseline-secondary-toggle' data-baseline-secondary-toggle='isometric' aria-expanded='false'>Expand view</button></div>
-            <div class='baseline-secondary-preview'>정적 3D 보조 뷰입니다. 실제 읽기는 interactive 3D의 frame camera가 더 적합합니다.</div>
-            <div class='baseline-secondary-body'>
-              <div class='overlay-view-note'>정적 3D 보조 뷰입니다. 이 케이스는 planar x/z frame이라 interactive 3D에서 frame camera로 보는 쪽이 더 직관적입니다.</div>
-              {baseline.get('isometric_xyz_svg', "<div class='note'>baseline unavailable</div>")}
-            </div>
-          </div>
-        </div>
-      </div>
-    """
         interactive_3d_lead = '이 케이스는 changed compare가 아니라 baseline-only OpenSees frame viewer입니다. `Elevation XZ`와 같은 프레임 읽기를 3D camera로 바로 이어서 보게 하고, plan view가 납작해 보이는 이유도 같이 설명합니다.'
-        interactive_3d_mode_banner_text = 'baseline-only 3D'
         interactive_3d_change_reading_title = '3D Baseline Reading'
         interactive_3d_change_reading_copy = '이 OpenSees 케이스는 AI changed overlay가 아니라 baseline-only 상세 구조 읽기용입니다. 먼저 frame/bracing 골조를 읽고, shell-beam mix는 shell panel이 어느 story에 추가됐는지 family compare surface에서 이어서 보면 됩니다.'
         interactive_3d_detail_empty_copy = '이 3D는 baseline-only OpenSees frame viewer입니다. hover로 member/category를 읽고, frame camera로 맞추면 planar x/z frame의 절점과 골조를 더 쉽게 확인할 수 있습니다. 정적 Elevation/Plan 선을 클릭해도 이 detail 패널과 동기화됩니다.'
@@ -24316,17 +24043,6 @@ def build_html(payload: dict[str, Any]) -> str:
             "</div>"
             "<div class='note' style='margin-top:8px'>이 OpenSees page는 changed overlay가 아니라 baseline-only geometry surface입니다.</div>"
             "</div>"
-        )
-        interactive_3d_after_family_markup = (
-            "<div class='filter-block' data-filter-block='after-3d-family'>"
-            "<div class='filter-title'>Changed Overlay</div>"
-            "<div class='note' style='margin-top:0'>이 케이스는 AI changed member compare가 아니라 baseline-only OpenSees geometry입니다. 상세 차이는 family compare surface에서 shell-only slab delta로 읽습니다.</div>"
-            + (
-                f"<div class='footer-links' style='margin-top:10px;'><a href='{html.escape(opensees_compare_href, quote=True)}'>Open OpenSees family compare</a></div>"
-                if opensees_compare_href
-                else ""
-            )
-            + "</div>"
         )
         opensees_baseline_scope_markup = (
             "<section class='section'>"
