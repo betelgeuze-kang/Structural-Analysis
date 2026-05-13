@@ -33,6 +33,9 @@ def test_index_html_uses_instanced_mesh_pipeline_for_large_line_models() -> None
 def test_index_html_keeps_instanced_wireframe_and_selection_refresh_hooks() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
     mesh_builder_text = Path("src/structure-viewer/viewer-render-mesh-builders.js").read_text(encoding="utf-8")
+    shared_selection_text = Path("src/structure-viewer/viewer-shared-selection-state.js").read_text(
+        encoding="utf-8"
+    )
 
     assert "function refreshInstancedVisuals()" in text
     assert "function createInstancedWireframe(" in mesh_builder_text
@@ -41,7 +44,7 @@ def test_index_html_keeps_instanced_wireframe_and_selection_refresh_hooks() -> N
     assert "let selectedElementKeys=new Set(),selectedElementRecords=new Map();" in text
     assert "function updateSelectionFromData(" in text
     assert "function clearSelection(" in text
-    assert "function normalizeSelectionValues(values)" in text
+    assert "function normalizeSelectionValues(values)" in shared_selection_text
     assert "getSelectedElementCount()" in text
     assert "Selection Set" in text
     assert "member_set" in text

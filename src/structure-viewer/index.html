@@ -396,6 +396,14 @@ import {
   persistRealDrawingBrowserState as persistRealDrawingBrowserStateToStorage,
   readInitialRealDrawingBrowserState as readInitialRealDrawingBrowserStateFromStorage,
 } from './viewer-real-drawing-browser-state.js';
+import {
+  SHARED_SELECTION_KEY,
+  applySharedSelectionQueryParams,
+  buildSharedSelectionPayload,
+  normalizeSelectionValue,
+  normalizeSelectionValues,
+  readSharedSelectionState,
+} from './viewer-shared-selection-state.js';
 
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
   modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,
@@ -417,7 +425,6 @@ let sectionEditPreviewState=createEmptySectionEditPreviewState();
 let sectionEditApplyState=createEmptySectionEditApplyState();
 let loadcombEditState=createEmptyLoadcombEditState();
 let viewerOptimizationWorker=null,viewerOptimizationWorkerRequestId=0;
-const SHARED_SELECTION_KEY='structural-viewer-selection-v1';
 const VIEWER_THEME_KEY='structural-viewer-theme-v1';
 const REAL_DRAWING_REVIEW_FLAG_KEYS=new Set([
   'not_solver_exact',
@@ -664,21 +671,6 @@ function toggleShortcutHelp(force=null){
   const next=typeof force==='boolean'?force:!node.classList.contains('is-open');
   node.classList.toggle('is-open',next);
 }
-function normalizeSelectionValue(value){
-  const text=String(value??'').trim();
-  return text||'';
-}
-function normalizeSelectionValues(values){
-  const source=Array.isArray(values)
-    ?values
-    :String(values??'').split('|');
-  const unique=[];
-  source.forEach(value=>{
-    const normalized=normalizeSelectionValue(value);
-    if(normalized&&!unique.includes(normalized))unique.push(normalized);
-  });
-  return unique;
-}
 function readInitialRealDrawingBrowserState(){
   return readInitialRealDrawingBrowserStateFromStorage({
     storageGet:safeStorageGet,
@@ -719,34 +711,10 @@ function updateSuiteRouteTabs(){
   });
 }
 function readSharedSelection(){
-  const params=new URLSearchParams(window.location.search);
-  const queryMember=normalizeSelectionValue(
-    params.get('drawing_asset')||params.get('asset_ref')||params.get('member')||params.get('member_id')||params.get('focus_member')||params.get('case_id')||params.get('focus')
-  );
-  const queryMemberIds=normalizeSelectionValues(params.get('member_set')||'');
-  const queryLoadCase=normalizeSelectionValue(params.get('load_case')||params.get('loadcase')||params.get('combination'));
-  let stored={};
-  const raw=safeStorageGet(SHARED_SELECTION_KEY);
-  if(raw){
-    try{stored=JSON.parse(raw)||{}}catch(_err){stored={}}
-  }
-  const storedMemberIds=normalizeSelectionValues(stored.memberIds||stored.memberSet||stored.member_ids||[]);
-  const memberIds=queryMemberIds.length
-    ?queryMemberIds
-    :(queryMember
-      ?normalizeSelectionValues([queryMember,...storedMemberIds])
-      :storedMemberIds);
-  const memberId=queryMember
-    ||memberIds[0]
-    ||normalizeSelectionValue(stored.memberId)
-    ||normalizeSelectionValue(stored.focusMember);
-  return{
-    memberId,
-    memberIds,
-    selectionSetCount:memberIds.length,
-    loadCase:queryLoadCase||normalizeSelectionValue(stored.loadCase),
-    updatedAt:normalizeSelectionValue(stored.updated_at)
-  };
+  return readSharedSelectionState({
+    storageGet:safeStorageGet,
+    storageKey:SHARED_SELECTION_KEY,
+  });
 }
 function readIsolationStateFromQuery(){
   const params=new URLSearchParams(window.location.search);
@@ -764,10 +732,7 @@ function readStoryClipStateFromQuery(){
 }
 function updateViewerQueryParams(selection){
   const url=new URL(window.location.href);
-  if(selection.memberId)url.searchParams.set('member',selection.memberId);else url.searchParams.delete('member');
-  const memberIds=normalizeSelectionValues(selection.memberIds||[]);
-  if(memberIds.length)url.searchParams.set('member_set',memberIds.join('|'));else url.searchParams.delete('member_set');
-  if(selection.loadCase)url.searchParams.set('load_case',selection.loadCase);else url.searchParams.delete('load_case');
+  applySharedSelectionQueryParams(url,selection);
   if(activeIsolation.kind&&activeIsolation.value){
     url.searchParams.set('isolate_kind',activeIsolation.kind);
     url.searchParams.set('isolate_value',activeIsolation.value);
@@ -788,19 +753,10 @@ function updateViewerQueryParams(selection){
   window.history.replaceState({},'',url);
 }
 function publishSharedSelection(selection){
-  const memberIds=normalizeSelectionValues(selection.memberIds||selection.memberId||[]);
-  const primaryMember=normalizeSelectionValue(selection.memberId)||memberIds[0]||'';
-  const next={
-    memberId:primaryMember,
-    memberIds,
-    memberSet:memberIds,
-    selectionSetCount:memberIds.length,
-    focusMember:primaryMember,
-    loadCase:normalizeSelectionValue(selection.loadCase),
+  const next=buildSharedSelectionPayload(selection,{
     source:'interactive3d',
     viewerFamily:'interactive_3d_viewer',
-    updated_at:new Date().toISOString()
-  };
+  });
   safeStorageSet(SHARED_SELECTION_KEY,JSON.stringify(next));
   updateViewerQueryParams(next);
   try{selectionChannel?.postMessage(next)}catch(_err){}
