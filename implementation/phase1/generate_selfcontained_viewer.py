@@ -594,6 +594,12 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
         f"from '{shared_selection_state_url}';",
     )
     search_results_model_url = _encode_js_module_data_url(search_results_model_source)
+    selection_summary_model_source = (VIEWER_ROOT / "viewer-selection-summary-model.js").read_text(encoding="utf-8")
+    selection_summary_model_source = selection_summary_model_source.replace(
+        "from './viewer-shared-selection-state.js';",
+        f"from '{shared_selection_state_url}';",
+    )
+    selection_summary_model_url = _encode_js_module_data_url(selection_summary_model_source)
     return {
         "./viewer-data-loader.js": data_loader_url,
         "./viewer-model-normalizer.js": model_normalizer_url,
@@ -615,6 +621,7 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
         "./viewer-real-drawing-tree-model.js": real_drawing_tree_model_url,
         "./viewer-side-panel-model.js": side_panel_model_url,
         "./viewer-search-results-model.js": search_results_model_url,
+        "./viewer-selection-summary-model.js": selection_summary_model_url,
     }
 
 

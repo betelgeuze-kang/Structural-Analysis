@@ -426,6 +426,11 @@ import {
   viewerElementMatchesSearchQuery,
 } from './viewer-search-results-model.js';
 import {
+  buildClearSelectionButtonModel,
+  buildElementSelectionKey,
+  buildSelectionSetSummary,
+} from './viewer-selection-summary-model.js';
+import {
   SHARED_SELECTION_KEY,
   applySharedSelectionQueryParams,
   buildSharedSelectionPayload,
@@ -1172,8 +1177,9 @@ function renderSelectionPlaceholder(){
 function updateSelectionControls(){
   const button=document.getElementById('clear-selection-button');
   if(button instanceof HTMLButtonElement){
-    button.style.display=selectedElementKeys.size?'inline-flex':'none';
-    button.textContent=selectedElementKeys.size>1?`Clear Selection (${selectedElementKeys.size})`:'Clear Selection';
+    const model=buildClearSelectionButtonModel(selectedElementKeys.size);
+    button.style.display=model.display;
+    button.textContent=model.text;
   }
 }
 async function copyCurrentDeepLink(){
@@ -1268,20 +1274,17 @@ function updateProvenanceBlock(){
   }
 }
 function getElementSelectionKey(data){
-  return `${resolveSelectionMemberId(data)||''}::${normalizeSelectionValue(data?.id)}`;
+  return buildElementSelectionKey(data,{resolveMemberId:resolveSelectionMemberId});
 }
 function getSelectedElementCount(){
   return selectedElementKeys.size;
 }
 function getSelectionSetSummary(limit=4){
-  const labels=[...selectedElementRecords.values()]
-    .filter(item=>item&&selectedElementKeys.has(getElementSelectionKey(item)))
-    .map(item=>normalizeSelectionValue(item.member_id)||`#${normalizeSelectionValue(item.id)}`)
-    .filter(Boolean);
-  const unique=[...new Set(labels)];
-  if(!unique.length)return'--';
-  const head=unique.slice(0,limit).join(', ');
-  return unique.length>limit?`${head} +${unique.length-limit}`:head;
+  return buildSelectionSetSummary([...selectedElementRecords.values()],selectedElementKeys,{
+    limit,
+    resolveMemberId:resolveSelectionMemberId,
+    buildSelectionKey:buildElementSelectionKey,
+  });
 }
 function createEmptySectionEditPreviewState(){
   return{

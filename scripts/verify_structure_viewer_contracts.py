@@ -30,6 +30,7 @@ STRUCTURE_VIEWER_CONTRACT_TESTS = [
     "tests/test_structure_viewer_real_drawing_selection_contract.py",
     "tests/test_structure_viewer_real_drawing_tree_model_contract.py",
     "tests/test_structure_viewer_search_results_model_contract.py",
+    "tests/test_structure_viewer_selection_summary_model_contract.py",
     "tests/test_structure_viewer_side_panel_model_contract.py",
     "tests/test_structure_viewer_shared_selection_state_contract.py",
     "tests/test_structure_viewer_stats_summary_contract.py",

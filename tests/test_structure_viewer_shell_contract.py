@@ -34,6 +34,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     search_results_model_text = (ROOT / "src" / "structure-viewer" / "viewer-search-results-model.js").read_text(
         encoding="utf-8"
     )
+    selection_summary_model_text = (
+        ROOT / "src" / "structure-viewer" / "viewer-selection-summary-model.js"
+    ).read_text(encoding="utf-8")
     renderer_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-renderer.js").read_text(
         encoding="utf-8"
     )
@@ -88,6 +91,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "viewer-real-drawing-selection.js" in text
     assert "viewer-real-drawing-tree-model.js" in text
     assert "viewer-search-results-model.js" in text
+    assert "viewer-selection-summary-model.js" in text
     assert "viewer-side-panel-model.js" in text
     assert "viewer-stats-summary.js" in text
     assert "drawing_asset" in text
@@ -111,6 +115,8 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "buildViewerSearchResultsModel" in text
     assert "Search ready | members" in search_results_model_text
     assert "data-search-focus" in text
+    assert "buildSelectionSetSummary" in text
+    assert "Clear Selection (" in selection_summary_model_text
     assert "real-drawing-inspector-cell" in (
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")
