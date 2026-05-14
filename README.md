@@ -21,15 +21,32 @@
 
 ## Commercial Priority Snapshot
 
-- Current state: source-boundary cleanup is closed, P0 is closed, P1 is now unblocked, and P0-1 release publication for `structural-analysis-artifacts-2026-04-26` is verified against the GitHub Release asset listing, metadata preflight, and published-byte SHA/bytes evidence.
-- P0 closure status is scriptable: `python3 scripts/check_p0_closure_status.py --json` without release evidence still reports the publication gate as open by design, while the same command with release assets, upload plan, metadata preflight, hydrated artifact root, and `--tag-ref-present` reports overall P0 closed.
-- Commercial scope is release-facing and intentionally bounded: grade is `Commercial`, `engineer_in_loop_accelerated_coverage_ready=true` for 95-99% accelerated coverage, `full_commercial_replacement_ready=false`, and the residual holdout queue stays explicit as `licensed_engineer_review_required` (`owner=기술사`, `status=pending_review`, `work_item=RH-001`, `SLA=72h`, `due=assignment_plus_3_business_days`, `closure_evidence=signed_engineer_review_packet`), `legacy_tool_cross_validation_required` (`owner=기존툴+기술사`, `status=pending_cross_validation`, `work_item=RH-002`, `SLA=120h`, `due=assignment_plus_5_business_days`, `closure_evidence=legacy_tool_cross_validation_packet`), and `legal_authority_signoff_required` (`owner=기술사/기존 승인 workflow`, `status=pending_signoff`, `work_item=RH-003`, `SLA=168h`, `due=assignment_plus_7_business_days`, `closure_evidence=authority_signoff_packet`). The EB/RH evidence sidecars are structurally materialized and can pass `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open`, while strict promotion evidence remains bounded: EB receipt stays `0/4`, and RH closure evidence stays pending at `0/3`.
+- Current state: the 7 commercialization gaps are closed for conditional productization. Default P0/P1/P1 breadth status commands now converge on the same release-publication evidence index, the PR/full quality gates are explicit, and the source structure viewer has a real Playwright browser smoke for the registered optimized/real-drawing 3D preset.
+- Default P0 closure is reproducible: `python3 scripts/check_p0_closure_status.py --json --fail-open` auto-uses `implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json`, which verifies the `structural-analysis-artifacts-2026-04-26` release against the 22 manifest assets, metadata preflight, upload-plan SHA/bytes, hydrated published bytes, and post-publish round-trip evidence. If that default evidence index is missing, the status stays blocked with `default publication evidence missing`.
+- Commercial scope is release-facing and intentionally bounded: `python3 scripts/report_commercialization_level.py --closure-mode conditional --fail-below 9.0` reports score `9.0/10`, `conditional_productization_closed=true`, `strict_evidence_closed=false`, recommended claim `engineer-in-loop commercial assist only`, grade `Commercial`, `engineer_in_loop_accelerated_coverage_ready=true` for 95-99% accelerated coverage, and `full_commercial_replacement_ready=false`. The residual holdout queue stays explicit as `licensed_engineer_review_required` (`owner=기술사`, `status=pending_review`, `work_item=RH-001`, `SLA=72h`, `due=assignment_plus_3_business_days`, `closure_evidence=signed_engineer_review_packet`), `legacy_tool_cross_validation_required` (`owner=기존툴+기술사`, `status=pending_cross_validation`, `work_item=RH-002`, `SLA=120h`, `due=assignment_plus_5_business_days`, `closure_evidence=legacy_tool_cross_validation_packet`), and `legal_authority_signoff_required` (`owner=기술사/기존 승인 workflow`, `status=pending_signoff`, `work_item=RH-003`, `SLA=168h`, `due=assignment_plus_7_business_days`, `closure_evidence=authority_signoff_packet`). The EB/RH evidence sidecars are structurally materialized and can pass `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open`, while strict promotion evidence remains bounded: EB receipt stays `0/4`, and RH closure evidence stays pending at `0/3`.
 - External benchmark handoff is tracked separately through the one-page attestation queue (`hardest_external_10case`, `tpu_hffb`, `peer_spd_hinge`, `korean_public_structures`), with work item, submission id, lifecycle, receipt status, owner action, and dry-run evidence visible in the release-gap and committee package surfaces.
 - Before a live queue changes, preview batch review updates with `implementation/phase1/preview_external_benchmark_submission_after_review_updates.py --queue-manifest <queue-manifest.json> --batch-updates-json <batch-updates.json> --out <external_benchmark_submission_readiness_preview.json>` so the next `submission_receipt` / `receipt_status` and owner action stay explicit; when a receipt/update sidecar exists, merge it with `implementation/phase1/generate_external_benchmark_submission_readiness.py --submission-updates <external_benchmark_submission_updates.json>` so `receipt_url`, `submitted_at_utc`, `last_checked_at_utc`, and `closure_evidence_status` stay machine-readable. The same closure pattern applies to RH through the planned `residual_holdout_closure_updates.json` sidecar.
-- P0 source-boundary item: tracked stress/workspace/output/rust target artifacts are removed from Git tracking; 25MiB+ open-data artifacts are externalized in `implementation/phase1/open_data_external_artifacts_manifest.json`.
-- Next order: P1 quality/fallback/benchmark breadth (now unblocked) -> real-project row provenance/parser breadth -> residual holdout queue ownership/status -> P2 viewer shared selection/provenance and report polish.
+- Source-boundary cleanup now uses `implementation/phase1/source_boundary_allowlist.json` with `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 10 --allowlist-manifest implementation/phase1/source_boundary_allowlist.json --fail-on-candidates`, so unknown large/generated/private artifacts fail CI while approved source-required or external-restore artifacts remain explicit.
+- CI is split by intent: `.github/workflows/ci.yml` runs `python scripts/verify_quality_gate.py --mode pr`; `.github/workflows/nightly-full-quality.yml` runs `python scripts/verify_quality_gate.py --mode full`, including full pytest, full browser smoke, generated drift, and conditional commercialization gate.
+- Viewer/frontend status: `npm run verify:frontend-browser-smoke` starts a local HTTP server and uses Playwright to load `src/structure-viewer/index.html?preset=real_drawing_private_3d`, verify the canvas is nonblank, exercise drawing search, render mode, fit/reset controls, and check provenance/selection chips on desktop and mobile.
+- Operational product layer status: `implementation/phase1/project_ops_api_service.py` is a SaaS control-plane reference with bearer token, tenant/actor/request headers, tenant filtering, RBAC roles, audit JSONL, license status, telemetry off by default, version, and update-channel endpoints while preserving `/health`, `/summary`, `/projects`, `/families`, and `/submissions` compatibility.
+- Next order: collect strict EB/RH evidence when available, harden deployment packaging around the reference API, and continue shrinking remaining large frontend/generator surfaces. Current README claim remains not full autonomous replacement.
 - P0-1 remains closed only while the release has exactly the current 22 manifest assets, metadata preflight passes, upload-plan SHA/bytes match the promoted manifest, and hydrated published bytes plus post-publish round-trip evidence verify cleanly.
-- Viewer provenance/performance/report polish stays in P2, including shared selection/provenance, wall/slab batching/LOD, solver-verified panel-zone, and SVG sheet/revision/callout.
+- Viewer provenance/performance/report polish is partially closed through `viewer-provenance-model.js`, the source/single-file viewer contract, and browser smoke; remaining work is deeper componentization, wall/slab batching/LOD, solver-verified panel-zone, and SVG sheet/revision/callout.
+
+## Commercial Gate Commands
+
+These commands are the current reproducible readiness contract:
+
+```bash
+python3 scripts/check_p0_closure_status.py --json --fail-open
+python3 scripts/check_p1_readiness_status.py --json --fail-blocked
+python3 scripts/check_p1_benchmark_breadth_status.py --json --fail-blocked
+python3 scripts/report_commercialization_level.py --closure-mode conditional --fail-below 9.0
+python3 scripts/verify_quality_gate.py --mode pr
+python3 scripts/verify_quality_gate.py --mode full
+npm run verify:frontend-browser-smoke
+```
 
 ## Clean Clone Quickstart
 
@@ -38,17 +55,10 @@ From a source checkout, run:
 ```bash
 npm ci
 python3 -m pip install -e .[dev]
-npm run build
-python3 -m pytest -q tests/test_generate_optimized_drawing_review_ui.py
-python3 -m pytest -q tests/test_real_project_corpus_manifest.py
-python3 scripts/check_repo_hygiene.py --show-ok
-python3 scripts/check_git_remote_safety.py --show-ok
-python3 scripts/verify_release_artifacts_manifest.py --manifest implementation/phase1/release_artifacts_manifest.json --structure-only
-python3 scripts/check_p0_closure_status.py --json
-python3 scripts/verify_open_data_external_artifacts_manifest.py --manifest implementation/phase1/open_data_external_artifacts_manifest.json --structure-only
-python3 scripts/plan_open_data_artifact_restore.py --json --out /tmp/open-data-restore-plan.json
-python3 implementation/phase1/validate_real_project_corpus_manifest.py --schema implementation/phase1/real_project_corpus_manifest.schema.json --manifest implementation/phase1/real_project_corpus_seed_manifest.json --show-summary
+python3 scripts/verify_quality_gate.py --mode pr
 ```
+
+Run `python3 scripts/verify_quality_gate.py --mode full` before release-facing promotion or after broad refactors. It includes the PR gate, full `python -m pytest -q`, full Playwright browser smoke, conditional commercialization scoring, generated drift, and whitespace checks.
 
 After publication, pass the captured P0 closure evidence into the same clean-checkout materializer: `python3 scripts/materialize_clean_checkout_evidence_chain.py --p0-status <p0-status.json> --p1-readiness-out <p1-readiness-status.json> --p1-benchmark-out <p1-benchmark-breadth-status.json> --p1-operational-queues-out <p1-operational-queues.json> --p1-operational-queues-out-md <p1-operational-queues.md> --p1-evidence-intake-template-out <p1-evidence-intake.template.json> --p1-evidence-intake-template-out-md <p1-evidence-intake.template.md> --json --out <clean-checkout-evidence-chain.json>`. When a completed intake exists, add `--p1-evidence-intake <p1-evidence-intake.json> --p1-evidence-sidecar-build-summary-out <p1-evidence-sidecar-build-summary.json>` to build EB/RH sidecars and rerun the same preflight in the chain. The materializer reports both `p1_evidence_sidecar_structure_preflight` for internal readiness and `p1_evidence_sidecar_preflight` for strict promotion evidence. It keeps `contract_pass=false` unless P0 closure evidence is consumed and P1 execution/breadth gates are unblocked; `inputs_contract_pass` remains available for the softer pre-P0 materialization check.
 
