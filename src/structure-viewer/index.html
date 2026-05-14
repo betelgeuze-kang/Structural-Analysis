@@ -397,20 +397,13 @@ import {
   readInitialRealDrawingBrowserState as readInitialRealDrawingBrowserStateFromStorage,
 } from './viewer-real-drawing-browser-state.js';
 import {
-  buildRealDrawingQualitySummary,
   getRealDrawingAssetRegistry,
   getRealDrawingClaimQualityFlags,
   getRealDrawingLoadEvidenceLabel,
-  getRealDrawingOpenPromotionItems,
-  getRealDrawingPlannedUnlockBatch,
-  getRealDrawingPromotionQueue,
   getRealDrawingQualityBadge,
   getRealDrawingSegmentLabel,
   getRealDrawingSourceQualityFlags,
-  isRealDrawingReviewAsset,
-  realDrawingAssetMatchesBrowserQuery,
   realDrawingAssetMatchesQualityFilter,
-  sortRealDrawingBrowserAssets,
 } from './viewer-real-drawing-quality.js';
 import {
   filterRecentRealDrawingAssetRefs as filterRecentRealDrawingAssetRefsWithSelection,
@@ -420,6 +413,9 @@ import {
   resolveRealDrawingAssetRefForSelection as resolveRealDrawingAssetRefFromSelection,
   stepRealDrawingAssetRef,
 } from './viewer-real-drawing-selection.js';
+import {
+  buildRealDrawingQualityPanelModel,
+} from './viewer-real-drawing-panel-model.js';
 import {
   SHARED_SELECTION_KEY,
   applySharedSelectionQueryParams,
@@ -3546,64 +3542,22 @@ function setRealDrawingBrowserSort(sortKey='priority'){
 function renderRealDrawingQualityPanel(data=modelData,{focusQuery=false}={}){
   const panel=document.getElementById('real-drawing-quality-panel');
   if(!(panel instanceof HTMLElement))return;
-  const quality=buildRealDrawingQualitySummary(data);
-  if(!quality.assetCount){
-    panel.innerHTML='<div class="panel-placeholder">Real drawing quality data appears when a drawing preset is loaded.</div>';
-    return;
-  }
-  const filteredAssets=quality.assets.filter(row=>realDrawingAssetMatchesQualityFilter(row,activeRealDrawingQualityFilter));
-  const browserAssets=sortRealDrawingBrowserAssets(
-    filteredAssets.filter(row=>realDrawingAssetMatchesBrowserQuery(row,activeRealDrawingAssetQuery)),
-    activeRealDrawingBrowserSort
-  );
-  const reviewRows=browserAssets.filter(isRealDrawingReviewAsset).slice(0,16);
-  const promotionQueue=getRealDrawingPromotionQueue(data);
-  const promotionSummary=promotionQueue.summary&&typeof promotionQueue.summary==='object'?promotionQueue.summary:{};
-  const plannedUnlockBatch=getRealDrawingPlannedUnlockBatch(data).slice(0,8);
-  const allOpenPromotionItems=getRealDrawingOpenPromotionItems(data)
-    .sort((a,b)=>{
-      const aIsIfc=normalizeSelectionValue(a.promotion_family).startsWith('ifc_')?0:1;
-      const bIsIfc=normalizeSelectionValue(b.promotion_family).startsWith('ifc_')?0:1;
-      return aIsIfc-bIsIfc||safeNumber(a.priority_rank,99)-safeNumber(b.priority_rank,99);
-    });
-  const ifcOpenPromotionItems=allOpenPromotionItems
-    .filter(row=>normalizeSelectionValue(row.promotion_family).startsWith('ifc_'));
-  const ifcLoadPromotionItems=ifcOpenPromotionItems
-    .filter(row=>normalizeSelectionValue(row.promotion_family)==='ifc_load_model_evidence_closure');
-  const openPromotionItems=(ifcLoadPromotionItems.length?ifcLoadPromotionItems:ifcOpenPromotionItems.length?ifcOpenPromotionItems:allOpenPromotionItems).slice(0,8);
-  const promotionTarget=safeNumber(promotionSummary.target_solver_exact_asset_count,0);
-  const promotionAfterBatch=safeNumber(promotionSummary.planned_solver_exact_asset_count_after_unlock_batch,0);
-  const promotionCurrent=safeNumber(promotionSummary.current_solver_exact_asset_count,quality.exactCount);
-  const promotionRequiredDelta=safeNumber(promotionSummary.required_solver_exact_delta,0);
-  const activeAssetRef=getActiveRealDrawingAssetRef(data);
-  const activeAsset=quality.assets.find(row=>normalizeSelectionValue(row.asset_ref)===activeAssetRef)||quality.assets[0]||{};
-  const nextQueueTitle=ifcLoadPromotionItems.length
-    ?'IFC Load Evidence Queue'
-    :ifcOpenPromotionItems.length
-    ?'IFC Reconstruction Queue'
-    :'Next Quality Closure';
-  panel.innerHTML=buildRealDrawingQualityPanelHtml({
-    data,
-    quality,
-    filteredAssets,
-    browserAssets,
-    reviewRows,
-    activeAssetRef,
-    activeAsset,
+  const panelModel=buildRealDrawingQualityPanelModel(data,{
+    activeAssetRef:getActiveRealDrawingAssetRef(data),
     activeIsolation,
     activeFilter:activeRealDrawingQualityFilter,
     activeSort:activeRealDrawingBrowserSort,
     activeQuery:activeRealDrawingAssetQuery,
     recentAssetRefs:getRecentRealDrawingAssetRefs(data),
+  });
+  if(!panelModel.quality.assetCount){
+    panel.innerHTML='<div class="panel-placeholder">Real drawing quality data appears when a drawing preset is loaded.</div>';
+    return;
+  }
+  panel.innerHTML=buildRealDrawingQualityPanelHtml({
+    ...panelModel,
     qualityFilters:REAL_DRAWING_QUALITY_FILTERS,
     sortOptions:REAL_DRAWING_BROWSER_SORT_OPTIONS,
-    plannedUnlockBatch,
-    openPromotionItems,
-    nextQueueTitle,
-    promotionTarget,
-    promotionAfterBatch,
-    promotionCurrent,
-    promotionRequiredDelta,
   });
   const assetSelect=panel.querySelector('[data-real-drawing-asset-select]');
   if(assetSelect instanceof HTMLSelectElement){

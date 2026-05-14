@@ -19,6 +19,9 @@ def _read_viewer_html(page_name: str) -> str:
 def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None:
     text = (ROOT / "src" / "structure-viewer" / "index.html").read_text(encoding="utf-8")
     stats_text = (ROOT / "src" / "structure-viewer" / "viewer-stats-summary.js").read_text(encoding="utf-8")
+    panel_model_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-model.js").read_text(
+        encoding="utf-8"
+    )
     renderer_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-renderer.js").read_text(
         encoding="utf-8"
     )
@@ -67,6 +70,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "REAL_DRAWING_BROWSER_STATE_KEY" in text
     assert "viewer-real-drawing-browser-state.js" in text
     assert "viewer-real-drawing-quality.js" in text
+    assert "viewer-real-drawing-panel-model.js" in text
     assert "viewer-real-drawing-panel-renderer.js" in text
     assert "viewer-real-drawing-selection.js" in text
     assert "viewer-stats-summary.js" in text
@@ -77,8 +81,8 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "copyRealDrawingDeepLink" in text
     assert "setRealDrawingAssetQuery" in text
     assert "setRealDrawingBrowserSort" in text
-    assert "sortRealDrawingBrowserAssets" in text
-    assert "realDrawingAssetMatchesBrowserQuery" in text
+    assert "sortRealDrawingBrowserAssets" in panel_model_text
+    assert "realDrawingAssetMatchesBrowserQuery" in panel_model_text
     assert "real-drawing-inspector-cell" in (
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")
@@ -94,10 +98,10 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "Drawing Review Queue" in stats_text
     assert "Next Unlock Batch" in renderer_text
     assert "Solver-Exact Target Reached" in renderer_text
-    assert "IFC Reconstruction Queue" in text
-    assert "getRealDrawingOpenPromotionItems" in text
+    assert "IFC Reconstruction Queue" in panel_model_text
+    assert "getRealDrawingOpenPromotionItems" in panel_model_text
     assert "data-real-drawing-open-promotion-count" in renderer_text
-    assert "getRealDrawingPromotionQueue" in text
+    assert "getRealDrawingPromotionQueue" in panel_model_text
     assert "data-real-drawing-promotion-asset" in renderer_text
     assert "quality-badge--exact" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
         encoding="utf-8"
