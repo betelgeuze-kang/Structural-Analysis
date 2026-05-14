@@ -38,6 +38,7 @@ def test_release_singlefile_viewers_do_not_depend_on_remote_or_sidecar_assets() 
         "./viewer-real-drawing-panel-renderer.js",
         "./viewer-real-drawing-selection.js",
         "./viewer-real-drawing-tree-model.js",
+        "./viewer-search-results-model.js",
         "./viewer-shared-selection-state.js",
         "./viewer-side-panel-model.js",
         "./viewer-stats-summary.js",

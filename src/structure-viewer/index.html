@@ -421,6 +421,11 @@ import {
   buildLoadCaseListModel,
 } from './viewer-side-panel-model.js';
 import {
+  buildViewerSearchResultsModel,
+  resolveViewerSearchMatches,
+  viewerElementMatchesSearchQuery,
+} from './viewer-search-results-model.js';
+import {
   SHARED_SELECTION_KEY,
   applySharedSelectionQueryParams,
   buildSharedSelectionPayload,
@@ -922,24 +927,7 @@ function getSearchTokens(query=getSearchInputValue()){
   return normalizeSelectionValue(query).toLowerCase().split(/\s+/).filter(Boolean);
 }
 function matchesSearchQuery(data,query=getSearchInputValue()){
-  const tokens=getSearchTokens(query);
-  if(!tokens.length)return true;
-  const haystack=[
-    resolveEffectiveSectionValue(data),
-    data?.member_id,
-    data?.id,
-    data?.section,
-    data?.section_family,
-    data?.section_shape,
-    data?.group_label,
-    ...(Array.isArray(data?.group_names)?data.group_names:[]),
-    data?.review_case_id,
-    data?.review_row_label,
-    data?.review_summary_label,
-    data?.story_band_label,
-    data?.zone_label
-  ].map(value=>String(value||'').toLowerCase()).join(' | ');
-  return tokens.every(token=>haystack.includes(token));
+  return viewerElementMatchesSearchQuery(data,query,{resolveEffectiveSectionValue});
 }
 function deriveStoryClipBands(data=modelData){
   if(!data||!Array.isArray(data.nodes)||!Array.isArray(data.elements))return [];
@@ -1061,16 +1049,11 @@ function clearStoryClip(){
 }
 function resolveSearchMatches(query=getSearchInputValue(),limit=12){
   if(!modelData||!Array.isArray(modelData.elements))return [];
-  const seen=new Set();
-  return modelData.elements
-    .filter(element=>matchesSearchQuery(element,query))
-    .filter(element=>{
-      const memberId=resolveSelectionMemberId(element);
-      if(!memberId||seen.has(memberId))return false;
-      seen.add(memberId);
-      return true;
-    })
-    .slice(0,limit);
+  return resolveViewerSearchMatches(modelData.elements,query,{
+    limit,
+    resolveMemberId:resolveSelectionMemberId,
+    resolveEffectiveSectionValue,
+  });
 }
 function focusMemberSearchResult(memberId,{isolate=false}={}){
   const normalized=normalizeSelectionValue(memberId);
@@ -1089,33 +1072,30 @@ function renderSearchResults(data=modelData){
   const list=document.getElementById('search-results');
   if(!(status instanceof HTMLElement)||!(list instanceof HTMLElement))return;
   const query=getSearchInputValue();
-  if(!data||!Array.isArray(data.elements)){
-    status.textContent='Search unavailable';
+  const searchModel=buildViewerSearchResultsModel(data,{
+    query,
+    limit:10,
+    selectedMemberId:resolveSelectionMemberId(selectedElementData),
+    activeIsolation,
+    resolveMemberId:resolveSelectionMemberId,
+    resolveEffectiveSectionValue,
+    hasAppliedSectionOverride,
+  });
+  status.textContent=searchModel.statusText;
+  if(searchModel.unavailable||searchModel.ready){
     list.innerHTML='';
     return;
   }
-  if(!query){
-    status.textContent=`Search ready | members ${[...new Set(data.elements.map(element=>resolveSelectionMemberId(element)).filter(Boolean))].length}`;
-    list.innerHTML='';
-    return;
-  }
-  const matches=resolveSearchMatches(query,10);
-  status.textContent=`"${query}" | matches ${matches.length}${matches.length===10?'+':''}`;
-  list.innerHTML=matches.map(match=>{
-    const memberId=resolveSelectionMemberId(match);
-    const isolateActive=activeIsolation.kind==='member'&&activeIsolation.value===memberId;
-    const memberLabel=hasAppliedSectionOverride(match)
-      ?resolveEffectiveSectionValue(match)
-      :(match.section_family||match.section||match.type||'member');
-    return `<div class="tree-item${selectedElementData&&resolveSelectionMemberId(selectedElementData)===memberId?' selected':''}">
-      <div class="tree-item-main" data-search-focus="${escapeHtml(memberId)}">
-        <span class="tree-item-label">${escapeHtml(memberId)} · ${escapeHtml(memberLabel)}</span>
+  list.innerHTML=searchModel.items.map(item=>{
+    return `<div class="tree-item${item.selected?' selected':''}">
+      <div class="tree-item-main" data-search-focus="${escapeHtml(item.memberId)}">
+        <span class="tree-item-label">${escapeHtml(item.memberId)} · ${escapeHtml(item.memberLabel)}</span>
       </div>
       <div class="tree-item-actions">
-        <button type="button" class="tree-item-action${isolateActive?' is-active':''}" data-search-isolate="${escapeHtml(memberId)}">${isolateActive?'Release':'Isolate'}</button>
+        <button type="button" class="tree-item-action${item.isolateActive?' is-active':''}" data-search-isolate="${escapeHtml(item.memberId)}">${item.isolateActive?'Release':'Isolate'}</button>
       </div>
     </div>`;
-  }).join('')||'<div class="search-status">No matches</div>';
+  }).join('')||searchModel.emptyHtml;
   list.querySelectorAll('[data-search-focus]').forEach(button=>{
     button.addEventListener('click',()=>{
       focusMemberSearchResult(button.getAttribute('data-search-focus'));
