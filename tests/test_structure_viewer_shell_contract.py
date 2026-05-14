@@ -68,6 +68,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "viewer-real-drawing-browser-state.js" in text
     assert "viewer-real-drawing-quality.js" in text
     assert "viewer-real-drawing-panel-renderer.js" in text
+    assert "viewer-real-drawing-selection.js" in text
     assert "viewer-stats-summary.js" in text
     assert "drawing_asset" in text
     assert "data-real-drawing-copy-link" in renderer_text

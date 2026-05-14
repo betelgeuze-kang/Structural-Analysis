@@ -537,6 +537,16 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
     shared_selection_state_url = _encode_js_module_data_url(
         (VIEWER_ROOT / "viewer-shared-selection-state.js").read_text(encoding="utf-8")
     )
+    real_drawing_selection_source = (VIEWER_ROOT / "viewer-real-drawing-selection.js").read_text(encoding="utf-8")
+    real_drawing_selection_source = real_drawing_selection_source.replace(
+        "from './viewer-real-drawing-quality.js';",
+        f"from '{real_drawing_quality_url}';",
+    )
+    real_drawing_selection_source = real_drawing_selection_source.replace(
+        "from './viewer-shared-selection-state.js';",
+        f"from '{shared_selection_state_url}';",
+    )
+    real_drawing_selection_url = _encode_js_module_data_url(real_drawing_selection_source)
     stats_summary_source = (VIEWER_ROOT / "viewer-stats-summary.js").read_text(encoding="utf-8")
     stats_summary_source = stats_summary_source.replace(
         "from './viewer-real-drawing-quality.js';",
@@ -564,6 +574,7 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
         "./viewer-real-drawing-browser-state.js": real_drawing_browser_state_url,
         "./viewer-real-drawing-quality.js": real_drawing_quality_url,
         "./viewer-shared-selection-state.js": shared_selection_state_url,
+        "./viewer-real-drawing-selection.js": real_drawing_selection_url,
         "./viewer-stats-summary.js": stats_summary_url,
         "./viewer-real-drawing-panel-renderer.js": real_drawing_panel_renderer_url,
     }
