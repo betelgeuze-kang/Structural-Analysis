@@ -22,6 +22,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     panel_model_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-model.js").read_text(
         encoding="utf-8"
     )
+    panel_events_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-events.js").read_text(
+        encoding="utf-8"
+    )
     renderer_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-renderer.js").read_text(
         encoding="utf-8"
     )
@@ -70,6 +73,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "REAL_DRAWING_BROWSER_STATE_KEY" in text
     assert "viewer-real-drawing-browser-state.js" in text
     assert "viewer-real-drawing-quality.js" in text
+    assert "viewer-real-drawing-panel-events.js" in text
     assert "viewer-real-drawing-panel-model.js" in text
     assert "viewer-real-drawing-panel-renderer.js" in text
     assert "viewer-real-drawing-selection.js" in text
@@ -78,11 +82,14 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-real-drawing-copy-link" in renderer_text
     assert "data-real-drawing-recent-asset" in renderer_text
     assert "rememberRealDrawingAssetRef" in text
+    assert "bindRealDrawingQualityPanelEvents" in text
     assert "copyRealDrawingDeepLink" in text
     assert "setRealDrawingAssetQuery" in text
     assert "setRealDrawingBrowserSort" in text
     assert "sortRealDrawingBrowserAssets" in panel_model_text
     assert "realDrawingAssetMatchesBrowserQuery" in panel_model_text
+    assert "data-real-drawing-browser-clear" in panel_events_text
+    assert "data-real-drawing-promotion-asset" in panel_events_text
     assert "real-drawing-inspector-cell" in (
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")

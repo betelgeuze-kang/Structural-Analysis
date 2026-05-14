@@ -569,6 +569,14 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
         f"from '{real_drawing_quality_url}';",
     )
     real_drawing_panel_model_url = _encode_js_module_data_url(real_drawing_panel_model_source)
+    real_drawing_panel_events_source = (VIEWER_ROOT / "viewer-real-drawing-panel-events.js").read_text(
+        encoding="utf-8"
+    )
+    real_drawing_panel_events_source = real_drawing_panel_events_source.replace(
+        "from './viewer-real-drawing-quality.js';",
+        f"from '{real_drawing_quality_url}';",
+    )
+    real_drawing_panel_events_url = _encode_js_module_data_url(real_drawing_panel_events_source)
     return {
         "./viewer-data-loader.js": data_loader_url,
         "./viewer-model-normalizer.js": model_normalizer_url,
@@ -586,6 +594,7 @@ def _build_inline_viewer_module_import_urls() -> dict[str, str]:
         "./viewer-stats-summary.js": stats_summary_url,
         "./viewer-real-drawing-panel-renderer.js": real_drawing_panel_renderer_url,
         "./viewer-real-drawing-panel-model.js": real_drawing_panel_model_url,
+        "./viewer-real-drawing-panel-events.js": real_drawing_panel_events_url,
     }
 
 

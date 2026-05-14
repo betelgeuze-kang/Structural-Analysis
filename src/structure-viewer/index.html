@@ -417,6 +417,9 @@ import {
   buildRealDrawingQualityPanelModel,
 } from './viewer-real-drawing-panel-model.js';
 import {
+  bindRealDrawingQualityPanelEvents,
+} from './viewer-real-drawing-panel-events.js';
+import {
   SHARED_SELECTION_KEY,
   applySharedSelectionQueryParams,
   buildSharedSelectionPayload,
@@ -3559,99 +3562,15 @@ function renderRealDrawingQualityPanel(data=modelData,{focusQuery=false}={}){
     qualityFilters:REAL_DRAWING_QUALITY_FILTERS,
     sortOptions:REAL_DRAWING_BROWSER_SORT_OPTIONS,
   });
-  const assetSelect=panel.querySelector('[data-real-drawing-asset-select]');
-  if(assetSelect instanceof HTMLSelectElement){
-    assetSelect.addEventListener('change',()=>{
-      focusRealDrawingAssetRef(assetSelect.value);
-    });
-  }
-  panel.querySelectorAll('[data-real-drawing-step]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      stepRealDrawingAsset(safeNumber(button.getAttribute('data-real-drawing-step'),1));
-    });
-  });
-  panel.querySelectorAll('[data-real-drawing-focus]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      focusRealDrawingAssetRef(getActiveRealDrawingAssetRef(modelData));
-    });
-  });
-  panel.querySelectorAll('[data-real-drawing-isolate]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      focusRealDrawingAssetRef(getActiveRealDrawingAssetRef(modelData),{isolate:true});
-    });
-  });
-  panel.querySelectorAll('[data-real-drawing-copy-link]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      copyRealDrawingDeepLink(
-        normalizeSelectionValue(button.getAttribute('data-real-drawing-copy-link'))||getActiveRealDrawingAssetRef(modelData),
-        button
-      );
-    });
-  });
-  panel.querySelectorAll('[data-real-drawing-quality-filter]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      setRealDrawingQualityFilter(normalizeSelectionValue(button.getAttribute('data-real-drawing-quality-filter')));
-    });
-  });
-  const browserQuery=panel.querySelector('[data-real-drawing-browser-query]');
-  if(browserQuery instanceof HTMLInputElement){
-    browserQuery.addEventListener('input',()=>{
-      setRealDrawingAssetQuery(browserQuery.value,{preserveFocus:true});
-    });
-    browserQuery.addEventListener('keydown',event=>{
-      if(event.key!=='Enter')return;
-      const firstAsset=panel.querySelector('[data-real-drawing-browser-asset]');
-      const assetRef=normalizeSelectionValue(firstAsset?.getAttribute('data-real-drawing-browser-asset'));
-      if(assetRef)focusRealDrawingAssetRef(assetRef);
-    });
-    if(focusQuery){
-      browserQuery.focus({preventScroll:true});
-      const cursor=browserQuery.value.length;
-      browserQuery.setSelectionRange(cursor,cursor);
-    }
-  }
-  const browserClear=panel.querySelector('[data-real-drawing-browser-clear]');
-  if(browserClear instanceof HTMLButtonElement){
-    browserClear.addEventListener('click',()=>{
-      setRealDrawingAssetQuery('',{preserveFocus:true});
-    });
-  }
-  const browserSort=panel.querySelector('[data-real-drawing-browser-sort]');
-  if(browserSort instanceof HTMLSelectElement){
-    browserSort.addEventListener('change',()=>{
-      setRealDrawingBrowserSort(browserSort.value);
-    });
-  }
-  const nextReviewButton=panel.querySelector('[data-real-drawing-next-review]');
-  if(nextReviewButton instanceof HTMLButtonElement){
-    nextReviewButton.addEventListener('click',()=>{
-      const assetRef=normalizeSelectionValue(nextReviewButton.getAttribute('data-real-drawing-next-review'));
-      if(assetRef)focusRealDrawingAssetRef(assetRef);
-    });
-  }
-  panel.querySelectorAll('[data-real-drawing-browser-asset]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-browser-asset'));
-      focusRealDrawingAssetRef(assetRef);
-    });
-  });
-  panel.querySelectorAll('[data-real-drawing-recent-asset]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-recent-asset'));
-      focusRealDrawingAssetRef(assetRef);
-    });
-  });
-  panel.querySelectorAll('[data-real-drawing-review-asset]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-review-asset'));
-      focusRealDrawingAssetRef(assetRef);
-    });
-  });
-  panel.querySelectorAll('[data-real-drawing-promotion-asset]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      const assetRef=normalizeSelectionValue(button.getAttribute('data-real-drawing-promotion-asset'));
-      focusRealDrawingAssetRef(assetRef);
-    });
+  bindRealDrawingQualityPanelEvents(panel,{
+    focusQuery,
+    getActiveAssetRef:()=>getActiveRealDrawingAssetRef(modelData),
+    focusAsset:focusRealDrawingAssetRef,
+    stepAsset:stepRealDrawingAsset,
+    copyDeepLink:copyRealDrawingDeepLink,
+    setQualityFilter:setRealDrawingQualityFilter,
+    setAssetQuery:setRealDrawingAssetQuery,
+    setBrowserSort:setRealDrawingBrowserSort,
   });
 }
 function buildUI(data){
