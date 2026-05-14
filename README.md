@@ -1,8 +1,9 @@
 # Structural Optimization Workbench
 
-![Structural Optimization Workbench commercialization status](docs/assets/commercialization-status-card.png)
+![Actual Structural Optimization Workbench viewer capture](docs/assets/commercialization-status-card.png)
 
 Release-facing structural optimization workbench with reproducible P0/P1 quality gates, browser-verified 3D viewer smoke, and bounded engineer-in-loop commercial assist readiness.
+The README image is captured from the actual `src/structure-viewer/index.html` web viewer with `npm run capture:readme-viewer-image`.
 
 ## Documents
 

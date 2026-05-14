@@ -24,6 +24,7 @@ env/
 node_modules/
 dist/
 build/
+test-results/
 *.tsbuildinfo
 
 # Rust

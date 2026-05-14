@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "verify:frontend-contract": "node ./scripts/verify-frontend-build-contract.mjs",
     "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs",
-    "verify:frontend-browser-smoke": "playwright install chromium && node ./scripts/verify-frontend-browser-smoke.mjs"
+    "verify:frontend-browser-smoke": "playwright install chromium && node ./scripts/verify-frontend-browser-smoke.mjs",
+    "capture:readme-viewer-image": "playwright install chromium && node ./scripts/capture-readme-viewer-image.mjs"
   },
   "dependencies": {
     "react": "18.2.0",
