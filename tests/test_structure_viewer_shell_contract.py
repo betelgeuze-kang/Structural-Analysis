@@ -25,6 +25,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     panel_events_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-events.js").read_text(
         encoding="utf-8"
     )
+    tree_model_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-tree-model.js").read_text(
+        encoding="utf-8"
+    )
     renderer_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-renderer.js").read_text(
         encoding="utf-8"
     )
@@ -56,11 +59,11 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert 'id="shell-meta-stories"' in text
     assert 'id="shell-meta-review"' in text
     assert 'id="shell-meta-source"' in text
-    assert "Real Drawing Assets" in text
+    assert "Real Drawing Assets" in tree_model_text
     assert "getRealDrawingAssetRegistry" in text
     assert 'id="real-drawing-quality-panel"' in text
     assert "setRealDrawingQualityFilter" in text
-    assert "getRealDrawingSegmentLabel" in text
+    assert "getRealDrawingSegmentLabel" in tree_model_text
     assert "real-drawing-switcher" in renderer_text
     assert "data-real-drawing-asset-select" in renderer_text
     assert "stepRealDrawingAsset" in text
@@ -77,6 +80,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "viewer-real-drawing-panel-model.js" in text
     assert "viewer-real-drawing-panel-renderer.js" in text
     assert "viewer-real-drawing-selection.js" in text
+    assert "viewer-real-drawing-tree-model.js" in text
     assert "viewer-stats-summary.js" in text
     assert "drawing_asset" in text
     assert "data-real-drawing-copy-link" in renderer_text
@@ -90,6 +94,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "realDrawingAssetMatchesBrowserQuery" in panel_model_text
     assert "data-real-drawing-browser-clear" in panel_events_text
     assert "data-real-drawing-promotion-asset" in panel_events_text
+    assert "buildRealDrawingTreeModel" in text
+    assert "badge-real-drawing-" in text
+    assert "No assets match the active drawing quality filter." in tree_model_text
     assert "real-drawing-inspector-cell" in (
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")

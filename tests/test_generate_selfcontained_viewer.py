@@ -38,6 +38,7 @@ def test_generate_selfcontained_html_uses_full_index_template() -> None:
     assert "./viewer-real-drawing-panel-model.js" not in html
     assert "./viewer-real-drawing-panel-renderer.js" not in html
     assert "./viewer-real-drawing-selection.js" not in html
+    assert "./viewer-real-drawing-tree-model.js" not in html
     assert "./viewer-shared-selection-state.js" not in html
     assert "./viewer-stats-summary.js" not in html
     assert "./viewer-optimization-worker.js" not in html

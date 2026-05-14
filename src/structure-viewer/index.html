@@ -398,12 +398,6 @@ import {
 } from './viewer-real-drawing-browser-state.js';
 import {
   getRealDrawingAssetRegistry,
-  getRealDrawingClaimQualityFlags,
-  getRealDrawingLoadEvidenceLabel,
-  getRealDrawingQualityBadge,
-  getRealDrawingSegmentLabel,
-  getRealDrawingSourceQualityFlags,
-  realDrawingAssetMatchesQualityFilter,
 } from './viewer-real-drawing-quality.js';
 import {
   filterRecentRealDrawingAssetRefs as filterRecentRealDrawingAssetRefsWithSelection,
@@ -419,6 +413,9 @@ import {
 import {
   bindRealDrawingQualityPanelEvents,
 } from './viewer-real-drawing-panel-events.js';
+import {
+  buildRealDrawingTreeModel,
+} from './viewer-real-drawing-tree-model.js';
 import {
   SHARED_SELECTION_KEY,
   applySharedSelectionQueryParams,
@@ -3650,39 +3647,28 @@ function buildUI(data){
       );
     });
   }
-  const realDrawingAssets=getRealDrawingAssetRegistry(data);
-  if(realDrawingAssets.length){
-    const filteredRealDrawingAssets=realDrawingAssets.filter(row=>realDrawingAssetMatchesQualityFilter(row,activeRealDrawingQualityFilter));
-    appendTreeHeading(`Real Drawing Assets · ${filteredRealDrawingAssets.length}/${realDrawingAssets.length}`);
-    if(!filteredRealDrawingAssets.length){
+  const realDrawingTreeModel=buildRealDrawingTreeModel(data,{activeFilter:activeRealDrawingQualityFilter});
+  if(realDrawingTreeModel.totalCount){
+    appendTreeHeading(realDrawingTreeModel.heading);
+    if(!realDrawingTreeModel.filteredCount){
       const empty=document.createElement('div');
       empty.className='panel-placeholder';
-      empty.textContent='No assets match the active drawing quality filter.';
+      empty.textContent=realDrawingTreeModel.emptyText;
       tree.appendChild(empty);
     }
-    filteredRealDrawingAssets.slice(0,32).forEach(row=>{
-      const assetRef=normalizeSelectionValue(row.asset_ref);
-      const status=normalizeSelectionValue(row.status)||'ready';
-      const badgeInfo=getRealDrawingQualityBadge(row);
-      const flags=Array.isArray(row.quality_flags)?row.quality_flags.filter(Boolean):[];
-      const claimFlags=getRealDrawingClaimQualityFlags(row).map(flag=>`claim:${flag}`);
-      const sourceFlags=getRealDrawingSourceQualityFlags(row).map(flag=>`source:${flag}`);
-      const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
-      const warning=normalizeSelectionValue(row.warning_label);
-      const label=`${assetRef} · ${warning||normalizeSelectionValue(row.geometry_mode)||status}`;
+    realDrawingTreeModel.items.forEach(item=>{
       appendTreeItem(
-        label,
-        `${badgeInfo.label} · ${getRealDrawingSegmentLabel(row)}`,
-        ()=>focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===assetRef),
+        item.label,
+        item.badgeText,
+        ()=>focusFirstElementByPredicate(el=>resolveSelectionMemberId(el)===item.assetRef),
         '',
-        {isolateKind:'member',isolateValue:assetRef,isolateLabel:label}
+        {isolateKind:item.isolateKind,isolateValue:item.isolateValue,isolateLabel:item.isolateLabel}
       );
       const last=tree.lastElementChild;
       const badgeNode=last?.querySelector?.('.badge');
       if(badgeNode instanceof HTMLElement){
-        badgeNode.classList.add(`badge-real-drawing-${badgeInfo.tone}`);
-        const tooltipFlags=[...flags,...claimFlags,...sourceFlags,loadEvidence].filter(Boolean);
-        badgeNode.title=`${status}${tooltipFlags.length?` | ${tooltipFlags.join(', ')}`:''}`;
+        badgeNode.classList.add(`badge-real-drawing-${item.badgeTone}`);
+        badgeNode.title=item.badgeTitle;
       }
     });
   }
