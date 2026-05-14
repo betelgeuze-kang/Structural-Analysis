@@ -1,5 +1,9 @@
 # Structural Optimization Workbench
 
+![Structural Optimization Workbench commercialization status](docs/assets/commercialization-status-card.png)
+
+Release-facing structural optimization workbench with reproducible P0/P1 quality gates, browser-verified 3D viewer smoke, and bounded engineer-in-loop commercial assist readiness.
+
 ## Documents
 
 - [Frontend build reproducibility](docs/frontend-build-reproducibility.md)
