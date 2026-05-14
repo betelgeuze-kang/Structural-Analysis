@@ -398,17 +398,13 @@ import {
 } from './viewer-real-drawing-browser-state.js';
 import {
   buildRealDrawingQualitySummary,
-  getRealDrawingAssetOptionLabel,
   getRealDrawingAssetRegistry,
   getRealDrawingClaimQualityFlags,
-  getRealDrawingInspectorRows,
   getRealDrawingLoadEvidenceLabel,
   getRealDrawingOpenPromotionItems,
   getRealDrawingPlannedUnlockBatch,
   getRealDrawingPromotionQueue,
   getRealDrawingQualityBadge,
-  getRealDrawingQualityFlags,
-  getRealDrawingReviewAction,
   getRealDrawingSegmentLabel,
   getRealDrawingSourceQualityFlags,
   isRealDrawingReviewAsset,
@@ -430,6 +426,9 @@ import {
   buildViewerStatEntries,
   buildViewerStatsSummary,
 } from './viewer-stats-summary.js';
+import {
+  buildRealDrawingQualityPanelHtml,
+} from './viewer-real-drawing-panel-renderer.js';
 
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
   modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,
@@ -3374,30 +3373,6 @@ async function buildModel(data,sourceMeta=null){
 function getPropValueClass(tone=''){
   return tone?`prop-value prop-value--${tone}`:'prop-value';
 }
-function renderRealDrawingActiveInspector(row){
-  const assetRef=normalizeSelectionValue(row?.asset_ref);
-  if(!assetRef)return'';
-  const badge=getRealDrawingQualityBadge(row);
-  const notice=normalizeSelectionValue(row?.quality_notice)||normalizeSelectionValue(row?.warning_label)||normalizeSelectionValue(row?.status)||'ready';
-  const rows=getRealDrawingInspectorRows(row);
-  return `
-    <section class="real-drawing-active-inspector" data-real-drawing-active-inspector="true" data-real-drawing-active-ref="${escapeHtml(assetRef)}">
-      <div class="real-drawing-active-inspector__header">
-        <span>Active Drawing</span>
-        <strong>${escapeHtml(assetRef)}</strong>
-        <span class="quality-badge quality-badge--${escapeHtml(badge.tone)}">${escapeHtml(badge.label)}</span>
-      </div>
-      <div class="real-drawing-active-inspector__grid">
-        ${rows.map(item=>`
-          <div class="real-drawing-inspector-cell real-drawing-inspector-cell--${escapeHtml(item.tone)}" data-real-drawing-inspector-row="${escapeHtml(item.label)}">
-            <span>${escapeHtml(item.label)}</span>
-            <strong>${escapeHtml(item.value)}</strong>
-            <small>${escapeHtml(item.detail)}</small>
-          </div>`).join('')}
-      </div>
-      <div class="real-drawing-active-inspector__notice">${escapeHtml(notice)}</div>
-    </section>`;
-}
 function resolveRealDrawingAssetRefForSelection(selection={},data=modelData){
   const assets=getRealDrawingAssetRegistry(data);
   if(!assets.length)return'';
@@ -3563,78 +3538,6 @@ function setRealDrawingBrowserSort(sortKey='priority'){
   updateViewerQueryParams(getCurrentSelectionState());
   if(modelData)renderRealDrawingQualityPanel(modelData);
 }
-function renderRealDrawingRecentRail(activeAssetRef){
-  const recentRefs=getRecentRealDrawingAssetRefs(modelData);
-  if(!recentRefs.length)return'';
-  return `
-      <div class="real-drawing-recent-rail" aria-label="Recent optimized drawings">
-        <span>Recent</span>
-        <div class="real-drawing-recent-rail__items">
-          ${recentRefs.map(ref=>`
-            <button type="button" class="real-drawing-recent-chip${ref===activeAssetRef?' is-active':''}" data-real-drawing-recent-asset="${escapeHtml(ref)}" title="${escapeHtml(ref)}">
-              ${escapeHtml(ref)}
-            </button>`).join('')}
-        </div>
-      </div>`;
-}
-function renderRealDrawingBrowserBlock({assets,browserAssets,activeAssetRef}){
-  const query=activeRealDrawingAssetQuery;
-  const nextReviewRef=normalizeSelectionValue((browserAssets.find(isRealDrawingReviewAsset)||browserAssets[0]||{}).asset_ref);
-  const sortOptions=REAL_DRAWING_BROWSER_SORT_OPTIONS.map(option=>
-    `<option value="${escapeHtml(option.key)}"${option.key===activeRealDrawingBrowserSort?' selected':''}>${escapeHtml(option.label)}</option>`
-  ).join('');
-  const recentRail=renderRealDrawingRecentRail(activeAssetRef);
-  const visibleAssets=browserAssets.slice(0,32);
-  const overflowCount=Math.max(browserAssets.length-visibleAssets.length,0);
-  const list=visibleAssets.length
-    ?visibleAssets.map(row=>{
-      const assetRef=normalizeSelectionValue(row.asset_ref);
-      const badge=getRealDrawingQualityBadge(row);
-      const route=normalizeSelectionValue(row.file_type)||normalizeSelectionValue(row.route)||normalizeSelectionValue(row.status)||'--';
-      const flags=[
-        ...getRealDrawingQualityFlags(row),
-        ...getRealDrawingSourceQualityFlags(row).map(flag=>`source:${flag}`),
-        ...getRealDrawingClaimQualityFlags(row).map(flag=>`claim:${flag}`)
-      ].filter(Boolean);
-      const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
-      const detail=loadEvidence||flags.slice(0,3).join(', ')||normalizeSelectionValue(row.quality_notice)||normalizeSelectionValue(row.status)||'ready';
-      return `
-        <button type="button" class="real-drawing-browser-item${assetRef===activeAssetRef?' is-active':''}" data-real-drawing-browser-asset="${escapeHtml(assetRef)}">
-          <span class="quality-badge quality-badge--${escapeHtml(badge.tone)}">${escapeHtml(badge.label)}</span>
-          <span class="real-drawing-browser-item__body">
-            <strong>${escapeHtml(assetRef)}</strong>
-            <small>${escapeHtml(route)}</small>
-          </span>
-          <span class="real-drawing-browser-item__meta">
-            <span>${escapeHtml(getRealDrawingSegmentLabel(row))}</span>
-            <small>${escapeHtml(detail)}</small>
-          </span>
-        </button>`;
-    }).join('')
-    :'<div class="panel-placeholder">No drawings match the active browser filters.</div>';
-  return `
-    <section class="real-drawing-browser" data-real-drawing-browser="true">
-      <div class="real-drawing-browser__header">
-        <span>Drawing Browser</span>
-        <strong>${escapeHtml(String(browserAssets.length))}/${escapeHtml(String(assets.length))}</strong>
-      </div>
-      <div class="real-drawing-browser__search">
-        <input type="search" id="real-drawing-browser-query" data-real-drawing-browser-query="true" value="${escapeHtml(query)}" placeholder="RD-001 / ifc / load" aria-label="Search optimized drawings">
-        <button type="button" data-real-drawing-browser-clear="true" aria-label="Clear drawing search"${query?'':' disabled'}>×</button>
-      </div>
-      <div class="real-drawing-browser__toolbar">
-        <label class="real-drawing-browser__sort" for="real-drawing-browser-sort">
-          <select id="real-drawing-browser-sort" data-real-drawing-browser-sort="true" aria-label="Sort optimized drawings">${sortOptions}</select>
-        </label>
-        <button type="button" data-real-drawing-next-review="${escapeHtml(nextReviewRef)}"${nextReviewRef?'':' disabled'}>Next Review</button>
-      </div>
-      ${recentRail}
-      <div class="real-drawing-browser__list" data-real-drawing-browser-count="${escapeHtml(String(browserAssets.length))}">
-        ${list}
-      </div>
-      ${overflowCount?`<div class="real-drawing-browser__overflow">+${escapeHtml(String(overflowCount))} more</div>`:''}
-    </section>`;
-}
 function renderRealDrawingQualityPanel(data=modelData,{focusQuery=false}={}){
   const panel=document.getElementById('real-drawing-quality-panel');
   if(!(panel instanceof HTMLElement))return;
@@ -3669,159 +3572,34 @@ function renderRealDrawingQualityPanel(data=modelData,{focusQuery=false}={}){
   const promotionRequiredDelta=safeNumber(promotionSummary.required_solver_exact_delta,0);
   const activeAssetRef=getActiveRealDrawingAssetRef(data);
   const activeAsset=quality.assets.find(row=>normalizeSelectionValue(row.asset_ref)===activeAssetRef)||quality.assets[0]||{};
-  const activeBadge=getRealDrawingQualityBadge(activeAsset);
-  const activeLoadEvidence=getRealDrawingLoadEvidenceLabel(activeAsset);
-  const activeInspectorBlock=renderRealDrawingActiveInspector(activeAsset);
-  const browserBlock=renderRealDrawingBrowserBlock({assets:filteredAssets,browserAssets,activeAssetRef});
-  const switcherOptions=quality.assets.map(row=>{
-    const assetRef=normalizeSelectionValue(row.asset_ref);
-    return `<option value="${escapeHtml(assetRef)}"${assetRef===activeAssetRef?' selected':''}>${escapeHtml(getRealDrawingAssetOptionLabel(row))}</option>`;
-  }).join('');
-  const switcherBlock=`
-    <section class="real-drawing-switcher" aria-label="Optimized drawing selector">
-      <div class="real-drawing-switcher__top">
-        <span class="quality-badge quality-badge--${escapeHtml(activeBadge.tone)}">${escapeHtml(activeBadge.label)}</span>
-        <strong>${escapeHtml(activeAssetRef||'--')}</strong>
-        <span>${escapeHtml(`${quality.assets.length} drawings`)}</span>
-      </div>
-      <div class="real-drawing-switcher__row">
-        <label class="real-drawing-switcher__select" for="real-drawing-asset-select">
-          <select id="real-drawing-asset-select" data-real-drawing-asset-select="true">${switcherOptions}</select>
-        </label>
-        <div class="real-drawing-switcher__controls" aria-label="Drawing navigation">
-          <button type="button" class="real-drawing-switcher__button" data-real-drawing-step="-1" title="Previous drawing" aria-label="Previous drawing">‹</button>
-          <button type="button" class="real-drawing-switcher__button" data-real-drawing-step="1" title="Next drawing" aria-label="Next drawing">›</button>
-          <button type="button" class="real-drawing-switcher__button" data-real-drawing-focus="true" title="Focus drawing" aria-label="Focus drawing">⌖</button>
-          <button type="button" class="real-drawing-switcher__button${activeIsolation.kind==='member'&&activeIsolation.value===activeAssetRef?' is-active':''}" data-real-drawing-isolate="true" title="Isolate drawing" aria-label="Isolate drawing">⊙</button>
-        </div>
-      </div>
-      <div class="real-drawing-switcher__meta">
-        <span>${escapeHtml(getRealDrawingReviewAction(activeAsset))}</span>
-        <small>${escapeHtml(activeLoadEvidence||normalizeSelectionValue(activeAsset.quality_notice)||normalizeSelectionValue(activeAsset.status)||'ready')}</small>
-      </div>
-      <div class="real-drawing-action-row">
-        <button type="button" data-real-drawing-copy-link="${escapeHtml(activeAssetRef)}">Copy Link</button>
-        <span data-real-drawing-browser-state="true">${escapeHtml(`${activeRealDrawingQualityFilter} | ${activeRealDrawingBrowserSort}${activeRealDrawingAssetQuery?` | ${activeRealDrawingAssetQuery}`:''}`)}</span>
-      </div>
-    </section>`;
-  const filterButtons=REAL_DRAWING_QUALITY_FILTERS.map(filter=>{
-    const count=quality.assets.filter(row=>realDrawingAssetMatchesQualityFilter(row,filter.key)).length;
-    const selected=filter.key===activeRealDrawingQualityFilter;
-    return `<button type="button" class="quality-filter-button${selected?' is-active':''}" data-real-drawing-quality-filter="${escapeHtml(filter.key)}">${escapeHtml(filter.label)} <span>${count}</span></button>`;
-  }).join('');
-  const emptyReviewText=activeRealDrawingAssetQuery
-    ?'No review queue assets match the drawing browser filters.'
-    :'No review queue assets in the active quality filter.';
-  const reviewList=reviewRows.length
-    ?reviewRows.map(row=>{
-      const badge=getRealDrawingQualityBadge(row);
-      const assetRef=normalizeSelectionValue(row.asset_ref);
-      const flags=getRealDrawingQualityFlags(row);
-      const claimFlags=getRealDrawingClaimQualityFlags(row).map(flag=>`claim:${flag}`);
-      const sourceFlags=getRealDrawingSourceQualityFlags(row).map(flag=>`source:${flag}`);
-      const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
-      const notice=normalizeSelectionValue(row.quality_notice)||normalizeSelectionValue(row.geometry_mode)||normalizeSelectionValue(row.status);
-      return `
-        <button type="button" class="real-drawing-review-item" data-real-drawing-review-asset="${escapeHtml(assetRef)}">
-          <span class="quality-badge quality-badge--${escapeHtml(badge.tone)}">${escapeHtml(badge.label)}</span>
-          <span class="real-drawing-review-item__body">
-            <strong>${escapeHtml(assetRef)}</strong>
-            <span>${escapeHtml(getRealDrawingReviewAction(row))}</span>
-            <small>${escapeHtml([...flags,...claimFlags,...sourceFlags,loadEvidence].filter(Boolean).join(', ')||notice||'solver-exact')}</small>
-          </span>
-          <span class="real-drawing-review-item__segments">${escapeHtml(getRealDrawingSegmentLabel(row))}</span>
-        </button>`;
-    }).join('')
-    :`<div class="panel-placeholder">${escapeHtml(emptyReviewText)}</div>`;
-  let promotionBlock='';
-  if(plannedUnlockBatch.length){
-    promotionBlock=`
-    <section class="real-drawing-promotion-panel" data-real-drawing-promotion-target="${escapeHtml(String(promotionTarget))}">
-      <div class="real-drawing-promotion-header">
-        <span>Next Unlock Batch</span>
-        <strong>${escapeHtml(String(promotionCurrent))} -> ${escapeHtml(String(promotionAfterBatch||promotionCurrent))}/${escapeHtml(String(promotionTarget||'--'))}</strong>
-      </div>
-      <div class="real-drawing-review-list real-drawing-unlock-list" data-real-drawing-promotion-count="${escapeHtml(String(plannedUnlockBatch.length))}">
-        ${plannedUnlockBatch.map(row=>{
-          const assetRef=normalizeSelectionValue(row.asset_ref);
-          const family=normalizeSelectionValue(row.promotion_family)||'solver-exact promotion';
-          const action=normalizeSelectionValue(row.recommended_action)||family;
-          const delta=safeNumber(row.expected_solver_exact_delta,1);
-          const flags=Array.isArray(row.quality_flags)?row.quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean):[];
-          const claimFlags=Array.isArray(row.claim_quality_flags)?row.claim_quality_flags.map(flag=>`claim:${normalizeSelectionValue(flag)}`).filter(Boolean):[];
-          const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
-          return `
-            <button type="button" class="real-drawing-review-item real-drawing-promotion-item" data-real-drawing-promotion-asset="${escapeHtml(assetRef)}">
-              <span class="quality-badge quality-badge--review">${escapeHtml(normalizeSelectionValue(row.promotion_id)||'unlock')}</span>
-              <span class="real-drawing-review-item__body">
-                <strong>${escapeHtml(assetRef)} · ${escapeHtml(family)}</strong>
-                <span>${escapeHtml(action)}</span>
-                <small>${escapeHtml([...flags,...claimFlags,loadEvidence].filter(Boolean).join(', ')||normalizeSelectionValue(row.status)||'pending')}</small>
-              </span>
-              <span class="real-drawing-review-item__segments">+${escapeHtml(String(delta))}</span>
-            </button>`;
-        }).join('')}
-      </div>
-    </section>`
-  }else if(promotionTarget&&promotionRequiredDelta===0){
-    const nextQueueTitle=ifcLoadPromotionItems.length
-      ?'IFC Load Evidence Queue'
-      :ifcOpenPromotionItems.length
-      ?'IFC Reconstruction Queue'
-      :'Next Quality Closure';
-    const nextQueueList=openPromotionItems.length
-      ?`<div class="real-drawing-review-list real-drawing-unlock-list" data-real-drawing-open-promotion-count="${escapeHtml(String(openPromotionItems.length))}">
-        ${openPromotionItems.map(row=>{
-          const assetRef=normalizeSelectionValue(row.asset_ref);
-          const family=normalizeSelectionValue(row.promotion_family)||'quality closure';
-          const action=normalizeSelectionValue(row.recommended_action)||family;
-          const blocker=normalizeSelectionValue(row.blocker_reason_code);
-          const effort=normalizeSelectionValue(row.effort_label)||'review';
-          const flags=Array.isArray(row.quality_flags)?row.quality_flags.map(flag=>normalizeSelectionValue(flag)).filter(Boolean):[];
-          const claimFlags=Array.isArray(row.claim_quality_flags)?row.claim_quality_flags.map(flag=>`claim:${normalizeSelectionValue(flag)}`).filter(Boolean):[];
-          const loadEvidence=getRealDrawingLoadEvidenceLabel(row);
-          return `
-            <button type="button" class="real-drawing-review-item real-drawing-promotion-item" data-real-drawing-promotion-asset="${escapeHtml(assetRef)}">
-              <span class="quality-badge quality-badge--review">${escapeHtml(normalizeSelectionValue(row.promotion_id)||'open')}</span>
-              <span class="real-drawing-review-item__body">
-                <strong>${escapeHtml(assetRef)} · ${escapeHtml(family)}</strong>
-                <span>${escapeHtml(action)}</span>
-                <small>${escapeHtml(loadEvidence||blocker||[...flags,...claimFlags].filter(Boolean).join(', ')||normalizeSelectionValue(row.status)||'pending')}</small>
-              </span>
-              <span class="real-drawing-review-item__segments">${escapeHtml(effort)}</span>
-            </button>`;
-        }).join('')}
-      </div>`
-      :'<div class="panel-placeholder">Archive native write-back promotions are closed for this target.</div>';
-    promotionBlock=`
-    <section class="real-drawing-promotion-panel" data-real-drawing-promotion-state="target-reached" data-real-drawing-promotion-target="${escapeHtml(String(promotionTarget))}">
-      <div class="real-drawing-promotion-header">
-        <span>Solver-Exact Target Reached</span>
-        <strong>${escapeHtml(String(promotionCurrent))}/${escapeHtml(String(promotionTarget))}</strong>
-      </div>
-      <div class="real-drawing-promotion-header real-drawing-promotion-header--subtle">
-        <span>${escapeHtml(nextQueueTitle)}</span>
-        <strong>${escapeHtml(String(openPromotionItems.length))}</strong>
-      </div>
-      ${nextQueueList}
-    </section>`;
-  }
-  panel.innerHTML=`
-    ${switcherBlock}
-    ${activeInspectorBlock}
-    <div class="real-drawing-quality-summary" data-real-drawing-quality-gate="${escapeHtml(quality.gateLabel)}">
-      <div><span>Gate</span><strong>${escapeHtml(quality.gateLabel)}</strong></div>
-      <div><span>Renderable</span><strong>${escapeHtml(String(safeNumber(data?.meta?.real_drawing_renderable_asset_count,quality.assetCount)))}/${escapeHtml(String(quality.assetCount))}</strong></div>
-      <div><span>Solver Exact</span><strong>${escapeHtml(String(quality.exactCount))}</strong></div>
-      <div><span>Review Queue</span><strong>${escapeHtml(String(quality.reviewQueueCount))}</strong></div>
-      <div><span>Full Exact</span><strong>${quality.fullSolverExactReady?'true':'false'}</strong></div>
-    </div>
-    ${promotionBlock}
-    <div class="quality-filter-bar" aria-label="Real drawing quality filters">${filterButtons}</div>
-    ${browserBlock}
-    <div class="real-drawing-review-list" data-real-drawing-review-count="${escapeHtml(String(quality.reviewQueueCount))}">
-      ${reviewList}
-    </div>`;
+  const nextQueueTitle=ifcLoadPromotionItems.length
+    ?'IFC Load Evidence Queue'
+    :ifcOpenPromotionItems.length
+    ?'IFC Reconstruction Queue'
+    :'Next Quality Closure';
+  panel.innerHTML=buildRealDrawingQualityPanelHtml({
+    data,
+    quality,
+    filteredAssets,
+    browserAssets,
+    reviewRows,
+    activeAssetRef,
+    activeAsset,
+    activeIsolation,
+    activeFilter:activeRealDrawingQualityFilter,
+    activeSort:activeRealDrawingBrowserSort,
+    activeQuery:activeRealDrawingAssetQuery,
+    recentAssetRefs:getRecentRealDrawingAssetRefs(data),
+    qualityFilters:REAL_DRAWING_QUALITY_FILTERS,
+    sortOptions:REAL_DRAWING_BROWSER_SORT_OPTIONS,
+    plannedUnlockBatch,
+    openPromotionItems,
+    nextQueueTitle,
+    promotionTarget,
+    promotionAfterBatch,
+    promotionCurrent,
+    promotionRequiredDelta,
+  });
   const assetSelect=panel.querySelector('[data-real-drawing-asset-select]');
   if(assetSelect instanceof HTMLSelectElement){
     assetSelect.addEventListener('change',()=>{

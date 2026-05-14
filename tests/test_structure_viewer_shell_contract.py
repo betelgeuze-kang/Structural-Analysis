@@ -19,6 +19,9 @@ def _read_viewer_html(page_name: str) -> str:
 def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None:
     text = (ROOT / "src" / "structure-viewer" / "index.html").read_text(encoding="utf-8")
     stats_text = (ROOT / "src" / "structure-viewer" / "viewer-stats-summary.js").read_text(encoding="utf-8")
+    renderer_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-renderer.js").read_text(
+        encoding="utf-8"
+    )
 
     expected_shell_primitives = {
         "top search shell": 'class="top-search-shell"',
@@ -52,22 +55,23 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert 'id="real-drawing-quality-panel"' in text
     assert "setRealDrawingQualityFilter" in text
     assert "getRealDrawingSegmentLabel" in text
-    assert "real-drawing-switcher" in text
-    assert "data-real-drawing-asset-select" in text
+    assert "real-drawing-switcher" in renderer_text
+    assert "data-real-drawing-asset-select" in renderer_text
     assert "stepRealDrawingAsset" in text
     assert "focusRealDrawingAssetRef" in text
-    assert "data-real-drawing-active-inspector" in text
-    assert "getRealDrawingInspectorRows" in text
-    assert "data-real-drawing-browser-query" in text
-    assert "data-real-drawing-browser-sort" in text
-    assert "data-real-drawing-next-review" in text
+    assert "data-real-drawing-active-inspector" in renderer_text
+    assert "getRealDrawingInspectorRows" in renderer_text
+    assert "data-real-drawing-browser-query" in renderer_text
+    assert "data-real-drawing-browser-sort" in renderer_text
+    assert "data-real-drawing-next-review" in renderer_text
     assert "REAL_DRAWING_BROWSER_STATE_KEY" in text
     assert "viewer-real-drawing-browser-state.js" in text
     assert "viewer-real-drawing-quality.js" in text
+    assert "viewer-real-drawing-panel-renderer.js" in text
     assert "viewer-stats-summary.js" in text
     assert "drawing_asset" in text
-    assert "data-real-drawing-copy-link" in text
-    assert "data-real-drawing-recent-asset" in text
+    assert "data-real-drawing-copy-link" in renderer_text
+    assert "data-real-drawing-recent-asset" in renderer_text
     assert "rememberRealDrawingAssetRef" in text
     assert "copyRealDrawingDeepLink" in text
     assert "setRealDrawingAssetQuery" in text
@@ -87,13 +91,13 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")
     assert "Drawing Review Queue" in stats_text
-    assert "Next Unlock Batch" in text
-    assert "Solver-Exact Target Reached" in text
+    assert "Next Unlock Batch" in renderer_text
+    assert "Solver-Exact Target Reached" in renderer_text
     assert "IFC Reconstruction Queue" in text
     assert "getRealDrawingOpenPromotionItems" in text
-    assert "data-real-drawing-open-promotion-count" in text
+    assert "data-real-drawing-open-promotion-count" in renderer_text
     assert "getRealDrawingPromotionQueue" in text
-    assert "data-real-drawing-promotion-asset" in text
+    assert "data-real-drawing-promotion-asset" in renderer_text
     assert "quality-badge--exact" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
         encoding="utf-8"
     )

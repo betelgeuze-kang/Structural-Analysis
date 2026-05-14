@@ -19,6 +19,7 @@ def test_structure_viewer_contract_runner_covers_source_and_singlefile_surfaces(
     script = (ROOT / "scripts" / "verify_structure_viewer_contracts.py").read_text(encoding="utf-8")
 
     assert "tests/test_structure_viewer_real_drawing_browser_state_contract.py" in script
+    assert "tests/test_structure_viewer_real_drawing_panel_renderer_contract.py" in script
     assert "tests/test_structure_viewer_real_drawing_quality_contract.py" in script
     assert "tests/test_structure_viewer_shared_selection_state_contract.py" in script
     assert "tests/test_structure_viewer_stats_summary_contract.py" in script
@@ -37,5 +38,6 @@ def test_structure_viewer_contract_runner_has_dry_run_command_preview() -> None:
 
     assert result.returncode == 0, result.stderr
     assert "pytest -q" in result.stdout
+    assert "tests/test_structure_viewer_real_drawing_panel_renderer_contract.py" in result.stdout
     assert "tests/test_structure_viewer_real_drawing_quality_contract.py" in result.stdout
     assert "tests/test_structure_viewer_stats_summary_contract.py" in result.stdout

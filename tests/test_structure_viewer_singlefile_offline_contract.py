@@ -33,6 +33,7 @@ def test_release_singlefile_viewers_do_not_depend_on_remote_or_sidecar_assets() 
         "./viewer-contour-materials.js",
         "./viewer-real-drawing-browser-state.js",
         "./viewer-real-drawing-quality.js",
+        "./viewer-real-drawing-panel-renderer.js",
         "./viewer-shared-selection-state.js",
         "./viewer-stats-summary.js",
         "./vendor/three.module.js",

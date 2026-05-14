@@ -23,6 +23,7 @@ STRUCTURE_VIEWER_CONTRACT_TESTS = [
     "tests/test_structure_viewer_local_vendor_contract.py",
     "tests/test_structure_viewer_suite_shell_contract.py",
     "tests/test_structure_viewer_real_drawing_browser_state_contract.py",
+    "tests/test_structure_viewer_real_drawing_panel_renderer_contract.py",
     "tests/test_structure_viewer_real_drawing_quality_contract.py",
     "tests/test_structure_viewer_shared_selection_state_contract.py",
     "tests/test_structure_viewer_stats_summary_contract.py",
