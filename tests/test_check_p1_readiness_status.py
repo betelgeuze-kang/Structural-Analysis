@@ -242,6 +242,32 @@ def test_p1_readiness_rejects_summary_only_midas_kds_evidence_claim(tmp_path: Pa
     assert row_gate["midas_kds_validation_row_present"] is False
 
 
+def test_p1_readiness_passes_publication_evidence_index_when_building_p0(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    paths = _paths(tmp_path)
+    paths.pop("p0_status")
+    publication_index = tmp_path / "release-publication-evidence-index.json"
+
+    def fake_build_p0_status(*, publication_evidence_index=None, **_kwargs):
+        assert publication_evidence_index == publication_index
+        return {
+            "schema_version": "p0-closure-status.v1",
+            "p0_closed": True,
+            "core_evidence_closed": True,
+            "release_publication_closed": True,
+            "publication_evidence_index": str(publication_index),
+        }
+
+    monkeypatch.setattr(check_p1_readiness, "build_p0_status", fake_build_p0_status)
+
+    status = check_p1_readiness.build_status(publication_evidence_index=publication_index, **paths)
+
+    assert status["p1_execution_unblocked"] is True
+    assert status["publication_evidence_index"] == str(publication_index)
+
+
 def test_cli_writes_markdown_and_fails_when_execution_blocked(tmp_path: Path, capsys) -> None:
     paths = _paths(tmp_path)
     out_md = tmp_path / "p1.md"

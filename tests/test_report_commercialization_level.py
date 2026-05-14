@@ -125,6 +125,20 @@ def _external_updates(path: Path) -> Path:
     )
 
 
+def _residual_pending_updates(path: Path) -> Path:
+    return _write_json(
+        path,
+        {
+            "schema_version": "residual-holdout-closure-updates.v1",
+            "updates": {
+                "RH-001": {"last_checked_at_utc": "2026-05-05T05:05:53Z", "closure_evidence_status": "pending"},
+                "RH-002": {"last_checked_at_utc": "2026-05-05T05:05:53Z", "closure_evidence_status": "pending"},
+                "RH-003": {"last_checked_at_utc": "2026-05-05T05:05:53Z", "closure_evidence_status": "pending"},
+            },
+        },
+    )
+
+
 def test_report_commercialization_level_marks_engineer_in_loop_commercial_assist(tmp_path: Path) -> None:
     payload = report_commercialization_level.build_report(
         commercial_readiness=_commercial(tmp_path / "commercial.json"),
@@ -135,7 +149,7 @@ def test_report_commercialization_level_marks_engineer_in_loop_commercial_assist
     )
 
     assert payload["contract_pass"] is True
-    assert payload["commercialization_score"] == 7.0
+    assert payload["commercialization_score"] == 7.5
     assert payload["commercialization_level"] == "L3"
     assert payload["commercialization_level_label"] == "engineer_in_loop_commercial_assist_ready"
     assert payload["commercial_scope"]["full_commercial_replacement_ready"] is False
@@ -144,10 +158,9 @@ def test_report_commercialization_level_marks_engineer_in_loop_commercial_assist
     assert payload["external_benchmark_submission"]["submission_last_checked_count"] == 0
     assert "not a full autonomous commercial replacement" in payload["recommended_claim"]
     assert "external_submission_receipts_pending=4" in payload["blockers"]
-    assert "p1_benchmark_execution_blocked_by_p0_or_execution_gate" in payload["blockers"]
+    assert "p1_benchmark_execution_unblocked" in payload["accelerators"]
     assert "residual_holdout_closure_pending=3" in payload["blockers"]
     assert "full_commercial_replacement_ready=false" in payload["blockers"]
-    assert "p1_benchmark_breadth_inputs_ready" in payload["accelerators"]
     assert "residual_holdout_operational_queue_present" in payload["accelerators"]
 
 
@@ -217,7 +230,7 @@ def test_report_commercialization_level_reads_residual_holdout_sidecar(tmp_path:
         p1_operational_queues=tmp_path / "missing-ops.json",
     )
 
-    assert payload["commercialization_score"] == 7.5
+    assert payload["commercialization_score"] == 8.0
     assert "residual_holdout_closure_evidence_closed" in payload["accelerators"]
     assert all(not blocker.startswith("residual_holdout_closure_pending") for blocker in payload["blockers"])
     assert payload["artifacts"]["residual_holdout_closure_updates"].endswith("rh-updates.json")
@@ -242,3 +255,45 @@ def test_report_commercialization_level_reads_external_submission_update_sidecar
     assert external["submission_receipt_pending_count"] == 4
     assert "external_submission_update_sidecar_applied" in payload["accelerators"]
     assert payload["artifacts"]["external_benchmark_submission_updates"].endswith("eb-updates.json")
+
+
+def test_report_commercialization_level_conditional_mode_closes_productization_without_strict_receipts(
+    tmp_path: Path,
+) -> None:
+    p1_breadth = _write_json(
+        tmp_path / "p1-breadth.json",
+        {"p1_benchmark_execution_unblocked": True},
+    )
+    ops = _write_json(
+        tmp_path / "ops.json",
+        {
+            "contract_pass": True,
+            "summary": {
+                "residual_holdout_work_item_count": 3,
+                "residual_holdout_open_count": 3,
+                "residual_holdout_closure_evidence_pending_count": 3,
+                "residual_holdout_last_checked_count": 3,
+            },
+        },
+    )
+
+    payload = report_commercialization_level.build_report(
+        commercial_readiness=_commercial(tmp_path / "commercial.json"),
+        external_benchmark_submission_readiness=_external(tmp_path / "external.json"),
+        external_benchmark_submission_updates=_external_updates(tmp_path / "eb-updates.json"),
+        residual_holdout_closure_updates=_residual_pending_updates(tmp_path / "rh-updates.json"),
+        p1_benchmark_breadth_status=p1_breadth,
+        p1_operational_queues=ops,
+        closure_mode="conditional",
+    )
+
+    assert payload["commercialization_score"] == 9.0
+    assert payload["commercialization_level"] == "L4"
+    assert payload["strict_evidence_closed"] is False
+    assert payload["conditional_productization_closed"] is True
+    assert payload["recommended_claim"].startswith("engineer-in-loop commercial assist only")
+    assert "external_submission_conditional_productization_closed" in payload["accelerators"]
+    assert "residual_holdout_conditional_productization_closed" in payload["accelerators"]
+    assert "external_submission_receipts_pending=4" not in payload["blockers"]
+    assert "residual_holdout_closure_pending=3" not in payload["blockers"]
+    assert payload["blockers"] == ["full_commercial_replacement_ready=false"]

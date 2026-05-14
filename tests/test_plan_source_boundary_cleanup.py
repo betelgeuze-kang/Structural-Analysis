@@ -171,6 +171,51 @@ def test_write_pathspec_includes_remove_from_git_candidates_only(tmp_path: Path,
     assert pathspec_file.read_text(encoding="utf-8") == "implementation/phase1/output/report.json\n"
 
 
+def test_large_file_allowlist_closes_known_artifacts(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    large = tmp_path / "data" / "large.bin"
+    large.parent.mkdir(parents=True)
+    large.write_bytes(b"x" * 2048)
+
+    plan = plan_source_boundary_cleanup.build_plan(
+        ["data/large.bin"],
+        large_file_threshold_mib=0.001,
+        allowlist={
+            "data/large.bin": {
+                "classification": "external_restore",
+                "rationale": "kept for deterministic restore testing",
+            }
+        },
+    )
+
+    assert plan["contract_pass"] is True
+    assert plan["total_candidate_files"] == 0
+    assert plan["total_allowlisted_files"] == 1
+    assert plan["allowlisted_counts_by_classification"] == {"external_restore": 1}
+    assert plan["allowlisted_records"][0]["classification"] == "external_restore"
+
+
+def test_large_file_allowlist_keeps_generated_remove_candidate_open(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    large = tmp_path / "data" / "large.bin"
+    large.parent.mkdir(parents=True)
+    large.write_bytes(b"x" * 2048)
+
+    plan = plan_source_boundary_cleanup.build_plan(
+        ["data/large.bin"],
+        large_file_threshold_mib=0.001,
+        allowlist={
+            "data/large.bin": {
+                "classification": "generated_remove_candidate",
+                "rationale": "must be removed from git tracking",
+            }
+        },
+    )
+
+    assert plan["contract_pass"] is False
+    assert plan["records"][0]["recommended_action"] == "remove_from_git"
+
+
 def test_cli_writes_json_and_markdown_inventory_and_can_fail_on_candidates(tmp_path: Path) -> None:
     tracked_file = tmp_path / "tracked-files.txt"
     tracked_file.write_text(

@@ -1960,7 +1960,7 @@ def test_commercialization_depth_surface_tracks_p0_p1_release_gap_summary() -> N
         }
     }
 
-    surface = module._commercialization_depth_surface(release_gap_payload)
+    surface = module.build_commercialization_depth_surface(release_gap_payload)
     parity = module._commercial_parity_summary([], {}, release_gap_payload)
 
     assert surface["available"] is True
@@ -2020,7 +2020,7 @@ def test_commercial_workflow_breadth_surface_tracks_open_commercialization_areas
         },
     }
 
-    surface = module._commercial_workflow_breadth_surface(
+    surface = module.build_commercial_workflow_breadth_surface(
         report_payload,
         artifact_href="commercial_workflow_breadth_report.json",
         artifact_path="implementation/phase1/release/commercial_workflow_breadth_report.json",

@@ -3,10 +3,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import threading
-from urllib.request import urlopen
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 from implementation.phase1.project_ops_api_service import (
     build_project_ops_snapshot,
+    create_project_ops_test_token,
     create_project_ops_server,
     write_project_ops_snapshot,
 )
@@ -15,6 +17,21 @@ from implementation.phase1.project_ops_api_service import (
 def _write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _headers(*, role: str = "viewer", tenant_id: str = "tenant-a", actor_id: str = "engineer-1") -> dict[str, str]:
+    return {
+        "Authorization": f"Bearer {create_project_ops_test_token(tenant_id=tenant_id, actor_id=actor_id, roles=[role])}",
+        "X-Tenant-ID": tenant_id,
+        "X-Actor-ID": actor_id,
+        "X-Request-ID": f"req-{role}-{tenant_id}",
+    }
+
+
+def _get_json(url: str, *, role: str = "viewer", tenant_id: str = "tenant-a") -> dict:
+    request = Request(url, headers=_headers(role=role, tenant_id=tenant_id))
+    with urlopen(request) as response:
+        return json.loads(response.read().decode("utf-8"))
 
 
 def _prepare_release_root(tmp_path: Path) -> Path:
@@ -503,7 +520,7 @@ def test_build_project_ops_snapshot_aggregates_release_ops_surfaces(tmp_path: Pa
     assert payload["summary"]["family_runtime_writeback_alignment_label"] == "PASS 1/1 ready families aligned"
     assert "writeback_ready_submissions=1" in payload["summary"]["family_runtime_writeback_alignment_evidence"]
     assert payload["summary"]["queued_submission_count"] == 0
-    assert payload["summary"]["endpoint_count"] == 10
+    assert payload["summary"]["endpoint_count"] == 14
     assert payload["summary"]["service_ready"] is True
     assert payload["summary"]["release_candidate_pass"] is True
     assert payload["summary"]["commercial_grade"] == "Commercial"
@@ -552,21 +569,27 @@ def test_write_project_ops_snapshot_and_http_endpoints(tmp_path: Path) -> None:
     assert persisted["summary"]["multi_project_runtime_writeback_project_count"] == 1
     assert persisted["summary"]["local_runtime_scenario_depth_ready"] is True
 
-    server = create_project_ops_server(release_root=release_root, port=0)
+    audit_log = tmp_path / "audit" / "project_ops.jsonl"
+    server = create_project_ops_server(
+        release_root=release_root,
+        port=0,
+        allowed_tenants=["tenant-a"],
+        audit_log_path=audit_log,
+    )
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
         host, port = server.server_address[:2]
         base = f"http://{host}:{port}"
 
-        with urlopen(f"{base}/") as response:
-            root_payload = json.loads(response.read().decode("utf-8"))
+        root_payload = _get_json(f"{base}/")
         assert "/submissions" in root_payload["endpoints"]
         assert "/submissions/{family_id}" in root_payload["endpoints"]
+        assert "/audit/events" in root_payload["endpoints"]
 
-        with urlopen(f"{base}/summary") as response:
-            summary_payload = json.loads(response.read().decode("utf-8"))
+        summary_payload = _get_json(f"{base}/summary")
         assert summary_payload["contract_pass"] is True
+        assert summary_payload["tenant_id"] == "tenant-a"
         assert summary_payload["summary"]["project_count"] == 1
         assert summary_payload["summary"]["submission_count"] == 1
         assert summary_payload["summary"]["family_runtime_writeback_alignment_pass"] is True
@@ -578,31 +601,97 @@ def test_write_project_ops_snapshot_and_http_endpoints(tmp_path: Path) -> None:
         assert summary_payload["runtime_submissions"]["summary"]["submission_count"] == 1
         assert summary_payload["runtime_submissions"]["summary"]["runtime_ready_count"] == 1
 
-        with urlopen(f"{base}/projects?family_id=steel_braced_frame") as response:
-            project_payload = json.loads(response.read().decode("utf-8"))
+        project_payload = _get_json(f"{base}/projects?family_id=steel_braced_frame")
         assert project_payload["count"] == 1
         assert project_payload["items"][0]["project_id"] == "native-authoring-steel-braced"
 
-        with urlopen(f"{base}/families/steel_braced_frame") as response:
-            family_payload = json.loads(response.read().decode("utf-8"))
+        family_payload = _get_json(f"{base}/families/steel_braced_frame")
         assert family_payload["family_id"] == "steel_braced_frame"
         assert family_payload["project_count"] == 1
         assert family_payload["runtime_ready"] is True
 
-        with urlopen(f"{base}/portfolios/phase1-native-authoring-ops-portfolio") as response:
-            portfolio_payload = json.loads(response.read().decode("utf-8"))
+        portfolio_payload = _get_json(f"{base}/portfolios/phase1-native-authoring-ops-portfolio")
         assert portfolio_payload["portfolio_name"] == "phase1-native-authoring-ops-portfolio"
         assert portfolio_payload["family_count"] == 1
 
-        with urlopen(f"{base}/submissions") as response:
-            submission_payload = json.loads(response.read().decode("utf-8"))
+        submission_payload = _get_json(f"{base}/submissions")
         assert submission_payload["count"] == 1
         assert submission_payload["items"][0]["submission_status"] == "released"
 
-        with urlopen(f"{base}/submissions/steel_braced_frame") as response:
-            family_submission_payload = json.loads(response.read().decode("utf-8"))
+        family_submission_payload = _get_json(f"{base}/submissions/steel_braced_frame")
         assert family_submission_payload["family_id"] == "steel_braced_frame"
         assert family_submission_payload["runtime_ready"] is True
+
+        license_payload = _get_json(f"{base}/license")
+        assert license_payload["license"]["status"] == "active"
+        assert license_payload["license"]["telemetry_enabled"] is False
+        version_payload = _get_json(f"{base}/version")
+        assert version_payload["version"] == "project-ops-api-service.v1"
+        update_payload = _get_json(f"{base}/update-channel")
+        assert update_payload["channel"] == "stable"
+        audit_payload = _get_json(f"{base}/audit/events", role="admin")
+        assert audit_payload["tenant_id"] == "tenant-a"
+        assert audit_payload["count"] >= 1
+        assert all("Authorization" not in json.dumps(row) for row in audit_payload["items"])
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_project_ops_api_rejects_missing_auth_and_invalid_tenant(tmp_path: Path) -> None:
+    release_root = _prepare_release_root(tmp_path)
+    server = create_project_ops_server(release_root=release_root, port=0, allowed_tenants=["tenant-a"])
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address[:2]
+        base = f"http://{host}:{port}"
+        try:
+            urlopen(f"{base}/health")
+            raise AssertionError("missing auth should fail")
+        except HTTPError as error:
+            assert error.code == 401
+        try:
+            _get_json(f"{base}/health", tenant_id="tenant-b")
+            raise AssertionError("invalid tenant should fail")
+        except HTTPError as error:
+            assert error.code == 403
+        try:
+            _get_json(f"{base}/audit/events", role="viewer")
+            raise AssertionError("viewer role should not read audit events")
+        except HTTPError as error:
+            assert error.code == 403
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_project_ops_api_surfaces_expired_license_as_degraded(tmp_path: Path) -> None:
+    release_root = _prepare_release_root(tmp_path)
+    license_status = tmp_path / "license.json"
+    _write_json(
+        license_status,
+        {
+            "status": "active",
+            "tier": "enterprise",
+            "expires_at": "2020-01-01T00:00:00+00:00",
+        },
+    )
+    server = create_project_ops_server(
+        release_root=release_root,
+        port=0,
+        allowed_tenants=["tenant-a"],
+        license_status_path=license_status,
+    )
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address[:2]
+        payload = _get_json(f"http://{host}:{port}/license")
+        assert payload["license"]["status"] == "expired"
+        assert payload["license"]["degraded"] is True
     finally:
         server.shutdown()
         server.server_close()

@@ -61,6 +61,9 @@ DEFAULT_REPORT_FALLBACKS = {
     ),
 }
 DEFAULT_MANIFEST = Path("implementation/phase1/release_artifacts_manifest.json")
+DEFAULT_PUBLICATION_EVIDENCE_INDEX = Path(
+    "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json"
+)
 PUBLICATION_EVIDENCE_INDEX_SCHEMA = "release-publication-evidence-index.v1"
 
 
@@ -205,7 +208,7 @@ def _release_publication_status(
 
 def build_status(
     *,
-    manifest: Path = DEFAULT_MANIFEST,
+    manifest: Path | None = None,
     promoted_manifest_json: Path | None = None,
     release_assets_json: Path | None = None,
     artifact_root: Path | None = None,
@@ -218,6 +221,28 @@ def build_status(
     reports: dict[str, Path] | None = None,
     publication_evidence_index: Path | None = None,
 ) -> dict[str, Any]:
+    manifest = manifest or DEFAULT_MANIFEST
+    release_inputs_provided = any(
+        value is not None
+        for value in (
+            promoted_manifest_json,
+            release_assets_json,
+            artifact_root,
+            upload_plan_json,
+            metadata_preflight_json,
+            post_publish_roundtrip_json,
+        )
+    )
+    default_publication_evidence_index_missing = False
+    if (
+        publication_evidence_index is None
+        and manifest == DEFAULT_MANIFEST
+        and not release_inputs_provided
+    ):
+        if DEFAULT_PUBLICATION_EVIDENCE_INDEX.exists():
+            publication_evidence_index = DEFAULT_PUBLICATION_EVIDENCE_INDEX
+        else:
+            default_publication_evidence_index_missing = True
     index_paths = _publication_index_paths(publication_evidence_index)
     manifest = index_paths.get("manifest") or manifest
     promoted_manifest_json = index_paths.get("promoted_manifest_json") or promoted_manifest_json
@@ -241,6 +266,9 @@ def build_status(
         require_all=require_all,
         require_exact=require_exact,
     )
+    if default_publication_evidence_index_missing and not bool(release.get("ok", False)):
+        release["reason"] = "default publication evidence missing"
+        release["default_publication_evidence_index"] = str(DEFAULT_PUBLICATION_EVIDENCE_INDEX)
     midas_exact = _gate_status(
         "P0-2 MIDAS exact roundtrip",
         report_paths["p0_2_midas_exact_roundtrip"],
@@ -310,6 +338,7 @@ def build_status(
         "core_evidence_closed": all(bool(gate.get("ok", False)) for gate in core_gates),
         "release_publication_closed": bool(release.get("ok", False)),
         "publication_evidence_index": str(publication_evidence_index) if publication_evidence_index else "",
+        "default_publication_evidence_index_missing": default_publication_evidence_index_missing,
         "gates": gates,
         "next_action": (
             "run Publish Release Assets workflow or provide release asset listing"

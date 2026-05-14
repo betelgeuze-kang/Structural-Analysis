@@ -19,11 +19,16 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
     assert package_json["packageManager"] == "npm@10.8.2"
     assert package_json["scripts"]["verify:frontend-contract"] == "node ./scripts/verify-frontend-build-contract.mjs"
     assert package_json["scripts"]["verify:frontend-smoke"] == "node ./scripts/verify-frontend-smoke.mjs"
+    assert (
+        package_json["scripts"]["verify:frontend-browser-smoke"]
+        == "playwright install chromium && node ./scripts/verify-frontend-browser-smoke.mjs"
+    )
     assert package_json["dependencies"] == {
         "react": "18.2.0",
         "react-dom": "18.2.0",
     }
     assert package_json["devDependencies"] == {
+        "@playwright/test": "1.56.1",
         "@types/react": "18.2.15",
         "@types/react-dom": "18.2.7",
         "@vitejs/plugin-react": "6.0.1",
@@ -46,6 +51,7 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert package_lock["packages"][""]["devDependencies"] == package_json["devDependencies"]
     assert "npm run verify:frontend-contract" in docs_text
     assert "npm run verify:frontend-smoke" in docs_text
+    assert "npm run verify:frontend-browser-smoke" in docs_text
     assert "package-lock.json" in docs_text
 
 

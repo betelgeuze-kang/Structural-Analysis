@@ -1,8 +1,12 @@
 import { type ChangeEvent, startTransition, useEffect, useState } from 'react'
+import {
+  createInitialResources,
+  type JsonRecord,
+  type ResourceMap,
+  type ResourceState,
+} from './workbench/resourceModel'
 
 type StatusTone = 'ok' | 'warn' | 'missing'
-type ResourceStatus = 'loading' | 'ready' | 'missing' | 'error'
-type JsonRecord = Record<string, unknown>
 type ReviewSurfaceId = 'viewer' | 'drawing-review' | 'real-drawing-3d' | 'benchmark-review' | 'committee'
 type GovernanceArtifactId = 'gap' | 'registry' | 'registry-index' | 'package' | 'signature' | 'batch'
 
@@ -57,41 +61,6 @@ type RoutePlan = {
 }
 
 type DeepLinkParams = Record<string, string | number | null | undefined>
-
-type ResourceState = {
-  status: ResourceStatus
-  source: string
-  data: JsonRecord | null
-  error: string
-}
-
-type ResourceMap = {
-  authoring: ResourceState
-  authoringSolver: ResourceState
-  authoringOpsBundle: ResourceState
-  authoringOpsBatch: ResourceState
-  authoringOpsRegistry: ResourceState
-  authoringPortfolio: ResourceState
-  authoringServerOps: ResourceState
-  authoringFamilyTrack: ResourceState
-  authoringRuntimeSubmissionLane: ResourceState
-  authoringRuntimeWritebackDepth: ResourceState
-  authoringMultiProjectRuntimeWriteback: ResourceState
-  authoringSolverFamilyBreadth: ResourceState
-  authoringLocalRuntimeScenarioDepth: ResourceState
-  authoringLocalVariantWritebackTrace: ResourceState
-  authoringWritebackBreadth: ResourceState
-  viewer: ResourceState
-  drawing: ResourceState
-  benchmark: ResourceState
-  committeeSummary: ResourceState
-  committeeReport: ResourceState
-  commercialWorkflowBreadth: ResourceState
-  releaseGap: ResourceState
-  registry: ResourceState
-  registryIndex: ResourceState
-  batch: ResourceState
-}
 
 type AuthoringControls = {
   familyId: string
@@ -373,45 +342,6 @@ const legacyViewers: Surface[] = [
     kind: 'html',
   },
 ]
-
-function createResource(status: ResourceStatus = 'loading'): ResourceState {
-  return {
-    status,
-    source: '',
-    data: null,
-    error: '',
-  }
-}
-
-function createInitialResources(): ResourceMap {
-  return {
-    authoring: createResource(),
-    authoringSolver: createResource(),
-    authoringOpsBundle: createResource(),
-    authoringOpsBatch: createResource(),
-    authoringOpsRegistry: createResource(),
-    authoringPortfolio: createResource(),
-    authoringServerOps: createResource(),
-    authoringFamilyTrack: createResource(),
-    authoringRuntimeSubmissionLane: createResource(),
-    authoringRuntimeWritebackDepth: createResource(),
-    authoringMultiProjectRuntimeWriteback: createResource(),
-    authoringSolverFamilyBreadth: createResource(),
-    authoringLocalRuntimeScenarioDepth: createResource(),
-    authoringLocalVariantWritebackTrace: createResource(),
-    authoringWritebackBreadth: createResource(),
-    viewer: createResource(),
-    drawing: createResource(),
-    benchmark: createResource(),
-    committeeSummary: createResource(),
-    committeeReport: createResource(),
-    commercialWorkflowBreadth: createResource(),
-    releaseGap: createResource(),
-    registry: createResource(),
-    registryIndex: createResource(),
-    batch: createResource(),
-  }
-}
 
 function createDefaultAuthoringControls(): AuthoringControls {
   return {

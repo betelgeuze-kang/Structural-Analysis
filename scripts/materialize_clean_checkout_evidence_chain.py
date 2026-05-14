@@ -390,6 +390,18 @@ def _commercial_scope(path: Path) -> dict[str, Any]:
     }
 
 
+def _gates_ready_excluding(payload: dict[str, Any], excluded_labels: set[str]) -> bool:
+    gates = payload.get("gates")
+    if not isinstance(gates, list):
+        return False
+    selected = [
+        gate
+        for gate in gates
+        if isinstance(gate, dict) and str(gate.get("label", "") or "") not in excluded_labels
+    ]
+    return bool(selected) and all(bool(gate.get("ok", False)) for gate in selected)
+
+
 def build_chain(args: argparse.Namespace) -> dict[str, Any]:
     steps: list[dict[str, Any]] = []
     index_paths = _publication_index_paths(args.publication_evidence_index)
@@ -588,6 +600,28 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         str(args.row_provenance),
         "--json",
     ]
+    p0_status_temp_dir: tempfile.TemporaryDirectory[str] | None = None
+    if p0_status_path is None and args.publication_evidence_index is None:
+        p0_status_temp_dir = tempfile.TemporaryDirectory(prefix="clean-checkout-p0-open-")
+        p0_status_path = Path(p0_status_temp_dir.name) / "p0-status-open.json"
+        _write_json(
+            p0_status_path,
+            {
+                "schema_version": "p0-closure-status.v1",
+                "status": "open",
+                "p0_closed": False,
+                "release_publication_closed": False,
+                "core_evidence_closed": False,
+                "gates": [
+                    {
+                        "label": "P0 release publication",
+                        "status": "open",
+                        "ok": False,
+                        "reason": "p0 closure evidence was not provided to clean-checkout materialization",
+                    }
+                ],
+            },
+        )
     if p0_status_path is not None:
         p1_cmd.extend(["--p0-status", str(p0_status_path)])
     p1_step = _run_json_command(p1_cmd)
@@ -622,6 +656,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
 
     if temp_dir is not None:
         temp_dir.cleanup()
+    if p0_status_temp_dir is not None:
+        p0_status_temp_dir.cleanup()
 
     if args.p1_benchmark_out and isinstance(benchmark_step.get("json"), dict):
         _write_json(args.p1_benchmark_out, benchmark_step["json"])
@@ -770,13 +806,15 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         ),
         updated_by_intake=bool(p1_evidence_sidecar_build_step and p1_evidence_sidecar_build_step.get("ok")),
     )
+    p1_non_p0_inputs_ready = _gates_ready_excluding(p1_readiness, {"P0 release publication"})
+    benchmark_non_p0_inputs_ready = _gates_ready_excluding(p1_benchmark, {"P1 execution prerequisite"})
     inputs_contract_pass = bool(
         (publication_step is None or publication_step.get("ok"))
         and midas_payload.get("ok")
         and commercial_payload.get("ok")
         and row_payload.get("ok")
-        and p1_readiness.get("p1_inputs_ready", False)
-        and p1_benchmark.get("benchmark_breadth_inputs_ready", False)
+        and (p1_readiness.get("p1_inputs_ready", False) or p1_non_p0_inputs_ready)
+        and (p1_benchmark.get("benchmark_breadth_inputs_ready", False) or benchmark_non_p0_inputs_ready)
     )
     p0_closure_evidence_consumed = bool(
         p0_status_path is not None

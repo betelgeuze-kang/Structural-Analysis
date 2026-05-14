@@ -41,6 +41,7 @@ def test_generate_selfcontained_html_uses_full_index_template() -> None:
     assert "./viewer-real-drawing-tree-model.js" not in html
     assert "./viewer-search-results-model.js" not in html
     assert "./viewer-selection-summary-model.js" not in html
+    assert "./viewer-provenance-model.js" not in html
     assert "./viewer-shared-selection-state.js" not in html
     assert "./viewer-side-panel-model.js" not in html
     assert "./viewer-stats-summary.js" not in html

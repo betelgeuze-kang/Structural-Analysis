@@ -34,6 +34,14 @@ BUCKETS = (
 DEFAULT_LARGE_FILE_THRESHOLD_MIB = 25.0
 BYTES_PER_MIB = 1024 * 1024
 SCHEMA_VERSION = "source-boundary-cleanup-plan.v1"
+ALLOWLIST_SCHEMA_VERSION = "source-boundary-allowlist.v1"
+DEFAULT_ALLOWLIST_MANIFEST = Path("implementation/phase1/source_boundary_allowlist.json")
+ALLOWLIST_CLOSING_CLASSIFICATIONS = {
+    "source_required",
+    "release_asset",
+    "external_restore",
+}
+ALLOWLIST_CLASSIFICATIONS = ALLOWLIST_CLOSING_CLASSIFICATIONS | {"generated_remove_candidate"}
 
 
 def _git_files() -> list[str]:
@@ -45,6 +53,31 @@ def _read_tracked_files(path: Path) -> list[str]:
     text = path.read_text(encoding="utf-8")
     separator = "\0" if "\0" in text else "\n"
     return [item.strip() for item in text.split(separator) if item.strip()]
+
+
+def _read_allowlist(path: Path | None) -> dict[str, dict[str, object]]:
+    if path is None or not path.exists():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"source boundary allowlist must be an object: {path}")
+    if payload.get("schema_version") != ALLOWLIST_SCHEMA_VERSION:
+        raise ValueError(f"unsupported source boundary allowlist schema: {path}")
+    rows = payload.get("records", [])
+    if not isinstance(rows, list):
+        raise ValueError(f"source boundary allowlist records must be a list: {path}")
+    allowlist: dict[str, dict[str, object]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        row_path = str(row.get("path", "") or "").strip()
+        classification = str(row.get("classification", "") or "").strip()
+        if not row_path:
+            continue
+        if classification not in ALLOWLIST_CLASSIFICATIONS:
+            raise ValueError(f"unsupported source boundary allowlist classification: {classification}")
+        allowlist[row_path] = row
+    return allowlist
 
 
 def _path_size(path: str) -> int | None:
@@ -79,7 +112,9 @@ def classify_path(path: str, *, size_bytes: int | None, large_file_threshold_byt
     return buckets
 
 
-def recommended_action(buckets: list[str]) -> str:
+def recommended_action(buckets: list[str], *, allowlist_record: dict[str, object] | None = None) -> str:
+    if allowlist_record and allowlist_record.get("classification") == "generated_remove_candidate":
+        return "remove_from_git"
     if "private_secret" in buckets:
         return "manual_review"
     if "build_output" in buckets or "generated_boundary" in buckets:
@@ -89,11 +124,26 @@ def recommended_action(buckets: list[str]) -> str:
     return "manual_review"
 
 
-def build_plan(files: list[str], *, large_file_threshold_mib: float = DEFAULT_LARGE_FILE_THRESHOLD_MIB) -> dict[str, object]:
+def _allowlist_closes_candidate(buckets: list[str], allowlist_record: dict[str, object] | None) -> bool:
+    if not allowlist_record:
+        return False
+    classification = str(allowlist_record.get("classification", "") or "")
+    return bool(buckets == ["large_file"] and classification in ALLOWLIST_CLOSING_CLASSIFICATIONS)
+
+
+def build_plan(
+    files: list[str],
+    *,
+    large_file_threshold_mib: float = DEFAULT_LARGE_FILE_THRESHOLD_MIB,
+    allowlist: dict[str, dict[str, object]] | None = None,
+) -> dict[str, object]:
     large_file_threshold_bytes = int(large_file_threshold_mib * BYTES_PER_MIB)
     records: list[dict[str, int | str | list[str] | None]] = []
+    allowlisted_records: list[dict[str, int | str | list[str] | None]] = []
     counts_by_bucket = dict.fromkeys(BUCKETS, 0)
+    allowlisted_counts_by_classification: dict[str, int] = {}
     total_candidate_bytes = 0
+    total_allowlisted_bytes = 0
 
     for path in sorted(files):
         size_bytes = _path_size(path)
@@ -104,6 +154,24 @@ def build_plan(files: list[str], *, large_file_threshold_mib: float = DEFAULT_LA
         )
         if not buckets:
             continue
+        allowlist_record = (allowlist or {}).get(path)
+        if _allowlist_closes_candidate(buckets, allowlist_record):
+            classification = str(allowlist_record.get("classification", "") or "")
+            allowlisted_counts_by_classification[classification] = (
+                allowlisted_counts_by_classification.get(classification, 0) + 1
+            )
+            if size_bytes is not None:
+                total_allowlisted_bytes += size_bytes
+            allowlisted_records.append(
+                {
+                    "path": path,
+                    "bytes": size_bytes,
+                    "buckets": buckets,
+                    "classification": classification,
+                    "rationale": str(allowlist_record.get("rationale", "") or ""),
+                }
+            )
+            continue
         for bucket in buckets:
             counts_by_bucket[bucket] += 1
         if size_bytes is not None:
@@ -113,7 +181,7 @@ def build_plan(files: list[str], *, large_file_threshold_mib: float = DEFAULT_LA
                 "path": path,
                 "bytes": size_bytes,
                 "buckets": buckets,
-                "recommended_action": recommended_action(buckets),
+                "recommended_action": recommended_action(buckets, allowlist_record=allowlist_record),
             }
         )
 
@@ -128,8 +196,12 @@ def build_plan(files: list[str], *, large_file_threshold_mib: float = DEFAULT_LA
         },
         "large_file_threshold_bytes": large_file_threshold_bytes,
         "records": records,
+        "allowlisted_records": allowlisted_records,
+        "allowlisted_counts_by_classification": allowlisted_counts_by_classification,
         "total_candidate_bytes": total_candidate_bytes,
+        "total_allowlisted_bytes": total_allowlisted_bytes,
         "total_candidate_files": len(records),
+        "total_allowlisted_files": len(allowlisted_records),
         "total_tracked_files": len(files),
     }
 
@@ -155,7 +227,9 @@ def build_markdown(plan: dict[str, object]) -> str:
         f"- `reason_code`: `{plan.get('reason_code', '')}`",
         f"- `total_tracked_files`: `{plan.get('total_tracked_files', 0)}`",
         f"- `total_candidate_files`: `{plan.get('total_candidate_files', 0)}`",
+        f"- `total_allowlisted_files`: `{plan.get('total_allowlisted_files', 0)}`",
         f"- `total_candidate_bytes`: `{_format_bytes(plan.get('total_candidate_bytes', 0))}`",
+        f"- `total_allowlisted_bytes`: `{_format_bytes(plan.get('total_allowlisted_bytes', 0))}`",
         f"- `large_file_threshold_bytes`: `{plan.get('large_file_threshold_bytes', 0)}`",
         "",
         "## Counts By Bucket",
@@ -191,6 +265,30 @@ def build_markdown(plan: dict[str, object]) -> str:
             )
     else:
         lines.append("| none | 0 B | none | none |")
+    allowlisted_records = plan.get("allowlisted_records")
+    rows = allowlisted_records if isinstance(allowlisted_records, list) else []
+    lines.extend(
+        [
+            "",
+            "## Allowlisted Large Artifacts",
+            "",
+            "| Path | Bytes | Classification | Rationale |",
+            "|---|---:|---|---|",
+        ]
+    )
+    if rows:
+        for record in rows:
+            if not isinstance(record, dict):
+                continue
+            lines.append(
+                "| "
+                f"{record.get('path', '')} | "
+                f"{_format_bytes(record.get('bytes'))} | "
+                f"{record.get('classification', '')} | "
+                f"{record.get('rationale', '')} |"
+            )
+    else:
+        lines.append("| none | 0 B | none | none |")
     return "\n".join(lines) + "\n"
 
 
@@ -219,6 +317,12 @@ def main(argv: list[str] | None = None) -> int:
         help="classify tracked files at or above this size as large_file",
     )
     parser.add_argument(
+        "--allowlist-manifest",
+        type=Path,
+        default=DEFAULT_ALLOWLIST_MANIFEST,
+        help="source-boundary allowlist for approved tracked large artifacts",
+    )
+    parser.add_argument(
         "--write-pathspec",
         type=Path,
         help="write remove_from_git paths for git rm --cached --pathspec-from-file",
@@ -233,7 +337,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     files = _read_tracked_files(args.tracked_files) if args.tracked_files else _git_files()
-    plan = build_plan(files, large_file_threshold_mib=args.large_file_threshold_mib)
+    plan = build_plan(
+        files,
+        large_file_threshold_mib=args.large_file_threshold_mib,
+        allowlist=_read_allowlist(args.allowlist_manifest),
+    )
     if args.write_pathspec:
         _write_pathspec(args.write_pathspec, plan["records"])
     text = json.dumps(plan, indent=2, sort_keys=True)

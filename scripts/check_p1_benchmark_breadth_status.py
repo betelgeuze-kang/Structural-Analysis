@@ -467,10 +467,10 @@ def _benchmark_gate(path: Path) -> dict[str, Any]:
     }
 
 
-def _read_or_build_p1(path: Path | None) -> dict[str, Any]:
+def _read_or_build_p1(path: Path | None, publication_evidence_index: Path | None) -> dict[str, Any]:
     if path is not None:
         return _load_json(path)
-    return build_p1_readiness_status()
+    return build_p1_readiness_status(publication_evidence_index=publication_evidence_index)
 
 
 def _p1_gate(payload: dict[str, Any]) -> dict[str, Any]:
@@ -488,13 +488,15 @@ def _p1_gate(payload: dict[str, Any]) -> dict[str, Any]:
 def build_status(
     *,
     p1_readiness_status: Path | None = None,
+    publication_evidence_index: Path | None = None,
     commercial_readiness: Path = DEFAULT_COMMERCIAL_READINESS,
     external_benchmark_submission_readiness: Path = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
     external_benchmark_submission_updates: Path | None = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
     residual_holdout_closure_updates: Path | None = DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
     benchmark_reports: list[Path] | tuple[Path, ...] | None = None,
 ) -> dict[str, Any]:
-    p1_gate = _p1_gate(_read_or_build_p1(p1_readiness_status))
+    p1_payload = _read_or_build_p1(p1_readiness_status, publication_evidence_index)
+    p1_gate = _p1_gate(p1_payload)
     reports = list(benchmark_reports if benchmark_reports is not None else DEFAULT_BENCHMARK_REPORTS)
     commercial_gate = _commercial_gate(
         commercial_readiness,
@@ -524,6 +526,9 @@ def build_status(
         "p1_benchmark_execution_unblocked": p1_benchmark_execution_unblocked,
         "p1_execution_unblocked": bool(p1_gate["p1_execution_unblocked"]),
         "p0_release_blocker": bool(p1_gate["p0_release_blocker"]),
+        "publication_evidence_index": str(
+            publication_evidence_index or p1_payload.get("publication_evidence_index", "")
+        ),
         "summary": {
             "evidence_gate_count": len(evidence_gates),
             "evidence_gate_pass_count": pass_count,
@@ -615,6 +620,11 @@ def _markdown(status: dict[str, Any]) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Summarize P1 benchmark breadth readiness.")
     parser.add_argument("--p1-readiness-status", type=Path)
+    parser.add_argument(
+        "--publication-evidence-index",
+        type=Path,
+        help="Release publication evidence index used when --p1-readiness-status is omitted.",
+    )
     parser.add_argument("--commercial-readiness", type=Path, default=DEFAULT_COMMERCIAL_READINESS)
     parser.add_argument(
         "--external-benchmark-submission-readiness",
@@ -650,6 +660,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         status = build_status(
             p1_readiness_status=args.p1_readiness_status,
+            publication_evidence_index=args.publication_evidence_index,
             commercial_readiness=args.commercial_readiness,
             external_benchmark_submission_readiness=args.external_benchmark_submission_readiness,
             external_benchmark_submission_updates=args.external_benchmark_submission_updates,

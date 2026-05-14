@@ -9,10 +9,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_ci_runs_structure_viewer_contract_suite_before_frontend_smoke() -> None:
     workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
 
-    assert "Structure viewer contracts" in workflow
-    assert "python scripts/verify_structure_viewer_contracts.py" in workflow
-    assert workflow.index("Structure viewer contracts") < workflow.index("Frontend smoke")
+    assert "PR quality gate" in workflow
+    assert "scripts/verify_quality_gate.py --mode pr" in workflow
+    assert "scripts/verify_structure_viewer_contracts.py" in gate
+    assert "verify:frontend-browser-smoke" in gate
+    assert gate.index("scripts/verify_structure_viewer_contracts.py") < gate.index("verify:frontend-browser-smoke")
 
 
 def test_structure_viewer_contract_runner_covers_source_and_singlefile_surfaces() -> None:
@@ -27,6 +30,7 @@ def test_structure_viewer_contract_runner_covers_source_and_singlefile_surfaces(
     assert "tests/test_structure_viewer_real_drawing_tree_model_contract.py" in script
     assert "tests/test_structure_viewer_search_results_model_contract.py" in script
     assert "tests/test_structure_viewer_selection_summary_model_contract.py" in script
+    assert "tests/test_structure_viewer_provenance_model_contract.py" in script
     assert "tests/test_structure_viewer_side_panel_model_contract.py" in script
     assert "tests/test_structure_viewer_shared_selection_state_contract.py" in script
     assert "tests/test_structure_viewer_stats_summary_contract.py" in script
@@ -53,5 +57,6 @@ def test_structure_viewer_contract_runner_has_dry_run_command_preview() -> None:
     assert "tests/test_structure_viewer_real_drawing_tree_model_contract.py" in result.stdout
     assert "tests/test_structure_viewer_search_results_model_contract.py" in result.stdout
     assert "tests/test_structure_viewer_selection_summary_model_contract.py" in result.stdout
+    assert "tests/test_structure_viewer_provenance_model_contract.py" in result.stdout
     assert "tests/test_structure_viewer_side_panel_model_contract.py" in result.stdout
     assert "tests/test_structure_viewer_stats_summary_contract.py" in result.stdout

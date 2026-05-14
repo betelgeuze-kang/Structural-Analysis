@@ -1,0 +1,100 @@
+{
+  "schema_version": "source-boundary-allowlist.v1",
+  "records": [
+    {
+      "path": "implementation/phase1/spatiotemporal_data/tunnel_dynamic_cases.jsonl",
+      "classification": "source_required",
+      "rationale": "Deterministic spatiotemporal tunnel benchmark fixture used by local regression gates."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/probes/case_616.mat",
+      "classification": "external_restore",
+      "rationale": "TPU/HFFB raw probe mirror retained for reproducible wind benchmark normalization."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/isolated_probes/case_616.mat",
+      "classification": "external_restore",
+      "rationale": "Isolated TPU/HFFB benchmark source retained for reproducible probe comparisons."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/case_616_materialized/tpu_hffb_isolated_highrise_seed_01.mat",
+      "classification": "external_restore",
+      "rationale": "Materialized isolated high-rise wind benchmark seed referenced by release evidence."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/probes/case_617.mat",
+      "classification": "external_restore",
+      "rationale": "TPU/HFFB raw probe mirror retained for reproducible wind benchmark normalization."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/isolated_probes/case_617.mat",
+      "classification": "external_restore",
+      "rationale": "Isolated TPU/HFFB benchmark source retained for reproducible probe comparisons."
+    },
+    {
+      "path": "implementation/phase1/spatiotemporal_data/track_dynamic_cases.jsonl",
+      "classification": "source_required",
+      "rationale": "Deterministic track dynamics benchmark fixture used by local regression gates."
+    },
+    {
+      "path": "implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model1/layershell.tcl",
+      "classification": "external_restore",
+      "rationale": "Harvested OpenSees irregular tower source used for topology breadth evidence."
+    },
+    {
+      "path": "implementation/phase1/spatiotemporal_data/dynamic_cases.jsonl",
+      "classification": "source_required",
+      "rationale": "Deterministic dynamic-case fixture used by solver breadth regression gates."
+    },
+    {
+      "path": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/GMs.xlsx",
+      "classification": "external_restore",
+      "rationale": "E-Defense/PEER blind prediction ground-motion source retained for PBD benchmark reproducibility."
+    },
+    {
+      "path": "src/structure-viewer/index.midas33.data.js",
+      "classification": "source_required",
+      "rationale": "Self-contained MIDAS33 viewer payload used by offline structure-viewer contract tests."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/probes/case_1280.mat",
+      "classification": "external_restore",
+      "rationale": "TPU/HFFB raw probe mirror retained for diversified wind benchmark mapping."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/probes/case_1279.mat",
+      "classification": "external_restore",
+      "rationale": "TPU/HFFB raw probe mirror retained for diversified wind benchmark mapping."
+    },
+    {
+      "path": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/Materials.zip",
+      "classification": "external_restore",
+      "rationale": "E-Defense/PEER material source archive retained for PBD benchmark reproducibility."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/probes/case_917.mat",
+      "classification": "external_restore",
+      "rationale": "TPU/HFFB interference raw probe mirror retained for wind benchmark normalization."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/case_917_probe.mat",
+      "classification": "external_restore",
+      "rationale": "TPU/HFFB case 917 probe source retained for release evidence reproducibility."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.mat",
+      "classification": "external_restore",
+      "rationale": "Materialized interference high-rise wind benchmark seed referenced by release evidence."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/probes/case_918.mat",
+      "classification": "external_restore",
+      "rationale": "TPU/HFFB interference raw probe mirror retained for wind benchmark normalization."
+    },
+    {
+      "path": "implementation/phase1/open_data/wind/tpu/probes/case_919.mat",
+      "classification": "external_restore",
+      "rationale": "TPU/HFFB interference raw probe mirror retained for wind benchmark normalization."
+    }
+  ]
+}

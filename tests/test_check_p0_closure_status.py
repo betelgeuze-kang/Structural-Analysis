@@ -291,6 +291,52 @@ def test_p0_status_can_read_release_publication_evidence_index(tmp_path: Path) -
     assert release_gate["details"]["post_publish_roundtrip"]["evidence_json"] == str(roundtrip_json)
 
 
+def test_p0_status_auto_uses_default_publication_evidence_index(tmp_path: Path, monkeypatch) -> None:
+    manifest, artifact_root, assets_json = _release_fixture(tmp_path)
+    upload_plan_json = _upload_plan_json(tmp_path)
+    metadata_preflight_json = _metadata_preflight_json(tmp_path)
+    roundtrip_json = _post_publish_roundtrip_json(tmp_path)
+    evidence_index = _write_json(
+        tmp_path / "release-publication-evidence-index.json",
+        {
+            "schema_version": "release-publication-evidence-index.v1",
+            "tag_ref_present": True,
+            "paths": {
+                "manifest": str(manifest),
+                "release_assets_json": str(assets_json),
+                "artifact_root": str(artifact_root),
+                "upload_plan_json": str(upload_plan_json),
+                "metadata_preflight_json": str(metadata_preflight_json),
+                "post_publish_roundtrip_json": str(roundtrip_json),
+            },
+        },
+    )
+    monkeypatch.setattr(check_p0_closure_status, "DEFAULT_MANIFEST", manifest)
+    monkeypatch.setattr(check_p0_closure_status, "DEFAULT_PUBLICATION_EVIDENCE_INDEX", evidence_index)
+
+    status = check_p0_closure_status.build_status(reports=_reports(tmp_path))
+
+    assert status["p0_closed"] is True
+    assert status["publication_evidence_index"] == str(evidence_index)
+    assert status["default_publication_evidence_index_missing"] is False
+
+
+def test_p0_status_reports_missing_default_publication_evidence_index(tmp_path: Path, monkeypatch) -> None:
+    manifest = tmp_path / "manifest.json"
+    monkeypatch.setattr(check_p0_closure_status, "DEFAULT_MANIFEST", manifest)
+    monkeypatch.setattr(
+        check_p0_closure_status,
+        "DEFAULT_PUBLICATION_EVIDENCE_INDEX",
+        tmp_path / "missing-index.json",
+    )
+
+    status = check_p0_closure_status.build_status(manifest=manifest, reports=_reports(tmp_path))
+
+    assert status["p0_closed"] is False
+    assert status["default_publication_evidence_index_missing"] is True
+    assert status["gates"][0]["reason"] == "default publication evidence missing"
+
+
 def test_p0_status_surfaces_upload_plan_and_metadata_preflight_evidence(tmp_path: Path) -> None:
     manifest, artifact_root, assets_json = _release_fixture(tmp_path)
     upload_plan_json = _upload_plan_json(tmp_path)

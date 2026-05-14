@@ -375,6 +375,29 @@ def test_benchmark_breadth_blocks_when_commercial_scope_is_not_ready(tmp_path: P
     assert commercial_gate["full_commercial_replacement_ready"] is False
 
 
+def test_benchmark_breadth_passes_publication_index_to_readiness_builder(tmp_path: Path, monkeypatch) -> None:
+    paths = _paths(tmp_path)
+    paths.pop("p1_readiness_status")
+    publication_index = tmp_path / "release-publication-evidence-index.json"
+
+    def fake_build_p1_readiness_status(*, publication_evidence_index=None, **_kwargs):
+        assert publication_evidence_index == publication_index
+        return {
+            "schema_version": "p1-readiness-status.v1",
+            "p1_inputs_ready": True,
+            "p1_execution_unblocked": True,
+            "p0_release_blocker": False,
+            "publication_evidence_index": str(publication_index),
+        }
+
+    monkeypatch.setattr(check_p1_benchmark, "build_p1_readiness_status", fake_build_p1_readiness_status)
+
+    status = check_p1_benchmark.build_status(publication_evidence_index=publication_index, **paths)
+
+    assert status["p1_benchmark_execution_unblocked"] is True
+    assert status["publication_evidence_index"] == str(publication_index)
+
+
 def test_cli_writes_markdown_and_fails_when_blocked(tmp_path: Path, capsys) -> None:
     paths = _paths(tmp_path)
     out_md = tmp_path / "p1-benchmark.md"

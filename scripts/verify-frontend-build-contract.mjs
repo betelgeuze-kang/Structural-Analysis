@@ -24,6 +24,8 @@ const requiredFiles = [
   'src/App.tsx',
   'scripts/verify-frontend-build-contract.mjs',
   'scripts/verify-frontend-smoke.mjs',
+  'scripts/verify-frontend-browser-smoke.mjs',
+  'tests/frontend/structure-viewer-smoke.spec.ts',
   'docs/frontend-build-reproducibility.md',
 ]
 
@@ -59,6 +61,7 @@ const expectedScripts = {
   preview: 'vite preview',
   'verify:frontend-contract': 'node ./scripts/verify-frontend-build-contract.mjs',
   'verify:frontend-smoke': 'node ./scripts/verify-frontend-smoke.mjs',
+  'verify:frontend-browser-smoke': 'playwright install chromium && node ./scripts/verify-frontend-browser-smoke.mjs',
 }
 
 for (const [name, command] of Object.entries(expectedScripts)) {
@@ -73,6 +76,7 @@ const expectedDependencies = {
 }
 
 const expectedDevDependencies = {
+  '@playwright/test': '1.56.1',
   '@types/react': '18.2.15',
   '@types/react-dom': '18.2.7',
   '@vitejs/plugin-react': '6.0.1',

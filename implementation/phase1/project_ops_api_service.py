@@ -4,12 +4,16 @@
 from __future__ import annotations
 
 import argparse
+import base64
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import hashlib
+import hmac
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
+import time
 from typing import Any
 from urllib.parse import parse_qs, unquote, urlsplit
 
@@ -48,6 +52,10 @@ SERVICE_ENDPOINT_PATHS = (
     "/portfolios/{portfolio_name}",
     "/submissions",
     "/submissions/{family_id}",
+    "/audit/events",
+    "/license",
+    "/version",
+    "/update-channel",
 )
 
 REASONS = {
@@ -74,6 +82,14 @@ class ProjectOpsServiceConfig:
     snapshot_manifest_glob: str = DEFAULT_SNAPSHOT_MANIFEST_GLOB
     project_registry_paths: tuple[str, ...] = ()
     project_registry_dirs: tuple[str, ...] = ()
+    auth_required: bool = True
+    jwt_hmac_secret: str = "project-ops-dev-secret"
+    allowed_tenants: tuple[str, ...] = ()
+    audit_log_path: Path | None = None
+    telemetry_enabled: bool = False
+    license_status_path: Path | None = None
+    service_version: str = "project-ops-api-service.v1"
+    update_channel: str = "stable"
 
 
 def _now_utc_iso() -> str:
@@ -211,6 +227,120 @@ def _decode_bool_query(params: dict[str, list[str]], name: str) -> bool | None:
     if not value:
         return None
     return _coerce_bool(value)
+
+
+def _base64url_decode(value: str) -> bytes:
+    padding = "=" * (-len(value) % 4)
+    return base64.urlsafe_b64decode((value + padding).encode("ascii"))
+
+
+def _base64url_encode(payload: bytes) -> str:
+    return base64.urlsafe_b64encode(payload).decode("ascii").rstrip("=")
+
+
+def create_project_ops_test_token(
+    *,
+    tenant_id: str = "tenant-a",
+    actor_id: str = "engineer-1",
+    roles: list[str] | tuple[str, ...] = ("viewer",),
+    secret: str = "project-ops-dev-secret",
+    expires_in_seconds: int = 3600,
+) -> str:
+    """Create a compact HS256 JWT fixture for local tests and examples."""
+
+    header = {"alg": "HS256", "typ": "JWT"}
+    payload = {
+        "sub": actor_id,
+        "actor_id": actor_id,
+        "tenant_id": tenant_id,
+        "roles": list(roles),
+        "iat": int(time.time()),
+        "exp": int(time.time()) + expires_in_seconds,
+    }
+    signing_input = ".".join(
+        [
+            _base64url_encode(json.dumps(header, separators=(",", ":")).encode("utf-8")),
+            _base64url_encode(json.dumps(payload, separators=(",", ":")).encode("utf-8")),
+        ]
+    )
+    signature = hmac.new(secret.encode("utf-8"), signing_input.encode("ascii"), hashlib.sha256).digest()
+    return f"{signing_input}.{_base64url_encode(signature)}"
+
+
+def _verify_project_ops_token(token: str, *, secret: str) -> tuple[dict[str, Any] | None, str]:
+    parts = token.split(".")
+    if len(parts) != 3:
+        return None, "malformed_token"
+    try:
+        header = json.loads(_base64url_decode(parts[0]).decode("utf-8"))
+        payload = json.loads(_base64url_decode(parts[1]).decode("utf-8"))
+    except (ValueError, json.JSONDecodeError, UnicodeDecodeError):
+        return None, "malformed_token"
+    if not isinstance(header, dict) or not isinstance(payload, dict):
+        return None, "malformed_token"
+    if header.get("alg") != "HS256":
+        return None, "unsupported_token_alg"
+    signing_input = f"{parts[0]}.{parts[1]}"
+    expected = hmac.new(secret.encode("utf-8"), signing_input.encode("ascii"), hashlib.sha256).digest()
+    try:
+        actual = _base64url_decode(parts[2])
+    except ValueError:
+        return None, "malformed_token"
+    if not hmac.compare_digest(expected, actual):
+        return None, "invalid_token_signature"
+    exp = payload.get("exp")
+    if exp is not None and int(exp) < int(time.time()):
+        return None, "token_expired"
+    return payload, ""
+
+
+def _roles_from_claims(payload: dict[str, Any]) -> set[str]:
+    roles = payload.get("roles", payload.get("role", []))
+    if isinstance(roles, str):
+        return {roles}
+    if isinstance(roles, list):
+        return {str(role) for role in roles if str(role).strip()}
+    return set()
+
+
+def _tenant_matches(row: dict[str, Any], tenant_id: str) -> bool:
+    row_tenant = _text(row.get("tenant_id") or row.get("tenant"))
+    return not row_tenant or row_tenant == tenant_id
+
+
+def _filter_snapshot_for_tenant(snapshot: dict[str, Any], tenant_id: str) -> dict[str, Any]:
+    filtered = dict(snapshot)
+    for key in ("projects", "families", "portfolios", "submissions"):
+        rows = snapshot.get(key)
+        if isinstance(rows, list):
+            filtered[key] = [row for row in rows if isinstance(row, dict) and _tenant_matches(row, tenant_id)]
+    return filtered
+
+
+def _load_license_status(config: ProjectOpsServiceConfig) -> dict[str, Any]:
+    payload = _read_json_object(config.license_status_path)
+    if not payload:
+        payload = {
+            "status": "active",
+            "tier": "enterprise_reference",
+            "expires_at": "",
+        }
+    expires_at = _text(payload.get("expires_at"))
+    expired = False
+    if expires_at:
+        try:
+            expires = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+            expired = expires < datetime.now(timezone.utc)
+        except ValueError:
+            expired = True
+    status = "expired" if expired else _text(payload.get("status")) or "active"
+    return {
+        "status": status,
+        "degraded": expired or status not in {"active", "trial", "enterprise_reference"},
+        "tier": _text(payload.get("tier")) or "enterprise_reference",
+        "expires_at": expires_at,
+        "telemetry_enabled": bool(config.telemetry_enabled),
+    }
 
 
 def _resolve_paths(config: ProjectOpsServiceConfig) -> dict[str, Any]:
@@ -1772,6 +1902,33 @@ class ProjectOpsHTTPServer(ThreadingHTTPServer):
             project_registry_dirs=[Path(item) for item in self.config.project_registry_dirs],
         )
 
+    def write_audit_event(
+        self,
+        *,
+        status: HTTPStatus,
+        path: str,
+        context: dict[str, Any] | None,
+    ) -> None:
+        if self.config.audit_log_path is None:
+            return
+        event = {
+            "event_id": hashlib.sha256(
+                f"{time.time_ns()}|{path}|{status.value}".encode("utf-8")
+            ).hexdigest()[:16],
+            "timestamp": _now_utc_iso(),
+            "tenant_id": _text((context or {}).get("tenant_id")) or "unknown",
+            "actor_id": _text((context or {}).get("actor_id")) or "unknown",
+            "request_id": _text((context or {}).get("request_id")) or "unknown",
+            "roles": sorted((context or {}).get("roles", [])),
+            "method": "GET",
+            "path": urlsplit(path).path,
+            "status": int(status),
+            "token_redacted": True,
+        }
+        self.config.audit_log_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.config.audit_log_path.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
+
 
 class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
     """JSON-only request handler for the local project ops service."""
@@ -1787,10 +1944,22 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
             self._write_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"error": "server_misconfigured"})
             return
 
-        snapshot = server.build_snapshot()
         parsed = urlsplit(self.path)
         path = parsed.path.rstrip("/") or "/"
         query = parse_qs(parsed.query)
+        auth_context = self._authenticate(path)
+        self._auth_context = auth_context
+        if auth_context.get("error"):
+            self._write_json(
+                auth_context["status"],
+                {
+                    "error": auth_context["error"],
+                    "reason": auth_context["reason"],
+                },
+            )
+            return
+
+        snapshot = _filter_snapshot_for_tenant(server.build_snapshot(), auth_context["tenant_id"])
 
         if path == "/":
             self._write_json(
@@ -1800,6 +1969,7 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
                     "generated_at": snapshot["generated_at"],
                     "summary_line": snapshot["summary_line"],
                     "endpoints": list(SERVICE_ENDPOINT_PATHS),
+                    "tenant_id": auth_context["tenant_id"],
                 },
             )
             return
@@ -1811,6 +1981,8 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
                     "generated_at": snapshot["generated_at"],
                     "health": snapshot["health"],
                     "summary": snapshot["summary"],
+                    "license": _load_license_status(server.config),
+                    "telemetry": {"enabled": bool(server.config.telemetry_enabled)},
                     "contract_pass": snapshot["contract_pass"],
                     "reason_code": snapshot["reason_code"],
                     "summary_line": snapshot["summary_line"],
@@ -1824,6 +1996,7 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
                 {
                     "generated_at": snapshot["generated_at"],
                     "summary": snapshot["summary"],
+                    "tenant_id": auth_context["tenant_id"],
                     "batch": snapshot["batch"],
                     "runtime_submissions": snapshot["runtime_submissions"],
                     "release_governance": snapshot["release_governance"],
@@ -1832,6 +2005,65 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
                     "contract_pass": snapshot["contract_pass"],
                     "reason_code": snapshot["reason_code"],
                     "summary_line": snapshot["summary_line"],
+                },
+            )
+            return
+
+        if path == "/audit/events":
+            if "admin" not in auth_context["roles"]:
+                self._write_json(HTTPStatus.FORBIDDEN, {"error": "insufficient_role", "required_role": "admin"})
+                return
+            audit_path = server.config.audit_log_path
+            events: list[dict[str, Any]] = []
+            if audit_path and audit_path.exists():
+                for line in audit_path.read_text(encoding="utf-8").splitlines()[-100:]:
+                    try:
+                        row = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if isinstance(row, dict) and _text(row.get("tenant_id")) == auth_context["tenant_id"]:
+                        events.append(row)
+            self._write_json(
+                HTTPStatus.OK,
+                {
+                    "generated_at": _now_utc_iso(),
+                    "tenant_id": auth_context["tenant_id"],
+                    "count": len(events),
+                    "items": events,
+                },
+            )
+            return
+
+        if path == "/license":
+            self._write_json(
+                HTTPStatus.OK,
+                {
+                    "generated_at": _now_utc_iso(),
+                    "tenant_id": auth_context["tenant_id"],
+                    "license": _load_license_status(server.config),
+                },
+            )
+            return
+
+        if path == "/version":
+            self._write_json(
+                HTTPStatus.OK,
+                {
+                    "service": "phase1-project-ops-api-service",
+                    "version": server.config.service_version,
+                    "schema_version": "project-ops-api-service.version.v1",
+                },
+            )
+            return
+
+        if path == "/update-channel":
+            self._write_json(
+                HTTPStatus.OK,
+                {
+                    "schema_version": "project-ops-api-service.update-channel.v1",
+                    "channel": server.config.update_channel,
+                    "latest_version": server.config.service_version,
+                    "mandatory": False,
                 },
             )
             return
@@ -2005,6 +2237,56 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
 
         self._write_json(HTTPStatus.NOT_FOUND, {"error": "route_not_found", "path": path})
 
+    def _authenticate(self, path: str) -> dict[str, Any]:
+        server = self.server
+        if not isinstance(server, ProjectOpsHTTPServer):  # pragma: no cover
+            return {"status": HTTPStatus.INTERNAL_SERVER_ERROR, "error": "server_misconfigured", "reason": "server"}
+        config = server.config
+        if not config.auth_required:
+            return {
+                "tenant_id": "local",
+                "actor_id": "local",
+                "request_id": "local",
+                "roles": {"admin", "operator", "viewer"},
+            }
+        authorization = self.headers.get("Authorization", "")
+        tenant_id = _text(self.headers.get("X-Tenant-ID"))
+        actor_id = _text(self.headers.get("X-Actor-ID"))
+        request_id = _text(self.headers.get("X-Request-ID"))
+        if not authorization.startswith("Bearer "):
+            return {"status": HTTPStatus.UNAUTHORIZED, "error": "missing_auth", "reason": "bearer token required"}
+        if not tenant_id or not actor_id or not request_id:
+            return {
+                "status": HTTPStatus.UNAUTHORIZED,
+                "error": "missing_control_plane_headers",
+                "reason": "X-Tenant-ID, X-Actor-ID, and X-Request-ID are required",
+            }
+        token_payload, token_error = _verify_project_ops_token(
+            authorization.removeprefix("Bearer ").strip(),
+            secret=config.jwt_hmac_secret,
+        )
+        if token_payload is None:
+            return {"status": HTTPStatus.UNAUTHORIZED, "error": "invalid_token", "reason": token_error}
+        token_tenant = _text(token_payload.get("tenant_id") or token_payload.get("tid"))
+        token_actor = _text(token_payload.get("actor_id") or token_payload.get("sub"))
+        roles = _roles_from_claims(token_payload)
+        if not roles:
+            return {"status": HTTPStatus.FORBIDDEN, "error": "missing_role", "reason": "token role is required"}
+        if token_tenant and token_tenant != tenant_id:
+            return {"status": HTTPStatus.FORBIDDEN, "error": "tenant_mismatch", "reason": "token tenant mismatch"}
+        if token_actor and token_actor != actor_id:
+            return {"status": HTTPStatus.FORBIDDEN, "error": "actor_mismatch", "reason": "token actor mismatch"}
+        if config.allowed_tenants and tenant_id not in set(config.allowed_tenants):
+            return {"status": HTTPStatus.FORBIDDEN, "error": "tenant_not_allowed", "reason": "tenant not allowed"}
+        if path.startswith("/audit") and "admin" not in roles:
+            return {"status": HTTPStatus.FORBIDDEN, "error": "insufficient_role", "reason": "admin role required"}
+        return {
+            "tenant_id": tenant_id,
+            "actor_id": actor_id,
+            "request_id": request_id,
+            "roles": roles,
+        }
+
     def _write_json(self, status: HTTPStatus, payload: dict[str, Any]) -> None:
         body = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
         self.send_response(int(status))
@@ -2012,6 +2294,13 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+        server = self.server
+        if isinstance(server, ProjectOpsHTTPServer):
+            server.write_audit_event(
+                status=status,
+                path=self.path,
+                context=getattr(self, "_auth_context", None),
+            )
 
 
 def create_project_ops_server(
@@ -2033,6 +2322,14 @@ def create_project_ops_server(
     snapshot_manifest_glob: str = DEFAULT_SNAPSHOT_MANIFEST_GLOB,
     project_registry_paths: list[Path | str] | None = None,
     project_registry_dirs: list[Path | str] | None = None,
+    auth_required: bool = True,
+    jwt_hmac_secret: str = "project-ops-dev-secret",
+    allowed_tenants: list[str] | tuple[str, ...] | None = None,
+    audit_log_path: Path | None = None,
+    telemetry_enabled: bool = False,
+    license_status_path: Path | None = None,
+    service_version: str = "project-ops-api-service.v1",
+    update_channel: str = "stable",
 ) -> ProjectOpsHTTPServer:
     config = ProjectOpsServiceConfig(
         release_root=release_root,
@@ -2050,6 +2347,14 @@ def create_project_ops_server(
         snapshot_manifest_glob=snapshot_manifest_glob,
         project_registry_paths=tuple(str(item) for item in (project_registry_paths or []) if _text(item)),
         project_registry_dirs=tuple(str(item) for item in (project_registry_dirs or []) if _text(item)),
+        auth_required=auth_required,
+        jwt_hmac_secret=jwt_hmac_secret,
+        allowed_tenants=tuple(str(item) for item in (allowed_tenants or []) if _text(item)),
+        audit_log_path=audit_log_path,
+        telemetry_enabled=telemetry_enabled,
+        license_status_path=license_status_path,
+        service_version=service_version,
+        update_channel=update_channel,
     )
     return ProjectOpsHTTPServer((host, port), config)
 
@@ -2073,10 +2378,19 @@ def main() -> None:
     parser.add_argument("--snapshot-manifest-glob", default=DEFAULT_SNAPSHOT_MANIFEST_GLOB)
     parser.add_argument("--project-registry-paths", default="")
     parser.add_argument("--project-registry-dirs", default="")
+    parser.add_argument("--no-auth", action="store_true", help="disable SaaS control-plane auth for local debugging")
+    parser.add_argument("--jwt-hmac-secret", default="project-ops-dev-secret")
+    parser.add_argument("--allowed-tenants", default="")
+    parser.add_argument("--audit-log-path", default="")
+    parser.add_argument("--telemetry-enabled", action="store_true")
+    parser.add_argument("--license-status-json", default="")
+    parser.add_argument("--service-version", default="project-ops-api-service.v1")
+    parser.add_argument("--update-channel", default="stable")
     args = parser.parse_args()
 
     project_registry_paths = [Path(item) for item in _dedupe_strings(_text(args.project_registry_paths).split(","))]
     project_registry_dirs = [Path(item) for item in _dedupe_strings(_text(args.project_registry_dirs).split(","))]
+    allowed_tenants = _dedupe_strings(_text(args.allowed_tenants).split(","))
 
     server = create_project_ops_server(
         host=_text(args.host) or "127.0.0.1",
@@ -2110,6 +2424,14 @@ def main() -> None:
         snapshot_manifest_glob=_text(args.snapshot_manifest_glob) or DEFAULT_SNAPSHOT_MANIFEST_GLOB,
         project_registry_paths=project_registry_paths,
         project_registry_dirs=project_registry_dirs,
+        auth_required=not bool(args.no_auth),
+        jwt_hmac_secret=_text(args.jwt_hmac_secret) or "project-ops-dev-secret",
+        allowed_tenants=allowed_tenants,
+        audit_log_path=Path(args.audit_log_path) if _text(args.audit_log_path) else None,
+        telemetry_enabled=bool(args.telemetry_enabled),
+        license_status_path=Path(args.license_status_json) if _text(args.license_status_json) else None,
+        service_version=_text(args.service_version) or "project-ops-api-service.v1",
+        update_channel=_text(args.update_channel) or "stable",
     )
     bound_host, bound_port = server.server_address[:2]
     print(f"http://{bound_host}:{bound_port}")

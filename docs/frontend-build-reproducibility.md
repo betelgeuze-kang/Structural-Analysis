@@ -10,6 +10,9 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - `npm run verify:frontend-smoke`
   - Runs the contract check, executes `npm ci`, and then runs `npm run build`.
   - This is the clean-checkout smoke path for CI or local verification.
+- `npm run verify:frontend-browser-smoke`
+  - Starts a local static HTTP server and runs the Playwright structure-viewer smoke against the source HTML.
+  - The PR quality gate uses `-- --mode minimal`; the full gate runs desktop and mobile coverage.
 
 ## Expected Contract
 
@@ -17,3 +20,4 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - Dependency versions are pinned exactly instead of using floating `^` or `~` ranges.
 - `package-lock.json` is the source of truth for deterministic installs.
 - `vite.config.ts` declares the React/Vite build entry explicitly.
+- Browser smoke must load `src/structure-viewer/index.html`, verify a nonblank canvas, and exercise real-drawing selection controls.

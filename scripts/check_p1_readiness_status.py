@@ -14,6 +14,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from check_p0_closure_status import build_status as build_p0_status  # noqa: E402
+from check_p0_closure_status import DEFAULT_PUBLICATION_EVIDENCE_INDEX  # noqa: E402
 from plan_open_data_artifact_restore import build_restore_plan  # noqa: E402
 
 
@@ -163,10 +164,10 @@ def _row_provenance_gate(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _read_or_build_p0(path: Path | None) -> dict[str, Any]:
+def _read_or_build_p0(path: Path | None, publication_evidence_index: Path | None) -> dict[str, Any]:
     if path is not None:
         return _load_json(path)
-    return build_p0_status()
+    return build_p0_status(publication_evidence_index=publication_evidence_index)
 
 
 def _read_or_build_open_data(path: Path | None, cache_root: Path | None) -> dict[str, Any]:
@@ -178,13 +179,15 @@ def _read_or_build_open_data(path: Path | None, cache_root: Path | None) -> dict
 def build_status(
     *,
     p0_status: Path | None = None,
+    publication_evidence_index: Path | None = None,
     open_data_restore_plan: Path | None = None,
     coverage_matrix: Path = DEFAULT_COVERAGE_MATRIX,
     peer_metric_records: Path = DEFAULT_PEER_METRIC_RECORDS,
     row_provenance: Path = DEFAULT_ROW_PROVENANCE,
     cache_root: Path | None = None,
 ) -> dict[str, Any]:
-    p0_gate = _p0_gate(_read_or_build_p0(p0_status))
+    p0_payload = _read_or_build_p0(p0_status, publication_evidence_index)
+    p0_gate = _p0_gate(p0_payload)
     gates = [
         p0_gate,
         _open_data_gate(_read_or_build_open_data(open_data_restore_plan, cache_root)),
@@ -208,6 +211,10 @@ def build_status(
         "p1_inputs_ready": p1_inputs_ready,
         "p1_execution_unblocked": p1_execution_unblocked,
         "p0_release_blocker": p0_release_blocker,
+        "publication_evidence_index": str(
+            publication_evidence_index or p0_payload.get("publication_evidence_index", "")
+        ),
+        "default_publication_evidence_index": str(DEFAULT_PUBLICATION_EVIDENCE_INDEX),
         "gates": gates,
         "next_action": next_action,
     }
@@ -234,6 +241,11 @@ def _markdown(status: dict[str, Any]) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Summarize P1 readiness while preserving the P0 release blocker.")
     parser.add_argument("--p0-status", type=Path)
+    parser.add_argument(
+        "--publication-evidence-index",
+        type=Path,
+        help="Release publication evidence index used when --p0-status is omitted.",
+    )
     parser.add_argument("--open-data-restore-plan", type=Path)
     parser.add_argument("--cache-root", type=Path)
     parser.add_argument("--coverage-matrix", type=Path, default=DEFAULT_COVERAGE_MATRIX)
@@ -251,6 +263,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         status = build_status(
             p0_status=args.p0_status,
+            publication_evidence_index=args.publication_evidence_index,
             open_data_restore_plan=args.open_data_restore_plan,
             coverage_matrix=args.coverage_matrix,
             peer_metric_records=args.peer_metric_records,

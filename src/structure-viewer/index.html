@@ -431,6 +431,9 @@ import {
   buildSelectionSetSummary,
 } from './viewer-selection-summary-model.js';
 import {
+  buildViewerProvenanceModel,
+} from './viewer-provenance-model.js';
+import {
   SHARED_SELECTION_KEY,
   applySharedSelectionQueryParams,
   buildSharedSelectionPayload,
@@ -1238,39 +1241,39 @@ function updateProvenanceBlock(){
   const meta=modelData?.meta&&typeof modelData.meta==='object'?modelData.meta:{};
   const selection=getCurrentSelectionState();
   const reviewHref=buildReviewRowProvenanceUrl(selection.memberId,selection.loadCase);
-  const reportName=
-    basenameLabel(meta.source_path,'')
-    || basenameLabel(modelSourceMeta?.resolvedPath,'')
-    || normalizeSelectionValue(meta.name)
-    || '--';
-  sourceValue.textContent=normalizeSelectionValue(meta.source_label||modelSourceMeta?.label)||'--';
-  reportValue.textContent=reportName||'--';
-  timestampValue.textContent=formatTimestampLabel(meta.generated_at||meta.loaded_at||modelSourceMeta?.loadedAt||'');
-  const isolationLabel=activeIsolation.kind&&activeIsolation.value
-    ?`${activeIsolation.kind}=${activeIsolation.label||activeIsolation.value}`
-    :'--';
-  const clipLabel=activeStoryClipLabel||'--';
-  const drawingAssetLabel=resolveRealDrawingAssetRefForSelection(selection)||'--';
-  selectionValue.textContent=`member=${selection.memberId||'--'} | drawing=${drawingAssetLabel} | load_case=${selection.loadCase||'--'} | selected=${getSelectedElementCount()} | isolate=${isolationLabel} | clip=${clipLabel}`;
+  const provenanceModel=buildViewerProvenanceModel({
+    meta,
+    modelSourceMeta:modelSourceMeta||{},
+    selection,
+    selectedCount:getSelectedElementCount(),
+    isolation:activeIsolation,
+    clipLabel:activeStoryClipLabel||'--',
+    drawingAssetLabel:resolveRealDrawingAssetRefForSelection(selection)||'--',
+    reviewHref,
+  });
+  sourceValue.textContent=provenanceModel.sourceLabel;
+  reportValue.textContent=provenanceModel.reportName;
+  timestampValue.textContent=provenanceModel.timestampLabel;
+  selectionValue.textContent=provenanceModel.selectionText;
   const reviewLink=document.getElementById('header-review-row-link');
   if(reviewLink instanceof HTMLAnchorElement){
-    reviewLink.href=reviewHref||'#';
-    reviewLink.classList.toggle('is-disabled',!reviewHref);
-    reviewLink.textContent=reviewHref?'Row provenance':'Row provenance unavailable';
+    reviewLink.href=provenanceModel.reviewLink.href||'#';
+    reviewLink.classList.toggle('is-disabled',provenanceModel.reviewLink.disabled);
+    reviewLink.textContent=provenanceModel.reviewLink.text;
   }
   const stageLoadCaseChip=document.getElementById('stage-load-case-chip');
   if(stageLoadCaseChip){
-    stageLoadCaseChip.textContent=`Load case ${selection.loadCase||'--'}`;
-    stageLoadCaseChip.classList.toggle('is-accent',Boolean(selection.loadCase));
+    stageLoadCaseChip.textContent=provenanceModel.stageLoadCase.text;
+    stageLoadCaseChip.classList.toggle('is-accent',provenanceModel.stageLoadCase.accent);
   }
   const stageSelectionChip=document.getElementById('stage-selection-chip');
   if(stageSelectionChip){
-    stageSelectionChip.textContent=`Selection ${getSelectedElementCount()} · ${selection.memberId||'--'}`;
-    stageSelectionChip.classList.toggle('is-warn',Boolean(selection.memberId||getSelectedElementCount()));
+    stageSelectionChip.textContent=provenanceModel.stageSelection.text;
+    stageSelectionChip.classList.toggle('is-warn',provenanceModel.stageSelection.warn);
   }
   const footerSelection=document.getElementById('footer-selection-context');
   if(footerSelection){
-    footerSelection.textContent=`${getSelectedElementCount()} selected · load ${selection.loadCase||'--'} · isolate ${isolationLabel} · clip ${clipLabel}`;
+    footerSelection.textContent=provenanceModel.footerSelectionText;
   }
 }
 function getElementSelectionKey(data){

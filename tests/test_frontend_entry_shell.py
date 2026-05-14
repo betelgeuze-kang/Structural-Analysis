@@ -12,6 +12,7 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     app_tsx = (ROOT / "src" / "App.tsx").read_text(encoding="utf-8")
     index_css = (ROOT / "src" / "index.css").read_text(encoding="utf-8")
     index_html = (ROOT / "index.html").read_text(encoding="utf-8")
+    resource_model = (ROOT / "src" / "workbench" / "resourceModel.ts").read_text(encoding="utf-8")
     tsconfig = json.loads((ROOT / "tsconfig.json").read_text(encoding="utf-8"))
 
     assert "import App from './App'" in main_tsx
@@ -72,13 +73,13 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     assert "Deep Transfer Basement" in app_tsx
     assert "function buildAuthoringFamilyOptions" in app_tsx
     assert "function estimateAuthoringMemberCount" in app_tsx
-    assert "authoringRuntimeSubmissionLane: ResourceState" in app_tsx
-    assert "authoringRuntimeWritebackDepth: ResourceState" in app_tsx
-    assert "authoringMultiProjectRuntimeWriteback: ResourceState" in app_tsx
-    assert "authoringSolverFamilyBreadth: ResourceState" in app_tsx
-    assert "authoringLocalRuntimeScenarioDepth: ResourceState" in app_tsx
-    assert "authoringLocalVariantWritebackTrace: ResourceState" in app_tsx
-    assert "authoringWritebackBreadth: ResourceState" in app_tsx
+    assert "authoringRuntimeSubmissionLane: ResourceState" in resource_model
+    assert "authoringRuntimeWritebackDepth: ResourceState" in resource_model
+    assert "authoringMultiProjectRuntimeWriteback: ResourceState" in resource_model
+    assert "authoringSolverFamilyBreadth: ResourceState" in resource_model
+    assert "authoringLocalRuntimeScenarioDepth: ResourceState" in resource_model
+    assert "authoringLocalVariantWritebackTrace: ResourceState" in resource_model
+    assert "authoringWritebackBreadth: ResourceState" in resource_model
     assert "function buildAuthoringRuntimeSubmissionLaneSnapshot" in app_tsx
     assert "function buildAuthoringRuntimeWritebackDepthSnapshot" in app_tsx
     assert "function buildAuthoringMultiProjectRuntimeWritebackSnapshot" in app_tsx
@@ -379,9 +380,10 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
 
 def test_frontend_entry_shell_adds_authoring_server_ops_and_family_track_surfaces() -> None:
     app_tsx = (ROOT / "src" / "App.tsx").read_text(encoding="utf-8")
+    resource_model = (ROOT / "src" / "workbench" / "resourceModel.ts").read_text(encoding="utf-8")
 
-    assert "authoringServerOps: ResourceState" in app_tsx
-    assert "authoringFamilyTrack: ResourceState" in app_tsx
+    assert "authoringServerOps: ResourceState" in resource_model
+    assert "authoringFamilyTrack: ResourceState" in resource_model
     assert "./implementation/phase1/release/project_ops_service_snapshot.json" in app_tsx
     assert "./implementation/phase1/release/authoring/native_authoring_job_manifest.json" in app_tsx
     assert "./implementation/phase1/release/authoring/portfolio/native_authoring_ops_portfolio_batch.json" in app_tsx
