@@ -10,8 +10,7 @@ const outputArgIndex = process.argv.indexOf('--out')
 const outputRelativePath =
   outputArgIndex >= 0 ? process.argv[outputArgIndex + 1] || '' : 'docs/assets/commercialization-status-card.png'
 const outputPath = path.resolve(rootDir, outputRelativePath)
-const viewerPath =
-  '/src/structure-viewer/index.html?preset=real_drawing_private_3d&member=RD-008&drawing_asset=RD-008'
+const viewerPath = '/src/structure-viewer/index.html?preset=midas33_optimized'
 const viewport = { width: 1600, height: 900 }
 
 const mimeTypes = {
@@ -106,14 +105,13 @@ async function capture(port) {
   try {
     await page.goto(`http://127.0.0.1:${port}${viewerPath}`, { timeout: 90000, waitUntil: 'commit' })
     await page.locator('#viewport canvas').waitFor({ state: 'visible', timeout: 30000 })
-    await page.locator('#real-drawing-quality-panel').waitFor({ state: 'visible', timeout: 30000 })
+    await page.locator('#stage-panel').waitFor({ state: 'visible', timeout: 30000 })
     await page.waitForFunction(() => {
       const label = document.querySelector('#provenance-source-label')
       return Boolean(label && label.textContent && label.textContent.trim() !== '--')
     })
     await waitForCanvasNonBlank(page)
     await page.locator('#btn-solid').click({ timeout: 10000 }).catch(() => {})
-    await page.getByRole('button', { name: 'Isolate' }).click({ timeout: 10000 }).catch(() => {})
     await page.getByRole('button', { name: 'Fit All' }).click({ timeout: 10000 }).catch(() => {})
     await page.waitForTimeout(1000)
     if (errors.length > 0) {
