@@ -28,6 +28,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     tree_model_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-tree-model.js").read_text(
         encoding="utf-8"
     )
+    side_panel_model_text = (ROOT / "src" / "structure-viewer" / "viewer-side-panel-model.js").read_text(
+        encoding="utf-8"
+    )
     renderer_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-renderer.js").read_text(
         encoding="utf-8"
     )
@@ -81,6 +84,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "viewer-real-drawing-panel-renderer.js" in text
     assert "viewer-real-drawing-selection.js" in text
     assert "viewer-real-drawing-tree-model.js" in text
+    assert "viewer-side-panel-model.js" in text
     assert "viewer-stats-summary.js" in text
     assert "drawing_asset" in text
     assert "data-real-drawing-copy-link" in renderer_text
@@ -97,6 +101,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "buildRealDrawingTreeModel" in text
     assert "badge-real-drawing-" in text
     assert "No assets match the active drawing quality filter." in tree_model_text
+    assert "buildLoadCaseListModel" in text
+    assert "buildLayerToggleItems" in text
+    assert "Artifact-driven view" in side_panel_model_text
     assert "real-drawing-inspector-cell" in (
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")

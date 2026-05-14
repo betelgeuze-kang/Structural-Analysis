@@ -417,6 +417,10 @@ import {
   buildRealDrawingTreeModel,
 } from './viewer-real-drawing-tree-model.js';
 import {
+  buildLayerToggleItems,
+  buildLoadCaseListModel,
+} from './viewer-side-panel-model.js';
+import {
   SHARED_SELECTION_KEY,
   applySharedSelectionQueryParams,
   buildSharedSelectionPayload,
@@ -3691,15 +3695,15 @@ function buildUI(data){
   // Layer toggles
   const layers=document.getElementById('layer-toggles');
   layers.innerHTML='';
-  for(const type of Object.keys(types)){
+  buildLayerToggleItems(types).forEach(item=>{
     const label=document.createElement('label');
     label.className='panel-toggle-row';
     const cb=document.createElement('input');
-    cb.type='checkbox';cb.checked=true;
-    cb.onchange=()=>toggleLayer(type,cb.checked);
-    label.appendChild(cb);label.appendChild(document.createTextNode(type));
+    cb.type='checkbox';cb.checked=item.checked;
+    cb.onchange=()=>toggleLayer(item.type,cb.checked);
+    label.appendChild(cb);label.appendChild(document.createTextNode(item.label));
     layers.appendChild(label);
-  }
+  });
   renderLoadCaseList(data);
   refreshStoryClipControls(data);
   renderSearchResults(data);
@@ -3719,13 +3723,10 @@ function buildUI(data){
 function renderLoadCaseList(data=modelData){
   const loadCaseList=document.getElementById('load-case-list');
   if(!(loadCaseList instanceof HTMLElement))return;
-  const storySlices=Array.isArray(data?.meta?.story_slices)?data.meta.story_slices:[];
-  const explicitLoadCases=Array.isArray(data?.meta?.load_case_inventory)?data.meta.load_case_inventory:[];
   const activeLoadCase=normalizeSelectionValue(readSharedSelection().loadCase);
-  const labels=(explicitLoadCases.length?explicitLoadCases:storySlices).slice(0,24);
-  const inventory=activeLoadCase&&!labels.includes(activeLoadCase)?[activeLoadCase,...labels]:labels;
-  if(inventory.length){
-    loadCaseList.innerHTML=inventory.map(label=>`<div class="tree-item${label===activeLoadCase?' selected':''}" data-load-case-value="${escapeHtml(label)}"><span>${escapeHtml(label)}</span></div>`).join('');
+  const loadCaseModel=buildLoadCaseListModel(data,{activeLoadCase});
+  if(loadCaseModel.items.length){
+    loadCaseList.innerHTML=loadCaseModel.items.map(item=>`<div class="tree-item${item.selected?' selected':''}" data-load-case-value="${escapeHtml(item.label)}"><span>${escapeHtml(item.label)}</span></div>`).join('');
     loadCaseList.querySelectorAll('[data-load-case-value]').forEach(item=>{
       item.addEventListener('click',()=>{
         const loadCase=normalizeSelectionValue(item.getAttribute('data-load-case-value'));
@@ -3738,8 +3739,7 @@ function renderLoadCaseList(data=modelData){
     });
     return;
   }
-  const comparison=data?.meta?.comparison_availability?` | ${data.meta.comparison_availability}`:'';
-  loadCaseList.innerHTML=`<div class="panel-placeholder">${escapeHtml(data?.meta?.source_label||'Artifact-driven view')}${escapeHtml(comparison)}</div>`;
+  loadCaseList.innerHTML=`<div class="panel-placeholder">${escapeHtml(loadCaseModel.emptyText)}</div>`;
 }
 
 /* ── Interaction ── */
