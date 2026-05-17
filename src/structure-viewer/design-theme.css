@@ -2215,7 +2215,8 @@ body.structural-surface.command-center-shell .stage-toolbar-stack {
 }
 
 body.structural-surface.command-center-shell .stage-mode-toolbar,
-body.structural-surface.command-center-shell .stage-utility-toolbar {
+body.structural-surface.command-center-shell .stage-utility-toolbar,
+body.structural-surface.command-center-shell .stage-view-toolbar {
   justify-content:flex-end;
   gap:6px;
   padding:7px;
@@ -2227,9 +2228,17 @@ body.structural-surface.command-center-shell .stage-utility-toolbar {
 }
 
 body.structural-surface.command-center-shell .stage-mode-toolbar button,
-body.structural-surface.command-center-shell .stage-utility-toolbar button {
+body.structural-surface.command-center-shell .stage-utility-toolbar button,
+body.structural-surface.command-center-shell .stage-view-toolbar button {
   min-height:34px;
   padding:8px 12px;
+}
+
+body.structural-surface.command-center-shell .stage-view-toolbar {
+  border-color:rgba(79,183,173,.22);
+  background:
+    linear-gradient(180deg, rgba(79,183,173,.10), rgba(244,181,107,.04)),
+    rgba(8,18,29,.58);
 }
 
 body.structural-surface.command-center-shell .stage-frame {
@@ -2525,7 +2534,8 @@ body.structural-surface.command-center-shell.light-mode .instrument-group {
   }
 
   body.structural-surface.command-center-shell .stage-mode-toolbar,
-  body.structural-surface.command-center-shell .stage-utility-toolbar {
+  body.structural-surface.command-center-shell .stage-utility-toolbar,
+  body.structural-surface.command-center-shell .stage-view-toolbar {
     justify-content:flex-start;
   }
 
@@ -2624,6 +2634,7 @@ body.structural-surface.command-center-shell.light-mode .instrument-group {
 
   body.structural-surface.command-center-shell .top-toolbar,
   body.structural-surface.command-center-shell .stage-toolbar-stack,
+  body.structural-surface.command-center-shell .stage-view-toolbar,
   body.structural-surface.command-center-shell #left-panel,
   body.structural-surface.command-center-shell #loading,
   body.structural-surface.command-center-shell #shortcut-help,
@@ -4919,7 +4930,7 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .stage-shell__header {
     display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-columns:minmax(420px,1fr) auto;
     align-items:end;
     gap:12px;
     padding:2px 2px 0;
@@ -4953,14 +4964,16 @@ body.structural-surface.panel-inspection-shell canvas {
   }
 
   body.structural-surface.command-center-shell .stage-mode-toolbar,
-  body.structural-surface.command-center-shell .stage-utility-toolbar {
+  body.structural-surface.command-center-shell .stage-utility-toolbar,
+  body.structural-surface.command-center-shell .stage-view-toolbar {
     gap:6px;
     padding:5px;
     border-radius:18px;
   }
 
   body.structural-surface.command-center-shell .stage-mode-toolbar button,
-  body.structural-surface.command-center-shell .stage-utility-toolbar button {
+  body.structural-surface.command-center-shell .stage-utility-toolbar button,
+  body.structural-surface.command-center-shell .stage-view-toolbar button {
     min-height:32px;
     padding:7px 11px;
     white-space:nowrap;

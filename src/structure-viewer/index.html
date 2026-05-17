@@ -159,6 +159,12 @@
           <button onclick="resetCamera()">Reset</button>
           <button onclick="fitAll()">Fit All</button>
         </div>
+        <div class="toolbar stage-view-toolbar" id="midas33-view-toolbar" aria-label="MIDAS33 view presets">
+          <button id="btn-view-review" data-view-preset-button="true" onclick="setMidas33ViewPreset('review')">Review</button>
+          <button id="btn-view-frame" data-view-preset-button="true" onclick="setMidas33ViewPreset('frame')">Frame</button>
+          <button id="btn-view-plan" data-view-preset-button="true" onclick="setMidas33ViewPreset('plan')">Plan</button>
+          <button id="btn-view-fit" data-view-preset-button="true" onclick="setMidas33ViewPreset('fit')">Fit</button>
+        </div>
       </div>
     </div>
     <div class="stage-frame">
@@ -3096,6 +3102,7 @@ function init(){
   const vp=document.getElementById('viewport');
   applySavedThemeMode();
   updateSuiteRouteTabs();
+  updateMidas33ViewToolbarVisibility();
   activeIsolation=readIsolationStateFromQuery();
   const clipState=readStoryClipStateFromQuery();
   activeStoryClipLabel=clipState.label;
@@ -3481,6 +3488,15 @@ function renderShellSummary(summary){
     const node=document.getElementById(id);
     if(node)node.textContent=value;
   });
+}
+function isMidas33PresetActive(){
+  const preset=getRequestedPreset();
+  return preset==='midas33'||preset==='midas33_pr'||preset==='midas33_optimized';
+}
+function updateMidas33ViewToolbarVisibility(){
+  const toolbar=document.getElementById('midas33-view-toolbar');
+  if(!(toolbar instanceof HTMLElement))return;
+  toolbar.hidden=!isMidas33PresetActive();
 }
 function renderKpiSummary(entries){
   const panel=document.getElementById('kpi-summary-panel');
@@ -4035,6 +4051,59 @@ function setViewerCameraPose({position,target,up}={}){
   defaultView={position:camera.position.clone(),target:controls.target.clone()};
   return true;
 }
+const MIDAS33_VIEW_PRESETS={
+  review:{label:'Review',mode:'solid',factors:{x:-.55,y:.85,z:.35},up:{x:0,y:0,z:1}},
+  frame:{label:'Frame',mode:'solid',factors:{x:.72,y:.56,z:.48},up:{x:0,y:0,z:1}},
+  plan:{label:'Plan',mode:'wireframe',factors:{x:.08,y:1.25,z:.18},up:{x:0,y:0,z:1}},
+};
+let activeMidas33ViewPreset='';
+function updateMidas33ViewPresetButtons(){
+  document.querySelectorAll('[data-view-preset-button]').forEach(button=>{
+    const id=button.id||'';
+    const key=id.replace('btn-view-','');
+    button.classList.toggle('active',Boolean(activeMidas33ViewPreset&&key===activeMidas33ViewPreset));
+  });
+}
+function resolveViewerCameraPoseFromFactors(factors={},up={x:0,y:0,z:1}){
+  const bounds=getViewerModelBounds();
+  if(!bounds)return null;
+  const target=bounds.center;
+  const radius=safeNumber(bounds.radius,1);
+  return{
+    target,
+    position:{
+      x:target.x+radius*safeNumber(factors.x,0),
+      y:target.y+radius*safeNumber(factors.y,0),
+      z:target.z+radius*safeNumber(factors.z,0)
+    },
+    up
+  };
+}
+function setMidas33ViewPreset(preset='review'){
+  const normalized=normalizeSelectionValue(preset)||'review';
+  if(normalized==='fit'){
+    fitAll();
+    activeMidas33ViewPreset='fit';
+    updateMidas33ViewPresetButtons();
+    return true;
+  }
+  const config=MIDAS33_VIEW_PRESETS[normalized]||MIDAS33_VIEW_PRESETS.review;
+  const pose=resolveViewerCameraPoseFromFactors(config.factors,config.up);
+  if(!pose)return false;
+  if(config.mode&&renderMode!==config.mode)setRenderMode(config.mode);
+  const applied=setViewerCameraPose(pose);
+  if(applied){
+    activeMidas33ViewPreset=normalized;
+    updateMidas33ViewPresetButtons();
+  }
+  return applied;
+}
+function applyDefaultViewPreset(){
+  updateMidas33ViewToolbarVisibility();
+  if(isMidas33PresetActive()){
+    setMidas33ViewPreset('review');
+  }
+}
 function resetCamera(){
   camera.position.copy(defaultView.position);
   controls.target.copy(defaultView.target);
@@ -4076,6 +4145,7 @@ window.resetCamera=resetCamera;
 window.fitAll=fitAll;
 window.getViewerModelBounds=getViewerModelBounds;
 window.setViewerCameraPose=setViewerCameraPose;
+window.setMidas33ViewPreset=setMidas33ViewPreset;
 window.clearSelection=clearSelection;
 window.handleSectionEditPreviewInputChange=handleSectionEditPreviewInputChange;
 window.stageSectionEditPreview=stageSectionEditPreview;
@@ -4175,6 +4245,7 @@ try{
 }
 animate();
 fitAll();
+applyDefaultViewPreset();
 </script>
 </body>
 </html>

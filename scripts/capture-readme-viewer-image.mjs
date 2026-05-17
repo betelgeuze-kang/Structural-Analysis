@@ -12,6 +12,7 @@ const outputRelativePath =
 const outputPath = path.resolve(rootDir, outputRelativePath)
 const viewerPath = '/src/structure-viewer/index.html?preset=midas33_optimized'
 const viewport = { width: 1600, height: 900 }
+const captureViewPreset = process.env.README_CAPTURE_VIEW_PRESET ?? 'review'
 const cameraFactors = {
   x: Number(process.env.README_CAPTURE_CAMERA_X ?? '-0.55'),
   y: Number(process.env.README_CAPTURE_CAMERA_Y ?? '0.85'),
@@ -97,11 +98,19 @@ async function waitForCanvasNonBlank(page) {
 }
 
 async function applyMidas33ReadmeCameraPose(page) {
-  const result = await page.evaluate((factors) => {
+  const result = await page.evaluate(({ preset, factors }) => {
+    if (typeof window.setMidas33ViewPreset === 'function') {
+      return {
+        applied: window.setMidas33ViewPreset(preset),
+        mode: 'midas33-view-preset',
+        preset,
+      }
+    }
     const bounds = typeof window.getViewerModelBounds === 'function' ? window.getViewerModelBounds() : null
     if (!bounds || typeof window.setViewerCameraPose !== 'function') {
       return {
         applied: false,
+        mode: 'fallback-camera-factors',
         hasBoundsApi: typeof window.getViewerModelBounds === 'function',
         hasPoseApi: typeof window.setViewerCameraPose === 'function',
         bounds,
@@ -119,7 +128,7 @@ async function applyMidas33ReadmeCameraPose(page) {
       up: { x: 0, y: 0, z: 1 },
     })
     return { applied, hasBoundsApi: true, hasPoseApi: true, bounds }
-  }, cameraFactors)
+  }, { preset: captureViewPreset, factors: cameraFactors })
   if (!result.applied) {
     throw new Error(`Failed to apply the MIDAS33 README camera pose in the structure viewer: ${JSON.stringify(result)}`)
   }

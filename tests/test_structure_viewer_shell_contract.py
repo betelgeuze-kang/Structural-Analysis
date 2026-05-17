@@ -144,8 +144,14 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "Structural Model Workspace" in text
     assert "function getViewerModelBounds()" in text
     assert "function setViewerCameraPose(" in text
+    assert 'id="midas33-view-toolbar"' in text
+    assert "setMidas33ViewPreset('review')" in text
+    assert "const MIDAS33_VIEW_PRESETS=" in text
+    assert "function setMidas33ViewPreset(" in text
+    assert "function applyDefaultViewPreset()" in text
     assert "window.getViewerModelBounds=getViewerModelBounds;" in text
     assert "window.setViewerCameraPose=setViewerCameraPose;" in text
+    assert "window.setMidas33ViewPreset=setMidas33ViewPreset;" in text
 
 
 def test_dark_viewer_shell_pages_keep_shared_provenance_and_control_vocabulary() -> None:
