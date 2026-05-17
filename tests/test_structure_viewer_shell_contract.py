@@ -142,6 +142,10 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     )
     assert "Structural Insight Viewer" in text
     assert "Structural Model Workspace" in text
+    assert "function getViewerModelBounds()" in text
+    assert "function setViewerCameraPose(" in text
+    assert "window.getViewerModelBounds=getViewerModelBounds;" in text
+    assert "window.setViewerCameraPose=setViewerCameraPose;" in text
 
 
 def test_dark_viewer_shell_pages_keep_shared_provenance_and_control_vocabulary() -> None:

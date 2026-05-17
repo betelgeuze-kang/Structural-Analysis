@@ -4000,6 +4000,41 @@ function fitAll(){
   controls.target.copy(center);controls.update();
   defaultView={position:camera.position.clone(),target:center.clone()};
 }
+function getViewerModelBounds(){
+  if(!modelGroup)return null;
+  const box=new THREE.Box3().setFromObject(modelGroup);
+  if(box.isEmpty())return null;
+  const center=box.getCenter(new THREE.Vector3());
+  const size=box.getSize(new THREE.Vector3());
+  const min=box.min;
+  const max=box.max;
+  return{
+    center:{x:center.x,y:center.y,z:center.z},
+    size:{x:size.x,y:size.y,z:size.z},
+    min:{x:min.x,y:min.y,z:min.z},
+    max:{x:max.x,y:max.y,z:max.z},
+    radius:Math.max(size.length(),1)
+  };
+}
+function setViewerCameraPose({position,target,up}={}){
+  if(!camera||!controls||!position||!target)return false;
+  const nextPosition=new THREE.Vector3(position.x,position.y,position.z);
+  const nextTarget=new THREE.Vector3(target.x,target.y,target.z);
+  if(!Number.isFinite(nextPosition.x)||!Number.isFinite(nextPosition.y)||!Number.isFinite(nextPosition.z))return false;
+  if(!Number.isFinite(nextTarget.x)||!Number.isFinite(nextTarget.y)||!Number.isFinite(nextTarget.z))return false;
+  if(up){
+    const nextUp=new THREE.Vector3(up.x,up.y,up.z);
+    if(Number.isFinite(nextUp.x)&&Number.isFinite(nextUp.y)&&Number.isFinite(nextUp.z)&&nextUp.lengthSq()>1e-6){
+      camera.up.copy(nextUp.normalize());
+    }
+  }
+  camera.position.copy(nextPosition);
+  controls.target.copy(nextTarget);
+  camera.lookAt(nextTarget);
+  controls.update();
+  defaultView={position:camera.position.clone(),target:controls.target.clone()};
+  return true;
+}
 function resetCamera(){
   camera.position.copy(defaultView.position);
   controls.target.copy(defaultView.target);
@@ -4039,6 +4074,8 @@ window.updateDeformScale=updateDeformScale;
 window.updateContour=updateContour;
 window.resetCamera=resetCamera;
 window.fitAll=fitAll;
+window.getViewerModelBounds=getViewerModelBounds;
+window.setViewerCameraPose=setViewerCameraPose;
 window.clearSelection=clearSelection;
 window.handleSectionEditPreviewInputChange=handleSectionEditPreviewInputChange;
 window.stageSectionEditPreview=stageSectionEditPreview;

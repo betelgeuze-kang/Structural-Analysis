@@ -12,6 +12,11 @@ const outputRelativePath =
 const outputPath = path.resolve(rootDir, outputRelativePath)
 const viewerPath = '/src/structure-viewer/index.html?preset=midas33_optimized'
 const viewport = { width: 1600, height: 900 }
+const cameraFactors = {
+  x: Number(process.env.README_CAPTURE_CAMERA_X ?? '-0.55'),
+  y: Number(process.env.README_CAPTURE_CAMERA_Y ?? '0.85'),
+  z: Number(process.env.README_CAPTURE_CAMERA_Z ?? '0.35'),
+}
 
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -91,6 +96,35 @@ async function waitForCanvasNonBlank(page) {
   )
 }
 
+async function applyMidas33ReadmeCameraPose(page) {
+  const result = await page.evaluate((factors) => {
+    const bounds = typeof window.getViewerModelBounds === 'function' ? window.getViewerModelBounds() : null
+    if (!bounds || typeof window.setViewerCameraPose !== 'function') {
+      return {
+        applied: false,
+        hasBoundsApi: typeof window.getViewerModelBounds === 'function',
+        hasPoseApi: typeof window.setViewerCameraPose === 'function',
+        bounds,
+      }
+    }
+    const target = bounds.center
+    const radius = Number(bounds.radius) || 1
+    const applied = window.setViewerCameraPose({
+      target,
+      position: {
+        x: target.x + radius * factors.x,
+        y: target.y + radius * factors.y,
+        z: target.z + radius * factors.z,
+      },
+      up: { x: 0, y: 0, z: 1 },
+    })
+    return { applied, hasBoundsApi: true, hasPoseApi: true, bounds }
+  }, cameraFactors)
+  if (!result.applied) {
+    throw new Error(`Failed to apply the MIDAS33 README camera pose in the structure viewer: ${JSON.stringify(result)}`)
+  }
+}
+
 async function capture(port) {
   const browser = await chromium.launch()
   const page = await browser.newPage({ viewport })
@@ -113,6 +147,7 @@ async function capture(port) {
     await waitForCanvasNonBlank(page)
     await page.locator('#btn-solid').click({ timeout: 10000 }).catch(() => {})
     await page.getByRole('button', { name: 'Fit All' }).click({ timeout: 10000 }).catch(() => {})
+    await applyMidas33ReadmeCameraPose(page)
     await page.waitForTimeout(1000)
     if (errors.length > 0) {
       throw new Error(`Viewer console/page errors while capturing README image:\n${errors.join('\n')}`)
