@@ -25,6 +25,15 @@ const requiredFiles = [
   'scripts/verify-frontend-build-contract.mjs',
   'scripts/verify-frontend-smoke.mjs',
   'scripts/verify-frontend-browser-smoke.mjs',
+  'scripts/verify-structure-viewer-project-manifest.mjs',
+  'scripts/export-structure-viewer-report-pdf.mjs',
+  'scripts/verify-structure-viewer-report-pdf.mjs',
+  'src/structure-viewer/viewer-drawing-review-model.js',
+  'src/structure-viewer/viewer-member-comparison-model.js',
+  'src/structure-viewer/viewer-optimization-comparison-model.js',
+  'src/structure-viewer/viewer-project-workspace-renderer.js',
+  'src/structure-viewer/viewer-report-panel-renderer.js',
+  'src/structure-viewer/viewer-selection-inspector-renderer.js',
   'tests/frontend/structure-viewer-smoke.spec.ts',
   'docs/frontend-build-reproducibility.md',
 ]
@@ -61,7 +70,10 @@ const expectedScripts = {
   preview: 'vite preview',
   'verify:frontend-contract': 'node ./scripts/verify-frontend-build-contract.mjs',
   'verify:frontend-smoke': 'node ./scripts/verify-frontend-smoke.mjs',
+  'verify:viewer-manifest': 'node ./scripts/verify-structure-viewer-project-manifest.mjs',
   'verify:frontend-browser-smoke': 'playwright install chromium && node ./scripts/verify-frontend-browser-smoke.mjs',
+  'export:viewer-report-pdf': 'playwright install chromium && node ./scripts/export-structure-viewer-report-pdf.mjs',
+  'verify:viewer-report-pdf': 'playwright install chromium && node ./scripts/verify-structure-viewer-report-pdf.mjs',
 }
 
 for (const [name, command] of Object.entries(expectedScripts)) {

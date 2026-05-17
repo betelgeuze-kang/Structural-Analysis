@@ -33,6 +33,7 @@ def _command_groups(mode: str) -> list[list[str]]:
     pr_commands = [
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
         source_boundary,
+        [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
         [_python(), "scripts/check_git_remote_safety.py", "--show-ok"],
         [_python(), "-m", "ruff", "check", "."],
         [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-open"],
@@ -55,8 +56,18 @@ def _command_groups(mode: str) -> list[list[str]]:
         ],
         [_npm(), "run", "verify:frontend-contract"],
         [_npm(), "run", "build"],
+        [_npm(), "run", "verify:viewer-manifest"],
         [_python(), "scripts/verify_structure_viewer_contracts.py"],
         [_npm(), "run", "verify:frontend-browser-smoke", "--", "--mode", "minimal"],
+        [
+            _python(),
+            "-m",
+            "pytest",
+            "-q",
+            "tests/test_project_ops_api_service.py",
+            "tests/test_source_boundary_ci_contract.py",
+            "tests/test_source_boundary_footprint_report.py",
+        ],
     ]
     if mode == "pr":
         return pr_commands
@@ -64,6 +75,7 @@ def _command_groups(mode: str) -> list[list[str]]:
         *pr_commands,
         [_python(), "-m", "pytest", "-q"],
         [_npm(), "run", "verify:frontend-browser-smoke"],
+        [_npm(), "run", "verify:viewer-report-pdf"],
         [
             _python(),
             "scripts/report_commercialization_level.py",

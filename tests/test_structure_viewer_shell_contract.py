@@ -144,11 +144,34 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "Structural Model Workspace" in text
     assert "function getViewerModelBounds()" in text
     assert "function setViewerCameraPose(" in text
+    assert "viewer-viewport-command-state.js" in text
+    assert "buildViewerRenderModeButtonStates" in text
+    assert "getViewerLegendDisplayForRenderMode" in text
     assert 'id="midas33-view-toolbar"' in text
+    assert "viewer-midas33-view-presets.js" in text
     assert "setMidas33ViewPreset('review')" in text
-    assert "const MIDAS33_VIEW_PRESETS=" in text
+    assert "buildMidas33CameraPoseFromBounds" in text
+    assert "buildMidas33ViewButtonStates" in text
     assert "function setMidas33ViewPreset(" in text
     assert "function applyDefaultViewPreset()" in text
+    assert "viewer-project-workspace.js" in text
+    assert "viewer-explainability-model.js" in text
+    assert "viewer-optimization-comparison-model.js" in text
+    assert "viewer-report-export.js" in text
+    assert "viewer-local-ops-state.js" in text
+    assert 'id="project-workspace-section"' in text
+    assert 'id="project-drawing-list"' in text
+    assert 'id="project-workspace-query"' in text
+    assert "setProjectWorkspaceSearch" in text
+    assert 'id="explainability-panel"' in text
+    assert 'id="viewer-report-export-panel"' in text
+    assert "function exportWorkspaceHtmlReport()" in text
+    assert "function exportWorkspaceAuditJsonl()" in text
+    assert "buildOptimizationComparisonModel" in text
+    assert "Export Audit" in text
+    assert "structure-viewer-project-manifest.v1" in (
+        ROOT / "src" / "structure-viewer" / "viewer-project-workspace.js"
+    ).read_text(encoding="utf-8")
     assert "window.getViewerModelBounds=getViewerModelBounds;" in text
     assert "window.setViewerCameraPose=setViewerCameraPose;" in text
     assert "window.setMidas33ViewPreset=setMidas33ViewPreset;" in text

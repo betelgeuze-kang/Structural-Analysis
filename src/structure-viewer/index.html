@@ -45,6 +45,7 @@
     <div class="toolbar top-toolbar">
       <button type="button" onclick="toggleDeformed()">Compare</button>
       <button id="export-png-button" onclick="exportViewportPng()">Export</button>
+      <button id="export-html-report-button" onclick="exportWorkspaceHtmlReport()">Report</button>
       <button id="copy-deep-link-button" onclick="copyCurrentDeepLink()">Share</button>
       <button id="toggle-light-mode-button" onclick="toggleLightMode()">Light</button>
       <button id="toggle-shortcuts-button" onclick="toggleShortcutHelp()">Shortcuts</button>
@@ -126,6 +127,32 @@
       <span>Source</span><span id="shell-meta-source">--</span>
     </div>
   </section>
+  <section class="panel-section" id="project-workspace-section">
+    <div class="section-title">Project Browser</div>
+    <div class="panel-field project-workspace-controls">
+      <label for="project-workspace-select">Project</label>
+      <select id="project-workspace-select" onchange="setProjectWorkspaceProject(this.value)"></select>
+      <label for="project-workspace-filter">Status Filter</label>
+      <select id="project-workspace-filter" onchange="setProjectWorkspaceFilter(this.value)">
+        <option value="all">All</option>
+        <option value="ready">Ready</option>
+        <option value="needs_review">Needs Review</option>
+        <option value="blocked">Blocked</option>
+      </select>
+      <label for="project-workspace-query">Drawing Search</label>
+      <input id="project-workspace-query" type="text" placeholder="Search drawing, family, status" oninput="setProjectWorkspaceSearch(this.value)">
+      <div id="project-workspace-status" class="provenance-status">Project manifest pending</div>
+    </div>
+    <div class="project-variant-toolbar" aria-label="Workspace variants">
+      <button id="btn-variant-baseline" type="button" onclick="setProjectWorkspaceVariant('baseline')">Baseline</button>
+      <button id="btn-variant-optimized" type="button" onclick="setProjectWorkspaceVariant('optimized')">Optimized</button>
+      <button id="btn-variant-compare" type="button" onclick="setProjectWorkspaceVariant('compare')">Compare</button>
+    </div>
+    <div id="project-drawing-list" class="project-drawing-list"></div>
+    <div id="project-drawing-evidence-panel" class="project-drawing-evidence-panel"></div>
+    <div id="before-after-comparison-panel" class="member-comparison-panel"></div>
+    <div id="project-recent-list" class="project-recent-list"></div>
+  </section>
   <section class="panel-section" id="tree-section">
     <div class="section-title">Model Tree</div>
     <div id="model-tree" class="panel-field"></div>
@@ -145,6 +172,8 @@
         <div class="stage-context-row">
           <span id="stage-load-case-chip" class="context-chip">Load case --</span>
           <span id="stage-selection-chip" class="context-chip">Selection --</span>
+          <span id="stage-variant-chip" class="context-chip">Variant --</span>
+          <span id="stage-quality-chip" class="context-chip">Review --</span>
         </div>
       </div>
       <div class="stage-toolbar-stack">
@@ -268,6 +297,21 @@
   <section class="panel-section" id="properties-section">
     <div class="section-title">Properties</div>
     <div id="prop-panel" class="panel-field"><div class="panel-placeholder">Select an element</div></div>
+  </section>
+  <section class="panel-section" id="explainability-section">
+    <div class="section-title">Why / Risk</div>
+    <div id="explainability-panel" class="panel-field"><div class="panel-placeholder">Select a member to see section, material, load, D/C, optimization delta, and evidence status.</div></div>
+  </section>
+  <section class="panel-section" id="viewer-report-section">
+    <div class="section-title">Review Report</div>
+    <div id="viewer-report-export-panel" class="panel-field">
+      <div class="panel-placeholder">Export an engineer-in-loop HTML report for the active project and selection.</div>
+      <div class="panel-actions">
+        <button type="button" onclick="exportWorkspaceHtmlReport()">Export HTML</button>
+        <button type="button" onclick="exportWorkspaceAuditJsonl()">Export Audit</button>
+        <button type="button" onclick="copyCurrentDeepLink()">Copy Link</button>
+      </div>
+    </div>
   </section>
   <section class="panel-section" id="statistics-section">
     <div class="section-title">Statistics</div>
@@ -456,11 +500,78 @@ import {
 import {
   buildRealDrawingQualityPanelHtml,
 } from './viewer-real-drawing-panel-renderer.js';
+import {
+  buildMidas33CameraPoseFromBounds,
+  buildMidas33ViewButtonStates,
+  getMidas33ViewPresetConfig,
+  isMidas33PresetToken,
+  normalizeMidas33ViewPreset,
+} from './viewer-midas33-view-presets.js';
+import {
+  buildViewerRenderModeButtonStates,
+  getViewerLegendDisplayForRenderMode,
+  normalizeViewerRenderMode,
+} from './viewer-viewport-command-state.js';
+import {
+  DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST,
+  buildProjectBrowserModel,
+  buildWorkspaceUrl,
+  normalizeProjectManifest,
+  resolveWorkspaceStateFromSearch,
+} from './viewer-project-workspace.js';
+import {
+  buildMemberComparisonPanelHtml,
+  buildProjectDrawingListHtml,
+  buildProjectEvidencePanelHtml,
+  buildProjectRecentListHtml,
+} from './viewer-project-workspace-renderer.js';
+import {
+  buildViewerExplainabilityModel,
+} from './viewer-explainability-model.js';
+import {
+  buildSelectionInspectorHtml,
+} from './viewer-selection-inspector-renderer.js';
+import {
+  buildOptimizationComparisonModel,
+} from './viewer-optimization-comparison-model.js';
+import {
+  buildMemberComparisonModel,
+} from './viewer-member-comparison-model.js';
+import {
+  buildDrawingReviewModel,
+} from './viewer-drawing-review-model.js';
+import {
+  buildStructureViewerReportExport,
+} from './viewer-report-export.js';
+import {
+  buildReportExportPanelHtml,
+} from './viewer-report-panel-renderer.js';
+import {
+  VIEWER_LOCAL_OPS_STATE_KEY,
+  appendViewerAuditEvent,
+  appendViewerExportHistory,
+  buildViewerProjectBundleExport,
+  buildViewerAuditJsonlExport,
+  getViewerReviewNote,
+  readViewerLocalOpsState,
+  rememberViewerWorkspaceSelection,
+  setViewerReviewNote,
+  writeViewerLocalOpsState,
+} from './viewer-local-ops-state.js';
 
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
   modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,
   directModelNormalizer: new URL('./viewer-direct-model-normalizer.js', import.meta.url).href,
 };
+const projectManifest=normalizeProjectManifest(DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST);
+let workspaceState=resolveWorkspaceStateFromSearch(window.location.search,{
+  manifest:projectManifest,
+  legacyPreset:new URLSearchParams(window.location.search).get('preset')||'',
+});
+workspaceState.manifest=projectManifest;
+window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__=workspaceState.viewerPreset||'';
+window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__=workspaceState.viewerPreset?'':workspaceState.artifactPath||'';
+let memberComparisonFilter='changed';
 
 /* ── State ── */
 let scene,camera,renderer,controls,raycaster,mouse;
@@ -469,6 +580,7 @@ let elementMeshes=new Map(),selectedMesh=null;
 let instancedElementGroups=[],instancedElementRecordsByMemberId=new Map();
 let selectedElementData=null,selectedElementKey='',activeTypeHighlight='';
 let selectedElementKeys=new Set(),selectedElementRecords=new Map();
+let activeComparisonHighlightMemberIds=new Set(),activeComparisonHighlightToneByMemberId=new Map(),activeComparisonHighlightFilter='changed';
 let renderMode='wireframe',showDeformed=false,deformScale=100,isAnimating=false,animTime=0;
 let modelData=null,modelSourceMeta=null,frameCount=0,lastFpsTime=Date.now();
 let defaultView={position:new THREE.Vector3(80,60,80),target:new THREE.Vector3(24,14,14)};
@@ -509,6 +621,17 @@ const NORMALIZATION_CHUNK_SIZE=1200;
 const SELECTION_HIGHLIGHT_HEX=0x224488;
 const TYPE_HIGHLIGHT_HEX=0x223355;
 const APPLIED_OVERRIDE_HEX=0xf59e0b;
+const COMPARISON_HIGHLIGHT_HEX={
+  changed:0x2563eb,
+  reduced:0x059669,
+  retained:0x475569,
+  risk_up:0xdc2626,
+  missing_evidence:0xd97706,
+  accent:0x2563eb,
+  success:0x059669,
+  warn:0xd97706,
+  danger:0xdc2626,
+};
 const NODE_CONTOUR_FIELDS=new Set(['disp_mag','stress_vm']);
 const deformedRenderingToolkit=createViewerDeformedRenderingToolkit(THREE,{meshTriangleBvhThreshold:LARGE_MODEL_PICK_SPATIAL_INDEX_MESH_TRIANGLE_BVH_THRESHOLD});
 const {
@@ -692,6 +815,52 @@ function safeStorageGet(key){
 function safeStorageSet(key,value){
   try{window.localStorage.setItem(key,value)}catch(_err){}
 }
+function syncWorkspaceResolvedGlobals(){
+  window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__=workspaceState.viewerPreset||'';
+  window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__=workspaceState.viewerPreset?'':workspaceState.artifactPath||'';
+}
+function readLocalOpsState(){
+  return readViewerLocalOpsState({
+    storageGet:safeStorageGet,
+    storageKey:VIEWER_LOCAL_OPS_STATE_KEY,
+  });
+}
+function writeLocalOpsState(state){
+  writeViewerLocalOpsState(state,{
+    storageSet:safeStorageSet,
+    storageKey:VIEWER_LOCAL_OPS_STATE_KEY,
+  });
+}
+function rememberWorkspaceState(){
+  const next=rememberViewerWorkspaceSelection(readLocalOpsState(),{
+    projectId:workspaceState.projectId,
+    drawingId:workspaceState.drawingId,
+    variant:workspaceState.variant,
+    memberId:resolveSelectionMemberId(selectedElementData)||'',
+    filter:memberComparisonFilter,
+    label:`${workspaceState.projectTitle||workspaceState.projectId} / ${workspaceState.drawingTitle||workspaceState.drawingId}`,
+  });
+  writeLocalOpsState(next);
+}
+function auditWorkspaceEvent(type,note='',memberId=''){
+  const next=appendViewerAuditEvent(readLocalOpsState(),{
+    type,
+    note,
+    projectId:workspaceState.projectId,
+    drawingId:workspaceState.drawingId,
+    variant:workspaceState.variant,
+    memberId,
+    filter:memberComparisonFilter,
+  });
+  writeLocalOpsState(next);
+}
+function captureViewerCanvasDataUrl(){
+  try{
+    return renderer?.domElement?.toDataURL?.('image/png')||'';
+  }catch(_err){
+    return '';
+  }
+}
 function applySavedThemeMode(){
   const theme=normalizeSelectionValue(safeStorageGet(VIEWER_THEME_KEY));
   document.body.classList.toggle('light-mode',theme==='light');
@@ -776,6 +945,9 @@ function readStoryClipStateFromQuery(){
 }
 function updateViewerQueryParams(selection){
   const url=new URL(window.location.href);
+  if(workspaceState.projectId)url.searchParams.set('project',workspaceState.projectId);
+  if(workspaceState.drawingId)url.searchParams.set('drawing',workspaceState.drawingId);
+  if(workspaceState.variant)url.searchParams.set('variant',workspaceState.variant);
   applySharedSelectionQueryParams(url,selection);
   if(activeIsolation.kind&&activeIsolation.value){
     url.searchParams.set('isolate_kind',activeIsolation.kind);
@@ -911,6 +1083,9 @@ function getCurrentSelectionState(){
 function buildCurrentDeepLinkUrl(){
   const selection=getCurrentSelectionState();
   const url=new URL(window.location.href);
+  if(workspaceState.projectId)url.searchParams.set('project',workspaceState.projectId);
+  if(workspaceState.drawingId)url.searchParams.set('drawing',workspaceState.drawingId);
+  if(workspaceState.variant)url.searchParams.set('variant',workspaceState.variant);
   if(selection.memberId)url.searchParams.set('member',selection.memberId);else url.searchParams.delete('member');
   if(selection.memberIds?.length)url.searchParams.set('member_set',selection.memberIds.join('|'));else url.searchParams.delete('member_set');
   if(selection.loadCase)url.searchParams.set('load_case',selection.loadCase);else url.searchParams.delete('load_case');
@@ -1178,9 +1353,122 @@ async function exportViewportPng(){
     }
   }
 }
+function buildCurrentStructureViewerReportHtml(){
+  const explanation=buildViewerExplainabilityModel({
+    data:modelData||{},
+    element:selectedElementData,
+    selection:getCurrentSelectionState(),
+    workspace:workspaceState,
+  });
+  const comparison=buildOptimizationComparisonModel({
+    data:modelData||{},
+    workspace:workspaceState,
+  });
+  const drawingReview=buildDrawingReviewModel(workspaceState.drawing||{});
+  const memberComparison=buildMemberComparisonModel({
+    data:modelData||{},
+    workspace:workspaceState,
+    filter:memberComparisonFilter,
+  });
+  return buildStructureViewerReportExport({
+    workspace:workspaceState,
+    data:modelData||{},
+    selectedElement:selectedElementData,
+    explainability:explanation,
+    comparison,
+    drawingReview,
+    memberComparison,
+    screenshotDataUrl:captureViewerCanvasDataUrl(),
+    reviewNote:getViewerReviewNote(readLocalOpsState(),{
+      projectId:workspaceState.projectId,
+      drawingId:workspaceState.drawingId,
+      memberId:resolveSelectionMemberId(selectedElementData)||'',
+    }),
+  });
+}
+function exportWorkspaceHtmlReport(){
+  const button=document.getElementById('export-html-report-button');
+  const restore=()=>{
+    if(button instanceof HTMLButtonElement)button.textContent='Report';
+  };
+  if(button instanceof HTMLButtonElement)button.textContent='Exporting...';
+  try{
+    const report=buildCurrentStructureViewerReportHtml();
+    downloadBlob(new Blob([report.html],{type:'text/html;charset=utf-8'}),report.filename);
+    const next=appendViewerExportHistory(readLocalOpsState(),{
+      filename:report.filename,
+      projectId:workspaceState.projectId,
+      drawingId:workspaceState.drawingId,
+      type:'html_report',
+    });
+    writeLocalOpsState(next);
+    auditWorkspaceEvent('report_exported',report.filename,resolveSelectionMemberId(selectedElementData));
+    renderReportExportPanel();
+    if(button instanceof HTMLButtonElement){
+      button.textContent='Report saved';
+      window.setTimeout(restore,1200);
+    }
+  }catch(err){
+    console.error('[Viewer] HTML report export failed:',err);
+    if(button instanceof HTMLButtonElement){
+      button.textContent='Report failed';
+      window.setTimeout(restore,1400);
+    }
+  }
+}
+function exportWorkspaceAuditJsonl(){
+  const exportPayload=buildViewerAuditJsonlExport(readLocalOpsState(),{
+    projectId:workspaceState.projectId,
+    drawingId:workspaceState.drawingId,
+  });
+  downloadBlob(new Blob([exportPayload.jsonl],{type:'application/x-ndjson;charset=utf-8'}),exportPayload.filename);
+  const next=appendViewerExportHistory(readLocalOpsState(),{
+    filename:exportPayload.filename,
+    projectId:workspaceState.projectId,
+    drawingId:workspaceState.drawingId,
+    type:'audit_jsonl',
+  });
+  writeLocalOpsState(next);
+  auditWorkspaceEvent('audit_exported',exportPayload.filename,resolveSelectionMemberId(selectedElementData));
+  renderReportExportPanel();
+}
+function saveReviewNote(){
+  const input=document.getElementById('review-note-input');
+  const note=input instanceof HTMLTextAreaElement?input.value:'';
+  const memberId=resolveSelectionMemberId(selectedElementData)||'';
+  const next=setViewerReviewNote(readLocalOpsState(),{
+    projectId:workspaceState.projectId,
+    drawingId:workspaceState.drawingId,
+    memberId,
+    note,
+  });
+  writeLocalOpsState(next);
+  auditWorkspaceEvent('review_note_saved',note,memberId);
+  renderReportExportPanel();
+}
+function exportProjectBundleJson(){
+  const exportPayload=buildViewerProjectBundleExport(readLocalOpsState(),{
+    projectId:workspaceState.projectId,
+    drawingId:workspaceState.drawingId,
+    variant:workspaceState.variant,
+    manifest:projectManifest,
+  });
+  downloadBlob(new Blob([exportPayload.json],{type:'application/json;charset=utf-8'}),exportPayload.filename);
+  const next=appendViewerExportHistory(readLocalOpsState(),{
+    filename:exportPayload.filename,
+    projectId:workspaceState.projectId,
+    drawingId:workspaceState.drawingId,
+    variant:workspaceState.variant,
+    type:'project_bundle_json',
+  });
+  writeLocalOpsState(next);
+  auditWorkspaceEvent('project_bundle_exported',exportPayload.filename,resolveSelectionMemberId(selectedElementData));
+  renderReportExportPanel();
+}
 function renderSelectionPlaceholder(){
   const panel=document.getElementById('prop-panel');
   if(panel)panel.innerHTML='<div class="panel-placeholder">Select an element</div>';
+  renderExplainabilityPanel(null);
   renderSectionEditPreview();
 }
 function updateSelectionControls(){
@@ -1280,6 +1568,18 @@ function updateProvenanceBlock(){
   const footerSelection=document.getElementById('footer-selection-context');
   if(footerSelection){
     footerSelection.textContent=provenanceModel.footerSelectionText;
+  }
+  const stageVariantChip=document.getElementById('stage-variant-chip');
+  if(stageVariantChip){
+    stageVariantChip.textContent=`Variant ${workspaceState.variant||'--'}`;
+    stageVariantChip.classList.toggle('is-accent',Boolean(workspaceState.variant));
+  }
+  const stageQualityChip=document.getElementById('stage-quality-chip');
+  if(stageQualityChip){
+    const status=workspaceState.drawing?.commercial_review_status||'--';
+    stageQualityChip.textContent=`Review ${status}`;
+    stageQualityChip.classList.toggle('is-warn',status==='needs_review');
+    stageQualityChip.classList.toggle('is-danger',status==='blocked');
   }
 }
 function getElementSelectionKey(data){
@@ -2515,6 +2815,8 @@ function computeContourContext(){
 function getSurfaceContourTint(mesh){
   const type=normalizeElementType(mesh.userData.type);
   if(isSelectedElement(mesh.userData))return{color:new THREE.Color(SELECTION_HIGHLIGHT_HEX),mix:.26};
+  const comparisonHex=resolveMemberComparisonHighlightHex(mesh.userData);
+  if(comparisonHex)return{color:new THREE.Color(comparisonHex),mix:.22};
   if(Boolean(activeTypeHighlight)&&type===activeTypeHighlight)return{color:new THREE.Color(TYPE_HIGHLIGHT_HEX),mix:.16};
   return{color:new THREE.Color(1,1,1),mix:0};
 }
@@ -2544,16 +2846,27 @@ function resolveDisplayColorHex(el,baseColorHex){
   if(activeTypeHighlight&&normalizeElementType(el.type)===activeTypeHighlight){
     colorHex=TYPE_HIGHLIGHT_HEX;
   }
+  const comparisonHex=resolveMemberComparisonHighlightHex(el);
+  if(comparisonHex){
+    colorHex=comparisonHex;
+  }
   if(isSelectedElement(el)){
     colorHex=SELECTION_HIGHLIGHT_HEX;
   }
   return colorHex;
+}
+function resolveMemberComparisonHighlightHex(el={}){
+  const memberId=normalizeSelectionValue(resolveSelectionMemberId(el)||el.member_id||el.case_id||el.id);
+  if(!memberId||!activeComparisonHighlightMemberIds.has(memberId))return 0;
+  const tone=activeComparisonHighlightToneByMemberId.get(memberId)||activeComparisonHighlightFilter||'accent';
+  return COMPARISON_HIGHLIGHT_HEX[activeComparisonHighlightFilter]||COMPARISON_HIGHLIGHT_HEX[tone]||COMPARISON_HIGHLIGHT_HEX.accent;
 }
 function refreshDirectMeshVisuals(){
   getDirectRenderableMeshes().forEach(mesh=>{
     const type=normalizeElementType(mesh.userData.type);
     const selected=isSelectedElement(mesh.userData);
     const typeHighlighted=Boolean(activeTypeHighlight)&&type===activeTypeHighlight;
+    const comparisonHex=resolveMemberComparisonHighlightHex(mesh.userData);
     if(renderMode==='contour'&&mesh.userData?.contourGeometryKind==='surface'){
       applySurfaceContourShaderMaterial(mesh,contourContext||computeContourContext());
       return;
@@ -2563,7 +2876,12 @@ function refreshDirectMeshVisuals(){
       mesh.material.needsUpdate=true;
     }
     if(mesh.material.emissive){
-      mesh.material.emissive.setHex(selected?SELECTION_HIGHLIGHT_HEX:typeHighlighted?TYPE_HIGHLIGHT_HEX:0x000000);
+      const emissiveHex=selected
+        ?SELECTION_HIGHLIGHT_HEX
+        :(comparisonHex||typeHighlighted)
+          ?comparisonHex||TYPE_HIGHLIGHT_HEX
+          :0x000000;
+      mesh.material.emissive.setHex(emissiveHex);
     }
   });
 }
@@ -3102,6 +3420,8 @@ function init(){
   const vp=document.getElementById('viewport');
   applySavedThemeMode();
   updateSuiteRouteTabs();
+  refreshWorkspaceStateFromUrl();
+  renderProjectWorkspacePanel();
   updateMidas33ViewToolbarVisibility();
   activeIsolation=readIsolationStateFromQuery();
   const clipState=readStoryClipStateFromQuery();
@@ -3490,8 +3810,7 @@ function renderShellSummary(summary){
   });
 }
 function isMidas33PresetActive(){
-  const preset=getRequestedPreset();
-  return preset==='midas33'||preset==='midas33_pr'||preset==='midas33_optimized';
+  return isMidas33PresetToken(getRequestedPreset());
 }
 function updateMidas33ViewToolbarVisibility(){
   const toolbar=document.getElementById('midas33-view-toolbar');
@@ -3574,6 +3893,182 @@ function renderRealDrawingQualityPanel(data=modelData,{focusQuery=false}={}){
     setQualityFilter:setRealDrawingQualityFilter,
     setAssetQuery:setRealDrawingAssetQuery,
     setBrowserSort:setRealDrawingBrowserSort,
+  });
+}
+function refreshWorkspaceStateFromUrl(){
+  workspaceState=resolveWorkspaceStateFromSearch(window.location.search,{
+    manifest:projectManifest,
+    legacyPreset:new URLSearchParams(window.location.search).get('preset')||getRequestedPreset(),
+  });
+  workspaceState.manifest=projectManifest;
+  syncWorkspaceResolvedGlobals();
+  return workspaceState;
+}
+function navigateProjectWorkspace(overrides={}){
+  const href=buildWorkspaceUrl(window.location.href,{...workspaceState,manifest:projectManifest},overrides);
+  window.location.href=href;
+}
+function setProjectWorkspaceProject(projectId=''){
+  const project=projectManifest.projects.find(row=>row.project_id===normalizeSelectionValue(projectId));
+  const drawing=project?.drawings?.[0];
+  navigateProjectWorkspace({
+    projectId:project?.project_id||projectId,
+    drawingId:drawing?.drawing_id||'',
+    variant:drawing?.variants?.find(row=>row.variant==='optimized')?.variant||drawing?.variants?.[0]?.variant||'optimized',
+  });
+}
+function setProjectWorkspaceDrawing(drawingId=''){
+  navigateProjectWorkspace({drawingId,variant:'optimized'});
+}
+function setProjectWorkspaceVariant(variant='optimized'){
+  navigateProjectWorkspace({variant});
+}
+function setProjectWorkspaceFilter(filter='all'){
+  workspaceState.filter=normalizeSelectionValue(filter)||'all';
+  const url=new URL(window.location.href);
+  if(workspaceState.filter&&workspaceState.filter!=='all')url.searchParams.set('filter',workspaceState.filter);
+  else url.searchParams.delete('filter');
+  window.history.replaceState({},'',url);
+  renderProjectWorkspacePanel();
+}
+function setProjectWorkspaceSearch(query=''){
+  workspaceState.drawingQuery=normalizeSelectionValue(query);
+  const url=new URL(window.location.href);
+  if(workspaceState.drawingQuery)url.searchParams.set('drawing_query',workspaceState.drawingQuery);
+  else url.searchParams.delete('drawing_query');
+  window.history.replaceState({},'',url);
+  renderProjectWorkspacePanel();
+}
+function updateMemberComparisonHighlights(model={}){
+  activeComparisonHighlightFilter=normalizeSelectionValue(model.filter)||'changed';
+  activeComparisonHighlightMemberIds=new Set((Array.isArray(model.highlightMemberIds)?model.highlightMemberIds:[]).map(normalizeSelectionValue).filter(Boolean));
+  activeComparisonHighlightToneByMemberId=new Map(Object.entries(model.highlightToneByMemberId||{}).map(([memberId,tone])=>[
+    normalizeSelectionValue(memberId),
+    normalizeSelectionValue(tone)||'accent',
+  ]));
+  window.__STRUCTURE_VIEWER_COMPARISON_HIGHLIGHT_STATE__={
+    filter:activeComparisonHighlightFilter,
+    count:activeComparisonHighlightMemberIds.size,
+    memberIds:[...activeComparisonHighlightMemberIds],
+  };
+  refreshDirectMeshVisuals();
+  refreshInstancedVisuals();
+}
+function setMemberComparisonFilter(filter='changed'){
+  memberComparisonFilter=normalizeSelectionValue(filter)||'changed';
+  auditWorkspaceEvent('member_comparison_filter_changed',memberComparisonFilter,resolveSelectionMemberId(selectedElementData));
+  rememberWorkspaceState();
+  renderProjectWorkspacePanel();
+}
+function selectMemberFromComparison(memberId=''){
+  const normalized=normalizeSelectionValue(memberId);
+  if(!normalized||normalized==='manifest_member_delta')return;
+  const record=(modelData?.elements||[]).find(element=>normalizeSelectionValue(resolveSelectionMemberId(element)||element.id)===normalized);
+  if(record)showProperties(record,{publish:true});
+}
+function renderProjectWorkspacePanel(){
+  const section=document.getElementById('project-workspace-section');
+  if(!(section instanceof HTMLElement))return;
+  const model=buildProjectBrowserModel(projectManifest,workspaceState);
+  const projectSelect=document.getElementById('project-workspace-select');
+  if(projectSelect instanceof HTMLSelectElement){
+    projectSelect.innerHTML=model.projects.map(project=>`<option value="${escapeHtml(project.projectId)}"${project.active?' selected':''}>${escapeHtml(project.projectTitle)} (${project.drawingCount})</option>`).join('');
+  }
+  const filterSelect=document.getElementById('project-workspace-filter');
+  if(filterSelect instanceof HTMLSelectElement){
+    filterSelect.innerHTML=model.filterOptions.map(option=>`<option value="${escapeHtml(option.key)}"${option.key===model.filter?' selected':''}>${escapeHtml(option.label)}</option>`).join('');
+  }
+  const queryInput=document.getElementById('project-workspace-query');
+  if(queryInput instanceof HTMLInputElement&&queryInput.value!==model.drawingQuery){
+    queryInput.value=model.drawingQuery||'';
+  }
+  const status=document.getElementById('project-workspace-status');
+  if(status){
+    const active=model.activeDrawing;
+    status.textContent=active
+      ?`${model.activeProject?.project_title||'Project'} | ${active.drawing_title} | ${active.commercial_review_status} | visible ${model.drawings.length}/${model.activeProject?.drawings?.length||0} | total ${model.summary.drawingCount} drawings`
+      :'No drawings registered';
+  }
+  const variantButtons=['baseline','optimized','compare'];
+  variantButtons.forEach(key=>{
+    const button=document.getElementById(`btn-variant-${key}`);
+    if(!(button instanceof HTMLButtonElement))return;
+    const hasVariant=Boolean(model.activeDrawing?.variants?.some(row=>row.variant===key));
+    button.disabled=!hasVariant;
+    button.classList.toggle('is-active',workspaceState.variant===key);
+  });
+  const list=document.getElementById('project-drawing-list');
+  if(list instanceof HTMLElement){
+    list.innerHTML=buildProjectDrawingListHtml(model.drawings);
+    list.querySelectorAll('[data-project-drawing]').forEach(button=>{
+      button.addEventListener('click',()=>setProjectWorkspaceDrawing(button.getAttribute('data-project-drawing')||''));
+    });
+  }
+  const evidencePanel=document.getElementById('project-drawing-evidence-panel');
+  if(evidencePanel instanceof HTMLElement){
+    evidencePanel.innerHTML=buildProjectEvidencePanelHtml(model.activeEvidence||{});
+  }
+  const comparisonPanel=document.getElementById('before-after-comparison-panel');
+  if(comparisonPanel instanceof HTMLElement){
+    const memberComparison=buildMemberComparisonModel({
+      data:modelData||{},
+      workspace:workspaceState,
+      filter:memberComparisonFilter,
+    });
+    updateMemberComparisonHighlights(memberComparison);
+    comparisonPanel.innerHTML=buildMemberComparisonPanelHtml(memberComparison);
+    comparisonPanel.querySelectorAll('[data-member-comparison-filter]').forEach(button=>{
+      button.addEventListener('click',()=>setMemberComparisonFilter(button.getAttribute('data-member-comparison-filter')||'changed'));
+    });
+    comparisonPanel.querySelectorAll('[data-member-comparison-member]').forEach(button=>{
+      button.addEventListener('click',()=>selectMemberFromComparison(button.getAttribute('data-member-comparison-member')||''));
+    });
+  }
+  const recent=document.getElementById('project-recent-list');
+  if(recent instanceof HTMLElement){
+    const ops=readLocalOpsState();
+    const recentRows=Array.isArray(ops.recentSelections)?ops.recentSelections:[];
+    recent.innerHTML=buildProjectRecentListHtml(recentRows);
+    recent.querySelectorAll('[data-project-recent-project]').forEach(button=>{
+      button.addEventListener('click',()=>navigateProjectWorkspace({
+        projectId:button.getAttribute('data-project-recent-project')||'',
+        drawingId:button.getAttribute('data-project-recent-drawing')||'',
+        variant:button.getAttribute('data-project-recent-variant')||'optimized',
+      }));
+    });
+  }
+}
+function renderExplainabilityPanel(element=selectedElementData){
+  const panel=document.getElementById('explainability-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const explanation=buildViewerExplainabilityModel({
+    data:modelData||{},
+    element,
+    selection:getCurrentSelectionState(),
+    workspace:workspaceState,
+  });
+  panel.innerHTML=buildSelectionInspectorHtml(explanation,{hasElement:Boolean(element)});
+}
+function renderReportExportPanel(){
+  const panel=document.getElementById('viewer-report-export-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const ops=readLocalOpsState();
+  const lastExport=Array.isArray(ops.exportHistory)&&ops.exportHistory.length?ops.exportHistory[0]:null;
+  const comparison=buildOptimizationComparisonModel({
+    data:modelData||{},
+    workspace:workspaceState,
+  });
+  const memberId=resolveSelectionMemberId(selectedElementData)||'';
+  panel.innerHTML=buildReportExportPanelHtml({
+    workspace:workspaceState,
+    comparison,
+    drawingReview:buildDrawingReviewModel(workspaceState.drawing||{}),
+    lastExport,
+    reviewNote:getViewerReviewNote(ops,{
+      projectId:workspaceState.projectId,
+      drawingId:workspaceState.drawingId,
+      memberId,
+    }),
   });
 }
 function buildUI(data){
@@ -3721,6 +4216,9 @@ function buildUI(data){
   renderKpiSummary(statEntries);
   renderStatsPanel(statEntries);
   renderRealDrawingQualityPanel(data);
+  renderProjectWorkspacePanel();
+  renderExplainabilityPanel(selectedElementData);
+  renderReportExportPanel();
 }
 function renderLoadCaseList(data=modelData){
   const loadCaseList=document.getElementById('load-case-list');
@@ -3837,14 +4335,18 @@ function showProperties(d,{publish=true}={}){
   renderSectionEditPreview();
   updateProvenanceBlock();
   renderSearchResults(modelData);
+  renderExplainabilityPanel(d);
+  renderReportExportPanel();
+  auditWorkspaceEvent('member_selected','selection updated',resolveSelectionMemberId(d));
 }
 
 /* ── Render Modes ── */
 function setRenderMode(mode){
-  renderMode=mode;
-  document.querySelectorAll('[data-render-mode-button]').forEach(button=>button.classList.remove('active'));
-  document.getElementById('btn-'+mode)?.classList.add('active');
-  document.getElementById('legend-container').style.display=mode==='contour'?'block':'none';
+  renderMode=normalizeViewerRenderMode(mode,renderMode);
+  buildViewerRenderModeButtonStates(renderMode).forEach(state=>{
+    document.getElementById(state.buttonId)?.classList.toggle('active',state.active);
+  });
+  document.getElementById('legend-container').style.display=getViewerLegendDisplayForRenderMode(renderMode);
   updateRenderMode();
 }
 function updateRenderMode(){
@@ -4051,44 +4553,24 @@ function setViewerCameraPose({position,target,up}={}){
   defaultView={position:camera.position.clone(),target:controls.target.clone()};
   return true;
 }
-const MIDAS33_VIEW_PRESETS={
-  review:{label:'Review',mode:'solid',factors:{x:-.55,y:.85,z:.35},up:{x:0,y:0,z:1}},
-  frame:{label:'Frame',mode:'solid',factors:{x:.72,y:.56,z:.48},up:{x:0,y:0,z:1}},
-  plan:{label:'Plan',mode:'wireframe',factors:{x:.08,y:1.25,z:.18},up:{x:0,y:0,z:1}},
-};
 let activeMidas33ViewPreset='';
 function updateMidas33ViewPresetButtons(){
-  document.querySelectorAll('[data-view-preset-button]').forEach(button=>{
-    const id=button.id||'';
-    const key=id.replace('btn-view-','');
-    button.classList.toggle('active',Boolean(activeMidas33ViewPreset&&key===activeMidas33ViewPreset));
+  const states=buildMidas33ViewButtonStates(activeMidas33ViewPreset);
+  states.forEach(state=>{
+    const button=document.getElementById(`btn-view-${state.key}`);
+    if(button)button.classList.toggle('active',state.active);
   });
 }
-function resolveViewerCameraPoseFromFactors(factors={},up={x:0,y:0,z:1}){
-  const bounds=getViewerModelBounds();
-  if(!bounds)return null;
-  const target=bounds.center;
-  const radius=safeNumber(bounds.radius,1);
-  return{
-    target,
-    position:{
-      x:target.x+radius*safeNumber(factors.x,0),
-      y:target.y+radius*safeNumber(factors.y,0),
-      z:target.z+radius*safeNumber(factors.z,0)
-    },
-    up
-  };
-}
 function setMidas33ViewPreset(preset='review'){
-  const normalized=normalizeSelectionValue(preset)||'review';
+  const normalized=normalizeMidas33ViewPreset(preset);
   if(normalized==='fit'){
     fitAll();
     activeMidas33ViewPreset='fit';
     updateMidas33ViewPresetButtons();
     return true;
   }
-  const config=MIDAS33_VIEW_PRESETS[normalized]||MIDAS33_VIEW_PRESETS.review;
-  const pose=resolveViewerCameraPoseFromFactors(config.factors,config.up);
+  const config=getMidas33ViewPresetConfig(normalized);
+  const pose=buildMidas33CameraPoseFromBounds(getViewerModelBounds(),normalized);
   if(!pose)return false;
   if(config.mode&&renderMode!==config.mode)setRenderMode(config.mode);
   const applied=setViewerCameraPose(pose);
@@ -4160,10 +4642,22 @@ window.setRealDrawingQualityFilter=setRealDrawingQualityFilter;
 window.runSearchFocus=runSearchFocus;
 window.runSearchIsolate=runSearchIsolate;
 window.clearSearch=clearSearch;
+window.setProjectWorkspaceProject=setProjectWorkspaceProject;
+window.setProjectWorkspaceDrawing=setProjectWorkspaceDrawing;
+window.setProjectWorkspaceVariant=setProjectWorkspaceVariant;
+window.setProjectWorkspaceFilter=setProjectWorkspaceFilter;
+window.setProjectWorkspaceSearch=setProjectWorkspaceSearch;
+window.setMemberComparisonFilter=setMemberComparisonFilter;
 window.setStoryClipLabel=setStoryClipLabel;
 window.updateStoryClipPadding=updateStoryClipPadding;
 window.clearStoryClip=clearStoryClip;
 window.exportViewportPng=exportViewportPng;
+window.exportWorkspaceHtmlReport=exportWorkspaceHtmlReport;
+window.exportWorkspaceAuditJsonl=exportWorkspaceAuditJsonl;
+window.exportProjectBundleJson=exportProjectBundleJson;
+window.saveReviewNote=saveReviewNote;
+window.buildCurrentStructureViewerReportHtml=buildCurrentStructureViewerReportHtml;
+window.buildOptimizationComparisonModel=buildOptimizationComparisonModel;
 window.toggleLightMode=toggleLightMode;
 window.toggleShortcutHelp=toggleShortcutHelp;
 window.addEventListener('keydown',event=>{
@@ -4216,6 +4710,7 @@ selectionChannel?.addEventListener('message',()=>{
   renderSearchResults(modelData);
 });
 window.addEventListener('popstate',()=>{
+  refreshWorkspaceStateFromUrl();
   activeIsolation=readIsolationStateFromQuery();
   const clipState=readStoryClipStateFromQuery();
   activeStoryClipLabel=clipState.label;
@@ -4227,6 +4722,8 @@ window.addEventListener('popstate',()=>{
   if(selectedElementData)showProperties(selectedElementData,{publish:false});
   applyStoryClipPlanes();
   updateRenderMode();
+  renderProjectWorkspacePanel();
+  renderReportExportPanel();
   updateProvenanceBlock();
   renderSearchResults(modelData);
 });
@@ -4239,9 +4736,12 @@ try{
     await yieldToMainThread({message:'Building render geometry...',ensurePaint:true});
   }
   await buildModel(initial.data,initial.sourceMeta);
+  rememberWorkspaceState();
+  auditWorkspaceEvent('model_loaded','initial workspace model loaded');
 }catch(err){
   console.error('[Viewer] Failed to initialize real data path, using demo fallback.',err);
   await buildModel(generateDemoModel(),{mode:'demo',label:'emergency demo fallback'});
+  auditWorkspaceEvent('model_load_fallback','demo fallback used');
 }
 animate();
 fitAll();

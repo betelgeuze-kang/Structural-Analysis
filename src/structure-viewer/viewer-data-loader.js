@@ -52,11 +52,14 @@ export function normalizePresetToken(value) {
 
 export function getRequestedPreset(search = globalThis.window?.location?.search || '') {
   const params = new URLSearchParams(search);
-  return normalizePresetToken(params.get('preset') || params.get('model_preset') || '');
+  const explicitPreset = normalizePresetToken(params.get('preset') || params.get('model_preset') || '');
+  if (explicitPreset) return explicitPreset;
+  return normalizePresetToken(globalThis.window?.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__ || '');
 }
 
 export function buildArtifactCandidates(search = globalThis.window?.location?.search || '') {
   const params = new URLSearchParams(search);
+  const hasExplicitPreset = Boolean(normalizePresetToken(params.get('preset') || params.get('model_preset') || ''));
   const preset = getRequestedPreset(search);
   const presetCandidates = Array.isArray(ARTIFACT_PRESET_CANDIDATES[preset])
     ? ARTIFACT_PRESET_CANDIDATES[preset]
@@ -64,7 +67,10 @@ export function buildArtifactCandidates(search = globalThis.window?.location?.se
   const custom = [...params.getAll('artifact'), ...params.getAll('data')]
     .map(value => String(value || '').trim())
     .filter(Boolean);
-  return [...custom, ...presetCandidates, ...DEFAULT_ARTIFACT_CANDIDATES];
+  const workspaceArtifact = custom.length || hasExplicitPreset
+    ? ''
+    : String(globalThis.window?.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__ || '').trim();
+  return [...new Set([...custom, workspaceArtifact, ...presetCandidates, ...DEFAULT_ARTIFACT_CANDIDATES].filter(Boolean))];
 }
 
 export function getPresetSidecarPath(preset) {

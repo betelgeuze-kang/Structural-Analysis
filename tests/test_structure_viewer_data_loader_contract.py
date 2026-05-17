@@ -17,6 +17,8 @@ import {
 } from './src/structure-viewer/viewer-data-loader.js';
 
 const root = {
+  __STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__: 'midas33_optimized',
+  __STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__: 'workspace-artifact.json',
   __STRUCTURE_VIEWER_PAYLOAD__: {inline: true},
   __STRUCTURE_VIEWER_PRESET_PAYLOADS__: {
     real_drawing_private_3d: {
@@ -27,11 +29,14 @@ const root = {
     },
   },
 };
+globalThis.window = root;
 console.log(JSON.stringify({
   alias: normalizePresetToken('real drawings'),
   query: getRequestedPreset('?model_preset=real_drawing_3d'),
   sidecar: getPresetSidecarPath('real_drawings'),
+  workspacePreset: getRequestedPreset(''),
   candidates: buildArtifactCandidates('?preset=midas33_pr&artifact=custom.json').slice(0, 3),
+  workspaceCandidates: buildArtifactCandidates('').slice(0, 2),
   inlineLabel: readEmbeddedPayload({root})?.label || '',
   embedded: readEmbeddedPresetPayload('real_drawings', root)?.reportName || '',
 }));
@@ -48,7 +53,9 @@ console.log(JSON.stringify({
     assert payload["alias"] == "real_drawing_private_3d"
     assert payload["query"] == "real_drawing_private_3d"
     assert payload["sidecar"] == "./index.real_drawing_private.data.js"
+    assert payload["workspacePreset"] == "midas33_optimized"
     assert payload["candidates"][0] == "custom.json"
     assert payload["candidates"][1].endswith("midas_generator_33.pr_recheck.json")
+    assert payload["workspaceCandidates"][0] == "workspace-artifact.json"
     assert payload["inlineLabel"] == "window.__STRUCTURE_VIEWER_PAYLOAD__"
     assert payload["embedded"] == "fixture-report"

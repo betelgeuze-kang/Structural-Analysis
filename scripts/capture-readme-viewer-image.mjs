@@ -3,6 +3,11 @@ import http from 'node:http'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from '@playwright/test'
+import {
+  assertCanvasWellFramed,
+  installCanvasFrameProbe,
+  waitForCanvasNonBlank,
+} from './structure-viewer-canvas-frame.mjs'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
@@ -59,44 +64,6 @@ function createStaticServer() {
   })
 }
 
-async function waitForCanvasNonBlank(page) {
-  await page.waitForFunction(
-    () => {
-      const canvas = document.querySelector('#viewport canvas')
-      if (!(canvas instanceof HTMLCanvasElement) || canvas.width < 10 || canvas.height < 10) {
-        return false
-      }
-      const probe = document.createElement('canvas')
-      const width = Math.min(128, canvas.width)
-      const height = Math.min(128, canvas.height)
-      probe.width = width
-      probe.height = height
-      const context = probe.getContext('2d')
-      if (!context) {
-        return false
-      }
-      context.drawImage(canvas, 0, 0, width, height)
-      const pixels = context.getImageData(0, 0, width, height).data
-      let variedPixels = 0
-      for (let index = 0; index < pixels.length; index += 4) {
-        const red = pixels[index]
-        const green = pixels[index + 1]
-        const blue = pixels[index + 2]
-        const alpha = pixels[index + 3]
-        if (alpha > 0 && (red > 8 || green > 8 || blue > 8)) {
-          variedPixels += 1
-        }
-        if (variedPixels > 32) {
-          return true
-        }
-      }
-      return false
-    },
-    undefined,
-    { timeout: 45000 },
-  )
-}
-
 async function applyMidas33ReadmeCameraPose(page) {
   const result = await page.evaluate(({ preset, factors }) => {
     if (typeof window.setMidas33ViewPreset === 'function') {
@@ -137,6 +104,7 @@ async function applyMidas33ReadmeCameraPose(page) {
 async function capture(port) {
   const browser = await chromium.launch()
   const page = await browser.newPage({ viewport })
+  await installCanvasFrameProbe(page)
   const errors = []
   page.on('pageerror', (error) => errors.push(error.message))
   page.on('console', (message) => {
@@ -158,6 +126,12 @@ async function capture(port) {
     await page.getByRole('button', { name: 'Fit All' }).click({ timeout: 10000 }).catch(() => {})
     await applyMidas33ReadmeCameraPose(page)
     await page.waitForTimeout(1000)
+    await assertCanvasWellFramed(page, {
+      label: 'README MIDAS33 optimized capture',
+      minCoverageWidth: 0.12,
+      minCoverageHeight: 0.14,
+      maxAspectRatio: 6,
+    })
     if (errors.length > 0) {
       throw new Error(`Viewer console/page errors while capturing README image:\n${errors.join('\n')}`)
     }

@@ -1515,6 +1515,464 @@ body.structural-surface .quality-filter-button.is-active {
   color:var(--accent);
 }
 
+body.structural-surface .project-workspace-controls {
+  gap:9px;
+}
+
+body.structural-surface .project-variant-toolbar {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+}
+
+body.structural-surface .project-variant-toolbar button,
+body.structural-surface .project-drawing-button,
+body.structural-surface .project-recent-chip {
+  min-width:0;
+  min-height:32px;
+  border-radius:10px;
+  border:1px solid rgba(148,168,190,.18);
+  background:rgba(15,23,42,.42);
+  color:var(--text);
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+body.structural-surface.light-mode .project-variant-toolbar button,
+body.structural-surface.light-mode .project-drawing-button,
+body.structural-surface.light-mode .project-recent-chip {
+  background:rgba(255,255,255,.72);
+  border-color:rgba(133,102,70,.14);
+}
+
+body.structural-surface .project-variant-toolbar button.is-active,
+body.structural-surface .project-drawing-button.is-active,
+body.structural-surface .project-recent-chip.is-active {
+  border-color:rgba(79,183,173,.52);
+  background:rgba(79,183,173,.15);
+  color:var(--accent);
+}
+
+body.structural-surface .project-drawing-list,
+body.structural-surface .project-recent-list {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  min-width:0;
+}
+
+body.structural-surface .project-drawing-button {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  padding:9px;
+  text-align:left;
+}
+
+body.structural-surface .project-drawing-button strong,
+body.structural-surface .project-drawing-button small {
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .project-drawing-button small {
+  margin-top:2px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+body.structural-surface .project-drawing-badges {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface .project-status-badge {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:22px;
+  padding:3px 7px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+body.structural-surface .project-status-badge--success,
+body.structural-surface .explainability-chip--success {
+  background:rgba(99,199,161,.16);
+  color:var(--success);
+}
+
+body.structural-surface .project-status-badge--warn,
+body.structural-surface .explainability-chip--warn {
+  background:rgba(230,169,93,.16);
+  color:var(--warn);
+}
+
+body.structural-surface .project-status-badge--danger,
+body.structural-surface .explainability-chip--danger {
+  background:rgba(239,125,115,.16);
+  color:var(--danger);
+}
+
+body.structural-surface .project-status-badge--accent,
+body.structural-surface .explainability-chip--accent {
+  background:rgba(79,183,173,.14);
+  color:var(--accent);
+}
+
+body.structural-surface .project-drawing-evidence-panel {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width:0;
+  padding:9px;
+  border:1px solid rgba(148,168,190,.16);
+  border-radius:10px;
+  background:rgba(15,23,42,.28);
+}
+
+body.structural-surface.light-mode .project-drawing-evidence-panel {
+  background:rgba(255,255,255,.58);
+  border-color:rgba(133,102,70,.12);
+}
+
+body.structural-surface .project-evidence-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+}
+
+body.structural-surface .project-evidence-header strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:11px;
+}
+
+body.structural-surface .project-evidence-grid {
+  display:grid;
+  grid-template-columns:minmax(82px,.52fr) minmax(0,1fr);
+  gap:5px 8px;
+  min-width:0;
+  font-size:10px;
+}
+
+body.structural-surface .project-evidence-grid span {
+  color:var(--muted);
+  font-weight:800;
+}
+
+body.structural-surface .project-evidence-grid strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:10px;
+  text-align:right;
+}
+
+body.structural-surface .project-evidence-variants {
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  min-width:0;
+}
+
+body.structural-surface .project-variant-chip {
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  max-width:100%;
+  padding:3px 7px;
+  border-radius:999px;
+  border:1px solid rgba(148,168,190,.16);
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .project-variant-chip.is-active {
+  border-color:rgba(79,183,173,.45);
+  background:rgba(79,183,173,.14);
+  color:var(--accent);
+}
+
+body.structural-surface .project-review-card,
+body.structural-surface .member-comparison-panel {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  min-width:0;
+  padding:9px;
+  border-radius:10px;
+  border:1px solid rgba(148,168,190,.16);
+  background:rgba(15,23,42,.24);
+}
+
+body.structural-surface .project-review-card strong,
+body.structural-surface .project-review-card span,
+body.structural-surface .project-review-card small {
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+
+body.structural-surface .project-review-card span,
+body.structural-surface .project-review-card small {
+  color:var(--muted);
+  font-size:10px;
+}
+
+body.structural-surface .project-issue-list {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+body.structural-surface .project-issue-row {
+  display:grid;
+  grid-template-columns:64px minmax(0,1fr);
+  gap:4px 7px;
+  padding:6px;
+  border-radius:8px;
+  background:rgba(148,168,190,.08);
+}
+
+body.structural-surface .project-issue-row strong {
+  font-size:9px;
+  text-transform:uppercase;
+}
+
+body.structural-surface .project-issue-row span,
+body.structural-surface .project-issue-row small {
+  min-width:0;
+  overflow-wrap:anywhere;
+  font-size:10px;
+}
+
+body.structural-surface .project-issue-row small {
+  grid-column:2;
+  color:var(--muted);
+}
+
+body.structural-surface .project-issue-row--danger strong { color:var(--danger); }
+body.structural-surface .project-issue-row--warn strong { color:var(--warn); }
+body.structural-surface .project-issue-row--accent strong,
+body.structural-surface .project-issue-row--success strong { color:var(--accent); }
+
+body.structural-surface .member-comparison-toolbar {
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+
+body.structural-surface .member-comparison-toolbar button {
+  min-height:26px;
+  padding:4px 7px;
+  border-radius:999px;
+  border:1px solid rgba(148,168,190,.16);
+  background:rgba(15,23,42,.42);
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+body.structural-surface .member-comparison-toolbar button.is-active {
+  border-color:rgba(79,183,173,.45);
+  background:rgba(79,183,173,.14);
+  color:var(--accent);
+}
+
+body.structural-surface .member-comparison-toolbar span {
+  color:var(--text);
+}
+
+body.structural-surface .member-comparison-highlight-status {
+  padding:7px 9px;
+  border-radius:6px;
+  border:1px solid rgba(37,99,235,.22);
+  background:rgba(37,99,235,.1);
+  color:#93c5fd;
+  font-size:10px;
+  font-weight:900;
+}
+
+body.structural-surface .member-comparison-summary {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+}
+
+body.structural-surface .member-comparison-summary div {
+  min-width:0;
+  padding:6px;
+  border-radius:8px;
+  background:rgba(148,168,190,.08);
+}
+
+body.structural-surface .member-comparison-summary span,
+body.structural-surface .member-comparison-summary small {
+  display:block;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+}
+
+body.structural-surface .member-comparison-table {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+body.structural-surface .member-comparison-row {
+  display:grid;
+  grid-template-columns:minmax(64px,.45fr) minmax(0,1fr);
+  gap:4px 7px;
+  width:100%;
+  padding:7px;
+  border-radius:8px;
+  border:1px solid rgba(148,168,190,.14);
+  background:rgba(15,23,42,.34);
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface .member-comparison-row span,
+body.structural-surface .member-comparison-row strong,
+body.structural-surface .member-comparison-row small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .member-comparison-row small {
+  grid-column:2;
+  color:var(--muted);
+}
+
+body.structural-surface .report-note-field textarea {
+  width:100%;
+  resize:vertical;
+}
+
+body.structural-surface .selection-inspector-groups {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+body.structural-surface .selection-inspector-group {
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+body.structural-surface .selection-inspector-group > strong {
+  color:var(--accent);
+  font-size:11px;
+}
+
+body.structural-surface .project-recent-list {
+  flex-direction:row;
+  overflow:auto;
+  padding-bottom:1px;
+}
+
+body.structural-surface .project-recent-chip {
+  max-width:112px;
+  padding:6px 8px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .explainability-header {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:8px;
+}
+
+body.structural-surface .explainability-header strong {
+  color:var(--text);
+  font-size:13px;
+}
+
+body.structural-surface .explainability-grid {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+body.structural-surface .explainability-row {
+  display:grid;
+  grid-template-columns:minmax(76px,.7fr) minmax(0,1fr);
+  gap:8px;
+  padding:7px 0;
+  border-bottom:1px solid rgba(148,168,190,.12);
+}
+
+body.structural-surface .explainability-row span,
+body.structural-surface .explainability-row strong,
+body.structural-surface .explainability-row small {
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+
+body.structural-surface .explainability-row span {
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .explainability-row strong {
+  color:var(--text);
+  font-size:12px;
+}
+
+body.structural-surface .explainability-row small {
+  display:block;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+body.structural-surface .explainability-checklist {
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  padding-top:4px;
+}
+
+body.structural-surface .explainability-checklist div {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  color:var(--muted);
+  font-size:11px;
+}
+
 body.structural-surface.light-mode .quality-filter-button {
   background:rgba(255,255,255,.68);
   border-color:rgba(133,102,70,.14);
