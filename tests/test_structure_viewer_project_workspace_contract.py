@@ -45,6 +45,9 @@ const legacyState = resolveWorkspaceStateFromSearch('?preset=midas33_optimized',
 const standardState = resolveWorkspaceStateFromSearch('?project=midas33_release&drawing=midas33_optimized&variant=baseline', {
   manifest,
 });
+const resumeState = resolveWorkspaceStateFromSearch('?project=midas33_release&drawing=midas33_optimized&variant=compare&comparison_filter=reduced&member=911', {
+  manifest,
+});
 const browser = buildProjectBrowserModel(manifest, {...standardState, filter: 'all'});
 const midasDrawing = browser.drawings.find((drawing) => drawing.drawingId === 'midas33_optimized');
 const prRecheckDrawing = browser.drawings.find((drawing) => drawing.drawingId === 'midas33_pr_recheck');
@@ -131,7 +134,7 @@ const review = validateDrawingQuality({
 const url = buildWorkspaceUrl('http://127.0.0.1/src/structure-viewer/index.html?member=911', {
   ...standardState,
   manifest,
-}, {variant: 'optimized'});
+}, {variant: 'optimized', comparisonFilter: 'reduced', memberId: '911'});
 
 console.log(JSON.stringify({
   schema: manifest.schema_version,
@@ -142,6 +145,12 @@ console.log(JSON.stringify({
     preset: legacyState.viewerPreset,
   },
   standardPreset: standardState.viewerPreset,
+  resumeState: {
+    projectId: resumeState.projectId,
+    drawingId: resumeState.drawingId,
+    variant: resumeState.variant,
+    comparisonFilter: resumeState.comparisonFilter,
+  },
   activeProject: browser.activeProject.project_id,
   drawingCount: browser.drawings.length,
   midasComparisonLabel: midasDrawing.comparisonLabel,
@@ -200,6 +209,12 @@ console.log(JSON.stringify({
         "preset": "midas33_optimized",
     }
     assert payload["standardPreset"] == "midas33"
+    assert payload["resumeState"] == {
+        "projectId": "midas33_release",
+        "drawingId": "midas33_optimized",
+        "variant": "compare",
+        "comparisonFilter": "reduced",
+    }
     assert payload["activeProject"] == "midas33_release"
     assert payload["drawingCount"] >= 1
     assert payload["midasComparisonLabel"] == "members 11,334 -> 2,242 (-80.2%)"
@@ -249,3 +264,5 @@ console.log(JSON.stringify({
     assert "load_model_missing" in payload["review"]["quality_flags"]
     assert "variant=optimized" in payload["url"]
     assert "preset=midas33_optimized" in payload["url"]
+    assert "comparison_filter=reduced" in payload["url"]
+    assert "member=911" in payload["url"]

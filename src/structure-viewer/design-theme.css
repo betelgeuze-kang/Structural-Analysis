@@ -1898,11 +1898,26 @@ body.structural-surface .project-recent-list {
 }
 
 body.structural-surface .project-recent-chip {
-  max-width:112px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  max-width:176px;
   padding:6px 8px;
+  overflow:hidden;
+  white-space:normal;
+}
+
+body.structural-surface .project-recent-chip strong,
+body.structural-surface .project-recent-chip small {
+  max-width:100%;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
+}
+
+body.structural-surface .project-recent-chip small {
+  color:var(--muted);
+  font-size:9px;
 }
 
 body.structural-surface .explainability-header {

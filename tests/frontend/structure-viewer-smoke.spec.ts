@@ -144,6 +144,8 @@ test('structure viewer renders MIDAS33 optimized model with view presets and sel
   await expect(page.locator('#before-after-comparison-panel')).toContainText('active reduced', { timeout: 30000 })
   await expect(page.locator('.member-comparison-highlight-status')).toHaveAttribute('data-member-comparison-highlight-count', /\d+/, { timeout: 30000 })
   await expect.poll(async () => page.evaluate(() => window.__STRUCTURE_VIEWER_COMPARISON_HIGHLIGHT_STATE__?.filter)).toBe('reduced')
+  await expect(page).toHaveURL(/comparison_filter=reduced/)
+  await expect(page.locator('#project-recent-list')).toContainText('member')
   await page.locator('#review-note-input').fill('smoke review note')
   await page.getByRole('button', { name: 'Save Note' }).click()
   await expect(page.locator('#review-note-input')).toHaveValue('smoke review note', { timeout: 30000 })

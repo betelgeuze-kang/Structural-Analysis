@@ -571,7 +571,7 @@ let workspaceState=resolveWorkspaceStateFromSearch(window.location.search,{
 workspaceState.manifest=projectManifest;
 window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__=workspaceState.viewerPreset||'';
 window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__=workspaceState.viewerPreset?'':workspaceState.artifactPath||'';
-let memberComparisonFilter='changed';
+let memberComparisonFilter=normalizeSelectionValue(workspaceState.comparisonFilter)||'changed';
 
 /* ── State ── */
 let scene,camera,renderer,controls,raycaster,mouse;
@@ -3901,11 +3901,12 @@ function refreshWorkspaceStateFromUrl(){
     legacyPreset:new URLSearchParams(window.location.search).get('preset')||getRequestedPreset(),
   });
   workspaceState.manifest=projectManifest;
+  memberComparisonFilter=normalizeSelectionValue(workspaceState.comparisonFilter)||memberComparisonFilter||'changed';
   syncWorkspaceResolvedGlobals();
   return workspaceState;
 }
 function navigateProjectWorkspace(overrides={}){
-  const href=buildWorkspaceUrl(window.location.href,{...workspaceState,manifest:projectManifest},overrides);
+  const href=buildWorkspaceUrl(window.location.href,{...workspaceState,manifest:projectManifest,comparisonFilter:memberComparisonFilter},overrides);
   window.location.href=href;
 }
 function setProjectWorkspaceProject(projectId=''){
@@ -3956,6 +3957,10 @@ function updateMemberComparisonHighlights(model={}){
 }
 function setMemberComparisonFilter(filter='changed'){
   memberComparisonFilter=normalizeSelectionValue(filter)||'changed';
+  const url=new URL(window.location.href);
+  if(memberComparisonFilter&&memberComparisonFilter!=='changed')url.searchParams.set('comparison_filter',memberComparisonFilter);
+  else url.searchParams.delete('comparison_filter');
+  window.history.replaceState({},'',url);
   auditWorkspaceEvent('member_comparison_filter_changed',memberComparisonFilter,resolveSelectionMemberId(selectedElementData));
   rememberWorkspaceState();
   renderProjectWorkspacePanel();
@@ -4034,6 +4039,8 @@ function renderProjectWorkspacePanel(){
         projectId:button.getAttribute('data-project-recent-project')||'',
         drawingId:button.getAttribute('data-project-recent-drawing')||'',
         variant:button.getAttribute('data-project-recent-variant')||'optimized',
+        memberId:button.getAttribute('data-project-recent-member')||'',
+        comparisonFilter:button.getAttribute('data-project-recent-comparison-filter')||'changed',
       }));
     });
   }

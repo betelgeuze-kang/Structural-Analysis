@@ -37,7 +37,7 @@ npm run export:viewer-report-pdf -- --query "project=midas33_release&drawing=mid
 npm run verify:viewer-report-pdf
 ```
 
-- Local ops state: recent project selections, active member/filter, review notes, export history, and audit events are stored in browser local storage as a reference control-plane surface. Audit JSONL and project-bundle JSON export give demos/reviews a portable activity trail without turning the static viewer into a SaaS tenant store.
+- Local ops state: recent project selections, active member/filter, review notes, export history, and audit events are stored in browser local storage as a reference control-plane surface. Recent chips restore project, drawing, variant, member, and comparison filter through URL state (`member` and `comparison_filter`), while audit JSONL and project-bundle JSON export give demos/reviews a portable activity trail without turning the static viewer into a SaaS tenant store.
 
 ## Verification
 

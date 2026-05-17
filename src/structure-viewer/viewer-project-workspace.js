@@ -701,6 +701,7 @@ export function resolveWorkspaceStateFromSearch(search = '', {
     drawingTitle: drawing?.drawing_title || '',
     variant: variant?.variant || explicitVariant || 'optimized',
     filter: normalizeWorkspaceStatus(params.get('filter')) || normalizeToken(params.get('filter')) || 'all',
+    comparisonFilter: normalizeToken(params.get('comparison_filter')) || 'changed',
     drawingQuery: normalizeText(params.get('drawing_query')),
     viewerPreset: variant?.viewer_preset || drawing?.viewer_preset || normalizedLegacyPreset || '',
     artifactPath: variant?.artifact_path || drawing?.artifact_path || '',
@@ -717,6 +718,7 @@ export function buildWorkspaceUrl(href = '', state = {}, overrides = {}) {
   const drawingId = normalizeToken(overrides.drawingId ?? state.drawingId);
   const variantName = normalizeToken(overrides.variant ?? state.variant) || 'optimized';
   const filter = normalizeToken(overrides.filter ?? state.filter) || 'all';
+  const comparisonFilter = normalizeToken(overrides.comparisonFilter ?? state.comparisonFilter);
   const drawingQuery = normalizeText(overrides.drawingQuery ?? state.drawingQuery);
   const { project, drawing } = findWorkspaceDrawing(manifest, projectId, drawingId);
   const variant = findWorkspaceVariant(drawing, variantName);
@@ -727,6 +729,13 @@ export function buildWorkspaceUrl(href = '', state = {}, overrides = {}) {
   else url.searchParams.delete('filter');
   if (drawingQuery) url.searchParams.set('drawing_query', drawingQuery);
   else url.searchParams.delete('drawing_query');
+  if (comparisonFilter && comparisonFilter !== 'changed') url.searchParams.set('comparison_filter', comparisonFilter);
+  else url.searchParams.delete('comparison_filter');
+  if (Object.prototype.hasOwnProperty.call(overrides, 'memberId') || Object.prototype.hasOwnProperty.call(state, 'memberId')) {
+    const memberId = normalizeText(overrides.memberId ?? state.memberId);
+    if (memberId) url.searchParams.set('member', memberId);
+    else url.searchParams.delete('member');
+  }
   const preset = variant?.viewer_preset || drawing?.viewer_preset || '';
   if (preset) url.searchParams.set('preset', preset);
   else url.searchParams.delete('preset');

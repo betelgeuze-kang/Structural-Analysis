@@ -21,6 +21,7 @@ import {
   setViewerReviewNote,
   writeViewerLocalOpsState,
 } from './src/structure-viewer/viewer-local-ops-state.js';
+import {buildProjectRecentListHtml} from './src/structure-viewer/viewer-project-workspace-renderer.js';
 
 const store = new Map();
 const storageGet = (key) => store.get(key) || '';
@@ -81,6 +82,7 @@ console.log(JSON.stringify({
     memberId: '911',
   }),
   auditExport,
+  recentHtml: buildProjectRecentListHtml(reread.recentSelections),
   bundleExport: {
     filename: bundleExport.filename,
     payload: JSON.parse(bundleExport.json),
@@ -108,6 +110,9 @@ console.log(JSON.stringify({
     assert payload["auditExport"]["filename"] == "structure_viewer_audit_midas33_release_midas33_optimized.jsonl"
     assert payload["auditExport"]["eventCount"] == 1
     assert payload["auditExport"]["jsonl"].endswith("\n")
+    assert 'data-project-recent-member="911"' in payload["recentHtml"]
+    assert 'data-project-recent-comparison-filter="changed"' in payload["recentHtml"]
+    assert "member 911" in payload["recentHtml"]
     assert payload["bundleExport"]["filename"] == "structure_viewer_bundle_midas33_release_midas33_optimized.json"
     assert payload["bundleExport"]["payload"]["schema_version"] == "structure-viewer-project-bundle.v1"
     assert payload["bundleExport"]["payload"]["local_state"]["reviewNotes"]

@@ -68,6 +68,10 @@ export function buildMemberComparisonPanelHtml(model = {}) {
 
 export function buildProjectRecentListHtml(recentRows = []) {
   return recentRows.length
-    ? recentRows.slice(0, 6).map(row => `<button type="button" class="project-recent-chip" data-project-recent-project="${escapeHtml(row.projectId)}" data-project-recent-drawing="${escapeHtml(row.drawingId)}" data-project-recent-variant="${escapeHtml(row.variant)}">${escapeHtml(row.drawingId || row.label || 'recent')}</button>`).join('')
+    ? recentRows.slice(0, 6).map(row => {
+      const memberLabel = row.memberId ? ` · member ${row.memberId}` : '';
+      const filterLabel = row.filter ? ` · ${row.filter}` : '';
+      return `<button type="button" class="project-recent-chip" data-project-recent-project="${escapeHtml(row.projectId)}" data-project-recent-drawing="${escapeHtml(row.drawingId)}" data-project-recent-variant="${escapeHtml(row.variant)}" data-project-recent-member="${escapeHtml(row.memberId || '')}" data-project-recent-comparison-filter="${escapeHtml(row.filter || 'changed')}"><strong>${escapeHtml(row.drawingId || row.label || 'recent')}</strong><small>${escapeHtml(row.variant || 'optimized')}${escapeHtml(memberLabel)}${escapeHtml(filterLabel)}</small></button>`;
+    }).join('')
     : '<div class="panel-placeholder">Recent project selections appear here.</div>';
 }
