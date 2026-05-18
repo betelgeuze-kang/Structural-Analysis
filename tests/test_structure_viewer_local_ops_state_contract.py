@@ -13,11 +13,16 @@ def test_local_ops_state_keeps_recent_audit_jsonl_and_export_history() -> None:
 import {
   appendViewerAuditEvent,
   appendViewerExportHistory,
+  buildViewerProjectBundleImportPreview,
   buildViewerAuditJsonlExport,
   buildViewerProjectBundleExport,
   getViewerReviewNote,
+  getViewerReviewTask,
+  mergeViewerEvidenceIngestPreview,
+  mergeViewerProjectBundleImport,
   readViewerLocalOpsState,
   rememberViewerWorkspaceSelection,
+  setViewerReviewTask,
   setViewerReviewNote,
   writeViewerLocalOpsState,
 } from './src/structure-viewer/viewer-local-ops-state.js';
@@ -51,6 +56,36 @@ state = setViewerReviewNote(state, {
   note: 'verify DCR after section change',
   updatedAt: '2026-05-17T00:00:30Z',
 });
+state = setViewerReviewTask(state, {
+  projectId: 'midas33_release',
+  drawingId: 'midas33_optimized',
+  memberId: '911',
+  status: 'approved',
+  note: 'verify DCR after section change',
+  updatedAt: '2026-05-17T00:00:40Z',
+});
+state = {
+  ...state,
+  annotations: {'midas33_release::midas33_optimized::911': {text: 'field note'}},
+  receiptIndex: {'midas33_release::midas33_optimized::911': {
+    project_id: 'midas33_release',
+    drawing_id: 'midas33_optimized',
+    member_id: '911',
+    status: 'verified',
+    receipt_path: 'receipt.json',
+  }},
+  lastIngestPreview: {schema_version: 'structure-viewer-evidence-ingest-preview.v1', source_type: 'csv', drawing_count: 1, blocked_issues: []},
+  lastIngestRenderablePayload: {
+    schema_version: 'structure-viewer-renderable-ingest-payload.v1',
+    source_type: 'json',
+    source_name: 'renderable.json',
+    payload_kind: 'direct_model',
+    node_count: 2,
+    element_count: 1,
+    segment_count: 0,
+    payload: {model: {nodes: [{id: 1}, {id: 2}], elements: [{id: 'R-1', node_ids: [1, 2]}]}},
+  },
+};
 state = appendViewerExportHistory(state, {
   filename: 'structure_viewer_report_midas33_release_midas33_optimized_optimized.html',
   projectId: 'midas33_release',
@@ -72,6 +107,32 @@ const bundleExport = buildViewerProjectBundleExport(reread, {
   manifest: {schema_version: 'structure-viewer-project-manifest.v1'},
   generatedAt: '2026-05-17T00:03:00Z',
 });
+const preview = buildViewerProjectBundleImportPreview(JSON.parse(bundleExport.json), {
+  currentManifest: {projects: [{project_id: 'midas33_release', drawings: [{drawing_id: 'midas33_optimized'}]}]},
+});
+const merged = mergeViewerProjectBundleImport({reviewTasks: {}, receiptIndex: {}}, preview);
+const ingestMerged = mergeViewerEvidenceIngestPreview({receiptIndex: {}}, {
+  schema_version: 'structure-viewer-evidence-ingest-preview.v1',
+  source_type: 'csv',
+  row_count: 1,
+  drawing_count: 1,
+  blocked_issues: [],
+  manifest: {
+    projects: [{
+      project_id: 'midas33_release',
+      drawings: [{
+        drawing_id: 'midas33_optimized',
+        solver_receipts: [{
+          project_id: 'midas33_release',
+          drawing_id: 'midas33_optimized',
+          member_id: '912',
+          status: 'verified',
+          receipt_path: 'receipt-912.json',
+        }],
+      }],
+    }],
+  },
+});
 console.log(JSON.stringify({
   recent: reread.recentSelections[0],
   auditLine: JSON.parse(reread.auditEventsJsonl.split('\\n')[0]),
@@ -81,8 +142,24 @@ console.log(JSON.stringify({
     drawingId: 'midas33_optimized',
     memberId: '911',
   }),
+  task: getViewerReviewTask(reread, {
+    projectId: 'midas33_release',
+    drawingId: 'midas33_optimized',
+    memberId: '911',
+  }),
+  receiptIndexCount: Object.keys(reread.receiptIndex).length,
   auditExport,
   recentHtml: buildProjectRecentListHtml(reread.recentSelections),
+  preview: {
+    blocked: preview.blocked,
+    counts: preview.incoming_counts,
+    issues: preview.issues,
+  },
+  mergedTask: merged.reviewTasks['midas33_release::midas33_optimized::911'],
+  mergedReceipt: merged.receiptIndex['midas33_release::midas33_optimized::911'],
+  ingestPreview: reread.lastIngestPreview,
+  ingestRenderable: reread.lastIngestRenderablePayload,
+  ingestMergedReceipt: ingestMerged.receiptIndex['midas33_release::midas33_optimized::912'],
   bundleExport: {
     filename: bundleExport.filename,
     payload: JSON.parse(bundleExport.json),
@@ -107,6 +184,9 @@ console.log(JSON.stringify({
     assert payload["exportRow"]["filename"] == "structure_viewer_report_midas33_release_midas33_optimized_optimized.html"
     assert payload["exportRow"]["variant"] == "optimized"
     assert payload["note"] == "verify DCR after section change"
+    assert payload["task"]["status"] == "approved"
+    assert payload["task"]["auditTrail"][0]["status"] == "approved"
+    assert payload["receiptIndexCount"] == 1
     assert payload["auditExport"]["filename"] == "structure_viewer_audit_midas33_release_midas33_optimized.jsonl"
     assert payload["auditExport"]["eventCount"] == 1
     assert payload["auditExport"]["jsonl"].endswith("\n")
@@ -116,3 +196,15 @@ console.log(JSON.stringify({
     assert payload["bundleExport"]["filename"] == "structure_viewer_bundle_midas33_release_midas33_optimized.json"
     assert payload["bundleExport"]["payload"]["schema_version"] == "structure-viewer-project-bundle.v1"
     assert payload["bundleExport"]["payload"]["local_state"]["reviewNotes"]
+    assert payload["bundleExport"]["payload"]["local_state"]["reviewTasks"]
+    assert payload["bundleExport"]["payload"]["local_state"]["receiptIndex"]
+    assert payload["bundleExport"]["payload"]["local_state"]["lastIngestPreview"]["source_type"] == "csv"
+    assert payload["bundleExport"]["payload"]["local_state"]["lastIngestRenderablePayload"]["payload_kind"] == "direct_model"
+    assert payload["ingestRenderable"]["source_name"] == "renderable.json"
+    assert payload["preview"]["blocked"] is False
+    assert payload["preview"]["counts"]["reviewTasks"] == 1
+    assert payload["preview"]["counts"]["receiptIndex"] == 1
+    assert payload["mergedTask"]["status"] == "approved"
+    assert payload["mergedReceipt"]["status"] == "verified"
+    assert payload["ingestPreview"]["drawing_count"] == 1
+    assert payload["ingestMergedReceipt"]["receipt_path"] == "receipt-912.json"

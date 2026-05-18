@@ -84,6 +84,7 @@ def _command_groups(mode: str) -> list[list[str]]:
             "--fail-below",
             "9.0",
         ],
+        [_python(), "scripts/check_independent_product_readiness.py", "--json"],
         [_python(), "scripts/check_generated_worktree_clean.py", "--show-ok"],
         ["git", "diff", "--check"],
     ]

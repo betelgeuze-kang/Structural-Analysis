@@ -38,4 +38,8 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     assert output.index("verify:frontend-browser-smoke") < output.index("verify:viewer-report-pdf")
     assert "scripts/report_commercialization_level.py --closure-mode conditional --fail-below 9.0" in output
     assert output.index("verify:viewer-report-pdf") < output.index("scripts/report_commercialization_level.py")
+    assert "scripts/check_independent_product_readiness.py --json" in output
+    assert output.index("scripts/report_commercialization_level.py") < output.index(
+        "scripts/check_independent_product_readiness.py"
+    )
     assert "git diff --check" in output

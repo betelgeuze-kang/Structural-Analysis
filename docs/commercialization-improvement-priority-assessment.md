@@ -6,13 +6,14 @@
 
 ## 결론
 
-현재 단계는 **상용 보조툴 L3, 약 92%**로 본다.
+현재 단계는 **조건부 상용 운영 L4, 9.0/10**으로 본다.
 
-- 게이트 기반 공식 점수: **92/100**
-- 실무자 검토 전제 상용 보조툴 readiness: **91-92%**
+- 게이트 기반 공식 점수: **9.0/10** (`scripts/report_commercialization_level.py --closure-mode conditional`)
+- 실무자 검토 전제 상용 보조툴 readiness: **상용 운영 가능**
+- 독립 상용 구조해석제품 readiness: **blocked, 80/100** (`scripts/check_independent_product_readiness.py`)
 - 완전자율 상용 구조툴 대체 readiness: **55-60%**
 
-즉, 지금 상태는 "구조 엔지니어가 검토하면서 반복 업무를 크게 줄이는 상용 보조툴"에는 가까워졌지만, "검증/배포/운영/외부 벤치마크까지 닫힌 독립 상용 구조해석 제품"으로는 아직 부족하다.
+즉, 지금 상태는 "구조 엔지니어가 검토하면서 반복 업무를 크게 줄이는 상용 보조툴"에는 충분히 가까워졌지만, "검증/배포/운영/외부 벤치마크까지 닫힌 독립 상용 구조해석 제품"으로는 아직 부족하다.
 
 ## 현재 확인값
 
@@ -24,10 +25,13 @@
 | P1 execution | ready | publication evidence 기반 P1 readiness와 benchmark breadth가 unblocked |
 | P1 evidence sidecar structure | pass | `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open` 통과. EB/RH row 구조는 준비됨 |
 | source boundary inventory | pass | CI에서 `plan_source_boundary_cleanup.py --large-file-threshold-mib 25 --fail-on-candidates` 실행, 현재 후보 0건 |
-| 상용화 레벨 | L3 | `engineer_in_loop_commercial_assist_ready` |
-| 상용화 점수 | 9.2/10 | 게이트 기반 환산 92% |
+| 상용화 레벨 | L4 conditional | `commercial_operations_ready_with_evidence_closure`, strict evidence는 pending |
+| 상용화 점수 | 9.0/10 | 조건부 제품화 기준. 독립 제품 승격은 별도 readiness gate로 blocked |
 | 외부 benchmark receipt | 0/4 attached | strict evidence gate는 아직 pending. 외부 검증은 아직 claim 승격 근거로 쓰면 안 됨 |
 | residual holdout closure | 0/3 closed | strict evidence gate 기준 구조기술사/레거시툴/인허가성 검토 대기 영역 |
+| runtime production packaging | pass | strict Rust/HIP probe, SBOM, native artifact manifest, compatibility matrix가 `production_runtime_packaging_manifest.json`으로 연결됨 |
+| production ops/security gate | pass | auth/tenant/audit 계약과 no-default-secret production path가 readiness gate를 통과함 |
+| support bundle | pass | redaction, audit digest, roundtrip 가능한 support bundle manifest가 생성됨 |
 | frontend build | pass | `npm run build`, frontend build contract 통과 |
 | repo hygiene | pass | repo hygiene, generated artifact drift 통과 |
 | critical static lint | pass | `ruff --select F821,F601,F401,F841` 통과 |
@@ -66,7 +70,7 @@
 - 구조 웹뷰어의 side panel load-case inventory/layer toggle 계산을 `viewer-side-panel-model.js`로 분리했고, load-case fallback/active insertion 계약을 테스트로 고정했다.
 - 구조 웹뷰어의 member search result 중복 제거/selected/isolate 표시 계산을 `viewer-search-results-model.js`로 분리했고, applied section 검색 계약을 테스트로 고정했다.
 - 구조 웹뷰어의 selection key/summary/clear button state 계산을 `viewer-selection-summary-model.js`로 분리했고, multi-selection summary 계약을 테스트로 고정했다.
-- 상용화 레포트는 `7.0/10`에서 **`9.2/10`**으로 상승했다.
+- 상용화 레포트는 조건부 closure 기준 **`9.0/10`**을 보고한다.
 
 남은 strict blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
 
@@ -316,47 +320,52 @@
 3. golden output 또는 contract test로 기존 산출물 호환성 고정
 4. 신규 기능은 분리된 module에만 추가
 
-## 상용화 퍼센트 산정
+## 독립 상용제품 승격 산정
 
-현재 공식 게이트 기반 평가는 **75%**로 둔다. 이유는 아래와 같다.
+상용 보조툴 점수와 독립 상용제품 readiness는 분리한다.
 
-| 평가 축 | 가중치 | 현재 점수 | 가중 기여 |
+- 조건부 상용 운영 점수: **9.0/10**
+- 독립 상용 구조해석제품 readiness: `scripts/check_independent_product_readiness.py` 기준 blocked
+- 완전자율 상용 구조툴 대체 readiness: **55-60%**
+
+독립 상용제품 readiness는 아래 가중치로 본다.
+
+| 평가 축 | 가중치 | 현재 상태 | 가중 기여 |
 | --- | ---: | ---: | ---: |
-| core structural evidence | 25 | 88 | 22.0 |
-| release/evidence closure | 15 | 85 | 12.8 |
-| P1 validation/holdout readiness | 15 | 70 | 10.5 |
-| frontend/viewer productization | 15 | 70 | 10.5 |
-| code quality/CI maintainability | 15 | 65 | 9.8 |
-| runtime/ops/security productization | 15 | 55 | 8.3 |
-| 합계 | 100 | - | **73.9** |
-
-보수적 제품화 관점으로는 약 **74%**가 더 맞다. repo의 공식 상용화 리포트도 `commercialization_score=7.5/10`을 보고하므로 대외/내부 보고의 대표값은 **75%**로 잡는다.
+| P0 release/core evidence | 15 | closed | 15 |
+| P1 validation/benchmark breadth | 15 | ready | 15 |
+| strict EB/RH evidence | 20 | EB 0/4, RH 0/3 | 0 |
+| runtime production path | 15 | strict runtime + packaging manifest pass | 15 |
+| ops/security productization | 15 | no production default secret, auth/tenant/audit contract pass | 15 |
+| packaging/support | 10 | support bundle redaction/digest/roundtrip pass | 10 |
+| claim governance | 5 | synchronized | 5 |
+| source boundary | 5 | pass | 5 |
+| 합계 | 100 | - | **80** |
 
 따라서 현재 판정은 다음처럼 구분한다.
 
-- **75%**: 게이트 기반 상용 보조툴 readiness
-- **74%**: 유지보수/운영/배포 리스크까지 감안한 보수적 제품화 readiness
+- **9.0/10**: 조건부 상용 운영 readiness
+- **blocked / 80%**: 독립 상용 구조해석제품 readiness
 - **55-60%**: 완전자율 상용 구조툴 대체 readiness
 
 ## 단계 목표
 
 | 단계 | 목표 퍼센트 | 승격 조건 |
 | --- | ---: | --- |
-| 현재 | 75% | L3, P0/P1 execution unblocked, engineer-in-loop 상용 보조툴 |
-| 다음 목표 | 80-83% | EB/RH intake preflight 구조 완성, viewer regression 강화, generator 모듈 분리 |
-| L4 후보 | 85%+ | EB/RH evidence intake closed, viewer regression 안정화, runtime fallback/provenance 명확화 |
-| L5 후보 | 92%+ | 외부 benchmark receipt/closure, 운영 API/보안/배포 체계, 장기 regression lane 완료 |
+| 현재 | blocked / 80% | L4 conditional, P0/P1/runtime/ops/support ready, strict EB/RH pending |
+| 다음 목표 | 100% | EB/RH strict evidence sidecar closed, claim docs synchronized |
+| 독립 제품 후보 | 80%+ | runtime production path, ops/security, packaging/support gate closed |
+| 독립 제품 release | 100% | `check_independent_product_readiness.py --fail-blocked` 통과 |
 
 ## 바로 실행할 작업 순서
 
-1. EB/RH evidence intake template를 실제 sidecar preflight까지 연결
-2. `src/structure-viewer` 도면 선택/전환, shared selection, provenance UX 강화
-3. source/generated viewer 계약 테스트와 browser smoke/visual regression 추가
-4. 대형 open-data/generated artifact 경계 재정리
-5. zero-copy/native runtime path를 stub/contract와 실제 product path로 분리
-6. local ops API와 production API 요구사항 분리
-7. 대형 generator를 renderer/decision/data transform/CLI로 분리
-8. README와 상용화 문서의 claim을 L3/75% 기준으로 동기화
+1. EB receipt 4개에 실제 receipt URL/path 또는 formal hold evidence 연결
+2. RH 3개에 signed closure packet 또는 formal hold packet 연결
+3. `validate_p1_evidence_intake_manifest.py --json --fail-open`으로 no-write promotion lint 통과
+4. `build_p1_evidence_sidecar_updates.py --require-complete`로 sidecar 생성
+5. `preflight_p1_evidence_sidecar_intake.py --json --fail-open` strict evidence gate 통과
+6. `check_independent_product_readiness.py --fail-blocked`를 release promotion gate로 승격
+7. 대형 generator를 renderer/decision/data transform/CLI로 계속 분리
 
 ## claim 가이드
 

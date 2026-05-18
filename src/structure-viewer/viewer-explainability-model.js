@@ -1,3 +1,7 @@
+import {
+  buildViewerLineageDrilldownModel,
+} from './viewer-lineage-drilldown-model.js';
+
 function normalizeText(value) {
   return String(value ?? '').trim();
 }
@@ -106,6 +110,10 @@ export function buildViewerExplainabilityModel({
   element = null,
   selection = {},
   workspace = {},
+  reviewTask = null,
+  solverReceipt = null,
+  ingestPreview = null,
+  commercialCrosswalk = null,
 } = {}) {
   const meta = data?.meta && typeof data.meta === 'object' ? data.meta : {};
   const drawing = workspace?.drawing && typeof workspace.drawing === 'object' ? workspace.drawing : {};
@@ -164,7 +172,73 @@ export function buildViewerExplainabilityModel({
       tone: riskTone,
       source: 'D/C ratio',
     }),
+    row('Review task', reviewTask?.label || '확인 필요', {
+      evidenceLevel: reviewTask?.hasTask ? 'local audit state' : 'derived proxy',
+      tone: reviewTask?.tone || 'warn',
+      source: 'local ops state',
+    }),
+    row('Reviewer note', reviewTask?.note || '', {
+      evidenceLevel: reviewTask?.note ? 'local annotation' : 'missing evidence',
+      tone: reviewTask?.note ? 'accent' : 'warn',
+      source: 'local ops state',
+    }),
+    row('Solver receipt', solverReceipt?.label || 'solver receipt pending', {
+      evidenceLevel: solverReceipt?.evidence_level || 'missing evidence',
+      tone: solverReceipt?.tone || 'warn',
+      source: solverReceipt?.receipt_path || 'receipt index',
+    }),
+    row('Solver DCR', solverReceipt?.dcr_after !== null && solverReceipt?.dcr_after !== undefined
+      ? `${Number(solverReceipt.dcr_before ?? NaN).toFixed(3)} -> ${Number(solverReceipt.dcr_after).toFixed(3)}`
+      : '', {
+      evidenceLevel: solverReceipt?.dcr_after !== null && solverReceipt?.dcr_after !== undefined ? 'exact source' : 'missing evidence',
+      tone: solverReceipt?.tone || 'warn',
+      source: solverReceipt?.source_tool || 'solver receipt',
+    }),
+    row('Governing constraint', solverReceipt?.governing_constraint || '', {
+      evidenceLevel: solverReceipt?.governing_constraint ? 'exact source' : 'missing evidence',
+      tone: solverReceipt?.governing_constraint ? 'accent' : 'warn',
+      source: solverReceipt?.load_combo || 'solver receipt',
+    }),
   ];
+  const lineageDrilldown = buildViewerLineageDrilldownModel({
+    workspace,
+    element: selected,
+    selection,
+    reviewTask,
+    solverReceipt,
+    ingestPreview,
+  });
+  const lineageRows = lineageDrilldown.rows.map((item) => ({
+    label: item.label,
+    value: item.value,
+    evidence: item.evidence,
+    tone: item.tone,
+    source: item.source,
+  }));
+  const selectedCrosswalkRows = Array.isArray(commercialCrosswalk?.selectedRows) ? commercialCrosswalk.selectedRows : [];
+  const crosswalkRows = [
+    row('Commercial tool crosswalk', commercialCrosswalk?.summary || '', {
+      evidenceLevel: commercialCrosswalk?.counts?.total ? 'local ingest crosswalk' : 'missing evidence',
+      tone: commercialCrosswalk?.tone || 'warn',
+      source: 'CSV/JSON/IFC ingest',
+    }),
+    row('External member', selectedCrosswalkRows[0]?.externalMemberId || '', {
+      evidenceLevel: selectedCrosswalkRows.length ? selectedCrosswalkRows[0].evidence : 'missing evidence',
+      tone: selectedCrosswalkRows[0]?.tone || 'warn',
+      source: selectedCrosswalkRows[0]?.sourceTool || 'commercial tool row',
+    }),
+    row('External section', selectedCrosswalkRows[0]?.externalSection || '', {
+      evidenceLevel: selectedCrosswalkRows.length ? 'local ingest crosswalk' : 'missing evidence',
+      tone: selectedCrosswalkRows[0]?.status === 'section_mismatch' ? 'warn' : selectedCrosswalkRows[0]?.tone || 'warn',
+      source: selectedCrosswalkRows[0]?.story || 'commercial tool row',
+    }),
+    row('External DCR', selectedCrosswalkRows[0]?.externalDcr || '', {
+      evidenceLevel: selectedCrosswalkRows.length ? 'local ingest crosswalk' : 'missing evidence',
+      tone: selectedCrosswalkRows[0]?.status === 'dcr_mismatch' ? 'warn' : selectedCrosswalkRows[0]?.tone || 'warn',
+      source: selectedCrosswalkRows[0]?.receiptPath || 'commercial tool row',
+    }),
+  ];
+  const allRows = [...rows, ...lineageRows, ...crosswalkRows];
   const checklist = [
     {
       label: '하중 확인 필요',
@@ -180,7 +254,15 @@ export function buildViewerExplainabilityModel({
     },
     {
       label: '근거 누락 확인',
-      status: rows.some((item) => item.evidence === 'missing evidence') ? 'needs_review' : 'ready',
+      status: allRows.some((item) => item.evidence === 'missing evidence') ? 'needs_review' : 'ready',
+    },
+    {
+      label: '검토 태스크 확인',
+      status: reviewTask?.status === 'approved' ? 'ready' : reviewTask?.status === 'hold' || reviewTask?.status === 'rerun_required' ? 'blocked' : 'needs_review',
+    },
+    {
+      label: 'solver receipt 확인',
+      status: solverReceipt?.status === 'verified' ? 'ready' : solverReceipt?.status === 'mismatch' ? 'blocked' : 'needs_review',
     },
   ];
 
@@ -191,12 +273,19 @@ export function buildViewerExplainabilityModel({
     reviewTone: reviewStatus === 'ready' ? 'success' : reviewStatus === 'blocked' ? 'danger' : 'warn',
     sourceFamily,
     qualityFlags,
-    rows,
+    rows: allRows,
     groups: [
       { title: 'Identity', rows: rows.slice(0, 3) },
       { title: 'Demand / Usage', rows: rows.slice(3, 6) },
-      { title: 'Optimization Evidence', rows: rows.slice(6) },
+      { title: 'Optimization Evidence', rows: rows.slice(6, 10) },
+      { title: 'Review Task / Solver Receipt', rows: rows.slice(10) },
+      { title: 'Lineage Drilldown', rows: lineageRows },
+      { title: 'Commercial Tool Crosswalk', rows: crosswalkRows },
     ],
+    reviewTask,
+    solverReceipt,
+    lineageDrilldown,
+    commercialCrosswalk,
     checklist,
   };
 }

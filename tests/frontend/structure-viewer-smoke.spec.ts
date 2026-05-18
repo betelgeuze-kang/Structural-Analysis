@@ -139,22 +139,109 @@ test('structure viewer renders MIDAS33 optimized model with view presets and sel
   await expect(page.locator('#viewer-report-export-panel')).toContainText('Artifact count verified', { timeout: 30000 })
   await expect(page.locator('#viewer-report-export-panel')).toContainText('midas33_optimized_roundtrip.json', { timeout: 30000 })
   await expect(page.locator('#explainability-panel')).toContainText('단면 변경 확인', { timeout: 30000 })
+  await expect(page.locator('#explainability-panel')).toContainText('Solver receipt', { timeout: 30000 })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('Solver Receipt', { timeout: 30000 })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText(/solver receipt (verified|pending)/, { timeout: 30000 })
   await page.locator('[data-member-comparison-filter="reduced"]').click()
   await expect(page.locator('#before-after-comparison-panel')).toContainText('Manifest member count delta', { timeout: 30000 })
   await expect(page.locator('#before-after-comparison-panel')).toContainText('active reduced', { timeout: 30000 })
+  await expect(page.locator('#before-after-comparison-panel')).toContainText('overlay layer count', { timeout: 30000 })
   await expect(page.locator('.member-comparison-highlight-status')).toHaveAttribute('data-member-comparison-highlight-count', /\d+/, { timeout: 30000 })
   await expect.poll(async () => page.evaluate(() => window.__STRUCTURE_VIEWER_COMPARISON_HIGHLIGHT_STATE__?.filter)).toBe('reduced')
   await expect(page).toHaveURL(/comparison_filter=reduced/)
+  await page.locator('[data-member-comparison-overlay="risk_up"]').click()
+  await expect.poll(async () => page.evaluate(() => window.__STRUCTURE_VIEWER_COMPARISON_HIGHLIGHT_STATE__?.filter)).toBe('risk_up')
+  await expect(page).toHaveURL(/overlay=risk_up/)
   await expect(page.locator('#project-recent-list')).toContainText('member')
+  await page.locator('#review-task-status-select').selectOption('approved')
   await page.locator('#review-note-input').fill('smoke review note')
+  await page.getByRole('button', { name: 'Save Task' }).click()
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('승인', { timeout: 30000 })
   await page.getByRole('button', { name: 'Save Note' }).click()
   await expect(page.locator('#review-note-input')).toHaveValue('smoke review note', { timeout: 30000 })
+  await page.locator('#evidence-ingest-source-select').selectOption('csv')
+  await page.locator('#evidence-ingest-input').setInputFiles({
+    name: 'viewer-evidence.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(`drawing_id,artifact_path,member_count,node_count,element_count,member_id,source_tool,story,frame_section,dcr_after,receipt_path,status\nmidas33_optimized,viewer-evidence.csv,4,6,4,${selectedMember || '911'},ETABS 22,L33,SRC-900,0.93,receipt-911.json,verified\nmidas33_optimized,viewer-evidence.csv,4,6,4,${selectedMember || '911'},ETABS 22,L33,FORCED-MISMATCH,0.99,receipt-912.json,verified\n`),
+  })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('Evidence Ingest', { timeout: 30000 })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('csv · 2 drawings · 0 blocked', { timeout: 30000 })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('Tool Crosswalk', { timeout: 30000 })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('ETABS/SAP2000 2', { timeout: 30000 })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('CSV Mapper', { timeout: 30000 })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('frame / frame_id / object_id', { timeout: 30000 })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText(/section_mismatch|missing_viewer_member|dcr_mismatch/, { timeout: 30000 })
+  await page.locator('[data-commercial-crosswalk-member]:not([disabled])').first().click()
+  await expect(page.locator('#stage-selection-chip')).toContainText(selectedMember || '911', { timeout: 30000 })
+  await page.getByRole('button', { name: 'Isolate Mismatch' }).click()
+  await expect(page).toHaveURL(/isolate_kind=member/, { timeout: 30000 })
+  await expect(page.locator('#clear-isolate-button')).toBeVisible({ timeout: 30000 })
+  await expect.poll(async () => page.evaluate(() => window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__?.drawing_count)).toBe(2)
+  await expect(page.locator('#project-workspace-select')).toContainText('Evidence Ingest Preview', { timeout: 30000 })
+  await page.getByRole('button', { name: 'Attach Ingest' }).click()
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('Evidence Ingest', { timeout: 30000 })
+  await expect(page.locator('#project-workspace-select')).toContainText('Evidence Ingest Preview', { timeout: 30000 })
   await expect(page.locator('#project-drawing-list')).toContainText('-80.2%', { timeout: 30000 })
   await expect(page.locator('#project-drawing-list')).toContainText('verified counts', { timeout: 30000 })
   await expect(page.locator('#project-drawing-evidence-panel')).toContainText('MIDAS33 Optimized Roundtrip', { timeout: 30000 })
   await expect(page.locator('#project-drawing-evidence-panel')).toContainText('Count source', { timeout: 30000 })
   await expect(page.locator('#project-drawing-evidence-panel')).toContainText('midas33_optimized_roundtrip.json', { timeout: 30000 })
   await expect(page.locator('#project-drawing-evidence-panel')).toContainText('Optimized', { timeout: 30000 })
+  await page.locator('#evidence-ingest-source-select').selectOption('json')
+  await page.locator('#evidence-ingest-input').setInputFiles({
+    name: 'viewer-renderable.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify({
+      drawing_id: 'renderable_json_evidence',
+      drawing_title: 'Renderable JSON Evidence',
+      artifact_path: 'viewer-renderable.json',
+      member_count: 7,
+      node_count: 8,
+      element_count: 7,
+      model: {
+        nodes: [
+          { id: 1, x: 0, y: 0, z: 0 },
+          { id: 2, x: 6, y: 0, z: 0 },
+          { id: 3, x: 0, y: 0, z: 8 },
+          { id: 4, x: 6, y: 0, z: 8 },
+          { id: 5, x: 0, y: 5, z: 0 },
+          { id: 6, x: 6, y: 5, z: 0 },
+          { id: 7, x: 0, y: 5, z: 8 },
+          { id: 8, x: 6, y: 5, z: 8 },
+        ],
+        elements: [
+          {
+            id: 'R-1',
+            member_id: 'R-1',
+            type: 'beam',
+            node_ids: [1, 2],
+            section: 'JSON-B1',
+            material: 'SM490',
+            dcr: 0.72,
+            before_section: 'JSON-B2',
+            after_section: 'JSON-B1',
+          },
+          {
+            id: 'R-2',
+            member_id: 'R-2',
+            type: 'column',
+            node_ids: [2, 4],
+            section: 'JSON-C1',
+            material: 'SM490',
+            dcr: 0.88,
+          },
+          { id: 'R-3', member_id: 'R-3', type: 'column', node_ids: [1, 3], section: 'JSON-C1', material: 'SM490', dcr: 0.81 },
+          { id: 'R-4', member_id: 'R-4', type: 'beam', node_ids: [3, 4], section: 'JSON-B1', material: 'SM490', dcr: 0.67 },
+          { id: 'R-5', member_id: 'R-5', type: 'beam', node_ids: [5, 6], section: 'JSON-B1', material: 'SM490', dcr: 0.62 },
+          { id: 'R-6', member_id: 'R-6', type: 'column', node_ids: [6, 8], section: 'JSON-C1', material: 'SM490', dcr: 0.91 },
+          { id: 'R-7', member_id: 'R-7', type: 'beam', node_ids: [7, 8], section: 'JSON-B1', material: 'SM490', dcr: 0.74 },
+        ],
+      },
+    })),
+  })
+  await expect(page.locator('#viewer-report-export-panel')).toContainText('renderable direct_model', { timeout: 30000 })
+  await expect.poll(async () => page.evaluate(() => window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__?.payload_kind)).toBe('direct_model')
   const downloadPromise = page.waitForEvent('download')
   await page.locator('#report-panel-export-html-button').click()
   const download = await downloadPromise
@@ -163,7 +250,19 @@ test('structure viewer renders MIDAS33 optimized model with view presets and sel
   await page.getByRole('button', { name: 'Export Audit' }).click()
   const auditDownload = await auditDownloadPromise
   expect(auditDownload.suggestedFilename()).toContain('structure_viewer_audit_midas33_release_midas33_optimized.jsonl')
-  await expectNoBrowserErrors(errors)
+  const ingestErrors = await openViewer(
+    page,
+    { width: 1440, height: 1000 },
+    'project=evidence_ingest_preview&drawing=renderable_json_evidence&variant=optimized',
+  )
+  await expectCanvasReady(page)
+  await expect(page.locator('#project-workspace-status')).toContainText('Evidence Ingest Preview', { timeout: 30000 })
+  await expect(page.locator('#project-drawing-list')).toContainText('Renderable JSON Evidence', { timeout: 30000 })
+  await expect(page.locator('#project-drawing-evidence-panel')).toContainText('local evidence ingest preview', { timeout: 30000 })
+  await page.locator('#member-search-input').fill('R-1')
+  await expect(page.locator('#search-results')).toContainText('R-1', { timeout: 30000 })
+  await expect(page.locator('#data-source')).toContainText('viewer-renderable.json', { timeout: 30000 })
+  await expectNoBrowserErrors([...errors, ...ingestErrors])
 })
 
 test('structure viewer keeps the mobile real drawing workflow usable', async ({ page }) => {

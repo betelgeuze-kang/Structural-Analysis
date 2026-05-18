@@ -113,6 +113,32 @@ export const DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST = {
             report_path: 'implementation/phase1/release/visualization/entries/midas33_optimized_roundtrip.json',
             evidence_level: 'repo exact roundtrip',
           },
+          solver_receipts: [
+            {
+              schema_version: 'structure-viewer-solver-receipt.v1',
+              project_id: 'midas33_release',
+              drawing_id: 'midas33_optimized',
+              member_id: '911',
+              source_tool: 'MIDAS Gen',
+              load_combo: 'KDS_ULS_1',
+              dcr_before: 0.91,
+              dcr_after: 0.88,
+              governing_constraint: 'story drift limit',
+              status: 'verified',
+              receipt_path: 'implementation/phase1/release/visualization/entries/midas33_optimized_roundtrip.json',
+              evidence_level: 'repo exact roundtrip receipt slot',
+            },
+          ],
+          lineage: [
+            { stage: 'source_model', label: 'MIDAS33 baseline', path: 'implementation/phase1/open_data/midas/midas_generator_33.json' },
+            { stage: 'optimized_model', label: 'MIDAS33 optimized roundtrip', path: 'implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json' },
+            { stage: 'viewer_report', label: 'Release viewer evidence', path: 'implementation/phase1/release/visualization/entries/midas33_optimized_roundtrip.json' },
+          ],
+          ingest_summary: {
+            source_formats: ['midas_mgt', 'json'],
+            receipt_slots: 1,
+            status: 'viewer-first evidence hub ready',
+          },
           variants: [
             {
               variant: 'baseline',
@@ -401,6 +427,9 @@ export function buildDrawingEvidenceDrilldownModel(drawing = null, {
   const review = buildDrawingReviewModel(drawing);
   const qualityFlags = Array.isArray(drawing.quality_flags) ? drawing.quality_flags : [];
   const provenance = drawing.provenance && typeof drawing.provenance === 'object' ? drawing.provenance : {};
+  const solverReceipts = Array.isArray(drawing.solver_receipts) ? drawing.solver_receipts : [];
+  const lineage = Array.isArray(drawing.lineage) ? drawing.lineage : [];
+  const ingestSummary = drawing.ingest_summary && typeof drawing.ingest_summary === 'object' ? drawing.ingest_summary : {};
   const normalizedActiveVariant = normalizeToken(activeVariant) || 'optimized';
   const rows = [
     { label: 'Review status', value: normalizeWorkspaceStatus(drawing.commercial_review_status) || 'needs_review', tone: getWorkspaceStatusTone(drawing.commercial_review_status) },
@@ -412,6 +441,11 @@ export function buildDrawingEvidenceDrilldownModel(drawing = null, {
     { label: 'Baseline ref', value: normalizeText(drawing.baseline_ref) || '--', tone: 'neutral' },
     { label: 'Optimized ref', value: normalizeText(drawing.optimized_ref) || '--', tone: 'neutral' },
     { label: 'Artifact', value: normalizeText(drawing.artifact_path) || normalizeText(provenance.source_path) || '--', tone: 'neutral' },
+    { label: 'Solver receipts', value: solverReceipts.length ? `${solverReceipts.length} receipt slots` : 'no receipt slots', tone: solverReceipts.length ? 'success' : 'warn' },
+    { label: 'Lineage', value: lineage.length ? `${lineage.length} stages` : 'lineage pending', tone: lineage.length ? 'accent' : 'warn' },
+    { label: 'Ingest summary', value: normalizeText(ingestSummary.status || ingestSummary.source_formats?.join?.(', ')) || '--', tone: ingestSummary.status ? 'accent' : 'neutral' },
+    { label: 'Tool profiles', value: normalizeText(ingestSummary.commercial_tool_profiles_label) || '--', tone: ingestSummary.commercial_tool_profiles_label ? 'accent' : 'neutral' },
+    { label: 'Crosswalk candidates', value: Number.isFinite(Number(ingestSummary.crosswalk_candidate_count)) ? String(ingestSummary.crosswalk_candidate_count) : '--', tone: Number(ingestSummary.crosswalk_candidate_count) ? 'accent' : 'neutral' },
     { label: 'Quality flags', value: qualityFlags.length ? qualityFlags.join(', ') : 'no quality flags', tone: qualityFlags.length ? 'warn' : 'success' },
   ];
   const variants = (Array.isArray(drawing.variants) ? drawing.variants : []).map((variant) => ({
@@ -507,6 +541,9 @@ export function normalizeProjectManifestRow(row = {}, index = 0) {
     geometry_summary: normalizeGeometrySummary(row),
     quality_flags: uniqueFlags(row.quality_flags),
     commercial_review_status: normalizeWorkspaceStatus(row.commercial_review_status),
+    solver_receipts: Array.isArray(row.solver_receipts) ? row.solver_receipts : [],
+    lineage: Array.isArray(row.lineage) ? row.lineage : [],
+    ingest_summary: row.ingest_summary && typeof row.ingest_summary === 'object' ? row.ingest_summary : {},
     provenance: row.provenance && typeof row.provenance === 'object'
       ? row.provenance
       : {
@@ -593,6 +630,9 @@ export function normalizeProjectManifest(manifest = DEFAULT_STRUCTURE_VIEWER_PRO
             commercial_review_status: quality.commercial_review_status,
             computed_review_status: quality.computed_review_status,
             provenance: drawing?.provenance && typeof drawing.provenance === 'object' ? drawing.provenance : {},
+            solver_receipts: Array.isArray(drawing?.solver_receipts) ? drawing.solver_receipts : [],
+            lineage: Array.isArray(drawing?.lineage) ? drawing.lineage : [],
+            ingest_summary: drawing?.ingest_summary && typeof drawing.ingest_summary === 'object' ? drawing.ingest_summary : {},
           };
         })
         .filter((drawing) => drawing.drawing_id);
@@ -609,6 +649,122 @@ export function normalizeProjectManifest(manifest = DEFAULT_STRUCTURE_VIEWER_PRO
     generated_at: normalizeText(manifest?.generated_at),
     projects,
   };
+}
+
+function cloneDrawingForIngestWorkspace(drawing = {}, index = 0, {
+  sourceType = '',
+  rowCount = 0,
+  drawingCount = 0,
+  blockedIssueCount = 0,
+  commercialToolProfiles = {},
+  crosswalkCandidateCount = 0,
+  fallbackViewerPreset = '',
+  fallbackArtifactPath = '',
+} = {}) {
+  const fallbackPreset = normalizeToken(fallbackViewerPreset);
+  const fallbackArtifact = normalizeText(fallbackArtifactPath);
+  const originalArtifact = normalizeText(drawing.artifact_path || drawing.provenance?.source_path);
+  const variants = (Array.isArray(drawing.variants) && drawing.variants.length
+    ? drawing.variants
+    : [{ variant: 'optimized', label: 'Ingest Preview', artifact_path: originalArtifact }]
+  ).map((variant) => ({
+    ...variant,
+    label: normalizeText(variant?.label || variant?.variant) || 'Ingest Preview',
+    viewer_preset: normalizeToken(variant?.viewer_preset) || fallbackPreset,
+    artifact_path: normalizeText(variant?.artifact_path) || fallbackArtifact || originalArtifact,
+  }));
+  return {
+    ...drawing,
+    drawing_id: normalizeToken(drawing.drawing_id || `ingest_drawing_${index + 1}`),
+    drawing_title: normalizeText(drawing.drawing_title || drawing.title || drawing.drawing_id) || `Ingest Drawing ${index + 1}`,
+    source_family: normalizeText(drawing.source_family) || sourceType || 'evidence_ingest',
+    artifact_path: originalArtifact || fallbackArtifact,
+    viewer_preset: normalizeToken(drawing.viewer_preset) || fallbackPreset,
+    variants,
+    provenance: {
+      ...(drawing.provenance && typeof drawing.provenance === 'object' ? drawing.provenance : {}),
+      source_path: originalArtifact || normalizeText(drawing.provenance?.source_path) || 'local evidence ingest',
+      evidence_level: normalizeText(drawing.provenance?.evidence_level) || `${sourceType || 'evidence'} ingest preview`,
+    },
+    lineage: [
+      ...(Array.isArray(drawing.lineage) ? drawing.lineage : []),
+      {
+        stage: 'evidence_ingest_preview',
+        label: `${sourceType || 'evidence'} ingest preview`,
+        path: originalArtifact || 'browser local file',
+      },
+    ],
+    ingest_summary: {
+      ...(drawing.ingest_summary && typeof drawing.ingest_summary === 'object' ? drawing.ingest_summary : {}),
+      source_type: sourceType || normalizeText(drawing.source_family) || 'evidence',
+      row_count: rowCount,
+      drawing_count: drawingCount,
+      blocked_issue_count: blockedIssueCount,
+      commercial_tool_profiles: commercialToolProfiles,
+      commercial_tool_profiles_label: Object.entries(commercialToolProfiles || {})
+        .map(([profile, count]) => `${profile}:${count}`)
+        .join(', '),
+      crosswalk_candidate_count: crosswalkCandidateCount,
+      status: 'local evidence ingest preview',
+      preview_only: true,
+    },
+  };
+}
+
+export function buildRuntimeProjectManifest(baseManifest = DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST, {
+  ingestPreview = null,
+  fallbackWorkspace = {},
+  previewProjectId = 'evidence_ingest_preview',
+  previewProjectTitle = 'Evidence Ingest Preview',
+} = {}) {
+  const base = normalizeProjectManifest(baseManifest);
+  const previewManifest = normalizeProjectManifest(ingestPreview?.manifest || { projects: [] });
+  const previewDrawings = previewManifest.projects.flatMap((project) => (
+    (Array.isArray(project.drawings) ? project.drawings : []).map((drawing) => ({
+      project,
+      drawing,
+    }))
+  ));
+  if (!previewDrawings.length) return base;
+  const sourceType = normalizeToken(ingestPreview?.source_type) || 'evidence';
+  const rowCount = safeNumber(ingestPreview?.row_count, 0);
+  const drawingCount = safeNumber(ingestPreview?.drawing_count, previewDrawings.length);
+  const blockedIssueCount = Array.isArray(ingestPreview?.blocked_issues) ? ingestPreview.blocked_issues.length : 0;
+  const commercialToolProfiles = ingestPreview?.commercial_tool_profiles && typeof ingestPreview.commercial_tool_profiles === 'object'
+    ? ingestPreview.commercial_tool_profiles
+    : {};
+  const crosswalkCandidateCount = safeNumber(ingestPreview?.crosswalk_candidate_count, 0);
+  const fallbackViewerPreset = normalizeToken(fallbackWorkspace.viewerPreset || fallbackWorkspace.preset || 'midas33_optimized');
+  const fallbackArtifactPath = normalizeText(fallbackWorkspace.artifactPath);
+  const seen = new Map();
+  const drawings = previewDrawings.map(({ drawing }, index) => {
+    const cloned = cloneDrawingForIngestWorkspace(drawing, index, {
+      sourceType,
+      rowCount,
+      drawingCount,
+      blockedIssueCount,
+      commercialToolProfiles,
+      crosswalkCandidateCount,
+      fallbackViewerPreset,
+      fallbackArtifactPath,
+    });
+    const count = seen.get(cloned.drawing_id) || 0;
+    seen.set(cloned.drawing_id, count + 1);
+    return count ? { ...cloned, drawing_id: `${cloned.drawing_id}_${count + 1}` } : cloned;
+  });
+  return normalizeProjectManifest({
+    schema_version: STRUCTURE_VIEWER_PROJECT_MANIFEST_SCHEMA_VERSION,
+    generated_at: normalizeText(ingestPreview?.generated_at) || base.generated_at,
+    projects: [
+      ...base.projects.filter((project) => project.project_id !== normalizeToken(previewProjectId)),
+      {
+        project_id: previewProjectId,
+        project_title: `${previewProjectTitle} (${sourceType.toUpperCase()})`,
+        ingest_preview: true,
+        drawings,
+      },
+    ],
+  });
 }
 
 export function summarizeProjectManifest(manifest = DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST) {
@@ -702,6 +858,9 @@ export function resolveWorkspaceStateFromSearch(search = '', {
     variant: variant?.variant || explicitVariant || 'optimized',
     filter: normalizeWorkspaceStatus(params.get('filter')) || normalizeToken(params.get('filter')) || 'all',
     comparisonFilter: normalizeToken(params.get('comparison_filter')) || 'changed',
+    taskStatus: normalizeToken(params.get('task')),
+    overlay: normalizeToken(params.get('overlay')),
+    receiptMemberId: normalizeText(params.get('receipt')),
     drawingQuery: normalizeText(params.get('drawing_query')),
     viewerPreset: variant?.viewer_preset || drawing?.viewer_preset || normalizedLegacyPreset || '',
     artifactPath: variant?.artifact_path || drawing?.artifact_path || '',
@@ -719,6 +878,9 @@ export function buildWorkspaceUrl(href = '', state = {}, overrides = {}) {
   const variantName = normalizeToken(overrides.variant ?? state.variant) || 'optimized';
   const filter = normalizeToken(overrides.filter ?? state.filter) || 'all';
   const comparisonFilter = normalizeToken(overrides.comparisonFilter ?? state.comparisonFilter);
+  const taskStatus = normalizeToken(overrides.taskStatus ?? state.taskStatus);
+  const overlay = normalizeToken(overrides.overlay ?? state.overlay);
+  const receiptMemberId = normalizeText(overrides.receiptMemberId ?? state.receiptMemberId);
   const drawingQuery = normalizeText(overrides.drawingQuery ?? state.drawingQuery);
   const { project, drawing } = findWorkspaceDrawing(manifest, projectId, drawingId);
   const variant = findWorkspaceVariant(drawing, variantName);
@@ -731,6 +893,12 @@ export function buildWorkspaceUrl(href = '', state = {}, overrides = {}) {
   else url.searchParams.delete('drawing_query');
   if (comparisonFilter && comparisonFilter !== 'changed') url.searchParams.set('comparison_filter', comparisonFilter);
   else url.searchParams.delete('comparison_filter');
+  if (taskStatus) url.searchParams.set('task', taskStatus);
+  else url.searchParams.delete('task');
+  if (overlay) url.searchParams.set('overlay', overlay);
+  else url.searchParams.delete('overlay');
+  if (receiptMemberId) url.searchParams.set('receipt', receiptMemberId);
+  else url.searchParams.delete('receipt');
   if (Object.prototype.hasOwnProperty.call(overrides, 'memberId') || Object.prototype.hasOwnProperty.call(state, 'memberId')) {
     const memberId = normalizeText(overrides.memberId ?? state.memberId);
     if (memberId) url.searchParams.set('member', memberId);

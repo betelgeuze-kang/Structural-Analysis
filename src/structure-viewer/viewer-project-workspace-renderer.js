@@ -55,8 +55,15 @@ export function buildMemberComparisonPanelHtml(model = {}) {
     <div class="member-comparison-toolbar">
       ${filters.map(option => `<button type="button" class="${option.key === model.filter ? 'is-active' : ''}" data-member-comparison-filter="${escapeHtml(option.key)}">${escapeHtml(option.label)} <span>${escapeHtml(option.count)}</span></button>`).join('')}
     </div>
+    <div class="member-comparison-toolbar member-comparison-overlay-toolbar">
+      <button type="button" data-member-comparison-overlay="changed">Overlay changed</button>
+      <button type="button" data-member-comparison-overlay="risk_up">Overlay risk up</button>
+      <button type="button" data-member-comparison-overlay="reduced">Overlay reduced</button>
+      <button type="button" data-member-comparison-isolate="changed">Isolate changed</button>
+      <button type="button" data-member-comparison-isolate="risk_up">Isolate risk up</button>
+    </div>
     <div class="member-comparison-highlight-status" data-member-comparison-highlight-count="${escapeHtml(model.highlightCount || 0)}">
-      3D highlight ${escapeHtml(model.highlightCount || 0)} exact members · active ${escapeHtml(model.filter || 'changed')}
+      3D highlight ${escapeHtml(model.highlightCount || 0)} exact members · active ${escapeHtml(model.filter || 'changed')} · overlay layer count ${escapeHtml(model.highlightCount || 0)}
     </div>
     <div class="member-comparison-summary">
       ${rows.map(row => `<div><span>${escapeHtml(row.label)}</span><strong class="prop-value--${escapeHtml(row.tone)}">${escapeHtml(row.value)}</strong><small>${escapeHtml(row.evidence)}</small></div>`).join('')}

@@ -515,6 +515,7 @@ import {
 import {
   DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST,
   buildProjectBrowserModel,
+  buildRuntimeProjectManifest,
   buildWorkspaceUrl,
   normalizeProjectManifest,
   resolveWorkspaceStateFromSearch,
@@ -538,8 +539,16 @@ import {
   buildMemberComparisonModel,
 } from './viewer-member-comparison-model.js';
 import {
+  buildCommercialToolCrosswalkModel,
+  buildCommercialToolCsvMapperModel,
+} from './viewer-commercial-tool-crosswalk-model.js';
+import {
   buildDrawingReviewModel,
 } from './viewer-drawing-review-model.js';
+import {
+  buildDrawingSheetPackage,
+  buildDrawingSheetPackageReportRows,
+} from './viewer-drawing-sheet-package-model.js';
 import {
   buildStructureViewerReportExport,
 } from './viewer-report-export.js';
@@ -547,14 +556,28 @@ import {
   buildReportExportPanelHtml,
 } from './viewer-report-panel-renderer.js';
 import {
+  buildEvidenceIngestPreviewFromText,
+  extractRenderableEvidencePayloadFromText,
+} from './viewer-evidence-ingest-model.js';
+import {
+  buildReviewTaskModel,
+} from './viewer-review-task-model.js';
+import {
+  buildSolverReceiptModel,
+} from './viewer-solver-receipt-model.js';
+import {
   VIEWER_LOCAL_OPS_STATE_KEY,
   appendViewerAuditEvent,
   appendViewerExportHistory,
+  buildViewerProjectBundleImportPreview,
   buildViewerProjectBundleExport,
   buildViewerAuditJsonlExport,
   getViewerReviewNote,
   readViewerLocalOpsState,
   rememberViewerWorkspaceSelection,
+  mergeViewerEvidenceIngestPreview,
+  mergeViewerProjectBundleImport,
+  setViewerReviewTask,
   setViewerReviewNote,
   writeViewerLocalOpsState,
 } from './viewer-local-ops-state.js';
@@ -563,7 +586,23 @@ const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
   modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,
   directModelNormalizer: new URL('./viewer-direct-model-normalizer.js', import.meta.url).href,
 };
-const projectManifest=normalizeProjectManifest(DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST);
+const baseProjectManifest=normalizeProjectManifest(DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST);
+function readStartupLocalOpsState(){
+  return readViewerLocalOpsState({
+    storageKey:VIEWER_LOCAL_OPS_STATE_KEY,
+    storageGet:(key)=>{
+      try{return window.localStorage.getItem(key)}catch(_err){return null}
+    },
+  });
+}
+const startupWorkspaceState=resolveWorkspaceStateFromSearch(window.location.search,{
+  manifest:baseProjectManifest,
+  legacyPreset:new URLSearchParams(window.location.search).get('preset')||'',
+});
+let projectManifest=buildRuntimeProjectManifest(baseProjectManifest,{
+  ingestPreview:readStartupLocalOpsState().lastIngestPreview,
+  fallbackWorkspace:startupWorkspaceState,
+});
 let workspaceState=resolveWorkspaceStateFromSearch(window.location.search,{
   manifest:projectManifest,
   legacyPreset:new URLSearchParams(window.location.search).get('preset')||'',
@@ -571,7 +610,8 @@ let workspaceState=resolveWorkspaceStateFromSearch(window.location.search,{
 workspaceState.manifest=projectManifest;
 window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__=workspaceState.viewerPreset||'';
 window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__=workspaceState.viewerPreset?'':workspaceState.artifactPath||'';
-let memberComparisonFilter=normalizeSelectionValue(workspaceState.comparisonFilter)||'changed';
+let memberComparisonFilter=normalizeSelectionValue(workspaceState.overlay||workspaceState.comparisonFilter)||'changed';
+let commercialToolMapperProfile='auto';
 
 /* ── State ── */
 let scene,camera,renderer,controls,raycaster,mouse;
@@ -831,6 +871,24 @@ function writeLocalOpsState(state){
     storageKey:VIEWER_LOCAL_OPS_STATE_KEY,
   });
 }
+function rebuildRuntimeProjectManifest({fallbackWorkspace=workspaceState}={}){
+  projectManifest=buildRuntimeProjectManifest(baseProjectManifest,{
+    ingestPreview:readLocalOpsState().lastIngestPreview,
+    fallbackWorkspace,
+  });
+  workspaceState.manifest=projectManifest;
+  return projectManifest;
+}
+function isEvidenceIngestPreviewWorkspaceActive(){
+  const params=new URLSearchParams(window.location.search||'');
+  return normalizeSelectionValue(params.get('project'))==='evidence_ingest_preview'
+    || normalizeSelectionValue(workspaceState.projectId)==='evidence_ingest_preview';
+}
+function getRuntimeIngestRenderablePayload(){
+  const payload=readLocalOpsState().lastIngestRenderablePayload;
+  if(!payload||typeof payload!=='object'||!payload.payload)return null;
+  return payload;
+}
 function rememberWorkspaceState(){
   const next=rememberViewerWorkspaceSelection(readLocalOpsState(),{
     projectId:workspaceState.projectId,
@@ -842,10 +900,11 @@ function rememberWorkspaceState(){
   });
   writeLocalOpsState(next);
 }
-function auditWorkspaceEvent(type,note='',memberId=''){
+function auditWorkspaceEvent(type,note='',memberId='',extra={}){
   const next=appendViewerAuditEvent(readLocalOpsState(),{
     type,
     note,
+    status:extra.status||'',
     projectId:workspaceState.projectId,
     drawingId:workspaceState.drawingId,
     variant:workspaceState.variant,
@@ -853,6 +912,43 @@ function auditWorkspaceEvent(type,note='',memberId=''){
     filter:memberComparisonFilter,
   });
   writeLocalOpsState(next);
+}
+function getActiveReviewMemberId(element=selectedElementData){
+  return resolveSelectionMemberId(element)||getCurrentSelectionState().memberId||'';
+}
+function buildActiveReviewTask(element=selectedElementData,ops=readLocalOpsState()){
+  const memberId=getActiveReviewMemberId(element);
+  return buildReviewTaskModel({
+    state:ops,
+    workspace:workspaceState,
+    memberId,
+    note:getViewerReviewNote(ops,{
+      projectId:workspaceState.projectId,
+      drawingId:workspaceState.drawingId,
+      memberId,
+    }),
+  });
+}
+function buildActiveSolverReceipt(element=selectedElementData,ops=readLocalOpsState()){
+  return buildSolverReceiptModel({
+    workspace:workspaceState,
+    state:ops,
+    memberId:getActiveReviewMemberId(element),
+    element,
+  });
+}
+function buildActiveCommercialToolCrosswalk(element=selectedElementData,ops=readLocalOpsState()){
+  return buildCommercialToolCrosswalkModel({
+    data:modelData||{},
+    ingestPreview:ops.lastIngestPreview,
+    memberId:getActiveReviewMemberId(element),
+  });
+}
+function buildActiveCommercialToolMapper(ops=readLocalOpsState()){
+  return buildCommercialToolCsvMapperModel({
+    profile:commercialToolMapperProfile||'auto',
+    ingestPreview:ops.lastIngestPreview,
+  });
 }
 function captureViewerCanvasDataUrl(){
   try{
@@ -1061,6 +1157,18 @@ function buildSvgReviewLinks(data){
   return candidates
     .map(row=>({label:row.label,href:buildSvgReviewUrl(row.sheet,memberId)}))
     .filter(row=>Boolean(row.href));
+}
+function buildActiveDrawingSheetPackage(element=selectedElementData){
+  const sheetPackage=buildDrawingSheetPackage({
+    workspace:workspaceState,
+    selectedElement:element,
+    sheetLinks:buildSvgReviewLinks(element||{}),
+    deepLinkUrl:buildCurrentDeepLinkUrl(),
+  });
+  return{
+    ...sheetPackage,
+    rows:buildDrawingSheetPackageReportRows(sheetPackage),
+  };
 }
 function resolveSelectionMemberId(data){
   return normalizeSelectionValue(data?.member_id||data?.case_id||data?.id);
@@ -1354,11 +1462,20 @@ async function exportViewportPng(){
   }
 }
 function buildCurrentStructureViewerReportHtml(){
+  const ops=readLocalOpsState();
+  const reviewTask=buildActiveReviewTask(selectedElementData,ops);
+  const solverReceipt=buildActiveSolverReceipt(selectedElementData,ops);
+  const commercialCrosswalk=buildActiveCommercialToolCrosswalk(selectedElementData,ops);
+  const commercialMapper=buildActiveCommercialToolMapper(ops);
   const explanation=buildViewerExplainabilityModel({
     data:modelData||{},
     element:selectedElementData,
     selection:getCurrentSelectionState(),
     workspace:workspaceState,
+    reviewTask,
+    solverReceipt,
+    ingestPreview:ops.lastIngestPreview,
+    commercialCrosswalk,
   });
   const comparison=buildOptimizationComparisonModel({
     data:modelData||{},
@@ -1370,6 +1487,7 @@ function buildCurrentStructureViewerReportHtml(){
     workspace:workspaceState,
     filter:memberComparisonFilter,
   });
+  const drawingSheetPackage=buildActiveDrawingSheetPackage(selectedElementData);
   return buildStructureViewerReportExport({
     workspace:workspaceState,
     data:modelData||{},
@@ -1378,8 +1496,15 @@ function buildCurrentStructureViewerReportHtml(){
     comparison,
     drawingReview,
     memberComparison,
+    reviewTask,
+    solverReceipt,
+    commercialCrosswalk,
+    commercialMapper,
+    importPreview:ops.lastImportPreview,
+    ingestPreview:ops.lastIngestPreview,
+    drawingSheetPackage,
     screenshotDataUrl:captureViewerCanvasDataUrl(),
-    reviewNote:getViewerReviewNote(readLocalOpsState(),{
+    reviewNote:getViewerReviewNote(ops,{
       projectId:workspaceState.projectId,
       drawingId:workspaceState.drawingId,
       memberId:resolveSelectionMemberId(selectedElementData)||'',
@@ -1446,6 +1571,30 @@ function saveReviewNote(){
   auditWorkspaceEvent('review_note_saved',note,memberId);
   renderReportExportPanel();
 }
+function saveReviewTask(){
+  const statusInput=document.getElementById('review-task-status-select');
+  const noteInput=document.getElementById('review-note-input');
+  const status=statusInput instanceof HTMLSelectElement?statusInput.value:'needs_check';
+  const note=noteInput instanceof HTMLTextAreaElement?noteInput.value:'';
+  const memberId=getActiveReviewMemberId(selectedElementData);
+  let next=setViewerReviewTask(readLocalOpsState(),{
+    projectId:workspaceState.projectId,
+    drawingId:workspaceState.drawingId,
+    memberId,
+    status,
+    note,
+  });
+  next=setViewerReviewNote(next,{
+    projectId:workspaceState.projectId,
+    drawingId:workspaceState.drawingId,
+    memberId,
+    note,
+  });
+  writeLocalOpsState(next);
+  auditWorkspaceEvent('review_task_saved',note,memberId,{status});
+  renderExplainabilityPanel(selectedElementData);
+  renderReportExportPanel();
+}
 function exportProjectBundleJson(){
   const exportPayload=buildViewerProjectBundleExport(readLocalOpsState(),{
     projectId:workspaceState.projectId,
@@ -1463,6 +1612,127 @@ function exportProjectBundleJson(){
   });
   writeLocalOpsState(next);
   auditWorkspaceEvent('project_bundle_exported',exportPayload.filename,resolveSelectionMemberId(selectedElementData));
+  renderReportExportPanel();
+}
+async function previewProjectBundleImportFromInput(event){
+  const input=event?.target;
+  const file=input instanceof HTMLInputElement?input.files?.[0]:null;
+  if(!file)return;
+  try{
+    const text=await file.text();
+    const payload=JSON.parse(text);
+    const preview=buildViewerProjectBundleImportPreview(payload,{currentManifest:projectManifest});
+    const next={...readLocalOpsState(),lastImportPreview:preview};
+    writeLocalOpsState(next);
+    auditWorkspaceEvent('project_bundle_import_previewed',file.name,resolveSelectionMemberId(selectedElementData),{
+      status:preview.blocked?'blocked':'mergeable',
+    });
+  }catch(err){
+    const preview={
+      schema_version:'structure-viewer-project-bundle-import-preview.v1',
+      blocked:true,
+      issues:[{severity:'critical',issue:'import parse failed',value:String(err?.message||err)}],
+      incoming_counts:{reviewTasks:0,receiptIndex:0},
+    };
+    writeLocalOpsState({...readLocalOpsState(),lastImportPreview:preview});
+    auditWorkspaceEvent('project_bundle_import_preview_failed',String(err?.message||err),resolveSelectionMemberId(selectedElementData),{status:'blocked'});
+  }finally{
+    if(input instanceof HTMLInputElement)input.value='';
+    renderReportExportPanel();
+  }
+}
+function mergeProjectBundleImportPreview(){
+  const ops=readLocalOpsState();
+  const preview=ops.lastImportPreview;
+  if(!preview){
+    renderReportExportPanel();
+    return;
+  }
+  const next=mergeViewerProjectBundleImport(ops,preview);
+  writeLocalOpsState(next);
+  auditWorkspaceEvent('project_bundle_import_merged',preview.blocked?'blocked import skipped':'merged',resolveSelectionMemberId(selectedElementData),{
+    status:preview.blocked?'blocked':'merged',
+  });
+  renderProjectWorkspacePanel();
+  renderExplainabilityPanel(selectedElementData);
+  renderReportExportPanel();
+}
+function inferEvidenceIngestSourceType(file=null){
+  const select=document.getElementById('evidence-ingest-source-select');
+  const requested=select instanceof HTMLSelectElement?normalizeSelectionValue(select.value):'auto';
+  if(requested&&requested!=='auto')return requested;
+  const name=normalizeSelectionValue(file?.name).toLowerCase();
+  if(name.endsWith('.csv'))return 'csv';
+  if(name.endsWith('.ifc'))return 'ifc';
+  return 'json';
+}
+async function previewEvidenceIngestFromInput(event){
+  const input=event?.target;
+  const file=input instanceof HTMLInputElement?input.files?.[0]:null;
+  if(!file)return;
+  try{
+    const sourceType=inferEvidenceIngestSourceType(file);
+    const text=await file.text();
+    const generatedAt=new Date().toISOString();
+    const preview=buildEvidenceIngestPreviewFromText(text,{
+      sourceType,
+      projectId:workspaceState.projectId||'ingested_project',
+      projectTitle:workspaceState.projectTitle||'Ingested Evidence Project',
+      artifactPath:file.name,
+      generatedAt,
+    });
+    const renderable=extractRenderableEvidencePayloadFromText(text,{
+      sourceType,
+      sourceName:file.name,
+      generatedAt,
+    });
+    window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
+    window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=renderable;
+    writeLocalOpsState({
+      ...readLocalOpsState(),
+      lastIngestPreview:preview,
+      lastIngestRenderablePayload:renderable,
+    });
+    rebuildRuntimeProjectManifest({fallbackWorkspace:workspaceState});
+    auditWorkspaceEvent('evidence_ingest_previewed',file.name,resolveSelectionMemberId(selectedElementData),{
+      status:preview.blocked_issues?.length?'needs_review':'ready',
+    });
+  }catch(err){
+    const preview={
+      schema_version:'structure-viewer-evidence-ingest-preview.v1',
+      source_type:'unknown',
+      row_count:0,
+      drawing_count:0,
+      blocked_issues:[{drawing_id:workspaceState.drawingId||'',issue:'evidence ingest parse failed',quality_flags:[String(err?.message||err)]}],
+      manifest:{schema_version:'structure-viewer-project-manifest.v1',projects:[]},
+    };
+    window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
+    window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=null;
+    writeLocalOpsState({...readLocalOpsState(),lastIngestPreview:preview,lastIngestRenderablePayload:null});
+    rebuildRuntimeProjectManifest({fallbackWorkspace:workspaceState});
+    auditWorkspaceEvent('evidence_ingest_preview_failed',String(err?.message||err),resolveSelectionMemberId(selectedElementData),{status:'blocked'});
+  }finally{
+    if(input instanceof HTMLInputElement)input.value='';
+    renderProjectWorkspacePanel();
+    renderReportExportPanel();
+  }
+}
+function attachEvidenceIngestPreview(){
+  const ops=readLocalOpsState();
+  const preview=ops.lastIngestPreview;
+  if(!preview){
+    renderReportExportPanel();
+    return;
+  }
+  const next=mergeViewerEvidenceIngestPreview(ops,preview);
+  writeLocalOpsState(next);
+  rebuildRuntimeProjectManifest({fallbackWorkspace:workspaceState});
+  auditWorkspaceEvent('evidence_ingest_attached',`${preview.source_type||'unknown'}:${preview.drawing_count||0}`,resolveSelectionMemberId(selectedElementData),{
+    status:preview.blocked_issues?.length?'needs_review':'attached',
+  });
+  workspaceState.manifest=projectManifest;
+  renderExplainabilityPanel(selectedElementData);
+  renderProjectWorkspacePanel();
   renderReportExportPanel();
 }
 function renderSelectionPlaceholder(){
@@ -3268,6 +3538,33 @@ async function tryFetchArtifact(candidate){
   return{payload,resolvedPath:url.href,label:candidate,loadedAt:new Date().toISOString()};
 }
 async function loadInitialModelData(){
+  const runtimeIngestPayload=getRuntimeIngestRenderablePayload();
+  if(runtimeIngestPayload&&isEvidenceIngestPreviewWorkspaceActive()){
+    setLoadingMessage(`Loading local evidence ingest model: ${runtimeIngestPayload.source_name||'JSON payload'}...`);
+    const loadedAt=new Date().toISOString();
+    try{
+      const normalized=await normalizeLoadedPayload(runtimeIngestPayload.payload,{
+        mode:'local_evidence_ingest',
+        label:runtimeIngestPayload.source_name||'Evidence ingest JSON',
+        resolvedPath:runtimeIngestPayload.source_name||'browser local evidence ingest',
+        loadedAt,
+      });
+      if(normalized){
+        window.__STRUCTURE_VIEWER_RUNTIME_INGEST_PAYLOAD__=runtimeIngestPayload;
+        return{
+          data:normalized,
+          sourceMeta:{
+            mode:'local_evidence_ingest',
+            label:runtimeIngestPayload.source_name||'Evidence ingest JSON',
+            resolvedPath:runtimeIngestPayload.source_name||'browser local evidence ingest',
+            loadedAt,
+          },
+        };
+      }
+    }catch(err){
+      console.warn('[Viewer] Unable to load local evidence ingest renderable payload:',err);
+    }
+  }
   const preset=getRequestedPreset();
   if(preset){
     setLoadingMessage(`Resolving preset payload: ${preset}...`);
@@ -3896,6 +4193,7 @@ function renderRealDrawingQualityPanel(data=modelData,{focusQuery=false}={}){
   });
 }
 function refreshWorkspaceStateFromUrl(){
+  rebuildRuntimeProjectManifest({fallbackWorkspace:workspaceState});
   workspaceState=resolveWorkspaceStateFromSearch(window.location.search,{
     manifest:projectManifest,
     legacyPreset:new URLSearchParams(window.location.search).get('preset')||getRequestedPreset(),
@@ -3960,6 +4258,8 @@ function setMemberComparisonFilter(filter='changed'){
   const url=new URL(window.location.href);
   if(memberComparisonFilter&&memberComparisonFilter!=='changed')url.searchParams.set('comparison_filter',memberComparisonFilter);
   else url.searchParams.delete('comparison_filter');
+  if(memberComparisonFilter&&memberComparisonFilter!=='changed')url.searchParams.set('overlay',memberComparisonFilter);
+  else url.searchParams.delete('overlay');
   window.history.replaceState({},'',url);
   auditWorkspaceEvent('member_comparison_filter_changed',memberComparisonFilter,resolveSelectionMemberId(selectedElementData));
   rememberWorkspaceState();
@@ -3970,6 +4270,39 @@ function selectMemberFromComparison(memberId=''){
   if(!normalized||normalized==='manifest_member_delta')return;
   const record=(modelData?.elements||[]).find(element=>normalizeSelectionValue(resolveSelectionMemberId(element)||element.id)===normalized);
   if(record)showProperties(record,{publish:true});
+}
+function selectMemberFromCommercialCrosswalk(memberId=''){
+  const normalized=normalizeSelectionValue(memberId);
+  if(!normalized||normalized==='--')return false;
+  const selected=selectMeshBySharedMemberId(normalized);
+  if(selectedElementData)showProperties(selectedElementData,{publish:true});
+  auditWorkspaceEvent('commercial_crosswalk_member_selected',normalized,normalized,{
+    status:selected?'selected':'missing',
+  });
+  renderExplainabilityPanel(selectedElementData);
+  renderReportExportPanel();
+  return selected;
+}
+function isolateMemberFromCommercialCrosswalk(memberId=''){
+  const normalized=normalizeSelectionValue(memberId);
+  if(!normalized||normalized==='--')return false;
+  selectMemberFromCommercialCrosswalk(normalized);
+  setActiveIsolation('member',normalized,`crosswalk ${normalized}`);
+  auditWorkspaceEvent('commercial_crosswalk_member_isolated',normalized,normalized,{status:'isolated'});
+  renderReportExportPanel();
+  return true;
+}
+function isolateFirstCommercialCrosswalkMismatch(){
+  const crosswalk=buildActiveCommercialToolCrosswalk(selectedElementData,readLocalOpsState());
+  const row=(Array.isArray(crosswalk.rows)?crosswalk.rows:[]).find(item=>item.status!=='matched'&&item.viewerMemberId&&item.viewerMemberId!=='--')
+    ||(Array.isArray(crosswalk.rows)?crosswalk.rows:[]).find(item=>item.viewerMemberId&&item.viewerMemberId!=='--');
+  if(!row)return false;
+  return isolateMemberFromCommercialCrosswalk(row.viewerMemberId);
+}
+function setCommercialToolMapperProfile(profile='auto'){
+  commercialToolMapperProfile=normalizeSelectionValue(profile)||'auto';
+  auditWorkspaceEvent('commercial_tool_mapper_changed',commercialToolMapperProfile,resolveSelectionMemberId(selectedElementData),{status:'mapper'});
+  renderReportExportPanel();
 }
 function renderProjectWorkspacePanel(){
   const section=document.getElementById('project-workspace-section');
@@ -4025,6 +4358,19 @@ function renderProjectWorkspacePanel(){
     comparisonPanel.querySelectorAll('[data-member-comparison-filter]').forEach(button=>{
       button.addEventListener('click',()=>setMemberComparisonFilter(button.getAttribute('data-member-comparison-filter')||'changed'));
     });
+    comparisonPanel.querySelectorAll('[data-member-comparison-overlay]').forEach(button=>{
+      button.addEventListener('click',()=>setMemberComparisonFilter(button.getAttribute('data-member-comparison-overlay')||'changed'));
+    });
+    comparisonPanel.querySelectorAll('[data-member-comparison-isolate]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const filter=button.getAttribute('data-member-comparison-isolate')||'changed';
+        setMemberComparisonFilter(filter);
+        window.setTimeout(()=>{
+          const first=window.__STRUCTURE_VIEWER_COMPARISON_HIGHLIGHT_STATE__?.memberIds?.[0]||'';
+          if(first)selectMemberFromComparison(first);
+        },0);
+      });
+    });
     comparisonPanel.querySelectorAll('[data-member-comparison-member]').forEach(button=>{
       button.addEventListener('click',()=>selectMemberFromComparison(button.getAttribute('data-member-comparison-member')||''));
     });
@@ -4048,11 +4394,19 @@ function renderProjectWorkspacePanel(){
 function renderExplainabilityPanel(element=selectedElementData){
   const panel=document.getElementById('explainability-panel');
   if(!(panel instanceof HTMLElement))return;
+  const ops=readLocalOpsState();
+  const reviewTask=buildActiveReviewTask(element,ops);
+  const solverReceipt=buildActiveSolverReceipt(element,ops);
+  const commercialCrosswalk=buildActiveCommercialToolCrosswalk(element,ops);
   const explanation=buildViewerExplainabilityModel({
     data:modelData||{},
     element,
     selection:getCurrentSelectionState(),
     workspace:workspaceState,
+    reviewTask,
+    solverReceipt,
+    ingestPreview:ops.lastIngestPreview,
+    commercialCrosswalk,
   });
   panel.innerHTML=buildSelectionInspectorHtml(explanation,{hasElement:Boolean(element)});
 }
@@ -4066,16 +4420,33 @@ function renderReportExportPanel(){
     workspace:workspaceState,
   });
   const memberId=resolveSelectionMemberId(selectedElementData)||'';
+  const reviewTask=buildActiveReviewTask(selectedElementData,ops);
+  const solverReceipt=buildActiveSolverReceipt(selectedElementData,ops);
+  const commercialCrosswalk=buildActiveCommercialToolCrosswalk(selectedElementData,ops);
+  const commercialMapper=buildActiveCommercialToolMapper(ops);
+  const drawingSheetPackage=buildActiveDrawingSheetPackage(selectedElementData);
   panel.innerHTML=buildReportExportPanelHtml({
     workspace:workspaceState,
     comparison,
     drawingReview:buildDrawingReviewModel(workspaceState.drawing||{}),
+    reviewTask,
+    solverReceipt,
+    commercialCrosswalk,
+    commercialMapper,
+    importPreview:ops.lastImportPreview,
+    ingestPreview:ops.lastIngestPreview,
+    drawingSheetPackage,
     lastExport,
     reviewNote:getViewerReviewNote(ops,{
       projectId:workspaceState.projectId,
       drawingId:workspaceState.drawingId,
       memberId,
     }),
+  });
+  panel.querySelectorAll('[data-commercial-crosswalk-member]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      selectMemberFromCommercialCrosswalk(button.getAttribute('data-commercial-crosswalk-member')||'');
+    });
   });
 }
 function buildUI(data){
@@ -4655,6 +5026,9 @@ window.setProjectWorkspaceVariant=setProjectWorkspaceVariant;
 window.setProjectWorkspaceFilter=setProjectWorkspaceFilter;
 window.setProjectWorkspaceSearch=setProjectWorkspaceSearch;
 window.setMemberComparisonFilter=setMemberComparisonFilter;
+window.selectMemberFromCommercialCrosswalk=selectMemberFromCommercialCrosswalk;
+window.isolateFirstCommercialCrosswalkMismatch=isolateFirstCommercialCrosswalkMismatch;
+window.setCommercialToolMapperProfile=setCommercialToolMapperProfile;
 window.setStoryClipLabel=setStoryClipLabel;
 window.updateStoryClipPadding=updateStoryClipPadding;
 window.clearStoryClip=clearStoryClip;
@@ -4662,6 +5036,11 @@ window.exportViewportPng=exportViewportPng;
 window.exportWorkspaceHtmlReport=exportWorkspaceHtmlReport;
 window.exportWorkspaceAuditJsonl=exportWorkspaceAuditJsonl;
 window.exportProjectBundleJson=exportProjectBundleJson;
+window.previewProjectBundleImportFromInput=previewProjectBundleImportFromInput;
+window.mergeProjectBundleImportPreview=mergeProjectBundleImportPreview;
+window.previewEvidenceIngestFromInput=previewEvidenceIngestFromInput;
+window.attachEvidenceIngestPreview=attachEvidenceIngestPreview;
+window.saveReviewTask=saveReviewTask;
 window.saveReviewNote=saveReviewNote;
 window.buildCurrentStructureViewerReportHtml=buildCurrentStructureViewerReportHtml;
 window.buildOptimizationComparisonModel=buildOptimizationComparisonModel;

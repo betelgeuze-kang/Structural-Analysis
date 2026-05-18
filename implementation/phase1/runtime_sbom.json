@@ -1,0 +1,201 @@
+{
+  "component_count": 26,
+  "components": [
+    {
+      "ecosystem": "python",
+      "kind": "project",
+      "name": "arch-struct-analysis-phase1",
+      "requires": ">=3.10",
+      "version": "0.1.0"
+    },
+    {
+      "ecosystem": "python",
+      "kind": "dependency",
+      "name": "numpy>=1.23",
+      "version": ""
+    },
+    {
+      "ecosystem": "python",
+      "kind": "dependency",
+      "name": "matplotlib>=3.7",
+      "version": ""
+    },
+    {
+      "ecosystem": "python",
+      "kind": "dependency",
+      "name": "jsonschema>=4.20",
+      "version": ""
+    },
+    {
+      "ecosystem": "node",
+      "kind": "project",
+      "name": "structural-optimization-workbench",
+      "requires": {
+        "node": ">=20.19.0 <21",
+        "npm": ">=10.8.2 <11"
+      },
+      "version": "1.0.0"
+    },
+    {
+      "ecosystem": "node",
+      "kind": "dependencies",
+      "name": "react",
+      "version": "18.2.0"
+    },
+    {
+      "ecosystem": "node",
+      "kind": "dependencies",
+      "name": "react-dom",
+      "version": "18.2.0"
+    },
+    {
+      "ecosystem": "node",
+      "kind": "devDependencies",
+      "name": "@playwright/test",
+      "version": "1.56.1"
+    },
+    {
+      "ecosystem": "node",
+      "kind": "devDependencies",
+      "name": "@types/react",
+      "version": "18.2.15"
+    },
+    {
+      "ecosystem": "node",
+      "kind": "devDependencies",
+      "name": "@types/react-dom",
+      "version": "18.2.7"
+    },
+    {
+      "ecosystem": "node",
+      "kind": "devDependencies",
+      "name": "@vitejs/plugin-react",
+      "version": "6.0.1"
+    },
+    {
+      "ecosystem": "node",
+      "kind": "devDependencies",
+      "name": "typescript",
+      "version": "5.0.2"
+    },
+    {
+      "ecosystem": "node",
+      "kind": "devDependencies",
+      "name": "vite",
+      "version": "8.0.8"
+    },
+    {
+      "ecosystem": "rust",
+      "kind": "crate",
+      "name": "rust_hip_md3bead_hook",
+      "requires": {
+        "edition": "2021"
+      },
+      "version": "0.1.0"
+    },
+    {
+      "checksum": "92ecc6618181def0457392ccd0ee51198e065e016d1d527a7ac1b6dc7c1f09d2",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "itoa",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.17"
+    },
+    {
+      "checksum": "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "memchr",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "2.8.0"
+    },
+    {
+      "checksum": "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "proc-macro2",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.106"
+    },
+    {
+      "checksum": "21b2ebcf727b7760c461f091f9f0f539b77b8e87f2fd88131e7f1b433b3cece4",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "quote",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.44"
+    },
+    {
+      "checksum": "",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "rust_hip_md3bead_hook",
+      "source": "",
+      "version": "0.1.0"
+    },
+    {
+      "checksum": "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "serde",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.228"
+    },
+    {
+      "checksum": "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "serde_core",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.228"
+    },
+    {
+      "checksum": "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "serde_derive",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.228"
+    },
+    {
+      "checksum": "83fc039473c5595ace860d8c4fafa220ff474b3fc6bfdb4293327f1a37e94d86",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "serde_json",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.149"
+    },
+    {
+      "checksum": "e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "syn",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "2.0.117"
+    },
+    {
+      "checksum": "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "unicode-ident",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.24"
+    },
+    {
+      "checksum": "b8848ee67ecc8aedbaf3e4122217aff892639231befc6a1b58d29fff4c2cabaa",
+      "ecosystem": "rust",
+      "kind": "cargo-lock-package",
+      "name": "zmij",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "version": "1.0.21"
+    }
+  ],
+  "generated_at": "2026-05-18T14:05:45.843564+00:00",
+  "schema_version": "runtime-sbom.v1",
+  "source_files": {
+    "cargo_lock": "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+    "cargo_toml": "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+    "package_json": "package.json",
+    "pyproject": "pyproject.toml"
+  }
+}

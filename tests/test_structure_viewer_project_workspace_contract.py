@@ -28,6 +28,7 @@ import {
   buildDrawingArtifactCountVerification,
   buildProjectManifestFromRows,
   buildReleaseVisualizationDrawings,
+  buildRuntimeProjectManifest,
   buildWorkspaceUrl,
   normalizeProjectManifest,
   normalizeProjectManifestRow,
@@ -56,6 +57,7 @@ const optimizedVariantEvidence = browser.activeEvidence.variants.find((variant) 
 const midasVerification = buildDrawingArtifactCountVerification(
   manifest.projects[0].drawings.find((drawing) => drawing.drawing_id === 'midas33_optimized'),
 );
+const midasManifestDrawing = manifest.projects[0].drawings.find((drawing) => drawing.drawing_id === 'midas33_optimized');
 const missingVerification = buildDrawingArtifactCountVerification({
   drawing_id: 'pending',
   source_family: 'ifc',
@@ -135,6 +137,44 @@ const url = buildWorkspaceUrl('http://127.0.0.1/src/structure-viewer/index.html?
   ...standardState,
   manifest,
 }, {variant: 'optimized', comparisonFilter: 'reduced', memberId: '911'});
+const runtimeManifest = buildRuntimeProjectManifest(manifest, {
+  fallbackWorkspace: standardState,
+  ingestPreview: {
+    schema_version: 'structure-viewer-evidence-ingest-preview.v1',
+    source_type: 'csv',
+    row_count: 1,
+    drawing_count: 1,
+    commercial_tool_profiles: {etabs: 1},
+    crosswalk_candidate_count: 1,
+    blocked_issues: [],
+    manifest: buildProjectManifestFromRows([{
+      drawing_id: 'csv_review',
+      drawing_title: 'CSV Review',
+      source_family: 'csv',
+      artifact_path: 'viewer-evidence.csv',
+      member_count: 4,
+      node_count: 6,
+      element_count: 4,
+      member_id: '911',
+      source_tool: 'ETABS 22',
+      frame_section: 'W14X90',
+      receipt_path: 'receipt-911.json',
+      status: 'verified',
+    }], {project_id: 'csv_upload', project_title: 'CSV Upload'}),
+  },
+});
+const runtimeBrowser = buildProjectBrowserModel(runtimeManifest, {
+  projectId: 'evidence_ingest_preview',
+  drawingId: 'csv_review',
+  variant: 'optimized',
+});
+const runtimeState = resolveWorkspaceStateFromSearch('?project=evidence_ingest_preview&drawing=csv_review&variant=optimized', {
+  manifest: runtimeManifest,
+});
+const runtimeUrl = buildWorkspaceUrl('http://127.0.0.1/src/structure-viewer/index.html', {
+  ...runtimeState,
+  manifest: runtimeManifest,
+}, {});
 
 console.log(JSON.stringify({
   schema: manifest.schema_version,
@@ -168,7 +208,15 @@ console.log(JSON.stringify({
   activeEvidenceIssueCount: browser.activeEvidence.review.issueCount,
   activeEvidenceVerification: browser.activeEvidence.verification,
   countSourceRow,
+  solverReceiptRow: browser.activeEvidence.rows.find((row) => row.label === 'Solver receipts'),
+  lineageRow: browser.activeEvidence.rows.find((row) => row.label === 'Lineage'),
+  ingestSummaryRow: browser.activeEvidence.rows.find((row) => row.label === 'Ingest summary'),
   optimizedVariantEvidence,
+  midasEvidenceHub: {
+    solverReceipts: midasManifestDrawing.solver_receipts,
+    lineage: midasManifestDrawing.lineage,
+    ingestSummary: midasManifestDrawing.ingest_summary,
+  },
   releaseVerificationLabel: releaseBrowser.drawings[0].verificationLabel,
   midasVerification,
   missingVerification,
@@ -197,6 +245,17 @@ console.log(JSON.stringify({
   blocked,
   review,
   url,
+  runtime: {
+    projectCount: runtimeManifest.projects.length,
+    projectTitle: runtimeBrowser.activeProject.project_title,
+    drawingTitle: runtimeBrowser.activeDrawing.drawing_title,
+    evidenceRows: runtimeBrowser.activeEvidence.rows,
+    toolProfileRow: runtimeBrowser.activeEvidence.rows.find((row) => row.label === 'Tool profiles'),
+    crosswalkCandidateRow: runtimeBrowser.activeEvidence.rows.find((row) => row.label === 'Crosswalk candidates'),
+    variant: runtimeBrowser.activeVariant,
+    state: runtimeState,
+    url: runtimeUrl,
+  },
 }));
 """
     )
@@ -232,8 +291,14 @@ console.log(JSON.stringify({
     assert payload["activeEvidenceIssueCount"] == 0
     assert payload["activeEvidenceVerification"]["status"] == "verified"
     assert payload["countSourceRow"]["value"].endswith("midas33_optimized_roundtrip.json")
+    assert payload["solverReceiptRow"]["value"] == "1 receipt slots"
+    assert payload["lineageRow"]["value"] == "3 stages"
+    assert payload["ingestSummaryRow"]["value"] == "viewer-first evidence hub ready"
     assert payload["optimizedVariantEvidence"]["active"] is False
     assert payload["optimizedVariantEvidence"]["artifactPath"].endswith("midas_generator_33.optimized.roundtrip.json")
+    assert payload["midasEvidenceHub"]["solverReceipts"][0]["member_id"] == "911"
+    assert payload["midasEvidenceHub"]["lineage"][0]["stage"] == "source_model"
+    assert payload["midasEvidenceHub"]["ingestSummary"]["receipt_slots"] == 1
     assert payload["releaseVerificationLabel"] == "Artifact count verified"
     assert payload["midasVerification"]["source"].endswith("midas33_optimized_roundtrip.json")
     assert payload["missingVerification"]["status"] == "missing"
@@ -266,3 +331,14 @@ console.log(JSON.stringify({
     assert "preset=midas33_optimized" in payload["url"]
     assert "comparison_filter=reduced" in payload["url"]
     assert "member=911" in payload["url"]
+    assert payload["runtime"]["projectCount"] == payload["summary"]["projectCount"] + 1
+    assert payload["runtime"]["projectTitle"] == "Evidence Ingest Preview (CSV)"
+    assert payload["runtime"]["drawingTitle"] == "CSV Review"
+    assert payload["runtime"]["state"]["projectId"] == "evidence_ingest_preview"
+    assert payload["runtime"]["state"]["viewerPreset"] == "midas33"
+    assert payload["runtime"]["variant"]["viewer_preset"] == "midas33"
+    assert "project=evidence_ingest_preview" in payload["runtime"]["url"]
+    assert "preset=midas33" in payload["runtime"]["url"]
+    assert any(row["label"] == "Ingest summary" and row["value"] == "local evidence ingest preview" for row in payload["runtime"]["evidenceRows"])
+    assert payload["runtime"]["toolProfileRow"]["value"] == "etabs:1"
+    assert payload["runtime"]["crosswalkCandidateRow"]["value"] == "1"

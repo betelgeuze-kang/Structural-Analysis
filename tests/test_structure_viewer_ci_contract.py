@@ -39,6 +39,12 @@ def test_structure_viewer_contract_runner_covers_source_and_singlefile_surfaces(
     assert "tests/test_structure_viewer_project_manifest_verifier.py" in script
     assert "tests/test_structure_viewer_optimization_comparison_model_contract.py" in script
     assert "tests/test_structure_viewer_member_comparison_model_contract.py" in script
+    assert "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py" in script
+    assert "tests/test_structure_viewer_review_task_model_contract.py" in script
+    assert "tests/test_structure_viewer_solver_receipt_model_contract.py" in script
+    assert "tests/test_structure_viewer_evidence_ingest_model_contract.py" in script
+    assert "tests/test_structure_viewer_lineage_drilldown_model_contract.py" in script
+    assert "tests/test_structure_viewer_drawing_sheet_package_contract.py" in script
     assert "tests/test_structure_viewer_pdf_export_contract.py" in script
     assert "tests/test_generate_selfcontained_viewer.py" in script
     assert "tests/test_structure_viewer_singlefile_offline_contract.py" in script
@@ -69,4 +75,10 @@ def test_structure_viewer_contract_runner_has_dry_run_command_preview() -> None:
     assert "tests/test_structure_viewer_project_manifest_verifier.py" in result.stdout
     assert "tests/test_structure_viewer_optimization_comparison_model_contract.py" in result.stdout
     assert "tests/test_structure_viewer_member_comparison_model_contract.py" in result.stdout
+    assert "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py" in result.stdout
+    assert "tests/test_structure_viewer_review_task_model_contract.py" in result.stdout
+    assert "tests/test_structure_viewer_solver_receipt_model_contract.py" in result.stdout
+    assert "tests/test_structure_viewer_evidence_ingest_model_contract.py" in result.stdout
+    assert "tests/test_structure_viewer_lineage_drilldown_model_contract.py" in result.stdout
+    assert "tests/test_structure_viewer_drawing_sheet_package_contract.py" in result.stdout
     assert "tests/test_structure_viewer_pdf_export_contract.py" in result.stdout

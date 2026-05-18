@@ -12,7 +12,9 @@ import hmac
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import os
 from pathlib import Path
+import threading
 import time
 from typing import Any
 from urllib.parse import parse_qs, unquote, urlsplit
@@ -41,6 +43,7 @@ DEFAULT_SOLVER_FAMILY_BREADTH_JSON = (
 DEFAULT_LOCAL_RUNTIME_SCENARIO_DEPTH_JSON = (
     DEFAULT_RELEASE_ROOT / "authoring" / "portfolio" / "native_authoring_local_runtime_scenario_depth_report.json"
 )
+PROJECT_OPS_JWT_HMAC_SECRET_ENV = "PROJECT_OPS_JWT_HMAC_SECRET"
 SERVICE_ENDPOINT_PATHS = (
     "/health",
     "/summary",
@@ -53,6 +56,8 @@ SERVICE_ENDPOINT_PATHS = (
     "/submissions",
     "/submissions/{family_id}",
     "/audit/events",
+    "/audit/digest",
+    "/ops/policy",
     "/license",
     "/version",
     "/update-channel",
@@ -83,9 +88,18 @@ class ProjectOpsServiceConfig:
     project_registry_paths: tuple[str, ...] = ()
     project_registry_dirs: tuple[str, ...] = ()
     auth_required: bool = True
-    jwt_hmac_secret: str = "project-ops-dev-secret"
+    jwt_hmac_secret: str = ""
     allowed_tenants: tuple[str, ...] = ()
     audit_log_path: Path | None = None
+    audit_digest_path: Path | None = None
+    audit_digest_enabled: bool = True
+    audit_retention_days: int = 365
+    audit_export_max_events: int = 1000
+    request_metadata_byte_limit: int = 8192
+    rate_limit_window_seconds: int = 60
+    rate_limit_max_requests: int = 120
+    backup_policy: str = "operator_managed_snapshot_required"
+    tenant_delete_policy: str = "manual_approval_required"
     telemetry_enabled: bool = False
     license_status_path: Path | None = None
     service_version: str = "project-ops-api-service.v1"
@@ -240,10 +254,10 @@ def _base64url_encode(payload: bytes) -> str:
 
 def create_project_ops_test_token(
     *,
+    secret: str,
     tenant_id: str = "tenant-a",
     actor_id: str = "engineer-1",
     roles: list[str] | tuple[str, ...] = ("viewer",),
-    secret: str = "project-ops-dev-secret",
     expires_in_seconds: int = 3600,
 ) -> str:
     """Create a compact HS256 JWT fixture for local tests and examples."""
@@ -265,6 +279,16 @@ def create_project_ops_test_token(
     )
     signature = hmac.new(secret.encode("utf-8"), signing_input.encode("ascii"), hashlib.sha256).digest()
     return f"{signing_input}.{_base64url_encode(signature)}"
+
+
+def _resolve_project_ops_hmac_secret(*, explicit_secret: str, auth_required: bool) -> str:
+    secret = _text(explicit_secret) or _text(os.environ.get(PROJECT_OPS_JWT_HMAC_SECRET_ENV))
+    if secret or not auth_required:
+        return secret
+    raise ValueError(
+        f"jwt_hmac_secret is required when auth_required=True; pass --jwt-hmac-secret "
+        f"or set {PROJECT_OPS_JWT_HMAC_SECRET_ENV}."
+    )
 
 
 def _verify_project_ops_token(token: str, *, secret: str) -> tuple[dict[str, Any] | None, str]:
@@ -1882,6 +1906,9 @@ class ProjectOpsHTTPServer(ThreadingHTTPServer):
     def __init__(self, server_address: tuple[str, int], config: ProjectOpsServiceConfig) -> None:
         super().__init__(server_address, ProjectOpsRequestHandler)
         self.config = config
+        self._audit_lock = threading.Lock()
+        self._rate_limit_lock = threading.Lock()
+        self._rate_limit_hits: dict[str, list[float]] = {}
 
     def build_snapshot(self) -> dict[str, Any]:
         return build_project_ops_snapshot(
@@ -1925,9 +1952,131 @@ class ProjectOpsHTTPServer(ThreadingHTTPServer):
             "status": int(status),
             "token_redacted": True,
         }
-        self.config.audit_log_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.config.audit_log_path.open("a", encoding="utf-8") as stream:
-            stream.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
+        with self._audit_lock:
+            self.config.audit_log_path.parent.mkdir(parents=True, exist_ok=True)
+            with self.config.audit_log_path.open("a", encoding="utf-8") as stream:
+                stream.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
+            self._write_audit_digest_unlocked()
+
+    def audit_digest_path(self) -> Path | None:
+        if self.config.audit_digest_path is not None:
+            return self.config.audit_digest_path
+        if self.config.audit_log_path is None:
+            return None
+        return self.config.audit_log_path.with_name(f"{self.config.audit_log_path.name}.digest.json")
+
+    def write_audit_digest(self) -> dict[str, Any]:
+        with self._audit_lock:
+            return self._write_audit_digest_unlocked()
+
+    def _write_audit_digest_unlocked(self) -> dict[str, Any]:
+        audit_path = self.config.audit_log_path
+        digest_path = self.audit_digest_path()
+        if not self.config.audit_digest_enabled or audit_path is None or digest_path is None:
+            return {"available": False, "reason": "audit_digest_disabled_or_unconfigured"}
+        if not audit_path.exists():
+            return {"available": False, "reason": "audit_log_missing", "audit_log_path": str(audit_path)}
+        audit_bytes = audit_path.read_bytes()
+        lines = [line for line in audit_bytes.splitlines() if line.strip()]
+        last_event_id = ""
+        last_timestamp = ""
+        if lines:
+            try:
+                last_event = json.loads(lines[-1].decode("utf-8"))
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                last_event = {}
+            if isinstance(last_event, dict):
+                last_event_id = _text(last_event.get("event_id"))
+                last_timestamp = _text(last_event.get("timestamp"))
+        payload = {
+            "schema_version": "project-ops-audit-digest.v1",
+            "generated_at": _now_utc_iso(),
+            "available": True,
+            "audit_log_path": str(audit_path),
+            "audit_digest_path": str(digest_path),
+            "audit_log_sha256": hashlib.sha256(audit_bytes).hexdigest(),
+            "event_count": len(lines),
+            "last_event_id": last_event_id,
+            "last_event_timestamp": last_timestamp,
+            "retention_days": max(0, int(self.config.audit_retention_days)),
+            "export_max_events": max(1, int(self.config.audit_export_max_events)),
+            "tamper_evidence": "sha256_batch_digest",
+        }
+        digest_path.parent.mkdir(parents=True, exist_ok=True)
+        digest_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return payload
+
+    def check_rate_limit(self, context: dict[str, Any]) -> tuple[bool, int]:
+        window_seconds = max(0, int(self.config.rate_limit_window_seconds))
+        max_requests = max(0, int(self.config.rate_limit_max_requests))
+        if window_seconds <= 0 or max_requests <= 0:
+            return True, 0
+        now = time.monotonic()
+        cutoff = now - window_seconds
+        key = "|".join(
+            [
+                _text(context.get("tenant_id")) or "unknown",
+                _text(context.get("actor_id")) or "unknown",
+            ]
+        )
+        with self._rate_limit_lock:
+            hits = [timestamp for timestamp in self._rate_limit_hits.get(key, []) if timestamp > cutoff]
+            if len(hits) >= max_requests:
+                oldest = min(hits)
+                retry_after = max(1, int((oldest + window_seconds) - now) + 1)
+                self._rate_limit_hits[key] = hits
+                return False, retry_after
+            hits.append(now)
+            self._rate_limit_hits[key] = hits
+        return True, 0
+
+    def ops_policy_manifest(self) -> dict[str, Any]:
+        audit_digest_path = self.audit_digest_path()
+        return {
+            "schema_version": "project-ops-policy.v1",
+            "generated_at": _now_utc_iso(),
+            "service": "phase1-project-ops-api-service",
+            "auth": {
+                "auth_required": bool(self.config.auth_required),
+                "allowed_tenants": list(self.config.allowed_tenants),
+                "token": "bearer_hs256_jwt",
+                "required_headers": ["Authorization", "X-Tenant-ID", "X-Actor-ID", "X-Request-ID"],
+            },
+            "rate_limit": {
+                "enabled": self.config.rate_limit_window_seconds > 0 and self.config.rate_limit_max_requests > 0,
+                "key_scope": "tenant_id+actor_id",
+                "window_seconds": max(0, int(self.config.rate_limit_window_seconds)),
+                "max_requests": max(0, int(self.config.rate_limit_max_requests)),
+            },
+            "request_limits": {
+                "metadata_byte_limit": max(0, int(self.config.request_metadata_byte_limit)),
+                "methods": ["GET"],
+                "request_body_policy": "no_request_body_accepted",
+            },
+            "audit": {
+                "audit_log_path": str(self.config.audit_log_path or ""),
+                "audit_digest_path": str(audit_digest_path or ""),
+                "digest_enabled": bool(self.config.audit_digest_enabled),
+                "tamper_evidence": "sha256_batch_digest",
+                "retention_days": max(0, int(self.config.audit_retention_days)),
+                "export_max_events": max(1, int(self.config.audit_export_max_events)),
+            },
+            "storage_lifecycle": {
+                "backup_policy": _text(self.config.backup_policy),
+                "tenant_delete_policy": _text(self.config.tenant_delete_policy),
+                "restore_policy": "operator_verified_restore_required",
+                "export_policy": "tenant_scoped_admin_export",
+            },
+            "telemetry": {
+                "enabled": bool(self.config.telemetry_enabled),
+                "default": "off",
+            },
+            "incident_response": {
+                "support_bundle": "redacted_support_bundle_roundtrip_required",
+                "audit_trace": "audit_log_and_digest_required",
+                "rollback": "disable_token_or_gateway_route_then_restore_snapshot",
+            },
+        }
 
 
 class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
@@ -1944,6 +2093,25 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
             self._write_json(HTTPStatus.INTERNAL_SERVER_ERROR, {"error": "server_misconfigured"})
             return
 
+        request_metadata_bytes = self._request_metadata_bytes()
+        metadata_limit = max(0, int(server.config.request_metadata_byte_limit))
+        if metadata_limit and request_metadata_bytes > metadata_limit:
+            self._auth_context = {
+                "tenant_id": _text(self.headers.get("X-Tenant-ID")) or "unknown",
+                "actor_id": _text(self.headers.get("X-Actor-ID")) or "unknown",
+                "request_id": _text(self.headers.get("X-Request-ID")) or "unknown",
+                "roles": set(),
+            }
+            self._write_json(
+                HTTPStatus.REQUEST_HEADER_FIELDS_TOO_LARGE,
+                {
+                    "error": "request_metadata_too_large",
+                    "request_metadata_bytes": request_metadata_bytes,
+                    "request_metadata_byte_limit": metadata_limit,
+                },
+            )
+            return
+
         parsed = urlsplit(self.path)
         path = parsed.path.rstrip("/") or "/"
         query = parse_qs(parsed.query)
@@ -1955,6 +2123,22 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
                 {
                     "error": auth_context["error"],
                     "reason": auth_context["reason"],
+                },
+            )
+            return
+
+        rate_limit_ok, retry_after_seconds = server.check_rate_limit(auth_context)
+        if not rate_limit_ok:
+            self._write_json(
+                HTTPStatus.TOO_MANY_REQUESTS,
+                {
+                    "error": "rate_limited",
+                    "retry_after_seconds": retry_after_seconds,
+                    "rate_limit": {
+                        "window_seconds": max(0, int(server.config.rate_limit_window_seconds)),
+                        "max_requests": max(0, int(server.config.rate_limit_max_requests)),
+                        "key_scope": "tenant_id+actor_id",
+                    },
                 },
             )
             return
@@ -2016,7 +2200,8 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
             audit_path = server.config.audit_log_path
             events: list[dict[str, Any]] = []
             if audit_path and audit_path.exists():
-                for line in audit_path.read_text(encoding="utf-8").splitlines()[-100:]:
+                export_max_events = max(1, int(server.config.audit_export_max_events))
+                for line in audit_path.read_text(encoding="utf-8").splitlines()[-export_max_events:]:
                     try:
                         row = json.loads(line)
                     except json.JSONDecodeError:
@@ -2032,6 +2217,31 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
                     "items": events,
                 },
             )
+            return
+
+        if path == "/audit/digest":
+            if "admin" not in auth_context["roles"]:
+                self._write_json(HTTPStatus.FORBIDDEN, {"error": "insufficient_role", "required_role": "admin"})
+                return
+            digest = server.write_audit_digest()
+            self._write_json(
+                HTTPStatus.OK,
+                {
+                    "generated_at": _now_utc_iso(),
+                    "tenant_id": auth_context["tenant_id"],
+                    "audit_digest": digest,
+                },
+            )
+            return
+
+        if path == "/ops/policy":
+            if not ({"admin", "operator"} & set(auth_context["roles"])):
+                self._write_json(
+                    HTTPStatus.FORBIDDEN,
+                    {"error": "insufficient_role", "required_role": "admin_or_operator"},
+                )
+                return
+            self._write_json(HTTPStatus.OK, server.ops_policy_manifest())
             return
 
         if path == "/license":
@@ -2237,6 +2447,14 @@ class ProjectOpsRequestHandler(BaseHTTPRequestHandler):
 
         self._write_json(HTTPStatus.NOT_FOUND, {"error": "route_not_found", "path": path})
 
+    def _request_metadata_bytes(self) -> int:
+        total = len(self.requestline.encode("utf-8", errors="replace"))
+        for key, value in self.headers.items():
+            total += len(key.encode("utf-8", errors="replace"))
+            total += len(str(value).encode("utf-8", errors="replace"))
+            total += 4
+        return total
+
     def _authenticate(self, path: str) -> dict[str, Any]:
         server = self.server
         if not isinstance(server, ProjectOpsHTTPServer):  # pragma: no cover
@@ -2323,14 +2541,27 @@ def create_project_ops_server(
     project_registry_paths: list[Path | str] | None = None,
     project_registry_dirs: list[Path | str] | None = None,
     auth_required: bool = True,
-    jwt_hmac_secret: str = "project-ops-dev-secret",
+    jwt_hmac_secret: str = "",
     allowed_tenants: list[str] | tuple[str, ...] | None = None,
     audit_log_path: Path | None = None,
+    audit_digest_path: Path | None = None,
+    audit_digest_enabled: bool = True,
+    audit_retention_days: int = 365,
+    audit_export_max_events: int = 1000,
+    request_metadata_byte_limit: int = 8192,
+    rate_limit_window_seconds: int = 60,
+    rate_limit_max_requests: int = 120,
+    backup_policy: str = "operator_managed_snapshot_required",
+    tenant_delete_policy: str = "manual_approval_required",
     telemetry_enabled: bool = False,
     license_status_path: Path | None = None,
     service_version: str = "project-ops-api-service.v1",
     update_channel: str = "stable",
 ) -> ProjectOpsHTTPServer:
+    resolved_jwt_hmac_secret = _resolve_project_ops_hmac_secret(
+        explicit_secret=jwt_hmac_secret,
+        auth_required=auth_required,
+    )
     config = ProjectOpsServiceConfig(
         release_root=release_root,
         portfolio_json_path=portfolio_json_path,
@@ -2348,9 +2579,18 @@ def create_project_ops_server(
         project_registry_paths=tuple(str(item) for item in (project_registry_paths or []) if _text(item)),
         project_registry_dirs=tuple(str(item) for item in (project_registry_dirs or []) if _text(item)),
         auth_required=auth_required,
-        jwt_hmac_secret=jwt_hmac_secret,
+        jwt_hmac_secret=resolved_jwt_hmac_secret,
         allowed_tenants=tuple(str(item) for item in (allowed_tenants or []) if _text(item)),
         audit_log_path=audit_log_path,
+        audit_digest_path=audit_digest_path,
+        audit_digest_enabled=audit_digest_enabled,
+        audit_retention_days=max(0, int(audit_retention_days)),
+        audit_export_max_events=max(1, int(audit_export_max_events)),
+        request_metadata_byte_limit=max(0, int(request_metadata_byte_limit)),
+        rate_limit_window_seconds=max(0, int(rate_limit_window_seconds)),
+        rate_limit_max_requests=max(0, int(rate_limit_max_requests)),
+        backup_policy=_text(backup_policy) or "operator_managed_snapshot_required",
+        tenant_delete_policy=_text(tenant_delete_policy) or "manual_approval_required",
         telemetry_enabled=telemetry_enabled,
         license_status_path=license_status_path,
         service_version=service_version,
@@ -2379,9 +2619,22 @@ def main() -> None:
     parser.add_argument("--project-registry-paths", default="")
     parser.add_argument("--project-registry-dirs", default="")
     parser.add_argument("--no-auth", action="store_true", help="disable SaaS control-plane auth for local debugging")
-    parser.add_argument("--jwt-hmac-secret", default="project-ops-dev-secret")
+    parser.add_argument(
+        "--jwt-hmac-secret",
+        default="",
+        help=f"HMAC secret for bearer-token verification; may also be set with {PROJECT_OPS_JWT_HMAC_SECRET_ENV}",
+    )
     parser.add_argument("--allowed-tenants", default="")
     parser.add_argument("--audit-log-path", default="")
+    parser.add_argument("--audit-digest-path", default="")
+    parser.add_argument("--no-audit-digest", action="store_true")
+    parser.add_argument("--audit-retention-days", type=int, default=365)
+    parser.add_argument("--audit-export-max-events", type=int, default=1000)
+    parser.add_argument("--request-metadata-byte-limit", type=int, default=8192)
+    parser.add_argument("--rate-limit-window-seconds", type=int, default=60)
+    parser.add_argument("--rate-limit-max-requests", type=int, default=120)
+    parser.add_argument("--backup-policy", default="operator_managed_snapshot_required")
+    parser.add_argument("--tenant-delete-policy", default="manual_approval_required")
     parser.add_argument("--telemetry-enabled", action="store_true")
     parser.add_argument("--license-status-json", default="")
     parser.add_argument("--service-version", default="project-ops-api-service.v1")
@@ -2425,9 +2678,18 @@ def main() -> None:
         project_registry_paths=project_registry_paths,
         project_registry_dirs=project_registry_dirs,
         auth_required=not bool(args.no_auth),
-        jwt_hmac_secret=_text(args.jwt_hmac_secret) or "project-ops-dev-secret",
+        jwt_hmac_secret=_text(args.jwt_hmac_secret),
         allowed_tenants=allowed_tenants,
         audit_log_path=Path(args.audit_log_path) if _text(args.audit_log_path) else None,
+        audit_digest_path=Path(args.audit_digest_path) if _text(args.audit_digest_path) else None,
+        audit_digest_enabled=not bool(args.no_audit_digest),
+        audit_retention_days=int(args.audit_retention_days),
+        audit_export_max_events=int(args.audit_export_max_events),
+        request_metadata_byte_limit=int(args.request_metadata_byte_limit),
+        rate_limit_window_seconds=int(args.rate_limit_window_seconds),
+        rate_limit_max_requests=int(args.rate_limit_max_requests),
+        backup_policy=_text(args.backup_policy) or "operator_managed_snapshot_required",
+        tenant_delete_policy=_text(args.tenant_delete_policy) or "manual_approval_required",
         telemetry_enabled=bool(args.telemetry_enabled),
         license_status_path=Path(args.license_status_json) if _text(args.license_status_json) else None,
         service_version=_text(args.service_version) or "project-ops-api-service.v1",

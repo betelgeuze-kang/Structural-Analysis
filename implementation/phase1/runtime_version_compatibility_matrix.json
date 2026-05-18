@@ -1,0 +1,57 @@
+{
+  "compatibility_rows": [
+    {
+      "requirement": ">=3.10",
+      "status": "declared",
+      "target": "python_runtime"
+    },
+    {
+      "requirement": {
+        "node": ">=20.19.0 <21",
+        "npm": ">=10.8.2 <11"
+      },
+      "status": "declared",
+      "target": "node_viewer_shell"
+    },
+    {
+      "requirement": {
+        "crate": "rust_hip_md3bead_hook",
+        "edition": "2021",
+        "version": "0.1.0"
+      },
+      "status": "declared",
+      "target": "rust_native_hook"
+    },
+    {
+      "requirement": {
+        "cpu_fallback_used": false,
+        "device": "cuda:0",
+        "host_copy_share": 0.0,
+        "runtime_backend": "rocm_torch",
+        "runtime_kind": "rust_hip"
+      },
+      "status": "verified",
+      "target": "strict_rust_hip_probe"
+    }
+  ],
+  "contract_pass": true,
+  "deployment_modes": [
+    {
+      "mode": "saas",
+      "requires": "production ops gateway secret injection",
+      "status": "manifest_ready"
+    },
+    {
+      "mode": "on_prem",
+      "requires": "offline artifact cache and license file",
+      "status": "manifest_ready"
+    },
+    {
+      "mode": "air_gapped",
+      "requires": "signed artifact transfer package",
+      "status": "manifest_ready"
+    }
+  ],
+  "generated_at": "2026-05-18T14:05:45.848623+00:00",
+  "schema_version": "runtime-version-compatibility-matrix.v1"
+}

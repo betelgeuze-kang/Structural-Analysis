@@ -1,0 +1,50 @@
+{
+  "artifacts": {
+    "native_artifact_manifest": {
+      "path": "implementation/phase1/native_runtime_artifact_manifest.json",
+      "sha256": "a45eba481a1dc29b0b0f91ff5feecf2064b6a6ed70b24a4c2d88252a07c87b1b"
+    },
+    "sbom": {
+      "path": "implementation/phase1/runtime_sbom.json",
+      "sha256": "bbb01dd56ce313c1daf5504ef94d9bda86559c063595f0ab289e866bb8d807f4"
+    },
+    "version_compatibility_matrix": {
+      "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
+      "sha256": "b5075cb20c9632c3bed1fb5e5c312a4b2b894d5ea6f086afd5a6c95b8b21482f"
+    }
+  },
+  "blockers": [],
+  "checks": {
+    "native_artifact_manifest_pass": true,
+    "rollback_runbook_present": true,
+    "sbom_present": true,
+    "strict_runtime_probe_pass": true,
+    "version_compatibility_matrix_pass": true
+  },
+  "contract_pass": true,
+  "generated_at": "2026-05-18T14:05:45.849062+00:00",
+  "reason_code": "PASS",
+  "required_evidence": {
+    "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",
+    "rollback_runbook": "docs/runtime-production-packaging.md",
+    "sbom": "implementation/phase1/runtime_sbom.json",
+    "strict_runtime_probe": "implementation/phase1/zero_copy_real_probe_report_strict.json",
+    "version_compatibility_matrix": "implementation/phase1/runtime_version_compatibility_matrix.json"
+  },
+  "runtime_package": {
+    "cpu_fallback_policy": "explicit_only_no_silent_fallback",
+    "package_id": "structural-analysis-runtime-production-candidate",
+    "supported_backends": [
+      "cpu",
+      "rust_hip"
+    ],
+    "supported_modes": [
+      "saas",
+      "on_prem",
+      "air_gapped"
+    ],
+    "version": "0.1.0"
+  },
+  "schema_version": "production-runtime-packaging-manifest.v1",
+  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=26 | native_artifacts=8/8"
+}

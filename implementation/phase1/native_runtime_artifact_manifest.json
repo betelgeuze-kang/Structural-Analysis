@@ -1,0 +1,74 @@
+{
+  "artifact_count": 8,
+  "artifact_rows": [
+    {
+      "available": true,
+      "bytes": 1957,
+      "label": "runtime_wrapper",
+      "path": "implementation/phase1/rust_hip_md3bead_hook.py",
+      "required": true,
+      "sha256": "64bdb9a74cac0fcbf00b5af058cd35cf0ba26b02190b20ccae8b2594b22ceef1"
+    },
+    {
+      "available": true,
+      "bytes": 232,
+      "label": "cargo_toml",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.toml",
+      "required": true,
+      "sha256": "d92ca7f9539f525f0b59e263951d809af8a90690e0b76f6bcc7b78332f01fa4f"
+    },
+    {
+      "available": true,
+      "bytes": 2680,
+      "label": "cargo_lock",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/Cargo.lock",
+      "required": true,
+      "sha256": "2d54732c9ce1f39c948335f9313646c4b73ec9fece8f3e0d9b344f379288ac77"
+    },
+    {
+      "available": true,
+      "bytes": 14519,
+      "label": "rust_main",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/src/main.rs",
+      "required": true,
+      "sha256": "de9dc4d35c107627ea6667681b44ce3e06d646b84a2baa03d6659eadbfffe0a9"
+    },
+    {
+      "available": true,
+      "bytes": 36903,
+      "label": "rust_lib",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+      "required": true,
+      "sha256": "9f1f58d45fc3d539ae49ff47baf0300b726580ea84189189ec83a14952fe2dab"
+    },
+    {
+      "available": true,
+      "bytes": 578832,
+      "label": "release_binary",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/target/release/rust_hip_md3bead_hook",
+      "required": true,
+      "sha256": "0d44102d630417e2e83da94b89de9ae01e655e821a01470a0aeb914c6a95b0c4"
+    },
+    {
+      "available": true,
+      "bytes": 425008,
+      "label": "release_cdylib",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/target/release/librust_hip_md3bead_hook.so",
+      "required": true,
+      "sha256": "431f5eba2888e91b0f7d2db8b87251db7ce02c2122f2e4cf4dda6a1ca89d8b9e"
+    },
+    {
+      "available": true,
+      "bytes": 103542,
+      "label": "release_rlib",
+      "path": "implementation/phase1/rust_hip_md3bead_hook/target/release/librust_hip_md3bead_hook.rlib",
+      "required": true,
+      "sha256": "f97518e8ff9393cbb10f5c53d04f9de87651e0649d0b3f0831cbd397500e122a"
+    }
+  ],
+  "available_artifact_count": 8,
+  "contract_pass": true,
+  "generated_at": "2026-05-18T14:05:45.848298+00:00",
+  "missing_required": [],
+  "schema_version": "native-runtime-artifact-manifest.v1"
+}

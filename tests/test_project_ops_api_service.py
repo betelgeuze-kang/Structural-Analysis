@@ -13,6 +13,8 @@ from implementation.phase1.project_ops_api_service import (
     write_project_ops_snapshot,
 )
 
+TEST_PROJECT_OPS_HMAC_SECRET = "test-project-ops-hmac-secret"
+
 
 def _write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -21,7 +23,10 @@ def _write_json(path: Path, payload: dict) -> None:
 
 def _headers(*, role: str = "viewer", tenant_id: str = "tenant-a", actor_id: str = "engineer-1") -> dict[str, str]:
     return {
-        "Authorization": f"Bearer {create_project_ops_test_token(tenant_id=tenant_id, actor_id=actor_id, roles=[role])}",
+        "Authorization": (
+            "Bearer "
+            f"{create_project_ops_test_token(secret=TEST_PROJECT_OPS_HMAC_SECRET, tenant_id=tenant_id, actor_id=actor_id, roles=[role])}"
+        ),
         "X-Tenant-ID": tenant_id,
         "X-Actor-ID": actor_id,
         "X-Request-ID": f"req-{role}-{tenant_id}",
@@ -520,7 +525,7 @@ def test_build_project_ops_snapshot_aggregates_release_ops_surfaces(tmp_path: Pa
     assert payload["summary"]["family_runtime_writeback_alignment_label"] == "PASS 1/1 ready families aligned"
     assert "writeback_ready_submissions=1" in payload["summary"]["family_runtime_writeback_alignment_evidence"]
     assert payload["summary"]["queued_submission_count"] == 0
-    assert payload["summary"]["endpoint_count"] == 14
+    assert payload["summary"]["endpoint_count"] == 16
     assert payload["summary"]["service_ready"] is True
     assert payload["summary"]["release_candidate_pass"] is True
     assert payload["summary"]["commercial_grade"] == "Commercial"
@@ -573,6 +578,7 @@ def test_write_project_ops_snapshot_and_http_endpoints(tmp_path: Path) -> None:
     server = create_project_ops_server(
         release_root=release_root,
         port=0,
+        jwt_hmac_secret=TEST_PROJECT_OPS_HMAC_SECRET,
         allowed_tenants=["tenant-a"],
         audit_log_path=audit_log,
     )
@@ -586,6 +592,8 @@ def test_write_project_ops_snapshot_and_http_endpoints(tmp_path: Path) -> None:
         assert "/submissions" in root_payload["endpoints"]
         assert "/submissions/{family_id}" in root_payload["endpoints"]
         assert "/audit/events" in root_payload["endpoints"]
+        assert "/audit/digest" in root_payload["endpoints"]
+        assert "/ops/policy" in root_payload["endpoints"]
 
         summary_payload = _get_json(f"{base}/summary")
         assert summary_payload["contract_pass"] is True
@@ -633,6 +641,12 @@ def test_write_project_ops_snapshot_and_http_endpoints(tmp_path: Path) -> None:
         assert audit_payload["tenant_id"] == "tenant-a"
         assert audit_payload["count"] >= 1
         assert all("Authorization" not in json.dumps(row) for row in audit_payload["items"])
+
+        policy_payload = _get_json(f"{base}/ops/policy", role="admin")
+        assert policy_payload["schema_version"] == "project-ops-policy.v1"
+        assert policy_payload["rate_limit"]["max_requests"] == 120
+        assert policy_payload["request_limits"]["metadata_byte_limit"] == 8192
+        assert policy_payload["audit"]["retention_days"] == 365
     finally:
         server.shutdown()
         server.server_close()
@@ -641,7 +655,12 @@ def test_write_project_ops_snapshot_and_http_endpoints(tmp_path: Path) -> None:
 
 def test_project_ops_api_rejects_missing_auth_and_invalid_tenant(tmp_path: Path) -> None:
     release_root = _prepare_release_root(tmp_path)
-    server = create_project_ops_server(release_root=release_root, port=0, allowed_tenants=["tenant-a"])
+    server = create_project_ops_server(
+        release_root=release_root,
+        port=0,
+        jwt_hmac_secret=TEST_PROJECT_OPS_HMAC_SECRET,
+        allowed_tenants=["tenant-a"],
+    )
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
@@ -682,6 +701,7 @@ def test_project_ops_api_surfaces_expired_license_as_degraded(tmp_path: Path) ->
     server = create_project_ops_server(
         release_root=release_root,
         port=0,
+        jwt_hmac_secret=TEST_PROJECT_OPS_HMAC_SECRET,
         allowed_tenants=["tenant-a"],
         license_status_path=license_status,
     )
@@ -696,3 +716,137 @@ def test_project_ops_api_surfaces_expired_license_as_degraded(tmp_path: Path) ->
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
+
+
+def test_project_ops_api_rate_limits_by_tenant_actor(tmp_path: Path) -> None:
+    release_root = _prepare_release_root(tmp_path)
+    server = create_project_ops_server(
+        release_root=release_root,
+        port=0,
+        jwt_hmac_secret=TEST_PROJECT_OPS_HMAC_SECRET,
+        allowed_tenants=["tenant-a"],
+        rate_limit_window_seconds=60,
+        rate_limit_max_requests=2,
+    )
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address[:2]
+        base = f"http://{host}:{port}"
+        assert _get_json(f"{base}/health")["contract_pass"] is True
+        assert _get_json(f"{base}/version")["version"] == "project-ops-api-service.v1"
+        try:
+            _get_json(f"{base}/health")
+            raise AssertionError("third request in the same window should be rate-limited")
+        except HTTPError as error:
+            assert error.code == 429
+            payload = json.loads(error.read().decode("utf-8"))
+            assert payload["error"] == "rate_limited"
+            assert payload["rate_limit"]["max_requests"] == 2
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_project_ops_api_rejects_oversized_request_metadata(tmp_path: Path) -> None:
+    release_root = _prepare_release_root(tmp_path)
+    server = create_project_ops_server(
+        release_root=release_root,
+        port=0,
+        jwt_hmac_secret=TEST_PROJECT_OPS_HMAC_SECRET,
+        allowed_tenants=["tenant-a"],
+        request_metadata_byte_limit=1,
+    )
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address[:2]
+        try:
+            _get_json(f"http://{host}:{port}/health")
+            raise AssertionError("oversized request metadata should fail")
+        except HTTPError as error:
+            assert error.code == 431
+            payload = json.loads(error.read().decode("utf-8"))
+            assert payload["error"] == "request_metadata_too_large"
+            assert payload["request_metadata_byte_limit"] == 1
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_project_ops_api_writes_audit_digest_and_policy_manifest(tmp_path: Path) -> None:
+    release_root = _prepare_release_root(tmp_path)
+    audit_log = tmp_path / "audit" / "project_ops.jsonl"
+    audit_digest = tmp_path / "audit" / "project_ops.digest.json"
+    server = create_project_ops_server(
+        release_root=release_root,
+        port=0,
+        jwt_hmac_secret=TEST_PROJECT_OPS_HMAC_SECRET,
+        allowed_tenants=["tenant-a"],
+        audit_log_path=audit_log,
+        audit_digest_path=audit_digest,
+        audit_retention_days=30,
+        audit_export_max_events=5,
+        request_metadata_byte_limit=4096,
+        rate_limit_window_seconds=10,
+        rate_limit_max_requests=25,
+        backup_policy="daily_snapshot_plus_support_bundle",
+        tenant_delete_policy="ticket_approved_delete_manifest",
+    )
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        host, port = server.server_address[:2]
+        base = f"http://{host}:{port}"
+        assert _get_json(f"{base}/health")["contract_pass"] is True
+
+        digest_payload = _get_json(f"{base}/audit/digest", role="admin")
+        digest = digest_payload["audit_digest"]
+        assert digest["schema_version"] == "project-ops-audit-digest.v1"
+        assert digest["event_count"] >= 1
+        assert len(digest["audit_log_sha256"]) == 64
+        assert digest["retention_days"] == 30
+        assert audit_digest.exists()
+
+        persisted_digest = json.loads(audit_digest.read_text(encoding="utf-8"))
+        assert persisted_digest["event_count"] >= digest["event_count"]
+        assert persisted_digest["tamper_evidence"] == "sha256_batch_digest"
+
+        policy_payload = _get_json(f"{base}/ops/policy", role="operator")
+        assert policy_payload["rate_limit"]["window_seconds"] == 10
+        assert policy_payload["rate_limit"]["max_requests"] == 25
+        assert policy_payload["request_limits"]["metadata_byte_limit"] == 4096
+        assert policy_payload["audit"]["audit_digest_path"] == str(audit_digest)
+        assert policy_payload["audit"]["retention_days"] == 30
+        assert policy_payload["audit"]["export_max_events"] == 5
+        assert policy_payload["storage_lifecycle"]["backup_policy"] == "daily_snapshot_plus_support_bundle"
+        assert policy_payload["storage_lifecycle"]["tenant_delete_policy"] == "ticket_approved_delete_manifest"
+
+        try:
+            _get_json(f"{base}/ops/policy", role="viewer")
+            raise AssertionError("viewer role should not read ops policy")
+        except HTTPError as error:
+            assert error.code == 403
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def test_project_ops_api_requires_explicit_secret_when_auth_enabled(tmp_path: Path) -> None:
+    release_root = _prepare_release_root(tmp_path)
+
+    try:
+        create_project_ops_server(release_root=release_root, port=0, allowed_tenants=["tenant-a"])
+        raise AssertionError("auth-enabled server should require an explicit HMAC secret")
+    except ValueError as error:
+        assert "PROJECT_OPS_JWT_HMAC_SECRET" in str(error)
+
+
+def test_project_ops_api_allows_no_auth_without_secret(tmp_path: Path) -> None:
+    release_root = _prepare_release_root(tmp_path)
+
+    server = create_project_ops_server(release_root=release_root, port=0, auth_required=False)
+    server.server_close()
