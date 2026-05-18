@@ -1,6 +1,6 @@
 # Independent Commercial Product Gap Reassessment
 
-- 기준일: 2026-05-18
+- 기준일: 2026-05-19
 - 목적: 조건부 상용 보조툴 상태에서 독립 상용 구조해석제품 claim으로 넘어가기 위해 남은 gap을 재산정한다.
 - 판정 기준: `scripts/check_independent_product_readiness.py --json`
 
@@ -107,6 +107,7 @@ The following items were previous independent-product blockers, but are now read
 - Runtime compatibility matrix: `runtime_version_compatibility_matrix.json` has `contract_pass=true`
 - Support bundle: `support_bundle_manifest.json` has `contract_pass=true`
 - Production ops hardening: auth-enabled production path has no default secret, tenant/actor rate limit is present, request metadata limit is present, audit digest is generated, `/ops/policy` exposes retention/export/backup/delete policy
+- Viewer workflow packaging: evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, and SVG sheet/revision/callout deep-link package are covered by source viewer contracts
 - Source boundary: readiness gate reports candidate files `0`
 
 ## Promotion Decision

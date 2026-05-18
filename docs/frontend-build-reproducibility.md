@@ -19,6 +19,9 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - `npm run verify:viewer-report-pdf`
   - Uses Playwright to export the active MIDAS33 engineer-in-loop report to PDF and checks that the PDF is non-empty with a valid `%PDF-` header.
   - Runs in the full quality gate because it is a release-output smoke rather than a fast PR contract.
+- `python3 scripts/verify_structure_viewer_contracts.py`
+  - Runs the source viewer contract suite before browser smoke.
+  - Covers evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, drawing sheet package, report export, PDF export, and single-file inline contracts.
 
 ## Expected Contract
 
@@ -27,4 +30,5 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - `package-lock.json` is the source of truth for deterministic installs.
 - `vite.config.ts` declares the React/Vite build entry explicitly.
 - Browser smoke must load `src/structure-viewer/index.html`, verify a nonblank canvas, and exercise real-drawing selection controls.
+- Source viewer reports must preserve selected-member sheet evidence through `structure-viewer-drawing-sheet-package.v1`, including SVG sheet link, revision, callout, and viewer deep-link.
 - Full-gate PDF smoke must exercise the same source viewer report export path before release-facing promotion.

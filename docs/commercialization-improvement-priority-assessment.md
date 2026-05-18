@@ -1,6 +1,6 @@
 # 상용화 개선 우선순위 및 단계 평가
 
-- 기준일: 2026-05-14
+- 기준일: 2026-05-19
 - 대상: 전체 repo, `implementation/phase1`, `src/structure-viewer`, 릴리즈/검증 문서와 게이트 스크립트
 - 평가 방식: 현재 로컬 게이트 결과, 기존 상용화 gap 문서, 프론트엔드/viewer 계약 문서, 빌드/품질 체크 결과를 함께 반영한다.
 
@@ -30,8 +30,9 @@
 | 외부 benchmark receipt | 0/4 attached | strict evidence gate는 아직 pending. 외부 검증은 아직 claim 승격 근거로 쓰면 안 됨 |
 | residual holdout closure | 0/3 closed | strict evidence gate 기준 구조기술사/레거시툴/인허가성 검토 대기 영역 |
 | runtime production packaging | pass | strict Rust/HIP probe, SBOM, native artifact manifest, compatibility matrix가 `production_runtime_packaging_manifest.json`으로 연결됨 |
-| production ops/security gate | pass | auth/tenant/audit 계약과 no-default-secret production path가 readiness gate를 통과함 |
+| production ops/security gate | pass | auth/tenant/audit 계약, no-default-secret production path, tenant/actor rate limit, request metadata limit, audit digest, `/ops/policy` manifest가 readiness gate를 통과함 |
 | support bundle | pass | redaction, audit digest, roundtrip 가능한 support bundle manifest가 생성됨 |
+| viewer sheet package | pass | SVG sheet/revision/callout/deep-link가 `structure-viewer-drawing-sheet-package.v1`로 report/panel에 연결됨 |
 | frontend build | pass | `npm run build`, frontend build contract 통과 |
 | repo hygiene | pass | repo hygiene, generated artifact drift 통과 |
 | critical static lint | pass | `ruff --select F821,F601,F401,F841` 통과 |
@@ -73,6 +74,16 @@
 - 상용화 레포트는 조건부 closure 기준 **`9.0/10`**을 보고한다.
 
 남은 strict blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
+
+## 2026-05-18~2026-05-19 실행 결과
+
+- `project_ops_api_service.py`에서 production default secret을 제거하고, auth-enabled server는 명시 secret 또는 `PROJECT_OPS_JWT_HMAC_SECRET` 없이는 시작하지 않도록 닫았다.
+- Project ops API에 tenant/actor rate limit, request metadata byte limit, audit SHA-256 batch digest, `/audit/digest`, `/ops/policy`, retention/export/backup/delete policy surface를 추가했다.
+- `scripts/check_independent_product_readiness.py`가 auth/audit뿐 아니라 rate limit, request limit, audit digest, policy manifest, lifecycle policy를 production ops gate로 확인하도록 강화했다.
+- Runtime packaging manifest, runtime SBOM, native runtime artifact manifest, compatibility matrix, support bundle manifest를 생성하고 독립 제품 gate에 연결했다.
+- Viewer evidence hub에 review task, solver receipt, commercial-tool crosswalk, evidence ingest, renderable ingest, lineage drilldown, local ops bundle 흐름을 확장했다.
+- 선택 부재의 SVG sheet/revision/callout/viewer deep-link를 `structure-viewer-drawing-sheet-package.v1`로 정규화하고 HTML report/report panel에 노출했다.
+- 현재 `python3 scripts/check_independent_product_readiness.py --json`은 production ops/runtime/support/viewer packaging이 ready인 상태에서도 strict EB/RH 때문에 **80/100 blocked**를 유지한다.
 
 ## 우선순위 0. P0 릴리즈 증거 게이트 닫기
 
@@ -245,7 +256,7 @@
 2. 도면 목록 검색/필터/최근 선택/품질 상태 badge 강화
 3. panel-zone proxy/verified 상태를 UI에서 명확히 표시
 4. large model 성능 측정과 LOD/batching 회귀 테스트 추가
-5. SVG sheet/revision/callout과 viewer deep-link 연결
+5. `structure-viewer-drawing-sheet-package.v1` 계약을 유지하면서 wall/slab batching/LOD, hit-test 성능, solver-verified panel-zone surfacing으로 이동
 
 ## 우선순위 5. 하드 런타임 productization
 
@@ -255,7 +266,7 @@
 
 - zero-copy bridge가 실제 device producer 경로보다 fallback/contract 성격이 강함
 - Rust/HIP/ONNX native runtime이 상용 통합 런타임 수준으로 완전히 제품화됐다고 보기 어려움
-- 성능, 장애 복구, fallback 정책, runtime packaging evidence가 더 필요함
+- 성능, 장애 복구, fallback 정책은 더 필요하지만 runtime packaging manifest/SBOM/native artifact/compatibility evidence는 readiness gate에서 ready 상태임
 
 완료 기준:
 
@@ -269,32 +280,32 @@
 1. zero-copy/Rust/HIP path에서 stub 명칭과 실제 구현 범위 분리
 2. end-to-end smoke를 CPU/GPU lane으로 분리
 3. fallback 발생 시 viewer/report에 provenance로 남기기
-4. runtime packaging manifest 추가
+4. runtime packaging manifest 유지 및 installer/container packaging evidence 확장
 
 ## 우선순위 6. 운영 API와 보안/권한 모델
 
-현재 project ops API는 로컬 운영 도구에 가깝다. 상용툴로 보려면 인증, 권한, 감사, 동시성, 저장소 전략이 필요하다.
+현재 project ops API는 reference control-plane API로 올라왔지만, 상용 배포 전에는 gateway/WAF, secret rotation, tenant deletion/restore drill, WORM 또는 서명된 audit storage가 더 필요하다.
 
 현재 부족한 부분:
 
 - local `http.server` 기반 API
-- 인증/권한/rate limit 없음
-- multi-user나 tenant 경계 없음
-- 감사로그, 변경 이력, 실패 복구 정책 부족
+- production gateway/WAF와 API rate limit 파라미터가 아직 실제 배포값으로 검증되지 않음
+- multi-user 저장소/tenant deletion execution evidence는 아직 drill 수준
+- audit digest는 구현됐지만 외부 WORM 저장소 또는 서명 키 연동은 남음
 
 완료 기준:
 
 - 상용 배포 대상 API와 local helper API 분리
-- authn/authz, audit log, request validation, rate limit 정책 정의
+- authn/authz, audit log, request validation, rate limit 정책 유지 및 배포 파라미터 검증
 - 프로젝트/도면/검토 evidence의 저장소 수명주기 정의
 - 최소 보안 smoke와 threat model 문서화
 
 다음 작업:
 
-1. local ops API와 production API 책임 분리 문서화
-2. auth/audit/storage 요구사항 작성
-3. 위험한 write endpoint에 validation과 audit trail 추가
-4. 보안 체크를 release checklist에 포함
+1. production gateway/WAF와 project ops rate limit 파라미터 확정
+2. secret rotation, backup/restore, tenant deletion, incident drill evidence 추가
+3. audit digest를 WORM 저장소 또는 서명 키와 연동
+4. 보안 체크를 release checklist와 support bundle roundtrip에 계속 포함
 
 ## 우선순위 7. 대형 generator 리팩터링
 
@@ -336,7 +347,7 @@
 | P1 validation/benchmark breadth | 15 | ready | 15 |
 | strict EB/RH evidence | 20 | EB 0/4, RH 0/3 | 0 |
 | runtime production path | 15 | strict runtime + packaging manifest pass | 15 |
-| ops/security productization | 15 | no production default secret, auth/tenant/audit contract pass | 15 |
+| ops/security productization | 15 | no production default secret, auth/tenant/audit/rate/request-limit/audit-digest/policy contract pass | 15 |
 | packaging/support | 10 | support bundle redaction/digest/roundtrip pass | 10 |
 | claim governance | 5 | synchronized | 5 |
 | source boundary | 5 | pass | 5 |

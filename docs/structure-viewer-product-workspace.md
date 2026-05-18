@@ -58,6 +58,7 @@ python3 -m pytest -q tests/test_structure_viewer_project_workspace_contract.py \
   tests/test_structure_viewer_review_task_model_contract.py \
   tests/test_structure_viewer_solver_receipt_model_contract.py \
   tests/test_structure_viewer_evidence_ingest_model_contract.py \
+  tests/test_structure_viewer_drawing_sheet_package_contract.py \
   tests/test_structure_viewer_explainability_report_contract.py \
   tests/test_structure_viewer_local_ops_state_contract.py
 npm run verify:viewer-manifest

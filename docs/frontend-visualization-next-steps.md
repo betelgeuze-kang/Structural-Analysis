@@ -1,7 +1,7 @@
 # 프론트엔드 시각화 다음 단계
 
-> 업데이트: 2026-04-12  
-> 기준: 현재 repo 구현, payload generator, viewer contract 테스트 기준
+> 업데이트: 2026-05-19
+> 기준: 현재 repo 구현, project workspace/evidence hub, payload generator, viewer contract 테스트 기준
 
 ## 현재 기준선
 
@@ -14,14 +14,16 @@
 - 3D viewer의 instancing path 존재
 - panel-zone vector-ready rendering path 존재
 - SVG title block / dimension collision avoidance 존재
+- project workspace, review task, solver receipt, evidence ingest, commercial-tool crosswalk, lineage drilldown 존재
+- SVG sheet/revision/callout/viewer deep-link가 `structure-viewer-drawing-sheet-package.v1`로 report/panel에 연결됨
 
 지금부터의 일은 "뷰어를 만들기"가 아니라 "실무형 review surface로 닫기"입니다.
 
 ## 다음 우선순위
 
-### 1. source viewer와 generated single-file viewer 계약 분리 문서화
+### 1. source viewer와 generated single-file viewer 계약 유지
 
-현재 가장 먼저 분명히 해야 하는 부분입니다.
+기본 계약은 닫혔고, 이제 새 viewer 모듈을 추가할 때마다 source viewer와 generated single-file viewer의 의존성 차이가 다시 섞이지 않게 유지해야 합니다.
 
 - source viewer는 대체로 repo-local `vendor`와 `.data.js` sidecar를 유지합니다.
 - generated export는 payload와 vendor import를 inline한 single-file HTML 경로가 있습니다.
@@ -58,9 +60,9 @@
 - section-cut / detail drill-down
 - proxy fallback이 활성화된 경우 그 사실을 더 명확히 표기
 
-### 4. shared selection / provenance를 전 viewer에 같은 계약으로 정리
+### 4. shared selection / provenance 계약 확장
 
-이미 각 viewer에 deep-link와 selection 뼈대가 있지만, 계약이 완전히 통일되진 않았습니다.
+3D source viewer는 shared selection, provenance, lineage drilldown, report deep-link 계약이 생겼습니다. 다음은 charts / panel-zone / optimization-history까지 같은 vocabulary를 더 넓히는 일입니다.
 
 남은 일:
 
@@ -68,14 +70,14 @@
 - 3D -> charts -> panel-zone -> optimization-history handoff 일치
 - URL 공유와 row provenance 링크 규칙 통일
 
-### 5. SVG를 sheet/revision 수준으로 마감
+### 5. SVG sheet package 유지와 CAD 연계 검토
 
-`structural_svg_generator.py`는 이미 title block과 dimension label lane을 갖고 있습니다. 다음 단계는 도면 체계를 실무형으로 닫는 것입니다.
+`structural_svg_generator.py`는 title block과 dimension label lane을 갖고 있고, source viewer는 선택 부재의 SVG sheet/revision/callout/deep-link를 report package로 남깁니다. 다음 단계는 이 계약을 CAD/export 흐름까지 확장하는 것입니다.
 
-- multi-sheet metadata
-- revision lifecycle
+- multi-sheet metadata 유지
+- revision lifecycle evidence 확장
 - callout / annotation collision handling 확대
-- SVG와 viewer 간 deep-link
+- SVG와 viewer 간 deep-link 회귀 테스트 유지
 - DXF/DWG 연계 검토
 
 ## 문서상 주의할 표현
@@ -114,8 +116,8 @@
 
 ### Batch D
 
-- SVG sheet/revision/callout 마감
-- review deep-link를 3D/chart/panel-zone와 연결
+- SVG sheet/revision/callout report package는 완료
+- 다음은 review deep-link를 chart/panel-zone/optimization-history까지 같은 계약으로 확장
 
 ## 한 줄 결론
 

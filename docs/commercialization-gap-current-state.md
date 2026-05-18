@@ -1,6 +1,6 @@
 # 상용화 갭 현재상태 보고서
 
-- 기준일: 2026-05-05
+- 기준일: 2026-05-19
 - 목적: P0 hygiene inventory 이후, 상용 구조해석 툴(MIDAS/ETABS/SAP2000/OpenSees) 대비 현재 상태와 다음 작업 순서를 고정한다.
 
 ## 한 줄 요약
@@ -22,7 +22,7 @@ source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다.
 - 외부 benchmark submission queue는 residual holdout과 별개로 `hardest_external_10case`, `tpu_hffb`, `peer_spd_hinge`, `korean_public_structures` 4개 one-page lane을 노출하고, evidence가 아직 투입되기 전에는 `receipt_attached=0/4`(EB receipt 0/4) 상태를 유지한다. RH 쪽은 `residual_holdout_closure_updates.json` 같은 closure-update sidecar가 materialize되기 전까지 `closure_evidence_status=pending`이다. work item, submission id, lifecycle status, receipt status/url, owner action, dry-run evidence와 queue-wide `onepage_attestation_status`를 release-gap/committee package에서 함께 본다. 현재 EB/RH sidecar row 구조는 `scripts/preflight_p1_evidence_sidecar_intake.py --structure-only --json --fail-open`로 내부 준비도 통과가 가능하지만, 실제 승격 전에는 `scripts/generate_p1_evidence_intake_template.py`로 7개 evidence slot을 만들고, `scripts/validate_p1_evidence_intake_manifest.py --intake-manifest <p1-evidence-intake.json> --json --fail-open`으로 no-write lint를 통과시킨 뒤, `scripts/build_p1_evidence_sidecar_updates.py --intake-manifest <p1-evidence-intake.json>`로 실제 evidence를 sidecar로 변환한다. 마지막으로 `scripts/preflight_p1_evidence_sidecar_intake.py --json --fail-open` strict mode로 EB receipt `4/4`와 RH closure evidence `3/3`가 attached/closed인지 다시 확인한다.
 - intake가 불완전하거나 로컬 evidence path가 없으면 sidecar builder는 `ERR_P1_EVIDENCE_SIDECAR_BUILD_FAILED`와 machine-readable blockers를 summary JSON에 남긴다. clean checkout chain은 이 실패를 `p1_evidence_sidecar_build` payload로 노출하고 기존 pending sidecar를 자동 승격하지 않는다.
 - wind/SSI gate outputs는 `response_artifacts_consumed`를 canonical contract name으로 쓴다. 현재 machine-readable evidence는 rename transition 동안 `_pass` suffix가 붙은 필드를 계속 노출할 수 있다.
-- P2는 viewer/report 제품화 단계로, shared selection과 provenance를 전 surface에 통일하고 wall/slab batching/LOD, solver-verified panel-zone, SVG sheet/revision/callout을 정리해야 한다.
+- P2는 viewer/report 제품화 단계다. shared selection/provenance와 SVG sheet/revision/callout deep-link report package는 source viewer 계약으로 닫혔고, 다음 핵심은 wall/slab batching/LOD, hit-test 성능, solver-verified panel-zone surfacing이다.
 
 ## P0-1 Release closure
 
@@ -72,7 +72,7 @@ P1 상용화 코어 순서는 `MIDAS exact roundtrip -> KDS load combination -> 
 
 1. P1 quality/fallback/benchmark breadth
 2. real-project row provenance and parser breadth hardening
-3. viewer shared selection/provenance, wall/slab batching/LOD, solver-verified panel-zone, SVG sheet/revision/callout
+3. viewer wall/slab batching/LOD, hit-test 성능, solver-verified panel-zone surfacing
 
 - MIDAS exact roundtrip, KDS load combinations, MIDAS-KDS geometry identity, constitutive libraries, element/solver engine은 P0-2~P0-6 evidence로 닫힌 상태를 유지한다.
 - 1~2는 P1 reliability/validation slice다.

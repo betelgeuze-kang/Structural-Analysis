@@ -1,13 +1,42 @@
 # Expert API Quickstart Guide
 
 > Structural Analysis Viewer — Data Format & Integration Guide  
-> Version: 1.0 | Date: 2026-04-12
+> Version: 1.1 | Date: 2026-05-19
 
 ## Overview
 
 This guide describes the data formats used by the Structural Analysis Viewer and how external experts can load, review, and extend the visualization data.
 
+Current integration status:
+
+- Source viewers live under `src/structure-viewer/` and are intended for local QA, evidence review, and deterministic rebuilds.
+- Generated release viewers are produced by `implementation/phase1/generate_selfcontained_viewer.py` and must remain self-contained delivery artifacts.
+- The project workspace can browse manifest-driven projects/drawings, including MIDAS33 release views and release visualization entries.
+- Review packages now preserve selected-member provenance, evidence ingest/import summaries, solver receipt slots, commercial-tool crosswalk rows, lineage drilldown, and SVG sheet/revision/callout viewer deep-links.
+- The commercial claim remains `engineer-in-loop commercial assist only` until strict EB/RH external evidence is closed.
+
 ---
+
+## 0. Viewer Surfaces
+
+Use the source viewer for development and review:
+
+```text
+src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized
+```
+
+Use generated single-file viewers for delivery:
+
+```bash
+python3 implementation/phase1/generate_selfcontained_viewer.py --preset midas33_optimized --output viewer.html
+```
+
+The source/export boundary is documented in `docs/viewer-contract.md` and checked by:
+
+```bash
+python3 scripts/verify_structure_viewer_contracts.py --dry-run
+node scripts/verify-structure-viewer-project-manifest.mjs
+```
 
 ## 1. Model Data Format (`model.json`)
 
@@ -122,7 +151,7 @@ const ngElements = model.elements.filter(e => e.dcr > 1.0);
 ## 4. Generating SVG Drawings
 
 ```python
-from structural_svg_generator import StructuralSVGGenerator
+from implementation.phase1.structural_svg_generator import StructuralSVGGenerator
 
 with open("demo_5f_rc_office.json") as f:
     model = json.load(f)
@@ -146,15 +175,32 @@ drawings = gen.full_drawing_set(output_dir="output/drawings")
 
 ```bash
 # From demo model
-python generate_selfcontained_viewer.py --demo --output viewer.html
+python3 implementation/phase1/generate_selfcontained_viewer.py --demo --output viewer.html
 
 # From custom model JSON
-python generate_selfcontained_viewer.py --input my_model.json --output my_viewer.html
+python3 implementation/phase1/generate_selfcontained_viewer.py --input my_model.json --output my_viewer.html
+
+# From a repository artifact preset
+python3 implementation/phase1/generate_selfcontained_viewer.py --preset midas33_optimized --output midas33_viewer.html
 ```
 
 The generated HTML file can be opened directly in any browser — no server required.
 
-## 6. Demo Models Available
+## 6. Review Package Fields
+
+Viewer reports and exported HTML/PDF evidence should preserve these review fields when available:
+
+| Field group | Purpose |
+|-------------|---------|
+| `member`, `load_case`, `combination`, `focus_member` | Shared selection and deep-link restore keys |
+| `provenance` | Source path, artifact family, row pointer, and evidence level |
+| `solver_receipts` | Solver run/receipt slots used to explain analysis origin |
+| `lineage` | Source to analysis to optimization to report trail |
+| `commercial_tool_crosswalk` | ETABS/SAP/RFEM/Tekla/Revit-aware member matching and mismatch isolation |
+| `drawing_sheet_package` | SVG sheet link, revision, callout id/label, and viewer deep-link |
+| `ingest_summary` | Imported JSON/CSV/IFC/MIDAS evidence preview and attachment state |
+
+## 7. Demo Models Available
 
 | Model | Stories | Nodes | Elements | Type |
 |-------|---------|-------|----------|------|
@@ -162,7 +208,7 @@ The generated HTML file can be opened directly in any browser — no server requ
 | `demo_15f_rc_corewall.json` | 15 | 384 | 975 | RC + Core Wall |
 | `demo_30f_composite_highrise.json` | 30 | 1,085 | 3,060 | SRC + Wall |
 
-## 7. Design Code Check Report
+## 8. Design Code Check Report
 
 The `code_check_summary` in each model provides:
 
@@ -176,8 +222,18 @@ The `code_check_summary` in each model provides:
 }
 ```
 
+## 9. Product Readiness Boundary
+
+For GitHub-facing documentation and external handoff, keep the product claim aligned with the current gate:
+
+```bash
+python3 scripts/check_independent_product_readiness.py --json
+```
+
+As of 2026-05-19, runtime packaging, production ops/security hardening, support bundle, and viewer workflow packaging are ready. Independent commercial replacement remains blocked at `80/100` because strict EB receipt is `0/4` and RH closure evidence is `0/3`.
+
 ---
 
 ## Contact
 
-For questions about data formats or integration, refer to the project's `docs/architecture-definition-document.md`.
+For questions about data formats or integration, refer to `docs/viewer-contract.md`, `docs/structure-viewer-product-workspace.md`, and `docs/architecture-definition-document.md`.

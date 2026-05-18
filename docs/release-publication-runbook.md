@@ -203,7 +203,7 @@ P0-1 is closed only when all of these are true:
 
 ## After P0-1
 
-P0-1 is closed, so the next order is P1 quality/fallback/benchmark breadth, external benchmark submission receipts, residual holdout closure packet execution, and then viewer/report polish. Keep `check_p0_closure_status.py` in the loop whenever the release assets or promoted manifest change.
+P0-1 is closed, so the next order is P1 quality/fallback/benchmark breadth, external benchmark submission receipts, residual holdout closure packet execution, and then viewer/report polish. Current viewer/report polish includes evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, and SVG sheet/revision/callout deep-link packaging; remaining viewer work is wall/slab batching/LOD, hit-test performance, and solver-verified panel-zone surfacing. Keep `check_p0_closure_status.py` in the loop whenever the release assets or promoted manifest change.
 
 Commercial scope stays bounded in this handoff path: `Commercial`, `engineer_in_loop_accelerated_coverage_ready=true`, `full_commercial_replacement_ready=false`. The EB/RH evidence sidecars can be structurally materialized and checked with `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open`, but strict promotion remains pending until EB receipt reaches `4/4` and RH closure evidence reaches `3/3`.
 
