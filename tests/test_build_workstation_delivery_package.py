@@ -67,11 +67,19 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
     assert payload["restore_smoke"]["pass"] is True
     assert payload["restore_smoke"]["viewer_shell_marker_pass"] is True
     assert payload["restore_smoke"]["delivery_index_marker_pass"] is True
+    assert payload["restore_smoke"]["acceptance_packet_marker_pass"] is True
+    assert payload["restore_smoke"]["pdf_magic_pass"] is True
+    assert payload["restore_smoke"]["manifest_report_reference_pass"] is True
+    assert payload["restore_smoke"]["manifest_acceptance_reference_pass"] is True
+    assert payload["restore_smoke"]["manifest_claim_boundary_pass"] is True
     assert payload["restore_smoke"]["revision_policy_pass"] is True
+    assert payload["restore_smoke"]["redelivery_comparison_pass"] is True
     assert any(row["path"] == "manifest.json" for row in payload["file_rows"])
+    assert any(row["path"] == "ACCEPTANCE_PACKET.md" for row in payload["file_rows"])
     assert any(row["path"] == "DELIVERY_INDEX.md" for row in payload["file_rows"])
     assert any(row["path"] == "REVISION_HISTORY.md" for row in payload["file_rows"])
     assert any(row["path"] == "data/revision_policy.json" for row in payload["file_rows"])
+    assert any(row["path"] == "data/redelivery_comparison_manifest.json" for row in payload["file_rows"])
     assert payload["job_record"]["schema_version"] == "workstation-job-record.v1"
     assert payload["job_folder_contract"]["pass"] is True
     job_dir = Path(payload["job_folder_contract"]["job_dir"])
@@ -99,6 +107,57 @@ def test_restore_package_smoke_blocks_missing_zip(tmp_path: Path) -> None:
 
     assert payload["pass"] is False
     assert payload["reason"] == "package_missing"
+
+
+def test_restore_package_smoke_blocks_non_pdf_report(tmp_path: Path) -> None:
+    package = tmp_path / "bad.zip"
+    root = tmp_path / "root"
+    (root / "data").mkdir(parents=True)
+    (root / "drawings").mkdir()
+    (root / "evidence").mkdir()
+    _write_text(root / "DELIVERY_INDEX.md", "## Open Order\n## Acceptance Checklist\n")
+    _write_text(
+        root / "ACCEPTANCE_PACKET.md",
+        "## Acceptance Decision\n## Package Integrity\n## Engineer Review Required\n",
+    )
+    _write_text(root / "REVISION_HISTORY.md", "# Revision History\n")
+    _write_text(root / "README_DELIVERY.md", "# Delivery\n")
+    _write_text(root / "viewer.html", "<html><body>Structural Insight Viewer</body></html>")
+    _write_text(root / "report.pdf", "not a pdf")
+    _write_json(
+        root / "data" / "revision_policy.json",
+        {
+            "schema_version": "workstation-delivery-revision-policy.v1",
+            "policy": {"redelivery_requires_new_package": True},
+        },
+    )
+    _write_json(
+        root / "data" / "redelivery_comparison_manifest.json",
+        {
+            "schema_version": "workstation-delivery-redelivery-comparison.v1",
+            "current_job_id": "J1",
+            "engineer_review_required": True,
+            "redelivery_policy": {"previous_packages_must_not_be_overwritten": True},
+        },
+    )
+    rows = build_workstation_delivery_package._checksum_rows(root, include_manifest=False)
+    _write_json(
+        root / "manifest.json",
+        {
+            "package_claim_boundary": "requires structural engineer review",
+            "output_rows": rows,
+        },
+    )
+    build_workstation_delivery_package._write_checksums(
+        root,
+        build_workstation_delivery_package._checksum_rows(root, include_manifest=True),
+    )
+    build_workstation_delivery_package._write_zip(root, package)
+
+    payload = build_workstation_delivery_package.restore_package_smoke(package)
+
+    assert payload["pass"] is False
+    assert payload["pdf_magic_pass"] is False
 
 
 def test_package_manifest_consistency_blocks_missing_zip(tmp_path: Path) -> None:

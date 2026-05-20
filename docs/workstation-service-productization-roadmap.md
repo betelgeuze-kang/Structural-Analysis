@@ -93,11 +93,13 @@ Package structure:
 project_package.zip
   report.pdf
   viewer.html
+  ACCEPTANCE_PACKET.md
   DELIVERY_INDEX.md
   REVISION_HISTORY.md
   drawings/
   data/
     revision_policy.json
+    redelivery_comparison_manifest.json
   evidence/
   manifest.json
   checksums.sha256
@@ -110,7 +112,9 @@ Completion criteria:
 - Checksums match.
 - Manifest records input refs, output rows, file bytes, SHA-256 values, claim boundary, and proxy/fallback labeling.
 - `DELIVERY_INDEX.md` tells the customer what to open first and what to verify.
+- `ACCEPTANCE_PACKET.md` gives the customer an acceptance/rejection checklist and keeps engineer review explicit.
 - `REVISION_HISTORY.md` and `data/revision_policy.json` lock redelivery/revision expectations.
+- `data/redelivery_comparison_manifest.json` links the current job/package to previous delivery history without overwriting prior packages.
 
 ## Batch 3. Client Input Validation
 
@@ -143,11 +147,11 @@ Pass conditions:
 - Hardware profile exists and `contract_pass=true`.
 - Service budget exists and `contract_pass=true`.
 - Delivery package manifest exists and `contract_pass=true`.
-- Package checksum and restore smoke pass.
+- Package checksum, restore smoke, PDF magic/header, manifest report/viewer/acceptance references, redelivery comparison, and manifest claim-boundary checks pass.
 - Viewer browser probe and visual regression baseline pass.
 - Client input validation report exists and is not `blocked`.
 - Job record/folder contract exists and checksums pass.
-- Job retention policy exists, disables automatic deletion, and requires explicit confirmation plus dry-run before cleanup.
+- Job retention policy exists, disables automatic deletion, requires explicit confirmation plus dry-run before cleanup, and emits a non-destructive cleanup preview.
 - Proxy/fallback values are explicitly labeled.
 
 The full quality gate includes this check before independent product readiness:
@@ -200,4 +204,4 @@ Retention policy:
 python3 scripts/build_workstation_job_retention_policy.py --json
 ```
 
-The policy is intentionally non-destructive: automatic deletion is disabled, cleanup requires a dry-run plus explicit confirmation, and the latest job remains pinned.
+The policy is intentionally non-destructive: automatic deletion is disabled, cleanup requires a dry-run plus explicit confirmation, and the latest job remains pinned. The generated `cleanup_preview` only lists `would_delete_if_explicitly_confirmed` candidates by retention age or max completed job count; it never deletes folders.

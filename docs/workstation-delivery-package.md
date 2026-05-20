@@ -22,11 +22,13 @@ It does not claim independent SaaS readiness, structural engineer replacement, a
 project_package.zip
   report.pdf
   viewer.html
+  ACCEPTANCE_PACKET.md
   DELIVERY_INDEX.md
   REVISION_HISTORY.md
   drawings/
   data/
     revision_policy.json
+    redelivery_comparison_manifest.json
   evidence/
   manifest.json
   checksums.sha256
@@ -38,6 +40,7 @@ project_package.zip
 | Section | Role |
 | --- | --- |
 | `viewer.html` | Interactive review surface for model/result inspection. |
+| `ACCEPTANCE_PACKET.md` | Customer acceptance/rejection checklist and engineer-review acknowledgement. |
 | `DELIVERY_INDEX.md` | First-open guide and customer acceptance checklist. |
 | `REVISION_HISTORY.md` | Current delivery revision row and redelivery rule. |
 | `report.pdf` | Printable review summary. If the canonical report is missing, the builder creates a clearly bounded fallback PDF. |
@@ -73,9 +76,15 @@ The builder extracts the zip into a temporary directory and verifies:
 - every checksum row matches extracted bytes
 - manifest, report, viewer, drawings, data, evidence, and README are present
 - `manifest.json` output rows match zip bytes/SHA-256 rows for packaged content
+- `report.pdf` starts with a PDF header
+- `manifest.json` references both `report.pdf` and `viewer.html`
+- `manifest.json` references `ACCEPTANCE_PACKET.md` and `data/redelivery_comparison_manifest.json`
+- manifest claim boundary still says structural engineer review is required
 - restored `viewer.html` has a viewer shell marker
+- `ACCEPTANCE_PACKET.md` contains acceptance decision, package integrity, and engineer-review markers
 - `DELIVERY_INDEX.md` contains the open-order and acceptance checklist markers
 - `data/revision_policy.json` is present and enforces new package/manifest/checksum/job record on redelivery
+- `data/redelivery_comparison_manifest.json` links the current job to previous delivery history without overwriting prior packages
 - job reproducibility folder contains `input_manifest.json`, `run_log.jsonl`, `output_manifest.json`, and `checksums.sha256`
 
 The same restore result is stored in `restore_smoke` and `checksum_self_test`.
@@ -95,9 +104,10 @@ The delivery package gate passes only when:
 - checksum self-test passes
 - manifest consistency self-test passes
 - restore smoke passes
+- PDF header, report/viewer/acceptance manifest reference, redelivery comparison, and manifest claim-boundary checks pass
 - viewer shell marker check passes
 - job record and job folder checksum self-test pass
-- job retention policy disables automatic deletion and requires explicit confirmation plus cleanup dry-run
+- job retention policy disables automatic deletion, requires explicit confirmation plus cleanup dry-run, and exposes a read-only cleanup preview
 - claim boundary remains engineer-review bounded
 
 This readiness gate is independent from strict EB/RH evidence. A green workstation delivery package does not make `check_independent_product_readiness.py` green unless EB/RH also closes.

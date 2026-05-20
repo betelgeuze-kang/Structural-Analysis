@@ -164,6 +164,90 @@ def _revision_policy_payload(generated_at: str) -> dict[str, Any]:
     }
 
 
+def _job_identity(input_refs: list[dict[str, Any]], timestamp: str) -> tuple[str, str]:
+    input_hash = _sha256_bytes(json.dumps(input_refs, sort_keys=True).encode("utf-8"))[:16]
+    job_id = f"{timestamp.replace(':', '').replace('-', '')[:15]}-{input_hash}"
+    return job_id, input_hash
+
+
+def _previous_delivery_rows(job_root: Path, *, limit: int = 5) -> list[dict[str, Any]]:
+    if not job_root.exists():
+        return []
+    latest_path = job_root / "latest_job_id.txt"
+    latest_job_id = latest_path.read_text(encoding="utf-8").strip() if latest_path.exists() else ""
+    rows = []
+    for job_dir in sorted((path for path in job_root.iterdir() if path.is_dir()), reverse=True):
+        output_manifest = _load_json(job_dir / "output_manifest.json")
+        rows.append(
+            {
+                "job_id": job_dir.name,
+                "job_dir": str(job_dir),
+                "package_path": str(output_manifest.get("package_path", "")),
+                "output_manifest": str(job_dir / "output_manifest.json"),
+                "checksums": str(job_dir / "checksums.sha256"),
+                "is_previous_latest": job_dir.name == latest_job_id,
+            }
+        )
+    return rows[:limit]
+
+
+def _acceptance_packet_text(*, generated_at: str, current_job_id: str) -> str:
+    return f"""# Customer Acceptance Packet
+
+Generated at: `{generated_at}`
+Current job id: `{current_job_id}`
+
+## Acceptance Decision
+
+- [ ] Accepted for structural engineer review.
+- [ ] Accepted with comments; redelivery not required.
+- [ ] Redelivery requested; comments are attached separately.
+- [ ] Rejected; scope or input package must be corrected.
+
+## Package Integrity
+
+- Verify `checksums.sha256` before review.
+- Confirm `manifest.json` lists `report.pdf`, `viewer.html`, drawings, data, and evidence.
+- Confirm `data/redelivery_comparison_manifest.json` links this package to the previous delivery history.
+
+## Engineer Review Required
+
+This package is for structural engineer review. It is not an autonomous approval, not an independent SaaS structural solver claim, and not a customer-device FPS claim.
+
+## Client Comments
+
+Record comments outside the package and preserve this package manifest for traceability.
+"""
+
+
+def _redelivery_comparison_payload(
+    *,
+    generated_at: str,
+    current_job_id: str,
+    previous_deliveries: list[dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "schema_version": "workstation-delivery-redelivery-comparison.v1",
+        "generated_at": generated_at,
+        "current_job_id": current_job_id,
+        "previous_delivery_count": len(previous_deliveries),
+        "previous_latest_job_id": next(
+            (row["job_id"] for row in previous_deliveries if row.get("is_previous_latest")),
+            "",
+        ),
+        "comparison_scope": "traceability_only",
+        "engineer_review_required": True,
+        "previous_deliveries": previous_deliveries,
+        "redelivery_policy": {
+            "previous_packages_must_not_be_overwritten": True,
+            "current_package_requires_new_manifest": True,
+            "current_package_requires_new_checksums": True,
+            "current_package_requires_new_job_record": True,
+        },
+        "claim_boundary": CLAIM_BOUNDARY,
+    }
+
+
 def _checksum_rows(root: Path, *, include_manifest: bool = True) -> list[dict[str, Any]]:
     rows = []
     for path in sorted(item for item in root.rglob("*") if item.is_file()):
@@ -349,6 +433,7 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             rel = item.relative_to(root).as_posix()
             names.add(f"{rel}/" if item.is_dir() else rel)
         required = {
+            "ACCEPTANCE_PACKET.md": (root / "ACCEPTANCE_PACKET.md").exists(),
             "DELIVERY_INDEX.md": (root / "DELIVERY_INDEX.md").exists(),
             "REVISION_HISTORY.md": (root / "REVISION_HISTORY.md").exists(),
             "report.pdf": (root / "report.pdf").exists(),
@@ -356,6 +441,7 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             "drawings/": (root / "drawings").is_dir(),
             "data/": (root / "data").is_dir(),
             "data/revision_policy.json": (root / "data" / "revision_policy.json").exists(),
+            "data/redelivery_comparison_manifest.json": (root / "data" / "redelivery_comparison_manifest.json").exists(),
             "evidence/": (root / "evidence").is_dir(),
             "manifest.json": (root / "manifest.json").exists(),
             "checksums.sha256": (root / "checksums.sha256").exists(),
@@ -373,6 +459,33 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             else ""
         )
         delivery_index_marker_pass = "Open Order" in delivery_index_text and "Acceptance Checklist" in delivery_index_text
+        acceptance_text = (
+            (root / "ACCEPTANCE_PACKET.md").read_text(encoding="utf-8", errors="replace")
+            if required["ACCEPTANCE_PACKET.md"]
+            else ""
+        )
+        acceptance_packet_marker_pass = (
+            "Acceptance Decision" in acceptance_text
+            and "Package Integrity" in acceptance_text
+            and "Engineer Review Required" in acceptance_text
+        )
+        report_path = root / "report.pdf"
+        pdf_magic_pass = report_path.read_bytes().startswith(b"%PDF-") if required["report.pdf"] else False
+        manifest_payload = _load_json(root / "manifest.json") if required["manifest.json"] else {}
+        output_rows = manifest_payload.get("output_rows", [])
+        manifest_output_paths = {
+            str(row.get("path", ""))
+            for row in output_rows
+            if isinstance(row, dict)
+        } if isinstance(output_rows, list) else set()
+        manifest_report_reference_pass = "report.pdf" in manifest_output_paths and "viewer.html" in manifest_output_paths
+        manifest_acceptance_reference_pass = (
+            "ACCEPTANCE_PACKET.md" in manifest_output_paths
+            and "data/redelivery_comparison_manifest.json" in manifest_output_paths
+        )
+        manifest_claim_boundary_pass = "structural engineer review" in str(
+            manifest_payload.get("package_claim_boundary", "")
+        ).lower()
         revision_policy_pass = False
         if required["data/revision_policy.json"]:
             revision_policy = _load_json(root / "data" / "revision_policy.json")
@@ -380,26 +493,47 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
                 revision_policy.get("schema_version") == "workstation-delivery-revision-policy.v1"
                 and bool(revision_policy.get("policy", {}).get("redelivery_requires_new_package", False))
             )
+        redelivery_comparison_pass = False
+        if required["data/redelivery_comparison_manifest.json"]:
+            redelivery_comparison = _load_json(root / "data" / "redelivery_comparison_manifest.json")
+            redelivery_comparison_pass = (
+                redelivery_comparison.get("schema_version") == "workstation-delivery-redelivery-comparison.v1"
+                and bool(redelivery_comparison.get("current_job_id"))
+                and bool(redelivery_comparison.get("engineer_review_required", False))
+                and bool(redelivery_comparison.get("redelivery_policy", {}).get("previous_packages_must_not_be_overwritten", False))
+            )
         checksums = _verify_checksums(root)
         restore_pass = (
             all(required.values())
             and checksums["pass"]
             and viewer_shell_marker_pass
             and delivery_index_marker_pass
+            and acceptance_packet_marker_pass
+            and pdf_magic_pass
+            and manifest_report_reference_pass
+            and manifest_acceptance_reference_pass
+            and manifest_claim_boundary_pass
             and revision_policy_pass
+            and redelivery_comparison_pass
         )
         return {
             "pass": restore_pass,
             "reason": (
                 "PASS"
                 if restore_pass
-                else "restore_checksum_viewer_index_or_revision_policy_failed"
+                else "restore_checksum_viewer_pdf_manifest_index_or_revision_policy_failed"
             ),
             "required_paths": required,
             "checksum_self_test": checksums,
             "viewer_shell_marker_pass": viewer_shell_marker_pass,
             "delivery_index_marker_pass": delivery_index_marker_pass,
+            "acceptance_packet_marker_pass": acceptance_packet_marker_pass,
+            "pdf_magic_pass": pdf_magic_pass,
+            "manifest_report_reference_pass": manifest_report_reference_pass,
+            "manifest_acceptance_reference_pass": manifest_acceptance_reference_pass,
+            "manifest_claim_boundary_pass": manifest_claim_boundary_pass,
             "revision_policy_pass": revision_policy_pass,
+            "redelivery_comparison_pass": redelivery_comparison_pass,
             "zip_entry_count": len(names),
         }
 
@@ -413,10 +547,19 @@ def _input_hash(paths: list[Path]) -> str:
     return digest.hexdigest()[:16]
 
 
-def _build_job_record(*, package_path: Path, input_refs: list[dict[str, Any]], manifest_rows: list[dict[str, Any]]) -> dict[str, Any]:
-    timestamp = _now_utc_iso()
-    input_hash = _sha256_bytes(json.dumps(input_refs, sort_keys=True).encode("utf-8"))[:16]
-    job_id = f"{timestamp.replace(':', '').replace('-', '')[:15]}-{input_hash}"
+def _build_job_record(
+    *,
+    package_path: Path,
+    input_refs: list[dict[str, Any]],
+    manifest_rows: list[dict[str, Any]],
+    timestamp: str | None = None,
+    job_id: str | None = None,
+    input_hash: str | None = None,
+) -> dict[str, Any]:
+    timestamp = timestamp or _now_utc_iso()
+    resolved_job_id, resolved_input_hash = _job_identity(input_refs, timestamp)
+    job_id = job_id or resolved_job_id
+    input_hash = input_hash or resolved_input_hash
     return {
         "schema_version": JOB_SCHEMA_VERSION,
         "job_id": job_id,
@@ -499,14 +642,6 @@ def build_workstation_delivery_package(
         for name, source in evidence_sources:
             _copy_if_exists(source, evidence_dir / name)
 
-        (root / "README_DELIVERY.md").write_text(_readme_text(), encoding="utf-8")
-        (root / "DELIVERY_INDEX.md").write_text(_delivery_index_text(), encoding="utf-8")
-        (root / "REVISION_HISTORY.md").write_text(_revision_history_text(generated_at), encoding="utf-8")
-        (data_dir / "revision_policy.json").write_text(
-            json.dumps(_revision_policy_payload(generated_at), ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
-
         input_refs = [
             {"label": "viewer_html", "path": str(viewer_source), "available": viewer_source.exists()},
             {"label": "report_pdf", "path": str(report_pdf), "available": report_pdf.exists()},
@@ -516,10 +651,39 @@ def build_workstation_delivery_package(
             {"label": "service_budget", "path": str(service_budget), "available": service_budget.exists()},
             {"label": "source_model", "path": str(source_model), "available": source_model.exists()},
         ]
+        current_job_id, input_hash = _job_identity(input_refs, generated_at)
+        previous_deliveries = _previous_delivery_rows(job_root)
+
+        (root / "README_DELIVERY.md").write_text(_readme_text(), encoding="utf-8")
+        (root / "DELIVERY_INDEX.md").write_text(_delivery_index_text(), encoding="utf-8")
+        (root / "ACCEPTANCE_PACKET.md").write_text(
+            _acceptance_packet_text(generated_at=generated_at, current_job_id=current_job_id),
+            encoding="utf-8",
+        )
+        (root / "REVISION_HISTORY.md").write_text(_revision_history_text(generated_at), encoding="utf-8")
+        (data_dir / "revision_policy.json").write_text(
+            json.dumps(_revision_policy_payload(generated_at), ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        (data_dir / "redelivery_comparison_manifest.json").write_text(
+            json.dumps(
+                _redelivery_comparison_payload(
+                    generated_at=generated_at,
+                    current_job_id=current_job_id,
+                    previous_deliveries=previous_deliveries,
+                ),
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
         content_rows = _checksum_rows(root, include_manifest=False)
         manifest_inside = {
             "schema_version": SCHEMA_VERSION,
             "generated_at": _now_utc_iso(),
+            "current_job_id": current_job_id,
             "package_claim_boundary": CLAIM_BOUNDARY,
             "delivery_formats_v1": ["HTML", "PDF", "SVG", "JSON", "CSV"],
             "dxf_dwg_roundtrip": "v2_extension",
@@ -542,7 +706,14 @@ def build_workstation_delivery_package(
     restore = restore_package_smoke(out)
     manifest_rows = _zip_file_rows(out)
     manifest_consistency = verify_package_manifest_consistency(out)
-    job_record = _build_job_record(package_path=out, input_refs=input_refs, manifest_rows=manifest_rows)
+    job_record = _build_job_record(
+        package_path=out,
+        input_refs=input_refs,
+        manifest_rows=manifest_rows,
+        timestamp=generated_at,
+        job_id=current_job_id,
+        input_hash=input_hash,
+    )
     job_record_out.parent.mkdir(parents=True, exist_ok=True)
     job_record_out.write_text(json.dumps(job_record, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     job_folder_contract = _write_job_folder(job_root=job_root, job_record=job_record, package_path=out)
@@ -550,11 +721,13 @@ def build_workstation_delivery_package(
     required_sections = {
         "report.pdf": any(row["path"] == "report.pdf" for row in manifest_rows),
         "viewer.html": any(row["path"] == "viewer.html" for row in manifest_rows),
+        "ACCEPTANCE_PACKET.md": any(row["path"] == "ACCEPTANCE_PACKET.md" for row in manifest_rows),
         "DELIVERY_INDEX.md": any(row["path"] == "DELIVERY_INDEX.md" for row in manifest_rows),
         "REVISION_HISTORY.md": any(row["path"] == "REVISION_HISTORY.md" for row in manifest_rows),
         "drawings": any(row["path"].startswith("drawings/") for row in manifest_rows),
         "data": any(row["path"].startswith("data/") for row in manifest_rows),
         "data/revision_policy.json": any(row["path"] == "data/revision_policy.json" for row in manifest_rows),
+        "data/redelivery_comparison_manifest.json": any(row["path"] == "data/redelivery_comparison_manifest.json" for row in manifest_rows),
         "evidence": any(row["path"].startswith("evidence/") for row in manifest_rows),
         "manifest.json": any(row["path"] == "manifest.json" for row in manifest_rows),
         "checksums.sha256": any(row["path"] == "checksums.sha256" for row in manifest_rows),

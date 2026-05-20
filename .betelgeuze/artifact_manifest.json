@@ -5,7 +5,7 @@
       "type": "json",
       "purpose": "Workstation delivery readiness gate output",
       "created_by": "scripts/check_workstation_delivery_readiness.py",
-      "verification": "Workstation delivery readiness: PASS | gates=7/7, including job reproducibility, package manifest consistency, viewer shell marker, delivery index, revision policy, and retention policy checks",
+      "verification": "Workstation delivery readiness: PASS | gates=7/7, including job reproducibility, package manifest consistency, viewer shell marker, delivery index, acceptance packet, PDF header, report/viewer/acceptance manifest references, claim boundary, revision policy, redelivery comparison, and retention cleanup preview checks",
       "limitations": "Does not close independent EB/RH evidence."
     },
     {
@@ -13,11 +13,11 @@
       "type": "zip",
       "purpose": "Customer delivery package for workstation service",
       "created_by": "scripts/build_workstation_delivery_package.py",
-      "verification": "Package restore smoke, checksum self-test, manifest consistency self-test, viewer shell marker, delivery index marker, and revision policy pass",
+      "verification": "Package restore smoke, checksum self-test, manifest consistency self-test, viewer shell marker, delivery index marker, acceptance packet marker, PDF header, report/viewer/acceptance manifest references, claim boundary, revision policy, and redelivery comparison pass",
       "limitations": "Contains v1 formats only: HTML/PDF/SVG/JSON/CSV."
     },
     {
-      "path": "implementation/phase1/workstation_jobs/20260520T133301-f8616d87d2ed53b4",
+      "path": "implementation/phase1/workstation_jobs/20260520T142939-f8616d87d2ed53b4",
       "type": "job-folder",
       "purpose": "Folderized job reproducibility record",
       "created_by": "scripts/build_workstation_delivery_package.py",
@@ -29,8 +29,8 @@
       "type": "json",
       "purpose": "Workstation job retention and cleanup policy",
       "created_by": "scripts/build_workstation_job_retention_policy.py",
-      "verification": "Workstation job retention policy: PASS | jobs=4 | retention_days=365 | max_jobs=200",
-      "limitations": "Cleanup is policy-only; deletion requires explicit external-state confirmation."
+      "verification": "Workstation job retention policy: PASS | jobs=6 | retention_days=365 | max_jobs=200 | cleanup_preview=dry_run_only | candidates=0",
+      "limitations": "Cleanup preview is non-destructive; deletion requires explicit external-state confirmation."
     },
     {
       "path": "implementation/phase1/support_bundle_manifest.json",

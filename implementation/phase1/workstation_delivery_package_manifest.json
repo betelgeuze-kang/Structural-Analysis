@@ -1,13 +1,18 @@
 {
   "blockers": [],
   "checksum_self_test": {
-    "checked_rows": 26,
+    "checked_rows": 28,
     "mismatches": [],
     "pass": true,
     "reason": "PASS"
   },
   "contract_pass": true,
   "file_rows": [
+    {
+      "bytes": 948,
+      "path": "ACCEPTANCE_PACKET.md",
+      "sha256": "de492294f9e36cb70b4d1b12b47e156512c61fec0021f561b8b77598d7537c63"
+    },
     {
       "bytes": 877,
       "path": "DELIVERY_INDEX.md",
@@ -21,12 +26,12 @@
     {
       "bytes": 435,
       "path": "REVISION_HISTORY.md",
-      "sha256": "625d3b7be611bd7b816fa1e5e4701af7c9e3d33b7617bdc67fdc88728538e7af"
+      "sha256": "942969ec14263e23edfa74f291914ee65405ec5299a4feb2caeebdffbe8a722e"
     },
     {
-      "bytes": 2397,
+      "bytes": 2591,
       "path": "checksums.sha256",
-      "sha256": "da22839687b4ebdcfcc78699ff6a88b98686575d2e8bf8cdd87104220b210032"
+      "sha256": "336b3da5a5455b7f8067b354423d8836684b8c4acc8d5d5228c9564fa7392126"
     },
     {
       "bytes": 1278,
@@ -34,9 +39,14 @@
       "sha256": "516c051f8f68126e80626cc65363bd23ea579fe36c46d60976a50dec1ec5d98a"
     },
     {
+      "bytes": 3503,
+      "path": "data/redelivery_comparison_manifest.json",
+      "sha256": "9c17536b67b42c2899d3c43e24a6582e7db308b7a088950aae5ac4a38554b0fb"
+    },
+    {
       "bytes": 702,
       "path": "data/revision_policy.json",
-      "sha256": "3c8f93b4038e7530a2ae76d2b071907f9e4766c356e00e078a7f4bf67543a3b2"
+      "sha256": "bb3eeccd51b6f9dfc7b9355bec16283774432b92064c21136630f875b638b18a"
     },
     {
       "bytes": 9110297,
@@ -116,7 +126,7 @@
     {
       "bytes": 14231,
       "path": "evidence/support_bundle_manifest.json",
-      "sha256": "e1b7616f2a9a7614b85d291ae2e9b0cea8b927073b776d528c51529a203710e4"
+      "sha256": "65f1a6adf8d674067db6f941add51aa1f5d03cc43df00833623410518d3d9bd7"
     },
     {
       "bytes": 3972,
@@ -129,9 +139,9 @@
       "sha256": "a4d36a0a87244d6df667948e4c99c6df515e574bf94562e4be90cc6f62142580"
     },
     {
-      "bytes": 5839,
+      "bytes": 6224,
       "path": "manifest.json",
-      "sha256": "f34f7a5533d1b0ded026f293fc5e79242dad70207130926423796391240a1c4c"
+      "sha256": "9709831418dcf3e74f49c2eb2ce7395dccb82975f4d35c0d43a7df68c4224451"
     },
     {
       "bytes": 143745,
@@ -144,7 +154,7 @@
       "sha256": "eb08924a99072e5deca16a04cd77abe5196b1194b05d5ccf69b5757da152a2ce"
     }
   ],
-  "generated_at": "2026-05-20T13:33:01.312532+00:00",
+  "generated_at": "2026-05-20T14:29:39.849706+00:00",
   "input_refs": [
     {
       "available": true,
@@ -189,7 +199,7 @@
       "pass": true,
       "reason": "PASS"
     },
-    "job_dir": "implementation/phase1/workstation_jobs/20260520T133301-f8616d87d2ed53b4",
+    "job_dir": "implementation/phase1/workstation_jobs/20260520T142939-f8616d87d2ed53b4",
     "pass": true,
     "reason": "PASS",
     "required_paths": {
@@ -200,7 +210,7 @@
     }
   },
   "job_record": {
-    "generated_at": "2026-05-20T13:33:01.311339+00:00",
+    "generated_at": "2026-05-20T14:29:39.420264+00:00",
     "input_hash": "f8616d87d2ed53b4",
     "input_manifest": [
       {
@@ -239,8 +249,13 @@
         "path": "implementation/phase1/open_data/midas/midas_model.json"
       }
     ],
-    "job_id": "20260520T133301-f8616d87d2ed53b4",
+    "job_id": "20260520T142939-f8616d87d2ed53b4",
     "output_manifest": [
+      {
+        "bytes": 948,
+        "path": "ACCEPTANCE_PACKET.md",
+        "sha256": "de492294f9e36cb70b4d1b12b47e156512c61fec0021f561b8b77598d7537c63"
+      },
       {
         "bytes": 877,
         "path": "DELIVERY_INDEX.md",
@@ -254,12 +269,12 @@
       {
         "bytes": 435,
         "path": "REVISION_HISTORY.md",
-        "sha256": "625d3b7be611bd7b816fa1e5e4701af7c9e3d33b7617bdc67fdc88728538e7af"
+        "sha256": "942969ec14263e23edfa74f291914ee65405ec5299a4feb2caeebdffbe8a722e"
       },
       {
-        "bytes": 2397,
+        "bytes": 2591,
         "path": "checksums.sha256",
-        "sha256": "da22839687b4ebdcfcc78699ff6a88b98686575d2e8bf8cdd87104220b210032"
+        "sha256": "336b3da5a5455b7f8067b354423d8836684b8c4acc8d5d5228c9564fa7392126"
       },
       {
         "bytes": 1278,
@@ -267,9 +282,14 @@
         "sha256": "516c051f8f68126e80626cc65363bd23ea579fe36c46d60976a50dec1ec5d98a"
       },
       {
+        "bytes": 3503,
+        "path": "data/redelivery_comparison_manifest.json",
+        "sha256": "9c17536b67b42c2899d3c43e24a6582e7db308b7a088950aae5ac4a38554b0fb"
+      },
+      {
         "bytes": 702,
         "path": "data/revision_policy.json",
-        "sha256": "3c8f93b4038e7530a2ae76d2b071907f9e4766c356e00e078a7f4bf67543a3b2"
+        "sha256": "bb3eeccd51b6f9dfc7b9355bec16283774432b92064c21136630f875b638b18a"
       },
       {
         "bytes": 9110297,
@@ -349,7 +369,7 @@
       {
         "bytes": 14231,
         "path": "evidence/support_bundle_manifest.json",
-        "sha256": "e1b7616f2a9a7614b85d291ae2e9b0cea8b927073b776d528c51529a203710e4"
+        "sha256": "65f1a6adf8d674067db6f941add51aa1f5d03cc43df00833623410518d3d9bd7"
       },
       {
         "bytes": 3972,
@@ -362,9 +382,9 @@
         "sha256": "a4d36a0a87244d6df667948e4c99c6df515e574bf94562e4be90cc6f62142580"
       },
       {
-        "bytes": 5839,
+        "bytes": 6224,
         "path": "manifest.json",
-        "sha256": "f34f7a5533d1b0ded026f293fc5e79242dad70207130926423796391240a1c4c"
+        "sha256": "9709831418dcf3e74f49c2eb2ce7395dccb82975f4d35c0d43a7df68c4224451"
       },
       {
         "bytes": 143745,
@@ -382,14 +402,14 @@
         "artifact_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
         "command": "python3 scripts/build_workstation_delivery_package.py",
         "status": "pass",
-        "timestamp": "2026-05-20T13:33:01.311339+00:00"
+        "timestamp": "2026-05-20T14:29:39.420264+00:00"
       }
     ],
     "schema_version": "workstation-job-record.v1"
   },
   "job_record_path": "implementation/phase1/workstation_job_record.json",
   "manifest_consistency_self_test": {
-    "checked_rows": 25,
+    "checked_rows": 27,
     "mismatches": [],
     "pass": true,
     "reason": "PASS"
@@ -398,11 +418,13 @@
   "package_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
   "reason_code": "PASS",
   "required_sections": {
+    "ACCEPTANCE_PACKET.md": true,
     "DELIVERY_INDEX.md": true,
     "README_DELIVERY.md": true,
     "REVISION_HISTORY.md": true,
     "checksums.sha256": true,
     "data": true,
+    "data/redelivery_comparison_manifest.json": true,
     "data/revision_policy.json": true,
     "drawings": true,
     "evidence": true,
@@ -411,21 +433,29 @@
     "viewer.html": true
   },
   "restore_smoke": {
+    "acceptance_packet_marker_pass": true,
     "checksum_self_test": {
-      "checked_rows": 26,
+      "checked_rows": 28,
       "mismatches": [],
       "pass": true,
       "reason": "PASS"
     },
     "delivery_index_marker_pass": true,
+    "manifest_acceptance_reference_pass": true,
+    "manifest_claim_boundary_pass": true,
+    "manifest_report_reference_pass": true,
     "pass": true,
+    "pdf_magic_pass": true,
     "reason": "PASS",
+    "redelivery_comparison_pass": true,
     "required_paths": {
+      "ACCEPTANCE_PACKET.md": true,
       "DELIVERY_INDEX.md": true,
       "README_DELIVERY.md": true,
       "REVISION_HISTORY.md": true,
       "checksums.sha256": true,
       "data/": true,
+      "data/redelivery_comparison_manifest.json": true,
       "data/revision_policy.json": true,
       "drawings/": true,
       "evidence/": true,
@@ -435,8 +465,8 @@
     },
     "revision_policy_pass": true,
     "viewer_shell_marker_pass": true,
-    "zip_entry_count": 30
+    "zip_entry_count": 32
   },
   "schema_version": "workstation-delivery-package-manifest.v1",
-  "summary_line": "Workstation delivery package: PASS | files=27 | restore=True"
+  "summary_line": "Workstation delivery package: PASS | files=29 | restore=True"
 }

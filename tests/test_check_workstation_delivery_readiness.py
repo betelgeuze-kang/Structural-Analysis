@@ -31,6 +31,7 @@ def test_workstation_delivery_readiness_passes_green_artifacts(tmp_path: Path) -
             "required_sections": {
                 "report.pdf": True,
                 "viewer.html": True,
+                "ACCEPTANCE_PACKET.md": True,
                 "drawings": True,
                 "data": True,
                 "evidence": True,
@@ -40,6 +41,7 @@ def test_workstation_delivery_readiness_passes_green_artifacts(tmp_path: Path) -
                 "DELIVERY_INDEX.md": True,
                 "REVISION_HISTORY.md": True,
                 "data/revision_policy.json": True,
+                "data/redelivery_comparison_manifest.json": True,
             },
             "checksum_self_test": {"pass": True},
             "manifest_consistency_self_test": {"pass": True},
@@ -47,7 +49,13 @@ def test_workstation_delivery_readiness_passes_green_artifacts(tmp_path: Path) -
                 "pass": True,
                 "viewer_shell_marker_pass": True,
                 "delivery_index_marker_pass": True,
+                "acceptance_packet_marker_pass": True,
+                "pdf_magic_pass": True,
+                "manifest_report_reference_pass": True,
+                "manifest_acceptance_reference_pass": True,
+                "manifest_claim_boundary_pass": True,
                 "revision_policy_pass": True,
+                "redelivery_comparison_pass": True,
             },
             "job_folder_contract": {
                 "pass": True,
@@ -77,6 +85,11 @@ def test_workstation_delivery_readiness_passes_green_artifacts(tmp_path: Path) -
                 "max_completed_jobs": 200,
                 "delete_requires_explicit_confirmation": True,
                 "cleanup_dry_run_required": True,
+            },
+            "cleanup_preview": {
+                "mode": "dry_run_only",
+                "delete_operation_executed": False,
+                "candidate_count": 0,
             },
         },
     )
@@ -115,7 +128,13 @@ def test_workstation_delivery_readiness_blocks_bad_package(tmp_path: Path) -> No
                 "pass": False,
                 "viewer_shell_marker_pass": False,
                 "delivery_index_marker_pass": False,
+                "acceptance_packet_marker_pass": False,
+                "pdf_magic_pass": False,
+                "manifest_report_reference_pass": False,
+                "manifest_acceptance_reference_pass": False,
+                "manifest_claim_boundary_pass": False,
                 "revision_policy_pass": False,
+                "redelivery_comparison_pass": False,
             },
             "job_folder_contract": {"pass": False, "required_paths": {}, "checksum_self_test": {"pass": False}},
         },
@@ -127,7 +146,11 @@ def test_workstation_delivery_readiness_blocks_bad_package(tmp_path: Path) -> No
     )
     retention = _write_json(
         tmp_path / "retention.json",
-        {"contract_pass": False, "policy": {"delete_requires_explicit_confirmation": False}},
+        {
+            "contract_pass": False,
+            "policy": {"delete_requires_explicit_confirmation": False},
+            "cleanup_preview": {"mode": "delete", "delete_operation_executed": True},
+        },
     )
     viewer = _write_json(tmp_path / "viewer.json", {"contract_pass": True})
     visual = _write_json(tmp_path / "visual.json", {"contract_pass": True})
@@ -149,6 +172,14 @@ def test_workstation_delivery_readiness_blocks_bad_package(tmp_path: Path) -> No
     assert "Delivery package manifest::package_manifest_consistency_self_test_failed" in payload["blockers"]
     assert "Delivery package manifest::package_viewer_shell_marker_missing" in payload["blockers"]
     assert "Delivery package manifest::package_delivery_index_marker_missing" in payload["blockers"]
+    assert "Delivery package manifest::package_acceptance_packet_marker_missing" in payload["blockers"]
+    assert "Delivery package manifest::package_pdf_magic_missing" in payload["blockers"]
+    assert "Delivery package manifest::package_manifest_report_reference_missing" in payload["blockers"]
+    assert "Delivery package manifest::package_manifest_acceptance_reference_missing" in payload["blockers"]
+    assert "Delivery package manifest::package_manifest_claim_boundary_missing" in payload["blockers"]
     assert "Delivery package manifest::package_revision_policy_missing_or_invalid" in payload["blockers"]
+    assert "Delivery package manifest::package_redelivery_comparison_missing_or_invalid" in payload["blockers"]
     assert "Job reproducibility contract::job_folder_contract_failed" in payload["blockers"]
     assert "Job retention and cleanup policy::workstation_job_retention_policy_not_green" in payload["blockers"]
+    assert "Job retention and cleanup policy::job_retention_cleanup_preview_not_dry_run" in payload["blockers"]
+    assert "Job retention and cleanup policy::job_retention_cleanup_deleted_files" in payload["blockers"]

@@ -26,12 +26,17 @@ Resolved local productization gaps:
 - Restore smoke now verifies the delivery index marker and revision policy.
 - Added `workstation-job-retention-policy.v1` with explicit-confirmation cleanup policy.
 - `check_workstation_delivery_readiness.py` now includes `Job retention and cleanup policy`.
+- Added a read-only `cleanup_preview` that lists stale job folders without deleting.
+- Restore smoke now checks PDF header, manifest report/viewer references, and manifest claim boundary.
+- Added `ACCEPTANCE_PACKET.md` with customer acceptance/rejection and engineer-review acknowledgement markers.
+- Added `data/redelivery_comparison_manifest.json` to link current package/job to previous delivery history.
+- Restore smoke now verifies acceptance packet markers, manifest acceptance references, and redelivery comparison policy.
 - Current workstation delivery readiness is `PASS | gates=7/7`.
 - Support bundle includes 21/21 required artifacts, including workstation job retention policy.
-- Full Python test suite passes: `1463 passed`.
+- Full Python test suite passes: `1465 passed`.
 
 ## Next Recursive Candidates
 
-1. Add a read-only retention cleanup preview that lists stale job folders without deleting.
-2. Add stronger package restore checks for PDF magic/header and manifest-to-report cross-reference.
-3. Add customer-facing sample acceptance packet for a realistic project handoff.
+1. Add report metadata/manifest revision cross-reference beyond PDF header.
+2. Add a customer-facing delivery QA summary page that mirrors readiness PASS/BLOCKED without exposing internal-only paths.
+3. Add optional signed delivery manifest skeleton for offline handoff, still placeholder-only until keys exist.

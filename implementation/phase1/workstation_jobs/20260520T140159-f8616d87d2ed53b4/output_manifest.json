@@ -1,50 +1,6 @@
 {
-  "generated_at": "2026-05-20T14:29:39.420264+00:00",
-  "input_hash": "f8616d87d2ed53b4",
-  "input_manifest": [
-    {
-      "available": true,
-      "label": "viewer_html",
-      "path": "implementation/phase1/release/visualization/structural_viewer_midas33_pr_singlefile.html"
-    },
-    {
-      "available": true,
-      "label": "report_pdf",
-      "path": "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/optimized_drawing_expert_review.default.pdf"
-    },
-    {
-      "available": true,
-      "label": "drawings_dir",
-      "path": "implementation/phase1/output/structural_svg"
-    },
-    {
-      "available": true,
-      "label": "client_validation_report",
-      "path": "implementation/phase1/client_input_validation_report.json"
-    },
-    {
-      "available": true,
-      "label": "hardware_profile",
-      "path": "implementation/phase1/workstation_hardware_profile.json"
-    },
-    {
-      "available": true,
-      "label": "service_budget",
-      "path": "implementation/phase1/workstation_service_budget.json"
-    },
-    {
-      "available": true,
-      "label": "source_model",
-      "path": "implementation/phase1/open_data/midas/midas_model.json"
-    }
-  ],
-  "job_id": "20260520T142939-f8616d87d2ed53b4",
-  "output_manifest": [
-    {
-      "bytes": 948,
-      "path": "ACCEPTANCE_PACKET.md",
-      "sha256": "de492294f9e36cb70b4d1b12b47e156512c61fec0021f561b8b77598d7537c63"
-    },
+  "job_id": "20260520T140159-f8616d87d2ed53b4",
+  "output_rows": [
     {
       "bytes": 877,
       "path": "DELIVERY_INDEX.md",
@@ -58,12 +14,12 @@
     {
       "bytes": 435,
       "path": "REVISION_HISTORY.md",
-      "sha256": "942969ec14263e23edfa74f291914ee65405ec5299a4feb2caeebdffbe8a722e"
+      "sha256": "6d140bbeb060e5605094616e3aacdc85e610925832597f73a4fd74debba1861f"
     },
     {
-      "bytes": 2591,
+      "bytes": 2397,
       "path": "checksums.sha256",
-      "sha256": "336b3da5a5455b7f8067b354423d8836684b8c4acc8d5d5228c9564fa7392126"
+      "sha256": "993226205173f393ed07ded70aeee3d52efd859302bdeb61813d2714b44540be"
     },
     {
       "bytes": 1278,
@@ -71,14 +27,9 @@
       "sha256": "516c051f8f68126e80626cc65363bd23ea579fe36c46d60976a50dec1ec5d98a"
     },
     {
-      "bytes": 3503,
-      "path": "data/redelivery_comparison_manifest.json",
-      "sha256": "9c17536b67b42c2899d3c43e24a6582e7db308b7a088950aae5ac4a38554b0fb"
-    },
-    {
       "bytes": 702,
       "path": "data/revision_policy.json",
-      "sha256": "bb3eeccd51b6f9dfc7b9355bec16283774432b92064c21136630f875b638b18a"
+      "sha256": "afa1b74603162aa2e668e7a29fb2a55e8f0ce77363300a34fcfbda5012a74640"
     },
     {
       "bytes": 9110297,
@@ -158,7 +109,7 @@
     {
       "bytes": 14231,
       "path": "evidence/support_bundle_manifest.json",
-      "sha256": "65f1a6adf8d674067db6f941add51aa1f5d03cc43df00833623410518d3d9bd7"
+      "sha256": "606d986fe46d697f4057464ac8d32ac789fdbf8ccb75dad1f238ef8f91730923"
     },
     {
       "bytes": 3972,
@@ -171,9 +122,9 @@
       "sha256": "a4d36a0a87244d6df667948e4c99c6df515e574bf94562e4be90cc6f62142580"
     },
     {
-      "bytes": 6224,
+      "bytes": 5839,
       "path": "manifest.json",
-      "sha256": "9709831418dcf3e74f49c2eb2ce7395dccb82975f4d35c0d43a7df68c4224451"
+      "sha256": "f57cffcfd5a17011b46cb324a58bb497231f7e34a761b772eb760e63ea5e87d7"
     },
     {
       "bytes": 143745,
@@ -186,13 +137,6 @@
       "sha256": "eb08924a99072e5deca16a04cd77abe5196b1194b05d5ccf69b5757da152a2ce"
     }
   ],
-  "run_log": [
-    {
-      "artifact_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
-      "command": "python3 scripts/build_workstation_delivery_package.py",
-      "status": "pass",
-      "timestamp": "2026-05-20T14:29:39.420264+00:00"
-    }
-  ],
-  "schema_version": "workstation-job-record.v1"
+  "package_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
+  "schema_version": "workstation-job-output-manifest.v1"
 }

@@ -49,12 +49,84 @@ def _job_rows(job_root: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _parse_job_timestamp(job_id: str) -> datetime | None:
+    token = job_id.split("-", 1)[0]
+    try:
+        return datetime.strptime(token, "%Y%m%dT%H%M%S").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
+def _cleanup_preview(
+    *,
+    rows: list[dict[str, Any]],
+    latest_job_id: str,
+    generated_at: datetime,
+    retention_days: int,
+    max_completed_jobs: int,
+) -> dict[str, Any]:
+    sortable_rows = []
+    for row in rows:
+        job_id = str(row.get("job_id", ""))
+        timestamp = _parse_job_timestamp(job_id)
+        age_days = (generated_at - timestamp).days if timestamp else None
+        sortable_rows.append(
+            {
+                **row,
+                "parsed_timestamp": timestamp.isoformat() if timestamp else "",
+                "age_days": age_days,
+                "is_latest": job_id == latest_job_id,
+            }
+        )
+
+    by_newest = sorted(
+        sortable_rows,
+        key=lambda row: row["parsed_timestamp"] or row["job_id"],
+        reverse=True,
+    )
+    retained_by_count = {str(row["job_id"]) for row in by_newest[:max(max_completed_jobs, 0)]}
+    candidates = []
+    retained_count = 0
+    for row in by_newest:
+        job_id = str(row["job_id"])
+        reasons = []
+        if row["is_latest"]:
+            retained_count += 1
+            continue
+        if row["age_days"] is not None and row["age_days"] > retention_days:
+            reasons.append("older_than_retention_days")
+        if job_id not in retained_by_count:
+            reasons.append("exceeds_max_completed_jobs")
+        if reasons:
+            candidates.append(
+                {
+                    "job_id": job_id,
+                    "path": row["path"],
+                    "age_days": row["age_days"],
+                    "reasons": reasons,
+                    "action": "would_delete_if_explicitly_confirmed",
+                }
+            )
+        else:
+            retained_count += 1
+
+    return {
+        "mode": "dry_run_only",
+        "delete_operation_executed": False,
+        "requires_explicit_confirmation": True,
+        "candidate_count": len(candidates),
+        "retained_count": retained_count,
+        "candidate_rows": candidates,
+    }
+
+
 def build_workstation_job_retention_policy(
     *,
     job_root: Path = DEFAULT_JOB_ROOT,
     retention_days: int = 365,
     max_completed_jobs: int = 200,
 ) -> dict[str, Any]:
+    generated_at_dt = datetime.now(timezone.utc)
     rows = _job_rows(job_root)
     latest_path = job_root / "latest_job_id.txt"
     latest_job_id = latest_path.read_text(encoding="utf-8").strip() if latest_path.exists() else ""
@@ -68,9 +140,16 @@ def build_workstation_job_retention_policy(
         *(["job_checksum_manifest_missing"] if any(not row["checksums_available"] for row in rows) else []),
     ]
     contract_pass = not blockers
+    cleanup_preview = _cleanup_preview(
+        rows=rows,
+        latest_job_id=latest_job_id,
+        generated_at=generated_at_dt,
+        retention_days=retention_days,
+        max_completed_jobs=max_completed_jobs,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": _now_utc_iso(),
+        "generated_at": generated_at_dt.isoformat(),
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_WORKSTATION_JOB_RETENTION_POLICY_BLOCKED",
         "summary_line": (
@@ -92,6 +171,7 @@ def build_workstation_job_retention_policy(
             "manual_cleanup_gate": "External-State confirmation required before deleting job folders.",
             "dry_run_command": "python3 scripts/build_workstation_job_retention_policy.py --json",
         },
+        "cleanup_preview": cleanup_preview,
         "job_rows": rows,
         "blockers": blockers,
     }

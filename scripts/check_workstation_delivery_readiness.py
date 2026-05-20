@@ -105,8 +105,38 @@ def _package_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
             else []
         ),
         *(
+            ["package_acceptance_packet_marker_missing"]
+            if path.exists() and not restore.get("acceptance_packet_marker_pass", False)
+            else []
+        ),
+        *(
+            ["package_pdf_magic_missing"]
+            if path.exists() and not restore.get("pdf_magic_pass", False)
+            else []
+        ),
+        *(
+            ["package_manifest_report_reference_missing"]
+            if path.exists() and not restore.get("manifest_report_reference_pass", False)
+            else []
+        ),
+        *(
+            ["package_manifest_acceptance_reference_missing"]
+            if path.exists() and not restore.get("manifest_acceptance_reference_pass", False)
+            else []
+        ),
+        *(
+            ["package_manifest_claim_boundary_missing"]
+            if path.exists() and not restore.get("manifest_claim_boundary_pass", False)
+            else []
+        ),
+        *(
             ["package_revision_policy_missing_or_invalid"]
             if path.exists() and not restore.get("revision_policy_pass", False)
+            else []
+        ),
+        *(
+            ["package_redelivery_comparison_missing_or_invalid"]
+            if path.exists() and not restore.get("redelivery_comparison_pass", False)
             else []
         ),
         *(
@@ -127,7 +157,13 @@ def _package_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
         restore_smoke_pass=bool(restore.get("pass", False)),
         viewer_shell_marker_pass=bool(restore.get("viewer_shell_marker_pass", False)),
         delivery_index_marker_pass=bool(restore.get("delivery_index_marker_pass", False)),
+        acceptance_packet_marker_pass=bool(restore.get("acceptance_packet_marker_pass", False)),
+        pdf_magic_pass=bool(restore.get("pdf_magic_pass", False)),
+        manifest_report_reference_pass=bool(restore.get("manifest_report_reference_pass", False)),
+        manifest_acceptance_reference_pass=bool(restore.get("manifest_acceptance_reference_pass", False)),
+        manifest_claim_boundary_pass=bool(restore.get("manifest_claim_boundary_pass", False)),
         revision_policy_pass=bool(restore.get("revision_policy_pass", False)),
+        redelivery_comparison_pass=bool(restore.get("redelivery_comparison_pass", False)),
     )
 
 
@@ -204,11 +240,25 @@ def _job_retention_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
     policy = payload.get("policy", {})
     if not isinstance(policy, dict):
         policy = {}
+    cleanup_preview = payload.get("cleanup_preview", {})
+    if not isinstance(cleanup_preview, dict):
+        cleanup_preview = {}
     blockers = [
         *(["workstation_job_retention_policy_missing"] if not path.exists() else []),
         *(["workstation_job_retention_policy_not_green"] if path.exists() and not payload.get("contract_pass", False) else []),
         *(["job_retention_delete_confirmation_missing"] if path.exists() and not policy.get("delete_requires_explicit_confirmation", False) else []),
         *(["job_retention_dry_run_missing"] if path.exists() and not policy.get("cleanup_dry_run_required", False) else []),
+        *(["job_retention_cleanup_preview_missing"] if path.exists() and not cleanup_preview else []),
+        *(
+            ["job_retention_cleanup_preview_not_dry_run"]
+            if path.exists() and cleanup_preview and cleanup_preview.get("mode") != "dry_run_only"
+            else []
+        ),
+        *(
+            ["job_retention_cleanup_deleted_files"]
+            if path.exists() and cleanup_preview.get("delete_operation_executed", False)
+            else []
+        ),
     ]
     return _gate(
         "Job retention and cleanup policy",
@@ -218,6 +268,8 @@ def _job_retention_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
         retention_days=int(policy.get("retention_days", 0) or 0),
         max_completed_jobs=int(policy.get("max_completed_jobs", 0) or 0),
         latest_job_id=str(payload.get("latest_job_id", "")),
+        cleanup_preview_candidate_count=int(cleanup_preview.get("candidate_count", 0) or 0),
+        cleanup_preview_mode=str(cleanup_preview.get("mode", "")),
     )
 
 
