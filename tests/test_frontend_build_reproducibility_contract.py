@@ -28,6 +28,14 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         package_json["scripts"]["verify:viewer-report-pdf"]
         == "playwright install chromium && node ./scripts/verify-structure-viewer-report-pdf.mjs"
     )
+    assert (
+        package_json["scripts"]["verify:viewer-performance-probe"]
+        == "playwright install chromium && node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked"
+    )
+    assert (
+        package_json["scripts"]["verify:viewer-visual-regression"]
+        == "playwright install chromium && node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
+    )
     assert package_json["dependencies"] == {
         "react": "18.2.0",
         "react-dom": "18.2.0",
@@ -59,6 +67,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "npm run verify:frontend-browser-smoke" in docs_text
     assert "npm run verify:viewer-manifest" in docs_text
     assert "npm run verify:viewer-report-pdf" in docs_text
+    assert "npm run verify:viewer-performance-probe" in docs_text
+    assert "npm run verify:viewer-visual-regression" in docs_text
     assert "package-lock.json" in docs_text
 
 

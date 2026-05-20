@@ -68,6 +68,7 @@ typography:
     lineHeight: 1.05
     letterSpacing: -0.03em
 rounded:
+  xs: 6px
   sm: 10px
   md: 16px
   lg: 24px
@@ -97,16 +98,16 @@ components:
     backgroundColor: "{colors.surfaceDarkStrong}"
     textColor: "{colors.textOnDark}"
     typography: "{typography.bodySm}"
-    rounded: "{rounded.lg}"
-    padding: 12px
-    height: 56px
+    rounded: "{rounded.md}"
+    padding: 8px
+    height: 44px
   viewerWorkflowTabsDark:
     backgroundColor: "{colors.surfaceDarkStrong}"
     textColor: "{colors.textOnDark}"
     typography: "{typography.bodySm}"
-    rounded: "{rounded.lg}"
-    padding: 10px
-    height: 44px
+    rounded: "{rounded.md}"
+    padding: 6px
+    height: 34px
   viewerNavRailDark:
     backgroundColor: "{colors.surfaceDarkStrong}"
     textColor: "{colors.textOnDark}"
@@ -124,8 +125,8 @@ components:
     backgroundColor: "{colors.inkDark}"
     textColor: "{colors.textOnDark}"
     typography: "{typography.bodyMd}"
-    rounded: "{rounded.xl}"
-    padding: 16px
+    rounded: "{rounded.lg}"
+    padding: 10px
   viewerStageControlPodDark:
     backgroundColor: "{colors.surfaceDarkSoft}"
     textColor: "{colors.textOnDark}"
@@ -136,9 +137,15 @@ components:
     backgroundColor: "{colors.surfaceDarkSoft}"
     textColor: "{colors.textOnDark}"
     typography: "{typography.bodySm}"
-    rounded: "{rounded.lg}"
-    padding: 12px
-    width: 148px
+    rounded: "{rounded.md}"
+    padding: 6px
+    width: 44px
+  analysisStageOverlayDark:
+    backgroundColor: "{colors.surfaceDarkStrong}"
+    textColor: "{colors.textOnDark}"
+    typography: "{typography.bodySm}"
+    rounded: "{rounded.sm}"
+    padding: 8px
   viewerSelectionOverlayDark:
     backgroundColor: "{colors.surfaceDarkSoft}"
     textColor: "{colors.textOnDark}"
@@ -191,6 +198,33 @@ components:
     rounded: "{rounded.md}"
     padding: 10px
     height: 112px
+  analysisCockpitKpiCardDark:
+    backgroundColor: "{colors.surfaceDark}"
+    textColor: "{colors.textOnDark}"
+    typography: "{typography.metricLg}"
+    rounded: "{rounded.md}"
+    padding: 10px
+    height: 88px
+  analysisCockpitChartPanelDark:
+    backgroundColor: "{colors.surfaceDarkStrong}"
+    textColor: "{colors.textOnDark}"
+    typography: "{typography.bodySm}"
+    rounded: "{rounded.md}"
+    padding: 12px
+    height: 164px
+  criticalMemberTableDark:
+    backgroundColor: "{colors.surfaceDarkStrong}"
+    textColor: "{colors.textOnDark}"
+    typography: "{typography.bodySm}"
+    rounded: "{rounded.sm}"
+    padding: 8px
+  analysisTimelineFooterDark:
+    backgroundColor: "{colors.surfaceDarkStrong}"
+    textColor: "{colors.textOnDark}"
+    typography: "{typography.bodySm}"
+    rounded: "{rounded.md}"
+    padding: 10px
+    height: 34px
   reviewHeroLight:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.textOnDark}"
@@ -390,13 +424,15 @@ Layout rules:
 - The workflow tab row should stay compact and shallow so it reads as workflow context, not primary navigation
 - The 3D viewport is the hero on geometry-heavy pages, and side panels should frame it rather than compete with it
 - The top app bar should stay compact and global so the 3D stage keeps most of the vertical attention
+- Desktop provenance cards, suite-route context, and low-priority chips should fold out of the first viewport when they compete with the model stage; the workflow tabs and project/status controls are the visible chrome budget
 - Command-center shell pages should omit `viewerHeroDark` by default and use `viewerShellDark` with `viewerTopBarDark` and `viewerWorkflowTabsDark` as the entry unless a separate overview block is essential
 - The left side should feel like a slim navigation rail first, with stronger route hierarchy than a generic control column
 - The in-stage control pod and vertical tool rail should stay inside or immediately adjacent to the stage frame, not expand into equal-weight sidebars
-- The right side should separate fast KPI scanning at the top from deeper properties, selection evidence cards, and insight cards below
+- The right side should separate fast KPI scanning at the top from optimization summaries, critical member rankings, deeper properties, selection evidence cards, and insight cards below
 - Toolbars around the stage should have clear action hierarchy: one teal primary action, warm brass only for bounded comparison or caution emphasis, and dark pills for quiet utilities
 - Mouse, pen, and touch should share the same direct-manipulation grammar: tap or click to select, drag to orbit or pan, pinch to zoom, and explicit buttons for reset, fit, isolate, and compare when a gesture would be ambiguous
 - The viewport chrome should stay thin and overlap-free, with the axis compass, selection badges, and interaction ribbon anchored inside the stage frame rather than floating as page-level decoration
+- Default analysis-stage overlays should make result state visible on the geometry itself: lateral-load arrows, support markers, active contour/deformed cues, and selection halos belong in the viewport and should never be presented only as sidebar text
 - Selection feedback should be persistent and mirrored: the shared selection state API should be the single source of truth for member, grid, story, and empty selection, and the active entity should keep the same identity in the viewport, selection inspector, provenance row, selected table row, URL/share state, diff/export handoff, archive handoff, and deep-link target; outbound copy/share URLs should emit canonical selection params only, legacy `member`, `story`, and `grid` remain inbound compatibility only, and generated summary/export metadata should retain the active selection contract version and diff-focus contract version alongside that canonical state
 - Share/copy URL generation should serialize only canonical selection params, keep legacy `member`, `story`, and `grid` for inbound compatibility only, and let canonical restore win before stale or conflicting legacy/hash params are removed deterministically; if member-story context is needed, keep it in the canonical context param only rather than mixing it with legacy `story`
 - The selection inspector should behave as a review evidence card, not a plain property table; it should compress AI-optimized reasoning, D/C ratio, cost delta, constructability, selection gate, diff/export handoff, and share-link status into a compact stack
@@ -405,7 +441,7 @@ Layout rules:
 - The optimization legend and inspector must keep one meaning system across `Member type`, `D/C ratio`, `Cost delta`, and `Constructability`: member type is identity, D/C ratio and cost delta are brass-toned quantitative comparisons, and constructability is a feasibility verdict that may resolve to success, warning, or danger
 - Missing optimization or linkage data must fall back to explicit muted labels such as `No data`, `N/A`, `Unknown`, or `not linked`, and those fallbacks should remain readable, subordinate, and accessible instead of masquerading as a result or a zero
 - Copy success, copy failure, and no-selection states must be announced through an `aria-live` region or equivalent live channel, with the visible handoff strip mirroring the same state
-- Engineering evidence should stay dense but structured, with IDs, units, member names, load cases, deltas, and solver state compacted into rows, chips, and cards instead of long prose
+- Engineering evidence should stay dense but structured, with IDs, units, member names, load cases, deltas, critical-member ratios, chart snapshots, and solver state compacted into rows, chips, and cards instead of long prose
 - Accessibility should be built into the shell: keyboard parity for every important action, visible focus states, sufficient touch targets, concise label text, selected table rows that reflect state with `aria-selected`, no reliance on color alone for selection or status, and accessible names for legend rows, selection inspector fields, and optimization overlay chips
 - Light review pages should privilege reading order, comparison, and decision support
 - Dense engineering pages should feel information-rich but never noisy
@@ -447,7 +483,8 @@ Shared selection identity must stay stable across URL, copied deep links, restor
 - `viewerWorkflowTabsDark` for the shallow workflow tab row that switches between model, analysis, optimization, materials, results, and drawing contexts
 - `viewerNavRailDark` for slim left-side navigation and operations rails with persistent workflow hierarchy
 - `viewerHeroDark` and `reviewHeroLight` for page entry blocks
-- `viewerStageFrameDark` for the dominant central stage zone inside `viewerShellDark`, including primary 3D viewport framing, stage-adjacent legends, direct-manipulation tool docks, selection halos, and touch-safe interaction ribbons
+- `viewerStageFrameDark` for the dominant central stage zone inside `viewerShellDark`, including primary 3D viewport framing, stage-adjacent legends, direct-manipulation tool docks, selection halos, support markers, lateral-load arrows, and touch-safe interaction ribbons
+- `analysisStageOverlayDark` for compact stage-native result overlays such as load arrows, base supports, contour hints, and deformed-shape affordances that make the 3D model read as an analysis result, not a neutral wireframe
 - `viewerSelectionOverlayDark` for the compact selected-member, story, or grid overlay that renders the canonical selection record, shows active identity, mirrors shareable review state and copy-link feedback without obscuring the geometry, and keeps story evidence counts split into renderable, total, and invalid-excluded segments so the overlay reads like audit-visible engineering status rather than a warning chip
 - `viewerSelectionInspectorDark` for the compact right-rail evidence card that reads the same canonical selection record and explains the selected member, story, or grid with AI-optimized judgment, D/C ratio, cost delta, constructability, selection gate, diff/export handoff, explicit empty-data labels such as `null`, `No data`, `N/A`, or `not linked`, and coordinate diagnostics for `p0` / `p1`, including `coordinate_valid`, `coordinate_status`, `coordinate_fallback_provenance`, and `coordinate_fallback_diagnostics` when the renderer had to use a safe fallback; its selection handoff copy should stay canonical and explicit, and `no_valid_geometry` should read as an audit-visible engineering state rather than an error banner
 - `viewerOptimizationOverlayDark` for the semantic AI Optimization Overlay Mode that layers legend, selected-state emphasis, inspector cues, and review handoff over the stage while keeping the same shareable review state, identity key, and evidence payload contract
@@ -460,6 +497,7 @@ Shared selection identity must stay stable across URL, copied deep links, restor
 - `viewerPillDark` and `reviewPillLight` for state summaries, route tokens, legend chips, compact utilities, deep-link chips, and low-emphasis toolbar actions
 - `metricCardDark` and `metricCardLight` for headline KPIs and bounded numeric evidence
 - `viewerKpiCardCompactDark` for compact insight-rail KPI cards with short trend context; treat it as a denser semantic subvariant of `metricCardDark` that sits on the rail as separated evidence cards rather than shell slabs
+- `analysisCockpitKpiCardDark`, `analysisCockpitChartPanelDark`, `criticalMemberTableDark`, and `analysisTimelineFooterDark` for the flagship viewer's analysis cockpit layer: eight result/quantity KPI cards, before/after optimization summary cards, top utilization member rows, compact trend/heatmap panels, and footer solver timeline context that must remain linked to the current model artifact rather than marketing copy
 - `signalCard` for small review summaries that must read clearly in either light-oriented surfaces or export workflows
 - `viewerMetaMuted` and `reviewMetaMuted` for provenance strips, secondary labels, route context details, review handoff copy, compact accessible helper text, and explicit empty-data fallback such as `null`, `No data`, `N/A`, or `not linked`
 - `viewerActionPrimary`, `viewerActionSecondary`, and `reviewAccentChip` for bounded emphasis without inventing new accent logic, especially brass-toned optimization deltas and caution markers
@@ -477,7 +515,7 @@ Shared selection identity must stay stable across URL, copied deep links, restor
 
 ### Surface Mapping
 
-- `src/structure-viewer/index.html` is the flagship dark Structural Insight Viewer shell and should read as a compact enterprise FE-analysis application shell rather than a loose collection of panels: compact app bar, workflow tab row, slim navigation rail, dominant 3D stage, in-stage control pod, vertical tool rail, dense KPI insight rail, and lower instrumentation strip; it must preserve the same member, story, grid, and empty-state identity across URL, share, restore, inspector, overlay, diff/export handoff, export handoff, and archive handoff, with outbound copy/share URLs using canonical params only, legacy `member`, `story`, and `grid` remaining inbound compatibility only, and member-story context staying in the canonical context param instead of being mixed with legacy `story`; it must keep `p0` / `p1` as the canonical geometry identity so viewport extent, axis refs, selection focus, story aggregates, and export/archive handoff all resolve from the same segment record; generated summary/export metadata must retain the active selection contract version and diff-focus contract version
+- `src/structure-viewer/index.html` is the flagship dark Structural Insight Viewer shell and should read as a compact enterprise FE-analysis application shell rather than a loose collection of panels: compact app bar, workflow tab row, slim navigation rail, dominant 3D stage, in-stage control pod, vertical tool rail, dense analysis cockpit KPI insight rail, optimization summary, critical member table, lower chart strip, and lower instrumentation strip; it must preserve the same member, story, grid, and empty-state identity across URL, share, restore, inspector, overlay, diff/export handoff, export handoff, and archive handoff, with outbound copy/share URLs using canonical params only, legacy `member`, `story`, and `grid` remaining inbound compatibility only, and member-story context staying in the canonical context param instead of being mixed with legacy `story`; it must keep `p0` / `p1` as the canonical geometry identity so viewport extent, axis refs, selection focus, story aggregates, and export/archive handoff all resolve from the same segment record; generated summary/export metadata must retain the active selection contract version and diff-focus contract version
 - `src/structure-viewer/index.html` should expose AI Optimization Overlay Mode as a stage-anchored semantic layer whose legend, selected state, selection inspector evidence card, and handoff stay synchronized with the same shareable review state and never fork into a separate copy-link flow
 - The selection inspector on `src/structure-viewer/index.html` should explain the same selected member, story, or grid state that the overlay marks, and missing metrics or linkage data should appear as explicit `null`, `No data`, `N/A`, or `not linked` rather than zero or blank placeholders; invalid, missing, `NaN`, or `inf` coordinates should still surface `coordinate_valid`, `coordinate_status`, `coordinate_fallback_provenance`, and `coordinate_fallback_diagnostics` even when the stage uses a safe render fallback, and invalid row preview/details must stay traceable in reviewer handoff
 - `implementation/phase1/release/visualization` is a generated artifact surface and should only change after the generator and contract test pass and the HTML is regenerated from source
@@ -527,7 +565,7 @@ Shared selection identity must stay stable across URL, copied deep links, restor
 - Do keep `Member type`, `D/C ratio`, `Cost delta`, and `Constructability` aligned across legend, selected state, inspector, and review handoff
 - Do bias toward teal and warm mineral accents instead of purple SaaS defaults, and keep teal/brass meaning distinct from success/warning/danger verdicts
 - Do preserve high information density while improving grouping, spacing, and scan order
-- Do keep the 3D stage visually dominant even when KPI cards, properties, and optimization summaries become dense
+- Do keep the 3D stage visually dominant even when KPI cards, trend charts, critical member rows, properties, and optimization summaries become dense
 - Do keep Korean and English labels equally robust in headers, controls, and metadata rows
 - Do make direct manipulation feel precise across mouse, pen, and touch, with selection feedback that survives deep links and reloads
 - Do keep engineering evidence dense but readable, with IDs, units, deltas, and provenance close to the viewport

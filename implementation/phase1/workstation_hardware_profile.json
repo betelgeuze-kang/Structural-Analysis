@@ -1,0 +1,98 @@
+{
+  "blockers": [],
+  "contract_pass": true,
+  "generated_at": "2026-05-20T13:18:30.816165+00:00",
+  "hardware_profile": {
+    "cpu": {
+      "architecture": "x86_64",
+      "cores_per_socket": 12,
+      "cpu_count": 12,
+      "flags_present": true,
+      "model_name": "AMD Ryzen 9 5900X 12-Core Processor",
+      "socket_count": 1,
+      "threads_per_core": 1,
+      "vendor_id": "AuthenticAMD"
+    },
+    "gpu": [
+      {
+        "label": "Advanced Micro Devices, Inc. [AMD/ATI] Navi 21 [Radeon RX 6800/6800 XT / 6900 XT] (rev c0)",
+        "source": "lspci"
+      }
+    ],
+    "memory": {
+      "swap_total_gib": 30.52,
+      "swap_total_kib": 31999996,
+      "total_gib": 31.23,
+      "total_kib": 32745480
+    },
+    "os": {
+      "id": "ubuntu",
+      "kernel": "Linux betelgeuze-X570S-AORUS-ELITE 6.5.0-26-generic #26~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue Mar 12 10:22:43 UTC 2 x86_64 x86_64 x86_64 GNU/Linux",
+      "name": "Ubuntu 22.04.5 LTS",
+      "version": "22.04"
+    },
+    "storage": [
+      {
+        "fstype": "",
+        "model": "Seagate FireCuda 520 SSD ZP2000GM30002",
+        "mountpoint": "",
+        "name": "nvme0n1",
+        "size": "1.8T",
+        "type": "disk"
+      }
+    ]
+  },
+  "profile_scope": {
+    "customer_device_performance_claim": false,
+    "multi_tenant_saas_claim": false,
+    "service_model": "single_operator_workstation_delivery"
+  },
+  "reason_code": "PASS",
+  "recommended_max_project_size": {
+    "large": {
+      "delivery_class": "batch_or_overnight",
+      "max_elements": 300000,
+      "max_nodes": 150000
+    },
+    "medium": {
+      "delivery_class": "standard",
+      "max_elements": 150000,
+      "max_nodes": 75000
+    },
+    "oversize": {
+      "delivery_class": "split_or_quote_required"
+    },
+    "small": {
+      "delivery_class": "same_session",
+      "max_elements": 50000,
+      "max_nodes": 25000
+    }
+  },
+  "schema_version": "workstation-hardware-profile.v1",
+  "source_rows": [
+    {
+      "available": true,
+      "bytes": 3972,
+      "label": "viewer_browser_performance_probe",
+      "path": "implementation/phase1/structure_viewer_browser_performance_probe.json",
+      "sha256": "fcfe59e467ec3c776ca51e6813183f0fcad9792d42aed2a8dd29dd917e0618be"
+    }
+  ],
+  "summary_line": "Workstation hardware profile: PASS | cpu=AMD Ryzen 9 5900X 12-Core Processor | ram=31.2GiB | gpu=Advanced Micro Devices, Inc. [AMD/ATI] Navi 21 [Radeon RX 6800/6800 XT / 6900 XT] (rev c0)",
+  "unsupported_conditions": [
+    "multi_tenant_saas_operation",
+    "customer_device_fps_claims",
+    "autonomous_structural_engineer_replacement_claims",
+    "projects_above_oversize_budget_without_split_or_quote"
+  ],
+  "viewer_performance_probe": {
+    "available": true,
+    "average_fps": 38.862753119247294,
+    "claim_boundary": "Local browser performance smoke only; not a normalized customer hardware FPS claim.",
+    "contract_pass": true,
+    "path": "implementation/phase1/structure_viewer_browser_performance_probe.json",
+    "ready_ms": 4443,
+    "summary_line": "Structure viewer browser performance probe: PASS | ready=4443ms | fps=38.9 | mode=local_browser_probe"
+  },
+  "warnings": []
+}

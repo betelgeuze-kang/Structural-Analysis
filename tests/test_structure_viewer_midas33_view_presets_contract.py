@@ -51,9 +51,10 @@ console.log(JSON.stringify({
     assert payload["fitPreset"] == "fit"
     assert payload["planMode"] == "wireframe"
     assert payload["reviewPose"]["target"] == {"x": 10, "y": 20, "z": 30}
-    assert round(payload["reviewPose"]["position"]["x"], 6) == -45
-    assert round(payload["reviewPose"]["position"]["y"], 6) == 105
-    assert round(payload["reviewPose"]["position"]["z"], 6) == 65
+    assert round(payload["reviewPose"]["position"]["x"], 6) == -38
+    assert round(payload["reviewPose"]["position"]["y"], 6) == 82
+    assert round(payload["reviewPose"]["position"]["z"], 6) == 82
+    assert payload["reviewPose"]["up"] == {"x": 0, "y": 1, "z": 0}
     assert payload["activeStates"] == [
         {"key": "review", "active": False},
         {"key": "frame", "active": True},

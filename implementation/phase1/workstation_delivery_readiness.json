@@ -1,0 +1,121 @@
+{
+  "artifacts": {
+    "client_input_validation_report": "implementation/phase1/client_input_validation_report.json",
+    "delivery_package_manifest": "implementation/phase1/workstation_delivery_package_manifest.json",
+    "hardware_profile": "implementation/phase1/workstation_hardware_profile.json",
+    "job_record": "implementation/phase1/workstation_job_record.json",
+    "job_retention_policy": "implementation/phase1/workstation_job_retention_policy.json",
+    "service_budget": "implementation/phase1/workstation_service_budget.json",
+    "viewer_browser_performance_probe": "implementation/phase1/structure_viewer_browser_performance_probe.json",
+    "viewer_visual_regression_baseline": "implementation/phase1/structure_viewer_visual_regression_baseline.json"
+  },
+  "blockers": [],
+  "claim_boundary": {
+    "allowed": "workstation-based structural analysis/optimization deliverable preparation with engineer review",
+    "forbidden": [
+      "independent commercial structural analysis product",
+      "structural engineer replacement",
+      "full autonomous replacement",
+      "customer-device FPS claim",
+      "multi-tenant SaaS throughput claim"
+    ]
+  },
+  "contract_pass": true,
+  "gates": [
+    {
+      "blockers": [],
+      "label": "Workstation hardware profile",
+      "ok": true,
+      "path": "implementation/phase1/workstation_hardware_profile.json",
+      "status": "ready",
+      "summary_line": "Workstation hardware profile: PASS | cpu=AMD Ryzen 9 5900X 12-Core Processor | ram=31.2GiB | gpu=Advanced Micro Devices, Inc. [AMD/ATI] Navi 21 [Radeon RX 6800/6800 XT / 6900 XT] (rev c0)"
+    },
+    {
+      "blockers": [],
+      "label": "Workstation service budget",
+      "ok": true,
+      "path": "implementation/phase1/workstation_service_budget.json",
+      "status": "ready",
+      "summary_line": "Workstation service budget: PASS | tiers=small/medium/large/oversize | ready=4443ms | fps=38.9"
+    },
+    {
+      "blockers": [],
+      "checksum_self_test_pass": true,
+      "delivery_index_marker_pass": true,
+      "label": "Delivery package manifest",
+      "manifest_consistency_self_test_pass": true,
+      "ok": true,
+      "package_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
+      "path": "implementation/phase1/workstation_delivery_package_manifest.json",
+      "required_sections": {
+        "DELIVERY_INDEX.md": true,
+        "README_DELIVERY.md": true,
+        "REVISION_HISTORY.md": true,
+        "checksums.sha256": true,
+        "data": true,
+        "data/revision_policy.json": true,
+        "drawings": true,
+        "evidence": true,
+        "manifest.json": true,
+        "report.pdf": true,
+        "viewer.html": true
+      },
+      "restore_smoke_pass": true,
+      "revision_policy_pass": true,
+      "status": "ready",
+      "viewer_shell_marker_pass": true
+    },
+    {
+      "blockers": [],
+      "label": "Viewer smoke and visual evidence",
+      "ok": true,
+      "status": "ready",
+      "viewer_browser_performance_probe": "implementation/phase1/structure_viewer_browser_performance_probe.json",
+      "viewer_probe_summary": "Structure viewer browser performance probe: PASS | ready=4443ms | fps=38.9 | mode=local_browser_probe",
+      "viewer_visual_regression_baseline": "implementation/phase1/structure_viewer_visual_regression_baseline.json",
+      "visual_summary": "Structure viewer visual regression: PASS | cases=11/11 | mode=baseline_update"
+    },
+    {
+      "blockers": [],
+      "label": "Client input validation report",
+      "missing_data_report": [],
+      "ok": true,
+      "path": "implementation/phase1/client_input_validation_report.json",
+      "status": "ready",
+      "validation_status": "ready"
+    },
+    {
+      "blockers": [],
+      "checksum_self_test_pass": true,
+      "job_dir": "implementation/phase1/workstation_jobs/20260520T133301-f8616d87d2ed53b4",
+      "job_id": "20260520T133301-f8616d87d2ed53b4",
+      "job_record_path": "implementation/phase1/workstation_job_record.json",
+      "label": "Job reproducibility contract",
+      "ok": true,
+      "required_paths": {
+        "checksums.sha256": true,
+        "input_manifest.json": true,
+        "output_manifest.json": true,
+        "run_log.jsonl": true
+      },
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "label": "Job retention and cleanup policy",
+      "latest_job_id": "20260520T133301-f8616d87d2ed53b4",
+      "max_completed_jobs": 200,
+      "ok": true,
+      "path": "implementation/phase1/workstation_job_retention_policy.json",
+      "retention_days": 365,
+      "status": "ready"
+    }
+  ],
+  "generated_at": "2026-05-20T13:48:37.647395+00:00",
+  "independent_commercial_product_ready": false,
+  "reason_code": "PASS",
+  "schema_version": "workstation-delivery-readiness.v1",
+  "status": "ready",
+  "summary_line": "Workstation delivery readiness: PASS | gates=7/7",
+  "workstation_delivery_service_ready": true
+}

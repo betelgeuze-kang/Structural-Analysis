@@ -19,6 +19,9 @@ def _read_viewer_html(page_name: str) -> str:
 def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None:
     text = (ROOT / "src" / "structure-viewer" / "index.html").read_text(encoding="utf-8")
     stats_text = (ROOT / "src" / "structure-viewer" / "viewer-stats-summary.js").read_text(encoding="utf-8")
+    analysis_cockpit_text = (
+        ROOT / "src" / "structure-viewer" / "viewer-analysis-cockpit-model.js"
+    ).read_text(encoding="utf-8")
     panel_model_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-model.js").read_text(
         encoding="utf-8"
     )
@@ -94,6 +97,24 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "viewer-selection-summary-model.js" in text
     assert "viewer-side-panel-model.js" in text
     assert "viewer-stats-summary.js" in text
+    assert "viewer-analysis-cockpit-model.js" in text
+    assert "buildAnalysisCockpitModel" in text
+    assert "ANALYSIS_COCKPIT_KPI_KEYS" in analysis_cockpit_text
+    assert "Max Displacement" in analysis_cockpit_text
+    assert "Critical Members" in text
+    assert 'id="optimization-summary-panel"' in text
+    assert 'id="critical-members-panel"' in text
+    assert 'id="analysis-cockpit-chart-strip"' in text
+    assert 'id="analysis-timeline-status"' in text
+    assert "renderAnalysisCockpitCharts" in text
+    assert "analysis-stage-overlays" in text
+    assert "lateral_load_arrow" in text
+    assert "support_marker" in text
+    assert "<span>Drift</span>" in text
+    assert "analysisStageOverlayDark" in (ROOT / "DESIGN.md").read_text(encoding="utf-8")
+    assert "clip-path:inset(50%)" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
     assert "drawing_asset" in text
     assert "data-real-drawing-copy-link" in renderer_text
     assert "data-real-drawing-recent-asset" in renderer_text

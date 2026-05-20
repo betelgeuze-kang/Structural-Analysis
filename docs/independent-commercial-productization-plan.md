@@ -5,7 +5,7 @@
 
 ## Current Boundary
 
-현재 제품 claim은 `engineer-in-loop commercial assist only`다. P0/P1, runtime packaging, production ops/security hardening, support bundle, source-boundary, viewer evidence/report workflow는 ready지만, 독립 상용제품 claim은 strict EB/RH evidence 미완료 때문에 아직 blocked로 본다.
+현재 제품 claim은 `engineer-in-loop commercial assist only`다. P0/P1, runtime packaging, production ops/security hardening, project ops dry-run deployment drill, on-prem/air-gapped packaging skeleton, support bundle, source-boundary, viewer evidence/report workflow, static viewer performance budget, local browser performance probe, 11-case render-mode/core/advanced workflow visual regression baseline은 ready지만, 독립 상용제품 claim은 strict EB/RH evidence 미완료 때문에 아직 blocked로 본다.
 
 금지 claim:
 
@@ -45,9 +45,9 @@ python3 scripts/check_independent_product_readiness.py --fail-blocked
 | P1 validation/breadth | P1 inputs, execution, benchmark breadth가 ready |
 | Strict EB/RH evidence | EB receipt 4/4, EB closure evidence 4/4, RH closure 3/3 |
 | Runtime production path | real producer -> runtime -> verifier 경로가 strict Rust/HIP 또는 승인된 production backend로 pass |
-| API/security/ops | production auth secret injection, tenant isolation, audit, rate limit, request limit, audit digest, policy manifest, retention/backup/runbook |
-| Packaging/support | runtime package manifest, version compatibility, support bundle manifest, SBOM/license evidence |
-| Viewer/workflow | evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, SVG sheet/revision/callout deep-link package |
+| API/security/ops | production auth secret injection, tenant isolation, audit, rate limit, request limit, audit digest, policy manifest, dry-run deployment drill, retention/backup/runbook |
+| Packaging/support | runtime package manifest, version compatibility, on-prem/air-gapped skeleton manifest, support bundle manifest, SBOM/license evidence |
+| Viewer/workflow | evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, SVG sheet/revision/callout deep-link package, static wall/slab/LOD/hit-test performance budget manifest, local browser performance probe without customer-hardware FPS claim, 11-case render-mode/core/advanced workflow visual regression baseline without pixel-perfect customer-device claim |
 | Claim governance | README/docs/report/committee package가 같은 recommended claim과 blocker vocabulary 사용 |
 | Source boundary | source repo에 unknown large/generated/private artifact가 없음 |
 
@@ -79,15 +79,20 @@ python3 scripts/check_independent_product_readiness.py --fail-blocked
 5. `scripts/preflight_p1_evidence_sidecar_intake.py --json --fail-open` strict mode를 통과시킨다.
 6. `zero_copy_real_probe_report_strict.json` 또는 승인된 production backend strict report를 유지한다.
 7. `scripts/build_runtime_packaging_manifest.py --json`으로 runtime packaging/SBOM/native artifact/compatibility evidence를 갱신한다.
-8. `scripts/build_support_bundle.py --json`으로 support bundle redaction/digest/roundtrip evidence를 갱신한다.
-9. `scripts/verify_structure_viewer_contracts.py`로 viewer evidence/report workflow contract를 유지한다.
-10. `scripts/check_independent_product_readiness.py --fail-blocked`를 release promotion 전 gate로 승격한다.
+8. `scripts/build_project_ops_deployment_drill_manifest.py --json`으로 project ops deployment dry-run evidence를 갱신한다.
+9. `scripts/build_structure_viewer_performance_budget_manifest.py --json`으로 viewer static performance budget evidence를 갱신한다.
+10. `npm run verify:viewer-performance-probe`로 local browser performance smoke를 갱신한다.
+11. `npm run verify:viewer-visual-regression`으로 11-case render-mode/core/advanced workflow visual baseline을 검증한다.
+12. `scripts/build_support_bundle.py --json`으로 support bundle redaction/digest/roundtrip evidence를 갱신한다.
+13. `scripts/build_onprem_deployment_packaging_manifest.py --json`으로 on-prem/air-gapped skeleton packaging evidence를 갱신한다.
+14. `scripts/verify_structure_viewer_contracts.py`로 viewer evidence/report workflow contract를 유지한다.
+15. `scripts/check_independent_product_readiness.py --fail-blocked`를 release promotion 전 gate로 승격한다.
 
 ## Claim Promotion Ladder
 
 | State | Allowed wording |
 | --- | --- |
 | Current | engineer-in-loop commercial assist only; independent readiness 80/100 blocked by EB/RH evidence |
-| Runtime/ops/packaging/viewer workflow closed | production-packaged engineer-in-loop commercial assist platform |
+| Runtime/ops/packaging/viewer workflow closed | production-packaged engineer-in-loop commercial assist platform with on-prem/air-gapped skeleton |
 | Strict EB/RH closed | independent commercial structural analysis product with engineer sign-off boundary |
 | Full autonomous replacement | 금지. 별도 법적/전문가 책임 검토와 authority acceptance evidence 없이는 사용하지 않는다. |

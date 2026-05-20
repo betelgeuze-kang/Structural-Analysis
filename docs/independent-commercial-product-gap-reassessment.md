@@ -1,6 +1,6 @@
 # Independent Commercial Product Gap Reassessment
 
-- 기준일: 2026-05-19
+- 기준일: 2026-05-20
 - 목적: 조건부 상용 보조툴 상태에서 독립 상용 구조해석제품 claim으로 넘어가기 위해 남은 gap을 재산정한다.
 - 판정 기준: `scripts/check_independent_product_readiness.py --json`
 
@@ -10,10 +10,13 @@
 
 상용 보조툴 관점에서는 L4 conditional, `9.0/10`으로 운영 가능한 상태에 가깝다. 그러나 독립 상용 구조해석제품 claim은 아직 사용할 수 없다. 이유는 runtime, ops, packaging이 아니라 **strict external benchmark / residual holdout evidence**가 비어 있기 때문이다.
 
+별도 로컬 트랙으로 **Workstation Delivery Service Readiness**를 추가했다. 이 트랙은 내 워크스테이션에서 구조해석/최적화 산출물, 리포트, 뷰어, 도면, 데이터, evidence, manifest/checksum zip을 생성해 납품하는 서비스 gate이며, EB/RH를 닫지 않아도 로컬에서 green이 될 수 있다. 다만 이 green은 독립 상용 구조해석제품 claim을 의미하지 않는다.
+
 현재 허용 claim:
 
 - Commercial engineer-in-loop acceleration
 - 구조 엔지니어 검토 전제 구조해석/최적화 보조 플랫폼
+- 구조 엔지니어 검토 전제의 워크스테이션 기반 구조해석/최적화 산출물 제작 서비스
 - P0/P1 evidence 기반 반복 업무 가속
 
 현재 금지 claim:
@@ -31,11 +34,33 @@
 | P1 validation/benchmark breadth | 15 | ready | P1 inputs/execution ready, benchmark breadth unblocked |
 | Strict EB/RH evidence | 20 | blocked | EB receipt `0/4`, RH closure `0/3` |
 | Runtime production path | 15 | ready | strict Rust/HIP probe pass, runtime packaging manifest pass |
-| Production API/security/ops | 15 | ready | bearer/tenant/audit contract present, production default secret removed, rate/request limits, audit digest, ops policy manifest |
-| Deployment packaging/support | 10 | ready | support bundle redaction/digest/roundtrip pass |
+| Production API/security/ops | 15 | ready | bearer/tenant/audit contract present, production default secret removed, rate/request limits, audit digest, ops policy manifest, dry-run deployment drill |
+| Deployment packaging/support | 10 | ready | support bundle redaction/digest/roundtrip pass, on-prem/air-gapped skeleton packaging pass, static viewer performance budget pass |
 | Claim governance | 5 | ready | recommended claim remains engineer-in-loop bounded |
 | Source boundary/artifact footprint | 5 | ready | cleanup candidate count `0` |
 | Total | 100 | blocked | **80/100** |
+
+## Separate Workstation Delivery Service Gate
+
+| Gate | Status | Evidence |
+| --- | --- | --- |
+| Hardware profile | local gate | `implementation/phase1/workstation_hardware_profile.json` |
+| Service budget | local gate | `implementation/phase1/workstation_service_budget.json` |
+| Delivery package | local gate | `implementation/phase1/workstation_delivery_package_manifest.json` and `project_package.zip` |
+| Client input validation | local gate | `implementation/phase1/client_input_validation_report.json` |
+| Delivery readiness | local gate | `implementation/phase1/workstation_delivery_readiness.json` |
+
+Command sequence:
+
+```bash
+python3 scripts/build_workstation_hardware_profile.py --json
+python3 scripts/build_workstation_service_budget.py --json
+python3 scripts/validate_client_input_package.py --input implementation/phase1/open_data/midas/midas_model.json --json
+python3 scripts/build_workstation_delivery_package.py --json
+python3 scripts/check_workstation_delivery_readiness.py --json
+```
+
+This track is documented in `docs/workstation-service-productization-roadmap.md` and `docs/workstation-delivery-package.md`.
 
 ## Remaining Commercialization Gaps
 
@@ -105,9 +130,13 @@ The following items were previous independent-product blockers, but are now read
 - Runtime SBOM: `runtime_sbom.json` generated
 - Native runtime artifact manifest: `native_runtime_artifact_manifest.json` has `contract_pass=true`
 - Runtime compatibility matrix: `runtime_version_compatibility_matrix.json` has `contract_pass=true`
+- On-prem/air-gapped packaging skeleton: `onprem_deployment_packaging_manifest.json` has `contract_pass=true`
 - Support bundle: `support_bundle_manifest.json` has `contract_pass=true`
-- Production ops hardening: auth-enabled production path has no default secret, tenant/actor rate limit is present, request metadata limit is present, audit digest is generated, `/ops/policy` exposes retention/export/backup/delete policy
+- Production ops hardening: auth-enabled production path has no default secret, tenant/actor rate limit is present, request metadata limit is present, audit digest is generated, `/ops/policy` exposes retention/export/backup/delete policy, and dry-run deployment drill evidence is attached
 - Viewer workflow packaging: evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, and SVG sheet/revision/callout deep-link package are covered by source viewer contracts
+- Viewer static performance budget: `structure_viewer_performance_budget_manifest.json` has `contract_pass=true` for wall/slab instancing, surface LOD, BVH picking, and pick-candidate cap; live FPS/latency evidence remains future work and is not used as an independent-product claim
+- Viewer local browser performance probe: `structure_viewer_browser_performance_probe.json` records local canvas ready/FPS smoke with `live_performance_claim=false`; customer-hardware FPS/latency remains future evidence
+- Viewer visual regression baseline: `structure_viewer_visual_regression_baseline.json` records 11 desktop/mobile render-mode and workflow signatures, including plan view, review member selection, compare overlay, CSV evidence ingest, renderable JSON ingest, section edit apply, and load-combination draft markers with `live_visual_claim=false`; customer-device visual evidence remains future work
 - Source boundary: readiness gate reports candidate files `0`
 
 ## Promotion Decision

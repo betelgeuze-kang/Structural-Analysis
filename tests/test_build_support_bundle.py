@@ -38,8 +38,52 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
             },
         ),
         "project_ops_snapshot": _write_json(tmp_path / "project-ops.json", {"summary": {"project_count": 1}}),
+        "project_ops_deployment_drill": _write_json(
+            tmp_path / "project-ops-drill.json",
+            {"contract_pass": True, "drill_mode": "dry_run_contract"},
+        ),
         "runtime_probe": _write_json(tmp_path / "runtime-probe.json", {"strict_rust_hip_pass": True}),
         "runtime_packaging_manifest": _write_json(tmp_path / "runtime-manifest.json", {"contract_pass": False}),
+        "viewer_performance_budget_manifest": _write_json(
+            tmp_path / "viewer-performance-budget.json",
+            {"contract_pass": True, "budget_mode": "static_contract", "live_performance_claim": False},
+        ),
+        "viewer_browser_performance_probe": _write_json(
+            tmp_path / "viewer-browser-performance.json",
+            {"contract_pass": True, "probe_mode": "local_browser_probe", "live_performance_claim": False},
+        ),
+        "viewer_visual_regression_baseline": _write_json(
+            tmp_path / "viewer-visual-regression.json",
+            {"contract_pass": True, "visual_regression_mode": "local_canvas_signature_baseline"},
+        ),
+        "workstation_hardware_profile": _write_json(
+            tmp_path / "workstation-hardware.json",
+            {"contract_pass": True, "schema_version": "workstation-hardware-profile.v1"},
+        ),
+        "workstation_service_budget": _write_json(
+            tmp_path / "workstation-budget.json",
+            {"contract_pass": True, "schema_version": "workstation-service-budget.v1"},
+        ),
+        "workstation_delivery_package_manifest": _write_json(
+            tmp_path / "workstation-package.json",
+            {"contract_pass": True, "schema_version": "workstation-delivery-package-manifest.v1"},
+        ),
+        "workstation_delivery_readiness": _write_json(
+            tmp_path / "workstation-readiness.json",
+            {"contract_pass": True, "schema_version": "workstation-delivery-readiness.v1"},
+        ),
+        "client_input_validation_report": _write_json(
+            tmp_path / "client-validation.json",
+            {"status": "ready", "schema_version": "client-input-validation-report.v1"},
+        ),
+        "workstation_job_record": _write_json(
+            tmp_path / "workstation-job.json",
+            {"schema_version": "workstation-job-record.v1", "job_id": "J1"},
+        ),
+        "workstation_job_retention_policy": _write_json(
+            tmp_path / "workstation-retention.json",
+            {"schema_version": "workstation-job-retention-policy.v1", "contract_pass": True},
+        ),
         "external_benchmark_updates": _write_json(tmp_path / "eb.json", {"receipt_status": "pending"}),
         "residual_holdout_updates": _write_json(tmp_path / "rh.json", {"status": "open"}),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
@@ -69,6 +113,17 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
 
     index_path = Path(payload["bundle_index"]["path"])
     assert index_path.exists()
+    assert "project_ops_deployment_drill" in payload["required_sections"]
+    assert "viewer_performance_budget_manifest" in payload["required_sections"]
+    assert "viewer_browser_performance_probe" in payload["required_sections"]
+    assert "viewer_visual_regression_baseline" in payload["required_sections"]
+    assert "workstation_hardware_profile" in payload["required_sections"]
+    assert "workstation_service_budget" in payload["required_sections"]
+    assert "workstation_delivery_package_manifest" in payload["required_sections"]
+    assert "workstation_delivery_readiness" in payload["required_sections"]
+    assert "client_input_validation_report" in payload["required_sections"]
+    assert "workstation_job_record" in payload["required_sections"]
+    assert "workstation_job_retention_policy" in payload["required_sections"]
     redacted_preflight = Path(payload["required_sections"]["p1_strict_evidence_preflight"]).read_text(
         encoding="utf-8"
     )

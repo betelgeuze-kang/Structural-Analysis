@@ -67,6 +67,7 @@ def test_index_html_exposes_bounded_loadcomb_authoring_draft_contract() -> None:
     assert "function exportLoadcombEditPreview()" in text
     assert "working_loadcomb_override_patch" in text
     assert "--loadcomb-override-patch-json <loadcomb-override-patch.json>" in text
+    assert "window.handleLoadcombEditInputChange=handleLoadcombEditInputChange;" in text
     assert "window.stageLoadcombEditPreview=stageLoadcombEditPreview;" in text
     assert "window.exportLoadcombEditPreview=exportLoadcombEditPreview;" in text
 
@@ -432,6 +433,7 @@ def test_index_html_adds_non_destructive_section_edit_preview_export() -> None:
     assert "source_artifact_sha256:normalizeSelectionValue(modelData?.meta?.source_artifact_sha256)" in text
     assert "source_artifact_format:normalizeSelectionValue(modelData?.meta?.source_artifact_format)" in text
     assert "target_section_resolution_mode:targetSectionCatalogMatch.resolution_mode||'unresolved_free_text'" in text
+    assert "current_sections:currentSections" in text
     assert "current_section_summary:entry.current_section_summary||entry.source_section_summary||'--'" in text
     assert "current_section_ids:entry.current_section_ids||[]" in text
     assert "element_section_pairs:entry.element_section_pairs||[]" in text

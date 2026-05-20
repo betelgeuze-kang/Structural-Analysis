@@ -1,0 +1,176 @@
+{
+  "attestation_envelope": {
+    "canonical_payload_bytes": 2050,
+    "generated_at": "2026-05-19T13:17:55.069297+00:00",
+    "schema_version": "project-ops-drill-attestation-envelope.v1",
+    "sha256": "4938c2e1ae2f5d4c10a6ed7133ef6ff6a12de31b72411b67438789086a6778cd",
+    "signature_mode": "sha256_attestation_envelope_not_cryptographic_signature"
+  },
+  "blockers": [],
+  "checks": {
+    "all_drills_pass": true,
+    "all_sources_available": true,
+    "attestation_sha256_present": true,
+    "live_deployment_claim": false
+  },
+  "contract_pass": true,
+  "drill_mode": "dry_run_contract",
+  "drill_rows": [
+    {
+      "blockers": [],
+      "checks": {
+        "auth_start_without_secret_rejected": true,
+        "dev_secret_removed": true,
+        "env_secret_contract_present": true,
+        "rotation_runbook_declared": true
+      },
+      "drill_id": "secret_rotation_negative_start",
+      "evidence": [
+        "implementation/phase1/project_ops_api_service.py",
+        "docs/production-ops-security.md"
+      ],
+      "mode": "dry_run_contract",
+      "residual_live_work": "Run the same negative-start and rotation drill against the selected production secret store.",
+      "status": "pass",
+      "title": "Auth-enabled service requires injected secret and has a documented rotation path"
+    },
+    {
+      "blockers": [],
+      "checks": {
+        "gateway_boundary_declared": true,
+        "rate_limit_present": true,
+        "request_limit_present": true,
+        "tenant_allowlist_present": true
+      },
+      "drill_id": "gateway_boundary_and_rate_policy",
+      "evidence": [
+        "implementation/phase1/project_ops_api_service.py",
+        "docs/production-ops-security.md"
+      ],
+      "mode": "dry_run_contract",
+      "residual_live_work": "Bind these parameters to the real gateway/WAF profile and capture a live throttle proof.",
+      "status": "pass",
+      "title": "Gateway boundary, tenant allow-list, request limit, and rate policy are declared"
+    },
+    {
+      "blockers": [],
+      "checks": {
+        "backup_policy_surface_present": true,
+        "backup_restore_runbook_declared": true,
+        "restore_policy_surface_present": true,
+        "support_bundle_roundtrip_pass": true
+      },
+      "drill_id": "backup_restore_policy_roundtrip",
+      "evidence": [
+        "implementation/phase1/project_ops_api_service.py",
+        "docs/production-ops-security.md",
+        "implementation/phase1/support_bundle_manifest.json"
+      ],
+      "mode": "dry_run_contract",
+      "residual_live_work": "Execute backup and clean restore with tenant-scoped evidence against the deployment store.",
+      "status": "pass",
+      "title": "Backup/restore policy is surfaced and support bundle roundtrip is green"
+    },
+    {
+      "blockers": [],
+      "checks": {
+        "support_bundle_tenant_scoped": true,
+        "tenant_delete_policy_surface_present": true,
+        "tenant_delete_runbook_declared": true,
+        "tenant_filtering_present": true
+      },
+      "drill_id": "tenant_delete_policy_roundtrip",
+      "evidence": [
+        "implementation/phase1/project_ops_api_service.py",
+        "docs/production-ops-security.md",
+        "implementation/phase1/support_bundle_manifest.json"
+      ],
+      "mode": "dry_run_contract",
+      "residual_live_work": "Run a tenant-delete drill and verify export/restore denies deleted tenant state.",
+      "status": "pass",
+      "title": "Tenant delete policy and tenant-scoped redacted support handoff are present"
+    },
+    {
+      "blockers": [],
+      "checks": {
+        "api_audit_digest_present": true,
+        "support_audit_digest_pass": true,
+        "support_audit_digest_sha_present": true,
+        "worm_or_signature_boundary_declared": true
+      },
+      "drill_id": "audit_tamper_evidence_roundtrip",
+      "evidence": [
+        "implementation/phase1/project_ops_api_service.py",
+        "docs/production-ops-security.md",
+        "implementation/phase1/support_bundle_manifest.json"
+      ],
+      "mode": "dry_run_contract",
+      "residual_live_work": "Replace the local SHA-256 envelope with WORM storage or a production signing key.",
+      "status": "pass",
+      "title": "Audit digest and redacted audit support handoff are reproducible"
+    },
+    {
+      "blockers": [],
+      "checks": {
+        "incident_runbook_declared": true,
+        "redaction_self_test_pass": true,
+        "runtime_modes_declared": true,
+        "runtime_package_contract_pass": true,
+        "support_bundle_contract_pass": true
+      },
+      "drill_id": "incident_response_support_bundle_roundtrip",
+      "evidence": [
+        "docs/production-ops-security.md",
+        "implementation/phase1/support_bundle_manifest.json",
+        "implementation/phase1/production_runtime_packaging_manifest.json"
+      ],
+      "mode": "dry_run_contract",
+      "residual_live_work": "Run a timed incident drill with token disable, route rollback, and support upload receipt.",
+      "status": "pass",
+      "title": "Incident response handoff can be assembled from support/runtime evidence"
+    }
+  ],
+  "generated_at": "2026-05-19T13:17:55.069314+00:00",
+  "live_deployment_claim": false,
+  "reason_code": "PASS",
+  "residual_live_work": [
+    "Capture gateway/WAF/TLS deployment parameter evidence.",
+    "Run production secret rotation against the chosen secret store.",
+    "Execute backup/restore and tenant-delete drills against the deployment data store.",
+    "Attach WORM or production signing-key proof for audit digest storage.",
+    "Run a timed incident response drill with support bundle upload receipt."
+  ],
+  "schema_version": "project-ops-deployment-drill-manifest.v1",
+  "source_rows": [
+    {
+      "available": true,
+      "bytes": 130765,
+      "label": "project_ops_api",
+      "path": "implementation/phase1/project_ops_api_service.py",
+      "sha256": "a8b316fa8a7f7c28ab51752137d11891cf3b3c69978febddc3d1a50d7a8ea80b"
+    },
+    {
+      "available": true,
+      "bytes": 3692,
+      "label": "production_security_doc",
+      "path": "docs/production-ops-security.md",
+      "sha256": "f83f3482d42d11a62c615659f5050e7e8f2dd5b603ff29208331129b2354a21f"
+    },
+    {
+      "available": true,
+      "bytes": 1878,
+      "label": "runtime_packaging_manifest",
+      "path": "implementation/phase1/production_runtime_packaging_manifest.json",
+      "sha256": "9b76649f947ec13ab53e248f181735ddede6d900c60ac0573a030534c2f2d958"
+    }
+  ],
+  "summary_line": "Project ops deployment drill: PASS | drills=6/6 | mode=dry_run_contract",
+  "support_bundle_evidence": {
+    "audit_digest_pass": true,
+    "available": true,
+    "contract_pass": true,
+    "path": "implementation/phase1/support_bundle_manifest.json",
+    "roundtrip_pass": true,
+    "tenant_scoped": true
+  }
+}

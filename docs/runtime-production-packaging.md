@@ -1,7 +1,7 @@
 # Runtime Production Packaging Runbook
 
 - 기준일: 2026-05-18
-- 상태: runtime packaging gate ready, installer/container hardening still required
+- 상태: runtime packaging gate ready, on-prem/air-gapped skeleton ready, live installer/container hardening still required
 - 목적: solver/runtime evidence를 독립 상용제품 배포 단위로 승격하기 위한 패키징, 호환성, 지원 번들 기준을 고정한다.
 
 ## Current Boundary
@@ -13,7 +13,7 @@ P0/P1 evidence는 closed/ready이고, runtime packaging gate는 `scripts/build_r
 | Artifact | Required fields |
 | --- | --- |
 | `production_runtime_packaging_manifest.json` | runtime version, backend list, CPU/GPU policy, supported OS/driver, model/data artifact contract, compatibility matrix |
-| `support_bundle_manifest.json` | audit log, version, license status, runtime probe, EB/RH receipts, viewer report, package SHA, redaction policy |
+| `support_bundle_manifest.json` | audit log, version, license status, runtime probe, project ops deployment drill, viewer performance budget/probe/visual baseline, EB/RH receipts, viewer report, package SHA, redaction policy |
 | strict runtime probe | real producer path, host-copy metrics, CPU fallback flag, verifier result |
 | SBOM/license report | dependencies, native artifacts, third-party license status |
 | rollback notes | package rollback and evidence restore steps |
@@ -30,6 +30,7 @@ python3 scripts/check_independent_product_readiness.py --json
 - SBOM: `implementation/phase1/runtime_sbom.json`
 - Native artifact manifest: `implementation/phase1/native_runtime_artifact_manifest.json`
 - Compatibility matrix: `implementation/phase1/runtime_version_compatibility_matrix.json`
+- On-prem/air-gapped packaging manifest: `implementation/phase1/onprem_deployment_packaging_manifest.json`
 - Support bundle manifest: `implementation/phase1/support_bundle_manifest.json`
 
 ## Closure Criteria
@@ -45,9 +46,9 @@ python3 scripts/check_independent_product_readiness.py --json
 | Mode | Current policy |
 | --- | --- |
 | SaaS | Requires production ops/security runbook and tenant isolation tests |
-| On-prem | Requires installer/container, offline license, update channel, support bundle |
-| Air-gapped | Requires artifact cache, no external network dependency, signed update package |
+| On-prem | Skeleton contract present in `deployment/onprem`; live image build/scan and site gateway evidence still required |
+| Air-gapped | Skeleton contract present with offline license and signed update package examples; production signing and import/export drill still required |
 
 ## Current Gate Status
 
-This runbook and the generated manifests close the runtime packaging/support blockers in the independent product gate. The product gate should still remain blocked until strict EB/RH receipt and closure evidence are attached.
+This runbook and the generated manifests close the runtime packaging/support and on-prem/air-gapped skeleton blockers in the independent product gate. The product gate should still remain blocked until strict EB/RH receipt and closure evidence are attached.

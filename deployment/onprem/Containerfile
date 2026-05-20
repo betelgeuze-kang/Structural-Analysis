@@ -1,0 +1,25 @@
+FROM python:3.10-slim
+
+LABEL org.opencontainers.image.title="Structural Analysis On-Prem Control Plane"
+LABEL org.opencontainers.image.description="Reference on-prem packaging skeleton for project ops API and packaged evidence review."
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PROJECT_OPS_AUTH_REQUIRED=true
+ENV PROJECT_OPS_HOST=0.0.0.0
+ENV PROJECT_OPS_PORT=8080
+
+WORKDIR /opt/structural-analysis
+
+COPY pyproject.toml package.json ./
+COPY implementation ./implementation
+COPY scripts ./scripts
+COPY docs ./docs
+COPY src/structure-viewer ./src/structure-viewer
+
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir -e .
+
+EXPOSE 8080
+
+CMD ["python", "implementation/phase1/project_ops_api_service.py", "--serve", "--host", "0.0.0.0", "--port", "8080", "--auth-required"]

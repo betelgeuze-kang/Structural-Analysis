@@ -1,6 +1,6 @@
 # 프론트엔드 시각화 다음 단계
 
-> 업데이트: 2026-05-19
+> 업데이트: 2026-05-20
 > 기준: 현재 repo 구현, project workspace/evidence hub, payload generator, viewer contract 테스트 기준
 
 ## 현재 기준선
@@ -12,6 +12,10 @@
 - artifact-driven loader 존재
 - generated single-file export 경로 존재
 - 3D viewer의 instancing path 존재
+- wall/slab surface instancing, surface LOD, BVH picking, pick-candidate cap은 `structure_viewer_performance_budget_manifest.json`의 static contract로 고정됨
+- local browser performance smoke는 `structure_viewer_browser_performance_probe.json`으로 canvas ready 시간과 RAF cadence를 남김
+- 11-case render mode/core/advanced workflow visual regression baseline은 `structure_viewer_visual_regression_baseline.json`으로 local canvas signature와 active workflow marker를 남김
+- Structural Insight Viewer cockpit layer는 8개 analysis KPI, before/after optimization summary, drift contribution이 있는 critical member ranking, story-drift/load-step/material/heatmap chart strip, footer solver timeline, compact desktop chrome, stage-native lateral-load/support-marker overlay를 source viewer contract로 노출함
 - panel-zone vector-ready rendering path 존재
 - SVG title block / dimension collision avoidance 존재
 - project workspace, review task, solver receipt, evidence ingest, commercial-tool crosswalk, lineage drilldown 존재
@@ -40,14 +44,14 @@
 
 ### 2. 3D viewer 성능 경로 확장
 
-`index.html`에는 이미 line-dominant 모델용 instancing path가 있습니다. 다음은 그 경로를 broader model surface로 넓히는 일입니다.
+`index.html`에는 line-dominant 모델용 instancing path뿐 아니라 wall/slab surface instancing, surface LOD, BVH picking, pick-candidate cap까지 static contract가 있습니다. 또한 analysis cockpit layer가 KPI/optimization/critical-member/chart/timeline과 stage-native load/support overlay를 한 화면에 묶고, local browser probe가 canvas ready 시간과 RAF cadence를 남기며, 11-case render-mode/core/advanced workflow visual baseline이 local canvas signature와 active workflow marker를 비교합니다. 다음은 이 경로를 고객 하드웨어 매트릭스로 넓히는 일입니다.
 
-- wall/slab batching
-- 큰 모델용 LOD
+- wall/slab batching static contract 유지
+- 큰 모델용 LOD static contract 유지
 - contour/deformed 모드에서의 비용 제어
-- selection/hit-test 비용 축소
+- selection/hit-test 비용 축소의 고객 하드웨어 실측 budget 추가
 
-핵심 메시지는 `instancing 도입`이 아니라 `instancing coverage 확장`입니다.
+핵심 메시지는 `instancing 도입`이 아니라 `local browser smoke에서 repeatable customer-hardware regression gate로 이동`입니다.
 
 ### 3. panel-zone을 vector-ready에서 solver-verified review surface로 승격
 
@@ -105,8 +109,10 @@
 
 ### Batch B
 
-- 3D instancing coverage를 wall/slab까지 확장
-- 큰 모델 기준 성능 측정 항목 추가
+- `scripts/build_structure_viewer_performance_budget_manifest.py --json`으로 wall/slab/LOD/hit-test static budget을 유지
+- `npm run verify:viewer-performance-probe`로 local browser probe를 유지
+- `npm run verify:viewer-visual-regression`으로 11-case render-mode/core/advanced workflow visual baseline을 유지
+- 큰 모델 기준 고객 하드웨어 FPS/interaction latency 측정 항목 추가
 
 ### Batch C
 

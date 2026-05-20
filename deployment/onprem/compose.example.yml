@@ -1,0 +1,21 @@
+services:
+  project-ops:
+    build:
+      context: ../..
+      dockerfile: deployment/onprem/Containerfile
+    image: structural-analysis/project-ops:0.1.0
+    read_only: true
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      PROJECT_OPS_AUTH_REQUIRED: "true"
+      PROJECT_OPS_JWT_HMAC_SECRET: "${PROJECT_OPS_JWT_HMAC_SECRET:?set from deployment secret store}"
+      PROJECT_OPS_TELEMETRY_ENABLED: "false"
+    volumes:
+      - project_ops_state:/opt/structural-analysis/implementation/phase1/release
+      - support_bundle:/opt/structural-analysis/implementation/phase1/release/support_bundle
+    restart: unless-stopped
+
+volumes:
+  project_ops_state:
+  support_bundle:

@@ -10,14 +10,14 @@ export const MIDAS33_VIEW_PRESETS = {
   review: {
     label: 'Review',
     mode: 'solid',
-    factors: { x: -0.55, y: 0.85, z: 0.35 },
-    up: { x: 0, y: 0, z: 1 },
+    factors: { x: -0.48, y: 0.62, z: 0.52 },
+    up: { x: 0, y: 1, z: 0 },
   },
   frame: {
     label: 'Frame',
     mode: 'solid',
-    factors: { x: 0.72, y: 0.56, z: 0.48 },
-    up: { x: 0, y: 0, z: 1 },
+    factors: { x: 0.62, y: 0.48, z: 0.58 },
+    up: { x: 0, y: 1, z: 0 },
   },
   plan: {
     label: 'Plan',

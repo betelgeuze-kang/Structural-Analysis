@@ -1,0 +1,344 @@
+{
+  "blockers": [],
+  "budget_mode": "static_contract",
+  "budget_rows": [
+    {
+      "actual": 120,
+      "budget_id": "surface_instancing_threshold",
+      "comparator": "lte",
+      "limit": 120,
+      "status": "pass",
+      "title": "Wall/slab surfaces switch to instancing early enough for drawing-scale models",
+      "unit": "elements"
+    },
+    {
+      "actual": 480,
+      "budget_id": "surface_lod_medium_threshold",
+      "comparator": "lte",
+      "limit": 480,
+      "status": "pass",
+      "title": "Medium surface LOD engages before high-density surface batches dominate the frame",
+      "unit": "elements"
+    },
+    {
+      "actual": 1200,
+      "budget_id": "surface_lod_coarse_threshold",
+      "comparator": "lte",
+      "limit": 1200,
+      "status": "pass",
+      "title": "Coarse surface LOD engages for large surface batches",
+      "unit": "elements"
+    },
+    {
+      "actual": 100000,
+      "budget_id": "large_model_gate",
+      "comparator": "eq",
+      "limit": 100000,
+      "status": "pass",
+      "title": "Large-model acceleration gate is explicit and stable",
+      "unit": "elements"
+    },
+    {
+      "actual": 900,
+      "budget_id": "pick_acceleration_threshold",
+      "comparator": "lte",
+      "limit": 900,
+      "status": "pass",
+      "title": "Picking broadphase acceleration starts before linear mesh scans dominate interaction",
+      "unit": "records"
+    },
+    {
+      "actual": 1600,
+      "budget_id": "pick_candidate_mesh_cap",
+      "comparator": "lte",
+      "limit": 1600,
+      "status": "pass",
+      "title": "Ray pick candidates are capped after near-ray filtering",
+      "unit": "meshes"
+    },
+    {
+      "actual": 10,
+      "budget_id": "line_screen_tolerance",
+      "comparator": "eq",
+      "limit": 10,
+      "status": "pass",
+      "title": "Line hit-test screen tolerance remains bounded",
+      "unit": "px"
+    },
+    {
+      "actual": 2048,
+      "budget_id": "mesh_triangle_bvh_threshold",
+      "comparator": "lte",
+      "limit": 2048,
+      "status": "pass",
+      "title": "Mesh triangle BVH is required for high-density picking catalogs",
+      "unit": "triangles"
+    },
+    {
+      "actual": 1024,
+      "budget_id": "surface_facet_bvh_threshold",
+      "comparator": "lte",
+      "limit": 1024,
+      "status": "pass",
+      "title": "Surface facet BVH is required for high-density surface picking",
+      "unit": "facets"
+    }
+  ],
+  "budget_values": {
+    "broadphase_acceleration_fallback": 900,
+    "broadphase_line_tolerance_fallback_px": 10,
+    "instanced_line_element_threshold": 400,
+    "instanced_surface_element_threshold": 120,
+    "large_model_element_threshold": 100000,
+    "large_model_pick_acceleration_threshold": 900,
+    "large_model_pick_line_screen_tolerance_px": 10,
+    "large_model_pick_mesh_triangle_bvh_threshold": 2048,
+    "large_model_pick_spatial_index_full_bvh_threshold": 4096,
+    "large_model_pick_spatial_index_max_overlap_cells": 96,
+    "large_model_pick_spatial_index_target_bucket_size": 24,
+    "large_model_pick_surface_facet_bvh_threshold": 1024,
+    "max_pick_candidate_meshes": 1600,
+    "surface_lod_coarse_element_threshold": 1200,
+    "surface_lod_medium_element_threshold": 480
+  },
+  "check_rows": [
+    {
+      "blockers": [],
+      "check_id": "surface_instancing_contract",
+      "checks": {
+        "builder_exports_surface_instancing": true,
+        "surface_geometry_kind_tagged": true,
+        "surface_groups_marked_instanced": true,
+        "viewer_invokes_surface_instancing": true,
+        "wall_slab_opacity_split_present": true
+      },
+      "evidence": [
+        "src/structure-viewer/viewer-render-mesh-builders.js",
+        "src/structure-viewer/index.html"
+      ],
+      "status": "pass",
+      "title": "Wall/slab surface batching is backed by instanced render objects"
+    },
+    {
+      "blockers": [],
+      "check_id": "surface_lod_contract",
+      "checks": {
+        "direct_surface_fallback_marked": true,
+        "instanced_surface_pick_preference_present": true,
+        "lod_label_recorded": true,
+        "lod_profile_builder_present": true,
+        "lod_subdivision_builder_present": true,
+        "lod_subdivisions_recorded": true
+      },
+      "evidence": [
+        "src/structure-viewer/viewer-render-picking-geometry.js",
+        "src/structure-viewer/viewer-render-mesh-builders.js",
+        "src/structure-viewer/index.html",
+        "src/structure-viewer/viewer-pick-broadphase.js"
+      ],
+      "status": "pass",
+      "title": "Surface LOD records the active profile and keeps direct fallback pick geometry"
+    },
+    {
+      "blockers": [],
+      "check_id": "large_model_pick_bvh_contract",
+      "checks": {
+        "cell_visit_cap_present": true,
+        "deformed_bvh_refresh_present": true,
+        "large_model_picker_uses_spatial_index": true,
+        "mesh_triangle_bvh_query_present": true,
+        "surface_facet_bvh_query_present": true
+      },
+      "evidence": [
+        "src/structure-viewer/viewer-large-model-picking.js",
+        "src/structure-viewer/viewer-render-picking-geometry.js",
+        "src/structure-viewer/viewer-deformed-rendering.js",
+        "src/structure-viewer/index.html"
+      ],
+      "status": "pass",
+      "title": "Large model hit-testing uses spatial index, mesh BVH, surface BVH, and deformed mesh refresh"
+    },
+    {
+      "blockers": [],
+      "check_id": "pick_broadphase_budget_contract",
+      "checks": {
+        "acceleration_records_built": true,
+        "acceleration_threshold_declared": true,
+        "candidate_mesh_cap_present": true,
+        "fallback_cache_present": true,
+        "line_screen_tolerance_declared": true,
+        "surface_fallback_filtered": true
+      },
+      "evidence": [
+        "src/structure-viewer/viewer-pick-broadphase.js"
+      ],
+      "status": "pass",
+      "title": "Fallback mesh picking is bounded by thresholded acceleration records and candidate caps"
+    },
+    {
+      "blockers": [],
+      "check_id": "browser_smoke_visual_contract",
+      "checks": {
+        "canvas_frame_probe_present": true,
+        "canvas_nonblank_probe_present": true,
+        "desktop_viewport_present": true,
+        "midas33_project_route_present": true,
+        "mobile_viewport_present": true,
+        "playwright_spec_present": true
+      },
+      "evidence": [
+        "tests/frontend/structure-viewer-smoke.spec.ts"
+      ],
+      "status": "pass",
+      "title": "Browser smoke tests keep desktop/mobile canvas rendering and workflow coverage visible"
+    },
+    {
+      "blockers": [],
+      "check_id": "contract_suite_regression_surface",
+      "checks": {
+        "instancing_contract_listed": true,
+        "large_model_picking_contract_listed": true,
+        "performance_budget_contract_listed": true,
+        "pick_broadphase_contract_listed": true,
+        "render_mesh_contract_listed": true
+      },
+      "evidence": [
+        "scripts/verify_structure_viewer_contracts.py"
+      ],
+      "status": "pass",
+      "title": "Structure viewer contract suite includes the large-model and pick broadphase tests"
+    },
+    {
+      "blockers": [],
+      "check_id": "browser_performance_probe_contract",
+      "checks": {
+        "canvas_probe_reused": true,
+        "independent_product_claim_disabled": true,
+        "live_performance_claim_disabled": true,
+        "local_probe_mode_declared": true,
+        "probe_schema_declared": true,
+        "probe_script_present": true,
+        "raf_sampling_present": true
+      },
+      "evidence": [
+        "scripts/measure-structure-viewer-performance.mjs"
+      ],
+      "status": "pass",
+      "title": "Local browser performance probe is present and keeps the FPS claim boundary explicit"
+    },
+    {
+      "blockers": [],
+      "check_id": "visual_regression_probe_contract",
+      "checks": {
+        "advanced_workflow_cases_declared": true,
+        "advanced_workflow_markers_recorded": true,
+        "independent_product_claim_disabled": true,
+        "live_visual_claim_disabled": true,
+        "local_signature_mode_declared": true,
+        "mode_specific_cases_declared": true,
+        "probe_script_present": true,
+        "render_mode_marker_recorded": true,
+        "signature_comparison_present": true,
+        "viewport_hash_recorded": true,
+        "visual_schema_declared": true,
+        "workflow_state_cases_declared": true,
+        "workflow_state_markers_recorded": true
+      },
+      "evidence": [
+        "scripts/measure-structure-viewer-visual-regression.mjs"
+      ],
+      "status": "pass",
+      "title": "Local visual regression baseline probe is present and keeps the visual claim boundary explicit"
+    }
+  ],
+  "checks": {
+    "all_budget_rows_pass": true,
+    "all_sources_available": true,
+    "all_static_contracts_pass": true,
+    "live_performance_claim": false
+  },
+  "contract_pass": true,
+  "generated_at": "2026-05-20T12:42:59.289446+00:00",
+  "live_performance_claim": false,
+  "reason_code": "PASS",
+  "residual_live_work": [
+    "Promote the local browser probe to repeatable customer-hardware FPS and interaction latency budgets.",
+    "Capture real wall/slab large-payload traces for MIDAS33 and OPSTOOL-class drawings across the device matrix.",
+    "Record browser/device matrix results for GPU, CPU fallback, and low-memory profiles.",
+    "Expand visual baselines beyond core workflow states to customer browser/device matrix runs."
+  ],
+  "schema_version": "structure-viewer-performance-budget-manifest.v1",
+  "source_rows": [
+    {
+      "available": true,
+      "bytes": 251726,
+      "label": "viewer_index",
+      "path": "src/structure-viewer/index.html",
+      "sha256": "851ad2d3f10f9306d9219e5997d4976e63ebba95d8debfb21eb3e2029b2966fc"
+    },
+    {
+      "available": true,
+      "bytes": 11431,
+      "label": "render_mesh_builders",
+      "path": "src/structure-viewer/viewer-render-mesh-builders.js",
+      "sha256": "47666bc9ae9153f441ebee01e32256d46ae533ff0bbe1fa6d61a33b34ae1d345"
+    },
+    {
+      "available": true,
+      "bytes": 29259,
+      "label": "render_picking_geometry",
+      "path": "src/structure-viewer/viewer-render-picking-geometry.js",
+      "sha256": "06b13020899d1df24ab33a73a0602e4ad74f69804fc29e2d1a3a90ca0cf8b891"
+    },
+    {
+      "available": true,
+      "bytes": 11272,
+      "label": "large_model_picking",
+      "path": "src/structure-viewer/viewer-large-model-picking.js",
+      "sha256": "03df9f346f8a6488411935b2c8686b4d4f2e1ddb6941a76acabbffb54e48fcdc"
+    },
+    {
+      "available": true,
+      "bytes": 5261,
+      "label": "pick_broadphase",
+      "path": "src/structure-viewer/viewer-pick-broadphase.js",
+      "sha256": "2b1d8bccfaa596ed48d1c684df6661eb5db112567dc688c07cf437ef00053fe8"
+    },
+    {
+      "available": true,
+      "bytes": 7608,
+      "label": "deformed_rendering",
+      "path": "src/structure-viewer/viewer-deformed-rendering.js",
+      "sha256": "9a7af6d94861b998e0263291de489959fd675be0845185be0aa4d7fd9cf85c3b"
+    },
+    {
+      "available": true,
+      "bytes": 17538,
+      "label": "frontend_smoke_spec",
+      "path": "tests/frontend/structure-viewer-smoke.spec.ts",
+      "sha256": "8e95735e01e1e7182d2d89f2bffb405c4866dea88329bbdf75902a3f57f558c4"
+    },
+    {
+      "available": true,
+      "bytes": 4319,
+      "label": "viewer_contract_script",
+      "path": "scripts/verify_structure_viewer_contracts.py",
+      "sha256": "03632fa5ecaf383935ed8c8e3db9900b8d634ce27537839d5d6e02b7da2516a2"
+    },
+    {
+      "available": true,
+      "bytes": 10527,
+      "label": "browser_performance_probe",
+      "path": "scripts/measure-structure-viewer-performance.mjs",
+      "sha256": "bfe768a815d41e410d330c1d4b75a6074967b6a67a42be2c6a95bb1aed33f3fe"
+    },
+    {
+      "available": true,
+      "bytes": 36084,
+      "label": "visual_regression_probe",
+      "path": "scripts/measure-structure-viewer-visual-regression.mjs",
+      "sha256": "3df2bcf9debad63d49b9544a5f6f66485b9c13b95e44d9d582e37f81450e0644"
+    }
+  ],
+  "summary_line": "Structure viewer performance budget: PASS | checks=8/8 | budgets=9/9 | mode=static_contract"
+}

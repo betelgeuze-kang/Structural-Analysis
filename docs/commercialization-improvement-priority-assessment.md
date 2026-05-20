@@ -33,6 +33,9 @@
 | production ops/security gate | pass | auth/tenant/audit 계약, no-default-secret production path, tenant/actor rate limit, request metadata limit, audit digest, `/ops/policy` manifest가 readiness gate를 통과함 |
 | support bundle | pass | redaction, audit digest, roundtrip 가능한 support bundle manifest가 생성됨 |
 | viewer sheet package | pass | SVG sheet/revision/callout/deep-link가 `structure-viewer-drawing-sheet-package.v1`로 report/panel에 연결됨 |
+| viewer performance budget | pass | wall/slab instancing, surface LOD, BVH picking, pick-candidate cap이 `structure_viewer_performance_budget_manifest.json` static contract로 고정됨 |
+| viewer browser performance probe | pass | `npm run verify:viewer-performance-probe`가 local browser ready/FPS smoke를 수행하며 고객 하드웨어 FPS claim은 하지 않음 |
+| viewer visual regression | pass | `npm run verify:viewer-visual-regression`이 render mode와 plan/review/compare/evidence-ingest workflow-state local canvas signature baseline을 비교하며 pixel-perfect 고객 장비 claim은 하지 않음 |
 | frontend build | pass | `npm run build`, frontend build contract 통과 |
 | repo hygiene | pass | repo hygiene, generated artifact drift 통과 |
 | critical static lint | pass | `ruff --select F821,F601,F401,F841` 통과 |
@@ -80,7 +83,12 @@
 - `project_ops_api_service.py`에서 production default secret을 제거하고, auth-enabled server는 명시 secret 또는 `PROJECT_OPS_JWT_HMAC_SECRET` 없이는 시작하지 않도록 닫았다.
 - Project ops API에 tenant/actor rate limit, request metadata byte limit, audit SHA-256 batch digest, `/audit/digest`, `/ops/policy`, retention/export/backup/delete policy surface를 추가했다.
 - `scripts/check_independent_product_readiness.py`가 auth/audit뿐 아니라 rate limit, request limit, audit digest, policy manifest, lifecycle policy를 production ops gate로 확인하도록 강화했다.
+- `scripts/build_project_ops_deployment_drill_manifest.py`를 추가해 secret rotation negative-start, gateway/rate policy, backup/restore, tenant delete, audit digest, incident response dry-run contract를 `project_ops_deployment_drill_manifest.json`으로 남기고 readiness/support bundle에 연결했다.
 - Runtime packaging manifest, runtime SBOM, native runtime artifact manifest, compatibility matrix, support bundle manifest를 생성하고 독립 제품 gate에 연결했다.
+- `deployment/onprem` packaging skeleton과 `scripts/build_onprem_deployment_packaging_manifest.py`를 추가해 Containerfile, compose example, offline license example, signed update package example을 on-prem/air-gapped skeleton contract로 검증한다.
+- `scripts/build_structure_viewer_performance_budget_manifest.py`를 추가해 wall/slab instancing, surface LOD, BVH picking, pick-candidate cap을 `static_contract` evidence로 남긴다.
+- `scripts/measure-structure-viewer-performance.mjs`와 `npm run verify:viewer-performance-probe`를 추가해 local browser canvas ready/FPS smoke를 full quality gate에 연결했다. 이 증거는 `live_performance_claim=false`이며 고객 하드웨어 FPS claim으로 쓰지 않는다.
+- `scripts/measure-structure-viewer-visual-regression.mjs`와 `npm run verify:viewer-visual-regression`을 추가해 render mode 및 plan/review/compare/evidence-ingest workflow-state local canvas signature baseline을 full quality gate에 연결했다. 이 증거는 `live_visual_claim=false`이며 pixel-perfect 고객 장비 렌더링 claim으로 쓰지 않는다.
 - Viewer evidence hub에 review task, solver receipt, commercial-tool crosswalk, evidence ingest, renderable ingest, lineage drilldown, local ops bundle 흐름을 확장했다.
 - 선택 부재의 SVG sheet/revision/callout/viewer deep-link를 `structure-viewer-drawing-sheet-package.v1`로 정규화하고 HTML report/report panel에 노출했다.
 - 현재 `python3 scripts/check_independent_product_readiness.py --json`은 production ops/runtime/support/viewer packaging이 ready인 상태에서도 strict EB/RH 때문에 **80/100 blocked**를 유지한다.
@@ -221,7 +229,7 @@
 - `design-theme.css`도 장기 유지보수에는 큰 편
 - source viewer와 generated single-file viewer의 차이를 사용자가 체감하기 어려울 수 있음
 - 최적화 도면 선택/전환, provenance, cross-view selection이 더 제품형이어야 함
-- 3D wall/slab batching, LOD, hit-test 비용 제어가 더 필요함
+- 3D wall/slab batching, LOD, hit-test 비용 제어는 static contract, local browser probe, 11-case render-mode/core/advanced workflow visual baseline으로 고정됐지만 고객 하드웨어 FPS/latency matrix는 더 필요함
 
 진행된 부분:
 
@@ -241,6 +249,9 @@
 - side panel load-case inventory/layer toggle 계산을 `viewer-side-panel-model.js`로 분리하고 load-case fallback/active insertion 계약 테스트 추가
 - member search result 중복 제거/selected/isolate 표시 계산을 `viewer-search-results-model.js`로 분리하고 applied section 검색 계약 테스트 추가
 - selection key/summary/clear button state 계산을 `viewer-selection-summary-model.js`로 분리하고 multi-selection summary 계약 테스트 추가
+- wall/slab surface instancing, surface LOD, BVH picking, pick-candidate cap을 `structure_viewer_performance_budget_manifest.json` static contract와 전용 테스트로 고정
+- local browser performance probe를 full quality gate에 연결하고 `structure_viewer_browser_performance_probe.json` artifact 생성 경로를 추가
+- render-mode/core workflow-state와 renderable JSON/section-edit/load-combination draft visual regression baseline을 full quality gate에 연결하고 `structure_viewer_visual_regression_baseline.json` artifact 생성 경로를 추가
 
 완료 기준:
 
@@ -248,6 +259,7 @@
 - 도면 선택/전환 UX가 현재 등록 도면 수가 늘어나도 빠르고 명확함
 - 3D/charts/panel-zone/optimization-history 간 shared selection 계약 통일
 - Playwright 또는 동등한 smoke/visual regression으로 blank canvas, layout overlap, 주요 interaction 검증
+- wall/slab/LOD/hit-test static budget manifest, local browser probe, local visual baseline, 고객 하드웨어 FPS/latency regression budget 분리
 - single-file export와 repo-local source viewer의 의존성이 문서와 테스트에서 분리됨
 
 다음 작업:
@@ -255,8 +267,8 @@
 1. `index.html`에서 viewer state, drawing registry, selection controller를 추가 분리
 2. 도면 목록 검색/필터/최근 선택/품질 상태 badge 강화
 3. panel-zone proxy/verified 상태를 UI에서 명확히 표시
-4. large model 성능 측정과 LOD/batching 회귀 테스트 추가
-5. `structure-viewer-drawing-sheet-package.v1` 계약을 유지하면서 wall/slab batching/LOD, hit-test 성능, solver-verified panel-zone surfacing으로 이동
+4. static performance budget manifest, local browser probe, 11-case render-mode/core/advanced workflow visual baseline을 유지하면서 customer hardware large model FPS/latency 측정 추가
+5. `structure-viewer-drawing-sheet-package.v1` 계약을 유지하면서 solver-verified panel-zone surfacing으로 이동
 
 ## 우선순위 5. 하드 런타임 productization
 
@@ -347,8 +359,8 @@
 | P1 validation/benchmark breadth | 15 | ready | 15 |
 | strict EB/RH evidence | 20 | EB 0/4, RH 0/3 | 0 |
 | runtime production path | 15 | strict runtime + packaging manifest pass | 15 |
-| ops/security productization | 15 | no production default secret, auth/tenant/audit/rate/request-limit/audit-digest/policy contract pass | 15 |
-| packaging/support | 10 | support bundle redaction/digest/roundtrip pass | 10 |
+| ops/security productization | 15 | no production default secret, auth/tenant/audit/rate/request-limit/audit-digest/policy/deployment-drill contract pass | 15 |
+| packaging/support | 10 | support bundle redaction/digest/roundtrip pass, on-prem/air-gapped skeleton pass | 10 |
 | claim governance | 5 | synchronized | 5 |
 | source boundary | 5 | pass | 5 |
 | 합계 | 100 | - | **80** |

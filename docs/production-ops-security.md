@@ -1,7 +1,7 @@
 # Production Ops Security Runbook
 
-- 기준일: 2026-05-18
-- 상태: reference gate ready, deployment hardening still required
+- 기준일: 2026-05-19
+- 상태: reference gate ready, dry-run deployment drill ready, live deployment hardening still required
 - 목적: `project_ops_api_service.py` reference control-plane surface를 독립 상용제품 운영 API로 승격하기 위한 보안/운영 닫힘 기준을 고정한다.
 
 ## Current Boundary
@@ -16,9 +16,10 @@
 - tenant/actor rate limit과 request metadata byte limit
 - audit JSONL SHA-256 batch digest와 `/audit/digest` admin endpoint
 - `/ops/policy` manifest: retention, export, backup, restore, tenant delete policy 표면화
+- `project_ops_deployment_drill_manifest.json`: secret rotation negative-start, gateway/rate policy, backup/restore, tenant delete, audit digest, incident response dry-run contract
 - support bundle과 audit digest evidence 연결
 
-아직 deployment hardening으로 남은 항목:
+아직 live deployment hardening으로 남은 항목:
 
 - production secret rotation 운영 절차
 - TLS/reverse proxy/deployment boundary가 문서화 단계
@@ -46,9 +47,10 @@
 3. Maintain rate-limit middleware for GET endpoints.
 4. Maintain audit batch digest writer and `/audit/digest` endpoint.
 5. Maintain tenant isolation and role negative tests.
-6. Add production deployment sample with secret/env contract.
-7. Run backup/restore, tenant delete, and incident response drills with signed evidence.
+6. Maintain `scripts/build_project_ops_deployment_drill_manifest.py` as the dry-run deployment drill evidence.
+7. Add production deployment sample with secret/env contract.
+8. Run backup/restore, tenant delete, and incident response drills with signed evidence.
 
 ## Current Gate Status
 
-The independent product readiness gate now passes the reference API security/ops check including rate limit, request metadata limit, audit tamper-evidence digest, and policy manifest. Release promotion still stays blocked by strict EB/RH evidence, and deployment hardening work above remains required before exposing this service outside a controlled gateway.
+The independent product readiness gate now passes the reference API security/ops check including rate limit, request metadata limit, audit tamper-evidence digest, policy manifest, and dry-run deployment drill manifest. Release promotion still stays blocked by strict EB/RH evidence, and live deployment hardening work above remains required before exposing this service outside a controlled gateway.

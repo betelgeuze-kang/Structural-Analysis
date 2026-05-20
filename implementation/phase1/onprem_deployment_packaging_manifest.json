@@ -1,0 +1,186 @@
+{
+  "attestation_envelope": {
+    "canonical_payload_bytes": 2795,
+    "generated_at": "2026-05-20T12:14:28.367959+00:00",
+    "schema_version": "onprem-deployment-packaging-attestation.v1",
+    "sha256": "5e8dcf80a82537571001c6abcaf9a59348b1fe70ce3eb97ff5f9334303a59a6a",
+    "signature_mode": "sha256_attestation_envelope_not_cryptographic_signature"
+  },
+  "blockers": [],
+  "check_rows": [
+    {
+      "blockers": [],
+      "check_id": "container_runtime_contract",
+      "checks": {
+        "auth_required_cmd": true,
+        "containerfile_present": true,
+        "secret_not_baked_into_image": true,
+        "service_entrypoint_present": true,
+        "telemetry_default_off": true
+      },
+      "evidence": [
+        "deployment/onprem/Containerfile",
+        "deployment/onprem/compose.example.yml"
+      ],
+      "residual_live_work": "Build and scan the image in the customer-approved container environment.",
+      "status": "pass",
+      "title": "Container skeleton runs the auth-required project ops service without embedding secrets"
+    },
+    {
+      "blockers": [],
+      "check_id": "compose_secret_and_volume_contract",
+      "checks": {
+        "compose_present": true,
+        "loopback_port_binding": true,
+        "read_only_root": true,
+        "secret_store_reference": true,
+        "support_bundle_volume": true
+      },
+      "evidence": [
+        "deployment/onprem/compose.example.yml"
+      ],
+      "residual_live_work": "Bind the compose profile to the site gateway/TLS/WAF and backup storage.",
+      "status": "pass",
+      "title": "Compose example uses secret injection, loopback binding, read-only root, and support volumes"
+    },
+    {
+      "blockers": [],
+      "check_id": "offline_license_contract",
+      "checks": {
+        "expiry_declared": true,
+        "license_present": true,
+        "license_schema_declared": true,
+        "required_features_present": true,
+        "signature_placeholder_present": true,
+        "tenant_bound": true
+      },
+      "evidence": [
+        "deployment/onprem/offline-license.example.json"
+      ],
+      "residual_live_work": "Replace placeholder signature fields with production license signing output.",
+      "status": "pass",
+      "title": "Offline license example has tenant, expiry, features, public key id, and signature placeholder"
+    },
+    {
+      "blockers": [],
+      "check_id": "signed_update_contract",
+      "checks": {
+        "artifact_hashes_declared": true,
+        "artifact_rows_present": true,
+        "offline_transfer_policy": true,
+        "rollback_policy_present": true,
+        "signature_placeholder_present": true,
+        "update_manifest_present": true,
+        "update_schema_declared": true
+      },
+      "evidence": [
+        "deployment/onprem/signed-update-package.example.json"
+      ],
+      "residual_live_work": "Replace placeholder hashes/signatures with the generated release asset digests and signing key output.",
+      "status": "pass",
+      "title": "Signed update package example has offline transfer policy, artifact hashes, signature, and rollback"
+    },
+    {
+      "blockers": [],
+      "check_id": "runtime_support_bundle_link",
+      "checks": {
+        "runtime_manifest_pass": true,
+        "runtime_modes_include_onprem_airgap": true,
+        "support_bundle_pass": true,
+        "support_bundle_roundtrip_pass": true
+      },
+      "evidence": [
+        "implementation/phase1/production_runtime_packaging_manifest.json",
+        "implementation/phase1/support_bundle_manifest.json"
+      ],
+      "residual_live_work": "Run a restore/support-bundle roundtrip from the actual installed package.",
+      "status": "pass",
+      "title": "On-prem packaging is linked to runtime and support bundle evidence"
+    },
+    {
+      "blockers": [],
+      "check_id": "airgap_operator_runbook",
+      "checks": {
+        "no_implicit_network_dependency": true,
+        "offline_transfer_declared": true,
+        "readme_present": true,
+        "signed_update_declared": true,
+        "support_bundle_handoff_declared": true
+      },
+      "evidence": [
+        "deployment/onprem/README.md"
+      ],
+      "residual_live_work": "Capture the customer site import/export checklist and operator sign-off.",
+      "status": "pass",
+      "title": "Operator runbook states offline transfer, no implicit network dependency, signed update, and support bundle handoff"
+    }
+  ],
+  "contract_pass": true,
+  "generated_at": "2026-05-20T12:14:28.367976+00:00",
+  "live_deployment_claim": false,
+  "package_mode": "skeleton_contract",
+  "reason_code": "PASS",
+  "residual_live_work": [
+    "Build and scan the container image in the deployment environment.",
+    "Replace example license/update signatures with production signing keys.",
+    "Run offline artifact import, restore, and support bundle roundtrip from the installed package.",
+    "Attach customer/site gateway, backup, and incident response drill evidence."
+  ],
+  "schema_version": "onprem-deployment-packaging-manifest.v1",
+  "source_rows": [
+    {
+      "available": true,
+      "bytes": 1702,
+      "label": "packaging_readme",
+      "path": "deployment/onprem/README.md",
+      "sha256": "4f3dcc2f09f1e979afae3e994d8c9fc18511832a31fd46aba30a630ad0fd24b0"
+    },
+    {
+      "available": true,
+      "bytes": 834,
+      "label": "containerfile",
+      "path": "deployment/onprem/Containerfile",
+      "sha256": "1b21c0d52d2a0a6e00be12d1c1738099f1911244f691bed508eb08a64284b168"
+    },
+    {
+      "available": true,
+      "bytes": 685,
+      "label": "compose_example",
+      "path": "deployment/onprem/compose.example.yml",
+      "sha256": "40e25cad0dcbe1811c37e6f6d11537fd54044676597bac6c8fa94fa1fe628714"
+    },
+    {
+      "available": true,
+      "bytes": 595,
+      "label": "offline_license_example",
+      "path": "deployment/onprem/offline-license.example.json",
+      "sha256": "d85487e987fb6ac4af38af3493ca4889fec0240fcc1cfff58353433eec9dce6d"
+    },
+    {
+      "available": true,
+      "bytes": 852,
+      "label": "signed_update_package_example",
+      "path": "deployment/onprem/signed-update-package.example.json",
+      "sha256": "598fa6461472864903e500c2dee54bd445cc08d85668b9e5bbb13fc292859166"
+    },
+    {
+      "available": true,
+      "bytes": 1878,
+      "label": "runtime_packaging_manifest",
+      "path": "implementation/phase1/production_runtime_packaging_manifest.json",
+      "sha256": "9b76649f947ec13ab53e248f181735ddede6d900c60ac0573a030534c2f2d958"
+    },
+    {
+      "available": true,
+      "bytes": 9915,
+      "label": "support_bundle_manifest",
+      "path": "implementation/phase1/support_bundle_manifest.json",
+      "sha256": "c6c0fc95b68a099d44bd2676e4cfa5100328973145b0b263da7fc66212bbc29b"
+    }
+  ],
+  "summary_line": "On-prem deployment packaging: PASS | checks=6/6 | mode=skeleton_contract",
+  "supported_deployment_modes": [
+    "on_prem",
+    "air_gapped"
+  ]
+}

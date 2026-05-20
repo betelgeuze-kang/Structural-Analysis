@@ -35,11 +35,19 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     assert exit_code == 0
     assert "-m pytest -q" in output
     assert "verify:viewer-report-pdf" in output
+    assert "verify:viewer-performance-probe" in output
+    assert "verify:viewer-visual-regression" in output
     assert output.index("verify:frontend-browser-smoke") < output.index("verify:viewer-report-pdf")
+    assert output.index("verify:viewer-report-pdf") < output.index("verify:viewer-performance-probe")
+    assert output.index("verify:viewer-performance-probe") < output.index("verify:viewer-visual-regression")
     assert "scripts/report_commercialization_level.py --closure-mode conditional --fail-below 9.0" in output
-    assert output.index("verify:viewer-report-pdf") < output.index("scripts/report_commercialization_level.py")
-    assert "scripts/check_independent_product_readiness.py --json" in output
+    assert output.index("verify:viewer-visual-regression") < output.index("scripts/report_commercialization_level.py")
+    assert "scripts/check_workstation_delivery_readiness.py --json" in output
     assert output.index("scripts/report_commercialization_level.py") < output.index(
+        "scripts/check_workstation_delivery_readiness.py"
+    )
+    assert "scripts/check_independent_product_readiness.py --json" in output
+    assert output.index("scripts/check_workstation_delivery_readiness.py") < output.index(
         "scripts/check_independent_product_readiness.py"
     )
     assert "git diff --check" in output

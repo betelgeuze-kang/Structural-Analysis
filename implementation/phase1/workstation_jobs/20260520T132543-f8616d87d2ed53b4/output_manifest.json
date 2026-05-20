@@ -1,0 +1,127 @@
+{
+  "job_id": "20260520T132543-f8616d87d2ed53b4",
+  "output_rows": [
+    {
+      "bytes": 915,
+      "path": "README_DELIVERY.md",
+      "sha256": "e17f4ea0b12e93f9b04367ac5d48bd671580cf56a2d114dd87283aa9a7ef34d1"
+    },
+    {
+      "bytes": 2135,
+      "path": "checksums.sha256",
+      "sha256": "a7a5a11fdf1ddc59a70e9f2c2dff6e25aee71c21facad5ef01a4a570de6b8b79"
+    },
+    {
+      "bytes": 1278,
+      "path": "data/client_input_validation_report.json",
+      "sha256": "516c051f8f68126e80626cc65363bd23ea579fe36c46d60976a50dec1ec5d98a"
+    },
+    {
+      "bytes": 9110297,
+      "path": "data/source_model.json",
+      "sha256": "0964ab6f94d38cfd6d71cc9d6352d1d6e93379941faa7596658d8026b1d55457"
+    },
+    {
+      "bytes": 3152,
+      "path": "data/workstation_hardware_profile.json",
+      "sha256": "6f3836677e9a49bc2085d17b4ffc110b99b80b6b17021978ca16c579b320891a"
+    },
+    {
+      "bytes": 3463,
+      "path": "data/workstation_service_budget.json",
+      "sha256": "3afd99a6d6e5cc0b6640a03378d55bfc1e6cd8d396ea409dfd5a3a9118bbaa31"
+    },
+    {
+      "bytes": 207136,
+      "path": "drawings/elevation_xz.svg",
+      "sha256": "7b3dfdd332bc1b48db5f7b12229ff086daca7f892ba8d0e026b97e4d74aac138"
+    },
+    {
+      "bytes": 207056,
+      "path": "drawings/elevation_yz.svg",
+      "sha256": "e054c8dd3fe34e85238dc4180c3328742943fd60ff02a8493aad810ef1e67d22"
+    },
+    {
+      "bytes": 219875,
+      "path": "drawings/isometric.svg",
+      "sha256": "c40a990414fb7cc0b856b762829a9eecb4655568263a421a4e21d101784f5433"
+    },
+    {
+      "bytes": 23004,
+      "path": "drawings/plan_z0.0.svg",
+      "sha256": "d4b561fbb727d403feb86ee7e8d152014554b77c5ab1ea001f2c055cd0f5f3c6"
+    },
+    {
+      "bytes": 49379,
+      "path": "drawings/plan_z10.5.svg",
+      "sha256": "05bf9a91f7bde02ee090dacc4e3030609dca20f1d91e332b8d3a2eafe276f5e2"
+    },
+    {
+      "bytes": 49474,
+      "path": "drawings/plan_z14.0.svg",
+      "sha256": "fb310cbb4a3b85f2a47ef5f32d3f09f80363908733283a387d93f01dfcde31e3"
+    },
+    {
+      "bytes": 49600,
+      "path": "drawings/plan_z17.5.svg",
+      "sha256": "e825d8cd9371d8e11575098eea8abd7745c39e56253a148938dea9ec10bbdb5d"
+    },
+    {
+      "bytes": 49623,
+      "path": "drawings/plan_z21.0.svg",
+      "sha256": "7ec128bfc765ab0734d2408fb7356474e9a1510ee9c069aeec5818e13bd31ed0"
+    },
+    {
+      "bytes": 49617,
+      "path": "drawings/plan_z24.5.svg",
+      "sha256": "8dd6854484a55fb335559c804cab971d5d3d3e61f1c88c1e696992fc47dbdabf"
+    },
+    {
+      "bytes": 39433,
+      "path": "drawings/plan_z28.0.svg",
+      "sha256": "6ce10112be2a62765d8e6a9e4666c238bf8de6ad2c157ba69cda60db4e74cef1"
+    },
+    {
+      "bytes": 49158,
+      "path": "drawings/plan_z3.5.svg",
+      "sha256": "669ff09e9633cb2f790d2ed67aa336d383dbf5be3cf7348fee90674855a8179f"
+    },
+    {
+      "bytes": 49204,
+      "path": "drawings/plan_z7.0.svg",
+      "sha256": "4310f58cec14d025d1060f9f71c69767482537ad9016231b16ee3ac0000f9df5"
+    },
+    {
+      "bytes": 13601,
+      "path": "evidence/support_bundle_manifest.json",
+      "sha256": "fe7e6f1b526c432a94726b3470d7ee6040af6339af10fcfc40bf4c6c1f0caad1"
+    },
+    {
+      "bytes": 3972,
+      "path": "evidence/viewer_browser_performance_probe.json",
+      "sha256": "fcfe59e467ec3c776ca51e6813183f0fcad9792d42aed2a8dd29dd917e0618be"
+    },
+    {
+      "bytes": 105533,
+      "path": "evidence/viewer_visual_regression_baseline.json",
+      "sha256": "a4d36a0a87244d6df667948e4c99c6df515e574bf94562e4be90cc6f62142580"
+    },
+    {
+      "bytes": 5376,
+      "path": "manifest.json",
+      "sha256": "ecc39ade7f0b8a58e72553235785185e27a668b4bd971f8ca07f9af5b77df82c"
+    },
+    {
+      "bytes": 143745,
+      "path": "report.pdf",
+      "sha256": "76fc124511540cc0a96ea2056d78abaaff9c5fe1e4c91b299710256896249af4"
+    },
+    {
+      "bytes": 6338983,
+      "path": "viewer.html",
+      "sha256": "eb08924a99072e5deca16a04cd77abe5196b1194b05d5ccf69b5757da152a2ce"
+    }
+  ],
+  "package_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
+  "schema_version": "workstation-job-output-manifest.v1"
+}

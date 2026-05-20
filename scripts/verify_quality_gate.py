@@ -76,6 +76,8 @@ def _command_groups(mode: str) -> list[list[str]]:
         [_python(), "-m", "pytest", "-q"],
         [_npm(), "run", "verify:frontend-browser-smoke"],
         [_npm(), "run", "verify:viewer-report-pdf"],
+        [_npm(), "run", "verify:viewer-performance-probe"],
+        [_npm(), "run", "verify:viewer-visual-regression"],
         [
             _python(),
             "scripts/report_commercialization_level.py",
@@ -84,6 +86,7 @@ def _command_groups(mode: str) -> list[list[str]]:
             "--fail-below",
             "9.0",
         ],
+        [_python(), "scripts/check_workstation_delivery_readiness.py", "--json"],
         [_python(), "scripts/check_independent_product_readiness.py", "--json"],
         [_python(), "scripts/check_generated_worktree_clean.py", "--show-ok"],
         ["git", "diff", "--check"],

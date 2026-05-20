@@ -1,0 +1,119 @@
+{
+  "blockers": [],
+  "claim_boundary": "Performance and size budgets apply only to this local workstation profile. They are not SaaS throughput or customer-device FPS claims.",
+  "contract_pass": true,
+  "generated_at": "2026-05-20T13:33:00.839876+00:00",
+  "performance_budget": {
+    "memory_budget_gib": {
+      "available_total_gib": 31.23,
+      "minimum_required_gib": 16,
+      "recommended_gib": 32
+    },
+    "package_generation_target_seconds": {
+      "large": 1800,
+      "medium": 180,
+      "oversize": null,
+      "small": 60
+    },
+    "viewer_average_fps": 38.862753119247294,
+    "viewer_max_ready_ms": 60000,
+    "viewer_min_average_fps": 5,
+    "viewer_ready_ms": 4443
+  },
+  "project_size_tiers": [
+    {
+      "customer_commitment": "ready for immediate workstation delivery when input validation passes",
+      "label": "immediate_delivery",
+      "max_elements": 50000,
+      "max_nodes": 25000,
+      "processing_mode": "same_session",
+      "tier": "small"
+    },
+    {
+      "customer_commitment": "standard workstation delivery",
+      "label": "standard_delivery",
+      "max_elements": 150000,
+      "max_nodes": 75000,
+      "processing_mode": "standard",
+      "tier": "medium"
+    },
+    {
+      "customer_commitment": "batch or overnight workstation delivery",
+      "label": "batch_or_overnight",
+      "max_elements": 300000,
+      "max_nodes": 150000,
+      "processing_mode": "batch_or_overnight",
+      "tier": "large"
+    },
+    {
+      "customer_commitment": "requires model split, scope review, or pre-quote",
+      "label": "split_or_quote_required",
+      "max_elements": null,
+      "max_nodes": null,
+      "processing_mode": "split_or_quote_required",
+      "tier": "oversize"
+    }
+  ],
+  "reason_code": "PASS",
+  "schema_version": "workstation-service-budget.v1",
+  "service_model": {
+    "customer_device_fps_claim": false,
+    "delivery_formats_v1": [
+      "HTML",
+      "PDF",
+      "SVG",
+      "JSON",
+      "CSV"
+    ],
+    "dxf_dwg_roundtrip": "v2_extension",
+    "mode": "single_operator_workstation_delivery",
+    "multi_tenant_saas": false
+  },
+  "source_rows": [
+    {
+      "available": true,
+      "bytes": 3152,
+      "label": "workstation_hardware_profile",
+      "path": "implementation/phase1/workstation_hardware_profile.json",
+      "sha256": "6f3836677e9a49bc2085d17b4ffc110b99b80b6b17021978ca16c579b320891a"
+    },
+    {
+      "available": true,
+      "bytes": 3972,
+      "label": "viewer_browser_performance_probe",
+      "path": "implementation/phase1/structure_viewer_browser_performance_probe.json",
+      "sha256": "fcfe59e467ec3c776ca51e6813183f0fcad9792d42aed2a8dd29dd917e0618be"
+    },
+    {
+      "available": true,
+      "bytes": 105533,
+      "label": "viewer_visual_regression_baseline",
+      "path": "implementation/phase1/structure_viewer_visual_regression_baseline.json",
+      "sha256": "a4d36a0a87244d6df667948e4c99c6df515e574bf94562e4be90cc6f62142580"
+    }
+  ],
+  "summary_line": "Workstation service budget: PASS | tiers=small/medium/large/oversize | ready=4443ms | fps=38.9",
+  "tier_classifier_examples": [
+    {
+      "elements": 20000,
+      "nodes": 10000,
+      "tier": "small"
+    },
+    {
+      "elements": 120000,
+      "nodes": 60000,
+      "tier": "medium"
+    },
+    {
+      "elements": 250000,
+      "nodes": 120000,
+      "tier": "large"
+    },
+    {
+      "elements": 400000,
+      "nodes": 200000,
+      "tier": "oversize"
+    }
+  ],
+  "warnings": []
+}

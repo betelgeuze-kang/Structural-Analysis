@@ -26,6 +26,8 @@ src/structure-viewer/index.html?preset=real_drawing_private_3d
 - Drawing evidence drilldown: the selected drawing now shows review status, count verification/source, baseline/optimized refs, artifact path, quality flags, and registered variants directly in the project browser.
 - Drawing review card: quality flags are normalized into `critical`, `warning`, and `info` issues. The selected drawing shows `상용 검토 가능`, `제한적 검토`, or `검토 불가`, issue counts, recommended action, and severity rows. Drawing list badges use the same issue-count model, so a blocked or limited drawing is visible before opening it.
 - Before/optimized work surface: registered drawings can expose member-count, weight/cost proxy, risk-movement, and member-level comparison rows. The viewer now provides fixed comparison filters for `changed`, `reduced`, `retained`, `risk_up`, and `missing_evidence`; manifest-level deltas are shown as derived proxy evidence when exact member rows are not available. When exact member rows exist, the active comparison filter is also promoted into 3D highlight state and shown as an exact-member highlight count in the comparison panel/report.
+- Analysis cockpit: the main viewer now derives eight command-center KPI cards, before/after optimization summary cards, top critical member rows with drift contribution, story-drift/load-step/material/heatmap chart panels, and a footer solver timeline from the loaded artifact. Empty result fields fall back to explicit artifact-derived product proxies instead of rendering zero-filled demo panels. Critical member rows are clickable and reuse the existing member focus path, so the cockpit is scan-first but still connected to model selection.
+- Stage-native analysis overlays: the desktop command-center shell keeps top chrome compact, folds low-priority provenance/chip rows out of the first viewport, tightens the default camera fit, and renders lateral-load arrows plus base support markers directly in the 3D stage so the geometry reads as an analysis result rather than a neutral wireframe.
 - Evidence Hub v1: the workspace now carries review tasks (`needs_check`, `approved`, `hold`, `rerun_required`), local annotations, solver receipt slots, CSV/JSON/IFC evidence ingest previews, renderable JSON ingest payloads, bundle import/export preview, and manifest lineage in the same local ops state/report flow. The URL also accepts `task`, `overlay`, and `receipt` parameters alongside the existing `project`, `drawing`, `variant`, `member`, and `comparison_filter` state.
 - Commercial-tool crosswalk: CSV/JSON ingest rows now preserve normalized result rows and infer source profiles for MIDAS, ETABS/SAP2000, RFEM, Tekla, Revit, IFC, and generic exports. The viewer compares external member IDs, sections, and DCR values against the loaded viewer model, then reports matched rows, section/DCR mismatches, missing viewer members, and selected-member crosswalk evidence in the inspector and report. Crosswalk rows in the report panel are actionable: selectable rows focus the viewer member, and the mismatch isolation command applies the existing member isolate path for fast review.
 - CSV mapper preview: the report panel exposes mapper presets for `auto`, MIDAS, ETABS/SAP2000, RFEM, Tekla, Revit, IFC, and generic CSV/JSON. Each preset shows accepted source columns for canonical fields such as `member_id`, `section`, `dcr_after`, `story`, `load_combo`, `material`, and `receipt_path`, so an engineer can see why an ingest row was normalized the way it was.
@@ -40,6 +42,9 @@ src/structure-viewer/index.html?preset=real_drawing_private_3d
 - Lineage drilldown: the selection inspector and HTML/PDF report now show a source model → analysis result → optimization delta → optimized model → solver receipt → review task → report package chain. Each row is tagged as `exact source`, `derived proxy`, `local ingest payload`, or `missing evidence`, keeping engineer-in-loop claim boundaries visible in the exported review package.
 - Report export: the viewer exports an HTML engineer-in-loop review report and a local audit JSONL file for the active project/drawing. The report includes the drawing review card, issue list, before/after member comparison, selected member checklist, local review note, review task table, solver receipt summary, commercial-tool crosswalk table, CSV mapper candidates, overlay state, renderable ingest status, lineage drilldown, import/ingest summary, and a viewer screenshot marker. PDF export is available through Playwright:
 - Drawing sheet package: selected members now carry an explicit `structure-viewer-drawing-sheet-package.v1` bridge into the report/panel. It preserves SVG sheet links, drawing revision, callout id/label, and the viewer deep-link, so a review package can move from 3D selection to plan/elevation/isometric SVG evidence without relying on a live browser state.
+- Static performance budget: `scripts/build_structure_viewer_performance_budget_manifest.py` records the wall/slab instancing, surface LOD, BVH picking, deformed pick refresh, Playwright canvas smoke, and pick-candidate cap contract in `implementation/phase1/structure_viewer_performance_budget_manifest.json`. This is a regression contract only; measured FPS/latency remains separate follow-up evidence.
+- Browser performance probe: `scripts/measure-structure-viewer-performance.mjs` starts the source viewer under Playwright, waits for a nonblank well-framed canvas, samples `requestAnimationFrame`, and writes `implementation/phase1/structure_viewer_browser_performance_probe.json`. The npm verifier runs in `--verify` mode and writes to the OS temp directory so full quality gates do not dirty the repo. This remains local-browser smoke evidence, not a normalized customer-hardware FPS claim.
+- Visual regression baseline: `scripts/measure-structure-viewer-visual-regression.mjs --update-baseline` captures 11 desktop/mobile render-mode and workflow signatures, including plan view, review member selection, compare overlay, CSV evidence ingest, renderable JSON ingest, section edit apply, and load-combination draft markers in `implementation/phase1/structure_viewer_visual_regression_baseline.json`. The npm verifier compares against that baseline in `--verify` mode and writes only to the OS temp directory. This is local visual-signature regression evidence, not a pixel-perfect customer-device rendering claim.
 
 ```bash
 npm run export:viewer-report-pdf -- --query "project=midas33_release&drawing=midas33_optimized&variant=optimized" --out /tmp/structure_viewer_report.pdf
@@ -63,6 +68,9 @@ python3 -m pytest -q tests/test_structure_viewer_project_workspace_contract.py \
   tests/test_structure_viewer_local_ops_state_contract.py
 npm run verify:viewer-manifest
 npm run verify:frontend-browser-smoke -- --mode minimal
+python3 scripts/build_structure_viewer_performance_budget_manifest.py --json
+npm run verify:viewer-performance-probe
+npm run verify:viewer-visual-regression
 ```
 
 Full viewer verification:
@@ -72,6 +80,9 @@ python3 -m pytest -q tests/test_structure_viewer_*
 npm run verify:viewer-manifest
 npm run verify:frontend-browser-smoke
 npm run verify:viewer-report-pdf
+npm run verify:viewer-performance-probe
+npm run verify:viewer-visual-regression
+python3 scripts/build_structure_viewer_performance_budget_manifest.py --json --fail-blocked
 python3 scripts/verify_quality_gate.py --mode pr
 ```
 

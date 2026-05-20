@@ -1,0 +1,7 @@
+{"event":"frame","status":"acting","summary":"Deep/R3 recursive improvement track started for workstation delivery service; independent EB/RH evidence remains out of local closure scope."}
+{"event":"implementation","status":"acting","summary":"Promoted workstation job reproducibility to a folderized job contract and readiness gate."}
+{"event":"verification","status":"verifying","summary":"Focused workstation/support tests passed: 19 passed; ruff passed; workstation readiness PASS gates=6/6; independent readiness remains BLOCKED 80/100 by EB/RH."}
+{"event":"implementation","status":"acting","summary":"Added package manifest consistency self-test and viewer shell marker check to delivery restore/readiness path."}
+{"event":"verification","status":"done","summary":"Focused workstation/support tests passed: 20 passed; ruff passed; support bundle PASS 20/20; workstation readiness PASS gates=6/6; independent readiness remains BLOCKED 80/100 by EB/RH."}
+{"event":"implementation","status":"acting","summary":"Added delivery index, revision history, revision policy, and workstation job retention policy to the delivery service contract."}
+{"event":"verification","status":"done","summary":"Browser viewer probes passed, workstation readiness PASS gates=7/7, support bundle PASS 21/21, full pytest passed 1463 tests, and independent readiness remains BLOCKED 80/100 by EB/RH."}

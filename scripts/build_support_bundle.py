@@ -19,8 +19,25 @@ DEFAULT_P0_STATUS = Path("implementation/phase1/release/publication_evidence/cur
 DEFAULT_P1_STATUS = Path("implementation/phase1/release/publication_evidence/current/p1-readiness-status.json")
 DEFAULT_P1_STRICT_PREFLIGHT = Path("implementation/phase1/commercialization_status/p1_evidence_sidecar_preflight.json")
 DEFAULT_PROJECT_OPS_SNAPSHOT = Path("implementation/phase1/release/project_ops_service_snapshot.json")
+DEFAULT_PROJECT_OPS_DEPLOYMENT_DRILL = Path("implementation/phase1/project_ops_deployment_drill_manifest.json")
 DEFAULT_RUNTIME_PROBE = Path("implementation/phase1/zero_copy_real_probe_report_strict.json")
 DEFAULT_RUNTIME_PACKAGING_MANIFEST = Path("implementation/phase1/production_runtime_packaging_manifest.json")
+DEFAULT_VIEWER_PERFORMANCE_BUDGET_MANIFEST = Path(
+    "implementation/phase1/structure_viewer_performance_budget_manifest.json"
+)
+DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE = Path("implementation/phase1/structure_viewer_browser_performance_probe.json")
+DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE = Path(
+    "implementation/phase1/structure_viewer_visual_regression_baseline.json"
+)
+DEFAULT_WORKSTATION_HARDWARE_PROFILE = Path("implementation/phase1/workstation_hardware_profile.json")
+DEFAULT_WORKSTATION_SERVICE_BUDGET = Path("implementation/phase1/workstation_service_budget.json")
+DEFAULT_WORKSTATION_DELIVERY_PACKAGE_MANIFEST = Path(
+    "implementation/phase1/workstation_delivery_package_manifest.json"
+)
+DEFAULT_WORKSTATION_DELIVERY_READINESS = Path("implementation/phase1/workstation_delivery_readiness.json")
+DEFAULT_CLIENT_INPUT_VALIDATION_REPORT = Path("implementation/phase1/client_input_validation_report.json")
+DEFAULT_WORKSTATION_JOB_RECORD = Path("implementation/phase1/workstation_job_record.json")
+DEFAULT_WORKSTATION_JOB_RETENTION_POLICY = Path("implementation/phase1/workstation_job_retention_policy.json")
 DEFAULT_EXTERNAL_BENCHMARK_UPDATES = Path(
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json"
 )
@@ -233,8 +250,19 @@ def build_support_bundle(
     p1_status: Path = DEFAULT_P1_STATUS,
     p1_strict_evidence_preflight: Path = DEFAULT_P1_STRICT_PREFLIGHT,
     project_ops_snapshot: Path = DEFAULT_PROJECT_OPS_SNAPSHOT,
+    project_ops_deployment_drill: Path = DEFAULT_PROJECT_OPS_DEPLOYMENT_DRILL,
     runtime_probe: Path = DEFAULT_RUNTIME_PROBE,
     runtime_packaging_manifest: Path = DEFAULT_RUNTIME_PACKAGING_MANIFEST,
+    viewer_performance_budget_manifest: Path = DEFAULT_VIEWER_PERFORMANCE_BUDGET_MANIFEST,
+    viewer_browser_performance_probe: Path = DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE,
+    viewer_visual_regression_baseline: Path = DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE,
+    workstation_hardware_profile: Path = DEFAULT_WORKSTATION_HARDWARE_PROFILE,
+    workstation_service_budget: Path = DEFAULT_WORKSTATION_SERVICE_BUDGET,
+    workstation_delivery_package_manifest: Path = DEFAULT_WORKSTATION_DELIVERY_PACKAGE_MANIFEST,
+    workstation_delivery_readiness: Path = DEFAULT_WORKSTATION_DELIVERY_READINESS,
+    client_input_validation_report: Path = DEFAULT_CLIENT_INPUT_VALIDATION_REPORT,
+    workstation_job_record: Path = DEFAULT_WORKSTATION_JOB_RECORD,
+    workstation_job_retention_policy: Path = DEFAULT_WORKSTATION_JOB_RETENTION_POLICY,
     external_benchmark_updates: Path = DEFAULT_EXTERNAL_BENCHMARK_UPDATES,
     residual_holdout_updates: Path = DEFAULT_RESIDUAL_HOLDOUT_UPDATES,
     package_json: Path = DEFAULT_PACKAGE_JSON,
@@ -246,8 +274,19 @@ def build_support_bundle(
         ("p1_status", p1_status),
         ("p1_strict_evidence_preflight", p1_strict_evidence_preflight),
         ("project_ops_snapshot", project_ops_snapshot),
+        ("project_ops_deployment_drill", project_ops_deployment_drill),
         ("runtime_probe", runtime_probe),
         ("runtime_packaging_manifest", runtime_packaging_manifest),
+        ("viewer_performance_budget_manifest", viewer_performance_budget_manifest),
+        ("viewer_browser_performance_probe", viewer_browser_performance_probe),
+        ("viewer_visual_regression_baseline", viewer_visual_regression_baseline),
+        ("workstation_hardware_profile", workstation_hardware_profile),
+        ("workstation_service_budget", workstation_service_budget),
+        ("workstation_delivery_package_manifest", workstation_delivery_package_manifest),
+        ("workstation_delivery_readiness", workstation_delivery_readiness),
+        ("client_input_validation_report", client_input_validation_report),
+        ("workstation_job_record", workstation_job_record),
+        ("workstation_job_retention_policy", workstation_job_retention_policy),
         ("external_benchmark_updates", external_benchmark_updates),
         ("residual_holdout_updates", residual_holdout_updates),
         ("package_json", package_json),
@@ -329,8 +368,39 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--p1-status", type=Path, default=DEFAULT_P1_STATUS)
     parser.add_argument("--p1-strict-evidence-preflight", type=Path, default=DEFAULT_P1_STRICT_PREFLIGHT)
     parser.add_argument("--project-ops-snapshot", type=Path, default=DEFAULT_PROJECT_OPS_SNAPSHOT)
+    parser.add_argument("--project-ops-deployment-drill", type=Path, default=DEFAULT_PROJECT_OPS_DEPLOYMENT_DRILL)
     parser.add_argument("--runtime-probe", type=Path, default=DEFAULT_RUNTIME_PROBE)
     parser.add_argument("--runtime-packaging-manifest", type=Path, default=DEFAULT_RUNTIME_PACKAGING_MANIFEST)
+    parser.add_argument(
+        "--viewer-performance-budget-manifest",
+        type=Path,
+        default=DEFAULT_VIEWER_PERFORMANCE_BUDGET_MANIFEST,
+    )
+    parser.add_argument(
+        "--viewer-browser-performance-probe",
+        type=Path,
+        default=DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE,
+    )
+    parser.add_argument(
+        "--viewer-visual-regression-baseline",
+        type=Path,
+        default=DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE,
+    )
+    parser.add_argument("--workstation-hardware-profile", type=Path, default=DEFAULT_WORKSTATION_HARDWARE_PROFILE)
+    parser.add_argument("--workstation-service-budget", type=Path, default=DEFAULT_WORKSTATION_SERVICE_BUDGET)
+    parser.add_argument(
+        "--workstation-delivery-package-manifest",
+        type=Path,
+        default=DEFAULT_WORKSTATION_DELIVERY_PACKAGE_MANIFEST,
+    )
+    parser.add_argument("--workstation-delivery-readiness", type=Path, default=DEFAULT_WORKSTATION_DELIVERY_READINESS)
+    parser.add_argument("--client-input-validation-report", type=Path, default=DEFAULT_CLIENT_INPUT_VALIDATION_REPORT)
+    parser.add_argument("--workstation-job-record", type=Path, default=DEFAULT_WORKSTATION_JOB_RECORD)
+    parser.add_argument(
+        "--workstation-job-retention-policy",
+        type=Path,
+        default=DEFAULT_WORKSTATION_JOB_RETENTION_POLICY,
+    )
     parser.add_argument("--external-benchmark-updates", type=Path, default=DEFAULT_EXTERNAL_BENCHMARK_UPDATES)
     parser.add_argument("--residual-holdout-updates", type=Path, default=DEFAULT_RESIDUAL_HOLDOUT_UPDATES)
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
@@ -351,8 +421,19 @@ def main(argv: list[str] | None = None) -> int:
         p1_status=args.p1_status,
         p1_strict_evidence_preflight=args.p1_strict_evidence_preflight,
         project_ops_snapshot=args.project_ops_snapshot,
+        project_ops_deployment_drill=args.project_ops_deployment_drill,
         runtime_probe=args.runtime_probe,
         runtime_packaging_manifest=args.runtime_packaging_manifest,
+        viewer_performance_budget_manifest=args.viewer_performance_budget_manifest,
+        viewer_browser_performance_probe=args.viewer_browser_performance_probe,
+        viewer_visual_regression_baseline=args.viewer_visual_regression_baseline,
+        workstation_hardware_profile=args.workstation_hardware_profile,
+        workstation_service_budget=args.workstation_service_budget,
+        workstation_delivery_package_manifest=args.workstation_delivery_package_manifest,
+        workstation_delivery_readiness=args.workstation_delivery_readiness,
+        client_input_validation_report=args.client_input_validation_report,
+        workstation_job_record=args.workstation_job_record,
+        workstation_job_retention_policy=args.workstation_job_retention_policy,
         external_benchmark_updates=args.external_benchmark_updates,
         residual_holdout_updates=args.residual_holdout_updates,
         package_json=args.package_json,

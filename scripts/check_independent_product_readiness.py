@@ -36,9 +36,19 @@ DEFAULT_INDEPENDENT_PLAN = Path("docs/independent-commercial-productization-plan
 DEFAULT_PRODUCTION_SECURITY_DOC = Path("docs/production-ops-security.md")
 DEFAULT_RUNTIME_PACKAGING_DOC = Path("docs/runtime-production-packaging.md")
 DEFAULT_PROJECT_OPS_API = Path("implementation/phase1/project_ops_api_service.py")
+DEFAULT_PROJECT_OPS_DEPLOYMENT_DRILL = Path("implementation/phase1/project_ops_deployment_drill_manifest.json")
 DEFAULT_RUNTIME_STRICT_PROBE = Path("implementation/phase1/zero_copy_real_probe_report_strict.json")
 DEFAULT_RUNTIME_PACKAGING_MANIFEST = Path("implementation/phase1/production_runtime_packaging_manifest.json")
 DEFAULT_SUPPORT_BUNDLE_MANIFEST = Path("implementation/phase1/support_bundle_manifest.json")
+DEFAULT_ONPREM_DEPLOYMENT_PACKAGING_MANIFEST = Path("implementation/phase1/onprem_deployment_packaging_manifest.json")
+DEFAULT_VIEWER_PERFORMANCE_BUDGET_MANIFEST = Path(
+    "implementation/phase1/structure_viewer_performance_budget_manifest.json"
+)
+DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE = Path("implementation/phase1/structure_viewer_browser_performance_probe.json")
+DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE = Path(
+    "implementation/phase1/structure_viewer_visual_regression_baseline.json"
+)
+DEFAULT_WORKSTATION_DELIVERY_READINESS = Path("implementation/phase1/workstation_delivery_readiness.json")
 DEFAULT_CLAIM_DOCS = (
     Path("README.md"),
     Path("docs/commercialization-gap-current-state.md"),
@@ -212,8 +222,13 @@ def _runtime_gate(runtime_strict_probe: Path, runtime_packaging_manifest: Path) 
     )
 
 
-def _ops_security_gate(project_ops_api: Path, production_security_doc: Path) -> dict[str, Any]:
+def _ops_security_gate(
+    project_ops_api: Path,
+    production_security_doc: Path,
+    project_ops_deployment_drill: Path,
+) -> dict[str, Any]:
     api_text = _read_text(project_ops_api)
+    drill = _load_json(project_ops_deployment_drill)
     has_auth = "Authorization" in api_text and "Bearer " in api_text and "X-Tenant-ID" in api_text
     has_audit = "write_audit_event" in api_text and "/audit/events" in api_text
     has_rate_limit = "rate_limit" in api_text and "rate_limited" in api_text and "TOO_MANY_REQUESTS" in api_text
@@ -224,6 +239,8 @@ def _ops_security_gate(project_ops_api: Path, production_security_doc: Path) -> 
         "audit_retention_days" in api_text and "backup_policy" in api_text and "tenant_delete_policy" in api_text
     )
     has_default_dev_secret = "project-ops-dev-secret" in api_text
+    drill_pass = bool(drill.get("contract_pass"))
+    drill_mode = str(drill.get("drill_mode", ""))
     blockers = [
         *(["project_ops_api_missing"] if not project_ops_api.exists() else []),
         *(["project_ops_auth_contract_missing"] if not has_auth else []),
@@ -234,6 +251,12 @@ def _ops_security_gate(project_ops_api: Path, production_security_doc: Path) -> 
         *(["project_ops_policy_manifest_missing"] if not has_policy_manifest else []),
         *(["project_ops_lifecycle_policy_missing"] if not has_lifecycle_policy else []),
         *(["project_ops_dev_secret_default_present"] if has_default_dev_secret else []),
+        *(["project_ops_deployment_drill_manifest_missing"] if not project_ops_deployment_drill.exists() else []),
+        *(
+            ["project_ops_deployment_drill_manifest_not_green"]
+            if project_ops_deployment_drill.exists() and not drill_pass
+            else []
+        ),
         *(["production_ops_security_doc_missing"] if not production_security_doc.exists() else []),
     ]
     return _gate(
@@ -242,6 +265,7 @@ def _ops_security_gate(project_ops_api: Path, production_security_doc: Path) -> 
         blockers=blockers,
         project_ops_api=str(project_ops_api),
         production_security_doc=str(production_security_doc),
+        project_ops_deployment_drill=str(project_ops_deployment_drill),
         auth_contract_present=has_auth,
         audit_contract_present=has_audit,
         rate_limit_present=has_rate_limit,
@@ -250,6 +274,8 @@ def _ops_security_gate(project_ops_api: Path, production_security_doc: Path) -> 
         policy_manifest_present=has_policy_manifest,
         lifecycle_policy_present=has_lifecycle_policy,
         dev_secret_default_present=has_default_dev_secret,
+        deployment_drill_manifest_pass=drill_pass,
+        deployment_drill_mode=drill_mode,
     )
 
 
@@ -258,14 +284,58 @@ def _packaging_gate(
     independent_plan: Path,
     runtime_packaging_doc: Path,
     support_bundle_manifest: Path,
+    onprem_deployment_packaging_manifest: Path,
+    viewer_performance_budget_manifest: Path,
+    viewer_browser_performance_probe: Path,
+    viewer_visual_regression_baseline: Path,
 ) -> dict[str, Any]:
     support_bundle = _load_json(support_bundle_manifest)
+    onprem_packaging = _load_json(onprem_deployment_packaging_manifest)
+    viewer_performance_budget = _load_json(viewer_performance_budget_manifest)
+    viewer_browser_performance = _load_json(viewer_browser_performance_probe)
+    viewer_visual_regression = _load_json(viewer_visual_regression_baseline)
     support_bundle_pass = bool(support_bundle.get("contract_pass", False))
+    onprem_packaging_pass = bool(onprem_packaging.get("contract_pass", False))
+    viewer_performance_budget_pass = bool(viewer_performance_budget.get("contract_pass", False))
+    viewer_browser_performance_pass = bool(viewer_browser_performance.get("contract_pass", False))
+    viewer_visual_regression_pass = bool(viewer_visual_regression.get("contract_pass", False))
     blockers = [
         *(["independent_productization_plan_missing"] if not independent_plan.exists() else []),
         *(["runtime_packaging_doc_missing"] if not runtime_packaging_doc.exists() else []),
         *(["support_bundle_manifest_missing"] if not support_bundle_manifest.exists() else []),
         *(["support_bundle_manifest_not_green"] if support_bundle_manifest.exists() and not support_bundle_pass else []),
+        *(
+            ["onprem_deployment_packaging_manifest_missing"]
+            if not onprem_deployment_packaging_manifest.exists()
+            else []
+        ),
+        *(
+            ["onprem_deployment_packaging_manifest_not_green"]
+            if onprem_deployment_packaging_manifest.exists() and not onprem_packaging_pass
+            else []
+        ),
+        *(
+            ["viewer_performance_budget_manifest_missing"]
+            if not viewer_performance_budget_manifest.exists()
+            else []
+        ),
+        *(
+            ["viewer_performance_budget_manifest_not_green"]
+            if viewer_performance_budget_manifest.exists() and not viewer_performance_budget_pass
+            else []
+        ),
+        *(["viewer_browser_performance_probe_missing"] if not viewer_browser_performance_probe.exists() else []),
+        *(
+            ["viewer_browser_performance_probe_not_green"]
+            if viewer_browser_performance_probe.exists() and not viewer_browser_performance_pass
+            else []
+        ),
+        *(["viewer_visual_regression_baseline_missing"] if not viewer_visual_regression_baseline.exists() else []),
+        *(
+            ["viewer_visual_regression_baseline_not_green"]
+            if viewer_visual_regression_baseline.exists() and not viewer_visual_regression_pass
+            else []
+        ),
     ]
     return _gate(
         "Deployment packaging and support bundle",
@@ -275,7 +345,33 @@ def _packaging_gate(
         runtime_packaging_doc=str(runtime_packaging_doc),
         support_bundle_manifest=str(support_bundle_manifest),
         support_bundle_manifest_pass=support_bundle_pass,
+        onprem_deployment_packaging_manifest=str(onprem_deployment_packaging_manifest),
+        onprem_deployment_packaging_manifest_pass=onprem_packaging_pass,
+        viewer_performance_budget_manifest=str(viewer_performance_budget_manifest),
+        viewer_performance_budget_manifest_pass=viewer_performance_budget_pass,
+        viewer_browser_performance_probe=str(viewer_browser_performance_probe),
+        viewer_browser_performance_probe_pass=viewer_browser_performance_pass,
+        viewer_visual_regression_baseline=str(viewer_visual_regression_baseline),
+        viewer_visual_regression_baseline_pass=viewer_visual_regression_pass,
     )
+
+
+def _workstation_delivery_service_status(path: Path) -> dict[str, Any]:
+    payload = _load_json(path)
+    ok = bool(payload.get("contract_pass", False))
+    return {
+        "label": "Workstation delivery service readiness",
+        "status": "ready" if ok else "blocked",
+        "ok": ok,
+        "path": str(path),
+        "summary_line": str(payload.get("summary_line", "")),
+        "claim_boundary": payload.get("claim_boundary", {}),
+        "blockers": list(payload.get("blockers", [])) if isinstance(payload.get("blockers"), list) else [],
+        "note": (
+            "This is a separate local workstation delivery-service gate and does not change "
+            "independent commercial product EB/RH readiness."
+        ),
+    }
 
 
 def _score(gates: list[dict[str, Any]]) -> float:
@@ -313,10 +409,20 @@ def _next_actions(gates: list[dict[str, Any]]) -> list[str]:
         "project_ops_audit_digest_missing": "Add audit tamper-evidence digest generation and an admin digest endpoint.",
         "project_ops_policy_manifest_missing": "Expose the production ops policy manifest from the project ops API.",
         "project_ops_lifecycle_policy_missing": "Document retention, backup, restore, and tenant deletion policy in the API policy surface.",
+        "project_ops_deployment_drill_manifest_missing": "Build the project ops deployment drill manifest for secret rotation, backup/restore, tenant delete, audit, and incident response dry-runs.",
+        "project_ops_deployment_drill_manifest_not_green": "Fix blocked rows in the project ops deployment drill manifest.",
         "production_ops_security_doc_missing": "Write the production API security/threat-model/runbook.",
         "runtime_packaging_doc_missing": "Write the runtime packaging and deployment compatibility runbook.",
         "support_bundle_manifest_missing": "Add a support bundle manifest for audit logs, receipts, versions, and diagnostics.",
         "support_bundle_manifest_not_green": "Implement support bundle builder, redaction test, digest, and roundtrip evidence.",
+        "onprem_deployment_packaging_manifest_missing": "Build the on-prem and air-gapped deployment packaging manifest.",
+        "onprem_deployment_packaging_manifest_not_green": "Fix blocked rows in the on-prem and air-gapped deployment packaging manifest.",
+        "viewer_performance_budget_manifest_missing": "Build the structure viewer performance budget manifest.",
+        "viewer_performance_budget_manifest_not_green": "Fix blocked rows in the structure viewer performance budget manifest.",
+        "viewer_browser_performance_probe_missing": "Run the structure viewer browser performance probe.",
+        "viewer_browser_performance_probe_not_green": "Fix blocked rows in the structure viewer browser performance probe.",
+        "viewer_visual_regression_baseline_missing": "Build the structure viewer visual regression baseline.",
+        "viewer_visual_regression_baseline_not_green": "Fix blocked rows in the structure viewer visual regression baseline.",
         "commercialization_percentage_claims_conflict": "Normalize commercialization claim documents to one source of truth.",
     }
     ordered: list[str] = []
@@ -344,9 +450,15 @@ def build_report(
     production_security_doc: Path = DEFAULT_PRODUCTION_SECURITY_DOC,
     runtime_packaging_doc: Path = DEFAULT_RUNTIME_PACKAGING_DOC,
     project_ops_api: Path = DEFAULT_PROJECT_OPS_API,
+    project_ops_deployment_drill: Path = DEFAULT_PROJECT_OPS_DEPLOYMENT_DRILL,
     runtime_strict_probe: Path = DEFAULT_RUNTIME_STRICT_PROBE,
     runtime_packaging_manifest: Path = DEFAULT_RUNTIME_PACKAGING_MANIFEST,
     support_bundle_manifest: Path = DEFAULT_SUPPORT_BUNDLE_MANIFEST,
+    onprem_deployment_packaging_manifest: Path = DEFAULT_ONPREM_DEPLOYMENT_PACKAGING_MANIFEST,
+    viewer_performance_budget_manifest: Path = DEFAULT_VIEWER_PERFORMANCE_BUDGET_MANIFEST,
+    viewer_browser_performance_probe: Path = DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE,
+    viewer_visual_regression_baseline: Path = DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE,
+    workstation_delivery_readiness: Path = DEFAULT_WORKSTATION_DELIVERY_READINESS,
     source_boundary_allowlist: Path = DEFAULT_ALLOWLIST_MANIFEST,
     tracked_files: list[str] | None = None,
 ) -> dict[str, Any]:
@@ -372,17 +484,22 @@ def build_report(
         _p1_gate(p1_payload, p1_benchmark_payload),
         _strict_evidence_gate(strict_preflight_payload, commercialization_payload),
         _runtime_gate(runtime_strict_probe, runtime_packaging_manifest),
-        _ops_security_gate(project_ops_api, production_security_doc),
+        _ops_security_gate(project_ops_api, production_security_doc, project_ops_deployment_drill),
         _packaging_gate(
             independent_plan=independent_plan,
             runtime_packaging_doc=runtime_packaging_doc,
             support_bundle_manifest=support_bundle_manifest,
+            onprem_deployment_packaging_manifest=onprem_deployment_packaging_manifest,
+            viewer_performance_budget_manifest=viewer_performance_budget_manifest,
+            viewer_browser_performance_probe=viewer_browser_performance_probe,
+            viewer_visual_regression_baseline=viewer_visual_regression_baseline,
         ),
         _commercial_claim_gate(commercialization_payload, claim_docs),
         _source_boundary_gate(tracked_files, source_boundary_allowlist),
     ]
     readiness_score = _score(gates)
     independent_ready = all(bool(gate.get("ok", False)) for gate in gates)
+    workstation_delivery_service = _workstation_delivery_service_status(workstation_delivery_readiness)
     full_autonomous_ready = bool(
         independent_ready
         and commercialization_payload.get("commercial_scope", {}).get("full_commercial_replacement_ready", False)
@@ -407,6 +524,7 @@ def build_report(
         ),
         "recommended_claim": commercialization_payload.get("recommended_claim", ""),
         "gates": gates,
+        "workstation_delivery_service": workstation_delivery_service,
         "blockers": blockers,
         "next_actions": _next_actions(gates),
         "artifacts": {
@@ -415,9 +533,15 @@ def build_report(
             "p1_benchmark_breadth_status": str(p1_benchmark_breadth_status or "build_current"),
             "commercialization_status": str(commercialization_status or "build_current"),
             "strict_evidence_preflight": str(strict_evidence_preflight or "build_current"),
+            "project_ops_deployment_drill": str(project_ops_deployment_drill),
             "runtime_strict_probe": str(runtime_strict_probe),
             "runtime_packaging_manifest": str(runtime_packaging_manifest),
             "support_bundle_manifest": str(support_bundle_manifest),
+            "onprem_deployment_packaging_manifest": str(onprem_deployment_packaging_manifest),
+            "viewer_performance_budget_manifest": str(viewer_performance_budget_manifest),
+            "viewer_browser_performance_probe": str(viewer_browser_performance_probe),
+            "viewer_visual_regression_baseline": str(viewer_visual_regression_baseline),
+            "workstation_delivery_readiness": str(workstation_delivery_readiness),
         },
     }
 
@@ -439,6 +563,17 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"| {gate['label']} | {gate['status']} | {', '.join(gate.get('blockers', [])) or 'none'} |"
         )
+    workstation = payload.get("workstation_delivery_service", {})
+    lines.extend(
+        [
+            "",
+            "## Separate Workstation Delivery Track",
+            "",
+            f"- `status`: `{workstation.get('status', 'unknown')}`",
+            f"- `summary_line`: `{workstation.get('summary_line', '')}`",
+            "- This local delivery-service gate does not close EB/RH independent-product evidence.",
+        ]
+    )
     lines.extend(["", "## Next Actions", ""])
     for index, action in enumerate(payload.get("next_actions", []), start=1):
         lines.append(f"{index}. {action}")
@@ -459,9 +594,31 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--production-security-doc", type=Path, default=DEFAULT_PRODUCTION_SECURITY_DOC)
     parser.add_argument("--runtime-packaging-doc", type=Path, default=DEFAULT_RUNTIME_PACKAGING_DOC)
     parser.add_argument("--project-ops-api", type=Path, default=DEFAULT_PROJECT_OPS_API)
+    parser.add_argument("--project-ops-deployment-drill", type=Path, default=DEFAULT_PROJECT_OPS_DEPLOYMENT_DRILL)
     parser.add_argument("--runtime-strict-probe", type=Path, default=DEFAULT_RUNTIME_STRICT_PROBE)
     parser.add_argument("--runtime-packaging-manifest", type=Path, default=DEFAULT_RUNTIME_PACKAGING_MANIFEST)
     parser.add_argument("--support-bundle-manifest", type=Path, default=DEFAULT_SUPPORT_BUNDLE_MANIFEST)
+    parser.add_argument(
+        "--onprem-deployment-packaging-manifest",
+        type=Path,
+        default=DEFAULT_ONPREM_DEPLOYMENT_PACKAGING_MANIFEST,
+    )
+    parser.add_argument(
+        "--viewer-performance-budget-manifest",
+        type=Path,
+        default=DEFAULT_VIEWER_PERFORMANCE_BUDGET_MANIFEST,
+    )
+    parser.add_argument(
+        "--viewer-browser-performance-probe",
+        type=Path,
+        default=DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE,
+    )
+    parser.add_argument(
+        "--viewer-visual-regression-baseline",
+        type=Path,
+        default=DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE,
+    )
+    parser.add_argument("--workstation-delivery-readiness", type=Path, default=DEFAULT_WORKSTATION_DELIVERY_READINESS)
     parser.add_argument("--source-boundary-allowlist", type=Path, default=DEFAULT_ALLOWLIST_MANIFEST)
     parser.add_argument("--out", type=Path)
     parser.add_argument("--out-md", type=Path)
@@ -483,9 +640,15 @@ def main(argv: list[str] | None = None) -> int:
         production_security_doc=args.production_security_doc,
         runtime_packaging_doc=args.runtime_packaging_doc,
         project_ops_api=args.project_ops_api,
+        project_ops_deployment_drill=args.project_ops_deployment_drill,
         runtime_strict_probe=args.runtime_strict_probe,
         runtime_packaging_manifest=args.runtime_packaging_manifest,
         support_bundle_manifest=args.support_bundle_manifest,
+        onprem_deployment_packaging_manifest=args.onprem_deployment_packaging_manifest,
+        viewer_performance_budget_manifest=args.viewer_performance_budget_manifest,
+        viewer_browser_performance_probe=args.viewer_browser_performance_probe,
+        viewer_visual_regression_baseline=args.viewer_visual_regression_baseline,
+        workstation_delivery_readiness=args.workstation_delivery_readiness,
         source_boundary_allowlist=args.source_boundary_allowlist,
     )
     text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)

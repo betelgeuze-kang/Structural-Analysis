@@ -276,6 +276,24 @@
         <button type="button" title="Fit All" onclick="fitAll()">⤢</button>
       </div>
     </div>
+    <section class="analysis-cockpit-strip" id="analysis-cockpit-chart-strip" aria-label="Analysis cockpit charts">
+      <article class="analysis-chart-panel" id="story-drift-chart-panel">
+        <div class="analysis-chart-title">Story Drift Over Height</div>
+        <div class="analysis-chart-empty">Awaiting model</div>
+      </article>
+      <article class="analysis-chart-panel" id="load-step-chart-panel">
+        <div class="analysis-chart-title">Displacement vs Load Step</div>
+        <div class="analysis-chart-empty">Awaiting model</div>
+      </article>
+      <article class="analysis-chart-panel" id="material-quantity-chart-panel">
+        <div class="analysis-chart-title">Material Quantity Comparison</div>
+        <div class="analysis-chart-empty">Awaiting model</div>
+      </article>
+      <article class="analysis-chart-panel" id="utilization-heatmap-panel">
+        <div class="analysis-chart-title">Utilization Heatmap</div>
+        <div class="analysis-chart-empty">Awaiting model</div>
+      </article>
+    </section>
   </section>
 </main>
 <div id="right-panel" class="insight-rail">
@@ -292,6 +310,28 @@
         <strong class="kpi-card__value">--</strong>
         <span class="kpi-card__meta">Load an artifact to populate the command-center summary.</span>
       </article>
+    </div>
+  </section>
+  <section class="panel-section" id="optimization-summary-section">
+    <div class="panel-header">
+      <div>
+        <div class="section-title">Optimization Summary</div>
+        <div class="panel-intro">Before/after quantity, cost, and carbon deltas.</div>
+      </div>
+    </div>
+    <div id="optimization-summary-panel" class="optimization-summary-grid">
+      <div class="panel-placeholder">Optimization summary appears when a model artifact is loaded.</div>
+    </div>
+  </section>
+  <section class="panel-section" id="critical-members-section">
+    <div class="panel-header">
+      <div>
+        <div class="section-title">Critical Members</div>
+        <div class="panel-intro">Top utilization and drift contributors linked to viewer selection.</div>
+      </div>
+    </div>
+    <div id="critical-members-panel" class="critical-members-table">
+      <div class="panel-placeholder">Critical member ranking appears when utilization data is available.</div>
     </div>
   </section>
   <section class="panel-section" id="properties-section">
@@ -392,6 +432,10 @@
   <div class="instrument-group instrument-group--wide">
     <span class="instrument-label">Selection</span>
     <span id="footer-selection-context">Selection sync idle</span>
+  </div>
+  <div class="instrument-group instrument-group--timeline">
+    <span class="instrument-label">Analysis</span>
+    <span id="analysis-timeline-status">Load case -- | Step -- / -- | Solver --</span>
   </div>
   <div class="instrument-signature">© 2026 Structural Analysis Viewer v1.0</div>
 </footer>
@@ -497,6 +541,10 @@ import {
   buildViewerStatEntries,
   buildViewerStatsSummary,
 } from './viewer-stats-summary.js';
+import {
+  ANALYSIS_COCKPIT_KPI_KEYS,
+  buildAnalysisCockpitModel,
+} from './viewer-analysis-cockpit-model.js';
 import {
   buildRealDrawingQualityPanelHtml,
 } from './viewer-real-drawing-panel-renderer.js';
@@ -615,7 +663,7 @@ let commercialToolMapperProfile='auto';
 
 /* ── State ── */
 let scene,camera,renderer,controls,raycaster,mouse;
-let modelGroup,deformedGroup,originalPositions=new Map();
+let modelGroup,deformedGroup,analysisOverlayGroup,originalPositions=new Map();
 let elementMeshes=new Map(),selectedMesh=null;
 let instancedElementGroups=[],instancedElementRecordsByMemberId=new Map();
 let selectedElementData=null,selectedElementKey='',activeTypeHighlight='';
@@ -623,6 +671,7 @@ let selectedElementKeys=new Set(),selectedElementRecords=new Map();
 let activeComparisonHighlightMemberIds=new Set(),activeComparisonHighlightToneByMemberId=new Map(),activeComparisonHighlightFilter='changed';
 let renderMode='wireframe',showDeformed=false,deformScale=100,isAnimating=false,animTime=0;
 let modelData=null,modelSourceMeta=null,frameCount=0,lastFpsTime=Date.now();
+let viewerNeedsRender=true,lastRenderAt=0;
 let defaultView={position:new THREE.Vector3(80,60,80),target:new THREE.Vector3(24,14,14)};
 let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;
 let sectionEditPreviewState=createEmptySectionEditPreviewState();
@@ -654,6 +703,7 @@ const LARGE_MODEL_PICK_SPATIAL_INDEX_FULL_BVH_THRESHOLD=4096;
 const LARGE_MODEL_PICK_SPATIAL_INDEX_MESH_TRIANGLE_BVH_THRESHOLD=2048;
 const LARGE_MODEL_PICK_SPATIAL_INDEX_SURFACE_FACET_BVH_THRESHOLD=1024;
 const MODEL_SANITIZATION_WORKER_THRESHOLD=80000;
+const STATIC_RENDER_REFRESH_MS=500;
 const CONTOUR_SURFACE_TESSELLATION_MIN=10;
 const CONTOUR_SURFACE_TESSELLATION_MAX=20;
 const CONTOUR_LUT_SIZE=256;
@@ -854,6 +904,9 @@ function safeStorageGet(key){
 }
 function safeStorageSet(key,value){
   try{window.localStorage.setItem(key,value)}catch(_err){}
+}
+function requestViewerRender(){
+  viewerNeedsRender=true;
 }
 function syncWorkspaceResolvedGlobals(){
   window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__=workspaceState.viewerPreset||'';
@@ -2245,7 +2298,7 @@ function buildSectionEditPreviewEntries(targetSection,memberIds){
       type_summary:summarizeSectionEditPreviewValues(elementTypes,2),
       current_section_summary:appliedSection||sourceSectionSummary,
       source_section_summary:sourceSectionSummary,
-      current_sections,
+      current_sections:currentSections,
       current_section_ids:currentSectionIds,
       current_section_catalog_labels:currentSectionCatalogRows
         .map(row=>normalizeSelectionValue(row?.display_label))
@@ -3734,8 +3787,8 @@ function init(){
 
   renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
   renderer.setSize(vp.clientWidth,vp.clientHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.shadowMap.enabled=true;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.25));
+  renderer.shadowMap.enabled=false;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure=1.2;
@@ -3746,6 +3799,7 @@ function init(){
   controls.enableDamping=true;controls.dampingFactor=.08;
   controls.minDistance=5;controls.maxDistance=500;
   controls.target.set(24,14,14);controls.update();
+  controls.addEventListener('change',requestViewerRender);
 
   // Lights
   const amb=new THREE.AmbientLight(0x334466,.6);scene.add(amb);
@@ -3781,6 +3835,9 @@ function init(){
 
   modelGroup=new THREE.Group();scene.add(modelGroup);
   deformedGroup=new THREE.Group();deformedGroup.visible=false;scene.add(deformedGroup);
+  analysisOverlayGroup=new THREE.Group();
+  analysisOverlayGroup.name='analysis-stage-overlays';
+  scene.add(analysisOverlayGroup);
 }
 
 /* ── Build Model ── */
@@ -3856,6 +3913,7 @@ async function buildModel(data,sourceMeta=null){
   // Clear
   while(modelGroup.children.length)modelGroup.remove(modelGroup.children[0]);
   while(deformedGroup.children.length)deformedGroup.remove(deformedGroup.children[0]);
+  while(analysisOverlayGroup?.children?.length)analysisOverlayGroup.remove(analysisOverlayGroup.children[0]);
   elementMeshes.clear();originalPositions.clear();
   instancedElementGroups=[];
   instancedElementRecordsByMemberId.clear();
@@ -3967,6 +4025,7 @@ async function buildModel(data,sourceMeta=null){
   largeModelBuildProfile.surfacePickMode=shouldPreferInstancedSurfacePicking()?'instanced surfaces':'direct meshes';
   largeModelBuildProfile.pickRecordCount=pickAnalyticRecords.length;
 
+  rebuildAnalysisStageOverlays();
   updateRenderMode();
   document.getElementById('loading').style.display='none';
   document.getElementById('element-count').textContent=`Elements: ${data.elements.length}`;
@@ -4114,9 +4173,53 @@ function updateMidas33ViewToolbarVisibility(){
   if(!(toolbar instanceof HTMLElement))return;
   toolbar.hidden=!isMidas33PresetActive();
 }
-function renderKpiSummary(entries){
+function normalizeAnalysisTone(tone='neutral'){
+  const normalized=String(tone||'neutral').trim().toLowerCase();
+  return ['accent','danger','neutral','success','warn'].includes(normalized)?normalized:'neutral';
+}
+function formatCockpitValue(value,{digits=0,unit='',money=false}={}){
+  const number=safeNumber(value,0);
+  if(money){
+    return `$ ${number.toLocaleString('en-US',{maximumFractionDigits:2,minimumFractionDigits:2})} M`;
+  }
+  return `${number.toLocaleString('en-US',{maximumFractionDigits:digits,minimumFractionDigits:digits})}${unit?` ${unit}`:''}`;
+}
+function renderSparkline(values=[],tone='accent'){
+  const normalizedTone=normalizeAnalysisTone(tone);
+  const series=(Array.isArray(values)?values:[])
+    .map(value=>safeNumber(value,NaN))
+    .filter(Number.isFinite);
+  const pointsSource=series.length>1?series:(series.length?[series[0],series[0]]:[0,1]);
+  const min=Math.min(...pointsSource);
+  const max=Math.max(...pointsSource);
+  const span=Math.max(max-min,1e-6);
+  const points=pointsSource.map((value,index)=>{
+    const x=(index/Math.max(pointsSource.length-1,1))*100;
+    const y=28-((value-min)/span)*22-3;
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(' ');
+  return `<svg class="kpi-sparkline kpi-sparkline--${escapeHtml(normalizedTone)}" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+    <polyline points="${points}" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></polyline>
+  </svg>`;
+}
+function renderKpiSummary(entries,cockpitModel=null){
   const panel=document.getElementById('kpi-summary-panel');
   if(!(panel instanceof HTMLElement))return;
+  if(cockpitModel?.kpiCards?.length){
+    const cardsByKey=new Map(cockpitModel.kpiCards.map(card=>[card.key,card]));
+    const orderedCards=ANALYSIS_COCKPIT_KPI_KEYS.map(key=>cardsByKey.get(key)).filter(Boolean);
+    panel.innerHTML=orderedCards.map(card=>{
+      const tone=normalizeAnalysisTone(card.tone);
+      return `
+      <article class="kpi-card kpi-card--${escapeHtml(tone)}">
+        <span class="kpi-card__label">${escapeHtml(card.label)}</span>
+        <strong class="kpi-card__value">${escapeHtml(card.value)}</strong>
+        ${renderSparkline(card.sparkline,tone)}
+        <span class="kpi-card__meta">${escapeHtml(card.meta)}</span>
+      </article>`;
+    }).join('');
+    return;
+  }
   panel.innerHTML=VIEWER_KPI_CARD_CONFIGS.map(config=>{
     const entry=entries[config.key];
     if(!entry)return'';
@@ -4133,6 +4236,190 @@ function renderKpiSummary(entries){
       <span class="kpi-card__meta">${escapeHtml(meta)}</span>
     </article>`;
   }).join('');
+}
+function renderOptimizationSummaryPanel(cockpitModel=null){
+  const panel=document.getElementById('optimization-summary-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const rows=Array.isArray(cockpitModel?.optimizationRows)?cockpitModel.optimizationRows:[];
+  if(!rows.length){
+    panel.innerHTML='<div class="panel-placeholder">Optimization summary appears when a model artifact is loaded.</div>';
+    return;
+  }
+  panel.innerHTML=rows.map(row=>{
+    const before=row.valueFormatter==='money'
+      ?formatCockpitValue(row.before,{money:true})
+      :formatCockpitValue(row.before,{digits:0,unit:row.unit});
+    const after=row.valueFormatter==='money'
+      ?formatCockpitValue(row.after,{money:true})
+      :formatCockpitValue(row.after,{digits:0,unit:row.unit});
+    const delta=safeNumber(row.deltaPct,0);
+    const deltaTone=delta<=0?'success':'danger';
+    return `
+    <article class="optimization-summary-card">
+      <div class="optimization-summary-card__label">${escapeHtml(row.label)}</div>
+      <div class="optimization-summary-card__values">
+        <span><small>Before</small>${escapeHtml(before)}</span>
+        <span><small>After</small>${escapeHtml(after)}</span>
+      </div>
+      <strong class="optimization-summary-delta optimization-summary-delta--${escapeHtml(deltaTone)}">${delta>=0?'+':''}${delta.toFixed(1)} %</strong>
+    </article>`;
+  }).join('');
+}
+function renderCriticalMembersPanel(cockpitModel=null){
+  const panel=document.getElementById('critical-members-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const rows=Array.isArray(cockpitModel?.criticalMembers)?cockpitModel.criticalMembers:[];
+  if(!rows.length){
+    panel.innerHTML='<div class="panel-placeholder">Critical member ranking appears when utilization data is available.</div>';
+    return;
+  }
+  panel.innerHTML=`
+    <div class="critical-members-row critical-members-row--header">
+      <span>ID</span><span>Story</span><span>Type</span><span>Ratio</span><span>Drift</span><span>Status</span><span>Recommended Change</span>
+    </div>
+    ${rows.map(row=>{
+      const status=normalizeSelectionValue(row.status||'ok')||'ok';
+      const ratio=safeNumber(row.ratio,0);
+      const drift=safeNumber(row.driftContributionPct,0);
+      const barWidth=Math.max(4,Math.min(ratio,1.1)/1.1*100).toFixed(1);
+      return `
+      <button type="button" class="critical-members-row critical-members-row--${escapeHtml(status)}" data-critical-member-id="${escapeHtml(row.id)}">
+        <span class="critical-members-id">${escapeHtml(row.id)}</span>
+        <span>${escapeHtml(row.story)}</span>
+        <span>${escapeHtml(row.type)}</span>
+        <span class="critical-member-ratio">
+          <strong>${ratio.toFixed(2)}</strong>
+          <i style="width:${barWidth}%"></i>
+        </span>
+        <span>${drift.toFixed(1)}%</span>
+        <span class="critical-member-status">${escapeHtml(row.status)}</span>
+        <span>${escapeHtml(row.recommendedChange)}</span>
+      </button>`;
+    }).join('')}`;
+  panel.querySelectorAll('[data-critical-member-id]').forEach(button=>{
+    button.addEventListener('click',()=>focusMemberSearchResult(button.getAttribute('data-critical-member-id')||''));
+  });
+}
+function buildChartPolyline(values,width=132,height=78,pad=8){
+  const series=(Array.isArray(values)?values:[]).map(value=>safeNumber(value,NaN)).filter(Number.isFinite);
+  const pointsSource=series.length>1?series:(series.length?[series[0],series[0]]:[0,1]);
+  const min=Math.min(...pointsSource);
+  const max=Math.max(...pointsSource);
+  const span=Math.max(max-min,1e-6);
+  return pointsSource.map((value,index)=>{
+    const x=pad+(index/Math.max(pointsSource.length-1,1))*(width-pad*2);
+    const y=height-pad-((value-min)/span)*(height-pad*2);
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(' ');
+}
+function renderStoryDriftChart(chart={}){
+  const rows=Array.isArray(chart.rows)?chart.rows:[];
+  const maxHeight=Math.max(...rows.map(row=>safeNumber(row.height,0)),1);
+  const maxDrift=Math.max(safeNumber(chart.limitPct,2),...rows.map(row=>safeNumber(row.driftPct,0)),0.1);
+  const points=rows.length?rows.map(row=>{
+    const x=10+(safeNumber(row.driftPct,0)/maxDrift)*108;
+    const y=72-(safeNumber(row.height,0)/maxHeight)*58;
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(' '):buildChartPolyline([0,0]);
+  const limitX=10+(safeNumber(chart.limitPct,2)/maxDrift)*108;
+  return `
+    <div class="analysis-chart-title">${escapeHtml(chart.title||'Story Drift Over Height')}</div>
+    <svg class="analysis-line-chart" viewBox="0 0 132 82" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M10 72 H122 M10 14 V72" class="analysis-chart-axis"></path>
+      <line x1="${limitX.toFixed(2)}" y1="12" x2="${limitX.toFixed(2)}" y2="72" class="analysis-chart-limit"></line>
+      <polyline points="${points}" class="analysis-chart-line analysis-chart-line--accent"></polyline>
+    </svg>
+    <div class="analysis-chart-caption">Limit ${safeNumber(chart.limitPct,2).toFixed(1)}%</div>`;
+}
+function renderLoadStepChart(chart={}){
+  const points=Array.isArray(chart.points)?chart.points:[];
+  const original=points.map(row=>safeNumber(row.original,0));
+  const optimized=points.map(row=>safeNumber(row.optimized,0));
+  return `
+    <div class="analysis-chart-title">${escapeHtml(chart.title||'Displacement vs Load Step')}</div>
+    <svg class="analysis-line-chart" viewBox="0 0 132 82" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M10 72 H122 M10 14 V72" class="analysis-chart-axis"></path>
+      <polyline points="${buildChartPolyline(original)}" class="analysis-chart-line analysis-chart-line--muted"></polyline>
+      <polyline points="${buildChartPolyline(optimized)}" class="analysis-chart-line analysis-chart-line--accent"></polyline>
+      <line x1="${(10+(safeNumber(chart.activeStep,18)/20)*108).toFixed(2)}" y1="12" x2="${(10+(safeNumber(chart.activeStep,18)/20)*108).toFixed(2)}" y2="72" class="analysis-chart-limit"></line>
+    </svg>
+    <div class="analysis-chart-legend"><span>Original</span><span>Optimized</span><strong>Step ${escapeHtml(chart.activeStep||'--')}</strong></div>`;
+}
+function renderMaterialQuantityChart(chart={}){
+  const rows=Array.isArray(chart.rows)?chart.rows:[];
+  const maxValue=Math.max(...rows.flatMap(row=>[safeNumber(row.original,0),safeNumber(row.optimized,0)]),1);
+  return `
+    <div class="analysis-chart-title">${escapeHtml(chart.title||'Material Quantity Comparison')}</div>
+    <div class="analysis-chart-barset">
+      ${rows.map(row=>{
+        const original=Math.max(safeNumber(row.original,0)/maxValue*100,2);
+        const optimized=Math.max(safeNumber(row.optimized,0)/maxValue*100,2);
+        return `<div class="analysis-chart-bar-row">
+          <span>${escapeHtml(row.label)}</span>
+          <div class="analysis-chart-bar-track" aria-hidden="true">
+            <i class="analysis-chart-bar analysis-chart-bar--original" style="width:${original.toFixed(1)}%"></i>
+            <i class="analysis-chart-bar analysis-chart-bar--optimized" style="width:${optimized.toFixed(1)}%"></i>
+          </div>
+          <strong>${escapeHtml(formatCockpitValue(row.optimized,{digits:0,unit:row.unit}))}</strong>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="analysis-chart-legend"><span>Original</span><span>Optimized</span></div>`;
+}
+function getHeatmapColor(value){
+  const ratio=Math.max(0,Math.min(safeNumber(value,0)/1.1,1));
+  if(ratio>.82)return '#EF7D73';
+  if(ratio>.62)return '#F4B56B';
+  if(ratio>.42)return '#63C7A1';
+  return '#4FB7AD';
+}
+function renderUtilizationHeatmapChart(chart={}){
+  const cells=Array.isArray(chart.cells)?chart.cells:[];
+  const columns=Math.max(safeNumber(chart.columns,12),1);
+  const rows=Math.max(safeNumber(chart.rows,6),1);
+  const cellWidth=120/columns;
+  const cellHeight=62/rows;
+  return `
+    <div class="analysis-chart-title">${escapeHtml(chart.title||'Utilization Heatmap')}</div>
+    <svg class="analysis-heatmap-chart" viewBox="0 0 132 82" preserveAspectRatio="none" aria-hidden="true">
+      ${cells.map(cell=>{
+        const x=6+safeNumber(cell.column,0)*cellWidth;
+        const y=10+safeNumber(cell.row,0)*cellHeight;
+        return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${Math.max(cellWidth-1.2,1).toFixed(2)}" height="${Math.max(cellHeight-1.2,1).toFixed(2)}" fill="${getHeatmapColor(cell.value)}" opacity="${(0.34+Math.min(safeNumber(cell.value,0),1)*0.58).toFixed(2)}"></rect>`;
+      }).join('')}
+      <rect x="6" y="10" width="120" height="62" class="analysis-chart-frame"></rect>
+    </svg>
+    <div class="analysis-chart-legend"><span>0.00</span><span>Utilization Ratio</span><strong>1.00</strong></div>`;
+}
+function renderAnalysisCockpitCharts(cockpitModel=null){
+  const charts=cockpitModel?.charts||{};
+  const targets=[
+    ['story-drift-chart-panel',renderStoryDriftChart(charts.storyDrift)],
+    ['load-step-chart-panel',renderLoadStepChart(charts.displacementLoadStep)],
+    ['material-quantity-chart-panel',renderMaterialQuantityChart(charts.materialQuantity)],
+    ['utilization-heatmap-panel',renderUtilizationHeatmapChart(charts.utilizationHeatmap)],
+  ];
+  targets.forEach(([id,html])=>{
+    const panel=document.getElementById(id);
+    if(panel instanceof HTMLElement)panel.innerHTML=html;
+  });
+}
+function renderAnalysisTimeline(cockpitModel=null){
+  const node=document.getElementById('analysis-timeline-status');
+  if(!(node instanceof HTMLElement))return;
+  const timeline=cockpitModel?.timeline;
+  if(!timeline){
+    node.textContent='Load case -- | Step -- / -- | Solver --';
+    return;
+  }
+  node.textContent=[
+    `Load Case: ${timeline.loadCase||'--'}`,
+    `Step: ${timeline.activeStep||'--'} / ${timeline.totalSteps||'--'}`,
+    `Scale: ${safeNumber(timeline.scale,1).toFixed(1)}x`,
+    `Solver: ${timeline.solver||'--'}`,
+    `Convergence: ${timeline.convergence||'--'}`,
+    `Run Time: ${timeline.runTime||'--'}`,
+  ].join(' | ');
 }
 function renderStatsPanel(entries){
   const stats=document.getElementById('stats-panel');
@@ -4590,8 +4877,13 @@ function buildUI(data){
     modelSourceLabel:modelSourceMeta?.label||''
   });
   const statEntries=buildViewerStatEntries(summary,{largeModelBuildProfile});
+  const cockpitModel=buildAnalysisCockpitModel(data,{summary});
   renderShellSummary(summary);
-  renderKpiSummary(statEntries);
+  renderKpiSummary(statEntries,cockpitModel);
+  renderOptimizationSummaryPanel(cockpitModel);
+  renderCriticalMembersPanel(cockpitModel);
+  renderAnalysisCockpitCharts(cockpitModel);
+  renderAnalysisTimeline(cockpitModel);
   renderStatsPanel(statEntries);
   renderRealDrawingQualityPanel(data);
   renderProjectWorkspacePanel();
@@ -4786,6 +5078,7 @@ function updateRenderMode(){
   refreshDirectMeshVisuals();
   if(renderMode==='contour')applyContour();
   rebuildPickTargetMeshes();
+  requestViewerRender();
 }
 function applyContour(){
   if(!modelData)return;
@@ -4833,8 +5126,74 @@ function applyContour(){
   });
   refreshInstancedVisuals();
   refreshDirectMeshVisuals();
+  requestViewerRender();
 }
 function updateContour(){if(renderMode==='contour')applyContour()}
+
+function clearAnalysisStageOverlays(){
+  if(!analysisOverlayGroup)return;
+  while(analysisOverlayGroup.children.length){
+    const child=analysisOverlayGroup.children[0];
+    analysisOverlayGroup.remove(child);
+    child.geometry?.dispose?.();
+    if(Array.isArray(child.material))child.material.forEach(material=>material?.dispose?.());
+    else child.material?.dispose?.();
+  }
+}
+function getBaseSupportNodesForOverlay(data,limit=22){
+  const nodes=Array.isArray(data?.nodes)?data.nodes:[];
+  if(!nodes.length)return[];
+  const minZ=Math.min(...nodes.map(node=>safeNumber(node?.z,0)));
+  const baseNodes=nodes
+    .filter(node=>Math.abs(safeNumber(node?.z,0)-minZ)<=0.05)
+    .sort((a,b)=>(safeNumber(a?.x,0)-safeNumber(b?.x,0))||(safeNumber(a?.y,0)-safeNumber(b?.y,0)));
+  if(baseNodes.length<=limit)return baseNodes;
+  const stride=Math.max(1,Math.floor(baseNodes.length/limit));
+  return baseNodes.filter((_node,index)=>index%stride===0).slice(0,limit);
+}
+function rebuildAnalysisStageOverlays(){
+  clearAnalysisStageOverlays();
+  if(!modelGroup||!analysisOverlayGroup||!modelData)return;
+  const box=new THREE.Box3().setFromObject(modelGroup);
+  if(box.isEmpty())return;
+  const center=box.getCenter(new THREE.Vector3());
+  const size=box.getSize(new THREE.Vector3());
+  const maxSpan=Math.max(size.x,size.y,size.z,1);
+  const arrowLength=Math.max(maxSpan*.13,3);
+  const arrowStartX=box.max.x+maxSpan*.035;
+  const arrowBaseZ=center.z+size.z*.2;
+  const arrowDir=new THREE.Vector3(1,0,0);
+  Array.from({length:6},(_,index)=>index).forEach(index=>{
+    const t=(index+1)/7;
+    const y=box.min.y+size.y*t;
+    const origin=new THREE.Vector3(arrowStartX,y,arrowBaseZ);
+    const arrow=new THREE.ArrowHelper(
+      arrowDir,
+      origin,
+      arrowLength,
+      0xfacc15,
+      arrowLength*.24,
+      arrowLength*.11
+    );
+    arrow.name=`lateral_load_arrow_${index+1}`;
+    arrow.userData={_analysisOverlay:true,overlayKind:'lateral_load_arrow'};
+    analysisOverlayGroup.add(arrow);
+  });
+  const supportNodes=getBaseSupportNodesForOverlay(modelData);
+  const markerHeight=Math.max(maxSpan*.045,.8);
+  const markerRadius=Math.max(markerHeight*.42,.22);
+  const supportGeometry=new THREE.ConeGeometry(markerRadius,markerHeight,4);
+  const supportMaterial=new THREE.MeshBasicMaterial({color:0x39ff88,transparent:true,opacity:.95});
+  supportNodes.forEach((node,index)=>{
+    const marker=new THREE.Mesh(supportGeometry,supportMaterial);
+    marker.position.set(safeNumber(node?.x,0),safeNumber(node?.z,0)-markerHeight*.55,safeNumber(node?.y,0));
+    marker.rotation.y=Math.PI*.25;
+    marker.name=`support_marker_${index+1}`;
+    marker.userData={_analysisOverlay:true,overlayKind:'support_marker',nodeId:normalizeSelectionValue(node?.id)};
+    analysisOverlayGroup.add(marker);
+  });
+  requestViewerRender();
+}
 
 /* ── Deformed Shape ── */
 function toggleDeformed(){
@@ -4846,6 +5205,7 @@ function toggleDeformed(){
   }else if(pickAnalyticSpatialIndex){
     clearDeformedPickAcceleration(pickAnalyticSpatialIndex,largeModelBuildProfile);
   }
+  requestViewerRender();
 }
 function updateDeformScale(v){
   deformScale=parseFloat(v);
@@ -4869,6 +5229,7 @@ function rebuildDeformed(){
     }
   });
   refreshDeformedPickMeshTriangleBvh();
+  requestViewerRender();
 }
 function toggleAnimation(){
   isAnimating = !isAnimating;
@@ -4886,15 +5247,18 @@ function highlightType(type){
   activeTypeHighlight=type.toLowerCase();
   refreshDirectMeshVisuals();
   refreshInstancedVisuals();
+  requestViewerRender();
 }
 function fitAll(){
   const box=new THREE.Box3().setFromObject(modelGroup);
   if(box.isEmpty())return;
   const center=box.getCenter(new THREE.Vector3());
-  const size=box.getSize(new THREE.Vector3()).length();
-  camera.position.copy(center).add(new THREE.Vector3(size*.6,size*.5,size*.6));
+  const size=box.getSize(new THREE.Vector3());
+  const radius=Math.max(size.x,size.y,size.z,1);
+  camera.position.copy(center).add(new THREE.Vector3(radius*.72,radius*.58,radius*.72));
   controls.target.copy(center);controls.update();
   defaultView={position:camera.position.clone(),target:center.clone()};
+  requestViewerRender();
 }
 function getViewerModelBounds(){
   if(!modelGroup)return null;
@@ -4909,7 +5273,7 @@ function getViewerModelBounds(){
     size:{x:size.x,y:size.y,z:size.z},
     min:{x:min.x,y:min.y,z:min.z},
     max:{x:max.x,y:max.y,z:max.z},
-    radius:Math.max(size.length(),1)
+    radius:Math.max(size.x,size.y,size.z,1)
   };
 }
 function setViewerCameraPose({position,target,up}={}){
@@ -4929,6 +5293,7 @@ function setViewerCameraPose({position,target,up}={}){
   camera.lookAt(nextTarget);
   controls.update();
   defaultView={position:camera.position.clone(),target:controls.target.clone()};
+  requestViewerRender();
   return true;
 }
 let activeMidas33ViewPreset='';
@@ -4968,19 +5333,25 @@ function resetCamera(){
   camera.position.copy(defaultView.position);
   controls.target.copy(defaultView.target);
   controls.update();
+  requestViewerRender();
 }
 
 /* ── Animation ── */
 const clock = new THREE.Clock();
 function animate(){
   requestAnimationFrame(animate);
-  controls.update();
+  if(controls.update())requestViewerRender();
   const dt = clock.getDelta();
   if(isAnimating && showDeformed) {
     animTime += dt;
     rebuildDeformed();
   }
-  renderer.render(scene,camera);
+  const nowMs=performance.now();
+  if(viewerNeedsRender||isAnimating||nowMs-lastRenderAt>=STATIC_RENDER_REFRESH_MS){
+    renderer.render(scene,camera);
+    viewerNeedsRender=false;
+    lastRenderAt=nowMs;
+  }
   frameCount++;
   const now=Date.now();
   if(now-lastFpsTime>=1000){
@@ -4993,6 +5364,7 @@ function onResize(){
   camera.aspect=vp.clientWidth/vp.clientHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(vp.clientWidth,vp.clientHeight);
+  requestViewerRender();
 }
 
 /* ── Expose to window ── */
@@ -5013,6 +5385,7 @@ window.applySectionEditPreview=applySectionEditPreview;
 window.exportSectionEditPreview=exportSectionEditPreview;
 window.revertAppliedSectionOverrides=revertAppliedSectionOverrides;
 window.clearSectionEditPreview=clearSectionEditPreview;
+window.handleLoadcombEditInputChange=handleLoadcombEditInputChange;
 window.stageLoadcombEditPreview=stageLoadcombEditPreview;
 window.exportLoadcombEditPreview=exportLoadcombEditPreview;
 window.clearLoadcombEditPreview=clearLoadcombEditPreview;

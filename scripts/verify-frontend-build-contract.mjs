@@ -28,6 +28,8 @@ const requiredFiles = [
   'scripts/verify-structure-viewer-project-manifest.mjs',
   'scripts/export-structure-viewer-report-pdf.mjs',
   'scripts/verify-structure-viewer-report-pdf.mjs',
+  'scripts/measure-structure-viewer-performance.mjs',
+  'scripts/measure-structure-viewer-visual-regression.mjs',
   'src/structure-viewer/viewer-drawing-review-model.js',
   'src/structure-viewer/viewer-member-comparison-model.js',
   'src/structure-viewer/viewer-optimization-comparison-model.js',
@@ -74,6 +76,8 @@ const expectedScripts = {
   'verify:frontend-browser-smoke': 'playwright install chromium && node ./scripts/verify-frontend-browser-smoke.mjs',
   'export:viewer-report-pdf': 'playwright install chromium && node ./scripts/export-structure-viewer-report-pdf.mjs',
   'verify:viewer-report-pdf': 'playwright install chromium && node ./scripts/verify-structure-viewer-report-pdf.mjs',
+  'verify:viewer-performance-probe': 'playwright install chromium && node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked',
+  'verify:viewer-visual-regression': 'playwright install chromium && node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked',
 }
 
 for (const [name, command] of Object.entries(expectedScripts)) {
