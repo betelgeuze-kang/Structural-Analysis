@@ -282,6 +282,9 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   if (clickedStep) {
     await expect(page.locator('[data-result-step-schedule] [data-result-step-active="true"]')).toHaveAttribute('data-result-step', clickedStep)
   }
+  if (await page.locator('[data-drawing-handoff-sheet]').count() > 1) {
+    await page.locator('[data-drawing-handoff-sheet]').nth(1).focus()
+  }
 
   const layout = await page.evaluate(() => {
     const rectFor = (selector: string) => {
@@ -619,6 +622,21 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      analysisTimelineFooterStatus: document.querySelector('[data-analysis-timeline-footer]')?.getAttribute('data-analysis-timeline-status') || '',
+      analysisTimelineFooterSchema: document.querySelector('[data-analysis-timeline-footer]')?.getAttribute('data-analysis-timeline-schema') || '',
+      analysisTimelineFooterActiveStep: Number(document.querySelector('[data-analysis-timeline-footer]')?.getAttribute('data-analysis-timeline-active-step') || '0'),
+      analysisTimelineFooterTotalSteps: Number(document.querySelector('[data-analysis-timeline-footer]')?.getAttribute('data-analysis-timeline-total-steps') || '0'),
+      analysisTimelineFooterTickCount: document.querySelectorAll('[data-analysis-timeline-step-tick]').length,
+      analysisTimelineFooterActiveTickCount: document.querySelectorAll('[data-analysis-timeline-step-tick][aria-current="step"]').length,
+      analysisTimelineFooterSolvedTickCount: document.querySelectorAll('[data-analysis-timeline-step-tick][data-analysis-timeline-tick-status="solved"]').length,
+      analysisTimelineFooterLoadCase: document.querySelector('[data-analysis-timeline-footer]')?.getAttribute('data-analysis-timeline-load-case') || '',
+      analysisTimelineFooterSolver: document.querySelector('[data-analysis-timeline-footer]')?.getAttribute('data-analysis-timeline-solver') || '',
+      analysisTimelineFooterConvergence: document.querySelector('[data-analysis-timeline-footer]')?.getAttribute('data-analysis-timeline-convergence') || '',
+      analysisTimelineFooterWindowState: window.__STRUCTURE_VIEWER_ANALYSIS_TIMELINE_FOOTER_STATE__ || null,
+      analysisTimelineFooterOverflowCount: [...document.querySelectorAll('[data-analysis-timeline-footer], [data-analysis-timeline-footer] .analysis-timeline-field strong, [data-analysis-timeline-footer] .analysis-timeline-slider, [data-analysis-timeline-footer] [data-analysis-timeline-step-tick]')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       resultEnvelopeStatus: document.querySelector('[data-result-envelope]')?.getAttribute('data-result-envelope-status') || '',
       resultEnvelopeRowCount: document.querySelectorAll('[data-result-envelope] [data-result-envelope-row]').length,
       resultEnvelopeLoadCase: document.querySelector('[data-result-envelope]')?.getAttribute('data-result-envelope-load-case') || '',
@@ -762,6 +780,24 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       deliveryDrawingReview: document.querySelector('[data-delivery-review-receipt]')?.getAttribute('data-delivery-drawing-review') || '',
       deliveryRowCount: document.querySelectorAll('[data-delivery-review-receipt] [data-delivery-review-row]').length,
       deliveryOverflowCount: [...document.querySelectorAll('[data-delivery-review-receipt], [data-delivery-review-receipt] [data-delivery-review-row]')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingHandoffStatus: document.querySelector('[data-drawing-handoff-panel]')?.getAttribute('data-drawing-handoff-status') || '',
+      drawingHandoffSchema: document.querySelector('[data-drawing-handoff-panel]')?.getAttribute('data-drawing-handoff-schema') || '',
+      drawingHandoffSheetCount: Number(document.querySelector('[data-drawing-handoff-panel]')?.getAttribute('data-drawing-handoff-sheet-count') || '0'),
+      drawingHandoffActiveSheet: document.querySelector('[data-drawing-handoff-panel]')?.getAttribute('data-drawing-handoff-active-sheet') || '',
+      drawingHandoffActiveCallout: document.querySelector('[data-drawing-handoff-panel]')?.getAttribute('data-drawing-handoff-active-callout') || '',
+      drawingHandoffSelectedMember: document.querySelector('[data-drawing-handoff-panel]')?.getAttribute('data-drawing-handoff-selected-member') || '',
+      drawingHandoffRevision: document.querySelector('[data-drawing-handoff-panel]')?.getAttribute('data-drawing-handoff-revision') || '',
+      drawingHandoffDeepLinkReady: document.querySelector('[data-drawing-handoff-panel]')?.getAttribute('data-drawing-handoff-deep-link-ready') || '',
+      drawingHandoffReceiptRowCount: document.querySelectorAll('[data-drawing-handoff-receipt] [data-drawing-handoff-receipt-row]').length,
+      drawingHandoffSheetLinkCount: document.querySelectorAll('[data-drawing-handoff-sheet]').length,
+      drawingHandoffActiveSheetCount: document.querySelectorAll('[data-drawing-handoff-sheet][aria-current="true"]').length,
+      drawingHandoffPreviewSheet: document.querySelector('[data-drawing-handoff-preview]')?.getAttribute('data-drawing-handoff-preview-sheet') || '',
+      drawingHandoffPreviewCallout: document.querySelector('[data-drawing-handoff-preview]')?.getAttribute('data-drawing-handoff-preview-callout') || '',
+      drawingHandoffOpenSheetName: document.querySelector('[data-drawing-handoff-active-sheet-open]')?.getAttribute('data-drawing-handoff-active-sheet-name') || '',
+      drawingHandoffReceiptOverflowCount: [...document.querySelectorAll('[data-drawing-handoff-panel], [data-drawing-handoff-receipt] [data-drawing-handoff-receipt-row], [data-drawing-handoff-receipt] strong, [data-drawing-handoff-receipt] em, [data-drawing-handoff-sheet], [data-drawing-handoff-preview]')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
@@ -1043,6 +1079,20 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.resultStepScheduleConvergence).not.toBe('')
   expect(layout.resultStepScheduleSolver).not.toBe('')
   expect(layout.resultStepScheduleOverflowCount).toBe(0)
+  expect(layout.analysisTimelineFooterStatus).toBe('ready')
+  expect(layout.analysisTimelineFooterSchema).toBe('structure-viewer-analysis-timeline-footer.v1')
+  expect(layout.analysisTimelineFooterActiveStep).toBe(layout.resultStepScheduleActiveStep)
+  expect(layout.analysisTimelineFooterTotalSteps).toBe(layout.resultStepScheduleTotal)
+  expect(layout.analysisTimelineFooterTickCount).toBeGreaterThanOrEqual(5)
+  expect(layout.analysisTimelineFooterActiveTickCount).toBe(1)
+  expect(layout.analysisTimelineFooterSolvedTickCount).toBeGreaterThanOrEqual(1)
+  expect(layout.analysisTimelineFooterLoadCase).toBe(layout.resultStepScheduleLoadCase)
+  expect(layout.analysisTimelineFooterSolver).toBe(layout.resultStepScheduleSolver)
+  expect(layout.analysisTimelineFooterConvergence).toBe(layout.resultStepScheduleConvergence)
+  expect(layout.analysisTimelineFooterWindowState?.schemaVersion).toBe('structure-viewer-analysis-timeline-footer.v1')
+  expect(layout.analysisTimelineFooterWindowState?.status).toBe('ready')
+  expect(layout.analysisTimelineFooterWindowState?.tickCount).toBe(layout.analysisTimelineFooterTickCount)
+  expect(layout.analysisTimelineFooterOverflowCount).toBe(0)
   expect(layout.resultEnvelopeStatus).toBe('ready')
   expect(layout.resultEnvelopeRowCount).toBeGreaterThanOrEqual(4)
   expect(layout.resultEnvelopeLoadCase).not.toBe('')
@@ -1166,6 +1216,22 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.deliveryDrawingReview).not.toBe('blocked')
   expect(layout.deliveryRowCount).toBeGreaterThanOrEqual(5)
   expect(layout.deliveryOverflowCount).toBe(0)
+  expect(layout.drawingHandoffStatus).toBe('linked')
+  expect(layout.drawingHandoffSchema).toBe('structure-viewer-drawing-handoff-panel.v2')
+  expect(layout.drawingHandoffSheetCount).toBeGreaterThanOrEqual(4)
+  expect(layout.drawingHandoffSheetLinkCount).toBeGreaterThanOrEqual(4)
+  expect(layout.drawingHandoffActiveSheetCount).toBe(1)
+  expect(layout.drawingHandoffDeepLinkReady).toBe('true')
+  expect(layout.drawingHandoffReceiptRowCount).toBe(4)
+  expect(layout.drawingHandoffActiveSheet).not.toBe('')
+  expect(layout.drawingHandoffActiveCallout).not.toBe('')
+  expect(layout.drawingHandoffSelectedMember).not.toBe('')
+  expect(layout.drawingHandoffSelectedMember).not.toBe('--')
+  expect(layout.drawingHandoffRevision).not.toBe('')
+  expect(layout.drawingHandoffPreviewSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingHandoffPreviewCallout).toBe(layout.drawingHandoffActiveCallout)
+  expect(layout.drawingHandoffOpenSheetName).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingHandoffReceiptOverflowCount).toBe(0)
   expect(layout.materialCatalogStatus).toBe('ready')
   expect(['ready', 'needs_review']).toContain(layout.materialCoverageStatus)
   expect(layout.materialCoverageSchema).toBe('structure-viewer-material-coverage-readiness.v1')

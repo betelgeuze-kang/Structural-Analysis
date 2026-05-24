@@ -378,6 +378,14 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "copyDrawingHandoffDeepLink" in text
     assert "data-drawing-handoff-preview" in drawing_handoff_renderer_text
     assert "data-drawing-handoff-preview-link" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-handoff-panel.v2" in drawing_handoff_renderer_text
+    assert "data-drawing-handoff-schema" in drawing_handoff_renderer_text
+    assert "data-drawing-handoff-receipt" in drawing_handoff_renderer_text
+    assert "data-drawing-handoff-receipt-row" in drawing_handoff_renderer_text
+    assert "compactReceiptValue" in drawing_handoff_renderer_text
+    assert "compactDrawingHandoffReceiptToken" in text
+    assert "data-drawing-handoff-deep-link-ready" in drawing_handoff_renderer_text
+    assert "data-drawing-handoff-selected-member" in drawing_handoff_renderer_text
     assert "data-drawing-handoff-active-sheet-open" in drawing_handoff_renderer_text
     assert "data-drawing-handoff-sheet-href" in drawing_handoff_renderer_text
     assert "aria-current" in drawing_handoff_renderer_text
@@ -421,6 +429,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert 'id="critical-members-panel"' in text
     assert 'id="analysis-cockpit-chart-strip"' in text
     assert 'id="analysis-timeline-status"' in text
+    assert "data-analysis-timeline-footer" in text
+    assert "structure-viewer-analysis-timeline-footer.v1" in text
+    assert "buildAnalysisTimelineFooterModel" in text
+    assert "compactAnalysisTimelineSolverLabel" in text
+    assert "data-analysis-timeline-step-tick" in text
+    assert "__STRUCTURE_VIEWER_ANALYSIS_TIMELINE_FOOTER_STATE__" in text
     assert "analysis-timeline-control" in text
     assert "setAnalysisTimelineStep" in text
     assert "stepAnalysisTimeline" in text

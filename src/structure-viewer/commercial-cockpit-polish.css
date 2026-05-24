@@ -1549,8 +1549,8 @@
   body.structural-surface.command-center-shell .analysis-timeline-slider {
     position:relative;
     min-width:0;
-    height:22px;
-    display:flex;
+    height:24px;
+    display:grid;
     align-items:center;
   }
 
@@ -1578,6 +1578,56 @@
     pointer-events:none;
   }
 
+  body.structural-surface.command-center-shell .analysis-timeline-ticks {
+    position:absolute;
+    z-index:3;
+    left:5px;
+    right:5px;
+    top:50%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    transform:translateY(-50%);
+    pointer-events:none;
+  }
+
+  body.structural-surface.command-center-shell .analysis-timeline-tick {
+    width:8px;
+    height:8px;
+    min-width:8px;
+    padding:0;
+    border-radius:999px;
+    border:1px solid rgba(148,168,190,.48);
+    background:rgba(10,17,27,.92);
+    color:transparent;
+    font-size:0;
+    line-height:0;
+    box-shadow:0 0 0 1px rgba(8,13,21,.70);
+    cursor:pointer;
+    pointer-events:auto;
+  }
+
+  body.structural-surface.command-center-shell .analysis-timeline-tick span {
+    display:block;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+  }
+
+  body.structural-surface.command-center-shell .analysis-timeline-tick--solved {
+    border-color:rgba(79,183,173,.72);
+    background:var(--accent);
+  }
+
+  body.structural-surface.command-center-shell .analysis-timeline-tick--active {
+    width:12px;
+    height:12px;
+    min-width:12px;
+    border-color:rgba(121,179,255,.95);
+    background:#79b3ff;
+    box-shadow:0 0 0 3px rgba(121,179,255,.16),0 0 0 1px rgba(8,13,21,.80);
+  }
+
   body.structural-surface.command-center-shell #drawing-handoff-panel {
     padding:0;
     border:0;
@@ -1593,6 +1643,7 @@
 
   body.structural-surface.command-center-shell .drawing-handoff-header,
   body.structural-surface.command-center-shell .drawing-handoff-callout,
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row,
   body.structural-surface.command-center-shell .drawing-handoff-preview,
   body.structural-surface.command-center-shell .drawing-handoff-sheet,
   body.structural-surface.command-center-shell .drawing-handoff-grid > div {
@@ -1611,6 +1662,7 @@
 
   body.structural-surface.command-center-shell .drawing-handoff-header div,
   body.structural-surface.command-center-shell .drawing-handoff-callout,
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row,
   body.structural-surface.command-center-shell .drawing-handoff-preview,
   body.structural-surface.command-center-shell .drawing-handoff-sheet {
     min-width:0;
@@ -1620,6 +1672,7 @@
   body.structural-surface.command-center-shell .drawing-handoff-grid span,
   body.structural-surface.command-center-shell .drawing-handoff-preview__meta span,
   body.structural-surface.command-center-shell .drawing-handoff-callout span,
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row b,
   body.structural-surface.command-center-shell .drawing-handoff-sheet small {
     color:var(--muted);
     font-size:9px;
@@ -1631,6 +1684,7 @@
   body.structural-surface.command-center-shell .drawing-handoff-header strong,
   body.structural-surface.command-center-shell .drawing-handoff-callout strong,
   body.structural-surface.command-center-shell .drawing-handoff-preview__meta strong,
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row strong,
   body.structural-surface.command-center-shell .drawing-handoff-sheet strong,
   body.structural-surface.command-center-shell .drawing-handoff-grid strong {
     display:block;
@@ -1691,6 +1745,50 @@
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .drawing-handoff-receipt {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row {
+    display:grid;
+    grid-template-columns:minmax(54px,.54fr) minmax(0,1fr);
+    column-gap:6px;
+    row-gap:1px;
+    align-items:center;
+    padding:6px 7px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row b {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row em {
+    grid-column:1/-1;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row--success strong {
+    color:#58d78d;
+  }
+
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row--warn strong {
+    color:#ffc56f;
+  }
+
+  body.structural-surface.command-center-shell .drawing-handoff-receipt__row--danger strong {
+    color:#ff8a80;
   }
 
   body.structural-surface.command-center-shell .drawing-handoff-preview {

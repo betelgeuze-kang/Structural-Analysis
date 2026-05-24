@@ -174,6 +174,7 @@ function staticViewerChecks(extractRoot, packagePath) {
     stage_drift_bands: viewerText.includes('data-stage-drift-bands') && viewerText.includes('renderStageDriftBands') && viewerText.includes('positionStageDriftBands') && viewerText.includes('structure-viewer-stage-drift-bands.v1'),
     stage_critical_hotspots: viewerText.includes('data-stage-critical-hotspots') && viewerText.includes('renderStageCriticalHotspots') && viewerText.includes('positionStageCriticalHotspots') && viewerText.includes('structure-viewer-stage-critical-hotspots.v1'),
     stage_result_receipt: viewerText.includes('data-stage-result-receipt') || viewerText.includes('stage-result-receipt'),
+    analysis_timeline_footer: viewerText.includes('data-analysis-timeline-footer') && viewerText.includes('data-analysis-timeline-step-tick') && viewerText.includes('buildAnalysisTimelineFooterModel') && viewerText.includes('structure-viewer-analysis-timeline-footer.v1'),
     result_step_schedule: viewerText.includes('data-result-step-schedule') && viewerText.includes('data-result-step-row') && viewerText.includes('renderResultStepSchedule') && viewerText.includes('structure-viewer-result-step-schedule.v1'),
     result_envelope: viewerText.includes('data-result-envelope') && viewerText.includes('data-result-envelope-row') && viewerText.includes('renderResultEnvelope') && viewerText.includes('structure-viewer-result-envelope.v1'),
     critical_triage: viewerText.includes('data-critical-triage') && viewerText.includes('data-critical-triage-row') && viewerText.includes('renderCriticalTriagePanel') && viewerText.includes('structure-viewer-critical-triage.v1'),
@@ -190,6 +191,16 @@ function staticViewerChecks(extractRoot, packagePath) {
     critical_members: viewerText.includes('Critical Members'),
     optimization_summary: viewerText.includes('Optimization Summary'),
     drawing_handoff_panel: viewerText.includes('data-drawing-handoff-panel') || viewerText.includes('buildDrawingHandoffPanelHtml'),
+    drawing_handoff_receipt: (
+      viewerText.includes('data-drawing-handoff-receipt')
+      && viewerText.includes('data-drawing-handoff-receipt-row')
+      && viewerText.includes('data-drawing-handoff-deep-link-ready')
+      && viewerText.includes('structure-viewer-drawing-handoff-panel.v2')
+    ) || (
+      viewerText.includes('drawing-handoff-receipt__row')
+      && viewerText.includes('data-drawing-handoff-receipt-full-value')
+      && viewerText.includes('buildDrawingHandoffPanelHtml')
+    ),
   }
   const commercialMarkerCount = Object.values(commercialMarkers).filter(Boolean).length
   const requiredCommercialMarkerCount = Object.keys(commercialMarkers).length

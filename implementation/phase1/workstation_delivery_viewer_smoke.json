@@ -1,6 +1,6 @@
 {
   "schema_version": "workstation-delivery-viewer-smoke.v1",
-  "generated_at": "2026-05-24T21:13:02.635Z",
+  "generated_at": "2026-05-24T21:35:07.488Z",
   "contract_pass": true,
   "reason_code": "PASS",
   "status": "ready",
@@ -36,8 +36,8 @@
     },
     "commercial_cockpit_alignment": {
       "status": "current_cockpit_delivery",
-      "marker_count": 45,
-      "required_marker_count_for_current_cockpit": 45,
+      "marker_count": 47,
+      "required_marker_count_for_current_cockpit": 47,
       "markers": {
         "structural_insight_title": true,
         "cockpit_polish_css": true,
@@ -68,6 +68,7 @@
         "stage_drift_bands": true,
         "stage_critical_hotspots": true,
         "stage_result_receipt": true,
+        "analysis_timeline_footer": true,
         "result_step_schedule": true,
         "result_envelope": true,
         "critical_triage": true,
@@ -83,7 +84,8 @@
         "section_member_schedule": true,
         "critical_members": true,
         "optimization_summary": true,
-        "drawing_handoff_panel": true
+        "drawing_handoff_panel": true,
+        "drawing_handoff_receipt": true
       },
       "note": "Current cockpit alignment is required for workstation delivery handoff acceptance."
     }
@@ -91,7 +93,7 @@
   "browser_checks": {
     "pass": true,
     "reason": "PASS",
-    "opened_url": "http://127.0.0.1:37979/viewer.html",
+    "opened_url": "http://127.0.0.1:44799/viewer.html",
     "viewport": {
       "width": 1440,
       "height": 1000

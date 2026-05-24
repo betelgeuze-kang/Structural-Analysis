@@ -24,6 +24,18 @@ function resolveReviewTone(review = {}) {
   return ['success', 'warn', 'danger', 'accent', 'neutral'].includes(tone) ? tone : 'neutral';
 }
 
+function compactReceiptValue(value = '') {
+  const text = normalizeText(value) || '--';
+  if (text.length <= 15) return text;
+  if (text.includes(':')) {
+    const tail = text.split(':').filter(Boolean).pop() || text;
+    return tail.length <= 10 ? `...:${tail}` : `${tail.slice(0, 7)}...`;
+  }
+  return `${text.slice(0, 6)}...${text.slice(-5)}`;
+}
+
+export const STRUCTURE_VIEWER_DRAWING_HANDOFF_PANEL_SCHEMA_VERSION = 'structure-viewer-drawing-handoff-panel.v2';
+
 function buildDrawingHandoffPreviewHtml({
   sheets = [],
   sheetPackage = {},
@@ -87,6 +99,42 @@ export function buildDrawingHandoffPanelHtml({
   const calloutId = normalizeText(sheetPackage.callout_id) || '--';
   const calloutLabel = normalizeText(sheetPackage.callout_label) || 'Active selection';
   const memberId = normalizeText(sheetPackage.member_id) || '--';
+  const deepLinkReady = Boolean(deepLinkUrl);
+  const selectionSyncReady = Boolean(memberId && memberId !== '--' && calloutId && calloutId !== '--');
+  const receiptRows = [
+    {
+      key: 'active-sheet',
+      label: 'Active Sheet',
+      value: primarySheetLabel,
+      detail: primarySheetHref ? 'SVG linked' : 'sheet missing',
+      tone: primarySheetHref ? 'success' : 'danger',
+      attr: 'sheet',
+    },
+    {
+      key: 'callout',
+      label: 'Callout',
+      value: calloutId,
+      detail: calloutLabel,
+      tone: calloutId !== '--' ? 'success' : 'warn',
+      attr: 'callout',
+    },
+    {
+      key: 'deep-link',
+      label: 'Viewer Link',
+      value: deepLinkReady ? 'copy-ready' : 'missing',
+      detail: deepLinkReady ? 'selection URL' : 'URL unavailable',
+      tone: deepLinkReady ? 'success' : 'danger',
+      attr: 'deep-link',
+    },
+    {
+      key: 'selection-sync',
+      label: 'Selection Sync',
+      value: memberId,
+      detail: selectionSyncReady ? 'viewport/report aligned' : 'member pending',
+      tone: selectionSyncReady ? 'success' : 'warn',
+      attr: 'member',
+    },
+  ];
   const previewHtml = buildDrawingHandoffPreviewHtml({
     sheets,
     sheetPackage,
@@ -111,7 +159,7 @@ export function buildDrawingHandoffPanelHtml({
     </a>`;
   }).join('');
 
-  return `<div class="drawing-handoff-panel" data-drawing-handoff-panel data-drawing-handoff-status="${escapeHtml(status)}">
+  return `<div class="drawing-handoff-panel" data-drawing-handoff-panel data-drawing-handoff-schema="${escapeHtml(STRUCTURE_VIEWER_DRAWING_HANDOFF_PANEL_SCHEMA_VERSION)}" data-drawing-handoff-status="${escapeHtml(status)}" data-drawing-handoff-sheet-count="${escapeHtml(String(sheetPackage.sheet_count ?? sheets.length ?? 0))}" data-drawing-handoff-active-sheet="${escapeHtml(primarySheetLabel)}" data-drawing-handoff-active-callout="${escapeHtml(calloutId)}" data-drawing-handoff-selected-member="${escapeHtml(memberId)}" data-drawing-handoff-revision="${escapeHtml(revision)}" data-drawing-handoff-deep-link-ready="${deepLinkReady ? 'true' : 'false'}">
     <div class="drawing-handoff-header">
       <div>
         <span>Drawing Handoff</span>
@@ -130,6 +178,13 @@ export function buildDrawingHandoffPanelHtml({
       <span>Active callout</span>
       <strong>${escapeHtml(calloutLabel)}</strong>
       <small>${escapeHtml(calloutId)}</small>
+    </div>
+    <div class="drawing-handoff-receipt" data-drawing-handoff-receipt>
+      ${receiptRows.map(row => `<span class="drawing-handoff-receipt__row drawing-handoff-receipt__row--${escapeHtml(row.tone)}" data-drawing-handoff-receipt-row="${escapeHtml(row.key)}">
+        <b>${escapeHtml(row.label)}</b>
+        <strong title="${escapeHtml(row.value)}" data-drawing-handoff-active-${escapeHtml(row.attr)}-value data-drawing-handoff-receipt-full-value="${escapeHtml(row.value)}">${escapeHtml(compactReceiptValue(row.value))}</strong>
+        <em title="${escapeHtml(row.detail)}" data-drawing-handoff-${escapeHtml(row.key)}-detail>${escapeHtml(row.detail)}</em>
+      </span>`).join('')}
     </div>
     <div class="drawing-handoff-sheet-list">
       ${sheetButtons || '<div class="drawing-handoff-empty">No SVG sheet callout links attached.</div>'}

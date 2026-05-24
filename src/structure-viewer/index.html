@@ -620,7 +620,7 @@
   </div>
   <div class="instrument-group instrument-group--timeline">
     <span class="instrument-label">Analysis</span>
-    <div id="analysis-timeline-status" class="analysis-timeline-control">Load case -- | Step -- / -- | Solver --</div>
+    <div id="analysis-timeline-status" class="analysis-timeline-control" data-analysis-timeline-footer data-analysis-timeline-schema="structure-viewer-analysis-timeline-footer.v1" data-analysis-timeline-status="pending">Load case -- | Step -- / -- | Solver --</div>
   </div>
   <div class="instrument-signature">© 2026 Structural Analysis Viewer v1.0</div>
 </footer>
@@ -887,6 +887,7 @@ const CRITICAL_MEMBERS_COMPACT_TABLE_SCHEMA='structure-viewer-critical-members-c
 const OPTIMIZATION_DELTA_STRIP_SCHEMA='structure-viewer-optimization-delta-strip.v1';
 const PANEL_ZONE_STAGE_BADGE_SCHEMA='structure-viewer-panel-zone-stage-badge.v1';
 const MATERIAL_COVERAGE_READINESS_SCHEMA='structure-viewer-material-coverage-readiness.v1';
+const ANALYSIS_TIMELINE_FOOTER_SCHEMA='structure-viewer-analysis-timeline-footer.v1';
 let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;
 let sectionEditPreviewState=createEmptySectionEditPreviewState();
 let sectionEditApplyState=createEmptySectionEditApplyState();
@@ -7877,18 +7878,86 @@ function toggleAnalysisTimelinePlayback(){
   },900);
   renderAnalysisTimeline(lastAnalysisCockpitModel);
 }
+function buildAnalysisTimelineFooterModel(cockpitModel=null){
+  const timeline=getResolvedAnalysisTimeline(cockpitModel||lastAnalysisCockpitModel);
+  if(!timeline){
+    return{
+      schemaVersion:ANALYSIS_TIMELINE_FOOTER_SCHEMA,
+      status:'missing',
+      activeStep:0,
+      totalSteps:0,
+      progressPct:0,
+      tickRows:[],
+      tickCount:0,
+    };
+  }
+  const totalSteps=Math.max(1,Math.round(safeNumber(timeline.totalSteps,20)));
+  const activeStep=Math.min(totalSteps,Math.max(1,Math.round(safeNumber(timeline.activeStep,1))));
+  const visibleCount=Math.min(totalSteps,7);
+  let startStep=Math.max(1,activeStep-Math.floor(visibleCount/2));
+  if(startStep+visibleCount-1>totalSteps)startStep=Math.max(1,totalSteps-visibleCount+1);
+  const tickRows=Array.from({length:visibleCount},(_,index)=>{
+    const step=startStep+index;
+    const status=step===activeStep?'active':step<activeStep?'solved':'queued';
+    return{
+      step,
+      status,
+      progressPct:step/totalSteps*100,
+    };
+  });
+  return{
+    schemaVersion:ANALYSIS_TIMELINE_FOOTER_SCHEMA,
+    status:'ready',
+    loadCase:normalizeSelectionValue(timeline.loadCase)||'--',
+    solver:normalizeSelectionValue(timeline.solver)||'--',
+    convergence:normalizeSelectionValue(timeline.convergence)||'--',
+    runTime:normalizeSelectionValue(timeline.runTime)||'--',
+    scale:safeNumber(timeline.scale,1),
+    activeStep,
+    totalSteps,
+    progressPct:activeStep/totalSteps*100,
+    playing:Boolean(analysisTimelinePlaybackTimer),
+    tickRows,
+    tickCount:tickRows.length,
+  };
+}
+function compactAnalysisTimelineSolverLabel(value=''){
+  const text=normalizeSelectionValue(value);
+  if(!text)return'--';
+  const replacements=[
+    [/nonlinear\s*\(\s*displacement\s+control\s*\)/i,'Nonlinear DC'],
+    [/nonlinear\s+displacement\s+control/i,'Nonlinear DC'],
+    [/linear\s+static/i,'Linear Static'],
+    [/response\s+spectrum/i,'Response Spectrum'],
+    [/pushover/i,'Pushover'],
+  ];
+  const matched=replacements.find(([pattern])=>pattern.test(text));
+  if(matched)return matched[1];
+  return text.length>18?`${text.slice(0,15).trim()}...`:text;
+}
 function renderAnalysisTimeline(cockpitModel=null){
   const node=document.getElementById('analysis-timeline-status');
   if(cockpitModel)lastAnalysisCockpitModel=cockpitModel;
   const activeModel=cockpitModel||lastAnalysisCockpitModel;
-  const timeline=getResolvedAnalysisTimeline(activeModel);
+  const footerModel=buildAnalysisTimelineFooterModel(activeModel);
   if(!(node instanceof HTMLElement)){
     renderResultStepSchedule(activeModel);
     renderResultEnvelope(activeModel);
     renderPanelZoneEvidencePanel(activeModel);
     return;
   }
-  if(!timeline){
+  node.dataset.analysisTimelineFooter='';
+  node.dataset.analysisTimelineSchema=ANALYSIS_TIMELINE_FOOTER_SCHEMA;
+  node.dataset.analysisTimelineStatus=footerModel.status;
+  node.dataset.analysisTimelineActiveStep=String(footerModel.activeStep||0);
+  node.dataset.analysisTimelineTotalSteps=String(footerModel.totalSteps||0);
+  node.dataset.analysisTimelineTickCount=String(footerModel.tickCount||0);
+  node.dataset.analysisTimelineLoadCase=footerModel.loadCase||'';
+  node.dataset.analysisTimelineSolver=footerModel.solver||'';
+  node.dataset.analysisTimelineConvergence=footerModel.convergence||'';
+  node.dataset.analysisTimelineRunTime=footerModel.runTime||'';
+  window.__STRUCTURE_VIEWER_ANALYSIS_TIMELINE_FOOTER_STATE__={...footerModel};
+  if(footerModel.status!=='ready'){
     node.textContent='Load case -- | Step -- / -- | Solver --';
     renderResultStepSchedule(activeModel);
     renderResultEnvelope(activeModel);
@@ -7897,8 +7966,10 @@ function renderAnalysisTimeline(cockpitModel=null){
     syncTopRunControl({cockpitModel:activeModel});
     return;
   }
-  const stepPct=(timeline.activeStep/Math.max(timeline.totalSteps,1))*100;
-  const playing=Boolean(analysisTimelinePlaybackTimer);
+  const timeline=footerModel;
+  const stepPct=timeline.progressPct;
+  const playing=Boolean(timeline.playing);
+  const solverLabel=compactAnalysisTimelineSolverLabel(timeline.solver);
   node.innerHTML=`
     <span class="analysis-timeline-field analysis-timeline-field--load"><b>Load Case</b><strong>${escapeHtml(timeline.loadCase||'--')}</strong></span>
     <span class="analysis-timeline-field"><b>Step</b><strong>${escapeHtml(String(timeline.activeStep))} / ${escapeHtml(String(timeline.totalSteps))}</strong></span>
@@ -7907,12 +7978,15 @@ function renderAnalysisTimeline(cockpitModel=null){
       <button type="button" class="${playing?'is-active':''}" onclick="toggleAnalysisTimelinePlayback()" title="${playing?'Pause':'Play'}">${playing?'Ⅱ':'▶'}</button>
       <button type="button" onclick="stepAnalysisTimeline(1)" title="Next step">▶</button>
     </span>
-    <label class="analysis-timeline-slider" aria-label="Analysis step ${escapeHtml(String(timeline.activeStep))} of ${escapeHtml(String(timeline.totalSteps))}">
-      <input type="range" min="1" max="${escapeHtml(String(timeline.totalSteps))}" step="1" value="${escapeHtml(String(timeline.activeStep))}" oninput="setAnalysisTimelineStep(this.value)"/>
+    <div class="analysis-timeline-slider" data-analysis-timeline-slider role="group" aria-label="Analysis step ${escapeHtml(String(timeline.activeStep))} of ${escapeHtml(String(timeline.totalSteps))}">
+      <input type="range" min="1" max="${escapeHtml(String(timeline.totalSteps))}" step="1" value="${escapeHtml(String(timeline.activeStep))}" aria-label="Analysis step scrubber" oninput="setAnalysisTimelineStep(this.value)"/>
       <i style="--timeline-progress:${stepPct.toFixed(2)}%"></i>
-    </label>
+      <span class="analysis-timeline-ticks" data-analysis-timeline-step-ticks aria-label="Nearby analysis steps">
+        ${timeline.tickRows.map(row=>`<button type="button" class="analysis-timeline-tick analysis-timeline-tick--${escapeHtml(row.status)}" data-analysis-timeline-step-tick data-analysis-timeline-tick-step="${escapeHtml(String(row.step))}" data-analysis-timeline-tick-status="${escapeHtml(row.status)}" aria-current="${row.status==='active'?'step':'false'}" title="Step ${escapeHtml(String(row.step))}" onclick="setAnalysisTimelineStep(${escapeHtml(String(row.step))})"><span>${escapeHtml(String(row.step))}</span></button>`).join('')}
+      </span>
+    </div>
     <span class="analysis-timeline-field"><b>Scale</b><strong>${escapeHtml(safeNumber(timeline.scale,1).toFixed(1))}x</strong></span>
-    <span class="analysis-timeline-field analysis-timeline-field--solver"><b>Solver</b><strong>${escapeHtml(timeline.solver||'--')}</strong></span>
+    <span class="analysis-timeline-field analysis-timeline-field--solver"><b>Solver</b><strong title="${escapeHtml(timeline.solver||'--')}" data-analysis-timeline-full-solver="${escapeHtml(timeline.solver||'--')}">${escapeHtml(solverLabel)}</strong></span>
     <span class="analysis-timeline-field analysis-timeline-field--convergence"><b>Convergence</b><strong>${escapeHtml(timeline.convergence||'--')}</strong></span>
     <span class="analysis-timeline-field"><b>Run Time</b><strong>${escapeHtml(timeline.runTime||'--')}</strong></span>`;
   renderResultStepSchedule(activeModel);
@@ -8284,6 +8358,15 @@ function getDrawingHandoffSheetData(sheetElement){
     member:normalizeSelectionValue(sheetElement.getAttribute('data-drawing-handoff-sheet-member'))||'--',
   };
 }
+function compactDrawingHandoffReceiptToken(value=''){
+  const text=normalizeSelectionValue(value)||'--';
+  if(text.length<=15)return text;
+  if(text.includes(':')){
+    const tail=text.split(':').filter(Boolean).pop()||text;
+    return tail.length<=10?`...:${tail}`:`${tail.slice(0,7)}...`;
+  }
+  return `${text.slice(0,6)}...${text.slice(-5)}`;
+}
 function setDrawingHandoffActiveSheet(sheetName=''){
   const panel=document.getElementById('drawing-handoff-panel');
   if(!(panel instanceof HTMLElement))return false;
@@ -8294,6 +8377,13 @@ function setDrawingHandoffActiveSheet(sheetName=''){
   const sheetData=getDrawingHandoffSheetData(target);
   if(!sheetData)return false;
   activeDrawingHandoffSheetName=sheetData.sheetName;
+  const handoffRoot=panel.querySelector('[data-drawing-handoff-panel]');
+  if(handoffRoot instanceof HTMLElement){
+    handoffRoot.setAttribute('data-drawing-handoff-active-sheet',sheetData.sheetName);
+    handoffRoot.setAttribute('data-drawing-handoff-active-callout',sheetData.callout);
+    handoffRoot.setAttribute('data-drawing-handoff-selected-member',sheetData.member);
+    handoffRoot.setAttribute('data-drawing-handoff-revision',sheetData.revision);
+  }
   sheetButtons.forEach(button=>{
     const isActive=normalizeSelectionValue(button.getAttribute('data-drawing-handoff-sheet'))===sheetData.sheetName;
     button.classList.toggle('is-active',isActive);
@@ -8318,6 +8408,30 @@ function setDrawingHandoffActiveSheet(sheetName=''){
     if(labelText)labelText.textContent=sheetData.label;
     if(metaText)metaText.textContent=`Active sheet · ${sheetData.member} · ${sheetData.callout}`;
   }
+  const activeSheetValue=panel.querySelector('[data-drawing-handoff-active-sheet-value]');
+  const activeCalloutValue=panel.querySelector('[data-drawing-handoff-active-callout-value]');
+  const activeMemberValue=panel.querySelector('[data-drawing-handoff-active-member-value]');
+  const activeSheetDetail=panel.querySelector('[data-drawing-handoff-active-sheet-detail]');
+  const calloutDetail=panel.querySelector('[data-drawing-handoff-callout-detail]');
+  const selectionSyncDetail=panel.querySelector('[data-drawing-handoff-selection-sync-detail]');
+  if(activeSheetValue){
+    activeSheetValue.textContent=compactDrawingHandoffReceiptToken(sheetData.sheetName);
+    activeSheetValue.setAttribute('title',sheetData.sheetName);
+    activeSheetValue.setAttribute('data-drawing-handoff-receipt-full-value',sheetData.sheetName);
+  }
+  if(activeCalloutValue){
+    activeCalloutValue.textContent=compactDrawingHandoffReceiptToken(sheetData.callout);
+    activeCalloutValue.setAttribute('title',sheetData.callout);
+    activeCalloutValue.setAttribute('data-drawing-handoff-receipt-full-value',sheetData.callout);
+  }
+  if(activeMemberValue){
+    activeMemberValue.textContent=compactDrawingHandoffReceiptToken(sheetData.member);
+    activeMemberValue.setAttribute('title',sheetData.member);
+    activeMemberValue.setAttribute('data-drawing-handoff-receipt-full-value',sheetData.member);
+  }
+  if(activeSheetDetail)activeSheetDetail.textContent=sheetData.href?'SVG linked':'sheet missing';
+  if(calloutDetail)calloutDetail.textContent=`${sheetData.label} · ${sheetData.revision}`;
+  if(selectionSyncDetail)selectionSyncDetail.textContent=`viewport/report aligned`;
   const openLink=panel.querySelector('[data-drawing-handoff-active-sheet-open]');
   if(openLink instanceof HTMLAnchorElement){
     openLink.href=sheetData.href||'#';
