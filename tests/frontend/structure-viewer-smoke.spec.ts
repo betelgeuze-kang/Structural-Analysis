@@ -639,6 +639,10 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       criticalTriage,
       criticalTriageStatus: document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-status') || '',
       criticalTriageSchema: document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-schema') || '',
+      criticalMembersCompactSchema: document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-members-compact-table-schema') || '',
+      criticalMembersCompactHeadCount: document.querySelectorAll('[data-critical-members-compact-head] span').length,
+      criticalMembersCompactTableCount: document.querySelectorAll('[data-critical-members-compact-table]').length,
+      criticalMembersCompactRowCount: document.querySelectorAll('[data-critical-members-compact-row]').length,
       criticalTriageRowCount: Number(document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-row-count') || '0'),
       criticalTriageSourceCount: Number(document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-source-count') || '0'),
       criticalTriageHighCount: Number(document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-high-count') || '0'),
@@ -649,7 +653,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       criticalTriageActionCount: document.querySelectorAll('[data-critical-triage] .critical-triage-row__action').length,
       criticalTriageText: document.querySelector('[data-critical-triage]')?.textContent || '',
       criticalTriageWindowState: window.__STRUCTURE_VIEWER_CRITICAL_TRIAGE_STATE__ || null,
-      criticalTriageOverflowCount: [...document.querySelectorAll('[data-critical-triage], [data-critical-triage] [data-critical-triage-row], [data-critical-triage] .critical-triage__head')].filter((node) => {
+      criticalTriageOverflowCount: [...document.querySelectorAll('[data-critical-triage], [data-critical-triage] [data-critical-triage-row], [data-critical-triage] .critical-triage__head, [data-critical-members-compact-head]')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
@@ -762,6 +766,17 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
       materialCatalogStatus: document.querySelector('[data-material-member-catalog]')?.getAttribute('data-material-catalog-status') || '',
+      materialCoverageStatus: document.querySelector('[data-material-coverage-readiness]')?.getAttribute('data-material-coverage-status') || '',
+      materialCoverageSchema: document.querySelector('[data-material-coverage-readiness]')?.getAttribute('data-material-coverage-schema') || '',
+      materialCoverageScore: Number(document.querySelector('[data-material-coverage-readiness]')?.getAttribute('data-material-coverage-score') || '0'),
+      materialCoverageReviewQueueCount: Number(document.querySelector('[data-material-coverage-readiness]')?.getAttribute('data-material-review-queue-count') || '0'),
+      materialCoverageSourceCount: Number(document.querySelector('[data-material-coverage-readiness]')?.getAttribute('data-material-source-count') || '0'),
+      materialCoverageInferredCount: Number(document.querySelector('[data-material-coverage-readiness]')?.getAttribute('data-material-inferred-count') || '0'),
+      materialCoverageMissingDefinitionCount: Number(document.querySelector('[data-material-coverage-readiness]')?.getAttribute('data-material-missing-definition-count') || '0'),
+      materialCoverageUnclassifiedCount: Number(document.querySelector('[data-material-coverage-readiness]')?.getAttribute('data-material-unclassified-count') || '0'),
+      materialCoverageCheckCount: document.querySelectorAll('[data-material-coverage-readiness] [data-material-coverage-check]').length,
+      materialCoveragePassCheckCount: document.querySelectorAll('[data-material-coverage-readiness] [data-material-coverage-check-status="pass"]').length,
+      materialCoverageQueueEmptyCount: document.querySelectorAll('[data-material-coverage-readiness] [data-material-review-queue-empty]').length,
       materialCatalogMaterialCount: Number(document.querySelector('[data-material-member-catalog]')?.getAttribute('data-material-count') || '0'),
       materialCatalogUsedMaterialCount: Number(document.querySelector('[data-material-member-catalog]')?.getAttribute('data-used-material-count') || '0'),
       materialCatalogMissingMaterialCount: Number(document.querySelector('[data-material-member-catalog]')?.getAttribute('data-missing-material-count') || '0'),
@@ -806,6 +821,10 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
       materialCatalogFamilyOverflowCount: [...document.querySelectorAll('[data-material-family-coverage], [data-material-family-coverage] [data-material-family-chip]')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      materialCoverageOverflowCount: [...document.querySelectorAll('[data-material-coverage-readiness], [data-material-coverage-readiness] [data-material-coverage-check], [data-material-coverage-readiness] .material-coverage-readiness__headline, [data-material-coverage-readiness] [data-material-review-queue]')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
@@ -1041,6 +1060,10 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.criticalTriage?.top || 9999).toBeLessThanOrEqual((layout.rightPanel?.bottom || 0) + 1)
   expect(layout.criticalTriageStatus).toBe('ready')
   expect(layout.criticalTriageSchema).toBe('structure-viewer-critical-triage.v1')
+  expect(layout.criticalMembersCompactSchema).toBe('structure-viewer-critical-members-compact-table.v1')
+  expect(layout.criticalMembersCompactHeadCount).toBe(5)
+  expect(layout.criticalMembersCompactTableCount).toBeGreaterThanOrEqual(2)
+  expect(layout.criticalMembersCompactRowCount).toBe(layout.criticalTriageRowCount)
   expect(layout.criticalTriageRowCount).toBeGreaterThanOrEqual(4)
   expect(layout.criticalTriageRows).toBe(layout.criticalTriageRowCount)
   expect(layout.criticalTriageMemberRows).toBe(layout.criticalTriageRowCount)
@@ -1049,6 +1072,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.criticalTriageMaxRatio).toBeGreaterThan(0)
   expect(layout.criticalTriageStatusCount).toBe(layout.criticalTriageRowCount)
   expect(layout.criticalTriageActionCount).toBe(layout.criticalTriageRowCount)
+  expect(layout.criticalTriageText).toContain('Critical Members')
   expect(layout.criticalTriageText).toContain('Critical Triage')
   expect(layout.criticalTriageText).toContain('D/C')
   expect(layout.criticalTriageWindowState?.schemaVersion).toBe('structure-viewer-critical-triage.v1')
@@ -1143,6 +1167,15 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.deliveryRowCount).toBeGreaterThanOrEqual(5)
   expect(layout.deliveryOverflowCount).toBe(0)
   expect(layout.materialCatalogStatus).toBe('ready')
+  expect(['ready', 'needs_review']).toContain(layout.materialCoverageStatus)
+  expect(layout.materialCoverageSchema).toBe('structure-viewer-material-coverage-readiness.v1')
+  expect(layout.materialCoverageScore).toBeGreaterThanOrEqual(80)
+  expect(layout.materialCoverageReviewQueueCount).toBeGreaterThanOrEqual(layout.materialCoverageUnclassifiedCount)
+  expect(layout.materialCoverageSourceCount + layout.materialCoverageInferredCount).toBeGreaterThanOrEqual(6)
+  expect(layout.materialCoverageMissingDefinitionCount).toBe(0)
+  expect(layout.materialCoverageCheckCount).toBeGreaterThanOrEqual(6)
+  expect(layout.materialCoveragePassCheckCount).toBeGreaterThanOrEqual(layout.materialCoverageCheckCount - 1)
+  expect(layout.materialCoverageQueueEmptyCount).toBe(layout.materialCoverageReviewQueueCount === 0 ? 1 : 0)
   expect(layout.materialCatalogMaterialCount).toBeGreaterThanOrEqual(6)
   expect(layout.materialCatalogUsedMaterialCount).toBeGreaterThanOrEqual(6)
   expect(layout.materialCatalogMissingMaterialCount).toBe(0)
@@ -1170,6 +1203,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.materialCatalogScheduleOverflowCount).toBe(0)
   expect(layout.materialCatalogSectionScheduleOverflowCount).toBe(0)
   expect(layout.materialCatalogFamilyOverflowCount).toBe(0)
+  expect(layout.materialCoverageOverflowCount).toBe(0)
   expect(layout.optimizationCardCount).toBe(4)
   expect(layout.optimizationSourceCount).toBe(4)
   expect(layout.optimizationAfterBarCount).toBe(4)

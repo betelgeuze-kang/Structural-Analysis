@@ -4900,6 +4900,27 @@ body.structural-surface.command-center-shell .critical-triage__rows {
   min-width:0;
 }
 
+body.structural-surface.command-center-shell .critical-triage-table-head {
+  display:grid;
+  grid-template-columns:minmax(76px,.86fr) minmax(82px,.9fr) minmax(38px,.38fr) minmax(44px,.44fr) minmax(76px,.72fr);
+  align-items:center;
+  gap:6px;
+  min-width:0;
+  padding:0 7px 3px;
+  border-bottom:1px solid rgba(148,168,190,.12);
+  color:var(--muted);
+  font-size:7px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .critical-triage-table-head span {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
 body.structural-surface.command-center-shell .critical-triage-row {
   display:grid;
   grid-template-columns:minmax(76px,.86fr) minmax(82px,.9fr) minmax(38px,.38fr) minmax(44px,.44fr) minmax(76px,.72fr);
@@ -8979,6 +9000,141 @@ body.structural-surface.panel-inspection-shell canvas {
     display:grid;
     gap:8px;
     min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness {
+    display:grid;
+    grid-template-columns:minmax(150px,.72fr) minmax(0,1.5fr) minmax(128px,.48fr);
+    align-items:stretch;
+    gap:6px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(79,183,173,.18);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(79,183,173,.10), rgba(7,15,24,.42));
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness--needs_review {
+    border-color:rgba(230,169,93,.26);
+    background:linear-gradient(135deg, rgba(230,169,93,.10), rgba(7,15,24,.42));
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness--blocked {
+    border-color:rgba(239,125,115,.28);
+    background:linear-gradient(135deg, rgba(239,125,115,.10), rgba(7,15,24,.42));
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    padding:5px 6px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:7px;
+    background:rgba(255,255,255,.035);
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline span {
+    display:grid;
+    min-width:0;
+    gap:1px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline b,
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline em {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:850;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline em {
+    color:var(--muted);
+    font-size:8px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline strong {
+    color:var(--accent);
+    font-family:var(--font-display);
+    font-size:21px;
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline small {
+    color:var(--muted);
+    font-size:10px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__checks {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-check {
+    display:grid;
+    gap:1px;
+    min-width:0;
+    padding:4px 5px;
+    border:1px solid rgba(79,183,173,.14);
+    border-radius:7px;
+    background:rgba(79,183,173,.055);
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-check--review {
+    border-color:rgba(230,169,93,.24);
+    background:rgba(230,169,93,.07);
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-check b,
+  body.structural-surface.command-center-shell .material-coverage-check em {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-check b {
+    color:var(--text);
+    font-size:8px;
+    font-weight:850;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-check em {
+    color:var(--muted);
+    font-size:7px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-review-queue {
+    display:grid;
+    align-content:center;
+    gap:2px;
+    min-width:0;
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:7px;
+    background:rgba(7,15,24,.34);
+  }
+
+  body.structural-surface.command-center-shell .material-review-queue span {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--muted);
+    font-size:8px;
+    font-weight:700;
   }
 
   body.structural-surface.command-center-shell .material-catalog-summary {

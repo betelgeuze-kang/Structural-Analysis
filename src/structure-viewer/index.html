@@ -883,8 +883,10 @@ const STAGE_STORY_RULER_SCHEMA='structure-viewer-stage-story-ruler.v1';
 const STAGE_DRIFT_BANDS_SCHEMA='structure-viewer-stage-drift-bands.v1';
 const STAGE_LOAD_SUPPORT_GLYPHS_SCHEMA='structure-viewer-stage-load-support-glyphs.v1';
 const CRITICAL_TRIAGE_SCHEMA='structure-viewer-critical-triage.v1';
+const CRITICAL_MEMBERS_COMPACT_TABLE_SCHEMA='structure-viewer-critical-members-compact-table.v1';
 const OPTIMIZATION_DELTA_STRIP_SCHEMA='structure-viewer-optimization-delta-strip.v1';
 const PANEL_ZONE_STAGE_BADGE_SCHEMA='structure-viewer-panel-zone-stage-badge.v1';
+const MATERIAL_COVERAGE_READINESS_SCHEMA='structure-viewer-material-coverage-readiness.v1';
 let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;
 let sectionEditPreviewState=createEmptySectionEditPreviewState();
 let sectionEditApplyState=createEmptySectionEditApplyState();
@@ -5878,6 +5880,7 @@ function renderCriticalTriagePanel(cockpitModel=null){
   if(!(panel instanceof HTMLElement))return;
   const triage=buildCriticalTriageModel(cockpitModel||lastAnalysisCockpitModel);
   panel.dataset.criticalTriageSchema=CRITICAL_TRIAGE_SCHEMA;
+  panel.dataset.criticalMembersCompactTableSchema=CRITICAL_MEMBERS_COMPACT_TABLE_SCHEMA;
   panel.dataset.criticalTriageStatus=triage.status;
   panel.dataset.criticalTriageRowCount=String(triage.rowCount||0);
   panel.dataset.criticalTriageSourceCount=String(triage.sourceCount||0);
@@ -5903,16 +5906,23 @@ function renderCriticalTriagePanel(cockpitModel=null){
     :`${triage.rowCount} ranked`;
   panel.innerHTML=`
     <div class="critical-triage__head" data-critical-triage-head>
-      <span><b>Critical Triage</b><em>${escapeHtml(sourceLabel)} · D/C governed</em></span>
+      <span><b>Critical Members</b><em>Critical Triage · ${escapeHtml(sourceLabel)} · D/C governed</em></span>
       <strong>${escapeHtml(String(triage.highCount))} high</strong>
     </div>
-    <div class="critical-triage__rows" data-critical-triage-rows>
+    <div class="critical-triage-table-head" data-critical-members-compact-head data-critical-members-compact-table data-critical-members-compact-table-schema="${escapeHtml(CRITICAL_MEMBERS_COMPACT_TABLE_SCHEMA)}" role="row">
+      <span>ID</span>
+      <span>D/C</span>
+      <span>Drift</span>
+      <span>Status</span>
+      <span>Recommended Change</span>
+    </div>
+    <div class="critical-triage__rows" data-critical-triage-rows data-critical-members-compact-table data-critical-members-compact-table-schema="${escapeHtml(CRITICAL_MEMBERS_COMPACT_TABLE_SCHEMA)}">
       ${triage.rows.map(row=>{
         const ratioWidth=Math.max(4,Math.min(row.ratioPct,104)).toFixed(1);
         const driftWidth=Math.max(3,Math.min(row.driftPct,100)).toFixed(1);
         const selected=Boolean(row.id&&selectedMemberIds.has(row.id));
         const primary=Boolean(row.id&&row.id===selectedMemberId);
-        return `<button type="button" class="critical-triage-row critical-triage-row--${escapeHtml(row.statusTone)}${selected?' is-selected':''}${primary?' is-primary':''}" data-critical-triage-row data-critical-triage-member-id="${escapeHtml(row.id)}" data-critical-member-id="${escapeHtml(row.id)}" data-critical-status="${escapeHtml(row.statusKey)}" data-critical-ratio="${row.ratio.toFixed(3)}" aria-selected="${selected?'true':'false'}" aria-pressed="${selected?'true':'false'}" title="Focus ${escapeHtml(row.id)} · D/C ${row.ratio.toFixed(2)}">
+        return `<button type="button" class="critical-triage-row critical-triage-row--${escapeHtml(row.statusTone)}${selected?' is-selected':''}${primary?' is-primary':''}" data-critical-triage-row data-critical-members-compact-row data-critical-triage-member-id="${escapeHtml(row.id)}" data-critical-member-id="${escapeHtml(row.id)}" data-critical-status="${escapeHtml(row.statusKey)}" data-critical-ratio="${row.ratio.toFixed(3)}" aria-selected="${selected?'true':'false'}" aria-pressed="${selected?'true':'false'}" title="Focus ${escapeHtml(row.id)} · D/C ${row.ratio.toFixed(2)}">
           <span class="critical-triage-row__id"><b>${escapeHtml(String(row.rank))}</b><strong>${escapeHtml(row.id)}</strong><em>S${escapeHtml(row.story)} · ${escapeHtml(row.type)}</em></span>
           <span class="critical-triage-row__ratio">
             <span><b>D/C</b><strong>${row.ratio.toFixed(2)}</strong></span>
@@ -6364,11 +6374,98 @@ function buildMaterialMemberCatalogPanelModel(data=modelData||{}){
     rebarCodes,
   };
 }
+function buildMaterialCoverageReadinessModel(catalog={}){
+  const materialRows=Array.isArray(catalog.materialRows)?catalog.materialRows:[];
+  const sourceMaterialCount=materialRows.filter(row=>normalizeSelectionValue(row.source_status)==='source_material').length;
+  const inferredMaterialCount=materialRows.filter(row=>normalizeSelectionValue(row.source_status)==='element_inferred').length;
+  const missingMaterialCount=Math.max(0,Math.round(safeNumber(catalog.missingMaterialCount,0)));
+  const unclassifiedMaterialCount=Math.max(0,Math.round(safeNumber(catalog.unclassifiedMaterialCount,0)));
+  const materialCount=Math.max(0,Math.round(safeNumber(catalog.materialCount,materialRows.length)));
+  const usedMaterialCount=Math.max(0,Math.round(safeNumber(catalog.usedMaterialCount,0)));
+  const knownFamilyCount=Math.max(0,Math.round(safeNumber(catalog.knownMaterialFamilyCount,0)));
+  const ontologyFamilyCount=Math.max(0,Math.round(safeNumber(catalog.materialFamilyOntologyCount,MATERIAL_FAMILY_ONTOLOGY.length)));
+  const materialSectionLinkCount=Math.max(0,Math.round(safeNumber(catalog.materialSectionScheduleCount,0)));
+  const sectionMaterialLinkCount=Math.max(0,Math.round(safeNumber(catalog.sectionMaterialScheduleCount,0)));
+  const sectionCount=Math.max(0,Math.round(safeNumber(catalog.sectionCount,0)));
+  const thicknessCount=Math.max(0,Math.round(safeNumber(catalog.thicknessCount,0)));
+  const checks=[
+    {
+      key:'definitions',
+      label:'Material definitions',
+      ok:materialCount>0&&missingMaterialCount===0,
+      value:`${materialCount.toLocaleString()} total · ${sourceMaterialCount.toLocaleString()} source · ${inferredMaterialCount.toLocaleString()} inferred`,
+      fail:`${missingMaterialCount.toLocaleString()} missing definitions`,
+    },
+    {
+      key:'families',
+      label:'Family coverage',
+      ok:knownFamilyCount>=2&&ontologyFamilyCount>=45&&unclassifiedMaterialCount===0,
+      value:`${knownFamilyCount.toLocaleString()} used · ${ontologyFamilyCount.toLocaleString()} supported`,
+      fail:`${unclassifiedMaterialCount.toLocaleString()} unclassified`,
+    },
+    {
+      key:'sections',
+      label:'Section catalog',
+      ok:sectionCount>=180,
+      value:`${sectionCount.toLocaleString()} sections`,
+      fail:'section catalog below MIDAS33 baseline',
+    },
+    {
+      key:'links',
+      label:'Material-section links',
+      ok:materialSectionLinkCount>=6&&sectionMaterialLinkCount>=6,
+      value:`${materialSectionLinkCount.toLocaleString()} mat-sec · ${sectionMaterialLinkCount.toLocaleString()} sec-mat`,
+      fail:'schedule links below delivery baseline',
+    },
+    {
+      key:'thickness',
+      label:'Slab/wall thickness',
+      ok:thicknessCount>=30,
+      value:`${thicknessCount.toLocaleString()} thickness rows`,
+      fail:'thickness rows below delivery baseline',
+    },
+    {
+      key:'usage',
+      label:'Used material rows',
+      ok:usedMaterialCount>=6,
+      value:`${usedMaterialCount.toLocaleString()} used material rows`,
+      fail:'used material rows below delivery baseline',
+    },
+  ];
+  const failedChecks=checks.filter(check=>!check.ok);
+  const reviewQueueCount=missingMaterialCount+unclassifiedMaterialCount+failedChecks.length;
+  const score=Math.round(checks.filter(check=>check.ok).length/Math.max(checks.length,1)*100);
+  const status=!materialRows.length?'blocked':failedChecks.length?'needs_review':'ready';
+  return{
+    schemaVersion:MATERIAL_COVERAGE_READINESS_SCHEMA,
+    status,
+    score,
+    checks,
+    failedChecks,
+    reviewQueueCount,
+    sourceMaterialCount,
+    inferredMaterialCount,
+    missingMaterialCount,
+    unclassifiedMaterialCount,
+    materialCount,
+    usedMaterialCount,
+    knownFamilyCount,
+    ontologyFamilyCount,
+    materialSectionLinkCount,
+    sectionMaterialLinkCount,
+    sectionCount,
+    thicknessCount,
+  };
+}
 function renderMaterialMemberCatalogPanel(data=modelData||{}){
   const panel=document.getElementById('material-member-catalog-panel');
   if(!(panel instanceof HTMLElement))return;
   const catalog=buildMaterialMemberCatalogPanelModel(data);
+  const readiness=buildMaterialCoverageReadinessModel(catalog);
   panel.dataset.materialCatalogStatus=catalog.status;
+  panel.dataset.materialCoverageReadinessStatus=readiness.status;
+  panel.dataset.materialCoverageReadinessScore=String(readiness.score);
+  panel.dataset.materialCoverageReviewQueueCount=String(readiness.reviewQueueCount);
   panel.dataset.materialCount=String(catalog.materialCount);
   panel.dataset.usedMaterialCount=String(catalog.usedMaterialCount);
   panel.dataset.missingMaterialCount=String(catalog.missingMaterialCount);
@@ -6393,6 +6490,26 @@ function renderMaterialMemberCatalogPanel(data=modelData||{}){
   const familyRows=catalog.sectionFamilies.slice(0,4);
   const thicknessPreview=catalog.thicknessRows.slice(0,3);
   panel.innerHTML=`
+    <div class="material-coverage-readiness material-coverage-readiness--${escapeHtml(readiness.status)}" data-material-coverage-readiness data-material-coverage-schema="${escapeHtml(readiness.schemaVersion)}" data-material-coverage-status="${escapeHtml(readiness.status)}" data-material-coverage-score="${readiness.score}" data-material-review-queue-count="${readiness.reviewQueueCount}" data-material-source-count="${readiness.sourceMaterialCount}" data-material-inferred-count="${readiness.inferredMaterialCount}" data-material-missing-definition-count="${readiness.missingMaterialCount}" data-material-unclassified-count="${readiness.unclassifiedMaterialCount}">
+      <div class="material-coverage-readiness__headline">
+        <span>
+          <b>${readiness.status==='ready'?'Coverage Ready':readiness.status==='blocked'?'Coverage Blocked':'Coverage Review'}</b>
+          <em>${readiness.reviewQueueCount?`${readiness.reviewQueueCount.toLocaleString()} review items`:'No blocking material gaps'}</em>
+        </span>
+        <strong>${readiness.score}<small>%</small></strong>
+      </div>
+      <div class="material-coverage-readiness__checks">
+        ${readiness.checks.map(check=>`<span class="material-coverage-check material-coverage-check--${check.ok?'pass':'review'}" data-material-coverage-check data-material-coverage-check-key="${escapeHtml(check.key)}" data-material-coverage-check-status="${check.ok?'pass':'review'}" title="${escapeHtml(check.ok?check.value:check.fail)}">
+          <b>${escapeHtml(check.label)}</b>
+          <em>${escapeHtml(check.ok?check.value:check.fail)}</em>
+        </span>`).join('')}
+      </div>
+      <div class="material-review-queue" data-material-review-queue>
+        ${readiness.failedChecks.length
+          ?readiness.failedChecks.map(check=>`<span data-material-review-queue-item="${escapeHtml(check.key)}">${escapeHtml(check.label)} · ${escapeHtml(check.fail)}</span>`).join('')
+          :'<span data-material-review-queue-empty>source/inferred families, sections, links, and thickness rows pass delivery baseline</span>'}
+      </div>
+    </div>
     <div class="material-catalog-summary" data-material-catalog-summary>
       <span><b>${catalog.materialCount.toLocaleString()}</b><em>materials</em></span>
       <span><b>${catalog.sectionCount.toLocaleString()}</b><em>sections</em></span>

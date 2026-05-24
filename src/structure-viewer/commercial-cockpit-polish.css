@@ -1282,6 +1282,13 @@
     gap:5px;
   }
 
+  body.structural-surface.command-center-shell .critical-triage-table-head {
+    grid-template-columns:minmax(70px,.86fr) minmax(76px,.88fr) minmax(34px,.36fr) minmax(42px,.44fr) minmax(72px,.7fr);
+    gap:5px;
+    padding:0 5px 2px;
+    font-size:6.6px;
+  }
+
   body.structural-surface.command-center-shell .critical-triage-row__id strong,
   body.structural-surface.command-center-shell .critical-triage-row__ratio span strong,
   body.structural-surface.command-center-shell .critical-triage-row__drift b {
@@ -1335,6 +1342,46 @@
 
   body.structural-surface.command-center-shell .material-member-catalog-panel {
     gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness {
+    grid-template-columns:minmax(130px,.66fr) minmax(0,1.55fr) minmax(106px,.42fr);
+    gap:5px;
+    padding:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline {
+    padding:4px 5px;
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline b {
+    font-size:9px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline em,
+  body.structural-surface.command-center-shell .material-review-queue span {
+    font-size:7.25px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__headline strong {
+    font-size:19px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-readiness__checks {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-check {
+    padding:3px 4px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-check b {
+    font-size:7.5px;
+  }
+
+  body.structural-surface.command-center-shell .material-coverage-check em {
+    font-size:6.6px;
   }
 
   body.structural-surface.command-center-shell .material-catalog-summary span {
@@ -2340,6 +2387,11 @@
       gap:4px;
     }
 
+    body.structural-surface.command-center-shell .critical-triage-table-head {
+      gap:4px;
+      padding-inline:4px;
+    }
+
     body.structural-surface.command-center-shell .critical-triage-row__ratio small {
       display:none;
     }
@@ -2366,6 +2418,10 @@
     }
 
     body.structural-surface.command-center-shell .material-catalog-grid {
+      grid-template-columns:1fr;
+    }
+
+    body.structural-surface.command-center-shell .material-coverage-readiness {
       grid-template-columns:1fr;
     }
 

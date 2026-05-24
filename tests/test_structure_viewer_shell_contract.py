@@ -216,6 +216,10 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "renderCriticalTriagePanel" in text
     assert "buildCriticalTriageModel" in text
     assert "structure-viewer-critical-triage.v1" in text
+    assert "data-critical-members-compact-table" in text
+    assert "data-critical-members-compact-row" in text
+    assert "data-critical-members-compact-head" in text
+    assert "structure-viewer-critical-members-compact-table.v1" in text
     assert "__STRUCTURE_VIEWER_CRITICAL_TRIAGE_STATE__" in text
     assert 'id="panel-zone-evidence-panel"' in text
     assert "data-panel-zone-evidence" in text
@@ -242,6 +246,11 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "buildMaterialMemberCatalogPanelModel" in text
     assert "renderMaterialMemberCatalogPanel" in text
     assert "structure-viewer-material-member-catalog.v1" in text
+    assert "buildMaterialCoverageReadinessModel" in text
+    assert "data-material-coverage-readiness" in text
+    assert "data-material-coverage-schema" in text
+    assert "data-material-coverage-check" in text
+    assert "structure-viewer-material-coverage-readiness.v1" in text
     assert "MATERIAL_FAMILY_ONTOLOGY" in text
     assert "data-material-family-coverage" in text
     assert "data-material-family-chip" in text
@@ -263,6 +272,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
         ROOT / "src" / "structure-viewer" / "viewer-direct-model-normalizer.js"
     ).read_text(encoding="utf-8")
     assert "material-catalog-row__props" in text
+    assert "material-coverage-readiness" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "material-coverage-readiness" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
     assert "data-material-section-schedule" in text
     assert "data-material-section-row" in text
     assert "material_section_schedule_count" in text
