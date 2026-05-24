@@ -37,6 +37,12 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
     probe = _write_json(tmp_path / "probe.json", {"contract_pass": True})
     visual = _write_json(tmp_path / "visual.json", {"contract_pass": True})
     support = _write_json(tmp_path / "support.json", {"contract_pass": True})
+    panel_zone_artifact = _write_json(tmp_path / "panel_zone_clash_artifact.json", {"contract_pass": True})
+    panel_zone_report = _write_json(tmp_path / "panel_zone_clash_report.json", {"contract_pass": True})
+    panel_zone_handoff = _write_json(
+        tmp_path / "panel_zone_solver_verified_handoff_report.json",
+        {"contract_pass": True},
+    )
     source_model = _write_json(
         tmp_path / "model.json",
         {"model": {"nodes": [{"id": "N1", "x": 0, "y": 0, "z": 0}], "elements": [{"id": "E1"}]}},
@@ -57,6 +63,9 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
         viewer_visual_regression_baseline=visual,
         support_bundle_manifest=support,
         source_model=source_model,
+        panel_zone_clash_artifact=panel_zone_artifact,
+        panel_zone_clash_report=panel_zone_report,
+        panel_zone_solver_handoff_report=panel_zone_handoff,
     )
 
     assert payload["schema_version"] == "workstation-delivery-package-manifest.v1"
@@ -90,6 +99,9 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
     assert any(row["path"] == "data/revision_policy.json" for row in payload["file_rows"])
     assert any(row["path"] == "data/redelivery_comparison_manifest.json" for row in payload["file_rows"])
     assert any(row["path"] == "data/signing_manifest.json" for row in payload["file_rows"])
+    assert any(row["path"] == "evidence/panel_zone_clash_artifact.json" for row in payload["file_rows"])
+    assert any(row["path"] == "evidence/panel_zone_clash_report.json" for row in payload["file_rows"])
+    assert any(row["path"] == "evidence/panel_zone_solver_verified_handoff_report.json" for row in payload["file_rows"])
     assert payload["job_record"]["schema_version"] == "workstation-job-record.v1"
     assert payload["job_folder_contract"]["pass"] is True
     job_dir = Path(payload["job_folder_contract"]["job_dir"])

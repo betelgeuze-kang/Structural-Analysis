@@ -165,10 +165,17 @@ Resolved local productization gaps:
     - Dense 1600x900 browser smoke verifies the control is ready, synced to internal `100`, and overflow-free.
     - Customer-open package smoke now requires `deformation_scale_control`, raising `current_cockpit_delivery` marker coverage to 28/28.
     - Regenerated the delivery package artifacts; workstation delivery smoke/readiness/support remain PASS with latest job `20260524T162906-f8616d87d2ed53b4`.
+  - Added solver-verified Panel Zone / Joint Evidence coverage:
+    - The right rail now exposes `structure-viewer-panel-zone-evidence.v1` between Result Envelope and Delivery Review Receipt.
+    - The panel shows joint-geometry, rebar-anchorage, 3D clash, exact/fallback validation counts, candidate member rows, member-focus actions, source path, and `solver_verified` boundary without claiming autonomous approval.
+    - Workstation delivery package now includes `evidence/panel_zone_clash_artifact.json`, `evidence/panel_zone_clash_report.json`, and `evidence/panel_zone_solver_verified_handoff_report.json`.
+    - Dense 1600x900 browser smoke verifies the panel is ready, has 3/3 validated sources, 0 fallback sources, at least 45 candidates, at least 3 member rows, and zero overflow.
+    - Customer-open package smoke now requires `panel_zone_evidence`, raising `current_cockpit_delivery` marker coverage to 29/29.
+    - Regenerated the delivery package artifacts; workstation delivery smoke/readiness/support remain PASS with latest job `20260524T164604-81d7549969225809`.
 
 ## Next Recursive Candidates
 
 1. Add detached signature verification flow after explicit key/signature material exists.
 2. Add customer-facing delivery index cross-links to QA, diff, signing, and report metadata files.
-3. Continue viewer fidelity toward the reference image with deeper model/result evidence richness and high-density edge-case refinements beyond the now-covered top project selector, top run-control strip, stage review controls, commercial deformation scale control, result evidence receipt, Result Step Schedule, Result Envelope, contour scale evidence, load-case evidence rows, utilization heatmap evidence, viewport tool rail, 3D overlay receipt with visual-evidence legend, stage result receipt, KPI evidence cards, Optimization Summary evidence receipts, Critical Members review rows, Materials & Members catalog, Material Schedule links, Section Schedule links, Material Family Coverage chips, 47-family Material Ontology Breadth receipt, lower-chart axis labeling, and 1600x900 cockpit layout.
+3. Continue viewer fidelity toward the reference image with deeper model/result evidence richness and high-density edge-case refinements beyond the now-covered top project selector, top run-control strip, stage review controls, commercial deformation scale control, result evidence receipt, Result Step Schedule, Result Envelope, Panel Zone / Joint Evidence, contour scale evidence, load-case evidence rows, utilization heatmap evidence, viewport tool rail, 3D overlay receipt with visual-evidence legend, stage result receipt, KPI evidence cards, Optimization Summary evidence receipts, Critical Members review rows, Materials & Members catalog, Material Schedule links, Section Schedule links, Material Family Coverage chips, 47-family Material Ontology Breadth receipt, lower-chart axis labeling, and 1600x900 cockpit layout.
 4. Reduce remaining operator-prompt friction by keeping verification/build paths non-interactive and using saved approval prefixes for repeated browser/sandbox gates.

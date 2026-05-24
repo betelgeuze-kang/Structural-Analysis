@@ -164,6 +164,7 @@ function staticViewerChecks(extractRoot, packagePath) {
     stage_result_receipt: viewerText.includes('data-stage-result-receipt') || viewerText.includes('stage-result-receipt'),
     result_step_schedule: viewerText.includes('data-result-step-schedule') && viewerText.includes('data-result-step-row') && viewerText.includes('renderResultStepSchedule') && viewerText.includes('structure-viewer-result-step-schedule.v1'),
     result_envelope: viewerText.includes('data-result-envelope') && viewerText.includes('data-result-envelope-row') && viewerText.includes('renderResultEnvelope') && viewerText.includes('structure-viewer-result-envelope.v1'),
+    panel_zone_evidence: viewerText.includes('data-panel-zone-evidence') && viewerText.includes('data-panel-zone-member-row') && viewerText.includes('renderPanelZoneEvidencePanel') && viewerText.includes('structure-viewer-panel-zone-evidence.v1'),
     delivery_review_receipt: viewerText.includes('data-delivery-review-receipt') && viewerText.includes('renderDeliveryReviewReceipt') && viewerText.includes('structure-viewer-delivery-review-receipt.v1'),
     material_member_catalog: viewerText.includes('data-material-member-catalog') && viewerText.includes('renderMaterialMemberCatalogPanel') && viewerText.includes('structure-viewer-material-member-catalog.v1'),
     material_family_coverage: viewerText.includes('data-material-family-coverage') && viewerText.includes('data-material-family-chip') && viewerText.includes('MATERIAL_FAMILY_ONTOLOGY'),

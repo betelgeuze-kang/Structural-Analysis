@@ -447,6 +447,9 @@
     <div id="result-envelope-panel" class="result-envelope-panel" data-result-envelope data-result-envelope-status="pending" data-result-envelope-count="0">
       <div class="panel-placeholder">Result envelope appears when a model artifact is loaded.</div>
     </div>
+    <div id="panel-zone-evidence-panel" class="panel-zone-evidence-panel" data-panel-zone-evidence data-panel-zone-schema="structure-viewer-panel-zone-evidence.v1" data-panel-zone-status="pending" data-panel-zone-source-count="0" data-panel-zone-validated-source-count="0" data-panel-zone-fallback-source-count="0">
+      <div class="panel-placeholder">Panel-zone and joint evidence appears when solver-verified handoff evidence is available.</div>
+    </div>
     <div id="delivery-review-receipt" class="delivery-review-receipt" data-delivery-review-receipt data-delivery-status="pending">
       <span class="delivery-review-receipt__row"><b>Delivery</b><strong>--</strong><em>Awaiting model</em></span>
     </div>
@@ -703,6 +706,10 @@ import {
   ANALYSIS_COCKPIT_KPI_KEYS,
   buildAnalysisCockpitModel,
 } from './viewer-analysis-cockpit-model.js';
+import {
+  PANEL_ZONE_EVIDENCE_SCHEMA,
+  buildPanelZoneEvidenceModel,
+} from './viewer-panel-zone-evidence.js';
 import {
   buildRealDrawingQualityPanelHtml,
 } from './viewer-real-drawing-panel-renderer.js';
@@ -6614,6 +6621,65 @@ function renderResultEnvelope(cockpitModel=null){
     button.addEventListener('click',()=>focusMemberSearchResult(button.getAttribute('data-result-envelope-member-id')||''));
   });
 }
+function renderPanelZoneEvidencePanel(cockpitModel=null){
+  const panel=document.getElementById('panel-zone-evidence-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const model=buildPanelZoneEvidenceModel(modelData||{}, {cockpitModel:cockpitModel||lastAnalysisCockpitModel});
+  panel.dataset.panelZoneSchema=PANEL_ZONE_EVIDENCE_SCHEMA;
+  panel.dataset.panelZoneStatus=model.status;
+  panel.dataset.panelZoneSourceCount=String(model.sourceCount||0);
+  panel.dataset.panelZoneValidatedSourceCount=String(model.validatedSourceCount||0);
+  panel.dataset.panelZoneExactSourceCount=String(model.exactSourceCount||0);
+  panel.dataset.panelZoneFallbackSourceCount=String(model.fallbackSourceCount||0);
+  panel.dataset.panelZoneCandidateMemberCount=String(model.candidateMemberCount||0);
+  panel.dataset.panelZoneValidatedMemberCount=String(model.validatedMemberCount||0);
+  panel.dataset.panelZoneExactMemberCount=String(model.exactMemberCount||0);
+  panel.dataset.panelZoneValidatedRowCount=String(model.validatedRowCount||0);
+  panel.dataset.panelZoneInterferenceRowCount=String(model.interferenceRowCount||0);
+  panel.dataset.panelZoneBoundary=model.boundary||'';
+  panel.dataset.panelZoneSourcePath=model.sourcePath||'';
+  panel.dataset.panelZonePrimaryMember=model.primaryMemberId||'';
+  window.__STRUCTURE_VIEWER_PANEL_ZONE_EVIDENCE_STATE__={...model};
+  if(model.status==='blocked'||!model.rows.length){
+    panel.innerHTML='<div class="panel-placeholder">Panel-zone evidence is blocked or missing for this model.</div>';
+    return;
+  }
+  const statusLabel=model.status==='ready'?'Solver verified':'Needs review';
+  panel.innerHTML=`
+    <div class="panel-zone-evidence__head" data-panel-zone-evidence-head>
+      <span>
+        <b>Panel Zone / Joint</b>
+        <em>${escapeHtml(statusLabel)} · ${escapeHtml(model.boundary||'--')}</em>
+      </span>
+      <strong>${escapeHtml(String(model.validatedSourceCount))}/${escapeHtml(String(model.sourceCount))} sources</strong>
+    </div>
+    <div class="panel-zone-evidence__rows" data-panel-zone-evidence-rows>
+      ${model.rows.map(row=>`
+        <span class="panel-zone-evidence-row panel-zone-evidence-row--${escapeHtml(normalizeAnalysisTone(row.tone||'neutral'))}" data-panel-zone-row data-panel-zone-row-key="${escapeHtml(row.key)}">
+          <b>${escapeHtml(row.label)}</b>
+          <strong>${escapeHtml(row.value)}</strong>
+          <em>${escapeHtml(row.detail)}</em>
+        </span>`).join('')}
+    </div>
+    <div class="panel-zone-candidate-list" data-panel-zone-candidate-list>
+      ${model.candidateRows.map(row=>`
+        <button type="button" class="panel-zone-candidate-row" data-panel-zone-member-row data-panel-zone-member-id="${escapeHtml(row.memberId)}" title="Focus panel-zone candidate ${escapeHtml(row.memberId)}">
+          <span><b>${escapeHtml(row.memberId)}</b><em>${escapeHtml(row.story||'--')} · ${escapeHtml(row.memberType||'member')}</em></span>
+          <span><strong>${escapeHtml(row.section||'--')}</strong><em>detail ${escapeHtml(formatPercentLabel(row.detailingViolationRatio))}</em></span>
+        </button>`).join('')}
+    </div>
+    <div class="panel-zone-evidence__foot" data-panel-zone-evidence-foot>
+      <span>${escapeHtml(model.sourceLabel||'Solver evidence')}</span>
+      <em>${escapeHtml(model.closureMode||'--')}</em>
+    </div>`;
+  panel.querySelectorAll('[data-panel-zone-member-id]').forEach(button=>{
+    button.addEventListener('click',()=>focusMemberSearchResult(button.getAttribute('data-panel-zone-member-id')||''));
+  });
+}
+function formatPercentLabel(value,digits=0){
+  const number=safeNumber(value,0)*100;
+  return `${number.toLocaleString('en-US',{maximumFractionDigits:digits,minimumFractionDigits:digits})}%`;
+}
 function getResolvedAnalysisTimeline(cockpitModel=null){
   const timeline=cockpitModel?.timeline;
   if(!timeline)return null;
@@ -6660,12 +6726,14 @@ function renderAnalysisTimeline(cockpitModel=null){
   if(!(node instanceof HTMLElement)){
     renderResultStepSchedule(activeModel);
     renderResultEnvelope(activeModel);
+    renderPanelZoneEvidencePanel(activeModel);
     return;
   }
   if(!timeline){
     node.textContent='Load case -- | Step -- / -- | Solver --';
     renderResultStepSchedule(activeModel);
     renderResultEnvelope(activeModel);
+    renderPanelZoneEvidencePanel(activeModel);
     renderStageResultReceipt(activeModel,contourContext);
     syncTopRunControl({cockpitModel:activeModel});
     return;
@@ -6690,6 +6758,7 @@ function renderAnalysisTimeline(cockpitModel=null){
     <span class="analysis-timeline-field"><b>Run Time</b><strong>${escapeHtml(timeline.runTime||'--')}</strong></span>`;
   renderResultStepSchedule(activeModel);
   renderResultEnvelope(activeModel);
+  renderPanelZoneEvidencePanel(activeModel);
   renderStageResultReceipt(activeModel,contourContext);
   syncTopRunControl({cockpitModel:activeModel});
 }
@@ -7333,6 +7402,7 @@ function buildUI(data){
   renderKpiSummary(statEntries,cockpitModel);
   renderAnalysisResultEvidence(cockpitModel);
   renderResultEnvelope(cockpitModel);
+  renderPanelZoneEvidencePanel(cockpitModel);
   renderDeliveryReviewReceipt(cockpitModel);
   renderOptimizationSummaryPanel(cockpitModel);
   renderCriticalMembersPanel(cockpitModel);

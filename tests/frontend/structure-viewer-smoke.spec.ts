@@ -491,6 +491,29 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      panelZoneStatus: document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-status') || '',
+      panelZoneSchema: document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-schema') || '',
+      panelZoneSourceCount: Number(document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-source-count') || '0'),
+      panelZoneValidatedSourceCount: Number(document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-validated-source-count') || '0'),
+      panelZoneExactSourceCount: Number(document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-exact-source-count') || '0'),
+      panelZoneFallbackSourceCount: Number(document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-fallback-source-count') || '0'),
+      panelZoneCandidateMemberCount: Number(document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-candidate-member-count') || '0'),
+      panelZoneValidatedMemberCount: Number(document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-validated-member-count') || '0'),
+      panelZoneValidatedRowCount: Number(document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-validated-row-count') || '0'),
+      panelZoneInterferenceRowCount: Number(document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-interference-row-count') || '0'),
+      panelZoneBoundary: document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-boundary') || '',
+      panelZoneSourcePath: document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-source-path') || '',
+      panelZonePrimaryMember: document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-primary-member') || '',
+      panelZoneRowCount: document.querySelectorAll('[data-panel-zone-evidence] [data-panel-zone-row]').length,
+      panelZoneMemberRowCount: document.querySelectorAll('[data-panel-zone-evidence] [data-panel-zone-member-row]').length,
+      panelZoneHasJoint: Boolean(document.querySelector('[data-panel-zone-row-key="joint-geometry"]')),
+      panelZoneHasAnchorage: Boolean(document.querySelector('[data-panel-zone-row-key="rebar-anchorage"]')),
+      panelZoneHasClash: Boolean(document.querySelector('[data-panel-zone-row-key="clash"]')),
+      panelZoneWindowState: window.__STRUCTURE_VIEWER_PANEL_ZONE_EVIDENCE_STATE__ || null,
+      panelZoneOverflowCount: [...document.querySelectorAll('[data-panel-zone-evidence], [data-panel-zone-evidence] [data-panel-zone-row], [data-panel-zone-evidence] [data-panel-zone-member-row], [data-panel-zone-evidence] .panel-zone-evidence__head')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       deliveryStatus: document.querySelector('[data-delivery-review-receipt]')?.getAttribute('data-delivery-status') || '',
       deliverySheetStatus: document.querySelector('[data-delivery-review-receipt]')?.getAttribute('data-delivery-sheet-status') || '',
       deliverySheetCount: Number(document.querySelector('[data-delivery-review-receipt]')?.getAttribute('data-delivery-sheet-count') || '0'),
@@ -730,6 +753,26 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.resultEnvelopeHasUtilization).toBe(true)
   expect(layout.resultEnvelopeMemberRowCount).toBeGreaterThanOrEqual(1)
   expect(layout.resultEnvelopeOverflowCount).toBe(0)
+  expect(layout.panelZoneStatus).toBe('ready')
+  expect(layout.panelZoneSchema).toBe('structure-viewer-panel-zone-evidence.v1')
+  expect(layout.panelZoneSourceCount).toBe(3)
+  expect(layout.panelZoneValidatedSourceCount).toBe(3)
+  expect(layout.panelZoneExactSourceCount).toBe(3)
+  expect(layout.panelZoneFallbackSourceCount).toBe(0)
+  expect(layout.panelZoneCandidateMemberCount).toBeGreaterThanOrEqual(45)
+  expect(layout.panelZoneValidatedMemberCount).toBeGreaterThanOrEqual(1)
+  expect(layout.panelZoneValidatedRowCount).toBeGreaterThanOrEqual(3)
+  expect(layout.panelZoneInterferenceRowCount).toBeGreaterThanOrEqual(45)
+  expect(layout.panelZoneBoundary).toContain('solver')
+  expect(layout.panelZoneSourcePath).toContain('panel_zone_clash_artifact')
+  expect(layout.panelZonePrimaryMember).not.toBe('')
+  expect(layout.panelZoneRowCount).toBeGreaterThanOrEqual(4)
+  expect(layout.panelZoneMemberRowCount).toBeGreaterThanOrEqual(3)
+  expect(layout.panelZoneHasJoint).toBe(true)
+  expect(layout.panelZoneHasAnchorage).toBe(true)
+  expect(layout.panelZoneHasClash).toBe(true)
+  expect(layout.panelZoneWindowState?.status).toBe('ready')
+  expect(layout.panelZoneOverflowCount).toBe(0)
   expect(layout.deliveryStatus).not.toBe('pending')
   expect(layout.deliveryStatus).not.toBe('blocked')
   expect(layout.deliverySheetStatus).toBe('linked')

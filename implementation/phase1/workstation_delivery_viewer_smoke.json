@@ -1,6 +1,6 @@
 {
   "schema_version": "workstation-delivery-viewer-smoke.v1",
-  "generated_at": "2026-05-24T16:29:30.910Z",
+  "generated_at": "2026-05-24T16:46:23.054Z",
   "contract_pass": true,
   "reason_code": "PASS",
   "status": "ready",
@@ -19,7 +19,7 @@
     "checksum_self_test": {
       "pass": true,
       "reason": "PASS",
-      "checked_rows": 33,
+      "checked_rows": 36,
       "mismatches": []
     },
     "viewer_markers": {
@@ -36,8 +36,8 @@
     },
     "commercial_cockpit_alignment": {
       "status": "current_cockpit_delivery",
-      "marker_count": 28,
-      "required_marker_count_for_current_cockpit": 28,
+      "marker_count": 29,
+      "required_marker_count_for_current_cockpit": 29,
       "markers": {
         "structural_insight_title": true,
         "cockpit_polish_css": true,
@@ -58,6 +58,7 @@
         "stage_result_receipt": true,
         "result_step_schedule": true,
         "result_envelope": true,
+        "panel_zone_evidence": true,
         "delivery_review_receipt": true,
         "material_member_catalog": true,
         "material_family_coverage": true,
@@ -74,7 +75,7 @@
   "browser_checks": {
     "pass": true,
     "reason": "PASS",
-    "opened_url": "http://127.0.0.1:36027/viewer.html",
+    "opened_url": "http://127.0.0.1:45193/viewer.html",
     "viewport": {
       "width": 1440,
       "height": 1000

@@ -34,6 +34,9 @@ DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE = Path("implementation/phase1/structure
 DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE = Path("implementation/phase1/structure_viewer_visual_regression_baseline.json")
 DEFAULT_SUPPORT_BUNDLE_MANIFEST = Path("implementation/phase1/support_bundle_manifest.json")
 DEFAULT_SOURCE_MODEL = Path("implementation/phase1/open_data/midas/midas_model.json")
+DEFAULT_PANEL_ZONE_CLASH_ARTIFACT = Path("implementation/phase1/panel_zone_clash_artifact.json")
+DEFAULT_PANEL_ZONE_CLASH_REPORT = Path("implementation/phase1/panel_zone_clash_report.json")
+DEFAULT_PANEL_ZONE_SOLVER_HANDOFF_REPORT = Path("implementation/phase1/panel_zone_solver_verified_handoff_report.json")
 
 
 CLAIM_BOUNDARY = (
@@ -101,7 +104,7 @@ Open `viewer.html` for the interactive review surface and `report.pdf` for the p
 Package sections:
 - `drawings/`: SVG drawing sheets and callout references.
 - `data/`: JSON/CSV artifacts, hardware profile, service budget, and client input validation.
-- `evidence/`: local viewer probes, visual regression evidence, and support/readiness manifests.
+- `evidence/`: local viewer probes, visual regression evidence, panel-zone solver-verified handoff evidence, and support/readiness manifests.
 - `manifest.json`: package file list, checksums, source references, and claim boundary.
 - `checksums.sha256`: SHA-256 verification rows for package contents.
 
@@ -122,7 +125,8 @@ def _delivery_index_text() -> str:
 2. `viewer.html` for the interactive model/result review.
 3. `drawings/` for SVG sheets and callout references.
 4. `data/client_input_validation_report.json` for input readiness and missing-data status.
-5. `manifest.json` and `checksums.sha256` for file provenance and integrity.
+5. `evidence/panel_zone_clash_artifact.json` for solver-verified panel-zone/joint handoff evidence when present.
+6. `manifest.json` and `checksums.sha256` for file provenance and integrity.
 
 ## Acceptance Checklist
 
@@ -869,6 +873,9 @@ def build_workstation_delivery_package(
     viewer_visual_regression_baseline: Path = DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE,
     support_bundle_manifest: Path = DEFAULT_SUPPORT_BUNDLE_MANIFEST,
     source_model: Path = DEFAULT_SOURCE_MODEL,
+    panel_zone_clash_artifact: Path = DEFAULT_PANEL_ZONE_CLASH_ARTIFACT,
+    panel_zone_clash_report: Path = DEFAULT_PANEL_ZONE_CLASH_REPORT,
+    panel_zone_solver_handoff_report: Path = DEFAULT_PANEL_ZONE_SOLVER_HANDOFF_REPORT,
 ) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="workstation-delivery-build-") as temp:
         generated_at = _now_utc_iso()
@@ -911,6 +918,9 @@ def build_workstation_delivery_package(
             ("viewer_browser_performance_probe.json", viewer_browser_performance_probe),
             ("viewer_visual_regression_baseline.json", viewer_visual_regression_baseline),
             ("support_bundle_manifest.json", support_bundle_manifest),
+            ("panel_zone_clash_artifact.json", panel_zone_clash_artifact),
+            ("panel_zone_clash_report.json", panel_zone_clash_report),
+            ("panel_zone_solver_verified_handoff_report.json", panel_zone_solver_handoff_report),
         ]
         for name, source in data_sources:
             _copy_if_exists(source, data_dir / name)
@@ -925,6 +935,9 @@ def build_workstation_delivery_package(
             {"label": "hardware_profile", "path": str(hardware_profile), "available": hardware_profile.exists()},
             {"label": "service_budget", "path": str(service_budget), "available": service_budget.exists()},
             {"label": "source_model", "path": str(source_model), "available": source_model.exists()},
+            {"label": "panel_zone_clash_artifact", "path": str(panel_zone_clash_artifact), "available": panel_zone_clash_artifact.exists()},
+            {"label": "panel_zone_clash_report", "path": str(panel_zone_clash_report), "available": panel_zone_clash_report.exists()},
+            {"label": "panel_zone_solver_handoff_report", "path": str(panel_zone_solver_handoff_report), "available": panel_zone_solver_handoff_report.exists()},
         ]
         current_job_id, input_hash = _job_identity(input_refs, generated_at)
         previous_deliveries = _previous_delivery_rows(job_root)
@@ -1107,6 +1120,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--viewer-visual-regression-baseline", type=Path, default=DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE)
     parser.add_argument("--support-bundle-manifest", type=Path, default=DEFAULT_SUPPORT_BUNDLE_MANIFEST)
     parser.add_argument("--source-model", type=Path, default=DEFAULT_SOURCE_MODEL)
+    parser.add_argument("--panel-zone-clash-artifact", type=Path, default=DEFAULT_PANEL_ZONE_CLASH_ARTIFACT)
+    parser.add_argument("--panel-zone-clash-report", type=Path, default=DEFAULT_PANEL_ZONE_CLASH_REPORT)
+    parser.add_argument("--panel-zone-solver-handoff-report", type=Path, default=DEFAULT_PANEL_ZONE_SOLVER_HANDOFF_REPORT)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
@@ -1129,6 +1145,9 @@ def main(argv: list[str] | None = None) -> int:
         viewer_visual_regression_baseline=args.viewer_visual_regression_baseline,
         support_bundle_manifest=args.support_bundle_manifest,
         source_model=args.source_model,
+        panel_zone_clash_artifact=args.panel_zone_clash_artifact,
+        panel_zone_clash_report=args.panel_zone_clash_report,
+        panel_zone_solver_handoff_report=args.panel_zone_solver_handoff_report,
     )
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["summary_line"])
     return 1 if args.fail_blocked and not payload["contract_pass"] else 0

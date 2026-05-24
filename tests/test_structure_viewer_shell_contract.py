@@ -22,6 +22,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     analysis_cockpit_text = (
         ROOT / "src" / "structure-viewer" / "viewer-analysis-cockpit-model.js"
     ).read_text(encoding="utf-8")
+    panel_zone_evidence_text = (
+        ROOT / "src" / "structure-viewer" / "viewer-panel-zone-evidence.js"
+    ).read_text(encoding="utf-8")
     panel_model_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-model.js").read_text(
         encoding="utf-8"
     )
@@ -125,6 +128,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "viewer-side-panel-model.js" in text
     assert "viewer-stats-summary.js" in text
     assert "viewer-analysis-cockpit-model.js" in text
+    assert "viewer-panel-zone-evidence.js" in text
     assert "viewer-drawing-handoff-panel-renderer.js" in text
     assert "viewer-stage-result-callouts-renderer.js" in text
     assert "buildAnalysisCockpitModel" in text
@@ -171,6 +175,15 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "structure-viewer-result-envelope.v1" in text
     assert "data-result-envelope-row" in text
     assert "data-result-envelope-member-id" in text
+    assert 'id="panel-zone-evidence-panel"' in text
+    assert "data-panel-zone-evidence" in text
+    assert "data-panel-zone-member-row" in text
+    assert "renderPanelZoneEvidencePanel" in text
+    assert "buildPanelZoneEvidenceModel" in text
+    assert "structure-viewer-panel-zone-evidence.v1" in text
+    assert "PANEL_ZONE_EVIDENCE_SCHEMA" in panel_zone_evidence_text
+    assert "panel_zone_clash_artifact.json" in panel_zone_evidence_text
+    assert "panel_zone_solver_verified_handoff_report.json" in panel_zone_evidence_text
     assert "data-delivery-review-receipt" in text
     assert "buildDeliveryReviewReceiptModel" in text
     assert "renderDeliveryReviewReceipt" in text

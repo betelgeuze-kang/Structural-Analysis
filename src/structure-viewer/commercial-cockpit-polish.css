@@ -903,6 +903,59 @@
     font-size:8px;
   }
 
+  body.structural-surface.command-center-shell .panel-zone-evidence-panel {
+    gap:4px;
+    margin-top:5px;
+    padding:5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-evidence__head {
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-evidence__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-evidence__head em,
+  body.structural-surface.command-center-shell .panel-zone-evidence__head strong,
+  body.structural-surface.command-center-shell .panel-zone-evidence__foot {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-evidence__rows {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-evidence-row {
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-evidence-row b,
+  body.structural-surface.command-center-shell .panel-zone-evidence-row em,
+  body.structural-surface.command-center-shell .panel-zone-candidate-row em {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-evidence-row strong,
+  body.structural-surface.command-center-shell .panel-zone-candidate-row b,
+  body.structural-surface.command-center-shell .panel-zone-candidate-row strong {
+    font-size:7.5px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-candidate-list {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-candidate-row {
+    grid-template-columns:minmax(58px,.65fr) minmax(0,1fr);
+    padding:4px 5px;
+    gap:5px;
+    border-radius:6px;
+  }
+
   body.structural-surface.command-center-shell .delivery-review-receipt {
     gap:4px;
     margin-top:5px;
@@ -1870,6 +1923,23 @@
     body.structural-surface.command-center-shell .result-envelope-row__metric strong,
     body.structural-surface.command-center-shell .result-envelope-row__govern b {
       font-size:7.5px;
+    }
+
+    body.structural-surface.command-center-shell .panel-zone-evidence-panel {
+      gap:3px;
+      margin-top:4px;
+      padding:4px;
+    }
+
+    body.structural-surface.command-center-shell .panel-zone-evidence-row {
+      padding:3px 4px;
+      gap:0;
+    }
+
+    body.structural-surface.command-center-shell .panel-zone-candidate-row {
+      min-height:24px;
+      padding:3px 4px;
+      gap:4px;
     }
 
     body.structural-surface.command-center-shell .delivery-review-receipt {
