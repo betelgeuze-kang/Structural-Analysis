@@ -160,6 +160,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "renderStageDriftBands" in text
     assert "positionStageDriftBands" in text
     assert "__STRUCTURE_VIEWER_STAGE_DRIFT_BANDS_STATE__" in text
+    assert 'data-stage-overlay-occlusion-budget="dense-model-protagonist"' in text
     assert "data-stage-review-controls" in text
     assert "data-stage-view-mode-select" in text
     assert "data-stage-model-stack" in text
@@ -174,6 +175,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-contour-scale-evidence" in text
     assert "data-contour-scale-ticks" in text
     assert "data-contour-colorbar" in text
+    assert 'data-stage-results-priority="first-stage-viewport"' in text
+    assert 'data-stage-loadcases-priority="after-results"' in text
+    assert text.index('id="contour-section"') < text.index('id="loadcases-section"')
     assert "renderContourScaleEvidence" in text
     assert "data-analysis-result-evidence" in text
     assert "renderAnalysisResultEvidence" in text

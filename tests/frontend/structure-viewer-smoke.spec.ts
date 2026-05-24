@@ -306,11 +306,16 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     const footer = rectFor('.instrument-footer')
     const chartStrip = rectFor('#analysis-cockpit-chart-strip')
     const rightPanel = rectFor('#right-panel')
+    const stageFrame = rectFor('.stage-frame')
     const callouts = rectFor('[data-stage-result-callouts]')
     const stageReceipt = rectFor('#stage-result-receipt')
     const stageOverlayReceipt = rectFor('[data-stage-overlay-receipt]')
     const stageLoadSupportGlyphs = rectFor('[data-stage-load-support-glyphs]')
     const stageReviewControls = rectFor('[data-stage-review-controls]')
+    const stageOverlayPanel = rectFor('.stage-overlay-panel--left')
+    const contourSection = rectFor('#contour-section')
+    const contourScale = rectFor('[data-contour-scale-evidence]')
+    const loadCasesSection = rectFor('#loadcases-section')
     const stageStoryRuler = rectFor('[data-stage-story-ruler]')
     const stageDriftBands = rectFor('[data-stage-drift-bands]')
     const stageCriticalHotspots = rectFor('[data-stage-critical-hotspots]')
@@ -321,8 +326,49 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     const toolRail = rectFor('[data-viewport-tool-rail]')
     const topRunControl = rectFor('[data-top-run-control]')
     const topProjectSelect = document.querySelector('[data-shell-project-select]') as HTMLSelectElement | null
+    const stageOverlayBudgetSelectors = [
+      '[data-stage-result-callouts]',
+      '[data-stage-drift-band]',
+      '[data-stage-critical-hotspot]',
+      '[data-panel-zone-stage-badge]',
+      '[data-stage-story-ruler-row]',
+      '[data-stage-overlay-receipt]',
+      '[data-viewport-selection-focus-badge].is-visible',
+    ]
+    const overlayBudgetRects = stageOverlayBudgetSelectors.flatMap((selector) => {
+      return [...document.querySelectorAll(selector)].flatMap((node) => {
+        if (!(node instanceof HTMLElement)) return []
+        const style = getComputedStyle(node)
+        const rect = node.getBoundingClientRect()
+        if (style.display === 'none' || style.visibility === 'hidden' || rect.width <= 0 || rect.height <= 0) return []
+        return [{
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        }]
+      })
+    })
+    const stageCentralClearRect = viewport
+      ? {
+        left: viewport.left + viewport.width * 0.25,
+        right: viewport.left + viewport.width * 0.75,
+        top: viewport.top + viewport.height * 0.18,
+        bottom: viewport.top + viewport.height * 0.82,
+        width: viewport.width * 0.5,
+        height: viewport.height * 0.64,
+      }
+      : null
+    const overlayViewportArea = overlayBudgetRects.reduce((total, rect) => total + overlapArea(rect, viewport), 0)
+    const overlayCentralArea = overlayBudgetRects.reduce((total, rect) => total + overlapArea(rect, stageCentralClearRect), 0)
     return {
       appOverflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      stageOverlayOcclusionBudget: document.querySelector('#viewport')?.getAttribute('data-stage-overlay-occlusion-budget') || '',
+      stageOverlayBudgetNodeCount: overlayBudgetRects.length,
+      stageOverlayViewportOcclusionRatio: viewport ? overlayViewportArea / Math.max(1, viewport.width * viewport.height) : 1,
+      stageOverlayCentralOcclusionRatio: stageCentralClearRect ? overlayCentralArea / Math.max(1, stageCentralClearRect.width * stageCentralClearRect.height) : 1,
       topbar: rectFor('.app-topbar'),
       topProjectSelect: rectFor('[data-shell-project-select]'),
       topProjectOptionCount: topProjectSelect?.options.length || 0,
@@ -375,11 +421,12 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       footer,
       chartStrip,
       rightPanel,
-      stageFrame: rectFor('.stage-frame'),
+      stageFrame,
       callouts,
       focusBadge,
       toolRail,
       stageOverlayReceipt,
+      stageOverlayPanel,
       stageReviewControls,
       stageReviewModeValue: (document.querySelector('[data-stage-view-mode-select]') as HTMLSelectElement | null)?.value || '',
       stageReviewPresetValue: (document.querySelector('[data-stage-view-preset-select]') as HTMLSelectElement | null)?.value || '',
@@ -404,6 +451,13 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2 ? 1 : 0
       })(),
       contourScaleTickCount: document.querySelectorAll('[data-contour-scale-ticks] [data-contour-scale-tick]').length,
+      contourSection,
+      contourScale,
+      loadCasesSection,
+      contourScalePriority: document.querySelector('#contour-section')?.getAttribute('data-stage-results-priority') || '',
+      loadCasesPriority: document.querySelector('#loadcases-section')?.getAttribute('data-stage-loadcases-priority') || '',
+      contourScaleVisibleArea: overlapArea(contourScale, stageFrame),
+      contourScalePanelVisibleArea: overlapArea(contourScale, stageOverlayPanel),
       contourScaleUnit: document.querySelector('[data-contour-scale-evidence]')?.getAttribute('data-contour-unit') || '',
       contourScaleSource: document.querySelector('[data-contour-scale-evidence]')?.getAttribute('data-scalar-source') || '',
       contourScaleMin: Number(document.querySelector('[data-contour-scale-evidence]')?.getAttribute('data-contour-min') || '0'),
@@ -842,6 +896,10 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.modelOverviewOverflowCount).toBe(0)
   expect(layout.viewport?.width || 0).toBeGreaterThanOrEqual(540)
   expect(layout.viewport?.height || 0).toBeGreaterThanOrEqual(398)
+  expect(layout.stageOverlayOcclusionBudget).toBe('dense-model-protagonist')
+  expect(layout.stageOverlayBudgetNodeCount).toBeGreaterThanOrEqual(8)
+  expect(layout.stageOverlayViewportOcclusionRatio).toBeLessThanOrEqual(0.40)
+  expect(layout.stageOverlayCentralOcclusionRatio).toBeLessThanOrEqual(0.18)
   expect(layout.rightPanel?.width || 0).toBeGreaterThanOrEqual(360)
   expect(layout.toolRail?.width || 0).toBeGreaterThanOrEqual(30)
   expect(layout.toolRailGroupCount).toBe(3)
@@ -871,6 +929,12 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.stageReviewReceiptHasScale).toBe(true)
   expect(layout.stageReviewOverflow).toBe(0)
   expect(layout.contourScaleTickCount).toBe(5)
+  expect(layout.contourScalePriority).toBe('first-stage-viewport')
+  expect(layout.loadCasesPriority).toBe('after-results')
+  expect(layout.contourSection?.top || 9999).toBeLessThan(layout.loadCasesSection?.top || 99999)
+  expect(layout.contourScaleVisibleArea).toBeGreaterThan(1200)
+  expect(layout.contourScalePanelVisibleArea).toBeGreaterThan(1200)
+  expect(layout.contourScale?.bottom || 9999).toBeLessThanOrEqual((layout.stageFrame?.bottom || 0) + 1)
   expect(layout.contourScaleUnit).toBe('mm')
   expect(layout.contourScaleSource).not.toBe('')
   expect(layout.contourScaleMax).toBeGreaterThan(layout.contourScaleMin)

@@ -258,11 +258,7 @@
             <span class="stage-review-control-receipt__row"><b>Scale</b><em>1.0x</em></span>
           </div>
         </section>
-        <section class="panel-section stage-overlay-section" id="loadcases-section">
-          <div class="section-title">Load Cases</div>
-          <div id="load-case-list" class="panel-field"></div>
-        </section>
-        <section class="panel-section stage-overlay-section" id="contour-section">
+        <section class="panel-section stage-overlay-section stage-overlay-section--results-priority" id="contour-section" data-stage-results-priority="first-stage-viewport">
           <div class="section-title">Results</div>
           <div class="panel-field">
             <label>Scalar Field</label>
@@ -318,6 +314,10 @@
             </div>
           </div>
         </section>
+        <section class="panel-section stage-overlay-section" id="loadcases-section" data-stage-loadcases-priority="after-results">
+          <div class="section-title">Load Cases</div>
+          <div id="load-case-list" class="panel-field"></div>
+        </section>
         <section class="panel-section stage-overlay-section" id="deformation-section">
           <div class="section-title">Deformation</div>
           <div class="panel-field">
@@ -343,7 +343,7 @@
           </div>
         </section>
       </aside>
-      <div id="viewport">
+      <div id="viewport" data-stage-overlay-occlusion-budget="dense-model-protagonist">
         <div id="loading"><div class="spinner"></div><div id="loading-message">Loading model...</div></div>
         <div id="info-overlay"></div>
         <div id="stage-result-callouts" class="stage-result-callouts" data-stage-result-callouts aria-label="Stage result callouts">
@@ -6645,6 +6645,11 @@ function getRectOverlapArea(a,b,margin=0){
   return Math.max(0,right-left)*Math.max(0,bottom-top);
 }
 
+function hasDenseModelProtagonistBudget(vp){
+  return vp instanceof HTMLElement
+    && vp.getAttribute('data-stage-overlay-occlusion-budget')==='dense-model-protagonist';
+}
+
 function setStageResultCalloutDock(panel,dock='right',overlapState='clear'){
   if(!(panel instanceof HTMLElement))return;
   panel.setAttribute('data-stage-callout-dock',dock);
@@ -6693,16 +6698,57 @@ function positionViewportSelectionFocusBadge(){
   const viewportRect=vp.getBoundingClientRect();
   const rawLeft=(projected.x*.5+.5)*rect.width+rect.left-viewportRect.left;
   const rawTop=(-projected.y*.5+.5)*rect.height+rect.top-viewportRect.top;
-  const maxLeft=Math.max(viewportRect.width-118,118);
+  const denseModelBudget=hasDenseModelProtagonistBudget(vp)&&viewportRect.width<760&&viewportRect.height<620;
+  const badgeRect=badge.getBoundingClientRect();
+  const badgeHalfWidth=Math.max(badgeRect.width/2,denseModelBudget?58:84);
+  const badgeHeight=Math.max(badgeRect.height,denseModelBudget?36:64);
+  const minLeft=denseModelBudget?Math.max(badgeHalfWidth+8,66):118;
+  const maxLeft=denseModelBudget
+    ?Math.max(viewportRect.width-badgeHalfWidth-8,minLeft)
+    :Math.max(viewportRect.width-118,118);
   const maxTop=Math.max(viewportRect.height-28,56);
-  const left=Math.min(Math.max(rawLeft,118),maxLeft);
+  let left=Math.min(Math.max(rawLeft,minLeft),maxLeft);
   const top=Math.min(Math.max(rawTop,56),maxTop);
   const edgeParts=[];
   if(projected.z<-1||projected.z>1)edgeParts.push('clipped');
-  if(rawLeft<118)edgeParts.push('left');
+  if(rawLeft<minLeft)edgeParts.push('left');
   if(rawLeft>maxLeft)edgeParts.push('right');
   if(rawTop<56)edgeParts.push('top');
   if(rawTop>maxTop)edgeParts.push('bottom');
+  if(denseModelBudget){
+    const clearRect={
+      left:viewportRect.width*.25,
+      right:viewportRect.width*.75,
+      top:viewportRect.height*.18,
+      bottom:viewportRect.height*.82,
+    };
+    const projectedBadge={
+      left:left-badgeHalfWidth,
+      right:left+badgeHalfWidth,
+      top:top-badgeHeight-14,
+      bottom:top-14,
+    };
+    if(getRectOverlapArea(projectedBadge,clearRect)>0){
+      const leftDock=Math.min(Math.max(badgeHalfWidth+8,minLeft),maxLeft);
+      const rightDock=Math.min(Math.max(viewportRect.width-badgeHalfWidth-8,minLeft),maxLeft);
+      const dockTop=projectedBadge.top;
+      const dockBottom=projectedBadge.bottom;
+      const leftOverlap=getRectOverlapArea({
+        left:leftDock-badgeHalfWidth,
+        right:leftDock+badgeHalfWidth,
+        top:dockTop,
+        bottom:dockBottom,
+      },clearRect);
+      const rightOverlap=getRectOverlapArea({
+        left:rightDock-badgeHalfWidth,
+        right:rightDock+badgeHalfWidth,
+        top:dockTop,
+        bottom:dockBottom,
+      },clearRect);
+      left=rightOverlap<=leftOverlap?rightDock:leftDock;
+      edgeParts.push(rightOverlap<=leftOverlap?'right-budget':'left-budget');
+    }
+  }
   const edgeMode=edgeParts.length?edgeParts.join('-'):'inside';
   badge.style.left=`${left.toFixed(1)}px`;
   badge.style.top=`${top.toFixed(1)}px`;

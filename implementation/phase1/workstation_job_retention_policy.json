@@ -11,10 +11,10 @@
     "delete_operation_executed": false,
     "mode": "dry_run_only",
     "requires_explicit_confirmation": true,
-    "retained_count": 57
+    "retained_count": 60
   },
   "contract_pass": true,
-  "generated_at": "2026-05-24T19:23:52.022999+00:00",
+  "generated_at": "2026-05-24T20:10:56.645346+00:00",
   "job_root": "implementation/phase1/workstation_jobs",
   "job_rows": [
     {
@@ -586,9 +586,39 @@
       "output_manifest": "implementation/phase1/workstation_jobs/20260524T192344-81d7549969225809/output_manifest.json",
       "path": "implementation/phase1/workstation_jobs/20260524T192344-81d7549969225809",
       "run_log": "implementation/phase1/workstation_jobs/20260524T192344-81d7549969225809/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T194534-81d7549969225809/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "08423e849becb0cf036be9020d37ed9bc4e464079efd4aaa5c6e648c995f0958",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T194534-81d7549969225809/input_manifest.json",
+      "job_id": "20260524T194534-81d7549969225809",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T194534-81d7549969225809/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T194534-81d7549969225809",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T194534-81d7549969225809/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T200929-81d7549969225809/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "1f5136a0f2dfbdc45ac94a3a988831a471089e249658b4de8256d6399aa8411f",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T200929-81d7549969225809/input_manifest.json",
+      "job_id": "20260524T200929-81d7549969225809",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T200929-81d7549969225809/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T200929-81d7549969225809",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T200929-81d7549969225809/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T201023-81d7549969225809/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "fe736623ee7b0c91be715739ca4c12a80fee53baa72e9637497f04503137e8b0",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T201023-81d7549969225809/input_manifest.json",
+      "job_id": "20260524T201023-81d7549969225809",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T201023-81d7549969225809/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T201023-81d7549969225809",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T201023-81d7549969225809/run_log.jsonl"
     }
   ],
-  "latest_job_id": "20260524T192344-81d7549969225809",
+  "latest_job_id": "20260524T201023-81d7549969225809",
   "policy": {
     "cleanup_dry_run_required": true,
     "delete_requires_explicit_confirmation": true,
@@ -599,5 +629,5 @@
   },
   "reason_code": "PASS",
   "schema_version": "workstation-job-retention-policy.v1",
-  "summary_line": "Workstation job retention policy: PASS | jobs=57 | retention_days=365 | max_jobs=200"
+  "summary_line": "Workstation job retention policy: PASS | jobs=60 | retention_days=365 | max_jobs=200"
 }

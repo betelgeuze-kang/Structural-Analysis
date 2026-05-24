@@ -1,6 +1,6 @@
 {
   "schema_version": "workstation-delivery-viewer-smoke.v1",
-  "generated_at": "2026-05-24T19:24:47.267Z",
+  "generated_at": "2026-05-24T20:10:35.673Z",
   "contract_pass": true,
   "reason_code": "PASS",
   "status": "ready",
@@ -36,8 +36,8 @@
     },
     "commercial_cockpit_alignment": {
       "status": "current_cockpit_delivery",
-      "marker_count": 38,
-      "required_marker_count_for_current_cockpit": 38,
+      "marker_count": 40,
+      "required_marker_count_for_current_cockpit": 40,
       "markers": {
         "structural_insight_title": true,
         "cockpit_polish_css": true,
@@ -52,12 +52,14 @@
         "analysis_result_evidence": true,
         "optimization_delta_strip": true,
         "contour_scale_evidence": true,
+        "stage_result_scale_priority": true,
         "load_case_evidence_rows": true,
         "utilization_heatmap_evidence": true,
         "viewport_tool_rail": true,
         "analysis_overlay_receipt": true,
         "analysis_overlay_visual_evidence": true,
         "analysis_overlay_projected_glyphs": true,
+        "stage_overlay_occlusion_budget": true,
         "stage_result_callouts": true,
         "stage_story_ruler": true,
         "stage_drift_bands": true,
@@ -84,7 +86,7 @@
   "browser_checks": {
     "pass": true,
     "reason": "PASS",
-    "opened_url": "http://127.0.0.1:34493/viewer.html",
+    "opened_url": "http://127.0.0.1:43923/viewer.html",
     "viewport": {
       "width": 1440,
       "height": 1000
@@ -135,8 +137,8 @@
       "nonBlank": true,
       "width": 500,
       "height": 601,
-      "significantPixelCount": 92229,
-      "significantPixelRatio": 0.30691846921797006,
+      "significantPixelCount": 92411,
+      "significantPixelRatio": 0.3075241264559068,
       "bbox": {
         "minX": 0,
         "minY": 0,

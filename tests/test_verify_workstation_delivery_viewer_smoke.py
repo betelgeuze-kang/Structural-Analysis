@@ -48,7 +48,7 @@ def test_workstation_delivery_viewer_smoke_static_contract(tmp_path: Path) -> No
           <head><title>Structural Insight Viewer</title></head>
           <body>
             <link rel="stylesheet" href="commercial-cockpit-polish.css">
-            <main id="viewport"><canvas></canvas></main>
+            <main id="viewport" data-stage-overlay-occlusion-budget="dense-model-protagonist"><canvas></canvas></main>
             <nav class="workflow-tab">Model Optimization</nav>
             <select data-shell-project-select onchange="setTopbarWorkspaceSelection(this.value)"><option value="demo::drawing">Demo Drawing</option></select>
             <section data-top-run-control><button data-top-run-action="new-run" onclick="startNewReviewRun()">New Run</button></section>
@@ -93,8 +93,8 @@ def test_workstation_delivery_viewer_smoke_static_contract(tmp_path: Path) -> No
                 <button data-section-schedule-row data-section-id="S1">H-400x200 STEEL SM355 section_material_schedule_count</button>
               </div>
             </section>
-            <section data-contour-scale-evidence><div data-contour-scale-ticks>Contour ticks</div></section>
-            <section class="load-case-evidence-row" data-load-case-status="Governing">Load evidence</section>
+            <section id="contour-section" data-stage-results-priority="first-stage-viewport" data-contour-scale-evidence><div data-contour-scale-ticks>Contour ticks</div></section>
+            <section id="loadcases-section" data-stage-loadcases-priority="after-results" class="load-case-evidence-row" data-load-case-status="Governing">Load evidence</section>
             <section data-utilization-heatmap-evidence><div class="analysis-heatmap-receipt">Heatmap evidence</div></section>
             <section data-viewport-tool-rail><button data-viewport-tool-render-mode="contour">Contour</button></section>
             <section data-stage-overlay-receipt>
@@ -134,6 +134,7 @@ def test_workstation_delivery_viewer_smoke_static_contract(tmp_path: Path) -> No
             </section>
             <button data-panel-zone-stage-badge data-panel-zone-stage-schema="structure-viewer-panel-zone-stage-badge.v1" data-panel-zone-stage-member="26705">Panel Zone Stage Badge</button>
             <section data-drawing-handoff-panel>Optimization Summary</section>
+            <style>.stage-critical-hotspot small{display:none}.panel-zone-stage-badge__leader{flex-basis:18px}</style>
             <script>const THREE = {}; const MATERIAL_FAMILY_ONTOLOGY=[{family:'rail_steel'},{family:'seismic_isolator'},{family:'spring_link'},{family:'fireproofing'},{family:'waterproofing'},{family:'insulation'},{family:'expansion_joint'}]; const material_family_ontology_count=45; window.__STRUCTURE_VIEWER_ANALYSIS_OVERLAY_STATE__ = {}; window.__STRUCTURE_VIEWER_STAGE_LOAD_SUPPORT_GLYPHS_STATE__ = {}; window.__STRUCTURE_VIEWER_CRITICAL_TRIAGE_STATE__ = {}; window.__STRUCTURE_VIEWER_OPTIMIZATION_DELTA_STRIP_STATE__ = {}; function setRenderMode() { return true; } function startNewReviewRun() { return true; } function setTopbarWorkspaceSelection() { return true; } function renderTopbarProjectSelector() { return true; } function renderSourceAdapterMatrix() { return true; } function updateDeformDisplayScale() { return true; } function formatDeformDisplayScale() { return '1.0x'; } function renderKpiReadout() { return true; } function renderAnalysisResultEvidence() { return true; } function renderOptimizationDeltaStrip() { return true; } function renderStageLoadSupportGlyphs() { return true; } function positionStageLoadSupportGlyphs() { return true; } function renderStageCriticalHotspots() { return true; } function positionStageCriticalHotspots() { return true; } function renderStageStoryRuler() { return true; } function positionStageStoryRuler() { return true; } function renderStageDriftBands() { return true; } function positionStageDriftBands() { return true; } function renderResultStepSchedule() { return true; } function renderResultEnvelope() { return true; } function renderCriticalTriagePanel() { return true; } function renderPanelZoneEvidencePanel() { return true; } function renderPanelZoneStageBadge() { return true; } function positionPanelZoneStageBadge() { return true; } function renderDeliveryReviewReceipt() { return true; } function renderMaterialMemberCatalogPanel() { return true; } const SOURCE_ADAPTER_SCHEMA='structure-viewer-source-adapter-matrix.v1'; const STAGE_LOAD_SUPPORT_GLYPHS_SCHEMA='structure-viewer-stage-load-support-glyphs.v1'; const STAGE_CRITICAL_HOTSPOTS_SCHEMA='structure-viewer-stage-critical-hotspots.v1'; const STAGE_STORY_RULER_SCHEMA='structure-viewer-stage-story-ruler.v1'; const STAGE_DRIFT_BANDS_SCHEMA='structure-viewer-stage-drift-bands.v1'; const CRITICAL_TRIAGE_SCHEMA='structure-viewer-critical-triage.v1'; const OPTIMIZATION_DELTA_STRIP_SCHEMA='structure-viewer-optimization-delta-strip.v1'; const DELIVERY_RECEIPT_SCHEMA='structure-viewer-delivery-review-receipt.v1'; const RESULT_STEP_SCHEDULE_SCHEMA='structure-viewer-result-step-schedule.v1'; const RESULT_ENVELOPE_SCHEMA='structure-viewer-result-envelope.v1'; const PANEL_ZONE_SCHEMA='structure-viewer-panel-zone-evidence.v1'; const PANEL_ZONE_STAGE_SCHEMA='structure-viewer-panel-zone-stage-badge.v1'; const MATERIAL_CATALOG_SCHEMA='structure-viewer-material-member-catalog.v1';</script>
           </body>
         </html>

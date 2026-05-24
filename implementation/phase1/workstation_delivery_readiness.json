@@ -104,7 +104,7 @@
       "ok": true,
       "status": "ready",
       "viewer_browser_performance_probe": "implementation/phase1/structure_viewer_browser_performance_probe.json",
-      "viewer_probe_summary": "Structure viewer browser performance probe: PASS | ready=5639ms | fps=30.7 | mode=local_browser_probe",
+      "viewer_probe_summary": "Structure viewer browser performance probe: PASS | ready=5145ms | fps=32.0 | mode=local_browser_probe",
       "viewer_visual_regression_baseline": "implementation/phase1/structure_viewer_visual_regression_baseline.json",
       "visual_summary": "Structure viewer visual regression: PASS | cases=11/11 | mode=baseline_update"
     },
@@ -120,8 +120,8 @@
     {
       "blockers": [],
       "checksum_self_test_pass": true,
-      "job_dir": "implementation/phase1/workstation_jobs/20260524T192344-81d7549969225809",
-      "job_id": "20260524T192344-81d7549969225809",
+      "job_dir": "implementation/phase1/workstation_jobs/20260524T201023-81d7549969225809",
+      "job_id": "20260524T201023-81d7549969225809",
       "job_record_path": "implementation/phase1/workstation_job_record.json",
       "label": "Job reproducibility contract",
       "ok": true,
@@ -138,7 +138,7 @@
       "cleanup_preview_candidate_count": 0,
       "cleanup_preview_mode": "dry_run_only",
       "label": "Job retention and cleanup policy",
-      "latest_job_id": "20260524T192344-81d7549969225809",
+      "latest_job_id": "20260524T201023-81d7549969225809",
       "max_completed_jobs": 200,
       "ok": true,
       "path": "implementation/phase1/workstation_job_retention_policy.json",
@@ -146,7 +146,7 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-05-24T19:26:43.644849+00:00",
+  "generated_at": "2026-05-24T20:11:03.487972+00:00",
   "independent_commercial_product_ready": false,
   "reason_code": "PASS",
   "schema_version": "workstation-delivery-readiness.v1",
