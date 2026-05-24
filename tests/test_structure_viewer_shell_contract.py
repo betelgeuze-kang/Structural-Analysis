@@ -365,6 +365,14 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
         encoding="utf-8"
     )
     assert "data-stage-result-callouts" in text
+    assert "STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_SCHEMA_VERSION" in text
+    assert "structure-viewer-stage-result-callouts.v2" in stage_callouts_renderer_text
+    assert "data-stage-result-callout-source-type" in stage_callouts_renderer_text
+    assert "data-stage-result-callout-full-label" in stage_callouts_renderer_text
+    assert "data-stage-result-callout-full-value" in stage_callouts_renderer_text
+    assert "data-stage-result-callout-load-case" in stage_callouts_renderer_text
+    assert "data-stage-result-callout-step" in stage_callouts_renderer_text
+    assert "data-stage-result-callout-evidence" in stage_callouts_renderer_text
     assert "data-stage-result-callout-key" in stage_callouts_renderer_text
     assert "data-stage-callout-focus-member" in stage_callouts_renderer_text
     assert "max-displacement" in stage_callouts_renderer_text

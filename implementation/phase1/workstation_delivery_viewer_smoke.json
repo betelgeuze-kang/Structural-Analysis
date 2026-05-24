@@ -1,6 +1,6 @@
 {
   "schema_version": "workstation-delivery-viewer-smoke.v1",
-  "generated_at": "2026-05-24T21:35:07.488Z",
+  "generated_at": "2026-05-24T21:48:55.128Z",
   "contract_pass": true,
   "reason_code": "PASS",
   "status": "ready",
@@ -93,7 +93,7 @@
   "browser_checks": {
     "pass": true,
     "reason": "PASS",
-    "opened_url": "http://127.0.0.1:44799/viewer.html",
+    "opened_url": "http://127.0.0.1:43693/viewer.html",
     "viewport": {
       "width": 1440,
       "height": 1000
@@ -144,8 +144,8 @@
       "nonBlank": true,
       "width": 500,
       "height": 601,
-      "significantPixelCount": 92411,
-      "significantPixelRatio": 0.3075241264559068,
+      "significantPixelCount": 92197,
+      "significantPixelRatio": 0.30681198003327786,
       "bbox": {
         "minX": 0,
         "minY": 0,

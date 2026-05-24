@@ -926,6 +926,24 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2 ? 1 : 0
       })(),
       calloutCount: document.querySelectorAll('[data-stage-result-callout-key]').length,
+      stageResultCalloutsStatus: document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callouts-status') || '',
+      stageResultCalloutsSchema: document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callouts-schema') || '',
+      stageResultCalloutCount: Number(document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callout-count') || '0'),
+      stageResultCalloutSourceCount: Number(document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callout-source-count') || '0'),
+      stageResultCalloutEstimateCount: Number(document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callout-estimate-count') || '0'),
+      stageResultCalloutLoadCase: document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callout-load-case') || '',
+      stageResultCalloutStep: document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callout-step') || '',
+      stageResultCalloutEvidenceCount: document.querySelectorAll('[data-stage-result-callout-evidence]').length,
+      stageResultCalloutFullLabelCount: document.querySelectorAll('[data-stage-result-callout-full-label]').length,
+      stageResultCalloutFullValueCount: document.querySelectorAll('[data-stage-result-callout-full-value]').length,
+      stageResultCalloutSourceTypeCount: document.querySelectorAll('[data-stage-result-callout-source-type]').length,
+      stageResultCalloutMemberCount: document.querySelectorAll('[data-stage-result-callout-member]').length,
+      stageResultCalloutSourceText: [...document.querySelectorAll('[data-stage-result-callout-source]')].map((node) => node.getAttribute('data-stage-result-callout-source') || '').join(' '),
+      stageResultCalloutKeyText: [...document.querySelectorAll('[data-stage-result-callout-key]')].map((node) => node.getAttribute('data-stage-result-callout-key') || '').join(' '),
+      stageResultCalloutOverflowCount: [...document.querySelectorAll('[data-stage-result-callout], [data-stage-result-callout] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       chartFooterOverlap: overlapArea(chartStrip, footer),
       calloutBadgeOverlap: overlapArea(callouts, focusBadge),
     }
@@ -978,6 +996,24 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.stageOverlayBudgetNodeCount).toBeGreaterThanOrEqual(8)
   expect(layout.stageOverlayViewportOcclusionRatio).toBeLessThanOrEqual(0.40)
   expect(layout.stageOverlayCentralOcclusionRatio).toBeLessThanOrEqual(0.18)
+  expect(layout.stageResultCalloutsStatus).toBe('ready')
+  expect(layout.stageResultCalloutsSchema).toBe('structure-viewer-stage-result-callouts.v2')
+  expect(layout.stageResultCalloutCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutSourceCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageResultCalloutEstimateCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageResultCalloutLoadCase).not.toBe('')
+  expect(layout.stageResultCalloutStep).toContain('/')
+  expect(layout.stageResultCalloutEvidenceCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutFullLabelCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutFullValueCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutSourceTypeCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutMemberCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageResultCalloutSourceText).toContain('Model')
+  expect(layout.stageResultCalloutKeyText).toContain('max-displacement')
+  expect(layout.stageResultCalloutKeyText).toContain('max-drift')
+  expect(layout.stageResultCalloutKeyText).toContain('base-shear')
+  expect(layout.stageResultCalloutKeyText).toContain('critical-member')
+  expect(layout.stageResultCalloutOverflowCount).toBe(0)
   expect(layout.rightPanel?.width || 0).toBeGreaterThanOrEqual(360)
   expect(layout.toolRail?.width || 0).toBeGreaterThanOrEqual(30)
   expect(layout.toolRailGroupCount).toBe(3)

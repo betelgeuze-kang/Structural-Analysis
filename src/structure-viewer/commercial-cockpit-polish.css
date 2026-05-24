@@ -505,6 +505,40 @@
     white-space:nowrap;
   }
 
+  body.structural-surface.command-center-shell .stage-result-callout__evidence {
+    grid-column:2;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    min-width:0;
+    color:var(--muted);
+    font-size:8px;
+    line-height:1;
+    overflow:hidden;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout__evidence b,
+  body.structural-surface.command-center-shell .stage-result-callout__evidence em {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout__evidence b {
+    color:var(--accent);
+    font-style:normal;
+    font-weight:800;
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout__evidence em {
+    flex:0 0 auto;
+    color:var(--muted);
+    font-style:normal;
+  }
+
   body.structural-surface.command-center-shell .stage-result-callout--warn::before,
   body.structural-surface.command-center-shell .stage-result-callout--warn .stage-result-callout__pin {
     background:#f4b56b;
@@ -2618,6 +2652,10 @@
       display:none;
     }
 
+    body.structural-surface.command-center-shell .stage-result-callout__evidence {
+      display:none;
+    }
+
     body.structural-surface.command-center-shell .stage-drift-bands__receipt {
       width:128px;
       opacity:.88;
@@ -2768,6 +2806,10 @@
     }
 
     body.structural-surface.command-center-shell .stage-result-callout small {
+      display:none;
+    }
+
+    body.structural-surface.command-center-shell .stage-result-callout__evidence {
       display:none;
     }
 

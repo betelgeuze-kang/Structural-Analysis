@@ -11,7 +11,7 @@
     {
       "bytes": 948,
       "path": "ACCEPTANCE_PACKET.md",
-      "sha256": "6880f2ea2b65906fb2f2b51483a594a808bd22b1c85a1c47dc0d78937ee388f0"
+      "sha256": "e0224eaad35e850c4ead82b625b7c8974b79c7f07c42bcf346fc3abcba6de797"
     },
     {
       "bytes": 990,
@@ -21,12 +21,12 @@
     {
       "bytes": 779,
       "path": "DELIVERY_QA_SUMMARY.md",
-      "sha256": "60ca72627adcbe4637e0c089c5ea4f9098ba7616985529bfe5d0a9d39b6eb63b"
+      "sha256": "547a9f35fe4eb6f52ea1cc880d2c80aa930dbed5877f4a6a18a8abf1a7aca37b"
     },
     {
       "bytes": 775,
       "path": "HANDOFF_DIFF_SUMMARY.md",
-      "sha256": "eee866efcd990fe2441a747f6e6a149c9aec8a46d48d25bfbc59b4868c07a22c"
+      "sha256": "86a47218300a220c6bf097729efe197a4a5f1820aabc79562a72b8aafb2eb9c5"
     },
     {
       "bytes": 960,
@@ -36,12 +36,12 @@
     {
       "bytes": 435,
       "path": "REVISION_HISTORY.md",
-      "sha256": "b956ad4dc3bb5facf0f03a62bfcc5a279ed3af6d1607b5f8572dcc24f6c83b36"
+      "sha256": "060ecc7d6f4878ee07d781d9a9e427e09d710877e3b1186609e08782e2d1baa7"
     },
     {
       "bytes": 3384,
       "path": "checksums.sha256",
-      "sha256": "275b483150a3cbe374b6a49c7222858d20b1aa76dda00a6d633cd59729ddc452"
+      "sha256": "53d54ac0127b6c2fcde1bdbda9b2598754dff194c6498ab966b6a65433449747"
     },
     {
       "bytes": 1278,
@@ -49,29 +49,29 @@
       "sha256": "516c051f8f68126e80626cc65363bd23ea579fe36c46d60976a50dec1ec5d98a"
     },
     {
-      "bytes": 2184,
+      "bytes": 2139,
       "path": "data/handoff_diff_summary.json",
-      "sha256": "64aeedf9a2ddf5fbc8c5236f2bd9063e9e71018ed531d8ab677558978ad5f163"
+      "sha256": "87b70ff53537edf0f64994c0cfc0416e9d6ddcde9819090257a62ac7b3a8ed13"
     },
     {
       "bytes": 3503,
       "path": "data/redelivery_comparison_manifest.json",
-      "sha256": "c4c1bddd566f81becac2d7b06e1ad6e57ce12dbf91cefc5ca4b229ac1a6a93bb"
+      "sha256": "9e9b2a606bb93b6ab8f4706390a01f10f07e2c53ecb4814fdd97be44bd9bd042"
     },
     {
       "bytes": 1087,
       "path": "data/report_metadata.json",
-      "sha256": "794116df55a624a7a2f92703601c5bd6339b411db5fe6de358e84902d2e8e57d"
+      "sha256": "a873479906034fcecc72f0cffceff990ff2cfe7e6a79f7d919bb6823604e4de8"
     },
     {
       "bytes": 702,
       "path": "data/revision_policy.json",
-      "sha256": "283bc38da4be5ce8e40eb3c502daadba46216ab0f2d7f3252cb3274ed05307cf"
+      "sha256": "15b1e95ae4822cf50375af14e053f712bd61b4b63fe687f85bbed91e5f5c66fb"
     },
     {
       "bytes": 1045,
       "path": "data/signing_manifest.json",
-      "sha256": "551b24f0cd63d6bbc21320e71a0cb0706db681af9c5cca25af6c3a28471765cb"
+      "sha256": "85577445e1c068c9185667afc8f9e53d8d727143fb4004203bb1c676d04112a1"
     },
     {
       "bytes": 9110297,
@@ -166,7 +166,7 @@
     {
       "bytes": 14867,
       "path": "evidence/support_bundle_manifest.json",
-      "sha256": "9ae2c546a84c71a2409d7bd828f75afae467e4a22ffc3fb3776099a2581dabc2"
+      "sha256": "30b3a873610ca290ac2f45c1470177e0f0b9b7ebc3f7c1793e319a6ac15e5af8"
     },
     {
       "bytes": 4023,
@@ -181,7 +181,7 @@
     {
       "bytes": 8034,
       "path": "manifest.json",
-      "sha256": "923964ed48af9fd37b8ce6c5b60d7e2bcfd823de3fd3d9e5d6bcd41df02caa94"
+      "sha256": "28c897bf5816b4876482fc4278392a6f0e5f5eb91c4602dbac618ad41d9e3a50"
     },
     {
       "bytes": 143745,
@@ -189,12 +189,12 @@
       "sha256": "76fc124511540cc0a96ea2056d78abaaff9c5fe1e4c91b299710256896249af4"
     },
     {
-      "bytes": 8166640,
+      "bytes": 8173360,
       "path": "viewer.html",
-      "sha256": "7167db572b6fa4dc21e4df19241953352a462dfe124ce33e263e201e18bdd2ae"
+      "sha256": "5f5acbdf15a7452a058366c73cb2fd42e2843e8674811a01089f6400acfaeb09"
     }
   ],
-  "generated_at": "2026-05-24T21:34:16.393415+00:00",
+  "generated_at": "2026-05-24T21:48:44.605715+00:00",
   "input_refs": [
     {
       "available": true,
@@ -254,7 +254,7 @@
       "pass": true,
       "reason": "PASS"
     },
-    "job_dir": "implementation/phase1/workstation_jobs/20260524T213415-81d7549969225809",
+    "job_dir": "implementation/phase1/workstation_jobs/20260524T214844-81d7549969225809",
     "pass": true,
     "reason": "PASS",
     "required_paths": {
@@ -265,7 +265,7 @@
     }
   },
   "job_record": {
-    "generated_at": "2026-05-24T21:34:15.896988+00:00",
+    "generated_at": "2026-05-24T21:48:44.119664+00:00",
     "input_hash": "81d7549969225809",
     "input_manifest": [
       {
@@ -319,12 +319,12 @@
         "path": "implementation/phase1/panel_zone_solver_verified_handoff_report.json"
       }
     ],
-    "job_id": "20260524T213415-81d7549969225809",
+    "job_id": "20260524T214844-81d7549969225809",
     "output_manifest": [
       {
         "bytes": 948,
         "path": "ACCEPTANCE_PACKET.md",
-        "sha256": "6880f2ea2b65906fb2f2b51483a594a808bd22b1c85a1c47dc0d78937ee388f0"
+        "sha256": "e0224eaad35e850c4ead82b625b7c8974b79c7f07c42bcf346fc3abcba6de797"
       },
       {
         "bytes": 990,
@@ -334,12 +334,12 @@
       {
         "bytes": 779,
         "path": "DELIVERY_QA_SUMMARY.md",
-        "sha256": "60ca72627adcbe4637e0c089c5ea4f9098ba7616985529bfe5d0a9d39b6eb63b"
+        "sha256": "547a9f35fe4eb6f52ea1cc880d2c80aa930dbed5877f4a6a18a8abf1a7aca37b"
       },
       {
         "bytes": 775,
         "path": "HANDOFF_DIFF_SUMMARY.md",
-        "sha256": "eee866efcd990fe2441a747f6e6a149c9aec8a46d48d25bfbc59b4868c07a22c"
+        "sha256": "86a47218300a220c6bf097729efe197a4a5f1820aabc79562a72b8aafb2eb9c5"
       },
       {
         "bytes": 960,
@@ -349,12 +349,12 @@
       {
         "bytes": 435,
         "path": "REVISION_HISTORY.md",
-        "sha256": "b956ad4dc3bb5facf0f03a62bfcc5a279ed3af6d1607b5f8572dcc24f6c83b36"
+        "sha256": "060ecc7d6f4878ee07d781d9a9e427e09d710877e3b1186609e08782e2d1baa7"
       },
       {
         "bytes": 3384,
         "path": "checksums.sha256",
-        "sha256": "275b483150a3cbe374b6a49c7222858d20b1aa76dda00a6d633cd59729ddc452"
+        "sha256": "53d54ac0127b6c2fcde1bdbda9b2598754dff194c6498ab966b6a65433449747"
       },
       {
         "bytes": 1278,
@@ -362,29 +362,29 @@
         "sha256": "516c051f8f68126e80626cc65363bd23ea579fe36c46d60976a50dec1ec5d98a"
       },
       {
-        "bytes": 2184,
+        "bytes": 2139,
         "path": "data/handoff_diff_summary.json",
-        "sha256": "64aeedf9a2ddf5fbc8c5236f2bd9063e9e71018ed531d8ab677558978ad5f163"
+        "sha256": "87b70ff53537edf0f64994c0cfc0416e9d6ddcde9819090257a62ac7b3a8ed13"
       },
       {
         "bytes": 3503,
         "path": "data/redelivery_comparison_manifest.json",
-        "sha256": "c4c1bddd566f81becac2d7b06e1ad6e57ce12dbf91cefc5ca4b229ac1a6a93bb"
+        "sha256": "9e9b2a606bb93b6ab8f4706390a01f10f07e2c53ecb4814fdd97be44bd9bd042"
       },
       {
         "bytes": 1087,
         "path": "data/report_metadata.json",
-        "sha256": "794116df55a624a7a2f92703601c5bd6339b411db5fe6de358e84902d2e8e57d"
+        "sha256": "a873479906034fcecc72f0cffceff990ff2cfe7e6a79f7d919bb6823604e4de8"
       },
       {
         "bytes": 702,
         "path": "data/revision_policy.json",
-        "sha256": "283bc38da4be5ce8e40eb3c502daadba46216ab0f2d7f3252cb3274ed05307cf"
+        "sha256": "15b1e95ae4822cf50375af14e053f712bd61b4b63fe687f85bbed91e5f5c66fb"
       },
       {
         "bytes": 1045,
         "path": "data/signing_manifest.json",
-        "sha256": "551b24f0cd63d6bbc21320e71a0cb0706db681af9c5cca25af6c3a28471765cb"
+        "sha256": "85577445e1c068c9185667afc8f9e53d8d727143fb4004203bb1c676d04112a1"
       },
       {
         "bytes": 9110297,
@@ -479,7 +479,7 @@
       {
         "bytes": 14867,
         "path": "evidence/support_bundle_manifest.json",
-        "sha256": "9ae2c546a84c71a2409d7bd828f75afae467e4a22ffc3fb3776099a2581dabc2"
+        "sha256": "30b3a873610ca290ac2f45c1470177e0f0b9b7ebc3f7c1793e319a6ac15e5af8"
       },
       {
         "bytes": 4023,
@@ -494,7 +494,7 @@
       {
         "bytes": 8034,
         "path": "manifest.json",
-        "sha256": "923964ed48af9fd37b8ce6c5b60d7e2bcfd823de3fd3d9e5d6bcd41df02caa94"
+        "sha256": "28c897bf5816b4876482fc4278392a6f0e5f5eb91c4602dbac618ad41d9e3a50"
       },
       {
         "bytes": 143745,
@@ -502,9 +502,9 @@
         "sha256": "76fc124511540cc0a96ea2056d78abaaff9c5fe1e4c91b299710256896249af4"
       },
       {
-        "bytes": 8166640,
+        "bytes": 8173360,
         "path": "viewer.html",
-        "sha256": "7167db572b6fa4dc21e4df19241953352a462dfe124ce33e263e201e18bdd2ae"
+        "sha256": "5f5acbdf15a7452a058366c73cb2fd42e2843e8674811a01089f6400acfaeb09"
       }
     ],
     "run_log": [
@@ -512,7 +512,7 @@
         "artifact_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
         "command": "python3 scripts/build_workstation_delivery_package.py",
         "status": "pass",
-        "timestamp": "2026-05-24T21:34:15.896988+00:00"
+        "timestamp": "2026-05-24T21:48:44.119664+00:00"
       }
     ],
     "schema_version": "workstation-job-record.v1"

@@ -353,10 +353,10 @@
       <div id="viewport" data-stage-overlay-occlusion-budget="dense-model-protagonist" data-stage-dominance-budget="dense-stage-primary">
         <div id="loading"><div class="spinner"></div><div id="loading-message">Loading model...</div></div>
         <div id="info-overlay"></div>
-        <div id="stage-result-callouts" class="stage-result-callouts" data-stage-result-callouts aria-label="Stage result callouts">
-          <div class="stage-result-callout stage-result-callout--neutral" data-stage-result-callout-key="empty">
+        <div id="stage-result-callouts" class="stage-result-callouts" data-stage-result-callouts data-stage-result-callouts-schema="structure-viewer-stage-result-callouts.v2" data-stage-result-callouts-status="pending" data-stage-result-callout-count="0" aria-label="Stage result callouts">
+          <div class="stage-result-callout stage-result-callout--neutral" data-stage-result-callout data-stage-result-callout-key="empty" data-stage-result-callout-full-label="Result Callouts" data-stage-result-callout-source="missing" data-stage-result-callout-source-type="review" data-stage-result-callout-load-case="--" data-stage-result-callout-step="--">
             <span class="stage-result-callout__label">Result Callouts</span>
-            <strong>--</strong>
+            <strong data-stage-result-callout-full-value="--">--</strong>
             <small>Awaiting model</small>
           </div>
         </div>
@@ -792,6 +792,7 @@ import {
 } from './viewer-drawing-handoff-panel-renderer.js';
 import {
   buildStageResultCalloutsHtml,
+  STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_SCHEMA_VERSION,
 } from './viewer-stage-result-callouts-renderer.js';
 import {
   buildStructureViewerReportExport,
@@ -6643,10 +6644,23 @@ function renderMaterialMemberCatalogPanel(data=modelData||{}){
 function renderStageResultCallouts(cockpitModel=null){
   const panel=document.getElementById('stage-result-callouts');
   if(!(panel instanceof HTMLElement))return;
+  const model=cockpitModel||lastAnalysisCockpitModel;
+  const timeline=getResolvedAnalysisTimeline(model)||{};
   panel.innerHTML=buildStageResultCalloutsHtml({
-    cockpitModel,
+    cockpitModel:model,
     activeMemberId:resolveSelectionMemberId(selectedElementData),
+    timeline,
   });
+  const callouts=[...panel.querySelectorAll('[data-stage-result-callout]')];
+  const sourceCallouts=callouts.filter(node=>node.getAttribute('data-stage-result-callout-source-type')==='source');
+  const estimateCallouts=callouts.filter(node=>node.getAttribute('data-stage-result-callout-source-type')==='estimate');
+  panel.dataset.stageResultCalloutsSchema=STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_SCHEMA_VERSION;
+  panel.dataset.stageResultCalloutsStatus=callouts.length?'ready':'missing';
+  panel.dataset.stageResultCalloutCount=String(callouts.length);
+  panel.dataset.stageResultCalloutSourceCount=String(sourceCallouts.length);
+  panel.dataset.stageResultCalloutEstimateCount=String(estimateCallouts.length);
+  panel.dataset.stageResultCalloutLoadCase=normalizeSelectionValue(timeline.loadCase)||'--';
+  panel.dataset.stageResultCalloutStep=timeline.totalSteps?`${timeline.activeStep||'--'}/${timeline.totalSteps}`:'--';
   panel.querySelectorAll('[data-stage-callout-focus-member]').forEach(button=>{
     button.addEventListener('click',event=>{
       event.stopPropagation();
