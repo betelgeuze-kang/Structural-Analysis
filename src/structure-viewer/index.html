@@ -241,10 +241,21 @@
               <strong id="stage-model-compare-chip">Off</strong>
             </button>
           </div>
+          <div id="stage-deformation-control" class="stage-deformation-control" data-stage-deformation-control data-deformation-control-schema="structure-viewer-deformation-control.v1" data-deformation-control-status="pending" data-deformation-display-scale="1.0" data-deformation-internal-scale="100">
+            <div class="stage-deformation-control__head">
+              <span>Deformation Scale</span>
+              <strong data-deformation-display-scale-value>1.0x</strong>
+            </div>
+            <input id="stage-deform-scale-control" type="range" min="0.1" max="20" step="0.1" value="1.0" data-stage-deformation-scale-slider oninput="updateDeformDisplayScale(this.value)" aria-label="Deformation display scale"/>
+            <div class="stage-deformation-control__meta">
+              <span>Compare <b id="stage-deformation-compare-state">off</b></span>
+              <span>Internal <b data-deformation-internal-scale-value>100x</b></span>
+            </div>
+          </div>
           <div id="stage-review-control-receipt" class="stage-review-control-receipt" data-stage-review-control-receipt aria-live="polite">
             <span class="stage-review-control-receipt__row"><b>Result</b><em>--</em></span>
             <span class="stage-review-control-receipt__row"><b>Load/Step</b><em>--</em></span>
-            <span class="stage-review-control-receipt__row"><b>Scale</b><em>100x</em></span>
+            <span class="stage-review-control-receipt__row"><b>Scale</b><em>1.0x</em></span>
           </div>
         </section>
         <section class="panel-section stage-overlay-section" id="loadcases-section">
@@ -310,8 +321,8 @@
         <section class="panel-section stage-overlay-section" id="deformation-section">
           <div class="section-title">Deformation</div>
           <div class="panel-field">
-            <label>Scale Factor: <span id="scale-val">100</span>x</label>
-            <input type="range" id="deform-scale" min="1" max="2000" value="100" oninput="updateDeformScale(this.value)"/>
+            <label>Scale Factor: <span id="scale-val" data-deformation-display-scale-value>1.0x</span></label>
+            <input type="range" id="deform-scale" min="0.1" max="20" step="0.1" value="1.0" oninput="updateDeformDisplayScale(this.value)"/>
           </div>
         </section>
         <section class="panel-section stage-overlay-section" id="story-clip-section">
@@ -849,6 +860,7 @@ const SURFACE_LOD_MEDIUM_DIRECT_SUBDIVISIONS=12;
 const SURFACE_LOD_COARSE_DIRECT_SUBDIVISIONS=8;
 const SURFACE_LOD_MEDIUM_INSTANCED_SUBDIVISIONS=6;
 const SURFACE_LOD_COARSE_INSTANCED_SUBDIVISIONS=3;
+const DEFORMATION_DISPLAY_SCALE_BASE=100;
 const LARGE_MODEL_ELEMENT_THRESHOLD=100000;
 const LARGE_MODEL_BUILD_CHUNK_SIZE=320;
 const LARGE_MODEL_PICK_LINE_SCREEN_TOLERANCE_PX=10;
@@ -3540,6 +3552,42 @@ function renderContourScaleEvidence({mn=0,mx=1,field='dcr',source='direct',stops
     legendBar.dataset.contourUnit=unitLabel;
   }
 }
+function getDeformDisplayScale(value=deformScale){
+  return Math.max(.1,Math.min(20,safeNumber(value,DEFORMATION_DISPLAY_SCALE_BASE)/DEFORMATION_DISPLAY_SCALE_BASE));
+}
+function formatDeformDisplayScale(value=deformScale){
+  const displayScale=getDeformDisplayScale(value);
+  return `${displayScale.toLocaleString('en-US',{maximumFractionDigits:1,minimumFractionDigits:1})}x`;
+}
+function syncDeformationScaleControls({syncInputs=true}={}){
+  const displayScale=getDeformDisplayScale();
+  const displayLabel=formatDeformDisplayScale();
+  const internalLabel=`${Math.round(safeNumber(deformScale,DEFORMATION_DISPLAY_SCALE_BASE)).toLocaleString('en-US')}x`;
+  document.querySelectorAll('[data-deformation-display-scale-value]').forEach(node=>{
+    node.textContent=displayLabel;
+  });
+  document.querySelectorAll('[data-deformation-internal-scale-value]').forEach(node=>{
+    node.textContent=internalLabel;
+  });
+  const compareState=document.getElementById('stage-deformation-compare-state');
+  if(compareState)compareState.textContent=showDeformed?'on':'off';
+  const panel=document.getElementById('stage-deformation-control');
+  if(panel instanceof HTMLElement){
+    panel.dataset.deformationControlStatus='ready';
+    panel.dataset.deformationDisplayScale=displayScale.toFixed(1);
+    panel.dataset.deformationInternalScale=String(Math.round(safeNumber(deformScale,DEFORMATION_DISPLAY_SCALE_BASE)));
+    panel.dataset.compare=showDeformed?'on':'off';
+    panel.dataset.animate=isAnimating?'on':'off';
+  }
+  if(syncInputs){
+    ['stage-deform-scale-control','deform-scale'].forEach(id=>{
+      const input=document.getElementById(id);
+      if(input instanceof HTMLInputElement&&document.activeElement!==input){
+        input.value=displayScale.toFixed(1);
+      }
+    });
+  }
+}
 function renderStageResultReceipt(cockpitModel=lastAnalysisCockpitModel,context=contourContext){
   const panel=document.getElementById('stage-result-receipt');
   if(!(panel instanceof HTMLElement))return;
@@ -3557,7 +3605,7 @@ function renderStageResultReceipt(cockpitModel=lastAnalysisCockpitModel,context=
   const stepLabel=timeline.totalSteps?`${timeline.activeStep}/${timeline.totalSteps}`:'--';
   const rangeLabel=renderMode==='contour'?`${minLabel} - ${maxLabel}`:'Hidden';
   const modeLabel=renderMode==='contour'?'Contour result':renderMode==='solid'?'Solid review':'Wire review';
-  const compareLabel=showDeformed?`Compare ${safeNumber(deformScale,100).toFixed(0)}x`:'Compare off';
+  const compareLabel=showDeformed?`Compare ${formatDeformDisplayScale()}`:'Compare off';
   panel.dataset.renderMode=renderMode;
   panel.dataset.scalarField=field;
   panel.dataset.scalarSource=source;
@@ -7516,6 +7564,7 @@ function syncStageReviewControls(){
   if(compareState)compareState.textContent=showDeformed?'Neutral ghost visible':'Off';
   const compareChip=document.getElementById('stage-model-compare-chip');
   if(compareChip)compareChip.textContent=showDeformed?'On':'Off';
+  syncDeformationScaleControls();
   const receipt=document.getElementById('stage-review-control-receipt');
   if(receipt instanceof HTMLElement){
     const fieldLabel=getSelectedOptionText('scalar-select','--');
@@ -7529,7 +7578,7 @@ function syncStageReviewControls(){
     receipt.innerHTML=`
       <span class="stage-review-control-receipt__row"><b>Result</b><em>${escapeHtml(fieldLabel)}</em></span>
       <span class="stage-review-control-receipt__row"><b>Load/Step</b><em>${escapeHtml(activeLoadCase)} · ${escapeHtml(stepLabel)}</em></span>
-      <span class="stage-review-control-receipt__row"><b>Scale</b><em>${safeNumber(deformScale,100).toFixed(0)}x · ${showDeformed?'Compare':'Compare off'}</em></span>`;
+      <span class="stage-review-control-receipt__row"><b>Scale</b><em>${formatDeformDisplayScale()} · ${showDeformed?'Compare':'Compare off'}</em></span>`;
   }
 }
 function updateRenderMode(){
@@ -7800,12 +7849,17 @@ function toggleDeformed(){
   renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
   requestViewerRender();
 }
-function updateDeformScale(v){
-  deformScale=parseFloat(v);
-  document.getElementById('scale-val').textContent=deformScale;
+function updateDeformScale(v,{syncInputs=true}={}){
+  deformScale=Math.max(1,Math.min(2000,safeNumber(v,DEFORMATION_DISPLAY_SCALE_BASE)));
+  syncDeformationScaleControls({syncInputs});
   if(showDeformed)rebuildDeformed();
   renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
   syncStageReviewControls();
+}
+function updateDeformDisplayScale(v){
+  const displayScale=Math.max(.1,Math.min(20,safeNumber(v,1)));
+  updateDeformScale(displayScale*DEFORMATION_DISPLAY_SCALE_BASE,{syncInputs:false});
+  syncDeformationScaleControls({syncInputs:true});
 }
 function rebuildDeformed(){
   if(!modelData)return;
@@ -8002,6 +8056,7 @@ window.setAnalysisTimelineStep=setAnalysisTimelineStep;
 window.stepAnalysisTimeline=stepAnalysisTimeline;
 window.toggleAnalysisTimelinePlayback=toggleAnalysisTimelinePlayback;
 window.updateDeformScale=updateDeformScale;
+window.updateDeformDisplayScale=updateDeformDisplayScale;
 window.updateContour=updateContour;
 window.resetCamera=resetCamera;
 window.fitAll=fitAll;

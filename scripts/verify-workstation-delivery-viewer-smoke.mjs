@@ -152,6 +152,7 @@ function staticViewerChecks(extractRoot, packagePath) {
     top_run_control: viewerText.includes('data-top-run-control') && viewerText.includes('data-top-run-action') && viewerText.includes('startNewReviewRun'),
     model_overview: viewerText.includes('data-model-overview-panel') && viewerText.includes('data-source-adapter-matrix') && viewerText.includes('structure-viewer-source-adapter-matrix.v1') && viewerText.includes('renderSourceAdapterMatrix'),
     stage_review_controls: viewerText.includes('data-stage-review-controls') && viewerText.includes('data-stage-model-stack'),
+    deformation_scale_control: viewerText.includes('data-stage-deformation-control') && viewerText.includes('structure-viewer-deformation-control.v1') && viewerText.includes('updateDeformDisplayScale') && viewerText.includes('formatDeformDisplayScale'),
     analysis_result_evidence: viewerText.includes('data-analysis-result-evidence') && viewerText.includes('renderAnalysisResultEvidence') && viewerText.includes('analysis-result-evidence-row'),
     contour_scale_evidence: viewerText.includes('data-contour-scale-evidence') && viewerText.includes('data-contour-scale-ticks'),
     load_case_evidence_rows: viewerText.includes('load-case-evidence-row') && viewerText.includes('data-load-case-status'),

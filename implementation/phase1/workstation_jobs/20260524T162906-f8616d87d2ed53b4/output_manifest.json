@@ -1,45 +1,6 @@
 {
-  "generated_at": "2026-05-24T16:29:06.988559+00:00",
-  "input_hash": "f8616d87d2ed53b4",
-  "input_manifest": [
-    {
-      "available": true,
-      "label": "viewer_html",
-      "path": "implementation/phase1/release/visualization/structural_viewer_midas33_pr_singlefile.html"
-    },
-    {
-      "available": true,
-      "label": "report_pdf",
-      "path": "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/optimized_drawing_expert_review.default.pdf"
-    },
-    {
-      "available": true,
-      "label": "drawings_dir",
-      "path": "implementation/phase1/output/structural_svg"
-    },
-    {
-      "available": true,
-      "label": "client_validation_report",
-      "path": "implementation/phase1/client_input_validation_report.json"
-    },
-    {
-      "available": true,
-      "label": "hardware_profile",
-      "path": "implementation/phase1/workstation_hardware_profile.json"
-    },
-    {
-      "available": true,
-      "label": "service_budget",
-      "path": "implementation/phase1/workstation_service_budget.json"
-    },
-    {
-      "available": true,
-      "label": "source_model",
-      "path": "implementation/phase1/open_data/midas/midas_model.json"
-    }
-  ],
   "job_id": "20260524T162906-f8616d87d2ed53b4",
-  "output_manifest": [
+  "output_rows": [
     {
       "bytes": 948,
       "path": "ACCEPTANCE_PACKET.md",
@@ -211,13 +172,6 @@
       "sha256": "22c86250ef73510a02383975d67526f1721f219349efb5dac5c01f4eccd1e114"
     }
   ],
-  "run_log": [
-    {
-      "artifact_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
-      "command": "python3 scripts/build_workstation_delivery_package.py",
-      "status": "pass",
-      "timestamp": "2026-05-24T16:29:06.988559+00:00"
-    }
-  ],
-  "schema_version": "workstation-job-record.v1"
+  "package_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
+  "schema_version": "workstation-job-output-manifest.v1"
 }

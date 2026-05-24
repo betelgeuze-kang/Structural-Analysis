@@ -609,6 +609,25 @@
     font-size:7.5px;
   }
 
+  body.structural-surface.command-center-shell .stage-deformation-control {
+    gap:4px;
+    padding:6px 7px;
+    border-radius:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-deformation-control__head span,
+  body.structural-surface.command-center-shell .stage-deformation-control__meta {
+    font-size:7.5px;
+  }
+
+  body.structural-surface.command-center-shell .stage-deformation-control__head strong {
+    font-size:10px;
+  }
+
+  body.structural-surface.command-center-shell .stage-deformation-control input[type="range"] {
+    height:12px;
+  }
+
   body.structural-surface.command-center-shell .stage-review-control-receipt {
     gap:3px;
     padding:6px 7px;

@@ -142,6 +142,11 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-stage-view-mode-select" in text
     assert "data-stage-model-stack" in text
     assert "data-stage-review-control-receipt" in text
+    assert "data-stage-deformation-control" in text
+    assert "data-stage-deformation-scale-slider" in text
+    assert "structure-viewer-deformation-control.v1" in text
+    assert "updateDeformDisplayScale" in text
+    assert "formatDeformDisplayScale" in text
     assert "syncStageReviewControls" in text
     assert "stage-review-control-receipt__row" in text
     assert "data-contour-scale-evidence" in text
@@ -240,6 +245,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")
     assert "stage-model-stack__row" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-deformation-control__head" in (
         ROOT / "src" / "structure-viewer" / "design-theme.css"
     ).read_text(encoding="utf-8")
     assert "stage-contour-scale__body" in (

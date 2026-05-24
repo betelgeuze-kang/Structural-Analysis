@@ -2463,6 +2463,63 @@ body.structural-surface .stage-model-stack__row--button.is-active strong {
   color:var(--accent);
 }
 
+body.structural-surface .stage-deformation-control {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  padding:8px;
+  border:1px solid rgba(79,183,173,.24);
+  border-radius:8px;
+  background:linear-gradient(180deg,rgba(79,183,173,.10),rgba(8,18,29,.30));
+}
+
+body.structural-surface .stage-deformation-control__head,
+body.structural-surface .stage-deformation-control__meta {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+}
+
+body.structural-surface .stage-deformation-control__head span,
+body.structural-surface .stage-deformation-control__head strong,
+body.structural-surface .stage-deformation-control__meta span,
+body.structural-surface .stage-deformation-control__meta b {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-deformation-control__head span {
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-deformation-control__head strong {
+  color:var(--accent);
+  font-size:13px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-deformation-control input[type="range"] {
+  width:100%;
+  accent-color:var(--accent);
+}
+
+body.structural-surface .stage-deformation-control__meta {
+  color:var(--muted);
+  font-size:8px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-deformation-control__meta b {
+  color:var(--text);
+}
+
 body.structural-surface .stage-review-control-receipt {
   display:grid;
   gap:4px;

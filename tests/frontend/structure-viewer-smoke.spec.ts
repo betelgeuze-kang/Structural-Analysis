@@ -379,6 +379,16 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       stageReviewSelectCount: document.querySelectorAll('[data-stage-review-controls] select').length,
       stageReviewModelRowCount: document.querySelectorAll('[data-stage-model-stack] [data-stage-model-layer]').length,
       stageReviewComparePressed: document.querySelector('#stage-model-compare-toggle')?.getAttribute('aria-pressed') || '',
+      stageDeformationStatus: document.querySelector('[data-stage-deformation-control]')?.getAttribute('data-deformation-control-status') || '',
+      stageDeformationSchema: document.querySelector('[data-stage-deformation-control]')?.getAttribute('data-deformation-control-schema') || '',
+      stageDeformationDisplayScale: Number(document.querySelector('[data-stage-deformation-control]')?.getAttribute('data-deformation-display-scale') || '0'),
+      stageDeformationInternalScale: Number(document.querySelector('[data-stage-deformation-control]')?.getAttribute('data-deformation-internal-scale') || '0'),
+      stageDeformationSliderValue: Number((document.querySelector('[data-stage-deformation-scale-slider]') as HTMLInputElement | null)?.value || '0'),
+      stageDeformationLabel: (document.querySelector('[data-stage-deformation-control]')?.textContent || '').trim(),
+      stageDeformationOverflowCount: [...document.querySelectorAll('[data-stage-deformation-control], [data-stage-deformation-control] span, [data-stage-deformation-control] strong')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       stageReviewReceiptRowCount: document.querySelectorAll('[data-stage-review-control-receipt] .stage-review-control-receipt__row').length,
       stageReviewReceiptHasScale: (document.querySelector('[data-stage-review-control-receipt]')?.textContent || '').includes('Scale'),
       stageReviewOverflow: (() => {
@@ -665,6 +675,14 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.stageReviewSelectCount).toBe(2)
   expect(layout.stageReviewModelRowCount).toBe(2)
   expect(layout.stageReviewComparePressed).toBe('false')
+  expect(layout.stageDeformationStatus).toBe('ready')
+  expect(layout.stageDeformationSchema).toBe('structure-viewer-deformation-control.v1')
+  expect(layout.stageDeformationDisplayScale).toBeCloseTo(1, 1)
+  expect(layout.stageDeformationInternalScale).toBe(100)
+  expect(layout.stageDeformationSliderValue).toBeCloseTo(1, 1)
+  expect(layout.stageDeformationLabel).toContain('Deformation Scale')
+  expect(layout.stageDeformationLabel).toContain('1.0x')
+  expect(layout.stageDeformationOverflowCount).toBe(0)
   expect(layout.stageReviewReceiptRowCount).toBe(3)
   expect(layout.stageReviewReceiptHasScale).toBe(true)
   expect(layout.stageReviewOverflow).toBe(0)

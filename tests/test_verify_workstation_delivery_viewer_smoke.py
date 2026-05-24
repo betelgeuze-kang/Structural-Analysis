@@ -57,7 +57,12 @@ def test_workstation_delivery_viewer_smoke_static_contract(tmp_path: Path) -> No
                 <span data-source-adapter-row data-source-adapter-status="current">MIDAS structure-viewer-source-adapter-matrix.v1</span>
               </div>
             </section>
-            <section data-stage-review-controls><div data-stage-model-stack>Model Stack</div></section>
+            <section data-stage-review-controls>
+              <div data-stage-model-stack>Model Stack</div>
+              <div data-stage-deformation-control data-deformation-control-schema="structure-viewer-deformation-control.v1">
+                <input data-stage-deformation-scale-slider value="1.0">
+              </div>
+            </section>
             <section data-analysis-result-evidence><span class="analysis-result-evidence-row">Result evidence</span></section>
             <section data-delivery-review-receipt><span class="delivery-review-receipt__row">Delivery receipt</span></section>
             <section data-material-member-catalog>
@@ -94,7 +99,7 @@ def test_workstation_delivery_viewer_smoke_static_contract(tmp_path: Path) -> No
               <button data-result-envelope-row data-result-envelope-member-id="C-21">Result Envelope structure-viewer-result-envelope.v1</button>
             </section>
             <section data-drawing-handoff-panel>Optimization Summary</section>
-            <script>const THREE = {}; const MATERIAL_FAMILY_ONTOLOGY=[{family:'rail_steel'},{family:'seismic_isolator'},{family:'spring_link'},{family:'fireproofing'},{family:'waterproofing'},{family:'insulation'},{family:'expansion_joint'}]; const material_family_ontology_count=45; window.__STRUCTURE_VIEWER_ANALYSIS_OVERLAY_STATE__ = {}; function setRenderMode() { return true; } function startNewReviewRun() { return true; } function setTopbarWorkspaceSelection() { return true; } function renderTopbarProjectSelector() { return true; } function renderSourceAdapterMatrix() { return true; } function renderAnalysisResultEvidence() { return true; } function renderResultStepSchedule() { return true; } function renderResultEnvelope() { return true; } function renderDeliveryReviewReceipt() { return true; } function renderMaterialMemberCatalogPanel() { return true; } const SOURCE_ADAPTER_SCHEMA='structure-viewer-source-adapter-matrix.v1'; const DELIVERY_RECEIPT_SCHEMA='structure-viewer-delivery-review-receipt.v1'; const RESULT_STEP_SCHEDULE_SCHEMA='structure-viewer-result-step-schedule.v1'; const RESULT_ENVELOPE_SCHEMA='structure-viewer-result-envelope.v1'; const MATERIAL_CATALOG_SCHEMA='structure-viewer-material-member-catalog.v1';</script>
+            <script>const THREE = {}; const MATERIAL_FAMILY_ONTOLOGY=[{family:'rail_steel'},{family:'seismic_isolator'},{family:'spring_link'},{family:'fireproofing'},{family:'waterproofing'},{family:'insulation'},{family:'expansion_joint'}]; const material_family_ontology_count=45; window.__STRUCTURE_VIEWER_ANALYSIS_OVERLAY_STATE__ = {}; function setRenderMode() { return true; } function startNewReviewRun() { return true; } function setTopbarWorkspaceSelection() { return true; } function renderTopbarProjectSelector() { return true; } function renderSourceAdapterMatrix() { return true; } function updateDeformDisplayScale() { return true; } function formatDeformDisplayScale() { return '1.0x'; } function renderAnalysisResultEvidence() { return true; } function renderResultStepSchedule() { return true; } function renderResultEnvelope() { return true; } function renderDeliveryReviewReceipt() { return true; } function renderMaterialMemberCatalogPanel() { return true; } const SOURCE_ADAPTER_SCHEMA='structure-viewer-source-adapter-matrix.v1'; const DELIVERY_RECEIPT_SCHEMA='structure-viewer-delivery-review-receipt.v1'; const RESULT_STEP_SCHEDULE_SCHEMA='structure-viewer-result-step-schedule.v1'; const RESULT_ENVELOPE_SCHEMA='structure-viewer-result-envelope.v1'; const MATERIAL_CATALOG_SCHEMA='structure-viewer-material-member-catalog.v1';</script>
           </body>
         </html>
         """,
