@@ -353,7 +353,16 @@
             <small>Awaiting model</small>
           </div>
         </div>
+        <div id="stage-critical-hotspots" class="stage-critical-hotspots" data-stage-critical-hotspots data-stage-critical-hotspots-schema="structure-viewer-stage-critical-hotspots.v1" data-stage-critical-hotspots-status="pending" data-stage-critical-hotspot-count="0" aria-label="Projected critical member hotspots"></div>
         <div id="viewport-selection-focus-badge" class="viewport-selection-focus-badge" data-viewport-selection-focus-badge aria-live="polite"></div>
+        <button type="button" id="panel-zone-stage-badge" class="panel-zone-stage-badge" data-panel-zone-stage-badge data-panel-zone-stage-schema="structure-viewer-panel-zone-stage-badge.v1" data-panel-zone-stage-status="pending" data-panel-zone-stage-member="" data-panel-zone-stage-source-count="0" data-panel-zone-stage-fallback-count="0" data-panel-zone-stage-projection="pending" aria-live="polite">
+          <span class="panel-zone-stage-badge__leader" aria-hidden="true"></span>
+          <span class="panel-zone-stage-badge__content">
+            <span class="panel-zone-stage-badge__label">Panel Zone</span>
+            <strong>--</strong>
+            <small>Awaiting solver evidence</small>
+          </span>
+        </button>
         <div id="stage-overlay-receipt" class="stage-overlay-receipt" data-stage-overlay-receipt data-load-arrow-count="0" data-support-marker-count="0" aria-live="polite">
           <div class="stage-overlay-receipt__title">
             <span>3D Overlay Receipt</span>
@@ -841,14 +850,17 @@ let instancedElementGroups=[],instancedElementRecordsByMemberId=new Map();
 let selectedElementData=null,selectedElementKey='',activeTypeHighlight='';
 let selectedElementKeys=new Set(),selectedElementRecords=new Map();
 let selectionFocusWorldPoint=null;
+let panelZoneStageFocusWorldPoint=null;
 let activeDrawingHandoffSheetName='';
 let activeComparisonHighlightMemberIds=new Set(),activeComparisonHighlightToneByMemberId=new Map(),activeComparisonHighlightFilter='changed';
 let renderMode='contour',showDeformed=false,deformScale=100,isAnimating=false,animTime=0;
 let modelData=null,modelSourceMeta=null,frameCount=0,lastFpsTime=Date.now();
-let lastAnalysisCockpitModel=null,analysisTimelineStepOverride=null,analysisTimelinePlaybackTimer=null;
+let lastAnalysisCockpitModel=null,lastPanelZoneEvidenceModel=null,analysisTimelineStepOverride=null,analysisTimelinePlaybackTimer=null;
 let analysisStageOverlayState={loadArrowCount:0,supportMarkerCount:0,status:'pending',source:'--',loadCase:'--',direction:'+X',supportLimit:0};
 let viewerNeedsRender=true,lastRenderAt=0;
 let defaultView={position:new THREE.Vector3(80,60,80),target:new THREE.Vector3(24,14,14)};
+const STAGE_CRITICAL_HOTSPOTS_SCHEMA='structure-viewer-stage-critical-hotspots.v1';
+const PANEL_ZONE_STAGE_BADGE_SCHEMA='structure-viewer-panel-zone-stage-badge.v1';
 let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;
 let sectionEditPreviewState=createEmptySectionEditPreviewState();
 let sectionEditApplyState=createEmptySectionEditApplyState();
@@ -2906,6 +2918,8 @@ function clearSelection({publish=false}={}){
   renderSearchResults(modelData);
   renderSectionEditPreview();
   renderStageResultCallouts(lastAnalysisCockpitModel);
+  renderStageCriticalHotspots(lastAnalysisCockpitModel);
+  renderPanelZoneStageBadge(lastPanelZoneEvidenceModel);
 }
 function updateSelectionFromData(data,{mode='replace',publish=true}={}){
   if(!data||typeof data!=='object')return false;
@@ -2941,6 +2955,8 @@ function updateSelectionFromData(data,{mode='replace',publish=true}={}){
     refreshInstancedVisuals();
     updateProvenanceBlock();
   }
+  renderStageCriticalHotspots(lastAnalysisCockpitModel);
+  renderPanelZoneStageBadge(lastPanelZoneEvidenceModel);
   return true;
 }
 function isSelectedElement(data){
@@ -5290,6 +5306,7 @@ function renderCriticalMembersPanel(cockpitModel=null){
       mode:event.ctrlKey||event.metaKey?'toggle':'replace',
     }));
   });
+  renderStageCriticalHotspots(cockpitModel||lastAnalysisCockpitModel);
   syncCriticalMemberReviewFocus();
   positionStageResultCalloutDock();
 }
@@ -5839,6 +5856,8 @@ function renderStageResultCallouts(cockpitModel=null){
     });
   });
   syncCriticalMemberReviewFocus();
+  renderStageCriticalHotspots(cockpitModel||lastAnalysisCockpitModel);
+  if(lastPanelZoneEvidenceModel)renderPanelZoneStageBadge(lastPanelZoneEvidenceModel);
 }
 function syncCriticalMemberReviewFocus(){
   const selection=getCurrentSelectionState();
@@ -5857,6 +5876,15 @@ function syncCriticalMemberReviewFocus(){
     const memberId=normalizeSelectionValue(button.getAttribute('data-stage-callout-focus-member'));
     const selected=Boolean(activeMemberId&&memberId===activeMemberId);
     button.classList.toggle('is-selected',selected);
+    button.setAttribute('aria-pressed',selected?'true':'false');
+  });
+  document.querySelectorAll('[data-stage-critical-hotspot-member]').forEach(button=>{
+    const memberId=normalizeSelectionValue(button.getAttribute('data-stage-critical-hotspot-member'));
+    const selected=Boolean(memberId&&selectedMemberIds.has(memberId));
+    const primary=Boolean(activeMemberId&&memberId===activeMemberId);
+    button.classList.toggle('is-selected',selected);
+    button.classList.toggle('is-primary',primary);
+    button.setAttribute('aria-selected',selected?'true':'false');
     button.setAttribute('aria-pressed',selected?'true':'false');
   });
 }
@@ -6072,6 +6100,292 @@ function positionViewportSelectionFocusBadge(){
   }
   badge.classList.add('is-visible');
   positionStageResultCalloutDock();
+}
+
+function findElementRecordByMemberId(memberId=''){
+  const normalized=normalizeSelectionValue(memberId);
+  if(!normalized)return null;
+  const selected=[...selectedElementRecords.values()]
+    .find(record=>normalizeSelectionValue(resolveSelectionMemberId(record))===normalized);
+  if(selected)return selected;
+  if(!modelData||!Array.isArray(modelData.elements))return null;
+  return modelData.elements.find(element=>normalizeSelectionValue(resolveSelectionMemberId(element))===normalized)||null;
+}
+
+function buildStageCriticalHotspotRows(cockpitModel=null){
+  const rows=Array.isArray(cockpitModel?.criticalMembers)?cockpitModel.criticalMembers:[];
+  return rows.slice(0,3)
+    .map((row,index)=>({
+      memberId:normalizeSelectionValue(row?.id),
+      story:normalizeSelectionValue(row?.story)||'--',
+      type:normalizeSelectionValue(row?.type)||'member',
+      ratio:safeNumber(row?.ratio,NaN),
+      status:normalizeSelectionValue(row?.status)||'Review',
+      statusTone:normalizeAnalysisTone(row?.statusTone||row?.statusKey||row?.status||'neutral'),
+      driftContributionPct:safeNumber(row?.driftContributionPct,0),
+      rank:index+1,
+    }))
+    .filter(row=>row.memberId);
+}
+
+function renderStageCriticalHotspots(cockpitModel=null){
+  const panel=document.getElementById('stage-critical-hotspots');
+  if(!(panel instanceof HTMLElement))return;
+  const rows=buildStageCriticalHotspotRows(cockpitModel||lastAnalysisCockpitModel);
+  panel.dataset.stageCriticalHotspotsSchema=STAGE_CRITICAL_HOTSPOTS_SCHEMA;
+  panel.dataset.stageCriticalHotspotsStatus=rows.length?'ready':'pending';
+  panel.dataset.stageCriticalHotspotCount=String(rows.length);
+  panel.classList.toggle('is-visible',rows.length>0);
+  if(!rows.length){
+    panel.innerHTML='';
+    window.__STRUCTURE_VIEWER_STAGE_CRITICAL_HOTSPOTS_STATE__={
+      schemaVersion:STAGE_CRITICAL_HOTSPOTS_SCHEMA,
+      status:'pending',
+      hotspotCount:0,
+      rows:[],
+    };
+    return;
+  }
+  const selection=getCurrentSelectionState();
+  const selectedMemberIds=new Set(normalizeSelectionValues(selection.memberIds||selection.memberId));
+  panel.innerHTML=rows.map(row=>{
+    const selected=selectedMemberIds.has(row.memberId);
+    const ratioLabel=Number.isFinite(row.ratio)?row.ratio.toFixed(2):'--';
+    return `<button type="button" class="stage-critical-hotspot stage-critical-hotspot--${escapeHtml(row.statusTone)}${selected?' is-selected':''}" data-stage-critical-hotspot data-stage-critical-hotspot-member="${escapeHtml(row.memberId)}" data-stage-critical-hotspot-rank="${escapeHtml(String(row.rank))}" data-stage-critical-hotspot-ratio="${escapeHtml(ratioLabel)}" data-stage-critical-hotspot-projection="pending" aria-selected="${selected?'true':'false'}" aria-pressed="${selected?'true':'false'}" title="Focus critical member ${escapeHtml(row.memberId)}">
+      <span class="stage-critical-hotspot__leader" aria-hidden="true"></span>
+      <span class="stage-critical-hotspot__content">
+        <span class="stage-critical-hotspot__label">Critical ${escapeHtml(String(row.rank))}</span>
+        <strong>${escapeHtml(row.memberId)}</strong>
+        <small>D/C ${escapeHtml(ratioLabel)} | ${escapeHtml(row.story)} | drift ${escapeHtml(row.driftContributionPct.toFixed(1))}%</small>
+      </span>
+    </button>`;
+  }).join('');
+  panel.querySelectorAll('[data-stage-critical-hotspot-member]').forEach(button=>{
+    button.addEventListener('click',event=>{
+      event.stopPropagation();
+      focusMemberSearchResult(button.getAttribute('data-stage-critical-hotspot-member')||'',{
+        mode:event.ctrlKey||event.metaKey?'toggle':'replace',
+      });
+    });
+  });
+  syncCriticalMemberReviewFocus();
+  positionStageCriticalHotspots();
+}
+
+function positionStageCriticalHotspots(){
+  const panel=document.getElementById('stage-critical-hotspots');
+  const vp=document.getElementById('viewport');
+  if(!(panel instanceof HTMLElement)||!(vp instanceof HTMLElement))return;
+  const buttons=[...panel.querySelectorAll('[data-stage-critical-hotspot-member]')]
+    .filter(button=>button instanceof HTMLElement);
+  if(!buttons.length){
+    panel.classList.remove('is-visible');
+    return;
+  }
+  const viewportRect=vp.getBoundingClientRect();
+  const canvasRect=renderer?.domElement?.getBoundingClientRect?.()||viewportRect;
+  const minLeft=16;
+  const maxLeft=Math.max(viewportRect.width-168,minLeft);
+  const minTop=86;
+  const maxTop=Math.max(viewportRect.height-172,minTop);
+  const avoidRects=['[data-viewport-selection-focus-badge].is-visible','[data-panel-zone-stage-badge].is-visible']
+    .map(selector=>document.querySelector(selector))
+    .filter(node=>node instanceof HTMLElement)
+    .map(node=>{
+      const rect=node.getBoundingClientRect();
+      return{
+        left:rect.left-viewportRect.left,
+        right:rect.right-viewportRect.left,
+        top:rect.top-viewportRect.top,
+        bottom:rect.bottom-viewportRect.top,
+      };
+    });
+  const placed=[];
+  buttons.forEach((button,index)=>{
+    const memberId=normalizeSelectionValue(button.getAttribute('data-stage-critical-hotspot-member'));
+    const element=findElementRecordByMemberId(memberId);
+    const focusState=element?buildElementFocusState(element):null;
+    const worldPoint=focusState?.badgePoint?.clone?.()||null;
+    let rawLeft=24;
+    let rawTop=minTop+index*56;
+    let projection='docked';
+    if(worldPoint&&camera&&renderer){
+      const projected=worldPoint.clone().project(camera);
+      if(Number.isFinite(projected.x)&&Number.isFinite(projected.y)){
+        rawLeft=(projected.x*.5+.5)*canvasRect.width+canvasRect.left-viewportRect.left-168;
+        rawTop=(-projected.y*.5+.5)*canvasRect.height+canvasRect.top-viewportRect.top-20;
+        projection=projected.z<-1||projected.z>1?'edge-pinned':'projected';
+      }
+    }
+    placed.push({
+      button,
+      memberId,
+      left:Math.min(Math.max(rawLeft,minLeft),maxLeft),
+      top:Math.min(Math.max(rawTop,minTop),maxTop),
+      projection,
+      hasWorldPoint:Boolean(worldPoint),
+    });
+  });
+  placed.sort((a,b)=>a.top-b.top);
+  for(let index=1;index<placed.length;index+=1){
+    placed[index].top=Math.max(placed[index].top,placed[index-1].top+50);
+  }
+  for(let index=placed.length-1;index>=0;index-=1){
+    placed[index].top=Math.min(placed[index].top,maxTop-(placed.length-1-index)*50);
+  }
+  const hotspotWidth=154;
+  const hotspotHalfHeight=25;
+  placed.forEach((row,index)=>{
+    avoidRects.forEach(avoid=>{
+      const overlapsHoriz=Math.max(0,Math.min(row.left+hotspotWidth,avoid.right)-Math.max(row.left,avoid.left))>0;
+      const overlapsVert=Math.max(0,Math.min(row.top+hotspotHalfHeight,avoid.bottom)-Math.max(row.top-hotspotHalfHeight,avoid.top))>0;
+      if(!(overlapsHoriz&&overlapsVert))return;
+      const below=avoid.bottom+hotspotHalfHeight+10+index*4;
+      const above=avoid.top-hotspotHalfHeight-10-index*4;
+      row.top=below<=maxTop?below:Math.max(minTop,above);
+      row.projection=row.projection==='projected'?'edge-pinned':row.projection;
+    });
+  });
+  placed.forEach(row=>{
+    const top=Math.min(Math.max(row.top,minTop),maxTop);
+    row.button.style.left=`${row.left.toFixed(1)}px`;
+    row.button.style.top=`${top.toFixed(1)}px`;
+    row.button.setAttribute('data-stage-critical-hotspot-projection',row.projection);
+    row.button.classList.toggle('is-edge-pinned',row.projection!=='projected');
+  });
+  panel.classList.add('is-visible');
+  window.__STRUCTURE_VIEWER_STAGE_CRITICAL_HOTSPOTS_STATE__={
+    schemaVersion:STAGE_CRITICAL_HOTSPOTS_SCHEMA,
+    status:'ready',
+    hotspotCount:placed.length,
+    projectedCount:placed.filter(row=>row.projection==='projected').length,
+    edgePinnedCount:placed.filter(row=>row.projection==='edge-pinned').length,
+    dockedCount:placed.filter(row=>row.projection==='docked').length,
+    rows:placed.map(row=>({
+      memberId:row.memberId,
+      projection:row.projection,
+      hasWorldPoint:row.hasWorldPoint,
+    })),
+  };
+}
+
+function setPanelZoneStageBadgeVisibility(badge,visible=false,projection='hidden'){
+  if(!(badge instanceof HTMLElement))return;
+  badge.classList.toggle('is-visible',visible);
+  badge.setAttribute('data-panel-zone-stage-projection',projection);
+  if(!visible){
+    badge.style.left='';
+    badge.style.top='';
+    badge.removeAttribute('data-panel-zone-stage-edge');
+  }
+}
+
+function renderPanelZoneStageBadge(evidenceModel=null){
+  const badge=document.getElementById('panel-zone-stage-badge');
+  if(!(badge instanceof HTMLElement))return;
+  const model=evidenceModel||lastPanelZoneEvidenceModel||buildPanelZoneEvidenceModel(modelData||{}, {cockpitModel:lastAnalysisCockpitModel});
+  lastPanelZoneEvidenceModel=model;
+  const candidateIds=new Set((Array.isArray(model?.candidateRows)?model.candidateRows:[])
+    .map(row=>normalizeSelectionValue(row?.memberId))
+    .filter(Boolean));
+  const selection=getCurrentSelectionState();
+  const activeMemberId=normalizeSelectionValue(selection.memberId);
+  const memberId=candidateIds.has(activeMemberId)?activeMemberId:normalizeSelectionValue(model?.primaryMemberId);
+  const targetElement=findElementRecordByMemberId(memberId);
+  const focusState=targetElement?buildElementFocusState(targetElement):null;
+  panelZoneStageFocusWorldPoint=focusState?.badgePoint?.clone?.()||null;
+  const status=normalizeSelectionValue(model?.status)||'pending';
+  const sourceCount=Math.max(0,Math.round(safeNumber(model?.sourceCount,0)));
+  const validatedSourceCount=Math.max(0,Math.round(safeNumber(model?.validatedSourceCount,0)));
+  const fallbackSourceCount=Math.max(0,Math.round(safeNumber(model?.fallbackSourceCount,0)));
+  const interferenceRowCount=Math.max(0,Math.round(safeNumber(model?.interferenceRowCount,0)));
+  const boundary=normalizeSelectionValue(model?.boundary)||'engineer_review';
+  const statusLabel=status==='ready'?'Solver verified':(status==='blocked'?'Evidence blocked':'Needs review');
+  badge.dataset.panelZoneStageSchema=PANEL_ZONE_STAGE_BADGE_SCHEMA;
+  badge.dataset.panelZoneStageStatus=status;
+  badge.dataset.panelZoneStageMember=memberId||'';
+  badge.dataset.panelZoneStageSourceCount=String(sourceCount);
+  badge.dataset.panelZoneStageValidatedSourceCount=String(validatedSourceCount);
+  badge.dataset.panelZoneStageFallbackCount=String(fallbackSourceCount);
+  badge.dataset.panelZoneStageInterferenceCount=String(interferenceRowCount);
+  badge.dataset.panelZoneStageBoundary=boundary;
+  badge.disabled=!memberId;
+  badge.innerHTML=`
+    <span class="panel-zone-stage-badge__leader" aria-hidden="true"></span>
+    <span class="panel-zone-stage-badge__content">
+      <span class="panel-zone-stage-badge__label">Panel Zone / Joint</span>
+      <strong>${escapeHtml(memberId||'--')}</strong>
+      <small>${escapeHtml(statusLabel)} | ${escapeHtml(String(validatedSourceCount))}/${escapeHtml(String(sourceCount))} sources | clash ${escapeHtml(String(interferenceRowCount))} | fallback ${escapeHtml(String(fallbackSourceCount))}</small>
+      <em>${escapeHtml(boundary)}</em>
+    </span>`;
+  badge.onclick=event=>{
+    event.stopPropagation();
+    if(memberId)focusMemberSearchResult(memberId);
+  };
+  const visible=Boolean(memberId&&status!=='blocked');
+  setPanelZoneStageBadgeVisibility(badge,visible,visible?'ready':'hidden');
+  if(visible)positionPanelZoneStageBadge();
+  window.__STRUCTURE_VIEWER_PANEL_ZONE_STAGE_BADGE_STATE__={
+    schemaVersion:PANEL_ZONE_STAGE_BADGE_SCHEMA,
+    status,
+    memberId,
+    sourceCount,
+    validatedSourceCount,
+    fallbackSourceCount,
+    interferenceRowCount,
+    boundary,
+    projection:badge.getAttribute('data-panel-zone-stage-projection')||'pending',
+    hasWorldPoint:Boolean(panelZoneStageFocusWorldPoint),
+  };
+}
+
+function positionPanelZoneStageBadge(){
+  const badge=document.getElementById('panel-zone-stage-badge');
+  const vp=document.getElementById('viewport');
+  if(!(badge instanceof HTMLElement)||!(vp instanceof HTMLElement)||!badge.classList.contains('is-visible'))return;
+  if(!panelZoneStageFocusWorldPoint||!camera||!renderer){
+    badge.style.left='calc(50% + 78px)';
+    badge.style.top='36%';
+    badge.setAttribute('data-panel-zone-stage-projection','docked');
+    badge.setAttribute('data-panel-zone-stage-edge','docked');
+    badge.classList.add('is-edge-pinned');
+    if(window.__STRUCTURE_VIEWER_PANEL_ZONE_STAGE_BADGE_STATE__){
+      window.__STRUCTURE_VIEWER_PANEL_ZONE_STAGE_BADGE_STATE__.projection='docked';
+      window.__STRUCTURE_VIEWER_PANEL_ZONE_STAGE_BADGE_STATE__.hasWorldPoint=false;
+    }
+    return;
+  }
+  const projected=panelZoneStageFocusWorldPoint.clone().project(camera);
+  if(!Number.isFinite(projected.x)||!Number.isFinite(projected.y)){
+    badge.setAttribute('data-panel-zone-stage-projection','docked');
+    return;
+  }
+  const rect=renderer.domElement.getBoundingClientRect();
+  const viewportRect=vp.getBoundingClientRect();
+  const rawLeft=(projected.x*.5+.5)*rect.width+rect.left-viewportRect.left+38;
+  const rawTop=(-projected.y*.5+.5)*rect.height+rect.top-viewportRect.top-18;
+  const minLeft=128;
+  const maxLeft=Math.max(viewportRect.width-226,minLeft);
+  const minTop=78;
+  const maxTop=Math.max(viewportRect.height-92,minTop);
+  const left=Math.min(Math.max(rawLeft,minLeft),maxLeft);
+  const top=Math.min(Math.max(rawTop,minTop),maxTop);
+  const edgeParts=[];
+  if(projected.z<-1||projected.z>1)edgeParts.push('clipped');
+  if(rawLeft<minLeft)edgeParts.push('left');
+  if(rawLeft>maxLeft)edgeParts.push('right');
+  if(rawTop<minTop)edgeParts.push('top');
+  if(rawTop>maxTop)edgeParts.push('bottom');
+  const edgeMode=edgeParts.length?edgeParts.join('-'):'inside';
+  badge.style.left=`${left.toFixed(1)}px`;
+  badge.style.top=`${top.toFixed(1)}px`;
+  badge.setAttribute('data-panel-zone-stage-projection',edgeMode==='inside'?'projected':'edge-pinned');
+  badge.setAttribute('data-panel-zone-stage-edge',edgeMode);
+  badge.classList.toggle('is-edge-pinned',edgeMode!=='inside');
+  if(window.__STRUCTURE_VIEWER_PANEL_ZONE_STAGE_BADGE_STATE__){
+    window.__STRUCTURE_VIEWER_PANEL_ZONE_STAGE_BADGE_STATE__.projection=badge.getAttribute('data-panel-zone-stage-projection')||'projected';
+    window.__STRUCTURE_VIEWER_PANEL_ZONE_STAGE_BADGE_STATE__.hasWorldPoint=true;
+  }
 }
 
 function rebuildSelectionFocusOverlay(element=selectedElementData){
@@ -6625,6 +6939,7 @@ function renderPanelZoneEvidencePanel(cockpitModel=null){
   const panel=document.getElementById('panel-zone-evidence-panel');
   if(!(panel instanceof HTMLElement))return;
   const model=buildPanelZoneEvidenceModel(modelData||{}, {cockpitModel:cockpitModel||lastAnalysisCockpitModel});
+  lastPanelZoneEvidenceModel=model;
   panel.dataset.panelZoneSchema=PANEL_ZONE_EVIDENCE_SCHEMA;
   panel.dataset.panelZoneStatus=model.status;
   panel.dataset.panelZoneSourceCount=String(model.sourceCount||0);
@@ -6640,6 +6955,7 @@ function renderPanelZoneEvidencePanel(cockpitModel=null){
   panel.dataset.panelZoneSourcePath=model.sourcePath||'';
   panel.dataset.panelZonePrimaryMember=model.primaryMemberId||'';
   window.__STRUCTURE_VIEWER_PANEL_ZONE_EVIDENCE_STATE__={...model};
+  renderPanelZoneStageBadge(model);
   if(model.status==='blocked'||!model.rows.length){
     panel.innerHTML='<div class="panel-placeholder">Panel-zone evidence is blocked or missing for this model.</div>';
     return;
@@ -8098,6 +8414,8 @@ function animate(){
   const nowMs=performance.now();
   if(viewerNeedsRender||isAnimating||nowMs-lastRenderAt>=STATIC_RENDER_REFRESH_MS){
     positionViewportSelectionFocusBadge();
+    positionStageCriticalHotspots();
+    positionPanelZoneStageBadge();
     renderer.render(scene,camera);
     viewerNeedsRender=false;
     lastRenderAt=nowMs;
@@ -8115,6 +8433,8 @@ function onResize(){
   camera.updateProjectionMatrix();
   renderer.setSize(vp.clientWidth,vp.clientHeight);
   positionViewportSelectionFocusBadge();
+  positionStageCriticalHotspots();
+  positionPanelZoneStageBadge();
   requestViewerRender();
 }
 

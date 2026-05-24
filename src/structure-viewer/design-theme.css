@@ -2700,6 +2700,255 @@ body.structural-surface .stage-overlay-receipt__row em {
   font-weight:800;
 }
 
+body.structural-surface .stage-critical-hotspots {
+  position:absolute;
+  inset:0;
+  z-index:7;
+  display:none;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-critical-hotspots.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-critical-hotspot {
+  position:absolute;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  width:154px;
+  min-height:46px;
+  padding:6px 8px;
+  border:1px solid rgba(244,181,107,.42);
+  border-radius:9px;
+  background:linear-gradient(180deg, rgba(17,28,41,.92), rgba(8,18,29,.84));
+  color:var(--text);
+  box-shadow:0 12px 26px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  pointer-events:auto;
+  transform:translate(0,-50%);
+}
+
+body.structural-surface .stage-critical-hotspot__leader {
+  position:relative;
+  flex:0 0 22px;
+  align-self:stretch;
+  min-height:32px;
+}
+
+body.structural-surface .stage-critical-hotspot__leader::before,
+body.structural-surface .stage-critical-hotspot__leader::after {
+  content:"";
+  position:absolute;
+  background:#f4b56b;
+  box-shadow:0 0 14px rgba(244,181,107,.52);
+}
+
+body.structural-surface .stage-critical-hotspot__leader::before {
+  right:0;
+  top:50%;
+  width:22px;
+  height:1px;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-critical-hotspot__leader::after {
+  right:-2px;
+  top:50%;
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-critical-hotspot__content {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  text-align:left;
+}
+
+body.structural-surface .stage-critical-hotspot__label,
+body.structural-surface .stage-critical-hotspot strong,
+body.structural-surface .stage-critical-hotspot small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-critical-hotspot__label {
+  color:#f4b56b;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .stage-critical-hotspot strong {
+  color:#fff7ed;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.05;
+}
+
+body.structural-surface .stage-critical-hotspot small {
+  color:#b7c6d8;
+  font-size:9px;
+  font-weight:700;
+}
+
+body.structural-surface .stage-critical-hotspot--danger,
+body.structural-surface .stage-critical-hotspot--warn {
+  border-color:rgba(244,181,107,.56);
+}
+
+body.structural-surface .stage-critical-hotspot--success {
+  border-color:rgba(88,215,141,.44);
+}
+
+body.structural-surface .stage-critical-hotspot--success .stage-critical-hotspot__leader::before,
+body.structural-surface .stage-critical-hotspot--success .stage-critical-hotspot__leader::after {
+  background:#58d78d;
+}
+
+body.structural-surface .stage-critical-hotspot.is-selected {
+  border-color:rgba(88,215,141,.72);
+  background:linear-gradient(180deg, rgba(25,45,41,.94), rgba(7,22,22,.88));
+  box-shadow:0 0 0 1px rgba(88,215,141,.16), 0 14px 30px rgba(0,0,0,.30);
+}
+
+body.structural-surface .stage-critical-hotspot.is-edge-pinned {
+  border-style:dashed;
+}
+
+body.structural-surface .panel-zone-stage-badge {
+  position:absolute;
+  z-index:8;
+  left:calc(50% + 78px);
+  top:36%;
+  display:none;
+  align-items:stretch;
+  gap:8px;
+  width:min(252px, calc(100% - 32px));
+  min-height:76px;
+  padding:8px 10px;
+  border:1px solid rgba(34,211,238,.42);
+  border-radius:10px;
+  background:
+    linear-gradient(180deg, rgba(8,19,31,.92), rgba(5,12,22,.86)),
+    rgba(8,18,29,.92);
+  color:var(--text);
+  box-shadow:0 16px 34px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06);
+  cursor:pointer;
+  transform:translate(0, -50%);
+}
+
+body.structural-surface .panel-zone-stage-badge.is-visible {
+  display:flex;
+}
+
+body.structural-surface .panel-zone-stage-badge:disabled {
+  cursor:default;
+  opacity:.62;
+}
+
+body.structural-surface .panel-zone-stage-badge__leader {
+  position:relative;
+  flex:0 0 30px;
+  min-height:54px;
+}
+
+body.structural-surface .panel-zone-stage-badge__leader::before,
+body.structural-surface .panel-zone-stage-badge__leader::after {
+  content:"";
+  position:absolute;
+  background:#22d3ee;
+  box-shadow:0 0 16px rgba(34,211,238,.54);
+}
+
+body.structural-surface .panel-zone-stage-badge__leader::before {
+  left:4px;
+  top:50%;
+  width:26px;
+  height:1px;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .panel-zone-stage-badge__leader::after {
+  left:0;
+  top:50%;
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .panel-zone-stage-badge__content {
+  display:grid;
+  gap:2px;
+  min-width:0;
+  text-align:left;
+}
+
+body.structural-surface .panel-zone-stage-badge__label,
+body.structural-surface .panel-zone-stage-badge strong,
+body.structural-surface .panel-zone-stage-badge small,
+body.structural-surface .panel-zone-stage-badge em {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .panel-zone-stage-badge__label {
+  color:#67e8f9;
+  font-size:9px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .panel-zone-stage-badge strong {
+  color:#f8fafc;
+  font-size:16px;
+  font-weight:900;
+  line-height:1.05;
+}
+
+body.structural-surface .panel-zone-stage-badge small {
+  color:#b7c6d8;
+  font-size:10px;
+  font-weight:700;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
+
+body.structural-surface .panel-zone-stage-badge em {
+  color:#8aa1b8;
+  font-size:9px;
+  font-weight:800;
+}
+
+body.structural-surface .panel-zone-stage-badge[data-panel-zone-stage-status="ready"] {
+  border-color:rgba(34,211,238,.55);
+}
+
+body.structural-surface .panel-zone-stage-badge[data-panel-zone-stage-status="ready"]::after {
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:3px;
+  border-radius:10px 0 0 10px;
+  background:#22d3ee;
+}
+
+body.structural-surface .panel-zone-stage-badge[data-panel-zone-stage-projection="edge-pinned"] {
+  border-color:rgba(88,215,141,.50);
+}
+
 body.structural-surface .edit-preview-card {
   display:flex;
   flex-direction:column;

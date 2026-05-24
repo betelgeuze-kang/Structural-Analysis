@@ -310,7 +310,9 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     const stageReceipt = rectFor('#stage-result-receipt')
     const stageOverlayReceipt = rectFor('[data-stage-overlay-receipt]')
     const stageReviewControls = rectFor('[data-stage-review-controls]')
+    const stageCriticalHotspots = rectFor('[data-stage-critical-hotspots]')
     const focusBadge = rectFor('[data-viewport-selection-focus-badge]')
+    const panelZoneStageBadge = rectFor('[data-panel-zone-stage-badge]')
     const toolRail = rectFor('[data-viewport-tool-rail]')
     const topRunControl = rectFor('[data-top-run-control]')
     const topProjectSelect = document.querySelector('[data-shell-project-select]') as HTMLSelectElement | null
@@ -491,6 +493,33 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      stageCriticalHotspots,
+      stageCriticalHotspotsStatus: document.querySelector('[data-stage-critical-hotspots]')?.getAttribute('data-stage-critical-hotspots-status') || '',
+      stageCriticalHotspotsSchema: document.querySelector('[data-stage-critical-hotspots]')?.getAttribute('data-stage-critical-hotspots-schema') || '',
+      stageCriticalHotspotCount: Number(document.querySelector('[data-stage-critical-hotspots]')?.getAttribute('data-stage-critical-hotspot-count') || '0'),
+      stageCriticalHotspotMemberCount: document.querySelectorAll('[data-stage-critical-hotspot-member]').length,
+      stageCriticalHotspotSelectedCount: document.querySelectorAll('[data-stage-critical-hotspot-member].is-selected').length,
+      stageCriticalHotspotProjectedCount: document.querySelectorAll('[data-stage-critical-hotspot-projection="projected"]').length,
+      stageCriticalHotspotProjectionCount: document.querySelectorAll('[data-stage-critical-hotspot-projection]').length,
+      stageCriticalHotspotWindowState: window.__STRUCTURE_VIEWER_STAGE_CRITICAL_HOTSPOTS_STATE__ || null,
+      stageCriticalHotspotText: document.querySelector('[data-stage-critical-hotspots]')?.textContent || '',
+      stageCriticalHotspotVisible: Boolean(document.querySelector('[data-stage-critical-hotspots]')?.classList.contains('is-visible')),
+      stageCriticalHotspotOverlapFocus: [...document.querySelectorAll('[data-stage-critical-hotspot]')].reduce((total, node) => {
+        if (!(node instanceof HTMLElement)) return total
+        const rect = node.getBoundingClientRect()
+        return total + overlapArea({
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        }, focusBadge)
+      }, 0),
+      stageCriticalHotspotOverflowCount: [...document.querySelectorAll('[data-stage-critical-hotspot], [data-stage-critical-hotspot] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       panelZoneStatus: document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-status') || '',
       panelZoneSchema: document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-schema') || '',
       panelZoneSourceCount: Number(document.querySelector('[data-panel-zone-evidence]')?.getAttribute('data-panel-zone-source-count') || '0'),
@@ -510,6 +539,23 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       panelZoneHasAnchorage: Boolean(document.querySelector('[data-panel-zone-row-key="rebar-anchorage"]')),
       panelZoneHasClash: Boolean(document.querySelector('[data-panel-zone-row-key="clash"]')),
       panelZoneWindowState: window.__STRUCTURE_VIEWER_PANEL_ZONE_EVIDENCE_STATE__ || null,
+      panelZoneStageBadge,
+      panelZoneStageStatus: document.querySelector('[data-panel-zone-stage-badge]')?.getAttribute('data-panel-zone-stage-status') || '',
+      panelZoneStageSchema: document.querySelector('[data-panel-zone-stage-badge]')?.getAttribute('data-panel-zone-stage-schema') || '',
+      panelZoneStageMember: document.querySelector('[data-panel-zone-stage-badge]')?.getAttribute('data-panel-zone-stage-member') || '',
+      panelZoneStageSourceCount: Number(document.querySelector('[data-panel-zone-stage-badge]')?.getAttribute('data-panel-zone-stage-source-count') || '0'),
+      panelZoneStageValidatedSourceCount: Number(document.querySelector('[data-panel-zone-stage-badge]')?.getAttribute('data-panel-zone-stage-validated-source-count') || '0'),
+      panelZoneStageFallbackCount: Number(document.querySelector('[data-panel-zone-stage-badge]')?.getAttribute('data-panel-zone-stage-fallback-count') || '0'),
+      panelZoneStageInterferenceCount: Number(document.querySelector('[data-panel-zone-stage-badge]')?.getAttribute('data-panel-zone-stage-interference-count') || '0'),
+      panelZoneStageProjection: document.querySelector('[data-panel-zone-stage-badge]')?.getAttribute('data-panel-zone-stage-projection') || '',
+      panelZoneStageText: document.querySelector('[data-panel-zone-stage-badge]')?.textContent || '',
+      panelZoneStageVisible: Boolean(document.querySelector('[data-panel-zone-stage-badge]')?.classList.contains('is-visible')),
+      panelZoneStageWindowState: window.__STRUCTURE_VIEWER_PANEL_ZONE_STAGE_BADGE_STATE__ || null,
+      panelZoneStageOverlapFocus: overlapArea(panelZoneStageBadge, focusBadge),
+      panelZoneStageOverflowCount: [...document.querySelectorAll('[data-panel-zone-stage-badge], [data-panel-zone-stage-badge] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       panelZoneOverflowCount: [...document.querySelectorAll('[data-panel-zone-evidence], [data-panel-zone-evidence] [data-panel-zone-row], [data-panel-zone-evidence] [data-panel-zone-member-row], [data-panel-zone-evidence] .panel-zone-evidence__head')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
@@ -753,6 +799,20 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.resultEnvelopeHasUtilization).toBe(true)
   expect(layout.resultEnvelopeMemberRowCount).toBeGreaterThanOrEqual(1)
   expect(layout.resultEnvelopeOverflowCount).toBe(0)
+  expect(layout.stageCriticalHotspotsStatus).toBe('ready')
+  expect(layout.stageCriticalHotspotsSchema).toBe('structure-viewer-stage-critical-hotspots.v1')
+  expect(layout.stageCriticalHotspotCount).toBeGreaterThanOrEqual(3)
+  expect(layout.stageCriticalHotspotMemberCount).toBeGreaterThanOrEqual(3)
+  expect(layout.stageCriticalHotspotSelectedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageCriticalHotspotProjectionCount).toBeGreaterThanOrEqual(3)
+  expect(layout.stageCriticalHotspotWindowState?.schemaVersion).toBe('structure-viewer-stage-critical-hotspots.v1')
+  expect(layout.stageCriticalHotspotWindowState?.status).toBe('ready')
+  expect(layout.stageCriticalHotspotWindowState?.hotspotCount).toBeGreaterThanOrEqual(3)
+  expect(layout.stageCriticalHotspotText).toContain('Critical 1')
+  expect(layout.stageCriticalHotspotText).toContain('D/C')
+  expect(layout.stageCriticalHotspotVisible).toBe(true)
+  expect(layout.stageCriticalHotspotOverlapFocus).toBe(0)
+  expect(layout.stageCriticalHotspotOverflowCount).toBe(0)
   expect(layout.panelZoneStatus).toBe('ready')
   expect(layout.panelZoneSchema).toBe('structure-viewer-panel-zone-evidence.v1')
   expect(layout.panelZoneSourceCount).toBe(3)
@@ -772,6 +832,22 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.panelZoneHasAnchorage).toBe(true)
   expect(layout.panelZoneHasClash).toBe(true)
   expect(layout.panelZoneWindowState?.status).toBe('ready')
+  expect(layout.panelZoneStageStatus).toBe('ready')
+  expect(layout.panelZoneStageSchema).toBe('structure-viewer-panel-zone-stage-badge.v1')
+  expect(layout.panelZoneStageMember).not.toBe('')
+  expect(layout.panelZoneStageSourceCount).toBe(3)
+  expect(layout.panelZoneStageValidatedSourceCount).toBe(3)
+  expect(layout.panelZoneStageFallbackCount).toBe(0)
+  expect(layout.panelZoneStageInterferenceCount).toBeGreaterThanOrEqual(45)
+  expect(['projected', 'edge-pinned', 'docked']).toContain(layout.panelZoneStageProjection)
+  expect(layout.panelZoneStageText).toContain('Panel Zone')
+  expect(layout.panelZoneStageText).toContain('Solver verified')
+  expect(layout.panelZoneStageVisible).toBe(true)
+  expect(layout.panelZoneStageWindowState?.schemaVersion).toBe('structure-viewer-panel-zone-stage-badge.v1')
+  expect(layout.panelZoneStageWindowState?.status).toBe('ready')
+  expect(layout.panelZoneStageWindowState?.memberId).toBe(layout.panelZoneStageMember)
+  expect(layout.panelZoneStageOverlapFocus).toBe(0)
+  expect(layout.panelZoneStageOverflowCount).toBe(0)
   expect(layout.panelZoneOverflowCount).toBe(0)
   expect(layout.deliveryStatus).not.toBe('pending')
   expect(layout.deliveryStatus).not.toBe('blocked')

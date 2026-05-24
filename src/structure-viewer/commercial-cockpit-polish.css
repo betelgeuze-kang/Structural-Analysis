@@ -565,6 +565,72 @@
     color:#58d78d;
   }
 
+  body.structural-surface.command-center-shell .stage-critical-hotspot {
+    width:142px;
+    min-height:40px;
+    padding:5px 7px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(13,24,36,.94), rgba(5,12,21,.88));
+    box-shadow:0 12px 26px rgba(0,0,0,.34);
+  }
+
+  body.structural-surface.command-center-shell .stage-critical-hotspot__leader {
+    flex-basis:18px;
+    min-height:28px;
+  }
+
+  body.structural-surface.command-center-shell .stage-critical-hotspot__leader::before {
+    width:18px;
+  }
+
+  body.structural-surface.command-center-shell .stage-critical-hotspot__label {
+    font-size:7px;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .stage-critical-hotspot strong {
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .stage-critical-hotspot small {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-stage-badge {
+    z-index:8;
+    width:min(232px, calc(100% - 28px));
+    min-height:64px;
+    padding:7px 9px;
+    border-radius:7px;
+    border-color:rgba(34,211,238,.48);
+    background:linear-gradient(180deg, rgba(12,24,34,.96), rgba(5,12,22,.90));
+    box-shadow:0 0 0 1px rgba(34,211,238,.10), 0 16px 34px rgba(0,0,0,.36);
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-stage-badge__leader {
+    flex-basis:26px;
+    min-height:46px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-stage-badge__leader::before {
+    width:24px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-stage-badge__label {
+    color:#67e8f9;
+    font-size:8px;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-stage-badge strong {
+    font-size:14px;
+  }
+
+  body.structural-surface.command-center-shell .panel-zone-stage-badge small,
+  body.structural-surface.command-center-shell .panel-zone-stage-badge em {
+    font-size:8px;
+  }
+
   body.structural-surface.command-center-shell canvas {
     background:linear-gradient(180deg, rgba(8,15,26,.10), rgba(5,10,18,.46)), #050b14;
   }

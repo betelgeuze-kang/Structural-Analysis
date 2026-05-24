@@ -1,6 +1,6 @@
 {
   "schema_version": "workstation-delivery-viewer-smoke.v1",
-  "generated_at": "2026-05-24T16:46:23.054Z",
+  "generated_at": "2026-05-24T17:18:04.082Z",
   "contract_pass": true,
   "reason_code": "PASS",
   "status": "ready",
@@ -36,8 +36,8 @@
     },
     "commercial_cockpit_alignment": {
       "status": "current_cockpit_delivery",
-      "marker_count": 29,
-      "required_marker_count_for_current_cockpit": 29,
+      "marker_count": 31,
+      "required_marker_count_for_current_cockpit": 31,
       "markers": {
         "structural_insight_title": true,
         "cockpit_polish_css": true,
@@ -55,10 +55,12 @@
         "analysis_overlay_receipt": true,
         "analysis_overlay_visual_evidence": true,
         "stage_result_callouts": true,
+        "stage_critical_hotspots": true,
         "stage_result_receipt": true,
         "result_step_schedule": true,
         "result_envelope": true,
         "panel_zone_evidence": true,
+        "panel_zone_stage_badge": true,
         "delivery_review_receipt": true,
         "material_member_catalog": true,
         "material_family_coverage": true,
@@ -75,7 +77,7 @@
   "browser_checks": {
     "pass": true,
     "reason": "PASS",
-    "opened_url": "http://127.0.0.1:45193/viewer.html",
+    "opened_url": "http://127.0.0.1:46211/viewer.html",
     "viewport": {
       "width": 1440,
       "height": 1000
@@ -126,8 +128,8 @@
       "nonBlank": true,
       "width": 500,
       "height": 601,
-      "significantPixelCount": 87750,
-      "significantPixelRatio": 0.29201331114808654,
+      "significantPixelCount": 89105,
+      "significantPixelRatio": 0.296522462562396,
       "bbox": {
         "minX": 0,
         "minY": 0,

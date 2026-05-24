@@ -142,6 +142,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "renderStageResultReceipt" in text
     assert "formatContourSourceLabel" in text
     assert "stage-result-receipt__row" in text
+    assert 'id="stage-critical-hotspots"' in text
+    assert "data-stage-critical-hotspots" in text
+    assert "structure-viewer-stage-critical-hotspots.v1" in text
+    assert "renderStageCriticalHotspots" in text
+    assert "positionStageCriticalHotspots" in text
+    assert "__STRUCTURE_VIEWER_STAGE_CRITICAL_HOTSPOTS_STATE__" in text
     assert "data-stage-review-controls" in text
     assert "data-stage-view-mode-select" in text
     assert "data-stage-model-stack" in text
@@ -181,6 +187,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "renderPanelZoneEvidencePanel" in text
     assert "buildPanelZoneEvidenceModel" in text
     assert "structure-viewer-panel-zone-evidence.v1" in text
+    assert 'id="panel-zone-stage-badge"' in text
+    assert "data-panel-zone-stage-badge" in text
+    assert "structure-viewer-panel-zone-stage-badge.v1" in text
+    assert "renderPanelZoneStageBadge" in text
+    assert "positionPanelZoneStageBadge" in text
+    assert "__STRUCTURE_VIEWER_PANEL_ZONE_STAGE_BADGE_STATE__" in text
     assert "PANEL_ZONE_EVIDENCE_SCHEMA" in panel_zone_evidence_text
     assert "panel_zone_clash_artifact.json" in panel_zone_evidence_text
     assert "panel_zone_solver_verified_handoff_report.json" in panel_zone_evidence_text
