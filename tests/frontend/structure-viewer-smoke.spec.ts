@@ -315,6 +315,8 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     const stageDriftBands = rectFor('[data-stage-drift-bands]')
     const stageCriticalHotspots = rectFor('[data-stage-critical-hotspots]')
     const focusBadge = rectFor('[data-viewport-selection-focus-badge]')
+    const optimizationDeltaStrip = rectFor('[data-optimization-delta-strip]')
+    const criticalTriage = rectFor('[data-critical-triage]')
     const panelZoneStageBadge = rectFor('[data-panel-zone-stage-badge]')
     const toolRail = rectFor('[data-viewport-tool-rail]')
     const topRunControl = rectFor('[data-top-run-control]')
@@ -493,6 +495,21 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      optimizationDeltaStrip,
+      optimizationDeltaStripStatus: document.querySelector('[data-optimization-delta-strip]')?.getAttribute('data-optimization-delta-strip-status') || '',
+      optimizationDeltaStripSchema: document.querySelector('[data-optimization-delta-strip]')?.getAttribute('data-optimization-delta-strip-schema') || '',
+      optimizationDeltaStripRowCount: Number(document.querySelector('[data-optimization-delta-strip]')?.getAttribute('data-optimization-delta-strip-row-count') || '0'),
+      optimizationDeltaStripReductionCount: Number(document.querySelector('[data-optimization-delta-strip]')?.getAttribute('data-optimization-delta-strip-reduction-count') || '0'),
+      optimizationDeltaStripMaxReductionPct: Number(document.querySelector('[data-optimization-delta-strip]')?.getAttribute('data-optimization-delta-strip-max-reduction-pct') || '0'),
+      optimizationDeltaStripRows: document.querySelectorAll('[data-optimization-delta-strip] [data-optimization-delta-row]').length,
+      optimizationDeltaStripAfterBarCount: document.querySelectorAll('[data-optimization-delta-strip] .optimization-delta-tile__bar-after').length,
+      optimizationDeltaStripDeltaCount: document.querySelectorAll('[data-optimization-delta-strip] .optimization-delta-tile__foot strong').length,
+      optimizationDeltaStripText: document.querySelector('[data-optimization-delta-strip]')?.textContent || '',
+      optimizationDeltaStripWindowState: window.__STRUCTURE_VIEWER_OPTIMIZATION_DELTA_STRIP_STATE__ || null,
+      optimizationDeltaStripOverflowCount: [...document.querySelectorAll('[data-optimization-delta-strip], [data-optimization-delta-strip] [data-optimization-delta-row], [data-optimization-delta-strip] .optimization-delta-strip__head')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       resultStepScheduleStatus: document.querySelector('[data-result-step-schedule]')?.getAttribute('data-result-step-schedule-status') || '',
       resultStepScheduleRowCount: document.querySelectorAll('[data-result-step-schedule] [data-result-step-row]').length,
       resultStepScheduleActiveCount: document.querySelectorAll('[data-result-step-schedule] [data-result-step-active="true"]').length,
@@ -520,6 +537,23 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       resultEnvelopeHasUtilization: Boolean(document.querySelector('[data-result-envelope-key="utilization"]')),
       resultEnvelopeMemberRowCount: document.querySelectorAll('[data-result-envelope] [data-result-envelope-member-id]').length,
       resultEnvelopeOverflowCount: [...document.querySelectorAll('[data-result-envelope], [data-result-envelope] [data-result-envelope-row], [data-result-envelope] .result-envelope__head')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      criticalTriage,
+      criticalTriageStatus: document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-status') || '',
+      criticalTriageSchema: document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-schema') || '',
+      criticalTriageRowCount: Number(document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-row-count') || '0'),
+      criticalTriageSourceCount: Number(document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-source-count') || '0'),
+      criticalTriageHighCount: Number(document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-high-count') || '0'),
+      criticalTriageMaxRatio: Number(document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-max-ratio') || '0'),
+      criticalTriageRows: document.querySelectorAll('[data-critical-triage] [data-critical-triage-row]').length,
+      criticalTriageMemberRows: document.querySelectorAll('[data-critical-triage] [data-critical-triage-member-id]').length,
+      criticalTriageStatusCount: document.querySelectorAll('[data-critical-triage] .critical-triage-row__status').length,
+      criticalTriageActionCount: document.querySelectorAll('[data-critical-triage] .critical-triage-row__action').length,
+      criticalTriageText: document.querySelector('[data-critical-triage]')?.textContent || '',
+      criticalTriageWindowState: window.__STRUCTURE_VIEWER_CRITICAL_TRIAGE_STATE__ || null,
+      criticalTriageOverflowCount: [...document.querySelectorAll('[data-critical-triage], [data-critical-triage] [data-critical-triage-row], [data-critical-triage] .critical-triage__head')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
@@ -833,6 +867,21 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.resultEvidenceCoveragePct).toBeGreaterThan(0)
   expect(layout.resultEvidenceRowCount).toBeGreaterThanOrEqual(4)
   expect(layout.resultEvidenceOverflowCount).toBe(0)
+  expect(layout.optimizationDeltaStrip?.top || 9999).toBeLessThan(layout.criticalTriage?.top || 99999)
+  expect(layout.optimizationDeltaStripStatus).toBe('ready')
+  expect(layout.optimizationDeltaStripSchema).toBe('structure-viewer-optimization-delta-strip.v1')
+  expect(layout.optimizationDeltaStripRowCount).toBe(4)
+  expect(layout.optimizationDeltaStripRows).toBe(4)
+  expect(layout.optimizationDeltaStripReductionCount).toBeGreaterThanOrEqual(3)
+  expect(layout.optimizationDeltaStripMaxReductionPct).toBeGreaterThan(0)
+  expect(layout.optimizationDeltaStripAfterBarCount).toBe(4)
+  expect(layout.optimizationDeltaStripDeltaCount).toBe(4)
+  expect(layout.optimizationDeltaStripText).toContain('Optimization Summary')
+  expect(layout.optimizationDeltaStripText).toContain('After')
+  expect(layout.optimizationDeltaStripWindowState?.schemaVersion).toBe('structure-viewer-optimization-delta-strip.v1')
+  expect(layout.optimizationDeltaStripWindowState?.status).toBe('ready')
+  expect(layout.optimizationDeltaStripWindowState?.rowCount).toBe(4)
+  expect(layout.optimizationDeltaStripOverflowCount).toBe(0)
   expect(layout.resultStepScheduleStatus).toBe('ready')
   expect(layout.resultStepScheduleRowCount).toBeGreaterThanOrEqual(5)
   expect(layout.resultStepScheduleActiveCount).toBe(1)
@@ -857,6 +906,23 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.resultEnvelopeHasUtilization).toBe(true)
   expect(layout.resultEnvelopeMemberRowCount).toBeGreaterThanOrEqual(1)
   expect(layout.resultEnvelopeOverflowCount).toBe(0)
+  expect(layout.criticalTriage?.top || 9999).toBeLessThanOrEqual((layout.rightPanel?.bottom || 0) + 1)
+  expect(layout.criticalTriageStatus).toBe('ready')
+  expect(layout.criticalTriageSchema).toBe('structure-viewer-critical-triage.v1')
+  expect(layout.criticalTriageRowCount).toBeGreaterThanOrEqual(4)
+  expect(layout.criticalTriageRows).toBe(layout.criticalTriageRowCount)
+  expect(layout.criticalTriageMemberRows).toBe(layout.criticalTriageRowCount)
+  expect(layout.criticalTriageSourceCount).toBeGreaterThanOrEqual(layout.criticalTriageRowCount)
+  expect(layout.criticalTriageHighCount).toBeGreaterThanOrEqual(1)
+  expect(layout.criticalTriageMaxRatio).toBeGreaterThan(0)
+  expect(layout.criticalTriageStatusCount).toBe(layout.criticalTriageRowCount)
+  expect(layout.criticalTriageActionCount).toBe(layout.criticalTriageRowCount)
+  expect(layout.criticalTriageText).toContain('Critical Triage')
+  expect(layout.criticalTriageText).toContain('D/C')
+  expect(layout.criticalTriageWindowState?.schemaVersion).toBe('structure-viewer-critical-triage.v1')
+  expect(layout.criticalTriageWindowState?.status).toBe('ready')
+  expect(layout.criticalTriageWindowState?.rowCount).toBe(layout.criticalTriageRowCount)
+  expect(layout.criticalTriageOverflowCount).toBe(0)
   expect(layout.stageStoryRulerStatus).toBe('ready')
   expect(layout.stageStoryRulerSchema).toBe('structure-viewer-stage-story-ruler.v1')
   expect(layout.stageStoryRulerRowCount).toBeGreaterThanOrEqual(6)

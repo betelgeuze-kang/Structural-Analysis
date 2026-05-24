@@ -178,6 +178,13 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-analysis-result-evidence" in text
     assert "renderAnalysisResultEvidence" in text
     assert "analysis-result-evidence-row" in text
+    assert 'id="optimization-delta-strip"' in text
+    assert "data-optimization-delta-strip" in text
+    assert "data-optimization-delta-row" in text
+    assert "renderOptimizationDeltaStrip" in text
+    assert "buildOptimizationDeltaStripModel" in text
+    assert "structure-viewer-optimization-delta-strip.v1" in text
+    assert "__STRUCTURE_VIEWER_OPTIMIZATION_DELTA_STRIP_STATE__" in text
     assert 'id="result-step-schedule-panel"' in text
     assert "data-result-step-schedule" in text
     assert "renderResultStepSchedule" in text
@@ -193,6 +200,13 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "structure-viewer-result-envelope.v1" in text
     assert "data-result-envelope-row" in text
     assert "data-result-envelope-member-id" in text
+    assert 'id="critical-triage-panel"' in text
+    assert "data-critical-triage" in text
+    assert "data-critical-triage-row" in text
+    assert "renderCriticalTriagePanel" in text
+    assert "buildCriticalTriageModel" in text
+    assert "structure-viewer-critical-triage.v1" in text
+    assert "__STRUCTURE_VIEWER_CRITICAL_TRIAGE_STATE__" in text
     assert 'id="panel-zone-evidence-panel"' in text
     assert "data-panel-zone-evidence" in text
     assert "data-panel-zone-member-row" in text

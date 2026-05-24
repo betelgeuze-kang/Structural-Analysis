@@ -453,6 +453,12 @@
     <div id="analysis-result-evidence-panel" class="analysis-result-evidence-panel" data-analysis-result-evidence data-result-evidence-status="pending">
       <span class="analysis-result-evidence-row"><b>Evidence</b><strong>--</strong><em>Awaiting model</em></span>
     </div>
+    <div id="optimization-delta-strip" class="optimization-delta-strip" data-optimization-delta-strip data-optimization-delta-strip-schema="structure-viewer-optimization-delta-strip.v1" data-optimization-delta-strip-status="pending" data-optimization-delta-strip-row-count="0">
+      <div class="panel-placeholder">Optimization delta strip appears when before/after quantities are available.</div>
+    </div>
+    <div id="critical-triage-panel" class="critical-triage-panel" data-critical-triage data-critical-triage-schema="structure-viewer-critical-triage.v1" data-critical-triage-status="pending" data-critical-triage-row-count="0">
+      <div class="panel-placeholder">Critical member triage appears when utilization data is available.</div>
+    </div>
     <div id="result-step-schedule-panel" class="result-step-schedule-panel" data-result-step-schedule data-result-step-schedule-status="pending" data-result-step-count="0">
       <div class="panel-placeholder">Result step schedule appears when a model artifact is loaded.</div>
     </div>
@@ -869,6 +875,8 @@ const STAGE_CRITICAL_HOTSPOTS_SCHEMA='structure-viewer-stage-critical-hotspots.v
 const STAGE_STORY_RULER_SCHEMA='structure-viewer-stage-story-ruler.v1';
 const STAGE_DRIFT_BANDS_SCHEMA='structure-viewer-stage-drift-bands.v1';
 const STAGE_LOAD_SUPPORT_GLYPHS_SCHEMA='structure-viewer-stage-load-support-glyphs.v1';
+const CRITICAL_TRIAGE_SCHEMA='structure-viewer-critical-triage.v1';
+const OPTIMIZATION_DELTA_STRIP_SCHEMA='structure-viewer-optimization-delta-strip.v1';
 const PANEL_ZONE_STAGE_BADGE_SCHEMA='structure-viewer-panel-zone-stage-badge.v1';
 let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;
 let sectionEditPreviewState=createEmptySectionEditPreviewState();
@@ -5518,6 +5526,88 @@ function renderAnalysisResultEvidence(cockpitModel=null){
     </span>`;
   }).join('');
 }
+function buildOptimizationDeltaStripModel(cockpitModel=null){
+  const rows=(Array.isArray(cockpitModel?.optimizationRows)?cockpitModel.optimizationRows:[]).slice(0,4).map((row,index)=>{
+    const before=safeNumber(row?.before,0);
+    const after=safeNumber(row?.after,0);
+    const delta=safeNumber(row?.deltaPct,0);
+    const beforeValue=Math.max(before,1e-6);
+    const afterWidth=Math.max(3,Math.min(Math.max(after,0)/beforeValue,1.15)*100);
+    const savedValue=Math.max(before-after,0);
+    const money=row?.valueFormatter==='money';
+    const beforeLabel=money?formatCockpitValue(before,{money:true}):formatCockpitValue(before,{digits:0,unit:row?.unit});
+    const afterLabel=money?formatCockpitValue(after,{money:true}):formatCockpitValue(after,{digits:0,unit:row?.unit});
+    const savedLabel=money?formatCockpitValue(savedValue,{money:true}):formatCockpitValue(savedValue,{digits:0,unit:row?.unit});
+    return{
+      key:normalizeSelectionValue(row?.key)||`delta-${index+1}`,
+      label:normalizeSelectionValue(row?.label)||`Delta ${index+1}`,
+      beforeLabel,
+      afterLabel,
+      savedLabel:savedValue>0?`Saved ${savedLabel}`:'No reduction',
+      sourceLabel:normalizeSelectionValue(row?.sourceLabel)||'Model evidence',
+      metricLabel:normalizeSelectionValue(row?.metricLabel||row?.label)||'Metric',
+      delta,
+      afterWidth,
+      tone:delta<=0?'success':'danger',
+    };
+  });
+  const reductionCount=rows.filter(row=>row.delta<=0).length;
+  return{
+    schemaVersion:OPTIMIZATION_DELTA_STRIP_SCHEMA,
+    status:rows.length?'ready':'missing',
+    rowCount:rows.length,
+    reductionCount,
+    maxReductionPct:rows.reduce((max,row)=>Math.max(max,Math.abs(Math.min(row.delta,0))),0),
+    rows,
+  };
+}
+function renderOptimizationDeltaStrip(cockpitModel=null){
+  const panel=document.getElementById('optimization-delta-strip');
+  if(!(panel instanceof HTMLElement))return;
+  const strip=buildOptimizationDeltaStripModel(cockpitModel||lastAnalysisCockpitModel);
+  panel.dataset.optimizationDeltaStripSchema=OPTIMIZATION_DELTA_STRIP_SCHEMA;
+  panel.dataset.optimizationDeltaStripStatus=strip.status;
+  panel.dataset.optimizationDeltaStripRowCount=String(strip.rowCount||0);
+  panel.dataset.optimizationDeltaStripReductionCount=String(strip.reductionCount||0);
+  panel.dataset.optimizationDeltaStripMaxReductionPct=strip.maxReductionPct.toFixed(2);
+  window.__STRUCTURE_VIEWER_OPTIMIZATION_DELTA_STRIP_STATE__={
+    schemaVersion:OPTIMIZATION_DELTA_STRIP_SCHEMA,
+    status:strip.status,
+    rowCount:strip.rowCount,
+    reductionCount:strip.reductionCount,
+    maxReductionPct:strip.maxReductionPct,
+  };
+  if(strip.status!=='ready'||!strip.rows.length){
+    panel.innerHTML='<div class="panel-placeholder">Optimization delta strip appears when before/after quantities are available.</div>';
+    return;
+  }
+  panel.innerHTML=`
+    <div class="optimization-delta-strip__head" data-optimization-delta-strip-head>
+      <span><b>Optimization Summary</b><em>Before / after deliverable deltas</em></span>
+      <strong>${escapeHtml(String(strip.reductionCount))}/${escapeHtml(String(strip.rowCount))} reduced</strong>
+    </div>
+    <div class="optimization-delta-strip__grid" data-optimization-delta-strip-grid>
+      ${strip.rows.map(row=>`
+        <article class="optimization-delta-tile optimization-delta-tile--${escapeHtml(row.tone)}" data-optimization-delta-row data-optimization-delta-key="${escapeHtml(row.key)}" data-optimization-delta-pct="${row.delta.toFixed(2)}">
+          <span class="optimization-delta-tile__top">
+            <b>${escapeHtml(row.label)}</b>
+            <em>${escapeHtml(row.sourceLabel)}</em>
+          </span>
+          <span class="optimization-delta-tile__values">
+            <small>Before ${escapeHtml(row.beforeLabel)}</small>
+            <strong>After ${escapeHtml(row.afterLabel)}</strong>
+          </span>
+          <span class="optimization-delta-tile__bar" aria-hidden="true">
+            <i class="optimization-delta-tile__bar-before"></i>
+            <i class="optimization-delta-tile__bar-after" style="width:${row.afterWidth.toFixed(1)}%"></i>
+          </span>
+          <span class="optimization-delta-tile__foot">
+            <strong>${row.delta>=0?'+':''}${row.delta.toFixed(1)}%</strong>
+            <em>${escapeHtml(row.savedLabel)}</em>
+          </span>
+        </article>`).join('')}
+    </div>`;
+}
 function resolveDeliveryReceiptTone(pass, warn=false){
   if(!pass)return'danger';
   return warn?'warn':'success';
@@ -5661,6 +5751,104 @@ function renderOptimizationSummaryPanel(cockpitModel=null){
       </div>
     </article>`;
   }).join('');
+}
+function buildCriticalTriageModel(cockpitModel=null){
+  const rows=Array.isArray(cockpitModel?.criticalMembers)?cockpitModel.criticalMembers:[];
+  const triageRows=rows.slice(0,4).map((row,index)=>{
+    const ratio=safeNumber(row?.ratio,0);
+    const drift=safeNumber(row?.driftContributionPct,0);
+    const statusKey=normalizeSelectionValue(row?.statusKey||row?.status||'ok').toLowerCase()||'ok';
+    const statusTone=normalizeAnalysisTone(row?.statusTone||statusKey);
+    return{
+      rank:index+1,
+      id:normalizeSelectionValue(row?.id)||`critical-${index+1}`,
+      story:normalizeSelectionValue(row?.story)||'--',
+      type:normalizeSelectionValue(row?.type)||'Member',
+      ratio,
+      ratioPct:safeNumber(row?.ratioPercent,Math.max(4,Math.min(ratio,1.1)/1.1*100)),
+      drift,
+      driftPct:safeNumber(row?.driftPercent,Math.max(3,Math.min(drift,16)/16*100)),
+      status:normalizeSelectionValue(row?.status)||statusKey.toUpperCase(),
+      statusKey,
+      statusTone,
+      action:normalizeSelectionValue(row?.recommendedChange)||'Review',
+      actionTone:normalizeAnalysisTone(row?.actionTone||statusTone),
+      margin:normalizeSelectionValue(row?.ratioMarginLabel)||'Limit 1.00',
+    };
+  });
+  const highCount=triageRows.filter(row=>['high','danger','warn'].includes(row.statusKey)||['danger','warn'].includes(row.statusTone)).length;
+  const maxRatio=triageRows.reduce((max,row)=>Math.max(max,safeNumber(row.ratio,0)),0);
+  return{
+    schemaVersion:CRITICAL_TRIAGE_SCHEMA,
+    status:triageRows.length?'ready':'missing',
+    rowCount:triageRows.length,
+    sourceCount:rows.length,
+    highCount,
+    maxRatio,
+    rows:triageRows,
+  };
+}
+function renderCriticalTriagePanel(cockpitModel=null){
+  const panel=document.getElementById('critical-triage-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const triage=buildCriticalTriageModel(cockpitModel||lastAnalysisCockpitModel);
+  panel.dataset.criticalTriageSchema=CRITICAL_TRIAGE_SCHEMA;
+  panel.dataset.criticalTriageStatus=triage.status;
+  panel.dataset.criticalTriageRowCount=String(triage.rowCount||0);
+  panel.dataset.criticalTriageSourceCount=String(triage.sourceCount||0);
+  panel.dataset.criticalTriageHighCount=String(triage.highCount||0);
+  panel.dataset.criticalTriageMaxRatio=triage.maxRatio.toFixed(3);
+  window.__STRUCTURE_VIEWER_CRITICAL_TRIAGE_STATE__={
+    schemaVersion:CRITICAL_TRIAGE_SCHEMA,
+    status:triage.status,
+    rowCount:triage.rowCount,
+    sourceCount:triage.sourceCount,
+    highCount:triage.highCount,
+    maxRatio:triage.maxRatio,
+  };
+  if(triage.status!=='ready'||!triage.rows.length){
+    panel.innerHTML='<div class="panel-placeholder">Critical member triage appears when utilization data is available.</div>';
+    return;
+  }
+  const selection=getCurrentSelectionState();
+  const selectedMemberId=selection.memberId;
+  const selectedMemberIds=new Set(normalizeSelectionValues(selection.memberIds||selectedMemberId));
+  const sourceLabel=triage.sourceCount>triage.rowCount
+    ?`Top ${triage.rowCount} / ${triage.sourceCount}`
+    :`${triage.rowCount} ranked`;
+  panel.innerHTML=`
+    <div class="critical-triage__head" data-critical-triage-head>
+      <span><b>Critical Triage</b><em>${escapeHtml(sourceLabel)} · D/C governed</em></span>
+      <strong>${escapeHtml(String(triage.highCount))} high</strong>
+    </div>
+    <div class="critical-triage__rows" data-critical-triage-rows>
+      ${triage.rows.map(row=>{
+        const ratioWidth=Math.max(4,Math.min(row.ratioPct,104)).toFixed(1);
+        const driftWidth=Math.max(3,Math.min(row.driftPct,100)).toFixed(1);
+        const selected=Boolean(row.id&&selectedMemberIds.has(row.id));
+        const primary=Boolean(row.id&&row.id===selectedMemberId);
+        return `<button type="button" class="critical-triage-row critical-triage-row--${escapeHtml(row.statusTone)}${selected?' is-selected':''}${primary?' is-primary':''}" data-critical-triage-row data-critical-triage-member-id="${escapeHtml(row.id)}" data-critical-member-id="${escapeHtml(row.id)}" data-critical-status="${escapeHtml(row.statusKey)}" data-critical-ratio="${row.ratio.toFixed(3)}" aria-selected="${selected?'true':'false'}" aria-pressed="${selected?'true':'false'}" title="Focus ${escapeHtml(row.id)} · D/C ${row.ratio.toFixed(2)}">
+          <span class="critical-triage-row__id"><b>${escapeHtml(String(row.rank))}</b><strong>${escapeHtml(row.id)}</strong><em>S${escapeHtml(row.story)} · ${escapeHtml(row.type)}</em></span>
+          <span class="critical-triage-row__ratio">
+            <span><b>D/C</b><strong>${row.ratio.toFixed(2)}</strong></span>
+            <i aria-hidden="true"><em style="width:${ratioWidth}%"></em><strong></strong></i>
+            <small>${escapeHtml(row.margin)}</small>
+          </span>
+          <span class="critical-triage-row__drift">
+            <b>${row.drift.toFixed(1)}%</b>
+            <i aria-hidden="true"><em style="width:${driftWidth}%"></em></i>
+          </span>
+          <span class="critical-triage-row__status">${escapeHtml(row.status)}</span>
+          <span class="critical-triage-row__action">${escapeHtml(row.action)}</span>
+        </button>`;
+      }).join('')}
+    </div>`;
+  panel.querySelectorAll('[data-critical-triage-member-id]').forEach(button=>{
+    button.addEventListener('click',event=>focusMemberSearchResult(button.getAttribute('data-critical-triage-member-id')||'',{
+      mode:event.ctrlKey||event.metaKey?'toggle':'replace',
+    }));
+  });
+  syncCriticalMemberReviewFocus();
 }
 function renderCriticalMembersPanel(cockpitModel=null){
   const panel=document.getElementById('critical-members-panel');
@@ -8124,7 +8312,9 @@ function buildUI(data){
   renderShellSummary(summary,data);
   renderKpiSummary(statEntries,cockpitModel);
   renderAnalysisResultEvidence(cockpitModel);
+  renderOptimizationDeltaStrip(cockpitModel);
   renderResultEnvelope(cockpitModel);
+  renderCriticalTriagePanel(cockpitModel);
   renderPanelZoneEvidencePanel(cockpitModel);
   renderDeliveryReviewReceipt(cockpitModel);
   renderOptimizationSummaryPanel(cockpitModel);

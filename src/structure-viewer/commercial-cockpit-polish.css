@@ -317,6 +317,8 @@
   body.structural-surface.command-center-shell .stage-overlay-section,
   body.structural-surface.command-center-shell .kpi-card,
   body.structural-surface.command-center-shell .optimization-summary-card,
+  body.structural-surface.command-center-shell .optimization-delta-tile,
+  body.structural-surface.command-center-shell .critical-triage-row,
   body.structural-surface.command-center-shell .critical-members-row {
     border-radius:7px;
     background:rgba(15,26,39,.82);
@@ -1199,6 +1201,50 @@
     max-height:284px;
   }
 
+  body.structural-surface.command-center-shell .critical-triage-panel {
+    gap:5px;
+    padding:6px;
+  }
+
+  body.structural-surface.command-center-shell .optimization-delta-strip {
+    gap:5px;
+    padding:6px;
+  }
+
+  body.structural-surface.command-center-shell .optimization-delta-tile {
+    min-height:68px;
+    gap:3px;
+    padding:5px;
+  }
+
+  body.structural-surface.command-center-shell .optimization-delta-tile__top b,
+  body.structural-surface.command-center-shell .optimization-delta-tile__values strong {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .optimization-delta-tile__foot strong {
+    font-size:9px;
+  }
+
+  body.structural-surface.command-center-shell .critical-triage-row {
+    min-height:31px;
+    grid-template-columns:minmax(70px,.86fr) minmax(76px,.88fr) minmax(34px,.36fr) minmax(42px,.44fr) minmax(72px,.7fr);
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .critical-triage-row__id strong,
+  body.structural-surface.command-center-shell .critical-triage-row__ratio span strong,
+  body.structural-surface.command-center-shell .critical-triage-row__drift b {
+    font-size:8.5px;
+  }
+
+  body.structural-surface.command-center-shell .critical-triage-row__action,
+  body.structural-surface.command-center-shell .critical-triage-row__status {
+    min-height:17px;
+    padding:2px 4px;
+    font-size:7.5px;
+  }
+
   body.structural-surface.command-center-shell .critical-members-row {
     min-height:31px;
     grid-template-columns:minmax(50px,.72fr) minmax(34px,.42fr) minmax(44px,.52fr) minmax(74px,.88fr) minmax(48px,.52fr) minmax(44px,.5fr) minmax(86px,.9fr);
@@ -2079,6 +2125,27 @@
       font-size:8px;
     }
 
+    body.structural-surface.command-center-shell .optimization-delta-strip {
+      gap:4px;
+      margin-top:5px;
+      padding:5px;
+    }
+
+    body.structural-surface.command-center-shell .optimization-delta-tile {
+      min-height:58px;
+      padding:4px;
+    }
+
+    body.structural-surface.command-center-shell .optimization-delta-tile__top em,
+    body.structural-surface.command-center-shell .optimization-delta-tile__values small,
+    body.structural-surface.command-center-shell .optimization-delta-tile__foot em {
+      display:none;
+    }
+
+    body.structural-surface.command-center-shell .optimization-delta-tile__bar {
+      gap:1px;
+    }
+
     body.structural-surface.command-center-shell .result-envelope-panel {
       gap:3px;
       margin-top:4px;
@@ -2161,6 +2228,27 @@
 
     body.structural-surface.command-center-shell .critical-members-table {
       max-height:246px;
+    }
+
+    body.structural-surface.command-center-shell .critical-triage-panel {
+      gap:4px;
+      margin-top:5px;
+      padding:5px;
+    }
+
+    body.structural-surface.command-center-shell .critical-triage-row {
+      min-height:28px;
+      gap:4px;
+    }
+
+    body.structural-surface.command-center-shell .critical-triage-row__ratio small {
+      display:none;
+    }
+
+    body.structural-surface.command-center-shell .critical-triage-row__status,
+    body.structural-surface.command-center-shell .critical-triage-row__action {
+      min-height:16px;
+      font-size:7px;
     }
 
     body.structural-surface.command-center-shell .critical-members-row {
