@@ -97,6 +97,7 @@ console.log(JSON.stringify({
     wireframe: lineObjects.wireframe.isLine,
     deformed: lineObjects.deformedMesh.isMesh,
     contourKind: lineObjects.meshData.contourGeometryKind,
+    visualRadius: lineObjects.meshData.visualRadius,
     pickPointCount: lineObjects.pickPoints.length,
   },
   surface: {
@@ -111,6 +112,9 @@ console.log(JSON.stringify({
     mesh: instancedLineGroup.mesh.isInstancedMesh,
     wireframe: instancedLineGroup.wireframe.isLineSegments,
     recordMeshLinked: instancedRecords[0].mesh === instancedLineGroup.mesh,
+    visualRadius: instancedLineGroup.visualRadius,
+    meshVisualRadius: instancedLineGroup.mesh.userData.visualRadius,
+    recordVisualRadius: instancedRecords[0].visualRadius,
     defaultOpacity: instancedLineGroup.defaultOpacity,
   },
   instancedSurface: {
@@ -136,6 +140,7 @@ console.log(JSON.stringify({
         "wireframe": True,
         "deformed": True,
         "contourKind": "line_tube",
+        "visualRadius": 0.15,
         "pickPointCount": 2,
     }
     assert payload["surface"] == {
@@ -150,6 +155,9 @@ console.log(JSON.stringify({
         "mesh": True,
         "wireframe": True,
         "recordMeshLinked": True,
+        "visualRadius": 0.15,
+        "meshVisualRadius": 0.15,
+        "recordVisualRadius": 0.15,
         "defaultOpacity": 0.85,
     }
     assert payload["instancedSurface"] == {

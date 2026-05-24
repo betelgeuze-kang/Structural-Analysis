@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Structural Insight Viewer</title>
 <link rel="stylesheet" href="./design-theme.css"/>
+<link rel="stylesheet" href="./commercial-cockpit-polish.css"/>
 </head>
 <body class="structural-surface command-center-shell">
 <div id="app">
@@ -15,8 +16,8 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
       </button>
       <div class="app-brand-lockup">
-        <div class="header-eyebrow">Structural Insight Viewer</div>
-        <h1>Structural Model Workspace</h1>
+        <div class="header-eyebrow">Optimization Cockpit</div>
+        <h1>Structural Insight Viewer</h1>
       </div>
     </div>
     <section class="top-search-shell" id="search-section">
@@ -36,22 +37,33 @@
       <div id="search-results" class="search-results top-search-results"></div>
     </section>
     <div class="topbar-context-strip">
-      <div class="topbar-context-field">
+      <div class="topbar-context-field topbar-project-selector" data-topbar-project-selector>
         <span class="topbar-context-label">Project</span>
-        <button type="button" class="project-pill" id="shell-project-pill">Project --</button>
+        <select class="project-pill project-select" id="shell-project-select" data-shell-project-select onchange="setTopbarWorkspaceSelection(this.value)" aria-label="Project and drawing"></select>
+        <button type="button" class="project-pill" id="shell-project-pill" hidden>Project --</button>
+        <small id="shell-project-receipt" class="topbar-project-receipt" data-shell-project-receipt>--</small>
       </div>
       <span id="shell-status-pill" class="status-pill status-pill--success">Artifact Ready</span>
     </div>
-    <div class="toolbar top-toolbar">
-      <button type="button" onclick="toggleDeformed()">Compare</button>
-      <button id="export-png-button" onclick="exportViewportPng()">Export</button>
-      <button id="export-html-report-button" onclick="exportWorkspaceHtmlReport()">Report</button>
-      <button id="copy-deep-link-button" onclick="copyCurrentDeepLink()">Share</button>
-      <button id="toggle-light-mode-button" onclick="toggleLightMode()">Light</button>
-      <button id="toggle-shortcuts-button" onclick="toggleShortcutHelp()">Shortcuts</button>
-      <button id="clear-selection-button" class="is-initially-hidden" onclick="clearSelection()">Clear Selection</button>
-      <button id="clear-isolate-button" class="is-initially-hidden" onclick="clearIsolation()">Release Isolate</button>
-    </div>
+    <section class="toolbar top-toolbar top-run-control" data-top-run-control data-run-status="pending" aria-label="Run controls">
+      <div class="top-run-control__receipt" data-top-run-receipt>
+        <span><b>Load</b><em id="top-run-load-case">--</em></span>
+        <span><b>Step</b><em id="top-run-step">-- / --</em></span>
+        <span><b>Solver</b><em id="top-run-solver">--</em></span>
+        <span><b>Runtime</b><em id="top-run-runtime">--</em></span>
+      </div>
+      <div class="top-run-control__actions">
+        <button id="top-run-compare-button" type="button" class="top-run-action" data-top-run-action="compare" onclick="toggleDeformed()" aria-pressed="false">Compare</button>
+        <button id="export-png-button" class="top-run-action" data-top-run-action="export" onclick="exportViewportPng()">Export</button>
+        <button id="export-html-report-button" class="top-run-action" data-top-run-action="report" onclick="exportWorkspaceHtmlReport()">Report</button>
+        <button id="copy-deep-link-button" class="top-run-action" data-top-run-action="share" onclick="copyCurrentDeepLink()">Share</button>
+        <button id="top-run-new-button" type="button" class="top-run-action top-run-action--primary" data-top-run-action="new-run" onclick="startNewReviewRun()">New Run</button>
+        <button id="toggle-light-mode-button" class="top-run-action top-run-action--utility" data-top-run-action="light" onclick="toggleLightMode()">Light</button>
+        <button id="toggle-shortcuts-button" class="top-run-action top-run-action--utility" data-top-run-action="shortcuts" onclick="toggleShortcutHelp()">Shortcuts</button>
+        <button id="clear-selection-button" class="is-initially-hidden top-run-action" data-top-run-action="clear-selection" onclick="clearSelection()">Clear Selection</button>
+        <button id="clear-isolate-button" class="is-initially-hidden top-run-action" data-top-run-action="release-isolate" onclick="clearIsolation()">Release Isolate</button>
+      </div>
+    </section>
   </div>
   <div class="app-topbar__secondary">
     <nav class="viewer-tabbar" aria-label="Viewer workflow">
@@ -178,9 +190,9 @@
       </div>
       <div class="stage-toolbar-stack">
         <div class="toolbar stage-mode-toolbar">
-          <button id="btn-wireframe" class="active" data-render-mode-button="true" onclick="setRenderMode('wireframe')">Wire</button>
+          <button id="btn-wireframe" data-render-mode-button="true" onclick="setRenderMode('wireframe')">Wire</button>
           <button id="btn-solid" data-render-mode-button="true" onclick="setRenderMode('solid')">Solid</button>
-          <button id="btn-contour" data-render-mode-button="true" onclick="setRenderMode('contour')">Contour</button>
+          <button id="btn-contour" class="active" data-render-mode-button="true" onclick="setRenderMode('contour')">Contour</button>
         </div>
         <div class="toolbar stage-utility-toolbar">
           <button id="btn-deform" onclick="toggleDeformed()">Compare</button>
@@ -198,6 +210,39 @@
     </div>
     <div class="stage-frame">
       <aside class="stage-overlay-panel stage-overlay-panel--left">
+        <section class="panel-section stage-overlay-section stage-review-controls" id="stage-review-controls-section" data-stage-review-controls>
+          <div class="section-title">View Controls</div>
+          <div class="panel-field stage-review-control-grid">
+            <label for="stage-view-mode-select">View Mode</label>
+            <select id="stage-view-mode-select" data-stage-view-mode-select onchange="setRenderMode(this.value)">
+              <option value="contour" selected>Contour Result</option>
+              <option value="solid">Solid Review</option>
+              <option value="wireframe">Wireframe</option>
+            </select>
+            <label for="stage-view-preset-select">Camera</label>
+            <select id="stage-view-preset-select" data-stage-view-preset-select onchange="setMidas33ViewPreset(this.value)">
+              <option value="review">Review</option>
+              <option value="frame">Frame</option>
+              <option value="plan">Plan</option>
+              <option value="fit">Fit All</option>
+            </select>
+          </div>
+          <div id="stage-model-stack" class="stage-model-stack" data-stage-model-stack>
+            <div class="stage-model-stack__row stage-model-stack__row--active" data-stage-model-layer="optimized">
+              <span><b>Optimized Model</b><em id="stage-model-optimized-state">Visible</em></span>
+              <strong>On</strong>
+            </div>
+            <button type="button" id="stage-model-compare-toggle" class="stage-model-stack__row stage-model-stack__row--button" data-stage-model-layer="compare" aria-pressed="false" onclick="toggleDeformed()">
+              <span><b>Compare Ghost</b><em id="stage-model-compare-state">Off</em></span>
+              <strong id="stage-model-compare-chip">Off</strong>
+            </button>
+          </div>
+          <div id="stage-review-control-receipt" class="stage-review-control-receipt" data-stage-review-control-receipt aria-live="polite">
+            <span class="stage-review-control-receipt__row"><b>Result</b><em>--</em></span>
+            <span class="stage-review-control-receipt__row"><b>Load/Step</b><em>--</em></span>
+            <span class="stage-review-control-receipt__row"><b>Scale</b><em>100x</em></span>
+          </div>
+        </section>
         <section class="panel-section stage-overlay-section" id="loadcases-section">
           <div class="section-title">Load Cases</div>
           <div id="load-case-list" class="panel-field"></div>
@@ -207,8 +252,8 @@
           <div class="panel-field">
             <label>Scalar Field</label>
             <select id="scalar-select" onchange="updateContour()">
+              <option value="disp_mag" selected>Total Displacement</option>
               <option value="dcr">D/C Ratio</option>
-              <option value="disp_mag">Displacement Magnitude</option>
               <option value="stress_vm">von Mises Stress</option>
               <option value="axial">Axial Force</option>
               <option value="moment">Bending Moment</option>
@@ -224,9 +269,38 @@
               <option value="plasma">Plasma</option>
             </select>
           </div>
-          <div id="legend-container" class="panel-field">
-            <div id="legend-bar" class="legend-bar"></div>
-            <div class="legend-labels"><span id="legend-min">0</span><span id="legend-max">1</span></div>
+          <div id="legend-container" class="panel-field stage-contour-scale" data-contour-scale-evidence>
+            <div class="stage-contour-scale__title">
+              <span>Contour Scale</span>
+              <strong id="legend-unit-label" data-contour-scale-unit>--</strong>
+            </div>
+            <div class="stage-contour-scale__body">
+              <div id="legend-bar" class="legend-bar" data-contour-colorbar aria-hidden="true"></div>
+              <div id="legend-ticks" class="legend-ticks" data-contour-scale-ticks aria-label="Contour scale ticks">
+                <span class="legend-tick"><i></i><b>1.00</b></span>
+                <span class="legend-tick"><i></i><b>0.75</b></span>
+                <span class="legend-tick"><i></i><b>0.50</b></span>
+                <span class="legend-tick"><i></i><b>0.25</b></span>
+                <span class="legend-tick"><i></i><b>0.00</b></span>
+              </div>
+            </div>
+            <div class="legend-labels legend-labels--summary">
+              <span>Min <b id="legend-min">0</b></span>
+              <span>Max <b id="legend-max">1</b></span>
+            </div>
+            <div id="legend-source-label" class="stage-contour-scale__source" data-contour-scale-source>Source values</div>
+          </div>
+          <div id="stage-result-receipt" class="stage-result-receipt" data-stage-result-receipt aria-live="polite">
+            <div class="stage-result-receipt__title">
+              <span>Result Receipt</span>
+              <strong>Awaiting model</strong>
+            </div>
+            <div class="stage-result-receipt__grid">
+              <span class="stage-result-receipt__row"><b>Field</b><em>--</em></span>
+              <span class="stage-result-receipt__row"><b>Range</b><em>--</em></span>
+              <span class="stage-result-receipt__row"><b>Source</b><em>--</em></span>
+              <span class="stage-result-receipt__row"><b>Step</b><em>--</em></span>
+            </div>
           </div>
         </section>
         <section class="panel-section stage-overlay-section" id="deformation-section">
@@ -257,6 +331,35 @@
       <div id="viewport">
         <div id="loading"><div class="spinner"></div><div id="loading-message">Loading model...</div></div>
         <div id="info-overlay"></div>
+        <div id="stage-result-callouts" class="stage-result-callouts" data-stage-result-callouts aria-label="Stage result callouts">
+          <div class="stage-result-callout stage-result-callout--neutral" data-stage-result-callout-key="empty">
+            <span class="stage-result-callout__label">Result Callouts</span>
+            <strong>--</strong>
+            <small>Awaiting model</small>
+          </div>
+        </div>
+        <div id="viewport-selection-focus-badge" class="viewport-selection-focus-badge" data-viewport-selection-focus-badge aria-live="polite"></div>
+        <div id="stage-overlay-receipt" class="stage-overlay-receipt" data-stage-overlay-receipt data-load-arrow-count="0" data-support-marker-count="0" aria-live="polite">
+          <div class="stage-overlay-receipt__title">
+            <span>3D Overlay Receipt</span>
+            <strong>Awaiting model</strong>
+          </div>
+          <div class="stage-overlay-visual-evidence" data-stage-overlay-visual-evidence data-load-arrow-visible-count="0" data-support-marker-visible-count="0">
+            <span class="stage-overlay-visual-evidence__item" data-stage-overlay-load-key><i class="stage-overlay-legend-swatch stage-overlay-legend-swatch--load"></i><b>Vectors</b><em>--</em></span>
+            <span class="stage-overlay-visual-evidence__item" data-stage-overlay-support-key><i class="stage-overlay-legend-swatch stage-overlay-legend-swatch--support"></i><b>Supports</b><em>--</em></span>
+          </div>
+          <div class="stage-overlay-receipt__grid">
+            <span class="stage-overlay-receipt__row"><b>Load vectors</b><em>--</em></span>
+            <span class="stage-overlay-receipt__row"><b>Supports</b><em>--</em></span>
+            <span class="stage-overlay-receipt__row"><b>Source</b><em>--</em></span>
+          </div>
+        </div>
+        <div class="axis-helper" aria-hidden="true">
+          <span class="axis-helper__origin"></span>
+          <span class="axis-helper__axis axis-helper__axis--x"><i></i><b>X</b></span>
+          <span class="axis-helper__axis axis-helper__axis--y"><i></i><b>Y</b></span>
+          <span class="axis-helper__axis axis-helper__axis--z"><i></i><b>Z</b></span>
+        </div>
         <div id="shortcut-help">
           <strong>Shortcuts</strong>
           <div><code>Ctrl/Cmd+F</code> search member</div>
@@ -266,14 +369,23 @@
           <div><code>Esc</code> clear selection</div>
         </div>
       </div>
-      <div class="viewport-tool-rail" aria-label="Viewport quick tools">
-        <button type="button" title="Wireframe" onclick="setRenderMode('wireframe')">◫</button>
-        <button type="button" title="Solid" onclick="setRenderMode('solid')">◼</button>
-        <button type="button" title="Contour" onclick="setRenderMode('contour')">◌</button>
-        <button type="button" title="Compare" onclick="toggleDeformed()">⇄</button>
-        <button type="button" title="Animate" onclick="toggleAnimation()">▶</button>
-        <button type="button" title="Reset View" onclick="resetCamera()">⌖</button>
-        <button type="button" title="Fit All" onclick="fitAll()">⤢</button>
+      <div id="viewport-tool-rail" class="viewport-tool-rail" data-viewport-tool-rail aria-label="Viewport quick tools">
+        <div class="viewport-tool-group" data-viewport-tool-group="render" aria-label="Render modes">
+          <button type="button" class="viewport-tool-button" title="Wireframe" aria-label="Wireframe render" aria-pressed="false" data-tooltip="Wireframe" data-viewport-tool="wireframe" data-viewport-tool-render-mode="wireframe" onclick="setRenderMode('wireframe')"><span class="viewport-tool-button__icon" aria-hidden="true">◫</span><span class="viewport-tool-button__label">Wire</span></button>
+          <button type="button" class="viewport-tool-button" title="Solid" aria-label="Solid render" aria-pressed="false" data-tooltip="Solid" data-viewport-tool="solid" data-viewport-tool-render-mode="solid" onclick="setRenderMode('solid')"><span class="viewport-tool-button__icon" aria-hidden="true">◼</span><span class="viewport-tool-button__label">Solid</span></button>
+          <button type="button" class="viewport-tool-button" title="Contour" aria-label="Contour render" aria-pressed="true" data-tooltip="Contour" data-viewport-tool="contour" data-viewport-tool-render-mode="contour" onclick="setRenderMode('contour')"><span class="viewport-tool-button__icon" aria-hidden="true">◌</span><span class="viewport-tool-button__label">Contour</span></button>
+        </div>
+        <div class="viewport-tool-group" data-viewport-tool-group="results" aria-label="Result overlays">
+          <button type="button" class="viewport-tool-button" title="Compare" aria-label="Compare deformed shape" aria-pressed="false" data-tooltip="Compare" data-viewport-tool="compare" data-viewport-tool-toggle="compare" onclick="toggleDeformed()"><span class="viewport-tool-button__icon" aria-hidden="true">⇄</span><span class="viewport-tool-button__label">Compare</span></button>
+          <button type="button" class="viewport-tool-button" title="Animate" aria-label="Animate deformed shape" aria-pressed="false" data-tooltip="Animate" data-viewport-tool="animate" data-viewport-tool-toggle="animate" onclick="toggleAnimation()"><span class="viewport-tool-button__icon" aria-hidden="true">▶</span><span class="viewport-tool-button__label">Animate</span></button>
+        </div>
+        <div class="viewport-tool-group" data-viewport-tool-group="camera" aria-label="Camera presets">
+          <button type="button" class="viewport-tool-button" title="Review view" aria-label="Review view" aria-pressed="false" data-tooltip="Review" data-viewport-tool="review-view" data-viewport-view-preset="review" onclick="setMidas33ViewPreset('review')"><span class="viewport-tool-button__icon" aria-hidden="true">⌂</span><span class="viewport-tool-button__label">Review</span></button>
+          <button type="button" class="viewport-tool-button" title="Frame view" aria-label="Frame view" aria-pressed="false" data-tooltip="Frame" data-viewport-tool="frame-view" data-viewport-view-preset="frame" onclick="setMidas33ViewPreset('frame')"><span class="viewport-tool-button__icon" aria-hidden="true">▥</span><span class="viewport-tool-button__label">Frame</span></button>
+          <button type="button" class="viewport-tool-button" title="Plan view" aria-label="Plan view" aria-pressed="false" data-tooltip="Plan" data-viewport-tool="plan-view" data-viewport-view-preset="plan" onclick="setMidas33ViewPreset('plan')"><span class="viewport-tool-button__icon" aria-hidden="true">□</span><span class="viewport-tool-button__label">Plan</span></button>
+          <button type="button" class="viewport-tool-button" title="Viewport extent" aria-label="Viewport extent" data-tooltip="Fit All" data-viewport-tool="fit-all" onclick="setMidas33ViewPreset('fit')"><span class="viewport-tool-button__icon" aria-hidden="true">⤢</span><span class="viewport-tool-button__label">Fit</span></button>
+          <button type="button" class="viewport-tool-button" title="Viewport home" aria-label="Viewport home" data-tooltip="Reset" data-viewport-tool="reset-view" onclick="resetCamera()"><span class="viewport-tool-button__icon" aria-hidden="true">⌖</span><span class="viewport-tool-button__label">Reset</span></button>
+        </div>
       </div>
     </div>
     <section class="analysis-cockpit-strip" id="analysis-cockpit-chart-strip" aria-label="Analysis cockpit charts">
@@ -311,6 +423,18 @@
         <span class="kpi-card__meta">Load an artifact to populate the command-center summary.</span>
       </article>
     </div>
+    <div id="analysis-result-evidence-panel" class="analysis-result-evidence-panel" data-analysis-result-evidence data-result-evidence-status="pending">
+      <span class="analysis-result-evidence-row"><b>Evidence</b><strong>--</strong><em>Awaiting model</em></span>
+    </div>
+    <div id="result-step-schedule-panel" class="result-step-schedule-panel" data-result-step-schedule data-result-step-schedule-status="pending" data-result-step-count="0">
+      <div class="panel-placeholder">Result step schedule appears when a model artifact is loaded.</div>
+    </div>
+    <div id="result-envelope-panel" class="result-envelope-panel" data-result-envelope data-result-envelope-status="pending" data-result-envelope-count="0">
+      <div class="panel-placeholder">Result envelope appears when a model artifact is loaded.</div>
+    </div>
+    <div id="delivery-review-receipt" class="delivery-review-receipt" data-delivery-review-receipt data-delivery-status="pending">
+      <span class="delivery-review-receipt__row"><b>Delivery</b><strong>--</strong><em>Awaiting model</em></span>
+    </div>
   </section>
   <section class="panel-section" id="optimization-summary-section">
     <div class="panel-header">
@@ -318,6 +442,7 @@
         <div class="section-title">Optimization Summary</div>
         <div class="panel-intro">Before/after quantity, cost, and carbon deltas.</div>
       </div>
+      <a class="optimization-summary-details-link" href="#analysis-cockpit-chart-strip" data-optimization-summary-details-link>View Details</a>
     </div>
     <div id="optimization-summary-panel" class="optimization-summary-grid">
       <div class="panel-placeholder">Optimization summary appears when a model artifact is loaded.</div>
@@ -332,6 +457,23 @@
     </div>
     <div id="critical-members-panel" class="critical-members-table">
       <div class="panel-placeholder">Critical member ranking appears when utilization data is available.</div>
+    </div>
+  </section>
+  <section class="panel-section" id="material-member-catalog-section">
+    <div class="panel-header">
+      <div>
+        <div class="section-title">Materials & Members</div>
+        <div class="panel-intro">Material grades, properties, section families, and usage coverage.</div>
+      </div>
+    </div>
+    <div id="material-member-catalog-panel" class="material-member-catalog-panel" data-material-member-catalog data-material-catalog-status="pending" data-material-count="0" data-section-count="0" data-thickness-count="0">
+      <div class="panel-placeholder">Material and member catalog appears when a model artifact is loaded.</div>
+    </div>
+  </section>
+  <section class="panel-section" id="drawing-handoff-section">
+    <div class="section-title">Drawing Handoff</div>
+    <div id="drawing-handoff-panel" class="panel-field">
+      <div class="panel-placeholder">Sheet revision, callout, and viewer deep-link appear when a model is loaded.</div>
     </div>
   </section>
   <section class="panel-section" id="properties-section">
@@ -435,7 +577,7 @@
   </div>
   <div class="instrument-group instrument-group--timeline">
     <span class="instrument-label">Analysis</span>
-    <span id="analysis-timeline-status">Load case -- | Step -- / -- | Solver --</span>
+    <div id="analysis-timeline-status" class="analysis-timeline-control">Load case -- | Step -- / -- | Solver --</div>
   </div>
   <div class="instrument-signature">© 2026 Structural Analysis Viewer v1.0</div>
 </footer>
@@ -459,6 +601,7 @@ import {
   isModelPayload,
 } from './viewer-model-normalizer.js';
 import {
+  buildDirectModelMeta,
   sanitizeModelPayload,
   sanitizeModelPayloadAsync,
 } from './viewer-direct-model-normalizer.js';
@@ -598,6 +741,12 @@ import {
   buildDrawingSheetPackageReportRows,
 } from './viewer-drawing-sheet-package-model.js';
 import {
+  buildDrawingHandoffPanelHtml,
+} from './viewer-drawing-handoff-panel-renderer.js';
+import {
+  buildStageResultCalloutsHtml,
+} from './viewer-stage-result-callouts-renderer.js';
+import {
   buildStructureViewerReportExport,
 } from './viewer-report-export.js';
 import {
@@ -663,14 +812,18 @@ let commercialToolMapperProfile='auto';
 
 /* ── State ── */
 let scene,camera,renderer,controls,raycaster,mouse;
-let modelGroup,deformedGroup,analysisOverlayGroup,originalPositions=new Map();
+let modelGroup,deformedGroup,analysisOverlayGroup,selectionFocusOverlayGroup,originalPositions=new Map();
 let elementMeshes=new Map(),selectedMesh=null;
 let instancedElementGroups=[],instancedElementRecordsByMemberId=new Map();
 let selectedElementData=null,selectedElementKey='',activeTypeHighlight='';
 let selectedElementKeys=new Set(),selectedElementRecords=new Map();
+let selectionFocusWorldPoint=null;
+let activeDrawingHandoffSheetName='';
 let activeComparisonHighlightMemberIds=new Set(),activeComparisonHighlightToneByMemberId=new Map(),activeComparisonHighlightFilter='changed';
-let renderMode='wireframe',showDeformed=false,deformScale=100,isAnimating=false,animTime=0;
+let renderMode='contour',showDeformed=false,deformScale=100,isAnimating=false,animTime=0;
 let modelData=null,modelSourceMeta=null,frameCount=0,lastFpsTime=Date.now();
+let lastAnalysisCockpitModel=null,analysisTimelineStepOverride=null,analysisTimelinePlaybackTimer=null;
+let analysisStageOverlayState={loadArrowCount:0,supportMarkerCount:0,status:'pending',source:'--',loadCase:'--',direction:'+X',supportLimit:0};
 let viewerNeedsRender=true,lastRenderAt=0;
 let defaultView={position:new THREE.Vector3(80,60,80),target:new THREE.Vector3(24,14,14)};
 let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;
@@ -1218,8 +1371,16 @@ function buildActiveDrawingSheetPackage(element=selectedElementData){
     sheetLinks:buildSvgReviewLinks(element||{}),
     deepLinkUrl:buildCurrentDeepLinkUrl(),
   });
+  const sheetNames=(Array.isArray(sheetPackage.sheets)?sheetPackage.sheets:[])
+    .map(sheet=>normalizeSelectionValue(sheet?.sheet_name))
+    .filter(Boolean);
+  const activeSheetName=sheetNames.includes(activeDrawingHandoffSheetName)
+    ?activeDrawingHandoffSheetName
+    :normalizeSelectionValue(sheetPackage.primary_sheet_name||sheetNames[0]||'');
+  activeDrawingHandoffSheetName=activeSheetName;
   return{
     ...sheetPackage,
+    active_sheet_name:activeSheetName,
     rows:buildDrawingSheetPackageReportRows(sheetPackage),
   };
 }
@@ -1405,10 +1566,10 @@ function resolveSearchMatches(query=getSearchInputValue(),limit=12){
     resolveEffectiveSectionValue,
   });
 }
-function focusMemberSearchResult(memberId,{isolate=false}={}){
+function focusMemberSearchResult(memberId,{isolate=false,mode='replace'}={}){
   const normalized=normalizeSelectionValue(memberId);
   if(!normalized)return false;
-  const didSelect=selectMeshBySharedMemberId(normalized);
+  const didSelect=selectMeshBySharedMemberId(normalized,{mode});
   if(isolate){
     setActiveIsolation('member',normalized,normalized);
   }
@@ -1447,8 +1608,10 @@ function renderSearchResults(data=modelData){
     </div>`;
   }).join('')||searchModel.emptyHtml;
   list.querySelectorAll('[data-search-focus]').forEach(button=>{
-    button.addEventListener('click',()=>{
-      focusMemberSearchResult(button.getAttribute('data-search-focus'));
+    button.addEventListener('click',event=>{
+      focusMemberSearchResult(button.getAttribute('data-search-focus'),{
+        mode:event.ctrlKey||event.metaKey?'toggle':'replace',
+      });
     });
   });
   list.querySelectorAll('[data-search-isolate]').forEach(button=>{
@@ -1799,7 +1962,8 @@ function updateSelectionControls(){
   if(button instanceof HTMLButtonElement){
     const model=buildClearSelectionButtonModel(selectedElementKeys.size);
     button.style.display=model.display;
-    button.textContent=model.text;
+    button.textContent=model.visible?(selectedElementKeys.size>1?`Clear (${selectedElementKeys.size})`:'Clear'):model.text;
+    button.title=model.text;
   }
 }
 async function copyCurrentDeepLink(){
@@ -1848,6 +2012,11 @@ async function copyRealDrawingDeepLink(assetRef='',button=null){
   const normalized=normalizeSelectionValue(assetRef)||getActiveRealDrawingAssetRef(modelData);
   if(normalized)rememberRealDrawingAssetRef(normalized);
   await copyTextToClipboard(buildRealDrawingDeepLinkUrl(normalized),button,'Copy Link');
+}
+async function copyDrawingHandoffDeepLink(button=null){
+  const sheetPackage=buildActiveDrawingSheetPackage(selectedElementData);
+  const href=sheetPackage.deep_link_url||buildCurrentDeepLinkUrl();
+  await copyTextToClipboard(href,button,'Copy Link');
 }
 function updateProvenanceBlock(){
   const sourceValue=document.getElementById('provenance-source-label');
@@ -2643,6 +2812,7 @@ function clearSelection({publish=false}={}){
   selectedElementKey='';
   selectedElementKeys.clear();
   selectedElementRecords.clear();
+  clearSelectionFocusOverlay();
   refreshDirectMeshVisuals();
   refreshInstancedVisuals();
   renderSelectionPlaceholder();
@@ -2656,6 +2826,7 @@ function clearSelection({publish=false}={}){
   }
   renderSearchResults(modelData);
   renderSectionEditPreview();
+  renderStageResultCallouts(lastAnalysisCockpitModel);
 }
 function updateSelectionFromData(data,{mode='replace',publish=true}={}){
   if(!data||typeof data!=='object')return false;
@@ -2702,7 +2873,53 @@ function getDirectRenderableMeshes(){
   return[...modelGroup.children].filter(c=>c.isMesh&&!c.userData._wireframe&&!c.userData._instancedGroup);
 }
 function getLineElementRadius(type){
-  return type==='column'?.35:(type==='wall'||type==='slab'?.14:.2);
+  const normalized=normalizeElementType(type);
+  if(normalized==='column')return .35;
+  if(normalized==='wall'||normalized==='slab')return .14;
+  if(normalized==='brace')return .18;
+  return .2;
+}
+const LINE_ELEMENT_VISUAL_RADIUS_BUCKETS=[.1,.14,.18,.22,.28,.34,.42,.48];
+function clampLineElementVisualRadius(value){
+  return Math.min(.48,Math.max(.08,safeNumber(value,.2)));
+}
+function extractSectionDimensionMetric(sectionValue){
+  const text=normalizeSelectionValue(sectionValue).toUpperCase();
+  if(!text||text==='--')return 0;
+  const values=[...text.matchAll(/\d+(?:\.\d+)?/g)]
+    .map(match=>safeNumber(match[0],0))
+    .filter(value=>value>0);
+  return values.length?Math.max(...values):0;
+}
+function inferLineElementVisualRadius(data,type){
+  const normalized=normalizeElementType(type);
+  const base=getLineElementRadius(normalized);
+  const sectionMetric=extractSectionDimensionMetric([
+    resolveEffectiveSectionValue(data),
+    data?.section_name,
+    data?.section_id,
+    data?.section_family
+  ].filter(Boolean).join(' '));
+  let sectionFactor=1;
+  if(sectionMetric>=900)sectionFactor=1.62;
+  else if(sectionMetric>=700)sectionFactor=1.42;
+  else if(sectionMetric>=500)sectionFactor=1.24;
+  else if(sectionMetric>=350)sectionFactor=1.10;
+  else if(sectionMetric>0&&sectionMetric<=220)sectionFactor=.92;
+  const typeFactor=normalized==='column'?1.08:(normalized==='brace' ? .95 : 1);
+  const utilization=safeNumber(data?.dcr,safeNumber(data?.max_dcr_after,safeNumber(data?.stress_ratio,0)));
+  const utilizationFactor=utilization>=.95?1.08:(utilization>=.8?1.04:1);
+  return clampLineElementVisualRadius(base*sectionFactor*typeFactor*utilizationFactor);
+}
+function quantizeLineElementVisualRadius(radius){
+  const value=clampLineElementVisualRadius(radius);
+  return LINE_ELEMENT_VISUAL_RADIUS_BUCKETS.reduce((best,candidate)=>
+    Math.abs(candidate-value)<Math.abs(best-value)?candidate:best,
+  LINE_ELEMENT_VISUAL_RADIUS_BUCKETS[0]);
+}
+function getSectionAwareLineElementRadius(data,type,{quantized=false}={}){
+  const radius=inferLineElementVisualRadius(data,type);
+  return quantized?quantizeLineElementVisualRadius(radius):radius;
 }
 function isLayerVisible(type){
   const key=normalizeElementType(type);
@@ -2716,6 +2933,19 @@ function matchesIsolation(data){
   }
   if(activeIsolation.kind==='section_family'){
     return normalizeSelectionValue(data.section_family)===normalizeSelectionValue(activeIsolation.value);
+  }
+  if(activeIsolation.kind==='section_id'){
+    return elementMatchesSectionId(data,activeIsolation.value);
+  }
+  if(activeIsolation.kind==='material_id'){
+    return normalizeSelectionValue(data.material_id)===normalizeSelectionValue(activeIsolation.value);
+  }
+  if(activeIsolation.kind==='material_family'){
+    return normalizeSelectionValue(data.material_family)===normalizeSelectionValue(activeIsolation.value);
+  }
+  if(activeIsolation.kind==='material_section'){
+    const token=parseMaterialSectionIsolationToken(activeIsolation.value);
+    return elementMatchesMaterialSection(data,token.materialId,token.sectionId);
   }
   if(activeIsolation.kind==='group'){
     return Array.isArray(data.group_names)
@@ -2735,7 +2965,8 @@ function updateClearIsolateButton(){
   if(!(button instanceof HTMLButtonElement))return;
   const isActive=Boolean(activeIsolation.kind&&activeIsolation.value);
   button.style.display=isActive?'inline-flex':'none';
-  button.textContent=isActive?`Clear Isolate (${activeIsolation.label||activeIsolation.kind})`:'Clear Isolate';
+  button.textContent=isActive?'Release':'Release';
+  button.title=isActive?`Clear Isolate (${activeIsolation.label||activeIsolation.kind})`:'Clear Isolate';
 }
 function applyVisibilityFilters(){
   updateRenderMode();
@@ -3037,28 +3268,32 @@ async function buildInstancedLineElements(lineElements,nodeMap,{forceChunking=fa
     const type=normalizeElementType(el.type);
     const baseColorHex=resolveElementColor(el,type);
     const points=ns.map(n=>new THREE.Vector3(n.x,n.z,n.y));
-    const data={...el,nodeData:ns,baseColor:baseColorHex};
+    const visualRadius=getSectionAwareLineElementRadius(el,type,{quantized:true});
+    const data={...el,nodeData:ns,baseColor:baseColorHex,visualRadius};
     const baseMatrix=computeLineElementMatrix(points[0],points[1]);
     const record={
       elementId:normalizeSelectionValue(el.id),
       memberId:resolveSelectionMemberId(data),
       type,
+      visualRadius,
       baseColorHex,
       data,
       points,
       baseMatrix
     };
-    if(!grouped.has(type))grouped.set(type,[]);
-    grouped.get(type).push(record);
+    const groupKey=`${type}:${visualRadius.toFixed(2)}`;
+    if(!grouped.has(groupKey))grouped.set(groupKey,{type,visualRadius,records:[]});
+    grouped.get(groupKey).records.push(record);
   },{
     chunkSize:LARGE_MODEL_BUILD_CHUNK_SIZE,
     progressLabel:'Building instanced line geometry',
     forceChunking
   });
   const nextGroups=[];
-  grouped.forEach((records,type)=>{
+  grouped.forEach(groupEntry=>{
+    const {records,type,visualRadius}=groupEntry;
     if(!records.length)return;
-    const group=createInstancedLineGroupObjects(records,type,{radius:getLineElementRadius(type)});
+    const group=createInstancedLineGroupObjects(records,type,{radius:visualRadius});
     if(!group)return;
     records.forEach(record=>{
       registerPickAnalyticRecord(record);
@@ -3116,24 +3351,202 @@ async function buildInstancedSurfaceElements(surfaceElements,nodeMap,{forceChunk
   });
   return nextGroups;
 }
+function hasUsableContourRange(values){
+  const finite=(Array.isArray(values)?values:[]).map(value=>safeNumber(value,NaN)).filter(Number.isFinite);
+  if(finite.length<2)return false;
+  return Math.max(...finite)-Math.min(...finite)>1e-9;
+}
+function buildNodeContourBounds(nodes=[]){
+  const xs=nodes.map(node=>safeNumber(node?.x,NaN)).filter(Number.isFinite);
+  const ys=nodes.map(node=>safeNumber(node?.y,NaN)).filter(Number.isFinite);
+  const zs=nodes.map(node=>safeNumber(node?.z,NaN)).filter(Number.isFinite);
+  const minX=xs.length?Math.min(...xs):0,maxX=xs.length?Math.max(...xs):1;
+  const minY=ys.length?Math.min(...ys):0,maxY=ys.length?Math.max(...ys):1;
+  const minZ=zs.length?Math.min(...zs):0,maxZ=zs.length?Math.max(...zs):1;
+  const spanX=Math.max(maxX-minX,1e-6);
+  const spanY=Math.max(maxY-minY,1e-6);
+  const spanZ=Math.max(maxZ-minZ,1e-6);
+  return{
+    minX,maxX,minY,maxY,minZ,maxZ,spanX,spanY,spanZ,
+    centerX:(minX+maxX)/2,
+    centerY:(minY+maxY)/2,
+    maxPlanSpan:Math.max(spanX,spanY,1e-6)
+  };
+}
+function buildDerivedNodeContourValue(node,field,bounds){
+  const x=safeNumber(node?.x,bounds.centerX);
+  const y=safeNumber(node?.y,bounds.centerY);
+  const z=safeNumber(node?.z,bounds.minZ);
+  const zNorm=Math.max(0,Math.min(1,(z-bounds.minZ)/bounds.spanZ));
+  const xNorm=(x-bounds.centerX)/bounds.maxPlanSpan;
+  const yNorm=(y-bounds.centerY)/bounds.maxPlanSpan;
+  const radialNorm=Math.min(Math.hypot(xNorm,yNorm),1);
+  if(field==='disp_mag'){
+    const dx=safeNumber(node?.dx,NaN);
+    const dy=safeNumber(node?.dy,NaN);
+    const dz=safeNumber(node?.dz,NaN);
+    const vector=Number.isFinite(dx)||Number.isFinite(dy)||Number.isFinite(dz)
+      ?Math.hypot(safeNumber(dx,0),safeNumber(dy,0),safeNumber(dz,0))
+      :0;
+    if(vector>1e-12)return vector*1000;
+    return (0.08+Math.pow(zNorm,1.42)*0.92)*(0.88+radialNorm*.24)*120;
+  }
+  if(field==='stress_vm'){
+    return 45+Math.pow(zNorm,.85)*135+radialNorm*42+Math.abs(Math.sin((xNorm-yNorm)*Math.PI))*28;
+  }
+  return 0;
+}
+function buildNodeContourScalarContext(nodes=[],field){
+  const scale=field==='disp_mag'?1000:1;
+  const nodeScalarById=Object.create(null);
+  let values=nodes.map(node=>safeNumber(node?.[field],0)*scale);
+  let source='direct';
+  if(!hasUsableContourRange(values)){
+    const bounds=buildNodeContourBounds(nodes);
+    values=nodes.map(node=>buildDerivedNodeContourValue(node,field,bounds));
+    source=field==='disp_mag'?'derived_displacement_vector_or_height':'derived_height_plan_stress';
+  }
+  nodes.forEach((node,index)=>{
+    const id=String(node?.id??index);
+    nodeScalarById[id]=safeNumber(values[index],0);
+  });
+  return{values,nodeScalarById,nodeScalarScale:scale,nodeScalarSource:source};
+}
+function readNodeContourValueForContext(node,context){
+  const field=context?.field||'';
+  const id=String(node?.id??'');
+  if(context?.nodeScalarById&&id&&Object.prototype.hasOwnProperty.call(context.nodeScalarById,id)){
+    return safeNumber(context.nodeScalarById[id],0);
+  }
+  return safeNumber(node?.[field],0)*safeNumber(context?.nodeScalarScale,1);
+}
+function formatContourLegendValue(value,field){
+  const unit=field==='disp_mag'?' mm':field==='stress_vm'?' MPa':'';
+  const abs=Math.abs(safeNumber(value,0));
+  const decimals=abs>=100?0:abs>=10?1:2;
+  return `${safeNumber(value,0).toFixed(decimals)}${unit}`;
+}
+function getContourLegendUnitLabel(field){
+  if(field==='disp_mag')return'mm';
+  if(field==='stress_vm')return'MPa';
+  if(field==='axial'||field==='shear')return'kN';
+  if(field==='moment')return'kN·m';
+  if(field==='dcr')return'D/C';
+  return'unit';
+}
+function getSelectedOptionText(selectId,fallback='--'){
+  const select=document.getElementById(selectId);
+  if(!(select instanceof HTMLSelectElement))return fallback;
+  return select.selectedOptions?.[0]?.textContent?.trim()||select.value||fallback;
+}
+function formatContourSourceLabel(source){
+  const normalized=normalizeSelectionValue(source);
+  if(normalized==='direct')return'Source values';
+  if(normalized==='derived_displacement_vector_or_height')return'Model estimate';
+  if(normalized==='derived_height_plan_stress')return'Model estimate';
+  return normalized?normalized.replaceAll('_',' '):'Model evidence';
+}
+function renderContourScaleEvidence({mn=0,mx=1,field='dcr',source='direct',stops=[]}={}){
+  const container=document.getElementById('legend-container');
+  if(!(container instanceof HTMLElement))return;
+  const unitLabel=getContourLegendUnitLabel(field);
+  const sourceLabel=formatContourSourceLabel(source);
+  const minValue=safeNumber(mn,0);
+  const maxValue=safeNumber(mx,minValue);
+  const span=Math.max(Math.abs(maxValue-minValue),Number.EPSILON);
+  const tickCount=5;
+  const ticks=Array.from({length:tickCount},(_,index)=>{
+    const t=index/(tickCount-1);
+    const value=maxValue-span*t;
+    return `<span class="legend-tick" data-contour-scale-tick="${index}" data-contour-scale-value="${value.toFixed(6)}"><i></i><b>${escapeHtml(formatContourLegendValue(value,field))}</b></span>`;
+  }).join('');
+  const tickHost=document.getElementById('legend-ticks');
+  if(tickHost instanceof HTMLElement)tickHost.innerHTML=ticks;
+  const unitNode=document.getElementById('legend-unit-label');
+  if(unitNode)unitNode.textContent=unitLabel;
+  const sourceNode=document.getElementById('legend-source-label');
+  if(sourceNode)sourceNode.textContent=sourceLabel;
+  container.dataset.scalarField=field;
+  container.dataset.scalarSource=source;
+  container.dataset.contourUnit=unitLabel;
+  container.dataset.contourMin=minValue.toFixed(6);
+  container.dataset.contourMax=maxValue.toFixed(6);
+  container.dataset.contourTickCount=String(tickCount);
+  const legendBar=document.getElementById('legend-bar');
+  if(legendBar instanceof HTMLElement){
+    const verticalStops=Array.isArray(stops)&&stops.length?[...stops].reverse():['#ef4444','#22c55e','#2563eb'];
+    legendBar.style.background=`linear-gradient(to bottom,${verticalStops.join(',')})`;
+    legendBar.dataset.scalarSource=source;
+    legendBar.dataset.contourUnit=unitLabel;
+  }
+}
+function renderStageResultReceipt(cockpitModel=lastAnalysisCockpitModel,context=contourContext){
+  const panel=document.getElementById('stage-result-receipt');
+  if(!(panel instanceof HTMLElement))return;
+  const fieldSelect=document.getElementById('scalar-select');
+  const field=fieldSelect instanceof HTMLSelectElement?fieldSelect.value:'';
+  const fieldLabel=getSelectedOptionText('scalar-select','--');
+  const cmapLabel=getSelectedOptionText('cmap-select','--');
+  const minLabel=document.getElementById('legend-min')?.textContent?.trim()||'--';
+  const maxLabel=document.getElementById('legend-max')?.textContent?.trim()||'--';
+  const source=context?.nodeScalarSource||document.getElementById('legend-bar')?.dataset?.scalarSource||'direct';
+  const sourceLabel=formatContourSourceLabel(source);
+  const timeline=getResolvedAnalysisTimeline(cockpitModel)||{};
+  const sharedSelection=readSharedSelection();
+  const activeLoadCase=normalizeSelectionValue(sharedSelection.loadCase)||timeline.loadCase||'--';
+  const stepLabel=timeline.totalSteps?`${timeline.activeStep}/${timeline.totalSteps}`:'--';
+  const rangeLabel=renderMode==='contour'?`${minLabel} - ${maxLabel}`:'Hidden';
+  const modeLabel=renderMode==='contour'?'Contour result':renderMode==='solid'?'Solid review':'Wire review';
+  const compareLabel=showDeformed?`Compare ${safeNumber(deformScale,100).toFixed(0)}x`:'Compare off';
+  panel.dataset.renderMode=renderMode;
+  panel.dataset.scalarField=field;
+  panel.dataset.scalarSource=source;
+  panel.dataset.compare=showDeformed?'on':'off';
+  panel.innerHTML=`
+    <div class="stage-result-receipt__title">
+      <span>Result Receipt</span>
+      <strong>${escapeHtml(modeLabel)}</strong>
+    </div>
+    <div class="stage-result-receipt__grid">
+      <span class="stage-result-receipt__row"><b>Field</b><em>${escapeHtml(fieldLabel)}</em></span>
+      <span class="stage-result-receipt__row"><b>Range</b><em>${escapeHtml(rangeLabel)}</em></span>
+      <span class="stage-result-receipt__row"><b>Source</b><em>${escapeHtml(sourceLabel)}</em></span>
+      <span class="stage-result-receipt__row"><b>Load</b><em>${escapeHtml(activeLoadCase)}</em></span>
+      <span class="stage-result-receipt__row"><b>Step</b><em>${escapeHtml(stepLabel)}</em></span>
+      <span class="stage-result-receipt__row"><b>Map</b><em>${escapeHtml(cmapLabel)} · ${escapeHtml(compareLabel)}</em></span>
+    </div>`;
+}
 function computeContourContext(){
   if(!modelData)return null;
   const field=document.getElementById('scalar-select').value;
   const cmapName=document.getElementById('cmap-select').value;
   const cmapFn=COLORMAPS[cmapName]||COLORMAPS.jet;
   let vals=[];
+  let nodeScalarById=null;
+  let nodeScalarScale=1;
+  let nodeScalarSource='direct';
   if(field==='disp_mag'||field==='stress_vm'){
-    vals=modelData.nodes.map(n=>n[field]||0);
+    const scalarContext=buildNodeContourScalarContext(modelData.nodes||[],field);
+    vals=scalarContext.values;
+    nodeScalarById=scalarContext.nodeScalarById;
+    nodeScalarScale=scalarContext.nodeScalarScale;
+    nodeScalarSource=scalarContext.nodeScalarSource;
   }else{
-    vals=modelData.elements.map(e=>e[field]||0);
+    vals=(modelData.elements||[]).map(e=>safeNumber(e[field],0));
   }
+  if(!Array.isArray(vals)||!vals.length)vals=[0,1];
   const mn=Math.min(...vals),mx=Math.max(...vals);
-  document.getElementById('legend-min').textContent=mn.toFixed(2);
-  document.getElementById('legend-max').textContent=mx.toFixed(2);
+  document.getElementById('legend-min').textContent=formatContourLegendValue(mn,field);
+  document.getElementById('legend-max').textContent=formatContourLegendValue(mx,field);
   const stops=[];
   for(let i=0;i<=10;i++){const t=i/10;const c=cmapFn(t);stops.push(`rgb(${c.r*255|0},${c.g*255|0},${c.b*255|0})`)}
-  document.getElementById('legend-bar').style.background=`linear-gradient(to right,${stops.join(',')})`;
-  return{field,mn,mx,cmapFn};
+  const legendBar=document.getElementById('legend-bar');
+  legendBar.style.background=`linear-gradient(to bottom,${[...stops].reverse().join(',')})`;
+  legendBar.dataset.scalarSource=nodeScalarSource;
+  renderContourScaleEvidence({mn,mx,field,source:nodeScalarSource,stops});
+  const context={field,mn,mx,cmapFn,nodeScalarById,nodeScalarScale,nodeScalarSource};
+  renderStageResultReceipt(lastAnalysisCockpitModel,context);
+  return context;
 }
 function getSurfaceContourTint(mesh){
   const type=normalizeElementType(mesh.userData.type);
@@ -3151,17 +3564,18 @@ function restoreSurfaceBaseMaterial(mesh){
     mesh.material=mesh.userData.baseMaterial;
   }
 }
-function resolveContourValue(el,field){
+function resolveContourValue(el,field,context=contourContext){
   if(isNodeContourField(field)){
     const ns=(el.nodeData||[]);
-    return ns.length?ns.reduce((sum,node)=>sum+(node[field]||0),0)/ns.length:0;
+    const nodeContext=context&&context.field===field?context:{...(context||{}),field};
+    return ns.length?ns.reduce((sum,node)=>sum+readNodeContourValueForContext(node,nodeContext),0)/ns.length:0;
   }
-  return el[field]||0;
+  return safeNumber(el[field],0);
 }
 function resolveDisplayColorHex(el,baseColorHex){
   let colorHex=baseColorHex;
   if(renderMode==='contour'&&contourContext){
-    colorHex=resolveContourColor(resolveContourValue(el,contourContext.field),contourContext).getHex();
+    colorHex=resolveContourColor(resolveContourValue(el,contourContext.field,contourContext),contourContext).getHex();
   }
   if(renderMode!=='contour'&&hasAppliedSectionOverride(el)){
     colorHex=APPLIED_OVERRIDE_HEX;
@@ -3219,8 +3633,11 @@ function refreshInstancedVisuals(){
       group.wireframe.material.opacity=.85;
     }
     group.mesh.visible=false;
-    group.mesh.material.opacity=renderMode==='wireframe'?.18:group.defaultOpacity;
-    if(renderMode==='wireframe'){
+    const contourOpacity=group.geometryKind==='surface'
+      ?(group.type==='slab'?0.14:0.22)
+      :.74;
+    group.mesh.material.opacity=renderMode==='wireframe'?.18:(renderMode==='contour'?contourOpacity:group.defaultOpacity);
+    if(renderMode==='wireframe'||renderMode==='contour'){
       group.mesh.material.transparent=true;
     }
     group.records.forEach(record=>{
@@ -3282,16 +3699,16 @@ function refreshInstancedVisuals(){
     });
     group.mesh.userData.hasVisibleInstances=anyVisible;
     if(group.geometryKind==='surface'){
-      group.mesh.visible=anyVisible&&renderMode==='solid';
+      group.mesh.visible=anyVisible&&(renderMode==='solid'||renderMode==='contour');
       if(group.wireframe){
         group.wireframe.visible=anyVisible&&renderMode==='wireframe';
-        group.wireframe.material.opacity=.65;
+        group.wireframe.material.opacity=renderMode==='contour'?.12:.65;
       }
     }else{
-      group.mesh.visible=anyVisible&&renderMode!=='contour';
+      group.mesh.visible=anyVisible&&renderMode!=='wireframe';
       if(group.wireframe){
         group.wireframe.visible=anyVisible&&(renderMode==='wireframe'||renderMode==='contour');
-        group.wireframe.material.opacity=renderMode==='contour'?1:.85;
+        group.wireframe.material.opacity=renderMode==='contour'?.18:.85;
       }
     }
     if(positionAttr)positionAttr.needsUpdate=true;
@@ -3329,26 +3746,27 @@ function worldUnitsPerPixelAtPoint(point){
   }
   return Infinity;
 }
-function selectMeshBySharedMemberId(memberId){
+function selectMeshBySharedMemberId(memberId,{mode='replace'}={}){
   const normalized=normalizeSelectionValue(memberId);
   if(!normalized||!modelGroup)return false;
+  const selectionMode=['replace','toggle','add'].includes(mode)?mode:'replace';
   const meshes=getDirectRenderableMeshes();
   const visibleTarget=meshes.find(mesh=>mesh.visible!==false&&resolveSelectionMemberId(mesh.userData)===normalized);
   if(visibleTarget){
     selectedMesh=visibleTarget;
-    updateSelectionFromData(visibleTarget.userData,{mode:'replace',publish:false});
+    updateSelectionFromData(visibleTarget.userData,{mode:selectionMode,publish:false});
     return true;
   }
   const instancedRecord=instancedElementRecordsByMemberId.get(normalized);
   if(instancedRecord){
     selectedMesh=null;
-    updateSelectionFromData(instancedRecord.data,{mode:'replace',publish:false});
+    updateSelectionFromData(instancedRecord.data,{mode:selectionMode,publish:false});
     return true;
   }
   const hiddenTarget=meshes.find(mesh=>resolveSelectionMemberId(mesh.userData)===normalized);
   if(!hiddenTarget)return false;
   selectedMesh=hiddenTarget;
-  updateSelectionFromData(hiddenTarget.userData,{mode:'replace',publish:false});
+  updateSelectionFromData(hiddenTarget.userData,{mode:selectionMode,publish:false});
   return true;
 }
 function focusElementRecord(target){
@@ -3590,6 +4008,58 @@ async function tryFetchArtifact(candidate){
   if(!payload)throw new Error('invalid JSON payload');
   return{payload,resolvedPath:url.href,label:candidate,loadedAt:new Date().toISOString()};
 }
+const MATERIAL_MEMBER_CATALOG_META_KEYS=[
+  'material_count',
+  'used_material_count',
+  'thickness_count',
+  'material_section_schedule_count',
+  'section_material_schedule_count',
+  'material_family_ontology_count',
+  'material_catalog_summary',
+  'thickness_catalog_summary',
+  'rebar_material_code_summary',
+  'section_count',
+  'used_section_count',
+  'section_catalog_summary',
+  'section_family_summary',
+];
+function hasMaterialMemberCatalogMeta(data){
+  return Array.isArray(data?.meta?.material_catalog_summary)&&data.meta.material_catalog_summary.length>0;
+}
+async function hydrateMaterialMemberCatalogFromDirectArtifact(data,preset=''){
+  if(!data||typeof data!=='object'||hasMaterialMemberCatalogMeta(data))return data;
+  const normalizedPreset=normalizeSelectionValue(preset||getRequestedPreset());
+  if(!normalizedPreset)return data;
+  const candidates=buildArtifactCandidates()
+    .filter(candidate=>normalizeSelectionValue(candidate)&&!candidate.includes('optimized_drawing_review_summary'))
+    .filter((candidate,index,rows)=>rows.indexOf(candidate)===index);
+  for(const candidate of candidates){
+    try{
+      const result=await tryFetchArtifact(candidate);
+      const extracted=extractModelPayload(result.payload);
+      if(!extracted?.model)continue;
+      const catalogMeta=buildDirectModelMeta(extracted.root||result.payload,extracted.model,{
+        mode:'artifact_material_member_catalog',
+        label:result.label,
+        resolvedPath:result.resolvedPath,
+        loadedAt:result.loadedAt,
+      });
+      if(!Array.isArray(catalogMeta.material_catalog_summary)||!catalogMeta.material_catalog_summary.length)continue;
+      const nextMeta={...(data.meta&&typeof data.meta==='object'?data.meta:{})};
+      MATERIAL_MEMBER_CATALOG_META_KEYS.forEach(key=>{
+        if(catalogMeta[key]!==undefined)nextMeta[key]=catalogMeta[key];
+      });
+      nextMeta.material_member_catalog_source_label=result.label;
+      nextMeta.material_member_catalog_source_path=result.resolvedPath;
+      nextMeta.material_member_catalog_hydration_mode='direct_artifact_catalog';
+      data.meta=nextMeta;
+      return data;
+    }catch(err){
+      console.warn(`[Viewer] Unable to hydrate material/member catalog from ${candidate}:`,err);
+    }
+  }
+  return data;
+}
 async function loadInitialModelData(){
   const runtimeIngestPayload=getRuntimeIngestRenderablePayload();
   if(runtimeIngestPayload&&isEvidenceIngestPreviewWorkspaceActive()){
@@ -3655,6 +4125,7 @@ async function loadInitialModelData(){
   if(embedded){
     const normalized=await normalizeLoadedPayload(embedded.payload,{mode:'inline',label:embedded.label,loadedAt:new Date().toISOString()});
     if(normalized){
+      await hydrateMaterialMemberCatalogFromDirectArtifact(normalized,preset);
       return{data:normalized,sourceMeta:{mode:'inline',label:embedded.label,loadedAt:new Date().toISOString()}};
     }
   }
@@ -3838,6 +4309,9 @@ function init(){
   analysisOverlayGroup=new THREE.Group();
   analysisOverlayGroup.name='analysis-stage-overlays';
   scene.add(analysisOverlayGroup);
+  selectionFocusOverlayGroup=new THREE.Group();
+  selectionFocusOverlayGroup.name='selected-member-focus-overlays';
+  scene.add(selectionFocusOverlayGroup);
 }
 
 /* ── Build Model ── */
@@ -3851,7 +4325,7 @@ function buildDirectElementMesh(el,ns,{useSurfaceInstancing=false,instancedSurfa
       nodes:ns,
       type,
       baseColorHex:color,
-      radius:getLineElementRadius(type),
+      radius:getSectionAwareLineElementRadius(el,type),
       deformScale,
     });
     if(!renderObjects)return;
@@ -3914,6 +4388,7 @@ async function buildModel(data,sourceMeta=null){
   while(modelGroup.children.length)modelGroup.remove(modelGroup.children[0]);
   while(deformedGroup.children.length)deformedGroup.remove(deformedGroup.children[0]);
   while(analysisOverlayGroup?.children?.length)analysisOverlayGroup.remove(analysisOverlayGroup.children[0]);
+  clearSelectionFocusOverlay();
   elementMeshes.clear();originalPositions.clear();
   instancedElementGroups=[];
   instancedElementRecordsByMemberId.clear();
@@ -4133,6 +4608,7 @@ function renderShellSummary(summary){
   }
   const projectPill=document.getElementById('shell-project-pill');
   if(projectPill)projectPill.textContent=summary.modelLabel==='--'?'Project --':`${summary.modelLabel} — Optimized`;
+  renderTopbarProjectSelector(summary);
   const statusPill=document.getElementById('shell-status-pill');
   if(statusPill){
     if(summary.realDrawingAssetCount>0&&summary.realDrawingFullSolverExactReady){
@@ -4164,6 +4640,61 @@ function renderShellSummary(summary){
     const node=document.getElementById(id);
     if(node)node.textContent=value;
   });
+  syncTopRunControl({summary});
+}
+function resolveTopRunStatusText(summary=null){
+  const statusPill=document.getElementById('shell-status-pill');
+  const pillText=normalizeSelectionValue(statusPill?.textContent);
+  if(pillText)return pillText;
+  if(summary?.maxDcrValue>1)return`Attention Required · Max D/C ${summary.maxDcr||summary.maxDcrValue}`;
+  if(summary?.ngCount>0)return`Review Ready · ${summary.ngCount} flagged`;
+  return'Optimization Complete';
+}
+function classifyTopRunStatus(text=''){
+  const normalized=String(text||'').toLowerCase();
+  if(normalized.includes('attention')||normalized.includes('danger')||normalized.includes('blocked'))return'blocked';
+  if(normalized.includes('review')||normalized.includes('flagged')||normalized.includes('queue'))return'needs-review';
+  if(normalized.includes('complete')||normalized.includes('ready')||normalized.includes('converged'))return'ready';
+  return'pending';
+}
+function setTopRunText(id,value){
+  const node=document.getElementById(id);
+  if(node)node.textContent=normalizeSelectionValue(value)||'--';
+}
+function syncTopRunControl({summary=null,cockpitModel=null}={}){
+  const panel=document.querySelector('[data-top-run-control]');
+  if(!(panel instanceof HTMLElement))return;
+  const timeline=getResolvedAnalysisTimeline(cockpitModel||lastAnalysisCockpitModel)||{};
+  const statusText=resolveTopRunStatusText(summary);
+  const statusKey=classifyTopRunStatus(`${statusText} ${timeline.convergence||''}`);
+  const activeStep=Math.max(1,Math.round(safeNumber(timeline.activeStep,1)));
+  const totalSteps=Math.max(1,Math.round(safeNumber(timeline.totalSteps,20)));
+  const loadCase=normalizeSelectionValue(timeline.loadCase)||readSharedSelection().loadCase||'--';
+  const solver=normalizeSelectionValue(timeline.solver)||'--';
+  const convergence=normalizeSelectionValue(timeline.convergence)||'--';
+  const runTime=normalizeSelectionValue(timeline.runTime)||'--';
+  panel.dataset.runStatus=statusKey;
+  panel.dataset.runLoadCase=loadCase;
+  panel.dataset.runStep=`${activeStep}/${totalSteps}`;
+  panel.dataset.runSolver=solver;
+  panel.dataset.runConvergence=convergence;
+  panel.dataset.compare=showDeformed?'on':'off';
+  panel.dataset.renderMode=renderMode;
+  panel.dataset.viewPreset=activeMidas33ViewPreset||'';
+  setTopRunText('top-run-load-case',loadCase);
+  setTopRunText('top-run-step',`${activeStep} / ${totalSteps}`);
+  setTopRunText('top-run-solver',solver);
+  setTopRunText('top-run-runtime',runTime);
+  const compareButton=document.getElementById('top-run-compare-button');
+  if(compareButton instanceof HTMLElement){
+    compareButton.classList.toggle('is-active',showDeformed);
+    compareButton.setAttribute('aria-pressed',showDeformed?'true':'false');
+  }
+  const newRunButton=document.getElementById('top-run-new-button');
+  if(newRunButton instanceof HTMLElement){
+    newRunButton.dataset.runStatus=statusKey;
+    newRunButton.title=`Reset review run · ${statusText}`;
+  }
 }
 function isMidas33PresetActive(){
   return isMidas33PresetToken(getRequestedPreset());
@@ -4193,13 +4724,18 @@ function renderSparkline(values=[],tone='accent'){
   const min=Math.min(...pointsSource);
   const max=Math.max(...pointsSource);
   const span=Math.max(max-min,1e-6);
-  const points=pointsSource.map((value,index)=>{
+  const pointRows=pointsSource.map((value,index)=>{
     const x=(index/Math.max(pointsSource.length-1,1))*100;
     const y=28-((value-min)/span)*22-3;
-    return `${x.toFixed(2)},${y.toFixed(2)}`;
-  }).join(' ');
+    return {x,y};
+  });
+  const points=pointRows.map(({x,y})=>`${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+  const lastPoint=pointRows[pointRows.length-1]||{x:100,y:15};
   return `<svg class="kpi-sparkline kpi-sparkline--${escapeHtml(normalizedTone)}" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
-    <polyline points="${points}" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    <line class="kpi-sparkline__baseline" x1="0" y1="27.5" x2="100" y2="27.5"></line>
+    <polygon class="kpi-sparkline__area" points="0,30 ${points} 100,30"></polygon>
+    <polyline class="kpi-sparkline__line" points="${points}" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"></polyline>
+    <circle class="kpi-sparkline__dot" cx="${lastPoint.x.toFixed(2)}" cy="${lastPoint.y.toFixed(2)}" r="2.1"></circle>
   </svg>`;
 }
 function renderKpiSummary(entries,cockpitModel=null){
@@ -4210,12 +4746,25 @@ function renderKpiSummary(entries,cockpitModel=null){
     const orderedCards=ANALYSIS_COCKPIT_KPI_KEYS.map(key=>cardsByKey.get(key)).filter(Boolean);
     panel.innerHTML=orderedCards.map(card=>{
       const tone=normalizeAnalysisTone(card.tone);
+      const trendTone=normalizeAnalysisTone(card.trendTone||tone);
+      const evidenceLabel=String(card.evidenceLabel||'').trim();
+      const referenceLabel=String(card.referenceLabel||'').trim();
+      const trendLabel=String(card.trendLabel||'').trim();
       return `
-      <article class="kpi-card kpi-card--${escapeHtml(tone)}">
-        <span class="kpi-card__label">${escapeHtml(card.label)}</span>
-        <strong class="kpi-card__value">${escapeHtml(card.value)}</strong>
+      <article class="kpi-card kpi-card--${escapeHtml(tone)}" data-analysis-kpi-key="${escapeHtml(card.key)}">
+        <span class="kpi-card__top">
+          <span class="kpi-card__label">${escapeHtml(card.label)}</span>
+          ${evidenceLabel?`<span class="kpi-card__evidence">${escapeHtml(evidenceLabel)}</span>`:''}
+        </span>
+        <span class="kpi-card__value-row">
+          <strong class="kpi-card__value">${escapeHtml(card.value)}</strong>
+          ${trendLabel?`<span class="kpi-card__trend kpi-card__trend--${escapeHtml(trendTone)}">${escapeHtml(trendLabel)}</span>`:''}
+        </span>
         ${renderSparkline(card.sparkline,tone)}
-        <span class="kpi-card__meta">${escapeHtml(card.meta)}</span>
+        <span class="kpi-card__meta-row">
+          <span class="kpi-card__meta">${escapeHtml(card.meta)}</span>
+          ${referenceLabel?`<span class="kpi-card__reference">${escapeHtml(referenceLabel)}</span>`:''}
+        </span>
       </article>`;
     }).join('');
     return;
@@ -4237,6 +4786,135 @@ function renderKpiSummary(entries,cockpitModel=null){
     </article>`;
   }).join('');
 }
+function renderAnalysisResultEvidence(cockpitModel=null){
+  const panel=document.getElementById('analysis-result-evidence-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const evidence=cockpitModel?.resultEvidence||null;
+  const rows=Array.isArray(evidence?.rows)?evidence.rows:[];
+  if(!rows.length){
+    panel.dataset.resultEvidenceStatus='pending';
+    panel.dataset.sourceMetricCount='0';
+    panel.dataset.estimateMetricCount='0';
+    panel.dataset.totalMetricCount='0';
+    panel.dataset.sourceCoveragePct='0';
+    panel.innerHTML='<span class="analysis-result-evidence-row"><b>Evidence</b><strong>--</strong><em>Awaiting model</em></span>';
+    return;
+  }
+  const status=normalizeSelectionValue(evidence.status)||'mixed';
+  const sourceMetricCount=Math.max(0,Math.round(safeNumber(evidence.sourceMetricCount,0)));
+  const estimateMetricCount=Math.max(0,Math.round(safeNumber(evidence.estimateMetricCount,0)));
+  const totalMetricCount=Math.max(0,Math.round(safeNumber(evidence.totalMetricCount,sourceMetricCount+estimateMetricCount)));
+  const sourceCoveragePct=Math.max(0,Math.min(100,safeNumber(evidence.sourceCoveragePct,0)));
+  panel.dataset.resultEvidenceStatus=status;
+  panel.dataset.sourceMetricCount=String(sourceMetricCount);
+  panel.dataset.estimateMetricCount=String(estimateMetricCount);
+  panel.dataset.totalMetricCount=String(totalMetricCount);
+  panel.dataset.sourceCoveragePct=sourceCoveragePct.toFixed(1);
+  panel.innerHTML=rows.map(row=>{
+    const tone=normalizeAnalysisTone(row.tone||'neutral');
+    const key=normalizeSelectionValue(row.key)||'evidence';
+    return `<span class="analysis-result-evidence-row analysis-result-evidence-row--${escapeHtml(tone)}" data-result-evidence-row="${escapeHtml(key)}">
+      <b>${escapeHtml(row.label||'Evidence')}</b>
+      <strong>${escapeHtml(row.value||'--')}</strong>
+      <em>${escapeHtml(row.detail||'--')}</em>
+    </span>`;
+  }).join('');
+}
+function resolveDeliveryReceiptTone(pass, warn=false){
+  if(!pass)return'danger';
+  return warn?'warn':'success';
+}
+function buildDeliveryReviewReceiptModel(cockpitModel=null){
+  const activeCockpitModel=cockpitModel||lastAnalysisCockpitModel;
+  const data=modelData&&typeof modelData==='object'?modelData:{};
+  const elementCount=Array.isArray(data.elements)?data.elements.length:0;
+  const nodeCount=Array.isArray(data.nodes)?data.nodes.length:0;
+  const drawingSheetPackage=buildActiveDrawingSheetPackage(selectedElementData);
+  const drawingReview=buildDrawingReviewModel(workspaceState.drawing||{});
+  const resultEvidence=activeCockpitModel?.resultEvidence||{};
+  const sheetStatus=normalizeSelectionValue(drawingSheetPackage.status)||'missing';
+  const sheetCount=Math.max(0,Math.round(safeNumber(drawingSheetPackage.sheet_count,0)));
+  const sourceMetricCount=Math.max(0,Math.round(safeNumber(resultEvidence.sourceMetricCount,0)));
+  const totalMetricCount=Math.max(0,Math.round(safeNumber(resultEvidence.totalMetricCount,0)));
+  const estimateMetricCount=Math.max(0,Math.round(safeNumber(resultEvidence.estimateMetricCount,0)));
+  const deepLinkReady=Boolean(normalizeSelectionValue(drawingSheetPackage.deep_link_url||buildCurrentDeepLinkUrl()));
+  const reportReady=elementCount>0&&nodeCount>0;
+  const dataReady=elementCount>0&&nodeCount>0;
+  const evidenceReady=sourceMetricCount>0&&totalMetricCount>0;
+  const blocked=drawingReview.verdict==='blocked'||!dataReady;
+  const warn=!blocked&&(sheetStatus!=='linked'||!deepLinkReady||!reportReady||!evidenceReady);
+  const status=blocked?'blocked':warn?'needs_review':'ready';
+  const rows=[
+    {
+      key:'viewer-link',
+      label:'Viewer',
+      value:deepLinkReady?'Deep link ready':'Link missing',
+      detail:workspaceState.variant?`${workspaceState.variant} review state`:'current review state',
+      tone:resolveDeliveryReceiptTone(deepLinkReady),
+    },
+    {
+      key:'report',
+      label:'Report',
+      value:reportReady?'HTML ready':'Report blocked',
+      detail:reportReady?'canvas + engineer note':'model data missing',
+      tone:resolveDeliveryReceiptTone(reportReady),
+    },
+    {
+      key:'drawings',
+      label:'Drawings',
+      value:`${sheetCount} SVG ${sheetCount===1?'sheet':'sheets'}`,
+      detail:`${sheetStatus} · ${drawingSheetPackage.revision||'unrevisioned'}`,
+      tone:sheetStatus==='linked'?'success':sheetStatus==='partial'?'warn':'danger',
+    },
+    {
+      key:'data',
+      label:'Data',
+      value:`${elementCount.toLocaleString()} elements`,
+      detail:`${nodeCount.toLocaleString()} nodes · JSON/CSV handoff`,
+      tone:resolveDeliveryReceiptTone(dataReady),
+    },
+    {
+      key:'evidence',
+      label:'Evidence',
+      value:totalMetricCount?`${sourceMetricCount}/${totalMetricCount} source`:'pending',
+      detail:`${estimateMetricCount} estimate-labelled metrics`,
+      tone:evidenceReady?(estimateMetricCount?'warn':'success'):'danger',
+    },
+  ];
+  return{
+    schemaVersion:'structure-viewer-delivery-review-receipt.v1',
+    status,
+    sheetStatus,
+    sheetCount,
+    deepLinkReady,
+    reportReady,
+    dataReady,
+    evidenceReady,
+    drawingReviewVerdict:drawingReview.verdict||'needs_review',
+    rows,
+  };
+}
+function renderDeliveryReviewReceipt(cockpitModel=null){
+  const panel=document.getElementById('delivery-review-receipt');
+  if(!(panel instanceof HTMLElement))return;
+  const receipt=buildDeliveryReviewReceiptModel(cockpitModel);
+  panel.dataset.deliveryStatus=receipt.status;
+  panel.dataset.deliverySheetStatus=receipt.sheetStatus;
+  panel.dataset.deliverySheetCount=String(receipt.sheetCount);
+  panel.dataset.deliveryViewerLinkReady=receipt.deepLinkReady?'true':'false';
+  panel.dataset.deliveryReportReady=receipt.reportReady?'true':'false';
+  panel.dataset.deliveryDataReady=receipt.dataReady?'true':'false';
+  panel.dataset.deliveryEvidenceReady=receipt.evidenceReady?'true':'false';
+  panel.dataset.deliveryDrawingReview=receipt.drawingReviewVerdict;
+  panel.innerHTML=receipt.rows.map(row=>{
+    const tone=normalizeAnalysisTone(row.tone||'neutral');
+    return `<span class="delivery-review-receipt__row delivery-review-receipt__row--${escapeHtml(tone)}" data-delivery-review-row="${escapeHtml(row.key)}">
+      <b>${escapeHtml(row.label)}</b>
+      <strong>${escapeHtml(row.value)}</strong>
+      <em>${escapeHtml(row.detail)}</em>
+    </span>`;
+  }).join('');
+}
 function renderOptimizationSummaryPanel(cockpitModel=null){
   const panel=document.getElementById('optimization-summary-panel');
   if(!(panel instanceof HTMLElement))return;
@@ -4254,14 +4932,35 @@ function renderOptimizationSummaryPanel(cockpitModel=null){
       :formatCockpitValue(row.after,{digits:0,unit:row.unit});
     const delta=safeNumber(row.deltaPct,0);
     const deltaTone=delta<=0?'success':'danger';
+    const beforeValue=Math.max(safeNumber(row.before,0),1e-6);
+    const afterValue=Math.max(safeNumber(row.after,0),0);
+    const afterWidth=Math.max(3,Math.min(afterValue/beforeValue,1.15)*100).toFixed(1);
+    const savedValue=Math.max(beforeValue-afterValue,0);
+    const saved=row.valueFormatter==='money'
+      ?formatCockpitValue(savedValue,{money:true})
+      :formatCockpitValue(savedValue,{digits:0,unit:row.unit});
+    const savedLabel=savedValue>0?`Saved ${saved}`:'No reduction';
+    const metricLabel=String(row.metricLabel||row.label||'Metric').trim();
+    const sourceLabel=String(row.sourceLabel||'Model evidence').trim();
     return `
-    <article class="optimization-summary-card">
-      <div class="optimization-summary-card__label">${escapeHtml(row.label)}</div>
-      <div class="optimization-summary-card__values">
-        <span><small>Before</small>${escapeHtml(before)}</span>
-        <span><small>After</small>${escapeHtml(after)}</span>
+    <article class="optimization-summary-card" data-optimization-summary-key="${escapeHtml(row.key)}" data-optimization-delta="${delta.toFixed(2)}">
+      <div class="optimization-summary-card__top">
+        <div class="optimization-summary-card__label">${escapeHtml(row.label)}</div>
+        <span class="optimization-summary-card__source">${escapeHtml(sourceLabel)}</span>
       </div>
-      <strong class="optimization-summary-delta optimization-summary-delta--${escapeHtml(deltaTone)}">${delta>=0?'+':''}${delta.toFixed(1)} %</strong>
+      <div class="optimization-summary-card__values">
+        <span><small>Before</small><strong>${escapeHtml(before)}</strong></span>
+        <span><small>After</small><strong>${escapeHtml(after)}</strong></span>
+      </div>
+      <div class="optimization-summary-bars" aria-hidden="true">
+        <i class="optimization-summary-bar optimization-summary-bar--before"></i>
+        <i class="optimization-summary-bar optimization-summary-bar--after optimization-summary-bar--${escapeHtml(deltaTone)}" style="width:${afterWidth}%"></i>
+      </div>
+      <div class="optimization-summary-card__foot">
+        <strong class="optimization-summary-delta optimization-summary-delta--${escapeHtml(deltaTone)}">${delta>=0?'+':''}${delta.toFixed(1)} %</strong>
+        <span class="optimization-summary-saved">${escapeHtml(savedLabel)}</span>
+        <span class="optimization-summary-metric">${escapeHtml(metricLabel)}</span>
+      </div>
     </article>`;
   }).join('');
 }
@@ -4273,32 +4972,907 @@ function renderCriticalMembersPanel(cockpitModel=null){
     panel.innerHTML='<div class="panel-placeholder">Critical member ranking appears when utilization data is available.</div>';
     return;
   }
+  const selection=getCurrentSelectionState();
+  const selectedMemberId=selection.memberId;
+  const selectedMemberIds=new Set(normalizeSelectionValues(selection.memberIds||selectedMemberId));
   panel.innerHTML=`
     <div class="critical-members-row critical-members-row--header">
-      <span>ID</span><span>Story</span><span>Type</span><span>Ratio</span><span>Drift</span><span>Status</span><span>Recommended Change</span>
+      <span>ID</span><span>Story</span><span>Type</span><span>D/C Ratio</span><span>Drift</span><span>Status</span><span>Recommended Change</span>
     </div>
     ${rows.map(row=>{
-      const status=normalizeSelectionValue(row.status||'ok')||'ok';
+      const status=normalizeSelectionValue(row.statusKey||row.status||'ok').toLowerCase()||'ok';
       const ratio=safeNumber(row.ratio,0);
       const drift=safeNumber(row.driftContributionPct,0);
-      const barWidth=Math.max(4,Math.min(ratio,1.1)/1.1*100).toFixed(1);
+      const barWidth=safeNumber(row.ratioPercent,Math.max(4,Math.min(ratio,1.1)/1.1*100)).toFixed(1);
+      const driftWidth=safeNumber(row.driftPercent,Math.max(3,Math.min(drift,16)/16*100)).toFixed(1);
+      const limitLeft=(1/1.1*100).toFixed(1);
+      const statusTone=normalizeAnalysisTone(row.statusTone||status);
+      const driftTone=normalizeAnalysisTone(row.driftTone||'neutral');
+      const actionTone=normalizeAnalysisTone(row.actionTone||'neutral');
+      const rowMemberId=normalizeSelectionValue(row.id);
+      const selected=Boolean(rowMemberId&&selectedMemberIds.has(rowMemberId));
+      const primary=Boolean(rowMemberId&&rowMemberId===selectedMemberId);
       return `
-      <button type="button" class="critical-members-row critical-members-row--${escapeHtml(status)}" data-critical-member-id="${escapeHtml(row.id)}">
+      <button type="button" class="critical-members-row critical-members-row--${escapeHtml(status)} critical-members-row--tone-${escapeHtml(statusTone)}${selected?' is-selected':''}${primary?' is-primary':''}" data-critical-member-id="${escapeHtml(row.id)}" data-critical-status="${escapeHtml(status)}" data-critical-ratio="${ratio.toFixed(3)}" aria-selected="${selected?'true':'false'}" aria-pressed="${selected?'true':'false'}" title="${escapeHtml(row.id)} - D/C ${ratio.toFixed(2)} - ${escapeHtml(row.ratioMarginLabel||'Limit 1.00')}">
         <span class="critical-members-id">${escapeHtml(row.id)}</span>
         <span>${escapeHtml(row.story)}</span>
         <span>${escapeHtml(row.type)}</span>
         <span class="critical-member-ratio">
-          <strong>${ratio.toFixed(2)}</strong>
-          <i style="width:${barWidth}%"></i>
+          <span class="critical-member-ratio__head"><b>D/C</b><strong>${ratio.toFixed(2)}</strong></span>
+          <span class="critical-member-ratio__track" aria-hidden="true"><i style="width:${barWidth}%"></i><em style="left:${limitLeft}%"></em></span>
+          <small>${escapeHtml(row.ratioMarginLabel||'Limit 1.00')}</small>
         </span>
-        <span>${drift.toFixed(1)}%</span>
-        <span class="critical-member-status">${escapeHtml(row.status)}</span>
-        <span>${escapeHtml(row.recommendedChange)}</span>
+        <span class="critical-member-drift critical-member-drift--${escapeHtml(driftTone)}">
+          <b>${drift.toFixed(1)}%</b>
+          <i aria-hidden="true"><em style="width:${driftWidth}%"></em></i>
+        </span>
+        <span class="critical-member-status critical-member-status--${escapeHtml(statusTone)}">${escapeHtml(row.status)}</span>
+        <span class="critical-member-action critical-member-action--${escapeHtml(actionTone)}">${escapeHtml(row.recommendedChange)}</span>
       </button>`;
     }).join('')}`;
   panel.querySelectorAll('[data-critical-member-id]').forEach(button=>{
-    button.addEventListener('click',()=>focusMemberSearchResult(button.getAttribute('data-critical-member-id')||''));
+    button.addEventListener('click',event=>focusMemberSearchResult(button.getAttribute('data-critical-member-id')||'',{
+      mode:event.ctrlKey||event.metaKey?'toggle':'replace',
+    }));
   });
+  syncCriticalMemberReviewFocus();
+  positionStageResultCalloutDock();
+}
+function formatMaterialCatalogNumber(value,{digits=0,unit='',allowZero=false}={}){
+  const number=safeNumber(value,NaN);
+  if(!Number.isFinite(number)||(!allowZero&&number===0))return'--';
+  const abs=Math.abs(number);
+  const label=abs>=1e6||abs<0.001
+    ?number.toExponential(2)
+    :number.toLocaleString('en-US',{maximumFractionDigits:digits,minimumFractionDigits:digits});
+  return unit?`${label} ${unit}`:label;
+}
+const MATERIAL_FAMILY_ONTOLOGY=[
+  {family:'rigid_link',label:'Rigid link',patterns:[/\brigid\b/i,/\bdummy\b/i,/\brlink\b/i,/\bmassless\b/i]},
+  {family:'prestressing',label:'Prestressing tendon',patterns:[/\btendon\b/i,/\bstrand\b/i,/\bswpc\b/i,/\bpc\s*(bar|wire|strand)\b/i,/\bps\s*(bar|wire|strand)\b/i]},
+  {family:'rebar',label:'Rebar',patterns:[/\brebar\b/i,/\breinforc/i,/\bksd\s*3504\b/i,/\bsd[3-7]\d{2}\b/i,/\bhd[0-9]+\b/i,/\bdb?[0-9]{2,}\b/i]},
+  {family:'cable',label:'Cable',patterns:[/\bcable\b/i,/\bwire\s*rope\b/i,/\bstay\b/i,/\bsuspension\b/i]},
+  {family:'bolt_anchor',label:'Bolt / anchor',patterns:[/\bbolt\b/i,/\banchor\b/i,/\bf10t\b/i,/\ba325\b/i,/\ba490\b/i,/\bstud\b/i,/\brock\s*bolt\b/i,/\bsegment\s*bolt\b/i]},
+  {family:'weld',label:'Weld',patterns:[/\bweld\b/i,/\bfillet\b/i,/\bgroove\b/i]},
+  {family:'frp',label:'FRP / composite retrofit',patterns:[/\bfrp\b/i,/\bcfrp\b/i,/\bgfrp\b/i,/\bcarbon\s*fiber\b/i,/\bglass\s*fiber\b/i]},
+  {family:'formwork_shoring',label:'Formwork / shoring',patterns:[/\bform[-\s]*work\b/i,/\bfalse[-\s]*work\b/i,/\bshoring\b/i,/\btemporary\s*support\b/i]},
+  {family:'timber',label:'Timber',patterns:[/\btimber\b/i,/\bwood\b/i,/\bglulam\b/i,/\bclt\b/i,/\blvl\b/i,/\bplywood\b/i]},
+  {family:'screed_topping',label:'Screed / topping',patterns:[/\bscreed\b/i,/\btopping\b/i,/\bfloor\s*hardener\b/i,/\bself[-\s]*level(?:ing|ling)\b/i,/\blevel(?:ing|ling)\s*mortar\b/i]},
+  {family:'masonry',label:'Masonry',patterns:[/\bmasonry\b/i,/\bbrick\b/i,/\bcmu\b/i,/\bblock\b/i,/\bmortar\b/i]},
+  {family:'ground_improvement',label:'Ground improvement',patterns:[/\bground\s*improvement\b/i,/\bsoil[-\s]*cement\b/i,/\bjet\s*grout\b/i,/\bdcm\b/i,/\bdsm\b/i,/\bdeep\s*mix/i,/\bscp\b/i,/\bvibro[-\s]*(stone|replacement|compaction)\b/i]},
+  {family:'grout',label:'Grout / backfill',patterns:[/\bgrout\b/i,/\bnon[-\s]*shrink\b/i,/\bbackfill\b/i,/\bcementitious\s*fill\b/i]},
+  {family:'waterproofing',label:'Waterproofing / waterstop',patterns:[/\bwaterproof(?:ing)?\b/i,/\bwater[-\s]*stop\b/i,/\bbentonite\b/i,/\bsheet\s*membrane\b/i,/\bliquid\s*membrane\b/i,/\bpvc\s*membrane\b/i,/\btpo\b/i,/\bepdm\b/i]},
+  {family:'roofing',label:'Roofing',patterns:[/\broof(?:ing)?\b/i,/\bshingle\b/i,/\broof\s*tile\b/i,/\broof\s*membrane\b/i]},
+  {family:'asphalt',label:'Asphalt / bituminous',patterns:[/\basphalt\b/i,/\bbitumen\b/i,/\bbituminous\b/i,/\bpavement\b/i]},
+  {family:'insulation',label:'Insulation',patterns:[/\binsulat/i,/\beps\b/i,/\bxps\b/i,/\bpolyurethane\s*foam\b/i,/\bpu\s*foam\b/i,/\bpir\b/i,/\bmineral\s*wool\b/i,/\brock\s*wool\b/i,/\bglass\s*wool\b/i]},
+  {family:'fireproofing',label:'Fireproofing',patterns:[/\bfire[-\s]*proof/i,/\bfire[-\s]*stop/i,/\bintumescent\b/i,/\bsfrm\b/i,/\bsprayed\s*fire/i]},
+  {family:'coating',label:'Coating / corrosion protection',patterns:[/\bcoating\b/i,/\bpaint\b/i,/\bprimer\b/i,/\bgalvani[sz](?:ed|ing)?\b/i,/\bzinc[-\s]*rich\b/i,/\banti[-\s]*corrosion\b/i]},
+  {family:'sealant_joint',label:'Sealant / joint filler',patterns:[/\bsealant\b/i,/\bcaulk\b/i,/\bjoint\s*filler\b/i,/\bbacker\s*rod\b/i,/\bfiller\s*board\b/i]},
+  {family:'gypsum_board',label:'Gypsum / board',patterns:[/\bgypsum\b/i,/\bdrywall\b/i,/\bplaster\s*board\b/i,/\bgwb\b/i,/\bcement\s*board\b/i,/\bfiber\s*cement\b/i]},
+  {family:'stone_tile',label:'Stone / tile',patterns:[/\bstone\b/i,/\bmarble\b/i,/\btile\b/i,/\bterrazzo\b/i]},
+  {family:'aluminum',label:'Aluminum',patterns:[/\balum/i,/\b6061\b/i,/\b6063\b/i,/\b5083\b/i]},
+  {family:'stainless_steel',label:'Stainless steel',patterns:[/\bstainless\b/i,/\bsus\s*[0-9]+\b/i,/\bss\s*304\b/i,/\bss\s*316\b/i]},
+  {family:'cold_formed_steel',label:'Cold formed steel',patterns:[/\bcold[-\s]*formed\b/i,/\bcfs\b/i,/\blgs\b/i,/\blight\s*gauge\b/i]},
+  {family:'metal_deck',label:'Metal deck',patterns:[/\bdeck\b/i,/\bmetal\s*deck\b/i,/\bcomposite\s*deck\b/i]},
+  {family:'composite',label:'Composite',patterns:[/\bsrc\b/i,/\bcft\b/i,/\bcomposite\b/i,/\bfilled\s*tube\b/i]},
+  {family:'facade_panel',label:'Facade / cladding panel',patterns:[/\bcurtain\s*wall\b/i,/\bfacade\b/i,/\bcladding\b/i,/\baluminum\s*composite\s*panel\b/i,/\bacm\b/i,/\bacp\b/i,/\bgrc\b/i,/\bgfrc\b/i]},
+  {family:'sleeve_embed',label:'Sleeve / embedded insert',patterns:[/\bpipe\s*sleeve\b/i,/\bsleeve\b/i,/\bcast[-\s]*in\s*insert\b/i,/\bembed(?:ded)?\s*insert\b/i,/\bhanger\s*insert\b/i]},
+  {family:'rail_fastener',label:'Rail fastener',patterns:[/\bfastener\b/i,/\bpandrol\b/i,/\bclip\b/i,/\btoe\s*load\b/i]},
+  {family:'rail_sleeper',label:'Rail sleeper / tie',patterns:[/\bsleeper\b/i,/\brail\s*tie\b/i,/\bconcrete\s*tie\b/i,/\btimber\s*tie\b/i]},
+  {family:'rail_steel',label:'Rail steel',patterns:[/\brail\b/i,/\buic\s*60\b/i,/\bkrs[-_\s]*rail\b/i]},
+  {family:'steel',label:'Structural steel',patterns:[/\bsteel\b/i,/\bsm\s*[0-9]+\b/i,/\bsm[0-9]+\b/i,/\bss\s*[0-9]+\b/i,/\bss[0-9]+\b/i,/\bsn\s*[0-9]+\b/i,/\bsn[0-9]+\b/i,/\bq[0-9]{3}\b/i,/\bhrb[0-9]+\b/i,/\ba36\b/i,/\ba572\b/i,/\ba992\b/i]},
+  {family:'concrete',label:'Concrete',patterns:[/\bconcrete\b/i,/\bconc\b/i,/\buhpc\b/i,/\bhpc\b/i,/\blwac\b/i,/\bshotcrete\b/i,/\bprecast\b/i,/\bsegment\s*concrete\b/i,/\bc[0-9]{2,}\b/i,/\bfck\s*[0-9]+\b/i]},
+  {family:'seismic_isolator',label:'Seismic isolator',patterns:[/\bisolat/i,/\bfriction\s*pendulum\b/i,/\bfps\b/i,/\blead\s*rubber\b/i,/\blrb\b/i]},
+  {family:'elastomeric_bearing',label:'Elastomeric bearing',patterns:[/\belastomer/i,/\brubber\s*bearing\b/i,/\bptfe\s*bearing\b/i,/\bneoprene\b/i]},
+  {family:'pot_spherical_bearing',label:'Pot / spherical bearing',patterns:[/\bpot\s*bearing\b/i,/\bspherical\s*bearing\b/i,/\bdisk\s*bearing\b/i,/\bdisc\s*bearing\b/i]},
+  {family:'resilient_pad',label:'Resilient pad',patterns:[/\bresilient\s*pad\b/i,/\bpad\b/i,/\beva\b/i,/\bunder[-\s]*sleeper\b/i]},
+  {family:'expansion_joint',label:'Expansion joint',patterns:[/\bexpansion\s*joint\b/i,/\bmodular\s*joint\b/i,/\bfinger\s*joint\b/i,/\bbridge\s*joint\b/i]},
+  {family:'damper',label:'Damper / energy device',patterns:[/\bdamper\b/i,/\bviscous\b/i,/\bviscoelastic\b/i,/\btmd\b/i,/\btuned\s*mass\b/i]},
+  {family:'spring_link',label:'Spring / nonlinear link',patterns:[/\bspring\b/i,/\bgap\b/i,/\buplift\b/i,/\bcompression[-\s]*only\b/i,/\bp[-\s]*y\b/i,/\bq[-\s]*z\b/i,/\bt[-\s]*z\b/i]},
+  {family:'mass',label:'Mass / inertia',patterns:[/\blumped\s*mass\b/i,/\binertia\b/i,/\bmass\b/i]},
+  {family:'glass',label:'Glass',patterns:[/\bglass\b/i,/\bglazing\b/i]},
+  {family:'ballast',label:'Ballast',patterns:[/\bballast\b/i,/\bgranite\s*ballast\b/i]},
+  {family:'soil',label:'Soil / geotechnical',patterns:[/\bsoil\b/i,/\bclay\b/i,/\bsand\b/i,/\bgravel\b/i,/\brock\b/i]},
+  {family:'geosynthetic',label:'Geosynthetic / membrane',patterns:[/\bgeotextile\b/i,/\bgeomembrane\b/i,/\bgeogrid\b/i,/\bhdpe\s*membrane\b/i,/\bwaterproof(?:ing)?\s*membrane\b/i]},
+  {family:'adhesive_resin',label:'Adhesive / resin',patterns:[/\badhesive\b/i,/\bepoxy\b/i,/\bresin\b/i,/\bbonding\s*agent\b/i,/\binjection\s*resin\b/i,/\bchemical\s*anchor\b/i]},
+];
+const MATERIAL_FAMILY_LABEL_BY_ID=new Map(MATERIAL_FAMILY_ONTOLOGY.map(row=>[row.family,row.label]));
+function classifyFallbackMaterialFamily(row={}){
+  const rawTokens=Array.isArray(row.raw_tokens)?row.raw_tokens:[];
+  const text=[
+    row.material_name,row.material_grade,row.material_label,row.name,row.grade,row.type,row.material_type,row.code,
+    ...rawTokens,
+  ].map(value=>normalizeSelectionValue(value)).filter(Boolean).join(' ');
+  const matched=MATERIAL_FAMILY_ONTOLOGY.find(definition=>definition.patterns.some(pattern=>pattern.test(text)));
+  if(!matched)return{family:'unclassified',label:'Unclassified',source:'unclassified',token:''};
+  return{family:matched.family,label:matched.label,source:'ontology',token:text};
+}
+function inferFallbackMaterialFamily(row={}){
+  return classifyFallbackMaterialFamily(row).family;
+}
+function buildFallbackMaterialRowsFromElements(elements=[]){
+  const rowsByKey=new Map();
+  (Array.isArray(elements)?elements:[]).forEach(element=>{
+    const materialId=normalizeSelectionValue(element?.material_id);
+    const materialName=normalizeSelectionValue(element?.material_name||element?.material||element?.material_label);
+    const materialGrade=normalizeSelectionValue(element?.material_grade);
+    const key=materialId||materialName||materialGrade;
+    if(!key)return;
+    const classification=classifyFallbackMaterialFamily({
+      material_name:materialName,
+      material_grade:materialGrade,
+      material_label:normalizeSelectionValue(element?.material_label),
+      raw_tokens:[],
+    });
+    const elementMaterialFamily=normalizeSelectionValue(element?.material_family);
+    const row=rowsByKey.get(key)||{
+      material_id:materialId||key,
+      material_name:materialName||'Material',
+      material_grade:materialGrade||'--',
+      material_label:materialName&&materialGrade&&materialGrade!=='--'?`${materialName} ${materialGrade}`:(materialName||materialGrade||key),
+      material_family:elementMaterialFamily&&elementMaterialFamily!=='unclassified'?elementMaterialFamily:classification.family,
+      material_family_label:normalizeSelectionValue(element?.material_family_label)||classification.label,
+      material_family_source:normalizeSelectionValue(element?.material_family_source)||classification.source,
+      material_family_known:classification.family!=='unclassified',
+      usage_count:0,
+      element_family_mix:{},
+      elastic_modulus:safeNumber(element?.material_elastic_modulus,0),
+      poisson_ratio:safeNumber(element?.material_poisson_ratio,0),
+      density:safeNumber(element?.material_density,0),
+      source_status:normalizeSelectionValue(element?.material_source_status)||'element_inferred',
+      color:normalizeSelectionValue(element?.material_color||element?.color),
+      section_usage_by_key:new Map(),
+    };
+    row.usage_count+=1;
+    const family=normalizeElementType(element?.type);
+    row.element_family_mix[family]=safeNumber(row.element_family_mix[family],0)+1;
+    const sectionId=normalizeSelectionValue(element?.section_id||element?.section);
+    if(sectionId){
+      const sectionEntry=row.section_usage_by_key.get(sectionId)||{
+        section_id:sectionId,
+        section_label:normalizeSelectionValue(element?.section)||sectionId,
+        section_family:normalizeSelectionValue(element?.section_family)||'--',
+        section_shape:normalizeSelectionValue(element?.section_shape)||'--',
+        usage_count:0,
+        member_sample_id:normalizeSelectionValue(element?.member_id),
+        element_sample_id:normalizeSelectionValue(element?.id),
+        element_family_mix:{},
+      };
+      sectionEntry.usage_count+=1;
+      sectionEntry.element_family_mix[family]=safeNumber(sectionEntry.element_family_mix[family],0)+1;
+      if(!sectionEntry.member_sample_id)sectionEntry.member_sample_id=normalizeSelectionValue(element?.member_id);
+      if(!sectionEntry.element_sample_id)sectionEntry.element_sample_id=normalizeSelectionValue(element?.id);
+      row.section_usage_by_key.set(sectionId,sectionEntry);
+    }
+    const rowClassification=classifyFallbackMaterialFamily(row);
+    const currentFamily=normalizeSelectionValue(row.material_family);
+    row.material_family=currentFamily&&currentFamily!=='unclassified'?currentFamily:rowClassification.family;
+    row.material_family_label=normalizeSelectionValue(row.material_family_label)||rowClassification.label;
+    row.material_family_source=normalizeSelectionValue(row.material_family_source)||rowClassification.source;
+    row.material_family_known=row.material_family!=='unclassified';
+    rowsByKey.set(key,row);
+  });
+  return [...rowsByKey.values()].map(row=>{
+    const sectionUsageSummary=[...(row.section_usage_by_key instanceof Map?row.section_usage_by_key.values():[])]
+      .map(sectionRow=>({
+        section_id:normalizeSelectionValue(sectionRow.section_id),
+        section_label:normalizeSelectionValue(sectionRow.section_label||sectionRow.section_id)||'--',
+        section_family:normalizeSelectionValue(sectionRow.section_family)||'--',
+        section_shape:normalizeSelectionValue(sectionRow.section_shape)||'--',
+        usage_count:Math.max(0,Math.round(safeNumber(sectionRow.usage_count,0))),
+        member_sample_id:normalizeSelectionValue(sectionRow.member_sample_id),
+        element_sample_id:normalizeSelectionValue(sectionRow.element_sample_id),
+        element_family_mix_label:Object.entries(sectionRow.element_family_mix||{})
+          .sort((a,b)=>safeNumber(b[1],0)-safeNumber(a[1],0)||a[0].localeCompare(b[0]))
+          .map(([familyKey,count])=>`${familyKey}:${count}`)
+          .join(', ')||'--',
+      }))
+      .sort((a,b)=>b.usage_count-a.usage_count||a.section_label.localeCompare(b.section_label)||a.section_id.localeCompare(b.section_id))
+      .slice(0,12);
+    const {section_usage_by_key:sectionUsageByKey,...publicRow}=row;
+    return{
+      ...publicRow,
+      section_usage_summary:sectionUsageSummary,
+      element_family_mix_label:Object.entries(row.element_family_mix)
+      .sort((a,b)=>safeNumber(b[1],0)-safeNumber(a[1],0)||a[0].localeCompare(b[0]))
+      .map(([family,count])=>`${family}:${count}`)
+      .join(', ')||'--',
+    };
+  }).sort((a,b)=>b.usage_count-a.usage_count||a.material_label.localeCompare(b.material_label));
+}
+function buildMaterialSectionScheduleRows(materialRows=[]){
+  return (Array.isArray(materialRows)?materialRows:[]).flatMap(materialRow=>{
+    const sectionRows=Array.isArray(materialRow.section_usage_summary)?materialRow.section_usage_summary:[];
+    return sectionRows.map(sectionRow=>({
+      schedule_id:`${normalizeSelectionValue(materialRow.material_id)||'--'}::${normalizeSelectionValue(sectionRow.section_id)||'--'}`,
+      material_id:normalizeSelectionValue(materialRow.material_id)||'--',
+      material_label:normalizeSelectionValue(materialRow.material_label)||normalizeSelectionValue(materialRow.material_name)||'Material',
+      material_family:normalizeSelectionValue(materialRow.material_family)||'--',
+      material_color:normalizeSelectionValue(materialRow.color),
+      section_id:normalizeSelectionValue(sectionRow.section_id)||'--',
+      section_label:normalizeSelectionValue(sectionRow.section_label||sectionRow.section_name||sectionRow.section_id)||'--',
+      section_family:normalizeSelectionValue(sectionRow.section_family)||'--',
+      section_shape:normalizeSelectionValue(sectionRow.section_shape)||'--',
+      usage_count:Math.max(0,Math.round(safeNumber(sectionRow.usage_count,0))),
+      member_sample_id:normalizeSelectionValue(sectionRow.member_sample_id),
+      element_sample_id:normalizeSelectionValue(sectionRow.element_sample_id),
+      element_family_mix_label:normalizeSelectionValue(sectionRow.element_family_mix_label)||'--',
+    }));
+  })
+    .filter(row=>row.material_id!=='--'&&row.section_id!=='--')
+    .sort((a,b)=>b.usage_count-a.usage_count||a.material_label.localeCompare(b.material_label)||a.section_label.localeCompare(b.section_label));
+}
+function parseMaterialSectionIsolationToken(value=''){
+  const parts=normalizeSelectionValue(value).split('::');
+  return{
+    materialId:normalizeSelectionValue(parts[0]),
+    sectionId:normalizeSelectionValue(parts.slice(1).join('::')),
+  };
+}
+function elementMatchesMaterialSection(element={},materialId='',sectionId=''){
+  const normalizedMaterialId=normalizeSelectionValue(materialId);
+  const normalizedSectionId=normalizeSelectionValue(sectionId);
+  if(!normalizedMaterialId||!normalizedSectionId)return false;
+  const elementMaterialId=normalizeSelectionValue(element?.material_id);
+  const elementSectionId=normalizeSelectionValue(element?.section_id||element?.section);
+  return elementMaterialId===normalizedMaterialId&&elementSectionId===normalizedSectionId;
+}
+function elementMatchesSectionId(element={},sectionId=''){
+  const normalizedSectionId=normalizeSelectionValue(sectionId);
+  if(!normalizedSectionId)return false;
+  return normalizeSelectionValue(element?.section_id||element?.section)===normalizedSectionId;
+}
+function buildSectionScheduleRows(sectionRows=[]){
+  return (Array.isArray(sectionRows)?sectionRows:[])
+    .map(row=>{
+      const materialUsageRows=Array.isArray(row.material_usage_summary)?row.material_usage_summary:[];
+      const primaryMaterial=materialUsageRows[0]||{};
+      const materialMixLabel=materialUsageRows
+        .slice(0,2)
+        .map(materialRow=>`${normalizeSelectionValue(materialRow.material_label||materialRow.material_id)||'Material'}:${safeNumber(materialRow.usage_count,0).toLocaleString()}`)
+        .join(' · ')||'--';
+      return{
+        section_id:normalizeSelectionValue(row.section_id)||'--',
+        section_label:normalizeSelectionValue(row.display_label||row.section_name||row.section_id)||'--',
+        section_family:normalizeSelectionValue(row.inferred_family)||'--',
+        section_shape:normalizeSelectionValue(row.inferred_shape)||'--',
+        usage_count:Math.max(0,Math.round(safeNumber(row.usage_count,0))),
+        material_mix_label:materialMixLabel,
+        material_usage_count:materialUsageRows.length,
+        primary_material_label:normalizeSelectionValue(primaryMaterial.material_label||primaryMaterial.material_id)||'--',
+        primary_material_color:normalizeSelectionValue(primaryMaterial.material_color),
+      };
+    })
+    .filter(row=>row.section_id!=='--'&&row.usage_count>0)
+    .sort((a,b)=>b.usage_count-a.usage_count||a.section_label.localeCompare(b.section_label)||a.section_id.localeCompare(b.section_id));
+}
+function buildMaterialFamilyCoverageRows(materialRows=[],metaCoverage=null){
+  const coverageRows=Array.isArray(metaCoverage?.rows)?metaCoverage.rows:[];
+  if(coverageRows.length){
+    return coverageRows.map(row=>({
+      family:normalizeSelectionValue(row.family)||'unclassified',
+      label:normalizeSelectionValue(row.label)||MATERIAL_FAMILY_LABEL_BY_ID.get(normalizeSelectionValue(row.family))||normalizeSelectionValue(row.family)||'Unclassified',
+      material_count:Math.max(0,Math.round(safeNumber(row.material_count,0))),
+      used_material_count:Math.max(0,Math.round(safeNumber(row.used_material_count,0))),
+      usage_count:Math.max(0,Math.round(safeNumber(row.usage_count,0))),
+      missing_definition_count:Math.max(0,Math.round(safeNumber(row.missing_definition_count,0))),
+      unclassified_count:Math.max(0,Math.round(safeNumber(row.unclassified_count,0))),
+      sample_material_label:normalizeSelectionValue(row.sample_material_label)||'--',
+    })).sort((a,b)=>b.usage_count-a.usage_count||b.material_count-a.material_count||a.family.localeCompare(b.family));
+  }
+  const rowsByFamily=new Map();
+  (Array.isArray(materialRows)?materialRows:[]).forEach(row=>{
+    const family=normalizeSelectionValue(row.material_family)||'unclassified';
+    const entry=rowsByFamily.get(family)||{
+      family,
+      label:normalizeSelectionValue(row.material_family_label)||MATERIAL_FAMILY_LABEL_BY_ID.get(family)||family,
+      material_count:0,
+      used_material_count:0,
+      usage_count:0,
+      missing_definition_count:0,
+      unclassified_count:0,
+      sample_material_label:'',
+    };
+    entry.material_count+=1;
+    if(safeNumber(row.usage_count,0)>0)entry.used_material_count+=1;
+    entry.usage_count+=safeNumber(row.usage_count,0);
+    if(normalizeSelectionValue(row.source_status)==='missing_material_definition')entry.missing_definition_count+=1;
+    if(family==='unclassified')entry.unclassified_count+=1;
+    if(!entry.sample_material_label)entry.sample_material_label=normalizeSelectionValue(row.material_label||row.material_name||row.material_id);
+    rowsByFamily.set(family,entry);
+  });
+  return [...rowsByFamily.values()].sort((a,b)=>b.usage_count-a.usage_count||b.material_count-a.material_count||a.family.localeCompare(b.family));
+}
+function buildMaterialMemberCatalogPanelModel(data=modelData||{}){
+  const meta=data?.meta&&typeof data.meta==='object'?data.meta:{};
+  const metaMaterialRows=Array.isArray(meta.material_catalog_summary)?meta.material_catalog_summary:[];
+  const fallbackRows=metaMaterialRows.length?[]:buildFallbackMaterialRowsFromElements(data?.elements||[]);
+  const materialRows=(metaMaterialRows.length?metaMaterialRows:fallbackRows).map(row=>{
+    const materialName=normalizeSelectionValue(row.material_name)||'Material';
+    const materialGrade=normalizeSelectionValue(row.material_grade)||'--';
+    const materialLabel=normalizeSelectionValue(row.material_label)||`${materialName} ${materialGrade!=='--'?materialGrade:''}`.trim();
+    const classification=classifyFallbackMaterialFamily({...row,material_name:materialName,material_grade:materialGrade,material_label:materialLabel});
+    const family=normalizeSelectionValue(row.material_family);
+    const resolvedFamily=family&&family!=='unclassified'?family:classification.family;
+    return{
+    material_id:normalizeSelectionValue(row.material_id)||'--',
+    material_name:materialName,
+    material_grade:materialGrade,
+    material_label:materialLabel,
+    material_family:resolvedFamily,
+    material_family_label:normalizeSelectionValue(row.material_family_label)||MATERIAL_FAMILY_LABEL_BY_ID.get(resolvedFamily)||classification.label||resolvedFamily,
+    material_family_source:normalizeSelectionValue(row.material_family_source)||classification.source,
+    material_family_known:resolvedFamily!=='unclassified',
+    usage_count:Math.max(0,Math.round(safeNumber(row.usage_count,0))),
+    element_family_mix_label:normalizeSelectionValue(row.element_family_mix_label)||'--',
+    elastic_modulus:safeNumber(row.elastic_modulus,0),
+    poisson_ratio:safeNumber(row.poisson_ratio,0),
+    density:safeNumber(row.density,0),
+    source_status:normalizeSelectionValue(row.source_status)||'missing_material_definition',
+    color:normalizeSelectionValue(row.color),
+    section_usage_summary:(Array.isArray(row.section_usage_summary)?row.section_usage_summary:[]).map(sectionRow=>({
+      section_id:normalizeSelectionValue(sectionRow.section_id)||'--',
+      section_label:normalizeSelectionValue(sectionRow.section_label||sectionRow.section_name||sectionRow.section_id)||'--',
+      section_family:normalizeSelectionValue(sectionRow.section_family)||'--',
+      section_shape:normalizeSelectionValue(sectionRow.section_shape)||'--',
+      usage_count:Math.max(0,Math.round(safeNumber(sectionRow.usage_count,0))),
+      member_sample_id:normalizeSelectionValue(sectionRow.member_sample_id),
+      element_sample_id:normalizeSelectionValue(sectionRow.element_sample_id),
+      element_family_mix_label:normalizeSelectionValue(sectionRow.element_family_mix_label)||'--',
+    })),
+  };
+  });
+  const sectionRows=(Array.isArray(meta.section_catalog_summary)?meta.section_catalog_summary:[]).map(row=>({
+    section_id:normalizeSelectionValue(row.section_id)||'--',
+    section_name:normalizeSelectionValue(row.section_name),
+    display_label:normalizeSelectionValue(row.display_label||row.section_name||row.section_id)||'--',
+    inferred_family:normalizeSelectionValue(row.inferred_family)||'--',
+    inferred_shape:normalizeSelectionValue(row.inferred_shape)||'--',
+    usage_count:Math.max(0,Math.round(safeNumber(row.usage_count,0))),
+    material_usage_summary:(Array.isArray(row.material_usage_summary)?row.material_usage_summary:[]).map(materialRow=>({
+      material_id:normalizeSelectionValue(materialRow.material_id)||'--',
+      material_label:normalizeSelectionValue(materialRow.material_label||materialRow.material_id)||'--',
+      material_family:normalizeSelectionValue(materialRow.material_family)||'--',
+      material_color:normalizeSelectionValue(materialRow.material_color),
+      usage_count:Math.max(0,Math.round(safeNumber(materialRow.usage_count,0))),
+      member_sample_id:normalizeSelectionValue(materialRow.member_sample_id),
+      element_sample_id:normalizeSelectionValue(materialRow.element_sample_id),
+      element_family_mix_label:normalizeSelectionValue(materialRow.element_family_mix_label)||'--',
+    })),
+  }));
+  const sectionFamilies=Array.isArray(meta.section_family_summary)?meta.section_family_summary:[];
+  const thicknessRows=Array.isArray(meta.thickness_catalog_summary)?meta.thickness_catalog_summary:[];
+  const rebarCodes=Array.isArray(meta.rebar_material_code_summary)?meta.rebar_material_code_summary:[];
+  const materialFamilyCoverageRows=buildMaterialFamilyCoverageRows(materialRows,meta.material_family_coverage_summary);
+  const materialCount=Math.max(0,Math.round(safeNumber(meta.material_count,materialRows.length)));
+  const usedMaterialCount=Math.max(0,Math.round(safeNumber(meta.used_material_count,materialRows.filter(row=>row.usage_count>0).length)));
+  const missingMaterialCount=materialRows.filter(row=>row.source_status==='missing_material_definition').length;
+  const materialFamilyCount=Math.max(0,Math.round(safeNumber(meta.material_family_count,materialFamilyCoverageRows.length)));
+  const knownMaterialFamilyCount=Math.max(0,Math.round(safeNumber(meta.known_material_family_count,materialFamilyCoverageRows.filter(row=>row.family!=='unclassified').length)));
+  const unclassifiedMaterialCount=Math.max(0,Math.round(safeNumber(meta.unclassified_material_count,materialRows.filter(row=>row.material_family==='unclassified').length)));
+  const materialFamilyOntologyCount=Math.max(
+    MATERIAL_FAMILY_ONTOLOGY.length,
+    Math.round(safeNumber(meta.material_family_ontology_count,meta.material_family_coverage_summary?.ontology_family_count||MATERIAL_FAMILY_ONTOLOGY.length))
+  );
+  const sectionCount=Math.max(0,Math.round(safeNumber(meta.section_count,sectionRows.length)));
+  const usedSectionCount=Math.max(0,Math.round(safeNumber(meta.used_section_count,sectionFamilies.reduce((sum,row)=>sum+safeNumber(row.section_count,0),0))));
+  const thicknessCount=Math.max(0,Math.round(safeNumber(meta.thickness_count,thicknessRows.length)));
+  const materialSectionScheduleRows=buildMaterialSectionScheduleRows(materialRows);
+  const materialSectionScheduleCount=Math.max(
+    0,
+    Math.round(safeNumber(meta.material_section_schedule_count,materialSectionScheduleRows.length))
+  );
+  const sectionScheduleRows=buildSectionScheduleRows(sectionRows);
+  const sectionMaterialScheduleCount=Math.max(
+    0,
+    Math.round(safeNumber(meta.section_material_schedule_count,sectionScheduleRows.length))
+  );
+  const status=materialRows.length&&missingMaterialCount===0?'ready':materialRows.length?'needs_review':'missing';
+  return{
+    schemaVersion:'structure-viewer-material-member-catalog.v1',
+    status,
+    materialCount,
+    usedMaterialCount,
+    missingMaterialCount,
+    materialFamilyCount,
+    knownMaterialFamilyCount,
+    unclassifiedMaterialCount,
+    materialFamilyOntologyCount,
+    sectionCount,
+    usedSectionCount,
+    thicknessCount,
+    materialSectionScheduleCount,
+    sectionMaterialScheduleCount,
+    materialRows,
+    materialFamilyCoverageRows,
+    materialSectionScheduleRows,
+    sectionScheduleRows,
+    sectionFamilies,
+    thicknessRows,
+    rebarCodes,
+  };
+}
+function renderMaterialMemberCatalogPanel(data=modelData||{}){
+  const panel=document.getElementById('material-member-catalog-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const catalog=buildMaterialMemberCatalogPanelModel(data);
+  panel.dataset.materialCatalogStatus=catalog.status;
+  panel.dataset.materialCount=String(catalog.materialCount);
+  panel.dataset.usedMaterialCount=String(catalog.usedMaterialCount);
+  panel.dataset.missingMaterialCount=String(catalog.missingMaterialCount);
+  panel.dataset.materialFamilyCount=String(catalog.materialFamilyCount);
+  panel.dataset.knownMaterialFamilyCount=String(catalog.knownMaterialFamilyCount);
+  panel.dataset.unclassifiedMaterialCount=String(catalog.unclassifiedMaterialCount);
+  panel.dataset.materialFamilyOntologyCount=String(catalog.materialFamilyOntologyCount);
+  panel.dataset.sectionCount=String(catalog.sectionCount);
+  panel.dataset.usedSectionCount=String(catalog.usedSectionCount);
+  panel.dataset.thicknessCount=String(catalog.thicknessCount);
+  panel.dataset.materialSectionScheduleCount=String(catalog.materialSectionScheduleCount);
+  panel.dataset.sectionMaterialScheduleCount=String(catalog.sectionMaterialScheduleCount);
+  if(!catalog.materialRows.length){
+    panel.innerHTML='<div class="panel-placeholder">Material catalog missing. Attach source material rows or keep the handoff explicitly labelled as incomplete.</div>';
+    return;
+  }
+  const topRows=catalog.materialRows.slice(0,10);
+  const scheduleRows=catalog.materialSectionScheduleRows.slice(0,8);
+  const sectionScheduleRows=catalog.sectionScheduleRows.slice(0,6);
+  const coverageRows=catalog.materialFamilyCoverageRows.slice(0,12);
+  const hiddenCoverageCount=Math.max(0,catalog.materialFamilyCoverageRows.length-coverageRows.length);
+  const familyRows=catalog.sectionFamilies.slice(0,4);
+  const thicknessPreview=catalog.thicknessRows.slice(0,3);
+  panel.innerHTML=`
+    <div class="material-catalog-summary" data-material-catalog-summary>
+      <span><b>${catalog.materialCount.toLocaleString()}</b><em>materials</em></span>
+      <span><b>${catalog.sectionCount.toLocaleString()}</b><em>sections</em></span>
+      <span><b>${catalog.thicknessCount.toLocaleString()}</b><em>thickness</em></span>
+      <span><b>${catalog.usedMaterialCount.toLocaleString()}</b><em>used</em></span>
+      <span><b>${catalog.knownMaterialFamilyCount.toLocaleString()}</b><em>families</em></span>
+      <span><b>${catalog.materialFamilyOntologyCount.toLocaleString()}</b><em>ontology</em></span>
+      <span><b>${catalog.unclassifiedMaterialCount.toLocaleString()}</b><em>unclassified</em></span>
+    </div>
+    <div class="material-catalog-grid">
+      <div class="material-catalog-list" aria-label="Material usage catalog">
+        ${topRows.map(row=>{
+          const sourceTone=row.source_status==='source_material'&&row.material_family!=='unclassified'?'success':'warn';
+          const swatch=row.color?`<i class="material-catalog-row__swatch" style="background:${escapeHtml(row.color)}"></i>`:'<i class="material-catalog-row__swatch"></i>';
+          return `<button type="button" class="material-catalog-row material-catalog-row--${escapeHtml(sourceTone)}" data-material-catalog-row data-material-id="${escapeHtml(row.material_id)}" data-material-family="${escapeHtml(row.material_family)}" title="Focus first ${escapeHtml(row.material_label)} element">
+            ${swatch}
+            <span class="material-catalog-row__main">
+              <b>${escapeHtml(row.material_label)}</b>
+              <em>${escapeHtml(row.material_family_label||row.material_family)} · ${escapeHtml(row.element_family_mix_label)}</em>
+            </span>
+            <span class="material-catalog-row__props">
+              <strong>${row.usage_count.toLocaleString()}</strong>
+              <small>E ${escapeHtml(formatMaterialCatalogNumber(row.elastic_modulus,{digits:1}))}</small>
+              <small>ν ${escapeHtml(formatMaterialCatalogNumber(row.poisson_ratio,{digits:2,allowZero:true}))}</small>
+              <small>ρ ${escapeHtml(formatMaterialCatalogNumber(row.density,{digits:1,allowZero:true}))}</small>
+            </span>
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="material-family-coverage" data-material-family-coverage data-material-family-count="${catalog.materialFamilyCount}" data-known-material-family-count="${catalog.knownMaterialFamilyCount}" data-material-family-ontology-count="${catalog.materialFamilyOntologyCount}" data-unclassified-material-count="${catalog.unclassifiedMaterialCount}">
+        <div class="material-family-coverage__head">
+          <b>Material coverage</b>
+          <span>${catalog.knownMaterialFamilyCount.toLocaleString()} used families · ${catalog.materialFamilyOntologyCount.toLocaleString()} supported · ${catalog.unclassifiedMaterialCount.toLocaleString()} unclassified</span>
+        </div>
+        <div class="material-family-coverage__chips">
+          ${coverageRows.map(row=>{
+            const tone=row.family==='unclassified'||row.missing_definition_count?'warn':'ready';
+            return `<span class="material-family-chip material-family-chip--${escapeHtml(tone)}" data-material-family-chip data-material-family="${escapeHtml(row.family)}" title="${escapeHtml(row.sample_material_label)}">
+              <b>${escapeHtml(row.label||row.family)}</b>
+              <em>${safeNumber(row.used_material_count,0).toLocaleString()} mats · ${safeNumber(row.usage_count,0).toLocaleString()} elems</em>
+            </span>`;
+          }).join('')||'<span class="material-family-chip material-family-chip--warn"><b>Unclassified</b><em>No material family evidence</em></span>'}
+          ${hiddenCoverageCount?`<span class="material-family-chip material-family-chip--more" data-material-family-chip data-material-family="more"><b>+${hiddenCoverageCount.toLocaleString()} more</b><em>Used families hidden in dense rail</em></span>`:''}
+        </div>
+      </div>
+      <div class="material-section-schedule" data-material-section-schedule data-material-section-schedule-count="${catalog.materialSectionScheduleCount}">
+        <div class="material-section-schedule__head">
+          <b>Material schedule</b>
+          <span>${catalog.materialSectionScheduleCount.toLocaleString()} material-section links</span>
+        </div>
+        <div class="material-section-schedule__rows">
+          ${scheduleRows.map(row=>{
+            const swatch=row.material_color?`<i class="material-section-schedule__swatch" style="background:${escapeHtml(row.material_color)}"></i>`:'<i class="material-section-schedule__swatch"></i>';
+            const title=`Isolate ${row.material_label} on ${row.section_label}`;
+            return `<button type="button" class="material-section-schedule__row" data-material-section-row data-material-id="${escapeHtml(row.material_id)}" data-section-id="${escapeHtml(row.section_id)}" data-schedule-id="${escapeHtml(row.schedule_id)}" title="${escapeHtml(title)}">
+              ${swatch}
+              <span class="material-section-schedule__main">
+                <b>${escapeHtml(row.material_label)}</b>
+                <em>${escapeHtml(row.section_label)} · ${escapeHtml(row.section_family)} ${escapeHtml(row.section_shape)}</em>
+              </span>
+              <span class="material-section-schedule__meta">
+                <strong>${row.usage_count.toLocaleString()}</strong>
+                <small>${escapeHtml(row.element_family_mix_label)}</small>
+              </span>
+            </button>`;
+          }).join('')||'<div class="panel-placeholder">No material-section usage links available.</div>'}
+        </div>
+      </div>
+      <div class="section-schedule" data-section-schedule data-section-schedule-count="${catalog.sectionMaterialScheduleCount}">
+        <div class="section-schedule__head">
+          <b>Section schedule</b>
+          <span>${catalog.sectionMaterialScheduleCount.toLocaleString()} section-material links</span>
+        </div>
+        <div class="section-schedule__rows">
+          ${sectionScheduleRows.map(row=>{
+            const swatch=row.primary_material_color?`<i class="section-schedule__swatch" style="background:${escapeHtml(row.primary_material_color)}"></i>`:'<i class="section-schedule__swatch"></i>';
+            return `<button type="button" class="section-schedule__row" data-section-schedule-row data-section-id="${escapeHtml(row.section_id)}" title="Isolate section ${escapeHtml(row.section_label)}">
+              ${swatch}
+              <span class="section-schedule__main">
+                <b>${escapeHtml(row.section_label)}</b>
+                <em>${escapeHtml(row.section_family)} ${escapeHtml(row.section_shape)} · ${escapeHtml(row.primary_material_label)}</em>
+              </span>
+              <span class="section-schedule__meta">
+                <strong>${row.usage_count.toLocaleString()}</strong>
+                <small>${escapeHtml(row.material_mix_label)}</small>
+              </span>
+            </button>`;
+          }).join('')||'<div class="panel-placeholder">No section-material usage links available.</div>'}
+        </div>
+      </div>
+      <div class="material-catalog-side" aria-label="Section and rebar catalog summary">
+        <div class="material-catalog-side__block" data-material-section-family-summary>
+          <b>Section families</b>
+          ${familyRows.map(row=>`<span><strong>${escapeHtml(row.family||'--')}</strong><em>${safeNumber(row.section_count,0).toLocaleString()} sec · ${safeNumber(row.usage_count,0).toLocaleString()} elems</em></span>`).join('')||'<span><strong>--</strong><em>No section family data</em></span>'}
+        </div>
+        <div class="material-catalog-side__block" data-material-thickness-summary>
+          <b>Slab/wall thickness</b>
+          ${thicknessPreview.map(row=>`<span><strong>T${escapeHtml(row.thickness_id)}</strong><em>${escapeHtml(formatMaterialCatalogNumber(row.thickness_value,{digits:3,unit:'m',allowZero:true}))} · mat ${escapeHtml(row.material_id)}</em></span>`).join('')||'<span><strong>--</strong><em>No thickness rows</em></span>'}
+        </div>
+        <div class="material-catalog-side__block" data-material-rebar-summary>
+          <b>Rebar code</b>
+          <span><strong>${catalog.rebarCodes.length?escapeHtml(catalog.rebarCodes[0].material_code_label):'--'}</strong><em>${catalog.missingMaterialCount?`${catalog.missingMaterialCount} missing definition`:catalog.status}</em></span>
+        </div>
+      </div>
+    </div>`;
+  panel.querySelectorAll('[data-material-catalog-row]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const materialId=normalizeSelectionValue(button.getAttribute('data-material-id'));
+      focusFirstElementByPredicate(element=>normalizeSelectionValue(element?.material_id)===materialId);
+    });
+  });
+  panel.querySelectorAll('[data-material-section-row]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const materialId=normalizeSelectionValue(button.getAttribute('data-material-id'));
+      const sectionId=normalizeSelectionValue(button.getAttribute('data-section-id'));
+      const label=normalizeSelectionValue(button.textContent).replace(/\s+/g,' ');
+      setActiveIsolation('material_section',`${materialId}::${sectionId}`,label||`${materialId} · ${sectionId}`);
+      focusFirstElementByPredicate(element=>elementMatchesMaterialSection(element,materialId,sectionId));
+    });
+  });
+  panel.querySelectorAll('[data-section-schedule-row]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const sectionId=normalizeSelectionValue(button.getAttribute('data-section-id'));
+      const label=normalizeSelectionValue(button.textContent).replace(/\s+/g,' ');
+      setActiveIsolation('section_id',sectionId,label||sectionId);
+      focusFirstElementByPredicate(element=>elementMatchesSectionId(element,sectionId));
+    });
+  });
+}
+function renderStageResultCallouts(cockpitModel=null){
+  const panel=document.getElementById('stage-result-callouts');
+  if(!(panel instanceof HTMLElement))return;
+  panel.innerHTML=buildStageResultCalloutsHtml({
+    cockpitModel,
+    activeMemberId:resolveSelectionMemberId(selectedElementData),
+  });
+  panel.querySelectorAll('[data-stage-callout-focus-member]').forEach(button=>{
+    button.addEventListener('click',event=>{
+      event.stopPropagation();
+      focusMemberSearchResult(button.getAttribute('data-stage-callout-focus-member')||'');
+    });
+  });
+  syncCriticalMemberReviewFocus();
+}
+function syncCriticalMemberReviewFocus(){
+  const selection=getCurrentSelectionState();
+  const activeMemberId=selection.memberId;
+  const selectedMemberIds=new Set(normalizeSelectionValues(selection.memberIds||activeMemberId));
+  document.querySelectorAll('[data-critical-member-id]').forEach(button=>{
+    const memberId=normalizeSelectionValue(button.getAttribute('data-critical-member-id'));
+    const selected=Boolean(memberId&&selectedMemberIds.has(memberId));
+    const primary=Boolean(activeMemberId&&memberId===activeMemberId);
+    button.classList.toggle('is-selected',selected);
+    button.classList.toggle('is-primary',primary);
+    button.setAttribute('aria-selected',selected?'true':'false');
+    button.setAttribute('aria-pressed',selected?'true':'false');
+  });
+  document.querySelectorAll('[data-stage-callout-focus-member]').forEach(button=>{
+    const memberId=normalizeSelectionValue(button.getAttribute('data-stage-callout-focus-member'));
+    const selected=Boolean(activeMemberId&&memberId===activeMemberId);
+    button.classList.toggle('is-selected',selected);
+    button.setAttribute('aria-pressed',selected?'true':'false');
+  });
+}
+
+function disposeThreeObject(object){
+  if(!object)return;
+  object.geometry?.dispose?.();
+  if(Array.isArray(object.material))object.material.forEach(material=>material?.dispose?.());
+  else object.material?.dispose?.();
+  object.children?.forEach(child=>disposeThreeObject(child));
+}
+
+function clearSelectionFocusOverlay(){
+  selectionFocusWorldPoint=null;
+  const badge=document.getElementById('viewport-selection-focus-badge');
+  if(badge instanceof HTMLElement){
+    badge.classList.remove('is-visible');
+    badge.removeAttribute('data-viewport-selection-focus-member');
+    badge.innerHTML='';
+  }
+  positionStageResultCalloutDock();
+  if(!selectionFocusOverlayGroup)return;
+  while(selectionFocusOverlayGroup.children.length){
+    const child=selectionFocusOverlayGroup.children[0];
+    selectionFocusOverlayGroup.remove(child);
+    disposeThreeObject(child);
+  }
+  requestViewerRender();
+}
+
+function getViewerPointFromCoordinate(value){
+  if(Array.isArray(value)&&value.length>=3){
+    const x=safeNumber(value[0],NaN);
+    const y=safeNumber(value[1],NaN);
+    const z=safeNumber(value[2],NaN);
+    return Number.isFinite(x)&&Number.isFinite(y)&&Number.isFinite(z)
+      ?new THREE.Vector3(x,z,y)
+      :null;
+  }
+  if(value&&typeof value==='object'){
+    const x=safeNumber(value.x,NaN);
+    const y=safeNumber(value.y,NaN);
+    const z=safeNumber(value.z,NaN);
+    return Number.isFinite(x)&&Number.isFinite(y)&&Number.isFinite(z)
+      ?new THREE.Vector3(x,z,y)
+      :null;
+  }
+  return null;
+}
+
+function getElementFocusWorldPoints(element){
+  if(!element)return[];
+  const nodeDataPoints=(Array.isArray(element.nodeData)?element.nodeData:[])
+    .map(node=>getViewerPointFromCoordinate(node))
+    .filter(Boolean);
+  if(nodeDataPoints.length)return nodeDataPoints;
+  const endpointPoints=[element.p0,element.p1,element.start,element.end]
+    .map(point=>getViewerPointFromCoordinate(point))
+    .filter(Boolean);
+  if(endpointPoints.length)return endpointPoints;
+  if(!modelData||!Array.isArray(modelData.nodes)||!Array.isArray(element.node_ids))return[];
+  const nodeMap=new Map(modelData.nodes.map(node=>[normalizeSelectionValue(node?.id),node]));
+  return element.node_ids
+    .map(id=>nodeMap.get(normalizeSelectionValue(id)))
+    .filter(Boolean)
+    .map(node=>getViewerPointFromCoordinate(node))
+    .filter(Boolean);
+}
+
+function buildElementFocusState(element=selectedElementData){
+  const points=getElementFocusWorldPoints(element);
+  if(!points.length)return null;
+  const box=new THREE.Box3().setFromPoints(points);
+  if(box.isEmpty())return null;
+  const center=box.getCenter(new THREE.Vector3());
+  const extent=box.getSize(new THREE.Vector3()).length();
+  const screenRadius=worldUnitsPerPixelAtPoint(center)*22;
+  const radius=Math.max(extent*.38,screenRadius,.45);
+  const memberId=resolveSelectionMemberId(element);
+  const badgePoint=center.clone().add(new THREE.Vector3(0,radius*2.2,0));
+  return{center,radius,badgePoint,memberId};
+}
+
+function getSelectedFocusRecords(primaryElement=selectedElementData){
+  const records=[];
+  const seen=new Set();
+  const addRecord=(record)=>{
+    const memberId=resolveSelectionMemberId(record);
+    if(!record||!memberId||seen.has(memberId))return;
+    seen.add(memberId);
+    records.push(record);
+  };
+  addRecord(primaryElement);
+  [...selectedElementRecords.values()]
+    .filter(record=>record&&selectedElementKeys.has(getElementSelectionKey(record)))
+    .forEach(addRecord);
+  return records;
+}
+
+function buildSelectionFocusState(element=selectedElementData){
+  const primaryState=buildElementFocusState(element);
+  if(!primaryState)return null;
+  const selectedRecords=getSelectedFocusRecords(element);
+  const selectedMemberIds=normalizeSelectionValues(selectedRecords.map(record=>resolveSelectionMemberId(record)));
+  return{
+    ...primaryState,
+    selectedRecords,
+    selectedMemberIds,
+    selectionCount:Math.max(selectedMemberIds.length,1),
+  };
+}
+
+function renderViewportSelectionFocusBadge(element,state){
+  const badge=document.getElementById('viewport-selection-focus-badge');
+  if(!(badge instanceof HTMLElement)||!state?.memberId){
+    if(badge instanceof HTMLElement)badge.classList.remove('is-visible');
+    positionStageResultCalloutDock();
+    return;
+  }
+  const dcr=safeNumber(element?.dcr,safeNumber(element?.max_dcr_after,safeNumber(element?.max_dcr_before,NaN)));
+  const dcrLabel=Number.isFinite(dcr)?dcr.toFixed(2):'--';
+  const story=normalizeSelectionValue(element?.story_band_label||element?.story||element?.level)||'--';
+  const type=normalizeSelectionValue(element?.type)||'member';
+  const selectionCount=Math.max(safeNumber(state.selectionCount,1),1);
+  const setSuffix=selectionCount>1?` +${selectionCount-1}`:'';
+  badge.setAttribute('data-viewport-selection-focus-member',state.memberId);
+  badge.setAttribute('data-viewport-selection-focus-count',String(selectionCount));
+  badge.innerHTML=`
+    <span class="viewport-selection-focus-badge__label">${selectionCount>1?'Selected Member Set':'Selected Critical Member'}</span>
+    <strong>${escapeHtml(state.memberId)}${escapeHtml(setSuffix)}</strong>
+    <small>${escapeHtml(type)} | D/C ${escapeHtml(dcrLabel)} | ${escapeHtml(story)}</small>
+    <span class="viewport-selection-focus-badge__scope" data-viewport-selection-focus-count-label>${selectionCount>1?`${selectionCount} members selected`:'Primary member'}</span>
+    <span class="viewport-selection-focus-badge__edge" data-viewport-selection-focus-edge-label>In view</span>`;
+  badge.classList.add('is-visible');
+  positionViewportSelectionFocusBadge();
+}
+
+function getRectOverlapArea(a,b,margin=0){
+  if(!a||!b)return 0;
+  const left=Math.max(a.left,b.left-margin);
+  const right=Math.min(a.right,b.right+margin);
+  const top=Math.max(a.top,b.top-margin);
+  const bottom=Math.min(a.bottom,b.bottom+margin);
+  return Math.max(0,right-left)*Math.max(0,bottom-top);
+}
+
+function setStageResultCalloutDock(panel,dock='right',overlapState='clear'){
+  if(!(panel instanceof HTMLElement))return;
+  panel.setAttribute('data-stage-callout-dock',dock);
+  panel.setAttribute('data-stage-callout-overlap',overlapState);
+}
+
+function positionStageResultCalloutDock(){
+  const panel=document.getElementById('stage-result-callouts');
+  const badge=document.getElementById('viewport-selection-focus-badge');
+  const vp=document.getElementById('viewport');
+  if(!(panel instanceof HTMLElement)||!(vp instanceof HTMLElement))return;
+  if(!(badge instanceof HTMLElement)||!badge.classList.contains('is-visible')){
+    setStageResultCalloutDock(panel,'right','clear');
+    return;
+  }
+  const docks=['right','left','bottom-right','bottom-left'];
+  let bestDock='right';
+  let bestOverlap=Infinity;
+  for(const dock of docks){
+    setStageResultCalloutDock(panel,dock,'checking');
+    const overlap=getRectOverlapArea(panel.getBoundingClientRect(),badge.getBoundingClientRect(),8);
+    if(overlap<bestOverlap){
+      bestDock=dock;
+      bestOverlap=overlap;
+    }
+    if(overlap===0)break;
+  }
+  setStageResultCalloutDock(panel,bestDock,bestOverlap===0?'clear':'pinned');
+}
+
+function positionViewportSelectionFocusBadge(){
+  const badge=document.getElementById('viewport-selection-focus-badge');
+  const vp=document.getElementById('viewport');
+  if(!(badge instanceof HTMLElement)||!(vp instanceof HTMLElement)||!selectionFocusWorldPoint||!camera||!renderer){
+    if(badge instanceof HTMLElement)badge.classList.remove('is-visible');
+    positionStageResultCalloutDock();
+    return;
+  }
+  const projected=selectionFocusWorldPoint.clone().project(camera);
+  if(!Number.isFinite(projected.x)||!Number.isFinite(projected.y)){
+    badge.classList.remove('is-visible');
+    positionStageResultCalloutDock();
+    return;
+  }
+  const rect=renderer.domElement.getBoundingClientRect();
+  const viewportRect=vp.getBoundingClientRect();
+  const rawLeft=(projected.x*.5+.5)*rect.width+rect.left-viewportRect.left;
+  const rawTop=(-projected.y*.5+.5)*rect.height+rect.top-viewportRect.top;
+  const maxLeft=Math.max(viewportRect.width-118,118);
+  const maxTop=Math.max(viewportRect.height-28,56);
+  const left=Math.min(Math.max(rawLeft,118),maxLeft);
+  const top=Math.min(Math.max(rawTop,56),maxTop);
+  const edgeParts=[];
+  if(projected.z<-1||projected.z>1)edgeParts.push('clipped');
+  if(rawLeft<118)edgeParts.push('left');
+  if(rawLeft>maxLeft)edgeParts.push('right');
+  if(rawTop<56)edgeParts.push('top');
+  if(rawTop>maxTop)edgeParts.push('bottom');
+  const edgeMode=edgeParts.length?edgeParts.join('-'):'inside';
+  badge.style.left=`${left.toFixed(1)}px`;
+  badge.style.top=`${top.toFixed(1)}px`;
+  badge.setAttribute('data-viewport-selection-focus-edge',edgeMode);
+  badge.classList.toggle('is-edge-pinned',edgeMode!=='inside');
+  const edgeLabel=badge.querySelector('[data-viewport-selection-focus-edge-label]');
+  if(edgeLabel){
+    edgeLabel.textContent=edgeMode==='inside'?'In view':`Edge pinned | ${edgeMode}`;
+  }
+  badge.classList.add('is-visible');
+  positionStageResultCalloutDock();
+}
+
+function rebuildSelectionFocusOverlay(element=selectedElementData){
+  clearSelectionFocusOverlay();
+  const state=buildSelectionFocusState(element);
+  if(!state||!selectionFocusOverlayGroup)return;
+  selectionFocusWorldPoint=state.badgePoint.clone();
+  const haloColor=0xf4b56b;
+  const coreColor=0x58d78d;
+  const ringTube=Math.max(state.radius*.025,.025);
+  const ringGeometry=new THREE.TorusGeometry(state.radius,ringTube,8,56);
+  const ringMaterial=new THREE.MeshBasicMaterial({
+    color:haloColor,
+    transparent:true,
+    opacity:.92,
+    depthTest:false,
+  });
+  const horizontalRing=new THREE.Mesh(ringGeometry,ringMaterial);
+  horizontalRing.rotation.x=Math.PI*.5;
+  horizontalRing.renderOrder=20;
+  horizontalRing.position.copy(state.center);
+  horizontalRing.name='selected_member_focus_halo_horizontal';
+  const verticalRing=new THREE.Mesh(ringGeometry.clone(),ringMaterial.clone());
+  verticalRing.renderOrder=20;
+  verticalRing.position.copy(state.center);
+  verticalRing.name='selected_member_focus_halo_vertical';
+  const coreGeometry=new THREE.SphereGeometry(Math.max(state.radius*.11,.09),12,8);
+  const coreMaterial=new THREE.MeshBasicMaterial({
+    color:coreColor,
+    transparent:true,
+    opacity:.96,
+    depthTest:false,
+  });
+  const core=new THREE.Mesh(coreGeometry,coreMaterial);
+  core.renderOrder=21;
+  core.position.copy(state.center);
+  core.name='selected_member_focus_core';
+  const leaderGeometry=new THREE.BufferGeometry().setFromPoints([state.center,state.badgePoint]);
+  const leaderMaterial=new THREE.LineBasicMaterial({
+    color:haloColor,
+    transparent:true,
+    opacity:.72,
+    depthTest:false,
+  });
+  const leader=new THREE.Line(leaderGeometry,leaderMaterial);
+  leader.renderOrder=19;
+  leader.name='selected_member_focus_leader';
+  const group=new THREE.Group();
+  group.name='selected_member_focus_halo';
+  group.userData={_selectionFocusOverlay:true,memberId:state.memberId};
+  group.add(horizontalRing,verticalRing,core,leader);
+  const secondaryRecords=(Array.isArray(state.selectedRecords)?state.selectedRecords:[])
+    .filter(record=>resolveSelectionMemberId(record)!==state.memberId)
+    .slice(0,5);
+  secondaryRecords.forEach((record,index)=>{
+    const secondaryState=buildElementFocusState(record);
+    if(!secondaryState)return;
+    const secondaryRadius=Math.max(Math.min(secondaryState.radius,state.radius*.72),.28);
+    const secondaryRingGeometry=new THREE.TorusGeometry(secondaryRadius,Math.max(secondaryRadius*.035,.018),8,36);
+    const secondaryRingMaterial=new THREE.MeshBasicMaterial({
+      color:0x58d78d,
+      transparent:true,
+      opacity:.70,
+      depthTest:false,
+    });
+    const secondaryRing=new THREE.Mesh(secondaryRingGeometry,secondaryRingMaterial);
+    secondaryRing.rotation.x=Math.PI*.5;
+    secondaryRing.position.copy(secondaryState.center);
+    secondaryRing.renderOrder=18;
+    secondaryRing.name='selected_member_focus_secondary_marker';
+    secondaryRing.userData={memberId:secondaryState.memberId,selectionIndex:index+2};
+    group.add(secondaryRing);
+  });
+  selectionFocusOverlayGroup.add(group);
+  renderViewportSelectionFocusBadge(element,state);
+  requestViewerRender();
 }
 function buildChartPolyline(values,width=132,height=78,pad=8){
   const series=(Array.isArray(values)?values:[]).map(value=>safeNumber(value,NaN)).filter(Number.isFinite);
@@ -4315,52 +5889,109 @@ function buildChartPolyline(values,width=132,height=78,pad=8){
 function renderStoryDriftChart(chart={}){
   const rows=Array.isArray(chart.rows)?chart.rows:[];
   const maxHeight=Math.max(...rows.map(row=>safeNumber(row.height,0)),1);
-  const maxDrift=Math.max(safeNumber(chart.limitPct,2),...rows.map(row=>safeNumber(row.driftPct,0)),0.1);
-  const points=rows.length?rows.map(row=>{
-    const x=10+(safeNumber(row.driftPct,0)/maxDrift)*108;
+  const maxDrift=Math.max(
+    safeNumber(chart.limitPct,2),
+    ...rows.flatMap(row=>[
+      safeNumber(row.originalDriftPct,safeNumber(row.driftPct,0)),
+      safeNumber(row.optimizedDriftPct,safeNumber(row.driftPct,0)),
+      safeNumber(row.driftPct,0),
+    ]),
+    0.1,
+  );
+  const buildDriftPoints=(key,fallbackKey='driftPct')=>rows.length?rows.map(row=>{
+    const x=10+(safeNumber(row[key],safeNumber(row[fallbackKey],0))/maxDrift)*108;
     const y=72-(safeNumber(row.height,0)/maxHeight)*58;
     return `${x.toFixed(2)},${y.toFixed(2)}`;
   }).join(' '):buildChartPolyline([0,0]);
+  const originalPoints=buildDriftPoints('originalDriftPct');
+  const optimizedPoints=buildDriftPoints('optimizedDriftPct');
   const limitX=10+(safeNumber(chart.limitPct,2)/maxDrift)*108;
+  const peakRow=rows.reduce((best,row)=>safeNumber(row.optimizedDriftPct,row.driftPct)>safeNumber(best.optimizedDriftPct,best.driftPct)?row:best,{});
+  const peakValue=safeNumber(peakRow.optimizedDriftPct,peakRow.driftPct);
+  const peakX=10+(peakValue/maxDrift)*108;
+  const peakY=72-(safeNumber(peakRow.height,0)/maxHeight)*58;
+  const peakLabelX=Math.min(Math.max(peakX+3,16),112);
+  const peakLabelY=Math.min(Math.max(peakY-3,13),64);
   return `
     <div class="analysis-chart-title">${escapeHtml(chart.title||'Story Drift Over Height')}</div>
-    <svg class="analysis-line-chart" viewBox="0 0 132 82" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="analysis-line-chart analysis-drift-chart" viewBox="0 0 132 82" preserveAspectRatio="none" aria-hidden="true">
       <path d="M10 72 H122 M10 14 V72" class="analysis-chart-axis"></path>
+      <path d="M10 52 H122 M10 32 H122 M10 14 H122" class="analysis-chart-grid"></path>
       <line x1="${limitX.toFixed(2)}" y1="12" x2="${limitX.toFixed(2)}" y2="72" class="analysis-chart-limit"></line>
-      <polyline points="${points}" class="analysis-chart-line analysis-chart-line--accent"></polyline>
+      <polyline points="${originalPoints}" class="analysis-chart-line analysis-chart-line--muted"></polyline>
+      <polyline points="${optimizedPoints}" class="analysis-chart-line analysis-chart-line--accent"></polyline>
+      <circle cx="${peakX.toFixed(2)}" cy="${peakY.toFixed(2)}" r="2.3" class="analysis-chart-dot"></circle>
+      <g class="analysis-chart-ticks">
+        <text x="10" y="79">0.0%</text>
+        <text x="118" y="79" text-anchor="end">${escapeHtml(maxDrift.toFixed(1))}%</text>
+        <text x="12" y="12">${escapeHtml(maxHeight.toFixed(0))} m</text>
+        <text x="74" y="79" text-anchor="middle">Drift</text>
+      </g>
+      <text class="analysis-chart-peak-label" x="${peakLabelX.toFixed(2)}" y="${peakLabelY.toFixed(2)}">${escapeHtml(peakValue.toFixed(2))}%</text>
     </svg>
-    <div class="analysis-chart-caption">Limit ${safeNumber(chart.limitPct,2).toFixed(1)}%</div>`;
+    <div class="analysis-chart-legend analysis-chart-legend--drift"><span>Original</span><span>Optimized</span><strong>Limit ${safeNumber(chart.limitPct,2).toFixed(1)}%</strong></div>`;
 }
 function renderLoadStepChart(chart={}){
   const points=Array.isArray(chart.points)?chart.points:[];
-  const original=points.map(row=>safeNumber(row.original,0));
-  const optimized=points.map(row=>safeNumber(row.optimized,0));
+  const totalSteps=Math.max(safeNumber(chart.totalSteps,points.length||20),1);
+  const resolvedTimeline=getResolvedAnalysisTimeline(lastAnalysisCockpitModel);
+  const activeStep=Math.min(totalSteps,Math.max(1,safeNumber(resolvedTimeline?.activeStep,chart.activeStep||18)));
+  const maxDisp=Math.max(...points.flatMap(row=>[safeNumber(row.original,0),safeNumber(row.optimized,0)]),1);
+  const buildLoadStepPoints=(key)=>points.length?points.map((row,index)=>{
+    const step=safeNumber(row.step,index+1);
+    const x=10+(step/totalSteps)*108;
+    const y=72-(safeNumber(row[key],0)/maxDisp)*58;
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(' '):buildChartPolyline([0,0]);
+  const activeX=10+(activeStep/totalSteps)*108;
+  const activeLabelX=Math.min(Math.max(activeX+3,18),110);
   return `
     <div class="analysis-chart-title">${escapeHtml(chart.title||'Displacement vs Load Step')}</div>
-    <svg class="analysis-line-chart" viewBox="0 0 132 82" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="analysis-line-chart analysis-load-step-chart" viewBox="0 0 132 82" preserveAspectRatio="none" aria-hidden="true">
       <path d="M10 72 H122 M10 14 V72" class="analysis-chart-axis"></path>
-      <polyline points="${buildChartPolyline(original)}" class="analysis-chart-line analysis-chart-line--muted"></polyline>
-      <polyline points="${buildChartPolyline(optimized)}" class="analysis-chart-line analysis-chart-line--accent"></polyline>
-      <line x1="${(10+(safeNumber(chart.activeStep,18)/20)*108).toFixed(2)}" y1="12" x2="${(10+(safeNumber(chart.activeStep,18)/20)*108).toFixed(2)}" y2="72" class="analysis-chart-limit"></line>
+      <path d="M10 52 H122 M10 32 H122 M10 14 H122" class="analysis-chart-grid"></path>
+      <polyline points="${buildLoadStepPoints('original')}" class="analysis-chart-line analysis-chart-line--muted"></polyline>
+      <polyline points="${buildLoadStepPoints('optimized')}" class="analysis-chart-line analysis-chart-line--accent"></polyline>
+      <line x1="${activeX.toFixed(2)}" y1="12" x2="${activeX.toFixed(2)}" y2="72" class="analysis-chart-limit"></line>
+      <g class="analysis-chart-ticks">
+        <text x="10" y="79">0</text>
+        <text x="118" y="79" text-anchor="end">${escapeHtml(String(Math.round(totalSteps)))}</text>
+        <text x="12" y="12">${escapeHtml(maxDisp.toFixed(0))} mm</text>
+        <text x="74" y="79" text-anchor="middle">Load Step</text>
+      </g>
+      <text class="analysis-chart-step-label" x="${activeLabelX.toFixed(2)}" y="18">Step ${escapeHtml(String(Math.round(activeStep)))}</text>
     </svg>
-    <div class="analysis-chart-legend"><span>Original</span><span>Optimized</span><strong>Step ${escapeHtml(chart.activeStep||'--')}</strong></div>`;
+    <div class="analysis-chart-legend"><span>Original</span><span>Optimized</span><strong>Step ${escapeHtml(String(Math.round(activeStep)))}</strong></div>`;
 }
 function renderMaterialQuantityChart(chart={}){
   const rows=Array.isArray(chart.rows)?chart.rows:[];
   const maxValue=Math.max(...rows.flatMap(row=>[safeNumber(row.original,0),safeNumber(row.optimized,0)]),1);
+  const formatDelta=(row)=>{
+    const explicit=safeNumber(row.deltaPct,NaN);
+    const original=safeNumber(row.original,0);
+    const optimized=safeNumber(row.optimized,0);
+    const derived=original>0?(optimized-original)/original*100:0;
+    const delta=Number.isFinite(explicit)?explicit:derived;
+    return `${delta>0?'+':''}${delta.toFixed(1)}%`;
+  };
   return `
     <div class="analysis-chart-title">${escapeHtml(chart.title||'Material Quantity Comparison')}</div>
-    <div class="analysis-chart-barset">
+    <div class="analysis-material-chart" role="img" aria-label="${escapeHtml(chart.title||'Material Quantity Comparison')} original versus optimized quantities">
+      <div class="analysis-material-grid" aria-hidden="true">
+        <i></i><i></i><i></i>
+      </div>
       ${rows.map(row=>{
-        const original=Math.max(safeNumber(row.original,0)/maxValue*100,2);
-        const optimized=Math.max(safeNumber(row.optimized,0)/maxValue*100,2);
-        return `<div class="analysis-chart-bar-row">
-          <span>${escapeHtml(row.label)}</span>
-          <div class="analysis-chart-bar-track" aria-hidden="true">
-            <i class="analysis-chart-bar analysis-chart-bar--original" style="width:${original.toFixed(1)}%"></i>
-            <i class="analysis-chart-bar analysis-chart-bar--optimized" style="width:${optimized.toFixed(1)}%"></i>
+        const originalHeight=Math.max(safeNumber(row.original,0)/maxValue*100,3);
+        const optimizedHeight=Math.max(safeNumber(row.optimized,0)/maxValue*100,3);
+        const originalValue=formatCockpitValue(row.original,{digits:0,unit:row.unit});
+        const optimizedValue=formatCockpitValue(row.optimized,{digits:0,unit:row.unit});
+        const delta=formatDelta(row);
+        return `<div class="analysis-material-group" aria-label="${escapeHtml(`${row.label}: original ${originalValue}, optimized ${optimizedValue}, delta ${delta}`)}">
+          <div class="analysis-material-bars">
+            <i class="analysis-material-bar analysis-material-bar--original" style="height:${originalHeight.toFixed(1)}%"><span>${escapeHtml(originalValue)}</span></i>
+            <i class="analysis-material-bar analysis-material-bar--optimized" style="height:${optimizedHeight.toFixed(1)}%"><span>${escapeHtml(optimizedValue)}</span></i>
           </div>
-          <strong>${escapeHtml(formatCockpitValue(row.optimized,{digits:0,unit:row.unit}))}</strong>
+          <div class="analysis-material-label"><strong>${escapeHtml(row.label)}</strong><span>${escapeHtml(delta)}</span></div>
         </div>`;
       }).join('')}
     </div>
@@ -4379,17 +6010,55 @@ function renderUtilizationHeatmapChart(chart={}){
   const rows=Math.max(safeNumber(chart.rows,6),1);
   const cellWidth=120/columns;
   const cellHeight=62/rows;
+  const summary=chart.summary||{};
+  const activeLevel=String(summary.activeLevel||chart.activeLevel||'typ.').trim()||'typ.';
+  const loadCase=String(summary.loadCase||'Pushover X+').trim();
+  const sourceLabel=String(summary.sourceLabel||'Model evidence').trim();
+  const maxValue=safeNumber(summary.maxValue,Math.max(...cells.map(cell=>safeNumber(cell.value,0)),0));
+  const averageValue=safeNumber(summary.averageValue,0);
+  const hotCellCount=Math.round(safeNumber(summary.hotCellCount,0));
+  const activeCellCount=Math.round(safeNumber(summary.activeCellCount,cells.filter(cell=>cell.active!==false).length));
+  const criticalSharePct=safeNumber(summary.criticalSharePct,activeCellCount?hotCellCount/activeCellCount*100:0);
+  const governingMember=String(summary.governingMemberId||'N/A').trim()||'N/A';
+  const governingStory=String(summary.governingStory||activeLevel).trim()||activeLevel;
+  const title=String(chart.title||'Utilization Heatmap');
   return `
-    <div class="analysis-chart-title">${escapeHtml(chart.title||'Utilization Heatmap')}</div>
-    <svg class="analysis-heatmap-chart" viewBox="0 0 132 82" preserveAspectRatio="none" aria-hidden="true">
-      ${cells.map(cell=>{
-        const x=6+safeNumber(cell.column,0)*cellWidth;
-        const y=10+safeNumber(cell.row,0)*cellHeight;
-        return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${Math.max(cellWidth-1.2,1).toFixed(2)}" height="${Math.max(cellHeight-1.2,1).toFixed(2)}" fill="${getHeatmapColor(cell.value)}" opacity="${(0.34+Math.min(safeNumber(cell.value,0),1)*0.58).toFixed(2)}"></rect>`;
-      }).join('')}
-      <rect x="6" y="10" width="120" height="62" class="analysis-chart-frame"></rect>
-    </svg>
-    <div class="analysis-chart-legend"><span>0.00</span><span>Utilization Ratio</span><strong>1.00</strong></div>`;
+    <div class="analysis-chart-title analysis-chart-title--with-chip">
+      <span>${escapeHtml(title.replace(/\s*\(Plan\s*-\s*Level.*?\)\s*$/i,''))}</span>
+      <span class="analysis-chart-title__chip" data-heatmap-level-chip>Level ${escapeHtml(activeLevel)}</span>
+    </div>
+    <div class="analysis-heatmap-evidence" data-utilization-heatmap-evidence data-heatmap-level="${escapeHtml(activeLevel)}" data-heatmap-max="${maxValue.toFixed(2)}" data-heatmap-hot-cells="${hotCellCount}" data-heatmap-source="${escapeHtml(sourceLabel)}">
+      <svg class="analysis-heatmap-chart" viewBox="0 0 132 82" preserveAspectRatio="none" aria-label="${escapeHtml(`${title}: max D/C ${maxValue.toFixed(2)}, ${hotCellCount} hot cells`)}" role="img">
+        <rect x="51" y="29" width="30" height="28" class="analysis-heatmap-core"></rect>
+        ${cells.map(cell=>{
+          if(cell.active===false)return '';
+          const x=6+safeNumber(cell.column,0)*cellWidth;
+          const y=10+safeNumber(cell.row,0)*cellHeight;
+          const value=safeNumber(cell.value,0);
+          const hot=value>=0.85;
+          return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${Math.max(cellWidth-1.2,1).toFixed(2)}" height="${Math.max(cellHeight-1.2,1).toFixed(2)}" fill="${getHeatmapColor(value)}" opacity="${(0.34+Math.min(value,1)*0.58).toFixed(2)}" class="${hot?'analysis-heatmap-cell analysis-heatmap-cell--hot':'analysis-heatmap-cell'}"></rect>`;
+        }).join('')}
+        ${cells.filter(cell=>cell.active!==false&&safeNumber(cell.value,0)>=0.85).slice(0,18).map(cell=>{
+          const x=6+safeNumber(cell.column,0)*cellWidth;
+          const y=10+safeNumber(cell.row,0)*cellHeight;
+          return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${Math.max(cellWidth-1.2,1).toFixed(2)}" height="${Math.max(cellHeight-1.2,1).toFixed(2)}" class="analysis-heatmap-hotspot"></rect>`;
+        }).join('')}
+        <rect x="6" y="10" width="120" height="62" class="analysis-chart-frame"></rect>
+      </svg>
+      <div class="analysis-heatmap-receipt" data-heatmap-receipt aria-label="${escapeHtml(`Heatmap evidence: ${sourceLabel}, load case ${loadCase}`)}">
+        <span><b>Max</b><em>${maxValue.toFixed(2)}</em></span>
+        <span><b>Avg</b><em>${averageValue.toFixed(2)}</em></span>
+        <span><b>Hot</b><em>${hotCellCount}/${activeCellCount}</em></span>
+        <span><b>Zone</b><em>${criticalSharePct.toFixed(0)}%</em></span>
+        <span><b>Gov.</b><em>${escapeHtml(governingMember)} · ${escapeHtml(governingStory)}</em></span>
+      </div>
+    </div>
+    <div class="analysis-chart-legend analysis-chart-legend--heatmap">
+      <span>0.00</span>
+      <i class="analysis-heatmap-gradient" aria-hidden="true"></i>
+      <span>D/C</span>
+      <strong>1.00</strong>
+    </div>`;
 }
 function renderAnalysisCockpitCharts(cockpitModel=null){
   const charts=cockpitModel?.charts||{};
@@ -4404,22 +6073,357 @@ function renderAnalysisCockpitCharts(cockpitModel=null){
     if(panel instanceof HTMLElement)panel.innerHTML=html;
   });
 }
-function renderAnalysisTimeline(cockpitModel=null){
-  const node=document.getElementById('analysis-timeline-status');
-  if(!(node instanceof HTMLElement))return;
-  const timeline=cockpitModel?.timeline;
+function getDisplacementStepPoint(chart={},step=1){
+  const points=Array.isArray(chart.points)?chart.points:[];
+  const requestedStep=Math.max(1,Math.round(safeNumber(step,1)));
+  const exact=points.find(row=>Math.round(safeNumber(row.step,0))===requestedStep);
+  if(exact)return exact;
+  if(!points.length)return{step:requestedStep,original:0,optimized:0};
+  return points.reduce((best,row)=>{
+    const bestDelta=Math.abs(safeNumber(best.step,requestedStep)-requestedStep);
+    const rowDelta=Math.abs(safeNumber(row.step,requestedStep)-requestedStep);
+    return rowDelta<bestDelta?row:best;
+  },points[0]);
+}
+function formatResultStepDisplacement(value){
+  const number=safeNumber(value,0);
+  const digits=Math.abs(number)>=100?0:1;
+  return`${number.toLocaleString('en-US',{maximumFractionDigits:digits,minimumFractionDigits:digits})} mm`;
+}
+function buildResultStepScheduleModel(cockpitModel=null){
+  const model=cockpitModel||lastAnalysisCockpitModel;
+  const timeline=getResolvedAnalysisTimeline(model);
+  const chart=model?.charts?.displacementLoadStep||{};
   if(!timeline){
-    node.textContent='Load case -- | Step -- / -- | Solver --';
+    return{
+      schemaVersion:'structure-viewer-result-step-schedule.v1',
+      status:'missing',
+      rows:[],
+      rowCount:0,
+      activeStep:0,
+      totalSteps:0,
+    };
+  }
+  const totalSteps=Math.max(1,Math.round(safeNumber(timeline.totalSteps,20)));
+  const activeStep=Math.min(totalSteps,Math.max(1,Math.round(safeNumber(timeline.activeStep,1))));
+  const visibleCount=Math.min(totalSteps,5);
+  let startStep=Math.max(1,activeStep-2);
+  if(startStep+visibleCount-1>totalSteps)startStep=Math.max(1,totalSteps-visibleCount+1);
+  const rows=Array.from({length:visibleCount},(_,index)=>{
+    const step=startStep+index;
+    const point=getDisplacementStepPoint(chart,step);
+    const original=safeNumber(point.original,0);
+    const optimized=safeNumber(point.optimized,0);
+    const deltaPct=original>0?(optimized-original)/original*100:0;
+    const status=step===activeStep?'active':step<activeStep?'solved':'queued';
+    return{
+      step,
+      original,
+      optimized,
+      deltaPct,
+      progressPct:step/totalSteps*100,
+      status,
+      tone:status==='active'?'accent':status==='solved'?'success':'neutral',
+    };
+  });
+  return{
+    schemaVersion:'structure-viewer-result-step-schedule.v1',
+    status:'ready',
+    loadCase:normalizeSelectionValue(timeline.loadCase)||'--',
+    solver:normalizeSelectionValue(timeline.solver)||'--',
+    convergence:normalizeSelectionValue(timeline.convergence)||'--',
+    runTime:normalizeSelectionValue(timeline.runTime)||'--',
+    scale:safeNumber(timeline.scale,1),
+    activeStep,
+    totalSteps,
+    rowCount:rows.length,
+    rows,
+  };
+}
+function renderResultStepSchedule(cockpitModel=null){
+  const panel=document.getElementById('result-step-schedule-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const schedule=buildResultStepScheduleModel(cockpitModel||lastAnalysisCockpitModel);
+  panel.dataset.resultStepScheduleStatus=schedule.status;
+  panel.dataset.resultStepCount=String(schedule.rowCount||0);
+  panel.dataset.resultStepActive=String(schedule.activeStep||0);
+  panel.dataset.resultStepTotal=String(schedule.totalSteps||0);
+  panel.dataset.resultStepLoadCase=schedule.loadCase||'';
+  panel.dataset.resultStepConvergence=schedule.convergence||'';
+  panel.dataset.resultStepSolver=schedule.solver||'';
+  if(schedule.status!=='ready'||!schedule.rows.length){
+    panel.innerHTML='<div class="panel-placeholder">Result step schedule appears when load-step evidence is available.</div>';
     return;
   }
-  node.textContent=[
-    `Load Case: ${timeline.loadCase||'--'}`,
-    `Step: ${timeline.activeStep||'--'} / ${timeline.totalSteps||'--'}`,
-    `Scale: ${safeNumber(timeline.scale,1).toFixed(1)}x`,
-    `Solver: ${timeline.solver||'--'}`,
-    `Convergence: ${timeline.convergence||'--'}`,
-    `Run Time: ${timeline.runTime||'--'}`,
-  ].join(' | ');
+  panel.innerHTML=`
+    <div class="result-step-schedule__head" data-result-step-schedule-head>
+      <span><b>Load Case</b><strong>${escapeHtml(schedule.loadCase)}</strong></span>
+      <span><b>Step</b><strong>${escapeHtml(String(schedule.activeStep))} / ${escapeHtml(String(schedule.totalSteps))}</strong></span>
+      <span><b>Convergence</b><strong>${escapeHtml(schedule.convergence)}</strong></span>
+      <span><b>Run Time</b><strong>${escapeHtml(schedule.runTime)}</strong></span>
+    </div>
+    <div class="result-step-schedule__rows" data-result-step-schedule-rows>
+      ${schedule.rows.map(row=>{
+        const active=row.status==='active';
+        const deltaLabel=`${row.deltaPct>0?'+':''}${row.deltaPct.toFixed(1)}%`;
+        return `<button type="button" class="result-step-row result-step-row--${escapeHtml(row.tone)}${active?' is-active':''}" data-result-step-row data-result-step="${escapeHtml(String(row.step))}" data-result-step-active="${active?'true':'false'}" aria-current="${active?'step':'false'}" title="Show result step ${escapeHtml(String(row.step))}">
+          <span class="result-step-row__index"><b>${escapeHtml(String(row.step))}</b><em>${escapeHtml(row.status)}</em></span>
+          <span class="result-step-row__bar" aria-hidden="true"><i style="--result-step-progress:${row.progressPct.toFixed(2)}%"></i></span>
+          <span class="result-step-row__values"><strong>${escapeHtml(formatResultStepDisplacement(row.optimized))}</strong><em>orig ${escapeHtml(formatResultStepDisplacement(row.original))} · ${escapeHtml(deltaLabel)}</em></span>
+        </button>`;
+      }).join('')}
+    </div>`;
+  panel.querySelectorAll('[data-result-step-row]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      setAnalysisTimelineStep(button.getAttribute('data-result-step')||schedule.activeStep);
+    });
+  });
+}
+function getCockpitCard(cockpitModel=null,key=''){
+  const cards=Array.isArray(cockpitModel?.kpiCards)?cockpitModel.kpiCards:[];
+  return cards.find(card=>normalizeSelectionValue(card?.key)===key)||null;
+}
+function buildResultEnvelopeRow({
+  key,
+  label,
+  card,
+  governing,
+  context,
+  detail,
+  memberId='',
+  story='',
+  tone='neutral',
+}={}){
+  const resolvedTone=normalizeAnalysisTone(card?.trendTone||card?.tone||tone);
+  return{
+    key:normalizeSelectionValue(key)||'envelope',
+    label:normalizeSelectionValue(label)||normalizeSelectionValue(card?.label)||'Result',
+    value:normalizeSelectionValue(card?.value)||'--',
+    governing:normalizeSelectionValue(governing)||'--',
+    context:normalizeSelectionValue(context)||'--',
+    detail:normalizeSelectionValue(detail||card?.referenceLabel||card?.meta)||'--',
+    evidenceLabel:normalizeSelectionValue(card?.evidenceLabel||card?.meta)||'--',
+    memberId:normalizeSelectionValue(memberId),
+    story:normalizeSelectionValue(story),
+    tone:resolvedTone,
+  };
+}
+function buildResultEnvelopeModel(cockpitModel=null){
+  const model=cockpitModel||lastAnalysisCockpitModel;
+  const timeline=getResolvedAnalysisTimeline(model);
+  const cards=Array.isArray(model?.kpiCards)?model.kpiCards:[];
+  if(!cards.length||!timeline){
+    return{
+      schemaVersion:'structure-viewer-result-envelope.v1',
+      status:'missing',
+      rows:[],
+      rowCount:0,
+      activeStep:0,
+      totalSteps:0,
+      sourceMetricCount:0,
+      totalMetricCount:0,
+    };
+  }
+  const criticalRows=Array.isArray(model?.criticalMembers)?model.criticalMembers:[];
+  const critical=criticalRows[0]||{};
+  const storyRows=Array.isArray(model?.charts?.storyDrift?.rows)?model.charts.storyDrift.rows:[];
+  const driftPeak=storyRows.reduce((best,row)=>safeNumber(row?.driftPct,0)>safeNumber(best?.driftPct,0)?row:best,{});
+  const heatmapSummary=model?.charts?.utilizationHeatmap?.summary||{};
+  const sourceMetricCount=Math.max(0,Math.round(safeNumber(model?.resultEvidence?.sourceMetricCount,0)));
+  const totalMetricCount=Math.max(0,Math.round(safeNumber(model?.resultEvidence?.totalMetricCount,cards.length)));
+  const loadCase=normalizeSelectionValue(timeline.loadCase)||'--';
+  const activeStep=Math.max(1,Math.round(safeNumber(timeline.activeStep,1)));
+  const totalSteps=Math.max(1,Math.round(safeNumber(timeline.totalSteps,1)));
+  const criticalMemberId=normalizeSelectionValue(critical.id||heatmapSummary.governingMemberId);
+  const rows=[
+    buildResultEnvelopeRow({
+      key:'displacement',
+      label:'Displacement',
+      card:getCockpitCard(model,'maxDisplacement'),
+      governing:`Step ${activeStep}/${totalSteps}`,
+      context:loadCase,
+      detail:getCockpitCard(model,'maxDisplacement')?.referenceLabel||'service envelope',
+      tone:'accent',
+    }),
+    buildResultEnvelopeRow({
+      key:'drift',
+      label:'Story Drift',
+      card:getCockpitCard(model,'maxInterstoryDrift'),
+      governing:`Story ${normalizeSelectionValue(driftPeak.story)||normalizeSelectionValue(critical.story)||'--'}`,
+      context:loadCase,
+      detail:getCockpitCard(model,'maxInterstoryDrift')?.referenceLabel||'drift envelope',
+      tone:'warn',
+    }),
+    buildResultEnvelopeRow({
+      key:'base-shear',
+      label:'Base Shear',
+      card:getCockpitCard(model,'baseShear'),
+      governing:`Step ${activeStep}`,
+      context:loadCase,
+      detail:getCockpitCard(model,'baseShear')?.referenceLabel||'governing case',
+      tone:'neutral',
+    }),
+    buildResultEnvelopeRow({
+      key:'utilization',
+      label:'Utilization',
+      card:getCockpitCard(model,'utilizationRatio'),
+      governing:criticalMemberId?`${criticalMemberId} · ${normalizeSelectionValue(critical.type)||'member'}`:'Member envelope',
+      context:normalizeSelectionValue(critical.story)?`Story ${critical.story}`:normalizeSelectionValue(heatmapSummary.governingStory)||'critical zone',
+      detail:[critical.status,critical.recommendedChange].map(normalizeSelectionValue).filter(Boolean).join(' · ')||'D/C envelope',
+      memberId:criticalMemberId,
+      story:critical.story,
+      tone:critical.statusTone||'warn',
+    }),
+    buildResultEnvelopeRow({
+      key:'heatmap',
+      label:'Plan Hot Zone',
+      card:{value:formatCockpitValue(safeNumber(heatmapSummary.maxValue,0),{digits:2}),evidenceLabel:heatmapSummary.sourceLabel||'Heatmap D/C',tone:safeNumber(heatmapSummary.maxValue,0)>0.9?'warn':'success'},
+      governing:normalizeSelectionValue(heatmapSummary.governingMemberId)||criticalMemberId||'hot zone',
+      context:normalizeSelectionValue(heatmapSummary.governingStory)||normalizeSelectionValue(heatmapSummary.activeLevel)||'plan level',
+      detail:`${Math.max(0,Math.round(safeNumber(heatmapSummary.hotCellCount,0))).toLocaleString('en-US')} hot cells`,
+      memberId:normalizeSelectionValue(heatmapSummary.governingMemberId)||criticalMemberId,
+      tone:safeNumber(heatmapSummary.maxValue,0)>0.9?'warn':'success',
+    }),
+  ].filter(row=>row.value&&row.value!=='--');
+  return{
+    schemaVersion:'structure-viewer-result-envelope.v1',
+    status:rows.length?'ready':'missing',
+    loadCase,
+    activeStep,
+    totalSteps,
+    governingMemberId:criticalMemberId,
+    sourceMetricCount,
+    totalMetricCount,
+    rowCount:rows.length,
+    rows,
+  };
+}
+function renderResultEnvelope(cockpitModel=null){
+  const panel=document.getElementById('result-envelope-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const envelope=buildResultEnvelopeModel(cockpitModel||lastAnalysisCockpitModel);
+  panel.dataset.resultEnvelopeStatus=envelope.status;
+  panel.dataset.resultEnvelopeCount=String(envelope.rowCount||0);
+  panel.dataset.resultEnvelopeLoadCase=envelope.loadCase||'';
+  panel.dataset.resultEnvelopeActiveStep=String(envelope.activeStep||0);
+  panel.dataset.resultEnvelopeTotalSteps=String(envelope.totalSteps||0);
+  panel.dataset.resultEnvelopeGoverningMember=envelope.governingMemberId||'';
+  panel.dataset.resultEnvelopeSourceMetricCount=String(envelope.sourceMetricCount||0);
+  panel.dataset.resultEnvelopeTotalMetricCount=String(envelope.totalMetricCount||0);
+  if(envelope.status!=='ready'||!envelope.rows.length){
+    panel.innerHTML='<div class="panel-placeholder">Result envelope appears when governing result evidence is available.</div>';
+    return;
+  }
+  const sourceLabel=envelope.totalMetricCount
+    ?`${envelope.sourceMetricCount}/${envelope.totalMetricCount} source`
+    :'source pending';
+  panel.innerHTML=`
+    <div class="result-envelope__head" data-result-envelope-head>
+      <span><b>Result Envelope</b><em>${escapeHtml(envelope.loadCase)} · Step ${escapeHtml(String(envelope.activeStep))}/${escapeHtml(String(envelope.totalSteps))}</em></span>
+      <strong>${escapeHtml(sourceLabel)}</strong>
+    </div>
+    <div class="result-envelope__rows" data-result-envelope-rows>
+      ${envelope.rows.map(row=>{
+        const memberAttr=row.memberId?` data-result-envelope-member-id="${escapeHtml(row.memberId)}"`:'';
+        const focusLabel=row.memberId?'Focus governing member':'Governing result';
+        return `<button type="button" class="result-envelope-row result-envelope-row--${escapeHtml(row.tone)}" data-result-envelope-row data-result-envelope-key="${escapeHtml(row.key)}"${memberAttr} title="${escapeHtml(focusLabel)}">
+          <span class="result-envelope-row__metric">
+            <b>${escapeHtml(row.label)}</b>
+            <strong>${escapeHtml(row.value)}</strong>
+          </span>
+          <span class="result-envelope-row__govern">
+            <b>${escapeHtml(row.governing)}</b>
+            <em>${escapeHtml(row.context)}</em>
+          </span>
+          <span class="result-envelope-row__evidence">
+            <b>${escapeHtml(row.evidenceLabel)}</b>
+            <em>${escapeHtml(row.detail)}</em>
+          </span>
+        </button>`;
+      }).join('')}
+    </div>`;
+  panel.querySelectorAll('[data-result-envelope-member-id]').forEach(button=>{
+    button.addEventListener('click',()=>focusMemberSearchResult(button.getAttribute('data-result-envelope-member-id')||''));
+  });
+}
+function getResolvedAnalysisTimeline(cockpitModel=null){
+  const timeline=cockpitModel?.timeline;
+  if(!timeline)return null;
+  const totalSteps=Math.max(1,Math.round(safeNumber(timeline.totalSteps,20)));
+  const sourceStep=Math.round(safeNumber(timeline.activeStep,1));
+  const overrideStep=Number(analysisTimelineStepOverride);
+  const resolvedStep=analysisTimelineStepOverride===null||!Number.isFinite(overrideStep)?sourceStep:overrideStep;
+  const activeStep=Math.min(totalSteps,Math.max(1,Math.round(resolvedStep)));
+  return{...timeline,activeStep,totalSteps};
+}
+function setAnalysisTimelineStep(value){
+  const timeline=getResolvedAnalysisTimeline(lastAnalysisCockpitModel);
+  if(!timeline)return;
+  const next=Math.min(timeline.totalSteps,Math.max(1,Math.round(safeNumber(value,timeline.activeStep))));
+  analysisTimelineStepOverride=next;
+  renderAnalysisCockpitCharts(lastAnalysisCockpitModel);
+  renderAnalysisTimeline(lastAnalysisCockpitModel);
+}
+function stepAnalysisTimeline(delta=1){
+  const timeline=getResolvedAnalysisTimeline(lastAnalysisCockpitModel);
+  if(!timeline)return;
+  setAnalysisTimelineStep(timeline.activeStep+safeNumber(delta,1));
+}
+function toggleAnalysisTimelinePlayback(){
+  if(analysisTimelinePlaybackTimer){
+    window.clearInterval(analysisTimelinePlaybackTimer);
+    analysisTimelinePlaybackTimer=null;
+    renderAnalysisTimeline(lastAnalysisCockpitModel);
+    return;
+  }
+  analysisTimelinePlaybackTimer=window.setInterval(()=>{
+    const timeline=getResolvedAnalysisTimeline(lastAnalysisCockpitModel);
+    if(!timeline)return;
+    const next=timeline.activeStep>=timeline.totalSteps?1:timeline.activeStep+1;
+    setAnalysisTimelineStep(next);
+  },900);
+  renderAnalysisTimeline(lastAnalysisCockpitModel);
+}
+function renderAnalysisTimeline(cockpitModel=null){
+  const node=document.getElementById('analysis-timeline-status');
+  if(cockpitModel)lastAnalysisCockpitModel=cockpitModel;
+  const activeModel=cockpitModel||lastAnalysisCockpitModel;
+  const timeline=getResolvedAnalysisTimeline(activeModel);
+  if(!(node instanceof HTMLElement)){
+    renderResultStepSchedule(activeModel);
+    renderResultEnvelope(activeModel);
+    return;
+  }
+  if(!timeline){
+    node.textContent='Load case -- | Step -- / -- | Solver --';
+    renderResultStepSchedule(activeModel);
+    renderResultEnvelope(activeModel);
+    renderStageResultReceipt(activeModel,contourContext);
+    syncTopRunControl({cockpitModel:activeModel});
+    return;
+  }
+  const stepPct=(timeline.activeStep/Math.max(timeline.totalSteps,1))*100;
+  const playing=Boolean(analysisTimelinePlaybackTimer);
+  node.innerHTML=`
+    <span class="analysis-timeline-field analysis-timeline-field--load"><b>Load Case</b><strong>${escapeHtml(timeline.loadCase||'--')}</strong></span>
+    <span class="analysis-timeline-field"><b>Step</b><strong>${escapeHtml(String(timeline.activeStep))} / ${escapeHtml(String(timeline.totalSteps))}</strong></span>
+    <span class="analysis-timeline-buttons" aria-label="Analysis step controls">
+      <button type="button" onclick="stepAnalysisTimeline(-1)" title="Previous step">◀</button>
+      <button type="button" class="${playing?'is-active':''}" onclick="toggleAnalysisTimelinePlayback()" title="${playing?'Pause':'Play'}">${playing?'Ⅱ':'▶'}</button>
+      <button type="button" onclick="stepAnalysisTimeline(1)" title="Next step">▶</button>
+    </span>
+    <label class="analysis-timeline-slider" aria-label="Analysis step ${escapeHtml(String(timeline.activeStep))} of ${escapeHtml(String(timeline.totalSteps))}">
+      <input type="range" min="1" max="${escapeHtml(String(timeline.totalSteps))}" step="1" value="${escapeHtml(String(timeline.activeStep))}" oninput="setAnalysisTimelineStep(this.value)"/>
+      <i style="--timeline-progress:${stepPct.toFixed(2)}%"></i>
+    </label>
+    <span class="analysis-timeline-field"><b>Scale</b><strong>${escapeHtml(safeNumber(timeline.scale,1).toFixed(1))}x</strong></span>
+    <span class="analysis-timeline-field analysis-timeline-field--solver"><b>Solver</b><strong>${escapeHtml(timeline.solver||'--')}</strong></span>
+    <span class="analysis-timeline-field analysis-timeline-field--convergence"><b>Convergence</b><strong>${escapeHtml(timeline.convergence||'--')}</strong></span>
+    <span class="analysis-timeline-field"><b>Run Time</b><strong>${escapeHtml(timeline.runTime||'--')}</strong></span>`;
+  renderResultStepSchedule(activeModel);
+  renderResultEnvelope(activeModel);
+  renderStageResultReceipt(activeModel,contourContext);
+  syncTopRunControl({cockpitModel:activeModel});
 }
 function renderStatsPanel(entries){
   const stats=document.getElementById('stats-panel');
@@ -4493,6 +6497,79 @@ function refreshWorkspaceStateFromUrl(){
 function navigateProjectWorkspace(overrides={}){
   const href=buildWorkspaceUrl(window.location.href,{...workspaceState,manifest:projectManifest,comparisonFilter:memberComparisonFilter},overrides);
   window.location.href=href;
+}
+function getTopbarWorkspaceKey(projectId='',drawingId=''){
+  return `${normalizeSelectionValue(projectId)}::${normalizeSelectionValue(drawingId)}`;
+}
+function splitTopbarWorkspaceSelection(value=''){
+  const [projectId='',drawingId='']=String(value||'').split('::');
+  return {
+    projectId:normalizeSelectionValue(projectId),
+    drawingId:normalizeSelectionValue(drawingId),
+  };
+}
+function getPreferredWorkspaceVariant(drawing=null,preferredVariant=''){
+  const variants=Array.isArray(drawing?.variants)?drawing.variants:[];
+  const preferred=normalizeSelectionValue(preferredVariant);
+  if(preferred&&variants.some(row=>row.variant===preferred))return preferred;
+  return variants.find(row=>row.variant==='optimized')?.variant
+    ||variants.find(row=>row.variant==='compare')?.variant
+    ||variants[0]?.variant
+    ||'optimized';
+}
+function buildTopbarProjectOptionRows(){
+  return (Array.isArray(projectManifest?.projects)?projectManifest.projects:[]).flatMap(project=>(
+    (Array.isArray(project.drawings)?project.drawings:[]).map(drawing=>{
+      const projectTitle=normalizeSelectionValue(project.project_title)||normalizeSelectionValue(project.project_id)||'Project';
+      const drawingTitle=normalizeSelectionValue(drawing.drawing_title)||normalizeSelectionValue(drawing.drawing_id)||'Drawing';
+      const status=normalizeSelectionValue(drawing.commercial_review_status)||'needs_review';
+      const key=getTopbarWorkspaceKey(project.project_id,drawing.drawing_id);
+      return {
+        key,
+        projectId:normalizeSelectionValue(project.project_id),
+        drawingId:normalizeSelectionValue(drawing.drawing_id),
+        variant:getPreferredWorkspaceVariant(drawing,workspaceState?.variant),
+        status,
+        label:`${projectTitle} — ${drawingTitle}`,
+        receipt:`${status.replace(/_/g,' ')} · ${getPreferredWorkspaceVariant(drawing,workspaceState?.variant)}`,
+      };
+    })
+  ));
+}
+function renderTopbarProjectSelector(summary=null){
+  const select=document.getElementById('shell-project-select');
+  const receipt=document.getElementById('shell-project-receipt');
+  const legacyPill=document.getElementById('shell-project-pill');
+  const rows=buildTopbarProjectOptionRows();
+  const currentKey=getTopbarWorkspaceKey(workspaceState.projectId,workspaceState.drawingId);
+  const current=rows.find(row=>row.key===currentKey)||rows[0]||null;
+  if(select instanceof HTMLSelectElement){
+    select.innerHTML=rows.map(row=>`<option value="${escapeHtml(row.key)}"${row.key===current?.key?' selected':''}>${escapeHtml(row.label)}</option>`).join('');
+    if(current)select.value=current.key;
+    select.dataset.projectId=current?.projectId||'';
+    select.dataset.drawingId=current?.drawingId||'';
+    select.dataset.variant=current?.variant||'';
+    select.dataset.reviewStatus=current?.status||'';
+    select.title=current?.label||'Project --';
+  }
+  const label=current?.label
+    ||(summary?.modelLabel&&summary.modelLabel!=='--'?`${summary.modelLabel} — Optimized`:'Project --');
+  if(legacyPill)legacyPill.textContent=label;
+  if(receipt){
+    receipt.textContent=current?.receipt||'manifest pending';
+    receipt.setAttribute('data-review-status',current?.status||'pending');
+  }
+}
+function setTopbarWorkspaceSelection(value=''){
+  const selection=splitTopbarWorkspaceSelection(value);
+  if(!selection.projectId)return;
+  const project=projectManifest.projects.find(row=>row.project_id===selection.projectId);
+  const drawing=project?.drawings?.find(row=>row.drawing_id===selection.drawingId)||project?.drawings?.[0];
+  navigateProjectWorkspace({
+    projectId:project?.project_id||selection.projectId,
+    drawingId:drawing?.drawing_id||selection.drawingId,
+    variant:getPreferredWorkspaceVariant(drawing,workspaceState.variant),
+  });
 }
 function setProjectWorkspaceProject(projectId=''){
   const project=projectManifest.projects.find(row=>row.project_id===normalizeSelectionValue(projectId));
@@ -4599,6 +6676,7 @@ function renderProjectWorkspacePanel(){
   if(projectSelect instanceof HTMLSelectElement){
     projectSelect.innerHTML=model.projects.map(project=>`<option value="${escapeHtml(project.projectId)}"${project.active?' selected':''}>${escapeHtml(project.projectTitle)} (${project.drawingCount})</option>`).join('');
   }
+  renderTopbarProjectSelector();
   const filterSelect=document.getElementById('project-workspace-filter');
   if(filterSelect instanceof HTMLSelectElement){
     filterSelect.innerHTML=model.filterOptions.map(option=>`<option value="${escapeHtml(option.key)}"${option.key===model.filter?' selected':''}>${escapeHtml(option.label)}</option>`).join('');
@@ -4697,9 +6775,99 @@ function renderExplainabilityPanel(element=selectedElementData){
   });
   panel.innerHTML=buildSelectionInspectorHtml(explanation,{hasElement:Boolean(element)});
 }
+function getDrawingHandoffSheetData(sheetElement){
+  if(!(sheetElement instanceof HTMLElement))return null;
+  const sheetName=normalizeSelectionValue(sheetElement.getAttribute('data-drawing-handoff-sheet'));
+  if(!sheetName)return null;
+  return{
+    sheetName,
+    label:normalizeSelectionValue(sheetElement.getAttribute('data-drawing-handoff-sheet-label'))||sheetName,
+    href:normalizeSelectionValue(sheetElement.getAttribute('data-drawing-handoff-sheet-href'))||sheetElement.getAttribute('href')||'',
+    revision:normalizeSelectionValue(sheetElement.getAttribute('data-drawing-handoff-sheet-revision'))||'unrevisioned',
+    callout:normalizeSelectionValue(sheetElement.getAttribute('data-drawing-handoff-sheet-callout'))||'--',
+    member:normalizeSelectionValue(sheetElement.getAttribute('data-drawing-handoff-sheet-member'))||'--',
+  };
+}
+function setDrawingHandoffActiveSheet(sheetName=''){
+  const panel=document.getElementById('drawing-handoff-panel');
+  if(!(panel instanceof HTMLElement))return false;
+  const normalized=normalizeSelectionValue(sheetName);
+  const sheetButtons=[...panel.querySelectorAll('[data-drawing-handoff-sheet]')];
+  const target=sheetButtons.find(button=>normalizeSelectionValue(button.getAttribute('data-drawing-handoff-sheet'))===normalized)
+    || sheetButtons[0];
+  const sheetData=getDrawingHandoffSheetData(target);
+  if(!sheetData)return false;
+  activeDrawingHandoffSheetName=sheetData.sheetName;
+  sheetButtons.forEach(button=>{
+    const isActive=normalizeSelectionValue(button.getAttribute('data-drawing-handoff-sheet'))===sheetData.sheetName;
+    button.classList.toggle('is-active',isActive);
+    button.setAttribute('aria-current',isActive?'true':'false');
+  });
+  const preview=panel.querySelector('[data-drawing-handoff-preview]');
+  if(preview instanceof HTMLElement){
+    preview.setAttribute('data-drawing-handoff-preview-sheet',sheetData.sheetName);
+    preview.setAttribute('data-drawing-handoff-preview-callout',sheetData.callout);
+    preview.setAttribute('aria-label',`Open ${sheetData.label} ${sheetData.sheetName}`);
+    preview.setAttribute('aria-disabled',sheetData.href?'false':'true');
+    preview.classList.toggle('is-disabled',!sheetData.href);
+    if(preview instanceof HTMLAnchorElement)preview.href=sheetData.href||'#';
+    const sheetText=preview.querySelector('[data-drawing-handoff-preview-sheet-text]');
+    const revisionText=preview.querySelector('[data-drawing-handoff-preview-revision-text]');
+    const calloutText=preview.querySelector('[data-drawing-handoff-preview-callout-text]');
+    const labelText=preview.querySelector('[data-drawing-handoff-preview-label]');
+    const metaText=preview.querySelector('[data-drawing-handoff-preview-meta]');
+    if(sheetText)sheetText.textContent=sheetData.sheetName;
+    if(revisionText)revisionText.textContent=sheetData.revision;
+    if(calloutText)calloutText.textContent=sheetData.callout;
+    if(labelText)labelText.textContent=sheetData.label;
+    if(metaText)metaText.textContent=`Active sheet · ${sheetData.member} · ${sheetData.callout}`;
+  }
+  const openLink=panel.querySelector('[data-drawing-handoff-active-sheet-open]');
+  if(openLink instanceof HTMLAnchorElement){
+    openLink.href=sheetData.href||'#';
+    openLink.setAttribute('data-drawing-handoff-active-sheet-name',sheetData.sheetName);
+    openLink.setAttribute('aria-disabled',sheetData.href?'false':'true');
+    openLink.classList.toggle('is-disabled',!sheetData.href);
+    openLink.title=sheetData.href?`Open ${sheetData.sheetName}`:'No SVG sheet attached';
+  }
+  return true;
+}
+function bindDrawingHandoffSheetInteractions(panel){
+  if(!(panel instanceof HTMLElement))return;
+  panel.querySelectorAll('[data-drawing-handoff-sheet]').forEach(sheet=>{
+    const activate=()=>setDrawingHandoffActiveSheet(sheet.getAttribute('data-drawing-handoff-sheet')||'');
+    sheet.addEventListener('mouseenter',activate);
+    sheet.addEventListener('focus',activate);
+  });
+  panel.querySelectorAll('.drawing-handoff-preview, .drawing-handoff-sheet, [data-drawing-handoff-active-sheet-open]').forEach(link=>{
+    link.addEventListener('click',event=>{
+      if(link.classList.contains('is-disabled')){
+        event.preventDefault();
+      }
+    });
+  });
+  setDrawingHandoffActiveSheet(activeDrawingHandoffSheetName);
+}
+function renderDrawingHandoffPanel(element=selectedElementData){
+  const panel=document.getElementById('drawing-handoff-panel');
+  if(!(panel instanceof HTMLElement))return;
+  const drawingSheetPackage=buildActiveDrawingSheetPackage(element);
+  panel.innerHTML=buildDrawingHandoffPanelHtml({
+    workspace:workspaceState,
+    drawingReview:buildDrawingReviewModel(workspaceState.drawing||{}),
+    drawingSheetPackage,
+  });
+  const copyButton=panel.querySelector('[data-drawing-handoff-copy-link]');
+  if(copyButton instanceof HTMLButtonElement){
+    copyButton.addEventListener('click',()=>copyDrawingHandoffDeepLink(copyButton));
+  }
+  bindDrawingHandoffSheetInteractions(panel);
+}
 function renderReportExportPanel(){
   const panel=document.getElementById('viewer-report-export-panel');
   if(!(panel instanceof HTMLElement))return;
+  renderDrawingHandoffPanel(selectedElementData);
+  renderDeliveryReviewReceipt(lastAnalysisCockpitModel);
   const ops=readLocalOpsState();
   const lastExport=Array.isArray(ops.exportHistory)&&ops.exportHistory.length?ops.exportHistory[0]:null;
   const comparison=buildOptimizationComparisonModel({
@@ -4800,6 +6968,20 @@ function buildUI(data){
       );
     });
   }
+  const materialCatalogSummary=Array.isArray(data.meta?.material_catalog_summary)?data.meta.material_catalog_summary:[];
+  if(materialCatalogSummary.length){
+    appendTreeHeading('Materials');
+    materialCatalogSummary.slice(0,8).forEach(row=>{
+      const materialId=normalizeSelectionValue(row.material_id);
+      appendTreeItem(
+        normalizeSelectionValue(row.material_label)||`${row.material_name||'Material'} ${row.material_grade||''}`.trim(),
+        `${safeNumber(row.usage_count,0)}`,
+        ()=>focusFirstElementByPredicate(el=>normalizeSelectionValue(el.material_id)===materialId),
+        normalizeSelectionValue(row.color),
+        {isolateKind:'material_id',isolateValue:materialId,isolateLabel:row.material_label||materialId}
+      );
+    });
+  }
   const groupSummary=Array.isArray(data.meta?.group_summary)?data.meta.group_summary:[];
   if(groupSummary.length){
     appendTreeHeading('Groups');
@@ -4878,12 +7060,21 @@ function buildUI(data){
   });
   const statEntries=buildViewerStatEntries(summary,{largeModelBuildProfile});
   const cockpitModel=buildAnalysisCockpitModel(data,{summary});
+  lastAnalysisCockpitModel=cockpitModel;
   renderShellSummary(summary);
   renderKpiSummary(statEntries,cockpitModel);
+  renderAnalysisResultEvidence(cockpitModel);
+  renderResultEnvelope(cockpitModel);
+  renderDeliveryReviewReceipt(cockpitModel);
   renderOptimizationSummaryPanel(cockpitModel);
   renderCriticalMembersPanel(cockpitModel);
+  renderMaterialMemberCatalogPanel(data);
   renderAnalysisCockpitCharts(cockpitModel);
   renderAnalysisTimeline(cockpitModel);
+  renderStageResultCallouts(cockpitModel);
+  renderStageResultReceipt(cockpitModel,contourContext);
+  syncViewportToolRailState();
+  syncStageReviewControls();
   renderStatsPanel(statEntries);
   renderRealDrawingQualityPanel(data);
   renderProjectWorkspacePanel();
@@ -4896,7 +7087,19 @@ function renderLoadCaseList(data=modelData){
   const activeLoadCase=normalizeSelectionValue(readSharedSelection().loadCase);
   const loadCaseModel=buildLoadCaseListModel(data,{activeLoadCase});
   if(loadCaseModel.items.length){
-    loadCaseList.innerHTML=loadCaseModel.items.map(item=>`<div class="tree-item${item.selected?' selected':''}" data-load-case-value="${escapeHtml(item.label)}"><span>${escapeHtml(item.label)}</span></div>`).join('');
+    loadCaseList.classList.add('load-case-evidence-list');
+    loadCaseList.innerHTML=loadCaseModel.items.map(item=>`
+      <button type="button" class="load-case-evidence-row tree-item${item.selected?' selected':''}" data-load-case-value="${escapeHtml(item.label)}" data-load-case-status="${escapeHtml(item.statusLabel)}" data-load-case-kind="${escapeHtml(item.kind)}" style="--load-case-progress:${Math.max(0,Math.min(100,safeNumber(item.progressPct,0))).toFixed(0)}%">
+        <span class="load-case-evidence-row__main">
+          <strong>${escapeHtml(item.label)}</strong>
+          <em>${escapeHtml(item.kind)} · ${escapeHtml(item.sourceLabel)}</em>
+        </span>
+        <span class="load-case-evidence-row__meta">
+          <b>${escapeHtml(item.statusLabel)}</b>
+          <small>${escapeHtml(item.stepLabel)}</small>
+        </span>
+        <span class="load-case-evidence-row__bar" aria-hidden="true"><i></i></span>
+      </button>`).join('');
     loadCaseList.querySelectorAll('[data-load-case-value]').forEach(item=>{
       item.addEventListener('click',()=>{
         const loadCase=normalizeSelectionValue(item.getAttribute('data-load-case-value'));
@@ -4905,10 +7108,13 @@ function renderLoadCaseList(data=modelData){
         renderLoadCaseList(data);
         if(selectedElementData)showProperties(selectedElementData,{publish:false});
         updateProvenanceBlock();
+        renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
+        syncStageReviewControls();
       });
     });
     return;
   }
+  loadCaseList.classList.remove('load-case-evidence-list');
   loadCaseList.innerHTML=`<div class="panel-placeholder">${escapeHtml(loadCaseModel.emptyText)}</div>`;
 }
 
@@ -4969,6 +7175,14 @@ function showProperties(d,{publish=true}={}){
   if(d.action_name)extraRows.push(`<div class="prop-row"><span class="prop-label">Action</span><span class="prop-value">${escapeHtml(d.action_name)}</span></div>`);
   if(d.before_after_snapshot_note)extraRows.push(`<div class="prop-row"><span class="prop-label">Change</span><span class="prop-value">${escapeHtml(d.before_after_snapshot_note)}</span></div>`);
   if(d.optimization_meaning_label)extraRows.push(`<div class="prop-row"><span class="prop-label">Meaning</span><span class="prop-value">${escapeHtml(d.optimization_meaning_label)}</span></div>`);
+  const materialLabel=normalizeSelectionValue(d.material_label||d.material_name||d.material);
+  if(materialLabel&&materialLabel!=='--')extraRows.push(`<div class="prop-row"><span class="prop-label">Material</span><span class="prop-value">${escapeHtml(materialLabel)}</span></div>`);
+  if(d.material_id)extraRows.push(`<div class="prop-row"><span class="prop-label">Material ID</span><span class="prop-value">${escapeHtml(d.material_id)}</span></div>`);
+  if(d.material_family&&d.material_family!=='--')extraRows.push(`<div class="prop-row"><span class="prop-label">Material Family</span><span class="prop-value">${escapeHtml(d.material_family_label||d.material_family)}</span></div>`);
+  if(safeNumber(d.material_elastic_modulus,0)||safeNumber(d.material_poisson_ratio,0)||safeNumber(d.material_density,0)){
+    extraRows.push(`<div class="prop-row"><span class="prop-label">Material Props</span><span class="prop-value">E ${escapeHtml(formatMaterialCatalogNumber(d.material_elastic_modulus,{digits:1}))} · ν ${escapeHtml(formatMaterialCatalogNumber(d.material_poisson_ratio,{digits:2,allowZero:true}))} · ρ ${escapeHtml(formatMaterialCatalogNumber(d.material_density,{digits:1,allowZero:true}))}</span></div>`);
+  }
+  if(d.material_source_status&&d.material_source_status!=='source_material')extraRows.push(`<div class="prop-row"><span class="prop-label">Material Status</span><span class="prop-value">${escapeHtml(d.material_source_status)}</span></div>`);
   if(d.section_family&&d.section_family!=='--')extraRows.push(`<div class="prop-row"><span class="prop-label">Section Family</span><span class="prop-value">${escapeHtml(d.section_family)}</span></div>`);
   if(d.section_shape&&d.section_shape!=='--')extraRows.push(`<div class="prop-row"><span class="prop-label">Section Shape</span><span class="prop-value">${escapeHtml(d.section_shape)}</span></div>`);
   if(d.group_label&&d.group_label!=='--')extraRows.push(`<div class="prop-row"><span class="prop-label">Groups</span><span class="prop-value">${escapeHtml(d.group_label)}</span></div>`);
@@ -4998,15 +7212,24 @@ function showProperties(d,{publish=true}={}){
     <div class="prop-row"><span class="prop-label">Nodes</span><span class="prop-value">${escapeHtml((d.node_ids||[]).join(', '))}</span></div>
     ${extraRows.join('')}`;
   if(publish){
-    publishSharedSelection({memberId:resolveSelectionMemberId(d),loadCase:selection.loadCase});
+    const currentSelection=getCurrentSelectionState();
+    publishSharedSelection({
+      memberId:resolveSelectionMemberId(d),
+      memberIds:currentSelection.memberIds,
+      loadCase:selection.loadCase,
+    });
   }
   refreshDirectMeshVisuals();
   refreshInstancedVisuals();
+  rebuildSelectionFocusOverlay(d);
   renderSectionEditPreview();
   updateProvenanceBlock();
   renderSearchResults(modelData);
   renderExplainabilityPanel(d);
   renderReportExportPanel();
+  renderStageResultCallouts(lastAnalysisCockpitModel);
+  renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
+  syncCriticalMemberReviewFocus();
   auditWorkspaceEvent('member_selected','selection updated',resolveSelectionMemberId(d));
 }
 
@@ -5017,7 +7240,77 @@ function setRenderMode(mode){
     document.getElementById(state.buttonId)?.classList.toggle('active',state.active);
   });
   document.getElementById('legend-container').style.display=getViewerLegendDisplayForRenderMode(renderMode);
+  syncViewportToolRailState();
   updateRenderMode();
+}
+function syncViewportToolRailState(){
+  const rail=document.getElementById('viewport-tool-rail');
+  if(!(rail instanceof HTMLElement))return;
+  rail.dataset.renderMode=renderMode;
+  rail.dataset.compare=showDeformed?'on':'off';
+  rail.dataset.animate=isAnimating?'on':'off';
+  rail.dataset.viewPreset=activeMidas33ViewPreset||'';
+  rail.querySelectorAll('[data-viewport-tool-render-mode]').forEach(button=>{
+    if(!(button instanceof HTMLElement))return;
+    const active=normalizeSelectionValue(button.getAttribute('data-viewport-tool-render-mode'))===renderMode;
+    button.classList.toggle('is-active',active);
+    button.setAttribute('aria-pressed',active?'true':'false');
+  });
+  rail.querySelectorAll('[data-viewport-tool-toggle="compare"]').forEach(button=>{
+    if(!(button instanceof HTMLElement))return;
+    button.classList.toggle('is-active',showDeformed);
+    button.setAttribute('aria-pressed',showDeformed?'true':'false');
+  });
+  rail.querySelectorAll('[data-viewport-tool-toggle="animate"]').forEach(button=>{
+    if(!(button instanceof HTMLElement))return;
+    button.classList.toggle('is-active',isAnimating);
+    button.setAttribute('aria-pressed',isAnimating?'true':'false');
+  });
+  rail.querySelectorAll('[data-viewport-view-preset]').forEach(button=>{
+    if(!(button instanceof HTMLElement))return;
+    const active=normalizeSelectionValue(button.getAttribute('data-viewport-view-preset'))===activeMidas33ViewPreset;
+    button.classList.toggle('is-active',active);
+    button.setAttribute('aria-pressed',active?'true':'false');
+  });
+  syncTopRunControl({cockpitModel:lastAnalysisCockpitModel});
+}
+function syncStageReviewControls(){
+  const panel=document.getElementById('stage-review-controls-section');
+  if(!(panel instanceof HTMLElement))return;
+  panel.dataset.renderMode=renderMode;
+  panel.dataset.compare=showDeformed?'on':'off';
+  panel.dataset.animate=isAnimating?'on':'off';
+  panel.dataset.viewPreset=activeMidas33ViewPreset||'review';
+  const viewModeSelect=document.getElementById('stage-view-mode-select');
+  if(viewModeSelect instanceof HTMLSelectElement)viewModeSelect.value=renderMode;
+  const viewPresetSelect=document.getElementById('stage-view-preset-select');
+  if(viewPresetSelect instanceof HTMLSelectElement)viewPresetSelect.value=activeMidas33ViewPreset||'review';
+  const optimizedState=document.getElementById('stage-model-optimized-state');
+  if(optimizedState)optimizedState.textContent=renderMode==='wireframe'?'Wire visible':'Visible';
+  const compareButton=document.getElementById('stage-model-compare-toggle');
+  if(compareButton instanceof HTMLElement){
+    compareButton.classList.toggle('is-active',showDeformed);
+    compareButton.setAttribute('aria-pressed',showDeformed?'true':'false');
+  }
+  const compareState=document.getElementById('stage-model-compare-state');
+  if(compareState)compareState.textContent=showDeformed?'Neutral ghost visible':'Off';
+  const compareChip=document.getElementById('stage-model-compare-chip');
+  if(compareChip)compareChip.textContent=showDeformed?'On':'Off';
+  const receipt=document.getElementById('stage-review-control-receipt');
+  if(receipt instanceof HTMLElement){
+    const fieldLabel=getSelectedOptionText('scalar-select','--');
+    const timeline=getResolvedAnalysisTimeline(lastAnalysisCockpitModel)||{};
+    const sharedSelection=readSharedSelection();
+    const activeLoadCase=normalizeSelectionValue(sharedSelection.loadCase)||timeline.loadCase||'--';
+    const stepLabel=timeline.totalSteps?`${timeline.activeStep}/${timeline.totalSteps}`:'--';
+    receipt.dataset.renderMode=renderMode;
+    receipt.dataset.compare=showDeformed?'on':'off';
+    receipt.dataset.animate=isAnimating?'on':'off';
+    receipt.innerHTML=`
+      <span class="stage-review-control-receipt__row"><b>Result</b><em>${escapeHtml(fieldLabel)}</em></span>
+      <span class="stage-review-control-receipt__row"><b>Load/Step</b><em>${escapeHtml(activeLoadCase)} · ${escapeHtml(stepLabel)}</em></span>
+      <span class="stage-review-control-receipt__row"><b>Scale</b><em>${safeNumber(deformScale,100).toFixed(0)}x · ${showDeformed?'Compare':'Compare off'}</em></span>`;
+  }
 }
 function updateRenderMode(){
   contourContext=renderMode==='contour'?computeContourContext():null;
@@ -5078,6 +7371,8 @@ function updateRenderMode(){
   refreshDirectMeshVisuals();
   if(renderMode==='contour')applyContour();
   rebuildPickTargetMeshes();
+  renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
+  syncStageReviewControls();
   requestViewerRender();
 }
 function applyContour(){
@@ -5096,7 +7391,7 @@ function applyContour(){
           startColor=resolveNodeContourColor(nodeData[0],contourContext);
           endColor=resolveNodeContourColor(nodeData[1],contourContext);
         }else{
-          const color=resolveContourColor(resolveContourValue(linked.userData,contourContext.field),contourContext);
+          const color=resolveContourColor(resolveContourValue(linked.userData,contourContext.field,contourContext),contourContext);
           startColor=color;
           endColor=color;
         }
@@ -5126,10 +7421,65 @@ function applyContour(){
   });
   refreshInstancedVisuals();
   refreshDirectMeshVisuals();
+  renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
   requestViewerRender();
 }
-function updateContour(){if(renderMode==='contour')applyContour()}
+function updateContour(){
+  if(renderMode==='contour')applyContour();
+  else renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
+}
 
+function setAnalysisStageOverlayState(state={}){
+  const loadArrowCount=Math.max(0,Math.round(safeNumber(state.loadArrowCount,0)));
+  const supportMarkerCount=Math.max(0,Math.round(safeNumber(state.supportMarkerCount,0)));
+  analysisStageOverlayState={
+    loadArrowCount,
+    supportMarkerCount,
+    visibleEvidenceCount:Math.max(0,Math.round(safeNumber(state.visibleEvidenceCount,(loadArrowCount>0?1:0)+(supportMarkerCount>0?1:0)))),
+    supportLimit:Math.max(0,Math.round(safeNumber(state.supportLimit,0))),
+    status:normalizeSelectionValue(state.status)||'pending',
+    source:normalizeSelectionValue(state.source)||'--',
+    loadCase:normalizeSelectionValue(state.loadCase)||'--',
+    direction:normalizeSelectionValue(state.direction)||'+X',
+  };
+  window.__STRUCTURE_VIEWER_ANALYSIS_OVERLAY_STATE__={...analysisStageOverlayState};
+  renderAnalysisStageOverlayReceipt();
+}
+function renderAnalysisStageOverlayReceipt(){
+  const panel=document.getElementById('stage-overlay-receipt');
+  if(!(panel instanceof HTMLElement))return;
+  const state=analysisStageOverlayState||{};
+  const loadArrowCount=Math.max(0,Math.round(safeNumber(state.loadArrowCount,0)));
+  const supportMarkerCount=Math.max(0,Math.round(safeNumber(state.supportMarkerCount,0)));
+  const supportLimit=Math.max(supportMarkerCount,Math.round(safeNumber(state.supportLimit,supportMarkerCount)));
+  const status=normalizeSelectionValue(state.status)||'pending';
+  const statusLabel=status==='ready'?'Overlay active':status==='blocked'?'Overlay blocked':'Awaiting model';
+  const source=normalizeSelectionValue(state.source)||'Model extents';
+  const loadCase=normalizeSelectionValue(state.loadCase)||'--';
+  const direction=normalizeSelectionValue(state.direction)||'+X';
+  const visibleEvidenceCount=Math.max(0,Math.round(safeNumber(state.visibleEvidenceCount,(loadArrowCount>0?1:0)+(supportMarkerCount>0?1:0))));
+  panel.dataset.overlayStatus=status;
+  panel.dataset.loadArrowCount=String(loadArrowCount);
+  panel.dataset.supportMarkerCount=String(supportMarkerCount);
+  panel.dataset.visibleEvidenceCount=String(visibleEvidenceCount);
+  panel.dataset.overlaySource=source;
+  panel.dataset.overlayLoadCase=loadCase;
+  panel.innerHTML=`
+    <div class="stage-overlay-receipt__title">
+      <span>3D Overlay Receipt</span>
+      <strong>${escapeHtml(statusLabel)}</strong>
+    </div>
+    <div class="stage-overlay-visual-evidence" data-stage-overlay-visual-evidence data-load-arrow-visible-count="${loadArrowCount}" data-support-marker-visible-count="${supportMarkerCount}" data-visible-evidence-count="${visibleEvidenceCount}" aria-label="Visible 3D load and support overlay evidence">
+      <span class="stage-overlay-visual-evidence__item" data-stage-overlay-load-key><i class="stage-overlay-legend-swatch stage-overlay-legend-swatch--load"></i><b>Vectors</b><em>${loadArrowCount?`${loadArrowCount} ${escapeHtml(direction)}`:'--'}</em></span>
+      <span class="stage-overlay-visual-evidence__item" data-stage-overlay-support-key><i class="stage-overlay-legend-swatch stage-overlay-legend-swatch--support"></i><b>Supports</b><em>${supportMarkerCount?String(supportMarkerCount):'--'}</em></span>
+    </div>
+    <div class="stage-overlay-receipt__grid">
+      <span class="stage-overlay-receipt__row"><b>Load vectors</b><em>${loadArrowCount?`${loadArrowCount} ${escapeHtml(direction)}`:'--'}</em></span>
+      <span class="stage-overlay-receipt__row"><b>Supports</b><em>${supportMarkerCount?`${supportMarkerCount}/${supportLimit}`:'--'}</em></span>
+      <span class="stage-overlay-receipt__row"><b>Load case</b><em>${escapeHtml(loadCase)}</em></span>
+      <span class="stage-overlay-receipt__row"><b>Source</b><em>${escapeHtml(source)}</em></span>
+    </div>`;
+}
 function clearAnalysisStageOverlays(){
   if(!analysisOverlayGroup)return;
   while(analysisOverlayGroup.children.length){
@@ -5153,17 +7503,24 @@ function getBaseSupportNodesForOverlay(data,limit=22){
 }
 function rebuildAnalysisStageOverlays(){
   clearAnalysisStageOverlays();
-  if(!modelGroup||!analysisOverlayGroup||!modelData)return;
+  if(!modelGroup||!analysisOverlayGroup||!modelData){
+    setAnalysisStageOverlayState({status:'pending',source:'Model extents'});
+    return;
+  }
   const box=new THREE.Box3().setFromObject(modelGroup);
-  if(box.isEmpty())return;
+  if(box.isEmpty()){
+    setAnalysisStageOverlayState({status:'blocked',source:'Empty model bounds'});
+    return;
+  }
   const center=box.getCenter(new THREE.Vector3());
   const size=box.getSize(new THREE.Vector3());
   const maxSpan=Math.max(size.x,size.y,size.z,1);
-  const arrowLength=Math.max(maxSpan*.13,3);
+  const arrowLength=Math.max(maxSpan*.16,3.6);
   const arrowStartX=box.max.x+maxSpan*.035;
   const arrowBaseZ=center.z+size.z*.2;
   const arrowDir=new THREE.Vector3(1,0,0);
-  Array.from({length:6},(_,index)=>index).forEach(index=>{
+  const loadArrowCount=6;
+  Array.from({length:loadArrowCount},(_,index)=>index).forEach(index=>{
     const t=(index+1)/7;
     const y=box.min.y+size.y*t;
     const origin=new THREE.Vector3(arrowStartX,y,arrowBaseZ);
@@ -5172,16 +7529,16 @@ function rebuildAnalysisStageOverlays(){
       origin,
       arrowLength,
       0xfacc15,
-      arrowLength*.24,
-      arrowLength*.11
+      arrowLength*.28,
+      arrowLength*.13
     );
     arrow.name=`lateral_load_arrow_${index+1}`;
-    arrow.userData={_analysisOverlay:true,overlayKind:'lateral_load_arrow'};
+    arrow.userData={_analysisOverlay:true,overlayKind:'lateral_load_arrow',visualEvidence:true};
     analysisOverlayGroup.add(arrow);
   });
   const supportNodes=getBaseSupportNodesForOverlay(modelData);
-  const markerHeight=Math.max(maxSpan*.045,.8);
-  const markerRadius=Math.max(markerHeight*.42,.22);
+  const markerHeight=Math.max(maxSpan*.052,.9);
+  const markerRadius=Math.max(markerHeight*.48,.26);
   const supportGeometry=new THREE.ConeGeometry(markerRadius,markerHeight,4);
   const supportMaterial=new THREE.MeshBasicMaterial({color:0x39ff88,transparent:true,opacity:.95});
   supportNodes.forEach((node,index)=>{
@@ -5189,8 +7546,21 @@ function rebuildAnalysisStageOverlays(){
     marker.position.set(safeNumber(node?.x,0),safeNumber(node?.z,0)-markerHeight*.55,safeNumber(node?.y,0));
     marker.rotation.y=Math.PI*.25;
     marker.name=`support_marker_${index+1}`;
-    marker.userData={_analysisOverlay:true,overlayKind:'support_marker',nodeId:normalizeSelectionValue(node?.id)};
+    marker.userData={_analysisOverlay:true,overlayKind:'support_marker',nodeId:normalizeSelectionValue(node?.id),visualEvidence:true};
     analysisOverlayGroup.add(marker);
+  });
+  const timeline=getResolvedAnalysisTimeline(lastAnalysisCockpitModel)||{};
+  const sharedSelection=readSharedSelection();
+  const loadCase=normalizeSelectionValue(sharedSelection.loadCase)||timeline.loadCase||modelData?.meta?.governing_load_case||modelData?.meta?.active_load_case||'Model case';
+  setAnalysisStageOverlayState({
+    loadArrowCount,
+    supportMarkerCount:supportNodes.length,
+    visibleEvidenceCount:(loadArrowCount>0?1:0)+(supportNodes.length>0?1:0),
+    supportLimit:22,
+    status:'ready',
+    source:'Model extents + base nodes',
+    loadCase,
+    direction:'+X',
   });
   requestViewerRender();
 }
@@ -5205,12 +7575,17 @@ function toggleDeformed(){
   }else if(pickAnalyticSpatialIndex){
     clearDeformedPickAcceleration(pickAnalyticSpatialIndex,largeModelBuildProfile);
   }
+  syncViewportToolRailState();
+  syncStageReviewControls();
+  renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
   requestViewerRender();
 }
 function updateDeformScale(v){
   deformScale=parseFloat(v);
   document.getElementById('scale-val').textContent=deformScale;
   if(showDeformed)rebuildDeformed();
+  renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
+  syncStageReviewControls();
 }
 function rebuildDeformed(){
   if(!modelData)return;
@@ -5235,6 +7610,8 @@ function toggleAnimation(){
   isAnimating = !isAnimating;
   document.getElementById('btn-animate').classList.toggle('active', isAnimating);
   if(isAnimating && !showDeformed) toggleDeformed(); // 변형 모드가 아니면 자동으로 켬
+  syncViewportToolRailState();
+  syncStageReviewControls();
 }
 
 /* ── Layer / Type ── */
@@ -5303,6 +7680,8 @@ function updateMidas33ViewPresetButtons(){
     const button=document.getElementById(`btn-view-${state.key}`);
     if(button)button.classList.toggle('active',state.active);
   });
+  syncViewportToolRailState();
+  syncStageReviewControls();
 }
 function setMidas33ViewPreset(preset='review'){
   const normalized=normalizeMidas33ViewPreset(preset);
@@ -5329,6 +7708,32 @@ function applyDefaultViewPreset(){
     setMidas33ViewPreset('review');
   }
 }
+function startNewReviewRun(){
+  analysisTimelineStepOverride=null;
+  if(analysisTimelinePlaybackTimer){
+    window.clearInterval(analysisTimelinePlaybackTimer);
+    analysisTimelinePlaybackTimer=null;
+  }
+  if(isAnimating){
+    isAnimating=false;
+    document.getElementById('btn-animate')?.classList.remove('active');
+  }
+  if(showDeformed)toggleDeformed();
+  if(renderMode!=='contour')setRenderMode('contour');
+  clearSelection({publish:false});
+  if(activeIsolation.kind||activeIsolation.value)clearIsolation();
+  const cameraApplied=setMidas33ViewPreset('review');
+  if(!cameraApplied)fitAll();
+  renderAnalysisTimeline(lastAnalysisCockpitModel);
+  syncViewportToolRailState();
+  syncStageReviewControls();
+  auditWorkspaceEvent('review_run_reset','topbar new run',resolveSelectionMemberId(selectedElementData),{
+    renderMode,
+    compare:showDeformed?'on':'off',
+    viewPreset:activeMidas33ViewPreset||'review',
+  });
+  return true;
+}
 function resetCamera(){
   camera.position.copy(defaultView.position);
   controls.target.copy(defaultView.target);
@@ -5348,6 +7753,7 @@ function animate(){
   }
   const nowMs=performance.now();
   if(viewerNeedsRender||isAnimating||nowMs-lastRenderAt>=STATIC_RENDER_REFRESH_MS){
+    positionViewportSelectionFocusBadge();
     renderer.render(scene,camera);
     viewerNeedsRender=false;
     lastRenderAt=nowMs;
@@ -5364,6 +7770,7 @@ function onResize(){
   camera.aspect=vp.clientWidth/vp.clientHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(vp.clientWidth,vp.clientHeight);
+  positionViewportSelectionFocusBadge();
   requestViewerRender();
 }
 
@@ -5371,6 +7778,9 @@ function onResize(){
 window.setRenderMode=setRenderMode;
 window.toggleDeformed=toggleDeformed;
 window.toggleAnimation=toggleAnimation;
+window.setAnalysisTimelineStep=setAnalysisTimelineStep;
+window.stepAnalysisTimeline=stepAnalysisTimeline;
+window.toggleAnalysisTimelinePlayback=toggleAnalysisTimelinePlayback;
 window.updateDeformScale=updateDeformScale;
 window.updateContour=updateContour;
 window.resetCamera=resetCamera;
@@ -5378,6 +7788,7 @@ window.fitAll=fitAll;
 window.getViewerModelBounds=getViewerModelBounds;
 window.setViewerCameraPose=setViewerCameraPose;
 window.setMidas33ViewPreset=setMidas33ViewPreset;
+window.startNewReviewRun=startNewReviewRun;
 window.clearSelection=clearSelection;
 window.handleSectionEditPreviewInputChange=handleSectionEditPreviewInputChange;
 window.stageSectionEditPreview=stageSectionEditPreview;
@@ -5395,6 +7806,7 @@ window.runSearchIsolate=runSearchIsolate;
 window.clearSearch=clearSearch;
 window.setProjectWorkspaceProject=setProjectWorkspaceProject;
 window.setProjectWorkspaceDrawing=setProjectWorkspaceDrawing;
+window.setTopbarWorkspaceSelection=setTopbarWorkspaceSelection;
 window.setProjectWorkspaceVariant=setProjectWorkspaceVariant;
 window.setProjectWorkspaceFilter=setProjectWorkspaceFilter;
 window.setProjectWorkspaceSearch=setProjectWorkspaceSearch;
@@ -5417,6 +7829,7 @@ window.saveReviewTask=saveReviewTask;
 window.saveReviewNote=saveReviewNote;
 window.buildCurrentStructureViewerReportHtml=buildCurrentStructureViewerReportHtml;
 window.buildOptimizationComparisonModel=buildOptimizationComparisonModel;
+window.positionStageResultCalloutDock=positionStageResultCalloutDock;
 window.toggleLightMode=toggleLightMode;
 window.toggleShortcutHelp=toggleShortcutHelp;
 window.addEventListener('keydown',event=>{

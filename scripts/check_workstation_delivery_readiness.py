@@ -20,6 +20,7 @@ DEFAULT_JOB_RECORD = Path("implementation/phase1/workstation_job_record.json")
 DEFAULT_JOB_RETENTION_POLICY = Path("implementation/phase1/workstation_job_retention_policy.json")
 DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE = Path("implementation/phase1/structure_viewer_browser_performance_probe.json")
 DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE = Path("implementation/phase1/structure_viewer_visual_regression_baseline.json")
+DEFAULT_DELIVERY_VIEWER_SMOKE = Path("implementation/phase1/workstation_delivery_viewer_smoke.json")
 
 
 def _now_utc_iso() -> str:
@@ -110,6 +111,16 @@ def _package_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
             else []
         ),
         *(
+            ["package_qa_summary_marker_missing"]
+            if path.exists() and not restore.get("qa_summary_marker_pass", False)
+            else []
+        ),
+        *(
+            ["package_handoff_diff_marker_missing"]
+            if path.exists() and not restore.get("handoff_diff_marker_pass", False)
+            else []
+        ),
+        *(
             ["package_pdf_magic_missing"]
             if path.exists() and not restore.get("pdf_magic_pass", False)
             else []
@@ -127,6 +138,21 @@ def _package_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
         *(
             ["package_manifest_claim_boundary_missing"]
             if path.exists() and not restore.get("manifest_claim_boundary_pass", False)
+            else []
+        ),
+        *(
+            ["package_report_metadata_missing_or_invalid"]
+            if path.exists() and not restore.get("report_metadata_pass", False)
+            else []
+        ),
+        *(
+            ["package_handoff_diff_summary_missing_or_invalid"]
+            if path.exists() and not restore.get("handoff_diff_summary_pass", False)
+            else []
+        ),
+        *(
+            ["package_signing_manifest_missing_or_invalid"]
+            if path.exists() and not restore.get("signing_manifest_pass", False)
             else []
         ),
         *(
@@ -158,10 +184,15 @@ def _package_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
         viewer_shell_marker_pass=bool(restore.get("viewer_shell_marker_pass", False)),
         delivery_index_marker_pass=bool(restore.get("delivery_index_marker_pass", False)),
         acceptance_packet_marker_pass=bool(restore.get("acceptance_packet_marker_pass", False)),
+        qa_summary_marker_pass=bool(restore.get("qa_summary_marker_pass", False)),
+        handoff_diff_marker_pass=bool(restore.get("handoff_diff_marker_pass", False)),
         pdf_magic_pass=bool(restore.get("pdf_magic_pass", False)),
         manifest_report_reference_pass=bool(restore.get("manifest_report_reference_pass", False)),
         manifest_acceptance_reference_pass=bool(restore.get("manifest_acceptance_reference_pass", False)),
         manifest_claim_boundary_pass=bool(restore.get("manifest_claim_boundary_pass", False)),
+        report_metadata_pass=bool(restore.get("report_metadata_pass", False)),
+        handoff_diff_summary_pass=bool(restore.get("handoff_diff_summary_pass", False)),
+        signing_manifest_pass=bool(restore.get("signing_manifest_pass", False)),
         revision_policy_pass=bool(restore.get("revision_policy_pass", False)),
         redelivery_comparison_pass=bool(restore.get("redelivery_comparison_pass", False)),
     )
@@ -182,6 +213,42 @@ def _viewer_gate(viewer_probe_path: Path, visual_path: Path, viewer: dict[str, A
         viewer_visual_regression_baseline=str(visual_path),
         viewer_probe_summary=str(viewer.get("summary_line", "")),
         visual_summary=str(visual.get("summary_line", "")),
+    )
+
+
+def _delivery_viewer_smoke_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    static_checks = payload.get("static_checks", {})
+    if not isinstance(static_checks, dict):
+        static_checks = {}
+    browser_checks = payload.get("browser_checks", {})
+    if not isinstance(browser_checks, dict):
+        browser_checks = {}
+    alignment = static_checks.get("commercial_cockpit_alignment", {})
+    if not isinstance(alignment, dict):
+        alignment = {}
+    blockers = [
+        *(["workstation_delivery_viewer_smoke_missing"] if not path.exists() else []),
+        *(["workstation_delivery_viewer_smoke_not_green"] if path.exists() and not payload.get("contract_pass", False) else []),
+        *(["workstation_delivery_viewer_static_failed"] if path.exists() and not static_checks.get("pass", False) else []),
+        *(["workstation_delivery_viewer_browser_failed"] if path.exists() and not browser_checks.get("pass", False) else []),
+        *(
+            ["workstation_delivery_viewer_not_current_commercial_cockpit"]
+            if path.exists() and str(alignment.get("status", "")) != "current_cockpit_delivery"
+            else []
+        ),
+    ]
+    return _gate(
+        "Customer-open delivery viewer smoke",
+        not blockers,
+        blockers,
+        path=str(path),
+        summary_line=str(payload.get("summary_line", "")),
+        package_path=str(payload.get("package_path", "")),
+        static_smoke_pass=bool(static_checks.get("pass", False)),
+        browser_smoke_pass=bool(browser_checks.get("pass", False)),
+        browser_skipped=bool(payload.get("browser_skipped", False)),
+        commercial_cockpit_alignment_status=str(alignment.get("status", "")),
+        warnings=payload.get("warnings", []) if isinstance(payload.get("warnings", []), list) else [],
     )
 
 
@@ -283,6 +350,7 @@ def check_workstation_delivery_readiness(
     job_retention_policy: Path = DEFAULT_JOB_RETENTION_POLICY,
     viewer_browser_performance_probe: Path = DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE,
     viewer_visual_regression_baseline: Path = DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE,
+    delivery_viewer_smoke: Path = DEFAULT_DELIVERY_VIEWER_SMOKE,
 ) -> dict[str, Any]:
     hardware = _load_json(hardware_profile)
     budget = _load_json(service_budget)
@@ -291,11 +359,13 @@ def check_workstation_delivery_readiness(
     retention = _load_json(job_retention_policy)
     viewer = _load_json(viewer_browser_performance_probe)
     visual = _load_json(viewer_visual_regression_baseline)
+    delivery_viewer = _load_json(delivery_viewer_smoke)
 
     gates = [
         _hardware_gate(hardware_profile, hardware),
         _service_budget_gate(service_budget, budget),
         _package_gate(delivery_package_manifest, package),
+        _delivery_viewer_smoke_gate(delivery_viewer_smoke, delivery_viewer),
         _viewer_gate(viewer_browser_performance_probe, viewer_visual_regression_baseline, viewer, visual),
         _client_input_gate(client_input_validation_report, client),
         _job_reproducibility_gate(job_record, package),
@@ -340,6 +410,7 @@ def check_workstation_delivery_readiness(
             "job_retention_policy": str(job_retention_policy),
             "viewer_browser_performance_probe": str(viewer_browser_performance_probe),
             "viewer_visual_regression_baseline": str(viewer_visual_regression_baseline),
+            "delivery_viewer_smoke": str(delivery_viewer_smoke),
         },
     }
 
@@ -354,6 +425,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--job-retention-policy", type=Path, default=DEFAULT_JOB_RETENTION_POLICY)
     parser.add_argument("--viewer-browser-performance-probe", type=Path, default=DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE)
     parser.add_argument("--viewer-visual-regression-baseline", type=Path, default=DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE)
+    parser.add_argument("--delivery-viewer-smoke", type=Path, default=DEFAULT_DELIVERY_VIEWER_SMOKE)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -371,6 +443,7 @@ def main(argv: list[str] | None = None) -> int:
         job_retention_policy=args.job_retention_policy,
         viewer_browser_performance_probe=args.viewer_browser_performance_probe,
         viewer_visual_regression_baseline=args.viewer_visual_regression_baseline,
+        delivery_viewer_smoke=args.delivery_viewer_smoke,
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")

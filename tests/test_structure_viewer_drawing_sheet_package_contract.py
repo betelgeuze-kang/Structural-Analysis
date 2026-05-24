@@ -28,6 +28,7 @@ import {
 } from './src/structure-viewer/viewer-drawing-sheet-package-model.js';
 import {buildStructureViewerReportExport} from './src/structure-viewer/viewer-report-export.js';
 import {buildReportExportPanelHtml} from './src/structure-viewer/viewer-report-panel-renderer.js';
+import {buildDrawingHandoffPanelHtml} from './src/structure-viewer/viewer-drawing-handoff-panel-renderer.js';
 
 const workspace = {
   projectId: 'midas33_release',
@@ -76,6 +77,11 @@ const panel = buildReportExportPanelHtml({
   drawingReview: {label: 'Review ready', tone: 'success'},
   drawingSheetPackage: sheetPackage,
 });
+const handoffPanel = buildDrawingHandoffPanelHtml({
+  workspace,
+  drawingReview: {label: 'Review ready', tone: 'success'},
+  drawingSheetPackage: sheetPackage,
+});
 console.log(JSON.stringify({
   schema: sheetPackage.schema_version,
   status: sheetPackage.status,
@@ -91,6 +97,24 @@ console.log(JSON.stringify({
   reportHasSheetEvidenceRows: report.html.includes('Sheet / Callout Evidence Rows') && report.html.includes('member callout deep-link'),
   panelHasPackage: panel.includes('Sheet Package') && panel.includes('Drawing sheet package: linked'),
   panelHasSvgLinks: panel.includes('Plan') && panel.includes('Elev-X'),
+  handoffHasPanel: handoffPanel.includes('data-drawing-handoff-panel') && handoffPanel.includes('data-drawing-handoff-status="linked"'),
+  handoffHasPreview: handoffPanel.includes('data-drawing-handoff-preview')
+    && handoffPanel.includes('data-drawing-handoff-preview-sheet="plan_z12.0"')
+    && handoffPanel.includes('data-drawing-handoff-preview-callout="C-911"')
+    && handoffPanel.includes('data-drawing-handoff-preview-link')
+    && handoffPanel.includes('data-drawing-handoff-preview-label')
+    && handoffPanel.includes('data-drawing-handoff-preview-meta')
+    && handoffPanel.includes('Sheet Preview'),
+  handoffHasActiveSheetAction: handoffPanel.includes('data-drawing-handoff-active-sheet-open')
+    && handoffPanel.includes('data-drawing-handoff-active-sheet-name="plan_z12.0"')
+    && handoffPanel.includes('Open Active Sheet'),
+  handoffHasRevisionCallout: handoffPanel.includes('R7') && handoffPanel.includes('C-911') && handoffPanel.includes('Column 911 drift callout'),
+  handoffHasDeepLinkActions: handoffPanel.includes('Open Deep Link') && handoffPanel.includes('data-drawing-handoff-copy-link'),
+  handoffHasSheetButtons: handoffPanel.includes('data-drawing-handoff-sheet="plan_z12.0"')
+    && handoffPanel.includes('data-drawing-handoff-sheet="elevation_xz"')
+    && handoffPanel.includes('data-drawing-handoff-sheet-href="https://viewer.local/structural_svg/plan_z12.0.svg?member=911&amp;revision=R7&amp;callout=C-911"')
+    && handoffPanel.includes('aria-current="true"')
+    && handoffPanel.includes('aria-disabled="false"'),
 }));
 """
     )
@@ -109,3 +133,9 @@ console.log(JSON.stringify({
     assert payload["reportHasSheetEvidenceRows"] is True
     assert payload["panelHasPackage"] is True
     assert payload["panelHasSvgLinks"] is True
+    assert payload["handoffHasPanel"] is True
+    assert payload["handoffHasPreview"] is True
+    assert payload["handoffHasActiveSheetAction"] is True
+    assert payload["handoffHasRevisionCallout"] is True
+    assert payload["handoffHasDeepLinkActions"] is True
+    assert payload["handoffHasSheetButtons"] is True

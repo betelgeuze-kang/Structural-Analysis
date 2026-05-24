@@ -13,6 +13,7 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - `npm run verify:frontend-browser-smoke`
   - Starts a local static HTTP server and runs the Playwright structure-viewer smoke against the source HTML.
   - The PR quality gate uses `-- --mode minimal`; the full gate runs desktop and mobile coverage.
+  - Assumes Chromium is already available to Playwright; browser installation is an environment setup step, not part of the smoke command.
 - `npm run verify:viewer-manifest`
   - Checks the structure-viewer project manifest schema, registered drawing/variant counts, OPSTOOL release triples, and repo-local artifact/provenance paths.
   - Runs before viewer/browser smoke in the PR quality gate so broken drawing registrations fail early.
@@ -39,6 +40,7 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - `package-lock.json` is the source of truth for deterministic installs.
 - `vite.config.ts` declares the React/Vite build entry explicitly.
 - Browser smoke must load `src/structure-viewer/index.html`, verify a nonblank canvas, and exercise real-drawing selection controls.
+- Browser verification commands must not run `playwright install` implicitly; this keeps sandboxed quality gates from mutating the user home cache or stalling on network prompts.
 - Source viewer reports must preserve selected-member sheet evidence through `structure-viewer-drawing-sheet-package.v1`, including SVG sheet link, revision, callout, and viewer deep-link.
 - Full-gate PDF smoke must exercise the same source viewer report export path before release-facing promotion.
 - Full-gate viewer performance probe must keep the local-browser claim boundary explicit with `live_performance_claim=false`.

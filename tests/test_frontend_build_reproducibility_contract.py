@@ -22,19 +22,19 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
     assert package_json["scripts"]["verify:viewer-manifest"] == "node ./scripts/verify-structure-viewer-project-manifest.mjs"
     assert (
         package_json["scripts"]["verify:frontend-browser-smoke"]
-        == "playwright install chromium && node ./scripts/verify-frontend-browser-smoke.mjs"
+        == "node ./scripts/verify-frontend-browser-smoke.mjs"
     )
     assert (
         package_json["scripts"]["verify:viewer-report-pdf"]
-        == "playwright install chromium && node ./scripts/verify-structure-viewer-report-pdf.mjs"
+        == "node ./scripts/verify-structure-viewer-report-pdf.mjs"
     )
     assert (
         package_json["scripts"]["verify:viewer-performance-probe"]
-        == "playwright install chromium && node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked"
+        == "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked"
     )
     assert (
         package_json["scripts"]["verify:viewer-visual-regression"]
-        == "playwright install chromium && node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
+        == "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
     )
     assert package_json["dependencies"] == {
         "react": "18.2.0",

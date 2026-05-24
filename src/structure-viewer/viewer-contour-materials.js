@@ -38,18 +38,31 @@ export function createViewerContourMaterialToolkit(THREE, config = {}) {
     return context.cmapFn(resolveContourT(value, context));
   }
 
-  function resolveNodeContourColor(node, context) {
-    return resolveContourColor(node?.[context.field] || 0, context);
+  function readNodeContourValue(node, context) {
+    const field = normalizeField(context?.field);
+    const id = String(node?.id ?? '');
+    const nodeScalarById = context?.nodeScalarById;
+    if (nodeScalarById && id && Object.prototype.hasOwnProperty.call(nodeScalarById, id)) {
+      return safeNumber(nodeScalarById[id], 0);
+    }
+    return safeNumber(node?.[field], 0) * safeNumber(context?.nodeScalarScale, 1);
   }
 
-  function resolveContourValue(element, field) {
+  function resolveNodeContourColor(node, context) {
+    return resolveContourColor(readNodeContourValue(node, context), context);
+  }
+
+  function resolveContourValue(element, field, context = null) {
     if (isNodeContourField(field)) {
       const nodes = element?.nodeData || [];
+      const nodeContext = context && normalizeField(context.field) === normalizeField(field)
+        ? context
+        : { ...(context || {}), field };
       return nodes.length
-        ? nodes.reduce((sum, node) => sum + (node[field] || 0), 0) / nodes.length
+        ? nodes.reduce((sum, node) => sum + readNodeContourValue(node, nodeContext), 0) / nodes.length
         : 0;
     }
-    return element?.[field] || 0;
+    return safeNumber(element?.[field], 0);
   }
 
   function buildContourLutTexture(context) {
@@ -111,7 +124,7 @@ export function createViewerContourMaterialToolkit(THREE, config = {}) {
         colors[index * 3 + 2] = color.b;
       }
     } else {
-      const color = resolveContourColor(resolveContourValue(element, context.field), context);
+      const color = resolveContourColor(resolveContourValue(element, context.field, context), context);
       colors.set(buildConstantColorAttribute(vertexCount, color));
     }
     geometry.setAttribute('color', new T.BufferAttribute(colors, 3));
@@ -142,7 +155,7 @@ export function createViewerContourMaterialToolkit(THREE, config = {}) {
       geometry.setAttribute('color', new T.BufferAttribute(colors, 3));
       return;
     }
-    const color = resolveContourColor(resolveContourValue(element, context.field), context);
+    const color = resolveContourColor(resolveContourValue(element, context.field, context), context);
     geometry.setAttribute('color', new T.BufferAttribute(buildConstantColorAttribute(vertexCount, color), 3));
   }
 
@@ -151,7 +164,7 @@ export function createViewerContourMaterialToolkit(THREE, config = {}) {
     if (!vertexCount) return;
     if (isNodeContourField(context.field) && Array.isArray(nodeData) && nodeData.length >= 4) {
       const uvAttr = geometry?.getAttribute?.('uv');
-      const scalarCorners = nodeData.slice(0, 4).map(node => resolveContourT(node?.[context.field] || 0, context));
+      const scalarCorners = nodeData.slice(0, 4).map(node => resolveContourT(readNodeContourValue(node, context), context));
       const scalars = new Float32Array(vertexCount);
       for (let index = 0; index < vertexCount; index += 1) {
         const u = uvAttr ? Number(uvAttr.getX(index) || 0) : 0;
@@ -171,7 +184,7 @@ export function createViewerContourMaterialToolkit(THREE, config = {}) {
     geometry.setAttribute(
       'contourScalar',
       new T.BufferAttribute(
-        buildConstantScalarAttribute(vertexCount, resolveContourT(resolveContourValue(element, context.field), context)),
+        buildConstantScalarAttribute(vertexCount, resolveContourT(resolveContourValue(element, context.field, context), context)),
         1,
       ),
     );
@@ -185,7 +198,7 @@ export function createViewerContourMaterialToolkit(THREE, config = {}) {
       applySurfaceContourScalars(mesh.geometry, mesh.userData.nodeData, mesh.userData, context);
     } else {
       const vertexCount = mesh.geometry.getAttribute?.('position')?.count || 0;
-      const color = resolveContourColor(resolveContourValue(mesh.userData, context.field), context);
+      const color = resolveContourColor(resolveContourValue(mesh.userData, context.field, context), context);
       mesh.geometry.setAttribute('color', new T.BufferAttribute(buildConstantColorAttribute(vertexCount, color), 3));
     }
     if (mesh.userData?.contourGeometryKind === 'surface') {

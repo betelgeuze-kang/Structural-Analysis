@@ -1,9 +1,9 @@
 {
   "schema_version": "structure-viewer-browser-performance-probe.v1",
-  "generated_at": "2026-05-20T12:43:05.594Z",
+  "generated_at": "2026-05-24T12:58:45.248Z",
   "contract_pass": true,
   "reason_code": "PASS",
-  "summary_line": "Structure viewer browser performance probe: PASS | ready=4443ms | fps=38.9 | mode=local_browser_probe",
+  "summary_line": "Structure viewer browser performance probe: PASS | ready=4745ms | fps=26.6 | mode=local_browser_probe",
   "probe_mode": "local_browser_probe",
   "measured_browser_probe": true,
   "live_performance_claim": false,
@@ -17,46 +17,46 @@
     "sample_ms": 1500
   },
   "probe": {
-    "url": "http://127.0.0.1:42223/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
-    "readyMs": 4443,
+    "url": "http://127.0.0.1:40895/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+    "readyMs": 4745,
     "viewport": {
       "width": 1440,
       "height": 1000
     },
     "canvasMetrics": {
       "nonBlank": true,
-      "canvasWidth": 460,
-      "canvasHeight": 546,
+      "canvasWidth": 500,
+      "canvasHeight": 600,
       "sampleWidth": 180,
       "sampleHeight": 120,
-      "significantPixelCount": 9029,
-      "significantPixelRatio": 0.41800925925925925,
+      "significantPixelCount": 7513,
+      "significantPixelRatio": 0.34782407407407406,
       "bbox": {
         "minX": 0,
-        "minY": 0,
-        "maxX": 179,
-        "maxY": 116,
-        "width": 180,
-        "height": 117
+        "minY": 22,
+        "maxX": 178,
+        "maxY": 119,
+        "width": 179,
+        "height": 98
       },
-      "coverageWidth": 1,
-      "coverageHeight": 0.975,
-      "bboxAspectRatio": 1.5384615384615385,
-      "centerX": 0.5,
-      "centerY": 0.4875
+      "coverageWidth": 0.9944444444444445,
+      "coverageHeight": 0.8166666666666667,
+      "bboxAspectRatio": 1.8265306122448979,
+      "centerX": 0.49722222222222223,
+      "centerY": 0.5916666666666667
     },
     "rafSample": {
-      "frameCount": 58,
-      "elapsedMs": 1466.6999999999998,
-      "averageFps": 38.862753119247294,
-      "averageFrameMs": 25.73157894736842,
-      "p95FrameMs": 149.89999999999964,
-      "maxFrameMs": 150
+      "frameCount": 40,
+      "elapsedMs": 1466.6000000000004,
+      "averageFps": 26.59211782353743,
+      "averageFrameMs": 37.60512820512822,
+      "p95FrameMs": 233.39999999999964,
+      "maxFrameMs": 250
     },
     "navigationTiming": {
-      "domContentLoadedMs": 442.39999999990687,
-      "loadEventEndMs": 480.5,
-      "responseEndMs": 6.7999999998137355
+      "domContentLoadedMs": 406.70000000298023,
+      "loadEventEndMs": 407.70000000298023,
+      "responseEndMs": 7.800000011920929
     },
     "viewerState": {
       "title": "Structural Insight Viewer",
@@ -71,8 +71,8 @@
       "label": "viewer_index",
       "path": "src/structure-viewer/index.html",
       "available": true,
-      "bytes": 251726,
-      "sha256": "851ad2d3f10f9306d9219e5997d4976e63ebba95d8debfb21eb3e2029b2966fc"
+      "bytes": 332628,
+      "sha256": "94eaec0b10dade404b2af52ccbfe710d9364ee3ce3d4533b10729ab0eda62870"
     },
     {
       "label": "browser_performance_probe",
@@ -92,8 +92,8 @@
       "label": "frontend_smoke_spec",
       "path": "tests/frontend/structure-viewer-smoke.spec.ts",
       "available": true,
-      "bytes": 17538,
-      "sha256": "8e95735e01e1e7182d2d89f2bffb405c4866dea88329bbdf75902a3f57f558c4"
+      "bytes": 44008,
+      "sha256": "978dab74a42d924667106b9a239d5fdbd085a507441d4d651eba464325c91d9d"
     }
   ],
   "residual_live_work": [

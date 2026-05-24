@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 from implementation.phase1.generate_selfcontained_viewer import (
     ARTIFACT_PRESET_INPUTS,
@@ -56,6 +57,12 @@ def test_generate_selfcontained_html_uses_full_index_template() -> None:
     assert "new URL('./viewer-contour-materials.js'" not in html
     assert "./design-theme.css" not in html
     assert "inlined from src/structure-viewer/design-theme.css" in html
+    assert "./commercial-cockpit-polish.css" not in html
+    assert "inlined from src/structure-viewer/commercial-cockpit-polish.css" in html
+    assert not re.findall(r"from\s+['\"]\./viewer-[^'\"]+\.js['\"]", html)
+    assert "commercial-cockpit-polish" in html
+    assert "data-stage-callout-focus-member" in html
+    assert "buildDrawingHandoffPanelHtml" in html
     assert "cdn.jsdelivr.net" not in html
     assert "unpkg.com" not in html
     assert "https://" not in html

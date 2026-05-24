@@ -68,18 +68,28 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
     assert payload["restore_smoke"]["viewer_shell_marker_pass"] is True
     assert payload["restore_smoke"]["delivery_index_marker_pass"] is True
     assert payload["restore_smoke"]["acceptance_packet_marker_pass"] is True
+    assert payload["restore_smoke"]["qa_summary_marker_pass"] is True
+    assert payload["restore_smoke"]["handoff_diff_marker_pass"] is True
     assert payload["restore_smoke"]["pdf_magic_pass"] is True
     assert payload["restore_smoke"]["manifest_report_reference_pass"] is True
     assert payload["restore_smoke"]["manifest_acceptance_reference_pass"] is True
     assert payload["restore_smoke"]["manifest_claim_boundary_pass"] is True
+    assert payload["restore_smoke"]["report_metadata_pass"] is True
+    assert payload["restore_smoke"]["handoff_diff_summary_pass"] is True
+    assert payload["restore_smoke"]["signing_manifest_pass"] is True
     assert payload["restore_smoke"]["revision_policy_pass"] is True
     assert payload["restore_smoke"]["redelivery_comparison_pass"] is True
     assert any(row["path"] == "manifest.json" for row in payload["file_rows"])
     assert any(row["path"] == "ACCEPTANCE_PACKET.md" for row in payload["file_rows"])
+    assert any(row["path"] == "DELIVERY_QA_SUMMARY.md" for row in payload["file_rows"])
+    assert any(row["path"] == "HANDOFF_DIFF_SUMMARY.md" for row in payload["file_rows"])
     assert any(row["path"] == "DELIVERY_INDEX.md" for row in payload["file_rows"])
     assert any(row["path"] == "REVISION_HISTORY.md" for row in payload["file_rows"])
+    assert any(row["path"] == "data/handoff_diff_summary.json" for row in payload["file_rows"])
+    assert any(row["path"] == "data/report_metadata.json" for row in payload["file_rows"])
     assert any(row["path"] == "data/revision_policy.json" for row in payload["file_rows"])
     assert any(row["path"] == "data/redelivery_comparison_manifest.json" for row in payload["file_rows"])
+    assert any(row["path"] == "data/signing_manifest.json" for row in payload["file_rows"])
     assert payload["job_record"]["schema_version"] == "workstation-job-record.v1"
     assert payload["job_folder_contract"]["pass"] is True
     job_dir = Path(payload["job_folder_contract"]["job_dir"])
@@ -120,6 +130,14 @@ def test_restore_package_smoke_blocks_non_pdf_report(tmp_path: Path) -> None:
         root / "ACCEPTANCE_PACKET.md",
         "## Acceptance Decision\n## Package Integrity\n## Engineer Review Required\n",
     )
+    _write_text(
+        root / "DELIVERY_QA_SUMMARY.md",
+        "## Customer-Visible QA Status\n## Included Checks\n## Hidden/Internal Checks\n",
+    )
+    _write_text(
+        root / "HANDOFF_DIFF_SUMMARY.md",
+        "# Customer Handoff Diff Summary\n## Package Changes\n## Review Guidance\n",
+    )
     _write_text(root / "REVISION_HISTORY.md", "# Revision History\n")
     _write_text(root / "README_DELIVERY.md", "# Delivery\n")
     _write_text(root / "viewer.html", "<html><body>Structural Insight Viewer</body></html>")
@@ -132,6 +150,37 @@ def test_restore_package_smoke_blocks_non_pdf_report(tmp_path: Path) -> None:
         },
     )
     _write_json(
+        root / "data" / "report_metadata.json",
+        {
+            "schema_version": "workstation-delivery-report-metadata.v1",
+            "current_job_id": "J1",
+            "engineer_review_required": True,
+            "manifest_path": "manifest.json",
+            "qa_summary_path": "DELIVERY_QA_SUMMARY.md",
+            "report_path": "report.pdf",
+            "report_sha256": build_workstation_delivery_package._sha256_path(root / "report.pdf"),
+            "revision_history_path": "REVISION_HISTORY.md",
+            "revision_policy_path": "data/revision_policy.json",
+        },
+    )
+    _write_json(
+        root / "data" / "handoff_diff_summary.json",
+        {
+            "schema_version": "workstation-delivery-handoff-diff-summary.v1",
+            "comparison_scope": "package_member_delta",
+            "current_job_id": "J1",
+            "data_path": "data/handoff_diff_summary.json",
+            "engineer_review_required": True,
+            "summary": {
+                "added_count": 0,
+                "changed_count": 0,
+                "removed_count": 0,
+                "unchanged_count": 1,
+            },
+            "summary_markdown_path": "HANDOFF_DIFF_SUMMARY.md",
+        },
+    )
+    _write_json(
         root / "data" / "redelivery_comparison_manifest.json",
         {
             "schema_version": "workstation-delivery-redelivery-comparison.v1",
@@ -140,11 +189,27 @@ def test_restore_package_smoke_blocks_non_pdf_report(tmp_path: Path) -> None:
             "redelivery_policy": {"previous_packages_must_not_be_overwritten": True},
         },
     )
+    _write_json(
+        root / "data" / "signing_manifest.json",
+        {
+            "schema_version": "workstation-delivery-signing-manifest.v1",
+            "current_job_id": "J1",
+            "engineer_review_required": True,
+            "key_material_included": False,
+            "offline_signing_required": True,
+            "private_key_included": False,
+            "signable_payload": ["manifest.json", "checksums.sha256"],
+            "signed": False,
+            "signing_status": "unsigned_placeholder",
+            "verification_status": "not_signed",
+        },
+    )
     rows = build_workstation_delivery_package._checksum_rows(root, include_manifest=False)
     _write_json(
         root / "manifest.json",
         {
             "package_claim_boundary": "requires structural engineer review",
+            "current_job_id": "J1",
             "output_rows": rows,
         },
     )
@@ -157,6 +222,11 @@ def test_restore_package_smoke_blocks_non_pdf_report(tmp_path: Path) -> None:
     payload = build_workstation_delivery_package.restore_package_smoke(package)
 
     assert payload["pass"] is False
+    assert payload["qa_summary_marker_pass"] is True
+    assert payload["handoff_diff_marker_pass"] is True
+    assert payload["report_metadata_pass"] is True
+    assert payload["handoff_diff_summary_pass"] is True
+    assert payload["signing_manifest_pass"] is True
     assert payload["pdf_magic_pass"] is False
 
 

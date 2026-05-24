@@ -35,6 +35,7 @@ DEFAULT_WORKSTATION_DELIVERY_PACKAGE_MANIFEST = Path(
     "implementation/phase1/workstation_delivery_package_manifest.json"
 )
 DEFAULT_WORKSTATION_DELIVERY_READINESS = Path("implementation/phase1/workstation_delivery_readiness.json")
+DEFAULT_WORKSTATION_DELIVERY_VIEWER_SMOKE = Path("implementation/phase1/workstation_delivery_viewer_smoke.json")
 DEFAULT_CLIENT_INPUT_VALIDATION_REPORT = Path("implementation/phase1/client_input_validation_report.json")
 DEFAULT_WORKSTATION_JOB_RECORD = Path("implementation/phase1/workstation_job_record.json")
 DEFAULT_WORKSTATION_JOB_RETENTION_POLICY = Path("implementation/phase1/workstation_job_retention_policy.json")
@@ -260,6 +261,7 @@ def build_support_bundle(
     workstation_service_budget: Path = DEFAULT_WORKSTATION_SERVICE_BUDGET,
     workstation_delivery_package_manifest: Path = DEFAULT_WORKSTATION_DELIVERY_PACKAGE_MANIFEST,
     workstation_delivery_readiness: Path = DEFAULT_WORKSTATION_DELIVERY_READINESS,
+    workstation_delivery_viewer_smoke: Path = DEFAULT_WORKSTATION_DELIVERY_VIEWER_SMOKE,
     client_input_validation_report: Path = DEFAULT_CLIENT_INPUT_VALIDATION_REPORT,
     workstation_job_record: Path = DEFAULT_WORKSTATION_JOB_RECORD,
     workstation_job_retention_policy: Path = DEFAULT_WORKSTATION_JOB_RETENTION_POLICY,
@@ -284,6 +286,7 @@ def build_support_bundle(
         ("workstation_service_budget", workstation_service_budget),
         ("workstation_delivery_package_manifest", workstation_delivery_package_manifest),
         ("workstation_delivery_readiness", workstation_delivery_readiness),
+        ("workstation_delivery_viewer_smoke", workstation_delivery_viewer_smoke),
         ("client_input_validation_report", client_input_validation_report),
         ("workstation_job_record", workstation_job_record),
         ("workstation_job_retention_policy", workstation_job_retention_policy),
@@ -394,6 +397,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_WORKSTATION_DELIVERY_PACKAGE_MANIFEST,
     )
     parser.add_argument("--workstation-delivery-readiness", type=Path, default=DEFAULT_WORKSTATION_DELIVERY_READINESS)
+    parser.add_argument(
+        "--workstation-delivery-viewer-smoke",
+        type=Path,
+        default=DEFAULT_WORKSTATION_DELIVERY_VIEWER_SMOKE,
+    )
     parser.add_argument("--client-input-validation-report", type=Path, default=DEFAULT_CLIENT_INPUT_VALIDATION_REPORT)
     parser.add_argument("--workstation-job-record", type=Path, default=DEFAULT_WORKSTATION_JOB_RECORD)
     parser.add_argument(
@@ -431,6 +439,7 @@ def main(argv: list[str] | None = None) -> int:
         workstation_service_budget=args.workstation_service_budget,
         workstation_delivery_package_manifest=args.workstation_delivery_package_manifest,
         workstation_delivery_readiness=args.workstation_delivery_readiness,
+        workstation_delivery_viewer_smoke=args.workstation_delivery_viewer_smoke,
         client_input_validation_report=args.client_input_validation_report,
         workstation_job_record=args.workstation_job_record,
         workstation_job_retention_policy=args.workstation_job_retention_policy,

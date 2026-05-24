@@ -72,6 +72,10 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
             tmp_path / "workstation-readiness.json",
             {"contract_pass": True, "schema_version": "workstation-delivery-readiness.v1"},
         ),
+        "workstation_delivery_viewer_smoke": _write_json(
+            tmp_path / "workstation-delivery-viewer-smoke.json",
+            {"contract_pass": True, "schema_version": "workstation-delivery-viewer-smoke.v1"},
+        ),
         "client_input_validation_report": _write_json(
             tmp_path / "client-validation.json",
             {"status": "ready", "schema_version": "client-input-validation-report.v1"},
@@ -121,6 +125,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "workstation_service_budget" in payload["required_sections"]
     assert "workstation_delivery_package_manifest" in payload["required_sections"]
     assert "workstation_delivery_readiness" in payload["required_sections"]
+    assert "workstation_delivery_viewer_smoke" in payload["required_sections"]
     assert "client_input_validation_report" in payload["required_sections"]
     assert "workstation_job_record" in payload["required_sections"]
     assert "workstation_job_retention_policy" in payload["required_sections"]

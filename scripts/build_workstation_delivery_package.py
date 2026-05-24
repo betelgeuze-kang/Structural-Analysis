@@ -220,6 +220,190 @@ Record comments outside the package and preserve this package manifest for trace
 """
 
 
+def _delivery_qa_summary_text(*, generated_at: str, current_job_id: str) -> str:
+    return f"""# Delivery QA Summary
+
+Generated at: `{generated_at}`
+Current job id: `{current_job_id}`
+
+## Customer-Visible QA Status
+
+Status: PASS when this package's `manifest.json`, `checksums.sha256`, `report.pdf`, `viewer.html`, drawings, data, and evidence sections are present and restore checks pass.
+
+## Included Checks
+
+- Package integrity can be verified with `checksums.sha256`.
+- Report metadata is recorded in `data/report_metadata.json`.
+- Redelivery traceability is recorded in `data/redelivery_comparison_manifest.json`.
+- Engineer review remains required before external use.
+
+## Hidden/Internal Checks
+
+Internal workstation paths, operator-only logs, and EB/RH independent-product evidence are not included in this customer-facing summary.
+"""
+
+
+def _customer_handoff_diff_text(payload: dict[str, Any]) -> str:
+    summary = payload.get("summary", {})
+    previous_job_id = str(payload.get("previous_job_id", "")) or "none"
+    return f"""# Customer Handoff Diff Summary
+
+Generated at: `{payload.get("generated_at", "")}`
+Current job id: `{payload.get("current_job_id", "")}`
+Previous job id: `{previous_job_id}`
+
+## Package Changes
+
+| Change Type | Count |
+|---|---:|
+| Added members | {summary.get("added_count", 0)} |
+| Removed members | {summary.get("removed_count", 0)} |
+| Changed members | {summary.get("changed_count", 0)} |
+| Unchanged members | {summary.get("unchanged_count", 0)} |
+
+## Review Guidance
+
+- Treat this as a package-membership diff for redelivery review, not as independent engineering approval.
+- Verify `manifest.json`, `checksums.sha256`, `data/handoff_diff_summary.json`, and `data/redelivery_comparison_manifest.json` together.
+- If no previous delivery is available, this file records an initial-delivery baseline.
+
+## Claim Boundary
+
+Structural engineer review remains required before external use.
+"""
+
+
+def _diff_candidate_rows(root: Path) -> list[dict[str, Any]]:
+    excluded = {
+        "checksums.sha256",
+        "manifest.json",
+        "HANDOFF_DIFF_SUMMARY.md",
+        "data/handoff_diff_summary.json",
+    }
+    return [row for row in _checksum_rows(root, include_manifest=False) if row["path"] not in excluded]
+
+
+def _rows_by_path(rows: object) -> dict[str, dict[str, Any]]:
+    if not isinstance(rows, list):
+        return {}
+    parsed = {}
+    for row in rows:
+        if isinstance(row, dict) and row.get("path"):
+            parsed[str(row.get("path", ""))] = row
+    return parsed
+
+
+def _previous_output_rows(previous_deliveries: list[dict[str, Any]]) -> tuple[str, list[dict[str, Any]]]:
+    if not previous_deliveries:
+        return "", []
+    previous = previous_deliveries[0]
+    previous_job_id = str(previous.get("job_id", ""))
+    output_manifest_path = Path(str(previous.get("output_manifest", "")))
+    output_manifest = _load_json(output_manifest_path)
+    output_rows = output_manifest.get("output_rows", [])
+    if not isinstance(output_rows, list):
+        return previous_job_id, []
+    return previous_job_id, [row for row in output_rows if isinstance(row, dict)]
+
+
+def _handoff_diff_summary_payload(
+    *,
+    generated_at: str,
+    current_job_id: str,
+    current_rows: list[dict[str, Any]],
+    previous_deliveries: list[dict[str, Any]],
+) -> dict[str, Any]:
+    previous_job_id, previous_rows = _previous_output_rows(previous_deliveries)
+    current_by_path = _rows_by_path(current_rows)
+    previous_by_path = _rows_by_path(previous_rows)
+    added_paths = sorted(set(current_by_path) - set(previous_by_path))
+    removed_paths = sorted(set(previous_by_path) - set(current_by_path))
+    shared_paths = sorted(set(current_by_path) & set(previous_by_path))
+    changed_paths = [
+        path
+        for path in shared_paths
+        if current_by_path[path].get("sha256") != previous_by_path[path].get("sha256")
+        or int(current_by_path[path].get("bytes", -1)) != int(previous_by_path[path].get("bytes", -2))
+    ]
+    unchanged_paths = [path for path in shared_paths if path not in set(changed_paths)]
+    no_previous_delivery = not previous_job_id or not previous_rows
+    return {
+        "schema_version": "workstation-delivery-handoff-diff-summary.v1",
+        "generated_at": generated_at,
+        "current_job_id": current_job_id,
+        "previous_job_id": previous_job_id,
+        "comparison_scope": "package_member_delta",
+        "comparison_status": "initial_delivery" if no_previous_delivery else "compared_to_previous_delivery",
+        "no_previous_delivery": no_previous_delivery,
+        "summary_markdown_path": "HANDOFF_DIFF_SUMMARY.md",
+        "data_path": "data/handoff_diff_summary.json",
+        "redelivery_comparison_path": "data/redelivery_comparison_manifest.json",
+        "summary": {
+            "added_count": len(added_paths),
+            "removed_count": len(removed_paths),
+            "changed_count": len(changed_paths),
+            "unchanged_count": len(unchanged_paths),
+        },
+        "added_paths": added_paths[:50],
+        "removed_paths": removed_paths[:50],
+        "changed_paths": changed_paths[:50],
+        "unchanged_sample_paths": unchanged_paths[:20],
+        "engineer_review_required": True,
+        "claim_boundary": CLAIM_BOUNDARY,
+    }
+
+
+def _report_metadata_payload(
+    *,
+    generated_at: str,
+    current_job_id: str,
+    report_path: Path,
+    report_source: Path,
+    report_generated_fallback: bool,
+) -> dict[str, Any]:
+    return {
+        "schema_version": "workstation-delivery-report-metadata.v1",
+        "generated_at": generated_at,
+        "current_job_id": current_job_id,
+        "report_path": "report.pdf",
+        "report_sha256": _sha256_path(report_path) if report_path.exists() else "",
+        "report_bytes": report_path.stat().st_size if report_path.exists() else 0,
+        "report_source": str(report_source),
+        "report_generated_fallback": report_generated_fallback,
+        "manifest_path": "manifest.json",
+        "revision_history_path": "REVISION_HISTORY.md",
+        "revision_policy_path": "data/revision_policy.json",
+        "redelivery_comparison_path": "data/redelivery_comparison_manifest.json",
+        "qa_summary_path": "DELIVERY_QA_SUMMARY.md",
+        "claim_boundary": CLAIM_BOUNDARY,
+        "engineer_review_required": True,
+    }
+
+
+def _signing_manifest_payload(*, generated_at: str, current_job_id: str) -> dict[str, Any]:
+    return {
+        "schema_version": "workstation-delivery-signing-manifest.v1",
+        "generated_at": generated_at,
+        "current_job_id": current_job_id,
+        "signing_status": "unsigned_placeholder",
+        "signed": False,
+        "verification_status": "not_signed",
+        "signable_payload": ["manifest.json", "checksums.sha256"],
+        "signature_path": "",
+        "signature_algorithm": "",
+        "public_key_fingerprint": "",
+        "key_material_included": False,
+        "private_key_included": False,
+        "offline_signing_required": True,
+        "offline_signing_note": (
+            "This v1 delivery package records a signable payload skeleton only. "
+            "Attach a detached signature in a future external signing step; do not include private keys."
+        ),
+        "claim_boundary": CLAIM_BOUNDARY,
+        "engineer_review_required": True,
+    }
+
+
 def _redelivery_comparison_payload(
     *,
     generated_at: str,
@@ -434,14 +618,19 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             names.add(f"{rel}/" if item.is_dir() else rel)
         required = {
             "ACCEPTANCE_PACKET.md": (root / "ACCEPTANCE_PACKET.md").exists(),
+            "DELIVERY_QA_SUMMARY.md": (root / "DELIVERY_QA_SUMMARY.md").exists(),
+            "HANDOFF_DIFF_SUMMARY.md": (root / "HANDOFF_DIFF_SUMMARY.md").exists(),
             "DELIVERY_INDEX.md": (root / "DELIVERY_INDEX.md").exists(),
             "REVISION_HISTORY.md": (root / "REVISION_HISTORY.md").exists(),
             "report.pdf": (root / "report.pdf").exists(),
             "viewer.html": (root / "viewer.html").exists(),
             "drawings/": (root / "drawings").is_dir(),
             "data/": (root / "data").is_dir(),
+            "data/handoff_diff_summary.json": (root / "data" / "handoff_diff_summary.json").exists(),
+            "data/report_metadata.json": (root / "data" / "report_metadata.json").exists(),
             "data/revision_policy.json": (root / "data" / "revision_policy.json").exists(),
             "data/redelivery_comparison_manifest.json": (root / "data" / "redelivery_comparison_manifest.json").exists(),
+            "data/signing_manifest.json": (root / "data" / "signing_manifest.json").exists(),
             "evidence/": (root / "evidence").is_dir(),
             "manifest.json": (root / "manifest.json").exists(),
             "checksums.sha256": (root / "checksums.sha256").exists(),
@@ -469,9 +658,30 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             and "Package Integrity" in acceptance_text
             and "Engineer Review Required" in acceptance_text
         )
+        qa_summary_text = (
+            (root / "DELIVERY_QA_SUMMARY.md").read_text(encoding="utf-8", errors="replace")
+            if required["DELIVERY_QA_SUMMARY.md"]
+            else ""
+        )
+        qa_summary_marker_pass = (
+            "Customer-Visible QA Status" in qa_summary_text
+            and "Included Checks" in qa_summary_text
+            and "Hidden/Internal Checks" in qa_summary_text
+        )
+        handoff_diff_text = (
+            (root / "HANDOFF_DIFF_SUMMARY.md").read_text(encoding="utf-8", errors="replace")
+            if required["HANDOFF_DIFF_SUMMARY.md"]
+            else ""
+        )
+        handoff_diff_marker_pass = (
+            "Customer Handoff Diff Summary" in handoff_diff_text
+            and "Package Changes" in handoff_diff_text
+            and "Review Guidance" in handoff_diff_text
+        )
         report_path = root / "report.pdf"
         pdf_magic_pass = report_path.read_bytes().startswith(b"%PDF-") if required["report.pdf"] else False
         manifest_payload = _load_json(root / "manifest.json") if required["manifest.json"] else {}
+        manifest_current_job_id = str(manifest_payload.get("current_job_id", ""))
         output_rows = manifest_payload.get("output_rows", [])
         manifest_output_paths = {
             str(row.get("path", ""))
@@ -481,11 +691,66 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
         manifest_report_reference_pass = "report.pdf" in manifest_output_paths and "viewer.html" in manifest_output_paths
         manifest_acceptance_reference_pass = (
             "ACCEPTANCE_PACKET.md" in manifest_output_paths
+            and "DELIVERY_QA_SUMMARY.md" in manifest_output_paths
+            and "HANDOFF_DIFF_SUMMARY.md" in manifest_output_paths
+            and "data/handoff_diff_summary.json" in manifest_output_paths
+            and "data/report_metadata.json" in manifest_output_paths
             and "data/redelivery_comparison_manifest.json" in manifest_output_paths
+            and "data/signing_manifest.json" in manifest_output_paths
         )
         manifest_claim_boundary_pass = "structural engineer review" in str(
             manifest_payload.get("package_claim_boundary", "")
         ).lower()
+        report_metadata_pass = False
+        if required["data/report_metadata.json"]:
+            report_metadata = _load_json(root / "data" / "report_metadata.json")
+            report_metadata_pass = (
+                report_metadata.get("schema_version") == "workstation-delivery-report-metadata.v1"
+                and report_metadata.get("report_path") == "report.pdf"
+                and report_metadata.get("manifest_path") == "manifest.json"
+                and report_metadata.get("revision_history_path") == "REVISION_HISTORY.md"
+                and report_metadata.get("revision_policy_path") == "data/revision_policy.json"
+                and report_metadata.get("qa_summary_path") == "DELIVERY_QA_SUMMARY.md"
+                and report_metadata.get("current_job_id") == manifest_current_job_id
+                and report_metadata.get("report_sha256") == (_sha256_path(report_path) if report_path.exists() else "")
+                and bool(report_metadata.get("engineer_review_required", False))
+            )
+        handoff_diff_summary_pass = False
+        if required["data/handoff_diff_summary.json"]:
+            handoff_diff = _load_json(root / "data" / "handoff_diff_summary.json")
+            summary = handoff_diff.get("summary", {})
+            handoff_diff_summary_pass = (
+                handoff_diff.get("schema_version") == "workstation-delivery-handoff-diff-summary.v1"
+                and handoff_diff.get("current_job_id") == manifest_current_job_id
+                and handoff_diff.get("comparison_scope") == "package_member_delta"
+                and handoff_diff.get("summary_markdown_path") == "HANDOFF_DIFF_SUMMARY.md"
+                and handoff_diff.get("data_path") == "data/handoff_diff_summary.json"
+                and isinstance(summary, dict)
+                and all(
+                    isinstance(summary.get(name), int) and summary.get(name) >= 0
+                    for name in ("added_count", "removed_count", "changed_count", "unchanged_count")
+                )
+                and bool(handoff_diff.get("engineer_review_required", False))
+            )
+        signing_manifest_pass = False
+        if required["data/signing_manifest.json"]:
+            signing_manifest = _load_json(root / "data" / "signing_manifest.json")
+            signable_payload = signing_manifest.get("signable_payload", [])
+            if not isinstance(signable_payload, list):
+                signable_payload = []
+            signing_manifest_pass = (
+                signing_manifest.get("schema_version") == "workstation-delivery-signing-manifest.v1"
+                and signing_manifest.get("current_job_id") == manifest_current_job_id
+                and signing_manifest.get("signing_status") == "unsigned_placeholder"
+                and signing_manifest.get("signed") is False
+                and signing_manifest.get("verification_status") == "not_signed"
+                and "manifest.json" in signable_payload
+                and "checksums.sha256" in signable_payload
+                and signing_manifest.get("key_material_included") is False
+                and signing_manifest.get("private_key_included") is False
+                and bool(signing_manifest.get("offline_signing_required", False))
+                and bool(signing_manifest.get("engineer_review_required", False))
+            )
         revision_policy_pass = False
         if required["data/revision_policy.json"]:
             revision_policy = _load_json(root / "data" / "revision_policy.json")
@@ -509,10 +774,15 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             and viewer_shell_marker_pass
             and delivery_index_marker_pass
             and acceptance_packet_marker_pass
+            and qa_summary_marker_pass
+            and handoff_diff_marker_pass
             and pdf_magic_pass
             and manifest_report_reference_pass
             and manifest_acceptance_reference_pass
             and manifest_claim_boundary_pass
+            and report_metadata_pass
+            and handoff_diff_summary_pass
+            and signing_manifest_pass
             and revision_policy_pass
             and redelivery_comparison_pass
         )
@@ -528,10 +798,15 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             "viewer_shell_marker_pass": viewer_shell_marker_pass,
             "delivery_index_marker_pass": delivery_index_marker_pass,
             "acceptance_packet_marker_pass": acceptance_packet_marker_pass,
+            "qa_summary_marker_pass": qa_summary_marker_pass,
+            "handoff_diff_marker_pass": handoff_diff_marker_pass,
             "pdf_magic_pass": pdf_magic_pass,
             "manifest_report_reference_pass": manifest_report_reference_pass,
             "manifest_acceptance_reference_pass": manifest_acceptance_reference_pass,
             "manifest_claim_boundary_pass": manifest_claim_boundary_pass,
+            "report_metadata_pass": report_metadata_pass,
+            "handoff_diff_summary_pass": handoff_diff_summary_pass,
+            "signing_manifest_pass": signing_manifest_pass,
             "revision_policy_pass": revision_policy_pass,
             "redelivery_comparison_pass": redelivery_comparison_pass,
             "zip_entry_count": len(names),
@@ -656,6 +931,10 @@ def build_workstation_delivery_package(
 
         (root / "README_DELIVERY.md").write_text(_readme_text(), encoding="utf-8")
         (root / "DELIVERY_INDEX.md").write_text(_delivery_index_text(), encoding="utf-8")
+        (root / "DELIVERY_QA_SUMMARY.md").write_text(
+            _delivery_qa_summary_text(generated_at=generated_at, current_job_id=current_job_id),
+            encoding="utf-8",
+        )
         (root / "ACCEPTANCE_PACKET.md").write_text(
             _acceptance_packet_text(generated_at=generated_at, current_job_id=current_job_id),
             encoding="utf-8",
@@ -663,6 +942,22 @@ def build_workstation_delivery_package(
         (root / "REVISION_HISTORY.md").write_text(_revision_history_text(generated_at), encoding="utf-8")
         (data_dir / "revision_policy.json").write_text(
             json.dumps(_revision_policy_payload(generated_at), ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        (data_dir / "report_metadata.json").write_text(
+            json.dumps(
+                _report_metadata_payload(
+                    generated_at=generated_at,
+                    current_job_id=current_job_id,
+                    report_path=root / "report.pdf",
+                    report_source=report_pdf,
+                    report_generated_fallback=report_generated_fallback,
+                ),
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
             encoding="utf-8",
         )
         (data_dir / "redelivery_comparison_manifest.json").write_text(
@@ -677,6 +972,30 @@ def build_workstation_delivery_package(
                 sort_keys=True,
             )
             + "\n",
+            encoding="utf-8",
+        )
+        (data_dir / "signing_manifest.json").write_text(
+            json.dumps(
+                _signing_manifest_payload(generated_at=generated_at, current_job_id=current_job_id),
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        handoff_diff_payload = _handoff_diff_summary_payload(
+            generated_at=generated_at,
+            current_job_id=current_job_id,
+            current_rows=_diff_candidate_rows(root),
+            previous_deliveries=previous_deliveries,
+        )
+        (data_dir / "handoff_diff_summary.json").write_text(
+            json.dumps(handoff_diff_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        (root / "HANDOFF_DIFF_SUMMARY.md").write_text(
+            _customer_handoff_diff_text(handoff_diff_payload),
             encoding="utf-8",
         )
         content_rows = _checksum_rows(root, include_manifest=False)
@@ -722,12 +1041,17 @@ def build_workstation_delivery_package(
         "report.pdf": any(row["path"] == "report.pdf" for row in manifest_rows),
         "viewer.html": any(row["path"] == "viewer.html" for row in manifest_rows),
         "ACCEPTANCE_PACKET.md": any(row["path"] == "ACCEPTANCE_PACKET.md" for row in manifest_rows),
+        "DELIVERY_QA_SUMMARY.md": any(row["path"] == "DELIVERY_QA_SUMMARY.md" for row in manifest_rows),
+        "HANDOFF_DIFF_SUMMARY.md": any(row["path"] == "HANDOFF_DIFF_SUMMARY.md" for row in manifest_rows),
         "DELIVERY_INDEX.md": any(row["path"] == "DELIVERY_INDEX.md" for row in manifest_rows),
         "REVISION_HISTORY.md": any(row["path"] == "REVISION_HISTORY.md" for row in manifest_rows),
         "drawings": any(row["path"].startswith("drawings/") for row in manifest_rows),
         "data": any(row["path"].startswith("data/") for row in manifest_rows),
+        "data/handoff_diff_summary.json": any(row["path"] == "data/handoff_diff_summary.json" for row in manifest_rows),
+        "data/report_metadata.json": any(row["path"] == "data/report_metadata.json" for row in manifest_rows),
         "data/revision_policy.json": any(row["path"] == "data/revision_policy.json" for row in manifest_rows),
         "data/redelivery_comparison_manifest.json": any(row["path"] == "data/redelivery_comparison_manifest.json" for row in manifest_rows),
+        "data/signing_manifest.json": any(row["path"] == "data/signing_manifest.json" for row in manifest_rows),
         "evidence": any(row["path"].startswith("evidence/") for row in manifest_rows),
         "manifest.json": any(row["path"] == "manifest.json" for row in manifest_rows),
         "checksums.sha256": any(row["path"] == "checksums.sha256" for row in manifest_rows),

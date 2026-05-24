@@ -871,6 +871,99 @@ body.structural-surface .tree-item-action.is-active {
   background:rgba(251,191,36,.14);
 }
 
+body.structural-surface .load-case-evidence-list {
+  display:grid;
+  gap:6px;
+}
+
+body.structural-surface .load-case-evidence-row {
+  position:relative;
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:5px 8px;
+  align-items:center;
+  text-align:left;
+  font:inherit;
+  color:var(--text);
+  border:1px solid rgba(100,116,139,.34);
+  border-radius:8px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01)),
+    rgba(15,23,42,.42);
+  cursor:pointer;
+}
+
+body.structural-surface .load-case-evidence-row.selected {
+  border-left:1px solid rgba(79,183,173,.55);
+  border-color:rgba(79,183,173,.44);
+  background:
+    linear-gradient(180deg, rgba(79,183,173,.14), rgba(79,183,173,.045)),
+    rgba(15,23,42,.58);
+}
+
+body.structural-surface .load-case-evidence-row__main,
+body.structural-surface .load-case-evidence-row__meta {
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+
+body.structural-surface .load-case-evidence-row__main strong,
+body.structural-surface .load-case-evidence-row__main em,
+body.structural-surface .load-case-evidence-row__meta b,
+body.structural-surface .load-case-evidence-row__meta small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .load-case-evidence-row__main strong {
+  font-size:11px;
+  font-weight:800;
+  color:var(--text);
+}
+
+body.structural-surface .load-case-evidence-row__main em,
+body.structural-surface .load-case-evidence-row__meta small {
+  font-size:9px;
+  color:var(--muted);
+}
+
+body.structural-surface .load-case-evidence-row__meta {
+  justify-items:end;
+  max-width:82px;
+}
+
+body.structural-surface .load-case-evidence-row__meta b {
+  font-size:9px;
+  font-weight:800;
+  color:var(--accent);
+}
+
+body.structural-surface .load-case-evidence-row[data-load-case-status="Governing"] .load-case-evidence-row__meta b,
+body.structural-surface .load-case-evidence-row[data-load-case-status="Pinned selection"] .load-case-evidence-row__meta b {
+  color:var(--warn);
+}
+
+body.structural-surface .load-case-evidence-row__bar {
+  grid-column:1 / -1;
+  height:3px;
+  border-radius:999px;
+  background:rgba(100,116,139,.24);
+  overflow:hidden;
+}
+
+body.structural-surface .load-case-evidence-row__bar i {
+  display:block;
+  width:var(--load-case-progress, 0%);
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg, var(--accent), #facc15);
+}
+
 body.structural-surface .color-dot {
   width:8px;
   height:8px;
@@ -2121,17 +2214,433 @@ body.structural-surface .edit-preview-list {
   flex-direction:column;
 }
 
-body.structural-surface .legend-bar {
-  height:16px;
-  border-radius:999px;
-  margin:8px 0 4px;
+body.structural-surface .stage-contour-scale {
+  display:grid;
+  gap:7px;
+  margin-top:2px;
 }
 
+body.structural-surface .stage-contour-scale__title,
 body.structural-surface .legend-labels {
   display:flex;
+  align-items:center;
   justify-content:space-between;
-  font-size:10px;
+  gap:8px;
+  min-width:0;
   color:var(--muted);
+  font-size:10px;
+}
+
+body.structural-surface .stage-contour-scale__title span,
+body.structural-surface .legend-labels span {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .stage-contour-scale__title strong,
+body.structural-surface .legend-labels b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-contour-scale__body {
+  display:grid;
+  grid-template-columns:18px minmax(0,1fr);
+  gap:8px;
+  align-items:stretch;
+  min-height:96px;
+}
+
+body.structural-surface .legend-bar {
+  width:16px;
+  min-height:96px;
+  border-radius:999px;
+  margin:0;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.20),
+    0 7px 18px rgba(0,0,0,.22);
+}
+
+body.structural-surface .legend-ticks {
+  display:grid;
+  grid-template-rows:repeat(5, minmax(0,1fr));
+  min-width:0;
+}
+
+body.structural-surface .legend-tick {
+  display:grid;
+  grid-template-columns:13px minmax(0,1fr);
+  align-items:center;
+  min-width:0;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1;
+}
+
+body.structural-surface .legend-tick i {
+  display:block;
+  width:9px;
+  height:1px;
+  background:rgba(148,163,184,.55);
+}
+
+body.structural-surface .legend-tick b {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--text);
+  font-weight:700;
+}
+
+body.structural-surface .stage-contour-scale__source {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:rgba(203,213,225,.74);
+  font-size:9px;
+}
+
+body.structural-surface .stage-result-receipt {
+  display:grid;
+  gap:6px;
+  margin-top:2px;
+  padding:8px;
+  border:1px solid rgba(100,116,139,.34);
+  border-radius:8px;
+  background:rgba(15,23,42,.38);
+}
+
+body.structural-surface .stage-result-receipt__title {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+  font-size:10px;
+  font-weight:800;
+  color:var(--text);
+}
+
+body.structural-surface .stage-result-receipt__title span,
+body.structural-surface .stage-result-receipt__title strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .stage-result-receipt__title strong {
+  padding:2px 5px;
+  border-radius:999px;
+  background:rgba(79,183,173,.12);
+  color:var(--accent);
+  font-size:8px;
+}
+
+body.structural-surface .stage-result-receipt__grid {
+  display:grid;
+  gap:4px;
+}
+
+body.structural-surface .stage-result-receipt__row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+  font-size:9px;
+}
+
+body.structural-surface .stage-result-receipt__row b,
+body.structural-surface .stage-result-receipt__row em {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-result-receipt__row b {
+  color:var(--muted);
+  font-weight:700;
+}
+
+body.structural-surface .stage-result-receipt__row em {
+  color:var(--text);
+  font-weight:800;
+}
+
+body.structural-surface .stage-review-controls {
+  gap:8px;
+}
+
+body.structural-surface .stage-review-control-grid {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:6px;
+}
+
+body.structural-surface .stage-model-stack {
+  display:grid;
+  gap:6px;
+}
+
+body.structural-surface .stage-model-stack__row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+  padding:7px 8px;
+  border:1px solid rgba(100,116,139,.30);
+  border-radius:8px;
+  background:rgba(15,23,42,.34);
+  color:var(--text);
+  font:inherit;
+  text-align:left;
+}
+
+body.structural-surface .stage-model-stack__row--button {
+  width:100%;
+  cursor:pointer;
+}
+
+body.structural-surface .stage-model-stack__row--button:hover,
+body.structural-surface .stage-model-stack__row--button:focus-visible,
+body.structural-surface .stage-model-stack__row--button.is-active {
+  border-color:rgba(79,183,173,.58);
+  background:rgba(79,183,173,.11);
+}
+
+body.structural-surface .stage-model-stack__row span {
+  display:grid;
+  gap:2px;
+  min-width:0;
+}
+
+body.structural-surface .stage-model-stack__row b,
+body.structural-surface .stage-model-stack__row em,
+body.structural-surface .stage-model-stack__row strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-model-stack__row b {
+  font-size:10px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-model-stack__row em {
+  color:var(--muted);
+  font-size:8px;
+}
+
+body.structural-surface .stage-model-stack__row strong {
+  flex:0 0 auto;
+  padding:2px 6px;
+  border-radius:999px;
+  background:rgba(47,125,90,.16);
+  color:#7ee5a3;
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-model-stack__row--button strong {
+  background:rgba(148,168,190,.14);
+  color:var(--muted);
+}
+
+body.structural-surface .stage-model-stack__row--button.is-active strong {
+  background:rgba(79,183,173,.18);
+  color:var(--accent);
+}
+
+body.structural-surface .stage-review-control-receipt {
+  display:grid;
+  gap:4px;
+  padding:7px 8px;
+  border:1px solid rgba(100,116,139,.28);
+  border-radius:8px;
+  background:rgba(8,18,29,.32);
+}
+
+body.structural-surface .stage-review-control-receipt__row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+  font-size:9px;
+}
+
+body.structural-surface .stage-review-control-receipt__row b,
+body.structural-surface .stage-review-control-receipt__row em {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-review-control-receipt__row b {
+  color:var(--muted);
+  font-weight:700;
+}
+
+body.structural-surface .stage-review-control-receipt__row em {
+  color:var(--text);
+  font-weight:800;
+}
+
+body.structural-surface .stage-overlay-receipt {
+  position:absolute;
+  left:106px;
+  bottom:12px;
+  z-index:9;
+  display:grid;
+  gap:6px;
+  width:min(190px, calc(100% - 152px));
+  padding:8px;
+  border:1px solid rgba(100,116,139,.38);
+  border-radius:10px;
+  background:linear-gradient(180deg, rgba(15,23,42,.86), rgba(8,18,29,.78));
+  box-shadow:0 14px 28px rgba(0,0,0,.28);
+  color:var(--text);
+  pointer-events:none;
+}
+
+body.structural-surface .stage-overlay-receipt__title {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+  font-size:10px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-overlay-receipt__title span,
+body.structural-surface .stage-overlay-receipt__title strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .stage-overlay-receipt__title strong {
+  padding:2px 5px;
+  border-radius:999px;
+  background:rgba(47,125,90,.16);
+  color:#7ee5a3;
+  font-size:8px;
+}
+
+body.structural-surface .stage-overlay-receipt[data-overlay-status="pending"] .stage-overlay-receipt__title strong {
+  background:rgba(148,168,190,.14);
+  color:var(--muted);
+}
+
+body.structural-surface .stage-overlay-receipt[data-overlay-status="blocked"] .stage-overlay-receipt__title strong {
+  background:rgba(244,181,107,.16);
+  color:#ffd18a;
+}
+
+body.structural-surface .stage-overlay-receipt__grid {
+  display:grid;
+  gap:4px;
+}
+
+body.structural-surface .stage-overlay-visual-evidence {
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface .stage-overlay-visual-evidence__item {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,163,184,.18);
+  border-radius:7px;
+  background:rgba(8,18,29,.58);
+  font-size:8px;
+}
+
+body.structural-surface .stage-overlay-visual-evidence__item b,
+body.structural-surface .stage-overlay-visual-evidence__item em {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-overlay-visual-evidence__item b {
+  color:var(--muted);
+  font-weight:700;
+}
+
+body.structural-surface .stage-overlay-visual-evidence__item em {
+  margin-left:auto;
+  color:var(--text);
+  font-weight:900;
+}
+
+body.structural-surface .stage-overlay-legend-swatch {
+  flex:0 0 auto;
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.18), 0 0 12px currentColor;
+}
+
+body.structural-surface .stage-overlay-legend-swatch--load {
+  color:#facc15;
+  background:#facc15;
+}
+
+body.structural-surface .stage-overlay-legend-swatch--support {
+  color:#39ff88;
+  background:#39ff88;
+}
+
+body.structural-surface .stage-overlay-receipt__row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-width:0;
+  font-size:9px;
+}
+
+body.structural-surface .stage-overlay-receipt__row b,
+body.structural-surface .stage-overlay-receipt__row em {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-overlay-receipt__row b {
+  color:var(--muted);
+  font-weight:700;
+}
+
+body.structural-surface .stage-overlay-receipt__row em {
+  color:var(--text);
+  font-weight:800;
 }
 
 body.structural-surface .edit-preview-card {
@@ -2818,7 +3327,30 @@ body.structural-surface.command-center-shell .kpi-card__label {
   text-transform:uppercase;
 }
 
+body.structural-surface.command-center-shell .kpi-card__top,
+body.structural-surface.command-center-shell .kpi-card__value-row,
+body.structural-surface.command-center-shell .kpi-card__meta-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .kpi-card__label,
+body.structural-surface.command-center-shell .kpi-card__meta,
+body.structural-surface.command-center-shell .kpi-card__reference,
+body.structural-surface.command-center-shell .kpi-card__evidence {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
 body.structural-surface.command-center-shell .kpi-card__value {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
   color:var(--text);
   font-family:'Space Grotesk','IBM Plex Sans KR',sans-serif;
   font-size:20px;
@@ -2831,6 +3363,61 @@ body.structural-surface.command-center-shell .kpi-card__meta {
   color:var(--muted);
   font-size:9px;
   line-height:1.3;
+}
+
+body.structural-surface.command-center-shell .kpi-card__reference,
+body.structural-surface.command-center-shell .kpi-card__evidence,
+body.structural-surface.command-center-shell .kpi-card__trend {
+  flex:0 1 auto;
+  max-width:52%;
+  border-radius:5px;
+  font-size:8px;
+  font-weight:700;
+  line-height:1.15;
+  letter-spacing:0;
+  white-space:nowrap;
+}
+
+body.structural-surface.command-center-shell .kpi-card__evidence {
+  padding:3px 5px;
+  color:#AFC0D0;
+  background:rgba(148,168,190,.08);
+  border:1px solid rgba(148,168,190,.10);
+}
+
+body.structural-surface.command-center-shell .kpi-card__reference {
+  color:#9DB0C4;
+}
+
+body.structural-surface.command-center-shell .kpi-card__trend {
+  padding:3px 5px;
+  color:var(--text);
+  background:rgba(148,168,190,.09);
+  border:1px solid rgba(148,168,190,.12);
+}
+
+body.structural-surface.command-center-shell .kpi-card__trend--success {
+  color:var(--success);
+  background:rgba(99,199,161,.10);
+  border-color:rgba(99,199,161,.20);
+}
+
+body.structural-surface.command-center-shell .kpi-card__trend--warn {
+  color:var(--warn);
+  background:rgba(230,169,93,.10);
+  border-color:rgba(230,169,93,.20);
+}
+
+body.structural-surface.command-center-shell .kpi-card__trend--danger {
+  color:var(--danger);
+  background:rgba(239,125,115,.10);
+  border-color:rgba(239,125,115,.20);
+}
+
+body.structural-surface.command-center-shell .kpi-card__trend--accent {
+  color:var(--accent);
+  background:rgba(79,183,173,.10);
+  border-color:rgba(79,183,173,.20);
 }
 
 body.structural-surface.command-center-shell .kpi-card--success {
@@ -2857,8 +3444,466 @@ body.structural-surface.command-center-shell .kpi-card--accent .kpi-card__value 
   color:var(--accent);
 }
 
+body.structural-surface.command-center-shell .kpi-sparkline__baseline {
+  stroke:rgba(148,168,190,.18);
+  stroke-width:1;
+}
+
+body.structural-surface.command-center-shell .kpi-sparkline__area {
+  fill:currentColor;
+  opacity:.12;
+}
+
+body.structural-surface.command-center-shell .kpi-sparkline__dot {
+  fill:currentColor;
+  stroke:rgba(8,18,29,.86);
+  stroke-width:1.4;
+}
+
 body.structural-surface.command-center-shell .kpi-card--empty .kpi-card__value {
   color:var(--muted);
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-panel {
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row {
+  display:grid;
+  gap:2px;
+  min-width:0;
+  padding:7px 8px;
+  border:1px solid rgba(148,168,190,.14);
+  border-radius:8px;
+  background:rgba(8,18,29,.54);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row b,
+body.structural-surface.command-center-shell .analysis-result-evidence-row strong,
+body.structural-surface.command-center-shell .analysis-result-evidence-row em {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row b {
+  color:var(--muted);
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row strong {
+  color:var(--text);
+  font-size:11px;
+  font-weight:900;
+  line-height:1.1;
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row em {
+  color:var(--muted);
+  font-size:8px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row--success {
+  border-color:rgba(99,199,161,.22);
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row--success strong {
+  color:var(--success);
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row--warn {
+  border-color:rgba(230,169,93,.24);
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row--warn strong {
+  color:var(--warn);
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row--accent {
+  border-color:rgba(79,183,173,.24);
+}
+
+body.structural-surface.command-center-shell .analysis-result-evidence-row--accent strong {
+  color:var(--accent);
+}
+
+body.structural-surface.command-center-shell .result-step-schedule-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(79,183,173,.16);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(9,22,35,.70), rgba(6,15,25,.62));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .result-step-schedule__head {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:5px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .result-step-schedule__head span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:5px 6px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:7px;
+  background:rgba(4,11,19,.38);
+}
+
+body.structural-surface.command-center-shell .result-step-schedule__head b,
+body.structural-surface.command-center-shell .result-step-schedule__head strong,
+body.structural-surface.command-center-shell .result-step-row b,
+body.structural-surface.command-center-shell .result-step-row em,
+body.structural-surface.command-center-shell .result-step-row strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .result-step-schedule__head b {
+  color:var(--muted);
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .result-step-schedule__head strong {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .result-step-schedule__rows {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .result-step-row {
+  display:grid;
+  grid-template-columns:46px minmax(56px,.8fr) minmax(0,1.45fr);
+  align-items:center;
+  gap:7px;
+  min-width:0;
+  width:100%;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  background:rgba(7,17,28,.50);
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .result-step-row:hover,
+body.structural-surface.command-center-shell .result-step-row:focus-visible {
+  border-color:rgba(79,183,173,.34);
+  background:rgba(79,183,173,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .result-step-row.is-active {
+  border-color:rgba(79,183,173,.42);
+  background:linear-gradient(180deg, rgba(79,183,173,.16), rgba(8,20,31,.66));
+}
+
+body.structural-surface.command-center-shell .result-step-row--success {
+  border-color:rgba(99,199,161,.20);
+}
+
+body.structural-surface.command-center-shell .result-step-row__index,
+body.structural-surface.command-center-shell .result-step-row__values {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .result-step-row__index b {
+  color:var(--text);
+  font-size:11px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .result-step-row__index em,
+body.structural-surface.command-center-shell .result-step-row__values em {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+  text-transform:capitalize;
+}
+
+body.structural-surface.command-center-shell .result-step-row__values strong {
+  color:var(--accent);
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .result-step-row__bar {
+  position:relative;
+  min-width:0;
+  height:6px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(148,168,190,.16);
+}
+
+body.structural-surface.command-center-shell .result-step-row__bar i {
+  position:absolute;
+  inset:0 auto 0 0;
+  width:var(--result-step-progress,0%);
+  border-radius:inherit;
+  background:linear-gradient(90deg, var(--accent), var(--success));
+  box-shadow:0 0 10px rgba(79,183,173,.24);
+}
+
+body.structural-surface.command-center-shell .result-envelope-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(148,168,190,.16);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(8,18,30,.72), rgba(5,13,22,.64));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .result-envelope__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .result-envelope__head span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .result-envelope__head b,
+body.structural-surface.command-center-shell .result-envelope__head em,
+body.structural-surface.command-center-shell .result-envelope__head strong,
+body.structural-surface.command-center-shell .result-envelope-row b,
+body.structural-surface.command-center-shell .result-envelope-row em,
+body.structural-surface.command-center-shell .result-envelope-row strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .result-envelope__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .result-envelope__head em {
+  color:var(--muted);
+  font-size:8px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .result-envelope__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(79,183,173,.20);
+  border-radius:999px;
+  color:var(--accent);
+  background:rgba(79,183,173,.075);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .result-envelope__rows {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .result-envelope-row {
+  display:grid;
+  grid-template-columns:minmax(74px,.82fr) minmax(80px,1fr) minmax(0,1.18fr);
+  align-items:center;
+  gap:7px;
+  min-width:0;
+  width:100%;
+  min-height:34px;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(7,17,28,.50);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .result-envelope-row:hover,
+body.structural-surface.command-center-shell .result-envelope-row:focus-visible {
+  border-color:rgba(79,183,173,.34);
+  background:rgba(79,183,173,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .result-envelope-row__metric,
+body.structural-surface.command-center-shell .result-envelope-row__govern,
+body.structural-surface.command-center-shell .result-envelope-row__evidence {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .result-envelope-row__metric b,
+body.structural-surface.command-center-shell .result-envelope-row__govern em,
+body.structural-surface.command-center-shell .result-envelope-row__evidence b,
+body.structural-surface.command-center-shell .result-envelope-row__evidence em {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .result-envelope-row__metric strong,
+body.structural-surface.command-center-shell .result-envelope-row__govern b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .result-envelope-row--accent {
+  border-color:rgba(79,183,173,.22);
+}
+
+body.structural-surface.command-center-shell .result-envelope-row--accent .result-envelope-row__metric strong {
+  color:var(--accent);
+}
+
+body.structural-surface.command-center-shell .result-envelope-row--success {
+  border-color:rgba(99,199,161,.22);
+}
+
+body.structural-surface.command-center-shell .result-envelope-row--success .result-envelope-row__metric strong {
+  color:var(--success);
+}
+
+body.structural-surface.command-center-shell .result-envelope-row--warn {
+  border-color:rgba(230,169,93,.24);
+}
+
+body.structural-surface.command-center-shell .result-envelope-row--warn .result-envelope-row__metric strong {
+  color:var(--warn);
+}
+
+body.structural-surface.command-center-shell .result-envelope-row--danger {
+  border-color:rgba(239,125,115,.24);
+}
+
+body.structural-surface.command-center-shell .result-envelope-row--danger .result-envelope-row__metric strong {
+  color:var(--danger);
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt {
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row {
+  display:grid;
+  gap:2px;
+  min-width:0;
+  padding:7px 8px;
+  border:1px solid rgba(148,168,190,.14);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(11,23,37,.72), rgba(7,16,27,.62));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row b,
+body.structural-surface.command-center-shell .delivery-review-receipt__row strong,
+body.structural-surface.command-center-shell .delivery-review-receipt__row em {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row b {
+  color:var(--muted);
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row strong {
+  color:var(--text);
+  font-size:11px;
+  font-weight:900;
+  line-height:1.1;
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row em {
+  color:var(--muted);
+  font-size:8px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row--success {
+  border-color:rgba(99,199,161,.22);
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row--success strong {
+  color:var(--success);
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row--warn {
+  border-color:rgba(230,169,93,.24);
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row--warn strong {
+  color:var(--warn);
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row--danger {
+  border-color:rgba(239,125,115,.24);
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row--danger strong {
+  color:var(--danger);
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row--accent {
+  border-color:rgba(79,183,173,.24);
+}
+
+body.structural-surface.command-center-shell .delivery-review-receipt__row--accent strong {
+  color:var(--accent);
 }
 
 body.structural-surface.command-center-shell.light-mode .kpi-card {
@@ -5509,6 +6554,18 @@ body.structural-surface.panel-inspection-shell canvas {
     padding:8px 9px;
   }
 
+  body.structural-surface.command-center-shell .stage-result-receipt {
+    border-color:rgba(79,183,173,.20);
+    background:
+      linear-gradient(180deg, rgba(79,183,173,.08), rgba(255,255,255,.015)),
+      rgba(5,12,21,.70);
+  }
+
+  body.structural-surface.command-center-shell .stage-result-receipt__row {
+    padding-top:3px;
+    border-top:1px solid rgba(148,168,190,.09);
+  }
+
   body.structural-surface.command-center-shell #loadcases-section #load-case-list {
     max-height:92px;
     overflow:auto;
@@ -5557,7 +6614,21 @@ body.structural-surface.panel-inspection-shell canvas {
     z-index:2;
   }
 
-  body.structural-surface.command-center-shell .viewport-tool-rail button {
+  body.structural-surface.command-center-shell .viewport-tool-group {
+    display:grid;
+    gap:5px;
+    padding-bottom:6px;
+    border-bottom:1px solid rgba(148,168,190,.12);
+  }
+
+  body.structural-surface.command-center-shell .viewport-tool-group:last-child {
+    padding-bottom:0;
+    border-bottom:0;
+  }
+
+  body.structural-surface.command-center-shell .viewport-tool-rail button,
+  body.structural-surface.command-center-shell .viewport-tool-button {
+    position:relative;
     display:grid;
     place-items:center;
     width:34px;
@@ -5572,13 +6643,72 @@ body.structural-surface.panel-inspection-shell canvas {
     transition:transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
   }
 
-  body.structural-surface.command-center-shell .viewport-tool-rail button:hover {
+  body.structural-surface.command-center-shell .viewport-tool-button__icon {
+    display:grid;
+    place-items:center;
+    width:100%;
+    height:100%;
+    font-size:14px;
+    line-height:1;
+  }
+
+  body.structural-surface.command-center-shell .viewport-tool-button__label {
+    position:absolute;
+    width:1px;
+    height:1px;
+    padding:0;
+    margin:-1px;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
+    white-space:nowrap;
+    border:0;
+  }
+
+  body.structural-surface.command-center-shell .viewport-tool-rail button:hover,
+  body.structural-surface.command-center-shell .viewport-tool-rail button:focus-visible {
     transform:translateY(-1px);
     border-color:rgba(79,183,173,.30);
     background:
       linear-gradient(180deg, rgba(79,183,173,.12), rgba(255,255,255,.015)),
       rgba(10,18,29,.70);
     color:var(--accent);
+  }
+
+  body.structural-surface.command-center-shell .viewport-tool-rail button.is-active {
+    border-color:rgba(79,183,173,.52);
+    background:
+      linear-gradient(180deg, rgba(79,183,173,.22), rgba(79,183,173,.07)),
+      rgba(10,18,29,.84);
+    color:var(--accent);
+    box-shadow:inset 0 0 0 1px rgba(79,183,173,.12), 0 0 0 1px rgba(79,183,173,.08);
+  }
+
+  body.structural-surface.command-center-shell .viewport-tool-rail button::after {
+    content:attr(data-tooltip);
+    position:absolute;
+    right:calc(100% + 8px);
+    top:50%;
+    transform:translateY(-50%) translateX(4px);
+    max-width:150px;
+    padding:4px 7px;
+    border-radius:6px;
+    border:1px solid rgba(148,168,190,.20);
+    background:rgba(4,10,17,.94);
+    color:var(--text);
+    font-size:10px;
+    font-weight:800;
+    line-height:1.15;
+    white-space:nowrap;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 120ms ease, transform 120ms ease;
+    z-index:5;
+  }
+
+  body.structural-surface.command-center-shell .viewport-tool-rail button:hover::after,
+  body.structural-surface.command-center-shell .viewport-tool-rail button:focus-visible::after {
+    opacity:1;
+    transform:translateY(-50%) translateX(0);
   }
 
   body.structural-surface.command-center-shell .insight-rail .panel-section--kpi {
@@ -5682,6 +6812,37 @@ body.structural-surface.panel-inspection-shell canvas {
     line-height:1.25;
   }
 
+  body.structural-surface.command-center-shell .analysis-chart-title--with-chip {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-title--with-chip > span:first-child {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-title__chip {
+    flex:0 0 auto;
+    max-width:44%;
+    padding:2px 6px;
+    border-radius:999px;
+    border:1px solid rgba(79,183,173,.25);
+    background:rgba(79,183,173,.11);
+    color:#A9FFF5;
+    font-size:9px;
+    font-weight:700;
+    line-height:1.2;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
   body.structural-surface.command-center-shell .analysis-chart-empty,
   body.structural-surface.command-center-shell .analysis-chart-caption,
   body.structural-surface.command-center-shell .analysis-chart-legend {
@@ -5697,6 +6858,92 @@ body.structural-surface.panel-inspection-shell canvas {
     min-height:78px;
   }
 
+  body.structural-surface.command-center-shell .analysis-heatmap-evidence {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(52px,64px);
+    align-items:stretch;
+    gap:8px;
+    min-height:78px;
+  }
+
+  body.structural-surface.command-center-shell .analysis-heatmap-evidence .analysis-heatmap-chart {
+    min-width:0;
+    min-height:78px;
+  }
+
+  body.structural-surface.command-center-shell .analysis-heatmap-core {
+    fill:rgba(5,13,21,.66);
+    stroke:rgba(148,168,190,.32);
+    stroke-width:.8;
+    stroke-dasharray:2 2;
+  }
+
+  body.structural-surface.command-center-shell .analysis-heatmap-hotspot {
+    fill:none;
+    stroke:#FFE16A;
+    stroke-width:1.1;
+    vector-effect:non-scaling-stroke;
+  }
+
+  body.structural-surface.command-center-shell .analysis-heatmap-receipt {
+    display:grid;
+    align-content:stretch;
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .analysis-heatmap-receipt span {
+    display:grid;
+    grid-template-columns:minmax(0,20px) minmax(0,1fr);
+    align-items:center;
+    gap:4px;
+    min-width:0;
+    min-height:14px;
+    padding:2px 4px;
+    border-radius:6px;
+    border:1px solid rgba(148,168,190,.12);
+    background:rgba(255,255,255,.035);
+  }
+
+  body.structural-surface.command-center-shell .analysis-heatmap-receipt b,
+  body.structural-surface.command-center-shell .analysis-heatmap-receipt em {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+    line-height:1.1;
+  }
+
+  body.structural-surface.command-center-shell .analysis-heatmap-receipt b {
+    color:rgba(190,204,222,.68);
+    font-size:7px;
+    font-weight:800;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .analysis-heatmap-receipt em {
+    color:var(--text);
+    font-size:8px;
+    font-weight:800;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-legend--heatmap {
+    display:grid;
+    grid-template-columns:auto minmax(34px,1fr) auto auto;
+    align-items:center;
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .analysis-heatmap-gradient {
+    display:block;
+    height:5px;
+    min-width:34px;
+    border-radius:999px;
+    background:linear-gradient(90deg, #4FB7AD, #63C7A1, #F4B56B, #EF7D73);
+    box-shadow:0 0 0 1px rgba(255,255,255,.10) inset;
+  }
+
   body.structural-surface.command-center-shell .analysis-chart-axis {
     fill:none;
     stroke:rgba(148,168,190,.25);
@@ -5707,6 +6954,12 @@ body.structural-surface.panel-inspection-shell canvas {
     stroke:var(--accent2);
     stroke-width:1.2;
     stroke-dasharray:3 3;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-grid {
+    fill:none;
+    stroke:rgba(148,168,190,.10);
+    stroke-width:.8;
   }
 
   body.structural-surface.command-center-shell .analysis-chart-line {
@@ -5725,6 +6978,31 @@ body.structural-surface.panel-inspection-shell canvas {
     stroke-dasharray:4 4;
   }
 
+  body.structural-surface.command-center-shell .analysis-chart-dot {
+    fill:var(--accent);
+    stroke:rgba(7,15,24,.92);
+    stroke-width:1.2;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-ticks {
+    fill:rgba(202,216,229,.68);
+    font-size:4px;
+    font-weight:650;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-peak-label,
+  body.structural-surface.command-center-shell .analysis-chart-step-label {
+    fill:var(--accent2);
+    font-size:4.4px;
+    font-weight:800;
+    letter-spacing:0;
+    paint-order:stroke;
+    stroke:rgba(7,15,24,.86);
+    stroke-width:2px;
+    stroke-linejoin:round;
+  }
+
   body.structural-surface.command-center-shell .analysis-chart-frame {
     fill:none;
     stroke:rgba(148,168,190,.22);
@@ -5741,6 +7019,22 @@ body.structural-surface.panel-inspection-shell canvas {
   body.structural-surface.command-center-shell .analysis-chart-legend strong {
     color:var(--accent2);
     font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-legend--drift span:first-child::before,
+  body.structural-surface.command-center-shell .analysis-chart-legend--drift span:nth-child(2)::before {
+    content:'';
+    display:inline-block;
+    width:12px;
+    height:2px;
+    margin-right:4px;
+    vertical-align:middle;
+    border-radius:999px;
+    background:rgba(236,242,246,.58);
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-legend--drift span:nth-child(2)::before {
+    background:var(--accent);
   }
 
   body.structural-surface.command-center-shell .analysis-chart-barset {
@@ -5789,6 +7083,106 @@ body.structural-surface.panel-inspection-shell canvas {
     background:linear-gradient(90deg, var(--accent), var(--accent2));
   }
 
+  body.structural-surface.command-center-shell .analysis-material-chart {
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    align-items:end;
+    gap:10px;
+    flex:1;
+    min-height:96px;
+    padding:6px 2px 0;
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-grid {
+    position:absolute;
+    inset:8px 0 28px;
+    display:grid;
+    grid-template-rows:repeat(3, 1fr);
+    pointer-events:none;
+    opacity:.72;
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-grid i {
+    border-top:1px solid rgba(148,168,190,.12);
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-group {
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-rows:minmax(58px,1fr) auto;
+    gap:7px;
+    min-width:0;
+    height:100%;
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-bars {
+    display:flex;
+    align-items:end;
+    justify-content:center;
+    gap:5px;
+    min-height:66px;
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-bar {
+    position:relative;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    width:clamp(18px, 36%, 28px);
+    min-height:8px;
+    border-radius:6px 6px 2px 2px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-bar span {
+    position:absolute;
+    top:-17px;
+    left:50%;
+    transform:translateX(-50%);
+    color:var(--text);
+    font-size:9px;
+    font-weight:700;
+    line-height:1;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-bar--original {
+    background:linear-gradient(180deg, rgba(236,242,246,.70), rgba(148,168,190,.42));
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-bar--optimized {
+    background:linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent2) 72%, #0b1522));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.24),
+      0 0 18px rgba(79,183,173,.15);
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-label {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:5px;
+    min-width:0;
+    color:var(--muted);
+    font-size:10px;
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-label strong {
+    min-width:0;
+    overflow:hidden;
+    color:var(--text);
+    font-size:10px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .analysis-material-label span {
+    color:var(--success);
+    font-weight:700;
+  }
+
   body.structural-surface.command-center-shell .optimization-summary-grid {
     display:grid;
     grid-template-columns:repeat(4, minmax(0,1fr));
@@ -5799,7 +7193,7 @@ body.structural-surface.panel-inspection-shell canvas {
     display:flex;
     flex-direction:column;
     gap:6px;
-    min-height:86px;
+    min-height:104px;
     padding:9px;
     border-radius:12px;
     border:1px solid rgba(148,168,190,.14);
@@ -5808,10 +7202,51 @@ body.structural-surface.panel-inspection-shell canvas {
       rgba(7,15,24,.62);
   }
 
+  body.structural-surface.command-center-shell .optimization-summary-card__top,
+  body.structural-surface.command-center-shell .optimization-summary-card__foot {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-card__foot {
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr) minmax(0,.7fr);
+  }
+
   body.structural-surface.command-center-shell .optimization-summary-card__label {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
     color:var(--text);
     font-size:10px;
     font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-card__source,
+  body.structural-surface.command-center-shell .optimization-summary-saved,
+  body.structural-surface.command-center-shell .optimization-summary-metric {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--muted);
+    font-size:8px;
+    font-weight:700;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-card__source {
+    flex:0 1 auto;
+    max-width:50%;
+    padding:3px 5px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:5px;
+    background:rgba(148,168,190,.07);
+    color:#AFC0D0;
   }
 
   body.structural-surface.command-center-shell .optimization-summary-card__values {
@@ -5825,9 +7260,17 @@ body.structural-surface.panel-inspection-shell canvas {
     flex-direction:column;
     gap:2px;
     color:var(--text);
-    font-size:10px;
-    font-weight:700;
     min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-card__values strong {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--text);
+    font-size:10px;
+    font-weight:800;
   }
 
   body.structural-surface.command-center-shell .optimization-summary-card__values small {
@@ -5837,7 +7280,38 @@ body.structural-surface.panel-inspection-shell canvas {
     text-transform:uppercase;
   }
 
+  body.structural-surface.command-center-shell .optimization-summary-bars {
+    position:relative;
+    display:grid;
+    gap:3px;
+    min-height:12px;
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-bar {
+    display:block;
+    height:4px;
+    border-radius:999px;
+    background:rgba(148,168,190,.14);
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-bar--before {
+    width:100%;
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-bar--after {
+    min-width:3px;
+    background:linear-gradient(90deg, var(--accent), var(--success));
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-bar--danger {
+    background:linear-gradient(90deg, var(--warn), var(--danger));
+  }
+
   body.structural-surface.command-center-shell .optimization-summary-delta {
+    flex:0 0 auto;
+    padding:3px 5px;
+    border-radius:5px;
+    background:rgba(99,199,161,.10);
     font-size:12px;
     line-height:1;
   }
@@ -5847,7 +7321,30 @@ body.structural-surface.panel-inspection-shell canvas {
   }
 
   body.structural-surface.command-center-shell .optimization-summary-delta--danger {
+    background:rgba(239,125,115,.10);
     color:var(--danger);
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-details-link {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:24px;
+    padding:4px 8px;
+    border-radius:6px;
+    border:1px solid rgba(79,183,173,.24);
+    background:rgba(79,183,173,.08);
+    color:var(--accent);
+    font-size:9px;
+    font-weight:800;
+    line-height:1;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .optimization-summary-details-link:hover {
+    border-color:rgba(79,183,173,.42);
+    background:rgba(79,183,173,.14);
   }
 
   body.structural-surface.command-center-shell .critical-members-table {
@@ -5903,14 +7400,90 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .critical-member-ratio {
     display:grid;
-    gap:4px;
+    gap:3px;
+    min-width:0;
   }
 
-  body.structural-surface.command-center-shell .critical-member-ratio i {
+  body.structural-surface.command-center-shell .critical-member-ratio__head {
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .critical-member-ratio__head b,
+  body.structural-surface.command-center-shell .critical-member-ratio small {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--muted);
+    font-size:8px;
+    font-weight:800;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .critical-member-ratio__track {
+    position:relative;
     display:block;
-    height:3px;
+    height:5px;
     border-radius:999px;
-    background:linear-gradient(90deg, var(--accent), var(--accent2), var(--danger));
+    overflow:hidden;
+    background:rgba(148,168,190,.12);
+  }
+
+  body.structural-surface.command-center-shell .critical-member-ratio__track i {
+    display:block;
+    height:100%;
+    border-radius:inherit;
+    background:linear-gradient(90deg, var(--success), var(--warn), var(--danger));
+  }
+
+  body.structural-surface.command-center-shell .critical-member-ratio__track em {
+    position:absolute;
+    top:-2px;
+    bottom:-2px;
+    width:1px;
+    background:rgba(236,242,246,.72);
+    box-shadow:0 0 0 1px rgba(8,18,29,.54);
+  }
+
+  body.structural-surface.command-center-shell .critical-member-drift {
+    display:grid;
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .critical-member-drift b {
+    font-size:10px;
+  }
+
+  body.structural-surface.command-center-shell .critical-member-drift i {
+    display:block;
+    height:4px;
+    border-radius:999px;
+    overflow:hidden;
+    background:rgba(148,168,190,.10);
+  }
+
+  body.structural-surface.command-center-shell .critical-member-drift em {
+    display:block;
+    height:100%;
+    border-radius:inherit;
+    background:currentColor;
+  }
+
+  body.structural-surface.command-center-shell .critical-member-drift--success {
+    color:var(--success);
+  }
+
+  body.structural-surface.command-center-shell .critical-member-drift--warn {
+    color:var(--warn);
+  }
+
+  body.structural-surface.command-center-shell .critical-member-drift--danger {
+    color:var(--danger);
   }
 
   body.structural-surface.command-center-shell .critical-member-status {
@@ -5934,6 +7507,525 @@ body.structural-surface.panel-inspection-shell canvas {
   body.structural-surface.command-center-shell .critical-members-row--watch .critical-member-status {
     background:rgba(230,169,93,.14);
     color:var(--warn);
+  }
+
+  body.structural-surface.command-center-shell .critical-member-action {
+    display:inline-flex;
+    align-items:center;
+    min-width:0;
+    max-width:100%;
+    min-height:20px;
+    padding:2px 6px;
+    border-radius:6px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    border:1px solid rgba(148,168,190,.12);
+    background:rgba(148,168,190,.07);
+    color:var(--text);
+    font-size:9px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .critical-member-action--success {
+    color:var(--success);
+    border-color:rgba(99,199,161,.20);
+    background:rgba(99,199,161,.09);
+  }
+
+  body.structural-surface.command-center-shell .critical-member-action--warn {
+    color:var(--warn);
+    border-color:rgba(230,169,93,.20);
+    background:rgba(230,169,93,.09);
+  }
+
+  body.structural-surface.command-center-shell .critical-member-action--danger {
+    color:var(--danger);
+    border-color:rgba(239,125,115,.20);
+    background:rgba(239,125,115,.09);
+  }
+
+  body.structural-surface.command-center-shell .material-member-catalog-panel {
+    display:grid;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-summary {
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-summary span {
+    display:grid;
+    gap:1px;
+    min-width:0;
+    padding:6px 7px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:8px;
+    background:rgba(255,255,255,.03);
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-summary b {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--text);
+    font-size:13px;
+    line-height:1;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-summary em {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color:var(--muted);
+    font-size:8px;
+    font-style:normal;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-grid {
+    display:grid;
+    grid-template-columns:minmax(0,1.35fr) minmax(116px,.8fr);
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-list {
+    display:grid;
+    gap:5px;
+    min-width:0;
+    grid-row:1 / span 4;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row {
+    display:grid;
+    grid-template-columns:10px minmax(0,1fr) minmax(82px,.66fr);
+    align-items:center;
+    gap:6px;
+    width:100%;
+    min-height:34px;
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:8px;
+    background:rgba(255,255,255,.025);
+    color:var(--text);
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row:hover,
+  body.structural-surface.command-center-shell .material-catalog-row:focus-visible {
+    border-color:rgba(79,183,173,.34);
+    background:rgba(79,183,173,.08);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row--warn {
+    border-color:rgba(230,169,93,.24);
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row__swatch {
+    width:9px;
+    height:24px;
+    border-radius:999px;
+    background:linear-gradient(180deg, var(--accent), rgba(79,183,173,.22));
+    box-shadow:0 0 0 1px rgba(255,255,255,.12);
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row__main,
+  body.structural-surface.command-center-shell .material-catalog-row__props {
+    display:grid;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row__main b,
+  body.structural-surface.command-center-shell .material-catalog-row__main em,
+  body.structural-surface.command-center-shell .material-catalog-row__props strong,
+  body.structural-surface.command-center-shell .material-catalog-row__props small {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row__main b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:800;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row__main em,
+  body.structural-surface.command-center-shell .material-catalog-row__props small {
+    color:var(--muted);
+    font-size:8px;
+    font-style:normal;
+    line-height:1.15;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row__props {
+    justify-items:end;
+    gap:1px;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-row__props strong {
+    color:var(--accent);
+    font-size:10px;
+    line-height:1;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-side {
+    display:grid;
+    gap:5px;
+    min-width:0;
+    grid-column:2;
+  }
+
+  body.structural-surface.command-center-shell .material-family-coverage {
+    display:grid;
+    gap:5px;
+    min-width:0;
+    grid-column:2;
+    padding:7px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:8px;
+    background:rgba(9,19,30,.42);
+  }
+
+  body.structural-surface.command-center-shell .material-family-coverage__head {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-family-coverage__head b,
+  body.structural-surface.command-center-shell .material-family-coverage__head span {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .material-family-coverage__head b {
+    color:var(--text);
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+
+  body.structural-surface.command-center-shell .material-family-coverage__head span {
+    color:var(--muted);
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-family-coverage__chips {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-family-chip {
+    display:grid;
+    gap:1px;
+    min-width:0;
+    padding:4px 5px;
+    border:1px solid rgba(79,183,173,.14);
+    border-radius:7px;
+    background:rgba(79,183,173,.055);
+  }
+
+  body.structural-surface.command-center-shell .material-family-chip--warn {
+    border-color:rgba(230,169,93,.24);
+    background:rgba(230,169,93,.07);
+  }
+
+  body.structural-surface.command-center-shell .material-family-chip--more {
+    border-color:rgba(148,168,190,.18);
+    background:rgba(148,168,190,.07);
+  }
+
+  body.structural-surface.command-center-shell .material-family-chip b,
+  body.structural-surface.command-center-shell .material-family-chip em {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .material-family-chip b {
+    color:var(--text);
+    font-size:8px;
+    font-weight:800;
+  }
+
+  body.structural-surface.command-center-shell .material-family-chip em {
+    color:var(--muted);
+    font-size:7px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule {
+    display:grid;
+    gap:5px;
+    min-width:0;
+    grid-column:2;
+    padding:7px;
+    border:1px solid rgba(79,183,173,.14);
+    border-radius:8px;
+    background:rgba(7,15,24,.40);
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__head {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__head b,
+  body.structural-surface.command-center-shell .material-section-schedule__head span {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__head b {
+    color:var(--text);
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__head span {
+    color:var(--muted);
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__rows {
+    display:grid;
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__row {
+    display:grid;
+    grid-template-columns:8px minmax(0,1fr) minmax(38px,.34fr);
+    align-items:center;
+    gap:5px;
+    width:100%;
+    min-height:30px;
+    padding:4px 5px;
+    border:1px solid rgba(148,168,190,.10);
+    border-radius:7px;
+    background:rgba(255,255,255,.025);
+    color:var(--text);
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__row:hover,
+  body.structural-surface.command-center-shell .material-section-schedule__row:focus-visible {
+    border-color:rgba(79,183,173,.32);
+    background:rgba(79,183,173,.08);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__swatch {
+    width:8px;
+    height:20px;
+    border-radius:999px;
+    background:linear-gradient(180deg, var(--accent), rgba(79,183,173,.22));
+    box-shadow:0 0 0 1px rgba(255,255,255,.12);
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__main,
+  body.structural-surface.command-center-shell .material-section-schedule__meta {
+    display:grid;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__main b,
+  body.structural-surface.command-center-shell .material-section-schedule__main em,
+  body.structural-surface.command-center-shell .material-section-schedule__meta strong,
+  body.structural-surface.command-center-shell .material-section-schedule__meta small {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__main b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:800;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__main em,
+  body.structural-surface.command-center-shell .material-section-schedule__meta small {
+    color:var(--muted);
+    font-size:7.5px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__meta {
+    justify-items:end;
+    gap:1px;
+  }
+
+  body.structural-surface.command-center-shell .material-section-schedule__meta strong {
+    color:var(--accent);
+    font-size:9px;
+    line-height:1;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule {
+    display:grid;
+    gap:5px;
+    min-width:0;
+    grid-column:2;
+    padding:7px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:8px;
+    background:rgba(7,15,24,.36);
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__head,
+  body.structural-surface.command-center-shell .section-schedule__rows {
+    display:grid;
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__head b,
+  body.structural-surface.command-center-shell .section-schedule__head span {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__head b {
+    color:var(--text);
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__head span {
+    color:var(--muted);
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__row {
+    display:grid;
+    grid-template-columns:8px minmax(0,1fr) minmax(42px,.38fr);
+    align-items:center;
+    gap:5px;
+    width:100%;
+    min-height:30px;
+    padding:4px 5px;
+    border:1px solid rgba(148,168,190,.10);
+    border-radius:7px;
+    background:rgba(255,255,255,.022);
+    color:var(--text);
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__row:hover,
+  body.structural-surface.command-center-shell .section-schedule__row:focus-visible {
+    border-color:rgba(92,157,255,.30);
+    background:rgba(92,157,255,.075);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__swatch {
+    width:8px;
+    height:20px;
+    border-radius:999px;
+    background:linear-gradient(180deg, #5c9dff, rgba(92,157,255,.22));
+    box-shadow:0 0 0 1px rgba(255,255,255,.12);
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__main,
+  body.structural-surface.command-center-shell .section-schedule__meta {
+    display:grid;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__main b,
+  body.structural-surface.command-center-shell .section-schedule__main em,
+  body.structural-surface.command-center-shell .section-schedule__meta strong,
+  body.structural-surface.command-center-shell .section-schedule__meta small {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__main b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:800;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__main em,
+  body.structural-surface.command-center-shell .section-schedule__meta small {
+    color:var(--muted);
+    font-size:7.5px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__meta {
+    justify-items:end;
+    gap:1px;
+  }
+
+  body.structural-surface.command-center-shell .section-schedule__meta strong {
+    color:#5c9dff;
+    font-size:9px;
+    line-height:1;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-side__block {
+    display:grid;
+    gap:4px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(148,168,190,.10);
+    border-radius:8px;
+    background:rgba(7,15,24,.34);
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-side__block > b {
+    color:var(--muted);
+    font-size:8px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-side__block span {
+    display:grid;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-side__block strong,
+  body.structural-surface.command-center-shell .material-catalog-side__block em {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-side__block strong {
+    color:var(--text);
+    font-size:9px;
+  }
+
+  body.structural-surface.command-center-shell .material-catalog-side__block em {
+    color:var(--muted);
+    font-size:8px;
+    font-style:normal;
   }
 
   body.structural-surface.command-center-shell #prop-panel,

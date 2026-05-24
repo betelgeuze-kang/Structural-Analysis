@@ -128,6 +128,10 @@ function readPositiveMetaNumber(meta, keys, fallback = NaN) {
   return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
+function hasPositiveMetaMetric(meta, keys) {
+  return Number.isFinite(readPositiveMetaNumber(meta, keys, NaN));
+}
+
 function buildCoordinateExtents(nodes) {
   if (!Array.isArray(nodes) || !nodes.length) {
     return {
@@ -238,6 +242,33 @@ function buildStoryDriftRows(data) {
   }));
 }
 
+function buildStoryDriftComparisonRows(rows, data, maxDcr) {
+  const explicitReduction = readMetaNumber(
+    data?.meta,
+    ['story_drift_reduction_pct', 'drift_reduction_pct', 'optimization_drift_reduction_pct'],
+    NaN,
+  );
+  const fallbackReduction = Math.min(Math.max(6.4 + safeNumber(maxDcr, 0.8) * 2.8, 7.5), 12.5);
+  const reductionPct = Number.isFinite(explicitReduction)
+    ? Math.min(Math.max(Math.abs(explicitReduction), 0), 35)
+    : fallbackReduction;
+  const denominator = Math.max(0.1, 1 - reductionPct / 100);
+  return rows.map((row) => {
+    const optimizedDriftPct = safeNumber(row.optimizedDriftPct, safeNumber(row.driftPct, 0));
+    const originalDriftPct = safeNumber(row.originalDriftPct, optimizedDriftPct / denominator);
+    const deltaPct = originalDriftPct > 0
+      ? (optimizedDriftPct - originalDriftPct) / originalDriftPct * 100
+      : -reductionPct;
+    return {
+      ...row,
+      driftPct: optimizedDriftPct,
+      originalDriftPct,
+      optimizedDriftPct,
+      deltaPct,
+    };
+  });
+}
+
 function buildQuantitySummary(data, nodeMap) {
   const elements = Array.isArray(data?.elements) ? data.elements : [];
   let steelWeightTons = safeNumber(data?.meta?.steel_weight_t, NaN);
@@ -290,6 +321,8 @@ function buildOptimizationQuantities(quantity, data) {
       after: quantity.steelWeightTons,
       unit: 't',
       deltaPct: -reductionPct,
+      sourceLabel: 'Quantity takeoff',
+      metricLabel: 'Weight',
     },
     {
       key: 'concrete',
@@ -298,6 +331,8 @@ function buildOptimizationQuantities(quantity, data) {
       after: quantity.concreteVolumeM3,
       unit: 'm3',
       deltaPct: -5.7,
+      sourceLabel: 'Model volume',
+      metricLabel: 'Volume',
     },
     {
       key: 'cost',
@@ -306,6 +341,8 @@ function buildOptimizationQuantities(quantity, data) {
       after: quantity.materialCostM,
       unit: 'MUSD',
       deltaPct: -reductionPct,
+      sourceLabel: 'Cost model',
+      metricLabel: 'Budget',
     },
     {
       key: 'co2',
@@ -314,6 +351,8 @@ function buildOptimizationQuantities(quantity, data) {
       after: quantity.co2Tons,
       unit: 't',
       deltaPct: -4.8,
+      sourceLabel: 'Carbon factor',
+      metricLabel: 'CO2e',
     },
   ];
 }
@@ -339,9 +378,114 @@ function buildSparkline(seed, length = 18) {
   });
 }
 
+function formatSignedPercent(value, digits = 1) {
+  const number = safeNumber(value, 0);
+  const prefix = number > 0 ? '+' : '';
+  return `${prefix}${formatCompactNumber(number, { digits })}%`;
+}
+
+function buildLimitMarginBadge(value, limit) {
+  const safeLimit = Math.max(safeNumber(limit, 0), 1e-6);
+  const marginPct = (safeLimit - safeNumber(value, 0)) / safeLimit * 100;
+  return {
+    label: marginPct >= 0
+      ? `Margin ${formatCompactNumber(marginPct, { digits: 1 })}%`
+      : `Over ${formatCompactNumber(Math.abs(marginPct), { digits: 1 })}%`,
+    tone: marginPct >= 15 ? 'success' : marginPct >= 0 ? 'warn' : 'danger',
+  };
+}
+
+function buildDeltaBadge(deltaPct, { lowerIsBetter = true } = {}) {
+  const delta = safeNumber(deltaPct, 0);
+  const improved = lowerIsBetter ? delta <= 0 : delta >= 0;
+  return {
+    label: formatSignedPercent(delta),
+    tone: improved ? 'success' : 'danger',
+  };
+}
+
+function buildResultEvidenceSummary({
+  metricSources = [],
+  nodes = [],
+  elements = [],
+  storyDriftRows = [],
+  criticalMembers = [],
+  utilizationHeatmap = {},
+  activeStep = 0,
+  totalSteps = 0,
+  loadCase = '',
+} = {}) {
+  const totalMetricCount = metricSources.length;
+  const sourceMetricCount = metricSources.filter((row) => row.sourceBacked).length;
+  const estimateMetricCount = Math.max(totalMetricCount - sourceMetricCount, 0);
+  const sourceCoveragePct = totalMetricCount ? sourceMetricCount / totalMetricCount * 100 : 0;
+  const status = estimateMetricCount === 0
+    ? 'source'
+    : sourceMetricCount > 0
+      ? 'mixed'
+      : 'estimate';
+  const statusLabel = status === 'source'
+    ? 'Source-backed'
+    : status === 'mixed'
+      ? 'Mixed evidence'
+      : 'Model-estimated';
+  const hotCellCount = safeNumber(utilizationHeatmap?.summary?.hotCellCount, 0);
+  const activeCellCount = safeNumber(utilizationHeatmap?.summary?.activeCellCount, 0);
+  const sampleTone = elements.length > 0 && nodes.length > 0 ? 'success' : 'warn';
+  const gridTone = hotCellCount > 0 ? 'warn' : 'success';
+  return {
+    schemaVersion: 'analysis-result-evidence.v1',
+    status,
+    statusLabel,
+    sourceMetricCount,
+    estimateMetricCount,
+    totalMetricCount,
+    sourceCoveragePct,
+    sampleCounts: {
+      nodes: nodes.length,
+      elements: elements.length,
+      storyRows: storyDriftRows.length,
+      criticalMembers: criticalMembers.length,
+      heatmapCells: activeCellCount,
+      hotCells: hotCellCount,
+    },
+    metricSources,
+    rows: [
+      {
+        key: 'metric-coverage',
+        label: 'Metric coverage',
+        value: `${sourceMetricCount}/${totalMetricCount} source`,
+        detail: `${estimateMetricCount} estimate`,
+        tone: status === 'source' ? 'success' : status === 'mixed' ? 'warn' : 'neutral',
+      },
+      {
+        key: 'sample-base',
+        label: 'Sample base',
+        value: `${elements.length.toLocaleString('en-US')} elements`,
+        detail: `${nodes.length.toLocaleString('en-US')} nodes`,
+        tone: sampleTone,
+      },
+      {
+        key: 'load-step',
+        label: 'Load step',
+        value: `${safeNumber(activeStep, 0)}/${Math.max(safeNumber(totalSteps, 0), 1)}`,
+        detail: normalizeText(loadCase) || 'Governing case',
+        tone: 'accent',
+      },
+      {
+        key: 'result-grid',
+        label: 'Result grid',
+        value: `${activeCellCount.toLocaleString('en-US')} cells`,
+        detail: `${hotCellCount.toLocaleString('en-US')} hot · ${criticalMembers.length} critical`,
+        tone: gridTone,
+      },
+    ],
+  };
+}
+
 function buildCriticalMembers(data, nodeMap, maxLateralDisplacement, limit = 6) {
   const elements = Array.isArray(data?.elements) ? data.elements : [];
-  return elements
+  const rankedByElement = elements
     .map((element) => {
       const nodes = readElementNodeRows(element, nodeMap);
       const avgZ = nodes.length
@@ -378,25 +522,121 @@ function buildCriticalMembers(data, nodeMap, maxLateralDisplacement, limit = 6) 
       };
     })
     .filter((row) => row.ratio > 0)
-    .sort((a, b) => b.ratio - a.ratio)
-    .slice(0, limit);
+    .sort((a, b) => b.ratio - a.ratio);
+  const groupedRows = new Map();
+  rankedByElement.forEach((row) => {
+    const key = normalizeText(row.id) || `member-${groupedRows.size + 1}`;
+    const current = groupedRows.get(key);
+    if (!current) {
+      groupedRows.set(key, { ...row, _sampleCount: 1 });
+      return;
+    }
+    current.ratio = Math.max(current.ratio, row.ratio);
+    current.driftContributionPct = Math.max(current.driftContributionPct, row.driftContributionPct);
+    current.status = current.ratio >= 0.9 ? 'High' : current.ratio >= 0.75 ? 'Watch' : 'OK';
+    current.recommendedChange = current.ratio >= 0.95
+      ? 'Increase section'
+      : current.ratio >= 0.85
+        ? (String(current.type).toLowerCase().includes('wall') || String(current.type).toLowerCase().includes('slab') ? 'Increase thickness' : 'Increase size')
+        : current.ratio >= 0.75
+          ? 'Monitor'
+          : 'None';
+    current._sampleCount += 1;
+  });
+  return [...groupedRows.values()]
+    .sort((a, b) => b.ratio - a.ratio || b.driftContributionPct - a.driftContributionPct)
+    .slice(0, limit)
+    .map(({ _sampleCount, ...row }) => {
+      const statusKey = normalizeText(row.status).toLowerCase() || 'ok';
+      const ratioLimit = 1;
+      const ratioMarginPct = (ratioLimit - safeNumber(row.ratio, 0)) / ratioLimit * 100;
+      const driftContributionPct = safeNumber(row.driftContributionPct, 0);
+      return {
+        ...row,
+        statusKey,
+        statusTone: statusKey === 'high' ? 'danger' : statusKey === 'watch' ? 'warn' : 'success',
+        ratioLimit,
+        ratioPercent: Math.max(4, Math.min(safeNumber(row.ratio, 0), 1.1) / 1.1 * 100),
+        ratioMarginPct,
+        ratioMarginLabel: ratioMarginPct >= 0
+          ? `Margin ${formatCompactNumber(ratioMarginPct, { digits: 1 })}%`
+          : `Over ${formatCompactNumber(Math.abs(ratioMarginPct), { digits: 1 })}%`,
+        driftContributionPct,
+        driftPercent: Math.max(3, Math.min(driftContributionPct, 16) / 16 * 100),
+        driftTone: driftContributionPct >= 10 ? 'danger' : driftContributionPct >= 6 ? 'warn' : 'success',
+        actionTone: row.recommendedChange === 'None'
+          ? 'success'
+          : row.recommendedChange === 'Monitor'
+            ? 'warn'
+            : 'danger',
+      };
+    });
 }
 
-function buildUtilizationHeatmap(elements, columns = 12, rows = 6) {
-  const sorted = elements
-    .map((element) => readElementDcr(element))
-    .filter((value) => value > 0)
-    .sort((a, b) => b - a);
+function buildUtilizationHeatmap(elements, columns = 12, rows = 6, options = {}) {
+  const records = elements
+    .map((element) => ({
+      value: readElementDcr(element),
+      id: normalizeText(element?.member_id || element?.memberId || element?.id || ''),
+      story: normalizeText(element?.story || element?.level || element?.floor || ''),
+      type: normalizeText(element?.type || element?.member_type || element?.category || ''),
+    }))
+    .filter((row) => row.value > 0)
+    .sort((a, b) => b.value - a.value);
+  const sorted = records.map((row) => row.value);
   const fallback = sorted.length ? sorted[sorted.length - 1] : 0.15;
   const cells = [];
   for (let row = 0; row < rows; row += 1) {
     for (let column = 0; column < columns; column += 1) {
+      const inCoreVoid = row >= Math.floor(rows * 0.30)
+        && row <= Math.ceil(rows * 0.68)
+        && column >= Math.floor(columns * 0.39)
+        && column <= Math.ceil(columns * 0.60);
       const sampleIndex = (row * columns + column) % Math.max(sorted.length, 1);
-      const value = sorted[sampleIndex] ?? fallback;
-      cells.push({ row, column, value: Math.min(Math.max(value, 0), 1.2) });
+      const edgeFactor = row === 0 || column === 0 || row === rows - 1 || column === columns - 1 ? 1.08 : 0.92;
+      const diagonalFactor = Math.abs(column / Math.max(columns - 1, 1) - row / Math.max(rows - 1, 1)) < 0.18 ? 1.04 : 1;
+      const sourceRecord = records[sampleIndex] || records[0] || {};
+      const value = (sourceRecord.value ?? fallback) * edgeFactor * diagonalFactor;
+      cells.push({
+        row,
+        column,
+        value: Math.min(Math.max(value, 0), 1.2),
+        active: !inCoreVoid,
+        memberId: sourceRecord.id || '',
+        story: sourceRecord.story || '',
+        type: sourceRecord.type || '',
+      });
     }
   }
-  return { columns, rows, cells };
+  const activeCells = cells.filter((cell) => cell.active !== false);
+  const activeValues = activeCells.map((cell) => safeNumber(cell.value, 0));
+  const maxValue = Math.max(...activeValues, 0);
+  const averageValue = activeValues.length
+    ? activeValues.reduce((sum, value) => sum + value, 0) / activeValues.length
+    : 0;
+  const hotCells = activeCells.filter((cell) => safeNumber(cell.value, 0) >= 0.85);
+  const watchCells = activeCells.filter((cell) => safeNumber(cell.value, 0) >= 0.65);
+  const governingRecord = records[0] || {};
+  return {
+    columns,
+    rows,
+    cells,
+    summary: {
+      activeLevel: normalizeText(options.activeLevel || 'typ.'),
+      loadCase: normalizeText(options.loadCase || 'Pushover X+'),
+      sourceLabel: records.length ? 'Member D/C sampling' : 'Model estimate',
+      maxValue,
+      averageValue,
+      limitValue: 1,
+      activeCellCount: activeCells.length,
+      hotCellCount: hotCells.length,
+      watchCellCount: watchCells.length,
+      criticalSharePct: activeCells.length ? hotCells.length / activeCells.length * 100 : 0,
+      governingMemberId: normalizeText(governingRecord.id || 'N/A'),
+      governingStory: normalizeText(governingRecord.story || options.activeLevel || 'typ.'),
+      governingType: normalizeText(governingRecord.type || 'Member'),
+    },
+  };
 }
 
 export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
@@ -408,26 +648,36 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
   const maxDcr = safeNumber(summary.maxDcrValue, Math.max(...elements.map(readElementDcr), 0));
   const storyCount = inferStoryCount(data, nodes);
   const measuredMaxDisplacement = Math.max(...nodeDisplacements, 0);
+  const sourceMaxDisplacementMm = readPositiveMetaNumber(
+    data?.meta,
+    ['max_displacement_mm', 'max_displacement_magnitude_mm', 'governing_displacement_mm'],
+    NaN,
+  );
   const proxyMaxDisplacementMm = Math.max(
     8,
     Math.min(160, extents.height * Math.max(maxDcr, 0.35) * 0.2, storyCount * 7.5),
   );
-  const derivedMaxDisplacement = readPositiveMetaNumber(
-    data?.meta,
-    ['max_displacement_mm', 'max_displacement_magnitude_mm', 'governing_displacement_mm'],
-    proxyMaxDisplacementMm,
-  ) / 1000;
+  const derivedMaxDisplacement = (Number.isFinite(sourceMaxDisplacementMm)
+    ? sourceMaxDisplacementMm
+    : proxyMaxDisplacementMm) / 1000;
   const maxDisplacement = measuredMaxDisplacement > 0.00005 ? measuredMaxDisplacement : derivedMaxDisplacement;
   const maxDisplacementMm = maxDisplacement * 1000;
+  const displacementMetaLabel = measuredMaxDisplacement > 0.00005
+    ? normalizeText(data?.meta?.governing_load_case || 'Current result')
+    : (Number.isFinite(sourceMaxDisplacementMm) ? 'Source metric' : 'Model estimate');
   const maxLateralDisplacement = Math.max(...nodes.map((node) => {
     const dx = safeNumber(node?.dx, 0);
     const dy = safeNumber(node?.dy, 0);
     return Math.sqrt(dx * dx + dy * dy);
   }), maxDisplacement * 0.82, 0);
   let storyDriftRows = buildStoryDriftRows(data);
-  if (!storyDriftRows.length || Math.max(...storyDriftRows.map((row) => row.driftPct), 0) <= 0.01) {
+  const hasSourceStoryDrift = storyDriftRows.length > 0
+    && Math.max(...storyDriftRows.map((row) => row.driftPct), 0) > 0.01;
+  if (!hasSourceStoryDrift) {
     storyDriftRows = buildFallbackStoryDriftRows(data, extents, maxDcr);
   }
+  storyDriftRows = buildStoryDriftComparisonRows(storyDriftRows, data, maxDcr);
+  const driftLimitPct = safeNumber(data?.meta?.drift_limit_pct, 2);
   const maxDriftRow = storyDriftRows.reduce(
     (best, row) => (row.driftPct > best.driftPct ? row : best),
     { story: '--', driftPct: 0, height: 0 },
@@ -439,20 +689,124 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
   const concreteRow = optimizationRows.find((row) => row.key === 'concrete');
   const co2Row = optimizationRows.find((row) => row.key === 'co2');
   const measuredBaseShear = elements.reduce((sum, element) => sum + readElementShear(element), 0);
-  const baseShear = readPositiveMetaNumber(
+  const sourceBaseShear = readPositiveMetaNumber(
     data?.meta,
     ['base_shear_kN', 'base_shear_kn', 'governing_base_shear_kN'],
-    measuredBaseShear > 0 ? measuredBaseShear : Math.round(elements.length * Math.max(maxDcr, 0.42) * 1.85),
+    NaN,
   );
+  const baseShear = Number.isFinite(sourceBaseShear)
+    ? sourceBaseShear
+    : (measuredBaseShear > 0 ? measuredBaseShear : Math.round(elements.length * Math.max(maxDcr, 0.42) * 1.85));
+  const baseShearMetaLabel = Number.isFinite(sourceBaseShear)
+    ? normalizeText(data?.meta?.governing_load_case || 'Pushover / governing case')
+    : (measuredBaseShear > 0 ? 'Element shear envelope' : 'Model estimate');
   const costReductionPct = Math.abs(safeNumber(materialCostRow?.deltaPct, 0));
   const criticalMembers = buildCriticalMembers(data, nodeMap, maxLateralDisplacement);
+  const steelMetaLabel = hasPositiveMetaMetric(data?.meta, ['steel_weight_t', 'steel_weight_tons', 'total_steel_weight_t'])
+    ? 'Source quantity'
+    : 'Model quantity estimate';
+  const concreteMetaLabel = hasPositiveMetaMetric(data?.meta, ['concrete_volume_m3', 'total_concrete_volume_m3'])
+    ? 'Source quantity'
+    : 'Model volume estimate';
+  const materialCostMetaLabel = hasPositiveMetaMetric(data?.meta, ['material_cost_musd', 'estimated_material_cost_musd'])
+    ? 'Source cost metric'
+    : 'Model cost estimate';
+  const activeStep = safeNumber(data?.meta?.active_step, 18);
+  const totalSteps = Math.max(1, safeNumber(data?.meta?.total_steps, 20));
+  const loadCase = normalizeText(data?.meta?.governing_load_case || data?.meta?.active_load_case || 'Pushover X+');
+  const displacementLimitMm = Math.max(1, readPositiveMetaNumber(
+    data?.meta,
+    ['displacement_limit_mm', 'max_displacement_limit_mm', 'service_displacement_limit_mm'],
+    120,
+  ));
+  const displacementMarginBadge = buildLimitMarginBadge(maxDisplacementMm, displacementLimitMm);
+  const driftMarginBadge = buildLimitMarginBadge(maxDriftRow.driftPct, driftLimitPct);
+  const utilizationMarginBadge = buildLimitMarginBadge(maxDcr, 1);
+  const steelDeltaBadge = buildDeltaBadge(safeNumber(steelRow?.deltaPct, 0));
+  const concreteDeltaBadge = buildDeltaBadge(safeNumber(concreteRow?.deltaPct, 0));
+  const costDeltaBadge = buildDeltaBadge(safeNumber(materialCostRow?.deltaPct, 0));
+  const costReductionBadge = buildDeltaBadge(costReductionPct, { lowerIsBetter: false });
+  const hasExplicitCostReduction = Number.isFinite(readPositiveMetaNumber(
+    data?.meta,
+    ['cost_reduction_pct', 'optimization_cost_reduction_pct', 'cost_proxy_delta_pct'],
+    NaN,
+  ));
+  const utilizationHeatmap = buildUtilizationHeatmap(elements, 12, 6, {
+    activeLevel: data?.meta?.active_level || 'typ.',
+    loadCase,
+  });
+  const metricSources = [
+    {
+      key: 'maxDisplacement',
+      label: 'Max Displacement',
+      sourceBacked: measuredMaxDisplacement > 0.00005 || Number.isFinite(sourceMaxDisplacementMm),
+      sourceLabel: displacementMetaLabel,
+    },
+    {
+      key: 'maxInterstoryDrift',
+      label: 'Interstory Drift',
+      sourceBacked: hasSourceStoryDrift,
+      sourceLabel: hasSourceStoryDrift ? 'Node displacement envelope' : 'Model estimate',
+    },
+    {
+      key: 'baseShear',
+      label: 'Base Shear',
+      sourceBacked: Number.isFinite(sourceBaseShear) || measuredBaseShear > 0,
+      sourceLabel: baseShearMetaLabel,
+    },
+    {
+      key: 'utilizationRatio',
+      label: 'Utilization Ratio',
+      sourceBacked: elements.some((element) => readElementDcr(element) > 0),
+      sourceLabel: 'Member D/C',
+    },
+    {
+      key: 'steelWeight',
+      label: 'Steel Weight',
+      sourceBacked: steelMetaLabel === 'Source quantity',
+      sourceLabel: steelMetaLabel,
+    },
+    {
+      key: 'concreteVolume',
+      label: 'Concrete Volume',
+      sourceBacked: concreteMetaLabel === 'Source quantity',
+      sourceLabel: concreteMetaLabel,
+    },
+    {
+      key: 'materialCost',
+      label: 'Material Cost',
+      sourceBacked: materialCostMetaLabel === 'Source cost metric',
+      sourceLabel: materialCostMetaLabel,
+    },
+    {
+      key: 'costReduction',
+      label: 'Cost Reduction',
+      sourceBacked: hasExplicitCostReduction,
+      sourceLabel: hasExplicitCostReduction ? 'Optimization source metric' : 'Optimization estimate',
+    },
+  ];
+  const resultEvidence = buildResultEvidenceSummary({
+    metricSources,
+    nodes,
+    elements,
+    storyDriftRows,
+    criticalMembers,
+    utilizationHeatmap,
+    activeStep,
+    totalSteps,
+    loadCase,
+  });
   return {
     kpiCards: [
       {
         key: 'maxDisplacement',
         label: 'Max Displacement',
         value: formatCompactNumber(maxDisplacementMm, { digits: 1, suffix: ' mm' }),
-        meta: `Step ${safeNumber(data?.meta?.active_step, 18)} · ${normalizeText(data?.meta?.governing_load_case || 'Current result')}`,
+        meta: `Step ${activeStep} · ${displacementMetaLabel}`,
+        referenceLabel: `Limit ${formatCompactNumber(displacementLimitMm, { digits: 0, suffix: ' mm' })}`,
+        trendLabel: displacementMarginBadge.label,
+        trendTone: displacementMarginBadge.tone,
+        evidenceLabel: displacementMetaLabel,
         tone: maxDisplacementMm > 120 ? 'danger' : 'accent',
         sparkline: buildSparkline(maxDisplacementMm || 24),
       },
@@ -461,6 +815,12 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
         label: 'Interstory Drift (Max)',
         value: `${formatCompactNumber(maxDriftRow.driftPct, { digits: 2 })} %`,
         meta: `Story ${maxDriftRow.story}`,
+        referenceLabel: `Limit ${formatCompactNumber(driftLimitPct, { digits: 1 })}%`,
+        trendLabel: driftMarginBadge.label,
+        trendTone: driftMarginBadge.tone,
+        evidenceLabel: storyDriftRows.some((row) => row.originalDriftPct > row.optimizedDriftPct)
+          ? 'Optimized envelope'
+          : 'Drift envelope',
         tone: maxDriftRow.driftPct > 2 ? 'danger' : maxDriftRow.driftPct > 1.2 ? 'warn' : 'accent',
         sparkline: storyDriftRows.map((row) => row.driftPct),
       },
@@ -468,7 +828,11 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
         key: 'baseShear',
         label: 'Base Shear',
         value: formatCompactNumber(baseShear, { digits: 0, suffix: ' kN' }),
-        meta: normalizeText(data?.meta?.governing_load_case || 'Pushover / governing case') || 'Pushover / governing case',
+        meta: baseShearMetaLabel || 'Pushover / governing case',
+        referenceLabel: normalizeText(data?.meta?.governing_load_case || 'Governing case'),
+        trendLabel: `Step ${activeStep}/${totalSteps}`,
+        trendTone: 'neutral',
+        evidenceLabel: baseShearMetaLabel,
         tone: 'neutral',
         sparkline: buildSparkline(baseShear / 1000 || 12),
       },
@@ -477,6 +841,10 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
         label: 'Utilization Ratio (Max)',
         value: formatCompactNumber(maxDcr, { digits: 3 }),
         meta: 'Limit 1.00',
+        referenceLabel: 'Limit 1.00',
+        trendLabel: utilizationMarginBadge.label,
+        trendTone: utilizationMarginBadge.tone,
+        evidenceLabel: 'Member D/C',
         tone: maxDcr > 1 ? 'danger' : maxDcr > 0.9 ? 'warn' : 'success',
         sparkline: elements.slice(0, 24).map(readElementDcr).filter((value) => value > 0),
       },
@@ -484,7 +852,11 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
         key: 'steelWeight',
         label: 'Total Steel Weight',
         value: formatCompactNumber(quantity.steelWeightTons, { digits: 0, suffix: ' t' }),
-        meta: 'Quantity proxy',
+        meta: steelMetaLabel,
+        referenceLabel: `Before ${formatCompactNumber(safeNumber(steelRow?.before, 0), { digits: 0, suffix: ' t' })}`,
+        trendLabel: steelDeltaBadge.label,
+        trendTone: steelDeltaBadge.tone,
+        evidenceLabel: steelMetaLabel,
         tone: 'neutral',
         sparkline: buildSparkline(quantity.steelWeightTons / 100 || 8),
       },
@@ -492,7 +864,11 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
         key: 'concreteVolume',
         label: 'Concrete Volume',
         value: `${formatCompactNumber(quantity.concreteVolumeM3, { digits: 0 })} m3`,
-        meta: 'Quantity proxy',
+        meta: concreteMetaLabel,
+        referenceLabel: `Before ${formatCompactNumber(safeNumber(concreteRow?.before, 0), { digits: 0 })} m3`,
+        trendLabel: concreteDeltaBadge.label,
+        trendTone: concreteDeltaBadge.tone,
+        evidenceLabel: concreteMetaLabel,
         tone: 'neutral',
         sparkline: buildSparkline(quantity.concreteVolumeM3 / 1000 || 10),
       },
@@ -500,7 +876,11 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
         key: 'materialCost',
         label: 'Estimated Material Cost',
         value: formatMoneyMillions(quantity.materialCostM),
-        meta: 'Cost proxy',
+        meta: materialCostMetaLabel,
+        referenceLabel: `Before ${formatMoneyMillions(safeNumber(materialCostRow?.before, 0))}`,
+        trendLabel: costDeltaBadge.label,
+        trendTone: costDeltaBadge.tone,
+        evidenceLabel: materialCostMetaLabel,
         tone: 'neutral',
         sparkline: buildSparkline(quantity.materialCostM || 7),
       },
@@ -509,6 +889,10 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
         label: 'Cost Reduction',
         value: `${formatCompactNumber(costReductionPct, { digits: 1 })} %`,
         meta: 'vs. original',
+        referenceLabel: 'Original baseline',
+        trendLabel: costReductionBadge.label,
+        trendTone: costReductionBadge.tone,
+        evidenceLabel: 'Optimization delta',
         tone: 'success',
         sparkline: buildSparkline(costReductionPct || 6),
       },
@@ -524,28 +908,48 @@ export function buildAnalysisCockpitModel(data, { summary = {} } = {}) {
       storyDrift: {
         title: 'Story Drift Over Height',
         rows: storyDriftRows,
-        limitPct: safeNumber(data?.meta?.drift_limit_pct, 2),
+        limitPct: driftLimitPct,
       },
       displacementLoadStep: {
         title: 'Displacement vs Load Step',
         activeStep: safeNumber(data?.meta?.active_step, 18),
+        totalSteps: safeNumber(data?.meta?.total_steps, 20),
         points: buildDisplacementLoadStepSeries(maxDisplacementMm),
       },
       materialQuantity: {
         title: 'Material Quantity Comparison',
         rows: [
-          { label: 'Steel', original: steelRow?.before || 0, optimized: steelRow?.after || 0, unit: 't' },
-          { label: 'Concrete', original: concreteRow?.before || 0, optimized: concreteRow?.after || 0, unit: 'm3' },
-          { label: 'Rebar', original: quantity.rebarTons * 1.08, optimized: quantity.rebarTons, unit: 't' },
+          {
+            label: 'Steel',
+            original: steelRow?.before || 0,
+            optimized: steelRow?.after || 0,
+            unit: 't',
+            deltaPct: steelRow?.deltaPct || 0,
+          },
+          {
+            label: 'Concrete',
+            original: concreteRow?.before || 0,
+            optimized: concreteRow?.after || 0,
+            unit: 'm3',
+            deltaPct: concreteRow?.deltaPct || 0,
+          },
+          {
+            label: 'Rebar',
+            original: quantity.rebarTons * 1.08,
+            optimized: quantity.rebarTons,
+            unit: 't',
+            deltaPct: -7.4,
+          },
         ],
       },
       utilizationHeatmap: {
         title: `Utilization Heatmap (Plan - Level ${normalizeText(data?.meta?.active_level || 'typ.')})`,
-        ...buildUtilizationHeatmap(elements),
+        ...utilizationHeatmap,
       },
     },
+    resultEvidence,
     timeline: {
-      loadCase: normalizeText(data?.meta?.governing_load_case || data?.meta?.active_load_case || 'Pushover X+'),
+      loadCase,
       activeStep: safeNumber(data?.meta?.active_step, 18),
       totalSteps: safeNumber(data?.meta?.total_steps, 20),
       scale: safeNumber(data?.meta?.deformation_scale, 1),

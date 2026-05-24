@@ -9,14 +9,18 @@ export const DEFAULT_MIDAS33_VIEW_PRESET = 'review';
 export const MIDAS33_VIEW_PRESETS = {
   review: {
     label: 'Review',
-    mode: 'solid',
-    factors: { x: -0.48, y: 0.62, z: 0.52 },
+    mode: 'contour',
+    factors: { x: -0.70, y: 0.46, z: 0.82 },
+    distanceScale: 0.92,
+    targetOffset: { x: 0.02, y: 0.12, z: -0.04 },
     up: { x: 0, y: 1, z: 0 },
   },
   frame: {
     label: 'Frame',
-    mode: 'solid',
-    factors: { x: 0.62, y: 0.48, z: 0.58 },
+    mode: 'contour',
+    factors: { x: 0.78, y: 0.58, z: 0.54 },
+    distanceScale: 1.08,
+    targetOffset: { x: -0.02, y: 0.06, z: 0.02 },
     up: { x: 0, y: 1, z: 0 },
   },
   plan: {
@@ -67,15 +71,23 @@ export function buildMidas33CameraPoseFromBounds(bounds, preset = DEFAULT_MIDAS3
   if (!bounds || typeof bounds !== 'object') return null;
   const target = safePoint(bounds.center);
   if (!target) return null;
+  const size = safePoint(bounds.size) || { x: 0, y: 0, z: 0 };
   const radius = Math.max(safeNumber(bounds.radius, 1), 1);
   const config = getMidas33ViewPresetConfig(preset);
   const factors = config.factors || {};
+  const targetOffset = config.targetOffset || {};
+  const resolvedTarget = {
+    x: target.x + size.x * safeNumber(targetOffset.x, 0),
+    y: target.y + size.y * safeNumber(targetOffset.y, 0),
+    z: target.z + size.z * safeNumber(targetOffset.z, 0),
+  };
+  const distanceScale = Math.max(safeNumber(config.distanceScale, 1), 0.1);
   return {
-    target,
+    target: resolvedTarget,
     position: {
-      x: target.x + radius * safeNumber(factors.x, 0),
-      y: target.y + radius * safeNumber(factors.y, 0),
-      z: target.z + radius * safeNumber(factors.z, 0),
+      x: resolvedTarget.x + radius * distanceScale * safeNumber(factors.x, 0),
+      y: resolvedTarget.y + radius * distanceScale * safeNumber(factors.y, 0),
+      z: resolvedTarget.z + radius * distanceScale * safeNumber(factors.z, 0),
     },
     up: config.up || { x: 0, y: 0, z: 1 },
   };

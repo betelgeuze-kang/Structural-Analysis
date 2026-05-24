@@ -115,7 +115,8 @@ export function createViewerRenderMeshBuilderToolkit(THREE, config = {}) {
   function createInstancedLineGroupObjects(records, type, { radius = 0.15 } = {}) {
     const items = Array.isArray(records) ? records : [];
     if (!items.length) return null;
-    const geometry = new T.CylinderGeometry(radius, radius, 1, 8, 1, false);
+    const visualRadius = Math.max(0.001, safeNumber(radius, 0.15));
+    const geometry = new T.CylinderGeometry(visualRadius, visualRadius, 1, 8, 1, false);
     const material = new T.MeshPhongMaterial({
       color: 0xffffff,
       transparent: true,
@@ -125,11 +126,12 @@ export function createViewerRenderMeshBuilderToolkit(THREE, config = {}) {
     mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
-    mesh.userData = { _instancedGroup: true, type };
+    mesh.userData = { _instancedGroup: true, type, visualRadius };
     items.forEach((record, index) => {
       record.instanceId = index;
       record.groupType = type;
       record.mesh = mesh;
+      record.visualRadius = safeNumber(record.visualRadius, visualRadius);
       mesh.setMatrixAt(index, record.baseMatrix);
       mesh.setColorAt(index, new T.Color(record.baseColorHex));
     });
@@ -144,6 +146,7 @@ export function createViewerRenderMeshBuilderToolkit(THREE, config = {}) {
       wireframe: createInstancedWireframe(items, type),
       records: items,
       defaultOpacity: 0.85,
+      visualRadius,
     };
   }
 
@@ -215,6 +218,7 @@ export function createViewerRenderMeshBuilderToolkit(THREE, config = {}) {
       nodeData: nodeItems,
       baseColor: baseColor.getHex(),
       contourGeometryKind: 'line_tube',
+      visualRadius: Math.max(0.001, safeNumber(radius, 0.15)),
     };
     mesh.userData = meshData;
     const lineMaterial = new T.LineBasicMaterial({
@@ -227,7 +231,7 @@ export function createViewerRenderMeshBuilderToolkit(THREE, config = {}) {
     const deformedPoints = nodeItems.map(node => nodeToDeformedViewerVector(T, node, deformScale));
     const deformedCurve = new T.LineCurve3(deformedPoints[0], deformedPoints[1]);
     const deformedTubeGeometry = new T.TubeGeometry(deformedCurve, 1, radius, 8, false);
-    const deformedMaterial = new T.MeshPhongMaterial({ color: 0xff6b6b, transparent: true, opacity: 0.7 });
+    const deformedMaterial = new T.MeshPhongMaterial({ color: 0x9fb3c8, transparent: true, opacity: 0.34 });
     const deformedMesh = new T.Mesh(deformedTubeGeometry, deformedMaterial);
     deformedMesh.userData = { ...element, _deformed: true };
     return {

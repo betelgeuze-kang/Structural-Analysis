@@ -43,11 +43,20 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     renderer_text = (ROOT / "src" / "structure-viewer" / "viewer-real-drawing-panel-renderer.js").read_text(
         encoding="utf-8"
     )
+    drawing_handoff_renderer_text = (
+        ROOT / "src" / "structure-viewer" / "viewer-drawing-handoff-panel-renderer.js"
+    ).read_text(encoding="utf-8")
+    stage_callouts_renderer_text = (
+        ROOT / "src" / "structure-viewer" / "viewer-stage-result-callouts-renderer.js"
+    ).read_text(encoding="utf-8")
 
     expected_shell_primitives = {
         "top search shell": 'class="top-search-shell"',
         "project pill": 'id="shell-project-pill"',
+        "topbar project selector": "data-shell-project-select",
+        "topbar project receipt": "data-shell-project-receipt",
         "status pill": 'id="shell-status-pill"',
+        "top run control": "data-top-run-control",
         "viewer tabbar": 'class="viewer-tabbar"',
         "left nav list": 'class="shell-nav-list"',
         "stage overlay panel": 'class="stage-overlay-panel stage-overlay-panel--left"',
@@ -71,6 +80,14 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert 'id="shell-meta-stories"' in text
     assert 'id="shell-meta-review"' in text
     assert 'id="shell-meta-source"' in text
+    assert 'id="top-run-compare-button"' in text
+    assert 'id="top-run-new-button"' in text
+    assert "data-top-run-receipt" in text
+    assert "data-top-run-action" in text
+    assert "syncTopRunControl" in text
+    assert "startNewReviewRun" in text
+    assert "renderTopbarProjectSelector" in text
+    assert "setTopbarWorkspaceSelection" in text
     assert "Real Drawing Assets" in tree_model_text
     assert "getRealDrawingAssetRegistry" in text
     assert 'id="real-drawing-quality-panel"' in text
@@ -98,18 +115,276 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "viewer-side-panel-model.js" in text
     assert "viewer-stats-summary.js" in text
     assert "viewer-analysis-cockpit-model.js" in text
+    assert "viewer-drawing-handoff-panel-renderer.js" in text
+    assert "viewer-stage-result-callouts-renderer.js" in text
     assert "buildAnalysisCockpitModel" in text
+    assert "buildDrawingHandoffPanelHtml" in text
+    assert "buildStageResultCalloutsHtml" in text
+    assert "renderStageResultCallouts" in text
+    assert "syncCriticalMemberReviewFocus" in text
+    assert 'id="stage-result-callouts"' in text
+    assert 'id="stage-result-receipt"' in text
+    assert "data-stage-result-receipt" in text
+    assert "renderStageResultReceipt" in text
+    assert "formatContourSourceLabel" in text
+    assert "stage-result-receipt__row" in text
+    assert "data-stage-review-controls" in text
+    assert "data-stage-view-mode-select" in text
+    assert "data-stage-model-stack" in text
+    assert "data-stage-review-control-receipt" in text
+    assert "syncStageReviewControls" in text
+    assert "stage-review-control-receipt__row" in text
+    assert "data-contour-scale-evidence" in text
+    assert "data-contour-scale-ticks" in text
+    assert "data-contour-colorbar" in text
+    assert "renderContourScaleEvidence" in text
+    assert "data-analysis-result-evidence" in text
+    assert "renderAnalysisResultEvidence" in text
+    assert "analysis-result-evidence-row" in text
+    assert 'id="result-step-schedule-panel"' in text
+    assert "data-result-step-schedule" in text
+    assert "renderResultStepSchedule" in text
+    assert "buildResultStepScheduleModel" in text
+    assert "structure-viewer-result-step-schedule.v1" in text
+    assert "data-result-step-row" in text
+    assert "data-result-step-active" in text
+    assert "setAnalysisTimelineStep" in text
+    assert 'id="result-envelope-panel"' in text
+    assert "data-result-envelope" in text
+    assert "renderResultEnvelope" in text
+    assert "buildResultEnvelopeModel" in text
+    assert "structure-viewer-result-envelope.v1" in text
+    assert "data-result-envelope-row" in text
+    assert "data-result-envelope-member-id" in text
+    assert "data-delivery-review-receipt" in text
+    assert "buildDeliveryReviewReceiptModel" in text
+    assert "renderDeliveryReviewReceipt" in text
+    assert "structure-viewer-delivery-review-receipt.v1" in text
+    assert "delivery-review-receipt__row" in text
+    assert 'id="material-member-catalog-panel"' in text
+    assert "data-material-member-catalog" in text
+    assert "buildMaterialMemberCatalogPanelModel" in text
+    assert "renderMaterialMemberCatalogPanel" in text
+    assert "structure-viewer-material-member-catalog.v1" in text
+    assert "MATERIAL_FAMILY_ONTOLOGY" in text
+    assert "data-material-family-coverage" in text
+    assert "data-material-family-chip" in text
+    assert "data-material-family-ontology-count" in text
+    assert "rail_steel" in text
+    assert "seismic_isolator" in text
+    assert "damper" in text
+    assert "fireproofing" in text
+    assert "waterproofing" in text
+    assert "insulation" in text
+    assert "expansion_joint" in text
+    assert "known_material_family_count" in (
+        ROOT / "src" / "structure-viewer" / "viewer-direct-model-normalizer.js"
+    ).read_text(encoding="utf-8")
+    assert "material_family_ontology_count" in (
+        ROOT / "src" / "structure-viewer" / "viewer-direct-model-normalizer.js"
+    ).read_text(encoding="utf-8")
+    assert "structure-viewer-material-family-coverage.v1" in (
+        ROOT / "src" / "structure-viewer" / "viewer-direct-model-normalizer.js"
+    ).read_text(encoding="utf-8")
+    assert "material-catalog-row__props" in text
+    assert "data-material-section-schedule" in text
+    assert "data-material-section-row" in text
+    assert "material_section_schedule_count" in text
+    assert "material_section" in text
+    assert "data-section-schedule" in text
+    assert "data-section-schedule-row" in text
+    assert "section_material_schedule_count" in text
+    assert "section_id" in text
+    assert "material_catalog_summary" in (
+        ROOT / "src" / "structure-viewer" / "viewer-direct-model-normalizer.js"
+    ).read_text(encoding="utf-8")
+    assert "buildMaterialCatalogSummary" in (
+        ROOT / "src" / "structure-viewer" / "viewer-direct-model-normalizer.js"
+    ).read_text(encoding="utf-8")
+    assert "data-utilization-heatmap-evidence" in text
+    assert "analysis-heatmap-receipt" in text
+    assert "analysis-heatmap-hotspot" in text
+    assert "data-heatmap-level-chip" in text
+    assert 'id="stage-overlay-receipt"' in text
+    assert "data-stage-overlay-receipt" in text
+    assert "data-stage-overlay-visual-evidence" in text
+    assert "data-stage-overlay-load-key" in text
+    assert "data-stage-overlay-support-key" in text
+    assert "renderAnalysisStageOverlayReceipt" in text
+    assert "setAnalysisStageOverlayState" in text
+    assert "__STRUCTURE_VIEWER_ANALYSIS_OVERLAY_STATE__" in text
+    assert "stage-overlay-receipt__row" in text
+    assert "stage-overlay-legend-swatch--load" in text
+    assert "stage-overlay-legend-swatch--support" in text
+    assert "load-case-evidence-row" in text
+    assert "data-load-case-status" in text
+    assert "data-load-case-kind" in text
+    assert "data-viewport-tool-rail" in text
+    assert "data-viewport-tool-render-mode" in text
+    assert "data-viewport-view-preset" in text
+    assert "syncViewportToolRailState" in text
+    assert "classifyLoadCaseKind" in (
+        ROOT / "src" / "structure-viewer" / "viewer-side-panel-model.js"
+    ).read_text(encoding="utf-8")
+    assert "load-case-evidence-row__bar" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-model-stack__row" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-contour-scale__body" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "analysis-heatmap-gradient" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "viewport-tool-group" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "viewport-tool-rail button::after" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert 'id="viewport-selection-focus-badge"' in text
+    assert "selectionFocusOverlayGroup" in text
+    assert "selected-member-focus-overlays" in text
+    assert "getViewerPointFromCoordinate" in text
+    assert "buildElementFocusState" in text
+    assert "getSelectedFocusRecords" in text
+    assert "rebuildSelectionFocusOverlay" in text
+    assert "positionViewportSelectionFocusBadge" in text
+    assert "positionStageResultCalloutDock" in text
+    assert "window.positionStageResultCalloutDock=positionStageResultCalloutDock;" in text
+    assert "getRectOverlapArea" in text
+    assert "data-stage-callout-dock" in text
+    assert "data-stage-callout-overlap" in text
+    assert "selected_member_focus_halo" in text
+    assert "selected_member_focus_secondary_marker" in text
+    assert "data-viewport-selection-focus-count" in text
+    assert "data-viewport-selection-focus-edge" in text
+    assert "is-edge-pinned" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
+        encoding="utf-8"
+    )
+    assert "data-stage-result-callouts" in text
+    assert "data-stage-result-callout-key" in stage_callouts_renderer_text
+    assert "data-stage-callout-focus-member" in stage_callouts_renderer_text
+    assert "max-displacement" in stage_callouts_renderer_text
+    assert "critical-member" in stage_callouts_renderer_text
+    assert "aria-pressed" in stage_callouts_renderer_text
+    assert "mode:event.ctrlKey||event.metaKey?'toggle':'replace'" in text
+    assert "memberIds:currentSelection.memberIds" in text
+    assert "renderDrawingHandoffPanel" in text
+    assert "setDrawingHandoffActiveSheet" in text
+    assert "bindDrawingHandoffSheetInteractions" in text
+    assert "copyDrawingHandoffDeepLink" in text
+    assert "data-drawing-handoff-preview" in drawing_handoff_renderer_text
+    assert "data-drawing-handoff-preview-link" in drawing_handoff_renderer_text
+    assert "data-drawing-handoff-active-sheet-open" in drawing_handoff_renderer_text
+    assert "data-drawing-handoff-sheet-href" in drawing_handoff_renderer_text
+    assert "aria-current" in drawing_handoff_renderer_text
+    assert "drawing-handoff-preview__svg" in drawing_handoff_renderer_text
+    assert "data-drawing-handoff-copy-link" in drawing_handoff_renderer_text
+    assert "data-drawing-handoff-sheet" in drawing_handoff_renderer_text
+    assert "Drawing Handoff" in drawing_handoff_renderer_text
     assert "ANALYSIS_COCKPIT_KPI_KEYS" in analysis_cockpit_text
     assert "Max Displacement" in analysis_cockpit_text
+    assert "referenceLabel" in analysis_cockpit_text
+    assert "trendLabel" in analysis_cockpit_text
+    assert "evidenceLabel" in analysis_cockpit_text
+    assert "kpi-card__evidence" in text
+    assert "kpi-card__trend" in text
+    assert "kpi-card__reference" in text
+    assert "kpi-sparkline__area" in text
+    assert "kpi-sparkline__dot" in text
     assert "Critical Members" in text
+    assert "data-critical-status" in text
+    assert "data-critical-ratio" in text
+    assert "critical-member-ratio__track" in text
+    assert "critical-member-drift" in text
+    assert "critical-member-action" in text
     assert 'id="optimization-summary-panel"' in text
+    assert "data-optimization-summary-details-link" in text
+    assert "optimization-summary-card__source" in text
+    assert "optimization-summary-bars" in text
+    assert "optimization-summary-bar--after" in text
+    assert "optimization-summary-saved" in text
+    assert 'id="drawing-handoff-panel"' in text
     assert 'id="critical-members-panel"' in text
     assert 'id="analysis-cockpit-chart-strip"' in text
     assert 'id="analysis-timeline-status"' in text
+    assert "analysis-timeline-control" in text
+    assert "setAnalysisTimelineStep" in text
+    assert "stepAnalysisTimeline" in text
+    assert "toggleAnalysisTimelinePlayback" in text
+    assert "analysisTimelineStepOverride" in text
+    assert "analysis-timeline-slider" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
+        encoding="utf-8"
+    )
+    assert "analysis-timeline-buttons" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
+        encoding="utf-8"
+    )
+    assert "analysis-drift-chart" in text
+    assert "analysis-chart-grid" in text
+    assert "analysis-chart-dot" in text
+    assert "analysis-chart-ticks" in text
+    assert "analysis-chart-peak-label" in text
+    assert "analysis-chart-step-label" in text
+    assert "analysis-load-step-chart" in text
+    assert "analysis-chart-legend--drift" in text
+    assert "originalDriftPct" in text
+    assert "optimizedDriftPct" in text
+    assert "analysis-material-chart" in text
+    assert "analysis-material-group" in text
+    assert "analysis-material-bar--original" in text
+    assert "analysis-material-bar--optimized" in text
+    assert "analysis-material-chart" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "kpi-card__trend--success" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "critical-member-ratio__track" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "critical-member-action--danger" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "analysis-chart-ticks" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "analysis-material-chart" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert "drawing-handoff-preview" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
+        encoding="utf-8"
+    )
+    assert "stage-result-callouts" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
+        encoding="utf-8"
+    )
+    assert "Dense cockpit short-viewport compression" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert "@media (max-height: 940px) and (min-width: 1221px)" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert 'data-stage-callout-dock="bottom-right"' in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert "critical-members-row.is-selected" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
+        encoding="utf-8"
+    )
+    assert "viewport-selection-focus-badge" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
+        encoding="utf-8"
+    )
     assert "renderAnalysisCockpitCharts" in text
     assert "analysis-stage-overlays" in text
     assert "lateral_load_arrow" in text
     assert "support_marker" in text
+    assert "stage-overlay-receipt" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "stage-overlay-visual-evidence" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
     assert "<span>Drift</span>" in text
     assert "analysisStageOverlayDark" in (ROOT / "DESIGN.md").read_text(encoding="utf-8")
     assert "clip-path:inset(50%)" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
@@ -162,7 +437,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
         encoding="utf-8"
     )
     assert "Structural Insight Viewer" in text
-    assert "Structural Model Workspace" in text
+    assert "Optimization Cockpit" in text
     assert "function getViewerModelBounds()" in text
     assert "function setViewerCameraPose(" in text
     assert "viewer-viewport-command-state.js" in text

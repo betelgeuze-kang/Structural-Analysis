@@ -15,7 +15,7 @@ def test_structure_viewer_pdf_export_smoke_is_wired_to_package_and_full_gate() -
 
     assert (
         package_json["scripts"]["verify:viewer-report-pdf"]
-        == "playwright install chromium && node ./scripts/verify-structure-viewer-report-pdf.mjs"
+        == "node ./scripts/verify-structure-viewer-report-pdf.mjs"
     )
     assert "scripts/verify-structure-viewer-report-pdf.mjs" in frontend_contract
     assert "verify:viewer-report-pdf" in quality_gate

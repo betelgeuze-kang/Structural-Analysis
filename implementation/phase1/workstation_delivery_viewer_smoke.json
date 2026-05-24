@@ -1,0 +1,148 @@
+{
+  "schema_version": "workstation-delivery-viewer-smoke.v1",
+  "generated_at": "2026-05-24T15:48:52.049Z",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "status": "ready",
+  "summary_line": "Workstation delivery viewer smoke: PASS | static=true | browser=true",
+  "package_path": "implementation/phase1/release/workstation_delivery/project_package.zip",
+  "extract_mode": "temporary_zip_restore",
+  "static_checks": {
+    "pass": true,
+    "reason": "PASS",
+    "required_paths": {
+      "package_zip": true,
+      "viewer_html": true,
+      "manifest_json": true,
+      "checksums_sha256": true
+    },
+    "checksum_self_test": {
+      "pass": true,
+      "reason": "PASS",
+      "checked_rows": 33,
+      "mismatches": []
+    },
+    "viewer_markers": {
+      "has_html_shell": true,
+      "has_viewport_region": true,
+      "has_canvas_contract": true,
+      "has_three_runtime": true,
+      "has_render_controls": true
+    },
+    "manifest_markers": {
+      "references_viewer": true,
+      "references_report": true,
+      "claim_boundary_present": true
+    },
+    "commercial_cockpit_alignment": {
+      "status": "current_cockpit_delivery",
+      "marker_count": 26,
+      "required_marker_count_for_current_cockpit": 26,
+      "markers": {
+        "structural_insight_title": true,
+        "cockpit_polish_css": true,
+        "workflow_tabs": true,
+        "top_project_selector": true,
+        "top_run_control": true,
+        "stage_review_controls": true,
+        "analysis_result_evidence": true,
+        "contour_scale_evidence": true,
+        "load_case_evidence_rows": true,
+        "utilization_heatmap_evidence": true,
+        "viewport_tool_rail": true,
+        "analysis_overlay_receipt": true,
+        "analysis_overlay_visual_evidence": true,
+        "stage_result_callouts": true,
+        "stage_result_receipt": true,
+        "result_step_schedule": true,
+        "result_envelope": true,
+        "delivery_review_receipt": true,
+        "material_member_catalog": true,
+        "material_family_coverage": true,
+        "material_ontology_breadth": true,
+        "material_section_schedule": true,
+        "section_member_schedule": true,
+        "critical_members": true,
+        "optimization_summary": true,
+        "drawing_handoff_panel": true
+      },
+      "note": "Current cockpit alignment is required for workstation delivery handoff acceptance."
+    }
+  },
+  "browser_checks": {
+    "pass": true,
+    "reason": "PASS",
+    "opened_url": "http://127.0.0.1:41447/viewer.html",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "screenshot_path": "/tmp/workstation-delivery-viewer-smoke.png",
+    "browser_state": {
+      "title": "Structural Insight Viewer",
+      "viewport_present": true,
+      "canvas_present": true,
+      "canvas_width": 500,
+      "canvas_height": 600,
+      "loading_display": "none",
+      "loading_text": "Building direct render geometry 6968/6968",
+      "stats_text": "Max D/C0.000Avg D/C0.000NG Count0Stories36Modelphase1-midas-mgt-modelSource#embedded-model-dataMembers0Groups0Sections181/183Real Drawing Assets--Solver-Exact Assets--IFC Geometry-Ready Assets--Proxy / Preview Assets--Drawing Review Queue--Zero-Load Signatures--Full Solver-Exact Ready--Solver-Exact Target--Next Unlock Batch--Build PathdefaultSurface LODcoarsePickingdirect meshesPick Mesh TrianglesdisabledPick Mesh LocaldisabledPick Deformed TrianglesdisabledPick Deformed LocaldisabledPick Surface FacetsdisabledPick Full BVHdisabledPick Non-Surface BVHdisabledPick Dense Buckets--Review IDs12Load Patterns2",
+      "model_tree_text": "Member Typesbeam2192shell6968Section Familiessteel · h_beam, pipe2896IsolateMaterialsCONC C405774IsolateCONC C40F2860IsolateCONC C40WBR520IsolateUSER RigidBar6I",
+      "contour_button_present": true,
+      "render_mode_button_present": true,
+      "scalar_select_present": true,
+      "footer_present": true
+    },
+    "canvas_probe_wait": {
+      "pass": true,
+      "reason": "PASS"
+    },
+    "canvas_metrics": {
+      "nonBlank": true,
+      "canvasWidth": 500,
+      "canvasHeight": 600,
+      "sampleWidth": 180,
+      "sampleHeight": 120,
+      "significantPixelCount": 6001,
+      "significantPixelRatio": 0.27782407407407406,
+      "bbox": {
+        "minX": 0,
+        "minY": 40,
+        "maxX": 179,
+        "maxY": 119,
+        "width": 180,
+        "height": 80
+      },
+      "coverageWidth": 1,
+      "coverageHeight": 0.6666666666666666,
+      "bboxAspectRatio": 2.25,
+      "centerX": 0.5,
+      "centerY": 0.6666666666666666
+    },
+    "canvas_screenshot_metrics": {
+      "nonBlank": true,
+      "width": 500,
+      "height": 601,
+      "significantPixelCount": 87750,
+      "significantPixelRatio": 0.29201331114808654,
+      "bbox": {
+        "minX": 0,
+        "minY": 0,
+        "maxX": 499,
+        "maxY": 599,
+        "width": 500,
+        "height": 600
+      },
+      "coverageWidth": 1,
+      "coverageHeight": 0.9983361064891847,
+      "bboxAspectRatio": 0.8333333333333334,
+      "centerX": 0.5,
+      "centerY": 0.49916805324459235
+    },
+    "errors": []
+  },
+  "browser_skipped": false,
+  "claim_boundary": "Local customer-open browser smoke for the workstation delivery package only. This is not a customer-device FPS claim and not independent structural-solver approval.",
+  "warnings": [],
+  "blockers": []
+}

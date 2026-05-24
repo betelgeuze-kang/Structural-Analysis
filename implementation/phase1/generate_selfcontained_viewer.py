@@ -21,7 +21,7 @@ import re
 import shutil
 from pathlib import Path
 
-from implementation.phase1.singlefile_viewer_support import inline_design_theme_stylesheet
+from implementation.phase1.singlefile_viewer_support import inline_structure_viewer_stylesheets
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 VIEWER_ROOT = REPO_ROOT / "src" / "structure-viewer"
@@ -42,6 +42,9 @@ ARTIFACT_PRESET_INPUTS = {
     / "midas"
     / "midas_generator_33.optimized.roundtrip.json",
 }
+LOCAL_VIEWER_MODULE_IMPORT_RE = re.compile(
+    r"from\s+([\"'])(\./viewer-[^\"']+\.js)\1\s*;?"
+)
 
 
 def generate_demo_model() -> dict:
@@ -162,7 +165,7 @@ def generate_selfcontained_html(model_data: dict) -> str:
         html_content = viewer_html_path.read_text(encoding="utf-8")
         html_content = _remove_sidecar_data_bootstrap(html_content)
         html_content = _remove_importmap_bootstrap(html_content)
-        html_content = inline_design_theme_stylesheet(html_content)
+        html_content = inline_structure_viewer_stylesheets(html_content)
         html_content = _inline_vendor_module_imports(
             html_content,
             three_import_url=three_import_url,
@@ -499,134 +502,34 @@ def _mark_structural_singlefile_html(html_content: str) -> str:
 
 def _build_inline_viewer_module_import_urls() -> dict[str, str]:
     """Return data-URL module imports for local viewer helpers used by index.html."""
+    index_html = (VIEWER_ROOT / "index.html").read_text(encoding="utf-8")
+    root_imports = set(match.group(2) for match in LOCAL_VIEWER_MODULE_IMPORT_RE.finditer(index_html))
+    cache: dict[str, str] = {}
+    visiting: set[str] = set()
 
-    data_loader_url = _encode_js_module_data_url((VIEWER_ROOT / "viewer-data-loader.js").read_text(encoding="utf-8"))
-    model_normalizer_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-model-normalizer.js").read_text(encoding="utf-8")
-    )
-    direct_normalizer_source = (VIEWER_ROOT / "viewer-direct-model-normalizer.js").read_text(encoding="utf-8")
-    direct_normalizer_source = direct_normalizer_source.replace(
-        "from './viewer-model-normalizer.js';",
-        f"from '{model_normalizer_url}';",
-    )
-    direct_normalizer_url = _encode_js_module_data_url(direct_normalizer_source)
-    render_picking_geometry_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-render-picking-geometry.js").read_text(encoding="utf-8")
-    )
-    large_model_picking_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-large-model-picking.js").read_text(encoding="utf-8")
-    )
-    pick_broadphase_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-pick-broadphase.js").read_text(encoding="utf-8")
-    )
-    render_mesh_builders_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-render-mesh-builders.js").read_text(encoding="utf-8")
-    )
-    contour_materials_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-contour-materials.js").read_text(encoding="utf-8")
-    )
-    deformed_rendering_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-deformed-rendering.js").read_text(encoding="utf-8")
-    )
-    real_drawing_browser_state_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-real-drawing-browser-state.js").read_text(encoding="utf-8")
-    )
-    real_drawing_quality_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-real-drawing-quality.js").read_text(encoding="utf-8")
-    )
-    shared_selection_state_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-shared-selection-state.js").read_text(encoding="utf-8")
-    )
-    real_drawing_selection_source = (VIEWER_ROOT / "viewer-real-drawing-selection.js").read_text(encoding="utf-8")
-    real_drawing_selection_source = real_drawing_selection_source.replace(
-        "from './viewer-real-drawing-quality.js';",
-        f"from '{real_drawing_quality_url}';",
-    )
-    real_drawing_selection_source = real_drawing_selection_source.replace(
-        "from './viewer-shared-selection-state.js';",
-        f"from '{shared_selection_state_url}';",
-    )
-    real_drawing_selection_url = _encode_js_module_data_url(real_drawing_selection_source)
-    stats_summary_source = (VIEWER_ROOT / "viewer-stats-summary.js").read_text(encoding="utf-8")
-    stats_summary_source = stats_summary_source.replace(
-        "from './viewer-real-drawing-quality.js';",
-        f"from '{real_drawing_quality_url}';",
-    )
-    stats_summary_url = _encode_js_module_data_url(stats_summary_source)
-    real_drawing_panel_renderer_source = (VIEWER_ROOT / "viewer-real-drawing-panel-renderer.js").read_text(
-        encoding="utf-8"
-    )
-    real_drawing_panel_renderer_source = real_drawing_panel_renderer_source.replace(
-        "from './viewer-real-drawing-quality.js';",
-        f"from '{real_drawing_quality_url}';",
-    )
-    real_drawing_panel_renderer_url = _encode_js_module_data_url(real_drawing_panel_renderer_source)
-    real_drawing_panel_model_source = (VIEWER_ROOT / "viewer-real-drawing-panel-model.js").read_text(
-        encoding="utf-8"
-    )
-    real_drawing_panel_model_source = real_drawing_panel_model_source.replace(
-        "from './viewer-real-drawing-quality.js';",
-        f"from '{real_drawing_quality_url}';",
-    )
-    real_drawing_panel_model_url = _encode_js_module_data_url(real_drawing_panel_model_source)
-    real_drawing_panel_events_source = (VIEWER_ROOT / "viewer-real-drawing-panel-events.js").read_text(
-        encoding="utf-8"
-    )
-    real_drawing_panel_events_source = real_drawing_panel_events_source.replace(
-        "from './viewer-real-drawing-quality.js';",
-        f"from '{real_drawing_quality_url}';",
-    )
-    real_drawing_panel_events_url = _encode_js_module_data_url(real_drawing_panel_events_source)
-    real_drawing_tree_model_source = (VIEWER_ROOT / "viewer-real-drawing-tree-model.js").read_text(
-        encoding="utf-8"
-    )
-    real_drawing_tree_model_source = real_drawing_tree_model_source.replace(
-        "from './viewer-real-drawing-quality.js';",
-        f"from '{real_drawing_quality_url}';",
-    )
-    real_drawing_tree_model_url = _encode_js_module_data_url(real_drawing_tree_model_source)
-    side_panel_model_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-side-panel-model.js").read_text(encoding="utf-8")
-    )
-    search_results_model_source = (VIEWER_ROOT / "viewer-search-results-model.js").read_text(encoding="utf-8")
-    search_results_model_source = search_results_model_source.replace(
-        "from './viewer-shared-selection-state.js';",
-        f"from '{shared_selection_state_url}';",
-    )
-    search_results_model_url = _encode_js_module_data_url(search_results_model_source)
-    selection_summary_model_source = (VIEWER_ROOT / "viewer-selection-summary-model.js").read_text(encoding="utf-8")
-    selection_summary_model_source = selection_summary_model_source.replace(
-        "from './viewer-shared-selection-state.js';",
-        f"from '{shared_selection_state_url}';",
-    )
-    selection_summary_model_url = _encode_js_module_data_url(selection_summary_model_source)
-    provenance_model_url = _encode_js_module_data_url(
-        (VIEWER_ROOT / "viewer-provenance-model.js").read_text(encoding="utf-8")
-    )
-    return {
-        "./viewer-data-loader.js": data_loader_url,
-        "./viewer-model-normalizer.js": model_normalizer_url,
-        "./viewer-direct-model-normalizer.js": direct_normalizer_url,
-        "./viewer-render-picking-geometry.js": render_picking_geometry_url,
-        "./viewer-large-model-picking.js": large_model_picking_url,
-        "./viewer-pick-broadphase.js": pick_broadphase_url,
-        "./viewer-render-mesh-builders.js": render_mesh_builders_url,
-        "./viewer-contour-materials.js": contour_materials_url,
-        "./viewer-deformed-rendering.js": deformed_rendering_url,
-        "./viewer-real-drawing-browser-state.js": real_drawing_browser_state_url,
-        "./viewer-real-drawing-quality.js": real_drawing_quality_url,
-        "./viewer-shared-selection-state.js": shared_selection_state_url,
-        "./viewer-real-drawing-selection.js": real_drawing_selection_url,
-        "./viewer-stats-summary.js": stats_summary_url,
-        "./viewer-real-drawing-panel-renderer.js": real_drawing_panel_renderer_url,
-        "./viewer-real-drawing-panel-model.js": real_drawing_panel_model_url,
-        "./viewer-real-drawing-panel-events.js": real_drawing_panel_events_url,
-        "./viewer-real-drawing-tree-model.js": real_drawing_tree_model_url,
-        "./viewer-side-panel-model.js": side_panel_model_url,
-        "./viewer-search-results-model.js": search_results_model_url,
-        "./viewer-selection-summary-model.js": selection_summary_model_url,
-        "./viewer-provenance-model.js": provenance_model_url,
-    }
+    def inline_module(module_path: str) -> str:
+        if module_path in cache:
+            return cache[module_path]
+        if module_path in visiting:
+            raise RuntimeError(f"Cyclic viewer module import detected: {module_path}")
+        source_path = VIEWER_ROOT / module_path.removeprefix("./")
+        if not source_path.exists():
+            raise RuntimeError(f"Missing viewer module for single-file export: {module_path}")
+        visiting.add(module_path)
+        module_source = source_path.read_text(encoding="utf-8")
+
+        def replace_import(match: re.Match[str]) -> str:
+            dependency_path = match.group(2)
+            return f"from '{inline_module(dependency_path)}';"
+
+        module_source = LOCAL_VIEWER_MODULE_IMPORT_RE.sub(replace_import, module_source)
+        visiting.remove(module_path)
+        cache[module_path] = _encode_js_module_data_url(module_source)
+        return cache[module_path]
+
+    for module_path in sorted(root_imports):
+        inline_module(module_path)
+    return cache
 
 
 def build_inline_vendor_import_urls() -> tuple[str, str]:
@@ -671,14 +574,15 @@ def _inline_local_viewer_module_imports(html_content: str, module_import_urls: d
     """Inline local helper ESM imports so generated viewer HTML remains single-file."""
 
     for module_path, module_url in module_import_urls.items():
-        html_content, replacement_count = re.subn(
+        html_content, _replacement_count = re.subn(
             rf"from\s+['\"]{re.escape(module_path)}['\"];",
             f"from '{module_url}';",
             html_content,
             count=1,
         )
-        if replacement_count != 1:
-            raise RuntimeError(f"Failed to inline viewer module import: {module_path}")
+    leftover_imports = sorted(set(match.group(2) for match in LOCAL_VIEWER_MODULE_IMPORT_RE.finditer(html_content)))
+    if leftover_imports:
+        raise RuntimeError(f"Failed to inline viewer module imports: {', '.join(leftover_imports)}")
     return html_content
 
 

@@ -26,6 +26,7 @@ import {
   ANALYSIS_COCKPIT_KPI_KEYS,
   buildAnalysisCockpitModel,
 } from './src/structure-viewer/viewer-analysis-cockpit-model.js';
+import {buildStageResultCalloutsHtml} from './src/structure-viewer/viewer-stage-result-callouts-renderer.js';
 
 const data = {
   nodes: [
@@ -57,26 +58,92 @@ const data = {
   },
 };
 const model = buildAnalysisCockpitModel(data, {summary: {maxDcrValue: 0.96}});
+const stageCallouts = buildStageResultCalloutsHtml({cockpitModel: model});
+const activeStageCallouts = buildStageResultCalloutsHtml({cockpitModel: model, activeMemberId: 'B-15A'});
 console.log(JSON.stringify({
   kpiKeys: ANALYSIS_COCKPIT_KPI_KEYS,
   cardKeys: model.kpiCards.map((card) => card.key),
+  cardTelemetry: model.kpiCards.map((card) => ({
+    key: card.key,
+    referenceLabel: card.referenceLabel,
+    trendLabel: card.trendLabel,
+    trendTone: card.trendTone,
+    evidenceLabel: card.evidenceLabel,
+  })),
   firstCard: model.kpiCards[0],
   baseShearCard: model.kpiCards.find((card) => card.key === 'baseShear'),
   concreteVolumeCard: model.kpiCards.find((card) => card.key === 'concreteVolume'),
+  steelWeightCard: model.kpiCards.find((card) => card.key === 'steelWeight'),
+  materialCostCard: model.kpiCards.find((card) => card.key === 'materialCost'),
+  resultEvidence: {
+    schemaVersion: model.resultEvidence.schemaVersion,
+    status: model.resultEvidence.status,
+    sourceMetricCount: model.resultEvidence.sourceMetricCount,
+    estimateMetricCount: model.resultEvidence.estimateMetricCount,
+    totalMetricCount: model.resultEvidence.totalMetricCount,
+    rowKeys: model.resultEvidence.rows.map((row) => row.key),
+    sampleCounts: model.resultEvidence.sampleCounts,
+  },
   optimizationLabels: model.optimizationRows.map((row) => row.label),
+  optimizationEvidence: model.optimizationRows.map((row) => ({
+    key: row.key,
+    sourceLabel: row.sourceLabel,
+    metricLabel: row.metricLabel,
+    before: row.before,
+    after: row.after,
+    deltaPct: row.deltaPct,
+  })),
   criticalMembers: model.criticalMembers.map((row) => ({
     id: row.id,
     status: row.status,
+    statusKey: row.statusKey,
+    statusTone: row.statusTone,
     recommendedChange: row.recommendedChange,
+    actionTone: row.actionTone,
+    ratioPercent: row.ratioPercent,
+    ratioMarginLabel: row.ratioMarginLabel,
     driftContributionPct: row.driftContributionPct,
+    driftPercent: row.driftPercent,
+    driftTone: row.driftTone,
   })),
-  chartShape: {
-    storyRows: model.charts.storyDrift.rows.length,
+    chartShape: {
+      storyRows: model.charts.storyDrift.rows.length,
+    storyComparisonRows: model.charts.storyDrift.rows.filter((row) => (
+      row.originalDriftPct > row.optimizedDriftPct
+      && row.optimizedDriftPct === row.driftPct
+      && row.deltaPct < 0
+    )).length,
     loadStepPoints: model.charts.displacementLoadStep.points.length,
-    materialRows: model.charts.materialQuantity.rows.length,
-    heatmapCells: model.charts.utilizationHeatmap.cells.length,
-  },
+      materialRows: model.charts.materialQuantity.rows.length,
+      materialDeltas: model.charts.materialQuantity.rows.map((row) => row.deltaPct),
+      heatmapCells: model.charts.utilizationHeatmap.cells.length,
+      heatmapSummary: {
+        activeLevel: model.charts.utilizationHeatmap.summary.activeLevel,
+        loadCase: model.charts.utilizationHeatmap.summary.loadCase,
+        sourceLabel: model.charts.utilizationHeatmap.summary.sourceLabel,
+        maxValue: Number(model.charts.utilizationHeatmap.summary.maxValue.toFixed(2)),
+        hotCellCount: model.charts.utilizationHeatmap.summary.hotCellCount,
+        activeCellCount: model.charts.utilizationHeatmap.summary.activeCellCount,
+        governingMemberId: model.charts.utilizationHeatmap.summary.governingMemberId,
+      },
+    },
   timeline: model.timeline,
+  loadStepTotalSteps: model.charts.displacementLoadStep.totalSteps,
+  stageCallouts: {
+    hasLayer: stageCallouts.includes('data-stage-result-callout-key="max-displacement"')
+      && stageCallouts.includes('data-stage-result-callout-key="max-drift"')
+      && stageCallouts.includes('data-stage-result-callout-key="base-shear"')
+      && stageCallouts.includes('data-stage-result-callout-key="critical-member"'),
+    hasCriticalMember: stageCallouts.includes('C-21') && stageCallouts.includes('D/C 0.96'),
+    hasFocusButton: stageCallouts.includes('data-stage-callout-focus-member="C-21"')
+      && stageCallouts.includes('aria-pressed="false"'),
+    activeCriticalMember: activeStageCallouts.includes('B-15A')
+      && activeStageCallouts.includes('D/C 0.88')
+      && activeStageCallouts.includes('data-stage-callout-focus-member="B-15A"')
+      && activeStageCallouts.includes('is-selected')
+      && activeStageCallouts.includes('aria-pressed="true"'),
+    hasEngineeringValues: stageCallouts.includes('Max Disp') && stageCallouts.includes('Drift') && stageCallouts.includes('Base Shear'),
+  },
 }));
 """
     )
@@ -92,29 +159,88 @@ console.log(JSON.stringify({
         "costReduction",
     ]
     assert payload["cardKeys"] == payload["kpiKeys"]
+    assert all(row["referenceLabel"] for row in payload["cardTelemetry"])
+    assert all(row["trendLabel"] for row in payload["cardTelemetry"])
+    assert all(row["trendTone"] for row in payload["cardTelemetry"])
+    assert all(row["evidenceLabel"] for row in payload["cardTelemetry"])
     assert payload["firstCard"]["label"] == "Max Displacement"
     assert payload["firstCard"]["value"].endswith(" mm")
     assert payload["firstCard"]["value"] != "0.0 mm"
+    assert payload["firstCard"]["referenceLabel"] == "Limit 120 mm"
+    assert payload["firstCard"]["trendLabel"].startswith("Margin ")
     assert payload["baseShearCard"]["value"] != "0 kN"
+    assert payload["baseShearCard"]["trendLabel"] == "Step 14/20"
     assert payload["concreteVolumeCard"]["value"] != "0 m3"
+    assert payload["steelWeightCard"]["referenceLabel"].startswith("Before ")
+    assert payload["steelWeightCard"]["trendLabel"] == "-9.7%"
+    assert payload["steelWeightCard"]["meta"] == "Model quantity estimate"
+    assert payload["concreteVolumeCard"]["meta"] == "Model volume estimate"
+    assert payload["materialCostCard"]["meta"] == "Model cost estimate"
+    assert payload["resultEvidence"]["schemaVersion"] == "analysis-result-evidence.v1"
+    assert payload["resultEvidence"]["status"] == "mixed"
+    assert payload["resultEvidence"]["sourceMetricCount"] >= 4
+    assert payload["resultEvidence"]["estimateMetricCount"] >= 1
+    assert payload["resultEvidence"]["totalMetricCount"] == 8
+    assert payload["resultEvidence"]["rowKeys"] == [
+        "metric-coverage",
+        "sample-base",
+        "load-step",
+        "result-grid",
+    ]
+    assert payload["resultEvidence"]["sampleCounts"]["nodes"] == 7
+    assert payload["resultEvidence"]["sampleCounts"]["elements"] == 4
+    assert payload["resultEvidence"]["sampleCounts"]["hotCells"] == 13
     assert payload["optimizationLabels"] == [
         "Steel Weight",
         "Concrete Volume",
         "Material Cost",
         "CO2 Emissions",
     ]
+    assert [row["sourceLabel"] for row in payload["optimizationEvidence"]] == [
+        "Quantity takeoff",
+        "Model volume",
+        "Cost model",
+        "Carbon factor",
+    ]
+    assert [row["metricLabel"] for row in payload["optimizationEvidence"]] == [
+        "Weight",
+        "Volume",
+        "Budget",
+        "CO2e",
+    ]
+    assert all(row["before"] > row["after"] for row in payload["optimizationEvidence"])
+    assert all(row["deltaPct"] < 0 for row in payload["optimizationEvidence"])
     assert payload["criticalMembers"][0]["id"] == "C-21"
     assert payload["criticalMembers"][0]["status"] == "High"
+    assert payload["criticalMembers"][0]["statusKey"] == "high"
+    assert payload["criticalMembers"][0]["statusTone"] == "danger"
     assert payload["criticalMembers"][0]["recommendedChange"] == "Increase section"
+    assert payload["criticalMembers"][0]["actionTone"] == "danger"
+    assert payload["criticalMembers"][0]["ratioPercent"] > 80
+    assert payload["criticalMembers"][0]["ratioMarginLabel"].startswith("Margin ")
     assert payload["criticalMembers"][0]["driftContributionPct"] > 0
+    assert payload["criticalMembers"][0]["driftPercent"] > 0
     assert payload["criticalMembers"][1]["id"] == "B-15A"
     assert payload["criticalMembers"][1]["status"] == "Watch"
+    assert payload["criticalMembers"][1]["statusKey"] == "watch"
+    assert payload["criticalMembers"][1]["statusTone"] == "warn"
     assert payload["criticalMembers"][1]["recommendedChange"] == "Increase size"
     assert payload["chartShape"] == {
         "storyRows": 2,
+        "storyComparisonRows": 2,
         "loadStepPoints": 20,
         "materialRows": 3,
+        "materialDeltas": [-9.7, -5.7, -7.4],
         "heatmapCells": 72,
+        "heatmapSummary": {
+            "activeLevel": "15",
+            "loadCase": "Pushover X+",
+            "sourceLabel": "Member D/C sampling",
+            "maxValue": 1.08,
+            "hotCellCount": 13,
+            "activeCellCount": 47,
+            "governingMemberId": "C-21",
+        },
     }
     assert payload["timeline"] == {
         "loadCase": "Pushover X+",
@@ -125,9 +251,15 @@ console.log(JSON.stringify({
         "convergence": "Converged",
         "runTime": "00:11:08",
     }
+    assert payload["loadStepTotalSteps"] == 20
+    assert payload["stageCallouts"]["hasLayer"] is True
+    assert payload["stageCallouts"]["hasCriticalMember"] is True
+    assert payload["stageCallouts"]["hasFocusButton"] is True
+    assert payload["stageCallouts"]["activeCriticalMember"] is True
+    assert payload["stageCallouts"]["hasEngineeringValues"] is True
 
 
-def test_analysis_cockpit_model_derives_nonzero_proxy_metrics_when_result_fields_are_missing() -> None:
+def test_analysis_cockpit_model_derives_nonzero_estimate_metrics_when_result_fields_are_missing() -> None:
     payload = _run_node_contract_script(
         """
 import {buildAnalysisCockpitModel} from './src/structure-viewer/viewer-analysis-cockpit-model.js';
@@ -158,8 +290,17 @@ const data = {
 };
 const model = buildAnalysisCockpitModel(data, {summary: {maxDcrValue: 0.87}});
 const cards = Object.fromEntries(model.kpiCards.map((card) => [card.key, card.value]));
+const metas = Object.fromEntries(model.kpiCards.map((card) => [card.key, card.meta]));
 console.log(JSON.stringify({
   cards,
+  metas,
+  resultEvidence: {
+    status: model.resultEvidence.status,
+    sourceMetricCount: model.resultEvidence.sourceMetricCount,
+    estimateMetricCount: model.resultEvidence.estimateMetricCount,
+    totalMetricCount: model.resultEvidence.totalMetricCount,
+    rows: model.resultEvidence.rows,
+  },
   criticalDrift: model.criticalMembers[0].driftContributionPct,
   storyDriftPeak: Math.max(...model.charts.storyDrift.rows.map((row) => row.driftPct)),
 }));
@@ -169,5 +310,16 @@ console.log(JSON.stringify({
     assert payload["cards"]["maxDisplacement"] != "0.0 mm"
     assert payload["cards"]["baseShear"] != "0 kN"
     assert payload["cards"]["concreteVolume"] != "0 m3"
+    assert payload["metas"]["maxDisplacement"] == "Step 18 · Model estimate"
+    assert payload["metas"]["baseShear"] == "Model estimate"
+    assert payload["metas"]["steelWeight"] == "Model quantity estimate"
+    assert payload["metas"]["concreteVolume"] == "Model volume estimate"
+    assert payload["metas"]["materialCost"] == "Model cost estimate"
+    assert all("proxy" not in str(value).lower() for value in payload["metas"].values())
+    assert payload["resultEvidence"]["status"] in {"mixed", "estimate"}
+    assert payload["resultEvidence"]["estimateMetricCount"] > 0
+    assert payload["resultEvidence"]["totalMetricCount"] == 8
+    assert len(payload["resultEvidence"]["rows"]) == 4
+    assert payload["resultEvidence"]["rows"][0]["key"] == "metric-coverage"
     assert payload["criticalDrift"] > 0
     assert payload["storyDriftPeak"] > 0

@@ -36,6 +36,9 @@ function ensureThree(THREE) {
 export function createViewerDeformedRenderingToolkit(THREE, config = {}) {
   const T = ensureThree(THREE);
   const meshTriangleBvhThreshold = Math.max(1, Math.round(safeNumber(config.meshTriangleBvhThreshold, 2048)));
+  const deformedGhostColor = safeNumber(config.deformedGhostColor, 0x9fb3c8);
+  const deformedGhostOpacity = Math.max(0, Math.min(1, safeNumber(config.deformedGhostOpacity, 0.32)));
+  const deformedWireOpacity = Math.max(0, Math.min(1, safeNumber(config.deformedWireOpacity, 0.46)));
 
   function getDeformedLineRadius(type) {
     const normalizedType = normalizeElementType(type);
@@ -52,9 +55,9 @@ export function createViewerDeformedRenderingToolkit(THREE, config = {}) {
     const curve = new T.LineCurve3(points[0], points[1]);
     const geometry = new T.TubeGeometry(curve, 1, safeNumber(radius, getDeformedLineRadius(type)), 6, false);
     const material = new T.MeshPhongMaterial({
-      color: 0xff6b6b,
+      color: deformedGhostColor,
       transparent: true,
-      opacity: 0.55,
+      opacity: deformedGhostOpacity,
       wireframe: false,
     });
     const mesh = new T.Mesh(geometry, material);
@@ -62,7 +65,7 @@ export function createViewerDeformedRenderingToolkit(THREE, config = {}) {
     const lineGeometry = new T.BufferGeometry().setFromPoints(points);
     const line = new T.Line(
       lineGeometry,
-      new T.LineBasicMaterial({ color: 0xff6b6b, opacity: 0.8, transparent: true }),
+      new T.LineBasicMaterial({ color: deformedGhostColor, opacity: deformedWireOpacity, transparent: true }),
     );
     line.userData = { _wireframe: true, _deformedWireframe: true, elemId: element?.id, type };
     return { mesh, line, points };

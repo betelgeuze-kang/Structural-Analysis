@@ -16,12 +16,12 @@
     "verify:frontend-contract": "node ./scripts/verify-frontend-build-contract.mjs",
     "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs",
     "verify:viewer-manifest": "node ./scripts/verify-structure-viewer-project-manifest.mjs",
-    "verify:frontend-browser-smoke": "playwright install chromium && node ./scripts/verify-frontend-browser-smoke.mjs",
-    "capture:readme-viewer-image": "playwright install chromium && node ./scripts/capture-readme-viewer-image.mjs",
-    "export:viewer-report-pdf": "playwright install chromium && node ./scripts/export-structure-viewer-report-pdf.mjs",
-    "verify:viewer-report-pdf": "playwright install chromium && node ./scripts/verify-structure-viewer-report-pdf.mjs",
-    "verify:viewer-performance-probe": "playwright install chromium && node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
-    "verify:viewer-visual-regression": "playwright install chromium && node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
+    "verify:frontend-browser-smoke": "node ./scripts/verify-frontend-browser-smoke.mjs",
+    "capture:readme-viewer-image": "node ./scripts/capture-readme-viewer-image.mjs",
+    "export:viewer-report-pdf": "node ./scripts/export-structure-viewer-report-pdf.mjs",
+    "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
+    "verify:viewer-performance-probe": "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
+    "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
   },
   "dependencies": {
     "react": "18.2.0",

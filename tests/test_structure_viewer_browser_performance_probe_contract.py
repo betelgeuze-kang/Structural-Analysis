@@ -16,7 +16,7 @@ def test_structure_viewer_browser_performance_probe_is_wired_to_package_and_full
 
     assert (
         package_json["scripts"]["verify:viewer-performance-probe"]
-        == "playwright install chromium && node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked"
+        == "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked"
     )
     assert "scripts/measure-structure-viewer-performance.mjs" in frontend_contract
     assert "verify:viewer-performance-probe" in quality_gate

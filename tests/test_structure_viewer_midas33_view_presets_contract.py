@@ -25,6 +25,7 @@ import {
 
 const bounds = {
   center: {x: 10, y: 20, z: 30},
+  size: {x: 50, y: 80, z: 30},
   radius: 100,
 };
 console.log(JSON.stringify({
@@ -50,10 +51,10 @@ console.log(JSON.stringify({
     assert payload["badPreset"] == "review"
     assert payload["fitPreset"] == "fit"
     assert payload["planMode"] == "wireframe"
-    assert payload["reviewPose"]["target"] == {"x": 10, "y": 20, "z": 30}
-    assert round(payload["reviewPose"]["position"]["x"], 6) == -38
-    assert round(payload["reviewPose"]["position"]["y"], 6) == 82
-    assert round(payload["reviewPose"]["position"]["z"], 6) == 82
+    assert payload["reviewPose"]["target"] == {"x": 11, "y": 29.6, "z": 28.8}
+    assert round(payload["reviewPose"]["position"]["x"], 6) == -53.4
+    assert round(payload["reviewPose"]["position"]["y"], 6) == 71.92
+    assert round(payload["reviewPose"]["position"]["z"], 6) == 104.24
     assert payload["reviewPose"]["up"] == {"x": 0, "y": 1, "z": 0}
     assert payload["activeStates"] == [
         {"key": "review", "active": False},

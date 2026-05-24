@@ -16,7 +16,7 @@ def test_structure_viewer_visual_regression_is_wired_to_package_and_full_gate() 
 
     assert (
         package_json["scripts"]["verify:viewer-visual-regression"]
-        == "playwright install chromium && node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
+        == "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
     )
     assert "scripts/measure-structure-viewer-visual-regression.mjs" in frontend_contract
     assert "verify:viewer-visual-regression" in quality_gate

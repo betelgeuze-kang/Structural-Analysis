@@ -11,10 +11,10 @@
     "delete_operation_executed": false,
     "mode": "dry_run_only",
     "requires_explicit_confirmation": true,
-    "retained_count": 6
+    "retained_count": 42
   },
   "contract_pass": true,
-  "generated_at": "2026-05-20T14:29:39.882722+00:00",
+  "generated_at": "2026-05-24T15:21:41.697399+00:00",
   "job_root": "implementation/phase1/workstation_jobs",
   "job_rows": [
     {
@@ -76,9 +76,369 @@
       "output_manifest": "implementation/phase1/workstation_jobs/20260520T142939-f8616d87d2ed53b4/output_manifest.json",
       "path": "implementation/phase1/workstation_jobs/20260520T142939-f8616d87d2ed53b4",
       "run_log": "implementation/phase1/workstation_jobs/20260520T142939-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260522T124044-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "917a1325ef44a75bbfaeff32220285ea4b0c57f5b230a5233b27671a95fdef19",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260522T124044-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260522T124044-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260522T124044-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260522T124044-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260522T124044-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260522T125259-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "02aecbe93657b36338e944fad8844b0759774a9f71c0974732e4638c339392aa",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260522T125259-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260522T125259-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260522T125259-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260522T125259-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260522T125259-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260522T131816-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "b4b55e13c5aff589fdc7cd09dd55ca990adc35e02a08ac365c7163cd9bc6259a",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260522T131816-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260522T131816-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260522T131816-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260522T131816-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260522T131816-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T072029-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "0567d0ba54ce5932827aa156eacfc779d23dd7a86b1c13088e3cc8e630dea346",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T072029-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T072029-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T072029-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T072029-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T072029-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T073821-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "63e2d71bd577749f874b9ac185b41cc65c05f757338a5423d2079ff802f7fb4f",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T073821-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T073821-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T073821-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T073821-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T073821-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T075259-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "007cda1621a803c73180e3fb91854ae2ff316b41db346de3e75897a4a9df2da4",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T075259-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T075259-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T075259-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T075259-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T075259-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T075359-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "49235f319d81948bb34a51761a585bd0749120bdd17d1cb457b80e140589a6f0",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T075359-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T075359-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T075359-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T075359-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T075359-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T080251-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "daa69a2d212969955e092bad12c602cbaded51d0971358a884e75792bd136b37",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T080251-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T080251-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T080251-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T080251-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T080251-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T080946-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "923da20ff7e21351ff3d043b37290ed5c99e72fd9557c25ae5b0a2265c216b55",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T080946-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T080946-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T080946-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T080946-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T080946-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T082224-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "93576d38a9f3f936e6d2ecb0b82dcb4b8c7d5321333ecf73fe1f68ba708b54b9",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T082224-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T082224-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T082224-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T082224-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T082224-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T083059-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "8c3656430cade926cc2801b6390220d63e554f176590252345b7318c10c97a94",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T083059-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T083059-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T083059-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T083059-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T083059-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T084202-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "d7efbc5c66d4dd02e393cd27175c20a275d8dd4fde6a093ae557c7b4d00d0463",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T084202-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T084202-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T084202-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T084202-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T084202-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T085531-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "187d55e56a02e482f70f37560330eeafacc125bd0a88b2bd0787618546773983",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T085531-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T085531-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T085531-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T085531-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T085531-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T091419-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "4043a132ac0f1538fe80a5d93cc7d7ce5b7c74ab7644f8a27ac29913e76b6ed2",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T091419-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T091419-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T091419-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T091419-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T091419-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T092639-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "e5b38180935f01f5664737ba0aade3a9a786825fbc101e3b06e937dd47f6b666",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T092639-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T092639-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T092639-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T092639-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T092639-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T093725-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "17b14989200c18ffa7a2efb9f3639fee9fdd131e85159ce41810d487b2433e54",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T093725-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T093725-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T093725-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T093725-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T093725-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T094735-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "0708f7ba05a7624224bd5ca5498353b42d6b3ac0d22fb25455eea8845bc3574f",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T094735-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T094735-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T094735-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T094735-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T094735-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T100002-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "dbeaae4a862c35b7a321a9c71fa4f852140aab25533293018f59ba7b6897b4c6",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T100002-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T100002-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T100002-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T100002-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T100002-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T100720-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "5ae65fefa3dd94f63aa1c372e2f4a85a19de27519da9f74bd5247868a2173bf5",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T100720-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T100720-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T100720-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T100720-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T100720-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T102343-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "fac2d7f22c2bc107b6e31602cf6071bc628506704b6bd52ad8d3a0955c2a3d59",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T102343-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T102343-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T102343-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T102343-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T102343-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T102507-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "99851ef511bd795d2f34ad1b1ec08ebf9f54d5a724dfc4519fa93f02f6c587e0",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T102507-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T102507-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T102507-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T102507-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T102507-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T102744-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "b15e9269db6e63ea7c41d62c2322511eeb55076d322b08011fc6aff2daf048ee",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T102744-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T102744-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T102744-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T102744-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T102744-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T122819-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "17cf7800f0653cece663ad1074ea5b2a468a4bc656892e81b43e7c8c2b281911",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T122819-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T122819-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T122819-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T122819-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T122819-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T123120-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "a8f585cb98fab3c32adac2a57af95ef8ddf3918cc81d21acd34fbf46f4c64bed",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T123120-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T123120-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T123120-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T123120-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T123120-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T124523-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "433fda8942579ffb6aab0d70e4bc083829e7a453d4b87f2329afa15eba8d4523",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T124523-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T124523-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T124523-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T124523-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T124523-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T130037-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "9d6559e41bb119ea5107a5a3823f405293039e11720504275b44a7dffdc8246d",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T130037-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T130037-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T130037-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T130037-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T130037-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T133322-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "8c8cb0a192dfa81c78ac19e9256a76a00e1fef802281c1e7f204e62aafcf5c5b",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T133322-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T133322-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T133322-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T133322-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T133322-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T134607-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "d5a8402b60320072c3cb94809b8720dd210b8921698982f834bcb1e9f5b82eb7",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T134607-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T134607-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T134607-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T134607-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T134607-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T135523-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "6c58e8ef04d035f50f82a08713ee0cd5b006d00a2be794b9059e105e26f92b42",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T135523-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T135523-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T135523-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T135523-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T135523-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T141141-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "a087e89ee732db6bd38c31f24afce97bdc473afcf6def6effea9a856cbdce39e",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T141141-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T141141-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T141141-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T141141-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T141141-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T141336-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "de88668b369c7e3f3fe104123ed9733087de28839f5936fdd8666d848f14a3de",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T141336-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T141336-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T141336-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T141336-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T141336-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T142747-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "5a18feb5548af48fb2de469744e066d43b8d91185b26e86d988af63aec02b653",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T142747-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T142747-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T142747-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T142747-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T142747-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T142950-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "351ef15590afad79ef6b0602654f15b93ae5f308ed95485e9e814db32edcac06",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T142950-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T142950-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T142950-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T142950-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T142950-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T144145-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "3116f719ae1bda94aa311d07519fb19f7a84d179d71ca4b749908496f7f4efe9",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T144145-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T144145-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T144145-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T144145-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T144145-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T145752-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "d0ca7b8324b9b356488b23d6d8bf32c9b59084c39a7df9901dd59b5a6d5dcdfc",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T145752-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T145752-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T145752-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T145752-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T145752-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T152125-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "2fdd7af27ceb9dd1484694a2826b1c3df75377011f02e1ce26cd2b5bfa9168b6",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T152125-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T152125-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T152125-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T152125-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T152125-f8616d87d2ed53b4/run_log.jsonl"
     }
   ],
-  "latest_job_id": "20260520T142939-f8616d87d2ed53b4",
+  "latest_job_id": "20260524T152125-f8616d87d2ed53b4",
   "policy": {
     "cleanup_dry_run_required": true,
     "delete_requires_explicit_confirmation": true,
@@ -89,5 +449,5 @@
   },
   "reason_code": "PASS",
   "schema_version": "workstation-job-retention-policy.v1",
-  "summary_line": "Workstation job retention policy: PASS | jobs=6 | retention_days=365 | max_jobs=200"
+  "summary_line": "Workstation job retention policy: PASS | jobs=42 | retention_days=365 | max_jobs=200"
 }

@@ -2,7 +2,7 @@
   "blockers": [],
   "claim_boundary": "Performance and size budgets apply only to this local workstation profile. They are not SaaS throughput or customer-device FPS claims.",
   "contract_pass": true,
-  "generated_at": "2026-05-20T13:33:00.839876+00:00",
+  "generated_at": "2026-05-24T13:00:19.974855+00:00",
   "performance_budget": {
     "memory_budget_gib": {
       "available_total_gib": 31.23,
@@ -15,10 +15,10 @@
       "oversize": null,
       "small": 60
     },
-    "viewer_average_fps": 38.862753119247294,
+    "viewer_average_fps": 26.59211782353743,
     "viewer_max_ready_ms": 60000,
     "viewer_min_average_fps": 5,
-    "viewer_ready_ms": 4443
+    "viewer_ready_ms": 4745
   },
   "project_size_tiers": [
     {
@@ -79,20 +79,20 @@
     },
     {
       "available": true,
-      "bytes": 3972,
+      "bytes": 4041,
       "label": "viewer_browser_performance_probe",
       "path": "implementation/phase1/structure_viewer_browser_performance_probe.json",
-      "sha256": "fcfe59e467ec3c776ca51e6813183f0fcad9792d42aed2a8dd29dd917e0618be"
+      "sha256": "992c31b497bb48cb3758f4c74cb73bea684e9edc6fde66e272e3457657f6aca6"
     },
     {
       "available": true,
-      "bytes": 105533,
+      "bytes": 106126,
       "label": "viewer_visual_regression_baseline",
       "path": "implementation/phase1/structure_viewer_visual_regression_baseline.json",
-      "sha256": "a4d36a0a87244d6df667948e4c99c6df515e574bf94562e4be90cc6f62142580"
+      "sha256": "592f1fa25678211132f930c5015da69470768b06f72e1f11ba89da87f88fb6a3"
     }
   ],
-  "summary_line": "Workstation service budget: PASS | tiers=small/medium/large/oversize | ready=4443ms | fps=38.9",
+  "summary_line": "Workstation service budget: PASS | tiers=small/medium/large/oversize | ready=4745ms | fps=26.6",
   "tier_classifier_examples": [
     {
       "elements": 20000,

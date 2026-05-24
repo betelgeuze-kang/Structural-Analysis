@@ -79,6 +79,7 @@ Completion criteria:
 Artifact:
 
 - `implementation/phase1/workstation_delivery_package_manifest.json`
+- `implementation/phase1/workstation_delivery_viewer_smoke.json`
 - `implementation/phase1/release/workstation_delivery/project_package.zip`
 
 Command:
@@ -94,12 +95,17 @@ project_package.zip
   report.pdf
   viewer.html
   ACCEPTANCE_PACKET.md
+  DELIVERY_QA_SUMMARY.md
+  HANDOFF_DIFF_SUMMARY.md
   DELIVERY_INDEX.md
   REVISION_HISTORY.md
   drawings/
   data/
+    handoff_diff_summary.json
+    report_metadata.json
     revision_policy.json
     redelivery_comparison_manifest.json
+    signing_manifest.json
   evidence/
   manifest.json
   checksums.sha256
@@ -109,12 +115,18 @@ project_package.zip
 Completion criteria:
 
 - Zip restore smoke passes.
+- Customer-open viewer smoke writes `implementation/phase1/workstation_delivery_viewer_smoke.json` after restoring the zip and opening `viewer.html` through a local browser server.
 - Checksums match.
 - Manifest records input refs, output rows, file bytes, SHA-256 values, claim boundary, and proxy/fallback labeling.
 - `DELIVERY_INDEX.md` tells the customer what to open first and what to verify.
 - `ACCEPTANCE_PACKET.md` gives the customer an acceptance/rejection checklist and keeps engineer review explicit.
+- `DELIVERY_QA_SUMMARY.md` mirrors customer-safe QA status without exposing internal-only workstation paths.
+- `HANDOFF_DIFF_SUMMARY.md` gives customer-facing redelivery added/removed/changed/unchanged package-member counts.
+- `data/handoff_diff_summary.json` stores the machine-readable current-vs-previous package-member diff.
+- `data/report_metadata.json` links `report.pdf` to the manifest, revision history, revision policy, QA summary, checksum, and current job id.
 - `REVISION_HISTORY.md` and `data/revision_policy.json` lock redelivery/revision expectations.
 - `data/redelivery_comparison_manifest.json` links the current job/package to previous delivery history without overwriting prior packages.
+- `data/signing_manifest.json` records an unsigned offline-signing skeleton and explicitly proves no key material/private key is embedded.
 
 ## Batch 3. Client Input Validation
 
@@ -139,6 +151,7 @@ Statuses:
 Command:
 
 ```bash
+node scripts/verify-workstation-delivery-viewer-smoke.mjs --json
 python3 scripts/check_workstation_delivery_readiness.py --json
 ```
 
@@ -147,7 +160,8 @@ Pass conditions:
 - Hardware profile exists and `contract_pass=true`.
 - Service budget exists and `contract_pass=true`.
 - Delivery package manifest exists and `contract_pass=true`.
-- Package checksum, restore smoke, PDF magic/header, manifest report/viewer/acceptance references, redelivery comparison, and manifest claim-boundary checks pass.
+- Package checksum, restore smoke, PDF magic/header, manifest report/viewer/acceptance/QA/handoff-diff/report-metadata/signing references, redelivery comparison, and manifest claim-boundary checks pass.
+- Customer-open delivery viewer smoke exists and `contract_pass=true`, with restored `viewer.html` opened in Chromium, a visible nonblank canvas, package checksum verification, and `commercial_cockpit_alignment.status=current_cockpit_delivery`; stale or legacy single-file delivery viewers must be reported instead of being treated as current cockpit handoff.
 - Viewer browser probe and visual regression baseline pass.
 - Client input validation report exists and is not `blocked`.
 - Job record/folder contract exists and checksums pass.

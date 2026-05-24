@@ -35,6 +35,13 @@ const context = {
   mx: 10,
   cmapFn: t => new THREE.Color(t, 0, 1 - t),
 };
+const overrideContext = {
+  ...context,
+  nodeScalarById: {
+    overrideA: 2,
+    overrideB: 8,
+  },
+};
 const lineGeometry = new THREE.BufferGeometry().setFromPoints([
   new THREE.Vector3(0, 0, 0),
   new THREE.Vector3(10, 0, 0),
@@ -82,6 +89,13 @@ console.log(JSON.stringify({
     color: toolkit.resolveContourColor(10, context).toArray(),
     nodeColor: toolkit.resolveNodeContourColor({disp_mag: 0}, context).toArray(),
     value: toolkit.resolveContourValue({nodeData: surfaceNodes}, 'disp_mag'),
+    overrideNodeColor: toolkit.resolveNodeContourColor({id: 'overrideA', disp_mag: 0}, overrideContext).toArray(),
+    overrideValue: toolkit.resolveContourValue({
+      nodeData: [
+        {id: 'overrideA', disp_mag: 0},
+        {id: 'overrideB', disp_mag: 0},
+      ],
+    }, 'disp_mag', overrideContext),
   },
   material: {
     isShader: mesh.material.isShaderMaterial,
@@ -120,6 +134,8 @@ console.log(JSON.stringify({
         "color": [1, 0, 0],
         "nodeColor": [0, 0, 1],
         "value": 5,
+        "overrideNodeColor": [0.2, 0, 0.8],
+        "overrideValue": 5,
     }
     assert payload["material"] == {
         "isShader": True,
