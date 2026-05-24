@@ -165,6 +165,11 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-stage-review-controls" in text
     assert "data-stage-view-mode-select" in text
     assert "data-stage-model-stack" in text
+    assert "structure-viewer-stage-model-stack.v1" in text
+    assert 'data-stage-model-layer="optimized"' in text
+    assert 'data-stage-model-layer="original"' in text
+    assert 'data-stage-model-layer="deformed"' in text
+    assert "stage-model-stack__swatch--optimized" in text
     assert "data-stage-review-control-receipt" in text
     assert "data-stage-deformation-control" in text
     assert "data-stage-deformation-scale-slider" in text
@@ -374,6 +379,10 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "renderKpiReadout" in text
     assert "data-kpi-full-label" in text
     assert "data-kpi-full-value" in text
+    assert "data-kpi-chip-full-label" in text
+    assert "data-kpi-chip-short-label" in text
+    assert "compactKpiChipLabel" in text
+    assert "renderKpiChip" in text
     assert "kpi-card__value-number" in text
     assert "kpi-card__value-unit" in text
     assert "kpi-card__evidence" in text

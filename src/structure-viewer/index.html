@@ -231,15 +231,22 @@
               <option value="fit">Fit All</option>
             </select>
           </div>
-          <div id="stage-model-stack" class="stage-model-stack" data-stage-model-stack>
-            <div class="stage-model-stack__row stage-model-stack__row--active" data-stage-model-layer="optimized">
-              <span><b>Optimized Model</b><em id="stage-model-optimized-state">Visible</em></span>
+          <div id="stage-model-stack" class="stage-model-stack" data-stage-model-stack data-stage-model-stack-schema="structure-viewer-stage-model-stack.v1" data-stage-model-stack-status="pending" data-stage-model-layer-count="3" aria-label="Model stack visibility">
+            <div class="stage-model-stack__row stage-model-stack__row--active" data-stage-model-layer="optimized" data-stage-model-layer-status="visible">
+              <i class="stage-model-stack__swatch stage-model-stack__swatch--optimized" aria-hidden="true"></i>
+              <span class="stage-model-stack__text"><b>Optimized Model</b><em id="stage-model-optimized-state">Visible</em></span>
               <strong>On</strong>
             </div>
-            <button type="button" id="stage-model-compare-toggle" class="stage-model-stack__row stage-model-stack__row--button" data-stage-model-layer="compare" aria-pressed="false" onclick="toggleDeformed()">
-              <span><b>Compare Ghost</b><em id="stage-model-compare-state">Off</em></span>
+            <button type="button" id="stage-model-compare-toggle" class="stage-model-stack__row stage-model-stack__row--button" data-stage-model-layer="original" data-stage-model-layer-status="off" aria-pressed="false" onclick="toggleDeformed()">
+              <i class="stage-model-stack__swatch stage-model-stack__swatch--original" aria-hidden="true"></i>
+              <span class="stage-model-stack__text"><b>Original Ghost</b><em id="stage-model-compare-state">Off</em></span>
               <strong id="stage-model-compare-chip">Off</strong>
             </button>
+            <div class="stage-model-stack__row" data-stage-model-layer="deformed" data-stage-model-layer-status="off">
+              <i class="stage-model-stack__swatch stage-model-stack__swatch--deformed" aria-hidden="true"></i>
+              <span class="stage-model-stack__text"><b>Deformed Shape</b><em id="stage-model-deformed-state">Scale ready</em></span>
+              <strong id="stage-model-deformed-chip">1.0x</strong>
+            </div>
           </div>
           <div id="stage-deformation-control" class="stage-deformation-control" data-stage-deformation-control data-deformation-control-schema="structure-viewer-deformation-control.v1" data-deformation-control-status="pending" data-deformation-display-scale="1.0" data-deformation-internal-scale="100">
             <div class="stage-deformation-control__head">
@@ -5463,6 +5470,65 @@ function renderKpiReadout(value=''){
     ${readout.unit?`<span class="kpi-card__value-unit">${escapeHtml(readout.unit)}</span>`:''}
   </strong>`;
 }
+function compactKpiChipLabel(label='',{kind='evidence'}={}){
+  const text=String(label??'').trim();
+  if(!text)return'';
+  if(kind==='reference'){
+    const limitMatch=text.match(/^Limit\s+([-+]?\d+(?:\.\d+)?)/i);
+    if(limitMatch)return`L${limitMatch[1]}`;
+    const beforeMoneyMatch=text.match(/^Before\s+\$\s*([-+]?\d+(?:\.\d+)?)/i);
+    if(beforeMoneyMatch)return`B$${beforeMoneyMatch[1]}`;
+    const beforeNumberMatch=text.match(/^Before\s+([-+]?\d[\d,]*(?:\.\d+)?)/i);
+    if(beforeNumberMatch){
+      const number=safeNumber(beforeNumberMatch[1].replace(/,/g,''),NaN);
+      if(Number.isFinite(number)&&Math.abs(number)>=1000)return`B${(number/1000).toFixed(1)}k`;
+      if(Number.isFinite(number))return`B${Math.round(number)}`;
+    }
+  }
+  const replacements=[
+    [/model estimate/ig,'Model est.'],
+    [/source metric/ig,'Source'],
+    [/estimated metric/ig,'Estimate'],
+    [/optimization/ig,'Optim.'],
+    [/optimized/ig,'Optim.'],
+    [/interstory drift/ig,'Drift'],
+    [/max displacement/ig,'Max disp.'],
+    [/utilization ratio/ig,'Util.'],
+    [/governing/ig,'Gov.'],
+    [/baseline/ig,'Base'],
+    [/original/ig,'Orig.'],
+    [/material/ig,'Mat.'],
+    [/concrete/ig,'Conc.'],
+    [/volume/ig,'Vol.'],
+    [/weight/ig,'Wt.'],
+    [/reduction/ig,'Red.'],
+    [/member/ig,'Mem.'],
+  ];
+  let compact=text;
+  replacements.forEach(([pattern,replacement])=>{
+    compact=compact.replace(pattern,replacement);
+  });
+  compact=compact
+    .replace(/\s+/g,' ')
+    .replace(/\s+·\s+/g,' · ')
+    .trim();
+  const maxLength=kind==='trend'?9:kind==='reference'?11:10;
+  if(compact.length<=maxLength)return compact;
+  const pctMatch=compact.match(/[-+]?\d+(?:\.\d+)?\s*%/);
+  if(kind==='trend'&&pctMatch)return pctMatch[0].replace(/\s+/g,'');
+  const stepMatch=compact.match(/Step\s*\d+/i);
+  if(stepMatch)return stepMatch[0].replace(/\s+/g,' ');
+  const limitMatch=compact.match(/Limit\s*[-+]?\d+(?:\.\d+)?/i);
+  if(limitMatch)return limitMatch[0].replace(/\s+/g,' ');
+  return compact.slice(0,Math.max(4,maxLength-1)).trim()+'.';
+}
+function renderKpiChip(className,label,{kind='evidence',tone=''}={}){
+  const full=String(label??'').trim();
+  if(!full)return'';
+  const shortLabel=compactKpiChipLabel(full,{kind});
+  const toneClass=tone?` ${className}--${escapeHtml(tone)}`:'';
+  return `<span class="${escapeHtml(className)}${toneClass}" data-kpi-chip="${escapeHtml(kind)}" data-kpi-chip-full-label="${escapeHtml(full)}" data-kpi-chip-short-label="${escapeHtml(shortLabel)}" title="${escapeHtml(full)}">${escapeHtml(shortLabel)}</span>`;
+}
 function renderKpiSummary(entries,cockpitModel=null){
   const panel=document.getElementById('kpi-summary-panel');
   if(!(panel instanceof HTMLElement))return;
@@ -5479,16 +5545,16 @@ function renderKpiSummary(entries,cockpitModel=null){
       <article class="kpi-card kpi-card--${escapeHtml(tone)}" data-analysis-kpi-key="${escapeHtml(card.key)}">
         <span class="kpi-card__top">
           <span class="kpi-card__label" data-kpi-full-label="${escapeHtml(card.label)}" title="${escapeHtml(card.label)}">${escapeHtml(card.label)}</span>
-          ${evidenceLabel?`<span class="kpi-card__evidence">${escapeHtml(evidenceLabel)}</span>`:''}
+          ${renderKpiChip('kpi-card__evidence',evidenceLabel,{kind:'evidence'})}
         </span>
         <span class="kpi-card__value-row">
           ${renderKpiReadout(card.value)}
-          ${trendLabel?`<span class="kpi-card__trend kpi-card__trend--${escapeHtml(trendTone)}">${escapeHtml(trendLabel)}</span>`:''}
+          ${renderKpiChip('kpi-card__trend',trendLabel,{kind:'trend',tone:trendTone})}
         </span>
         ${renderSparkline(card.sparkline,tone)}
         <span class="kpi-card__meta-row">
           <span class="kpi-card__meta">${escapeHtml(card.meta)}</span>
-          ${referenceLabel?`<span class="kpi-card__reference">${escapeHtml(referenceLabel)}</span>`:''}
+          ${renderKpiChip('kpi-card__reference',referenceLabel,{kind:'reference'})}
         </span>
       </article>`;
     }).join('');
@@ -8599,21 +8665,38 @@ function syncStageReviewControls(){
   panel.dataset.compare=showDeformed?'on':'off';
   panel.dataset.animate=isAnimating?'on':'off';
   panel.dataset.viewPreset=activeMidas33ViewPreset||'review';
+  const stack=document.getElementById('stage-model-stack');
+  if(stack instanceof HTMLElement){
+    stack.dataset.stageModelStackStatus='ready';
+    stack.dataset.renderMode=renderMode;
+    stack.dataset.compare=showDeformed?'on':'off';
+    stack.dataset.deformationScale=formatDeformDisplayScale();
+    stack.dataset.stageModelLayerCount=String(stack.querySelectorAll('[data-stage-model-layer]').length);
+  }
   const viewModeSelect=document.getElementById('stage-view-mode-select');
   if(viewModeSelect instanceof HTMLSelectElement)viewModeSelect.value=renderMode;
   const viewPresetSelect=document.getElementById('stage-view-preset-select');
   if(viewPresetSelect instanceof HTMLSelectElement)viewPresetSelect.value=activeMidas33ViewPreset||'review';
   const optimizedState=document.getElementById('stage-model-optimized-state');
-  if(optimizedState)optimizedState.textContent=renderMode==='wireframe'?'Wire visible':'Visible';
+  const optimizedLayer=document.querySelector('[data-stage-model-layer="optimized"]');
+  if(optimizedLayer instanceof HTMLElement)optimizedLayer.dataset.stageModelLayerStatus='visible';
+  if(optimizedState)optimizedState.textContent=renderMode==='contour'?'Contour result':(renderMode==='wireframe'?'Wire visible':'Solid visible');
   const compareButton=document.getElementById('stage-model-compare-toggle');
   if(compareButton instanceof HTMLElement){
     compareButton.classList.toggle('is-active',showDeformed);
     compareButton.setAttribute('aria-pressed',showDeformed?'true':'false');
+    compareButton.dataset.stageModelLayerStatus=showDeformed?'visible':'off';
   }
   const compareState=document.getElementById('stage-model-compare-state');
   if(compareState)compareState.textContent=showDeformed?'Neutral ghost visible':'Off';
   const compareChip=document.getElementById('stage-model-compare-chip');
   if(compareChip)compareChip.textContent=showDeformed?'On':'Off';
+  const deformedLayer=document.querySelector('[data-stage-model-layer="deformed"]');
+  if(deformedLayer instanceof HTMLElement)deformedLayer.dataset.stageModelLayerStatus=showDeformed?'visible':'ready';
+  const deformedState=document.getElementById('stage-model-deformed-state');
+  if(deformedState)deformedState.textContent=showDeformed?'Shape offset active':'Scale ready';
+  const deformedChip=document.getElementById('stage-model-deformed-chip');
+  if(deformedChip)deformedChip.textContent=showDeformed?formatDeformDisplayScale():'Ready';
   syncDeformationScaleControls();
   const receipt=document.getElementById('stage-review-control-receipt');
   if(receipt instanceof HTMLElement){

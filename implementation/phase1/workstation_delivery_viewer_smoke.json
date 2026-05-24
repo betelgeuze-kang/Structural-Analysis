@@ -1,6 +1,6 @@
 {
   "schema_version": "workstation-delivery-viewer-smoke.v1",
-  "generated_at": "2026-05-24T20:20:06.375Z",
+  "generated_at": "2026-05-24T20:47:57.121Z",
   "contract_pass": true,
   "reason_code": "PASS",
   "status": "ready",
@@ -36,8 +36,8 @@
     },
     "commercial_cockpit_alignment": {
       "status": "current_cockpit_delivery",
-      "marker_count": 41,
-      "required_marker_count_for_current_cockpit": 41,
+      "marker_count": 43,
+      "required_marker_count_for_current_cockpit": 43,
       "markers": {
         "structural_insight_title": true,
         "cockpit_polish_css": true,
@@ -46,9 +46,11 @@
         "top_run_control": true,
         "model_overview": true,
         "stage_review_controls": true,
+        "stage_model_stack_evidence": true,
         "deformation_scale_control": true,
         "kpi_full_label_readout": true,
         "kpi_full_value_readout": true,
+        "kpi_chip_readout": true,
         "analysis_result_evidence": true,
         "optimization_delta_strip": true,
         "contour_scale_evidence": true,
@@ -87,7 +89,7 @@
   "browser_checks": {
     "pass": true,
     "reason": "PASS",
-    "opened_url": "http://127.0.0.1:46035/viewer.html",
+    "opened_url": "http://127.0.0.1:43215/viewer.html",
     "viewport": {
       "width": 1440,
       "height": 1000

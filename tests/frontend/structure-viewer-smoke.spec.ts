@@ -312,6 +312,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     const stageOverlayReceipt = rectFor('[data-stage-overlay-receipt]')
     const stageLoadSupportGlyphs = rectFor('[data-stage-load-support-glyphs]')
     const stageReviewControls = rectFor('[data-stage-review-controls]')
+    const stageModelStack = rectFor('[data-stage-model-stack]')
     const stageOverlayPanel = rectFor('.stage-overlay-panel--left')
     const contourSection = rectFor('#contour-section')
     const contourScale = rectFor('[data-contour-scale-evidence]')
@@ -431,10 +432,17 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       stageOverlayReceipt,
       stageOverlayPanel,
       stageReviewControls,
+      stageModelStack,
       stageReviewModeValue: (document.querySelector('[data-stage-view-mode-select]') as HTMLSelectElement | null)?.value || '',
       stageReviewPresetValue: (document.querySelector('[data-stage-view-preset-select]') as HTMLSelectElement | null)?.value || '',
       stageReviewSelectCount: document.querySelectorAll('[data-stage-review-controls] select').length,
+      stageReviewModelSchema: document.querySelector('[data-stage-model-stack]')?.getAttribute('data-stage-model-stack-schema') || '',
+      stageReviewModelStatus: document.querySelector('[data-stage-model-stack]')?.getAttribute('data-stage-model-stack-status') || '',
       stageReviewModelRowCount: document.querySelectorAll('[data-stage-model-stack] [data-stage-model-layer]').length,
+      stageReviewModelSwatchCount: document.querySelectorAll('[data-stage-model-stack] .stage-model-stack__swatch').length,
+      stageReviewOptimizedLayerStatus: document.querySelector('[data-stage-model-layer="optimized"]')?.getAttribute('data-stage-model-layer-status') || '',
+      stageReviewOriginalLayerStatus: document.querySelector('[data-stage-model-layer="original"]')?.getAttribute('data-stage-model-layer-status') || '',
+      stageReviewDeformedLayerStatus: document.querySelector('[data-stage-model-layer="deformed"]')?.getAttribute('data-stage-model-layer-status') || '',
       stageReviewComparePressed: document.querySelector('#stage-model-compare-toggle')?.getAttribute('aria-pressed') || '',
       stageDeformationStatus: document.querySelector('[data-stage-deformation-control]')?.getAttribute('data-deformation-control-status') || '',
       stageDeformationSchema: document.querySelector('[data-stage-deformation-control]')?.getAttribute('data-deformation-control-schema') || '',
@@ -538,6 +546,14 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       kpiTrendCount: document.querySelectorAll('#kpi-summary-panel .kpi-card__trend').length,
       kpiSparkAreaCount: document.querySelectorAll('#kpi-summary-panel .kpi-sparkline__area').length,
       kpiSparkDotCount: document.querySelectorAll('#kpi-summary-panel .kpi-sparkline__dot').length,
+      kpiChipCount: document.querySelectorAll('#kpi-summary-panel [data-kpi-chip]').length,
+      kpiChipFullLabelCount: document.querySelectorAll('#kpi-summary-panel [data-kpi-chip-full-label]').length,
+      kpiChipShortLabelCount: document.querySelectorAll('#kpi-summary-panel [data-kpi-chip-short-label]').length,
+      kpiChipText: [...document.querySelectorAll('#kpi-summary-panel [data-kpi-chip]')].map((node) => node.textContent || '').join(' '),
+      kpiChipOverflowCount: [...document.querySelectorAll('#kpi-summary-panel [data-kpi-chip]')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       kpiFullLabelCount: document.querySelectorAll('#kpi-summary-panel [data-kpi-full-label]').length,
       kpiLabelEllipsisCount: [...document.querySelectorAll('#kpi-summary-panel .kpi-card__label')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
@@ -922,7 +938,14 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.stageReviewModeValue).toBe('contour')
   expect(layout.stageReviewPresetValue).toBe('review')
   expect(layout.stageReviewSelectCount).toBe(2)
-  expect(layout.stageReviewModelRowCount).toBe(2)
+  expect(layout.stageModelStack?.width || 0).toBeGreaterThan(120)
+  expect(layout.stageReviewModelSchema).toBe('structure-viewer-stage-model-stack.v1')
+  expect(layout.stageReviewModelStatus).toBe('ready')
+  expect(layout.stageReviewModelRowCount).toBe(3)
+  expect(layout.stageReviewModelSwatchCount).toBe(3)
+  expect(layout.stageReviewOptimizedLayerStatus).toBe('visible')
+  expect(layout.stageReviewOriginalLayerStatus).toBe('off')
+  expect(layout.stageReviewDeformedLayerStatus).toBe('ready')
   expect(layout.stageReviewComparePressed).toBe('false')
   expect(layout.stageDeformationStatus).toBe('ready')
   expect(layout.stageDeformationSchema).toBe('structure-viewer-deformation-control.v1')
@@ -953,6 +976,11 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.kpiTrendCount).toBeGreaterThanOrEqual(8)
   expect(layout.kpiSparkAreaCount).toBeGreaterThanOrEqual(8)
   expect(layout.kpiSparkDotCount).toBeGreaterThanOrEqual(8)
+  expect(layout.kpiChipCount).toBeGreaterThanOrEqual(24)
+  expect(layout.kpiChipFullLabelCount).toBe(layout.kpiChipCount)
+  expect(layout.kpiChipShortLabelCount).toBe(layout.kpiChipCount)
+  expect(layout.kpiChipText).toContain('Model est.')
+  expect(layout.kpiChipOverflowCount).toBe(0)
   expect(layout.kpiFullLabelCount).toBeGreaterThanOrEqual(8)
   expect(layout.kpiFullLabelText).toContain('Max Displacement')
   expect(layout.kpiFullLabelText).toContain('Estimated Material Cost')

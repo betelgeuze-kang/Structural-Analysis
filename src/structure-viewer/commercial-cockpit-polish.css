@@ -783,6 +783,12 @@
   body.structural-surface.command-center-shell .stage-model-stack__row {
     padding:6px 7px;
     border-radius:7px;
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .stage-model-stack__swatch {
+    width:8px;
+    height:8px;
   }
 
   body.structural-surface.command-center-shell .stage-model-stack__row b {
@@ -2050,28 +2056,36 @@
 
     body.structural-surface.command-center-shell .stage-review-control-grid label[for="stage-view-preset-select"],
     body.structural-surface.command-center-shell #stage-view-preset-select,
-    body.structural-surface.command-center-shell .stage-model-stack,
     body.structural-surface.command-center-shell .stage-review-control-receipt {
       display:none;
     }
 
     body.structural-surface.command-center-shell .stage-model-stack {
-      gap:4px;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:3px;
     }
 
     body.structural-surface.command-center-shell .stage-model-stack__row,
     body.structural-surface.command-center-shell .stage-review-control-receipt {
-      padding:5px 6px;
+      min-height:18px;
+      padding:3px 4px;
+      gap:3px;
+      justify-content:center;
     }
 
-    body.structural-surface.command-center-shell .stage-model-stack__row b {
-      font-size:8px;
+    body.structural-surface.command-center-shell .stage-model-stack__swatch {
+      width:6px;
+      height:6px;
     }
 
-    body.structural-surface.command-center-shell .stage-model-stack__row em,
+    body.structural-surface.command-center-shell .stage-model-stack__text {
+      display:none;
+    }
+
     body.structural-surface.command-center-shell .stage-model-stack__row strong,
     body.structural-surface.command-center-shell .stage-review-control-receipt__row {
-      font-size:6.75px;
+      padding:1px 3px;
+      font-size:6.5px;
     }
 
     body.structural-surface.command-center-shell .stage-deformation-control {
@@ -2081,6 +2095,10 @@
 
     body.structural-surface.command-center-shell .stage-deformation-control__head {
       gap:4px;
+    }
+
+    body.structural-surface.command-center-shell .stage-deformation-control__meta {
+      display:none;
     }
 
     body.structural-surface.command-center-shell .stage-deformation-control input[type="range"] {
