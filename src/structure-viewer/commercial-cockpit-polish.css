@@ -177,6 +177,35 @@
     font-size:13px;
   }
 
+  body.structural-surface.command-center-shell .kpi-card__value-row {
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .kpi-card__top {
+    align-items:flex-start;
+    flex-wrap:wrap;
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .kpi-card__label {
+    font-size:7.75px;
+    max-width:100%;
+  }
+
+  body.structural-surface.command-center-shell .kpi-card__value {
+    flex:1 0 100%;
+  }
+
+  body.structural-surface.command-center-shell .kpi-card__trend {
+    max-width:100%;
+  }
+
+  body.structural-surface.command-center-shell .kpi-card__evidence {
+    max-width:100%;
+  }
+
   body.structural-surface.command-center-shell .viewer-tab {
     min-height:27px;
     padding:0 13px;
@@ -945,7 +974,7 @@
   }
 
   body.structural-surface.command-center-shell .kpi-card__value {
-    font-size:19px;
+    font-size:18px;
   }
 
   body.structural-surface.command-center-shell .kpi-sparkline {
@@ -2098,7 +2127,11 @@
     }
 
     body.structural-surface.command-center-shell .kpi-card__value {
-      font-size:19px;
+      font-size:17.5px;
+    }
+
+    body.structural-surface.command-center-shell .kpi-card__label {
+      font-size:7px;
     }
 
     body.structural-surface.command-center-shell .kpi-sparkline {

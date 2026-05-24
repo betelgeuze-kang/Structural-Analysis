@@ -1,9 +1,9 @@
 {
   "schema_version": "structure-viewer-browser-performance-probe.v1",
-  "generated_at": "2026-05-24T19:00:26.783Z",
+  "generated_at": "2026-05-24T19:22:31.215Z",
   "contract_pass": true,
   "reason_code": "PASS",
-  "summary_line": "Structure viewer browser performance probe: PASS | ready=4819ms | fps=39.1 | mode=local_browser_probe",
+  "summary_line": "Structure viewer browser performance probe: PASS | ready=5639ms | fps=30.7 | mode=local_browser_probe",
   "probe_mode": "local_browser_probe",
   "measured_browser_probe": true,
   "live_performance_claim": false,
@@ -17,8 +17,8 @@
     "sample_ms": 1500
   },
   "probe": {
-    "url": "http://127.0.0.1:33283/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
-    "readyMs": 4819,
+    "url": "http://127.0.0.1:34943/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+    "readyMs": 5639,
     "viewport": {
       "width": 1440,
       "height": 1000
@@ -46,17 +46,17 @@
       "centerY": 0.5916666666666667
     },
     "rafSample": {
-      "frameCount": 59,
-      "elapsedMs": 1483.0999999999995,
-      "averageFps": 39.10727530173287,
-      "averageFrameMs": 25.570689655172405,
-      "p95FrameMs": 133.20000000000073,
-      "maxFrameMs": 149.89999999999964
+      "frameCount": 46,
+      "elapsedMs": 1466.6000000000004,
+      "averageFps": 30.683212873312417,
+      "averageFrameMs": 32.59111111111112,
+      "p95FrameMs": 183.30000000000018,
+      "maxFrameMs": 233.40000000000055
     },
     "navigationTiming": {
-      "domContentLoadedMs": 363.69999998807907,
-      "loadEventEndMs": 409.09999999403954,
-      "responseEndMs": 13.799999997019768
+      "domContentLoadedMs": 385.59999999403954,
+      "loadEventEndMs": 386.70000000298023,
+      "responseEndMs": 7.700000002980232
     },
     "viewerState": {
       "title": "Structural Insight Viewer",
@@ -71,8 +71,8 @@
       "label": "viewer_index",
       "path": "src/structure-viewer/index.html",
       "available": true,
-      "bytes": 473208,
-      "sha256": "40802831c50aec7b9ae5f3f237fb08a91bd37a2c680dd088d431488224685849"
+      "bytes": 474138,
+      "sha256": "8babf04bede722b4ee7e75b598177bc343f6f77de666f5c3767ad1924482477f"
     },
     {
       "label": "browser_performance_probe",
@@ -92,8 +92,8 @@
       "label": "frontend_smoke_spec",
       "path": "tests/frontend/structure-viewer-smoke.spec.ts",
       "available": true,
-      "bytes": 91186,
-      "sha256": "176211bbfee123d530d9fb23754a41cae21d67bf675de51bd407d462405c3e03"
+      "bytes": 93563,
+      "sha256": "15cc0cd499eba414813da912671ccacebdb7f403c859ceb599dd52fd6d264c3d"
     }
   ],
   "residual_live_work": [

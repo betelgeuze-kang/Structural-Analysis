@@ -4119,6 +4119,7 @@ body.structural-surface.command-center-shell .kpi-card__label {
   font-size:8px;
   font-weight:700;
   letter-spacing:.08em;
+  line-height:1.08;
   text-transform:uppercase;
 }
 
@@ -4132,7 +4133,6 @@ body.structural-surface.command-center-shell .kpi-card__meta-row {
   min-width:0;
 }
 
-body.structural-surface.command-center-shell .kpi-card__label,
 body.structural-surface.command-center-shell .kpi-card__meta,
 body.structural-surface.command-center-shell .kpi-card__reference,
 body.structural-surface.command-center-shell .kpi-card__evidence {
@@ -4142,15 +4142,45 @@ body.structural-surface.command-center-shell .kpi-card__evidence {
   white-space:nowrap;
 }
 
-body.structural-surface.command-center-shell .kpi-card__value {
+body.structural-surface.command-center-shell .kpi-card__label {
+  flex:1 1 100%;
   min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  overflow:visible;
+  text-overflow:clip;
+  white-space:normal;
+  word-break:normal;
+}
+
+body.structural-surface.command-center-shell .kpi-card__value {
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:3px;
+  min-width:0;
+  max-width:100%;
+  overflow:visible;
+  text-overflow:clip;
   color:var(--text);
   font-family:'Space Grotesk','IBM Plex Sans KR',sans-serif;
   font-size:20px;
   line-height:1;
   letter-spacing:0;
+  white-space:normal;
+}
+
+body.structural-surface.command-center-shell .kpi-card__value-number {
+  min-width:0;
+  overflow:visible;
+  text-overflow:clip;
+  white-space:nowrap;
+}
+
+body.structural-surface.command-center-shell .kpi-card__value-unit {
+  color:#a7bacd;
+  font-family:'IBM Plex Sans KR','Pretendard','Noto Sans KR',sans-serif;
+  font-size:.56em;
+  font-weight:800;
+  line-height:1;
   white-space:nowrap;
 }
 

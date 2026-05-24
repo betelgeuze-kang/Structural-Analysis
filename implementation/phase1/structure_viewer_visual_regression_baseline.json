@@ -1,6 +1,6 @@
 {
   "schema_version": "structure-viewer-visual-regression-baseline.v1",
-  "generated_at": "2026-05-24T19:01:40.490Z",
+  "generated_at": "2026-05-24T19:23:29.354Z",
   "contract_pass": true,
   "reason_code": "PASS",
   "summary_line": "Structure viewer visual regression: PASS | cases=11/11 | mode=baseline_update",
@@ -34,7 +34,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -497,7 +497,7 @@
         ],
         "sha256": "67133983a0925ea438ee223005cd8fa076e5cccdeeb439b8941fd748fd62e927"
       },
-      "viewport_screenshot_sha256": "31cf473ed2666a396ec8ccc20c9c1f16601e6944b795a20e7d4afb67dcb0bc5a",
+      "viewport_screenshot_sha256": "d4ae0098c75cae19627f53f717e62c28f1192c8cb5a7bf621ffe213d30be2a87",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -535,7 +535,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 170,
@@ -998,7 +998,7 @@
         ],
         "sha256": "541ec858c98355a0703c6198bec19e3d32ea2ff3b889baf4cd17c5c2ed06c29d"
       },
-      "viewport_screenshot_sha256": "764ceea909a24ffaf949ab99f61aa9250265bc487705e3849f2f480ebfbd0586",
+      "viewport_screenshot_sha256": "e82b60bc4ea1022ed2acc77f568fe5e785d38448c8109e6d46717cab8a0751d9",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -1036,7 +1036,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -1499,7 +1499,7 @@
         ],
         "sha256": "728e2a0fd33c7551ceef0c8c9b179f5f467327b0b8901f91a74920ef77cb7aed"
       },
-      "viewport_screenshot_sha256": "1fee556a4c06a036ac3a9c3b49a41d15020c2719d04165b07a129bbcec846b8b",
+      "viewport_screenshot_sha256": "a9fdfd4db900ce0cc8753bb4c940935af736b4987ba0d13fd17eb175dbd12984",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -1537,7 +1537,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -2000,7 +2000,7 @@
         ],
         "sha256": "449cc5c4a9567f1000fb6b007bea2d4a265be3da007f8c970e37736778d55340"
       },
-      "viewport_screenshot_sha256": "c1acad1c48d1535d6fc446fd6d15cf0c0cb9f133df0dcc9a993141a4bf4ef1b6",
+      "viewport_screenshot_sha256": "75067686b89ebe07a55db97761fee2398e677d62fc69dbade10edee3909f8e71",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -2038,7 +2038,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -2501,7 +2501,7 @@
         ],
         "sha256": "cbc8850b9466d5c32c41e1bb4a8d773c1a55ef8e908facac656be74066ac6020"
       },
-      "viewport_screenshot_sha256": "05a22f2e86f2aa0bcfd8f59c060645c6c78611c0225781165a77ec3b988d810d",
+      "viewport_screenshot_sha256": "e6a4dbfbf32d40890e4ec59dda36bc6941d3d0e7327a74e960b4428393c8f660",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -2539,7 +2539,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -3002,7 +3002,7 @@
         ],
         "sha256": "0aa58301a42f4e25455a409639353f04694cc091f25c9bc28f80d02f006d150d"
       },
-      "viewport_screenshot_sha256": "84fef21ca5ba557ef0ae425bb2af358782bebdc19c56c111026840562a2f7bc3",
+      "viewport_screenshot_sha256": "3235f83bd7843ff4289be50aa73c46fd13d3ccfb47001f8e7519492dafdf42c4",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -3040,7 +3040,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=compare",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=compare",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -3503,7 +3503,7 @@
         ],
         "sha256": "728e2a0fd33c7551ceef0c8c9b179f5f467327b0b8901f91a74920ef77cb7aed"
       },
-      "viewport_screenshot_sha256": "b12594549ec056bffd53df6d48283e1505324514fe2f21c0a7211c06685ec322",
+      "viewport_screenshot_sha256": "332d2fed5c3c1df3a3fac41f8f4c0197c42dc5639f5287fc99a2cebd3da918b4",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant compare",
@@ -3541,7 +3541,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -4004,7 +4004,7 @@
         ],
         "sha256": "0aa58301a42f4e25455a409639353f04694cc091f25c9bc28f80d02f006d150d"
       },
-      "viewport_screenshot_sha256": "2b5bd38926e0623246bdc41de4782cb74c4831b546e0e0f9cb02c5f6fb0aca0d",
+      "viewport_screenshot_sha256": "ccb2e6e8bb246425e3ba4b46ed63ae1f58bed95d447a3a9b8d9f511a4669a812",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -4042,7 +4042,7 @@
       "expected_renderable_payload_kind": "direct_model",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -4505,7 +4505,7 @@
         ],
         "sha256": "728e2a0fd33c7551ceef0c8c9b179f5f467327b0b8901f91a74920ef77cb7aed"
       },
-      "viewport_screenshot_sha256": "7a556838cdf8050845a58e5fcfbef1db4665fbe6e6f00680e77f958e3112e110",
+      "viewport_screenshot_sha256": "496b2d7deb736ccbe1d98b23f4d7101d5f37f8548d660aa626a8b242c8cd1044",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -4543,7 +4543,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "VISUAL-REGRESSION-H400",
       "expected_loadcomb_draft_target": "",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized&member=2911&member_set=2911",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized&member=2911&member_set=2911",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -5006,7 +5006,7 @@
         ],
         "sha256": "0aa58301a42f4e25455a409639353f04694cc091f25c9bc28f80d02f006d150d"
       },
-      "viewport_screenshot_sha256": "fb697fe95d3ee345ed91782ad207e9d17cbacb95ea248a75fc13252c1ad177dd",
+      "viewport_screenshot_sha256": "bc51e2dcd2d7d92de1c9259c882e2c2af191cab37a0cbef9a1ec5f83ed73b4a5",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -5044,7 +5044,7 @@
       "expected_renderable_payload_kind": "",
       "expected_section_edit_target": "",
       "expected_loadcomb_draft_target": "VISUAL_REGRESSION_LCB_085",
-      "url": "http://127.0.0.1:36277/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "url": "http://127.0.0.1:40689/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
       "canvas_metrics": {
         "nonBlank": true,
         "canvasWidth": 500,
@@ -5507,7 +5507,7 @@
         ],
         "sha256": "c097bf34490a7328f236ef68424b22f35c177dc41bdb9cbbf30c9b15d309bf6f"
       },
-      "viewport_screenshot_sha256": "e6be92d9a848471233efe7f7470231013b12092e56c11b2318ddb730a0aa48ca",
+      "viewport_screenshot_sha256": "01725fb991a5ac71b9e7896906a7e9b0e510a0433e39c5a1cfe5693ec1be12ee",
       "markers": {
         "title": "Structural Insight Viewer",
         "stageVariant": "Variant optimized",
@@ -5564,8 +5564,8 @@
       "label": "viewer_index",
       "path": "src/structure-viewer/index.html",
       "available": true,
-      "bytes": 473208,
-      "sha256": "40802831c50aec7b9ae5f3f237fb08a91bd37a2c680dd088d431488224685849"
+      "bytes": 474138,
+      "sha256": "8babf04bede722b4ee7e75b598177bc343f6f77de666f5c3767ad1924482477f"
     },
     {
       "label": "visual_regression_probe",
@@ -5585,8 +5585,8 @@
       "label": "frontend_smoke_spec",
       "path": "tests/frontend/structure-viewer-smoke.spec.ts",
       "available": true,
-      "bytes": 91186,
-      "sha256": "176211bbfee123d530d9fb23754a41cae21d67bf675de51bd407d462405c3e03"
+      "bytes": 93563,
+      "sha256": "15cc0cd499eba414813da912671ccacebdb7f403c859ceb599dd52fd6d264c3d"
     }
   ],
   "residual_live_work": [

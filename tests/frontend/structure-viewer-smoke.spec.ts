@@ -481,6 +481,29 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       kpiTrendCount: document.querySelectorAll('#kpi-summary-panel .kpi-card__trend').length,
       kpiSparkAreaCount: document.querySelectorAll('#kpi-summary-panel .kpi-sparkline__area').length,
       kpiSparkDotCount: document.querySelectorAll('#kpi-summary-panel .kpi-sparkline__dot').length,
+      kpiFullLabelCount: document.querySelectorAll('#kpi-summary-panel [data-kpi-full-label]').length,
+      kpiLabelEllipsisCount: [...document.querySelectorAll('#kpi-summary-panel .kpi-card__label')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return window.getComputedStyle(node).textOverflow === 'ellipsis'
+      }).length,
+      kpiLabelOverflowCount: [...document.querySelectorAll('#kpi-summary-panel .kpi-card__label')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      kpiFullLabelText: [...document.querySelectorAll('#kpi-summary-panel [data-kpi-full-label]')]
+        .map((node) => node.getAttribute('data-kpi-full-label') || '')
+        .join(' | '),
+      kpiFullValueCount: document.querySelectorAll('#kpi-summary-panel [data-kpi-full-value]').length,
+      kpiValueNumberCount: document.querySelectorAll('#kpi-summary-panel .kpi-card__value-number').length,
+      kpiValueUnitCount: document.querySelectorAll('#kpi-summary-panel .kpi-card__value-unit').length,
+      kpiValueEllipsisCount: [...document.querySelectorAll('#kpi-summary-panel .kpi-card__value')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return window.getComputedStyle(node).textOverflow === 'ellipsis'
+      }).length,
+      kpiValueOverflowCount: [...document.querySelectorAll('#kpi-summary-panel .kpi-card__value, #kpi-summary-panel .kpi-card__value-number, #kpi-summary-panel .kpi-card__value-unit')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       kpiOverflowCount: [...document.querySelectorAll('#kpi-summary-panel .kpi-card')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
@@ -859,6 +882,16 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.kpiTrendCount).toBeGreaterThanOrEqual(8)
   expect(layout.kpiSparkAreaCount).toBeGreaterThanOrEqual(8)
   expect(layout.kpiSparkDotCount).toBeGreaterThanOrEqual(8)
+  expect(layout.kpiFullLabelCount).toBeGreaterThanOrEqual(8)
+  expect(layout.kpiFullLabelText).toContain('Max Displacement')
+  expect(layout.kpiFullLabelText).toContain('Estimated Material Cost')
+  expect(layout.kpiLabelEllipsisCount).toBe(0)
+  expect(layout.kpiLabelOverflowCount).toBe(0)
+  expect(layout.kpiFullValueCount).toBeGreaterThanOrEqual(8)
+  expect(layout.kpiValueNumberCount).toBeGreaterThanOrEqual(8)
+  expect(layout.kpiValueUnitCount).toBeGreaterThanOrEqual(6)
+  expect(layout.kpiValueEllipsisCount).toBe(0)
+  expect(layout.kpiValueOverflowCount).toBe(0)
   expect(layout.kpiOverflowCount).toBe(0)
   expect(layout.resultEvidenceStatus).not.toBe('pending')
   expect(layout.resultEvidenceSourceMetricCount).toBeGreaterThan(0)

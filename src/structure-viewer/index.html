@@ -5444,6 +5444,25 @@ function renderSparkline(values=[],tone='accent'){
     <circle class="kpi-sparkline__dot" cx="${lastPoint.x.toFixed(2)}" cy="${lastPoint.y.toFixed(2)}" r="2.1"></circle>
   </svg>`;
 }
+function splitKpiReadout(value=''){
+  const text=String(value??'').trim()||'--';
+  const moneyMatch=text.match(/^(\$\s*[-+]?\d[\d,]*(?:\.\d+)?)(?:\s+(.+))?$/);
+  if(moneyMatch){
+    return {text,number:moneyMatch[1],unit:moneyMatch[2]||''};
+  }
+  const numericMatch=text.match(/^([-+]?\d[\d,]*(?:\.\d+)?)(?:\s+(.+))?$/);
+  if(numericMatch){
+    return {text,number:numericMatch[1],unit:numericMatch[2]||''};
+  }
+  return {text,number:text,unit:''};
+}
+function renderKpiReadout(value=''){
+  const readout=splitKpiReadout(value);
+  return `<strong class="kpi-card__value" data-kpi-full-value="${escapeHtml(readout.text)}" title="${escapeHtml(readout.text)}">
+    <span class="kpi-card__value-number">${escapeHtml(readout.number)}</span>
+    ${readout.unit?`<span class="kpi-card__value-unit">${escapeHtml(readout.unit)}</span>`:''}
+  </strong>`;
+}
 function renderKpiSummary(entries,cockpitModel=null){
   const panel=document.getElementById('kpi-summary-panel');
   if(!(panel instanceof HTMLElement))return;
@@ -5459,11 +5478,11 @@ function renderKpiSummary(entries,cockpitModel=null){
       return `
       <article class="kpi-card kpi-card--${escapeHtml(tone)}" data-analysis-kpi-key="${escapeHtml(card.key)}">
         <span class="kpi-card__top">
-          <span class="kpi-card__label">${escapeHtml(card.label)}</span>
+          <span class="kpi-card__label" data-kpi-full-label="${escapeHtml(card.label)}" title="${escapeHtml(card.label)}">${escapeHtml(card.label)}</span>
           ${evidenceLabel?`<span class="kpi-card__evidence">${escapeHtml(evidenceLabel)}</span>`:''}
         </span>
         <span class="kpi-card__value-row">
-          <strong class="kpi-card__value">${escapeHtml(card.value)}</strong>
+          ${renderKpiReadout(card.value)}
           ${trendLabel?`<span class="kpi-card__trend kpi-card__trend--${escapeHtml(trendTone)}">${escapeHtml(trendLabel)}</span>`:''}
         </span>
         ${renderSparkline(card.sparkline,tone)}
@@ -5486,8 +5505,8 @@ function renderKpiSummary(entries,cockpitModel=null){
     const tone=config.tone||entry.statsTone||'neutral';
     return `
     <article class="kpi-card kpi-card--${escapeHtml(tone)}${config.wide?' kpi-card--wide':''}">
-      <span class="kpi-card__label">${escapeHtml(label)}</span>
-      <strong class="kpi-card__value">${escapeHtml(value)}</strong>
+      <span class="kpi-card__label" data-kpi-full-label="${escapeHtml(label)}" title="${escapeHtml(label)}">${escapeHtml(label)}</span>
+      ${renderKpiReadout(value)}
       <span class="kpi-card__meta">${escapeHtml(meta)}</span>
     </article>`;
   }).join('');

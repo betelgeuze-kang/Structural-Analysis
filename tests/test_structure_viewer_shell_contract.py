@@ -365,6 +365,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "referenceLabel" in analysis_cockpit_text
     assert "trendLabel" in analysis_cockpit_text
     assert "evidenceLabel" in analysis_cockpit_text
+    assert "splitKpiReadout" in text
+    assert "renderKpiReadout" in text
+    assert "data-kpi-full-label" in text
+    assert "data-kpi-full-value" in text
+    assert "kpi-card__value-number" in text
+    assert "kpi-card__value-unit" in text
     assert "kpi-card__evidence" in text
     assert "kpi-card__trend" in text
     assert "kpi-card__reference" in text

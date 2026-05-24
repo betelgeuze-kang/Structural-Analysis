@@ -153,6 +153,8 @@ function staticViewerChecks(extractRoot, packagePath) {
     model_overview: viewerText.includes('data-model-overview-panel') && viewerText.includes('data-source-adapter-matrix') && viewerText.includes('structure-viewer-source-adapter-matrix.v1') && viewerText.includes('renderSourceAdapterMatrix'),
     stage_review_controls: viewerText.includes('data-stage-review-controls') && viewerText.includes('data-stage-model-stack'),
     deformation_scale_control: viewerText.includes('data-stage-deformation-control') && viewerText.includes('structure-viewer-deformation-control.v1') && viewerText.includes('updateDeformDisplayScale') && viewerText.includes('formatDeformDisplayScale'),
+    kpi_full_label_readout: viewerText.includes('data-kpi-full-label') && viewerText.includes('kpi-card__label') && (viewerText.includes('title="${escapeHtml(card.label)}"') || viewerText.includes('Max Displacement')),
+    kpi_full_value_readout: viewerText.includes('data-kpi-full-value') && viewerText.includes('kpi-card__value-number') && viewerText.includes('kpi-card__value-unit') && viewerText.includes('renderKpiReadout'),
     analysis_result_evidence: viewerText.includes('data-analysis-result-evidence') && viewerText.includes('renderAnalysisResultEvidence') && viewerText.includes('analysis-result-evidence-row'),
     optimization_delta_strip: viewerText.includes('data-optimization-delta-strip') && viewerText.includes('data-optimization-delta-row') && viewerText.includes('renderOptimizationDeltaStrip') && viewerText.includes('structure-viewer-optimization-delta-strip.v1'),
     contour_scale_evidence: viewerText.includes('data-contour-scale-evidence') && viewerText.includes('data-contour-scale-ticks'),
