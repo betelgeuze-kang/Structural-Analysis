@@ -366,9 +366,12 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     return {
       appOverflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       stageOverlayOcclusionBudget: document.querySelector('#viewport')?.getAttribute('data-stage-overlay-occlusion-budget') || '',
+      stageDominanceBudget: document.querySelector('#viewport')?.getAttribute('data-stage-dominance-budget') || '',
       stageOverlayBudgetNodeCount: overlayBudgetRects.length,
       stageOverlayViewportOcclusionRatio: viewport ? overlayViewportArea / Math.max(1, viewport.width * viewport.height) : 1,
       stageOverlayCentralOcclusionRatio: stageCentralClearRect ? overlayCentralArea / Math.max(1, stageCentralClearRect.width * stageCentralClearRect.height) : 1,
+      stageViewportWidthRatio: viewport && stageFrame ? viewport.width / Math.max(1, stageFrame.width) : 0,
+      stageViewportAreaRatio: viewport && stageFrame ? (viewport.width * viewport.height) / Math.max(1, stageFrame.width * stageFrame.height) : 0,
       topbar: rectFor('.app-topbar'),
       topProjectSelect: rectFor('[data-shell-project-select]'),
       topProjectOptionCount: topProjectSelect?.options.length || 0,
@@ -897,6 +900,10 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.viewport?.width || 0).toBeGreaterThanOrEqual(540)
   expect(layout.viewport?.height || 0).toBeGreaterThanOrEqual(398)
   expect(layout.stageOverlayOcclusionBudget).toBe('dense-model-protagonist')
+  expect(layout.stageDominanceBudget).toBe('dense-stage-primary')
+  expect(layout.viewport?.width || 0).toBeGreaterThanOrEqual(640)
+  expect(layout.stageViewportWidthRatio).toBeGreaterThanOrEqual(0.74)
+  expect(layout.stageViewportAreaRatio).toBeGreaterThanOrEqual(0.72)
   expect(layout.stageOverlayBudgetNodeCount).toBeGreaterThanOrEqual(8)
   expect(layout.stageOverlayViewportOcclusionRatio).toBeLessThanOrEqual(0.40)
   expect(layout.stageOverlayCentralOcclusionRatio).toBeLessThanOrEqual(0.18)

@@ -161,6 +161,7 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "positionStageDriftBands" in text
     assert "__STRUCTURE_VIEWER_STAGE_DRIFT_BANDS_STATE__" in text
     assert 'data-stage-overlay-occlusion-budget="dense-model-protagonist"' in text
+    assert 'data-stage-dominance-budget="dense-stage-primary"' in text
     assert "data-stage-review-controls" in text
     assert "data-stage-view-mode-select" in text
     assert "data-stage-model-stack" in text
@@ -446,6 +447,9 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
         encoding="utf-8"
     )
     assert "Dense cockpit short-viewport compression" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert "grid-template-columns:minmax(154px,164px) minmax(0,1fr) 32px" in (
         ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
     ).read_text(encoding="utf-8")
     assert "@media (max-height: 940px) and (min-width: 1221px)" in (

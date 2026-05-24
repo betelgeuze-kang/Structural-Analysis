@@ -166,6 +166,7 @@ function staticViewerChecks(extractRoot, packagePath) {
     analysis_overlay_visual_evidence: viewerText.includes('data-stage-overlay-visual-evidence') && viewerText.includes('stage-overlay-legend-swatch--load') && viewerText.includes('stage-overlay-legend-swatch--support'),
     analysis_overlay_projected_glyphs: viewerText.includes('data-stage-load-support-glyphs') && viewerText.includes('renderStageLoadSupportGlyphs') && viewerText.includes('positionStageLoadSupportGlyphs') && viewerText.includes('structure-viewer-stage-load-support-glyphs.v1'),
     stage_overlay_occlusion_budget: viewerText.includes('data-stage-overlay-occlusion-budget="dense-model-protagonist"') && viewerText.includes('stage-critical-hotspot small') && viewerText.includes('panel-zone-stage-badge__leader'),
+    stage_dominance_budget: viewerText.includes('data-stage-dominance-budget="dense-stage-primary"') && viewerText.includes('grid-template-columns:minmax(154px,164px) minmax(0,1fr) 32px'),
     stage_result_callouts: viewerText.includes('data-stage-callout-focus-member'),
     stage_story_ruler: viewerText.includes('data-stage-story-ruler') && viewerText.includes('renderStageStoryRuler') && viewerText.includes('positionStageStoryRuler') && viewerText.includes('structure-viewer-stage-story-ruler.v1'),
     stage_drift_bands: viewerText.includes('data-stage-drift-bands') && viewerText.includes('renderStageDriftBands') && viewerText.includes('positionStageDriftBands') && viewerText.includes('structure-viewer-stage-drift-bands.v1'),

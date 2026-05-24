@@ -2013,7 +2013,7 @@
     }
 
     body.structural-surface.command-center-shell .stage-frame {
-      grid-template-columns:minmax(164px,188px) minmax(0,1fr) 38px;
+      grid-template-columns:minmax(154px,164px) minmax(0,1fr) 32px;
       min-height:clamp(408px, 55svh, 600px);
       padding:6px;
       gap:6px;
@@ -2159,13 +2159,13 @@
     }
 
     body.structural-surface.command-center-shell .viewport-tool-rail button {
-      width:30px;
-      min-height:30px;
+      width:28px;
+      min-height:28px;
     }
 
     body.structural-surface.command-center-shell .viewport-tool-group {
       gap:3px;
-      padding-bottom:4px;
+      padding:3px 1px 4px;
     }
 
     body.structural-surface.command-center-shell .kpi-card {
