@@ -354,6 +354,7 @@
           </div>
         </div>
         <div id="stage-critical-hotspots" class="stage-critical-hotspots" data-stage-critical-hotspots data-stage-critical-hotspots-schema="structure-viewer-stage-critical-hotspots.v1" data-stage-critical-hotspots-status="pending" data-stage-critical-hotspot-count="0" aria-label="Projected critical member hotspots"></div>
+        <div id="stage-load-support-glyphs" class="stage-load-support-glyphs" data-stage-load-support-glyphs data-stage-load-support-glyphs-schema="structure-viewer-stage-load-support-glyphs.v1" data-stage-load-support-glyphs-status="pending" data-stage-load-glyph-count="0" data-stage-support-glyph-count="0" aria-label="Projected load vector and support markers"></div>
         <div id="viewport-selection-focus-badge" class="viewport-selection-focus-badge" data-viewport-selection-focus-badge aria-live="polite"></div>
         <button type="button" id="panel-zone-stage-badge" class="panel-zone-stage-badge" data-panel-zone-stage-badge data-panel-zone-stage-schema="structure-viewer-panel-zone-stage-badge.v1" data-panel-zone-stage-status="pending" data-panel-zone-stage-member="" data-panel-zone-stage-source-count="0" data-panel-zone-stage-fallback-count="0" data-panel-zone-stage-projection="pending" aria-live="polite">
           <span class="panel-zone-stage-badge__leader" aria-hidden="true"></span>
@@ -855,6 +856,7 @@ let selectionFocusWorldPoint=null;
 let panelZoneStageFocusWorldPoint=null;
 let stageStoryRulerRows=[];
 let stageDriftBandRows=[];
+let stageLoadSupportGlyphRows={load:[],support:[]};
 let activeDrawingHandoffSheetName='';
 let activeComparisonHighlightMemberIds=new Set(),activeComparisonHighlightToneByMemberId=new Map(),activeComparisonHighlightFilter='changed';
 let renderMode='contour',showDeformed=false,deformScale=100,isAnimating=false,animTime=0;
@@ -866,6 +868,7 @@ let defaultView={position:new THREE.Vector3(80,60,80),target:new THREE.Vector3(2
 const STAGE_CRITICAL_HOTSPOTS_SCHEMA='structure-viewer-stage-critical-hotspots.v1';
 const STAGE_STORY_RULER_SCHEMA='structure-viewer-stage-story-ruler.v1';
 const STAGE_DRIFT_BANDS_SCHEMA='structure-viewer-stage-drift-bands.v1';
+const STAGE_LOAD_SUPPORT_GLYPHS_SCHEMA='structure-viewer-stage-load-support-glyphs.v1';
 const PANEL_ZONE_STAGE_BADGE_SCHEMA='structure-viewer-panel-zone-stage-badge.v1';
 let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;
 let sectionEditPreviewState=createEmptySectionEditPreviewState();
@@ -8505,6 +8508,7 @@ function setAnalysisStageOverlayState(state={}){
   };
   window.__STRUCTURE_VIEWER_ANALYSIS_OVERLAY_STATE__={...analysisStageOverlayState};
   renderAnalysisStageOverlayReceipt();
+  renderStageLoadSupportGlyphs();
 }
 function renderAnalysisStageOverlayReceipt(){
   const panel=document.getElementById('stage-overlay-receipt');
@@ -8540,6 +8544,185 @@ function renderAnalysisStageOverlayReceipt(){
       <span class="stage-overlay-receipt__row"><b>Load case</b><em>${escapeHtml(loadCase)}</em></span>
       <span class="stage-overlay-receipt__row"><b>Source</b><em>${escapeHtml(source)}</em></span>
     </div>`;
+}
+function getAnalysisOverlayObjectsByKind(kind=''){
+  const normalized=normalizeSelectionValue(kind);
+  return (analysisOverlayGroup?.children||[])
+    .filter(child=>normalizeSelectionValue(child?.userData?.overlayKind)===normalized);
+}
+function selectEvenlySpacedItems(items=[],limit=12){
+  const rows=Array.isArray(items)?items:[];
+  const max=Math.max(1,Math.round(safeNumber(limit,12)));
+  if(rows.length<=max)return rows;
+  if(max===1)return[rows[0]];
+  return Array.from({length:max},(_entry,index)=>rows[Math.round(index*(rows.length-1)/(max-1))]).filter(Boolean);
+}
+function projectWorldPointToViewport(point,viewportRect,canvasRect){
+  if(!point||!camera||!renderer)return null;
+  const projected=point.clone().project(camera);
+  if(!Number.isFinite(projected.x)||!Number.isFinite(projected.y)||!Number.isFinite(projected.z))return null;
+  return{
+    left:(projected.x*.5+.5)*canvasRect.width+canvasRect.left-viewportRect.left,
+    top:(-projected.y*.5+.5)*canvasRect.height+canvasRect.top-viewportRect.top,
+    projection:projected.z<-1||projected.z>1?'edge-pinned':'projected',
+  };
+}
+function getProjectedModelScreenBounds(viewportRect,canvasRect){
+  if(!modelGroup||!camera||!renderer)return null;
+  const box=new THREE.Box3().setFromObject(modelGroup);
+  if(box.isEmpty())return null;
+  const corners=[
+    new THREE.Vector3(box.min.x,box.min.y,box.min.z),
+    new THREE.Vector3(box.min.x,box.min.y,box.max.z),
+    new THREE.Vector3(box.min.x,box.max.y,box.min.z),
+    new THREE.Vector3(box.min.x,box.max.y,box.max.z),
+    new THREE.Vector3(box.max.x,box.min.y,box.min.z),
+    new THREE.Vector3(box.max.x,box.min.y,box.max.z),
+    new THREE.Vector3(box.max.x,box.max.y,box.min.z),
+    new THREE.Vector3(box.max.x,box.max.y,box.max.z),
+  ];
+  const points=corners
+    .map(point=>projectWorldPointToViewport(point,viewportRect,canvasRect))
+    .filter(Boolean);
+  if(!points.length)return null;
+  const left=Math.max(0,Math.min(...points.map(point=>point.left)));
+  const right=Math.min(viewportRect.width,Math.max(...points.map(point=>point.left)));
+  const top=Math.max(0,Math.min(...points.map(point=>point.top)));
+  const bottom=Math.min(viewportRect.height,Math.max(...points.map(point=>point.top)));
+  return{
+    left,
+    right:Math.max(right,left+1),
+    top,
+    bottom:Math.max(bottom,top+1),
+    width:Math.max(right-left,1),
+    height:Math.max(bottom-top,1),
+  };
+}
+function getOverlayObjectWorldPoint(object){
+  if(!object||typeof object.getWorldPosition!=='function')return null;
+  return object.getWorldPosition(new THREE.Vector3());
+}
+function buildStageLoadSupportGlyphRows(){
+  const loadObjects=getAnalysisOverlayObjectsByKind('lateral_load_arrow');
+  const supportObjects=getAnalysisOverlayObjectsByKind('support_marker');
+  const visibleSupportObjects=selectEvenlySpacedItems(supportObjects,14);
+  const direction=normalizeSelectionValue(analysisStageOverlayState?.direction)||'+X';
+  const loadCase=normalizeSelectionValue(analysisStageOverlayState?.loadCase)||'--';
+  return{
+    load:loadObjects.map((object,index)=>({
+      index,
+      label:`${direction} load ${index+1}`,
+      direction,
+      loadCase,
+      object,
+    })),
+    support:visibleSupportObjects.map((object,index)=>({
+      index,
+      sourceIndex:supportObjects.indexOf(object),
+      label:`Support ${index+1}`,
+      nodeId:normalizeSelectionValue(object?.userData?.nodeId)||'--',
+      object,
+    })),
+    supportSourceCount:supportObjects.length,
+  };
+}
+function renderStageLoadSupportGlyphs(){
+  const panel=document.getElementById('stage-load-support-glyphs');
+  if(!(panel instanceof HTMLElement))return;
+  const rows=buildStageLoadSupportGlyphRows();
+  stageLoadSupportGlyphRows=rows;
+  panel.dataset.stageLoadSupportGlyphsSchema=STAGE_LOAD_SUPPORT_GLYPHS_SCHEMA;
+  panel.dataset.stageLoadGlyphCount=String(rows.load.length);
+  panel.dataset.stageSupportGlyphCount=String(rows.support.length);
+  panel.dataset.stageSupportSourceCount=String(rows.supportSourceCount||0);
+  panel.dataset.stageLoadSupportGlyphsStatus=rows.load.length||rows.support.length?'ready':'pending';
+  panel.classList.toggle('is-visible',rows.load.length>0||rows.support.length>0);
+  if(!rows.load.length&&!rows.support.length){
+    panel.innerHTML='';
+    window.__STRUCTURE_VIEWER_STAGE_LOAD_SUPPORT_GLYPHS_STATE__={
+      schemaVersion:STAGE_LOAD_SUPPORT_GLYPHS_SCHEMA,
+      status:'pending',
+      loadGlyphCount:0,
+      supportGlyphCount:0,
+      supportSourceCount:0,
+      projectedCount:0,
+    };
+    return;
+  }
+  panel.innerHTML=`
+    ${rows.load.map(row=>`<span class="stage-load-glyph" data-stage-load-glyph data-stage-load-glyph-index="${escapeHtml(String(row.index))}" data-stage-load-glyph-direction="${escapeHtml(row.direction)}" data-stage-load-glyph-projection="pending" aria-hidden="true"><i></i><b>${escapeHtml(row.direction)}</b></span>`).join('')}
+    ${rows.support.map(row=>`<span class="stage-support-glyph" data-stage-support-glyph data-stage-support-glyph-index="${escapeHtml(String(row.index))}" data-stage-support-source-index="${escapeHtml(String(row.sourceIndex))}" data-stage-support-node="${escapeHtml(row.nodeId)}" data-stage-support-glyph-projection="pending" aria-hidden="true"><i></i></span>`).join('')}`;
+  positionStageLoadSupportGlyphs();
+}
+function positionStageLoadSupportGlyphs(){
+  const panel=document.getElementById('stage-load-support-glyphs');
+  const vp=document.getElementById('viewport');
+  if(!(panel instanceof HTMLElement)||!(vp instanceof HTMLElement))return;
+  const loadNodes=[...panel.querySelectorAll('[data-stage-load-glyph]')].filter(node=>node instanceof HTMLElement);
+  const supportNodes=[...panel.querySelectorAll('[data-stage-support-glyph]')].filter(node=>node instanceof HTMLElement);
+  if(!loadNodes.length&&!supportNodes.length){
+    panel.classList.remove('is-visible');
+    return;
+  }
+  const viewportRect=vp.getBoundingClientRect();
+  const canvasRect=renderer?.domElement?.getBoundingClientRect?.()||viewportRect;
+  const modelBounds=getProjectedModelScreenBounds(viewportRect,canvasRect);
+  const loadObjects=stageLoadSupportGlyphRows.load||[];
+  const supportObjects=stageLoadSupportGlyphRows.support||[];
+  const loadRight=modelBounds
+    ?Math.min(Math.max(modelBounds.right+14,viewportRect.width*.48),viewportRect.width-116)
+    :viewportRect.width*.66;
+  const loadTopMin=modelBounds?Math.max(96,modelBounds.top+28):116;
+  const loadTopMax=modelBounds?Math.min(viewportRect.height-132,modelBounds.bottom-42):viewportRect.height-132;
+  const loadRange=Math.max(1,loadTopMax-loadTopMin);
+  let projectedLoadCount=0;
+  let projectedSupportCount=0;
+  loadNodes.forEach((node,index)=>{
+    const row=loadObjects[index]||{};
+    const projected=projectWorldPointToViewport(getOverlayObjectWorldPoint(row.object),viewportRect,canvasRect);
+    const fallbackTop=loadTopMin+(index+1)*loadRange/(loadNodes.length+1);
+    const top=Math.min(Math.max(projected?.top??fallbackTop,loadTopMin),Math.max(loadTopMax,loadTopMin));
+    const left=Math.min(Math.max(loadRight,48),viewportRect.width-116);
+    const projection=projected?.projection==='projected'?'projected':'screen-pinned';
+    if(projection==='projected')projectedLoadCount+=1;
+    node.style.left=`${left.toFixed(1)}px`;
+    node.style.top=`${top.toFixed(1)}px`;
+    node.setAttribute('data-stage-load-glyph-projection',projection);
+    node.classList.toggle('is-edge-pinned',projection!=='projected');
+  });
+  supportNodes.forEach((node,index)=>{
+    const row=supportObjects[index]||{};
+    const projected=projectWorldPointToViewport(getOverlayObjectWorldPoint(row.object),viewportRect,canvasRect);
+    const fallbackLeft=modelBounds
+      ?modelBounds.left+(index+1)*modelBounds.width/(supportNodes.length+1)
+      :viewportRect.width*(.24+.46*((index+1)/(supportNodes.length+1)));
+    const fallbackTop=modelBounds?modelBounds.bottom-10:viewportRect.height-108;
+    const left=Math.min(Math.max(projected?.left??fallbackLeft,30),viewportRect.width-30);
+    const top=Math.min(Math.max(projected?.top??fallbackTop,116),viewportRect.height-88);
+    const projection=projected?.projection==='projected'?'projected':'screen-pinned';
+    if(projection==='projected')projectedSupportCount+=1;
+    node.style.left=`${left.toFixed(1)}px`;
+    node.style.top=`${top.toFixed(1)}px`;
+    node.setAttribute('data-stage-support-glyph-projection',projection);
+    node.classList.toggle('is-edge-pinned',projection!=='projected');
+  });
+  const projectedCount=projectedLoadCount+projectedSupportCount;
+  panel.classList.add('is-visible');
+  panel.dataset.stageLoadProjectedCount=String(projectedLoadCount);
+  panel.dataset.stageSupportProjectedCount=String(projectedSupportCount);
+  panel.dataset.stageLoadSupportProjectedCount=String(projectedCount);
+  window.__STRUCTURE_VIEWER_STAGE_LOAD_SUPPORT_GLYPHS_STATE__={
+    schemaVersion:STAGE_LOAD_SUPPORT_GLYPHS_SCHEMA,
+    status:'ready',
+    loadGlyphCount:loadNodes.length,
+    supportGlyphCount:supportNodes.length,
+    supportSourceCount:safeNumber(panel.dataset.stageSupportSourceCount,0),
+    projectedLoadCount,
+    projectedSupportCount,
+    projectedCount,
+    loadCase:analysisStageOverlayState?.loadCase||'--',
+    direction:analysisStageOverlayState?.direction||'+X',
+  };
 }
 function clearAnalysisStageOverlays(){
   if(!analysisOverlayGroup)return;
@@ -8822,6 +9005,7 @@ function animate(){
     positionViewportSelectionFocusBadge();
     positionStageStoryRuler();
     positionStageDriftBands();
+    positionStageLoadSupportGlyphs();
     positionStageCriticalHotspots();
     positionPanelZoneStageBadge();
     renderer.render(scene,camera);
@@ -8843,6 +9027,7 @@ function onResize(){
   positionViewportSelectionFocusBadge();
   positionStageStoryRuler();
   positionStageDriftBands();
+  positionStageLoadSupportGlyphs();
   positionStageCriticalHotspots();
   positionPanelZoneStageBadge();
   requestViewerRender();
@@ -8858,6 +9043,8 @@ window.toggleAnalysisTimelinePlayback=toggleAnalysisTimelinePlayback;
 window.updateDeformScale=updateDeformScale;
 window.updateDeformDisplayScale=updateDeformDisplayScale;
 window.updateContour=updateContour;
+window.renderStageLoadSupportGlyphs=renderStageLoadSupportGlyphs;
+window.positionStageLoadSupportGlyphs=positionStageLoadSupportGlyphs;
 window.resetCamera=resetCamera;
 window.fitAll=fitAll;
 window.getViewerModelBounds=getViewerModelBounds;

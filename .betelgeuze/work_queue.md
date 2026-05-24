@@ -65,12 +65,13 @@
 - Add projected Critical Member stage hotspots with leading member D/C/status/change labels, click-to-focus selection sync, edge/collision metadata, dense overflow/collision coverage, and delivery smoke marker coverage.
 - Add projected Story Level Ruler with story/height rows from the same Story Clip bands, model height/story count receipt, drift context, click-to-clip/clear behavior, dense overflow coverage, and delivery smoke marker coverage.
 - Add Stage Drift Limit Bands with original/optimized drift rows, limit utilization tones, story-clip synchronization, dense overflow coverage, and delivery smoke marker coverage.
+- Add projected Load/Support stage glyphs with high-contrast yellow lateral-load arrows and green sampled base-support markers, tied to existing 3D overlay counts/state, dense overflow coverage, and delivery smoke marker coverage.
 
 ## Next
 
 - Add detached signature verification flow after explicit key/signature material exists.
 - Add customer-facing delivery index cross-links to QA, diff, signing, and report metadata files.
-- Add deeper model/result evidence richness and dense model/callout edge-case refinements beyond the now-upgraded top project selector, top run-control strip, stage review controls, commercial deformation scale control, Model Overview/source adapter matrix, projected Story Level Ruler, Stage Drift Limit Bands, result evidence receipt, Result Step Schedule, Result Envelope, Panel Zone / Joint Evidence rail plus stage badge, projected Critical Member stage hotspots, contour scale evidence, load-case evidence rows, utilization heatmap evidence, viewport tool rail, 3D overlay receipt with visual-evidence legend, stage result receipt, KPI, Optimization Summary, Critical Members, Materials & Members rail, Material Schedule links, Section Schedule links, Material Family Coverage chips, and 47-family Material Ontology Breadth receipt.
+- Add deeper model/result evidence richness and dense model/callout edge-case refinements beyond the now-upgraded top project selector, top run-control strip, stage review controls, commercial deformation scale control, Model Overview/source adapter matrix, projected Story Level Ruler, Stage Drift Limit Bands, projected Load/Support glyphs, result evidence receipt, Result Step Schedule, Result Envelope, Panel Zone / Joint Evidence rail plus stage badge, projected Critical Member stage hotspots, contour scale evidence, load-case evidence rows, utilization heatmap evidence, viewport tool rail, 3D overlay receipt with visual-evidence legend, stage result receipt, KPI, Optimization Summary, Critical Members, Materials & Members rail, Material Schedule links, Section Schedule links, Material Family Coverage chips, and 47-family Material Ontology Breadth receipt.
 - Reduce remaining operator-prompt friction by preferring non-interactive script flags and saved approval prefixes where sandbox policy allows.
 
 ## External / Not Locally Closable

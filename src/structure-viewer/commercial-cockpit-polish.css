@@ -880,6 +880,34 @@
     font-size:8px;
   }
 
+  body.structural-surface.command-center-shell .stage-load-glyph {
+    width:108px;
+    height:28px;
+    filter:drop-shadow(0 0 12px rgba(250,204,21,.9)) drop-shadow(0 2px 6px rgba(0,0,0,.72));
+  }
+
+  body.structural-surface.command-center-shell .stage-load-glyph i {
+    right:20px;
+    height:3px;
+  }
+
+  body.structural-surface.command-center-shell .stage-load-glyph i::after {
+    right:-20px;
+    border-top-width:9px;
+    border-bottom-width:9px;
+    border-left-width:21px;
+  }
+
+  body.structural-surface.command-center-shell .stage-load-glyph b {
+    top:0;
+    font-size:7.5px;
+  }
+
+  body.structural-surface.command-center-shell .stage-support-glyph {
+    width:18px;
+    height:18px;
+  }
+
   body.structural-surface.command-center-shell .load-case-evidence-list {
     gap:5px;
   }

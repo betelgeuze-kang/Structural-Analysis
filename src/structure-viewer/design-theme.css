@@ -2700,6 +2700,123 @@ body.structural-surface .stage-overlay-receipt__row em {
   font-weight:800;
 }
 
+body.structural-surface .stage-load-support-glyphs {
+  position:absolute;
+  inset:0;
+  z-index:8;
+  display:none;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-load-support-glyphs.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-load-glyph,
+body.structural-surface .stage-support-glyph {
+  position:absolute;
+  box-sizing:border-box;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-load-glyph {
+  width:96px;
+  height:28px;
+  transform:translate(-8px, -50%);
+  color:#ffd426;
+  filter:drop-shadow(0 0 10px rgba(250,204,21,.82)) drop-shadow(0 2px 5px rgba(0,0,0,.65));
+}
+
+body.structural-surface .stage-load-glyph i {
+  position:absolute;
+  left:0;
+  right:18px;
+  top:17px;
+  height:3px;
+  border-radius:999px;
+  background:linear-gradient(90deg, rgba(250,204,21,.08), #facc15 36%, #fde047);
+  box-shadow:0 0 0 1px rgba(250,204,21,.28), 0 0 16px rgba(250,204,21,.72);
+}
+
+body.structural-surface .stage-load-glyph i::before {
+  content:"";
+  position:absolute;
+  left:-8px;
+  top:50%;
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  transform:translateY(-50%);
+  background:#facc15;
+  box-shadow:0 0 14px rgba(250,204,21,.9);
+}
+
+body.structural-surface .stage-load-glyph i::after {
+  content:"";
+  position:absolute;
+  right:-17px;
+  top:50%;
+  width:0;
+  height:0;
+  transform:translateY(-50%);
+  border-top:8px solid transparent;
+  border-bottom:8px solid transparent;
+  border-left:18px solid #fde047;
+  filter:drop-shadow(0 0 7px rgba(250,204,21,.82));
+}
+
+body.structural-surface .stage-load-glyph b {
+  position:absolute;
+  right:1px;
+  top:0;
+  min-width:20px;
+  padding:1px 4px;
+  border:1px solid rgba(250,204,21,.34);
+  border-radius:999px;
+  background:rgba(8,18,29,.72);
+  color:#fff1a8;
+  font-size:8px;
+  font-weight:900;
+  line-height:1.1;
+  text-align:center;
+}
+
+body.structural-surface .stage-load-glyph.is-edge-pinned {
+  opacity:.86;
+}
+
+body.structural-surface .stage-support-glyph {
+  width:20px;
+  height:20px;
+  transform:translate(-50%, -50%);
+  filter:drop-shadow(0 0 9px rgba(57,255,136,.8)) drop-shadow(0 2px 4px rgba(0,0,0,.68));
+}
+
+body.structural-surface .stage-support-glyph i {
+  position:absolute;
+  inset:1px 2px 2px;
+  background:linear-gradient(180deg, #a7ff83, #39ff88 56%, #13a64d);
+  clip-path:polygon(50% 0, 100% 66%, 70% 66%, 70% 100%, 30% 100%, 30% 66%, 0 66%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.2), 0 0 15px rgba(57,255,136,.72);
+}
+
+body.structural-surface .stage-support-glyph::after {
+  content:"";
+  position:absolute;
+  left:2px;
+  right:2px;
+  bottom:0;
+  height:3px;
+  border-radius:999px;
+  background:#39ff88;
+  box-shadow:0 0 10px rgba(57,255,136,.82);
+}
+
+body.structural-surface .stage-support-glyph.is-edge-pinned {
+  opacity:.82;
+}
+
 body.structural-surface .stage-story-ruler {
   position:absolute;
   inset:0 8px 0 auto;

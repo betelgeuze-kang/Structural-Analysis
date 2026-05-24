@@ -309,6 +309,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     const callouts = rectFor('[data-stage-result-callouts]')
     const stageReceipt = rectFor('#stage-result-receipt')
     const stageOverlayReceipt = rectFor('[data-stage-overlay-receipt]')
+    const stageLoadSupportGlyphs = rectFor('[data-stage-load-support-glyphs]')
     const stageReviewControls = rectFor('[data-stage-review-controls]')
     const stageStoryRuler = rectFor('[data-stage-story-ruler]')
     const stageDriftBands = rectFor('[data-stage-drift-bands]')
@@ -423,6 +424,33 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       stageOverlayLoadSwatchCount: document.querySelectorAll('[data-stage-overlay-load-key] .stage-overlay-legend-swatch--load').length,
       stageOverlaySupportSwatchCount: document.querySelectorAll('[data-stage-overlay-support-key] .stage-overlay-legend-swatch--support').length,
       stageOverlayWindowState: window.__STRUCTURE_VIEWER_ANALYSIS_OVERLAY_STATE__ || null,
+      stageLoadSupportGlyphs,
+      stageLoadSupportGlyphStatus: document.querySelector('[data-stage-load-support-glyphs]')?.getAttribute('data-stage-load-support-glyphs-status') || '',
+      stageLoadSupportGlyphSchema: document.querySelector('[data-stage-load-support-glyphs]')?.getAttribute('data-stage-load-support-glyphs-schema') || '',
+      stageLoadGlyphCount: Number(document.querySelector('[data-stage-load-support-glyphs]')?.getAttribute('data-stage-load-glyph-count') || '0'),
+      stageSupportGlyphCount: Number(document.querySelector('[data-stage-load-support-glyphs]')?.getAttribute('data-stage-support-glyph-count') || '0'),
+      stageSupportGlyphSourceCount: Number(document.querySelector('[data-stage-load-support-glyphs]')?.getAttribute('data-stage-support-source-count') || '0'),
+      stageLoadProjectedCount: Number(document.querySelector('[data-stage-load-support-glyphs]')?.getAttribute('data-stage-load-projected-count') || '0'),
+      stageSupportProjectedCount: Number(document.querySelector('[data-stage-load-support-glyphs]')?.getAttribute('data-stage-support-projected-count') || '0'),
+      stageLoadSupportProjectedCount: Number(document.querySelector('[data-stage-load-support-glyphs]')?.getAttribute('data-stage-load-support-projected-count') || '0'),
+      stageLoadGlyphVisibleCount: [...document.querySelectorAll('[data-stage-load-glyph]')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        const rect = node.getBoundingClientRect()
+        return rect.width > 0 && rect.height > 0 && getComputedStyle(node).display !== 'none'
+      }).length,
+      stageSupportGlyphVisibleCount: [...document.querySelectorAll('[data-stage-support-glyph]')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        const rect = node.getBoundingClientRect()
+        return rect.width > 0 && rect.height > 0 && getComputedStyle(node).display !== 'none'
+      }).length,
+      stageLoadGlyphProjectionCount: document.querySelectorAll('[data-stage-load-glyph-projection]').length,
+      stageSupportGlyphProjectionCount: document.querySelectorAll('[data-stage-support-glyph-projection]').length,
+      stageLoadSupportGlyphVisible: Boolean(document.querySelector('[data-stage-load-support-glyphs]')?.classList.contains('is-visible')),
+      stageLoadSupportGlyphWindowState: window.__STRUCTURE_VIEWER_STAGE_LOAD_SUPPORT_GLYPHS_STATE__ || null,
+      stageLoadSupportGlyphOverflowCount: [...document.querySelectorAll('[data-stage-load-glyph], [data-stage-support-glyph], [data-stage-load-glyph] b')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       stageOverlayVisualOverflow: (() => {
         const node = document.querySelector('[data-stage-overlay-visual-evidence]')
         if (!(node instanceof HTMLElement)) return 1
@@ -1006,6 +1034,28 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.stageOverlayWindowState?.visibleEvidenceCount || 0).toBe(layout.stageOverlayVisibleEvidenceCount)
   expect(layout.stageOverlayVisualOverflow).toBe(0)
   expect(layout.stageOverlayOverflow).toBe(0)
+  expect(layout.stageLoadSupportGlyphs?.width || 0).toBeGreaterThanOrEqual((layout.viewport?.width || 0) - 4)
+  expect(layout.stageLoadSupportGlyphStatus).toBe('ready')
+  expect(layout.stageLoadSupportGlyphSchema).toBe('structure-viewer-stage-load-support-glyphs.v1')
+  expect(layout.stageLoadGlyphCount).toBe(layout.stageOverlayArrowCount)
+  expect(layout.stageLoadGlyphCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageSupportGlyphSourceCount).toBe(layout.stageOverlaySupportCount)
+  expect(layout.stageSupportGlyphCount).toBeGreaterThanOrEqual(8)
+  expect(layout.stageSupportGlyphCount).toBeLessThanOrEqual(layout.stageOverlaySupportCount)
+  expect(layout.stageLoadGlyphVisibleCount).toBe(layout.stageLoadGlyphCount)
+  expect(layout.stageSupportGlyphVisibleCount).toBe(layout.stageSupportGlyphCount)
+  expect(layout.stageLoadGlyphProjectionCount).toBe(layout.stageLoadGlyphCount)
+  expect(layout.stageSupportGlyphProjectionCount).toBe(layout.stageSupportGlyphCount)
+  expect(layout.stageLoadSupportProjectedCount).toBeGreaterThan(0)
+  expect(layout.stageLoadProjectedCount + layout.stageSupportProjectedCount).toBe(layout.stageLoadSupportProjectedCount)
+  expect(layout.stageLoadSupportGlyphVisible).toBe(true)
+  expect(layout.stageLoadSupportGlyphWindowState?.schemaVersion).toBe('structure-viewer-stage-load-support-glyphs.v1')
+  expect(layout.stageLoadSupportGlyphWindowState?.status).toBe('ready')
+  expect(layout.stageLoadSupportGlyphWindowState?.loadGlyphCount).toBe(layout.stageLoadGlyphCount)
+  expect(layout.stageLoadSupportGlyphWindowState?.supportGlyphCount).toBe(layout.stageSupportGlyphCount)
+  expect(layout.stageLoadSupportGlyphWindowState?.supportSourceCount).toBe(layout.stageOverlaySupportCount)
+  expect(layout.stageLoadSupportGlyphWindowState?.projectedCount).toBe(layout.stageLoadSupportProjectedCount)
+  expect(layout.stageLoadSupportGlyphOverflowCount).toBe(0)
   expect(layout.calloutCount).toBeGreaterThanOrEqual(4)
   expect(layout.chartFooterOverlap).toBe(0)
   expect(layout.calloutBadgeOverlap).toBe(0)

@@ -160,6 +160,7 @@ function staticViewerChecks(extractRoot, packagePath) {
     viewport_tool_rail: viewerText.includes('data-viewport-tool-rail') && viewerText.includes('data-viewport-tool-render-mode'),
     analysis_overlay_receipt: viewerText.includes('data-stage-overlay-receipt') && viewerText.includes('__STRUCTURE_VIEWER_ANALYSIS_OVERLAY_STATE__'),
     analysis_overlay_visual_evidence: viewerText.includes('data-stage-overlay-visual-evidence') && viewerText.includes('stage-overlay-legend-swatch--load') && viewerText.includes('stage-overlay-legend-swatch--support'),
+    analysis_overlay_projected_glyphs: viewerText.includes('data-stage-load-support-glyphs') && viewerText.includes('renderStageLoadSupportGlyphs') && viewerText.includes('positionStageLoadSupportGlyphs') && viewerText.includes('structure-viewer-stage-load-support-glyphs.v1'),
     stage_result_callouts: viewerText.includes('data-stage-callout-focus-member'),
     stage_story_ruler: viewerText.includes('data-stage-story-ruler') && viewerText.includes('renderStageStoryRuler') && viewerText.includes('positionStageStoryRuler') && viewerText.includes('structure-viewer-stage-story-ruler.v1'),
     stage_drift_bands: viewerText.includes('data-stage-drift-bands') && viewerText.includes('renderStageDriftBands') && viewerText.includes('positionStageDriftBands') && viewerText.includes('structure-viewer-stage-drift-bands.v1'),

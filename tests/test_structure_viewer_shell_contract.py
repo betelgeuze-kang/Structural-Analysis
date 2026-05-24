@@ -262,6 +262,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-stage-overlay-visual-evidence" in text
     assert "data-stage-overlay-load-key" in text
     assert "data-stage-overlay-support-key" in text
+    assert 'id="stage-load-support-glyphs"' in text
+    assert "data-stage-load-support-glyphs" in text
+    assert "structure-viewer-stage-load-support-glyphs.v1" in text
+    assert "renderStageLoadSupportGlyphs" in text
+    assert "positionStageLoadSupportGlyphs" in text
+    assert "__STRUCTURE_VIEWER_STAGE_LOAD_SUPPORT_GLYPHS_STATE__" in text
     assert "renderAnalysisStageOverlayReceipt" in text
     assert "setAnalysisStageOverlayState" in text
     assert "__STRUCTURE_VIEWER_ANALYSIS_OVERLAY_STATE__" in text
@@ -438,6 +444,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
         encoding="utf-8"
     )
     assert "stage-overlay-visual-evidence" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "stage-load-support-glyphs" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "stage-load-glyph" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
         encoding="utf-8"
     )
     assert "<span>Drift</span>" in text
