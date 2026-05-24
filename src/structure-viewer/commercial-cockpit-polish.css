@@ -565,6 +565,83 @@
     color:#58d78d;
   }
 
+  body.structural-surface.command-center-shell .stage-story-ruler {
+    right:6px;
+    width:116px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-ruler__receipt {
+    width:112px;
+    padding:4px 6px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(8,19,31,.86), rgba(4,10,19,.72));
+  }
+
+  body.structural-surface.command-center-shell .stage-story-ruler__receipt span,
+  body.structural-surface.command-center-shell .stage-story-ruler__receipt small {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-ruler-row {
+    width:112px;
+    min-height:23px;
+    padding:3px 5px 3px 0;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-ruler-row__tick {
+    flex-basis:20px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-ruler-row__tick::before {
+    width:20px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-ruler-row b {
+    font-size:9px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-ruler-row small {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-drift-bands__receipt {
+    width:184px;
+    padding:4px 6px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(8,19,31,.84), rgba(4,10,19,.70));
+  }
+
+  body.structural-surface.command-center-shell .stage-drift-bands__receipt span,
+  body.structural-surface.command-center-shell .stage-drift-bands__receipt strong {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-drift-band {
+    width:184px;
+    min-height:30px;
+    padding:4px 6px;
+    border-radius:7px;
+    box-shadow:0 10px 22px rgba(0,0,0,.28);
+  }
+
+  body.structural-surface.command-center-shell .stage-drift-band__leader {
+    flex-basis:22px;
+  }
+
+  body.structural-surface.command-center-shell .stage-drift-band__leader::before {
+    width:22px;
+  }
+
+  body.structural-surface.command-center-shell .stage-drift-band b,
+  body.structural-surface.command-center-shell .stage-drift-band em {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .stage-drift-band small {
+    font-size:7px;
+  }
+
   body.structural-surface.command-center-shell .stage-critical-hotspot {
     width:142px;
     min-height:40px;

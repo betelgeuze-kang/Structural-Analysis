@@ -378,6 +378,8 @@
             <span class="stage-overlay-receipt__row"><b>Source</b><em>--</em></span>
           </div>
         </div>
+        <div id="stage-story-ruler" class="stage-story-ruler" data-stage-story-ruler data-stage-story-ruler-schema="structure-viewer-stage-story-ruler.v1" data-stage-story-ruler-status="pending" data-stage-story-ruler-row-count="0" data-stage-story-count="0" aria-label="Projected story level ruler"></div>
+        <div id="stage-drift-bands" class="stage-drift-bands" data-stage-drift-bands data-stage-drift-bands-schema="structure-viewer-stage-drift-bands.v1" data-stage-drift-bands-status="pending" data-stage-drift-band-count="0" data-stage-drift-limit-pct="0" aria-label="Projected story drift limit bands"></div>
         <div class="axis-helper" aria-hidden="true">
           <span class="axis-helper__origin"></span>
           <span class="axis-helper__axis axis-helper__axis--x"><i></i><b>X</b></span>
@@ -851,6 +853,8 @@ let selectedElementData=null,selectedElementKey='',activeTypeHighlight='';
 let selectedElementKeys=new Set(),selectedElementRecords=new Map();
 let selectionFocusWorldPoint=null;
 let panelZoneStageFocusWorldPoint=null;
+let stageStoryRulerRows=[];
+let stageDriftBandRows=[];
 let activeDrawingHandoffSheetName='';
 let activeComparisonHighlightMemberIds=new Set(),activeComparisonHighlightToneByMemberId=new Map(),activeComparisonHighlightFilter='changed';
 let renderMode='contour',showDeformed=false,deformScale=100,isAnimating=false,animTime=0;
@@ -860,6 +864,8 @@ let analysisStageOverlayState={loadArrowCount:0,supportMarkerCount:0,status:'pen
 let viewerNeedsRender=true,lastRenderAt=0;
 let defaultView={position:new THREE.Vector3(80,60,80),target:new THREE.Vector3(24,14,14)};
 const STAGE_CRITICAL_HOTSPOTS_SCHEMA='structure-viewer-stage-critical-hotspots.v1';
+const STAGE_STORY_RULER_SCHEMA='structure-viewer-stage-story-ruler.v1';
+const STAGE_DRIFT_BANDS_SCHEMA='structure-viewer-stage-drift-bands.v1';
 const PANEL_ZONE_STAGE_BADGE_SCHEMA='structure-viewer-panel-zone-stage-badge.v1';
 let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;
 let sectionEditPreviewState=createEmptySectionEditPreviewState();
@@ -1631,6 +1637,8 @@ function setStoryClipLabel(label=''){
   activeStoryClipLabel=normalizeSelectionValue(label);
   updateViewerQueryParams(getCurrentSelectionState());
   applyStoryClipPlanes();
+  renderStageStoryRuler(lastAnalysisCockpitModel);
+  renderStageDriftBands(lastAnalysisCockpitModel);
 }
 function updateStoryClipPadding(value){
   storyClipPadding=Math.max(0,safeNumber(value,.35));
@@ -1645,6 +1653,402 @@ function clearStoryClip(){
   storyClipPadding=.35;
   updateViewerQueryParams(getCurrentSelectionState());
   applyStoryClipPlanes();
+  renderStageStoryRuler(lastAnalysisCockpitModel);
+  renderStageDriftBands(lastAnalysisCockpitModel);
+}
+function formatStageStoryRulerLabel(label='',fallbackIndex=0){
+  const normalized=normalizeSelectionValue(label)||`Story ${fallbackIndex+1}`;
+  const match=normalized.match(/(\d+)/);
+  if(match)return`S${match[1]}`;
+  return normalized.length>5?normalized.slice(0,5):normalized;
+}
+function selectStageStoryRulerBands(bands=[],maxRows=8){
+  const rows=Array.isArray(bands)?bands:[];
+  if(rows.length<=maxRows)return rows.map((band,index)=>({...band,sourceIndex:index}));
+  const indices=new Set();
+  const slots=Math.max(maxRows,2);
+  for(let index=0;index<slots;index+=1){
+    indices.add(Math.round(index*(rows.length-1)/(slots-1)));
+  }
+  const activeIndex=rows.findIndex(row=>normalizeSelectionValue(row?.label)===activeStoryClipLabel);
+  if(activeIndex>=0&&!indices.has(activeIndex)){
+    const removable=[...indices].filter(index=>index!==0&&index!==rows.length-1)
+      .sort((a,b)=>Math.abs(a-activeIndex)-Math.abs(b-activeIndex))[0];
+    if(Number.isFinite(removable))indices.delete(removable);
+    indices.add(activeIndex);
+  }
+  return[...indices].sort((a,b)=>a-b).slice(0,maxRows).map(index=>({...rows[index],sourceIndex:index}));
+}
+function findNearestStageDriftRow(storyRows=[],z=0,storyIndex=0){
+  if(!Array.isArray(storyRows)||!storyRows.length)return null;
+  const direct=storyRows.find(row=>String(row?.story||'')===String(storyIndex+1));
+  if(direct)return direct;
+  return storyRows.reduce((best,row)=>{
+    const distance=Math.abs(safeNumber(row?.height,0)-z);
+    return !best||distance<best.distance?{row,distance}:best;
+  },null)?.row||null;
+}
+function buildStageStoryRulerRows(cockpitModel=null){
+  const bands=(storyClipBands.length?storyClipBands:deriveStoryClipBands(modelData))
+    .filter(band=>Number.isFinite(safeNumber(band?.zMax,NaN)))
+    .sort((a,b)=>safeNumber(a?.zMin,0)-safeNumber(b?.zMin,0));
+  const selectedBands=selectStageStoryRulerBands(bands,8);
+  const storyRows=Array.isArray(cockpitModel?.charts?.storyDrift?.rows)
+    ?cockpitModel.charts.storyDrift.rows
+    :[];
+  return selectedBands.map((band,index)=>{
+    const sourceIndex=Math.max(0,Math.round(safeNumber(band?.sourceIndex,index)));
+    const z=safeNumber(band?.zMax,safeNumber(band?.zMin,0));
+    const driftRow=findNearestStageDriftRow(storyRows,z,sourceIndex);
+    const driftPct=safeNumber(driftRow?.driftPct,NaN);
+    const active=normalizeSelectionValue(band?.label)===activeStoryClipLabel;
+    return{
+      label:normalizeSelectionValue(band?.label)||`Story ${sourceIndex+1}`,
+      shortLabel:formatStageStoryRulerLabel(band?.label,sourceIndex),
+      z,
+      zMin:safeNumber(band?.zMin,z),
+      zMax:z,
+      driftPct,
+      memberCount:Math.max(0,Math.round(safeNumber(band?.count,0))),
+      sourceIndex,
+      active,
+    };
+  });
+}
+function renderStageStoryRuler(cockpitModel=null){
+  const panel=document.getElementById('stage-story-ruler');
+  if(!(panel instanceof HTMLElement))return;
+  const rows=buildStageStoryRulerRows(cockpitModel||lastAnalysisCockpitModel);
+  const allBands=storyClipBands.length?storyClipBands:deriveStoryClipBands(modelData);
+  const height=getModelHeightMeters(modelData);
+  stageStoryRulerRows=rows;
+  panel.dataset.stageStoryRulerSchema=STAGE_STORY_RULER_SCHEMA;
+  panel.dataset.stageStoryRulerStatus=rows.length?'ready':'pending';
+  panel.dataset.stageStoryRulerRowCount=String(rows.length);
+  panel.dataset.stageStoryCount=String(allBands.length);
+  panel.dataset.stageStoryActive=activeStoryClipLabel||'';
+  panel.dataset.stageStoryHeightM=Number.isFinite(height)?height.toFixed(3):'';
+  panel.classList.toggle('is-visible',rows.length>0);
+  if(!rows.length){
+    panel.innerHTML='';
+    window.__STRUCTURE_VIEWER_STAGE_STORY_RULER_STATE__={
+      schemaVersion:STAGE_STORY_RULER_SCHEMA,
+      status:'pending',
+      rowCount:0,
+      storyCount:0,
+      rows:[],
+    };
+    return;
+  }
+  const heightLabel=Number.isFinite(height)&&height>0?`${height.toFixed(height>=10?1:2)} m`:'--';
+  panel.innerHTML=`
+    <div class="stage-story-ruler__axis" aria-hidden="true"></div>
+    <div class="stage-story-ruler__receipt">
+      <span>Story Levels</span>
+      <strong>${escapeHtml(String(allBands.length))}</strong>
+      <small>${escapeHtml(heightLabel)}</small>
+    </div>
+    ${rows.map(row=>{
+      const driftLabel=Number.isFinite(row.driftPct)?`${row.driftPct.toFixed(2)}%`:'--';
+      return `<button type="button" class="stage-story-ruler-row${row.active?' is-active':''}" data-stage-story-ruler-row data-stage-story-label="${escapeHtml(row.label)}" data-stage-story-short="${escapeHtml(row.shortLabel)}" data-stage-story-z="${escapeHtml(row.z.toFixed(4))}" data-stage-story-drift="${escapeHtml(driftLabel)}" data-stage-story-projection="pending" aria-pressed="${row.active?'true':'false'}" title="${escapeHtml(row.active?'Clear story clip':'Clip to '+row.label)}">
+        <span class="stage-story-ruler-row__tick" aria-hidden="true"></span>
+        <span class="stage-story-ruler-row__content">
+          <b>${escapeHtml(row.shortLabel)}</b>
+          <small>${escapeHtml(row.z.toFixed(0))}m drift ${escapeHtml(driftLabel)}</small>
+        </span>
+      </button>`;
+    }).join('')}`;
+  panel.querySelectorAll('[data-stage-story-ruler-row]').forEach(button=>{
+    button.addEventListener('click',event=>{
+      event.stopPropagation();
+      const label=normalizeSelectionValue(button.getAttribute('data-stage-story-label'));
+      if(label&&label===activeStoryClipLabel)clearStoryClip();
+      else setStoryClipLabel(label);
+    });
+  });
+  positionStageStoryRuler();
+}
+function positionStageStoryRuler(){
+  const panel=document.getElementById('stage-story-ruler');
+  const vp=document.getElementById('viewport');
+  if(!(panel instanceof HTMLElement)||!(vp instanceof HTMLElement))return;
+  const buttons=[...panel.querySelectorAll('[data-stage-story-ruler-row]')]
+    .filter(button=>button instanceof HTMLElement);
+  if(!buttons.length){
+    panel.classList.remove('is-visible');
+    return;
+  }
+  const viewportRect=vp.getBoundingClientRect();
+  const canvasRect=renderer?.domElement?.getBoundingClientRect?.()||viewportRect;
+  const minTop=86;
+  const maxTop=Math.max(viewportRect.height-82,minTop);
+  let box=null;
+  if(modelGroup){
+    const candidate=new THREE.Box3().setFromObject(modelGroup);
+    if(!candidate.isEmpty())box=candidate;
+  }
+  const center=box?box.getCenter(new THREE.Vector3()):new THREE.Vector3();
+  const size=box?box.getSize(new THREE.Vector3()):new THREE.Vector3(1,1,1);
+  const maxSpan=Math.max(size.x,size.y,size.z,1);
+  const projectedRows=buttons.map((button,index)=>{
+    const z=safeNumber(button.getAttribute('data-stage-story-z'),NaN);
+    let rawTop=minTop+(index+1)*(maxTop-minTop)/(buttons.length+1);
+    let projection='docked';
+    if(box&&Number.isFinite(z)&&camera&&renderer){
+      const worldPoint=new THREE.Vector3(box.max.x+maxSpan*.035,z,center.z);
+      const projected=worldPoint.project(camera);
+      if(Number.isFinite(projected.x)&&Number.isFinite(projected.y)){
+        rawTop=(-projected.y*.5+.5)*canvasRect.height+canvasRect.top-viewportRect.top;
+        projection=projected.z<-1||projected.z>1?'edge-pinned':'projected';
+      }
+    }
+    return{button,index,top:Math.min(Math.max(rawTop,minTop),maxTop),projection};
+  }).sort((a,b)=>a.top-b.top);
+  for(let index=1;index<projectedRows.length;index+=1){
+    projectedRows[index].top=Math.max(projectedRows[index].top,projectedRows[index-1].top+30);
+  }
+  for(let index=projectedRows.length-1;index>=0;index-=1){
+    projectedRows[index].top=Math.min(projectedRows[index].top,maxTop-(projectedRows.length-1-index)*30);
+  }
+  projectedRows.forEach(row=>{
+    const top=Math.min(Math.max(row.top,minTop),maxTop);
+    row.button.style.top=`${top.toFixed(1)}px`;
+    row.button.setAttribute('data-stage-story-projection',row.projection);
+    row.button.classList.toggle('is-edge-pinned',row.projection!=='projected');
+  });
+  panel.classList.add('is-visible');
+  panel.dataset.stageStoryProjectedCount=String(projectedRows.filter(row=>row.projection==='projected').length);
+  window.__STRUCTURE_VIEWER_STAGE_STORY_RULER_STATE__={
+    schemaVersion:STAGE_STORY_RULER_SCHEMA,
+    status:'ready',
+    rowCount:projectedRows.length,
+    storyCount:Number(panel.dataset.stageStoryCount||'0'),
+    activeStory:activeStoryClipLabel||'',
+    projectedCount:projectedRows.filter(row=>row.projection==='projected').length,
+    edgePinnedCount:projectedRows.filter(row=>row.projection==='edge-pinned').length,
+    dockedCount:projectedRows.filter(row=>row.projection==='docked').length,
+    rows:stageStoryRulerRows.map(row=>({
+      label:row.label,
+      shortLabel:row.shortLabel,
+      z:row.z,
+      active:row.active,
+    })),
+  };
+}
+function getStageDriftBandTone(driftPct=0,limitPct=2){
+  const drift=Math.max(0,safeNumber(driftPct,0));
+  const limit=Math.max(.1,safeNumber(limitPct,2));
+  if(drift>=limit*.9)return'danger';
+  if(drift>=limit*.62)return'warn';
+  return'success';
+}
+function findNearestStoryBandForHeight(height=0){
+  const bands=storyClipBands.length?storyClipBands:deriveStoryClipBands(modelData);
+  if(!bands.length)return null;
+  return bands.reduce((best,band,index)=>{
+    const mid=(safeNumber(band?.zMin,0)+safeNumber(band?.zMax,0))/2;
+    const distance=Math.abs(mid-safeNumber(height,0));
+    return !best||distance<best.distance?{band,index,distance}:best;
+  },null);
+}
+function buildStageDriftBandRows(cockpitModel=null){
+  const chart=cockpitModel?.charts?.storyDrift||{};
+  const rows=Array.isArray(chart.rows)?chart.rows:[];
+  const bands=(storyClipBands.length?storyClipBands:deriveStoryClipBands(modelData))
+    .filter(band=>Number.isFinite(safeNumber(band?.zMax,NaN)))
+    .sort((a,b)=>safeNumber(a?.zMin,0)-safeNumber(b?.zMin,0));
+  const limitPct=Math.max(.1,safeNumber(chart.limitPct,2));
+  const ranked=rows
+    .map((row,index)=>{
+      const driftPct=safeNumber(row?.optimizedDriftPct,safeNumber(row?.driftPct,NaN));
+      const originalDriftPct=safeNumber(row?.originalDriftPct,driftPct);
+      const height=safeNumber(row?.height,NaN);
+      if(!Number.isFinite(driftPct)||!Number.isFinite(height))return null;
+      const storyNumber=Number.parseInt(normalizeSelectionValue(row?.story),10);
+      const directBandIndex=Number.isFinite(storyNumber)&&storyNumber>0
+        ?Math.min(Math.max(storyNumber-1,0),Math.max(bands.length-1,0))
+        :-1;
+      const nearest=directBandIndex>=0&&bands[directBandIndex]
+        ?{band:bands[directBandIndex],index:directBandIndex,distance:0}
+        :findNearestStoryBandForHeight(height);
+      const band=nearest?.band||null;
+      const label=normalizeSelectionValue(band?.label)||`Story ${normalizeSelectionValue(row?.story)||index+1}`;
+      const storyIndex=Math.max(0,Math.round(safeNumber(nearest?.index,index)));
+      const deltaPct=originalDriftPct>0?(driftPct-originalDriftPct)/originalDriftPct*100:safeNumber(row?.deltaPct,0);
+      return{
+        label,
+        shortLabel:formatStageStoryRulerLabel(label,storyIndex),
+        story:normalizeSelectionValue(row?.story)||String(storyIndex+1),
+        height,
+        z:safeNumber(band?.zMax,height),
+        zMin:safeNumber(band?.zMin,height),
+        zMax:safeNumber(band?.zMax,height),
+        driftPct,
+        originalDriftPct,
+        deltaPct,
+        limitPct,
+        utilizationPct:Math.max(0,Math.min(140,(driftPct/limitPct)*100)),
+        tone:getStageDriftBandTone(driftPct,limitPct),
+        active:normalizeSelectionValue(band?.label)===activeStoryClipLabel,
+        sourceIndex:storyIndex,
+      };
+    })
+    .filter(Boolean)
+    .sort((a,b)=>safeNumber(b.driftPct,0)-safeNumber(a.driftPct,0));
+  const activeLabel=normalizeSelectionValue(activeStoryClipLabel);
+  const selected=[];
+  ranked.slice(0,4).forEach(row=>selected.push(row));
+  if(activeLabel&&!selected.some(row=>normalizeSelectionValue(row.label)===activeLabel)){
+    const activeRow=ranked.find(row=>normalizeSelectionValue(row.label)===activeLabel);
+    if(activeRow)selected[selected.length-1]=activeRow;
+  }
+  return selected
+    .filter((row,index,self)=>self.findIndex(other=>normalizeSelectionValue(other.label)===normalizeSelectionValue(row.label))===index)
+    .sort((a,b)=>safeNumber(a.z,0)-safeNumber(b.z,0));
+}
+function renderStageDriftBands(cockpitModel=null){
+  const panel=document.getElementById('stage-drift-bands');
+  if(!(panel instanceof HTMLElement))return;
+  const rows=buildStageDriftBandRows(cockpitModel||lastAnalysisCockpitModel);
+  stageDriftBandRows=rows;
+  const limitPct=rows.length?rows[0].limitPct:safeNumber((cockpitModel||lastAnalysisCockpitModel)?.charts?.storyDrift?.limitPct,2);
+  panel.dataset.stageDriftBandsSchema=STAGE_DRIFT_BANDS_SCHEMA;
+  panel.dataset.stageDriftBandsStatus=rows.length?'ready':'pending';
+  panel.dataset.stageDriftBandCount=String(rows.length);
+  panel.dataset.stageDriftLimitPct=safeNumber(limitPct,2).toFixed(2);
+  panel.dataset.stageDriftActive=activeStoryClipLabel||'';
+  panel.classList.toggle('is-visible',rows.length>0);
+  if(!rows.length){
+    panel.innerHTML='';
+    window.__STRUCTURE_VIEWER_STAGE_DRIFT_BANDS_STATE__={
+      schemaVersion:STAGE_DRIFT_BANDS_SCHEMA,
+      status:'pending',
+      bandCount:0,
+      rows:[],
+    };
+    return;
+  }
+  const maxDrift=Math.max(...rows.map(row=>safeNumber(row.driftPct,0)),safeNumber(limitPct,2),.1);
+  panel.innerHTML=`
+    <div class="stage-drift-bands__receipt">
+      <span>Drift Bands</span>
+      <strong>Limit ${escapeHtml(safeNumber(limitPct,2).toFixed(1))}%</strong>
+    </div>
+    ${rows.map((row,index)=>{
+      const driftLabel=`${row.driftPct.toFixed(2)}%`;
+      const originalLabel=`${row.originalDriftPct.toFixed(2)}%`;
+      const deltaLabel=Number.isFinite(row.deltaPct)?`${row.deltaPct.toFixed(1)}%`:'--';
+      const widthPct=Math.max(8,Math.min(100,(safeNumber(row.driftPct,0)/maxDrift)*100));
+      const limitPctWidth=Math.max(8,Math.min(100,(safeNumber(limitPct,2)/maxDrift)*100));
+      return `<button type="button" class="stage-drift-band stage-drift-band--${escapeHtml(row.tone)}${row.active?' is-active':''}" data-stage-drift-band data-stage-drift-band-label="${escapeHtml(row.label)}" data-stage-drift-band-story="${escapeHtml(row.story)}" data-stage-drift-band-z="${escapeHtml(row.z.toFixed(4))}" data-stage-drift-band-drift="${escapeHtml(driftLabel)}" data-stage-drift-band-rank="${escapeHtml(String(index+1))}" data-stage-drift-band-projection="pending" aria-pressed="${row.active?'true':'false'}" title="${escapeHtml(row.active?'Clear story clip':'Clip to '+row.label)}">
+        <span class="stage-drift-band__leader" aria-hidden="true"></span>
+        <span class="stage-drift-band__content">
+          <span class="stage-drift-band__meta"><b>${escapeHtml(row.shortLabel)}</b><em>${escapeHtml(driftLabel)} drift</em></span>
+          <span class="stage-drift-band__bar" style="--drift-band:${widthPct.toFixed(1)}%;--drift-limit:${limitPctWidth.toFixed(1)}%"><i></i><strong></strong></span>
+          <small>orig ${escapeHtml(originalLabel)} | delta ${escapeHtml(deltaLabel)}</small>
+        </span>
+      </button>`;
+    }).join('')}`;
+  panel.querySelectorAll('[data-stage-drift-band]').forEach(button=>{
+    button.addEventListener('click',event=>{
+      event.stopPropagation();
+      const label=normalizeSelectionValue(button.getAttribute('data-stage-drift-band-label'));
+      if(label&&label===activeStoryClipLabel)clearStoryClip();
+      else setStoryClipLabel(label);
+    });
+  });
+  positionStageDriftBands();
+}
+function positionStageDriftBands(){
+  const panel=document.getElementById('stage-drift-bands');
+  const vp=document.getElementById('viewport');
+  if(!(panel instanceof HTMLElement)||!(vp instanceof HTMLElement))return;
+  const buttons=[...panel.querySelectorAll('[data-stage-drift-band]')]
+    .filter(button=>button instanceof HTMLElement);
+  if(!buttons.length){
+    panel.classList.remove('is-visible');
+    return;
+  }
+  const viewportRect=vp.getBoundingClientRect();
+  const canvasRect=renderer?.domElement?.getBoundingClientRect?.()||viewportRect;
+  const minTop=112;
+  const maxTop=Math.max(viewportRect.height-118,minTop);
+  const minLeft=22;
+  const maxLeft=Math.max(viewportRect.width-392,minLeft);
+  let box=null;
+  if(modelGroup){
+    const candidate=new THREE.Box3().setFromObject(modelGroup);
+    if(!candidate.isEmpty())box=candidate;
+  }
+  const center=box?box.getCenter(new THREE.Vector3()):new THREE.Vector3();
+  const size=box?box.getSize(new THREE.Vector3()):new THREE.Vector3(1,1,1);
+  const maxSpan=Math.max(size.x,size.y,size.z,1);
+  const projectedRows=buttons.map((button,index)=>{
+    const z=safeNumber(button.getAttribute('data-stage-drift-band-z'),NaN);
+    let rawTop=minTop+(index+1)*(maxTop-minTop)/(buttons.length+1);
+    let rawLeft=42;
+    let projection='docked';
+    if(box&&Number.isFinite(z)&&camera&&renderer){
+      const worldPoint=new THREE.Vector3(box.min.x-maxSpan*.028,z,center.z);
+      const projected=worldPoint.project(camera);
+      if(Number.isFinite(projected.x)&&Number.isFinite(projected.y)){
+        rawLeft=(projected.x*.5+.5)*canvasRect.width+canvasRect.left-viewportRect.left-10;
+        rawTop=(-projected.y*.5+.5)*canvasRect.height+canvasRect.top-viewportRect.top;
+        projection=projected.z<-1||projected.z>1?'edge-pinned':'projected';
+      }
+    }
+    return{
+      button,
+      top:Math.min(Math.max(rawTop,minTop),maxTop),
+      left:Math.min(Math.max(rawLeft,minLeft),maxLeft),
+      projection,
+    };
+  }).sort((a,b)=>a.top-b.top);
+  for(let index=1;index<projectedRows.length;index+=1){
+    projectedRows[index].top=Math.max(projectedRows[index].top,projectedRows[index-1].top+42);
+  }
+  for(let index=projectedRows.length-1;index>=0;index-=1){
+    projectedRows[index].top=Math.min(projectedRows[index].top,maxTop-(projectedRows.length-1-index)*42);
+  }
+  const focusBadge=document.querySelector('[data-viewport-selection-focus-badge].is-visible');
+  const focusRect=focusBadge instanceof HTMLElement?focusBadge.getBoundingClientRect():null;
+  projectedRows.forEach(row=>{
+    let top=Math.min(Math.max(row.top,minTop),maxTop);
+    let left=Math.min(Math.max(row.left,minLeft),maxLeft);
+    if(focusRect){
+      const candidate={left:viewportRect.left+left,right:viewportRect.left+left+206,top:viewportRect.top+top-18,bottom:viewportRect.top+top+18};
+      const overlaps=Math.max(0,Math.min(candidate.right,focusRect.right)-Math.max(candidate.left,focusRect.left))*
+        Math.max(0,Math.min(candidate.bottom,focusRect.bottom)-Math.max(candidate.top,focusRect.top));
+      if(overlaps>0){
+        left=Math.min(Math.max(focusRect.right-viewportRect.left+12,minLeft),maxLeft);
+        row.projection=row.projection==='projected'?'edge-pinned':row.projection;
+      }
+    }
+    row.button.style.left=`${left.toFixed(1)}px`;
+    row.button.style.top=`${top.toFixed(1)}px`;
+    row.button.setAttribute('data-stage-drift-band-projection',row.projection);
+    row.button.classList.toggle('is-edge-pinned',row.projection!=='projected');
+  });
+  panel.classList.add('is-visible');
+  panel.dataset.stageDriftProjectedCount=String(projectedRows.filter(row=>row.projection==='projected').length);
+  window.__STRUCTURE_VIEWER_STAGE_DRIFT_BANDS_STATE__={
+    schemaVersion:STAGE_DRIFT_BANDS_SCHEMA,
+    status:'ready',
+    bandCount:projectedRows.length,
+    limitPct:safeNumber(panel.dataset.stageDriftLimitPct,0),
+    activeStory:activeStoryClipLabel||'',
+    projectedCount:projectedRows.filter(row=>row.projection==='projected').length,
+    edgePinnedCount:projectedRows.filter(row=>row.projection==='edge-pinned').length,
+    dockedCount:projectedRows.filter(row=>row.projection==='docked').length,
+    rows:stageDriftBandRows.map(row=>({
+      label:row.label,
+      story:row.story,
+      driftPct:row.driftPct,
+      limitPct:row.limitPct,
+      tone:row.tone,
+      active:row.active,
+    })),
+  };
 }
 function resolveSearchMatches(query=getSearchInputValue(),limit=12){
   if(!modelData||!Array.isArray(modelData.elements))return [];
@@ -7727,6 +8131,8 @@ function buildUI(data){
   renderAnalysisTimeline(cockpitModel);
   renderStageResultCallouts(cockpitModel);
   renderStageResultReceipt(cockpitModel,contourContext);
+  renderStageStoryRuler(cockpitModel);
+  renderStageDriftBands(cockpitModel);
   syncViewportToolRailState();
   syncStageReviewControls();
   renderStatsPanel(statEntries);
@@ -8414,6 +8820,8 @@ function animate(){
   const nowMs=performance.now();
   if(viewerNeedsRender||isAnimating||nowMs-lastRenderAt>=STATIC_RENDER_REFRESH_MS){
     positionViewportSelectionFocusBadge();
+    positionStageStoryRuler();
+    positionStageDriftBands();
     positionStageCriticalHotspots();
     positionPanelZoneStageBadge();
     renderer.render(scene,camera);
@@ -8433,6 +8841,8 @@ function onResize(){
   camera.updateProjectionMatrix();
   renderer.setSize(vp.clientWidth,vp.clientHeight);
   positionViewportSelectionFocusBadge();
+  positionStageStoryRuler();
+  positionStageDriftBands();
   positionStageCriticalHotspots();
   positionPanelZoneStageBadge();
   requestViewerRender();

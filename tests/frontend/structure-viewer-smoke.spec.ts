@@ -310,6 +310,8 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     const stageReceipt = rectFor('#stage-result-receipt')
     const stageOverlayReceipt = rectFor('[data-stage-overlay-receipt]')
     const stageReviewControls = rectFor('[data-stage-review-controls]')
+    const stageStoryRuler = rectFor('[data-stage-story-ruler]')
+    const stageDriftBands = rectFor('[data-stage-drift-bands]')
     const stageCriticalHotspots = rectFor('[data-stage-critical-hotspots]')
     const focusBadge = rectFor('[data-viewport-selection-focus-badge]')
     const panelZoneStageBadge = rectFor('[data-panel-zone-stage-badge]')
@@ -490,6 +492,34 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       resultEnvelopeHasUtilization: Boolean(document.querySelector('[data-result-envelope-key="utilization"]')),
       resultEnvelopeMemberRowCount: document.querySelectorAll('[data-result-envelope] [data-result-envelope-member-id]').length,
       resultEnvelopeOverflowCount: [...document.querySelectorAll('[data-result-envelope], [data-result-envelope] [data-result-envelope-row], [data-result-envelope] .result-envelope__head')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageStoryRuler,
+      stageStoryRulerStatus: document.querySelector('[data-stage-story-ruler]')?.getAttribute('data-stage-story-ruler-status') || '',
+      stageStoryRulerSchema: document.querySelector('[data-stage-story-ruler]')?.getAttribute('data-stage-story-ruler-schema') || '',
+      stageStoryRulerRowCount: Number(document.querySelector('[data-stage-story-ruler]')?.getAttribute('data-stage-story-ruler-row-count') || '0'),
+      stageStoryRulerStoryCount: Number(document.querySelector('[data-stage-story-ruler]')?.getAttribute('data-stage-story-count') || '0'),
+      stageStoryRulerHeightM: Number(document.querySelector('[data-stage-story-ruler]')?.getAttribute('data-stage-story-height-m') || '0'),
+      stageStoryRulerProjectedCount: Number(document.querySelector('[data-stage-story-ruler]')?.getAttribute('data-stage-story-projected-count') || '0'),
+      stageStoryRulerVisible: Boolean(document.querySelector('[data-stage-story-ruler]')?.classList.contains('is-visible')),
+      stageStoryRulerWindowState: window.__STRUCTURE_VIEWER_STAGE_STORY_RULER_STATE__ || null,
+      stageStoryRulerText: document.querySelector('[data-stage-story-ruler]')?.textContent || '',
+      stageStoryRulerOverflowCount: [...document.querySelectorAll('[data-stage-story-ruler], [data-stage-story-ruler] *, [data-stage-story-ruler-row], [data-stage-story-ruler-row] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageDriftBands,
+      stageDriftBandsStatus: document.querySelector('[data-stage-drift-bands]')?.getAttribute('data-stage-drift-bands-status') || '',
+      stageDriftBandsSchema: document.querySelector('[data-stage-drift-bands]')?.getAttribute('data-stage-drift-bands-schema') || '',
+      stageDriftBandCount: Number(document.querySelector('[data-stage-drift-bands]')?.getAttribute('data-stage-drift-band-count') || '0'),
+      stageDriftLimitPct: Number(document.querySelector('[data-stage-drift-bands]')?.getAttribute('data-stage-drift-limit-pct') || '0'),
+      stageDriftProjectedCount: Number(document.querySelector('[data-stage-drift-bands]')?.getAttribute('data-stage-drift-projected-count') || '0'),
+      stageDriftBandToneCount: document.querySelectorAll('[data-stage-drift-band].stage-drift-band--success, [data-stage-drift-band].stage-drift-band--warn, [data-stage-drift-band].stage-drift-band--danger').length,
+      stageDriftBandsVisible: Boolean(document.querySelector('[data-stage-drift-bands]')?.classList.contains('is-visible')),
+      stageDriftBandsWindowState: window.__STRUCTURE_VIEWER_STAGE_DRIFT_BANDS_STATE__ || null,
+      stageDriftBandsText: document.querySelector('[data-stage-drift-bands]')?.textContent || '',
+      stageDriftBandsOverflowCount: [...document.querySelectorAll('[data-stage-drift-bands], [data-stage-drift-bands] *, [data-stage-drift-band], [data-stage-drift-band] *')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
@@ -799,6 +829,32 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.resultEnvelopeHasUtilization).toBe(true)
   expect(layout.resultEnvelopeMemberRowCount).toBeGreaterThanOrEqual(1)
   expect(layout.resultEnvelopeOverflowCount).toBe(0)
+  expect(layout.stageStoryRulerStatus).toBe('ready')
+  expect(layout.stageStoryRulerSchema).toBe('structure-viewer-stage-story-ruler.v1')
+  expect(layout.stageStoryRulerRowCount).toBeGreaterThanOrEqual(6)
+  expect(layout.stageStoryRulerStoryCount).toBeGreaterThanOrEqual(layout.stageStoryRulerRowCount)
+  expect(layout.stageStoryRulerHeightM).toBeGreaterThan(0)
+  expect(layout.stageStoryRulerProjectedCount).toBeGreaterThan(0)
+  expect(layout.stageStoryRulerVisible).toBe(true)
+  expect(layout.stageStoryRulerWindowState?.schemaVersion).toBe('structure-viewer-stage-story-ruler.v1')
+  expect(layout.stageStoryRulerWindowState?.status).toBe('ready')
+  expect(layout.stageStoryRulerWindowState?.rowCount).toBeGreaterThanOrEqual(6)
+  expect(layout.stageStoryRulerText).toContain('Story Levels')
+  expect(layout.stageStoryRulerText).toContain('drift')
+  expect(layout.stageStoryRulerOverflowCount).toBe(0)
+  expect(layout.stageDriftBandsStatus).toBe('ready')
+  expect(layout.stageDriftBandsSchema).toBe('structure-viewer-stage-drift-bands.v1')
+  expect(layout.stageDriftBandCount).toBeGreaterThanOrEqual(3)
+  expect(layout.stageDriftLimitPct).toBeGreaterThan(0)
+  expect(layout.stageDriftProjectedCount).toBeGreaterThan(0)
+  expect(layout.stageDriftBandToneCount).toBeGreaterThanOrEqual(layout.stageDriftBandCount)
+  expect(layout.stageDriftBandsVisible).toBe(true)
+  expect(layout.stageDriftBandsWindowState?.schemaVersion).toBe('structure-viewer-stage-drift-bands.v1')
+  expect(layout.stageDriftBandsWindowState?.status).toBe('ready')
+  expect(layout.stageDriftBandsWindowState?.bandCount).toBeGreaterThanOrEqual(3)
+  expect(layout.stageDriftBandsText).toContain('Drift Bands')
+  expect(layout.stageDriftBandsText).toContain('Limit')
+  expect(layout.stageDriftBandsOverflowCount).toBe(0)
   expect(layout.stageCriticalHotspotsStatus).toBe('ready')
   expect(layout.stageCriticalHotspotsSchema).toBe('structure-viewer-stage-critical-hotspots.v1')
   expect(layout.stageCriticalHotspotCount).toBeGreaterThanOrEqual(3)

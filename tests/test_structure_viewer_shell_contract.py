@@ -148,6 +148,18 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "renderStageCriticalHotspots" in text
     assert "positionStageCriticalHotspots" in text
     assert "__STRUCTURE_VIEWER_STAGE_CRITICAL_HOTSPOTS_STATE__" in text
+    assert 'id="stage-story-ruler"' in text
+    assert "data-stage-story-ruler" in text
+    assert "structure-viewer-stage-story-ruler.v1" in text
+    assert "renderStageStoryRuler" in text
+    assert "positionStageStoryRuler" in text
+    assert "__STRUCTURE_VIEWER_STAGE_STORY_RULER_STATE__" in text
+    assert 'id="stage-drift-bands"' in text
+    assert "data-stage-drift-bands" in text
+    assert "structure-viewer-stage-drift-bands.v1" in text
+    assert "renderStageDriftBands" in text
+    assert "positionStageDriftBands" in text
+    assert "__STRUCTURE_VIEWER_STAGE_DRIFT_BANDS_STATE__" in text
     assert "data-stage-review-controls" in text
     assert "data-stage-view-mode-select" in text
     assert "data-stage-model-stack" in text

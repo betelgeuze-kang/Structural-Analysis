@@ -1,9 +1,9 @@
 {
   "schema_version": "structure-viewer-browser-performance-probe.v1",
-  "generated_at": "2026-05-24T17:15:31.548Z",
+  "generated_at": "2026-05-24T17:42:59.833Z",
   "contract_pass": true,
   "reason_code": "PASS",
-  "summary_line": "Structure viewer browser performance probe: PASS | ready=5067ms | fps=31.7 | mode=local_browser_probe",
+  "summary_line": "Structure viewer browser performance probe: PASS | ready=5050ms | fps=35.1 | mode=local_browser_probe",
   "probe_mode": "local_browser_probe",
   "measured_browser_probe": true,
   "live_performance_claim": false,
@@ -17,8 +17,8 @@
     "sample_ms": 1500
   },
   "probe": {
-    "url": "http://127.0.0.1:43289/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
-    "readyMs": 5067,
+    "url": "http://127.0.0.1:36829/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+    "readyMs": 5050,
     "viewport": {
       "width": 1440,
       "height": 1000
@@ -46,16 +46,16 @@
       "centerY": 0.5916666666666667
     },
     "rafSample": {
-      "frameCount": 48,
-      "elapsedMs": 1483.2999999999993,
-      "averageFps": 31.68610530573722,
-      "averageFrameMs": 31.559574468085092,
-      "p95FrameMs": 150,
-      "maxFrameMs": 266.6999999999998
+      "frameCount": 53,
+      "elapsedMs": 1483.3000000000002,
+      "averageFps": 35.05696757230499,
+      "averageFrameMs": 28.525000000000002,
+      "p95FrameMs": 133.40000000000055,
+      "maxFrameMs": 200
     },
     "navigationTiming": {
-      "domContentLoadedMs": 408.09999999403954,
-      "loadEventEndMs": 419.5,
+      "domContentLoadedMs": 380,
+      "loadEventEndMs": 401.79999999701977,
       "responseEndMs": 9
     },
     "viewerState": {
@@ -71,8 +71,8 @@
       "label": "viewer_index",
       "path": "src/structure-viewer/index.html",
       "available": true,
-      "bytes": 431265,
-      "sha256": "51bb7aa6c7eca4b4a58761d57ccd521d2392c964b8402928305662b2a1f4a502"
+      "bytes": 452328,
+      "sha256": "45be000274c92b5e362cea9e6f67d3460310751ef9d144e19fd4fa9710175903"
     },
     {
       "label": "browser_performance_probe",
@@ -92,8 +92,8 @@
       "label": "frontend_smoke_spec",
       "path": "tests/frontend/structure-viewer-smoke.spec.ts",
       "available": true,
-      "bytes": 74971,
-      "sha256": "3e597b0534a04dcd30b1de5552ab4e08c493865325bb8ff407cb8a8831e03563"
+      "bytes": 80073,
+      "sha256": "46d86443c0df2aef0f7868f8e20fc5c774134137b9a1f39e3bf0e7269fad47ac"
     }
   ],
   "residual_live_work": [
