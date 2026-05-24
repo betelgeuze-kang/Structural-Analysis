@@ -113,8 +113,8 @@
       "bytes": 17595,
       "label": "workstation_delivery_package_manifest",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_delivery_package_manifest.json",
-      "redacted_sha256": "f4fa58e369886fc75107bc0bbb98448645110bab4f128d8035ea508bf6a089a2",
-      "sha256": "f4fa58e369886fc75107bc0bbb98448645110bab4f128d8035ea508bf6a089a2",
+      "redacted_sha256": "4cbcfafbf274284c80d745d51de20a81f9f983bacbda856fb5e18fd4af38340c",
+      "sha256": "4cbcfafbf274284c80d745d51de20a81f9f983bacbda856fb5e18fd4af38340c",
       "source_path": "implementation/phase1/workstation_delivery_package_manifest.json"
     },
     {
@@ -122,17 +122,17 @@
       "bytes": 6480,
       "label": "workstation_delivery_readiness",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_delivery_readiness.json",
-      "redacted_sha256": "a560f5241916790d93c4cdc1d04ba9ad548539c43adb3ae75bf6b2b3cc6361e7",
-      "sha256": "a560f5241916790d93c4cdc1d04ba9ad548539c43adb3ae75bf6b2b3cc6361e7",
+      "redacted_sha256": "5dd5198f4149e04442c99a237fc3a756c87d11e5419b3ecb6c0aa298ea15f6df",
+      "sha256": "5dd5198f4149e04442c99a237fc3a756c87d11e5419b3ecb6c0aa298ea15f6df",
       "source_path": "implementation/phase1/workstation_delivery_readiness.json"
     },
     {
       "available": true,
-      "bytes": 5344,
+      "bytes": 5376,
       "label": "workstation_delivery_viewer_smoke",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_delivery_viewer_smoke.json",
-      "redacted_sha256": "d8fbc70c5a1931c3e76c16c1af9e53ecca8a5bb8f26ef0e78d0f284bca71d6b7",
-      "sha256": "984fd0f4c23dd6351bf7dcee8a6edec6bcb7800af199e8cab314a2a624376dca",
+      "redacted_sha256": "3db4804de08da181c84f54c6dfae0bceb8c25e00fa43c1e19d9047add25848d9",
+      "sha256": "c7ba07c8f6e0f4b97187c74ce510dc32d0f4a0f0c7d9820cd6d837a290b65586",
       "source_path": "implementation/phase1/workstation_delivery_viewer_smoke.json"
     },
     {
@@ -149,17 +149,17 @@
       "bytes": 7082,
       "label": "workstation_job_record",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_job_record.json",
-      "redacted_sha256": "ea3e9b009bc7a5cea3feb4aa86679bb90aa814c60aeac8ad6ebcf808bf0c1289",
-      "sha256": "ea3e9b009bc7a5cea3feb4aa86679bb90aa814c60aeac8ad6ebcf808bf0c1289",
+      "redacted_sha256": "ddb97f61d490a0477444a07c69472e1dc14d556094ab984aef7b7919badceede",
+      "sha256": "ddb97f61d490a0477444a07c69472e1dc14d556094ab984aef7b7919badceede",
       "source_path": "implementation/phase1/workstation_job_record.json"
     },
     {
       "available": true,
-      "bytes": 32168,
+      "bytes": 32907,
       "label": "workstation_job_retention_policy",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_job_retention_policy.json",
-      "redacted_sha256": "9010acbf4d37e1c2ac4c4abbe3070ff6979de9056e57031cb399b513a08d9714",
-      "sha256": "9010acbf4d37e1c2ac4c4abbe3070ff6979de9056e57031cb399b513a08d9714",
+      "redacted_sha256": "6610c295eafa163e1545a554a5a5dd8508639126a0b9a1a09d3d7ce9f9a9969e",
+      "sha256": "6610c295eafa163e1545a554a5a5dd8508639126a0b9a1a09d3d7ce9f9a9969e",
       "source_path": "implementation/phase1/workstation_job_retention_policy.json"
     },
     {
@@ -204,7 +204,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-05-24T15:49:02.757761+00:00",
+    "generated_at": "2026-05-24T16:18:06.044958+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -213,7 +213,7 @@
     "artifact_count": 22,
     "available_artifact_count": 22,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "921b95e064dc8a0eec3768fe65e49b0a0e1311fcfc23abd2548f25a8399575e7"
+    "sha256": "e5d6760a3c5ec16e6d579abf7298da061e4829ab89df46662a72e64a7ac4596a"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -229,7 +229,7 @@
     "redaction_self_test_pass": true
   },
   "contract_pass": true,
-  "generated_at": "2026-05-24T15:49:02.758503+00:00",
+  "generated_at": "2026-05-24T16:18:06.045640+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",

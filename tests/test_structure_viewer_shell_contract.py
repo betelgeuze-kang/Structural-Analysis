@@ -78,8 +78,18 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert 'id="shell-meta-nodes"' in text
     assert 'id="shell-meta-elements"' in text
     assert 'id="shell-meta-stories"' in text
+    assert 'id="shell-meta-height"' in text
+    assert 'id="shell-meta-units"' in text
+    assert 'id="shell-meta-analysis-type"' in text
+    assert 'id="shell-meta-last-run"' in text
     assert 'id="shell-meta-review"' in text
     assert 'id="shell-meta-source"' in text
+    assert 'data-model-overview-panel' in text
+    assert 'data-source-adapter-matrix' in text
+    assert 'id="shell-source-adapter-stack"' in text
+    assert "structure-viewer-source-adapter-matrix.v1" in text
+    assert "buildSourceAdapterMatrix" in text
+    assert "renderSourceAdapterMatrix" in text
     assert 'id="top-run-compare-button"' in text
     assert 'id="top-run-new-button"' in text
     assert "data-top-run-receipt" in text

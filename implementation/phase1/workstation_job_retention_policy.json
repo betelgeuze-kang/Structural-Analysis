@@ -11,10 +11,10 @@
     "delete_operation_executed": false,
     "mode": "dry_run_only",
     "requires_explicit_confirmation": true,
-    "retained_count": 42
+    "retained_count": 43
   },
   "contract_pass": true,
-  "generated_at": "2026-05-24T15:21:41.697399+00:00",
+  "generated_at": "2026-05-24T16:17:36.506341+00:00",
   "job_root": "implementation/phase1/workstation_jobs",
   "job_rows": [
     {
@@ -436,9 +436,19 @@
       "output_manifest": "implementation/phase1/workstation_jobs/20260524T152125-f8616d87d2ed53b4/output_manifest.json",
       "path": "implementation/phase1/workstation_jobs/20260524T152125-f8616d87d2ed53b4",
       "run_log": "implementation/phase1/workstation_jobs/20260524T152125-f8616d87d2ed53b4/run_log.jsonl"
+    },
+    {
+      "checksums": "implementation/phase1/workstation_jobs/20260524T161723-f8616d87d2ed53b4/checksums.sha256",
+      "checksums_available": true,
+      "checksums_sha256": "f926e5cd0526f6a09cfbebd6a551dcb67de3867809f688c133e5a1a48c06abe6",
+      "input_manifest": "implementation/phase1/workstation_jobs/20260524T161723-f8616d87d2ed53b4/input_manifest.json",
+      "job_id": "20260524T161723-f8616d87d2ed53b4",
+      "output_manifest": "implementation/phase1/workstation_jobs/20260524T161723-f8616d87d2ed53b4/output_manifest.json",
+      "path": "implementation/phase1/workstation_jobs/20260524T161723-f8616d87d2ed53b4",
+      "run_log": "implementation/phase1/workstation_jobs/20260524T161723-f8616d87d2ed53b4/run_log.jsonl"
     }
   ],
-  "latest_job_id": "20260524T152125-f8616d87d2ed53b4",
+  "latest_job_id": "20260524T161723-f8616d87d2ed53b4",
   "policy": {
     "cleanup_dry_run_required": true,
     "delete_requires_explicit_confirmation": true,
@@ -449,5 +459,5 @@
   },
   "reason_code": "PASS",
   "schema_version": "workstation-job-retention-policy.v1",
-  "summary_line": "Workstation job retention policy: PASS | jobs=42 | retention_days=365 | max_jobs=200"
+  "summary_line": "Workstation job retention policy: PASS | jobs=43 | retention_days=365 | max_jobs=200"
 }

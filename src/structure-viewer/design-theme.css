@@ -6404,6 +6404,58 @@ body.structural-surface.panel-inspection-shell canvas {
     gap:8px;
   }
 
+  body.structural-surface.command-center-shell .shell-source-adapter-stack {
+    display:grid;
+    grid-template-columns:1fr;
+    gap:7px;
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row {
+    display:grid;
+    grid-template-columns:minmax(54px,.72fr) auto;
+    align-items:center;
+    gap:4px 8px;
+    min-height:42px;
+    padding:8px 10px;
+    border-radius:8px;
+    text-align:left;
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row b,
+  body.structural-surface.command-center-shell .source-adapter-row em,
+  body.structural-surface.command-center-shell .source-adapter-row small {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row b {
+    color:var(--text);
+    font-size:12px;
+    font-weight:800;
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row em {
+    justify-self:end;
+    color:var(--accent);
+    font-size:9px;
+    font-style:normal;
+    font-weight:800;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row small {
+    grid-column:1 / -1;
+    color:var(--muted);
+    font-size:10px;
+    line-height:1.15;
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row--crosswalk em {
+    color:var(--accent2);
+  }
+
   body.structural-surface.command-center-shell .shell-meta-grid {
     display:grid;
     grid-template-columns:auto 1fr;
@@ -6423,6 +6475,8 @@ body.structural-surface.panel-inspection-shell canvas {
     color:var(--text);
     font-weight:600;
     text-align:right;
+    min-width:0;
+    overflow-wrap:anywhere;
   }
 
   body.structural-surface.command-center-shell #left-panel > #tree-section {

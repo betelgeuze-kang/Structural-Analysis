@@ -60,6 +60,44 @@
     letter-spacing:0;
   }
 
+  body.structural-surface.command-center-shell .shell-source-adapter-stack {
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row {
+    min-height:31px;
+    padding:5px 7px;
+    border-radius:6px;
+    grid-template-columns:minmax(48px,.78fr) auto;
+    border-color:rgba(104,126,151,.20);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)),
+      rgba(9,17,27,.72);
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row--current {
+    border-color:rgba(47,229,122,.45);
+    box-shadow:inset 3px 0 0 rgba(47,229,122,.70);
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row--crosswalk {
+    border-color:rgba(139,92,246,.40);
+    box-shadow:inset 3px 0 0 rgba(139,92,246,.52);
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row b {
+    font-size:10px;
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row em,
+  body.structural-surface.command-center-shell .source-adapter-row small {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .source-adapter-row small {
+    opacity:.86;
+  }
+
   body.structural-surface.command-center-shell .header-eyebrow {
     color:var(--muted);
     font-size:9px;

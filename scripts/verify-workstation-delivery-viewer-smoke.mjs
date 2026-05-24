@@ -150,6 +150,7 @@ function staticViewerChecks(extractRoot, packagePath) {
     workflow_tabs: viewerText.includes('workflow-tab') || viewerText.includes('Model') && viewerText.includes('Optimization'),
     top_project_selector: viewerText.includes('data-shell-project-select') && viewerText.includes('setTopbarWorkspaceSelection') && viewerText.includes('renderTopbarProjectSelector'),
     top_run_control: viewerText.includes('data-top-run-control') && viewerText.includes('data-top-run-action') && viewerText.includes('startNewReviewRun'),
+    model_overview: viewerText.includes('data-model-overview-panel') && viewerText.includes('data-source-adapter-matrix') && viewerText.includes('structure-viewer-source-adapter-matrix.v1') && viewerText.includes('renderSourceAdapterMatrix'),
     stage_review_controls: viewerText.includes('data-stage-review-controls') && viewerText.includes('data-stage-model-stack'),
     analysis_result_evidence: viewerText.includes('data-analysis-result-evidence') && viewerText.includes('renderAnalysisResultEvidence') && viewerText.includes('analysis-result-evidence-row'),
     contour_scale_evidence: viewerText.includes('data-contour-scale-evidence') && viewerText.includes('data-contour-scale-ticks'),

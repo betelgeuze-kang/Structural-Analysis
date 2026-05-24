@@ -153,6 +153,12 @@ Resolved local productization gaps:
     - Browser smoke verifies the envelope is ready, contains at least four governing rows, includes member-linked rows, and remains overflow-free at dense 1600x900.
     - Customer-open package smoke now requires `result_envelope`, raising `current_cockpit_delivery` marker coverage to 26/26.
     - Regenerated the single-file delivery viewer and `project_package.zip`; workstation delivery smoke/readiness/support remain PASS with latest job `20260524T152125-f8616d87d2ed53b4`.
+  - Added compact Model Overview and source adapter matrix coverage:
+    - The left rail now exposes `structure-viewer-model-overview.v1` and `structure-viewer-source-adapter-matrix.v1` for model/name/nodes/elements/stories/height/units/analysis type/last run plus MIDAS/OpenSees/Abaqus source slots.
+    - Dense 1600x900 browser smoke verifies the overview is ready, MIDAS is the active source for MIDAS33, all three adapter slots render, and the overview has zero overflow.
+    - Renderable JSON evidence ingest reload now persists the direct model payload through local/session storage and fixes the short-model height label fallback that previously caused demo fallback after reload.
+    - Customer-open package smoke now requires `model_overview`, raising `current_cockpit_delivery` marker coverage to 27/27.
+    - Regenerated the delivery package artifacts; workstation delivery smoke/readiness/support remain PASS with latest job `20260524T161723-f8616d87d2ed53b4`.
 
 ## Next Recursive Candidates
 

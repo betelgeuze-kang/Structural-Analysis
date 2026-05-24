@@ -122,19 +122,23 @@
       <a class="shell-nav-item" href="#statistics-section"><span class="shell-nav-item__icon">⚙</span><span>Settings</span></a>
     </nav>
   </section>
-  <section class="panel-section shell-meta-section">
+  <section class="panel-section shell-meta-section" data-model-overview-panel data-model-overview-status="pending">
     <div class="section-title">Imported From</div>
-    <div class="shell-source-stack">
+    <div id="shell-source-adapter-stack" class="shell-source-stack shell-source-adapter-stack" data-source-adapter-matrix data-source-adapter-status="pending" data-source-adapter-count="0">
       <span class="source-badge proxy">MIDAS</span>
       <span class="source-badge proxy">OpenSees</span>
       <span class="source-badge proxy">Abaqus</span>
     </div>
     <div class="section-title">Model Info</div>
-    <div class="shell-meta-grid">
+    <div class="shell-meta-grid" data-model-info-grid>
       <span>Model</span><span id="shell-meta-model">--</span>
       <span>Nodes</span><span id="shell-meta-nodes">--</span>
       <span>Elements</span><span id="shell-meta-elements">--</span>
       <span>Stories</span><span id="shell-meta-stories">--</span>
+      <span>Height</span><span id="shell-meta-height">--</span>
+      <span>Units</span><span id="shell-meta-units">--</span>
+      <span>Analysis Type</span><span id="shell-meta-analysis-type">--</span>
+      <span>Last Run</span><span id="shell-meta-last-run">--</span>
       <span>Review IDs</span><span id="shell-meta-review">--</span>
       <span>Source</span><span id="shell-meta-source">--</span>
     </div>
@@ -779,6 +783,7 @@ import {
   writeViewerLocalOpsState,
 } from './viewer-local-ops-state.js';
 
+const VIEWER_RUNTIME_INGEST_PAYLOAD_SESSION_KEY='structure-viewer-runtime-ingest-payload-v1';
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
   modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,
   directModelNormalizer: new URL('./viewer-direct-model-normalizer.js', import.meta.url).href,
@@ -1058,6 +1063,15 @@ function safeStorageGet(key){
 function safeStorageSet(key,value){
   try{window.localStorage.setItem(key,value)}catch(_err){}
 }
+function safeSessionStorageGet(key){
+  try{return window.sessionStorage.getItem(key)}catch(_err){return null}
+}
+function safeSessionStorageSet(key,value){
+  try{
+    if(value===null||value===undefined)window.sessionStorage.removeItem(key);
+    else window.sessionStorage.setItem(key,value);
+  }catch(_err){}
+}
 function requestViewerRender(){
   viewerNeedsRender=true;
 }
@@ -1091,9 +1105,52 @@ function isEvidenceIngestPreviewWorkspaceActive(){
     || normalizeSelectionValue(workspaceState.projectId)==='evidence_ingest_preview';
 }
 function getRuntimeIngestRenderablePayload(){
-  const payload=readLocalOpsState().lastIngestRenderablePayload;
+  const localOps=readLocalOpsState();
+  let payload=localOps.lastIngestRenderablePayload;
+  if(!payload){
+    const previewPayload=localOps.lastIngestPreview?.renderable_payload;
+    if(previewPayload&&typeof previewPayload==='object')payload=previewPayload;
+  }
+  if(!payload){
+    const rows=Array.isArray(localOps.lastIngestPreview?.normalized_rows)
+      ?localOps.lastIngestPreview.normalized_rows
+      :[];
+    const row=rows.find(item=>extractModelPayload(item)||extractInteractivePayload(item));
+    if(row){
+      const modelPayload=extractModelPayload(row);
+      const interactivePayload=extractInteractivePayload(row);
+      payload={
+        schema_version:'structure-viewer-renderable-ingest-payload.v1',
+        source_type:normalizeSelectionValue(localOps.lastIngestPreview?.source_type)||'json',
+        source_name:normalizeSelectionValue(row.artifact_path||row.path||'browser-json-ingest'),
+        generated_at:normalizeSelectionValue(localOps.lastIngestPreview?.generated_at)||new Date().toISOString(),
+        payload_kind:modelPayload?'direct_model':'interactive_3d',
+        node_count:modelPayload&&Array.isArray(modelPayload.model?.nodes)?modelPayload.model.nodes.length:0,
+        element_count:modelPayload&&Array.isArray(modelPayload.model?.elements)?modelPayload.model.elements.length:0,
+        segment_count:interactivePayload
+          ?(Array.isArray(interactivePayload.baseline_segments)?interactivePayload.baseline_segments.length:0)
+            +(Array.isArray(interactivePayload.after_segments)?interactivePayload.after_segments.length:0)
+          :0,
+        payload:row,
+      };
+    }
+  }
+  if(!payload){
+    try{
+      const parsed=JSON.parse(safeSessionStorageGet(VIEWER_RUNTIME_INGEST_PAYLOAD_SESSION_KEY)||'null');
+      if(parsed&&typeof parsed==='object')payload=parsed;
+    }catch(_err){
+      payload=null;
+    }
+  }
   if(!payload||typeof payload!=='object'||!payload.payload)return null;
   return payload;
+}
+function writeRuntimeIngestRenderablePayload(payload=null){
+  safeSessionStorageSet(
+    VIEWER_RUNTIME_INGEST_PAYLOAD_SESSION_KEY,
+    payload&&typeof payload==='object'?JSON.stringify(payload):null
+  );
 }
 function rememberWorkspaceState(){
   const next=rememberViewerWorkspaceSelection(readLocalOpsState(),{
@@ -1902,8 +1959,10 @@ async function previewEvidenceIngestFromInput(event){
       sourceName:file.name,
       generatedAt,
     });
+    if(renderable)preview.renderable_payload=renderable;
     window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
     window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=renderable;
+    writeRuntimeIngestRenderablePayload(renderable);
     writeLocalOpsState({
       ...readLocalOpsState(),
       lastIngestPreview:preview,
@@ -1924,6 +1983,7 @@ async function previewEvidenceIngestFromInput(event){
     };
     window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
     window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=null;
+    writeRuntimeIngestRenderablePayload(null);
     writeLocalOpsState({...readLocalOpsState(),lastIngestPreview:preview,lastIngestRenderablePayload:null});
     rebuildRuntimeProjectManifest({fallbackWorkspace:workspaceState});
     auditWorkspaceEvent('evidence_ingest_preview_failed',String(err?.message||err),resolveSelectionMemberId(selectedElementData),{status:'blocked'});
@@ -4595,7 +4655,162 @@ function setStatusPillTone(node,tone='success'){
   node.classList.remove('status-pill--success','status-pill--warn','status-pill--danger','status-pill--accent');
   node.classList.add(`status-pill--${tone}`);
 }
-function renderShellSummary(summary){
+const SOURCE_ADAPTER_MATRIX_SCHEMA_VERSION='structure-viewer-source-adapter-matrix.v1';
+function firstShellValue(source={},keys=[]){
+  for(const key of keys){
+    const value=source?.[key];
+    if(Array.isArray(value)&&value.length)return value.join(', ');
+    const normalized=normalizeSelectionValue(value);
+    if(normalized)return normalized;
+  }
+  return'';
+}
+function firstShellNumber(source={},keys=[]){
+  for(const key of keys){
+    const number=safeNumber(source?.[key],NaN);
+    if(Number.isFinite(number))return number;
+  }
+  return NaN;
+}
+function getModelHeightMeters(data=modelData){
+  const meta=data?.meta||{};
+  const explicit=firstShellNumber(meta,[
+    'height_m',
+    'building_height_m',
+    'model_height_m',
+    'structure_height_m',
+    'total_height_m',
+  ]);
+  if(Number.isFinite(explicit)&&explicit>0)return explicit;
+  const nodes=Array.isArray(data?.nodes)?data.nodes:[];
+  const zValues=nodes.map(node=>safeNumber(node?.z,NaN)).filter(Number.isFinite);
+  if(zValues.length>1){
+    const zSpan=Math.max(...zValues)-Math.min(...zValues);
+    if(zSpan>0.05)return zSpan;
+  }
+  const yValues=nodes.map(node=>safeNumber(node?.y,NaN)).filter(Number.isFinite);
+  if(yValues.length>1){
+    const ySpan=Math.max(...yValues)-Math.min(...yValues);
+    if(ySpan>0.05)return ySpan;
+  }
+  return NaN;
+}
+function formatShellHeightLabel(data=modelData){
+  const height=getModelHeightMeters(data);
+  const fractionDigits=height>=10?1:2;
+  return Number.isFinite(height)&&height>0
+    ?`${height.toLocaleString('en-US',{maximumFractionDigits:fractionDigits,minimumFractionDigits:fractionDigits})} m`
+    :'--';
+}
+function getShellUnitsLabel(data=modelData){
+  const meta=data?.meta||{};
+  const explicit=firstShellValue(meta,[
+    'units_label',
+    'unit_label',
+    'unit_system',
+    'units',
+    'display_units',
+  ]);
+  if(explicit)return explicit;
+  const sourceUnits=firstShellValue(data?.source||{},['unit','units','unit_system']);
+  if(sourceUnits)return sourceUnits;
+  return'kN, m, C';
+}
+function getShellAnalysisTypeLabel(data=modelData){
+  const meta=data?.meta||{};
+  const explicit=firstShellValue(meta,[
+    'analysis_type',
+    'solver_analysis_type',
+    'review_analysis_type',
+    'analysis_mode',
+  ]);
+  if(explicit)return explicit;
+  const loadCase=firstShellValue(meta,['governing_load_case','active_load_case','load_case']);
+  const text=[loadCase,firstShellValue(meta,['source_label','name'])].join(' ').toLowerCase();
+  if(text.includes('pushover'))return'Nonlinear Pushover';
+  if(text.includes('response')||text.includes('spectrum'))return'Response Spectrum';
+  if(text.includes('buckling'))return'Stability / Buckling';
+  return'Optimization Review';
+}
+function getShellLastRunLabel(data=modelData){
+  return formatTimestampLabel(
+    firstShellValue(data?.meta||{},['last_run_at','run_at','generated_at','loaded_at','timestamp'])
+    ||normalizeSelectionValue(data?.generated_at)
+    ||normalizeSelectionValue(modelSourceMeta?.loadedAt)
+  );
+}
+function inferSourceAdapterKey(data=modelData,summary={}){
+  const text=[
+    summary?.sourceLabel,
+    data?.meta?.source_label,
+    data?.meta?.source_artifact_family,
+    data?.meta?.source_artifact_format,
+    data?.source?.format,
+    data?.source?.source_family,
+    data?.source?.path,
+    modelSourceMeta?.label,
+    modelSourceMeta?.resolvedPath,
+    workspaceState?.projectId,
+    workspaceState?.drawingId,
+    workspaceState?.project?.name,
+    workspaceState?.drawing?.title,
+    getRequestedPreset(),
+  ].map(value=>String(value||'').toLowerCase()).join(' ');
+  if(text.includes('opensees'))return'opensees';
+  if(text.includes('abaqus')||text.includes('.inp')||text.includes('.odb'))return'abaqus';
+  if(text.includes('midas')||text.includes('.mgt'))return'midas';
+  return'generic';
+}
+function buildSourceAdapterMatrix(summary={},data=modelData){
+  const activeKey=inferSourceAdapterKey(data,summary);
+  const adapters=[
+    {key:'midas',label:'MIDAS',detail:activeKey==='midas'?'Current artifact':'MGT / JSON adapter',fallbackStatus:'ready'},
+    {key:'opensees',label:'OpenSees',detail:activeKey==='opensees'?'Current artifact':'Evidence crosswalk slot',fallbackStatus:'crosswalk'},
+    {key:'abaqus',label:'Abaqus',detail:activeKey==='abaqus'?'Current artifact':'Evidence crosswalk slot',fallbackStatus:'crosswalk'},
+  ].map(row=>({
+    ...row,
+    status:activeKey===row.key?'current':row.fallbackStatus,
+  }));
+  return{
+    schemaVersion:SOURCE_ADAPTER_MATRIX_SCHEMA_VERSION,
+    status:'ready',
+    activeKey,
+    adapters,
+  };
+}
+function renderSourceAdapterMatrix(summary={},data=modelData){
+  const panel=document.getElementById('shell-source-adapter-stack');
+  if(!(panel instanceof HTMLElement))return;
+  const matrix=buildSourceAdapterMatrix(summary,data);
+  panel.dataset.sourceAdapterStatus=matrix.status;
+  panel.dataset.sourceAdapterSchema=matrix.schemaVersion;
+  panel.dataset.sourceAdapterCount=String(matrix.adapters.length);
+  panel.dataset.activeSourceAdapter=matrix.activeKey;
+  panel.innerHTML=matrix.adapters.map(row=>`
+    <span class="source-adapter-row source-adapter-row--${escapeHtml(row.status)} source-badge ${row.status==='current'?'ok':'proxy'}" data-source-adapter-row data-source-adapter-key="${escapeHtml(row.key)}" data-source-adapter-status="${escapeHtml(row.status)}">
+      <b>${escapeHtml(row.label)}</b>
+      <em>${escapeHtml(row.status==='current'?'Current':row.status==='ready'?'Ready':'Crosswalk')}</em>
+      <small>${escapeHtml(row.detail)}</small>
+    </span>
+  `).join('');
+  window.__STRUCTURE_VIEWER_SOURCE_ADAPTER_MATRIX__=matrix;
+}
+function syncModelOverviewPanel(summary={},data=modelData){
+  const panel=document.querySelector('[data-model-overview-panel]');
+  if(!(panel instanceof HTMLElement))return;
+  const height=getModelHeightMeters(data);
+  const units=getShellUnitsLabel(data);
+  const analysisType=getShellAnalysisTypeLabel(data);
+  const lastRun=getShellLastRunLabel(data);
+  panel.dataset.modelOverviewStatus='ready';
+  panel.dataset.modelOverviewSchema='structure-viewer-model-overview.v1';
+  panel.dataset.modelHeightM=Number.isFinite(height)?height.toFixed(3):'';
+  panel.dataset.modelUnits=units;
+  panel.dataset.modelAnalysisType=analysisType;
+  panel.dataset.modelLastRun=lastRun;
+  renderSourceAdapterMatrix(summary,data);
+}
+function renderShellSummary(summary,data=modelData){
   const modelChip=document.getElementById('shell-model-chip');
   if(modelChip)modelChip.textContent=`Model ${summary.modelLabel}`;
   const sourceChip=document.getElementById('shell-source-chip');
@@ -4633,6 +4848,10 @@ function renderShellSummary(summary){
     'shell-meta-nodes':summary.nodeCountLabel,
     'shell-meta-elements':summary.elementCountLabel,
     'shell-meta-stories':summary.storiesLabel,
+    'shell-meta-height':formatShellHeightLabel(data),
+    'shell-meta-units':getShellUnitsLabel(data),
+    'shell-meta-analysis-type':getShellAnalysisTypeLabel(data),
+    'shell-meta-last-run':getShellLastRunLabel(data),
     'shell-meta-review':summary.reviewCoverage,
     'shell-meta-source':summary.sourceLabel,
   };
@@ -4640,6 +4859,7 @@ function renderShellSummary(summary){
     const node=document.getElementById(id);
     if(node)node.textContent=value;
   });
+  syncModelOverviewPanel(summary,data);
   syncTopRunControl({summary});
 }
 function resolveTopRunStatusText(summary=null){
@@ -7061,7 +7281,7 @@ function buildUI(data){
   const statEntries=buildViewerStatEntries(summary,{largeModelBuildProfile});
   const cockpitModel=buildAnalysisCockpitModel(data,{summary});
   lastAnalysisCockpitModel=cockpitModel;
-  renderShellSummary(summary);
+  renderShellSummary(summary,data);
   renderKpiSummary(statEntries,cockpitModel);
   renderAnalysisResultEvidence(cockpitModel);
   renderResultEnvelope(cockpitModel);

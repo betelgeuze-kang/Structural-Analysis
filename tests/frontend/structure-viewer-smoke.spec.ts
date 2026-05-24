@@ -345,6 +345,25 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      modelOverviewStatus: document.querySelector('[data-model-overview-panel]')?.getAttribute('data-model-overview-status') || '',
+      modelOverviewHeightM: Number(document.querySelector('[data-model-overview-panel]')?.getAttribute('data-model-height-m') || '0'),
+      modelOverviewUnits: document.querySelector('[data-model-overview-panel]')?.getAttribute('data-model-units') || '',
+      modelOverviewAnalysisType: document.querySelector('[data-model-overview-panel]')?.getAttribute('data-model-analysis-type') || '',
+      modelOverviewLastRun: document.querySelector('[data-model-overview-panel]')?.getAttribute('data-model-last-run') || '',
+      sourceAdapterStatus: document.querySelector('[data-source-adapter-matrix]')?.getAttribute('data-source-adapter-status') || '',
+      sourceAdapterSchema: document.querySelector('[data-source-adapter-matrix]')?.getAttribute('data-source-adapter-schema') || '',
+      sourceAdapterCount: document.querySelectorAll('[data-source-adapter-row]').length,
+      sourceAdapterCurrentCount: document.querySelectorAll('[data-source-adapter-row][data-source-adapter-status="current"]').length,
+      sourceAdapterActiveKey: document.querySelector('[data-source-adapter-matrix]')?.getAttribute('data-active-source-adapter') || '',
+      sourceAdapterHasMidas: Boolean(document.querySelector('[data-source-adapter-row][data-source-adapter-key="midas"]')),
+      modelInfoRowCount: document.querySelectorAll('[data-model-info-grid] span:nth-child(odd)').length,
+      modelInfoHasHeight: (document.querySelector('#shell-meta-height')?.textContent || '').includes('m'),
+      modelInfoHasUnits: (document.querySelector('#shell-meta-units')?.textContent || '').trim().length > 0,
+      modelInfoHasAnalysis: (document.querySelector('#shell-meta-analysis-type')?.textContent || '').trim().length > 0,
+      modelOverviewOverflowCount: [...document.querySelectorAll('[data-model-overview-panel], [data-source-adapter-row], [data-model-info-grid] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       viewport,
       footer,
       chartStrip,
@@ -611,6 +630,22 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.topRunSolver).not.toBe('')
   expect(layout.topRunComparePressed).toBe('false')
   expect(layout.topRunOverflowCount).toBe(0)
+  expect(layout.modelOverviewStatus).toBe('ready')
+  expect(layout.modelOverviewHeightM).toBeGreaterThan(0)
+  expect(layout.modelOverviewUnits).not.toBe('')
+  expect(layout.modelOverviewAnalysisType).not.toBe('')
+  expect(layout.modelOverviewLastRun).not.toBe('--')
+  expect(layout.sourceAdapterStatus).toBe('ready')
+  expect(layout.sourceAdapterSchema).toBe('structure-viewer-source-adapter-matrix.v1')
+  expect(layout.sourceAdapterCount).toBe(3)
+  expect(layout.sourceAdapterCurrentCount).toBe(1)
+  expect(layout.sourceAdapterActiveKey).toBe('midas')
+  expect(layout.sourceAdapterHasMidas).toBe(true)
+  expect(layout.modelInfoRowCount).toBeGreaterThanOrEqual(10)
+  expect(layout.modelInfoHasHeight).toBe(true)
+  expect(layout.modelInfoHasUnits).toBe(true)
+  expect(layout.modelInfoHasAnalysis).toBe(true)
+  expect(layout.modelOverviewOverflowCount).toBe(0)
   expect(layout.viewport?.width || 0).toBeGreaterThanOrEqual(540)
   expect(layout.viewport?.height || 0).toBeGreaterThanOrEqual(398)
   expect(layout.rightPanel?.width || 0).toBeGreaterThanOrEqual(360)

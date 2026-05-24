@@ -120,8 +120,8 @@
     {
       "blockers": [],
       "checksum_self_test_pass": true,
-      "job_dir": "implementation/phase1/workstation_jobs/20260524T152125-f8616d87d2ed53b4",
-      "job_id": "20260524T152125-f8616d87d2ed53b4",
+      "job_dir": "implementation/phase1/workstation_jobs/20260524T161723-f8616d87d2ed53b4",
+      "job_id": "20260524T161723-f8616d87d2ed53b4",
       "job_record_path": "implementation/phase1/workstation_job_record.json",
       "label": "Job reproducibility contract",
       "ok": true,
@@ -138,7 +138,7 @@
       "cleanup_preview_candidate_count": 0,
       "cleanup_preview_mode": "dry_run_only",
       "label": "Job retention and cleanup policy",
-      "latest_job_id": "20260524T152125-f8616d87d2ed53b4",
+      "latest_job_id": "20260524T161723-f8616d87d2ed53b4",
       "max_completed_jobs": 200,
       "ok": true,
       "path": "implementation/phase1/workstation_job_retention_policy.json",
@@ -146,7 +146,7 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-05-24T15:49:02.731191+00:00",
+  "generated_at": "2026-05-24T16:17:56.717226+00:00",
   "independent_commercial_product_ready": false,
   "reason_code": "PASS",
   "schema_version": "workstation-delivery-readiness.v1",
