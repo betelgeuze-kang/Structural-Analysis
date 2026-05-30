@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Structural Insight Viewer</title>
 <link rel="icon" href="data:,"/>
+<link rel="stylesheet" href="./design-tokens.css"/>
 <link rel="stylesheet" href="./design-theme.css"/>
+<link rel="stylesheet" href="./viewer-visual-identity.css"/>
 <link rel="stylesheet" href="./commercial-cockpit-polish.css"/>
 </head>
-<body class="structural-surface command-center-shell" data-viewer-workflow="model">
+<body class="structural-surface command-center-shell" data-si-identity="v2" data-viewer-workflow="model">
 <div id="app">
 <header class="app-topbar">
   <div class="app-topbar__primary">
@@ -111,7 +113,11 @@
     </div>
   </div>
 </header>
-<div id="left-panel" class="ops-rail">
+<div id="left-panel" class="ops-rail" data-panel-rail="left">
+  <div class="panel-rail-header">
+    <button type="button" class="panel-collapse-toggle" data-panel-collapse="left-panel" aria-expanded="true" aria-controls="left-panel" onclick="togglePanelRailCollapse('left-panel')" title="Collapse navigation">⟨</button>
+    <span class="panel-rail-header__title">Workspace</span>
+  </div>
   <section class="panel-section shell-nav-section">
     <div class="section-title">Navigation</div>
     <nav class="shell-nav-list" aria-label="Workspace routes">
@@ -199,7 +205,7 @@
   </section>
   <section class="panel-section" id="layers-section">
     <div class="section-title">Layers</div>
-    <div id="layer-toggles" class="panel-field"></div>
+    <div id="layer-toggles" class="panel-field" data-layer-toggle-taxonomy="Structure | Material families | Material laws"></div>
   </section>
 </div>
 <main id="stage-panel">
@@ -455,6 +461,10 @@
           <button type="button" class="viewport-tool-button" title="Plan view" aria-label="Plan view" aria-pressed="false" data-tooltip="Plan" data-viewport-tool="plan-view" data-viewport-view-preset="plan" onclick="setMidas33ViewPreset('plan')"><span class="viewport-tool-button__icon" aria-hidden="true">□</span><span class="viewport-tool-button__label">Plan</span></button>
           <button type="button" class="viewport-tool-button" title="Viewport extent" aria-label="Viewport extent" data-tooltip="Fit All" data-viewport-tool="fit-all" onclick="setMidas33ViewPreset('fit')"><span class="viewport-tool-button__icon" aria-hidden="true">⤢</span><span class="viewport-tool-button__label">Fit</span></button>
           <button type="button" class="viewport-tool-button" title="Viewport home" aria-label="Viewport home" data-tooltip="Reset" data-viewport-tool="reset-view" onclick="resetCamera()"><span class="viewport-tool-button__icon" aria-hidden="true">⌖</span><span class="viewport-tool-button__label">Reset</span></button>
+          <button type="button" class="viewport-tool-button" title="Toggle orthographic" aria-label="Toggle orthographic projection" data-tooltip="Ortho" data-viewport-tool="ortho-toggle" onclick="toggleOrthographicCamera()"><span class="viewport-tool-button__icon" aria-hidden="true">▣</span><span class="viewport-tool-button__label">Ortho</span></button>
+        </div>
+        <div class="viewport-tool-group" data-viewport-tool-group="quality" aria-label="Viewport quality">
+          <button type="button" class="viewport-tool-button" title="Cycle viewport quality" aria-label="Cycle viewport quality" data-tooltip="Quality" data-viewport-tool="quality-cycle" id="viewport-quality-toggle" onclick="cycleViewportVisualQuality()"><span class="viewport-tool-button__icon" aria-hidden="true">◆</span><span class="viewport-tool-button__label" id="viewport-quality-label">HQ</span></button>
         </div>
       </div>
     </div>
@@ -478,7 +488,11 @@
     </section>
   </section>
 </main>
-<div id="right-panel" class="insight-rail">
+<div id="right-panel" class="insight-rail" data-panel-rail="right">
+  <div class="panel-rail-header">
+    <button type="button" class="panel-collapse-toggle" data-panel-collapse="right-panel" aria-expanded="true" aria-controls="right-panel" onclick="togglePanelRailCollapse('right-panel')" title="Collapse insight rail">⟩</button>
+    <span class="panel-rail-header__title">Insight</span>
+  </div>
   <section class="panel-section panel-section--kpi">
     <div class="panel-header">
       <div>
@@ -746,14 +760,18 @@
   </div>
 </div>
 
-<script src="./index.data.js"></script>
 <script type="module">
 import * as THREE from './vendor/three.module.js';
 import {OrbitControls} from './vendor/OrbitControls.js';
 import {
   buildArtifactCandidates,
   getRequestedPreset,
+  normalizePresetToken,
   loadPresetSidecarIfNeeded,
+  getPresetSidecarPath,
+  resolvePresetModelPayload,
+  resolveRepoArtifactUrl,
+  loadEmbeddedDataScriptIfNeeded,
   readEmbeddedPayload,
 } from './viewer-data-loader.js';
 import {
@@ -765,6 +783,7 @@ import {
 } from './viewer-model-normalizer.js';
 import {
   buildDirectModelMeta,
+  buildMaterialCatalogSummary,
   sanitizeModelPayload,
   sanitizeModelPayloadAsync,
 } from './viewer-direct-model-normalizer.js';
@@ -780,6 +799,18 @@ import {
 import {
   createViewerRenderMeshBuilderToolkit,
 } from './viewer-render-mesh-builders.js';
+import {
+  createViewerVisualScene,
+} from './viewer-visual-scene.js';
+import {
+  ensureViewportHud,
+  updateViewportHudContext,
+  updateViewportHudReadout,
+  updateViewportHudScale,
+  updateInfoOverlay,
+  enhanceStageResultCalloutElement,
+} from './viewer-viewport-hud.js';
+import {separateCalloutAnchorRows} from './viewer-callout-layout.js';
 import {
   createViewerContourMaterialToolkit,
 } from './viewer-contour-materials.js';
@@ -976,11 +1007,28 @@ let workspaceState=resolveWorkspaceStateFromSearch(window.location.search,{
 workspaceState.manifest=projectManifest;
 window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__=workspaceState.viewerPreset||'';
 window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__=resolveWorkspaceArtifactCandidatePath(workspaceState.artifactPath);
+(function ensureDefaultWorkspaceUrl(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('project')||params.get('drawing')||params.get('preset')||params.get('model_preset')||params.get('artifact')||params.get('data'))return;
+  const url=buildWorkspaceUrl(window.location.href,{
+    manifest:projectManifest,
+    projectId:'midas33_release',
+    drawingId:'midas33_optimized',
+    variant:'optimized',
+  });
+  window.history.replaceState({},'',url);
+  workspaceState=resolveWorkspaceStateFromSearch(url.search,{manifest:projectManifest});
+  workspaceState.manifest=projectManifest;
+  window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__=workspaceState.viewerPreset||'';
+  window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__=resolveWorkspaceArtifactCandidatePath(workspaceState.artifactPath);
+})();
 let memberComparisonFilter=normalizeSelectionValue(workspaceState.overlay||workspaceState.comparisonFilter)||'changed';
 let commercialToolMapperProfile='auto';
 
 /* ── State ── */
-let scene,camera,renderer,controls,raycaster,mouse;
+let scene,camera,orthographicCamera,renderer,controls,raycaster,mouse;
+let visualScene=null;
+let useOrthographicCamera=false;
 let modelGroup,deformedGroup,analysisOverlayGroup,selectionFocusOverlayGroup,originalPositions=new Map();
 let elementMeshes=new Map(),selectedMesh=null;
 let instancedElementGroups=[],instancedElementRecordsByMemberId=new Map();
@@ -1087,6 +1135,7 @@ const selectionChannel=(()=>{
   try{return typeof BroadcastChannel==='function'?new BroadcastChannel(SHARED_SELECTION_KEY):null}catch(_err){return null}
 })();
 const COLORS={
+  // Structural members by type
   beam:0x38bdf8,column:0xf87171,wall:0x34d399,slab:0xfbbf24,brace:0xa78bfa,other:0x94a3b8,
   truss:0xc084fc,cable:0x60a5fa,rebar:0xa16207,girder:0x22d3ee,purlin:0x818cf8,
   joist:0x818cf8,tie:0xa78bfa,strut:0xd8b4fe,
@@ -1097,12 +1146,18 @@ const COLORS={
   isolator:0x06b6d4,damper:0x0891b2,
   mega_column:0xdc2626,spandrel:0xf97316,lintel:0xf97316,
   composite_beam:0x6366f1,src_column:0x4338ca,cft_column:0x4338ca,
+  // Composite truss (COMPTR) - distinct purple to show steel-concrete composite nature
+  comptr:0x8b5cf6,
   prestressing_tendon:0xeab308,anchor:0xca8a04,bolt:0xd97706,weld:0xb45309,
   friction_pendulum:0x14b8a6,lead_rubber_bearing:0x14b8a6,viscous_damper:0x0e7490,
   spring:0x06b6d4,link:0x06b6d4,rigid_link:0x06b6d4,lumped_mass:0xf43f5e,
   expansion_joint:0x8b5cf6,bearing:0xa855f7,pot_bearing:0xa855f7,spherical_bearing:0xa855f7,
   generic:0x94a3b8,unknown:0x64748b,soil:0x854d0e,rock:0x57534e,
   timber:0xa16207,masonry:0x78716c,cold_formed_steel:0x475569,frp_member:0x06b6d4,
+  // Material-family aware fallback colors for drawing handoff
+  material_concrete:0xf97316, material_steel:0x3b82f6, material_composite:0x8b5cf6,
+  material_rigid_link:0x06b6d4, material_rebar:0xa16207, material_timber:0x92400e,
+  material_soil:0x854d0e, material_masonry:0x78716c,
 };
 const INSTANCED_LINE_ELEMENT_THRESHOLD=400;
 const INSTANCED_SURFACE_ELEMENT_THRESHOLD=120;
@@ -1180,6 +1235,9 @@ const {
   createInstancedSurfaceGroupObjects,
   createLineElementRenderObjects,
   createSurfaceElementRenderObjects,
+  createSolidElementRenderObjects,
+  createCableElementRenderObjects,
+  createRebarElementRenderObjects,
 }=renderMeshBuilderToolkit;
 const renderPickingGeometryToolkit=createViewerRenderPickingGeometryToolkit(THREE,{
   contourSurfaceTessellationMin:CONTOUR_SURFACE_TESSELLATION_MIN,
@@ -1293,13 +1351,23 @@ function normalizeElementType(value){
   const t=String(value||'beam').trim().toLowerCase();
   return t||'beam';
 }
+// Check if an element has parseable real section dimensions so it should skip instancing
+// and render with actual cross-section geometry (H-beam, box, pipe) instead of simple tubes
+function elementHasDetailedSection(el){
+  const sectionLabel=String(el?.section||el?.section_label||'').trim();
+  if(!sectionLabel||sectionLabel==='--')return false;
+  // Match patterns like: H400x400x13x21, SB800X3002.00, P219.1x6.5, B400x400, RC300x400
+  const hasDims=/^(?:H|I|B|RC|SB|P|CHS|SHS|RHS|PIPE)?[\s]?\d+(?:\.\d+)?\s*[xX]\s*\d+(?:\.\d+)?/.test(sectionLabel);
+  return hasDims;
+}
+
 function getElementGeometryKind(type){
   const normalized=normalizeElementType(type);
   const lineTypes=new Set(['beam','column','brace','truss','cable','rebar','girder','purlin','joist','tie','strut','prestressing_tendon','anchor','bolt','weld','spring','link','rigid_link']);
   const surfaceTypes=new Set(['wall','slab','shell','roof','diaphragm','shear_wall','core_wall','retaining_wall','parapet','stairs','ramp','balcony','cold_formed_steel','masonry','frp_member','opening','void','opening_void']);
   const solidTypes=new Set(['footing','pile','mat','panel_zone','joint','isolator','damper','friction_pendulum','lead_rubber_bearing','viscous_damper','bearing','pot_bearing','spherical_bearing','lumped_mass','expansion_joint','generic','other','unknown']);
   const terrainTypes=new Set(['soil','rock','terrain']);
-  const compositeTypes=new Set(['composite_beam','src_column','cft_column']);
+  const compositeTypes=new Set(['comptr','composite_beam','src_column','cft_column']);
   if(lineTypes.has(normalized))return 'line';
   if(surfaceTypes.has(normalized))return 'surface';
   if(solidTypes.has(normalized))return 'solid';
@@ -1354,16 +1422,45 @@ function safeSessionStorageSet(key,value){
 function requestViewerRender(){
   viewerNeedsRender=true;
 }
+function syncVisualSelection(){
+  if(!visualScene)return;
+  const meshes=[];
+  if(selectedMesh?.isMesh)meshes.push(selectedMesh);
+  getDirectRenderableMeshes().forEach((mesh)=>{
+    if(mesh?.isMesh&&isSelectedElement(mesh.userData)&&!meshes.includes(mesh))meshes.push(mesh);
+  });
+  visualScene.updateSelectionOutline(meshes);
+}
+function refreshViewportHudFromModel(){
+  const meta=modelData?.meta||{};
+  const caseLabel=normalizeSelectionValue(meta.name||meta.project_id||workspaceState.viewerPreset)||'Structural model';
+  const modeLabel=renderMode==='contour'?'Contour results':renderMode==='wireframe'?'Wireframe':showDeformed?'Compare overlay':'Solid model';
+  updateViewportHudContext({
+    caseLabel,
+    modeLabel,
+    contourMode:renderMode==='contour',
+    contourUnit:'D/C ratio',
+  });
+  if(controls?.target){
+    updateViewportHudReadout({
+      x:controls.target.x,
+      y:controls.target.y,
+      z:controls.target.z,
+      selection:resolveSelectionMemberId(selectedElementData)||'',
+    });
+    const mpp=worldUnitsPerPixelAtPoint(controls.target);
+    if(Number.isFinite(mpp))updateViewportHudScale({metersPerPixel:mpp,label:`${Math.round(mpp*80)} m`});
+  }
+  const compass=document.querySelector('[data-viewport-compass]');
+  if(compass&&camera){
+    const yaw=Math.atan2(camera.position.x-controls.target.x,camera.position.z-controls.target.z);
+    compass.style.setProperty('--compass-rotation',`${-yaw*180/Math.PI}deg`);
+  }
+}
 function resolveWorkspaceArtifactCandidatePath(path=''){
   const raw=normalizeSelectionValue(path);
   if(!raw)return '';
-  if(raw.startsWith('implementation/')){
-    const base=window.location.pathname;
-    const depth=base.split('/').filter(Boolean).length;
-    const prefix='../'.repeat(Math.max(depth-1,2));
-    return`${prefix}${raw}`;
-  }
-  return raw;
+  return resolveRepoArtifactUrl(raw,window.location.href);
 }
 function syncWorkspaceResolvedGlobals(){
   window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__=workspaceState.viewerPreset||'';
@@ -1592,10 +1689,17 @@ function setViewerWorkflow(workflow='model',{targetId='',scroll=false}={}){
   });
   if(normalized==='drawings'){
     document.body.dataset.stageOverlayDensity='drawing-clean';
+    if(typeof closeIntegratedReviewNavigator==='function')closeIntegratedReviewNavigator();
     if(typeof setMidas33ViewPreset==='function')setMidas33ViewPreset('plan');
+    // Pause heavy 3D work while user focuses on drawings
+    isAnimating=false;
+    viewerNeedsRender=false;
   }else{
     document.body.dataset.stageOverlayDensity='analysis';
+    viewerNeedsRender=true;
   }
+  syncTechnicalViewportPresentation();
+  refreshViewportHudFromModel();
   const target=targetId?document.getElementById(targetId):null;
   if(scroll&&target)target.scrollIntoView({block:'start',inline:'nearest'});
 }
@@ -3799,6 +3903,8 @@ function clearSelection({publish=false}={}){
   selectedElementKeys.clear();
   selectedElementRecords.clear();
   clearSelectionFocusOverlay();
+  visualScene?.clearSelectionOutline?.();
+  updateInfoOverlay(null);
   refreshDirectMeshVisuals();
   refreshInstancedVisuals();
   renderSelectionPlaceholder();
@@ -3815,6 +3921,7 @@ function clearSelection({publish=false}={}){
   renderStageResultCallouts(lastAnalysisCockpitModel);
   renderStageCriticalHotspots(lastAnalysisCockpitModel);
   renderPanelZoneStageBadge(lastPanelZoneEvidenceModel);
+  refreshViewportHudFromModel();
 }
 function updateSelectionFromData(data,{mode='replace',publish=true}={}){
   if(!data||typeof data!=='object')return false;
@@ -3852,6 +3959,8 @@ function updateSelectionFromData(data,{mode='replace',publish=true}={}){
   }
   renderStageCriticalHotspots(lastAnalysisCockpitModel);
   renderPanelZoneStageBadge(lastPanelZoneEvidenceModel);
+  syncVisualSelection();
+  refreshViewportHudFromModel();
   return true;
 }
 function isSelectedElement(data){
@@ -4883,7 +4992,17 @@ function parseColorHex(value,fallback){
   return parseInt(raw.replace('#',''),16);
 }
 function resolveElementColor(el,type){
-  return parseColorHex(el?.color,COLORS[type]||COLORS.other);
+  // Priority 1: explicit element color
+  const explicit=parseColorHex(el?.color,null);
+  if(explicit!==null)return explicit;
+  // Priority 2: material-family aware color for composite/SRC elements
+  const materialFamily=normalizeSelectionValue(el?.material_family);
+  if(materialFamily){
+    const familyColor=COLORS[`material_${materialFamily}`];
+    if(familyColor)return familyColor;
+  }
+  // Priority 3: element-type fallback
+  return COLORS[type]||COLORS.other;
 }
 async function yieldToMainThread({message='',tone='neutral',ensurePaint=false,timeoutMs=32}={}){
   if(message)setLoadingMessage(message,tone);
@@ -5135,6 +5254,68 @@ async function hydrateMaterialMemberCatalogFromDirectArtifact(data,preset=''){
   }
   return data;
 }
+async function loadWorkspaceResolvedModelData(){
+  const workspacePreset=normalizePresetToken(workspaceState?.viewerPreset||'');
+  const workspaceArtifact=normalizeSelectionValue(window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__||'');
+  const hasWorkspace=Boolean(normalizeSelectionValue(workspaceState?.projectId)&&normalizeSelectionValue(workspaceState?.drawingId));
+  if(!hasWorkspace&&!workspacePreset&&!workspaceArtifact)return null;
+  if(workspacePreset){
+    setLoadingMessage(`Loading workspace model (${workspacePreset})...`);
+    try{
+      const presetPayload=await resolvePresetModelPayload(workspacePreset);
+      if(presetPayload?.payload){
+        const loadedAt=new Date().toISOString();
+        const resolvedPath=presetPayload.sourcePath||getPresetSidecarPath(workspacePreset)||workspaceArtifact||'';
+        const normalized=await normalizeLoadedPayload(presetPayload.payload,{
+          mode:'inline_preset',
+          label:presetPayload.label||workspaceState.drawingTitle||workspacePreset,
+          resolvedPath,
+          loadedAt,
+        });
+        if(normalized){
+          return{
+            data:normalized,
+            sourceMeta:{
+              mode:'inline_preset',
+              label:presetPayload.label||workspaceState.drawingTitle||workspacePreset,
+              resolvedPath,
+              loadedAt,
+            },
+          };
+        }
+      }
+    }catch(err){
+      initLog(`workspace preset ERROR ${err&&err.message||err}`);
+      console.warn(`[Viewer] Unable to resolve workspace preset ${workspacePreset}:`,err);
+    }
+  }
+  if(workspaceArtifact){
+    setLoadingMessage(`Loading workspace artifact: ${workspaceArtifact}...`);
+    try{
+      const result=await tryFetchArtifact(workspaceArtifact);
+      const normalized=await normalizeLoadedPayload(result.payload,{
+        mode:'artifact',
+        label:result.label,
+        resolvedPath:result.resolvedPath,
+        loadedAt:result.loadedAt,
+      });
+      if(normalized){
+        return{
+          data:normalized,
+          sourceMeta:{
+            mode:'artifact',
+            label:result.label,
+            resolvedPath:result.resolvedPath,
+            loadedAt:result.loadedAt,
+          },
+        };
+      }
+    }catch(err){
+      console.warn(`[Viewer] Unable to load workspace artifact ${workspaceArtifact}:`,err);
+    }
+  }
+  return null;
+}
 async function loadInitialModelData(){
   const runtimeIngestPayload=getRuntimeIngestRenderablePayload();
   if(runtimeIngestPayload&&isEvidenceIngestPreviewWorkspaceActive()){
@@ -5163,21 +5344,35 @@ async function loadInitialModelData(){
       console.warn('[Viewer] Unable to load local evidence ingest renderable payload:',err);
     }
   }
+  const workspaceInitial=await loadWorkspaceResolvedModelData();
+  if(workspaceInitial?.data){
+    const preset=getRequestedPreset();
+    if(preset){
+      try{
+        await loadPresetSidecarIfNeeded(preset);
+      }catch(err){
+        console.warn(`[Viewer] Unable to attach preset reference sidecar ${preset}:`,err);
+      }
+    }
+    await hydrateMaterialMemberCatalogFromDirectArtifact(workspaceInitial.data,preset);
+    return workspaceInitial;
+  }
   const preset=getRequestedPreset();
   const explicitPreset=normalizeSelectionValue(new URLSearchParams(window.location.search).get('preset')||new URLSearchParams(window.location.search).get('model_preset'));
   if(preset&&explicitPreset){
     setLoadingMessage(`Resolving preset payload: ${preset}...`);
     try{
-      const presetPayload=await loadPresetSidecarIfNeeded(preset);
-      if(presetPayload){
+      const presetPayload=await resolvePresetModelPayload(preset);
+      if(presetPayload?.payload){
         const loadedAt=new Date().toISOString();
+        const resolvedPath=presetPayload.sourcePath||getPresetSidecarPath(preset)||'';
         const normalized=await normalizeLoadedPayload(
           presetPayload.payload,
           {
             mode:'inline_preset',
             label:presetPayload.label||`preset ${preset}`,
-            resolvedPath:presetPayload.sourcePath||'',
-            loadedAt
+            resolvedPath,
+            loadedAt,
           }
         );
         if(normalized){
@@ -5186,20 +5381,29 @@ async function loadInitialModelData(){
             sourceMeta:{
               mode:'inline_preset',
               label:presetPayload.label||`preset ${preset}`,
-              resolvedPath:presetPayload.sourcePath||'',
-              loadedAt
-            }
+              resolvedPath,
+              loadedAt,
+            },
           };
         }
       }
     }catch(err){
-      console.warn(`[Viewer] Unable to resolve preset sidecar ${preset}:`,err);
+      console.warn(`[Viewer] Unable to resolve preset payload ${preset}:`,err);
     }
   }
   setLoadingMessage('Checking inline embedded JSON...');
+  console.log('[loadInitialModelData] Checking embedded payload...');
+  try{
+    await loadEmbeddedDataScriptIfNeeded();
+  }catch(err){
+    console.warn('[Viewer] Unable to load optional embedded data script:',err);
+  }
   const embedded=readEmbeddedPayload();
+  console.log('[loadInitialModelData] readEmbeddedPayload result:', embedded ? `found (${embedded.label})` : 'null');
   if(embedded){
+    console.log('[loadInitialModelData] Normalizing embedded payload...');
     const normalized=await normalizeLoadedPayload(embedded.payload,{mode:'inline',label:embedded.label,loadedAt:new Date().toISOString()});
+    console.log('[loadInitialModelData] normalizeLoadedPayload result:', normalized ? `success (nodes=${normalized.nodes?.length}, elements=${normalized.elements?.length})` : 'null');
     if(normalized){
       if(preset){
         try{
@@ -5344,11 +5548,18 @@ function init(){
   storyClipPadding=Math.max(0,clipState.padding);
   updateClearIsolateButton();
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x0a0e1a);
-  scene.fog=new THREE.FogExp2(0x0a0e1a,.003);
+  scene.background=new THREE.Color(0x060b12);
+  scene.fog=new THREE.FogExp2(0x060b12,.0025);
 
   camera=new THREE.PerspectiveCamera(50,vp.clientWidth/vp.clientHeight,.1,2000);
   camera.position.set(80,60,80);
+
+  // Orthographic camera for drawing-mode parallel projection
+  const viewSize=120;
+  const aspect=vp.clientWidth/vp.clientHeight;
+  orthographicCamera=new THREE.OrthographicCamera(-viewSize*aspect/2,viewSize*aspect/2,viewSize/2,-viewSize/2,.1,2000);
+  orthographicCamera.position.copy(camera.position);
+  orthographicCamera.lookAt(controls?.target||new THREE.Vector3(24,14,14));
 
   renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:"high-performance"});
   renderer.setSize(vp.clientWidth,vp.clientHeight);
@@ -5384,7 +5595,7 @@ function init(){
   const hemi=new THREE.HemisphereLight(0x87ceeb,0x362d1b,.3);
   scene.add(hemi);
 
-  // Grid
+  // Grid (legacy helpers hidden when visual scene infinite grid is active)
   const gridH=new THREE.GridHelper(200,40,0x1a2744,0x141e33);
   gridH.material.opacity=.4;gridH.material.transparent=true;
   scene.add(gridH);
@@ -5393,6 +5604,23 @@ function init(){
   scene.add(gridHSub);
   const axesH=new THREE.AxesHelper(15);
   scene.add(axesH);
+
+  ensureViewportHud(vp);
+  visualScene=createViewerVisualScene(THREE,{
+    renderer,
+    scene,
+    camera,
+    orthographicCamera,
+    controls,
+    viewportEl:vp,
+    getActiveCamera:()=>camera,
+    getUseOrthographic:()=>useOrthographicCamera,
+    requestRender:requestViewerRender,
+  });
+  const savedQuality=safeSessionStorageGet('structure-viewer-visual-quality')||'high';
+  visualScene.setQuality(savedQuality);
+  controls.addEventListener('change',refreshViewportHudFromModel);
+  refreshViewportHudFromModel();
 
   raycaster=new THREE.Raycaster();
   mouse=new THREE.Vector2();
@@ -5421,6 +5649,7 @@ function init(){
   selectionFocusOverlayGroup=new THREE.Group();
   selectionFocusOverlayGroup.name='selected-member-focus-overlays';
   scene.add(selectionFocusOverlayGroup);
+  restorePanelRailCollapseState();
 }
 
 /* ── Build Model ── */
@@ -5643,10 +5872,13 @@ async function buildModel(data,sourceMeta=null){
     };
   updateSelectionControls();
   const lineElements=[];
+  const detailedLineElements=[];
   const surfaceElements=[];
   await processInChunks(data.elements,el=>{
     const ns=Array.isArray(el.node_ids)?el.node_ids:[];
-    if(ns.length===2)lineElements.push(el);else surfaceElements.push(el);
+    if(ns.length===2){
+      if(elementHasDetailedSection(el))detailedLineElements.push(el);else lineElements.push(el);
+    }else surfaceElements.push(el);
   },{
     chunkSize:LARGE_MODEL_BUILD_CHUNK_SIZE,
     progressLabel:'Preparing render batches',
@@ -5677,7 +5909,7 @@ async function buildModel(data,sourceMeta=null){
   const elementsToBuild=[];
   await processInChunks(data.elements,el=>{
     const ns=Array.isArray(el.node_ids)?el.node_ids:[];
-    if(useLineInstancing&&ns.length===2)return;
+    if(useLineInstancing&&ns.length===2&&!elementHasDetailedSection(el))return;
     elementsToBuild.push(el);
   },{
     chunkSize:LARGE_MODEL_BUILD_CHUNK_SIZE,
@@ -5736,6 +5968,9 @@ async function buildModel(data,sourceMeta=null){
   updateProvenanceBlock();
   if(initialSelection.memberId)selectMeshBySharedMemberId(initialSelection.memberId);
   updateProvenanceBlock();
+  visualScene?.applyEnvironmentToModel?.(modelGroup);
+  syncTechnicalViewportPresentation();
+  refreshViewportHudFromModel();
 }
 
 /* ── UI Builders ── */
@@ -6734,12 +6969,16 @@ function classifyFallbackMaterialFamily(row={}){
 function inferFallbackMaterialFamily(row={}){
   return classifyFallbackMaterialFamily(row).family;
 }
-function buildFallbackMaterialRowsFromElements(elements=[]){
+function buildFallbackMaterialRowsFromElements(elements=[],materials=[]){
+  const materialById=new Map((Array.isArray(materials)?materials:[])
+    .map(m=>[normalizeSelectionValue(m?.id??m?.material_id),m])
+    .filter(([id])=>Boolean(id)));
   const rowsByKey=new Map();
   (Array.isArray(elements)?elements:[]).forEach(element=>{
     const materialId=normalizeSelectionValue(element?.material_id);
-    const materialName=normalizeSelectionValue(element?.material_name||element?.material||element?.material_label);
-    const materialGrade=normalizeSelectionValue(element?.material_grade);
+    const materialFromCatalog=materialId?materialById.get(materialId):null;
+    const materialName=normalizeSelectionValue(element?.material_name||element?.material||element?.material_label||materialFromCatalog?.name||materialFromCatalog?.material_name);
+    const materialGrade=normalizeSelectionValue(element?.material_grade||materialFromCatalog?.grade||materialFromCatalog?.material_grade);
     const key=materialId||materialName||materialGrade;
     if(!key)return;
     const classification=classifyFallbackMaterialFamily({
@@ -7181,7 +7420,7 @@ function buildMaterialStressStrainCurvesModel(constitutiveLens={}){
 function buildMaterialMemberCatalogPanelModel(data=modelData||{}){
   const meta=data?.meta&&typeof data.meta==='object'?data.meta:{};
   const metaMaterialRows=Array.isArray(meta.material_catalog_summary)?meta.material_catalog_summary:[];
-  const fallbackRows=metaMaterialRows.length?[]:buildFallbackMaterialRowsFromElements(data?.elements||[]);
+  const fallbackRows=metaMaterialRows.length?[]:buildFallbackMaterialRowsFromElements(data?.elements||[],data?.materials||[]);
   const materialRows=(metaMaterialRows.length?metaMaterialRows:fallbackRows).map(row=>{
     const materialName=normalizeSelectionValue(row.material_name)||'Material';
     const materialGrade=normalizeSelectionValue(row.material_grade)||'--';
@@ -7242,8 +7481,17 @@ function buildMaterialMemberCatalogPanelModel(data=modelData||{}){
   const materialCount=Math.max(0,Math.round(safeNumber(meta.material_count,materialRows.length)));
   const usedMaterialCount=Math.max(0,Math.round(safeNumber(meta.used_material_count,materialRows.filter(row=>row.usage_count>0).length)));
   const missingMaterialCount=materialRows.filter(row=>row.source_status==='missing_material_definition').length;
-  const materialFamilyCount=Math.max(0,Math.round(safeNumber(meta.material_family_count,materialFamilyCoverageRows.length)));
-  const knownMaterialFamilyCount=Math.max(0,Math.round(safeNumber(meta.known_material_family_count,materialFamilyCoverageRows.filter(row=>row.family!=='unclassified').length)));
+  const resolvedMaterialFamilyCount=materialFamilyCoverageRows.length||new Set(materialRows.map(row=>row.material_family).filter(Boolean)).size;
+  const resolvedKnownMaterialFamilyCount=materialFamilyCoverageRows.filter(row=>row.family&&row.family!=='unclassified').length
+    ||new Set(materialRows.map(row=>row.material_family).filter(family=>family&&family!=='unclassified')).size;
+  const materialFamilyCount=Math.max(
+    resolvedMaterialFamilyCount,
+    Math.max(0,Math.round(safeNumber(meta.material_family_count,0)))
+  );
+  const knownMaterialFamilyCount=Math.max(
+    resolvedKnownMaterialFamilyCount,
+    Math.max(0,Math.round(safeNumber(meta.known_material_family_count,0)))
+  );
   const unclassifiedMaterialCount=Math.max(0,Math.round(safeNumber(meta.unclassified_material_count,materialRows.filter(row=>row.material_family==='unclassified').length)));
   const materialFamilyOntologyCount=Math.max(
     MATERIAL_FAMILY_ONTOLOGY.length,
@@ -10066,6 +10314,7 @@ function renderStageResultCallouts(cockpitModel=null){
       focusMemberSearchResult(button.getAttribute('data-stage-callout-focus-member')||'');
     });
   });
+  callouts.forEach((node)=>enhanceStageResultCalloutElement(node));
   syncCriticalMemberReviewFocus();
   positionStageResultCalloutAnchors();
   renderStageCriticalHotspots(cockpitModel||lastAnalysisCockpitModel);
@@ -10388,7 +10637,10 @@ function positionStageResultCalloutAnchors(){
   const layer=document.getElementById('stage-result-callout-anchors');
   const panel=document.getElementById('stage-result-callouts');
   if(!(layer instanceof HTMLElement)||!(panel instanceof HTMLElement))return;
-  const rows=buildStageResultCalloutAnchorRows();
+  const vp=document.getElementById('viewport');
+  const viewportRect=vp?.getBoundingClientRect?.()||{width:800,height:600};
+  let rows=buildStageResultCalloutAnchorRows();
+  rows=separateCalloutAnchorRows(rows,viewportRect);
   const projectedCount=rows.filter(row=>row.projection==='projected').length;
   const edgePinnedCount=rows.filter(row=>row.projection==='edge-pinned').length;
   const semanticCount=rows.filter(row=>row.projection==='semantic').length;
@@ -17406,10 +17658,14 @@ function setDrawingHandoffActiveSheet(sheetName=''){
       }))
       :[];
   }
-  const sheetForceOverlay=panel.querySelector('[data-drawing-sheet-force-overlay]');
-  if(sheetForceOverlay instanceof HTMLElement){
-    sheetForceOverlay.setAttribute('data-drawing-sheet-force-overlay-active-sheet',sheetData.sheetName);
-    sheetForceOverlay.setAttribute('data-drawing-sheet-force-overlay-selected-member',sheetData.member);
+	  const sheetForceOverlay=panel.querySelector('[data-drawing-sheet-force-overlay]');
+	  if(sheetForceOverlay instanceof HTMLElement){
+	    sheetForceOverlay.setAttribute('data-drawing-sheet-force-overlay-active-sheet',sheetData.sheetName);
+	    const forceSelectedMember=normalizeSelectionValue(sheetForceOverlay.getAttribute('data-drawing-sheet-force-overlay-selected-member'))
+	      ||normalizeSelectionValue(window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__?.selectedMemberId)
+	      ||normalizeSelectionValue(window.__STRUCTURE_VIEWER_LOAD_COMBINATION_FORCE_MATRIX_STATE__?.selectedMemberId)
+	      ||sheetData.member;
+	    sheetForceOverlay.setAttribute('data-drawing-sheet-force-overlay-selected-member',forceSelectedMember);
     const vectorRows=sheetForceOverlay.querySelectorAll('[data-drawing-sheet-force-overlay-row]');
     if(vectorRows.length)sheetForceOverlay.setAttribute('data-drawing-sheet-force-overlay-row-count',String(vectorRows.length));
     const vectors=sheetForceOverlay.querySelectorAll('[data-drawing-sheet-force-overlay-vector]');
@@ -17429,11 +17685,14 @@ function setDrawingHandoffActiveSheet(sheetName=''){
     const revLabel=sheetForceOverlay.querySelector('.drawing-sheet-force-overlay__rev-label');
     if(revLabel)revLabel.textContent=`${sheetData.revision} · ${sheetData.callout}`;
   }
-  if(window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__){
-    window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.activeSheet=sheetData.sheetName;
-    window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.revision=sheetData.revision;
-    window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.calloutId=sheetData.callout;
-    window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.selectedDrawingMember=sheetData.member;
+	  if(window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__){
+	    window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.activeSheet=sheetData.sheetName;
+	    window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.revision=sheetData.revision;
+	    window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.calloutId=sheetData.callout;
+	    window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.selectedDrawingMember=sheetData.member;
+	    window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.selectedMemberId=normalizeSelectionValue(window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.selectedMemberId)
+	      ||normalizeSelectionValue(window.__STRUCTURE_VIEWER_LOAD_COMBINATION_FORCE_MATRIX_STATE__?.selectedMemberId)
+	      ||sheetData.member;
     window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.rows=Array.isArray(window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.rows)
       ?window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__.rows.map(row=>({
         ...row,
@@ -18053,6 +18312,10 @@ function renderReportExportPanel(){
   });
 }
 function buildUI(data){
+  // Debug: log data state for material/layer troubleshooting
+  console.log('[buildUI] data.meta?.material_catalog_summary:', data.meta?.material_catalog_summary?.length || 0);
+  console.log('[buildUI] data.materials:', data.materials?.length || 0);
+  console.log('[buildUI] data.elements:', data.elements?.length || 0);
   // Model tree
   const tree=document.getElementById('model-tree');
   const types={};
@@ -18116,8 +18379,15 @@ function buildUI(data){
       );
     });
   }
-  const materialCatalogSummary=Array.isArray(data.meta?.material_catalog_summary)?data.meta.material_catalog_summary:[];
-  const materialLayerRows=materialCatalogSummary.length?materialCatalogSummary:buildFallbackMaterialRowsFromElements(data.elements||[]);
+  let materialCatalogSummary=Array.isArray(data.meta?.material_catalog_summary)?data.meta.material_catalog_summary:[];
+  if(!materialCatalogSummary.length&&Array.isArray(data.materials)&&data.materials.length){
+    try{
+      materialCatalogSummary=buildMaterialCatalogSummary(data.materials,data.elements||[],data.meta||{});
+    }catch(err){
+      console.warn('[buildUI] buildMaterialCatalogSummary failed:',err);
+    }
+  }
+  const materialLayerRows=materialCatalogSummary.length?materialCatalogSummary:buildFallbackMaterialRowsFromElements(data.elements||[],data.materials||[]);
   const materialModelLayerRows=materialLayerRows.map(row=>{
     const defaults=resolveMaterialConstitutiveDefaults(row);
     const materialId=normalizeSelectionValue(row.material_id);
@@ -18324,7 +18594,7 @@ function onMouseClick(e){
   const rect=renderer.domElement.getBoundingClientRect();
   mouse.x=((e.clientX-rect.left)/rect.width)*2-1;
   mouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
-  raycaster.setFromCamera(mouse,camera);
+  raycaster.setFromCamera(mouse,window.camera||camera);
   const isMultiSelect=Boolean(e.ctrlKey||e.metaKey);
   const acceleratedHit=pickLargeModelRecord(raycaster.ray);
   if(acceleratedHit){
@@ -18431,6 +18701,10 @@ function showProperties(d,{publish=true}={}){
   renderStageResultCallouts(lastAnalysisCockpitModel);
   renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
   syncCriticalMemberReviewFocus();
+  const dcrTone=displayDcr>=1?'danger':displayDcr>=0.9?'warn':'neutral';
+  updateInfoOverlay(d,{dcr:displayDcr,tone:dcrTone});
+  syncVisualSelection();
+  refreshViewportHudFromModel();
   auditWorkspaceEvent('member_selected','selection updated',resolveSelectionMemberId(d));
 }
 
@@ -18443,6 +18717,8 @@ function setRenderMode(mode){
   document.getElementById('legend-container').style.display=getViewerLegendDisplayForRenderMode(renderMode);
   syncViewportToolRailState();
   updateRenderMode();
+  refreshViewportHudFromModel();
+  syncTechnicalViewportPresentation();
 }
 function syncViewportToolRailState(){
   const rail=document.getElementById('viewport-tool-rail');
@@ -18592,7 +18868,14 @@ function updateRenderMode(){
   rebuildPickTargetMeshes();
   renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
   syncStageReviewControls();
+  syncTechnicalViewportPresentation();
   requestViewerRender();
+}
+function syncTechnicalViewportPresentation(){
+  if(!visualScene||!modelGroup)return;
+  const technical=document.body.dataset.viewerWorkflow==='drawings'||Boolean(visualScene.state?.technicalDrawing);
+  visualScene.setTechnicalDrawingMode?.(technical);
+  visualScene.rebuildTechnicalEdges?.(modelGroup);
 }
 function applyContour(){
   if(!modelData)return;
@@ -19037,7 +19320,21 @@ function fitAll(){
   const center=box.getCenter(new THREE.Vector3());
   const size=box.getSize(new THREE.Vector3());
   const radius=Math.max(size.x,size.y,size.z,1);
-  camera.position.copy(center).add(new THREE.Vector3(radius*.72,radius*.58,radius*.72));
+  const targetPosition=center.clone().add(new THREE.Vector3(radius*.72,radius*.58,radius*.72));
+  camera.position.copy(targetPosition);
+  if(orthographicCamera){
+    orthographicCamera.position.copy(targetPosition);
+    orthographicCamera.lookAt(center);
+    // Match orthographic zoom to perspective view
+    const distance=camera.position.distanceTo(center);
+    const fov=THREE.MathUtils.degToRad(safeNumber(camera.fov,50));
+    const viewHeight=2*Math.tan(fov/2)*distance;
+    orthographicCamera.top=viewHeight/2;
+    orthographicCamera.bottom=-viewHeight/2;
+    orthographicCamera.left=-(viewHeight*camera.aspect)/2;
+    orthographicCamera.right=(viewHeight*camera.aspect)/2;
+    orthographicCamera.updateProjectionMatrix();
+  }
   controls.target.copy(center);controls.update();
   defaultView={position:camera.position.clone(),target:center.clone()};
   requestViewerRender();
@@ -19068,15 +19365,49 @@ function setViewerCameraPose({position,target,up}={}){
     const nextUp=new THREE.Vector3(up.x,up.y,up.z);
     if(Number.isFinite(nextUp.x)&&Number.isFinite(nextUp.y)&&Number.isFinite(nextUp.z)&&nextUp.lengthSq()>1e-6){
       camera.up.copy(nextUp.normalize());
+      if(orthographicCamera)orthographicCamera.up.copy(camera.up);
     }
   }
   camera.position.copy(nextPosition);
+  if(orthographicCamera){
+    orthographicCamera.position.copy(nextPosition);
+    orthographicCamera.lookAt(nextTarget);
+  }
   controls.target.copy(nextTarget);
   camera.lookAt(nextTarget);
   controls.update();
   defaultView={position:camera.position.clone(),target:controls.target.clone()};
   requestViewerRender();
   return true;
+}
+function toggleOrthographicCamera(){
+  if(!camera||!orthographicCamera||!controls)return;
+  useOrthographicCamera=!useOrthographicCamera;
+  if(useOrthographicCamera){
+    // Sync orthographic camera to current perspective state
+    orthographicCamera.position.copy(camera.position);
+    orthographicCamera.up.copy(camera.up);
+    orthographicCamera.lookAt(controls.target);
+    const distance=camera.position.distanceTo(controls.target);
+    const fov=THREE.MathUtils.degToRad(safeNumber(camera.fov,50));
+    const viewHeight=2*Math.tan(fov/2)*distance;
+    orthographicCamera.top=viewHeight/2;
+    orthographicCamera.bottom=-viewHeight/2;
+    orthographicCamera.left=-(viewHeight*camera.aspect)/2;
+    orthographicCamera.right=(viewHeight*camera.aspect)/2;
+    orthographicCamera.updateProjectionMatrix();
+    controls.object=orthographicCamera;
+    window.camera=orthographicCamera;
+  }else{
+    camera.position.copy(orthographicCamera.position);
+    camera.up.copy(orthographicCamera.up);
+    camera.lookAt(controls.target);
+    controls.object=camera;
+    window.camera=camera;
+  }
+  controls.update();
+  syncTechnicalViewportPresentation();
+  requestViewerRender();
 }
 let activeMidas33ViewPreset='';
 function updateMidas33ViewPresetButtons(){
@@ -19110,7 +19441,7 @@ function setMidas33ViewPreset(preset='review'){
 function applyDefaultViewPreset(){
   updateMidas33ViewToolbarVisibility();
   if(isMidas33PresetActive()){
-    setMidas33ViewPreset('review');
+    setMidas33ViewPreset(document.body?.dataset?.viewerWorkflow==='drawings'?'plan':'review');
   }
 }
 function startNewReviewRun(){
@@ -19141,6 +19472,10 @@ function startNewReviewRun(){
 }
 function resetCamera(){
   camera.position.copy(defaultView.position);
+  if(orthographicCamera){
+    orthographicCamera.position.copy(defaultView.position);
+    orthographicCamera.lookAt(defaultView.target);
+  }
   controls.target.copy(defaultView.target);
   controls.update();
   requestViewerRender();
@@ -19152,12 +19487,62 @@ function animate(){
   requestAnimationFrame(animate);
   if(controls.update())requestViewerRender();
   const dt = clock.getDelta();
-  if(isAnimating && showDeformed) {
+  const isDrawingMode=document.body.dataset.viewerWorkflow==='drawings';
+  if(isAnimating && showDeformed && !isDrawingMode) {
     animTime += dt;
     rebuildDeformed();
   }
   const nowMs=performance.now();
-  if(viewerNeedsRender||isAnimating||nowMs-lastRenderAt>=STATIC_RENDER_REFRESH_MS){
+  const refreshMs=isDrawingMode?5000:STATIC_RENDER_REFRESH_MS;
+  if(viewerNeedsRender||isAnimating||nowMs-lastRenderAt>=refreshMs){
+    if(!isDrawingMode){
+      positionViewportSelectionFocusBadge();
+      positionStageStoryRuler();
+      positionStageDriftBands();
+      positionStageStoryForceFlowBands();
+      positionStageLoadSupportGlyphs();
+      positionStageLoadCombinationForceGlyphs();
+      positionStageForceDemandContour();
+      positionStageMaterialModelDemandBadges();
+      positionStageMaterialForceRibbons();
+      positionStageMaterialForceEnvelope();
+      positionStageMaterialCapacityEnvelope();
+      positionStageMemberForcePlaybackTrail();
+      positionStageMemberForceVectorField();
+      positionStageMemberMaterialStateBadge();
+      positionStageResultCalloutAnchors();
+      positionStageCriticalHotspots();
+      positionPanelZoneStageBadge();
+    }
+    if(visualScene)visualScene.renderFrame();
+    else renderer.render(scene,useOrthographicCamera?orthographicCamera:camera);
+    viewerNeedsRender=false;
+    lastRenderAt=nowMs;
+  }
+  frameCount++;
+  const now=Date.now();
+  if(now-lastFpsTime>=1000){
+    document.getElementById('fps-counter').textContent=`FPS: ${frameCount}`;
+    frameCount=0;lastFpsTime=now;
+  }
+}
+function onResize(){
+  const vp=document.getElementById('viewport');
+  const aspect=vp.clientWidth/vp.clientHeight;
+  camera.aspect=aspect;
+  camera.updateProjectionMatrix();
+  if(orthographicCamera){
+    const viewSize=(orthographicCamera.top-orthographicCamera.bottom)||120;
+    orthographicCamera.left=-viewSize*aspect/2;
+    orthographicCamera.right=viewSize*aspect/2;
+    orthographicCamera.top=viewSize/2;
+    orthographicCamera.bottom=-viewSize/2;
+    orthographicCamera.updateProjectionMatrix();
+  }
+  renderer.setSize(vp.clientWidth,vp.clientHeight);
+  visualScene?.onResize?.(vp.clientWidth,vp.clientHeight);
+  const isDrawingMode=document.body.dataset.viewerWorkflow==='drawings';
+  if(!isDrawingMode){
     positionViewportSelectionFocusBadge();
     positionStageStoryRuler();
     positionStageDriftBands();
@@ -19175,43 +19560,68 @@ function animate(){
     positionStageResultCalloutAnchors();
     positionStageCriticalHotspots();
     positionPanelZoneStageBadge();
-    renderer.render(scene,camera);
-    viewerNeedsRender=false;
-    lastRenderAt=nowMs;
   }
-  frameCount++;
-  const now=Date.now();
-  if(now-lastFpsTime>=1000){
-    document.getElementById('fps-counter').textContent=`FPS: ${frameCount}`;
-    frameCount=0;lastFpsTime=now;
-  }
-}
-function onResize(){
-  const vp=document.getElementById('viewport');
-  camera.aspect=vp.clientWidth/vp.clientHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(vp.clientWidth,vp.clientHeight);
-  positionViewportSelectionFocusBadge();
-  positionStageStoryRuler();
-  positionStageDriftBands();
-  positionStageStoryForceFlowBands();
-  positionStageLoadSupportGlyphs();
-  positionStageLoadCombinationForceGlyphs();
-  positionStageForceDemandContour();
-  positionStageMaterialModelDemandBadges();
-  positionStageMaterialForceRibbons();
-  positionStageMaterialForceEnvelope();
-  positionStageMaterialCapacityEnvelope();
-  positionStageMemberForcePlaybackTrail();
-  positionStageMemberForceVectorField();
-  positionStageMemberMaterialStateBadge();
-  positionStageResultCalloutAnchors();
-  positionStageCriticalHotspots();
-  positionPanelZoneStageBadge();
   requestViewerRender();
 }
 
 /* ── Expose to window ── */
+function syncLegacyViewportGlobals(){
+  Object.defineProperties(window,{
+    THREE:{value:THREE,writable:true,configurable:true},
+    scene:{value:scene,writable:true,configurable:true},
+    camera:{value:camera,writable:true,configurable:true},
+    renderer:{value:renderer,writable:true,configurable:true},
+    controls:{value:controls,writable:true,configurable:true},
+    raycaster:{value:raycaster,writable:true,configurable:true},
+    mouse:{value:mouse,writable:true,configurable:true},
+    modelGroup:{value:modelGroup,writable:true,configurable:true},
+    selectedMesh:{value:selectedMesh,writable:true,configurable:true},
+  });
+}
+syncLegacyViewportGlobals();
+window.requestViewerRender=requestViewerRender;
+function cycleViewportVisualQuality(){
+  const order=['low','medium','high'];
+  const current=visualScene?.state?.quality||'high';
+  const next=order[(order.indexOf(current)+1)%order.length];
+  visualScene?.setQuality?.(next);
+  safeSessionStorageSet('structure-viewer-visual-quality',next);
+  const label=document.getElementById('viewport-quality-label');
+  if(label)label.textContent=next==='low'?'Lo':next==='medium'?'Med':'HQ';
+  syncVisualSelection();
+  requestViewerRender();
+}
+window.cycleViewportVisualQuality=cycleViewportVisualQuality;
+function togglePanelRailCollapse(panelId=''){
+  const panel=document.getElementById(panelId);
+  const app=document.getElementById('app');
+  if(!(panel instanceof HTMLElement))return;
+  const collapsed=panel.classList.toggle('is-collapsed');
+  const toggle=panel.querySelector('[data-panel-collapse]');
+  if(toggle instanceof HTMLElement){
+    toggle.setAttribute('aria-expanded',collapsed?'false':'true');
+    toggle.textContent=collapsed?(panelId==='left-panel'?'⟩':'⟨'):(panelId==='left-panel'?'⟨':'⟩');
+  }
+  if(app instanceof HTMLElement){
+    if(panelId==='left-panel')app.dataset.leftRailCollapsed=collapsed?'true':'false';
+    if(panelId==='right-panel')app.dataset.rightRailCollapsed=collapsed?'true':'false';
+  }
+  safeSessionStorageSet(`structure-viewer-panel-${panelId}`,collapsed?'collapsed':'expanded');
+  requestViewerRender();
+  onResize();
+}
+function restorePanelRailCollapseState(){
+  ['left-panel','right-panel'].forEach(panelId=>{
+    const stored=safeSessionStorageGet(`structure-viewer-panel-${panelId}`);
+    if(stored!=='collapsed')return;
+    const panel=document.getElementById(panelId);
+    if(!(panel instanceof HTMLElement)||panel.classList.contains('is-collapsed'))return;
+    togglePanelRailCollapse(panelId);
+  });
+}
+window.togglePanelRailCollapse=togglePanelRailCollapse;
+window.buildModel=buildModel;
+window.generateDemoModel=generateDemoModel;
 window.setRenderMode=setRenderMode;
 window.toggleDeformed=toggleDeformed;
 window.toggleAnimation=toggleAnimation;
@@ -19405,6 +19815,7 @@ window.addEventListener('popstate',()=>{
 
 /* ── Main ── */
 init();
+syncLegacyViewportGlobals();
 try{
   const initial=await loadInitialModelData();
   if(getModelRecordCount(initial.data)>NORMALIZATION_CHUNK_SIZE){
@@ -19448,6 +19859,197 @@ function updateFps(){
 }
 const origAnimate=animate;
 animate=function(){updateFps();origAnimate();};
+
+/* ── Drawing File Loader ──
+   The drawing catalog is the single source of truth at ./drawings/manifest.json.
+   These defaults are only a fallback if the manifest cannot be fetched. */
+const DRAWING_CATALOG_URL='./drawings/manifest.json';
+let DRAWING_FILE_MAP = {
+  midas33: 'implementation/phase1/open_data/midas/midas_generator_33.json',
+  midas33_pr: 'implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json',
+  midas33_optimized: 'implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json',
+  real_drawing: 'implementation/phase1/release/visualization/structural_optimization_viewer.json',
+  demo: null,
+};
+
+async function loadDrawingCatalog(){
+  try{
+    const response=await fetch(DRAWING_CATALOG_URL,{cache:'no-store'});
+    if(!response.ok)throw new Error(`HTTP ${response.status}`);
+    const manifest=await response.json();
+    const drawings=Array.isArray(manifest?.drawings)?manifest.drawings:[];
+    if(!drawings.length)return;
+    const nextMap={};
+    drawings.forEach(entry=>{
+      const id=normalizeSelectionValue(entry?.id);
+      if(!id)return;
+      nextMap[id]=entry?.artifact||null;
+      const preset=normalizeSelectionValue(entry?.preset);
+      if(preset&&entry?.artifact)nextMap[preset]=entry.artifact;
+    });
+    DRAWING_FILE_MAP=nextMap;
+    const select=document.getElementById('drawing-file-select');
+    if(select){
+      const current=select.value;
+      select.innerHTML='<option value="">-- Select Drawing --</option>';
+      drawings.forEach(entry=>{
+        const id=normalizeSelectionValue(entry?.id);
+        if(!id)return;
+        const option=document.createElement('option');
+        option.value=id;
+        option.textContent=entry?.label||id;
+        select.appendChild(option);
+      });
+      if(current&&Array.from(select.options).some(o=>o.value===current))select.value=current;
+    }
+  }catch(err){
+    console.warn('[Viewer] Unable to load drawing catalog manifest; using built-in defaults.',err);
+  }
+}
+
+function resolveDrawingArtifactPath(preset=''){
+  const key=normalizePresetToken(preset)||normalizeSelectionValue(preset);
+  const raw=DRAWING_FILE_MAP[key]||DRAWING_FILE_MAP[preset];
+  if(!raw)return '';
+  if(raw.startsWith('implementation/'))return resolveWorkspaceArtifactCandidatePath(raw);
+  return raw;
+}
+
+async function loadPresetDrawingModel(preset=''){
+  const normalized=normalizePresetToken(preset)||normalizeSelectionValue(preset);
+  if(!normalized)throw new Error('missing preset');
+  if(normalized==='demo'){
+    const demoData=window.generateDemoModel?.();
+    if(!demoData)throw new Error('demo model unavailable');
+    await window.buildModel?.(demoData,{mode:'demo',label:'Demo Model'});
+    return;
+  }
+  const presetPayload=await resolvePresetModelPayload(normalized);
+  const loadedAt=new Date().toISOString();
+  const resolvedPath=presetPayload.sourcePath||getPresetSidecarPath(normalized)||resolveDrawingArtifactPath(normalized)||'';
+  const model=await normalizeLoadedPayload(presetPayload.payload,{
+    mode:presetPayload.sourcePath?.includes('implementation/')?'artifact':'inline_preset',
+    label:presetPayload.label||normalized,
+    resolvedPath,
+    loadedAt,
+  });
+  if(!model)throw new Error('invalid model payload');
+  await hydrateMaterialMemberCatalogFromDirectArtifact(model,normalized);
+  await window.buildModel?.(model,{
+    mode:presetPayload.sourcePath?.includes('implementation/')?'artifact':'inline_preset',
+    label:presetPayload.label||normalized,
+    resolvedPath,
+    loadedAt,
+  });
+}
+
+async function loadDrawingFile(preset) {
+  if (!preset) return;
+  showLoadingIndicator(`Loading ${preset}...`);
+  try {
+    await loadPresetDrawingModel(preset);
+    hideLoadingIndicator();
+  } catch (err) {
+    console.error('[Viewer] Failed to load drawing file:', err);
+    hideLoadingIndicator();
+    alert(`Failed to load ${preset}: ${err.message}`);
+  }
+}
+
+async function loadCustomJson() {
+  const urlInput = document.getElementById('custom-json-url');
+  const url = urlInput?.value?.trim();
+  if (!url) {
+    alert('Please enter a JSON URL or path');
+    return;
+  }
+  showLoadingIndicator(`Loading ${url}...`);
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    await window.buildModel?.(data, { mode: 'custom', label: url, resolvedPath: url });
+    hideLoadingIndicator();
+  } catch (err) {
+    console.error('[Viewer] Failed to load custom JSON:', err);
+    hideLoadingIndicator();
+    alert(`Failed to load ${url}: ${err.message}`);
+  }
+}
+
+async function handleFileSelect(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  showLoadingIndicator(`Loading ${file.name}...`);
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    await window.buildModel?.(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
+    hideLoadingIndicator();
+  } catch (err) {
+    console.error('[Viewer] Failed to load file:', err);
+    hideLoadingIndicator();
+    alert(`Failed to load ${file.name}: ${err.message}`);
+  }
+}
+
+function showLoadingIndicator(message = 'Loading...') {
+  let el = document.getElementById('loading-indicator');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loading-indicator';
+    el.className = 'loading-indicator';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `
+    <div class="loading-indicator__spinner"></div>
+    <div class="loading-indicator__text">${message}</div>
+  `;
+  el.style.display = 'flex';
+}
+
+function hideLoadingIndicator() {
+  const el = document.getElementById('loading-indicator');
+  if (el) el.style.display = 'none';
+}
+
+function setupFileDropZone() {
+  const dropZone = document.getElementById('file-drop-zone');
+  if (!dropZone) return;
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('drag-over');
+  });
+  dropZone.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) return;
+    showLoadingIndicator(`Loading ${file.name}...`);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      await window.buildModel?.(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
+      hideLoadingIndicator();
+    } catch (err) {
+      console.error('[Viewer] Failed to load dropped file:', err);
+      hideLoadingIndicator();
+      alert(`Failed to load ${file.name}: ${err.message}`);
+    }
+  });
+}
+
+setupFileDropZone();
+loadDrawingCatalog();
+window.loadDrawingFile=loadDrawingFile;
+window.loadCustomJson=loadCustomJson;
+window.handleFileSelect=handleFileSelect;
+window.loadDrawingCatalog=loadDrawingCatalog;
+window.showLoadingIndicator=showLoadingIndicator;
+window.hideLoadingIndicator=hideLoadingIndicator;
 </script>
 
 <!-- Status Bar -->
@@ -19469,12 +20071,14 @@ animate=function(){updateFps();origAnimate();};
   const canvas=document.getElementById('axis-widget-canvas');
   if(!canvas)return;
   const ctx=canvas.getContext('2d');
-  function drawAxis(){
-    ctx.clearRect(0,0,60,60);
-    const cx=30,cy=30,len=22;
-    const cam=camera;
-    if(!cam)return;
-    const right=new THREE.Vector3(),up=new THREE.Vector3(),dir=new THREE.Vector3();
+	  function drawAxis(){
+	    ctx.clearRect(0,0,60,60);
+	    const cx=30,cy=30,len=22;
+	    const cam=window.camera;
+	    const Three=window.THREE;
+	    if(!cam)return;
+	    if(!Three?.Vector3)return;
+	    const right=new Three.Vector3(),up=new Three.Vector3(),dir=new Three.Vector3();
     cam.getWorldDirection(dir);
     right.crossVectors(cam.up,dir).normalize();
     up.crossVectors(dir,right).normalize();
@@ -19533,11 +20137,15 @@ animate=function(){updateFps();origAnimate();};
 <script>
 /* ── View Preset Functions ── */
 function setViewPreset(preset) {
-  const bounds = getViewerModelBounds();
+  const bounds = window.getViewerModelBounds?.();
   if (!bounds) return;
   const { center, radius } = bounds;
   const dist = radius * 2;
-  const target = new THREE.Vector3(center.x, center.y, center.z);
+  const camera = window.camera;
+  const controls = window.controls;
+  const Three = window.THREE;
+  if (!camera || !controls || !Three?.Vector3) return;
+  const target = new Three.Vector3(center.x, center.y, center.z);
 
   switch (preset) {
     case 'top':
@@ -19560,7 +20168,7 @@ function setViewPreset(preset) {
   controls.target.copy(target);
   camera.lookAt(target);
   controls.update();
-  requestViewerRender();
+  window.requestViewerRender?.();
 }
 
 let currentRenderMode = 'solid';
@@ -19574,7 +20182,7 @@ function toggleRenderMode() {
 }
 
 function applyRenderMode(mode) {
-  modelGroup.traverse(child => {
+  window.modelGroup?.traverse(child => {
     if (child.isMesh && child.material) {
       if (mode === 'wireframe') {
         child.material.wireframe = true;
@@ -19585,27 +20193,27 @@ function applyRenderMode(mode) {
       }
     }
   });
-  requestViewerRender();
+  window.requestViewerRender?.();
 }
 
 let gridVisible = true;
 function toggleGrid() {
   gridVisible = !gridVisible;
-  scene.traverse(child => {
+  window.scene?.traverse(child => {
     if (child.isGridHelper) child.visible = gridVisible;
   });
-  requestViewerRender();
+  window.requestViewerRender?.();
 }
 
 let wireframeVisible = true;
 function toggleWireframe() {
   wireframeVisible = !wireframeVisible;
-  modelGroup.traverse(child => {
+  window.modelGroup?.traverse(child => {
     if (child.userData?._wireframe) {
       child.visible = wireframeVisible;
     }
   });
-  requestViewerRender();
+  window.requestViewerRender?.();
 }
 
 /* ── Selection Highlight Enhancement ── */
@@ -19630,44 +20238,53 @@ tooltip.style.display = 'none';
 document.body.appendChild(tooltip);
 
 let hoveredMesh = null;
-renderer.domElement.addEventListener('mousemove', (event) => {
-  const rect = renderer.domElement.getBoundingClientRect();
-  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+if(window.renderer?.domElement){
+  window.renderer.domElement.addEventListener('mousemove', (event) => {
+    const renderer = window.renderer;
+    const mouse = window.mouse;
+    const raycaster = window.raycaster;
+    const camera = window.camera;
+    const modelGroup = window.modelGroup;
+    if(!renderer?.domElement || !mouse || !raycaster || !camera || !modelGroup)return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(modelGroup.children, true);
+    raycaster.setFromCamera(mouse, window.camera||camera);
+    const intersects = raycaster.intersectObjects(modelGroup.children, true);
+    const selectedMesh = window.selectedMesh;
 
-  if (hoveredMesh && hoveredMesh !== selectedMesh) {
-    unhighlightMesh(hoveredMesh);
-  }
+    if (hoveredMesh && hoveredMesh !== selectedMesh) {
+      unhighlightMesh(hoveredMesh);
+    }
 
-  if (intersects.length > 0) {
-    const mesh = intersects[0].object;
-    if (mesh.userData?.id) {
-      hoveredMesh = mesh;
-      if (mesh !== selectedMesh) {
-        highlightSelectedMesh(mesh);
+    if (intersects.length > 0) {
+      const mesh = intersects[0].object;
+      if (mesh.userData?.id) {
+        hoveredMesh = mesh;
+        if (mesh !== selectedMesh) {
+          highlightSelectedMesh(mesh);
+        }
+        const data = mesh.userData;
+        tooltip.innerHTML = `
+          <div class="viewport-tooltip__id">${data.id || '--'}</div>
+          <div class="viewport-tooltip__type">${data.type || 'element'}</div>
+          ${data.section ? `<div class="viewport-tooltip__section">${data.section}</div>` : ''}
+        `;
+        tooltip.style.display = 'block';
+        tooltip.style.left = event.clientX + 12 + 'px';
+        tooltip.style.top = event.clientY - 12 + 'px';
+      } else {
+        hoveredMesh = null;
+        tooltip.style.display = 'none';
       }
-      const data = mesh.userData;
-      tooltip.innerHTML = `
-        <div class="viewport-tooltip__id">${data.id || '--'}</div>
-        <div class="viewport-tooltip__type">${data.type || 'element'}</div>
-        ${data.section ? `<div class="viewport-tooltip__section">${data.section}</div>` : ''}
-      `;
-      tooltip.style.display = 'block';
-      tooltip.style.left = event.clientX + 12 + 'px';
-      tooltip.style.top = event.clientY - 12 + 'px';
     } else {
       hoveredMesh = null;
       tooltip.style.display = 'none';
     }
-  } else {
-    hoveredMesh = null;
-    tooltip.style.display = 'none';
-  }
-  requestViewerRender();
-});
+    window.requestViewerRender?.();
+  });
+}
 
 /* ── Loading Indicator ── */
 function showLoadingIndicator(message = 'Loading...') {
@@ -19746,7 +20363,7 @@ window.addEventListener('keydown', (event) => {
     case '2': setViewPreset('front'); break;
     case '3': setViewPreset('right'); break;
     case '4': setViewPreset('iso'); break;
-    case '5': fitAll(); break;
+    case '5': window.fitAll?.(); break;
     case 'g': toggleGrid(); break;
     case 'w': toggleWireframe(); break;
     case 'r': toggleRenderMode(); break;
@@ -19774,130 +20391,10 @@ window.addEventListener('keydown', (event) => {
       event.preventDefault();
       toggleFullscreen();
       break;
-    case 'Escape': clearSelection(); break;
+    case 'Escape': window.clearSelection?.(); break;
   }
 });
 
-/* ── Drawing File Loader ── */
-const DRAWING_FILE_MAP = {
-  'midas33': '../../implementation/phase1/open_data/midas/midas_generator_33.json',
-  'midas33_pr': '../../implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json',
-  'real_drawing': '../../implementation/phase1/release/visualization/structural_optimization_viewer.json',
-  'demo': null
-};
-
-async function loadDrawingFile(preset) {
-  if (!preset) return;
-  showLoadingIndicator(`Loading ${preset}...`);
-
-  try {
-    if (preset === 'demo') {
-      const demoData = generateDemoModel();
-      await buildModel(demoData, { mode: 'demo', label: 'Demo Model' });
-      hideLoadingIndicator();
-      return;
-    }
-
-    const filePath = DRAWING_FILE_MAP[preset];
-    if (!filePath) {
-      hideLoadingIndicator();
-      return;
-    }
-
-    const response = await fetch(filePath);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-
-    await buildModel(data, { mode: 'preset', label: preset, resolvedPath: filePath });
-    hideLoadingIndicator();
-  } catch (err) {
-    console.error('[Viewer] Failed to load drawing file:', err);
-    hideLoadingIndicator();
-    alert(`Failed to load ${preset}: ${err.message}`);
-  }
-}
-
-async function loadCustomJson() {
-  const urlInput = document.getElementById('custom-json-url');
-  const url = urlInput?.value?.trim();
-  if (!url) {
-    alert('Please enter a JSON URL or path');
-    return;
-  }
-
-  showLoadingIndicator(`Loading ${url}...`);
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-
-    await buildModel(data, { mode: 'custom', label: url, resolvedPath: url });
-    hideLoadingIndicator();
-  } catch (err) {
-    console.error('[Viewer] Failed to load custom JSON:', err);
-    hideLoadingIndicator();
-    alert(`Failed to load ${url}: ${err.message}`);
-  }
-}
-
-async function handleFileSelect(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  showLoadingIndicator(`Loading ${file.name}...`);
-
-  try {
-    const text = await file.text();
-    const data = JSON.parse(text);
-
-    await buildModel(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
-    hideLoadingIndicator();
-  } catch (err) {
-    console.error('[Viewer] Failed to load file:', err);
-    hideLoadingIndicator();
-    alert(`Failed to load ${file.name}: ${err.message}`);
-  }
-}
-
-/* ── File Drop Zone ── */
-function setupFileDropZone() {
-  const dropZone = document.getElementById('file-drop-zone');
-  if (!dropZone) return;
-
-  dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-  });
-
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('drag-over');
-  });
-
-  dropZone.addEventListener('drop', async (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-
-    const file = e.dataTransfer?.files?.[0];
-    if (!file) return;
-
-    showLoadingIndicator(`Loading ${file.name}...`);
-
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-
-      await buildModel(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
-      hideLoadingIndicator();
-    } catch (err) {
-      console.error('[Viewer] Failed to load dropped file:', err);
-      hideLoadingIndicator();
-      alert(`Failed to load ${file.name}: ${err.message}`);
-    }
-  });
-}
-
-setupFileDropZone();
 </script>
 
 </body>

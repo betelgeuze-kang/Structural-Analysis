@@ -1,13 +1,41 @@
-export const DEFAULT_ARTIFACT_CANDIDATES = [
-  '../../implementation/phase1/release/visualization/optimized_drawing_review_summary.json',
-  '../../implementation/phase1/release/visualization/structural_optimization_viewer.json',
+export const DEFAULT_ARTIFACT_LOGICAL_PATHS = [
+  'implementation/phase1/release/visualization/optimized_drawing_review_summary.json',
+  'implementation/phase1/release/visualization/structural_optimization_viewer.json',
 ];
 
-export const ARTIFACT_PRESET_CANDIDATES = {
-  midas33: ['../../implementation/phase1/open_data/midas/midas_generator_33.json'],
-  midas33_pr: ['../../implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json'],
-  midas33_optimized: ['../../implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json'],
+export const REPO_ARTIFACT_LOGICAL_PATHS = {
+  midas33: 'implementation/phase1/open_data/midas/midas_generator_33.json',
+  midas33_pr: 'implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json',
+  midas33_optimized: 'implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json',
+  real_drawing: 'implementation/phase1/release/visualization/structural_optimization_viewer.json',
 };
+
+/** @deprecated Use REPO_ARTIFACT_LOGICAL_PATHS; kept for contract tests. */
+export const ARTIFACT_PRESET_CANDIDATES = Object.fromEntries(
+  Object.entries(REPO_ARTIFACT_LOGICAL_PATHS).map(([preset, path]) => [preset, [path]]),
+);
+
+export const DEFAULT_ARTIFACT_CANDIDATES = DEFAULT_ARTIFACT_LOGICAL_PATHS;
+
+export function resolveRepoArtifactUrl(logicalPath, href = globalThis.window?.location?.href || '') {
+  const raw = String(logicalPath || '').trim();
+  if (!raw) return '';
+  if (!raw.startsWith('implementation/')) return raw;
+  try {
+    const url = new URL(href);
+    const segments = url.pathname.split('/').filter(Boolean);
+    if (segments.length && /\.[a-z0-9]+$/i.test(segments[segments.length - 1])) {
+      segments.pop();
+    }
+    // `segments` now represents the directory of the current document.
+    // Number of `../` needed to reach the server root equals its depth.
+    const depth = segments.length;
+    if (depth <= 0) return raw;
+    return `${'../'.repeat(depth)}${raw}`;
+  } catch {
+    return raw;
+  }
+}
 
 export const PRESET_SIDECAR_FILES = {
   midas33: './index.midas33.data.js',
@@ -69,10 +97,47 @@ export function buildArtifactCandidates(search = globalThis.window?.location?.se
   const custom = [...params.getAll('artifact'), ...params.getAll('data')]
     .map(value => String(value || '').trim())
     .filter(Boolean);
-  const workspaceArtifact = custom.length || hasExplicitPreset
-    ? ''
-    : String(globalThis.window?.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__ || '').trim();
-  return [...new Set([...custom, workspaceArtifact, ...presetCandidates, ...DEFAULT_ARTIFACT_CANDIDATES].filter(Boolean))];
+  const workspaceArtifact = String(globalThis.window?.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__ || '').trim();
+  const href = globalThis.window?.location?.href || '';
+  const resolved = [...custom, workspaceArtifact, ...presetCandidates, ...DEFAULT_ARTIFACT_LOGICAL_PATHS]
+    .filter(Boolean)
+    .map((candidate) => resolveRepoArtifactUrl(candidate, href));
+  return [...new Set(resolved)];
+}
+
+export async function resolvePresetModelPayload(preset, {
+  root = globalThis.window,
+  documentRef = globalThis.document,
+  fetchImpl = globalThis.fetch,
+  href = globalThis.window?.location?.href || '',
+} = {}) {
+  const normalized = normalizePresetToken(preset);
+  if (!normalized) throw new Error('missing preset');
+  try {
+    const sidecar = await loadPresetSidecarIfNeeded(normalized, { root, documentRef });
+    if (sidecar?.payload) return sidecar;
+  } catch (err) {
+    console.warn(`[Viewer] Preset sidecar unavailable for ${normalized}:`, err);
+  }
+  const logical = REPO_ARTIFACT_LOGICAL_PATHS[normalized];
+  if (!logical) throw new Error(`unknown preset ${preset}`);
+  const candidate = resolveRepoArtifactUrl(logical, href);
+  const url = new URL(candidate, href);
+  const response = await fetchImpl(url, { cache: 'no-store' });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  let payload;
+  try {
+    payload = JSON.parse(await response.text());
+  } catch (err) {
+    console.warn(`[Viewer] Failed to parse ${logical}:`, err);
+    throw new Error('invalid JSON payload');
+  }
+  return {
+    payload,
+    label: logical,
+    reportName: logical.split('/').pop() || normalized,
+    sourcePath: url.href,
+  };
 }
 
 export function getPresetSidecarPath(preset) {
@@ -129,6 +194,35 @@ export function readEmbeddedPayload({
     if (payload) return { payload, label: `#${id}` };
   }
   return null;
+}
+
+export async function loadEmbeddedDataScriptIfNeeded({
+  root = globalThis.window,
+  documentRef = globalThis.document,
+} = {}) {
+  if (root?.__STRUCTURE_VIEWER_PAYLOAD__) return;
+  if (!documentRef || typeof documentRef.createElement !== 'function') return;
+  const existing = documentRef.querySelector('script[data-viewer-embedded-data]');
+  if (existing) {
+    if (existing.dataset.loaded === 'true') return;
+    await new Promise((resolve, reject) => {
+      existing.addEventListener('load', () => resolve(), { once: true });
+      existing.addEventListener('error', () => reject(new Error('failed to load embedded data script')), { once: true });
+    });
+    return;
+  }
+  await new Promise((resolve, reject) => {
+    const script = documentRef.createElement('script');
+    script.src = './index.data.js';
+    script.dataset.viewerEmbeddedData = 'true';
+    script.async = true;
+    script.onload = () => {
+      script.dataset.loaded = 'true';
+      resolve();
+    };
+    script.onerror = () => reject(new Error('failed to load embedded data script ./index.data.js'));
+    documentRef.head.appendChild(script);
+  });
 }
 
 export async function loadPresetSidecarIfNeeded(preset, {

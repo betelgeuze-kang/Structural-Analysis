@@ -301,6 +301,196 @@ export function createViewerRenderMeshBuilderToolkit(THREE, config = {}) {
     };
   }
 
+  function createSolidElementRenderObjects({
+    element,
+    nodes,
+    type,
+    baseColorHex,
+    size = 0.3,
+    deformScale = 100,
+  } = {}) {
+    const nodeItems = Array.isArray(nodes) ? nodes : [];
+    if (!nodeItems.length) return null;
+    const normalizedType = normalizeElementType(type);
+    const baseColor = new T.Color(baseColorHex);
+    const points = nodeItems.map(node => nodeToViewerVector(T, node));
+    const box = new T.Box3().setFromPoints(points);
+    const center = box.getCenter(new T.Vector3());
+    const dims = box.getSize(new T.Vector3());
+    const minExtent = Math.max(0.05, safeNumber(size, 0.3) * 2);
+    const sx = Math.max(dims.x, minExtent);
+    const sy = Math.max(dims.y, minExtent);
+    const sz = Math.max(dims.z, minExtent);
+    const geometry = new T.BoxGeometry(sx, sy, sz);
+    geometry.translate(center.x, center.y, center.z);
+    const material = new T.MeshPhongMaterial({
+      color: baseColor.clone(),
+      transparent: true,
+      opacity: 0.7,
+      side: T.DoubleSide,
+      vertexColors: false,
+    });
+    const mesh = new T.Mesh(geometry, material);
+    const meshData = {
+      ...element,
+      nodeData: nodeItems,
+      baseColor: baseColor.getHex(),
+      contourGeometryKind: 'solid',
+      baseMaterial: material,
+    };
+    mesh.userData = meshData;
+    const wireframe = new T.LineSegments(
+      new T.EdgesGeometry(geometry),
+      new T.LineBasicMaterial({ color: baseColor.clone(), transparent: true, opacity: 0.6 }),
+    );
+    wireframe.userData = { _wireframe: true, elemId: element?.id, type: normalizedType };
+    const deformedPoints = nodeItems.map(node => nodeToDeformedViewerVector(T, node, deformScale));
+    const deformedBox = new T.Box3().setFromPoints(deformedPoints);
+    const deformedCenter = deformedBox.getCenter(new T.Vector3());
+    const deformedGeometry = new T.BoxGeometry(sx, sy, sz);
+    deformedGeometry.translate(deformedCenter.x, deformedCenter.y, deformedCenter.z);
+    const deformedMesh = new T.Mesh(
+      deformedGeometry,
+      new T.MeshPhongMaterial({ color: 0x9fb3c8, transparent: true, opacity: 0.3 }),
+    );
+    deformedMesh.userData = { ...element, _deformed: true };
+    return {
+      kind: 'solid',
+      mesh,
+      meshData,
+      wireframe,
+      deformedMesh,
+      pickPoints: points,
+    };
+  }
+
+  const VISUAL_RADIUS_BY_TYPE = {
+    column: 0.35, beam: 0.20, brace: 0.18, truss: 0.12, cable: 0.06, rebar: 0.015,
+    girder: 0.28, purlin: 0.08, joist: 0.09, tie: 0.07, strut: 0.14,
+    wall: 0.20, slab: 0.15, shell: 0.16, roof: 0.14, diaphragm: 0.14,
+    footing: 0.45, pile: 0.18, mat: 0.40, panel_zone: 0.30, joint: 0.20,
+    isolator: 0.16, damper: 0.12, shear_wall: 0.22, core_wall: 0.22,
+  };
+
+  function getVisualRadius(type) {
+    const normalized = normalizeElementType(type);
+    return safeNumber(VISUAL_RADIUS_BY_TYPE[normalized], 0.15);
+  }
+
+  function getMaterialProperties(type) {
+    const normalized = normalizeElementType(type);
+    if (normalized === 'cable' || normalized === 'rebar' || normalized === 'prestressing_tendon') {
+      return { roughness: 0.35, metalness: 0.85, opacity: 0.95 };
+    }
+    if (normalized === 'slab' || normalized === 'wall' || normalized === 'shell' || normalized === 'roof') {
+      return { roughness: 0.9, metalness: 0.05, opacity: normalized === 'slab' ? 0.25 : 0.45 };
+    }
+    if (normalized === 'footing' || normalized === 'pile' || normalized === 'mat') {
+      return { roughness: 0.95, metalness: 0.0, opacity: 0.7 };
+    }
+    return { roughness: 0.55, metalness: 0.45, opacity: 0.85 };
+  }
+
+  function createCableElementRenderObjects({
+    element,
+    nodes,
+    baseColorHex,
+    radius = 0.06,
+    sagRatio = 0.05,
+  } = {}) {
+    const nodeItems = Array.isArray(nodes) ? nodes : [];
+    if (nodeItems.length < 2) return null;
+    const baseColor = new T.Color(baseColorHex);
+    const start = nodeToViewerVector(T, nodeItems[0]);
+    const end = nodeToViewerVector(T, nodeItems[nodeItems.length - 1]);
+    const span = start.distanceTo(end);
+    const mid = start.clone().add(end).multiplyScalar(0.5);
+    mid.y -= span * Math.max(0, safeNumber(sagRatio, 0.05));
+    const curve = new T.CatmullRomCurve3([start, mid, end]);
+    const tubeGeometry = new T.TubeGeometry(curve, 16, Math.max(0.01, safeNumber(radius, 0.06)), 6, false);
+    const props = getMaterialProperties('cable');
+    const material = new T.MeshPhongMaterial({ color: baseColor.clone(), transparent: true, opacity: props.opacity });
+    const mesh = new T.Mesh(tubeGeometry, material);
+    const meshData = {
+      ...element,
+      nodeData: nodeItems,
+      baseColor: baseColor.getHex(),
+      contourGeometryKind: 'cable',
+      visualRadius: Math.max(0.01, safeNumber(radius, 0.06)),
+    };
+    mesh.userData = meshData;
+    const pickPoints = curve.getPoints(16);
+    const wireframe = new T.Line(
+      new T.BufferGeometry().setFromPoints(pickPoints),
+      new T.LineBasicMaterial({ color: baseColor.clone(), transparent: true, opacity: 0.6 }),
+    );
+    wireframe.userData = { _wireframe: true, elemId: element?.id, type: 'cable' };
+    return { kind: 'cable', mesh, meshData, wireframe, pickPoints: [start, end] };
+  }
+
+  function createRebarElementRenderObjects({
+    element,
+    nodes,
+    baseColorHex,
+    radius = 0.012,
+    deformScale = 100,
+  } = {}) {
+    const nodeItems = Array.isArray(nodes) ? nodes : [];
+    if (nodeItems.length < 2) return null;
+    const baseColor = new T.Color(baseColorHex);
+    const points = nodeItems.map(node => nodeToViewerVector(T, node));
+    const r = Math.max(0.004, safeNumber(radius, 0.012));
+    const curve = new T.CatmullRomCurve3(points);
+    const tubeGeometry = new T.TubeGeometry(curve, Math.max(2, points.length * 4), r, 6, false);
+    const props = getMaterialProperties('rebar');
+    const material = new T.MeshPhongMaterial({ color: baseColor.clone(), transparent: true, opacity: props.opacity });
+    const mesh = new T.Mesh(tubeGeometry, material);
+    const meshData = {
+      ...element,
+      nodeData: nodeItems,
+      baseColor: baseColor.getHex(),
+      contourGeometryKind: 'rebar',
+      visualRadius: r,
+    };
+    mesh.userData = meshData;
+    const deformedPoints = nodeItems.map(node => nodeToDeformedViewerVector(T, node, deformScale));
+    const deformedCurve = new T.CatmullRomCurve3(deformedPoints);
+    const deformedGeometry = new T.TubeGeometry(deformedCurve, Math.max(2, points.length * 4), r, 6, false);
+    const deformedMesh = new T.Mesh(
+      deformedGeometry,
+      new T.MeshPhongMaterial({ color: 0x9fb3c8, transparent: true, opacity: 0.3 }),
+    );
+    deformedMesh.userData = { ...element, _deformed: true };
+    return { kind: 'rebar', mesh, meshData, deformedMesh, pickPoints: points };
+  }
+
+  function createTerrainMesh({
+    element,
+    nodes,
+    baseColorHex,
+  } = {}) {
+    const nodeItems = Array.isArray(nodes) ? nodes : [];
+    if (nodeItems.length < 3) return null;
+    const baseColor = new T.Color(baseColorHex);
+    const points = nodeItems.map(node => nodeToViewerVector(T, node));
+    const geometry = new T.BufferGeometry();
+    const positions = [];
+    points.forEach(point => positions.push(point.x, point.y, point.z));
+    geometry.setAttribute('position', new T.BufferAttribute(new Float32Array(positions), 3));
+    const material = new T.MeshStandardMaterial({
+      color: baseColor.clone(),
+      transparent: true,
+      opacity: 0.85,
+      roughness: 0.95,
+      metalness: 0.0,
+      side: T.DoubleSide,
+    });
+    const mesh = new T.Mesh(geometry, material);
+    const meshData = { ...element, nodeData: nodeItems, contourGeometryKind: 'terrain' };
+    mesh.userData = meshData;
+    return { kind: 'terrain', mesh, meshData, pickPoints: points };
+  }
+
   return Object.freeze({
     createInstancedLineGroupObjects,
     createInstancedSurfaceGroupObjects,
@@ -308,5 +498,11 @@ export function createViewerRenderMeshBuilderToolkit(THREE, config = {}) {
     createInstancedWireframe,
     createLineElementRenderObjects,
     createSurfaceElementRenderObjects,
+    createSolidElementRenderObjects,
+    createCableElementRenderObjects,
+    createRebarElementRenderObjects,
+    createTerrainMesh,
+    getMaterialProperties,
+    getVisualRadius,
   });
 }

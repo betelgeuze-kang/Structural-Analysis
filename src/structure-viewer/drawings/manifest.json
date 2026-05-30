@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "description": "Single catalog of structural drawings selectable in the viewer. Each entry references an existing artifact by repo-relative path (served from the repository root). To add a drawing, append an entry here; the viewer's Drawing File selector is populated from this manifest at load time.",
+  "default": "midas33_optimized",
+  "drawings": [
+    {
+      "id": "midas33_optimized",
+      "label": "MIDAS33 — Optimized Roundtrip",
+      "preset": "midas33_optimized",
+      "artifact": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+    },
+    {
+      "id": "midas33",
+      "label": "MIDAS33 — Baseline",
+      "preset": "midas33",
+      "artifact": "implementation/phase1/open_data/midas/midas_generator_33.json"
+    },
+    {
+      "id": "midas33_pr",
+      "label": "MIDAS33 — PR Recheck",
+      "preset": "midas33_pr",
+      "artifact": "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json"
+    },
+    {
+      "id": "real_drawing",
+      "label": "Real Drawing — Optimization Viewer",
+      "preset": null,
+      "artifact": "implementation/phase1/release/visualization/structural_optimization_viewer.json"
+    },
+    {
+      "id": "demo",
+      "label": "Demo Model (synthetic)",
+      "preset": null,
+      "artifact": null
+    }
+  ]
+}
