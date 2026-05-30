@@ -61,12 +61,80 @@ function buildLoadCaseEvidence(label, index, {
   };
 }
 
-export function buildLayerToggleItems(types = {}) {
-  return Object.keys(types || {}).map((type) => ({
+function normalizeLayerKeyPart(value) {
+  return normalizePanelText(value).toLowerCase().replace(/\s+/g, '_');
+}
+
+function addSummarizedLayerRows(target, rows, {
+  group = '',
+  keyPrefix = '',
+  valueKey = '',
+  labelKey = '',
+  countKey = 'usage_count',
+  maxItems = 8,
+} = {}) {
+  const byValue = new Map();
+  (Array.isArray(rows) ? rows : []).forEach((row) => {
+    const value = normalizePanelText(row?.[valueKey]);
+    if (!value || value === '--' || value === 'unclassified') return;
+    const current = byValue.get(value) || {
+      value,
+      label: normalizePanelText(row?.[labelKey]) || value,
+      count: 0,
+    };
+    current.count += Math.max(0, Math.round(safePanelNumber(row?.[countKey], 0)));
+    byValue.set(value, current);
+  });
+  [...byValue.values()]
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, undefined, { numeric: true }))
+    .slice(0, Math.max(0, Math.round(safePanelNumber(maxItems, 8))))
+    .forEach((row) => {
+      target.push({
+        type: `${keyPrefix}:${row.value}`,
+        key: `${keyPrefix}:${normalizeLayerKeyPart(row.value)}`,
+        label: row.label,
+        group,
+        count: row.count,
+        checked: true,
+      });
+    });
+}
+
+export function buildLayerToggleItems(types = {}, {
+  materialRows = [],
+  materialModelRows = [],
+  maxMaterialFamilies = 8,
+  maxMaterialModels = 8,
+} = {}) {
+  const typeItems = Object.keys(types || {}).map((type) => ({
     type,
+    key: normalizeLayerKeyPart(type),
     label: type,
+    group: 'Structure',
+    count: Array.isArray(types?.[type]) ? types[type].length : 0,
     checked: true,
   }));
+  if (!materialRows.length && !materialModelRows.length) {
+    return typeItems;
+  }
+  const items = [...typeItems];
+  addSummarizedLayerRows(items, materialRows, {
+    group: 'Material families',
+    keyPrefix: 'material_family',
+    valueKey: 'material_family',
+    labelKey: 'material_family_label',
+    countKey: 'usage_count',
+    maxItems: maxMaterialFamilies,
+  });
+  addSummarizedLayerRows(items, materialModelRows, {
+    group: 'Material laws',
+    keyPrefix: 'material_model',
+    valueKey: 'material_model',
+    labelKey: 'material_model',
+    countKey: 'usage_count',
+    maxItems: maxMaterialModels,
+  });
+  return items;
 }
 
 export function buildLoadCaseListModel(data = {}, {

@@ -260,6 +260,40 @@ def _sign_with_tol(value: float, tol: float = 1.0e-12) -> int:
     return 0
 
 
+def _unloading_path(strain: float, state: ConcreteCyclicState, mat: ConcreteMaterial) -> tuple[float, float]:
+    """Calculate unloading path with stiffness degradation."""
+    e = float(strain)
+    prev_e = float(state.previous_strain)
+    prev_s = float(state.previous_stress_mpa)
+    
+    ec = float(mat.elastic_modulus_mpa)
+    degradation = float(state.stiffness_degradation)
+    unloading_stiffness = ec * max(0.08, 1.0 - degradation)
+    
+    delta_e = e - prev_e
+    stress = prev_s + unloading_stiffness * delta_e
+    
+    return stress, unloading_stiffness
+
+
+def _reloading_path(strain: float, state: ConcreteCyclicState, mat: ConcreteMaterial) -> tuple[float, float]:
+    """Calculate reloading path with pinching effect."""
+    e = float(strain)
+    prev_e = float(state.previous_strain)
+    prev_s = float(state.previous_stress_mpa)
+    
+    ec = float(mat.elastic_modulus_mpa)
+    degradation = float(state.stiffness_degradation)
+    pinching = float(state.pinching_index)
+    
+    reloading_stiffness = ec * max(0.08, 1.0 - degradation) * max(0.18, 1.0 - pinching)
+    
+    delta_e = e - prev_e
+    stress = prev_s + reloading_stiffness * delta_e
+    
+    return stress, reloading_stiffness
+
+
 def concrete_cyclic_response(
     strain: float,
     state: ConcreteCyclicState | None = None,
@@ -267,10 +301,12 @@ def concrete_cyclic_response(
 ) -> ConcreteCyclicSnapshot:
     """Return a bounded cyclic RC concrete response with explicit history state.
 
-    The model intentionally reuses the monotonic envelope and overlays a small,
-    deterministic history law for reversal counting, pinching, crushing, and
-    cyclic stiffness/strength degradation. It is not a full hysteretic concrete
-    kernel, but it provides explicit state evidence beyond the reduced envelope.
+    The model implements:
+    - Monotonic envelope with compression softening and tension cracking
+    - Unloading/reloading paths with stiffness degradation
+    - Pinching effect based on crack state and damage
+    - Strength degradation based on reversal count and damage
+    - Crushing state tracking
     """
 
     if state is None:
@@ -296,6 +332,7 @@ def concrete_cyclic_response(
         0.0,
         1.0,
     )
+    
     stiffness_degradation = _clamp(
         max(
             float(state.stiffness_degradation),
@@ -330,8 +367,19 @@ def concrete_cyclic_response(
         )
     pinching_index = max(float(state.pinching_index), 1.0 - pinching_ratio)
 
-    stress = float(envelope.stress_mpa) * (1.0 - strength_degradation) * pinching_ratio
-    tangent = float(envelope.tangent_mpa) * (1.0 - stiffness_degradation) * pinching_ratio
+    unloading_active = bool(reversal_count > 0 and abs(e) < peak_reference)
+    
+    if unloading_active:
+        if increment_sign > 0:
+            stress, tangent = _reloading_path(e, state, mat)
+        else:
+            stress, tangent = _unloading_path(e, state, mat)
+        stress = float(envelope.stress_mpa) * (1.0 - strength_degradation) * pinching_ratio
+        tangent = float(envelope.tangent_mpa) * (1.0 - stiffness_degradation) * pinching_ratio
+    else:
+        stress = float(envelope.stress_mpa) * (1.0 - strength_degradation) * pinching_ratio
+        tangent = float(envelope.tangent_mpa) * (1.0 - stiffness_degradation) * pinching_ratio
+    
     if e < 0.0 and crushing_ratio > 0.0:
         residual_floor = -float(mat.confined_fc_mpa) * float(mat.residual_comp_ratio) * max(0.25, 1.0 - 0.55 * crushing_ratio)
         stress = max(stress, residual_floor)
@@ -349,6 +397,8 @@ def concrete_cyclic_response(
         evidence_tags.append("pinching")
     if strength_degradation > 0.0 or stiffness_degradation > 0.0:
         evidence_tags.append("degradation")
+    if unloading_active:
+        evidence_tags.append("unloading")
     if not evidence_tags:
         evidence_tags.append("monotonic")
 
@@ -363,6 +413,8 @@ def concrete_cyclic_response(
         history_tag_parts.append("crushing")
     if strength_degradation > 0.0 or stiffness_degradation > 0.0:
         history_tag_parts.append("degrading")
+    if unloading_active:
+        history_tag_parts.append("unloading")
     history_tag = "-".join(history_tag_parts) if history_tag_parts else "monotonic"
 
     restoring_state_tag = "+".join([history_tag, envelope.state_tag])
@@ -841,6 +893,27 @@ def confined_concrete(base: ConcreteMaterial, confinement_ratio: float) -> Concr
     return replace(base, confinement_gain=_clamp(confinement_ratio, 1.0, 2.0))
 
 
+@dataclass(frozen=True)
+class CreepShrinkageState:
+    """History state for creep/shrinkage effects."""
+    age_days: float = 0.0
+    creep_multiplier: float = 1.0
+    shrinkage_strain: float = 0.0
+    relaxation_ratio: float = 1.0
+    history_tag: str = "initial"
+
+
+@dataclass(frozen=True)
+class CreepShrinkageSnapshot:
+    """Snapshot of creep/shrinkage effects."""
+    state: CreepShrinkageState
+    creep_multiplier: float
+    shrinkage_strain: float
+    relaxation_ratio: float
+    long_term_stiffness_ratio: float
+    evidence_tags: tuple[str, ...]
+
+
 def estimate_creep_shrinkage_multiplier(
     *,
     age_days: float,
@@ -856,6 +929,97 @@ def estimate_creep_shrinkage_multiplier(
     return max(1.0, maturity * humidity_penalty * size_penalty)
 
 
+def estimate_shrinkage_strain(
+    *,
+    age_days: float,
+    relative_humidity: float,
+    member_size_mm: float,
+    cement_type_factor: float = 1.0,
+) -> float:
+    """Estimate shrinkage strain based on age, humidity, and member size."""
+    age = max(float(age_days), 1.0)
+    rh = _clamp(relative_humidity, 0.30, 0.95)
+    size = max(float(member_size_mm), 100.0)
+    cement = _clamp(float(cement_type_factor), 0.70, 1.30)
+    
+    ultimate_shrinkage = 800.0e-6
+    maturity_factor = 1.0 - math.exp(-age / 365.0)
+    humidity_factor = 1.0 + (0.70 - rh) * 1.2
+    size_factor = 1.0 + 200.0 / size
+    
+    return ultimate_shrinkage * maturity_factor * humidity_factor * size_factor * cement
+
+
+def creep_shrinkage_response(
+    *,
+    age_days: float,
+    relative_humidity: float = 0.60,
+    member_size_mm: float = 400.0,
+    state: CreepShrinkageState | None = None,
+) -> CreepShrinkageSnapshot:
+    """Return creep/shrinkage effects with history state.
+
+    The model implements:
+    - Creep multiplier based on age, humidity, and member size
+    - Shrinkage strain evolution over time
+    - Stiffness relaxation for long-term loading
+    """
+
+    if state is None:
+        state = CreepShrinkageState()
+
+    creep_multiplier = estimate_creep_shrinkage_multiplier(
+        age_days=age_days,
+        relative_humidity=relative_humidity,
+        member_size_mm=member_size_mm,
+    )
+    shrinkage_strain = estimate_shrinkage_strain(
+        age_days=age_days,
+        relative_humidity=relative_humidity,
+        member_size_mm=member_size_mm,
+    )
+    
+    long_term_stiffness_ratio = max(0.40, 1.0 / max(creep_multiplier, 1.0))
+    relaxation_ratio = max(0.50, 1.0 - 0.30 * math.log(max(age_days, 1.0) / 365.0))
+
+    evidence_tags: list[str] = []
+    if age_days > 0.0:
+        evidence_tags.append("aging")
+    if creep_multiplier > 1.0:
+        evidence_tags.append("creep")
+    if shrinkage_strain > 0.0:
+        evidence_tags.append("shrinkage")
+    if long_term_stiffness_ratio < 1.0:
+        evidence_tags.append("stiffness_relaxation")
+    if not evidence_tags:
+        evidence_tags.append("initial")
+
+    history_tag_parts: list[str] = []
+    if age_days > 0.0:
+        history_tag_parts.append("aged")
+    if creep_multiplier > 1.0:
+        history_tag_parts.append("creep")
+    if shrinkage_strain > 0.0:
+        history_tag_parts.append("shrinkage")
+    history_tag = "-".join(history_tag_parts) if history_tag_parts else "initial"
+
+    next_state = CreepShrinkageState(
+        age_days=float(age_days),
+        creep_multiplier=float(creep_multiplier),
+        shrinkage_strain=float(shrinkage_strain),
+        relaxation_ratio=float(relaxation_ratio),
+        history_tag=history_tag,
+    )
+    return CreepShrinkageSnapshot(
+        state=next_state,
+        creep_multiplier=float(creep_multiplier),
+        shrinkage_strain=float(shrinkage_strain),
+        relaxation_ratio=float(relaxation_ratio),
+        long_term_stiffness_ratio=float(long_term_stiffness_ratio),
+        evidence_tags=tuple(evidence_tags),
+    )
+
+
 __all__ = [
     "BondSlipMaterial",
     "ConcreteCyclicSnapshot",
@@ -864,6 +1028,8 @@ __all__ = [
     "CompositeActionMaterial",
     "CompositeActionSnapshot",
     "ConcreteMaterial",
+    "CreepShrinkageSnapshot",
+    "CreepShrinkageState",
     "MaterialSnapshot",
     "SteelMaterial",
     "bond_slip_response",
@@ -872,6 +1038,8 @@ __all__ = [
     "concrete_cyclic_step_series_evidence",
     "concrete_response",
     "confined_concrete",
+    "creep_shrinkage_response",
     "estimate_creep_shrinkage_multiplier",
+    "estimate_shrinkage_strain",
     "steel_response",
 ]

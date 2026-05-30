@@ -20,7 +20,7 @@ DEFAULT_PACKAGE_OUT = Path("implementation/phase1/release/workstation_delivery/p
 DEFAULT_MANIFEST_OUT = Path("implementation/phase1/workstation_delivery_package_manifest.json")
 DEFAULT_JOB_RECORD_OUT = Path("implementation/phase1/workstation_job_record.json")
 DEFAULT_JOB_ROOT = Path("implementation/phase1/workstation_jobs")
-DEFAULT_VIEWER_HTML = Path("implementation/phase1/release/visualization/structural_viewer_midas33_pr_singlefile.html")
+DEFAULT_VIEWER_HTML = Path("implementation/phase1/release/visualization/structural_viewer_midas33_optimized_singlefile.html")
 DEFAULT_VIEWER_HTML_FALLBACK = Path("src/structure-viewer/index.html")
 DEFAULT_REPORT_PDF = Path(
     "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/"

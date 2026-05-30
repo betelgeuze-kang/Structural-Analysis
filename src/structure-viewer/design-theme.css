@@ -1688,6 +1688,385 @@ body.structural-surface .project-drawing-badges {
   min-width:0;
 }
 
+body.structural-surface .shell-nav-button {
+  width:100%;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface .integrated-review-navigator[hidden] {
+  display:none;
+}
+
+body.structural-surface .integrated-review-navigator {
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:grid;
+  place-items:center;
+  padding:18px;
+  background:rgba(3,8,14,.68);
+  backdrop-filter:blur(10px);
+}
+
+body.structural-surface .integrated-review-navigator__dialog {
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  width:min(1040px, calc(100vw - 36px));
+  max-height:min(780px, calc(100vh - 36px));
+  overflow:hidden;
+  border:1px solid rgba(148,168,190,.22);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(15,25,38,.98), rgba(7,14,24,.98));
+  color:var(--text);
+  box-shadow:0 28px 80px rgba(0,0,0,.44);
+}
+
+body.structural-surface .integrated-review-navigator__header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:14px 16px;
+  border-bottom:1px solid rgba(148,168,190,.16);
+}
+
+body.structural-surface .integrated-review-navigator__eyebrow {
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:0;
+  text-transform:uppercase;
+}
+
+body.structural-surface .integrated-review-navigator__header h2 {
+  margin:2px 0 0;
+  color:var(--text);
+  font-size:20px;
+  line-height:1.1;
+}
+
+body.structural-surface .integrated-review-navigator__close {
+  display:grid;
+  place-items:center;
+  width:32px;
+  height:32px;
+  border:1px solid rgba(148,168,190,.22);
+  border-radius:8px;
+  background:rgba(15,23,42,.72);
+  color:var(--text);
+  font-size:20px;
+  line-height:1;
+  cursor:pointer;
+}
+
+body.structural-surface .integrated-review-navigator__body {
+  display:grid;
+  grid-template-columns:minmax(280px, .82fr) minmax(0, 1.18fr);
+  gap:12px;
+  min-height:0;
+  padding:12px;
+}
+
+body.structural-surface .integrated-review-navigator__pane {
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr);
+  gap:10px;
+  min-width:0;
+  min-height:0;
+  padding:12px;
+  border:1px solid rgba(148,168,190,.16);
+  border-radius:8px;
+  background:rgba(8,18,29,.62);
+}
+
+body.structural-surface .integrated-review-navigator__pane--sections {
+  grid-template-rows:auto minmax(0,1fr) auto;
+}
+
+body.structural-surface .integrated-review-navigator__pane-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+}
+
+body.structural-surface .integrated-review-navigator__pane-head span {
+  min-width:0;
+  overflow:hidden;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  text-overflow:ellipsis;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+body.structural-surface .integrated-review-navigator__pane-head strong {
+  min-width:0;
+  overflow:hidden;
+  color:var(--accent);
+  font-size:12px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .integrated-review-navigator select {
+  width:100%;
+  min-width:0;
+}
+
+body.structural-surface .integrated-review-navigator__drawing-list {
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  min-height:0;
+  overflow:auto;
+  padding-right:2px;
+}
+
+body.structural-surface .integrated-review-drawing,
+body.structural-surface .integrated-review-section {
+  min-width:0;
+  border:1px solid rgba(148,168,190,.16);
+  border-radius:8px;
+  background:rgba(15,23,42,.58);
+  color:var(--text);
+  cursor:pointer;
+}
+
+body.structural-surface .integrated-review-drawing {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  min-height:48px;
+  padding:9px;
+  text-align:left;
+}
+
+body.structural-surface .integrated-review-drawing strong,
+body.structural-surface .integrated-review-drawing small,
+body.structural-surface .integrated-review-drawing em {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .integrated-review-drawing strong {
+  display:block;
+  font-size:12px;
+}
+
+body.structural-surface .integrated-review-drawing small {
+  display:block;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.25;
+  white-space:normal;
+}
+
+body.structural-surface .integrated-review-drawing em {
+  max-width:96px;
+  color:var(--accent);
+  font-size:10px;
+  font-style:normal;
+  font-weight:800;
+}
+
+body.structural-surface .integrated-review-drawing.is-active,
+body.structural-surface .integrated-review-section.is-active {
+  border-color:rgba(79,183,173,.54);
+  background:rgba(79,183,173,.14);
+}
+
+body.structural-surface .integrated-review-navigator__section-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  min-height:0;
+  overflow:auto;
+}
+
+body.structural-surface .integrated-review-section {
+  display:grid;
+  gap:4px;
+  min-height:74px;
+  padding:10px;
+  text-align:left;
+}
+
+body.structural-surface .integrated-review-section span,
+body.structural-surface .integrated-review-section strong,
+body.structural-surface .integrated-review-section small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .integrated-review-section span {
+  color:var(--text);
+  font-size:12px;
+  font-weight:900;
+}
+
+body.structural-surface .integrated-review-section strong {
+  color:var(--accent-warm);
+  font-size:10px;
+  text-transform:uppercase;
+}
+
+body.structural-surface .integrated-review-section small {
+  color:var(--muted);
+  font-size:10px;
+}
+
+body.structural-surface .integrated-review-navigator__preview {
+  display:grid;
+  grid-template-rows:auto auto auto;
+  gap:8px;
+  min-width:0;
+  padding:10px;
+  border:1px solid rgba(148,168,190,.14);
+  border-radius:8px;
+  background:rgba(4,11,20,.62);
+}
+
+body.structural-surface .integrated-review-navigator__preview-head {
+  display:grid;
+  grid-template-columns:minmax(78px,.7fr) minmax(92px,1fr) minmax(130px,1.2fr);
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+body.structural-surface .integrated-review-navigator__preview-head span,
+body.structural-surface .integrated-review-navigator__preview-head strong,
+body.structural-surface .integrated-review-navigator__preview-head small,
+body.structural-surface .integrated-review-preview-row strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+body.structural-surface .integrated-review-navigator__preview-head span {
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .integrated-review-navigator__preview-head strong {
+  color:var(--text);
+  font-size:13px;
+}
+
+body.structural-surface .integrated-review-navigator__preview-head small {
+  color:var(--accent);
+  font-size:10px;
+}
+
+body.structural-surface .integrated-review-navigator__preview-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface .integrated-review-preview-row {
+  display:grid;
+  gap:3px;
+  min-width:0;
+  min-height:45px;
+  padding:7px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(15,23,42,.52);
+}
+
+body.structural-surface .integrated-review-preview-row b {
+  min-width:0;
+  overflow:hidden;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:900;
+  line-height:1.15;
+  text-overflow:ellipsis;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+body.structural-surface .integrated-review-preview-row strong {
+  color:var(--text);
+  font-size:11px;
+  line-height:1.2;
+}
+
+body.structural-surface .integrated-review-preview-row--accent strong {
+  color:var(--accent);
+}
+
+body.structural-surface .integrated-review-preview-row--warn strong {
+  color:var(--accent-warm);
+}
+
+body.structural-surface .integrated-review-navigator__preview-actions {
+  display:flex;
+  justify-content:flex-end;
+  min-width:0;
+}
+
+body.structural-surface .integrated-review-navigator__preview-actions button {
+  min-width:112px;
+  min-height:30px;
+  border:1px solid rgba(79,183,173,.36);
+  border-radius:6px;
+  background:rgba(79,183,173,.14);
+  color:var(--text);
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+body.structural-surface .integrated-review-navigator__preview-actions button:disabled {
+  cursor:default;
+  opacity:.5;
+}
+
+@media (max-width: 720px) {
+  body.structural-surface .integrated-review-navigator {
+    align-items:start;
+    padding:10px;
+  }
+
+  body.structural-surface .integrated-review-navigator__dialog {
+    width:calc(100vw - 20px);
+    max-height:calc(100dvh - 20px);
+  }
+
+  body.structural-surface .integrated-review-navigator__body {
+    grid-template-columns:minmax(0,1fr);
+    overflow:auto;
+  }
+
+  body.structural-surface .integrated-review-navigator__section-grid,
+  body.structural-surface .integrated-review-navigator__preview-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  body.structural-surface .integrated-review-navigator__preview-head {
+    grid-template-columns:minmax(0,1fr);
+    gap:4px;
+  }
+}
+
 body.structural-surface .project-status-badge {
   display:inline-flex;
   align-items:center;
@@ -2841,6 +3220,606 @@ body.structural-surface .stage-support-glyph.is-edge-pinned {
   opacity:.82;
 }
 
+body.structural-surface .stage-load-combination-force-glyphs {
+  position:absolute;
+  inset:0;
+  z-index:9;
+  display:none;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-load-combination-force-glyphs.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-load-combination-force-glyph {
+  position:absolute;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:196px;
+  min-height:48px;
+  padding:6px 8px;
+  border:1px solid rgba(250,204,21,.46);
+  border-radius:9px;
+  background:linear-gradient(180deg, rgba(22,28,34,.94), rgba(7,14,24,.86));
+  color:var(--text);
+  box-shadow:0 13px 28px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  pointer-events:auto;
+  transform:translate(0,-50%);
+}
+
+body.structural-surface .stage-load-combination-force-glyph__leader {
+  position:relative;
+  flex:0 0 42px;
+  height:24px;
+}
+
+body.structural-surface .stage-load-combination-force-glyph__leader i,
+body.structural-surface .stage-load-combination-force-glyph__leader i::before,
+body.structural-surface .stage-load-combination-force-glyph__leader i::after {
+  content:"";
+  position:absolute;
+  display:block;
+}
+
+body.structural-surface .stage-load-combination-force-glyph__leader i {
+  left:0;
+  right:10px;
+  top:50%;
+  height:3px;
+  border-radius:999px;
+  transform:translateY(-50%);
+  background:linear-gradient(90deg, rgba(250,204,21,.10), #facc15 55%, #fde047);
+  box-shadow:0 0 14px rgba(250,204,21,.62);
+}
+
+body.structural-surface .stage-load-combination-force-glyph__leader i::before {
+  left:-3px;
+  top:50%;
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  transform:translateY(-50%);
+  background:#facc15;
+  box-shadow:0 0 13px rgba(250,204,21,.85);
+}
+
+body.structural-surface .stage-load-combination-force-glyph__leader i::after {
+  right:-12px;
+  top:50%;
+  width:0;
+  height:0;
+  transform:translateY(-50%);
+  border-top:7px solid transparent;
+  border-bottom:7px solid transparent;
+  border-left:13px solid #fde047;
+  filter:drop-shadow(0 0 6px rgba(250,204,21,.8));
+}
+
+body.structural-surface .stage-load-combination-force-glyph__content {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  text-align:left;
+}
+
+body.structural-surface .stage-load-combination-force-glyph__label,
+body.structural-surface .stage-load-combination-force-glyph strong,
+body.structural-surface .stage-load-combination-force-glyph small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-load-combination-force-glyph__label {
+  color:#facc15;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .stage-load-combination-force-glyph strong {
+  color:#fff7ed;
+  font-size:12px;
+  font-weight:900;
+  line-height:1.05;
+}
+
+body.structural-surface .stage-load-combination-force-glyph small {
+  color:#b7c6d8;
+  font-size:8px;
+  font-weight:700;
+}
+
+body.structural-surface .stage-load-combination-force-glyph:hover,
+body.structural-surface .stage-load-combination-force-glyph:focus-visible {
+  border-color:rgba(250,204,21,.74);
+  background:linear-gradient(180deg, rgba(38,31,12,.96), rgba(12,20,28,.90));
+  outline:none;
+}
+
+body.structural-surface .stage-load-combination-force-glyph--danger {
+  border-color:rgba(248,113,113,.62);
+}
+
+body.structural-surface .stage-load-combination-force-glyph--danger .stage-load-combination-force-glyph__leader i,
+body.structural-surface .stage-load-combination-force-glyph--danger .stage-load-combination-force-glyph__leader i::before {
+  background:#f87171;
+  box-shadow:0 0 14px rgba(248,113,113,.62);
+}
+
+body.structural-surface .stage-load-combination-force-glyph--danger .stage-load-combination-force-glyph__leader i::after {
+  border-left-color:#f87171;
+}
+
+body.structural-surface .stage-load-combination-force-glyph--shear .stage-load-combination-force-glyph__leader i,
+body.structural-surface .stage-load-combination-force-glyph--shear .stage-load-combination-force-glyph__leader i::before {
+  background:#38bdf8;
+  box-shadow:0 0 14px rgba(56,189,248,.62);
+}
+
+body.structural-surface .stage-load-combination-force-glyph--shear .stage-load-combination-force-glyph__leader i::after {
+  border-left-color:#38bdf8;
+}
+
+body.structural-surface .stage-load-combination-force-glyph--axial .stage-load-combination-force-glyph__leader i,
+body.structural-surface .stage-load-combination-force-glyph--axial .stage-load-combination-force-glyph__leader i::before {
+  background:#58d78d;
+  box-shadow:0 0 14px rgba(88,215,141,.62);
+}
+
+body.structural-surface .stage-load-combination-force-glyph--axial .stage-load-combination-force-glyph__leader i::after {
+  border-left-color:#58d78d;
+}
+
+body.structural-surface .stage-load-combination-force-glyph.is-edge-pinned {
+  border-style:dashed;
+  opacity:.88;
+}
+
+body.structural-surface .stage-member-force-playback-trail {
+  position:absolute;
+  inset:0;
+  z-index:10;
+  display:none;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-member-force-playback-trail.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame {
+  position:absolute;
+  box-sizing:border-box;
+  display:grid;
+  grid-template-columns:20px minmax(0,1fr);
+  align-items:center;
+  gap:6px;
+  width:118px;
+  min-height:40px;
+  padding:5px 6px;
+  border:1px solid rgba(125,211,252,.44);
+  border-radius:8px;
+  color:var(--text);
+  background:linear-gradient(180deg, rgba(7,24,34,.94), rgba(5,15,25,.86));
+  box-shadow:0 10px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  pointer-events:auto;
+  transform:translate(0,-50%);
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame:hover,
+body.structural-surface .stage-member-force-playback-trail-frame:focus-visible,
+body.structural-surface .stage-member-force-playback-trail-frame.is-active {
+  border-color:rgba(125,211,252,.76);
+  background:linear-gradient(180deg, rgba(13,42,56,.96), rgba(7,22,34,.90));
+  outline:none;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame.is-active {
+  box-shadow:0 0 0 1px rgba(125,211,252,.28), 0 12px 26px rgba(0,0,0,.30);
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame.is-edge-pinned {
+  border-style:dashed;
+  opacity:.9;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame__bead {
+  position:relative;
+  display:block;
+  width:20px;
+  height:20px;
+  border-radius:999px;
+  background:rgba(125,211,252,.10);
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame__bead::before,
+body.structural-surface .stage-member-force-playback-trail-frame__bead::after {
+  content:"";
+  position:absolute;
+  left:50%;
+  width:2px;
+  height:6px;
+  transform:translateX(-50%);
+  background:rgba(125,211,252,.34);
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame__bead::before {
+  bottom:14px;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame__bead::after {
+  top:14px;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame:first-child .stage-member-force-playback-trail-frame__bead::before,
+body.structural-surface .stage-member-force-playback-trail-frame:last-child .stage-member-force-playback-trail-frame__bead::after {
+  display:none;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame__bead i {
+  position:absolute;
+  inset:3px;
+  display:block;
+  border-radius:999px;
+  background:conic-gradient(var(--accent) var(--stage-member-force-playback-trail), rgba(148,168,190,.16) var(--stage-member-force-playback-trail));
+  box-shadow:0 0 12px rgba(125,211,252,.50);
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame__body {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  text-align:left;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame__body b,
+body.structural-surface .stage-member-force-playback-trail-frame__body small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame__body b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+  line-height:1.05;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame__body small {
+  color:#b7c6d8;
+  font-size:7px;
+  font-weight:800;
+  line-height:1.05;
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame--warn {
+  border-color:rgba(250,204,21,.58);
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame--warn .stage-member-force-playback-trail-frame__bead i {
+  background:conic-gradient(var(--warn) var(--stage-member-force-playback-trail), rgba(148,168,190,.16) var(--stage-member-force-playback-trail));
+  box-shadow:0 0 12px rgba(250,204,21,.52);
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame--danger {
+  border-color:rgba(248,113,113,.66);
+}
+
+body.structural-surface .stage-member-force-playback-trail-frame--danger .stage-member-force-playback-trail-frame__bead i {
+  background:conic-gradient(var(--danger) var(--stage-member-force-playback-trail), rgba(148,168,190,.16) var(--stage-member-force-playback-trail));
+  box-shadow:0 0 12px rgba(248,113,113,.52);
+}
+
+body.structural-surface .stage-member-force-vector-field {
+  position:absolute;
+  inset:0;
+  z-index:11;
+  display:none;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-member-force-vector-field.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-member-force-vector {
+  position:absolute;
+  box-sizing:border-box;
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr);
+  align-items:center;
+  gap:6px;
+  width:140px;
+  min-height:38px;
+  padding:5px 6px;
+  border:1px solid rgba(129,230,217,.44);
+  border-radius:8px;
+  color:var(--text);
+  background:linear-gradient(180deg, rgba(7,28,32,.94), rgba(5,16,25,.88));
+  box-shadow:0 11px 24px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  pointer-events:auto;
+  transform:translate(0,-50%);
+}
+
+body.structural-surface .stage-member-force-vector:hover,
+body.structural-surface .stage-member-force-vector:focus-visible {
+  border-color:rgba(129,230,217,.76);
+  background:linear-gradient(180deg, rgba(12,46,49,.96), rgba(6,22,32,.90));
+  outline:none;
+}
+
+body.structural-surface .stage-member-force-vector.is-edge-pinned {
+  border-style:dashed;
+  opacity:.9;
+}
+
+body.structural-surface .stage-member-force-vector__arrow {
+  position:relative;
+  width:36px;
+  height:20px;
+  transform:rotate(var(--stage-member-force-vector-angle,0deg));
+}
+
+body.structural-surface .stage-member-force-vector__arrow i,
+body.structural-surface .stage-member-force-vector__arrow i::before,
+body.structural-surface .stage-member-force-vector__arrow i::after {
+  content:"";
+  position:absolute;
+  display:block;
+}
+
+body.structural-surface .stage-member-force-vector__arrow i {
+  left:2px;
+  top:50%;
+  width:calc(var(--stage-member-force-vector,50%) * .34);
+  min-width:16px;
+  max-width:34px;
+  height:12px;
+  border-radius:999px;
+  transform:translateY(-50%);
+  background:linear-gradient(to bottom, transparent 0 4px, #81e6d9 4px 7px, transparent 7px);
+  box-shadow:0 0 13px rgba(129,230,217,.62);
+}
+
+body.structural-surface .stage-member-force-vector__arrow i::before {
+  left:0;
+  top:50%;
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  transform:translateY(-50%);
+  background:#81e6d9;
+  box-shadow:0 0 12px rgba(129,230,217,.75);
+}
+
+body.structural-surface .stage-member-force-vector__arrow i::after {
+  right:0;
+  top:50%;
+  width:0;
+  height:0;
+  transform:translateY(-50%);
+  border-top:6px solid transparent;
+  border-bottom:6px solid transparent;
+  border-left:10px solid #ccfbf1;
+  filter:drop-shadow(0 0 5px rgba(129,230,217,.78));
+}
+
+body.structural-surface .stage-member-force-vector__body {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  text-align:left;
+}
+
+body.structural-surface .stage-member-force-vector__body b,
+body.structural-surface .stage-member-force-vector__body small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-member-force-vector__body b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+  line-height:1.05;
+}
+
+body.structural-surface .stage-member-force-vector__body small {
+  color:#b7c6d8;
+  font-size:7px;
+  font-weight:800;
+  line-height:1.05;
+}
+
+body.structural-surface .stage-member-force-vector--warn {
+  border-color:rgba(250,204,21,.58);
+}
+
+body.structural-surface .stage-member-force-vector--warn .stage-member-force-vector__arrow i,
+body.structural-surface .stage-member-force-vector--warn .stage-member-force-vector__arrow i::before {
+  background:#facc15;
+  box-shadow:0 0 13px rgba(250,204,21,.58);
+}
+
+body.structural-surface .stage-member-force-vector--warn .stage-member-force-vector__arrow i {
+  background:linear-gradient(to bottom, transparent 0 4px, #facc15 4px 7px, transparent 7px);
+}
+
+body.structural-surface .stage-member-force-vector--warn .stage-member-force-vector__arrow i::after {
+  border-left-color:#fde047;
+}
+
+body.structural-surface .stage-member-force-vector--danger {
+  border-color:rgba(248,113,113,.66);
+}
+
+body.structural-surface .stage-member-force-vector--danger .stage-member-force-vector__arrow i,
+body.structural-surface .stage-member-force-vector--danger .stage-member-force-vector__arrow i::before {
+  background:#f87171;
+  box-shadow:0 0 13px rgba(248,113,113,.58);
+}
+
+body.structural-surface .stage-member-force-vector--danger .stage-member-force-vector__arrow i {
+  background:linear-gradient(to bottom, transparent 0 4px, #f87171 4px 7px, transparent 7px);
+}
+
+body.structural-surface .stage-member-force-vector--danger .stage-member-force-vector__arrow i::after {
+  border-left-color:#f87171;
+}
+
+body.structural-surface .stage-member-force-vector--moment .stage-member-force-vector__arrow {
+  border:1px solid rgba(129,230,217,.38);
+  border-left-color:transparent;
+  border-bottom-color:transparent;
+  border-radius:999px;
+}
+
+body.structural-surface .stage-member-material-state-badge {
+  position:absolute;
+  inset:0;
+  z-index:12;
+  display:none;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-member-material-state-badge.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-member-material-state-card {
+  position:absolute;
+  box-sizing:border-box;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 48px;
+  align-items:center;
+  gap:7px;
+  width:176px;
+  min-height:50px;
+  padding:6px 7px;
+  border:1px solid rgba(79,183,173,.54);
+  border-radius:8px;
+  color:var(--text);
+  background:linear-gradient(180deg, rgba(9,29,34,.96), rgba(4,13,22,.90));
+  box-shadow:0 13px 30px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.055);
+  cursor:pointer;
+  pointer-events:auto;
+}
+
+body.structural-surface .stage-member-material-state-card:hover,
+body.structural-surface .stage-member-material-state-card:focus-visible {
+  border-color:rgba(129,230,217,.84);
+  background:linear-gradient(180deg, rgba(12,43,45,.98), rgba(6,19,28,.92));
+  outline:none;
+}
+
+body.structural-surface .stage-member-material-state-card.is-edge-pinned {
+  border-style:dashed;
+  opacity:.92;
+}
+
+body.structural-surface .stage-member-material-state-card__body {
+  display:grid;
+  gap:2px;
+  min-width:0;
+  text-align:left;
+}
+
+body.structural-surface .stage-member-material-state-card__body b,
+body.structural-surface .stage-member-material-state-card__body em,
+body.structural-surface .stage-member-material-state-card__body small,
+body.structural-surface .stage-member-material-state-card__meter small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  letter-spacing:0;
+  font-style:normal;
+}
+
+body.structural-surface .stage-member-material-state-card__body b {
+  color:var(--text);
+  font-size:8.4px;
+  font-weight:900;
+  line-height:1.05;
+}
+
+body.structural-surface .stage-member-material-state-card__body em {
+  color:#c8d5e4;
+  font-size:7px;
+  font-weight:800;
+  line-height:1.08;
+}
+
+body.structural-surface .stage-member-material-state-card__body small {
+  color:#99abbe;
+  font-size:6.4px;
+  font-weight:800;
+  line-height:1.08;
+}
+
+body.structural-surface .stage-member-material-state-card__meter {
+  display:grid;
+  align-items:center;
+  justify-items:stretch;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface .stage-member-material-state-card__meter i {
+  display:block;
+  width:100%;
+  height:8px;
+  border-radius:999px;
+  background:linear-gradient(90deg, #4fb7ad var(--stage-member-material-state,0%), rgba(148,168,190,.18) var(--stage-member-material-state,0%));
+  box-shadow:0 0 12px rgba(79,183,173,.42);
+}
+
+body.structural-surface .stage-member-material-state-card__meter small {
+  color:#c8d5e4;
+  font-size:6.4px;
+  font-weight:900;
+  line-height:1;
+  text-align:right;
+}
+
+body.structural-surface .stage-member-material-state-card--warn {
+  border-color:rgba(250,204,21,.60);
+}
+
+body.structural-surface .stage-member-material-state-card--warn .stage-member-material-state-card__meter i {
+  background:linear-gradient(90deg, var(--warn) var(--stage-member-material-state,0%), rgba(148,168,190,.18) var(--stage-member-material-state,0%));
+  box-shadow:0 0 12px rgba(250,204,21,.44);
+}
+
+body.structural-surface .stage-member-material-state-card--danger {
+  border-color:rgba(248,113,113,.68);
+}
+
+body.structural-surface .stage-member-material-state-card--danger .stage-member-material-state-card__meter i {
+  background:linear-gradient(90deg, var(--danger) var(--stage-member-material-state,0%), rgba(148,168,190,.18) var(--stage-member-material-state,0%));
+  box-shadow:0 0 12px rgba(248,113,113,.46);
+}
+
 body.structural-surface .stage-story-ruler {
   position:absolute;
   inset:0 8px 0 auto;
@@ -3210,6 +4189,1219 @@ body.structural-surface .stage-drift-band.is-active {
 }
 
 body.structural-surface .stage-drift-band.is-edge-pinned {
+  border-style:dashed;
+}
+
+body.structural-surface .stage-story-force-flow-bands {
+  position:absolute;
+  inset:0;
+  z-index:7;
+  display:none;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-story-force-flow-bands.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-story-force-flow-bands__receipt {
+  position:absolute;
+  right:146px;
+  top:86px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  width:236px;
+  padding:5px 7px;
+  border:1px solid rgba(244,181,107,.28);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(24,18,10,.82), rgba(5,12,22,.68));
+  color:var(--text);
+  box-shadow:0 10px 22px rgba(0,0,0,.22);
+}
+
+body.structural-surface .stage-story-force-flow-bands__receipt span,
+body.structural-surface .stage-story-force-flow-bands__receipt strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-story-force-flow-bands__receipt span {
+  color:#f4b56b;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .stage-story-force-flow-bands__receipt strong {
+  color:#fff4df;
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-story-force-flow-band {
+  position:absolute;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  width:236px;
+  min-height:40px;
+  padding:5px 7px;
+  border:1px solid rgba(244,181,107,.26);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(20,21,26,.82), rgba(8,13,21,.70));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.24);
+  cursor:pointer;
+  opacity:.92;
+  pointer-events:auto;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-story-force-flow-band__leader {
+  position:relative;
+  flex:0 0 28px;
+  align-self:stretch;
+}
+
+body.structural-surface .stage-story-force-flow-band__leader::before,
+body.structural-surface .stage-story-force-flow-band__leader::after {
+  content:"";
+  position:absolute;
+  top:50%;
+  background:#f4b56b;
+  box-shadow:0 0 14px rgba(244,181,107,.38);
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-story-force-flow-band__leader::before {
+  left:0;
+  width:28px;
+  height:1px;
+}
+
+body.structural-surface .stage-story-force-flow-band__leader::after {
+  right:-1px;
+  width:6px;
+  height:6px;
+  border-radius:999px;
+}
+
+body.structural-surface .stage-story-force-flow-band__content {
+  display:grid;
+  gap:2px;
+  min-width:0;
+  flex:1 1 auto;
+  text-align:left;
+}
+
+body.structural-surface .stage-story-force-flow-band__meta {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:6px;
+  align-items:center;
+  min-width:0;
+}
+
+body.structural-surface .stage-story-force-flow-band b,
+body.structural-surface .stage-story-force-flow-band em,
+body.structural-surface .stage-story-force-flow-band small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-story-force-flow-band b {
+  color:#fff4df;
+  font-size:10px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-story-force-flow-band em {
+  color:#dbeafe;
+  font-size:8px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-story-force-flow-band small {
+  color:#a9bad0;
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface .stage-story-force-flow-band__bars {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:3px;
+  height:5px;
+  min-width:0;
+}
+
+body.structural-surface .stage-story-force-flow-bar {
+  position:relative;
+  display:block;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(77,96,122,.34);
+}
+
+body.structural-surface .stage-story-force-flow-bar::after {
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:var(--stage-story-force-flow, 0%);
+  border-radius:inherit;
+}
+
+body.structural-surface .stage-story-force-flow-bar--axial::after { background:var(--accent); }
+body.structural-surface .stage-story-force-flow-bar--shear::after { background:var(--accent2); }
+body.structural-surface .stage-story-force-flow-bar--moment::after { background:var(--warn); }
+
+body.structural-surface .stage-story-force-flow-band--warn {
+  border-color:rgba(244,181,107,.48);
+}
+
+body.structural-surface .stage-story-force-flow-band--danger {
+  border-color:rgba(248,113,113,.58);
+}
+
+body.structural-surface .stage-story-force-flow-band--danger .stage-story-force-flow-band__leader::before,
+body.structural-surface .stage-story-force-flow-band--danger .stage-story-force-flow-band__leader::after {
+  background:#f87171;
+  box-shadow:0 0 14px rgba(248,113,113,.42);
+}
+
+body.structural-surface .stage-story-force-flow-band:hover,
+body.structural-surface .stage-story-force-flow-band:focus-visible,
+body.structural-surface .stage-story-force-flow-band.is-active {
+  opacity:1;
+  border-color:rgba(88,215,141,.62);
+  background:linear-gradient(180deg, rgba(13,41,38,.92), rgba(5,20,22,.78));
+}
+
+body.structural-surface .stage-story-force-flow-band.is-edge-pinned {
+  border-style:dashed;
+}
+
+body.structural-surface .stage-force-demand-contour {
+  position:absolute;
+  inset:0;
+  z-index:6;
+  display:none;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-force-demand-contour.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-force-demand-contour__receipt {
+  position:absolute;
+  right:148px;
+  top:132px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:1px 8px;
+  width:232px;
+  padding:5px 7px;
+  border:1px solid rgba(125,211,252,.28);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(8,25,38,.84), rgba(5,12,22,.70));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.24);
+}
+
+body.structural-surface .stage-force-demand-contour__receipt span,
+body.structural-surface .stage-force-demand-contour__receipt strong,
+body.structural-surface .stage-force-demand-contour__receipt small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-force-demand-contour__receipt span {
+  color:#7dd3fc;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .stage-force-demand-contour__receipt strong {
+  color:#e6f6ff;
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-force-demand-contour__receipt small {
+  grid-column:1 / -1;
+  color:#9fb1c5;
+  font-size:7px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-force-demand-contour-marker {
+  position:absolute;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  width:122px;
+  min-height:28px;
+  padding:4px 6px;
+  border:1px solid rgba(125,211,252,.30);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(12,28,42,.86), rgba(5,12,22,.76));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  opacity:.88;
+  pointer-events:auto;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-force-demand-contour-marker__pulse {
+  position:relative;
+  flex:0 0 var(--force-demand-size, 22px);
+  width:var(--force-demand-size, 22px);
+  height:var(--force-demand-size, 22px);
+  overflow:hidden;
+  border-radius:999px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(230,246,255,.96) 0 22%, transparent 24%),
+    conic-gradient(from -90deg, #7dd3fc var(--force-demand-intensity, 0%), rgba(77,96,122,.34) 0);
+  box-shadow:0 0 16px rgba(125,211,252,.38);
+}
+
+body.structural-surface .stage-force-demand-contour-marker__pulse::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  border:1px solid currentColor;
+  border-radius:inherit;
+  opacity:.22;
+}
+
+body.structural-surface .stage-force-demand-contour-marker__body {
+  display:grid;
+  min-width:0;
+  flex:1 1 auto;
+  text-align:left;
+}
+
+body.structural-surface .stage-force-demand-contour-marker b,
+body.structural-surface .stage-force-demand-contour-marker em,
+body.structural-surface .stage-force-demand-contour-marker small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface .stage-force-demand-contour-marker b {
+  color:#e6f6ff;
+  font-size:10px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-force-demand-contour-marker em {
+  color:#dbeafe;
+  font-size:8px;
+  font-weight:850;
+}
+
+body.structural-surface .stage-force-demand-contour-marker small {
+  color:#9fb1c5;
+  font-size:7px;
+  font-weight:750;
+}
+
+body.structural-surface .stage-force-demand-contour-marker--warn {
+  border-color:rgba(244,181,107,.48);
+}
+
+body.structural-surface .stage-force-demand-contour-marker--warn .stage-force-demand-contour-marker__pulse {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,244,223,.96) 0 22%, transparent 24%),
+    conic-gradient(from -90deg, #f4b56b var(--force-demand-intensity, 0%), rgba(77,96,122,.34) 0);
+  box-shadow:0 0 16px rgba(244,181,107,.40);
+}
+
+body.structural-surface .stage-force-demand-contour-marker--danger {
+  border-color:rgba(248,113,113,.58);
+}
+
+body.structural-surface .stage-force-demand-contour-marker--danger .stage-force-demand-contour-marker__pulse {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,231,231,.96) 0 22%, transparent 24%),
+    conic-gradient(from -90deg, #f87171 var(--force-demand-intensity, 0%), rgba(77,96,122,.34) 0);
+  box-shadow:0 0 18px rgba(248,113,113,.44);
+}
+
+body.structural-surface .stage-force-demand-contour-marker:hover,
+body.structural-surface .stage-force-demand-contour-marker:focus-visible,
+body.structural-surface .stage-force-demand-contour-marker.is-selected {
+  opacity:1;
+  border-color:rgba(88,215,141,.62);
+  background:linear-gradient(180deg, rgba(13,41,38,.92), rgba(5,20,22,.78));
+}
+
+body.structural-surface .stage-force-demand-contour-marker.is-primary {
+  box-shadow:0 0 0 1px rgba(88,215,141,.45), 0 14px 28px rgba(0,0,0,.28);
+}
+
+body.structural-surface .stage-force-demand-contour-marker.is-edge-pinned {
+  border-style:dashed;
+}
+
+body.structural-surface .stage-material-model-demand-badges {
+  position:absolute;
+  inset:0;
+  z-index:6;
+  display:none;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-material-model-demand-badges.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-material-model-demand-badges__receipt {
+  position:absolute;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:1px 7px;
+  width:220px;
+  padding:5px 7px;
+  border:1px solid rgba(88,215,141,.28);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(8,33,28,.86), rgba(5,13,20,.72));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.24);
+}
+
+body.structural-surface .stage-material-model-demand-badges__receipt span,
+body.structural-surface .stage-material-model-demand-badges__receipt strong,
+body.structural-surface .stage-material-model-demand-badges__receipt small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-material-model-demand-badges__receipt span {
+  color:#58d78d;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .stage-material-model-demand-badges__receipt strong {
+  color:#eafff3;
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-model-demand-badges__receipt small {
+  grid-column:1 / -1;
+  color:#9fb1c5;
+  font-size:7px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-material-model-demand-badge {
+  position:absolute;
+  display:grid;
+  grid-template-columns:10px minmax(0,1fr) auto;
+  align-items:center;
+  gap:4px;
+  width:126px;
+  min-height:28px;
+  padding:4px 5px;
+  border:1px solid rgba(88,215,141,.32);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(11,31,28,.88), rgba(5,12,20,.78));
+  color:var(--text);
+  box-shadow:0 11px 22px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  opacity:.90;
+  pointer-events:auto;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-material-model-demand-badge__swatch {
+  width:9px;
+  height:18px;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:999px;
+  background:var(--stage-material-model-color, #58d78d);
+  box-shadow:0 0 10px color-mix(in srgb, var(--stage-material-model-color, #58d78d) 45%, transparent);
+}
+
+body.structural-surface .stage-material-model-demand-badge__main,
+body.structural-surface .stage-material-model-demand-badge__meta {
+  display:grid;
+  min-width:0;
+}
+
+body.structural-surface .stage-material-model-demand-badge b,
+body.structural-surface .stage-material-model-demand-badge em,
+body.structural-surface .stage-material-model-demand-badge strong,
+body.structural-surface .stage-material-model-demand-badge small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-material-model-demand-badge b {
+  color:#eafff3;
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-model-demand-badge em {
+  color:#c8f7dc;
+  font-size:7px;
+  font-weight:850;
+}
+
+body.structural-surface .stage-material-model-demand-badge strong {
+  color:#f7fbff;
+  font-size:7px;
+  font-weight:900;
+  text-align:right;
+}
+
+body.structural-surface .stage-material-model-demand-badge small {
+  color:#9fb1c5;
+  font-size:6.5px;
+  font-weight:750;
+  text-align:right;
+}
+
+body.structural-surface .stage-material-model-demand-badge--warn {
+  border-color:rgba(244,181,107,.48);
+  background:linear-gradient(180deg, rgba(48,35,15,.88), rgba(17,15,11,.78));
+}
+
+body.structural-surface .stage-material-model-demand-badge--danger {
+  border-color:rgba(248,113,113,.58);
+  background:linear-gradient(180deg, rgba(49,20,22,.90), rgba(17,9,14,.80));
+}
+
+body.structural-surface .stage-material-model-demand-badge--neutral,
+body.structural-surface .stage-material-model-demand-badge.is-model-only {
+  border-color:rgba(148,163,184,.26);
+  opacity:.82;
+}
+
+body.structural-surface .stage-material-model-demand-badge:hover,
+body.structural-surface .stage-material-model-demand-badge:focus-visible,
+body.structural-surface .stage-material-model-demand-badge.is-selected {
+  opacity:1;
+  border-color:rgba(125,211,252,.58);
+  background:linear-gradient(180deg, rgba(11,34,48,.92), rgba(5,16,26,.80));
+}
+
+body.structural-surface .stage-material-model-demand-badge.is-primary {
+  box-shadow:0 0 0 1px rgba(125,211,252,.45), 0 14px 28px rgba(0,0,0,.28);
+}
+
+body.structural-surface .stage-material-model-demand-badge.is-edge-pinned {
+  border-style:dashed;
+}
+
+body.structural-surface .stage-material-force-ribbons {
+  position:absolute;
+  inset:0;
+  z-index:6;
+  display:none;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-material-force-ribbons.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-material-force-ribbons__receipt {
+  position:absolute;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:1px 8px;
+  width:236px;
+  padding:5px 7px;
+  border:1px solid rgba(125,211,252,.30);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(8,25,38,.86), rgba(5,12,22,.72));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.24);
+}
+
+body.structural-surface .stage-material-force-ribbons__receipt span,
+body.structural-surface .stage-material-force-ribbons__receipt strong,
+body.structural-surface .stage-material-force-ribbons__receipt small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-material-force-ribbons__receipt span {
+  color:#7dd3fc;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .stage-material-force-ribbons__receipt strong {
+  color:#e6f6ff;
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-force-ribbons__receipt small {
+  grid-column:1 / -1;
+  color:#9fb1c5;
+  font-size:7px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-material-force-ribbon {
+  position:absolute;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  width:166px;
+  min-height:44px;
+  padding:5px 6px;
+  border:1px solid rgba(125,211,252,.34);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(11,30,43,.90), rgba(5,12,22,.80));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  opacity:.91;
+  pointer-events:auto;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-material-force-ribbon__leader {
+  position:relative;
+  flex:0 0 26px;
+  width:26px;
+  height:2px;
+  border-radius:999px;
+  background:linear-gradient(90deg, var(--stage-material-force-color, #7dd3fc), rgba(125,211,252,.18));
+  box-shadow:0 0 12px color-mix(in srgb, var(--stage-material-force-color, #7dd3fc) 45%, transparent);
+}
+
+body.structural-surface .stage-material-force-ribbon__leader::after {
+  content:"";
+  position:absolute;
+  right:0;
+  top:50%;
+  width:5px;
+  height:5px;
+  border-radius:999px;
+  background:var(--stage-material-force-color, #7dd3fc);
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-material-force-ribbon__body {
+  display:grid;
+  min-width:0;
+  flex:1 1 auto;
+  gap:2px;
+}
+
+body.structural-surface .stage-material-force-ribbon__head {
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface .stage-material-force-ribbon b,
+body.structural-surface .stage-material-force-ribbon em,
+body.structural-surface .stage-material-force-ribbon strong,
+body.structural-surface .stage-material-force-ribbon small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-material-force-ribbon b {
+  color:#e6f6ff;
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-force-ribbon em {
+  color:#dbeafe;
+  font-size:7px;
+  font-weight:850;
+}
+
+body.structural-surface .stage-material-force-ribbon strong {
+  color:#f7fbff;
+  font-size:7px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-force-ribbon small {
+  color:#9fb1c5;
+  font-size:6.5px;
+  font-weight:750;
+}
+
+body.structural-surface .stage-material-force-ribbon__bars {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:3px;
+  height:4px;
+}
+
+body.structural-surface .stage-material-force-ribbon__bar {
+  display:block;
+  width:100%;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(77,96,122,.36);
+}
+
+body.structural-surface .stage-material-force-ribbon__bar::before {
+  content:"";
+  display:block;
+  width:var(--stage-material-force, 0%);
+  height:100%;
+  border-radius:inherit;
+}
+
+body.structural-surface .stage-material-force-ribbon__bar--axial::before {
+  background:#58d78d;
+}
+
+body.structural-surface .stage-material-force-ribbon__bar--shear::before {
+  background:#7dd3fc;
+}
+
+body.structural-surface .stage-material-force-ribbon__bar--moment::before {
+  background:#f4b56b;
+}
+
+body.structural-surface .stage-material-force-ribbon--warn {
+  border-color:rgba(244,181,107,.50);
+  background:linear-gradient(180deg, rgba(48,35,15,.90), rgba(17,15,11,.80));
+}
+
+body.structural-surface .stage-material-force-ribbon--danger {
+  border-color:rgba(248,113,113,.60);
+  background:linear-gradient(180deg, rgba(49,20,22,.92), rgba(17,9,14,.82));
+}
+
+body.structural-surface .stage-material-force-ribbon:hover,
+body.structural-surface .stage-material-force-ribbon:focus-visible,
+body.structural-surface .stage-material-force-ribbon.is-selected {
+  opacity:1;
+  border-color:rgba(88,215,141,.58);
+  background:linear-gradient(180deg, rgba(13,41,38,.92), rgba(5,20,22,.80));
+}
+
+body.structural-surface .stage-material-force-ribbon.is-primary {
+  box-shadow:0 0 0 1px rgba(88,215,141,.45), 0 14px 28px rgba(0,0,0,.28);
+}
+
+body.structural-surface .stage-material-force-ribbon.is-edge-pinned {
+  border-style:dashed;
+}
+
+body.structural-surface .stage-material-force-envelope {
+  position:absolute;
+  inset:0;
+  z-index:6;
+  display:none;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-material-force-envelope.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-material-force-envelope__receipt {
+  position:absolute;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:1px 8px;
+  width:238px;
+  padding:5px 7px;
+  border:1px solid rgba(167,139,250,.30);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(26,22,45,.86), rgba(7,11,22,.72));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.24);
+}
+
+body.structural-surface .stage-material-force-envelope__receipt span,
+body.structural-surface .stage-material-force-envelope__receipt strong,
+body.structural-surface .stage-material-force-envelope__receipt small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-material-force-envelope__receipt span {
+  color:#c4b5fd;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .stage-material-force-envelope__receipt strong {
+  color:#f2efff;
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-force-envelope__receipt small {
+  grid-column:1 / -1;
+  color:#aeb9cf;
+  font-size:7px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-material-force-envelope-card {
+  position:absolute;
+  display:grid;
+  grid-template-rows:auto auto 22px 4px auto;
+  gap:2px;
+  width:178px;
+  min-height:58px;
+  padding:5px 6px;
+  border:1px solid rgba(167,139,250,.34);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(25,23,44,.90), rgba(6,10,22,.80));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  opacity:.91;
+  pointer-events:auto;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-material-force-envelope-card__head {
+  display:grid;
+  grid-template-columns:9px minmax(0,1fr) auto;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface .stage-material-force-envelope-card__head i {
+  width:8px;
+  height:8px;
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:999px;
+  background:var(--stage-material-force-envelope-color, #c4b5fd);
+  box-shadow:0 0 10px color-mix(in srgb, var(--stage-material-force-envelope-color, #c4b5fd) 50%, transparent);
+}
+
+body.structural-surface .stage-material-force-envelope-card__meta {
+  display:grid;
+  min-width:0;
+  gap:1px;
+}
+
+body.structural-surface .stage-material-force-envelope-card b,
+body.structural-surface .stage-material-force-envelope-card strong,
+body.structural-surface .stage-material-force-envelope-card em,
+body.structural-surface .stage-material-force-envelope-card small,
+body.structural-surface .stage-material-force-envelope-card__foot {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-material-force-envelope-card b {
+  color:#f2efff;
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-force-envelope-card strong {
+  color:#ffffff;
+  font-size:7px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-force-envelope-card em {
+  color:#ddd6fe;
+  font-size:6.8px;
+  font-weight:850;
+}
+
+body.structural-surface .stage-material-force-envelope-card small,
+body.structural-surface .stage-material-force-envelope-card__foot {
+  color:#aeb9cf;
+  font-size:6.4px;
+  font-weight:750;
+}
+
+body.structural-surface .stage-material-force-envelope-card__chart {
+  display:block;
+  width:100%;
+  height:22px;
+  overflow:hidden;
+  border:1px solid rgba(167,139,250,.16);
+  border-radius:6px;
+  background:rgba(10,16,28,.42);
+}
+
+body.structural-surface .stage-material-force-envelope-card__chart svg {
+  display:block;
+  width:100%;
+  height:100%;
+}
+
+body.structural-surface .stage-material-force-envelope-card__grid {
+  fill:none;
+  stroke:rgba(148,163,184,.20);
+  stroke-width:.8;
+}
+
+body.structural-surface .stage-material-force-envelope-card__line {
+  fill:none;
+  stroke:var(--stage-material-force-envelope-color, #c4b5fd);
+  stroke-width:2.1;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+body.structural-surface .stage-material-force-envelope-card__point {
+  fill:#e9d5ff;
+  stroke:rgba(6,10,22,.88);
+  stroke-width:.8;
+}
+
+body.structural-surface .stage-material-force-envelope-card__point.is-selected {
+  fill:#7dd3fc;
+}
+
+body.structural-surface .stage-material-force-envelope-card__point.is-governing {
+  fill:#f4b56b;
+}
+
+body.structural-surface .stage-material-force-envelope-card__bars {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:3px;
+  height:4px;
+}
+
+body.structural-surface .stage-material-force-envelope-card__bar {
+  display:block;
+  width:100%;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(77,96,122,.34);
+}
+
+body.structural-surface .stage-material-force-envelope-card__bar::before {
+  content:"";
+  display:block;
+  width:var(--stage-material-force-envelope, 0%);
+  height:100%;
+  border-radius:inherit;
+}
+
+body.structural-surface .stage-material-force-envelope-card__bar--axial::before {
+  background:#58d78d;
+}
+
+body.structural-surface .stage-material-force-envelope-card__bar--shear::before {
+  background:#7dd3fc;
+}
+
+body.structural-surface .stage-material-force-envelope-card__bar--moment::before {
+  background:#f4b56b;
+}
+
+body.structural-surface .stage-material-force-envelope-card--warn {
+  border-color:rgba(244,181,107,.50);
+  background:linear-gradient(180deg, rgba(48,35,15,.90), rgba(17,15,11,.80));
+}
+
+body.structural-surface .stage-material-force-envelope-card--danger {
+  border-color:rgba(248,113,113,.60);
+  background:linear-gradient(180deg, rgba(49,20,22,.92), rgba(17,9,14,.82));
+}
+
+body.structural-surface .stage-material-force-envelope-card:hover,
+body.structural-surface .stage-material-force-envelope-card:focus-visible,
+body.structural-surface .stage-material-force-envelope-card.is-selected {
+  opacity:1;
+  border-color:rgba(125,211,252,.58);
+  background:linear-gradient(180deg, rgba(14,31,48,.92), rgba(5,16,26,.80));
+}
+
+body.structural-surface .stage-material-force-envelope-card.is-edge-pinned {
+  border-style:dashed;
+}
+
+body.structural-surface .stage-material-capacity-envelope {
+  position:absolute;
+  inset:0;
+  z-index:6;
+  display:none;
+  pointer-events:none;
+}
+
+body.structural-surface .stage-material-capacity-envelope.is-visible {
+  display:block;
+}
+
+body.structural-surface .stage-material-capacity-envelope__receipt {
+  position:absolute;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:1px 8px;
+  width:246px;
+  padding:5px 7px;
+  border:1px solid rgba(88,215,141,.30);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(13,41,38,.86), rgba(7,11,22,.72));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.24);
+}
+
+body.structural-surface .stage-material-capacity-envelope__receipt span,
+body.structural-surface .stage-material-capacity-envelope__receipt strong,
+body.structural-surface .stage-material-capacity-envelope__receipt small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-material-capacity-envelope__receipt span {
+  color:#86efac;
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+body.structural-surface .stage-material-capacity-envelope__receipt strong {
+  color:#f0fdf4;
+  font-size:9px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-capacity-envelope__receipt small {
+  grid-column:1 / -1;
+  color:#aeb9cf;
+  font-size:7px;
+  font-weight:800;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card {
+  position:absolute;
+  display:grid;
+  grid-template-rows:auto auto 22px 4px auto;
+  gap:2px;
+  width:180px;
+  min-height:58px;
+  padding:5px 6px;
+  border:1px solid rgba(88,215,141,.34);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(14,38,34,.90), rgba(6,10,22,.80));
+  color:var(--text);
+  box-shadow:0 12px 24px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  opacity:.91;
+  pointer-events:auto;
+  transform:translateY(-50%);
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__head {
+  display:grid;
+  grid-template-columns:9px minmax(0,1fr) auto;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__head i {
+  width:8px;
+  height:8px;
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:999px;
+  background:var(--stage-material-capacity-envelope-color, #58d78d);
+  box-shadow:0 0 10px color-mix(in srgb, var(--stage-material-capacity-envelope-color, #58d78d) 50%, transparent);
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__meta {
+  display:grid;
+  min-width:0;
+  gap:1px;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card b,
+body.structural-surface .stage-material-capacity-envelope-card strong,
+body.structural-surface .stage-material-capacity-envelope-card em,
+body.structural-surface .stage-material-capacity-envelope-card small,
+body.structural-surface .stage-material-capacity-envelope-card__foot {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+  letter-spacing:0;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card b {
+  color:#f0fdf4;
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card strong {
+  color:#ffffff;
+  font-size:7px;
+  font-weight:900;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card em {
+  color:#bbf7d0;
+  font-size:6.8px;
+  font-weight:850;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card small,
+body.structural-surface .stage-material-capacity-envelope-card__foot {
+  color:#aeb9cf;
+  font-size:6.4px;
+  font-weight:750;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__chart {
+  display:block;
+  width:100%;
+  height:22px;
+  overflow:hidden;
+  border:1px solid rgba(88,215,141,.16);
+  border-radius:6px;
+  background:rgba(10,16,28,.42);
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__chart svg {
+  display:block;
+  width:100%;
+  height:100%;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__grid {
+  fill:none;
+  stroke:rgba(148,163,184,.20);
+  stroke-width:.8;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__line {
+  fill:none;
+  stroke:var(--stage-material-capacity-envelope-color, #58d78d);
+  stroke-width:2.1;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__point {
+  fill:#dcfce7;
+  stroke:rgba(6,10,22,.88);
+  stroke-width:.8;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__point.is-selected {
+  fill:#7dd3fc;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__point.is-governing {
+  fill:#f4b56b;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__bars {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:3px;
+  height:4px;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__bar {
+  display:block;
+  width:100%;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(77,96,122,.34);
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__bar::before {
+  content:"";
+  display:block;
+  width:var(--stage-material-capacity-envelope, 0%);
+  height:100%;
+  border-radius:inherit;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__bar--demand::before {
+  background:#f87171;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__bar--capacity::before {
+  background:#58d78d;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card__bar--margin::before {
+  background:#7dd3fc;
+}
+
+body.structural-surface .stage-material-capacity-envelope-card--warn {
+  border-color:rgba(244,181,107,.50);
+  background:linear-gradient(180deg, rgba(48,35,15,.90), rgba(17,15,11,.80));
+}
+
+body.structural-surface .stage-material-capacity-envelope-card--danger {
+  border-color:rgba(248,113,113,.60);
+  background:linear-gradient(180deg, rgba(49,20,22,.92), rgba(17,9,14,.82));
+}
+
+body.structural-surface .stage-material-capacity-envelope-card:hover,
+body.structural-surface .stage-material-capacity-envelope-card:focus-visible,
+body.structural-surface .stage-material-capacity-envelope-card.is-selected {
+  opacity:1;
+  border-color:rgba(125,211,252,.58);
+  background:linear-gradient(180deg, rgba(14,31,48,.92), rgba(5,16,26,.80));
+}
+
+body.structural-surface .stage-material-capacity-envelope-card.is-edge-pinned {
   border-style:dashed;
 }
 
@@ -4824,6 +7016,1684 @@ body.structural-surface.command-center-shell .result-envelope-row--danger {
 body.structural-surface.command-center-shell .result-envelope-row--danger .result-envelope-row__metric strong {
   color:var(--danger);
 }
+
+body.structural-surface.command-center-shell .force-flow-lens-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(79,183,173,.18);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(7,17,28,.70), rgba(4,12,21,.64));
+}
+
+body.structural-surface.command-center-shell .force-flow-lens {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .force-flow-lens__head,
+body.structural-surface.command-center-shell .force-flow-summary,
+body.structural-surface.command-center-shell .force-flow-row {
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .force-flow-lens__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+
+body.structural-surface.command-center-shell .force-flow-lens__head span,
+body.structural-surface.command-center-shell .force-flow-row__member,
+body.structural-surface.command-center-shell .force-flow-row__value {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .force-flow-lens__head b,
+body.structural-surface.command-center-shell .force-flow-lens__head em,
+body.structural-surface.command-center-shell .force-flow-lens__head strong,
+body.structural-surface.command-center-shell .force-flow-summary b,
+body.structural-surface.command-center-shell .force-flow-summary em,
+body.structural-surface.command-center-shell .force-flow-row b,
+body.structural-surface.command-center-shell .force-flow-row em,
+body.structural-surface.command-center-shell .force-flow-row strong {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .force-flow-lens__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .force-flow-lens__head em,
+body.structural-surface.command-center-shell .force-flow-summary em,
+body.structural-surface.command-center-shell .force-flow-row em {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .force-flow-lens__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(244,181,107,.24);
+  border-radius:999px;
+  color:var(--accent2);
+  background:rgba(244,181,107,.08);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .force-flow-summary {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .force-flow-summary span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .force-flow-summary b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .force-flow-rows {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .force-flow-row {
+  display:grid;
+  grid-template-columns:minmax(82px,.84fr) minmax(58px,.42fr) minmax(0,1.16fr);
+  align-items:center;
+  gap:7px;
+  width:100%;
+  min-height:36px;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(7,17,28,.50);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .force-flow-row:hover,
+body.structural-surface.command-center-shell .force-flow-row:focus-visible {
+  border-color:rgba(79,183,173,.34);
+  background:rgba(79,183,173,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .force-flow-row__bars {
+  display:grid;
+  gap:3px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .force-flow-bar {
+  position:relative;
+  display:block;
+  height:4px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(148,168,190,.13);
+}
+
+body.structural-surface.command-center-shell .force-flow-bar::after {
+  content:'';
+  position:absolute;
+  inset:0 auto 0 0;
+  width:var(--force-flow-bar,0%);
+  border-radius:inherit;
+}
+
+body.structural-surface.command-center-shell .force-flow-bar--axial::after { background:var(--accent); }
+body.structural-surface.command-center-shell .force-flow-bar--shear::after { background:var(--accent2); }
+body.structural-surface.command-center-shell .force-flow-bar--moment::after { background:var(--warn); }
+
+body.structural-surface.command-center-shell .force-flow-row__member b,
+body.structural-surface.command-center-shell .force-flow-row__value strong {
+  color:var(--text);
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .force-flow-row--warn .force-flow-row__value strong { color:var(--warn); }
+body.structural-surface.command-center-shell .force-flow-row--danger .force-flow-row__value strong { color:var(--danger); }
+
+body.structural-surface.command-center-shell .story-force-flow-ledger-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(125,211,252,.18);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(8,22,36,.66), rgba(4,12,21,.66));
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__head,
+body.structural-surface.command-center-shell .story-force-flow-ledger__summary,
+body.structural-surface.command-center-shell .story-force-flow-row {
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__head span,
+body.structural-surface.command-center-shell .story-force-flow-row__main,
+body.structural-surface.command-center-shell .story-force-flow-row__meta {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__head b,
+body.structural-surface.command-center-shell .story-force-flow-ledger__head em,
+body.structural-surface.command-center-shell .story-force-flow-ledger__head strong,
+body.structural-surface.command-center-shell .story-force-flow-ledger__summary b,
+body.structural-surface.command-center-shell .story-force-flow-ledger__summary em,
+body.structural-surface.command-center-shell .story-force-flow-row b,
+body.structural-surface.command-center-shell .story-force-flow-row em,
+body.structural-surface.command-center-shell .story-force-flow-row strong,
+body.structural-surface.command-center-shell .story-force-flow-row small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__head em,
+body.structural-surface.command-center-shell .story-force-flow-ledger__summary em,
+body.structural-surface.command-center-shell .story-force-flow-row em,
+body.structural-surface.command-center-shell .story-force-flow-row small {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(125,211,252,.24);
+  border-radius:999px;
+  color:var(--accent);
+  background:rgba(125,211,252,.08);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__summary {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__summary span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__summary b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-ledger__rows {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-row {
+  display:grid;
+  grid-template-columns:minmax(80px,.78fr) minmax(58px,.42fr) minmax(0,1.28fr);
+  align-items:center;
+  gap:7px;
+  width:100%;
+  min-height:38px;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(7,17,28,.50);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-row:hover,
+body.structural-surface.command-center-shell .story-force-flow-row:focus-visible {
+  border-color:rgba(125,211,252,.34);
+  background:rgba(125,211,252,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-row__bars {
+  display:grid;
+  gap:3px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-bar {
+  position:relative;
+  display:block;
+  height:4px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(148,168,190,.13);
+}
+
+body.structural-surface.command-center-shell .story-force-flow-bar::after {
+  content:'';
+  position:absolute;
+  inset:0 auto 0 0;
+  width:var(--story-force-flow,0%);
+  border-radius:inherit;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-bar--axial::after { background:var(--accent); }
+body.structural-surface.command-center-shell .story-force-flow-bar--shear::after { background:var(--accent2); }
+body.structural-surface.command-center-shell .story-force-flow-bar--moment::after { background:var(--warn); }
+
+body.structural-surface.command-center-shell .story-force-flow-row__main b,
+body.structural-surface.command-center-shell .story-force-flow-row__meta strong {
+  color:var(--text);
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .story-force-flow-row--warn .story-force-flow-row__meta strong { color:var(--warn); }
+body.structural-surface.command-center-shell .story-force-flow-row--danger .story-force-flow-row__meta strong { color:var(--danger); }
+
+body.structural-surface.command-center-shell .load-combination-force-matrix-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(244,181,107,.18);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(20,16,8,.58), rgba(4,12,21,.66));
+}
+
+body.structural-surface.command-center-shell .load-combination-force-matrix {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-matrix__head,
+body.structural-surface.command-center-shell .load-combination-force-summary,
+body.structural-surface.command-center-shell .load-combination-force-stepper,
+body.structural-surface.command-center-shell .load-combination-force-step,
+body.structural-surface.command-center-shell .load-combination-force-row {
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-matrix__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-matrix__head span,
+body.structural-surface.command-center-shell .load-combination-force-row__combo,
+body.structural-surface.command-center-shell .load-combination-force-row__result {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-matrix__head b,
+body.structural-surface.command-center-shell .load-combination-force-matrix__head em,
+body.structural-surface.command-center-shell .load-combination-force-matrix__head strong,
+body.structural-surface.command-center-shell .load-combination-force-summary b,
+body.structural-surface.command-center-shell .load-combination-force-summary em,
+body.structural-surface.command-center-shell .load-combination-force-step b,
+body.structural-surface.command-center-shell .load-combination-force-step em,
+body.structural-surface.command-center-shell .load-combination-force-step strong,
+body.structural-surface.command-center-shell .load-combination-force-row b,
+body.structural-surface.command-center-shell .load-combination-force-row em,
+body.structural-surface.command-center-shell .load-combination-force-row strong,
+body.structural-surface.command-center-shell .load-combination-force-row small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-matrix__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-matrix__head em,
+body.structural-surface.command-center-shell .load-combination-force-summary em,
+body.structural-surface.command-center-shell .load-combination-force-row em,
+body.structural-surface.command-center-shell .load-combination-force-row small {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-matrix__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(244,181,107,.25);
+  border-radius:999px;
+  color:var(--accent2);
+  background:rgba(244,181,107,.09);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-summary {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-summary span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .load-combination-force-summary b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-stepper {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-step {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:5px;
+  min-height:24px;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:6px;
+  color:var(--text);
+  background:rgba(7,17,28,.44);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-step span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-step b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-step em {
+  color:var(--muted);
+  font-size:7px;
+  font-style:normal;
+  font-weight:800;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-step strong {
+  color:var(--accent2);
+  font-size:7px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-step:hover,
+body.structural-surface.command-center-shell .load-combination-force-step:focus-visible,
+body.structural-surface.command-center-shell .load-combination-force-step.is-active {
+  border-color:rgba(244,181,107,.42);
+  background:rgba(244,181,107,.10);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-step--warn strong { color:var(--warn); }
+body.structural-surface.command-center-shell .load-combination-force-step--danger strong { color:var(--danger); }
+
+body.structural-surface.command-center-shell .load-combination-force-rows {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-row {
+  display:grid;
+  grid-template-columns:minmax(76px,.78fr) minmax(50px,.34fr) minmax(0,1.28fr);
+  align-items:center;
+  gap:7px;
+  width:100%;
+  min-height:36px;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(7,17,28,.50);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-row:hover,
+body.structural-surface.command-center-shell .load-combination-force-row:focus-visible,
+body.structural-surface.command-center-shell .load-combination-force-row.is-active {
+  border-color:rgba(244,181,107,.36);
+  background:rgba(244,181,107,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-row__meter {
+  display:block;
+  height:7px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(148,168,190,.13);
+}
+
+body.structural-surface.command-center-shell .load-combination-force-row__meter i {
+  display:block;
+  width:var(--load-combination-force,0%);
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+
+body.structural-surface.command-center-shell .load-combination-force-row--warn .load-combination-force-row__meter i { background:var(--warn); }
+body.structural-surface.command-center-shell .load-combination-force-row--danger .load-combination-force-row__meter i { background:var(--danger); }
+
+body.structural-surface.command-center-shell .load-combination-force-row__combo b,
+body.structural-surface.command-center-shell .load-combination-force-row__result strong {
+  color:var(--text);
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .load-combination-force-row--warn .load-combination-force-row__result strong { color:var(--warn); }
+body.structural-surface.command-center-shell .load-combination-force-row--danger .load-combination-force-row__result strong { color:var(--danger); }
+
+body.structural-surface.command-center-shell .member-force-diagram-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(79,183,173,.18);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(7,24,25,.58), rgba(4,12,21,.66));
+}
+
+body.structural-surface.command-center-shell .member-force-diagram {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__head,
+body.structural-surface.command-center-shell .member-force-diagram__summary,
+body.structural-surface.command-center-shell .member-force-diagram-row {
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__head span,
+body.structural-surface.command-center-shell .member-force-diagram-row__label,
+body.structural-surface.command-center-shell .member-force-diagram-row__result {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__head b,
+body.structural-surface.command-center-shell .member-force-diagram__head em,
+body.structural-surface.command-center-shell .member-force-diagram__head strong,
+body.structural-surface.command-center-shell .member-force-diagram__summary b,
+body.structural-surface.command-center-shell .member-force-diagram__summary em,
+body.structural-surface.command-center-shell .member-force-diagram-row b,
+body.structural-surface.command-center-shell .member-force-diagram-row em,
+body.structural-surface.command-center-shell .member-force-diagram-row strong,
+body.structural-surface.command-center-shell .member-force-diagram-row small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__head em,
+body.structural-surface.command-center-shell .member-force-diagram__summary em,
+body.structural-surface.command-center-shell .member-force-diagram-row em,
+body.structural-surface.command-center-shell .member-force-diagram-row small {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(79,183,173,.25);
+  border-radius:999px;
+  color:var(--accent);
+  background:rgba(79,183,173,.09);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__summary {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__summary span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__summary b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram__rows {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram-row {
+  display:grid;
+  grid-template-columns:minmax(66px,.66fr) 92px minmax(0,1fr);
+  align-items:center;
+  gap:6px;
+  width:100%;
+  min-height:45px;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(7,17,28,.50);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram-row:hover,
+body.structural-surface.command-center-shell .member-force-diagram-row:focus-visible {
+  border-color:rgba(79,183,173,.36);
+  background:rgba(79,183,173,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram-row__label b,
+body.structural-surface.command-center-shell .member-force-diagram-row__result strong {
+  color:var(--text);
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram-row__svg {
+  display:block;
+  width:92px;
+  height:42px;
+  overflow:visible;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram-row__axis {
+  fill:none;
+  stroke:rgba(148,168,190,.25);
+  stroke-width:1;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram-row__path {
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram-row__node {
+  fill:rgba(226,232,240,.85);
+  stroke:rgba(7,15,24,.9);
+  stroke-width:1;
+}
+
+body.structural-surface.command-center-shell .member-force-diagram-row--warn .member-force-diagram-row__path { stroke:var(--warn); }
+body.structural-surface.command-center-shell .member-force-diagram-row--danger .member-force-diagram-row__path { stroke:var(--danger); }
+body.structural-surface.command-center-shell .member-force-diagram-row--warn .member-force-diagram-row__result strong { color:var(--warn); }
+body.structural-surface.command-center-shell .member-force-diagram-row--danger .member-force-diagram-row__result strong { color:var(--danger); }
+
+body.structural-surface.command-center-shell .member-force-envelope-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(94,234,212,.16);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(5,30,34,.54), rgba(4,12,21,.66));
+}
+
+body.structural-surface.command-center-shell .member-force-envelope {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__head,
+body.structural-surface.command-center-shell .member-force-envelope__summary,
+body.structural-surface.command-center-shell .member-force-envelope-row {
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__head span,
+body.structural-surface.command-center-shell .member-force-envelope-row__label,
+body.structural-surface.command-center-shell .member-force-envelope-row__result {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__head b,
+body.structural-surface.command-center-shell .member-force-envelope__head em,
+body.structural-surface.command-center-shell .member-force-envelope__head strong,
+body.structural-surface.command-center-shell .member-force-envelope__summary b,
+body.structural-surface.command-center-shell .member-force-envelope__summary em,
+body.structural-surface.command-center-shell .member-force-envelope-row b,
+body.structural-surface.command-center-shell .member-force-envelope-row em,
+body.structural-surface.command-center-shell .member-force-envelope-row strong,
+body.structural-surface.command-center-shell .member-force-envelope-row small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:0;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__head em,
+body.structural-surface.command-center-shell .member-force-envelope__summary em,
+body.structural-surface.command-center-shell .member-force-envelope-row em,
+body.structural-surface.command-center-shell .member-force-envelope-row small {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(94,234,212,.25);
+  border-radius:999px;
+  color:var(--accent);
+  background:rgba(94,234,212,.08);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__summary {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__summary span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__summary b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope__rows {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope-row {
+  display:grid;
+  grid-template-columns:minmax(72px,.62fr) 104px minmax(0,1fr);
+  align-items:center;
+  gap:6px;
+  width:100%;
+  min-height:45px;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(6,19,30,.52);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope-row:hover,
+body.structural-surface.command-center-shell .member-force-envelope-row:focus-visible {
+  border-color:rgba(94,234,212,.36);
+  background:rgba(94,234,212,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope-row__label b,
+body.structural-surface.command-center-shell .member-force-envelope-row__result strong {
+  color:var(--text);
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope-row__svg {
+  display:block;
+  width:104px;
+  height:42px;
+  overflow:visible;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope-row__axis {
+  fill:none;
+  stroke:rgba(148,168,190,.22);
+  stroke-width:1;
+  stroke-dasharray:2 3;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope-row__path {
+  fill:none;
+  stroke:var(--accent);
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope-row__point {
+  fill:rgba(226,232,240,.72);
+  stroke:rgba(7,15,24,.9);
+  stroke-width:1;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope-row__point.is-selected {
+  fill:#fff;
+  stroke:var(--accent);
+  stroke-width:1.5;
+}
+
+body.structural-surface.command-center-shell .member-force-envelope-row--warn .member-force-envelope-row__path { stroke:var(--warn); }
+body.structural-surface.command-center-shell .member-force-envelope-row--danger .member-force-envelope-row__path { stroke:var(--danger); }
+body.structural-surface.command-center-shell .member-force-envelope-row--warn .member-force-envelope-row__result strong { color:var(--warn); }
+body.structural-surface.command-center-shell .member-force-envelope-row--danger .member-force-envelope-row__result strong { color:var(--danger); }
+
+body.structural-surface.command-center-shell .member-force-history-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(96,165,250,.16);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(7,21,38,.55), rgba(4,12,21,.66));
+}
+
+body.structural-surface.command-center-shell .member-force-history {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-history__head,
+body.structural-surface.command-center-shell .member-force-history__summary,
+body.structural-surface.command-center-shell .member-force-history-row {
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-history__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+
+body.structural-surface.command-center-shell .member-force-history__head span,
+body.structural-surface.command-center-shell .member-force-history-row__label,
+body.structural-surface.command-center-shell .member-force-history-row__result {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-history__head b,
+body.structural-surface.command-center-shell .member-force-history__head em,
+body.structural-surface.command-center-shell .member-force-history__head strong,
+body.structural-surface.command-center-shell .member-force-history__summary b,
+body.structural-surface.command-center-shell .member-force-history__summary em,
+body.structural-surface.command-center-shell .member-force-history-row b,
+body.structural-surface.command-center-shell .member-force-history-row em,
+body.structural-surface.command-center-shell .member-force-history-row strong,
+body.structural-surface.command-center-shell .member-force-history-row small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .member-force-history__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:0;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .member-force-history__head em,
+body.structural-surface.command-center-shell .member-force-history__summary em,
+body.structural-surface.command-center-shell .member-force-history-row em,
+body.structural-surface.command-center-shell .member-force-history-row small {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .member-force-history__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(96,165,250,.25);
+  border-radius:999px;
+  color:#93c5fd;
+  background:rgba(96,165,250,.09);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-history__summary {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .member-force-history__summary span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .member-force-history__summary b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-history__rows {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row {
+  display:grid;
+  grid-template-columns:minmax(70px,.60fr) 104px minmax(0,1fr);
+  align-items:center;
+  gap:6px;
+  width:100%;
+  min-height:45px;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(6,18,32,.52);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row:hover,
+body.structural-surface.command-center-shell .member-force-history-row:focus-visible {
+  border-color:rgba(96,165,250,.38);
+  background:rgba(96,165,250,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row__label b,
+body.structural-surface.command-center-shell .member-force-history-row__result strong {
+  color:var(--text);
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row__svg {
+  display:block;
+  width:104px;
+  height:42px;
+  overflow:visible;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row__axis {
+  fill:none;
+  stroke:rgba(148,168,190,.22);
+  stroke-width:1;
+  stroke-dasharray:2 3;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row__area {
+  fill:rgba(96,165,250,.16);
+  stroke:none;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row__path {
+  fill:none;
+  stroke:#93c5fd;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row__point {
+  fill:rgba(226,232,240,.72);
+  stroke:rgba(7,15,24,.9);
+  stroke-width:1;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row__point.is-selected {
+  fill:#fff;
+  stroke:#93c5fd;
+  stroke-width:1.5;
+}
+
+body.structural-surface.command-center-shell .member-force-history-row--warn .member-force-history-row__path { stroke:var(--warn); }
+body.structural-surface.command-center-shell .member-force-history-row--danger .member-force-history-row__path { stroke:var(--danger); }
+body.structural-surface.command-center-shell .member-force-history-row--warn .member-force-history-row__area { fill:rgba(250,204,21,.16); }
+body.structural-surface.command-center-shell .member-force-history-row--danger .member-force-history-row__area { fill:rgba(248,113,113,.16); }
+body.structural-surface.command-center-shell .member-force-history-row--warn .member-force-history-row__result strong { color:var(--warn); }
+body.structural-surface.command-center-shell .member-force-history-row--danger .member-force-history-row__result strong { color:var(--danger); }
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(244,181,107,.18);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(31,22,10,.55), rgba(5,13,22,.68));
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__head,
+body.structural-surface.command-center-shell .member-material-nonlinear-state__summary,
+body.structural-surface.command-center-shell .member-material-nonlinear-row,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row {
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__head span,
+body.structural-surface.command-center-shell .member-material-nonlinear-row__main,
+body.structural-surface.command-center-shell .member-material-nonlinear-row__meta,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__head b,
+body.structural-surface.command-center-shell .member-material-nonlinear-state__head em,
+body.structural-surface.command-center-shell .member-material-nonlinear-state__head strong,
+body.structural-surface.command-center-shell .member-material-nonlinear-state__summary b,
+body.structural-surface.command-center-shell .member-material-nonlinear-state__summary em,
+body.structural-surface.command-center-shell .member-material-nonlinear-row b,
+body.structural-surface.command-center-shell .member-material-nonlinear-row em,
+body.structural-surface.command-center-shell .member-material-nonlinear-row strong,
+body.structural-surface.command-center-shell .member-material-nonlinear-row small,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row b,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row em,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row strong,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:0;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__head em,
+body.structural-surface.command-center-shell .member-material-nonlinear-state__summary em,
+body.structural-surface.command-center-shell .member-material-nonlinear-row em,
+body.structural-surface.command-center-shell .member-material-nonlinear-row small,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row em,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row small {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(244,181,107,.26);
+  border-radius:999px;
+  color:var(--accent2);
+  background:rgba(244,181,107,.08);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state--danger .member-material-nonlinear-state__head strong { color:var(--danger); }
+body.structural-surface.command-center-shell .member-material-nonlinear-state--warn .member-material-nonlinear-state__head strong { color:var(--warn); }
+body.structural-surface.command-center-shell .member-material-nonlinear-state--success .member-material-nonlinear-state__head strong { color:var(--success); }
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__summary {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__summary span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__summary b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-row {
+  display:grid;
+  grid-template-columns:minmax(86px,.72fr) 104px minmax(0,1fr);
+  align-items:center;
+  gap:6px;
+  width:100%;
+  min-height:54px;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(7,17,28,.50);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-row:hover,
+body.structural-surface.command-center-shell .member-material-nonlinear-row:focus-visible {
+  border-color:rgba(244,181,107,.38);
+  background:rgba(244,181,107,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-row__main b,
+body.structural-surface.command-center-shell .member-material-nonlinear-row__meta strong,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row b,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row strong {
+  color:var(--text);
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-row__curve {
+  display:block;
+  width:104px;
+  height:42px;
+  overflow:visible;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-row__axis,
+body.structural-surface.command-center-shell .member-material-nonlinear-row__yield-line {
+  fill:none;
+  stroke:rgba(148,168,190,.24);
+  stroke-width:1;
+  stroke-dasharray:2 3;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-row__path {
+  fill:none;
+  stroke:var(--accent2);
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-row__yield {
+  fill:rgba(226,232,240,.78);
+  stroke:rgba(7,15,24,.9);
+  stroke-width:1;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-row__demand {
+  fill:#fff;
+  stroke:var(--accent2);
+  stroke-width:1.6;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-row--danger .member-material-nonlinear-row__path,
+body.structural-surface.command-center-shell .member-material-nonlinear-row--danger .member-material-nonlinear-row__demand { stroke:var(--danger); }
+body.structural-surface.command-center-shell .member-material-nonlinear-row--warn .member-material-nonlinear-row__path,
+body.structural-surface.command-center-shell .member-material-nonlinear-row--warn .member-material-nonlinear-row__demand { stroke:var(--warn); }
+body.structural-surface.command-center-shell .member-material-nonlinear-row--success .member-material-nonlinear-row__path,
+body.structural-surface.command-center-shell .member-material-nonlinear-row--success .member-material-nonlinear-row__demand { stroke:var(--success); }
+body.structural-surface.command-center-shell .member-material-nonlinear-row--danger .member-material-nonlinear-row__meta strong { color:var(--danger); }
+body.structural-surface.command-center-shell .member-material-nonlinear-row--warn .member-material-nonlinear-row__meta strong { color:var(--warn); }
+body.structural-surface.command-center-shell .member-material-nonlinear-row--success .member-material-nonlinear-row__meta strong { color:var(--success); }
+
+body.structural-surface.command-center-shell .member-material-nonlinear-state__forces {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 36px;
+  gap:4px;
+  align-items:center;
+  width:100%;
+  min-height:36px;
+  padding:5px 6px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(6,18,30,.48);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row small {
+  grid-column:1 / -1;
+}
+
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row:hover,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row:focus-visible,
+body.structural-surface.command-center-shell .member-material-nonlinear-force-row.is-active {
+  border-color:rgba(244,181,107,.34);
+  background:rgba(244,181,107,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(125,211,252,.18);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(9,28,39,.54), rgba(4,12,21,.68));
+}
+
+body.structural-surface.command-center-shell .member-section-capacity {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__head,
+body.structural-surface.command-center-shell .member-section-capacity__summary,
+body.structural-surface.command-center-shell .member-section-capacity-row {
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__head span,
+body.structural-surface.command-center-shell .member-section-capacity-row__main,
+body.structural-surface.command-center-shell .member-section-capacity-row__meta {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__head b,
+body.structural-surface.command-center-shell .member-section-capacity__head em,
+body.structural-surface.command-center-shell .member-section-capacity__head strong,
+body.structural-surface.command-center-shell .member-section-capacity__summary b,
+body.structural-surface.command-center-shell .member-section-capacity__summary em,
+body.structural-surface.command-center-shell .member-section-capacity-row b,
+body.structural-surface.command-center-shell .member-section-capacity-row em,
+body.structural-surface.command-center-shell .member-section-capacity-row strong,
+body.structural-surface.command-center-shell .member-section-capacity-row small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:0;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__head em,
+body.structural-surface.command-center-shell .member-section-capacity__summary em,
+body.structural-surface.command-center-shell .member-section-capacity-row em,
+body.structural-surface.command-center-shell .member-section-capacity-row small {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(125,211,252,.24);
+  border-radius:999px;
+  color:var(--accent);
+  background:rgba(125,211,252,.08);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__summary {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__summary span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__summary b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity__rows {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity-row {
+  display:grid;
+  grid-template-columns:minmax(80px,.72fr) 74px minmax(0,1fr);
+  gap:6px;
+  align-items:center;
+  width:100%;
+  min-height:40px;
+  padding:5px 7px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:7px;
+  color:var(--text);
+  background:rgba(7,17,28,.50);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity-row:hover,
+body.structural-surface.command-center-shell .member-section-capacity-row:focus-visible {
+  border-color:rgba(125,211,252,.40);
+  background:rgba(125,211,252,.08);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity-row__main b,
+body.structural-surface.command-center-shell .member-section-capacity-row__meta strong {
+  color:var(--text);
+  font-size:8.5px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity-row__bars {
+  display:grid;
+  gap:4px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-section-capacity-row__bar {
+  display:block;
+  position:relative;
+  height:5px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(148,168,190,.16);
+}
+
+body.structural-surface.command-center-shell .member-section-capacity-row__bar::before {
+  content:"";
+  display:block;
+  width:var(--member-section-capacity, 0%);
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg, var(--accent), rgba(125,211,252,.52));
+}
+
+body.structural-surface.command-center-shell .member-section-capacity-row__bar--estimate::before {
+  background:linear-gradient(90deg, var(--accent2), rgba(244,181,107,.50));
+}
+
+body.structural-surface.command-center-shell .member-section-capacity-row--warn .member-section-capacity-row__meta strong { color:var(--warn); }
+body.structural-surface.command-center-shell .member-section-capacity-row--danger .member-section-capacity-row__meta strong { color:var(--danger); }
+body.structural-surface.command-center-shell .member-section-capacity-row--accent .member-section-capacity-row__meta strong { color:var(--accent); }
+body.structural-surface.command-center-shell .member-section-capacity-row--danger .member-section-capacity-row__bar--source::before { background:linear-gradient(90deg, var(--danger), rgba(248,113,113,.52)); }
+body.structural-surface.command-center-shell .member-section-capacity-row--warn .member-section-capacity-row__bar--source::before { background:linear-gradient(90deg, var(--warn), rgba(250,204,21,.52)); }
+
+body.structural-surface.command-center-shell .member-force-playback-panel {
+  display:grid;
+  gap:6px;
+  min-width:0;
+  margin-top:7px;
+  padding:7px;
+  border:1px solid rgba(125,211,252,.16);
+  border-radius:8px;
+  background:linear-gradient(180deg, rgba(7,24,34,.54), rgba(4,12,21,.66));
+}
+
+body.structural-surface.command-center-shell .member-force-playback {
+  display:grid;
+  gap:6px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__head,
+body.structural-surface.command-center-shell .member-force-playback__controls,
+body.structural-surface.command-center-shell .member-force-playback__summary,
+body.structural-surface.command-center-shell .member-force-playback__track,
+body.structural-surface.command-center-shell .member-force-playback-frame {
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__head {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__head span,
+body.structural-surface.command-center-shell .member-force-playback__controls span,
+body.structural-surface.command-center-shell .member-force-playback-frame {
+  display:grid;
+  gap:1px;
+  min-width:0;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__head b,
+body.structural-surface.command-center-shell .member-force-playback__head em,
+body.structural-surface.command-center-shell .member-force-playback__head strong,
+body.structural-surface.command-center-shell .member-force-playback__controls b,
+body.structural-surface.command-center-shell .member-force-playback__controls em,
+body.structural-surface.command-center-shell .member-force-playback__summary b,
+body.structural-surface.command-center-shell .member-force-playback__summary em,
+body.structural-surface.command-center-shell .member-force-playback-frame span,
+body.structural-surface.command-center-shell .member-force-playback-frame em {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-style:normal;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__head b {
+  color:var(--text);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:0;
+  text-transform:uppercase;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__head em,
+body.structural-surface.command-center-shell .member-force-playback__controls em,
+body.structural-surface.command-center-shell .member-force-playback__summary em,
+body.structural-surface.command-center-shell .member-force-playback-frame em {
+  color:var(--muted);
+  font-size:7.5px;
+  font-weight:700;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__head strong {
+  padding:3px 6px;
+  border:1px solid rgba(125,211,252,.25);
+  border-radius:999px;
+  color:var(--accent);
+  background:rgba(125,211,252,.08);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__controls {
+  display:grid;
+  grid-template-columns:32px 38px 32px minmax(0,1fr);
+  align-items:center;
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__controls button {
+  min-width:0;
+  height:24px;
+  padding:0 5px;
+  border:1px solid rgba(148,168,190,.16);
+  border-radius:6px;
+  color:var(--text);
+  background:rgba(255,255,255,.045);
+  font-size:7.5px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__controls button:hover,
+body.structural-surface.command-center-shell .member-force-playback__controls button:focus-visible,
+body.structural-surface.command-center-shell .member-force-playback__controls button[aria-pressed="true"] {
+  border-color:rgba(125,211,252,.34);
+  background:rgba(125,211,252,.10);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__controls b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__summary {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__summary span {
+  display:grid;
+  gap:1px;
+  min-width:0;
+  padding:4px 5px;
+  border:1px solid rgba(148,168,190,.12);
+  border-radius:6px;
+  background:rgba(255,255,255,.035);
+}
+
+body.structural-surface.command-center-shell .member-force-playback__summary b {
+  color:var(--text);
+  font-size:8px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-playback__track {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px;
+}
+
+body.structural-surface.command-center-shell .member-force-playback-frame {
+  width:100%;
+  min-height:40px;
+  padding:5px;
+  border:1px solid rgba(148,168,190,.13);
+  border-radius:6px;
+  color:var(--text);
+  background:rgba(6,18,30,.52);
+  text-align:left;
+  cursor:pointer;
+}
+
+body.structural-surface.command-center-shell .member-force-playback-frame:hover,
+body.structural-surface.command-center-shell .member-force-playback-frame:focus-visible,
+body.structural-surface.command-center-shell .member-force-playback-frame.is-active {
+  border-color:rgba(125,211,252,.40);
+  background:rgba(125,211,252,.10);
+  outline:none;
+}
+
+body.structural-surface.command-center-shell .member-force-playback-frame span {
+  color:var(--text);
+  font-size:7.5px;
+  font-weight:900;
+}
+
+body.structural-surface.command-center-shell .member-force-playback-frame i {
+  display:block;
+  width:100%;
+  height:4px;
+  border-radius:999px;
+  background:linear-gradient(90deg, var(--accent) var(--member-force-playback), rgba(148,168,190,.18) var(--member-force-playback));
+}
+
+body.structural-surface.command-center-shell .member-force-playback-frame--warn i { background:linear-gradient(90deg, var(--warn) var(--member-force-playback), rgba(148,168,190,.18) var(--member-force-playback)); }
+body.structural-surface.command-center-shell .member-force-playback-frame--danger i { background:linear-gradient(90deg, var(--danger) var(--member-force-playback), rgba(148,168,190,.18) var(--member-force-playback)); }
+body.structural-surface.command-center-shell .member-force-playback-frame--warn em { color:var(--warn); }
+body.structural-surface.command-center-shell .member-force-playback-frame--danger em { color:var(--danger); }
 
 body.structural-surface.command-center-shell .critical-triage-panel {
   display:grid;
@@ -8302,6 +12172,50 @@ body.structural-surface.panel-inspection-shell canvas {
     line-height:1.35;
   }
 
+  body.structural-surface.command-center-shell .analysis-chart-axis-receipt {
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-axis-receipt span {
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    align-items:center;
+    gap:3px;
+    min-width:0;
+    min-height:16px;
+    padding:2px 4px;
+    border-radius:5px;
+    border:1px solid rgba(148,168,190,.12);
+    background:rgba(255,255,255,.032);
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-axis-receipt b,
+  body.structural-surface.command-center-shell .analysis-chart-axis-receipt em {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+    line-height:1.05;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-axis-receipt b {
+    color:rgba(190,204,222,.70);
+    font-size:7px;
+    font-weight:850;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .analysis-chart-axis-receipt em {
+    color:var(--text);
+    font-size:8px;
+    font-weight:750;
+  }
+
   body.structural-surface.command-center-shell .analysis-line-chart,
   body.structural-surface.command-center-shell .analysis-heatmap-chart {
     flex:1;
@@ -9002,6 +12916,1025 @@ body.structural-surface.panel-inspection-shell canvas {
     min-width:0;
   }
 
+  body.structural-surface.command-center-shell .material-model-parity-panel {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    margin-bottom:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(57,255,136,.18);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(57,255,136,.08), rgba(7,15,24,.42));
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity--warn {
+    border-color:rgba(230,169,93,.26);
+    background:linear-gradient(135deg, rgba(230,169,93,.10), rgba(7,15,24,.42));
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__head span,
+  body.structural-surface.command-center-shell .material-model-parity-row {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__head b,
+  body.structural-surface.command-center-shell .material-model-parity__head em,
+  body.structural-surface.command-center-shell .material-model-parity__head strong,
+  body.structural-surface.command-center-shell .material-model-parity__summary b,
+  body.structural-surface.command-center-shell .material-model-parity__summary em,
+  body.structural-surface.command-center-shell .material-model-parity-row b,
+  body.structural-surface.command-center-shell .material-model-parity-row strong,
+  body.structural-surface.command-center-shell .material-model-parity-row em {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__head b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:0;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__head em,
+  body.structural-surface.command-center-shell .material-model-parity__summary em,
+  body.structural-surface.command-center-shell .material-model-parity-row em {
+    color:var(--muted);
+    font-size:7.5px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__head strong {
+    padding:3px 6px;
+    border:1px solid rgba(57,255,136,.24);
+    border-radius:999px;
+    color:var(--success);
+    background:rgba(57,255,136,.08);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity--warn .material-model-parity__head strong {
+    color:var(--warn);
+    border-color:rgba(230,169,93,.26);
+    background:rgba(230,169,93,.08);
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__summary {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__summary span {
+    display:grid;
+    gap:1px;
+    min-width:0;
+    padding:4px 5px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:6px;
+    background:rgba(255,255,255,.035);
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__summary b,
+  body.structural-surface.command-center-shell .material-model-parity-row b,
+  body.structural-surface.command-center-shell .material-model-parity-row strong {
+    color:var(--text);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity-row {
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.13);
+    border-radius:7px;
+    background:rgba(7,17,28,.46);
+  }
+
+  body.structural-surface.command-center-shell .material-model-parity-row--success strong { color:var(--success); }
+  body.structural-surface.command-center-shell .material-model-parity-row--warn strong { color:var(--warn); }
+  body.structural-surface.command-center-shell .material-model-parity-row--danger strong { color:var(--danger); }
+  body.structural-surface.command-center-shell .material-model-parity-row--accent strong { color:var(--accent); }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger-panel {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    margin-bottom:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(125,211,252,.18);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(125,211,252,.075), rgba(7,15,24,.42));
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger--needs_review {
+    border-color:rgba(230,169,93,.28);
+    background:linear-gradient(135deg, rgba(230,169,93,.10), rgba(7,15,24,.42));
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head span,
+  body.structural-surface.command-center-shell .material-model-signature-row__main,
+  body.structural-surface.command-center-shell .material-model-signature-row__props,
+  body.structural-surface.command-center-shell .material-model-signature-row__raw {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head b,
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head em,
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head strong,
+  body.structural-surface.command-center-shell .material-model-signature-row b,
+  body.structural-surface.command-center-shell .material-model-signature-row em,
+  body.structural-surface.command-center-shell .material-model-signature-row strong {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:0;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head em {
+    color:var(--muted);
+    font-size:7.5px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head strong {
+    padding:3px 6px;
+    border:1px solid rgba(125,211,252,.24);
+    border-radius:999px;
+    color:var(--accent2);
+    background:rgba(125,211,252,.08);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__rows {
+    display:grid;
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row {
+    display:grid;
+    grid-template-columns:34px minmax(0,1fr) minmax(68px,.58fr) minmax(92px,.72fr);
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    width:100%;
+    min-height:36px;
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.13);
+    border-radius:7px;
+    color:var(--text);
+    background:rgba(7,17,28,.46);
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row:hover,
+  body.structural-surface.command-center-shell .material-model-signature-row:focus-visible {
+    border-color:rgba(125,211,252,.34);
+    background:rgba(125,211,252,.075);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row__id {
+    display:grid;
+    place-items:center;
+    gap:1px;
+    min-width:0;
+    padding:3px 2px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:6px;
+    background:rgba(255,255,255,.035);
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row__id b {
+    color:var(--accent2);
+    font-size:9px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row__id em,
+  body.structural-surface.command-center-shell .material-model-signature-row em {
+    color:var(--muted);
+    font-size:7px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row__main b,
+  body.structural-surface.command-center-shell .material-model-signature-row__props strong,
+  body.structural-surface.command-center-shell .material-model-signature-row__raw b {
+    color:var(--text);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row--success .material-model-signature-row__id b { color:var(--success); }
+  body.structural-surface.command-center-shell .material-model-signature-row--warn .material-model-signature-row__id b { color:var(--warn); }
+  body.structural-surface.command-center-shell .material-model-signature-row--danger .material-model-signature-row__id b { color:var(--danger); }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas-panel {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    margin-bottom:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(79,183,173,.20);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(79,183,173,.09), rgba(7,15,24,.46));
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head span,
+  body.structural-surface.command-center-shell .material-model-demand-row__main,
+  body.structural-surface.command-center-shell .material-model-demand-row__meta {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head b,
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head em,
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head strong,
+  body.structural-surface.command-center-shell .material-model-demand-atlas__summary b,
+  body.structural-surface.command-center-shell .material-model-demand-atlas__summary em,
+  body.structural-surface.command-center-shell .material-model-demand-row b,
+  body.structural-surface.command-center-shell .material-model-demand-row em,
+  body.structural-surface.command-center-shell .material-model-demand-row strong,
+  body.structural-surface.command-center-shell .material-model-demand-row small {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:0;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head em,
+  body.structural-surface.command-center-shell .material-model-demand-atlas__summary em,
+  body.structural-surface.command-center-shell .material-model-demand-row em,
+  body.structural-surface.command-center-shell .material-model-demand-row small {
+    color:var(--muted);
+    font-size:7.5px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head strong {
+    padding:3px 6px;
+    border:1px solid rgba(79,183,173,.28);
+    border-radius:999px;
+    color:var(--success);
+    background:rgba(79,183,173,.09);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__summary span {
+    display:grid;
+    gap:1px;
+    min-width:0;
+    padding:4px 5px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:6px;
+    background:rgba(255,255,255,.035);
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__summary b,
+  body.structural-surface.command-center-shell .material-model-demand-row b,
+  body.structural-surface.command-center-shell .material-model-demand-row strong {
+    color:var(--text);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row {
+    display:grid;
+    grid-template-columns:7px minmax(0,.98fr) 52px minmax(82px,.86fr);
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    width:100%;
+    min-height:50px;
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.13);
+    border-radius:7px;
+    color:var(--text);
+    background:rgba(7,17,28,.46);
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row:hover,
+  body.structural-surface.command-center-shell .material-model-demand-row:focus-visible {
+    border-color:rgba(79,183,173,.38);
+    background:rgba(79,183,173,.07);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row__swatch {
+    width:7px;
+    height:36px;
+    border-radius:999px;
+    background:linear-gradient(180deg, var(--success), var(--accent));
+    box-shadow:0 0 0 1px rgba(255,255,255,.14) inset;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row__meter {
+    display:grid;
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row__bar {
+    display:block;
+    width:100%;
+    height:6px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(148,168,190,.13);
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row__bar::before {
+    content:"";
+    display:block;
+    width:var(--material-model-demand-bar,0%);
+    height:100%;
+    border-radius:inherit;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row__bar--dcr::before { background:var(--warn); }
+  body.structural-surface.command-center-shell .material-model-demand-row__bar--demand::before { background:var(--accent); }
+  body.structural-surface.command-center-shell .material-model-demand-row--success .material-model-demand-row__meta strong { color:var(--success); }
+  body.structural-surface.command-center-shell .material-model-demand-row--accent .material-model-demand-row__meta strong { color:var(--accent); }
+  body.structural-surface.command-center-shell .material-model-demand-row--warn .material-model-demand-row__meta strong { color:var(--warn); }
+  body.structural-surface.command-center-shell .material-model-demand-row--danger .material-model-demand-row__meta strong { color:var(--danger); }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-panel {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    margin-bottom:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(167,139,250,.20);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(167,139,250,.08), rgba(7,15,24,.46));
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__head span,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__main,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__meta {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__head b,
+  body.structural-surface.command-center-shell .material-model-force-envelope__head em,
+  body.structural-surface.command-center-shell .material-model-force-envelope__head strong,
+  body.structural-surface.command-center-shell .material-model-force-envelope__summary b,
+  body.structural-surface.command-center-shell .material-model-force-envelope__summary em,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row b,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row em,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row strong,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row small {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__head b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:0;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__head em,
+  body.structural-surface.command-center-shell .material-model-force-envelope__summary em,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row em,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row small {
+    color:var(--muted);
+    font-size:7.5px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__head strong {
+    padding:3px 6px;
+    border:1px solid rgba(167,139,250,.30);
+    border-radius:999px;
+    color:var(--accent2);
+    background:rgba(167,139,250,.09);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__summary span {
+    display:grid;
+    gap:1px;
+    min-width:0;
+    padding:4px 5px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:6px;
+    background:rgba(255,255,255,.035);
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__summary b,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row b,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row strong {
+    color:var(--text);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__rows {
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row {
+    display:grid;
+    grid-template-columns:7px minmax(0,.88fr) 64px 46px minmax(74px,.78fr);
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    width:100%;
+    min-height:52px;
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.13);
+    border-radius:7px;
+    color:var(--text);
+    background:rgba(7,17,28,.46);
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row:hover,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row:focus-visible {
+    border-color:rgba(167,139,250,.42);
+    background:rgba(167,139,250,.075);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__swatch {
+    width:7px;
+    height:36px;
+    border-radius:999px;
+    background:linear-gradient(180deg, var(--accent2), var(--accent));
+    box-shadow:0 0 0 1px rgba(255,255,255,.14) inset;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__chart,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__bars {
+    display:grid;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__chart svg {
+    width:100%;
+    height:36px;
+    overflow:visible;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__grid {
+    fill:none;
+    stroke:rgba(148,168,190,.16);
+    stroke-width:1;
+    vector-effect:non-scaling-stroke;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__line {
+    fill:none;
+    stroke:var(--accent2);
+    stroke-width:2;
+    vector-effect:non-scaling-stroke;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__point {
+    fill:rgba(167,139,250,.72);
+    stroke:rgba(7,15,24,.78);
+    stroke-width:1;
+    vector-effect:non-scaling-stroke;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__point.is-selected { fill:var(--accent); }
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__point.is-governing { fill:var(--warn); }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__bars {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__bar {
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(148,168,190,.13);
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__bar::before {
+    content:"";
+    display:block;
+    width:var(--material-model-force-envelope-bar,0%);
+    height:100%;
+    border-radius:inherit;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__bar--axial::before { background:var(--accent); }
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__bar--shear::before { background:var(--warn); }
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__bar--moment::before { background:var(--accent2); }
+  body.structural-surface.command-center-shell .material-model-force-envelope-row--success .material-model-force-envelope-row__meta strong { color:var(--success); }
+  body.structural-surface.command-center-shell .material-model-force-envelope-row--accent .material-model-force-envelope-row__meta strong { color:var(--accent2); }
+  body.structural-surface.command-center-shell .material-model-force-envelope-row--warn .material-model-force-envelope-row__meta strong { color:var(--warn); }
+  body.structural-surface.command-center-shell .material-model-force-envelope-row--danger .material-model-force-envelope-row__meta strong { color:var(--danger); }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-panel {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    margin-bottom:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(244,181,107,.20);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(244,181,107,.08), rgba(7,15,24,.46));
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head span,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__main,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__meta {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head b,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head em,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head strong,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__summary b,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__summary em,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row b,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row em,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row strong,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row small {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:0;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head em,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__summary em,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row em,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row small {
+    color:var(--muted);
+    font-size:7.5px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head strong {
+    padding:3px 6px;
+    border:1px solid rgba(244,181,107,.30);
+    border-radius:999px;
+    color:var(--warn);
+    background:rgba(244,181,107,.09);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__summary span {
+    display:grid;
+    gap:1px;
+    min-width:0;
+    padding:4px 5px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:6px;
+    background:rgba(255,255,255,.035);
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__summary b,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row b,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row strong {
+    color:var(--text);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__rows {
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row {
+    display:grid;
+    grid-template-columns:7px minmax(0,.88fr) 64px 46px minmax(84px,.78fr);
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    width:100%;
+    min-height:52px;
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.13);
+    border-radius:7px;
+    color:var(--text);
+    background:rgba(7,17,28,.46);
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row:hover,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row:focus-visible {
+    border-color:rgba(244,181,107,.42);
+    background:rgba(244,181,107,.075);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__swatch {
+    width:7px;
+    height:36px;
+    border-radius:999px;
+    background:linear-gradient(180deg, var(--warn), var(--accent));
+    box-shadow:0 0 0 1px rgba(255,255,255,.14) inset;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__chart,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__bars {
+    display:grid;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__chart svg {
+    width:100%;
+    height:36px;
+    overflow:visible;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__grid {
+    fill:none;
+    stroke:rgba(148,168,190,.16);
+    stroke-width:1;
+    vector-effect:non-scaling-stroke;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__line {
+    fill:none;
+    stroke:var(--warn);
+    stroke-width:2;
+    vector-effect:non-scaling-stroke;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__point {
+    fill:rgba(244,181,107,.72);
+    stroke:rgba(7,15,24,.78);
+    stroke-width:1;
+    vector-effect:non-scaling-stroke;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__point.is-selected { fill:var(--accent); }
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__point.is-governing { fill:var(--danger); }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__bars {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__bar {
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(148,168,190,.13);
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__bar::before {
+    content:"";
+    display:block;
+    width:var(--material-model-capacity-envelope-bar,0%);
+    height:100%;
+    border-radius:inherit;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__bar--demand::before { background:var(--danger); }
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__bar--capacity::before { background:var(--accent); }
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__bar--margin::before { background:var(--success); }
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row--accent .material-model-capacity-envelope-row__meta strong { color:var(--accent); }
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row--warn .material-model-capacity-envelope-row__meta strong { color:var(--warn); }
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row--danger .material-model-capacity-envelope-row__meta strong { color:var(--danger); }
+
+  body.structural-surface.command-center-shell .material-force-interaction-panel {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    margin-bottom:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(125,211,252,.18);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(125,211,252,.08), rgba(7,15,24,.44));
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__head span,
+  body.structural-surface.command-center-shell .material-force-row__main,
+  body.structural-surface.command-center-shell .material-force-row__meta {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__head b,
+  body.structural-surface.command-center-shell .material-force-interaction__head em,
+  body.structural-surface.command-center-shell .material-force-interaction__head strong,
+  body.structural-surface.command-center-shell .material-force-interaction__summary b,
+  body.structural-surface.command-center-shell .material-force-interaction__summary em,
+  body.structural-surface.command-center-shell .material-force-row b,
+  body.structural-surface.command-center-shell .material-force-row em,
+  body.structural-surface.command-center-shell .material-force-row strong,
+  body.structural-surface.command-center-shell .material-force-row small {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__head b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:0;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__head em,
+  body.structural-surface.command-center-shell .material-force-interaction__summary em,
+  body.structural-surface.command-center-shell .material-force-row em,
+  body.structural-surface.command-center-shell .material-force-row small {
+    color:var(--muted);
+    font-size:7.5px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__head strong {
+    padding:3px 6px;
+    border:1px solid rgba(125,211,252,.25);
+    border-radius:999px;
+    color:var(--accent);
+    background:rgba(125,211,252,.08);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__summary span {
+    display:grid;
+    gap:1px;
+    min-width:0;
+    padding:4px 5px;
+    border:1px solid rgba(148,168,190,.12);
+    border-radius:6px;
+    background:rgba(255,255,255,.035);
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__summary b,
+  body.structural-surface.command-center-shell .material-force-row b,
+  body.structural-surface.command-center-shell .material-force-row strong {
+    color:var(--text);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row {
+    display:grid;
+    grid-template-columns:7px minmax(0,.82fr) 60px minmax(76px,.84fr);
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    width:100%;
+    min-height:45px;
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.13);
+    border-radius:7px;
+    color:var(--text);
+    background:rgba(7,17,28,.46);
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row:hover,
+  body.structural-surface.command-center-shell .material-force-row:focus-visible {
+    border-color:rgba(125,211,252,.38);
+    background:rgba(125,211,252,.07);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row__swatch {
+    width:7px;
+    height:32px;
+    border-radius:999px;
+    background:linear-gradient(180deg, var(--accent), var(--accent2));
+    box-shadow:0 0 0 1px rgba(255,255,255,.14) inset;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row__bars {
+    display:grid;
+    gap:3px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row__bar {
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(148,168,190,.13);
+  }
+
+  body.structural-surface.command-center-shell .material-force-row__bar::before {
+    content:"";
+    display:block;
+    width:var(--material-force-bar,0%);
+    height:100%;
+    border-radius:inherit;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row__bar--axial::before { background:var(--accent); }
+  body.structural-surface.command-center-shell .material-force-row__bar--shear::before { background:var(--warn); }
+  body.structural-surface.command-center-shell .material-force-row__bar--moment::before { background:var(--accent2); }
+  body.structural-surface.command-center-shell .material-force-row--danger .material-force-row__meta strong { color:var(--danger); }
+  body.structural-surface.command-center-shell .material-force-row--warn .material-force-row__meta strong { color:var(--warn); }
+  body.structural-surface.command-center-shell .material-force-row--accent .material-force-row__meta strong { color:var(--accent); }
+
   body.structural-surface.command-center-shell .material-coverage-readiness {
     display:grid;
     grid-template-columns:minmax(150px,.72fr) minmax(0,1.5fr) minmax(128px,.48fr);
@@ -9116,6 +14049,272 @@ body.structural-surface.panel-inspection-shell canvas {
     font-size:7px;
     font-style:normal;
   }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(244,181,107,.18);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(244,181,107,.08), rgba(7,15,24,.42));
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__head span,
+  body.structural-surface.command-center-shell .material-constitutive-row__main,
+  body.structural-surface.command-center-shell .material-constitutive-row__meta {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__head b,
+  body.structural-surface.command-center-shell .material-constitutive-lens__head em,
+  body.structural-surface.command-center-shell .material-constitutive-lens__head strong,
+  body.structural-surface.command-center-shell .material-constitutive-row b,
+  body.structural-surface.command-center-shell .material-constitutive-row em,
+  body.structural-surface.command-center-shell .material-constitutive-row strong,
+  body.structural-surface.command-center-shell .material-constitutive-row small {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__head b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__head em,
+  body.structural-surface.command-center-shell .material-constitutive-row em,
+  body.structural-surface.command-center-shell .material-constitutive-row small {
+    color:var(--muted);
+    font-size:7.5px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__head strong {
+    padding:3px 6px;
+    border:1px solid rgba(244,181,107,.24);
+    border-radius:999px;
+    color:var(--accent2);
+    background:rgba(244,181,107,.08);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-row {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 54px minmax(82px,.82fr);
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    width:100%;
+    min-height:38px;
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.13);
+    border-radius:7px;
+    color:var(--text);
+    background:rgba(7,17,28,.46);
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-row:hover,
+  body.structural-surface.command-center-shell .material-constitutive-row:focus-visible {
+    border-color:rgba(244,181,107,.36);
+    background:rgba(244,181,107,.07);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-row__main b,
+  body.structural-surface.command-center-shell .material-constitutive-row__meta strong {
+    color:var(--text);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-row__meter {
+    position:relative;
+    height:6px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(148,168,190,.13);
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-row__meter i {
+    position:absolute;
+    inset:0 auto 0 0;
+    width:var(--constitutive-demand,0%);
+    border-radius:inherit;
+    background:linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-row--warn .material-constitutive-row__meta strong { color:var(--warn); }
+  body.structural-surface.command-center-shell .material-constitutive-row--danger .material-constitutive-row__meta strong { color:var(--danger); }
+
+  body.structural-surface.command-center-shell .material-stress-strain-curves {
+    display:grid;
+    gap:6px;
+    min-width:0;
+    padding:7px;
+    border:1px solid rgba(79,183,173,.18);
+    border-radius:8px;
+    background:linear-gradient(135deg, rgba(79,183,173,.08), rgba(7,15,24,.42));
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-curves__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-curves__head span,
+  body.structural-surface.command-center-shell .material-stress-strain-row__main,
+  body.structural-surface.command-center-shell .material-stress-strain-row__meta {
+    display:grid;
+    gap:1px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-curves__head b,
+  body.structural-surface.command-center-shell .material-stress-strain-curves__head em,
+  body.structural-surface.command-center-shell .material-stress-strain-curves__head strong,
+  body.structural-surface.command-center-shell .material-stress-strain-row b,
+  body.structural-surface.command-center-shell .material-stress-strain-row em,
+  body.structural-surface.command-center-shell .material-stress-strain-row strong,
+  body.structural-surface.command-center-shell .material-stress-strain-row small {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-curves__head b {
+    color:var(--text);
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-curves__head em,
+  body.structural-surface.command-center-shell .material-stress-strain-row em,
+  body.structural-surface.command-center-shell .material-stress-strain-row small {
+    color:var(--muted);
+    font-size:7.5px;
+    font-weight:700;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-curves__head strong {
+    padding:3px 6px;
+    border:1px solid rgba(79,183,173,.26);
+    border-radius:999px;
+    color:var(--accent);
+    background:rgba(79,183,173,.08);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-curves__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:4px;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-row {
+    display:grid;
+    grid-template-columns:minmax(0,.86fr) 86px minmax(72px,.78fr);
+    align-items:center;
+    gap:6px;
+    min-width:0;
+    width:100%;
+    min-height:50px;
+    padding:5px 6px;
+    border:1px solid rgba(148,168,190,.13);
+    border-radius:7px;
+    color:var(--text);
+    background:rgba(7,17,28,.46);
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-row:hover,
+  body.structural-surface.command-center-shell .material-stress-strain-row:focus-visible {
+    border-color:rgba(79,183,173,.38);
+    background:rgba(79,183,173,.08);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-row__main b,
+  body.structural-surface.command-center-shell .material-stress-strain-row__meta strong {
+    color:var(--text);
+    font-size:8px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-row__curve {
+    display:block;
+    width:86px;
+    height:48px;
+    overflow:visible;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-row__axis {
+    fill:none;
+    stroke:rgba(148,168,190,.24);
+    stroke-width:1;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-row__path {
+    fill:none;
+    stroke:var(--accent);
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-row__yield {
+    fill:var(--accent2);
+    stroke:rgba(7,15,24,.9);
+    stroke-width:1;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-row__demand {
+    fill:var(--warn);
+    stroke:rgba(7,15,24,.9);
+    stroke-width:1;
+  }
+
+  body.structural-surface.command-center-shell .material-stress-strain-row--success .material-stress-strain-row__demand { fill:var(--success); }
+  body.structural-surface.command-center-shell .material-stress-strain-row--danger .material-stress-strain-row__path { stroke:var(--danger); }
+  body.structural-surface.command-center-shell .material-stress-strain-row--warn .material-stress-strain-row__path { stroke:var(--warn); }
+  body.structural-surface.command-center-shell .material-stress-strain-row--warn .material-stress-strain-row__meta strong { color:var(--warn); }
+  body.structural-surface.command-center-shell .material-stress-strain-row--danger .material-stress-strain-row__meta strong { color:var(--danger); }
 
   body.structural-surface.command-center-shell .material-review-queue {
     display:grid;
@@ -10024,4 +15223,336 @@ body.structural-surface.panel-inspection-shell canvas {
       min-height:38px;
     }
   }
+}
+
+/* ── Status Bar ── */
+.viewport-status-bar {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:28px;
+  background:rgba(10,14,26,.92);
+  border-top:1px solid rgba(148,168,190,.18);
+  display:flex;
+  align-items:center;
+  gap:24px;
+  padding:0 16px;
+  font-size:11px;
+  color:#96a8bb;
+  z-index:100;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+body.structural-surface.light-mode .viewport-status-bar {
+  background:rgba(255,250,242,.92);
+  border-top-color:rgba(133,102,70,.16);
+  color:#667085;
+}
+
+.viewport-status-bar span {
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+.viewport-status-bar b {
+  color:#ecf2f6;
+  font-weight:500;
+}
+
+body.structural-surface.light-mode .viewport-status-bar b {
+  color:#1c2430;
+}
+
+/* ── Axis Widget ── */
+.axis-widget {
+  position:fixed;
+  bottom:40px;
+  right:16px;
+  width:60px;
+  height:60px;
+  pointer-events:none;
+  z-index:100;
+}
+
+.axis-widget canvas {
+  width:60px;
+  height:60px;
+}
+
+/* ── Viewport Toolbar ── */
+.viewport-toolbar {
+  position:fixed;
+  top:50%;
+  right:16px;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  z-index:100;
+}
+
+.viewport-toolbar__btn {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  width:48px;
+  height:48px;
+  border:none;
+  border-radius:10px;
+  background:rgba(10,14,26,.85);
+  color:#96a8bb;
+  cursor:pointer;
+  transition:all .15s ease;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(148,168,190,.15);
+  padding:6px;
+}
+
+.viewport-toolbar__btn:hover {
+  background:rgba(79,183,173,.2);
+  color:#ecf2f6;
+  border-color:rgba(79,183,173,.4);
+}
+
+.viewport-toolbar__btn:active {
+  transform:scale(0.95);
+}
+
+.viewport-toolbar__btn svg {
+  width:16px;
+  height:16px;
+}
+
+.viewport-toolbar__btn span {
+  font-size:9px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+}
+
+.viewport-toolbar__sep {
+  height:1px;
+  margin:4px 8px;
+  background:rgba(148,168,190,.2);
+}
+
+body.structural-surface.light-mode .viewport-toolbar__btn {
+  background:rgba(255,250,242,.9);
+  color:#667085;
+  border-color:rgba(133,102,70,.15);
+}
+
+body.structural-surface.light-mode .viewport-toolbar__btn:hover {
+  background:rgba(15,106,115,.15);
+  color:#0f6a73;
+  border-color:rgba(15,106,115,.3);
+}
+
+/* ── Viewport Tooltip ── */
+.viewport-tooltip {
+  position:fixed;
+  padding:8px 12px;
+  background:rgba(10,14,26,.95);
+  border:1px solid rgba(79,183,173,.3);
+  border-radius:8px;
+  color:#ecf2f6;
+  font-size:11px;
+  pointer-events:none;
+  z-index:200;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+  max-width:200px;
+}
+
+.viewport-tooltip__id {
+  font-weight:700;
+  font-size:12px;
+  color:#4fb7ad;
+  margin-bottom:2px;
+}
+
+.viewport-tooltip__type {
+  color:#96a8bb;
+  text-transform:uppercase;
+  font-size:9px;
+  letter-spacing:0.05em;
+}
+
+.viewport-tooltip__section {
+  color:#f4b56b;
+  font-size:10px;
+  margin-top:2px;
+}
+
+body.structural-surface.light-mode .viewport-tooltip {
+  background:rgba(255,250,242,.95);
+  border-color:rgba(15,106,115,.3);
+  color:#1c2430;
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+}
+
+body.structural-surface.light-mode .viewport-tooltip__id {
+  color:#0f6a73;
+}
+
+body.structural-surface.light-mode .viewport-tooltip__type {
+  color:#667085;
+}
+
+body.structural-surface.light-mode .viewport-tooltip__section {
+  color:#c96d2c;
+}
+
+/* ── Loading Indicator ── */
+.loading-indicator {
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  background:rgba(8,18,29,.85);
+  z-index:300;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+
+.loading-indicator__spinner {
+  width:40px;
+  height:40px;
+  border:3px solid rgba(79,183,173,.2);
+  border-top-color:#4fb7ad;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform:rotate(360deg); }
+}
+
+.loading-indicator__text {
+  color:#96a8bb;
+  font-size:13px;
+  font-weight:500;
+}
+
+body.structural-surface.light-mode .loading-indicator {
+  background:rgba(244,239,231,.85);
+}
+
+body.structural-surface.light-mode .loading-indicator__spinner {
+  border-color:rgba(15,106,115,.2);
+  border-top-color:#0f6a73;
+}
+
+body.structural-surface.light-mode .loading-indicator__text {
+  color:#667085;
+}
+
+/* ── Selection Glow Effect ── */
+.selection-glow {
+  filter:drop-shadow(0 0 8px rgba(79,183,173,.6));
+}
+
+body.structural-surface.light-mode .selection-glow {
+  filter:drop-shadow(0 0 8px rgba(15,106,115,.4));
+}
+
+/* ── File Loader Section ── */
+#file-loader-section {
+  border-top: 1px solid var(--panel-edge);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+#file-loader-section label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 8px 0 4px;
+}
+
+#file-loader-section select,
+#file-loader-section input[type="text"] {
+  width: 100%;
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+#file-loader-section button {
+  padding: 6px 12px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 4px;
+}
+
+#file-loader-section button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.file-drop-zone {
+  border: 2px dashed var(--panel-edge);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.file-drop-zone:hover {
+  border-color: var(--accent);
+  background: rgba(79, 183, 173, 0.05);
+}
+
+.file-drop-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(79, 183, 173, 0.1);
+  transform: scale(1.02);
+}
+
+.file-drop-zone span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.file-drop-zone button {
+  margin-top: 0;
+}
+
+body.structural-surface.light-mode #file-loader-section select,
+body.structural-surface.light-mode #file-loader-section input[type="text"] {
+  background: var(--bg-soft);
+  border-color: var(--panel-edge);
+  color: var(--text);
+}
+
+body.structural-surface.light-mode .file-drop-zone {
+  border-color: var(--panel-edge);
+}
+
+body.structural-surface.light-mode .file-drop-zone:hover,
+body.structural-surface.light-mode .file-drop-zone.drag-over {
+  border-color: var(--accent);
 }

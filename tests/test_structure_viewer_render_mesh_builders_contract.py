@@ -128,12 +128,18 @@ console.log(JSON.stringify({
     )
 
     assert payload["toolkitKeys"] == [
+        "createCableElementRenderObjects",
         "createInstancedLineGroupObjects",
         "createInstancedSurfaceGroupObjects",
         "createInstancedSurfaceWireframe",
         "createInstancedWireframe",
         "createLineElementRenderObjects",
+        "createRebarElementRenderObjects",
+        "createSolidElementRenderObjects",
         "createSurfaceElementRenderObjects",
+        "createTerrainMesh",
+        "getMaterialProperties",
+        "getVisualRadius",
     ]
     assert payload["line"] == {
         "mesh": True,

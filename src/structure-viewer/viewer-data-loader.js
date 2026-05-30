@@ -11,6 +11,8 @@ export const ARTIFACT_PRESET_CANDIDATES = {
 
 export const PRESET_SIDECAR_FILES = {
   midas33: './index.midas33.data.js',
+  midas33_pr: './index.midas33.data.js',
+  midas33_optimized: './index.midas33.data.js',
   real_drawing_private_3d: './index.real_drawing_private.data.js',
 };
 
@@ -137,6 +139,7 @@ export async function loadPresetSidecarIfNeeded(preset, {
   if (!normalized) return null;
   const embedded = readEmbeddedPresetPayload(normalized, root);
   if (embedded) return embedded;
+  if (root?.__STRUCTURAL_SINGLEFILE__) return null;
   const sidecarPath = getPresetSidecarPath(normalized);
   if (!sidecarPath || !documentRef) return null;
   const existing = documentRef.querySelector?.(`script[data-viewer-preset="${normalized}"]`);

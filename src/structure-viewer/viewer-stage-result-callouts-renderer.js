@@ -16,7 +16,7 @@ function normalizeTone(value) {
   return ['accent', 'danger', 'neutral', 'success', 'warn'].includes(tone) ? tone : 'neutral';
 }
 
-export const STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_SCHEMA_VERSION = 'structure-viewer-stage-result-callouts.v2';
+export const STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_SCHEMA_VERSION = 'structure-viewer-stage-result-callouts.v3';
 
 function findKpiCard(cards = [], key = '') {
   return cards.find((card) => normalizeText(card?.key) === key) || null;
@@ -52,6 +52,36 @@ function classifyCalloutSource(label = '') {
   return 'review';
 }
 
+function buildCalloutAnchorProfile(key = '') {
+  switch (normalizeText(key)) {
+    case 'max-displacement':
+      return {
+        anchorKind: 'roof-displacement',
+        anchorLabel: 'Roof displacement contour peak',
+      };
+    case 'max-drift':
+      return {
+        anchorKind: 'governing-drift-story',
+        anchorLabel: 'Governing interstory drift band',
+      };
+    case 'base-shear':
+      return {
+        anchorKind: 'base-reaction',
+        anchorLabel: 'Base shear reaction line',
+      };
+    case 'critical-member':
+      return {
+        anchorKind: 'critical-member',
+        anchorLabel: 'Critical member focus',
+      };
+    default:
+      return {
+        anchorKind: 'review-result',
+        anchorLabel: 'Review result anchor',
+      };
+  }
+}
+
 function buildKpiCallout(card = {}, { label = '', key = '', timeline = {} } = {}) {
   const sourceLabel = normalizeText(card.evidenceLabel) || normalizeText(card.meta) || 'Model estimate';
   return {
@@ -77,6 +107,8 @@ function renderStageCallout(callout) {
   const stepLabel = normalizeText(callout.stepLabel) || '--';
   const fullLabel = normalizeText(callout.fullLabel) || normalizeText(callout.label) || '--';
   const fullValue = normalizeText(callout.fullValue) || normalizeText(callout.value) || '--';
+  const anchorKind = normalizeText(callout.anchorKind) || 'review-result';
+  const anchorLabel = normalizeText(callout.anchorLabel) || 'Review result anchor';
   const memberAttr = callout.focusMemberId
     ? ` data-stage-result-callout-member="${escapeHtml(callout.focusMemberId)}"`
     : '';
@@ -89,14 +121,17 @@ function renderStageCallout(callout) {
       <b>${escapeHtml(evidenceLabel)}</b>
       <em>${escapeHtml(stepLabel)}</em>
     </span>`;
-  const commonAttrs = `data-stage-result-callout data-stage-result-callout-key="${escapeHtml(callout.key)}" data-stage-result-callout-full-label="${escapeHtml(fullLabel)}" data-stage-result-callout-source="${escapeHtml(sourceLabel)}" data-stage-result-callout-source-type="${escapeHtml(sourceType)}" data-stage-result-callout-load-case="${escapeHtml(callout.loadCase || '--')}" data-stage-result-callout-step="${escapeHtml(stepLabel)}"${memberAttr}`;
+  const anchor = `<span class="stage-result-callout__leader" data-stage-result-callout-leader aria-hidden="true"></span>`;
+  const commonAttrs = `data-stage-result-callout data-stage-result-callout-key="${escapeHtml(callout.key)}" data-stage-result-callout-full-label="${escapeHtml(fullLabel)}" data-stage-result-callout-source="${escapeHtml(sourceLabel)}" data-stage-result-callout-source-type="${escapeHtml(sourceType)}" data-stage-result-callout-load-case="${escapeHtml(callout.loadCase || '--')}" data-stage-result-callout-step="${escapeHtml(stepLabel)}" data-stage-result-callout-anchor-kind="${escapeHtml(anchorKind)}" data-stage-result-callout-anchor-label="${escapeHtml(anchorLabel)}" data-stage-result-callout-projection="pending"${memberAttr}`;
   if (callout.focusMemberId) {
     return `<button type="button" class="stage-result-callout stage-result-callout--${escapeHtml(tone)}${selectedClass}" ${commonAttrs} data-stage-callout-focus-member="${escapeHtml(callout.focusMemberId)}" aria-pressed="${callout.selected ? 'true' : 'false'}" title="Focus critical member ${escapeHtml(callout.focusMemberId)} · ${escapeHtml(fullValue)}">
+      ${anchor}
       ${content}
       ${evidence}
     </button>`;
   }
   return `<article class="stage-result-callout stage-result-callout--${escapeHtml(tone)}${selectedClass}" ${commonAttrs} title="${escapeHtml(fullLabel)} · ${escapeHtml(fullValue)}">
+      ${anchor}
       ${content}
       ${evidence}
     </article>`;
@@ -134,8 +169,14 @@ export function buildStageResultCalloutsHtml({ cockpitModel = {}, activeMemberId
     } : null,
   ].filter(Boolean);
 
+  callouts.forEach((callout) => {
+    const anchor = buildCalloutAnchorProfile(callout.key);
+    callout.anchorKind = anchor.anchorKind;
+    callout.anchorLabel = anchor.anchorLabel;
+  });
+
   if (!callouts.length) {
-    return `<div class="stage-result-callout stage-result-callout--neutral" data-stage-result-callout data-stage-result-callout-key="empty" data-stage-result-callout-full-label="Result Callouts" data-stage-result-callout-full-value="--" data-stage-result-callout-source="missing" data-stage-result-callout-source-type="review" data-stage-result-callout-load-case="--" data-stage-result-callout-step="--"><span class="stage-result-callout__label">Result Callouts</span><strong>--</strong><small>Awaiting model</small></div>`;
+    return `<div class="stage-result-callout stage-result-callout--neutral" data-stage-result-callout data-stage-result-callout-key="empty" data-stage-result-callout-full-label="Result Callouts" data-stage-result-callout-full-value="--" data-stage-result-callout-source="missing" data-stage-result-callout-source-type="review" data-stage-result-callout-load-case="--" data-stage-result-callout-step="--" data-stage-result-callout-anchor-kind="review-result" data-stage-result-callout-anchor-label="Review result anchor" data-stage-result-callout-projection="pending"><span class="stage-result-callout__leader" data-stage-result-callout-leader aria-hidden="true"></span><span class="stage-result-callout__label">Result Callouts</span><strong>--</strong><small>Awaiting model</small></div>`;
   }
 
   return callouts.map(renderStageCallout).join('');

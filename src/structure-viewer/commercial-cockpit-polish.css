@@ -374,6 +374,81 @@
     background:rgba(5,12,21,.36);
   }
 
+  body.structural-surface.command-center-shell .layer-toggle-group {
+    margin:10px 0 4px;
+    color:var(--muted);
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .panel-toggle-row[data-layer-toggle-row] {
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:8px;
+    min-height:30px;
+    padding:4px 0;
+  }
+
+  body.structural-surface.command-center-shell .panel-toggle-row__label,
+  body.structural-surface.command-center-shell .panel-toggle-row__count {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .panel-toggle-row__label {
+    color:var(--text);
+    font-size:11px;
+    font-weight:800;
+  }
+
+  body.structural-surface.command-center-shell .panel-toggle-row__count {
+    min-width:24px;
+    padding:2px 6px;
+    border:1px solid rgba(104,126,151,.22);
+    border-radius:999px;
+    background:rgba(5,12,22,.46);
+    color:var(--muted);
+    font-size:9px;
+    text-align:center;
+  }
+
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-result-callout-anchors,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-result-callouts,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-critical-hotspots,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-load-support-glyphs,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-load-combination-force-glyphs,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-force-demand-contour,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-material-model-demand-badges,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-material-force-ribbons,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-material-force-envelope,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-material-capacity-envelope,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-member-force-playback-trail,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-member-force-vector-field,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-member-material-state-badge,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #viewport-selection-focus-badge,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #panel-zone-stage-badge,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-overlay-receipt,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-story-ruler,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-drift-bands,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] #stage-story-force-flow-bands {
+    display:none !important;
+    pointer-events:none !important;
+  }
+
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .stage-overlay-panel--left .stage-overlay-section:not(.stage-review-controls) {
+    display:none;
+  }
+
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .stage-subtitle::after {
+    content:" Drawing clean mode hides analysis callouts so sheets remain readable.";
+    color:var(--accent);
+  }
+
   body.structural-surface.command-center-shell #viewport {
     min-height:480px;
     border-radius:8px;
@@ -391,6 +466,80 @@
     width:min(238px, calc(100% - 28px));
     pointer-events:none;
     transition:left .16s ease, right .16s ease, top .16s ease, bottom .16s ease, opacity .16s ease;
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout-anchors {
+    position:absolute;
+    z-index:9;
+    inset:0;
+    pointer-events:none;
+    display:block;
+    opacity:0;
+    transition:opacity .16s ease;
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout-anchors.is-visible {
+    opacity:1;
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout-anchor {
+    position:absolute;
+    display:inline-grid;
+    grid-template-columns:10px minmax(0,auto);
+    align-items:center;
+    gap:5px;
+    max-width:124px;
+    min-height:18px;
+    padding:3px 6px 3px 4px;
+    border:1px solid rgba(95,242,220,.26);
+    border-radius:999px;
+    color:rgba(220,237,246,.92);
+    background:linear-gradient(90deg, rgba(3,11,20,.84), rgba(10,24,36,.62));
+    box-shadow:0 0 0 1px rgba(7,14,24,.48), 0 8px 22px rgba(0,0,0,.22);
+    transform:translate(-50%,-50%);
+    backdrop-filter:blur(6px);
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout-anchor::before {
+    content:"";
+    position:absolute;
+    left:9px;
+    top:50%;
+    width:34px;
+    height:1px;
+    background:linear-gradient(90deg, rgba(95,242,220,.62), rgba(95,242,220,0));
+    transform:translate(-100%,-50%);
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout-anchor__dot {
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#5ff2dc;
+    box-shadow:0 0 0 4px rgba(95,242,220,.12), 0 0 16px rgba(95,242,220,.46);
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout-anchor b {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:8px;
+    line-height:1;
+    font-weight:800;
+    letter-spacing:0;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout-anchor--edge-pinned,
+  body.structural-surface.command-center-shell .stage-result-callout-anchor--docked {
+    border-color:rgba(244,181,107,.34);
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout-anchor--edge-pinned .stage-result-callout-anchor__dot,
+  body.structural-surface.command-center-shell .stage-result-callout-anchor--docked .stage-result-callout-anchor__dot {
+    background:#f4b56b;
+    box-shadow:0 0 0 4px rgba(244,181,107,.12), 0 0 16px rgba(244,181,107,.44);
   }
 
   body.structural-surface.command-center-shell .stage-result-callouts[data-stage-callout-dock="right"] {
@@ -466,6 +615,17 @@
     width:3px;
     background:var(--accent);
     opacity:.88;
+  }
+
+  body.structural-surface.command-center-shell .stage-result-callout__leader {
+    position:absolute;
+    right:100%;
+    top:50%;
+    width:18px;
+    height:1px;
+    background:linear-gradient(90deg, rgba(79,183,173,0), rgba(79,183,173,.55));
+    transform:translateY(-50%);
+    opacity:.68;
   }
 
   body.structural-surface.command-center-shell .stage-result-callout__pin {
@@ -717,6 +877,320 @@
 
   body.structural-surface.command-center-shell .stage-drift-band small {
     font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-force-flow-bands__receipt {
+    right:128px;
+    width:210px;
+    padding:4px 6px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(19,16,11,.84), rgba(4,10,19,.70));
+  }
+
+  body.structural-surface.command-center-shell .stage-story-force-flow-bands__receipt span,
+  body.structural-surface.command-center-shell .stage-story-force-flow-bands__receipt strong {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-force-flow-band {
+    width:210px;
+    min-height:35px;
+    padding:4px 6px;
+    border-radius:7px;
+    box-shadow:0 10px 22px rgba(0,0,0,.28);
+  }
+
+  body.structural-surface.command-center-shell .stage-story-force-flow-band__leader {
+    flex-basis:23px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-force-flow-band__leader::before {
+    width:23px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-force-flow-band b,
+  body.structural-surface.command-center-shell .stage-story-force-flow-band em {
+    font-size:7.5px;
+  }
+
+  body.structural-surface.command-center-shell .stage-force-demand-contour__receipt {
+    right:126px;
+    top:124px;
+    width:204px;
+    padding:4px 6px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(8,23,34,.86), rgba(4,10,19,.72));
+  }
+
+  body.structural-surface.command-center-shell .stage-force-demand-contour__receipt span,
+  body.structural-surface.command-center-shell .stage-force-demand-contour__receipt strong {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-force-demand-contour__receipt small {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell .stage-force-demand-contour-marker {
+    width:114px;
+    min-height:25px;
+    gap:4px;
+    padding:3px 5px;
+    border-radius:7px;
+    box-shadow:0 9px 20px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.045);
+  }
+
+  body.structural-surface.command-center-shell .stage-force-demand-contour-marker__pulse {
+    flex-basis:calc(var(--force-demand-size, 22px) * .84);
+    width:calc(var(--force-demand-size, 22px) * .84);
+    height:calc(var(--force-demand-size, 22px) * .84);
+  }
+
+  body.structural-surface.command-center-shell .stage-force-demand-contour-marker b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .stage-force-demand-contour-marker em {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-force-demand-contour-marker small {
+    font-size:6.2px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-model-demand-badges__receipt {
+    width:196px;
+    padding:4px 6px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(7,30,26,.88), rgba(4,10,18,.74));
+  }
+
+  body.structural-surface.command-center-shell .stage-material-model-demand-badges__receipt span,
+  body.structural-surface.command-center-shell .stage-material-model-demand-badges__receipt strong {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-model-demand-badges__receipt small {
+    font-size:6.4px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-model-demand-badge {
+    width:118px;
+    min-height:25px;
+    gap:3px;
+    padding:3px 5px;
+    border-radius:7px;
+    box-shadow:0 9px 20px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.045);
+  }
+
+  body.structural-surface.command-center-shell .stage-material-model-demand-badge__swatch {
+    width:8px;
+    height:16px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-model-demand-badge b {
+    font-size:7.7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-model-demand-badge em,
+  body.structural-surface.command-center-shell .stage-material-model-demand-badge strong {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-model-demand-badge small {
+    font-size:5.8px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-ribbons__receipt {
+    width:202px;
+    padding:4px 6px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(7,24,36,.88), rgba(4,10,18,.74));
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-ribbons__receipt span,
+  body.structural-surface.command-center-shell .stage-material-force-ribbons__receipt strong {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-ribbons__receipt small {
+    font-size:6.4px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-ribbon {
+    width:152px;
+    min-height:38px;
+    gap:4px;
+    padding:4px 5px;
+    border-radius:7px;
+    box-shadow:0 9px 20px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.045);
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-ribbon__leader {
+    flex-basis:21px;
+    width:21px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-ribbon b {
+    font-size:7.7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-ribbon em,
+  body.structural-surface.command-center-shell .stage-material-force-ribbon strong {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-ribbon small {
+    font-size:5.8px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-ribbon__bars {
+    height:3px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope__receipt {
+    width:204px;
+    padding:4px 6px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(22,20,40,.88), rgba(4,10,18,.74));
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope__receipt span,
+  body.structural-surface.command-center-shell .stage-material-force-envelope__receipt strong {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope__receipt small {
+    font-size:6.4px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card {
+    width:160px;
+    min-height:51px;
+    gap:1px;
+    padding:4px 5px;
+    border-radius:7px;
+    box-shadow:0 9px 20px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.045);
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card__head {
+    grid-template-columns:8px minmax(0,1fr) auto;
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card__head i {
+    width:7px;
+    height:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card b {
+    font-size:7.5px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card strong,
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card em {
+    font-size:6.2px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card small,
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card__foot {
+    font-size:5.7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card__chart {
+    height:18px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-force-envelope-card__bars {
+    height:3px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope__receipt {
+    width:210px;
+    padding:4px 6px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(12,35,32,.88), rgba(4,10,18,.74));
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope__receipt span,
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope__receipt strong {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope__receipt small {
+    font-size:6.4px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card {
+    width:162px;
+    min-height:51px;
+    gap:1px;
+    padding:4px 5px;
+    border-radius:7px;
+    box-shadow:0 9px 20px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.045);
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card__head {
+    grid-template-columns:8px minmax(0,1fr) auto;
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card__head i {
+    width:7px;
+    height:7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card b {
+    font-size:7.5px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card strong,
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card em {
+    font-size:6.2px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card small,
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card__foot {
+    font-size:5.7px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card__chart {
+    height:18px;
+  }
+
+  body.structural-surface.command-center-shell .stage-material-capacity-envelope-card__bars {
+    height:3px;
+  }
+
+  body.structural-surface.command-center-shell .stage-member-material-state-card {
+    width:160px;
+    min-height:44px;
+    grid-template-columns:minmax(0,1fr) 42px;
+    gap:5px;
+    padding:5px 6px;
+    border-radius:7px;
+    box-shadow:0 10px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.045);
+  }
+
+  body.structural-surface.command-center-shell .stage-member-material-state-card__body b {
+    font-size:7.8px;
+  }
+
+  body.structural-surface.command-center-shell .stage-member-material-state-card__body em {
+    font-size:6.6px;
+  }
+
+  body.structural-surface.command-center-shell .stage-member-material-state-card__body small,
+  body.structural-surface.command-center-shell .stage-member-material-state-card__meter small {
+    font-size:5.9px;
+  }
+
+  body.structural-surface.command-center-shell .stage-member-material-state-card__meter i {
+    height:6px;
+  }
+
+  body.structural-surface.command-center-shell .stage-story-force-flow-band small {
+    font-size:6.6px;
   }
 
   body.structural-surface.command-center-shell .stage-critical-hotspot {
@@ -994,6 +1468,43 @@
     height:18px;
   }
 
+  body.structural-surface.command-center-shell .stage-load-combination-force-glyph {
+    width:196px;
+    min-height:42px;
+    gap:6px;
+    padding:5px 7px;
+    border-radius:7px;
+    background:linear-gradient(180deg, rgba(24,25,26,.95), rgba(6,13,22,.88));
+    box-shadow:0 12px 25px rgba(0,0,0,.34);
+  }
+
+  body.structural-surface.command-center-shell .stage-load-combination-force-glyph__leader {
+    flex-basis:34px;
+    height:20px;
+  }
+
+  body.structural-surface.command-center-shell .stage-load-combination-force-glyph__leader i {
+    right:8px;
+    height:2px;
+  }
+
+  body.structural-surface.command-center-shell .stage-load-combination-force-glyph__leader i::before {
+    display:none;
+  }
+
+  body.structural-surface.command-center-shell .stage-load-combination-force-glyph__leader i::after {
+    display:none;
+  }
+
+  body.structural-surface.command-center-shell .stage-load-combination-force-glyph__label,
+  body.structural-surface.command-center-shell .stage-load-combination-force-glyph small {
+    font-size:6.75px;
+  }
+
+  body.structural-surface.command-center-shell .stage-load-combination-force-glyph strong {
+    font-size:9.5px;
+  }
+
   body.structural-surface.command-center-shell .load-case-evidence-list {
     gap:5px;
   }
@@ -1158,6 +1669,218 @@
   body.structural-surface.command-center-shell .result-envelope-row__metric strong,
   body.structural-surface.command-center-shell .result-envelope-row__govern b {
     font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .force-flow-lens-panel {
+    gap:4px;
+    margin-top:5px;
+    padding:5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .force-flow-lens,
+  body.structural-surface.command-center-shell .force-flow-rows {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .force-flow-lens__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .force-flow-lens__head em,
+  body.structural-surface.command-center-shell .force-flow-lens__head strong,
+  body.structural-surface.command-center-shell .force-flow-summary b,
+  body.structural-surface.command-center-shell .force-flow-summary em {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .force-flow-summary {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .force-flow-row {
+    grid-template-columns:minmax(70px,.78fr) minmax(48px,.36fr) minmax(0,1.18fr);
+    min-height:30px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .force-flow-row__member b,
+  body.structural-surface.command-center-shell .force-flow-row__value strong {
+    font-size:7.75px;
+  }
+
+  body.structural-surface.command-center-shell .force-flow-row em {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell .story-force-flow-ledger-panel {
+    gap:4px;
+    margin-top:5px;
+    padding:5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .story-force-flow-ledger,
+  body.structural-surface.command-center-shell .story-force-flow-ledger__rows {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .story-force-flow-ledger__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .story-force-flow-ledger__head em,
+  body.structural-surface.command-center-shell .story-force-flow-ledger__head strong,
+  body.structural-surface.command-center-shell .story-force-flow-ledger__summary b,
+  body.structural-surface.command-center-shell .story-force-flow-ledger__summary em {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .story-force-flow-ledger__summary {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .story-force-flow-row {
+    grid-template-columns:minmax(68px,.74fr) minmax(48px,.34fr) minmax(0,1.2fr);
+    min-height:31px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .story-force-flow-row__main b,
+  body.structural-surface.command-center-shell .story-force-flow-row__meta strong {
+    font-size:7.75px;
+  }
+
+  body.structural-surface.command-center-shell .story-force-flow-row em,
+  body.structural-surface.command-center-shell .story-force-flow-row small {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-matrix-panel {
+    gap:4px;
+    margin-top:5px;
+    padding:5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-matrix,
+  body.structural-surface.command-center-shell .load-combination-force-stepper,
+  body.structural-surface.command-center-shell .load-combination-force-rows {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-matrix__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-matrix__head em,
+  body.structural-surface.command-center-shell .load-combination-force-matrix__head strong,
+  body.structural-surface.command-center-shell .load-combination-force-summary b,
+  body.structural-surface.command-center-shell .load-combination-force-summary em {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-summary {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-stepper {
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-step {
+    min-height:20px;
+    gap:3px;
+    padding:3px 4px;
+    border-radius:5px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-step b,
+  body.structural-surface.command-center-shell .load-combination-force-step strong {
+    font-size:6.75px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-step em {
+    font-size:6px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-row {
+    grid-template-columns:minmax(66px,.72fr) minmax(42px,.28fr) minmax(0,1.22fr);
+    min-height:30px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-row__combo b,
+  body.structural-surface.command-center-shell .load-combination-force-row__result strong {
+    font-size:7.75px;
+  }
+
+  body.structural-surface.command-center-shell .load-combination-force-row em,
+  body.structural-surface.command-center-shell .load-combination-force-row small {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity-panel {
+    gap:4px;
+    margin-top:5px;
+    padding:5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity {
+    gap:4px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity__head em,
+  body.structural-surface.command-center-shell .member-section-capacity__head strong,
+  body.structural-surface.command-center-shell .member-section-capacity__summary b,
+  body.structural-surface.command-center-shell .member-section-capacity__summary em {
+    font-size:6.8px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity__summary {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity__summary span {
+    padding:3px 4px;
+    border-radius:5px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity__rows {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity-row {
+    grid-template-columns:minmax(66px,.68fr) 52px minmax(0,1.26fr);
+    min-height:31px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity-row__main b,
+  body.structural-surface.command-center-shell .member-section-capacity-row__meta strong {
+    font-size:7.6px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity-row em,
+  body.structural-surface.command-center-shell .member-section-capacity-row small {
+    font-size:6.4px;
+  }
+
+  body.structural-surface.command-center-shell .member-section-capacity-row__bar {
+    height:4px;
   }
 
   body.structural-surface.command-center-shell .panel-zone-evidence-panel {
@@ -1416,6 +2139,295 @@
 
   body.structural-surface.command-center-shell .material-coverage-check em {
     font-size:6.6px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger {
+    gap:4px;
+    padding:6px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head em,
+  body.structural-surface.command-center-shell .material-model-signature-ledger__head strong {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-ledger__rows {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row {
+    grid-template-columns:30px minmax(0,1fr) minmax(54px,.5fr) minmax(78px,.68fr);
+    min-height:31px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row__id b,
+  body.structural-surface.command-center-shell .material-model-signature-row__main b,
+  body.structural-surface.command-center-shell .material-model-signature-row__props strong,
+  body.structural-surface.command-center-shell .material-model-signature-row__raw b {
+    font-size:7.4px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-signature-row em {
+    font-size:6.3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas {
+    gap:4px;
+    padding:6px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head em,
+  body.structural-surface.command-center-shell .material-model-demand-atlas__head strong,
+  body.structural-surface.command-center-shell .material-model-demand-atlas__summary em {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__summary {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__summary span {
+    padding:3px 4px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-atlas__rows {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row {
+    grid-template-columns:6px minmax(0,.94fr) 44px minmax(74px,.86fr);
+    min-height:39px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row__swatch {
+    width:6px;
+    height:28px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row__main b,
+  body.structural-surface.command-center-shell .material-model-demand-row__meta strong {
+    font-size:7.4px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-demand-row em,
+  body.structural-surface.command-center-shell .material-model-demand-row small {
+    font-size:6.3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope {
+    gap:4px;
+    padding:6px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__head em,
+  body.structural-surface.command-center-shell .material-model-force-envelope__head strong,
+  body.structural-surface.command-center-shell .material-model-force-envelope__summary em {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__summary {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__summary span {
+    padding:3px 4px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope__rows {
+    grid-template-columns:minmax(0,1fr);
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row {
+    grid-template-columns:6px minmax(0,.8fr) 54px 38px minmax(66px,.72fr);
+    min-height:40px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__swatch {
+    width:6px;
+    height:28px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__chart svg {
+    height:28px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__main b,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row__meta strong {
+    font-size:7.3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-force-envelope-row em,
+  body.structural-surface.command-center-shell .material-model-force-envelope-row small {
+    font-size:6.2px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope {
+    gap:4px;
+    padding:6px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head em,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__head strong,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__summary em {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__summary {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__summary span {
+    padding:3px 4px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope__rows {
+    grid-template-columns:minmax(0,1fr);
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row {
+    grid-template-columns:6px minmax(0,.8fr) 54px 38px minmax(70px,.72fr);
+    min-height:40px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__swatch {
+    width:6px;
+    height:28px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__chart svg {
+    height:28px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__main b,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row__meta strong {
+    font-size:7.3px;
+  }
+
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row em,
+  body.structural-surface.command-center-shell .material-model-capacity-envelope-row small {
+    font-size:6.2px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction {
+    gap:4px;
+    padding:6px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__head em,
+  body.structural-surface.command-center-shell .material-force-interaction__head strong,
+  body.structural-surface.command-center-shell .material-force-interaction__summary em {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__summary {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__summary span {
+    padding:3px 4px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-interaction__rows {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row {
+    grid-template-columns:6px minmax(0,.86fr) 48px minmax(70px,.86fr);
+    min-height:36px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row__swatch {
+    width:6px;
+    height:27px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row__main b,
+  body.structural-surface.command-center-shell .material-force-row__meta strong {
+    font-size:7.5px;
+  }
+
+  body.structural-surface.command-center-shell .material-force-row em,
+  body.structural-surface.command-center-shell .material-force-row small {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens {
+    gap:4px;
+    padding:6px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__head b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__head em,
+  body.structural-surface.command-center-shell .material-constitutive-lens__head strong {
+    font-size:7px;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-lens__rows {
+    gap:3px;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-row {
+    grid-template-columns:minmax(0,1fr) 44px minmax(72px,.8fr);
+    min-height:32px;
+    gap:5px;
+    padding:4px 5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-row__main b,
+  body.structural-surface.command-center-shell .material-constitutive-row__meta strong {
+    font-size:7.5px;
+  }
+
+  body.structural-surface.command-center-shell .material-constitutive-row em,
+  body.structural-surface.command-center-shell .material-constitutive-row small {
+    font-size:6.5px;
   }
 
   body.structural-surface.command-center-shell .material-catalog-summary span {
@@ -1766,6 +2778,1558 @@
   body.structural-surface.command-center-shell .drawing-handoff-grid > div {
     padding:7px;
   }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(79,183,173,.24);
+    border-radius:7px;
+    background:linear-gradient(135deg,rgba(17,35,45,.82),rgba(9,18,30,.74));
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger__head span,
+  body.structural-surface.command-center-shell .drawing-material-parity-row {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger__head b,
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger__head em,
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger__head strong,
+  body.structural-surface.command-center-shell .drawing-material-parity-row b,
+  body.structural-surface.command-center-shell .drawing-material-parity-row strong,
+  body.structural-surface.command-center-shell .drawing-material-parity-row em {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger__head em,
+  body.structural-surface.command-center-shell .drawing-material-parity-row em {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger__head strong {
+    color:#58d78d;
+    font-size:16px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-ledger__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-row {
+    display:grid;
+    grid-template-columns:minmax(100px,.68fr) minmax(0,1fr);
+    column-gap:6px;
+    row-gap:1px;
+    padding:6px 7px;
+    border:1px solid rgba(104,126,151,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.48);
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-row b {
+    color:var(--muted);
+    font-size:9px;
+    font-weight:800;
+    text-transform:uppercase;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-row strong {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-row em {
+    grid-column:1/-1;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-parity-row--success strong { color:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-material-parity-row--accent strong { color:var(--accent); }
+  body.structural-surface.command-center-shell .drawing-material-parity-row--warn strong { color:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-material-parity-row--danger strong { color:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(154,206,151,.24);
+    border-radius:7px;
+    background:linear-gradient(135deg,rgba(18,38,34,.82),rgba(8,17,28,.76));
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__head span,
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__summary span,
+  body.structural-surface.command-center-shell .drawing-source-detail-row {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__head b,
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__head em,
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__head strong,
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__summary b,
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__summary em,
+  body.structural-surface.command-center-shell .drawing-source-detail-row b,
+  body.structural-surface.command-center-shell .drawing-source-detail-row strong,
+  body.structural-surface.command-center-shell .drawing-source-detail-row em {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__head em,
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__summary em,
+  body.structural-surface.command-center-shell .drawing-source-detail-row em {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__head strong {
+    color:#9ace97;
+    font-size:16px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__summary {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__summary span {
+    padding:5px 6px;
+    border:1px solid rgba(154,206,151,.16);
+    border-radius:6px;
+    background:rgba(5,12,22,.46);
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__summary b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-ledger__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-row {
+    appearance:none;
+    display:grid;
+    grid-template-columns:minmax(86px,.72fr) minmax(0,1fr);
+    column-gap:6px;
+    row-gap:2px;
+    width:100%;
+    padding:6px 7px;
+    border:1px solid rgba(104,126,151,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.5);
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-row:hover,
+  body.structural-surface.command-center-shell .drawing-source-detail-row:focus-visible {
+    border-color:rgba(154,206,151,.48);
+    background:rgba(154,206,151,.1);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-row b {
+    color:var(--muted);
+    font-size:9px;
+    font-weight:800;
+    text-transform:uppercase;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-row strong {
+    color:var(--text);
+    font-size:11px;
+    text-align:right;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-row em {
+    grid-column:1/-1;
+    line-height:1.2;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    text-overflow:clip;
+  }
+
+  body.structural-surface.command-center-shell .drawing-source-detail-row--success strong { color:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-source-detail-row--accent strong { color:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-source-detail-row--warn strong { color:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-source-detail-row--danger strong { color:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(122,180,212,.24);
+    border-radius:7px;
+    background:linear-gradient(135deg,rgba(14,31,43,.82),rgba(7,16,27,.76));
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__head span,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__summary span,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row__main,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row__source {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__head b,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__head em,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__head strong,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__summary b,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__summary em,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row b,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row strong,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row em,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row small {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__head em,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__summary em,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row em,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row small {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__head strong {
+    color:#7ab4d4;
+    font-size:16px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__summary {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__summary span {
+    padding:5px 6px;
+    border:1px solid rgba(122,180,212,.16);
+    border-radius:6px;
+    background:rgba(5,12,22,.46);
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__summary b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-matrix__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row {
+    appearance:none;
+    display:grid;
+    grid-template-columns:minmax(78px,.74fr) minmax(54px,.44fr) minmax(36px,.28fr);
+    column-gap:6px;
+    row-gap:3px;
+    align-items:center;
+    width:100%;
+    padding:6px 7px;
+    border:1px solid rgba(104,126,151,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.5);
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row:hover,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row:focus-visible,
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row.is-active {
+    border-color:rgba(122,180,212,.5);
+    background:rgba(122,180,212,.1);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row__source {
+    text-align:right;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row__meter {
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(104,126,151,.22);
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row__meter i {
+    display:block;
+    width:var(--drawing-sheet-detail-force,0%);
+    height:100%;
+    border-radius:inherit;
+    background:#7ab4d4;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row small {
+    grid-column:1/-1;
+    line-height:1.2;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    text-overflow:clip;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row--success strong { color:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row--success .drawing-sheet-detail-row__meter i { background:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row--accent strong { color:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row--accent .drawing-sheet-detail-row__meter i { background:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row--warn strong { color:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row--warn .drawing-sheet-detail-row__meter i { background:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row--danger strong { color:#ff8a80; }
+  body.structural-surface.command-center-shell .drawing-sheet-detail-row--danger .drawing-sheet-detail-row__meter i { background:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(117,197,255,.22);
+    border-radius:7px;
+    background:linear-gradient(135deg,rgba(13,30,44,.86),rgba(7,15,27,.76));
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__head span,
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__summary span,
+  body.structural-surface.command-center-shell .drawing-force-handoff-row {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__head b,
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__head em,
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__head strong,
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__summary b,
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__summary em,
+  body.structural-surface.command-center-shell .drawing-force-handoff-row b,
+  body.structural-surface.command-center-shell .drawing-force-handoff-row strong,
+  body.structural-surface.command-center-shell .drawing-force-handoff-row em {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__head em,
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__summary em,
+  body.structural-surface.command-center-shell .drawing-force-handoff-row em {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__head strong {
+    color:#75c5ff;
+    font-size:16px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__summary {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__summary span {
+    padding:5px 6px;
+    border:1px solid rgba(117,197,255,.16);
+    border-radius:6px;
+    background:rgba(5,12,22,.46);
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__summary b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-ledger__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-row {
+    display:grid;
+    grid-template-columns:minmax(58px,.54fr) minmax(40px,.38fr) minmax(54px,.44fr);
+    column-gap:6px;
+    row-gap:3px;
+    align-items:center;
+    padding:6px 7px;
+    border:1px solid rgba(104,126,151,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.5);
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-row b {
+    color:var(--muted);
+    font-size:9px;
+    font-weight:800;
+    line-height:1.15;
+    text-transform:uppercase;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-row__meter {
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(104,126,151,.22);
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-row__meter i {
+    display:block;
+    width:var(--drawing-force-handoff,0%);
+    height:100%;
+    border-radius:inherit;
+    background:#75c5ff;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-row strong {
+    color:var(--text);
+    font-size:11px;
+    text-align:right;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-row em {
+    grid-column:1/-1;
+    line-height:1.2;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    text-overflow:clip;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-handoff-row--success strong { color:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-force-handoff-row--success .drawing-force-handoff-row__meter i { background:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-force-handoff-row--accent strong { color:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-force-handoff-row--accent .drawing-force-handoff-row__meter i { background:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-force-handoff-row--warn strong { color:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-force-handoff-row--warn .drawing-force-handoff-row__meter i { background:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-force-handoff-row--danger strong { color:#ff8a80; }
+  body.structural-surface.command-center-shell .drawing-force-handoff-row--danger .drawing-force-handoff-row__meter i { background:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(117,197,255,.24);
+    border-radius:7px;
+    background:linear-gradient(135deg,rgba(9,31,48,.86),rgba(6,14,25,.78));
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__head span,
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__summary span,
+  body.structural-surface.command-center-shell .drawing-force-vector-row,
+  body.structural-surface.command-center-shell .drawing-force-vector-row__main,
+  body.structural-surface.command-center-shell .drawing-force-vector-row__meta {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__head b,
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__head em,
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__head strong,
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__summary b,
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__summary em,
+  body.structural-surface.command-center-shell .drawing-force-vector-row b,
+  body.structural-surface.command-center-shell .drawing-force-vector-row strong,
+  body.structural-surface.command-center-shell .drawing-force-vector-row em,
+  body.structural-surface.command-center-shell .drawing-force-vector-row small {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__head em,
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__summary em,
+  body.structural-surface.command-center-shell .drawing-force-vector-row em,
+  body.structural-surface.command-center-shell .drawing-force-vector-row small {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__head strong {
+    color:#75c5ff;
+    font-size:16px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__summary span {
+    padding:5px 6px;
+    border:1px solid rgba(117,197,255,.16);
+    border-radius:6px;
+    background:rgba(5,12,22,.46);
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__summary b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-evidence__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row {
+    appearance:none;
+    display:grid;
+    grid-template-columns:50px minmax(0,1fr);
+    grid-template-rows:auto auto;
+    gap:5px 7px;
+    align-items:center;
+    width:100%;
+    padding:6px 7px;
+    border:1px solid rgba(117,197,255,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.52);
+    color:inherit;
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row__svg {
+    grid-row:1/3;
+    width:50px;
+    height:34px;
+    overflow:visible;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row__axis,
+  body.structural-surface.command-center-shell .drawing-force-vector-row__ghost {
+    fill:none;
+    stroke:rgba(225,233,242,.38);
+    stroke-width:2;
+    stroke-linecap:round;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row__vector,
+  body.structural-surface.command-center-shell .drawing-force-vector-row__arc,
+  body.structural-surface.command-center-shell .drawing-force-vector-row__diamond {
+    fill:none;
+    stroke:#75c5ff;
+    stroke-width:3;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row__head,
+  body.structural-surface.command-center-shell .drawing-force-vector-row__tail,
+  body.structural-surface.command-center-shell .drawing-force-vector-row__node {
+    fill:#75c5ff;
+    stroke:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+    line-height:1.15;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row small {
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    line-height:1.2;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row__meta {
+    display:grid;
+    grid-template-columns:minmax(0,auto) minmax(0,1fr);
+    gap:4px 6px;
+    align-items:center;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row strong {
+    color:var(--text);
+    font-size:11px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row__meter {
+    grid-column:1/-1;
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(104,126,151,.22);
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row__meter i {
+    display:block;
+    width:var(--drawing-force-vector,0%);
+    height:100%;
+    border-radius:inherit;
+    background:#75c5ff;
+  }
+
+  body.structural-surface.command-center-shell .drawing-force-vector-row--success .drawing-force-vector-row__vector,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--success .drawing-force-vector-row__arc,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--success .drawing-force-vector-row__diamond { stroke:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-force-vector-row--success .drawing-force-vector-row__head,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--success .drawing-force-vector-row__tail,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--success .drawing-force-vector-row__node,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--success .drawing-force-vector-row__meter i { fill:#58d78d; background:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-force-vector-row--warn .drawing-force-vector-row__vector,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--warn .drawing-force-vector-row__arc,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--warn .drawing-force-vector-row__diamond { stroke:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-force-vector-row--warn .drawing-force-vector-row__head,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--warn .drawing-force-vector-row__tail,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--warn .drawing-force-vector-row__node,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--warn .drawing-force-vector-row__meter i { fill:#ffc56f; background:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__vector,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__arc,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__diamond { stroke:#ff8a80; }
+  body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__head,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__tail,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__node,
+  body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__meter i { fill:#ff8a80; background:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(88,215,141,.24);
+    border-radius:7px;
+    background:linear-gradient(135deg,rgba(13,39,31,.84),rgba(7,15,24,.76));
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__head span,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__summary span,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row__main {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__head b,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__head em,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__head strong,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__summary b,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__summary em,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row b,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row em,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row strong,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row small {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__head em,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__summary em,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row em,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row small {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__head strong {
+    color:#58d78d;
+    font-size:15px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__summary span {
+    padding:5px 6px;
+    border:1px solid rgba(88,215,141,.16);
+    border-radius:6px;
+    background:rgba(5,12,22,.46);
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__summary b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row {
+    appearance:none;
+    display:grid;
+    grid-template-columns:minmax(74px,.78fr) minmax(36px,.32fr) minmax(46px,.36fr);
+    column-gap:6px;
+    row-gap:3px;
+    align-items:center;
+    width:100%;
+    padding:6px 7px;
+    border:1px solid rgba(104,126,151,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.5);
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row:hover,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row:focus-visible {
+    border-color:rgba(88,215,141,.5);
+    background:rgba(88,215,141,.1);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row__meter {
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(104,126,151,.22);
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row__meter i {
+    display:block;
+    width:var(--drawing-capacity-handoff,0%);
+    height:100%;
+    border-radius:inherit;
+    background:#58d78d;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row strong {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+    text-align:right;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row small,
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row > em {
+    grid-column:1/-1;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    line-height:1.2;
+    text-overflow:clip;
+  }
+
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row--success strong { color:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row--success .drawing-capacity-handoff-row__meter i { background:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row--accent strong { color:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row--accent .drawing-capacity-handoff-row__meter i { background:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row--warn strong { color:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row--warn .drawing-capacity-handoff-row__meter i { background:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row--danger strong { color:#ff8a80; }
+  body.structural-surface.command-center-shell .drawing-capacity-handoff-row--danger .drawing-capacity-handoff-row__meter i { background:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(117,197,255,.24);
+    border-radius:7px;
+    background:linear-gradient(135deg,rgba(9,26,38,.82),rgba(7,14,24,.76));
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__head span,
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__summary span,
+  body.structural-surface.command-center-shell .drawing-material-model-row,
+  body.structural-surface.command-center-shell .drawing-material-model-row__main,
+  body.structural-surface.command-center-shell .drawing-material-model-row__lock {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__head b,
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__head em,
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__head strong,
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__summary b,
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__summary em,
+  body.structural-surface.command-center-shell .drawing-material-model-row b,
+  body.structural-surface.command-center-shell .drawing-material-model-row em,
+  body.structural-surface.command-center-shell .drawing-material-model-row strong,
+  body.structural-surface.command-center-shell .drawing-material-model-row small {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__head em,
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__summary em,
+  body.structural-surface.command-center-shell .drawing-material-model-row em,
+  body.structural-surface.command-center-shell .drawing-material-model-row small {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__head strong {
+    color:#75c5ff;
+    font-size:13px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__summary {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__summary span {
+    padding:5px 6px;
+    border:1px solid rgba(117,197,255,.16);
+    border-radius:6px;
+    background:rgba(5,12,22,.46);
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__summary b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-matrix__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-row {
+    appearance:none;
+    display:grid;
+    grid-template-columns:minmax(76px,.85fr) minmax(48px,.42fr) minmax(34px,.28fr);
+    column-gap:6px;
+    row-gap:3px;
+    align-items:center;
+    width:100%;
+    padding:6px 7px;
+    border:1px solid rgba(104,126,151,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.5);
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-row:hover,
+  body.structural-surface.command-center-shell .drawing-material-model-row:focus-visible {
+    border-color:rgba(117,197,255,.5);
+    background:rgba(117,197,255,.1);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-row b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-row__lock {
+    text-align:right;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-row__meter {
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(104,126,151,.22);
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-row__meter i {
+    display:block;
+    width:var(--drawing-material-model-force,0%);
+    height:100%;
+    border-radius:inherit;
+    background:#75c5ff;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-row small {
+    grid-column:1/-1;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    line-height:1.2;
+    text-overflow:clip;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-model-row--success strong { color:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-material-model-row--success .drawing-material-model-row__meter i { background:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-material-model-row--accent strong { color:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-material-model-row--accent .drawing-material-model-row__meter i { background:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-material-model-row--warn strong { color:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-material-model-row--warn .drawing-material-model-row__meter i { background:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-material-model-row--danger strong { color:#ff8a80; }
+  body.structural-surface.command-center-shell .drawing-material-model-row--danger .drawing-material-model-row__meter i { background:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(168,133,255,.22);
+    border-radius:7px;
+    background:linear-gradient(135deg,rgba(26,19,45,.82),rgba(7,15,24,.76));
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__head span,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__summary span,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row__main,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row__law {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__head b,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__head em,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__head strong,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__summary b,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__summary em,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row b,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row em,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row strong,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row small {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__head em,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__summary em,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row em,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row small {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__head strong {
+    color:#c5a8ff;
+    font-size:13px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__summary span {
+    padding:5px 6px;
+    border:1px solid rgba(168,133,255,.16);
+    border-radius:6px;
+    background:rgba(5,12,22,.46);
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__summary b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-register__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row {
+    appearance:none;
+    display:grid;
+    grid-template-columns:minmax(76px,.82fr) minmax(52px,.44fr) minmax(36px,.3fr);
+    column-gap:6px;
+    row-gap:3px;
+    align-items:center;
+    width:100%;
+    padding:6px 7px;
+    border:1px solid rgba(104,126,151,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.5);
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row:hover,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row:focus-visible {
+    border-color:rgba(168,133,255,.54);
+    background:rgba(168,133,255,.1);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row__law {
+    text-align:right;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row__law em {
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    text-overflow:clip;
+    line-height:1.15;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row__meter {
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(104,126,151,.22);
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row__meter i {
+    display:block;
+    width:var(--drawing-material-constitutive,0%);
+    height:100%;
+    border-radius:inherit;
+    background:#c5a8ff;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row small,
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row > em {
+    grid-column:1/-1;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    line-height:1.2;
+    text-overflow:clip;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row--success strong { color:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row--success .drawing-material-constitutive-row__meter i { background:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row--accent strong { color:#c5a8ff; }
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row--accent .drawing-material-constitutive-row__meter i { background:#c5a8ff; }
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row--warn strong { color:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row--warn .drawing-material-constitutive-row__meter i { background:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row--danger strong { color:#ff8a80; }
+  body.structural-surface.command-center-shell .drawing-material-constitutive-row--danger .drawing-material-constitutive-row__meter i { background:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin:8px 0;
+    padding:8px;
+    border:1px solid rgba(79,183,173,.22);
+    border-radius:6px;
+    background:linear-gradient(135deg,rgba(79,183,173,.11),rgba(14,23,35,.78));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__head span,
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__summary span,
+  body.structural-surface.command-center-shell .drawing-material-curve-row,
+  body.structural-surface.command-center-shell .drawing-material-curve-row__main,
+  body.structural-surface.command-center-shell .drawing-material-curve-row__meta {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__head b,
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__head em,
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__head strong,
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__summary b,
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__summary em,
+  body.structural-surface.command-center-shell .drawing-material-curve-row b,
+  body.structural-surface.command-center-shell .drawing-material-curve-row em,
+  body.structural-surface.command-center-shell .drawing-material-curve-row strong,
+  body.structural-surface.command-center-shell .drawing-material-curve-row small {
+    display:block;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    text-overflow:clip;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__head b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__head em,
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__summary em,
+  body.structural-surface.command-center-shell .drawing-material-curve-row em,
+  body.structural-surface.command-center-shell .drawing-material-curve-row small {
+    color:var(--muted);
+    font-size:7.6px;
+    font-style:normal;
+    line-height:1.18;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__head strong {
+    color:#7edbcf;
+    font-size:10px;
+    font-weight:900;
+    text-align:right;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__summary span {
+    padding:5px;
+    border:1px solid rgba(104,126,151,.16);
+    border-radius:5px;
+    background:rgba(5,12,22,.42);
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__summary b {
+    color:#7edbcf;
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-evidence__rows {
+    display:grid;
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row {
+    display:grid;
+    grid-template-columns:minmax(82px,.74fr) minmax(96px,.76fr) minmax(64px,.5fr);
+    column-gap:6px;
+    row-gap:4px;
+    align-items:center;
+    width:100%;
+    min-height:62px;
+    padding:6px 7px;
+    border:1px solid rgba(104,126,151,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.5);
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row:hover,
+  body.structural-surface.command-center-shell .drawing-material-curve-row:focus-visible {
+    border-color:rgba(126,219,207,.56);
+    background:rgba(79,183,173,.1);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row b {
+    color:var(--text);
+    font-size:9.5px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row__svg {
+    display:block;
+    width:100%;
+    height:54px;
+    overflow:visible;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row__axis {
+    fill:none;
+    stroke:rgba(148,168,190,.38);
+    stroke-width:1;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row__path {
+    fill:none;
+    stroke:#7edbcf;
+    stroke-width:2.2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row__yield {
+    fill:#ffc56f;
+    stroke:rgba(5,12,22,.8);
+    stroke-width:1;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row__demand {
+    fill:#ff8a80;
+    stroke:#fff;
+    stroke-width:.9;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row__meta {
+    text-align:right;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row__meta strong {
+    color:#7edbcf;
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-material-curve-row--success .drawing-material-curve-row__path { stroke:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-material-curve-row--accent .drawing-material-curve-row__path { stroke:#c5a8ff; }
+  body.structural-surface.command-center-shell .drawing-material-curve-row--warn .drawing-material-curve-row__path { stroke:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-material-curve-row--danger .drawing-material-curve-row__path { stroke:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(213,184,116,.24);
+    border-radius:7px;
+    background:linear-gradient(135deg,rgba(34,29,18,.82),rgba(9,16,24,.76));
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__head span,
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__summary span,
+  body.structural-surface.command-center-shell .drawing-sheet-force-row {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__head b,
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__head em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__head strong,
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__summary b,
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__summary em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-row b,
+  body.structural-surface.command-center-shell .drawing-sheet-force-row em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-row strong,
+  body.structural-surface.command-center-shell .drawing-sheet-force-row small {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__head em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__summary em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-row em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-row small {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__head strong {
+    color:#d5b874;
+    font-size:13px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__summary {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__summary span {
+    padding:5px 6px;
+    border:1px solid rgba(213,184,116,.16);
+    border-radius:6px;
+    background:rgba(5,12,22,.46);
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__summary b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-matrix__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-row {
+    appearance:none;
+    display:grid;
+    grid-template-columns:minmax(72px,.72fr) minmax(36px,.36fr) minmax(46px,.42fr);
+    column-gap:6px;
+    row-gap:3px;
+    align-items:center;
+    width:100%;
+    padding:6px 7px;
+    border:1px solid rgba(104,126,151,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.5);
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-row:hover,
+  body.structural-surface.command-center-shell .drawing-sheet-force-row:focus-visible,
+  body.structural-surface.command-center-shell .drawing-sheet-force-row.is-active {
+    border-color:rgba(213,184,116,.52);
+    background:rgba(213,184,116,.12);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-row b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-row__meter {
+    display:block;
+    width:100%;
+    height:5px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(104,126,151,.22);
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-row__meter i {
+    display:block;
+    width:var(--drawing-sheet-force,0%);
+    height:100%;
+    border-radius:inherit;
+    background:#d5b874;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-row strong {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+    text-align:right;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-row small {
+    grid-column:1/-1;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    line-height:1.2;
+    text-overflow:clip;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-row--success strong { color:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-row--success .drawing-sheet-force-row__meter i { background:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-row--accent strong { color:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-row--accent .drawing-sheet-force-row__meter i { background:#75c5ff; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-row--warn strong { color:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-row--warn .drawing-sheet-force-row__meter i { background:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-row--danger strong { color:#ff8a80; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-row--danger .drawing-sheet-force-row__meter i { background:#ff8a80; }
 
   body.structural-surface.command-center-shell .drawing-handoff-callout {
     padding:8px;
@@ -2607,6 +5171,21 @@
       font-size:9px;
     }
 
+    body.structural-surface.command-center-shell .analysis-chart-axis-receipt {
+      gap:3px;
+    }
+
+    body.structural-surface.command-center-shell .analysis-chart-axis-receipt span {
+      min-height:13px;
+      padding:1px 3px;
+      gap:2px;
+    }
+
+    body.structural-surface.command-center-shell .analysis-chart-axis-receipt b,
+    body.structural-surface.command-center-shell .analysis-chart-axis-receipt em {
+      font-size:6.5px;
+    }
+
     body.structural-surface.command-center-shell .analysis-material-chart {
       min-height:82px;
       gap:7px;
@@ -2654,6 +5233,22 @@
 
     body.structural-surface.command-center-shell .stage-result-callout__evidence {
       display:none;
+    }
+
+    body.structural-surface.command-center-shell .stage-result-callout-anchor {
+      max-width:82px;
+      min-height:16px;
+      padding:2px 5px 2px 3px;
+      gap:4px;
+      opacity:.86;
+    }
+
+    body.structural-surface.command-center-shell .stage-result-callout-anchor::before {
+      width:18px;
+    }
+
+    body.structural-surface.command-center-shell .stage-result-callout-anchor b {
+      font-size:6.5px;
     }
 
     body.structural-surface.command-center-shell .stage-drift-bands__receipt {

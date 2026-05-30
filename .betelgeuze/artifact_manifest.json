@@ -5,87 +5,87 @@
       "type": "json",
       "purpose": "Workstation delivery readiness gate output",
       "created_by": "scripts/check_workstation_delivery_readiness.py",
-      "verification": "Workstation delivery readiness: PASS | gates=8/8, including job reproducibility, package manifest consistency, viewer shell marker, customer-open delivery viewer smoke, delivery index, acceptance packet, delivery QA summary, customer handoff diff summary, PDF header, report/viewer/acceptance/QA/handoff-diff/signing manifest references, report metadata cross-reference, unsigned signing manifest skeleton, claim boundary, revision policy, redelivery comparison, and retention cleanup preview checks",
+      "verification": "Workstation delivery readiness: PASS | gates=8/8, including job reproducibility, package manifest consistency, viewer shell marker, customer-open delivery viewer smoke, delivery index, acceptance packet, delivery QA summary, customer handoff diff summary, PDF header, report/viewer/acceptance/QA/handoff-diff/signing manifest references, report metadata cross-reference, unsigned signing manifest skeleton, claim boundary, revision policy, redelivery comparison, and retention cleanup preview checks.",
       "limitations": "Does not close independent EB/RH evidence."
     },
     {
-            "path": "implementation/phase1/workstation_delivery_viewer_smoke.json",
-            "type": "json",
-            "purpose": "Customer-open browser smoke for restored workstation delivery package viewer",
-            "created_by": "scripts/verify-workstation-delivery-viewer-smoke.mjs",
-            "verification": "Workstation delivery viewer smoke: PASS | static=true | browser=true; restored viewer.html opened through local Chromium with visible nonblank canvas screenshot metrics, checksum self-test PASS, and current_cockpit_delivery alignment with 18/18 required cockpit markers including top_project_selector, top_run_control, stage_review_controls, analysis_result_evidence, contour_scale_evidence, load_case_evidence_rows, utilization_heatmap_evidence, viewport_tool_rail, analysis_overlay_receipt, analysis_overlay_visual_evidence, and stage_result_receipt.",
-            "limitations": "Local package-open evidence only; not a customer-device FPS or independent solver-approval claim."
+      "path": "implementation/phase1/workstation_delivery_viewer_smoke.json",
+      "type": "json",
+      "purpose": "Customer-open browser smoke for restored workstation delivery package viewer",
+      "created_by": "scripts/verify-workstation-delivery-viewer-smoke.mjs",
+      "verification": "Workstation delivery viewer smoke: PASS | static=true | browser=true; restored viewer.html opened through local Chromium with visible nonblank canvas screenshot metrics, checksum self-test PASS, and current_cockpit_delivery alignment with 86/86 required cockpit markers including drawing_force_vector_evidence, drawing_material_curve_evidence, drawing_material_constitutive_register, drawing_capacity_handoff_ledger, stage_material_capacity_envelope, material_model_capacity_envelope, stage_material_force_envelope, material_model_force_envelope, drawing_sheet_detail_matrix, drawing_source_detail_ledger, drawing_material_model_matrix, drawing_sheet_force_matrix, drawing_material_parity_ledger, drawing_force_handoff_ledger, material_model_parity, material_model_signature_ledger, material_model_demand_atlas, stage_material_model_demand_badges, stage_material_force_ribbons, stage_member_material_state_badge, material_force_interaction, member_section_capacity, story_force_flow_ledger, stage_story_force_flow_bands, and stage_force_demand_contour.",
+      "limitations": "Local package-open evidence only; not a customer-device FPS or independent solver-approval claim."
     },
     {
       "path": "implementation/phase1/release/workstation_delivery/project_package.zip",
       "type": "zip",
       "purpose": "Customer delivery package for workstation service",
       "created_by": "scripts/build_workstation_delivery_package.py",
-      "verification": "Package restore smoke, checksum self-test, manifest consistency self-test, viewer shell marker, delivery index marker, acceptance packet marker, delivery QA summary marker, customer handoff diff marker, PDF header, report/viewer/acceptance/QA/handoff-diff/report-metadata/signing manifest references, handoff diff JSON cross-reference, report metadata cross-reference, unsigned signing manifest skeleton, claim boundary, revision policy, and redelivery comparison pass",
+      "verification": "Package restore smoke, checksum self-test, manifest consistency self-test, viewer shell marker, delivery index marker, acceptance packet marker, delivery QA summary marker, customer handoff diff marker, PDF header, report/viewer/acceptance/QA/handoff-diff/report-metadata/signing manifest references, handoff diff JSON cross-reference, report metadata cross-reference, unsigned signing manifest skeleton, claim boundary, revision policy, redelivery comparison, and current optimized viewer.html source pass. Package viewer.html bytes: 11551641.",
       "limitations": "Contains v1 formats only: HTML/PDF/SVG/JSON/CSV."
     },
-        {
-            "path": "implementation/phase1/workstation_jobs/20260524T130037-f8616d87d2ed53b4",
-            "type": "job-folder",
-            "purpose": "Folderized job reproducibility record",
-            "created_by": "scripts/build_workstation_delivery_package.py",
-            "verification": "input_manifest.json, run_log.jsonl, output_manifest.json, checksums.sha256 present and checksums pass",
+    {
+      "path": "implementation/phase1/workstation_jobs/20260525T214218-bd376eaf7819ec28",
+      "type": "job-folder",
+      "purpose": "Folderized job reproducibility record",
+      "created_by": "scripts/build_workstation_delivery_package.py",
+      "verification": "input_manifest.json, run_log.jsonl, output_manifest.json, and checksums.sha256 are present and checksums pass for package job 20260525T214218-bd376eaf7819ec28.",
       "limitations": "Current default creates a timestamped local job folder per package build."
     },
     {
       "path": "implementation/phase1/workstation_job_retention_policy.json",
-            "type": "json",
-            "purpose": "Workstation job retention and cleanup policy",
-            "created_by": "scripts/build_workstation_job_retention_policy.py",
-            "verification": "Workstation job retention policy: PASS | jobs=32 | retention_days=365 | max_jobs=200 | cleanup_preview=dry_run_only | candidates=0 | latest=20260524T130037-f8616d87d2ed53b4",
-            "limitations": "Cleanup preview is non-destructive; deletion requires explicit external-state confirmation."
-        },
+      "type": "json",
+      "purpose": "Workstation job retention and cleanup policy",
+      "created_by": "scripts/build_workstation_job_retention_policy.py",
+      "verification": "Workstation job retention policy: PASS | jobs=72 | retention_days=365 | max_jobs=200 | cleanup_preview=dry_run_only | candidates=0 | latest=20260525T113744-81d7549969225809.",
+      "limitations": "Cleanup preview is non-destructive; deletion requires explicit external-state confirmation."
+    },
     {
       "path": "implementation/phase1/support_bundle_manifest.json",
       "type": "json",
       "purpose": "Redacted support bundle manifest including workstation artifacts",
       "created_by": "scripts/build_support_bundle.py",
-      "verification": "Support bundle: PASS | artifacts=22/22, including workstation delivery viewer smoke",
+      "verification": "Support bundle: PASS | artifacts=22/22 | redaction=True | roundtrip=True, including workstation delivery viewer smoke.",
       "limitations": "No live audit log or license status supplied."
     },
     {
       "path": "/tmp/workstation-delivery-viewer-smoke.png",
-            "type": "png",
-            "purpose": "Canvas-only screenshot used by the customer-open delivery viewer smoke",
-            "created_by": "scripts/verify-workstation-delivery-viewer-smoke.mjs",
-            "verification": "Canvas screenshot metrics nonBlank=true, significantPixelRatio=0.23088, coverageWidth=1.0, coverageHeight=0.99834.",
-            "limitations": "Temporary artifact under /tmp; validates local package open only, not customer-device FPS."
-        },
-        {
-            "path": "implementation/phase1/release/visualization/structural_viewer_midas33_pr_singlefile.html",
-            "type": "html",
-            "purpose": "Current commercial cockpit single-file viewer used as package viewer.html source",
-            "created_by": "implementation/phase1/generate_selfcontained_viewer.py",
-            "verification": "Regenerated after recursive viewer-module inlining, cockpit stylesheet inlining, dense 1600x900 cockpit compression, manifest-backed top project selector, top run-control strip, Stage Review Controls, Result Evidence receipt, Contour Scale evidence ticks, Load Case evidence rows, Utilization Heatmap evidence receipt, grouped viewport tool rail, 3D Overlay Receipt with visual-evidence legend, Stage Result Receipt, grouped before/after material quantity chart polish, story drift original/optimized comparison polish, lower-chart axis/tick/unit labels, shared-scale displacement-vs-load-step comparison, KPI evidence-card telemetry polish, Optimization Summary before/after evidence receipts, and Critical Members engineering review-row polish; package smoke confirms current_cockpit_delivery with 18/18 markers including top_project_selector, top_run_control, stage_review_controls, analysis_result_evidence, contour_scale_evidence, utilization_heatmap_evidence, analysis_overlay_receipt, analysis_overlay_visual_evidence, viewport_tool_rail, stage callouts, stage result receipt, critical members, optimization summary, and drawing handoff panel markers.",
-            "limitations": "Generated release artifact; update through generator and tests rather than direct patching."
-        },
-        {
-            "path": "/tmp/structure-viewer-dense-cockpit-after.png",
-            "type": "png",
-            "purpose": "Manual review screenshot for dense 1600x900 commercial cockpit layout",
-            "created_by": "scripts/capture-readme-viewer-image.mjs",
-            "verification": "Captured after dense short-viewport compression; browser smoke verifies topbar budget, viewport/right-rail minimums, KPI/chart/critical/callout counts, and zero chart-footer/callout-HUD overlap.",
-            "limitations": "Temporary artifact under /tmp; not a repository release asset."
-        },
-        {
-            "path": "implementation/phase1/structure_viewer_visual_regression_baseline.json",
-            "type": "json",
-            "purpose": "Local browser canvas-signature baseline for Structural Insight Viewer visual regression",
-            "created_by": "scripts/measure-structure-viewer-visual-regression.mjs",
-            "verification": "Structure viewer visual regression: PASS | cases=11/11 | mode=baseline_update after manifest-backed top project selector, top run-control strip, Stage Review Controls, Result Evidence receipt, Contour Scale evidence ticks, Load Case evidence row polish, Utilization Heatmap evidence polish, grouped viewport tool rail, 3D Overlay Receipt visual-evidence legend polish, Stage Result Receipt polish, Optimization Summary before/after evidence-card polish, Critical Members engineering review-row polish, KPI evidence-card telemetry polish, lower cockpit line chart axis/tick/unit polish, and shared-scale load-step comparison",
-            "limitations": "Local canvas signature regression only; not a customer-device pixel-perfect claim."
-        },
+      "type": "png",
+      "purpose": "Canvas-only screenshot used by the customer-open delivery viewer smoke",
+      "created_by": "scripts/verify-workstation-delivery-viewer-smoke.mjs",
+      "verification": "Canvas screenshot metrics nonBlank=true, significantPixelRatio=0.2347620632279534, coverageWidth=1.0, coverageHeight=0.9983361064891847.",
+      "limitations": "Temporary artifact under /tmp; validates local package open only, not customer-device FPS."
+    },
+    {
+      "path": "implementation/phase1/release/visualization/structural_viewer_midas33_optimized_singlefile.html",
+      "type": "html",
+      "purpose": "Current commercial cockpit single-file viewer used as package viewer.html source with Material Model Lock, Material Model Signature Ledger, Material Model Demand Atlas, Material Model Force Envelope, Material Model Capacity Envelope, Stage Material Model Demand Badges, Stage Material Force Ribbons, Stage Material Force Envelope, Stage Material Capacity Envelope, Stage Member Material State Badge, Drawing Material Parity Ledger, Drawing Source Detail Ledger, Drawing Sheet Detail Matrix, Drawing Material Model Matrix, Drawing Force Handoff Ledger, Drawing Force Vector Evidence, Drawing Capacity Handoff Ledger, Drawing Material Constitutive Register, Drawing Material Curve Evidence, Drawing Sheet Force Matrix, Material-Force Interaction, Member Section Capacity, Story Force Flow Ledger, Stage Story Force Flow Bands, and Stage Force Demand Contour",
+      "created_by": "implementation/phase1/generate_selfcontained_viewer.py",
+      "verification": "Regenerated after recursive viewer-module inlining and cockpit stylesheet inlining; optimized single-file size 11280.5 KB with 11355 nodes and 12728 elements. Embedded material parity summary remains materialMatchPercent=100, memberAssignmentMatchPercent=100, materialMismatchCount=0, memberMaterialMismatchCount=0, comparableMemberCount=12728, and sectionAssignmentChangeCount=353. Drawing Material Constitutive Register source browser probe shows schema=structure-viewer-drawing-material-constitutive-register.v1, status=ready, rowCount>=6, materialCount>=rowCount, renderedRows=rowCount, active-sheet and selected-combination sync, source-backed/nonlinear/curve/capacity-backed counts match DOM state, materialLocked=true, materialMatchPercent=100, memberAssignmentMatchPercent=100, browser state rows include Concrete damage-plasticity, Steel bilinear, Composite steel-concrete interaction, and Rigid link constraint, and overflow=0. Drawing Material Curve Evidence source browser probe shows schema=structure-viewer-drawing-material-curve-evidence.v1, status=ready, curveCount matches constitutive register curve rows, renderedRows/SVG/yield-marker/demand-marker counts match curveCount, active-sheet and selected-combination sync, source-backed/capacity-backed counts match DOM state, materialLocked=true, materialMatchPercent=100, memberAssignmentMatchPercent=100, browser state rows include Concrete damage-plasticity, Steel bilinear, Composite steel-concrete interaction, and Rigid link constraint, and overflow=0. Drawing Force Vector Evidence source browser probe shows schema=structure-viewer-drawing-force-vector-evidence.v1, status=ready, rowCount>=3, renderedRows=rowCount, SVG count=rowCount, active-sheet, selected-combination, and selected-member sync, sourceBackedCount>=1, maxDcr>0, materialLocked=true, vector kinds include axial/shear/moment, browser state sync, and overflow=0. Existing Drawing Capacity Handoff, Drawing Material/Sheet matrices, Material Model Force/Capacity envelopes, Stage Material envelopes, Material-Force Interaction, Member Section Capacity, Story Force Flow Ledger, Stage Story Force Flow Bands, and Stage Force Demand Contour remain ready with locked material state and overflow=0. Package smoke confirms current_cockpit_delivery with 86/86 markers including drawing_force_vector_evidence and browser=true.",
+      "limitations": "Generated release artifact; update through generator and tests rather than direct patching."
+    },
+    {
+      "path": "/tmp/structure-viewer-dense-cockpit-after.png",
+      "type": "png",
+      "purpose": "Manual review screenshot for dense 1600x900 commercial cockpit layout",
+      "created_by": "scripts/capture-readme-viewer-image.mjs",
+      "verification": "Captured after dense short-viewport compression; browser smoke verifies topbar budget, viewport/right-rail minimums, KPI/chart/critical/callout counts, and zero chart-footer/callout-HUD overlap.",
+      "limitations": "Temporary artifact under /tmp; not a repository release asset."
+    },
+    {
+      "path": "implementation/phase1/structure_viewer_visual_regression_baseline.json",
+      "type": "json",
+      "purpose": "Local browser canvas-signature baseline for Structural Insight Viewer visual regression",
+      "created_by": "scripts/measure-structure-viewer-visual-regression.mjs",
+      "verification": "Structure viewer visual regression: PASS | cases=11/11 | mode=baseline_update after commercial cockpit polish batches.",
+      "limitations": "Local canvas signature regression only; not a customer-device pixel-perfect claim."
+    },
     {
       "path": "/tmp/structure-viewer-commercial-polish-v22.png",
       "type": "png",
-      "purpose": "Manual review screenshot for the contour-first commercial cockpit polish batch with collision-aware stage callout docking, multi-selection/edge-safe viewport HUD support, active drawing handoff sheet-preview interaction, active critical-member viewport halo/badge, focus-linked critical callout, commercial timeline footer, section-aware member thickness, and customer-facing KPI estimate labels",
+      "purpose": "Manual review screenshot for the contour-first commercial cockpit polish batch",
       "created_by": "scripts/capture-readme-viewer-image.mjs",
-      "verification": "Capture completed after callout docking polish; docking smoke PASS dock=left, multi-selection smoke PASS members=11744,11746, drawing handoff smoke PASS sheet=elevation_xz, critical callout browser smoke PASS member=11744, performance probe PASS ready=4854ms fps=32.0, and visual regression PASS 11/11.",
+      "verification": "Capture completed after callout docking polish; docking smoke, multi-selection smoke, drawing handoff smoke, critical callout browser smoke, performance probe, and visual regression passed at the time of capture.",
       "limitations": "Temporary artifact under /tmp; not a repository release asset."
     }
   ]

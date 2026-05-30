@@ -99,6 +99,20 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-top-run-action" in text
     assert "syncTopRunControl" in text
     assert "startNewReviewRun" in text
+    assert 'id="integrated-review-navigator"' in text
+    assert 'id="integrated-review-map-button"' in text
+    assert "data-integrated-review-navigator" in text
+    assert "data-integrated-review-drawing" in text
+    assert "data-integrated-review-section" in text
+    assert "data-integrated-review-preview" in text
+    assert "structure-viewer-integrated-review-navigator.v1" in text
+    assert "structure-viewer-integrated-review-preview.v1" in text
+    assert "openIntegratedReviewNavigator" in text
+    assert "renderIntegratedReviewNavigator" in text
+    assert "setIntegratedReviewNavigatorDrawing" in text
+    assert "setIntegratedReviewNavigatorPreview" in text
+    assert "openIntegratedReviewActiveSection" in text
+    assert "__STRUCTURE_VIEWER_INTEGRATED_REVIEW_NAVIGATOR_STATE__" in text
     assert "renderTopbarProjectSelector" in text
     assert "setTopbarWorkspaceSelection" in text
     assert "Real Drawing Assets" in tree_model_text
@@ -210,6 +224,166 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "structure-viewer-result-envelope.v1" in text
     assert "data-result-envelope-row" in text
     assert "data-result-envelope-member-id" in text
+    assert 'id="force-flow-lens-panel"' in text
+    assert "data-force-flow-lens" in text
+    assert "buildForceFlowLensModel" in text
+    assert "renderForceFlowLensPanel" in text
+    assert "structure-viewer-force-flow-lens.v1" in text
+    assert "data-force-flow-row" in text
+    assert "data-force-flow-member-id" in text
+    assert "__STRUCTURE_VIEWER_FORCE_FLOW_LENS_STATE__" in text
+    assert 'id="load-combination-force-matrix-panel"' in text
+    assert "data-load-combination-force-matrix" in text
+    assert "buildLoadCombinationForceMatrixModel" in text
+    assert "renderLoadCombinationForceMatrixPanel" in text
+    assert "structure-viewer-load-combination-force-matrix.v1" in text
+    assert "structure-viewer-load-combination-force-stepper.v1" in text
+    assert "structure-viewer-stage-load-combination-force-glyphs.v1" in text
+    assert "setLoadCombinationForceSelection" in text
+    assert "data-load-combination-force-row" in text
+    assert "data-load-combination-force-member-id" in text
+    assert "data-load-combination-force-stepper" in text
+    assert "data-load-combination-force-step-combination" in text
+    assert "data-load-combination-force-selected-combination" in text
+    assert "data-stage-load-combination-force-glyphs" in text
+    assert "data-stage-load-combination-force-glyph-member" in text
+    assert "renderStageLoadCombinationForceGlyphs" in text
+    assert "positionStageLoadCombinationForceGlyphs" in text
+    assert "__STRUCTURE_VIEWER_STAGE_LOAD_COMBINATION_FORCE_GLYPHS_STATE__" in text
+    assert "data-stage-force-demand-contour" in text
+    assert "data-stage-force-demand-contour-marker" in text
+    assert "structure-viewer-stage-force-demand-contour.v1" in text
+    assert "buildStageForceDemandContourModel" in text
+    assert "renderStageForceDemandContour" in text
+    assert "positionStageForceDemandContour" in text
+    assert "__STRUCTURE_VIEWER_STAGE_FORCE_DEMAND_CONTOUR_STATE__" in text
+    assert "data-stage-material-model-demand-badges" in text
+    assert "data-stage-material-model-demand-badge" in text
+    assert "data-stage-material-model-demand-force-backed" in text
+    assert "structure-viewer-stage-material-model-demand-badges.v1" in text
+    assert "buildStageMaterialModelDemandBadgesModel" in text
+    assert "renderStageMaterialModelDemandBadges" in text
+    assert "positionStageMaterialModelDemandBadges" in text
+    assert "__STRUCTURE_VIEWER_STAGE_MATERIAL_MODEL_DEMAND_BADGES_STATE__" in text
+    assert "data-stage-material-force-ribbons" in text
+    assert "data-stage-material-force-ribbon" in text
+    assert "data-stage-material-force-axial" in text
+    assert "structure-viewer-stage-material-force-ribbons.v1" in text
+    assert "buildStageMaterialForceRibbonsModel" in text
+    assert "renderStageMaterialForceRibbons" in text
+    assert "positionStageMaterialForceRibbons" in text
+    assert "__STRUCTURE_VIEWER_STAGE_MATERIAL_FORCE_RIBBONS_STATE__" in text
+    assert "data-stage-material-force-envelope" in text
+    assert "data-stage-material-force-envelope-card" in text
+    assert "data-stage-material-force-envelope-svg" in text
+    assert "data-stage-material-force-envelope-point" in text
+    assert "structure-viewer-stage-material-force-envelope.v1" in text
+    assert "buildStageMaterialForceEnvelopeModel" in text
+    assert "renderStageMaterialForceEnvelope" in text
+    assert "positionStageMaterialForceEnvelope" in text
+    assert "__STRUCTURE_VIEWER_STAGE_MATERIAL_FORCE_ENVELOPE_STATE__" in text
+    assert "data-stage-material-capacity-envelope" in text
+    assert "data-stage-material-capacity-envelope-card" in text
+    assert "data-stage-material-capacity-envelope-svg" in text
+    assert "data-stage-material-capacity-envelope-point" in text
+    assert "data-stage-material-capacity-envelope-source-capacity-count" in text
+    assert "data-stage-material-capacity-envelope-estimated-capacity-count" in text
+    assert "structure-viewer-stage-material-capacity-envelope.v1" in text
+    assert "buildStageMaterialCapacityEnvelopeModel" in text
+    assert "renderStageMaterialCapacityEnvelope" in text
+    assert "positionStageMaterialCapacityEnvelope" in text
+    assert "__STRUCTURE_VIEWER_STAGE_MATERIAL_CAPACITY_ENVELOPE_STATE__" in text
+    assert "data-stage-story-force-flow-bands" in text
+    assert "data-stage-story-force-flow-band" in text
+    assert "renderStageStoryForceFlowBands" in text
+    assert "positionStageStoryForceFlowBands" in text
+    assert "structure-viewer-stage-story-force-flow-bands.v1" in text
+    assert "__STRUCTURE_VIEWER_STAGE_STORY_FORCE_FLOW_BANDS_STATE__" in text
+    assert 'id="member-force-diagram-panel"' in text
+    assert "data-member-force-diagram" in text
+    assert "data-member-force-diagram-row" in text
+    assert "data-member-force-diagram-svg" in text
+    assert "structure-viewer-member-force-diagram.v1" in text
+    assert "buildMemberForceDiagramModel" in text
+    assert "renderMemberForceDiagramPanel" in text
+    assert "__STRUCTURE_VIEWER_MEMBER_FORCE_DIAGRAM_STATE__" in text
+    assert 'id="member-force-envelope-panel"' in text
+    assert "data-member-force-envelope" in text
+    assert "data-member-force-envelope-row" in text
+    assert "data-member-force-envelope-svg" in text
+    assert "structure-viewer-member-force-envelope.v1" in text
+    assert "buildMemberForceEnvelopeModel" in text
+    assert "renderMemberForceEnvelopePanel" in text
+    assert "__STRUCTURE_VIEWER_MEMBER_FORCE_ENVELOPE_STATE__" in text
+    assert 'id="story-force-flow-ledger-panel"' in text
+    assert "data-story-force-flow-ledger" in text
+    assert "data-story-force-flow-row" in text
+    assert "data-story-force-flow-axial-total" in text
+    assert "data-story-force-flow-shear-total" in text
+    assert "data-story-force-flow-moment-total" in text
+    assert "buildStoryForceFlowLedgerModel" in text
+    assert "renderStoryForceFlowLedgerPanel" in text
+    assert "structure-viewer-story-force-flow-ledger.v1" in text
+    assert "__STRUCTURE_VIEWER_STORY_FORCE_FLOW_LEDGER_STATE__" in text
+    assert 'id="member-force-history-panel"' in text
+    assert "data-member-force-history" in text
+    assert "data-member-force-history-row" in text
+    assert "data-member-force-history-svg" in text
+    assert "data-member-force-history-point" in text
+    assert "structure-viewer-member-force-history.v1" in text
+    assert "buildMemberForceHistoryModel" in text
+    assert "renderMemberForceHistoryPanel" in text
+    assert "__STRUCTURE_VIEWER_MEMBER_FORCE_HISTORY_STATE__" in text
+    assert 'id="member-material-nonlinear-state-panel"' in text
+    assert "data-member-material-nonlinear-state" in text
+    assert "data-member-material-nonlinear-row" in text
+    assert "data-member-material-nonlinear-svg" in text
+    assert "data-member-material-nonlinear-demand-marker" in text
+    assert "data-member-material-nonlinear-yield-marker" in text
+    assert "data-member-material-nonlinear-force-row" in text
+    assert "structure-viewer-member-material-nonlinear-state.v1" in text
+    assert "buildMemberMaterialNonlinearStateModel" in text
+    assert "renderMemberMaterialNonlinearStatePanel" in text
+    assert "__STRUCTURE_VIEWER_MEMBER_MATERIAL_NONLINEAR_STATE__" in text
+    assert 'id="member-section-capacity-panel"' in text
+    assert "data-member-section-capacity" in text
+    assert "data-member-section-capacity-row" in text
+    assert "data-member-section-capacity-source-capacity" in text
+    assert "data-member-section-capacity-estimated-capacity" in text
+    assert "buildMemberSectionCapacityModel" in text
+    assert "renderMemberSectionCapacityPanel" in text
+    assert "structure-viewer-member-section-capacity.v1" in text
+    assert "__STRUCTURE_VIEWER_MEMBER_SECTION_CAPACITY_STATE__" in text
+    assert 'id="member-force-playback-panel"' in text
+    assert "data-member-force-playback" in text
+    assert "data-member-force-playback-frame" in text
+    assert "data-member-force-playback-action" in text
+    assert "structure-viewer-member-force-playback.v1" in text
+    assert "buildMemberForcePlaybackModel" in text
+    assert "renderMemberForcePlaybackPanel" in text
+    assert "__STRUCTURE_VIEWER_MEMBER_FORCE_PLAYBACK_STATE__" in text
+    assert "data-stage-member-force-playback-trail" in text
+    assert "data-stage-member-force-playback-trail-frame" in text
+    assert "structure-viewer-stage-member-force-playback-trail.v1" in text
+    assert "buildStageMemberForcePlaybackTrailModel" in text
+    assert "renderStageMemberForcePlaybackTrail" in text
+    assert "positionStageMemberForcePlaybackTrail" in text
+    assert "__STRUCTURE_VIEWER_STAGE_MEMBER_FORCE_PLAYBACK_TRAIL_STATE__" in text
+    assert "data-stage-member-force-vector-field" in text
+    assert "data-stage-member-force-vector" in text
+    assert "structure-viewer-stage-member-force-vector-field.v1" in text
+    assert "buildStageMemberForceVectorFieldModel" in text
+    assert "renderStageMemberForceVectorField" in text
+    assert "positionStageMemberForceVectorField" in text
+    assert "__STRUCTURE_VIEWER_STAGE_MEMBER_FORCE_VECTOR_FIELD_STATE__" in text
+    assert "data-stage-member-material-state-badge" in text
+    assert "data-stage-member-material-state-card" in text
+    assert "structure-viewer-stage-member-material-state-badge.v1" in text
+    assert "buildStageMemberMaterialStateBadgeModel" in text
+    assert "renderStageMemberMaterialStateBadge" in text
+    assert "positionStageMemberMaterialStateBadge" in text
+    assert "__STRUCTURE_VIEWER_STAGE_MEMBER_MATERIAL_STATE_BADGE_STATE__" in text
+    assert "__STRUCTURE_VIEWER_LOAD_COMBINATION_FORCE_MATRIX_STATE__" in text
     assert 'id="critical-triage-panel"' in text
     assert "data-critical-triage" in text
     assert "data-critical-triage-row" in text
@@ -241,6 +415,60 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "renderDeliveryReviewReceipt" in text
     assert "structure-viewer-delivery-review-receipt.v1" in text
     assert "delivery-review-receipt__row" in text
+    assert 'id="material-model-parity-panel"' in text
+    assert "data-material-model-parity" in text
+    assert "data-material-model-parity-row" in text
+    assert "buildMaterialModelParityModel" in text
+    assert "renderMaterialModelParityPanel" in text
+    assert "structure-viewer-material-model-parity.v1" in text
+    assert "__STRUCTURE_VIEWER_MATERIAL_MODEL_PARITY_STATE__" in text
+    assert 'id="material-model-signature-ledger-panel"' in text
+    assert "data-material-model-signature-ledger" in text
+    assert "data-material-model-signature-row" in text
+    assert "data-material-model-signature-token-count" in text
+    assert "buildMaterialModelSignatureLedgerModel" in text
+    assert "renderMaterialModelSignatureLedgerPanel" in text
+    assert "structure-viewer-material-model-signature-ledger.v1" in text
+    assert "__STRUCTURE_VIEWER_MATERIAL_MODEL_SIGNATURE_LEDGER_STATE__" in text
+    assert 'id="material-model-demand-atlas-panel"' in text
+    assert "data-material-model-demand-atlas" in text
+    assert "data-material-model-demand-row" in text
+    assert "buildMaterialModelDemandAtlasModel" in text
+    assert "renderMaterialModelDemandAtlasPanel" in text
+    assert "structure-viewer-material-model-demand-atlas.v1" in text
+    assert "__STRUCTURE_VIEWER_MATERIAL_MODEL_DEMAND_ATLAS_STATE__" in text
+    assert 'id="material-model-force-envelope-panel"' in text
+    assert "data-material-model-force-envelope" in text
+    assert "data-material-model-force-envelope-row" in text
+    assert "data-material-model-force-envelope-svg" in text
+    assert "data-material-model-force-envelope-point" in text
+    assert "buildMaterialModelForceEnvelopeModel" in text
+    assert "renderMaterialModelForceEnvelopePanel" in text
+    assert "structure-viewer-material-model-force-envelope.v1" in text
+    assert "__STRUCTURE_VIEWER_MATERIAL_MODEL_FORCE_ENVELOPE_STATE__" in text
+    assert 'id="material-model-capacity-envelope-panel"' in text
+    assert "data-material-model-capacity-envelope" in text
+    assert "data-material-model-capacity-envelope-row" in text
+    assert "data-material-model-capacity-envelope-svg" in text
+    assert "data-material-model-capacity-envelope-point" in text
+    assert "data-material-model-capacity-envelope-row-source-capacity" in text
+    assert "data-material-model-capacity-envelope-row-estimated-capacity" in text
+    assert "buildMaterialModelCapacityEnvelopeModel" in text
+    assert "renderMaterialModelCapacityEnvelopePanel" in text
+    assert "structure-viewer-material-model-capacity-envelope.v1" in text
+    assert "__STRUCTURE_VIEWER_MATERIAL_MODEL_CAPACITY_ENVELOPE_STATE__" in text
+    assert "structure-viewer-stage-material-model-demand-badges.v1" in text
+    assert "structure-viewer-stage-material-force-ribbons.v1" in text
+    assert "structure-viewer-stage-material-force-envelope.v1" in text
+    assert "structure-viewer-stage-material-capacity-envelope.v1" in text
+    assert 'id="material-force-interaction-panel"' in text
+    assert "data-material-force-interaction" in text
+    assert "data-material-force-row" in text
+    assert "data-material-force-member-sample" in text
+    assert "buildMaterialForceInteractionModel" in text
+    assert "renderMaterialForceInteractionPanel" in text
+    assert "structure-viewer-material-force-interaction.v1" in text
+    assert "__STRUCTURE_VIEWER_MATERIAL_FORCE_INTERACTION_STATE__" in text
     assert 'id="material-member-catalog-panel"' in text
     assert "data-material-member-catalog" in text
     assert "buildMaterialMemberCatalogPanelModel" in text
@@ -251,6 +479,17 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-material-coverage-schema" in text
     assert "data-material-coverage-check" in text
     assert "structure-viewer-material-coverage-readiness.v1" in text
+    assert "buildMaterialConstitutiveLensModel" in text
+    assert "data-material-constitutive-lens" in text
+    assert "data-material-constitutive-row" in text
+    assert "structure-viewer-material-constitutive-lens.v1" in text
+    assert "buildMaterialStressStrainCurvesModel" in text
+    assert "data-material-stress-strain-curves" in text
+    assert "data-material-stress-strain-curve-row" in text
+    assert "structure-viewer-material-stress-strain-curves.v1" in text
+    assert "__STRUCTURE_VIEWER_MATERIAL_STRESS_STRAIN_CURVES_STATE__" in text
+    assert "Concrete damage-plasticity" in text
+    assert "Steel bilinear" in text
     assert "MATERIAL_FAMILY_ONTOLOGY" in text
     assert "data-material-family-coverage" in text
     assert "data-material-family-chip" in text
@@ -357,6 +596,11 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "getRectOverlapArea" in text
     assert "data-stage-callout-dock" in text
     assert "data-stage-callout-overlap" in text
+    assert 'id="stage-result-callout-anchors"' in text
+    assert "data-stage-result-callout-anchors" in text
+    assert "positionStageResultCalloutAnchors" in text
+    assert "window.positionStageResultCalloutAnchors=positionStageResultCalloutAnchors;" in text
+    assert "__STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_STATE__" in text
     assert "selected_member_focus_halo" in text
     assert "selected_member_focus_secondary_marker" in text
     assert "data-viewport-selection-focus-count" in text
@@ -366,12 +610,17 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     )
     assert "data-stage-result-callouts" in text
     assert "STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_SCHEMA_VERSION" in text
-    assert "structure-viewer-stage-result-callouts.v2" in stage_callouts_renderer_text
+    assert "structure-viewer-stage-result-callouts.v3" in stage_callouts_renderer_text
     assert "data-stage-result-callout-source-type" in stage_callouts_renderer_text
     assert "data-stage-result-callout-full-label" in stage_callouts_renderer_text
     assert "data-stage-result-callout-full-value" in stage_callouts_renderer_text
     assert "data-stage-result-callout-load-case" in stage_callouts_renderer_text
     assert "data-stage-result-callout-step" in stage_callouts_renderer_text
+    assert "data-stage-result-callout-anchor-kind" in stage_callouts_renderer_text
+    assert "data-stage-result-callout-anchor-label" in stage_callouts_renderer_text
+    assert "data-stage-result-callout-projection" in stage_callouts_renderer_text
+    assert "roof-displacement" in stage_callouts_renderer_text
+    assert "base-reaction" in stage_callouts_renderer_text
     assert "data-stage-result-callout-evidence" in stage_callouts_renderer_text
     assert "data-stage-result-callout-key" in stage_callouts_renderer_text
     assert "data-stage-callout-focus-member" in stage_callouts_renderer_text
@@ -396,6 +645,68 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-drawing-handoff-selected-member" in drawing_handoff_renderer_text
     assert "data-drawing-handoff-active-sheet-open" in drawing_handoff_renderer_text
     assert "data-drawing-handoff-sheet-href" in drawing_handoff_renderer_text
+    assert "data-drawing-material-parity-ledger" in drawing_handoff_renderer_text
+    assert "data-drawing-material-parity-row" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-material-parity-ledger.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_MATERIAL_PARITY_LEDGER_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingMaterialParityLedgerModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_MATERIAL_PARITY_LEDGER_STATE__" in text
+    assert "data-drawing-source-detail-ledger" in drawing_handoff_renderer_text
+    assert "data-drawing-source-detail-row" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-source-detail-ledger.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_SOURCE_DETAIL_LEDGER_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingSourceDetailLedgerModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_SOURCE_DETAIL_LEDGER_STATE__" in text
+    assert "data-drawing-sheet-detail-matrix" in drawing_handoff_renderer_text
+    assert "data-drawing-sheet-detail-row" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-sheet-detail-matrix.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_SHEET_DETAIL_MATRIX_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingSheetDetailMatrixModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_SHEET_DETAIL_MATRIX_STATE__" in text
+    assert "data-drawing-material-model-matrix" in drawing_handoff_renderer_text
+    assert "data-drawing-material-model-row" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-material-model-matrix.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_MATERIAL_MODEL_MATRIX_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingMaterialModelMatrixModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_MATERIAL_MODEL_MATRIX_STATE__" in text
+    assert "data-drawing-material-constitutive-register" in drawing_handoff_renderer_text
+    assert "data-drawing-material-constitutive-row" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-material-constitutive-register.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_MATERIAL_CONSTITUTIVE_REGISTER_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingMaterialConstitutiveRegisterModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_MATERIAL_CONSTITUTIVE_REGISTER_STATE__" in text
+    assert "data-drawing-material-curve-evidence" in drawing_handoff_renderer_text
+    assert "data-drawing-material-curve-row" in drawing_handoff_renderer_text
+    assert "data-drawing-material-curve-svg" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-material-curve-evidence.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_MATERIAL_CURVE_EVIDENCE_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingMaterialCurveEvidenceModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_MATERIAL_CURVE_EVIDENCE_STATE__" in text
+    assert "data-drawing-force-handoff-ledger" in drawing_handoff_renderer_text
+    assert "data-drawing-force-handoff-row" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-force-handoff-ledger.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_FORCE_HANDOFF_LEDGER_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingForceHandoffLedgerModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_FORCE_HANDOFF_LEDGER_STATE__" in text
+    assert "data-drawing-force-vector-evidence" in drawing_handoff_renderer_text
+    assert "data-drawing-force-vector-row" in drawing_handoff_renderer_text
+    assert "data-drawing-force-vector-svg" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-force-vector-evidence.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_FORCE_VECTOR_EVIDENCE_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingForceVectorEvidenceModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_FORCE_VECTOR_EVIDENCE_STATE__" in text
+    assert "data-drawing-capacity-handoff-ledger" in drawing_handoff_renderer_text
+    assert "data-drawing-capacity-handoff-row" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-capacity-handoff-ledger.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_CAPACITY_HANDOFF_LEDGER_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingCapacityHandoffLedgerModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_CAPACITY_HANDOFF_LEDGER_STATE__" in text
+    assert "data-drawing-sheet-force-matrix" in drawing_handoff_renderer_text
+    assert "data-drawing-sheet-force-row" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-sheet-force-matrix.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_MATRIX_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingSheetForceMatrixModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_MATRIX_STATE__" in text
     assert "aria-current" in drawing_handoff_renderer_text
     assert "drawing-handoff-preview__svg" in drawing_handoff_renderer_text
     assert "data-drawing-handoff-copy-link" in drawing_handoff_renderer_text
@@ -483,6 +794,14 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "analysis-chart-ticks" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
         encoding="utf-8"
     )
+    assert "LOWER_CHART_EVIDENCE_SCHEMA" in text
+    assert "structure-viewer-lower-chart-evidence.v1" in text
+    assert "data-lower-chart-axis-receipt" in text
+    assert "renderLowerChartAxisReceipt" in text
+    assert "data-lower-chart-shared-scale" in text
+    assert "analysis-chart-axis-receipt" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
     assert "analysis-material-chart" in (
         ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
     ).read_text(encoding="utf-8")
@@ -523,9 +842,81 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "stage-load-support-glyphs" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
         encoding="utf-8"
     )
+    assert "force-flow-lens" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "load-combination-force-matrix" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(
+        encoding="utf-8"
+    )
+    assert "member-force-diagram-row" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "member-force-envelope-row" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "member-force-history-row" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "member-material-nonlinear-row" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "member-force-playback-frame" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-load-combination-force-glyph" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-material-model-demand-badge" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-material-force-ribbon" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-member-force-playback-trail-frame" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-member-force-vector-field" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "integrated-review-navigator" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "material-model-parity-row" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "material-model-demand-row" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "material-constitutive-lens" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
+    assert "material-stress-strain-row" in (
+        ROOT / "src" / "structure-viewer" / "design-theme.css"
+    ).read_text(encoding="utf-8")
     assert "stage-load-glyph" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
         encoding="utf-8"
     )
+    assert "force-flow-row" in (ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css").read_text(
+        encoding="utf-8"
+    )
+    assert "load-combination-force-row" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert "load-combination-force-step" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-load-combination-force-glyph" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-material-model-demand-badge" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert "stage-material-force-ribbon" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
+    assert "material-constitutive-row" in (
+        ROOT / "src" / "structure-viewer" / "commercial-cockpit-polish.css"
+    ).read_text(encoding="utf-8")
     assert "<span>Drift</span>" in text
     assert "analysisStageOverlayDark" in (ROOT / "DESIGN.md").read_text(encoding="utf-8")
     assert "clip-path:inset(50%)" in (ROOT / "src" / "structure-viewer" / "design-theme.css").read_text(

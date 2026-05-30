@@ -71,15 +71,21 @@ console.log(JSON.stringify({
     )
 
     assert payload["exports"] == [
+        "ELEMENT_TYPE_REGISTRY",
         "buildModelFromInteractivePayload",
         "buildModelFromInteractivePayloadAsync",
+        "buildModelFromNativePayload",
+        "buildModelFromNativePayloadAsync",
         "estimateStoryCount",
         "extractInteractivePayload",
         "extractModelPayload",
+        "extractNativeModelPayload",
+        "getElementGeometryKind",
         "isModelPayload",
         "normalizeElementType",
         "normalizePoint",
         "registerSegmentNode",
+        "resolveMaterialType",
         "rgbArrayToHex",
         "safeNumber",
     ]
@@ -171,7 +177,41 @@ const interactivePayload = {
     axis_refs: {z: [0, 1, 2, 3]},
     comparison_availability: 'baseline_vs_opt',
   },
-  case_context: {case_id: 'CASE-17', case_label: 'Case 17'},
+  case_context: {
+    case_id: 'CASE-17',
+    case_label: 'Case 17',
+    load_combination_count_label: '8',
+    load_combination_source_label: 'release-context',
+    load_combination_contract_label: '0.3.0',
+    load_combination_graph_combo_count_label: '8',
+    load_combination_geometry_bridge_summary_label: 'rows exact=1056',
+    midas_kds_geometry_bridge_summary_line: 'rows=1056 | exact_rows=1056/1056',
+    load_combination_highlights: ['gLCB1'],
+    load_combination_graph_node_rows: [
+      {
+        id: 'COMBO:gLCB1',
+        name: 'gLCB1',
+        kind: 'combo',
+        focus_representative_member_id: '1003',
+      },
+    ],
+    load_combination_codecheck_table_by_name: {
+      gLCB1: {
+        row_count_label: '1',
+        governing_member_label: 'MF-012',
+        governing_component_label: 'bending_moment_y_kNm',
+        governing_dcr_label: '1.216',
+        table_rows: [
+          {
+            member_id: 'MF-012',
+            baseline_focus_member_id: '27441',
+            component: 'bending_moment_y_kNm',
+            dcr_label: '1.216',
+          },
+        ],
+      },
+    },
+  },
   generated_at: '2026-05-08T01:23:45+09:00',
 };
 const sourceMeta = {
@@ -227,6 +267,18 @@ console.log(JSON.stringify({
       baselineSegmentCount: direct.meta.baseline_segment_count,
       optimizedSegmentCount: direct.meta.optimized_segment_count,
       stories: direct.meta.stories,
+      loadCombinationCount: direct.meta.load_combination_count_label,
+      loadCombinationSource: direct.meta.load_combination_source_label,
+      loadCombinationContract: direct.meta.load_combination_contract_label,
+      loadCombinationGraphComboCount: direct.meta.load_combination_graph_combo_count_label,
+      loadCombinationBridgeSummary: direct.meta.load_combination_geometry_bridge_summary_label,
+      midasKdsBridgeSummary: direct.meta.midas_kds_geometry_bridge_summary_line,
+      loadCombinationHighlightCount: direct.meta.load_combination_highlights.length,
+      loadCombinationGraphNodeCount: direct.meta.load_combination_graph_node_rows.length,
+      loadCombinationGraphFocus: direct.meta.load_combination_graph_node_rows[0].focus_representative_member_id,
+      loadCombinationCodecheckKeys: Object.keys(direct.meta.load_combination_codecheck_table_by_name),
+      loadCombinationCodecheckRows: direct.meta.load_combination_codecheck_table_by_name.gLCB1.table_rows.length,
+      loadCombinationCodecheckFocus: direct.meta.load_combination_codecheck_table_by_name.gLCB1.table_rows[0].baseline_focus_member_id,
     },
   },
   chunked: {
@@ -245,6 +297,9 @@ console.log(JSON.stringify({
       baselineSegmentCount: chunked.meta.baseline_segment_count,
       optimizedSegmentCount: chunked.meta.optimized_segment_count,
       stories: chunked.meta.stories,
+      loadCombinationCount: chunked.meta.load_combination_count_label,
+      loadCombinationGraphNodeCount: chunked.meta.load_combination_graph_node_rows.length,
+      loadCombinationCodecheckRows: chunked.meta.load_combination_codecheck_table_by_name.gLCB1.table_rows.length,
     },
   },
   chunkCalls,
@@ -294,6 +349,18 @@ console.log(JSON.stringify({
         "baselineSegmentCount": 2,
         "optimizedSegmentCount": 1,
         "stories": 4,
+        "loadCombinationCount": "8",
+        "loadCombinationSource": "release-context",
+        "loadCombinationContract": "0.3.0",
+        "loadCombinationGraphComboCount": "8",
+        "loadCombinationBridgeSummary": "rows exact=1056",
+        "midasKdsBridgeSummary": "rows=1056 | exact_rows=1056/1056",
+        "loadCombinationHighlightCount": 1,
+        "loadCombinationGraphNodeCount": 1,
+        "loadCombinationGraphFocus": "1003",
+        "loadCombinationCodecheckKeys": ["gLCB1"],
+        "loadCombinationCodecheckRows": 1,
+        "loadCombinationCodecheckFocus": "27441",
     }
     assert payload["chunked"]["nodeCount"] == 4
     assert payload["chunked"]["elementCount"] == 3
@@ -310,6 +377,9 @@ console.log(JSON.stringify({
         "baselineSegmentCount": 2,
         "optimizedSegmentCount": 1,
         "stories": 4,
+        "loadCombinationCount": "8",
+        "loadCombinationGraphNodeCount": 1,
+        "loadCombinationCodecheckRows": 1,
     }
     assert payload["chunkCalls"] == [
         {

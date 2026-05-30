@@ -285,6 +285,88 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   if (await page.locator('[data-drawing-handoff-sheet]').count() > 1) {
     await page.locator('[data-drawing-handoff-sheet]').nth(1).focus()
   }
+  const loadCombinationSteps = page.locator('[data-load-combination-force-step-combination]')
+  await expect(loadCombinationSteps.first()).toBeVisible({ timeout: 10000 })
+  const stepCount = await loadCombinationSteps.count()
+  const stepIndex = Math.min(1, Math.max(0, stepCount - 1))
+  const clickedCombination = await loadCombinationSteps.nth(stepIndex).getAttribute('data-load-combination-force-step-combination')
+  let activeCombinationForPreview = clickedCombination || ''
+  await loadCombinationSteps.nth(stepIndex).click()
+  if (clickedCombination) {
+    await expect(page.locator('[data-load-combination-force-matrix]')).toHaveAttribute('data-load-combination-force-selected-combination', clickedCombination)
+    await expect(page.locator('[data-force-flow-lens]')).toHaveAttribute('data-force-flow-selected-combination', clickedCombination)
+    await expect(page.locator('[data-story-force-flow-ledger]')).toHaveAttribute('data-story-force-flow-selected-combination', clickedCombination)
+    await expect(page.locator('[data-member-force-envelope]')).toHaveAttribute('data-member-force-envelope-selected-combination', clickedCombination)
+    await expect(page.locator('[data-member-force-history]')).toHaveAttribute('data-member-force-history-selected-combination', clickedCombination)
+    await expect(page.locator('#member-material-nonlinear-state-panel')).toHaveAttribute('data-member-material-nonlinear-selected-combination', clickedCombination)
+    await expect(page.locator('[data-member-section-capacity]')).toHaveAttribute('data-member-section-capacity-selected-combination', clickedCombination)
+  }
+  const playbackNext = page.locator('[data-member-force-playback-action="next"]')
+  await expect(playbackNext).toBeVisible({ timeout: 10000 })
+  await playbackNext.click()
+  const playbackCombination = await page.locator('[data-member-force-playback]').getAttribute('data-member-force-playback-active-combination')
+  if (playbackCombination) {
+    activeCombinationForPreview = playbackCombination
+    await expect(page.locator('[data-load-combination-force-matrix]')).toHaveAttribute('data-load-combination-force-selected-combination', playbackCombination)
+    await expect(page.locator('[data-member-force-diagram]')).toHaveAttribute('data-member-force-diagram-selected-combination', playbackCombination)
+    await expect(page.locator('[data-story-force-flow-ledger]')).toHaveAttribute('data-story-force-flow-selected-combination', playbackCombination)
+    await expect(page.locator('[data-member-force-history]')).toHaveAttribute('data-member-force-history-selected-combination', playbackCombination)
+    await expect(page.locator('#member-material-nonlinear-state-panel')).toHaveAttribute('data-member-material-nonlinear-selected-combination', playbackCombination)
+    await expect(page.locator('[data-member-section-capacity]')).toHaveAttribute('data-member-section-capacity-selected-combination', playbackCombination)
+  }
+  await page.locator('#integrated-review-map-button').click()
+  await expect(page.locator('[data-integrated-review-navigator]')).toHaveAttribute('data-integrated-review-open', 'true')
+  await expect(page.locator('[data-integrated-review-drawing]').first()).toBeVisible({ timeout: 10000 })
+  await expect(page.locator('[data-integrated-review-section]').first()).toBeVisible({ timeout: 10000 })
+  await page.locator('[data-integrated-review-section-key="loads"]').focus()
+  await expect(page.locator('[data-integrated-review-preview]')).toHaveAttribute('data-integrated-review-preview-section', 'loads')
+  const reviewMapSnapshot = await page.evaluate(() => ({
+    schema: document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-schema') || '',
+    status: document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-status') || '',
+    activeSection: document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-active-section') || '',
+    drawingCount: Number(document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-drawing-count') || '0'),
+    allDrawingCount: Number(document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-all-drawing-count') || '0'),
+    sectionCount: Number(document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-section-count') || '0'),
+    drawingButtonCount: document.querySelectorAll('[data-integrated-review-drawing]').length,
+    sectionButtonCount: document.querySelectorAll('[data-integrated-review-section]').length,
+    previewSchema: document.querySelector('[data-integrated-review-preview]')?.getAttribute('data-integrated-review-preview-schema') || '',
+    previewStatus: document.querySelector('[data-integrated-review-preview]')?.getAttribute('data-integrated-review-preview-status') || '',
+    previewSection: document.querySelector('[data-integrated-review-preview]')?.getAttribute('data-integrated-review-preview-section') || '',
+    previewTarget: document.querySelector('[data-integrated-review-preview]')?.getAttribute('data-integrated-review-preview-target') || '',
+    previewRowCount: Number(document.querySelector('[data-integrated-review-preview]')?.getAttribute('data-integrated-review-preview-row-count') || '0'),
+    previewRenderedRowCount: document.querySelectorAll('[data-integrated-review-preview-row]').length,
+    previewOpenTarget: document.querySelector('[data-integrated-review-preview-open]')?.getAttribute('data-integrated-review-target') || '',
+    previewText: document.querySelector('[data-integrated-review-preview]')?.textContent || '',
+    windowState: window.__STRUCTURE_VIEWER_INTEGRATED_REVIEW_NAVIGATOR_STATE__ || null,
+    overflowCount: [...document.querySelectorAll('[data-integrated-review-navigator] button, [data-integrated-review-navigator] strong, [data-integrated-review-navigator] small, [data-integrated-review-navigator] em')].filter((node) => {
+      if (!(node instanceof HTMLElement)) return false
+      return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+    }).length,
+  }))
+  expect(reviewMapSnapshot.schema).toBe('structure-viewer-integrated-review-navigator.v1')
+  expect(reviewMapSnapshot.status).toBe('ready')
+  expect(reviewMapSnapshot.activeSection).toBe('loads')
+  expect(reviewMapSnapshot.drawingCount).toBeGreaterThanOrEqual(2)
+  expect(reviewMapSnapshot.allDrawingCount).toBeGreaterThanOrEqual(reviewMapSnapshot.drawingCount)
+  expect(reviewMapSnapshot.sectionCount).toBeGreaterThanOrEqual(8)
+  expect(reviewMapSnapshot.drawingButtonCount).toBe(reviewMapSnapshot.drawingCount)
+  expect(reviewMapSnapshot.sectionButtonCount).toBe(reviewMapSnapshot.sectionCount)
+  expect(reviewMapSnapshot.previewSchema).toBe('structure-viewer-integrated-review-preview.v1')
+  expect(reviewMapSnapshot.previewStatus).toBe('ready')
+  expect(reviewMapSnapshot.previewSection).toBe('loads')
+  expect(reviewMapSnapshot.previewTarget).toBe('loadcomb-section')
+  expect(reviewMapSnapshot.previewRowCount).toBeGreaterThanOrEqual(4)
+  expect(reviewMapSnapshot.previewRenderedRowCount).toBe(reviewMapSnapshot.previewRowCount)
+  expect(reviewMapSnapshot.previewOpenTarget).toBe('loadcomb-section')
+  expect(reviewMapSnapshot.previewText).toContain('Selected Combination')
+  if (activeCombinationForPreview) expect(reviewMapSnapshot.previewText).toContain(activeCombinationForPreview)
+  expect(reviewMapSnapshot.windowState?.open).toBe(true)
+  expect(reviewMapSnapshot.windowState?.previewSchemaVersion).toBe('structure-viewer-integrated-review-preview.v1')
+  expect(reviewMapSnapshot.windowState?.activePreviewSectionKey).toBe('loads')
+  expect(reviewMapSnapshot.windowState?.previewRowCount).toBe(reviewMapSnapshot.previewRowCount)
+  expect(reviewMapSnapshot.overflowCount).toBe(0)
+  await page.locator('[data-integrated-review-close]').click()
+  await expect(page.locator('[data-integrated-review-navigator]')).toHaveAttribute('data-integrated-review-open', 'false')
 
   const layout = await page.evaluate(() => {
     const rectFor = (selector: string) => {
@@ -311,6 +393,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     const rightPanel = rectFor('#right-panel')
     const stageFrame = rectFor('.stage-frame')
     const callouts = rectFor('[data-stage-result-callouts]')
+    const calloutAnchors = rectFor('[data-stage-result-callout-anchors]')
     const stageReceipt = rectFor('#stage-result-receipt')
     const stageOverlayReceipt = rectFor('[data-stage-overlay-receipt]')
     const stageLoadSupportGlyphs = rectFor('[data-stage-load-support-glyphs]')
@@ -332,9 +415,12 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
     const topProjectSelect = document.querySelector('[data-shell-project-select]') as HTMLSelectElement | null
     const stageOverlayBudgetSelectors = [
       '[data-stage-result-callouts]',
+      '[data-stage-result-callout-anchor]',
       '[data-stage-drift-band]',
       '[data-stage-critical-hotspot]',
       '[data-panel-zone-stage-badge]',
+      '[data-stage-member-force-playback-trail-frame]',
+      '[data-stage-member-force-vector]',
       '[data-stage-story-ruler-row]',
       '[data-stage-overlay-receipt]',
       '[data-viewport-selection-focus-badge].is-visible',
@@ -405,6 +491,17 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      integratedReviewOpenerCount: document.querySelectorAll('[data-integrated-review-open]').length,
+      integratedReviewSchema: document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-schema') || '',
+      integratedReviewOpen: document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-open') || '',
+      integratedReviewDrawingCount: Number(document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-drawing-count') || '0'),
+      integratedReviewAllDrawingCount: Number(document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-all-drawing-count') || '0'),
+      integratedReviewSectionCount: Number(document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-section-count') || '0'),
+      integratedReviewActiveSection: document.querySelector('[data-integrated-review-navigator]')?.getAttribute('data-integrated-review-active-section') || '',
+      integratedReviewPreviewSchema: document.querySelector('[data-integrated-review-preview]')?.getAttribute('data-integrated-review-preview-schema') || '',
+      integratedReviewPreviewSection: document.querySelector('[data-integrated-review-preview]')?.getAttribute('data-integrated-review-preview-section') || '',
+      integratedReviewPreviewRowCount: Number(document.querySelector('[data-integrated-review-preview]')?.getAttribute('data-integrated-review-preview-row-count') || '0'),
+      integratedReviewWindowState: window.__STRUCTURE_VIEWER_INTEGRATED_REVIEW_NAVIGATOR_STATE__ || null,
       modelOverviewStatus: document.querySelector('[data-model-overview-panel]')?.getAttribute('data-model-overview-status') || '',
       modelOverviewHeightM: Number(document.querySelector('[data-model-overview-panel]')?.getAttribute('data-model-height-m') || '0'),
       modelOverviewUnits: document.querySelector('[data-model-overview-panel]')?.getAttribute('data-model-units') || '',
@@ -430,6 +527,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       rightPanel,
       stageFrame,
       callouts,
+      calloutAnchors,
       focusBadge,
       toolRail,
       stageOverlayReceipt,
@@ -654,6 +752,446 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      forceFlowStatus: document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-status') || '',
+      forceFlowSchema: document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-schema') || '',
+      forceFlowRowCount: Number(document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-row-count') || '0'),
+      forceFlowSourceBackedCount: Number(document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-source-backed-count') || '0'),
+      forceFlowBaseReaction: Number(document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-base-reaction-kn') || '0'),
+      forceFlowGoverningMember: document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-governing-member') || '',
+      forceFlowLoadCase: document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-load-case') || '',
+      forceFlowSelectedCombination: document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-selected-combination') || '',
+      forceFlowActiveStep: Number(document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-active-step') || '0'),
+      forceFlowTotalSteps: Number(document.querySelector('[data-force-flow-lens]')?.getAttribute('data-force-flow-total-steps') || '0'),
+      forceFlowRenderedRowCount: document.querySelectorAll('[data-force-flow-lens] [data-force-flow-row]').length,
+      forceFlowMemberRowCount: document.querySelectorAll('[data-force-flow-lens] [data-force-flow-member-id]').length,
+      forceFlowWindowState: window.__STRUCTURE_VIEWER_FORCE_FLOW_LENS_STATE__ || null,
+      forceFlowOverflowCount: [...document.querySelectorAll('[data-force-flow-lens], [data-force-flow-lens] [data-force-flow-row], [data-force-flow-lens] [data-force-flow-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      storyForceFlowStatus: document.querySelector('[data-story-force-flow-ledger]')?.getAttribute('data-story-force-flow-status') || '',
+      storyForceFlowSchema: document.querySelector('[data-story-force-flow-ledger]')?.getAttribute('data-story-force-flow-schema') || '',
+      storyForceFlowRowCount: Number(document.querySelector('[data-story-force-flow-ledger]')?.getAttribute('data-story-force-flow-row-count') || '0'),
+      storyForceFlowStoryCount: Number(document.querySelector('[data-story-force-flow-ledger]')?.getAttribute('data-story-force-flow-story-count') || '0'),
+      storyForceFlowForceRowCount: Number(document.querySelector('[data-story-force-flow-ledger]')?.getAttribute('data-story-force-flow-force-row-count') || '0'),
+      storyForceFlowSourceBackedCount: Number(document.querySelector('[data-story-force-flow-ledger]')?.getAttribute('data-story-force-flow-source-backed-count') || '0'),
+      storyForceFlowSelectedCombination: document.querySelector('[data-story-force-flow-ledger]')?.getAttribute('data-story-force-flow-selected-combination') || '',
+      storyForceFlowGoverningStory: document.querySelector('[data-story-force-flow-ledger]')?.getAttribute('data-story-force-flow-governing-story') || '',
+      storyForceFlowMaxDcr: Number(document.querySelector('[data-story-force-flow-ledger]')?.getAttribute('data-story-force-flow-max-dcr') || '0'),
+      storyForceFlowRenderedRowCount: document.querySelectorAll('[data-story-force-flow-ledger] [data-story-force-flow-row]').length,
+      storyForceFlowBarCount: document.querySelectorAll('[data-story-force-flow-ledger] .story-force-flow-bar').length,
+      storyForceFlowWindowState: window.__STRUCTURE_VIEWER_STORY_FORCE_FLOW_LEDGER_STATE__ || null,
+      storyForceFlowText: document.querySelector('[data-story-force-flow-ledger]')?.textContent || '',
+      storyForceFlowOverflowCount: [...document.querySelectorAll('[data-story-force-flow-ledger], [data-story-force-flow-ledger] [data-story-force-flow-row], [data-story-force-flow-ledger] [data-story-force-flow-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      loadCombinationForceStatus: document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-status') || '',
+      loadCombinationForceSchema: document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-schema') || '',
+      loadCombinationForceRowCount: Number(document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-row-count') || '0'),
+      loadCombinationForceCombinationCount: Number(document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-combination-count') || '0'),
+      loadCombinationForceForceRowCount: Number(document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-force-row-count') || '0'),
+      loadCombinationForceSourceBackedCount: Number(document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-source-backed-count') || '0'),
+      loadCombinationForceMaxDcr: Number(document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-max-dcr') || '0'),
+      loadCombinationForceGoverningCombination: document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-governing-combination') || '',
+      loadCombinationForceGoverningMember: document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-governing-member') || '',
+      loadCombinationForceStepperSchema: document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-stepper-schema') || '',
+      loadCombinationForceStepperCount: Number(document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-stepper-count') || '0'),
+      loadCombinationForceSelectedCombination: document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-selected-combination') || '',
+      loadCombinationForceSelectedMember: document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-selected-member') || '',
+      loadCombinationForceSelectedDcr: Number(document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-selected-dcr') || '0'),
+      loadCombinationForceRenderedRowCount: document.querySelectorAll('[data-load-combination-force-matrix] [data-load-combination-force-row]').length,
+      loadCombinationForceMemberRowCount: document.querySelectorAll('[data-load-combination-force-matrix] [data-load-combination-force-member-id]').length,
+      loadCombinationForceStepButtonCount: document.querySelectorAll('[data-load-combination-force-step-combination]').length,
+      loadCombinationForceActiveStepCount: document.querySelectorAll('[data-load-combination-force-step-combination][aria-pressed="true"]').length,
+      loadCombinationForceActiveRowCount: document.querySelectorAll('[data-load-combination-force-row][data-load-combination-force-active="true"]').length,
+      loadCombinationForceWindowState: window.__STRUCTURE_VIEWER_LOAD_COMBINATION_FORCE_MATRIX_STATE__ || null,
+      loadCombinationForceOverflowCount: [...document.querySelectorAll('[data-load-combination-force-matrix], [data-load-combination-force-matrix] [data-load-combination-force-row], [data-load-combination-force-matrix] [data-load-combination-force-step], [data-load-combination-force-matrix] [data-load-combination-force-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      memberForceDiagramStatus: document.querySelector('[data-member-force-diagram]')?.getAttribute('data-member-force-diagram-status') || '',
+      memberForceDiagramSchema: document.querySelector('[data-member-force-diagram]')?.getAttribute('data-member-force-diagram-schema') || '',
+      memberForceDiagramRowCount: Number(document.querySelector('[data-member-force-diagram]')?.getAttribute('data-member-force-diagram-row-count') || '0'),
+      memberForceDiagramDiagramCount: Number(document.querySelector('[data-member-force-diagram]')?.getAttribute('data-member-force-diagram-diagram-count') || '0'),
+      memberForceDiagramSourceBackedCount: Number(document.querySelector('[data-member-force-diagram]')?.getAttribute('data-member-force-diagram-source-backed-count') || '0'),
+      memberForceDiagramMaxDcr: Number(document.querySelector('[data-member-force-diagram]')?.getAttribute('data-member-force-diagram-max-dcr') || '0'),
+      memberForceDiagramSelectedCombination: document.querySelector('[data-member-force-diagram]')?.getAttribute('data-member-force-diagram-selected-combination') || '',
+      memberForceDiagramSelectedMember: document.querySelector('[data-member-force-diagram]')?.getAttribute('data-member-force-diagram-selected-member') || '',
+      memberForceDiagramRenderedRowCount: document.querySelectorAll('[data-member-force-diagram] [data-member-force-diagram-row]').length,
+      memberForceDiagramSvgCount: document.querySelectorAll('[data-member-force-diagram] [data-member-force-diagram-svg]').length,
+      memberForceDiagramKindCount: new Set([...document.querySelectorAll('[data-member-force-diagram-row]')].map((node) => node.getAttribute('data-member-force-diagram-kind') || '')).size,
+      memberForceDiagramWindowState: window.__STRUCTURE_VIEWER_MEMBER_FORCE_DIAGRAM_STATE__ || null,
+      memberForceDiagramText: document.querySelector('[data-member-force-diagram]')?.textContent || '',
+      memberForceDiagramOverflowCount: [...document.querySelectorAll('[data-member-force-diagram], [data-member-force-diagram] [data-member-force-diagram-row], [data-member-force-diagram] [data-member-force-diagram-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      memberForceEnvelopeStatus: document.querySelector('[data-member-force-envelope]')?.getAttribute('data-member-force-envelope-status') || '',
+      memberForceEnvelopeSchema: document.querySelector('[data-member-force-envelope]')?.getAttribute('data-member-force-envelope-schema') || '',
+      memberForceEnvelopeRowCount: Number(document.querySelector('[data-member-force-envelope]')?.getAttribute('data-member-force-envelope-row-count') || '0'),
+      memberForceEnvelopeSampleCount: Number(document.querySelector('[data-member-force-envelope]')?.getAttribute('data-member-force-envelope-sample-count') || '0'),
+      memberForceEnvelopeSourceBackedCount: Number(document.querySelector('[data-member-force-envelope]')?.getAttribute('data-member-force-envelope-source-backed-count') || '0'),
+      memberForceEnvelopeMaxDcr: Number(document.querySelector('[data-member-force-envelope]')?.getAttribute('data-member-force-envelope-max-dcr') || '0'),
+      memberForceEnvelopeSelectedCombination: document.querySelector('[data-member-force-envelope]')?.getAttribute('data-member-force-envelope-selected-combination') || '',
+      memberForceEnvelopeSelectedMember: document.querySelector('[data-member-force-envelope]')?.getAttribute('data-member-force-envelope-selected-member') || '',
+      memberForceEnvelopeGoverningCombination: document.querySelector('[data-member-force-envelope]')?.getAttribute('data-member-force-envelope-governing-combination') || '',
+      memberForceEnvelopeRenderedRowCount: document.querySelectorAll('[data-member-force-envelope] [data-member-force-envelope-row]').length,
+      memberForceEnvelopeSvgCount: document.querySelectorAll('[data-member-force-envelope] [data-member-force-envelope-svg]').length,
+      memberForceEnvelopePointCount: document.querySelectorAll('[data-member-force-envelope] [data-member-force-envelope-point]').length,
+      memberForceEnvelopeSelectedPointCount: document.querySelectorAll('[data-member-force-envelope] [data-member-force-envelope-point].is-selected').length,
+      memberForceEnvelopeWindowState: window.__STRUCTURE_VIEWER_MEMBER_FORCE_ENVELOPE_STATE__ || null,
+      memberForceEnvelopeText: document.querySelector('[data-member-force-envelope]')?.textContent || '',
+      memberForceEnvelopeOverflowCount: [...document.querySelectorAll('[data-member-force-envelope], [data-member-force-envelope] [data-member-force-envelope-row], [data-member-force-envelope] [data-member-force-envelope-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      memberForceHistoryStatus: document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-status') || '',
+      memberForceHistorySchema: document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-schema') || '',
+      memberForceHistoryRowCount: Number(document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-row-count') || '0'),
+      memberForceHistorySampleCount: Number(document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-sample-count') || '0'),
+      memberForceHistorySourceBackedCount: Number(document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-source-backed-count') || '0'),
+      memberForceHistoryMaxDcr: Number(document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-max-dcr') || '0'),
+      memberForceHistorySelectedCombination: document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-selected-combination') || '',
+      memberForceHistorySelectedMember: document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-selected-member') || '',
+      memberForceHistoryGoverningCombination: document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-governing-combination') || '',
+      memberForceHistoryActiveFrame: Number(document.querySelector('[data-member-force-history]')?.getAttribute('data-member-force-history-active-frame') || '0'),
+      memberForceHistoryRenderedRowCount: document.querySelectorAll('[data-member-force-history] [data-member-force-history-row]').length,
+      memberForceHistorySvgCount: document.querySelectorAll('[data-member-force-history] [data-member-force-history-svg]').length,
+      memberForceHistoryPointCount: document.querySelectorAll('[data-member-force-history] [data-member-force-history-point]').length,
+      memberForceHistorySelectedPointCount: document.querySelectorAll('[data-member-force-history] [data-member-force-history-point].is-selected').length,
+      memberForceHistoryWindowState: window.__STRUCTURE_VIEWER_MEMBER_FORCE_HISTORY_STATE__ || null,
+      memberForceHistoryText: document.querySelector('[data-member-force-history]')?.textContent || '',
+      memberForceHistoryOverflowCount: [...document.querySelectorAll('[data-member-force-history], [data-member-force-history] [data-member-force-history-row], [data-member-force-history] [data-member-force-history-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      memberMaterialNonlinearStatus: document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-status') || '',
+      memberMaterialNonlinearSchema: document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-schema') || '',
+      memberMaterialNonlinearRowCount: Number(document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-row-count') || '0'),
+      memberMaterialNonlinearSourceBackedCount: Number(document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-source-backed-count') || '0'),
+      memberMaterialNonlinearSelectedCombination: document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-selected-combination') || '',
+      memberMaterialNonlinearSelectedMember: document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-selected-member') || '',
+      memberMaterialNonlinearGoverningCombination: document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-governing-combination') || '',
+      memberMaterialNonlinearMaterialId: document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-material-id') || '',
+      memberMaterialNonlinearSectionId: document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-section-id') || '',
+      memberMaterialNonlinearDemandRatio: Number(document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-demand-ratio') || '0'),
+      memberMaterialNonlinearState: document.querySelector('[data-member-material-nonlinear-state]')?.getAttribute('data-member-material-nonlinear-state') || '',
+      memberMaterialNonlinearRenderedRowCount: document.querySelectorAll('[data-member-material-nonlinear-state] [data-member-material-nonlinear-row]').length,
+      memberMaterialNonlinearSvgCount: document.querySelectorAll('[data-member-material-nonlinear-state] [data-member-material-nonlinear-svg]').length,
+      memberMaterialNonlinearDemandMarkerCount: document.querySelectorAll('[data-member-material-nonlinear-state] [data-member-material-nonlinear-demand-marker]').length,
+      memberMaterialNonlinearYieldMarkerCount: document.querySelectorAll('[data-member-material-nonlinear-state] [data-member-material-nonlinear-yield-marker]').length,
+      memberMaterialNonlinearForceRowCount: document.querySelectorAll('[data-member-material-nonlinear-state] [data-member-material-nonlinear-force-row]').length,
+      memberMaterialNonlinearWindowState: window.__STRUCTURE_VIEWER_MEMBER_MATERIAL_NONLINEAR_STATE__ || null,
+      memberMaterialNonlinearText: document.querySelector('[data-member-material-nonlinear-state]')?.textContent || '',
+      memberMaterialNonlinearOverflowCount: [...document.querySelectorAll('[data-member-material-nonlinear-state], [data-member-material-nonlinear-state] [data-member-material-nonlinear-row], [data-member-material-nonlinear-state] [data-member-material-nonlinear-force-row], [data-member-material-nonlinear-state] [data-member-material-nonlinear-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      memberSectionCapacityStatus: document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-status') || '',
+      memberSectionCapacitySchema: document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-schema') || '',
+      memberSectionCapacityRowCount: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-row-count') || '0'),
+      memberSectionCapacitySelectedCombination: document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-selected-combination') || '',
+      memberSectionCapacitySelectedMember: document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-selected-member') || '',
+      memberSectionCapacityMaterialId: document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-material-id') || '',
+      memberSectionCapacitySectionId: document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-section-id') || '',
+      memberSectionCapacitySourceBackedCount: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-source-backed-count') || '0'),
+      memberSectionCapacitySourceCapacityCount: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-source-capacity-count') || '0'),
+      memberSectionCapacityEstimatedCapacityCount: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-estimated-capacity-count') || '0'),
+      memberSectionCapacityMaxDcr: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-max-dcr') || '0'),
+      memberSectionCapacityGeometryReady: document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-geometry-ready') || '',
+      memberSectionCapacityRenderedRowCount: document.querySelectorAll('[data-member-section-capacity] [data-member-section-capacity-row]').length,
+      memberSectionCapacityBarCount: document.querySelectorAll('[data-member-section-capacity] .member-section-capacity-row__bar').length,
+      memberSectionCapacityWindowState: window.__STRUCTURE_VIEWER_MEMBER_SECTION_CAPACITY_STATE__ || null,
+      memberSectionCapacityText: document.querySelector('[data-member-section-capacity]')?.textContent || '',
+      memberSectionCapacityOverflowCount: [...document.querySelectorAll('[data-member-section-capacity], [data-member-section-capacity] [data-member-section-capacity-row], [data-member-section-capacity] [data-member-section-capacity-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      memberForcePlaybackStatus: document.querySelector('[data-member-force-playback]')?.getAttribute('data-member-force-playback-status') || '',
+      memberForcePlaybackSchema: document.querySelector('[data-member-force-playback]')?.getAttribute('data-member-force-playback-schema') || '',
+      memberForcePlaybackFrameCount: Number(document.querySelector('[data-member-force-playback]')?.getAttribute('data-member-force-playback-frame-count') || '0'),
+      memberForcePlaybackActiveFrame: Number(document.querySelector('[data-member-force-playback]')?.getAttribute('data-member-force-playback-active-frame') || '0'),
+      memberForcePlaybackActiveCombination: document.querySelector('[data-member-force-playback]')?.getAttribute('data-member-force-playback-active-combination') || '',
+      memberForcePlaybackSelectedMember: document.querySelector('[data-member-force-playback]')?.getAttribute('data-member-force-playback-selected-member') || '',
+      memberForcePlaybackMaxDcr: Number(document.querySelector('[data-member-force-playback]')?.getAttribute('data-member-force-playback-max-dcr') || '0'),
+      memberForcePlaybackSourceBackedCount: Number(document.querySelector('[data-member-force-playback]')?.getAttribute('data-member-force-playback-source-backed-count') || '0'),
+      memberForcePlaybackPlaying: document.querySelector('[data-member-force-playback]')?.getAttribute('data-member-force-playback-playing') || '',
+      memberForcePlaybackRenderedFrameCount: document.querySelectorAll('[data-member-force-playback] [data-member-force-playback-frame]').length,
+      memberForcePlaybackActionCount: document.querySelectorAll('[data-member-force-playback] [data-member-force-playback-action]').length,
+      memberForcePlaybackActiveButtonCount: document.querySelectorAll('[data-member-force-playback] [data-member-force-playback-frame][aria-pressed="true"]').length,
+      memberForcePlaybackWindowState: window.__STRUCTURE_VIEWER_MEMBER_FORCE_PLAYBACK_STATE__ || null,
+      memberForcePlaybackText: document.querySelector('[data-member-force-playback]')?.textContent || '',
+      memberForcePlaybackOverflowCount: [...document.querySelectorAll('[data-member-force-playback], [data-member-force-playback] [data-member-force-playback-frame], [data-member-force-playback] [data-member-force-playback-summary] span, [data-member-force-playback] [data-member-force-playback-controls] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageMemberForcePlaybackTrailStatus: document.querySelector('[data-stage-member-force-playback-trail]')?.getAttribute('data-stage-member-force-playback-trail-status') || '',
+      stageMemberForcePlaybackTrailSchema: document.querySelector('[data-stage-member-force-playback-trail]')?.getAttribute('data-stage-member-force-playback-trail-schema') || '',
+      stageMemberForcePlaybackTrailFrameCount: Number(document.querySelector('[data-stage-member-force-playback-trail]')?.getAttribute('data-stage-member-force-playback-trail-frame-count') || '0'),
+      stageMemberForcePlaybackTrailRenderedFrameCount: Number(document.querySelector('[data-stage-member-force-playback-trail]')?.getAttribute('data-stage-member-force-playback-trail-rendered-frame-count') || '0'),
+      stageMemberForcePlaybackTrailActiveFrame: Number(document.querySelector('[data-stage-member-force-playback-trail]')?.getAttribute('data-stage-member-force-playback-trail-active-frame') || '0'),
+      stageMemberForcePlaybackTrailActiveCombination: document.querySelector('[data-stage-member-force-playback-trail]')?.getAttribute('data-stage-member-force-playback-trail-active-combination') || '',
+      stageMemberForcePlaybackTrailSelectedMember: document.querySelector('[data-stage-member-force-playback-trail]')?.getAttribute('data-stage-member-force-playback-trail-selected-member') || '',
+      stageMemberForcePlaybackTrailMaxDcr: Number(document.querySelector('[data-stage-member-force-playback-trail]')?.getAttribute('data-stage-member-force-playback-trail-max-dcr') || '0'),
+      stageMemberForcePlaybackTrailProjectedCount: Number(document.querySelector('[data-stage-member-force-playback-trail]')?.getAttribute('data-stage-member-force-playback-trail-projected-count') || '0'),
+      stageMemberForcePlaybackTrailFrameButtonCount: document.querySelectorAll('[data-stage-member-force-playback-trail-frame]').length,
+      stageMemberForcePlaybackTrailActiveFrameCount: document.querySelectorAll('[data-stage-member-force-playback-trail-frame][aria-pressed="true"]').length,
+      stageMemberForcePlaybackTrailProjectionCount: document.querySelectorAll('[data-stage-member-force-playback-trail-projection]').length,
+      stageMemberForcePlaybackTrailVisible: Boolean(document.querySelector('[data-stage-member-force-playback-trail]')?.classList.contains('is-visible')),
+      stageMemberForcePlaybackTrailWindowState: window.__STRUCTURE_VIEWER_STAGE_MEMBER_FORCE_PLAYBACK_TRAIL_STATE__ || null,
+      stageMemberForcePlaybackTrailText: document.querySelector('[data-stage-member-force-playback-trail]')?.textContent || '',
+      stageMemberForcePlaybackTrailOverlapFocus: [...document.querySelectorAll('[data-stage-member-force-playback-trail-frame]')].reduce((total, node) => {
+        if (!(node instanceof HTMLElement)) return total
+        const rect = node.getBoundingClientRect()
+        return total + overlapArea({
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        }, focusBadge)
+      }, 0),
+      stageMemberForcePlaybackTrailOverflowCount: [...document.querySelectorAll('[data-stage-member-force-playback-trail-frame], [data-stage-member-force-playback-trail-frame] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageMemberForceVectorFieldStatus: document.querySelector('[data-stage-member-force-vector-field]')?.getAttribute('data-stage-member-force-vector-field-status') || '',
+      stageMemberForceVectorFieldSchema: document.querySelector('[data-stage-member-force-vector-field]')?.getAttribute('data-stage-member-force-vector-field-schema') || '',
+      stageMemberForceVectorCount: Number(document.querySelector('[data-stage-member-force-vector-field]')?.getAttribute('data-stage-member-force-vector-count') || '0'),
+      stageMemberForceVectorSourceBackedCount: Number(document.querySelector('[data-stage-member-force-vector-field]')?.getAttribute('data-stage-member-force-vector-source-backed-count') || '0'),
+      stageMemberForceVectorActiveFrame: Number(document.querySelector('[data-stage-member-force-vector-field]')?.getAttribute('data-stage-member-force-vector-active-frame') || '0'),
+      stageMemberForceVectorActiveCombination: document.querySelector('[data-stage-member-force-vector-field]')?.getAttribute('data-stage-member-force-vector-active-combination') || '',
+      stageMemberForceVectorSelectedMember: document.querySelector('[data-stage-member-force-vector-field]')?.getAttribute('data-stage-member-force-vector-selected-member') || '',
+      stageMemberForceVectorMaxDcr: Number(document.querySelector('[data-stage-member-force-vector-field]')?.getAttribute('data-stage-member-force-vector-max-dcr') || '0'),
+      stageMemberForceVectorProjectedCount: Number(document.querySelector('[data-stage-member-force-vector-field]')?.getAttribute('data-stage-member-force-vector-projected-count') || '0'),
+      stageMemberForceVectorButtonCount: document.querySelectorAll('[data-stage-member-force-vector]').length,
+      stageMemberForceVectorProjectionCount: document.querySelectorAll('[data-stage-member-force-vector-projection]').length,
+      stageMemberForceVectorKindText: [...document.querySelectorAll('[data-stage-member-force-vector-kind]')].map((node) => node.getAttribute('data-stage-member-force-vector-kind') || '').join(' '),
+      stageMemberForceVectorVisible: Boolean(document.querySelector('[data-stage-member-force-vector-field]')?.classList.contains('is-visible')),
+      stageMemberForceVectorWindowState: window.__STRUCTURE_VIEWER_STAGE_MEMBER_FORCE_VECTOR_FIELD_STATE__ || null,
+      stageMemberForceVectorText: document.querySelector('[data-stage-member-force-vector-field]')?.textContent || '',
+      stageMemberForceVectorOverlapFocus: [...document.querySelectorAll('[data-stage-member-force-vector]')].reduce((total, node) => {
+        if (!(node instanceof HTMLElement)) return total
+        const rect = node.getBoundingClientRect()
+        return total + overlapArea({
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        }, focusBadge)
+      }, 0),
+      stageMemberForceVectorOverflowCount: [...document.querySelectorAll('[data-stage-member-force-vector], [data-stage-member-force-vector] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageMemberMaterialStateBadgeStatus: document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-badge-status') || '',
+      stageMemberMaterialStateBadgeSchema: document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-badge-schema') || '',
+      stageMemberMaterialStateMember: document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-member') || '',
+      stageMemberMaterialStateCombination: document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-combination') || '',
+      stageMemberMaterialStateMaterialId: document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-material-id') || '',
+      stageMemberMaterialStateSectionId: document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-section-id') || '',
+      stageMemberMaterialStateDemandRatio: Number(document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-demand-ratio') || '0'),
+      stageMemberMaterialStateMaxDcr: Number(document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-max-dcr') || '0'),
+      stageMemberMaterialStateSourceBackedCount: Number(document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-source-backed-count') || '0'),
+      stageMemberMaterialStateProjectedCount: Number(document.querySelector('[data-stage-member-material-state-badge]')?.getAttribute('data-stage-member-material-state-projected-count') || '0'),
+      stageMemberMaterialStateCardCount: document.querySelectorAll('[data-stage-member-material-state-card]').length,
+      stageMemberMaterialStateProjectionCount: document.querySelectorAll('[data-stage-member-material-state-projection]').length,
+      stageMemberMaterialStateVisible: Boolean(document.querySelector('[data-stage-member-material-state-badge]')?.classList.contains('is-visible')),
+      stageMemberMaterialStateText: document.querySelector('[data-stage-member-material-state-badge]')?.textContent || '',
+      stageMemberMaterialStateWindowState: window.__STRUCTURE_VIEWER_STAGE_MEMBER_MATERIAL_STATE_BADGE_STATE__ || null,
+      stageMemberMaterialStateOverlapFocus: [...document.querySelectorAll('[data-stage-member-material-state-card]')].reduce((total, node) => {
+        if (!(node instanceof HTMLElement)) return total
+        const rect = node.getBoundingClientRect()
+        return total + overlapArea({
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        }, focusBadge)
+      }, 0),
+      stageMemberMaterialStateOverflowCount: [...document.querySelectorAll('[data-stage-member-material-state-card], [data-stage-member-material-state-card] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageLoadCombinationForceGlyphsStatus: document.querySelector('[data-stage-load-combination-force-glyphs]')?.getAttribute('data-stage-load-combination-force-glyphs-status') || '',
+      stageLoadCombinationForceGlyphsSchema: document.querySelector('[data-stage-load-combination-force-glyphs]')?.getAttribute('data-stage-load-combination-force-glyphs-schema') || '',
+      stageLoadCombinationForceGlyphCount: Number(document.querySelector('[data-stage-load-combination-force-glyphs]')?.getAttribute('data-stage-load-combination-force-glyph-count') || '0'),
+      stageLoadCombinationForceProjectedCount: Number(document.querySelector('[data-stage-load-combination-force-glyphs]')?.getAttribute('data-stage-load-combination-force-projected-count') || '0'),
+      stageLoadCombinationForceSelectedCombination: document.querySelector('[data-stage-load-combination-force-glyphs]')?.getAttribute('data-stage-load-combination-force-selected-combination') || '',
+      stageLoadCombinationForceSelectedMember: document.querySelector('[data-stage-load-combination-force-glyphs]')?.getAttribute('data-stage-load-combination-force-selected-member') || '',
+      stageLoadCombinationForceMaxDcr: Number(document.querySelector('[data-stage-load-combination-force-glyphs]')?.getAttribute('data-stage-load-combination-force-max-dcr') || '0'),
+      stageLoadCombinationForceMemberCount: document.querySelectorAll('[data-stage-load-combination-force-glyph-member]').length,
+      stageLoadCombinationForceProjectionCount: document.querySelectorAll('[data-stage-load-combination-force-glyph-projection]').length,
+      stageLoadCombinationForceVisible: Boolean(document.querySelector('[data-stage-load-combination-force-glyphs]')?.classList.contains('is-visible')),
+      stageLoadCombinationForceText: document.querySelector('[data-stage-load-combination-force-glyphs]')?.textContent || '',
+      stageLoadCombinationForceWindowState: window.__STRUCTURE_VIEWER_STAGE_LOAD_COMBINATION_FORCE_GLYPHS_STATE__ || null,
+      stageLoadCombinationForceOverlapFocus: [...document.querySelectorAll('[data-stage-load-combination-force-glyph]')].reduce((total, node) => {
+        if (!(node instanceof HTMLElement)) return total
+        const rect = node.getBoundingClientRect()
+        return total + overlapArea({
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          width: rect.width,
+          height: rect.height,
+        }, focusBadge)
+      }, 0),
+      stageLoadCombinationForceOverflowCount: [...document.querySelectorAll('[data-stage-load-combination-force-glyph], [data-stage-load-combination-force-glyph] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageForceDemandContourStatus: document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-status') || '',
+      stageForceDemandContourSchema: document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-schema') || '',
+      stageForceDemandContourCount: Number(document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-count') || '0'),
+      stageForceDemandContourRenderedCount: Number(document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-rendered-count') || '0'),
+      stageForceDemandContourProjectedCount: Number(document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-projected-count') || '0'),
+      stageForceDemandContourForceRowCount: Number(document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-force-row-count') || '0'),
+      stageForceDemandContourMappedForceRowCount: Number(document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-mapped-force-row-count') || '0'),
+      stageForceDemandContourSourceBackedCount: Number(document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-source-backed-count') || '0'),
+      stageForceDemandContourSelectedCombination: document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-selected-combination') || '',
+      stageForceDemandContourMaxDcr: Number(document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-max-dcr') || '0'),
+      stageForceDemandContourMaterialLockStatus: document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-material-lock-status') || '',
+      stageForceDemandContourMaterialModelCount: Number(document.querySelector('[data-stage-force-demand-contour]')?.getAttribute('data-stage-force-demand-contour-material-model-count') || '0'),
+      stageForceDemandContourMarkerCount: document.querySelectorAll('[data-stage-force-demand-contour-marker]').length,
+      stageForceDemandContourProjectionCount: document.querySelectorAll('[data-stage-force-demand-projection]').length,
+      stageForceDemandContourMaterialModelText: [...document.querySelectorAll('[data-stage-force-demand-material-model]')].map((node) => node.getAttribute('data-stage-force-demand-material-model') || '').join(' '),
+      stageForceDemandContourVisible: Boolean(document.querySelector('[data-stage-force-demand-contour]')?.classList.contains('is-visible')),
+      stageForceDemandContourText: document.querySelector('[data-stage-force-demand-contour]')?.textContent || '',
+      stageForceDemandContourWindowState: window.__STRUCTURE_VIEWER_STAGE_FORCE_DEMAND_CONTOUR_STATE__ || null,
+      stageForceDemandContourOverflowCount: [...document.querySelectorAll('[data-stage-force-demand-contour], [data-stage-force-demand-contour] *, [data-stage-force-demand-contour-marker], [data-stage-force-demand-contour-marker] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageMaterialModelDemandBadgesStatus: document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-badges-status') || '',
+      stageMaterialModelDemandBadgesSchema: document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-badges-schema') || '',
+      stageMaterialModelDemandBadgesCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-badge-count') || '0'),
+      stageMaterialModelDemandBadgesRenderedCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-rendered-count') || '0'),
+      stageMaterialModelDemandBadgesProjectedCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-projected-count') || '0'),
+      stageMaterialModelDemandBadgesEdgePinnedCount: document.querySelectorAll('[data-stage-material-model-demand-badge].is-edge-pinned').length,
+      stageMaterialModelDemandBadgesDockedCount: document.querySelectorAll('[data-stage-material-model-demand-projection="docked"]').length,
+      stageMaterialModelDemandBadgesMaterialCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-material-count') || '0'),
+      stageMaterialModelDemandBadgesForceBackedMaterialCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-force-backed-material-count') || '0'),
+      stageMaterialModelDemandBadgesForceRowCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-force-row-count') || '0'),
+      stageMaterialModelDemandBadgesMappedForceRowCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-mapped-force-row-count') || '0'),
+      stageMaterialModelDemandBadgesSourceBackedCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-source-backed-count') || '0'),
+      stageMaterialModelDemandBadgesSelectedCombination: document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-selected-combination') || '',
+      stageMaterialModelDemandBadgesMaxDcr: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-max-dcr') || '0'),
+      stageMaterialModelDemandBadgesLockStatus: document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-lock-status') || '',
+      stageMaterialModelDemandBadgesLockedCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-locked-count') || '0'),
+      stageMaterialModelDemandBadgesChangedCount: Number(document.querySelector('[data-stage-material-model-demand-badges]')?.getAttribute('data-stage-material-model-demand-changed-count') || '0'),
+      stageMaterialModelDemandBadgesBadgeCount: document.querySelectorAll('[data-stage-material-model-demand-badge]').length,
+      stageMaterialModelDemandBadgesProjectionCount: document.querySelectorAll('[data-stage-material-model-demand-projection]').length,
+      stageMaterialModelDemandBadgesForceBackedBadgeCount: document.querySelectorAll('[data-stage-material-model-demand-force-backed="true"]').length,
+      stageMaterialModelDemandBadgesVisible: Boolean(document.querySelector('[data-stage-material-model-demand-badges]')?.classList.contains('is-visible')),
+      stageMaterialModelDemandBadgesText: document.querySelector('[data-stage-material-model-demand-badges]')?.textContent || '',
+      stageMaterialModelDemandBadgesWindowState: window.__STRUCTURE_VIEWER_STAGE_MATERIAL_MODEL_DEMAND_BADGES_STATE__ || null,
+      stageMaterialModelDemandBadgesOverflowCount: [...document.querySelectorAll('[data-stage-material-model-demand-badges], [data-stage-material-model-demand-badges] *, [data-stage-material-model-demand-badge], [data-stage-material-model-demand-badge] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageMaterialForceRibbonsStatus: document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-ribbons-status') || '',
+      stageMaterialForceRibbonsSchema: document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-ribbons-schema') || '',
+      stageMaterialForceRibbonCount: Number(document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-ribbon-count') || '0'),
+      stageMaterialForceRenderedCount: Number(document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-rendered-count') || '0'),
+      stageMaterialForceProjectedCount: Number(document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-projected-count') || '0'),
+      stageMaterialForceEdgePinnedCount: document.querySelectorAll('[data-stage-material-force-ribbon].is-edge-pinned').length,
+      stageMaterialForceMaterialCount: Number(document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-material-count') || '0'),
+      stageMaterialForceForceRowCount: Number(document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-force-row-count') || '0'),
+      stageMaterialForceMappedForceRowCount: Number(document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-mapped-force-row-count') || '0'),
+      stageMaterialForceSourceBackedCount: Number(document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-source-backed-count') || '0'),
+      stageMaterialForceSelectedCombination: document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-selected-combination') || '',
+      stageMaterialForceGoverningMaterial: document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-governing-material') || '',
+      stageMaterialForceMaxDcr: Number(document.querySelector('[data-stage-material-force-ribbons]')?.getAttribute('data-stage-material-force-max-dcr') || '0'),
+      stageMaterialForceRibbonButtonCount: document.querySelectorAll('[data-stage-material-force-ribbon]').length,
+      stageMaterialForceProjectionCount: document.querySelectorAll('[data-stage-material-force-projection]').length,
+      stageMaterialForceBarCount: document.querySelectorAll('[data-stage-material-force-ribbons] .stage-material-force-ribbon__bar').length,
+      stageMaterialForceVisible: Boolean(document.querySelector('[data-stage-material-force-ribbons]')?.classList.contains('is-visible')),
+      stageMaterialForceText: document.querySelector('[data-stage-material-force-ribbons]')?.textContent || '',
+      stageMaterialForceWindowState: window.__STRUCTURE_VIEWER_STAGE_MATERIAL_FORCE_RIBBONS_STATE__ || null,
+      stageMaterialForceOverflowCount: [...document.querySelectorAll('[data-stage-material-force-ribbons], [data-stage-material-force-ribbons] *, [data-stage-material-force-ribbon], [data-stage-material-force-ribbon] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageMaterialForceEnvelopeStatus: document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-status') || '',
+      stageMaterialForceEnvelopeSchema: document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-schema') || '',
+      stageMaterialForceEnvelopeCardCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-card-count') || '0'),
+      stageMaterialForceEnvelopeRenderedCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-rendered-count') || '0'),
+      stageMaterialForceEnvelopeProjectedCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-projected-count') || '0'),
+      stageMaterialForceEnvelopeEdgePinnedCount: document.querySelectorAll('[data-stage-material-force-envelope-card].is-edge-pinned').length,
+      stageMaterialForceEnvelopeSourceRowCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-source-row-count') || '0'),
+      stageMaterialForceEnvelopeMaterialCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-material-count') || '0'),
+      stageMaterialForceEnvelopeCombinationCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-combination-count') || '0'),
+      stageMaterialForceEnvelopeForceBackedMaterialCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-force-backed-material-count') || '0'),
+      stageMaterialForceEnvelopeForceRowCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-force-row-count') || '0'),
+      stageMaterialForceEnvelopeMappedForceRowCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-mapped-force-row-count') || '0'),
+      stageMaterialForceEnvelopeSourceBackedCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-source-backed-count') || '0'),
+      stageMaterialForceEnvelopeSelectedCombination: document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-selected-combination') || '',
+      stageMaterialForceEnvelopeGoverningMaterial: document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-governing-material') || '',
+      stageMaterialForceEnvelopeLockedCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-locked-count') || '0'),
+      stageMaterialForceEnvelopeChangedCount: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-changed-count') || '0'),
+      stageMaterialForceEnvelopeLockStatus: document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-lock-status') || '',
+      stageMaterialForceEnvelopeMaterialMatchPercent: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-material-match-percent') || '0'),
+      stageMaterialForceEnvelopeMemberAssignmentMatchPercent: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-member-assignment-match-percent') || '0'),
+      stageMaterialForceEnvelopeMaxDcr: Number(document.querySelector('[data-stage-material-force-envelope]')?.getAttribute('data-stage-material-force-envelope-max-dcr') || '0'),
+      stageMaterialForceEnvelopeButtonCount: document.querySelectorAll('[data-stage-material-force-envelope-card]').length,
+      stageMaterialForceEnvelopeProjectionCount: document.querySelectorAll('[data-stage-material-force-envelope-projection]').length,
+      stageMaterialForceEnvelopeForceBackedCardCount: document.querySelectorAll('[data-stage-material-force-envelope-force-backed="true"]').length,
+      stageMaterialForceEnvelopeSvgCount: document.querySelectorAll('[data-stage-material-force-envelope] [data-stage-material-force-envelope-svg]').length,
+      stageMaterialForceEnvelopePointCount: document.querySelectorAll('[data-stage-material-force-envelope] [data-stage-material-force-envelope-point]').length,
+      stageMaterialForceEnvelopeBarCount: document.querySelectorAll('[data-stage-material-force-envelope] .stage-material-force-envelope-card__bar').length,
+      stageMaterialForceEnvelopeVisible: Boolean(document.querySelector('[data-stage-material-force-envelope]')?.classList.contains('is-visible')),
+      stageMaterialForceEnvelopeText: document.querySelector('[data-stage-material-force-envelope]')?.textContent || '',
+      stageMaterialForceEnvelopeWindowState: window.__STRUCTURE_VIEWER_STAGE_MATERIAL_FORCE_ENVELOPE_STATE__ || null,
+      stageMaterialForceEnvelopeOverflowCount: [...document.querySelectorAll('[data-stage-material-force-envelope], [data-stage-material-force-envelope] *, [data-stage-material-force-envelope-card], [data-stage-material-force-envelope-card] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageMaterialCapacityEnvelopeStatus: document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-status') || '',
+      stageMaterialCapacityEnvelopeSchema: document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-schema') || '',
+      stageMaterialCapacityEnvelopeCardCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-card-count') || '0'),
+      stageMaterialCapacityEnvelopeRenderedCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-rendered-count') || '0'),
+      stageMaterialCapacityEnvelopeProjectedCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-projected-count') || '0'),
+      stageMaterialCapacityEnvelopeEdgePinnedCount: document.querySelectorAll('[data-stage-material-capacity-envelope-card].is-edge-pinned').length,
+      stageMaterialCapacityEnvelopeSourceRowCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-source-row-count') || '0'),
+      stageMaterialCapacityEnvelopeMaterialCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-material-count') || '0'),
+      stageMaterialCapacityEnvelopeCombinationCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-combination-count') || '0'),
+      stageMaterialCapacityEnvelopeForceRowCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-force-row-count') || '0'),
+      stageMaterialCapacityEnvelopeMappedForceRowCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-mapped-force-row-count') || '0'),
+      stageMaterialCapacityEnvelopeSourceBackedCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-source-backed-count') || '0'),
+      stageMaterialCapacityEnvelopeSourceCapacityCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-source-capacity-count') || '0'),
+      stageMaterialCapacityEnvelopeEstimatedCapacityCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-estimated-capacity-count') || '0'),
+      stageMaterialCapacityEnvelopeCapacityBackedMaterialCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-capacity-backed-material-count') || '0'),
+      stageMaterialCapacityEnvelopeSelectedCombination: document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-selected-combination') || '',
+      stageMaterialCapacityEnvelopeGoverningMaterial: document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-governing-material') || '',
+      stageMaterialCapacityEnvelopeLockedCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-locked-count') || '0'),
+      stageMaterialCapacityEnvelopeChangedCount: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-changed-count') || '0'),
+      stageMaterialCapacityEnvelopeLockStatus: document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-lock-status') || '',
+      stageMaterialCapacityEnvelopeMaterialMatchPercent: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-material-match-percent') || '0'),
+      stageMaterialCapacityEnvelopeMemberAssignmentMatchPercent: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-member-assignment-match-percent') || '0'),
+      stageMaterialCapacityEnvelopeMaxDcr: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-max-dcr') || '0'),
+      stageMaterialCapacityEnvelopeMinMarginPercent: Number(document.querySelector('[data-stage-material-capacity-envelope]')?.getAttribute('data-stage-material-capacity-envelope-min-margin-percent') || '0'),
+      stageMaterialCapacityEnvelopeButtonCount: document.querySelectorAll('[data-stage-material-capacity-envelope-card]').length,
+      stageMaterialCapacityEnvelopeProjectionCount: document.querySelectorAll('[data-stage-material-capacity-envelope-projection]').length,
+      stageMaterialCapacityEnvelopeCapacityBackedCardCount: document.querySelectorAll('[data-stage-material-capacity-envelope-capacity-backed="true"]').length,
+      stageMaterialCapacityEnvelopeSourceCapacityCardCount: document.querySelectorAll('[data-stage-material-capacity-envelope-card][data-stage-material-capacity-envelope-source-capacity-count]').length,
+      stageMaterialCapacityEnvelopeEstimatedCapacityCardCount: document.querySelectorAll('[data-stage-material-capacity-envelope-card][data-stage-material-capacity-envelope-estimated-capacity-count]').length,
+      stageMaterialCapacityEnvelopeSvgCount: document.querySelectorAll('[data-stage-material-capacity-envelope] [data-stage-material-capacity-envelope-svg]').length,
+      stageMaterialCapacityEnvelopePointCount: document.querySelectorAll('[data-stage-material-capacity-envelope] [data-stage-material-capacity-envelope-point]').length,
+      stageMaterialCapacityEnvelopeBarCount: document.querySelectorAll('[data-stage-material-capacity-envelope] .stage-material-capacity-envelope-card__bar').length,
+      stageMaterialCapacityEnvelopeVisible: Boolean(document.querySelector('[data-stage-material-capacity-envelope]')?.classList.contains('is-visible')),
+      stageMaterialCapacityEnvelopeText: document.querySelector('[data-stage-material-capacity-envelope]')?.textContent || '',
+      stageMaterialCapacityEnvelopeWindowState: window.__STRUCTURE_VIEWER_STAGE_MATERIAL_CAPACITY_ENVELOPE_STATE__ || null,
+      stageMaterialCapacityEnvelopeOverflowCount: [...document.querySelectorAll('[data-stage-material-capacity-envelope], [data-stage-material-capacity-envelope] *, [data-stage-material-capacity-envelope-card], [data-stage-material-capacity-envelope-card] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       criticalTriage,
       criticalTriageStatus: document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-status') || '',
       criticalTriageSchema: document.querySelector('[data-critical-triage]')?.getAttribute('data-critical-triage-schema') || '',
@@ -700,6 +1238,21 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       stageDriftBandsWindowState: window.__STRUCTURE_VIEWER_STAGE_DRIFT_BANDS_STATE__ || null,
       stageDriftBandsText: document.querySelector('[data-stage-drift-bands]')?.textContent || '',
       stageDriftBandsOverflowCount: [...document.querySelectorAll('[data-stage-drift-bands], [data-stage-drift-bands] *, [data-stage-drift-band], [data-stage-drift-band] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      stageStoryForceFlowStatus: document.querySelector('[data-stage-story-force-flow-bands]')?.getAttribute('data-stage-story-force-flow-bands-status') || '',
+      stageStoryForceFlowSchema: document.querySelector('[data-stage-story-force-flow-bands]')?.getAttribute('data-stage-story-force-flow-bands-schema') || '',
+      stageStoryForceFlowBandCount: Number(document.querySelector('[data-stage-story-force-flow-bands]')?.getAttribute('data-stage-story-force-flow-band-count') || '0'),
+      stageStoryForceFlowProjectedCount: Number(document.querySelector('[data-stage-story-force-flow-bands]')?.getAttribute('data-stage-story-force-flow-projected-count') || '0'),
+      stageStoryForceFlowSelectedCombination: document.querySelector('[data-stage-story-force-flow-bands]')?.getAttribute('data-stage-story-force-flow-selected-combination') || '',
+      stageStoryForceFlowMaxDcr: Number(document.querySelector('[data-stage-story-force-flow-bands]')?.getAttribute('data-stage-story-force-flow-max-dcr') || '0'),
+      stageStoryForceFlowVisible: Boolean(document.querySelector('[data-stage-story-force-flow-bands]')?.classList.contains('is-visible')),
+      stageStoryForceFlowWindowState: window.__STRUCTURE_VIEWER_STAGE_STORY_FORCE_FLOW_BANDS_STATE__ || null,
+      stageStoryForceFlowText: document.querySelector('[data-stage-story-force-flow-bands]')?.textContent || '',
+      stageStoryForceFlowRenderedBandCount: document.querySelectorAll('[data-stage-story-force-flow-band]').length,
+      stageStoryForceFlowBarCount: document.querySelectorAll('[data-stage-story-force-flow-bands] .stage-story-force-flow-bar').length,
+      stageStoryForceFlowOverflowCount: [...document.querySelectorAll('[data-stage-story-force-flow-bands], [data-stage-story-force-flow-bands] *, [data-stage-story-force-flow-band], [data-stage-story-force-flow-band] *')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
@@ -797,6 +1350,206 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       drawingHandoffPreviewSheet: document.querySelector('[data-drawing-handoff-preview]')?.getAttribute('data-drawing-handoff-preview-sheet') || '',
       drawingHandoffPreviewCallout: document.querySelector('[data-drawing-handoff-preview]')?.getAttribute('data-drawing-handoff-preview-callout') || '',
       drawingHandoffOpenSheetName: document.querySelector('[data-drawing-handoff-active-sheet-open]')?.getAttribute('data-drawing-handoff-active-sheet-name') || '',
+      drawingMaterialParitySchema: document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-schema') || '',
+      drawingMaterialParityStatus: document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-status') || '',
+      drawingMaterialParityMaterialMatchPercent: Number(document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-material-match-percent') || '0'),
+      drawingMaterialParityMemberAssignmentMatchPercent: Number(document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-member-assignment-match-percent') || '0'),
+      drawingMaterialParityMaterialMismatchCount: Number(document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-material-mismatch-count') || '0'),
+      drawingMaterialParityMemberMaterialMismatchCount: Number(document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-member-material-mismatch-count') || '0'),
+      drawingMaterialParitySectionAssignmentChangeCount: Number(document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-section-assignment-change-count') || '0'),
+      drawingMaterialParitySheetCount: Number(document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-sheet-count') || '0'),
+      drawingMaterialParityActiveSheet: document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-active-sheet') || '',
+      drawingMaterialParityLocked: document.querySelector('[data-drawing-material-parity-ledger]')?.getAttribute('data-drawing-material-parity-locked') || '',
+      drawingMaterialParityRowCount: document.querySelectorAll('[data-drawing-material-parity-ledger] [data-drawing-material-parity-row]').length,
+      drawingMaterialParityText: document.querySelector('[data-drawing-material-parity-ledger]')?.textContent || '',
+      drawingMaterialParityWindowState: window.__STRUCTURE_VIEWER_DRAWING_MATERIAL_PARITY_LEDGER_STATE__ || null,
+      drawingMaterialParityOverflowCount: [...document.querySelectorAll('[data-drawing-material-parity-ledger], [data-drawing-material-parity-ledger] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingSourceDetailSchema: document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-schema') || '',
+      drawingSourceDetailStatus: document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-status') || '',
+      drawingSourceDetailActiveSheet: document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-active-sheet') || '',
+      drawingSourceDetailSheetCount: Number(document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-sheet-count') || '0'),
+      drawingSourceDetailSourceLinkedCount: Number(document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-source-linked-count') || '0'),
+      drawingSourceDetailDetailCount: Number(document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-detail-count') || '0'),
+      drawingSourceDetailMaterialLocked: document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-material-locked') || '',
+      drawingSourceDetailDrawingOnlyOptimized: document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-drawing-only-optimized') || '',
+      drawingSourceDetailSectionEditCount: Number(document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-section-edit-count') || '0'),
+      drawingSourceDetailMaterialMatchPercent: Number(document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-material-match-percent') || '0'),
+      drawingSourceDetailMemberAssignmentMatchPercent: Number(document.querySelector('[data-drawing-source-detail-ledger]')?.getAttribute('data-drawing-source-detail-member-assignment-match-percent') || '0'),
+      drawingSourceDetailRowCount: document.querySelectorAll('[data-drawing-source-detail-ledger] [data-drawing-source-detail-row]').length,
+      drawingSourceDetailText: document.querySelector('[data-drawing-source-detail-ledger]')?.textContent || '',
+      drawingSourceDetailWindowState: window.__STRUCTURE_VIEWER_DRAWING_SOURCE_DETAIL_LEDGER_STATE__ || null,
+      drawingSourceDetailOverflowCount: [...document.querySelectorAll('[data-drawing-source-detail-ledger], [data-drawing-source-detail-ledger] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingSheetDetailSchema: document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-schema') || '',
+      drawingSheetDetailStatus: document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-status') || '',
+      drawingSheetDetailActiveSheet: document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-active-sheet') || '',
+      drawingSheetDetailSheetCount: Number(document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-sheet-count') || '0'),
+      drawingSheetDetailSourceLinkedCount: Number(document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-source-linked-count') || '0'),
+      drawingSheetDetailMaterialLocked: document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-material-locked') || '',
+      drawingSheetDetailDrawingOnlyOptimized: document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-drawing-only-optimized') || '',
+      drawingSheetDetailSectionEditCount: Number(document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-section-edit-count') || '0'),
+      drawingSheetDetailMaterialMatchPercent: Number(document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-material-match-percent') || '0'),
+      drawingSheetDetailMemberAssignmentMatchPercent: Number(document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-member-assignment-match-percent') || '0'),
+      drawingSheetDetailMaxDcr: Number(document.querySelector('[data-drawing-sheet-detail-matrix]')?.getAttribute('data-drawing-sheet-detail-max-dcr') || '0'),
+      drawingSheetDetailRowCount: document.querySelectorAll('[data-drawing-sheet-detail-matrix] [data-drawing-sheet-detail-row]').length,
+      drawingSheetDetailActiveRowCount: document.querySelectorAll('[data-drawing-sheet-detail-matrix] [data-drawing-sheet-detail-row-active="true"]').length,
+      drawingSheetDetailSourceLinkedRowCount: document.querySelectorAll('[data-drawing-sheet-detail-matrix] [data-drawing-sheet-detail-row-source-linked="true"]').length,
+      drawingSheetDetailText: document.querySelector('[data-drawing-sheet-detail-matrix]')?.textContent || '',
+      drawingSheetDetailWindowState: window.__STRUCTURE_VIEWER_DRAWING_SHEET_DETAIL_MATRIX_STATE__ || null,
+      drawingSheetDetailOverflowCount: [...document.querySelectorAll('[data-drawing-sheet-detail-matrix], [data-drawing-sheet-detail-matrix] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingMaterialModelMatrixSchema: document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-schema') || '',
+      drawingMaterialModelMatrixStatus: document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-status') || '',
+      drawingMaterialModelMatrixActiveSheet: document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-active-sheet') || '',
+      drawingMaterialModelMatrixSelectedCombination: document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-selected-combination') || '',
+      drawingMaterialModelMatrixRowCount: Number(document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-row-count') || '0'),
+      drawingMaterialModelMatrixMaterialCount: Number(document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-material-count') || '0'),
+      drawingMaterialModelMatrixLockedCount: Number(document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-locked-count') || '0'),
+      drawingMaterialModelMatrixChangedCount: Number(document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-changed-count') || '0'),
+      drawingMaterialModelMatrixForceBackedMaterialCount: Number(document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-force-backed-material-count') || '0'),
+      drawingMaterialModelMatrixMaterialMatchPercent: Number(document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-material-match-percent') || '0'),
+      drawingMaterialModelMatrixMemberAssignmentMatchPercent: Number(document.querySelector('[data-drawing-material-model-matrix]')?.getAttribute('data-drawing-material-model-matrix-member-assignment-match-percent') || '0'),
+      drawingMaterialModelMatrixRenderedRowCount: document.querySelectorAll('[data-drawing-material-model-matrix] [data-drawing-material-model-row]').length,
+      drawingMaterialModelMatrixForceBackedRowCount: document.querySelectorAll('[data-drawing-material-model-matrix] [data-drawing-material-model-row-force-backed="true"]').length,
+      drawingMaterialModelMatrixText: document.querySelector('[data-drawing-material-model-matrix]')?.textContent || '',
+      drawingMaterialModelMatrixWindowState: window.__STRUCTURE_VIEWER_DRAWING_MATERIAL_MODEL_MATRIX_STATE__ || null,
+      drawingMaterialModelMatrixOverflowCount: [...document.querySelectorAll('[data-drawing-material-model-matrix], [data-drawing-material-model-matrix] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingMaterialConstitutiveRegisterSchema: document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-schema') || '',
+      drawingMaterialConstitutiveRegisterStatus: document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-status') || '',
+      drawingMaterialConstitutiveRegisterActiveSheet: document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-active-sheet') || '',
+      drawingMaterialConstitutiveRegisterSelectedCombination: document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-selected-combination') || '',
+      drawingMaterialConstitutiveRegisterRowCount: Number(document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-row-count') || '0'),
+      drawingMaterialConstitutiveRegisterMaterialCount: Number(document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-material-count') || '0'),
+      drawingMaterialConstitutiveRegisterSourceBackedCount: Number(document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-source-backed-count') || '0'),
+      drawingMaterialConstitutiveRegisterNonlinearCount: Number(document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-nonlinear-count') || '0'),
+      drawingMaterialConstitutiveRegisterCurveRowCount: Number(document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-curve-row-count') || '0'),
+      drawingMaterialConstitutiveRegisterCapacityBackedMaterialCount: Number(document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-capacity-backed-material-count') || '0'),
+      drawingMaterialConstitutiveRegisterMaterialLocked: document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-material-locked') || '',
+      drawingMaterialConstitutiveRegisterMaterialMatchPercent: Number(document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-material-match-percent') || '0'),
+      drawingMaterialConstitutiveRegisterMemberAssignmentMatchPercent: Number(document.querySelector('[data-drawing-material-constitutive-register]')?.getAttribute('data-drawing-material-constitutive-register-member-assignment-match-percent') || '0'),
+      drawingMaterialConstitutiveRegisterRenderedRowCount: document.querySelectorAll('[data-drawing-material-constitutive-register] [data-drawing-material-constitutive-row]').length,
+      drawingMaterialConstitutiveRegisterCurveBackedRowCount: document.querySelectorAll('[data-drawing-material-constitutive-register] [data-drawing-material-constitutive-row-curve-backed="true"]').length,
+      drawingMaterialConstitutiveRegisterCapacityBackedRowCount: document.querySelectorAll('[data-drawing-material-constitutive-register] [data-drawing-material-constitutive-row-capacity-backed="true"]').length,
+      drawingMaterialConstitutiveRegisterText: document.querySelector('[data-drawing-material-constitutive-register]')?.textContent || '',
+      drawingMaterialConstitutiveRegisterWindowState: window.__STRUCTURE_VIEWER_DRAWING_MATERIAL_CONSTITUTIVE_REGISTER_STATE__ || null,
+      drawingMaterialConstitutiveRegisterOverflowCount: [...document.querySelectorAll('[data-drawing-material-constitutive-register], [data-drawing-material-constitutive-register] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingMaterialCurveEvidenceSchema: document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-schema') || '',
+      drawingMaterialCurveEvidenceStatus: document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-status') || '',
+      drawingMaterialCurveEvidenceActiveSheet: document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-active-sheet') || '',
+      drawingMaterialCurveEvidenceSelectedCombination: document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-selected-combination') || '',
+      drawingMaterialCurveEvidenceCurveCount: Number(document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-curve-count') || '0'),
+      drawingMaterialCurveEvidenceSourceBackedCount: Number(document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-source-backed-count') || '0'),
+      drawingMaterialCurveEvidenceNonlinearCount: Number(document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-nonlinear-count') || '0'),
+      drawingMaterialCurveEvidenceCapacityBackedCount: Number(document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-capacity-backed-count') || '0'),
+      drawingMaterialCurveEvidenceMaterialLocked: document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-material-locked') || '',
+      drawingMaterialCurveEvidenceMaterialMatchPercent: Number(document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-material-match-percent') || '0'),
+      drawingMaterialCurveEvidenceMemberAssignmentMatchPercent: Number(document.querySelector('[data-drawing-material-curve-evidence]')?.getAttribute('data-drawing-material-curve-evidence-member-assignment-match-percent') || '0'),
+      drawingMaterialCurveEvidenceRenderedRowCount: document.querySelectorAll('[data-drawing-material-curve-evidence] [data-drawing-material-curve-row]').length,
+      drawingMaterialCurveEvidenceSvgCount: document.querySelectorAll('[data-drawing-material-curve-evidence] [data-drawing-material-curve-svg]').length,
+      drawingMaterialCurveEvidenceYieldMarkerCount: document.querySelectorAll('[data-drawing-material-curve-evidence] [data-drawing-material-curve-yield-marker]').length,
+      drawingMaterialCurveEvidenceDemandMarkerCount: document.querySelectorAll('[data-drawing-material-curve-evidence] [data-drawing-material-curve-demand-marker]').length,
+      drawingMaterialCurveEvidenceSourceBackedRowCount: document.querySelectorAll('[data-drawing-material-curve-evidence] [data-drawing-material-curve-row-source-backed="true"]').length,
+      drawingMaterialCurveEvidenceCapacityBackedRowCount: document.querySelectorAll('[data-drawing-material-curve-evidence] [data-drawing-material-curve-row-capacity-backed="true"]').length,
+      drawingMaterialCurveEvidenceText: document.querySelector('[data-drawing-material-curve-evidence]')?.textContent || '',
+      drawingMaterialCurveEvidenceWindowState: window.__STRUCTURE_VIEWER_DRAWING_MATERIAL_CURVE_EVIDENCE_STATE__ || null,
+      drawingMaterialCurveEvidenceOverflowCount: [...document.querySelectorAll('[data-drawing-material-curve-evidence], [data-drawing-material-curve-evidence] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingForceHandoffSchema: document.querySelector('[data-drawing-force-handoff-ledger]')?.getAttribute('data-drawing-force-handoff-schema') || '',
+      drawingForceHandoffStatus: document.querySelector('[data-drawing-force-handoff-ledger]')?.getAttribute('data-drawing-force-handoff-status') || '',
+      drawingForceHandoffSelectedCombination: document.querySelector('[data-drawing-force-handoff-ledger]')?.getAttribute('data-drawing-force-handoff-selected-combination') || '',
+      drawingForceHandoffSelectedMember: document.querySelector('[data-drawing-force-handoff-ledger]')?.getAttribute('data-drawing-force-handoff-selected-member') || '',
+      drawingForceHandoffActiveSheet: document.querySelector('[data-drawing-force-handoff-ledger]')?.getAttribute('data-drawing-force-handoff-active-sheet') || '',
+      drawingForceHandoffRowCount: Number(document.querySelector('[data-drawing-force-handoff-ledger]')?.getAttribute('data-drawing-force-handoff-row-count') || '0'),
+      drawingForceHandoffForceRowCount: Number(document.querySelector('[data-drawing-force-handoff-ledger]')?.getAttribute('data-drawing-force-handoff-force-row-count') || '0'),
+      drawingForceHandoffSourceBackedCount: Number(document.querySelector('[data-drawing-force-handoff-ledger]')?.getAttribute('data-drawing-force-handoff-source-backed-count') || '0'),
+      drawingForceHandoffMaxDcr: Number(document.querySelector('[data-drawing-force-handoff-ledger]')?.getAttribute('data-drawing-force-handoff-max-dcr') || '0'),
+      drawingForceHandoffText: document.querySelector('[data-drawing-force-handoff-ledger]')?.textContent || '',
+      drawingForceHandoffWindowState: window.__STRUCTURE_VIEWER_DRAWING_FORCE_HANDOFF_LEDGER_STATE__ || null,
+      drawingForceHandoffOverflowCount: [...document.querySelectorAll('[data-drawing-force-handoff-ledger], [data-drawing-force-handoff-ledger] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingForceVectorEvidenceSchema: document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-schema') || '',
+      drawingForceVectorEvidenceStatus: document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-status') || '',
+      drawingForceVectorEvidenceActiveSheet: document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-active-sheet') || '',
+      drawingForceVectorEvidenceSelectedCombination: document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-selected-combination') || '',
+      drawingForceVectorEvidenceSelectedMember: document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-selected-member') || '',
+      drawingForceVectorEvidenceRowCount: Number(document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-row-count') || '0'),
+      drawingForceVectorEvidenceForceRowCount: Number(document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-force-row-count') || '0'),
+      drawingForceVectorEvidenceSourceBackedCount: Number(document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-source-backed-count') || '0'),
+      drawingForceVectorEvidenceMaxDcr: Number(document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-max-dcr') || '0'),
+      drawingForceVectorEvidenceMaterialLocked: document.querySelector('[data-drawing-force-vector-evidence]')?.getAttribute('data-drawing-force-vector-material-locked') || '',
+      drawingForceVectorEvidenceRenderedRowCount: document.querySelectorAll('[data-drawing-force-vector-evidence] [data-drawing-force-vector-row]').length,
+      drawingForceVectorEvidenceSvgCount: document.querySelectorAll('[data-drawing-force-vector-evidence] [data-drawing-force-vector-svg]').length,
+      drawingForceVectorEvidenceSourceBackedRowCount: document.querySelectorAll('[data-drawing-force-vector-evidence] [data-drawing-force-vector-row-source-backed="true"]').length,
+      drawingForceVectorEvidenceKinds: [...document.querySelectorAll('[data-drawing-force-vector-evidence] [data-drawing-force-vector-row-vector-kind]')].map((node) => node.getAttribute('data-drawing-force-vector-row-vector-kind') || ''),
+      drawingForceVectorEvidenceText: document.querySelector('[data-drawing-force-vector-evidence]')?.textContent || '',
+      drawingForceVectorEvidenceWindowState: window.__STRUCTURE_VIEWER_DRAWING_FORCE_VECTOR_EVIDENCE_STATE__ || null,
+      drawingForceVectorEvidenceOverflowCount: [...document.querySelectorAll('[data-drawing-force-vector-evidence], [data-drawing-force-vector-evidence] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingCapacityHandoffSchema: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-schema') || '',
+      drawingCapacityHandoffStatus: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-status') || '',
+      drawingCapacityHandoffActiveSheet: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-active-sheet') || '',
+      drawingCapacityHandoffSelectedCombination: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-selected-combination') || '',
+      drawingCapacityHandoffSelectedMember: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-selected-member') || '',
+      drawingCapacityHandoffSelectedSection: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-selected-section') || '',
+      drawingCapacityHandoffRowCount: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-row-count') || '0'),
+      drawingCapacityHandoffMaterialCount: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-material-count') || '0'),
+      drawingCapacityHandoffSourceCapacityCount: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-source-capacity-count') || '0'),
+      drawingCapacityHandoffEstimatedCapacityCount: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-estimated-capacity-count') || '0'),
+      drawingCapacityHandoffCapacityBackedMaterialCount: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-capacity-backed-material-count') || '0'),
+      drawingCapacityHandoffForceRowCount: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-force-row-count') || '0'),
+      drawingCapacityHandoffMappedForceRowCount: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-mapped-force-row-count') || '0'),
+      drawingCapacityHandoffSourceBackedCount: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-source-backed-count') || '0'),
+      drawingCapacityHandoffMaxDcr: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-max-dcr') || '0'),
+      drawingCapacityHandoffMinMarginPercent: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-min-margin-percent') || '0'),
+      drawingCapacityHandoffMaterialLocked: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-material-locked') || '',
+      drawingCapacityHandoffMaterialMatchPercent: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-material-match-percent') || '0'),
+      drawingCapacityHandoffMemberAssignmentMatchPercent: Number(document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-member-assignment-match-percent') || '0'),
+      drawingCapacityHandoffRenderedRowCount: document.querySelectorAll('[data-drawing-capacity-handoff-ledger] [data-drawing-capacity-handoff-row]').length,
+      drawingCapacityHandoffSourceCapacityRowCount: document.querySelectorAll('[data-drawing-capacity-handoff-ledger] [data-drawing-capacity-handoff-row-source-capacity-count]').length,
+      drawingCapacityHandoffEstimatedCapacityRowCount: document.querySelectorAll('[data-drawing-capacity-handoff-ledger] [data-drawing-capacity-handoff-row-estimated-capacity-count]').length,
+      drawingCapacityHandoffText: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.textContent || '',
+      drawingCapacityHandoffWindowState: window.__STRUCTURE_VIEWER_DRAWING_CAPACITY_HANDOFF_LEDGER_STATE__ || null,
+      drawingCapacityHandoffOverflowCount: [...document.querySelectorAll('[data-drawing-capacity-handoff-ledger], [data-drawing-capacity-handoff-ledger] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      drawingSheetForceMatrixSchema: document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-schema') || '',
+      drawingSheetForceMatrixStatus: document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-status') || '',
+      drawingSheetForceMatrixActiveSheet: document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-active-sheet') || '',
+      drawingSheetForceMatrixSheetCount: Number(document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-sheet-count') || '0'),
+      drawingSheetForceMatrixSelectedCombination: document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-selected-combination') || '',
+      drawingSheetForceMatrixSelectedMember: document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-selected-member') || '',
+      drawingSheetForceMatrixSourceBackedCount: Number(document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-source-backed-count') || '0'),
+      drawingSheetForceMatrixForceRowCount: Number(document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-force-row-count') || '0'),
+      drawingSheetForceMatrixMaxDcr: Number(document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-max-dcr') || '0'),
+      drawingSheetForceMatrixMaterialLocked: document.querySelector('[data-drawing-sheet-force-matrix]')?.getAttribute('data-drawing-sheet-force-matrix-material-locked') || '',
+      drawingSheetForceMatrixRowCount: document.querySelectorAll('[data-drawing-sheet-force-matrix] [data-drawing-sheet-force-row]').length,
+      drawingSheetForceMatrixActiveRowCount: document.querySelectorAll('[data-drawing-sheet-force-matrix] [data-drawing-sheet-force-row-active="true"]').length,
+      drawingSheetForceMatrixText: document.querySelector('[data-drawing-sheet-force-matrix]')?.textContent || '',
+      drawingSheetForceMatrixWindowState: window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_MATRIX_STATE__ || null,
+      drawingSheetForceMatrixOverflowCount: [...document.querySelectorAll('[data-drawing-sheet-force-matrix], [data-drawing-sheet-force-matrix] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       drawingHandoffReceiptOverflowCount: [...document.querySelectorAll('[data-drawing-handoff-panel], [data-drawing-handoff-receipt] [data-drawing-handoff-receipt-row], [data-drawing-handoff-receipt] strong, [data-drawing-handoff-receipt] em, [data-drawing-handoff-sheet], [data-drawing-handoff-preview]')].filter((node) => {
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
@@ -813,6 +1566,160 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       materialCoverageCheckCount: document.querySelectorAll('[data-material-coverage-readiness] [data-material-coverage-check]').length,
       materialCoveragePassCheckCount: document.querySelectorAll('[data-material-coverage-readiness] [data-material-coverage-check-status="pass"]').length,
       materialCoverageQueueEmptyCount: document.querySelectorAll('[data-material-coverage-readiness] [data-material-review-queue-empty]').length,
+      materialModelParityStatus: document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-status') || '',
+      materialModelParitySchema: document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-schema') || '',
+      materialModelParityMaterialCount: Number(document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-material-count') || '0'),
+      materialModelParityReferenceMaterialCount: Number(document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-reference-material-count') || '0'),
+      materialModelParityMaterialMismatchCount: Number(document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-material-mismatch-count') || '0'),
+      materialModelParityMemberAssignmentCount: Number(document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-member-assignment-count') || '0'),
+      materialModelParityMemberMaterialMismatchCount: Number(document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-member-material-mismatch-count') || '0'),
+      materialModelParitySectionAssignmentChangeCount: Number(document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-section-assignment-change-count') || '0'),
+      materialModelParityMaterialMatchPercent: Number(document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-material-match-percent') || '0'),
+      materialModelParityMemberAssignmentMatchPercent: Number(document.querySelector('[data-material-model-parity]')?.getAttribute('data-material-model-parity-member-assignment-match-percent') || '0'),
+      materialModelParityRowCount: document.querySelectorAll('[data-material-model-parity] [data-material-model-parity-row]').length,
+      materialModelParityWindowState: window.__STRUCTURE_VIEWER_MATERIAL_MODEL_PARITY_STATE__ || null,
+      materialModelParityText: document.querySelector('[data-material-model-parity]')?.textContent || '',
+      materialModelParityOverflowCount: [...document.querySelectorAll('[data-material-model-parity], [data-material-model-parity] [data-material-model-parity-row], [data-material-model-parity] [data-material-model-parity-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      materialModelSignatureStatus: document.querySelector('[data-material-model-signature-ledger]')?.getAttribute('data-material-model-signature-ledger-status') || '',
+      materialModelSignatureSchema: document.querySelector('[data-material-model-signature-ledger]')?.getAttribute('data-material-model-signature-ledger-schema') || '',
+      materialModelSignatureRowCount: Number(document.querySelector('[data-material-model-signature-ledger]')?.getAttribute('data-material-model-signature-ledger-row-count') || '0'),
+      materialModelSignatureMaterialCount: Number(document.querySelector('[data-material-model-signature-ledger]')?.getAttribute('data-material-model-signature-ledger-material-count') || '0'),
+      materialModelSignatureLockedCount: Number(document.querySelector('[data-material-model-signature-ledger]')?.getAttribute('data-material-model-signature-ledger-locked-count') || '0'),
+      materialModelSignatureChangedCount: Number(document.querySelector('[data-material-model-signature-ledger]')?.getAttribute('data-material-model-signature-ledger-changed-count') || '0'),
+      materialModelSignatureRawTokenCount: Number(document.querySelector('[data-material-model-signature-ledger]')?.getAttribute('data-material-model-signature-ledger-raw-token-count') || '0'),
+      materialModelSignatureRenderedRowCount: document.querySelectorAll('[data-material-model-signature-ledger] [data-material-model-signature-row]').length,
+      materialModelSignatureWindowState: window.__STRUCTURE_VIEWER_MATERIAL_MODEL_SIGNATURE_LEDGER_STATE__ || null,
+      materialModelSignatureText: document.querySelector('[data-material-model-signature-ledger]')?.textContent || '',
+      materialModelSignatureOverflowCount: [...document.querySelectorAll('[data-material-model-signature-ledger], [data-material-model-signature-ledger] [data-material-model-signature-row], [data-material-model-signature-ledger] [data-material-model-signature-row] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      materialModelDemandAtlasStatus: document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-status') || '',
+      materialModelDemandAtlasSchema: document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-schema') || '',
+      materialModelDemandAtlasRowCount: Number(document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-row-count') || '0'),
+      materialModelDemandAtlasMaterialCount: Number(document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-material-count') || '0'),
+      materialModelDemandAtlasForceBackedMaterialCount: Number(document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-force-backed-material-count') || '0'),
+      materialModelDemandAtlasForceRowCount: Number(document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-force-row-count') || '0'),
+      materialModelDemandAtlasMappedForceRowCount: Number(document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-mapped-force-row-count') || '0'),
+      materialModelDemandAtlasSourceBackedCount: Number(document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-source-backed-count') || '0'),
+      materialModelDemandAtlasSelectedCombination: document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-selected-combination') || '',
+      materialModelDemandAtlasMaxDcr: Number(document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-max-dcr') || '0'),
+      materialModelDemandAtlasLockedCount: Number(document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-locked-count') || '0'),
+      materialModelDemandAtlasChangedCount: Number(document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-changed-count') || '0'),
+      materialModelDemandAtlasLockStatus: document.querySelector('[data-material-model-demand-atlas]')?.getAttribute('data-material-model-demand-atlas-lock-status') || '',
+      materialModelDemandAtlasRenderedRowCount: document.querySelectorAll('[data-material-model-demand-atlas] [data-material-model-demand-row]').length,
+      materialModelDemandAtlasForceBackedRowCount: document.querySelectorAll('[data-material-model-demand-atlas] [data-material-model-force-backed="true"]').length,
+      materialModelDemandAtlasBarCount: document.querySelectorAll('[data-material-model-demand-atlas] .material-model-demand-row__bar').length,
+      materialModelDemandAtlasWindowState: window.__STRUCTURE_VIEWER_MATERIAL_MODEL_DEMAND_ATLAS_STATE__ || null,
+      materialModelDemandAtlasText: document.querySelector('[data-material-model-demand-atlas]')?.textContent || '',
+      materialModelDemandAtlasOverflowCount: [...document.querySelectorAll('[data-material-model-demand-atlas], [data-material-model-demand-atlas] [data-material-model-demand-row], [data-material-model-demand-atlas] [data-material-model-demand-row] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      materialModelForceEnvelopeStatus: document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-status') || '',
+      materialModelForceEnvelopeSchema: document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-schema') || '',
+      materialModelForceEnvelopeRowCount: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-row-count') || '0'),
+      materialModelForceEnvelopeMaterialCount: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-material-count') || '0'),
+      materialModelForceEnvelopeCombinationCount: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-combination-count') || '0'),
+      materialModelForceEnvelopeForceRowCount: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-force-row-count') || '0'),
+      materialModelForceEnvelopeMappedForceRowCount: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-mapped-force-row-count') || '0'),
+      materialModelForceEnvelopeSourceBackedCount: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-source-backed-count') || '0'),
+      materialModelForceEnvelopeForceBackedMaterialCount: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-force-backed-material-count') || '0'),
+      materialModelForceEnvelopeSelectedCombination: document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-selected-combination') || '',
+      materialModelForceEnvelopeGoverningMaterial: document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-governing-material') || '',
+      materialModelForceEnvelopeLockedCount: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-locked-count') || '0'),
+      materialModelForceEnvelopeChangedCount: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-changed-count') || '0'),
+      materialModelForceEnvelopeLockStatus: document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-lock-status') || '',
+      materialModelForceEnvelopeMaterialMatchPercent: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-material-match-percent') || '0'),
+      materialModelForceEnvelopeMemberAssignmentMatchPercent: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-member-assignment-match-percent') || '0'),
+      materialModelForceEnvelopeMaxDcr: Number(document.querySelector('[data-material-model-force-envelope]')?.getAttribute('data-material-model-force-envelope-max-dcr') || '0'),
+      materialModelForceEnvelopeRenderedRowCount: document.querySelectorAll('[data-material-model-force-envelope] [data-material-model-force-envelope-row]').length,
+      materialModelForceEnvelopeForceBackedRowCount: document.querySelectorAll('[data-material-model-force-envelope] [data-material-model-force-envelope-row-force-backed="true"]').length,
+      materialModelForceEnvelopeSvgCount: document.querySelectorAll('[data-material-model-force-envelope] [data-material-model-force-envelope-svg]').length,
+      materialModelForceEnvelopePointCount: document.querySelectorAll('[data-material-model-force-envelope] [data-material-model-force-envelope-point]').length,
+      materialModelForceEnvelopeBarCount: document.querySelectorAll('[data-material-model-force-envelope] .material-model-force-envelope-row__bar').length,
+      materialModelForceEnvelopeWindowState: window.__STRUCTURE_VIEWER_MATERIAL_MODEL_FORCE_ENVELOPE_STATE__ || null,
+      materialModelForceEnvelopeText: document.querySelector('[data-material-model-force-envelope]')?.textContent || '',
+      materialModelForceEnvelopeOverflowCount: [...document.querySelectorAll('[data-material-model-force-envelope], [data-material-model-force-envelope] [data-material-model-force-envelope-row], [data-material-model-force-envelope] [data-material-model-force-envelope-row] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      materialModelCapacityEnvelopeStatus: document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-status') || '',
+      materialModelCapacityEnvelopeSchema: document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-schema') || '',
+      materialModelCapacityEnvelopeRowCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-row-count') || '0'),
+      materialModelCapacityEnvelopeMaterialCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-material-count') || '0'),
+      materialModelCapacityEnvelopeCombinationCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-combination-count') || '0'),
+      materialModelCapacityEnvelopeForceRowCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-force-row-count') || '0'),
+      materialModelCapacityEnvelopeMappedForceRowCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-mapped-force-row-count') || '0'),
+      materialModelCapacityEnvelopeSourceBackedCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-source-backed-count') || '0'),
+      materialModelCapacityEnvelopeSourceCapacityCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-source-capacity-count') || '0'),
+      materialModelCapacityEnvelopeEstimatedCapacityCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-estimated-capacity-count') || '0'),
+      materialModelCapacityEnvelopeCapacityBackedMaterialCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-capacity-backed-material-count') || '0'),
+      materialModelCapacityEnvelopeSelectedCombination: document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-selected-combination') || '',
+      materialModelCapacityEnvelopeGoverningMaterial: document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-governing-material') || '',
+      materialModelCapacityEnvelopeLockedCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-locked-count') || '0'),
+      materialModelCapacityEnvelopeChangedCount: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-changed-count') || '0'),
+      materialModelCapacityEnvelopeLockStatus: document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-lock-status') || '',
+      materialModelCapacityEnvelopeMaterialMatchPercent: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-material-match-percent') || '0'),
+      materialModelCapacityEnvelopeMemberAssignmentMatchPercent: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-member-assignment-match-percent') || '0'),
+      materialModelCapacityEnvelopeMaxDcr: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-max-dcr') || '0'),
+      materialModelCapacityEnvelopeMinMarginPercent: Number(document.querySelector('[data-material-model-capacity-envelope]')?.getAttribute('data-material-model-capacity-envelope-min-margin-percent') || '0'),
+      materialModelCapacityEnvelopeRenderedRowCount: document.querySelectorAll('[data-material-model-capacity-envelope] [data-material-model-capacity-envelope-row]').length,
+      materialModelCapacityEnvelopeCapacityBackedRowCount: document.querySelectorAll('[data-material-model-capacity-envelope] [data-material-model-capacity-envelope-row-capacity-backed="true"]').length,
+      materialModelCapacityEnvelopeSourceCapacityRowCount: document.querySelectorAll('[data-material-model-capacity-envelope] [data-material-model-capacity-envelope-row-source-capacity]').length,
+      materialModelCapacityEnvelopeEstimatedCapacityRowCount: document.querySelectorAll('[data-material-model-capacity-envelope] [data-material-model-capacity-envelope-row-estimated-capacity]').length,
+      materialModelCapacityEnvelopeSvgCount: document.querySelectorAll('[data-material-model-capacity-envelope] [data-material-model-capacity-envelope-svg]').length,
+      materialModelCapacityEnvelopePointCount: document.querySelectorAll('[data-material-model-capacity-envelope] [data-material-model-capacity-envelope-point]').length,
+      materialModelCapacityEnvelopeBarCount: document.querySelectorAll('[data-material-model-capacity-envelope] .material-model-capacity-envelope-row__bar').length,
+      materialModelCapacityEnvelopeWindowState: window.__STRUCTURE_VIEWER_MATERIAL_MODEL_CAPACITY_ENVELOPE_STATE__ || null,
+      materialModelCapacityEnvelopeText: document.querySelector('[data-material-model-capacity-envelope]')?.textContent || '',
+      materialModelCapacityEnvelopeOverflowCount: [...document.querySelectorAll('[data-material-model-capacity-envelope], [data-material-model-capacity-envelope] [data-material-model-capacity-envelope-row], [data-material-model-capacity-envelope] [data-material-model-capacity-envelope-row] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      materialForceInteractionStatus: document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-status') || '',
+      materialForceInteractionSchema: document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-schema') || '',
+      materialForceInteractionRowCount: Number(document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-row-count') || '0'),
+      materialForceInteractionForceRowCount: Number(document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-force-row-count') || '0'),
+      materialForceInteractionMappedForceRowCount: Number(document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-mapped-force-row-count') || '0'),
+      materialForceInteractionSourceBackedCount: Number(document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-source-backed-count') || '0'),
+      materialForceInteractionUnmatchedForceRowCount: Number(document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-unmatched-force-row-count') || '0'),
+      materialForceInteractionSelectedCombination: document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-selected-combination') || '',
+      materialForceInteractionGoverningMaterial: document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-governing-material') || '',
+      materialForceInteractionMaxDcr: Number(document.querySelector('[data-material-force-interaction]')?.getAttribute('data-material-force-interaction-max-dcr') || '0'),
+      materialForceInteractionRenderedRowCount: document.querySelectorAll('[data-material-force-interaction] [data-material-force-row]').length,
+      materialForceInteractionBarCount: document.querySelectorAll('[data-material-force-interaction] .material-force-row__bar').length,
+      materialForceInteractionWindowState: window.__STRUCTURE_VIEWER_MATERIAL_FORCE_INTERACTION_STATE__ || null,
+      materialForceInteractionText: document.querySelector('[data-material-force-interaction]')?.textContent || '',
+      materialForceInteractionOverflowCount: [...document.querySelectorAll('[data-material-force-interaction], [data-material-force-interaction] [data-material-force-row], [data-material-force-interaction] [data-material-force-interaction-summary] span')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
+      materialConstitutiveStatus: document.querySelector('[data-material-constitutive-lens]')?.getAttribute('data-material-constitutive-status') || '',
+      materialConstitutiveSchema: document.querySelector('[data-material-constitutive-lens]')?.getAttribute('data-material-constitutive-schema') || '',
+      materialConstitutiveRowCount: Number(document.querySelector('[data-material-constitutive-lens]')?.getAttribute('data-material-constitutive-row-count') || '0'),
+      materialConstitutiveNonlinearCount: Number(document.querySelector('[data-material-constitutive-lens]')?.getAttribute('data-material-constitutive-nonlinear-count') || '0'),
+      materialConstitutiveSourceBackedCount: Number(document.querySelector('[data-material-constitutive-lens]')?.getAttribute('data-material-constitutive-source-backed-count') || '0'),
+      materialConstitutiveRenderedRowCount: document.querySelectorAll('[data-material-constitutive-lens] [data-material-constitutive-row]').length,
+      materialConstitutiveHasSteelModel: (document.querySelector('[data-material-constitutive-lens]')?.textContent || '').includes('Steel bilinear'),
+      materialConstitutiveHasConcreteModel: (document.querySelector('[data-material-constitutive-lens]')?.textContent || '').includes('Concrete damage-plasticity'),
+      materialConstitutiveHasCompositeModel: (document.querySelector('[data-material-constitutive-lens]')?.textContent || '').includes('Composite steel-concrete interaction'),
+      materialConstitutiveHasRigidModel: (document.querySelector('[data-material-constitutive-lens]')?.textContent || '').includes('Rigid link constraint'),
+      materialStressStrainStatus: document.querySelector('[data-material-stress-strain-curves]')?.getAttribute('data-material-stress-strain-curves-status') || '',
+      materialStressStrainSchema: document.querySelector('[data-material-stress-strain-curves]')?.getAttribute('data-material-stress-strain-curves-schema') || '',
+      materialStressStrainCurveCount: Number(document.querySelector('[data-material-stress-strain-curves]')?.getAttribute('data-material-stress-strain-curve-count') || '0'),
+      materialStressStrainRenderedCurveCount: document.querySelectorAll('[data-material-stress-strain-curve-row]').length,
+      materialStressStrainSvgCount: document.querySelectorAll('[data-material-stress-strain-svg]').length,
+      materialStressStrainSourceBackedCount: Number(document.querySelector('[data-material-stress-strain-curves]')?.getAttribute('data-material-stress-strain-source-backed-count') || '0'),
+      materialStressStrainNonlinearCount: Number(document.querySelector('[data-material-stress-strain-curves]')?.getAttribute('data-material-stress-strain-nonlinear-count') || '0'),
+      materialStressStrainMaxDemandRatio: Number(document.querySelector('[data-material-stress-strain-curves]')?.getAttribute('data-material-stress-strain-max-demand-ratio') || '0'),
+      materialStressStrainDemandMarkerCount: document.querySelectorAll('[data-material-stress-strain-curves] .material-stress-strain-row__demand').length,
+      materialStressStrainYieldMarkerCount: document.querySelectorAll('[data-material-stress-strain-curves] .material-stress-strain-row__yield').length,
+      materialStressStrainWindowState: window.__STRUCTURE_VIEWER_MATERIAL_STRESS_STRAIN_CURVES_STATE__ || null,
+      materialStressStrainText: document.querySelector('[data-material-stress-strain-curves]')?.textContent || '',
       materialCatalogMaterialCount: Number(document.querySelector('[data-material-member-catalog]')?.getAttribute('data-material-count') || '0'),
       materialCatalogUsedMaterialCount: Number(document.querySelector('[data-material-member-catalog]')?.getAttribute('data-used-material-count') || '0'),
       materialCatalogMissingMaterialCount: Number(document.querySelector('[data-material-member-catalog]')?.getAttribute('data-missing-material-count') || '0'),
@@ -864,6 +1771,10 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      materialStressStrainOverflowCount: [...document.querySelectorAll('[data-material-stress-strain-curves], [data-material-stress-strain-curves] [data-material-stress-strain-curve-row], [data-material-stress-strain-curves] .material-stress-strain-curves__head')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       optimizationCardCount: document.querySelectorAll('#optimization-summary-panel .optimization-summary-card').length,
       optimizationSourceCount: document.querySelectorAll('#optimization-summary-panel .optimization-summary-card__source').length,
       optimizationAfterBarCount: document.querySelectorAll('#optimization-summary-panel .optimization-summary-bar--after').length,
@@ -874,6 +1785,25 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
       chartCount: document.querySelectorAll('#analysis-cockpit-chart-strip .analysis-chart-panel').length,
+      lowerChartEvidenceSchemaCount: document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-evidence-schema="structure-viewer-lower-chart-evidence.v1"]').length,
+      lowerChartReadyCount: document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-evidence-status="ready"]').length,
+      lowerChartAxisReceiptCount: document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-axis-receipt]').length,
+      lowerChartAxisReceiptSchemaCount: document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-axis-receipt][data-lower-chart-schema="structure-viewer-lower-chart-evidence.v1"]').length,
+      lowerChartSharedScaleCount: [...document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-scale-mode]')]
+        .filter((node) => (node.getAttribute('data-lower-chart-scale-mode') || '').includes('shared')).length,
+      lowerChartSvgSharedScaleCount: document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-svg][data-lower-chart-shared-scale="true"]').length,
+      lowerChartKindText: [...document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-kind]')]
+        .map((node) => node.getAttribute('data-lower-chart-kind') || '').join(' '),
+      lowerChartAxisText: [...document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-axis-receipt]')]
+        .map((node) => `${node.getAttribute('data-lower-chart-x-axis') || ''} ${node.getAttribute('data-lower-chart-y-axis') || ''} ${node.getAttribute('data-lower-chart-unit') || ''}`).join(' '),
+      lowerChartPeakCount: [...document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-peak]')]
+        .filter((node) => (node.getAttribute('data-lower-chart-peak') || '').trim()).length,
+      lowerChartActiveCount: [...document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-active]')]
+        .filter((node) => (node.getAttribute('data-lower-chart-active') || '').trim()).length,
+      lowerChartReceiptOverflowCount: [...document.querySelectorAll('#analysis-cockpit-chart-strip [data-lower-chart-axis-receipt], #analysis-cockpit-chart-strip [data-lower-chart-axis-receipt] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       driftLineCount: document.querySelectorAll('#story-drift-chart-panel .analysis-chart-line').length,
       driftLimitCount: document.querySelectorAll('#story-drift-chart-panel .analysis-chart-limit').length,
       driftTickCount: document.querySelectorAll('#story-drift-chart-panel .analysis-chart-ticks text').length,
@@ -938,6 +1868,25 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       stageResultCalloutFullValueCount: document.querySelectorAll('[data-stage-result-callout-full-value]').length,
       stageResultCalloutSourceTypeCount: document.querySelectorAll('[data-stage-result-callout-source-type]').length,
       stageResultCalloutMemberCount: document.querySelectorAll('[data-stage-result-callout-member]').length,
+      stageResultCalloutProjectionCount: document.querySelectorAll('[data-stage-result-callout-projection]').length,
+      stageResultCalloutAnchorKindCount: document.querySelectorAll('[data-stage-result-callout-anchor-kind]').length,
+      stageResultCalloutAnchorLabelCount: document.querySelectorAll('[data-stage-result-callout-anchor-label]').length,
+      stageResultCalloutAnchorCount: Number(document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callout-anchor-count') || '0'),
+      stageResultCalloutProjectedCount: Number(document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callout-projected-count') || '0'),
+      stageResultCalloutSemanticCount: Number(document.querySelector('[data-stage-result-callouts]')?.getAttribute('data-stage-result-callout-semantic-count') || '0'),
+      stageResultCalloutAnchorLayerStatus: document.querySelector('[data-stage-result-callout-anchors]')?.getAttribute('data-stage-result-callout-anchor-status') || '',
+      stageResultCalloutAnchorLayerSchema: document.querySelector('[data-stage-result-callout-anchors]')?.getAttribute('data-stage-result-callout-anchor-schema') || '',
+      stageResultCalloutAnchorLayerCount: Number(document.querySelector('[data-stage-result-callout-anchors]')?.getAttribute('data-stage-result-callout-anchor-count') || '0'),
+      stageResultCalloutAnchorLayerProjectedCount: Number(document.querySelector('[data-stage-result-callout-anchors]')?.getAttribute('data-stage-result-callout-anchor-projected-count') || '0'),
+      stageResultCalloutAnchorLayerSemanticCount: Number(document.querySelector('[data-stage-result-callout-anchors]')?.getAttribute('data-stage-result-callout-anchor-semantic-count') || '0'),
+      stageResultCalloutAnchorNodeCount: document.querySelectorAll('[data-stage-result-callout-anchor]').length,
+      stageResultCalloutAnchorKindText: [...document.querySelectorAll('[data-stage-result-callout-anchor-kind], [data-stage-result-callout-anchor]')].map((node) => node.getAttribute('data-stage-result-callout-anchor-kind') || '').join(' '),
+      stageResultCalloutAnchorProjectionText: [...document.querySelectorAll('[data-stage-result-callout-anchor-projection], [data-stage-result-callout-projection]')].map((node) => node.getAttribute('data-stage-result-callout-anchor-projection') || node.getAttribute('data-stage-result-callout-projection') || '').join(' '),
+      stageResultCalloutWindowState: window.__STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_STATE__ || null,
+      stageResultCalloutAnchorOverflowCount: [...document.querySelectorAll('[data-stage-result-callout-anchor], [data-stage-result-callout-anchor] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       stageResultCalloutSourceText: [...document.querySelectorAll('[data-stage-result-callout-source]')].map((node) => node.getAttribute('data-stage-result-callout-source') || '').join(' '),
       stageResultCalloutKeyText: [...document.querySelectorAll('[data-stage-result-callout-key]')].map((node) => node.getAttribute('data-stage-result-callout-key') || '').join(' '),
       stageResultCalloutOverflowCount: [...document.querySelectorAll('[data-stage-result-callout], [data-stage-result-callout] *')].filter((node) => {
@@ -970,6 +1919,21 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.topRunSolver).not.toBe('')
   expect(layout.topRunComparePressed).toBe('false')
   expect(layout.topRunOverflowCount).toBe(0)
+  expect(layout.integratedReviewOpenerCount).toBeGreaterThanOrEqual(2)
+  expect(layout.integratedReviewSchema).toBe('structure-viewer-integrated-review-navigator.v1')
+  expect(layout.integratedReviewOpen).toBe('false')
+  expect(layout.integratedReviewDrawingCount).toBeGreaterThanOrEqual(2)
+  expect(layout.integratedReviewAllDrawingCount).toBeGreaterThanOrEqual(layout.integratedReviewDrawingCount)
+  expect(layout.integratedReviewSectionCount).toBeGreaterThanOrEqual(8)
+  expect(layout.integratedReviewActiveSection).toBe('loads')
+  expect(layout.integratedReviewPreviewSchema).toBe('structure-viewer-integrated-review-preview.v1')
+  expect(layout.integratedReviewPreviewSection).toBe('loads')
+  expect(layout.integratedReviewPreviewRowCount).toBeGreaterThanOrEqual(4)
+  expect(layout.integratedReviewWindowState?.schemaVersion).toBe('structure-viewer-integrated-review-navigator.v1')
+  expect(layout.integratedReviewWindowState?.previewSchemaVersion).toBe('structure-viewer-integrated-review-preview.v1')
+  expect(layout.integratedReviewWindowState?.activePreviewSectionKey).toBe('loads')
+  expect(layout.integratedReviewWindowState?.open).toBe(false)
+  expect(layout.integratedReviewWindowState?.sectionCount).toBe(layout.integratedReviewSectionCount)
   expect(layout.modelOverviewStatus).toBe('ready')
   expect(layout.modelOverviewHeightM).toBeGreaterThan(0)
   expect(layout.modelOverviewUnits).not.toBe('')
@@ -997,7 +1961,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.stageOverlayViewportOcclusionRatio).toBeLessThanOrEqual(0.40)
   expect(layout.stageOverlayCentralOcclusionRatio).toBeLessThanOrEqual(0.18)
   expect(layout.stageResultCalloutsStatus).toBe('ready')
-  expect(layout.stageResultCalloutsSchema).toBe('structure-viewer-stage-result-callouts.v2')
+  expect(layout.stageResultCalloutsSchema).toBe('structure-viewer-stage-result-callouts.v3')
   expect(layout.stageResultCalloutCount).toBeGreaterThanOrEqual(4)
   expect(layout.stageResultCalloutSourceCount).toBeGreaterThanOrEqual(1)
   expect(layout.stageResultCalloutEstimateCount).toBeGreaterThanOrEqual(1)
@@ -1008,6 +1972,24 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.stageResultCalloutFullValueCount).toBeGreaterThanOrEqual(4)
   expect(layout.stageResultCalloutSourceTypeCount).toBeGreaterThanOrEqual(4)
   expect(layout.stageResultCalloutMemberCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageResultCalloutProjectionCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutAnchorKindCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutAnchorLabelCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutAnchorCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutSemanticCount).toBeGreaterThanOrEqual(3)
+  expect(layout.stageResultCalloutAnchorLayerStatus).toBe('ready')
+  expect(layout.stageResultCalloutAnchorLayerSchema).toBe('structure-viewer-stage-result-callouts.v3')
+  expect(layout.stageResultCalloutAnchorLayerCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutAnchorLayerSemanticCount).toBeGreaterThanOrEqual(3)
+  expect(layout.stageResultCalloutAnchorNodeCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutAnchorKindText).toContain('roof-displacement')
+  expect(layout.stageResultCalloutAnchorKindText).toContain('governing-drift-story')
+  expect(layout.stageResultCalloutAnchorKindText).toContain('base-reaction')
+  expect(layout.stageResultCalloutAnchorKindText).toContain('critical-member')
+  expect(layout.stageResultCalloutAnchorProjectionText).toContain('semantic')
+  expect(layout.stageResultCalloutWindowState?.schemaVersion).toBe('structure-viewer-stage-result-callouts.v3')
+  expect(layout.stageResultCalloutWindowState?.calloutCount || 0).toBeGreaterThanOrEqual(4)
+  expect(layout.stageResultCalloutAnchorOverflowCount).toBe(0)
   expect(layout.stageResultCalloutSourceText).toContain('Model')
   expect(layout.stageResultCalloutKeyText).toContain('max-displacement')
   expect(layout.stageResultCalloutKeyText).toContain('max-drift')
@@ -1143,6 +2125,408 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.resultEnvelopeHasUtilization).toBe(true)
   expect(layout.resultEnvelopeMemberRowCount).toBeGreaterThanOrEqual(1)
   expect(layout.resultEnvelopeOverflowCount).toBe(0)
+  expect(['ready', 'estimate']).toContain(layout.forceFlowStatus)
+  expect(layout.forceFlowSchema).toBe('structure-viewer-force-flow-lens.v1')
+  expect(layout.forceFlowRowCount).toBeGreaterThanOrEqual(4)
+  expect(layout.forceFlowRenderedRowCount).toBe(layout.forceFlowRowCount)
+  expect(layout.forceFlowMemberRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.forceFlowBaseReaction).toBeGreaterThan(0)
+  expect(layout.forceFlowGoverningMember).not.toBe('')
+  expect(layout.forceFlowLoadCase).not.toBe('')
+  expect(layout.forceFlowSelectedCombination).not.toBe('')
+  expect(layout.forceFlowActiveStep).toBeGreaterThan(0)
+  expect(layout.forceFlowTotalSteps).toBeGreaterThanOrEqual(layout.forceFlowActiveStep)
+  expect(layout.forceFlowWindowState?.schemaVersion).toBe('structure-viewer-force-flow-lens.v1')
+  expect(layout.forceFlowWindowState?.rowCount).toBe(layout.forceFlowRowCount)
+  expect(layout.forceFlowOverflowCount).toBe(0)
+  expect(layout.storyForceFlowStatus).toBe('ready')
+  expect(layout.storyForceFlowSchema).toBe('structure-viewer-story-force-flow-ledger.v1')
+  expect(layout.storyForceFlowRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.storyForceFlowRenderedRowCount).toBe(layout.storyForceFlowRowCount)
+  expect(layout.storyForceFlowStoryCount).toBeGreaterThanOrEqual(layout.storyForceFlowRowCount)
+  expect(layout.storyForceFlowForceRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.storyForceFlowSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.storyForceFlowSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.storyForceFlowGoverningStory).not.toBe('')
+  expect(layout.storyForceFlowMaxDcr).toBeGreaterThan(0)
+  expect(layout.storyForceFlowBarCount).toBeGreaterThanOrEqual(layout.storyForceFlowRowCount * 3)
+  expect(layout.storyForceFlowText).toContain('Story Force Ledger')
+  expect(layout.storyForceFlowText).toContain('source rows')
+  expect(layout.storyForceFlowWindowState?.schemaVersion).toBe('structure-viewer-story-force-flow-ledger.v1')
+  expect(layout.storyForceFlowWindowState?.rowCount).toBe(layout.storyForceFlowRowCount)
+  expect(layout.storyForceFlowWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.storyForceFlowOverflowCount).toBe(0)
+  expect(layout.loadCombinationForceStatus).toBe('ready')
+  expect(layout.loadCombinationForceSchema).toBe('structure-viewer-load-combination-force-matrix.v1')
+  expect(layout.loadCombinationForceRowCount).toBeGreaterThanOrEqual(4)
+  expect(layout.loadCombinationForceRenderedRowCount).toBe(layout.loadCombinationForceRowCount)
+  expect(layout.loadCombinationForceCombinationCount).toBeGreaterThanOrEqual(8)
+  expect(layout.loadCombinationForceForceRowCount).toBeGreaterThanOrEqual(40)
+  expect(layout.loadCombinationForceSourceBackedCount).toBe(layout.loadCombinationForceForceRowCount)
+  expect(layout.loadCombinationForceMaxDcr).toBeGreaterThan(0.8)
+  expect(layout.loadCombinationForceGoverningCombination).not.toBe('')
+  expect(layout.loadCombinationForceGoverningMember).not.toBe('')
+  expect(layout.loadCombinationForceStepperSchema).toBe('structure-viewer-load-combination-force-stepper.v1')
+  expect(layout.loadCombinationForceStepperCount).toBeGreaterThanOrEqual(2)
+  expect(layout.loadCombinationForceStepButtonCount).toBeGreaterThanOrEqual(2)
+  expect(layout.loadCombinationForceActiveStepCount).toBe(1)
+  expect(layout.loadCombinationForceActiveRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.loadCombinationForceSelectedCombination).not.toBe('')
+  expect(layout.loadCombinationForceSelectedMember).not.toBe('')
+  expect(layout.loadCombinationForceSelectedDcr).toBeGreaterThan(0)
+  expect(layout.forceFlowSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.loadCombinationForceMemberRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.loadCombinationForceWindowState?.schemaVersion).toBe('structure-viewer-load-combination-force-matrix.v1')
+  expect(layout.loadCombinationForceWindowState?.stepperSchemaVersion).toBe('structure-viewer-load-combination-force-stepper.v1')
+  expect(layout.loadCombinationForceWindowState?.rowCount).toBe(layout.loadCombinationForceRowCount)
+  expect(layout.loadCombinationForceWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.loadCombinationForceOverflowCount).toBe(0)
+  expect(layout.memberForceDiagramStatus).toBe('ready')
+  expect(layout.memberForceDiagramSchema).toBe('structure-viewer-member-force-diagram.v1')
+  expect(layout.memberForceDiagramRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForceDiagramRenderedRowCount).toBe(layout.memberForceDiagramRowCount)
+  expect(layout.memberForceDiagramDiagramCount).toBe(layout.memberForceDiagramRowCount)
+  expect(layout.memberForceDiagramSvgCount).toBe(layout.memberForceDiagramRowCount)
+  expect(layout.memberForceDiagramKindCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForceDiagramSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForceDiagramMaxDcr).toBeGreaterThan(0)
+  expect(layout.memberForceDiagramSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberForceDiagramSelectedMember).not.toBe('')
+  expect(layout.memberForceDiagramText).toContain('Member Force Diagram')
+  expect(layout.memberForceDiagramText).toContain('D/C')
+  expect(layout.memberForceDiagramWindowState?.schemaVersion).toBe('structure-viewer-member-force-diagram.v1')
+  expect(layout.memberForceDiagramWindowState?.rowCount).toBe(layout.memberForceDiagramRowCount)
+  expect(layout.memberForceDiagramWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberForceDiagramOverflowCount).toBe(0)
+  expect(layout.memberForceEnvelopeStatus).toBe('ready')
+  expect(layout.memberForceEnvelopeSchema).toBe('structure-viewer-member-force-envelope.v1')
+  expect(layout.memberForceEnvelopeRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForceEnvelopeRenderedRowCount).toBe(layout.memberForceEnvelopeRowCount)
+  expect(layout.memberForceEnvelopeSvgCount).toBe(layout.memberForceEnvelopeRowCount)
+  expect(layout.memberForceEnvelopeSampleCount).toBeGreaterThanOrEqual(2)
+  expect(layout.memberForceEnvelopePointCount).toBeGreaterThanOrEqual(layout.memberForceEnvelopeSampleCount)
+  expect(layout.memberForceEnvelopeSelectedPointCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForceEnvelopeSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForceEnvelopeMaxDcr).toBeGreaterThan(0)
+  expect(layout.memberForceEnvelopeSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberForceEnvelopeSelectedMember).not.toBe('')
+  expect(layout.memberForceEnvelopeGoverningCombination).not.toBe('')
+  expect(layout.memberForceEnvelopeText).toContain('Member Force Envelope')
+  expect(layout.memberForceEnvelopeText).toContain('selected / max D/C')
+  expect(layout.memberForceEnvelopeWindowState?.schemaVersion).toBe('structure-viewer-member-force-envelope.v1')
+  expect(layout.memberForceEnvelopeWindowState?.rowCount).toBe(layout.memberForceEnvelopeRowCount)
+  expect(layout.memberForceEnvelopeWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberForceEnvelopeOverflowCount).toBe(0)
+  expect(layout.memberForceHistoryStatus).toBe('ready')
+  expect(layout.memberForceHistorySchema).toBe('structure-viewer-member-force-history.v1')
+  expect(layout.memberForceHistoryRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForceHistoryRenderedRowCount).toBe(layout.memberForceHistoryRowCount)
+  expect(layout.memberForceHistorySvgCount).toBe(layout.memberForceHistoryRowCount)
+  expect(layout.memberForceHistorySampleCount).toBeGreaterThanOrEqual(2)
+  expect(layout.memberForceHistoryPointCount).toBeGreaterThanOrEqual(layout.memberForceHistorySampleCount)
+  expect(layout.memberForceHistorySelectedPointCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForceHistorySourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForceHistoryMaxDcr).toBeGreaterThan(0)
+  expect(layout.memberForceHistorySelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberForceHistorySelectedMember).toBe(layout.memberForceEnvelopeSelectedMember)
+  expect(layout.memberForceHistoryGoverningCombination).not.toBe('')
+  expect(layout.memberForceHistoryText).toContain('Member Force History')
+  expect(layout.memberForceHistoryText).toContain('current / max D/C')
+  expect(layout.memberForceHistoryWindowState?.schemaVersion).toBe('structure-viewer-member-force-history.v1')
+  expect(layout.memberForceHistoryWindowState?.rowCount).toBe(layout.memberForceHistoryRowCount)
+  expect(layout.memberForceHistoryWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberForceHistoryOverflowCount).toBe(0)
+  expect(layout.memberMaterialNonlinearStatus).toBe('ready')
+  expect(layout.memberMaterialNonlinearSchema).toBe('structure-viewer-member-material-nonlinear-state.v1')
+  expect(layout.memberMaterialNonlinearRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberMaterialNonlinearSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberMaterialNonlinearSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberMaterialNonlinearSelectedMember).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.memberMaterialNonlinearGoverningCombination).not.toBe('')
+  expect(layout.memberMaterialNonlinearMaterialId).not.toBe('')
+  expect(layout.memberMaterialNonlinearSectionId).not.toBe('')
+  expect(layout.memberMaterialNonlinearDemandRatio).toBeGreaterThan(0)
+  expect(layout.memberMaterialNonlinearState).not.toBe('')
+  expect(layout.memberMaterialNonlinearRenderedRowCount).toBe(1)
+  expect(layout.memberMaterialNonlinearSvgCount).toBe(1)
+  expect(layout.memberMaterialNonlinearDemandMarkerCount).toBe(1)
+  expect(layout.memberMaterialNonlinearYieldMarkerCount).toBe(1)
+  expect(layout.memberMaterialNonlinearForceRowCount).toBe(layout.memberMaterialNonlinearRowCount)
+  expect(layout.memberMaterialNonlinearText).toContain('Member Material State')
+  expect(layout.memberMaterialNonlinearText).toContain('fy/fc')
+  expect(layout.memberMaterialNonlinearWindowState?.schemaVersion).toBe('structure-viewer-member-material-nonlinear-state.v1')
+  expect(layout.memberMaterialNonlinearWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberMaterialNonlinearWindowState?.selectedMemberId).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.memberMaterialNonlinearWindowState?.rowCount).toBe(layout.memberMaterialNonlinearRowCount)
+  expect(layout.memberMaterialNonlinearOverflowCount).toBe(0)
+  expect(layout.memberSectionCapacityStatus).toBe('ready')
+  expect(layout.memberSectionCapacitySchema).toBe('structure-viewer-member-section-capacity.v1')
+  expect(layout.memberSectionCapacityRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberSectionCapacityRenderedRowCount).toBe(layout.memberSectionCapacityRowCount)
+  expect(layout.memberSectionCapacitySelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberSectionCapacitySelectedMember).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.memberSectionCapacityMaterialId).toBe(layout.memberMaterialNonlinearMaterialId)
+  expect(layout.memberSectionCapacitySectionId).toBe(layout.memberMaterialNonlinearSectionId)
+  expect(layout.memberSectionCapacitySourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberSectionCapacitySourceCapacityCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberSectionCapacityEstimatedCapacityCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberSectionCapacityMaxDcr).toBeGreaterThan(0)
+  expect(layout.memberSectionCapacityGeometryReady).toBe('true')
+  expect(layout.memberSectionCapacityBarCount).toBeGreaterThanOrEqual(layout.memberSectionCapacityRowCount * 2)
+  expect(layout.memberSectionCapacityText).toContain('Section Capacity Check')
+  expect(layout.memberSectionCapacityText).toContain('KDS source capacity')
+  expect(layout.memberSectionCapacityWindowState?.schemaVersion).toBe('structure-viewer-member-section-capacity.v1')
+  expect(layout.memberSectionCapacityWindowState?.rowCount).toBe(layout.memberSectionCapacityRowCount)
+  expect(layout.memberSectionCapacityWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberSectionCapacityWindowState?.sectionId).toBe(layout.memberMaterialNonlinearSectionId)
+  expect(layout.memberSectionCapacityOverflowCount).toBe(0)
+  expect(layout.memberForcePlaybackStatus).toBe('ready')
+  expect(layout.memberForcePlaybackSchema).toBe('structure-viewer-member-force-playback.v1')
+  expect(layout.memberForcePlaybackFrameCount).toBeGreaterThanOrEqual(2)
+  expect(layout.memberForcePlaybackRenderedFrameCount).toBeGreaterThanOrEqual(2)
+  expect(layout.memberForcePlaybackRenderedFrameCount).toBeLessThanOrEqual(layout.memberForcePlaybackFrameCount)
+  expect(layout.memberForcePlaybackActionCount).toBeGreaterThanOrEqual(3)
+  expect(layout.memberForcePlaybackActiveButtonCount).toBe(1)
+  expect(layout.memberForcePlaybackActiveFrame).toBeGreaterThanOrEqual(0)
+  expect(layout.memberForcePlaybackActiveCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberForcePlaybackSelectedMember).not.toBe('')
+  expect(layout.memberForcePlaybackMaxDcr).toBeGreaterThan(0)
+  expect(layout.memberForcePlaybackSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberForcePlaybackPlaying).toBe('false')
+  expect(layout.memberForcePlaybackText).toContain('Member Force Playback')
+  expect(layout.memberForcePlaybackText).toContain('frames')
+  expect(layout.memberForcePlaybackWindowState?.schemaVersion).toBe('structure-viewer-member-force-playback.v1')
+  expect(layout.memberForcePlaybackWindowState?.frameCount).toBe(layout.memberForcePlaybackFrameCount)
+  expect(layout.memberForcePlaybackWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.memberForcePlaybackOverflowCount).toBe(0)
+  expect(layout.stageMemberForcePlaybackTrailStatus).toBe('ready')
+  expect(layout.stageMemberForcePlaybackTrailSchema).toBe('structure-viewer-stage-member-force-playback-trail.v1')
+  expect(layout.stageMemberForcePlaybackTrailFrameCount).toBe(layout.memberForcePlaybackFrameCount)
+  expect(layout.stageMemberForcePlaybackTrailRenderedFrameCount).toBeGreaterThanOrEqual(2)
+  expect(layout.stageMemberForcePlaybackTrailFrameButtonCount).toBe(layout.stageMemberForcePlaybackTrailRenderedFrameCount)
+  expect(layout.stageMemberForcePlaybackTrailActiveFrame).toBe(layout.memberForcePlaybackActiveFrame)
+  expect(layout.stageMemberForcePlaybackTrailActiveFrameCount).toBe(1)
+  expect(layout.stageMemberForcePlaybackTrailProjectionCount).toBe(layout.stageMemberForcePlaybackTrailFrameButtonCount)
+  expect(layout.stageMemberForcePlaybackTrailVisible).toBe(true)
+  expect(layout.stageMemberForcePlaybackTrailActiveCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMemberForcePlaybackTrailSelectedMember).toBe(layout.memberForcePlaybackSelectedMember)
+  expect(layout.stageMemberForcePlaybackTrailMaxDcr).toBeGreaterThan(0)
+  expect(layout.stageMemberForcePlaybackTrailText).toContain('D/C')
+  expect(layout.stageMemberForcePlaybackTrailWindowState?.schemaVersion).toBe('structure-viewer-stage-member-force-playback-trail.v1')
+  expect(layout.stageMemberForcePlaybackTrailWindowState?.frameCount).toBe(layout.memberForcePlaybackFrameCount)
+  expect(layout.stageMemberForcePlaybackTrailWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMemberForcePlaybackTrailOverlapFocus).toBe(0)
+  expect(layout.stageMemberForcePlaybackTrailOverflowCount).toBe(0)
+  expect(layout.stageMemberForceVectorFieldStatus).toBe('ready')
+  expect(layout.stageMemberForceVectorFieldSchema).toBe('structure-viewer-stage-member-force-vector-field.v1')
+  expect(layout.stageMemberForceVectorCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageMemberForceVectorButtonCount).toBe(layout.stageMemberForceVectorCount)
+  expect(layout.stageMemberForceVectorProjectionCount).toBe(layout.stageMemberForceVectorCount)
+  expect(layout.stageMemberForceVectorSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageMemberForceVectorActiveFrame).toBe(layout.memberForcePlaybackActiveFrame)
+  expect(layout.stageMemberForceVectorActiveCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMemberForceVectorSelectedMember).toBe(layout.memberForcePlaybackSelectedMember)
+  expect(layout.stageMemberForceVectorMaxDcr).toBeGreaterThan(0)
+  expect(layout.stageMemberForceVectorKindText).not.toBe('')
+  expect(layout.stageMemberForceVectorVisible).toBe(true)
+  expect(layout.stageMemberForceVectorText).toContain('D/C')
+  expect(layout.stageMemberForceVectorWindowState?.schemaVersion).toBe('structure-viewer-stage-member-force-vector-field.v1')
+  expect(layout.stageMemberForceVectorWindowState?.vectorCount).toBe(layout.stageMemberForceVectorCount)
+  expect(layout.stageMemberForceVectorWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMemberForceVectorOverlapFocus).toBe(0)
+  expect(layout.stageMemberForceVectorOverflowCount).toBe(0)
+  expect(layout.stageMemberMaterialStateBadgeStatus).toBe('ready')
+  expect(layout.stageMemberMaterialStateBadgeSchema).toBe('structure-viewer-stage-member-material-state-badge.v1')
+  expect(layout.stageMemberMaterialStateCardCount).toBe(1)
+  expect(layout.stageMemberMaterialStateProjectionCount).toBe(1)
+  expect(layout.stageMemberMaterialStateVisible).toBe(true)
+  expect(layout.stageMemberMaterialStateCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMemberMaterialStateMember).toBe(layout.memberMaterialNonlinearSelectedMember)
+  expect(layout.stageMemberMaterialStateMaterialId).toBe(layout.memberMaterialNonlinearMaterialId)
+  expect(layout.stageMemberMaterialStateSectionId).toBe(layout.memberMaterialNonlinearSectionId)
+  expect(layout.stageMemberMaterialStateDemandRatio).toBeGreaterThan(0)
+  expect(layout.stageMemberMaterialStateMaxDcr).toBeGreaterThan(0)
+  expect(layout.stageMemberMaterialStateSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageMemberMaterialStateText).toContain('Material State')
+  expect(layout.stageMemberMaterialStateText).toContain('D/C')
+  expect(layout.stageMemberMaterialStateWindowState?.schemaVersion).toBe('structure-viewer-stage-member-material-state-badge.v1')
+  expect(layout.stageMemberMaterialStateWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMemberMaterialStateWindowState?.materialId).toBe(layout.memberMaterialNonlinearMaterialId)
+  expect(layout.stageMemberMaterialStateOverlapFocus).toBe(0)
+  expect(layout.stageMemberMaterialStateOverflowCount).toBe(0)
+  expect(layout.stageLoadCombinationForceGlyphsStatus).toBe('ready')
+  expect(layout.stageLoadCombinationForceGlyphsSchema).toBe('structure-viewer-stage-load-combination-force-glyphs.v1')
+  expect(layout.stageLoadCombinationForceGlyphCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageLoadCombinationForceMemberCount).toBe(layout.stageLoadCombinationForceGlyphCount)
+  expect(layout.stageLoadCombinationForceProjectionCount).toBe(layout.stageLoadCombinationForceGlyphCount)
+  expect(layout.stageLoadCombinationForceVisible).toBe(true)
+  expect(layout.stageLoadCombinationForceSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageLoadCombinationForceSelectedMember).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.stageLoadCombinationForceMaxDcr).toBeGreaterThan(0)
+  expect(layout.stageLoadCombinationForceText).toContain(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageLoadCombinationForceText).toContain('D/C')
+  expect(layout.stageLoadCombinationForceWindowState?.schemaVersion).toBe('structure-viewer-stage-load-combination-force-glyphs.v1')
+  expect(layout.stageLoadCombinationForceWindowState?.glyphCount).toBe(layout.stageLoadCombinationForceGlyphCount)
+  expect(layout.stageLoadCombinationForceWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageLoadCombinationForceOverlapFocus).toBe(0)
+  expect(layout.stageLoadCombinationForceOverflowCount).toBe(0)
+  expect(layout.stageForceDemandContourStatus).toBe('ready')
+  expect(layout.stageForceDemandContourSchema).toBe('structure-viewer-stage-force-demand-contour.v1')
+  expect(layout.stageForceDemandContourCount).toBeGreaterThanOrEqual(4)
+  expect(layout.stageForceDemandContourMarkerCount).toBe(layout.stageForceDemandContourCount)
+  expect(layout.stageForceDemandContourRenderedCount).toBe(layout.stageForceDemandContourCount)
+  expect(layout.stageForceDemandContourProjectionCount).toBe(layout.stageForceDemandContourCount)
+  expect(layout.stageForceDemandContourProjectedCount).toBeGreaterThan(0)
+  expect(layout.stageForceDemandContourSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageForceDemandContourForceRowCount).toBeGreaterThanOrEqual(layout.stageForceDemandContourCount)
+  expect(layout.stageForceDemandContourSourceBackedCount).toBeGreaterThanOrEqual(layout.stageForceDemandContourCount)
+  expect(layout.stageForceDemandContourMappedForceRowCount).toBeGreaterThanOrEqual(layout.stageForceDemandContourCount)
+  expect(layout.stageForceDemandContourMaxDcr).toBeGreaterThan(0)
+  expect(layout.stageForceDemandContourMaterialLockStatus).toBe('locked')
+  expect(layout.stageForceDemandContourMaterialModelCount).toBeGreaterThanOrEqual(6)
+  expect(layout.stageForceDemandContourMaterialModelText).not.toBe('')
+  expect(layout.stageForceDemandContourVisible).toBe(true)
+  expect(layout.stageForceDemandContourText).toContain('Force Demand Contour')
+  expect(layout.stageForceDemandContourText).toContain('D/C')
+  expect(layout.stageForceDemandContourWindowState?.schemaVersion).toBe('structure-viewer-stage-force-demand-contour.v1')
+  expect(layout.stageForceDemandContourWindowState?.status).toBe('ready')
+  expect(layout.stageForceDemandContourWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageForceDemandContourWindowState?.contourCount).toBe(layout.stageForceDemandContourCount)
+  expect(layout.stageForceDemandContourOverflowCount).toBe(0)
+  expect(layout.stageMaterialModelDemandBadgesStatus).toBe('ready')
+  expect(layout.stageMaterialModelDemandBadgesSchema).toBe('structure-viewer-stage-material-model-demand-badges.v1')
+  expect(layout.stageMaterialModelDemandBadgesCount).toBeGreaterThanOrEqual(6)
+  expect(layout.stageMaterialModelDemandBadgesBadgeCount).toBe(layout.stageMaterialModelDemandBadgesCount)
+  expect(layout.stageMaterialModelDemandBadgesRenderedCount).toBe(layout.stageMaterialModelDemandBadgesCount)
+  expect(layout.stageMaterialModelDemandBadgesProjectionCount).toBe(layout.stageMaterialModelDemandBadgesCount)
+  expect(layout.stageMaterialModelDemandBadgesProjectedCount + layout.stageMaterialModelDemandBadgesEdgePinnedCount).toBeGreaterThan(0)
+  expect(layout.stageMaterialModelDemandBadgesSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMaterialModelDemandBadgesMaterialCount).toBeGreaterThanOrEqual(layout.stageMaterialModelDemandBadgesCount)
+  expect(layout.stageMaterialModelDemandBadgesForceBackedMaterialCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageMaterialModelDemandBadgesForceBackedBadgeCount).toBe(layout.stageMaterialModelDemandBadgesForceBackedMaterialCount)
+  expect(layout.stageMaterialModelDemandBadgesForceRowCount).toBeGreaterThanOrEqual(layout.stageMaterialModelDemandBadgesForceBackedMaterialCount)
+  expect(layout.stageMaterialModelDemandBadgesMappedForceRowCount).toBeGreaterThanOrEqual(layout.stageMaterialModelDemandBadgesForceBackedMaterialCount)
+  expect(layout.stageMaterialModelDemandBadgesSourceBackedCount).toBeGreaterThanOrEqual(layout.stageMaterialModelDemandBadgesForceBackedMaterialCount)
+  expect(layout.stageMaterialModelDemandBadgesMaxDcr).toBeGreaterThan(0)
+  expect(layout.stageMaterialModelDemandBadgesLockStatus).toBe('locked')
+  expect(layout.stageMaterialModelDemandBadgesLockedCount).toBe(layout.stageMaterialModelDemandBadgesCount)
+  expect(layout.stageMaterialModelDemandBadgesChangedCount).toBe(0)
+  expect(layout.stageMaterialModelDemandBadgesVisible).toBe(true)
+  expect(layout.stageMaterialModelDemandBadgesText).toContain('Material Demand')
+  expect(layout.stageMaterialModelDemandBadgesText).toContain('D/C')
+  expect(layout.stageMaterialModelDemandBadgesWindowState?.schemaVersion).toBe('structure-viewer-stage-material-model-demand-badges.v1')
+  expect(layout.stageMaterialModelDemandBadgesWindowState?.status).toBe('ready')
+  expect(layout.stageMaterialModelDemandBadgesWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMaterialModelDemandBadgesWindowState?.rowCount).toBe(layout.stageMaterialModelDemandBadgesCount)
+  expect((layout.stageMaterialModelDemandBadgesWindowState?.projectedCount || 0) + (layout.stageMaterialModelDemandBadgesWindowState?.edgePinnedCount || 0)).toBeGreaterThan(0)
+  expect(layout.stageMaterialModelDemandBadgesOverflowCount).toBe(0)
+  expect(layout.stageMaterialForceRibbonsStatus).toBe('ready')
+  expect(layout.stageMaterialForceRibbonsSchema).toBe('structure-viewer-stage-material-force-ribbons.v1')
+  expect(layout.stageMaterialForceRibbonCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageMaterialForceRibbonButtonCount).toBe(layout.stageMaterialForceRibbonCount)
+  expect(layout.stageMaterialForceRenderedCount).toBe(layout.stageMaterialForceRibbonCount)
+  expect(layout.stageMaterialForceProjectionCount).toBe(layout.stageMaterialForceRibbonCount)
+  expect(layout.stageMaterialForceProjectedCount + layout.stageMaterialForceEdgePinnedCount).toBeGreaterThan(0)
+  expect(layout.stageMaterialForceSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMaterialForceMaterialCount).toBe(layout.stageMaterialForceRibbonCount)
+  expect(layout.stageMaterialForceForceRowCount).toBeGreaterThanOrEqual(layout.stageMaterialForceSourceBackedCount)
+  expect(layout.stageMaterialForceMappedForceRowCount).toBeGreaterThanOrEqual(layout.stageMaterialForceSourceBackedCount)
+  expect(layout.stageMaterialForceSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageMaterialForceGoverningMaterial).not.toBe('')
+  expect(layout.stageMaterialForceMaxDcr).toBeGreaterThan(0)
+  expect(layout.stageMaterialForceBarCount).toBe(layout.stageMaterialForceRibbonCount * 3)
+  expect(layout.stageMaterialForceVisible).toBe(true)
+  expect(layout.stageMaterialForceText).toContain('Material Forces')
+  expect(layout.stageMaterialForceText).toContain('D/C')
+  expect(layout.stageMaterialForceWindowState?.schemaVersion).toBe('structure-viewer-stage-material-force-ribbons.v1')
+  expect(layout.stageMaterialForceWindowState?.status).toBe('ready')
+  expect(layout.stageMaterialForceWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMaterialForceWindowState?.rowCount).toBe(layout.stageMaterialForceRibbonCount)
+  expect((layout.stageMaterialForceWindowState?.projectedCount || 0) + (layout.stageMaterialForceWindowState?.edgePinnedCount || 0)).toBeGreaterThan(0)
+  expect(layout.stageMaterialForceOverflowCount).toBe(0)
+  expect(layout.stageMaterialForceEnvelopeStatus).toBe('ready')
+  expect(layout.stageMaterialForceEnvelopeSchema).toBe('structure-viewer-stage-material-force-envelope.v1')
+  expect(layout.stageMaterialForceEnvelopeCardCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageMaterialForceEnvelopeButtonCount).toBe(layout.stageMaterialForceEnvelopeCardCount)
+  expect(layout.stageMaterialForceEnvelopeRenderedCount).toBe(layout.stageMaterialForceEnvelopeCardCount)
+  expect(layout.stageMaterialForceEnvelopeProjectionCount).toBe(layout.stageMaterialForceEnvelopeCardCount)
+  expect(layout.stageMaterialForceEnvelopeProjectedCount + layout.stageMaterialForceEnvelopeEdgePinnedCount).toBeGreaterThan(0)
+  expect(layout.stageMaterialForceEnvelopeSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMaterialForceEnvelopeSourceRowCount).toBe(layout.materialModelForceEnvelopeRowCount)
+  expect(layout.stageMaterialForceEnvelopeMaterialCount).toBe(layout.materialModelForceEnvelopeMaterialCount)
+  expect(layout.stageMaterialForceEnvelopeCombinationCount).toBe(layout.materialModelForceEnvelopeCombinationCount)
+  expect(layout.stageMaterialForceEnvelopeForceBackedMaterialCount).toBe(layout.materialModelForceEnvelopeForceBackedMaterialCount)
+  expect(layout.stageMaterialForceEnvelopeForceBackedCardCount).toBe(layout.stageMaterialForceEnvelopeCardCount)
+  expect(layout.stageMaterialForceEnvelopeForceRowCount).toBe(layout.materialModelForceEnvelopeForceRowCount)
+  expect(layout.stageMaterialForceEnvelopeMappedForceRowCount).toBe(layout.materialModelForceEnvelopeMappedForceRowCount)
+  expect(layout.stageMaterialForceEnvelopeSourceBackedCount).toBe(layout.materialModelForceEnvelopeSourceBackedCount)
+  expect(layout.stageMaterialForceEnvelopeGoverningMaterial).toBe(layout.materialModelForceEnvelopeGoverningMaterial)
+  expect(layout.stageMaterialForceEnvelopeLockedCount).toBe(layout.materialModelForceEnvelopeLockedCount)
+  expect(layout.stageMaterialForceEnvelopeChangedCount).toBe(0)
+  expect(layout.stageMaterialForceEnvelopeLockStatus).toBe('locked')
+  expect(layout.stageMaterialForceEnvelopeMaterialMatchPercent).toBe(100)
+  expect(layout.stageMaterialForceEnvelopeMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.stageMaterialForceEnvelopeMaxDcr).toBe(layout.materialModelForceEnvelopeMaxDcr)
+  expect(layout.stageMaterialForceEnvelopeSvgCount).toBe(layout.stageMaterialForceEnvelopeCardCount)
+  expect(layout.stageMaterialForceEnvelopePointCount).toBeGreaterThanOrEqual(layout.stageMaterialForceEnvelopeCardCount * 2)
+  expect(layout.stageMaterialForceEnvelopeBarCount).toBe(layout.stageMaterialForceEnvelopeCardCount * 3)
+  expect(layout.stageMaterialForceEnvelopeVisible).toBe(true)
+  expect(layout.stageMaterialForceEnvelopeText).toContain('Material Envelope')
+  expect(layout.stageMaterialForceEnvelopeText).toContain('combos')
+  expect(layout.stageMaterialForceEnvelopeText).toContain('D/C')
+  expect(layout.stageMaterialForceEnvelopeWindowState?.schemaVersion).toBe('structure-viewer-stage-material-force-envelope.v1')
+  expect(layout.stageMaterialForceEnvelopeWindowState?.status).toBe('ready')
+  expect(layout.stageMaterialForceEnvelopeWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMaterialForceEnvelopeWindowState?.rowCount).toBe(layout.stageMaterialForceEnvelopeCardCount)
+  expect(layout.stageMaterialForceEnvelopeWindowState?.materialMatchPercent).toBe(100)
+  expect(layout.stageMaterialForceEnvelopeWindowState?.memberAssignmentMatchPercent).toBe(100)
+  expect((layout.stageMaterialForceEnvelopeWindowState?.projectedCount || 0) + (layout.stageMaterialForceEnvelopeWindowState?.edgePinnedCount || 0)).toBeGreaterThan(0)
+  expect(layout.stageMaterialForceEnvelopeOverflowCount).toBe(0)
+  expect(layout.stageMaterialCapacityEnvelopeStatus).toBe('ready')
+  expect(layout.stageMaterialCapacityEnvelopeSchema).toBe('structure-viewer-stage-material-capacity-envelope.v1')
+  expect(layout.stageMaterialCapacityEnvelopeCardCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageMaterialCapacityEnvelopeButtonCount).toBe(layout.stageMaterialCapacityEnvelopeCardCount)
+  expect(layout.stageMaterialCapacityEnvelopeRenderedCount).toBe(layout.stageMaterialCapacityEnvelopeCardCount)
+  expect(layout.stageMaterialCapacityEnvelopeProjectionCount).toBe(layout.stageMaterialCapacityEnvelopeCardCount)
+  expect(layout.stageMaterialCapacityEnvelopeProjectedCount + layout.stageMaterialCapacityEnvelopeEdgePinnedCount).toBeGreaterThan(0)
+  expect(layout.stageMaterialCapacityEnvelopeSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMaterialCapacityEnvelopeSourceRowCount).toBe(layout.materialModelCapacityEnvelopeRowCount)
+  expect(layout.stageMaterialCapacityEnvelopeMaterialCount).toBe(layout.materialModelCapacityEnvelopeMaterialCount)
+  expect(layout.stageMaterialCapacityEnvelopeCombinationCount).toBe(layout.materialModelCapacityEnvelopeCombinationCount)
+  expect(layout.stageMaterialCapacityEnvelopeForceRowCount).toBe(layout.materialModelCapacityEnvelopeForceRowCount)
+  expect(layout.stageMaterialCapacityEnvelopeMappedForceRowCount).toBe(layout.materialModelCapacityEnvelopeMappedForceRowCount)
+  expect(layout.stageMaterialCapacityEnvelopeSourceBackedCount).toBe(layout.materialModelCapacityEnvelopeSourceBackedCount)
+  expect(layout.stageMaterialCapacityEnvelopeSourceCapacityCount).toBe(layout.materialModelCapacityEnvelopeSourceCapacityCount)
+  expect(layout.stageMaterialCapacityEnvelopeEstimatedCapacityCount).toBe(layout.materialModelCapacityEnvelopeEstimatedCapacityCount)
+  expect(layout.stageMaterialCapacityEnvelopeCapacityBackedMaterialCount).toBe(layout.materialModelCapacityEnvelopeCapacityBackedMaterialCount)
+  expect(layout.stageMaterialCapacityEnvelopeCapacityBackedCardCount).toBe(layout.stageMaterialCapacityEnvelopeCardCount)
+  expect(layout.stageMaterialCapacityEnvelopeSourceCapacityCardCount).toBe(layout.stageMaterialCapacityEnvelopeCardCount)
+  expect(layout.stageMaterialCapacityEnvelopeEstimatedCapacityCardCount).toBe(layout.stageMaterialCapacityEnvelopeCardCount)
+  expect(layout.stageMaterialCapacityEnvelopeGoverningMaterial).toBe(layout.materialModelCapacityEnvelopeGoverningMaterial)
+  expect(layout.stageMaterialCapacityEnvelopeLockedCount).toBe(layout.materialModelCapacityEnvelopeLockedCount)
+  expect(layout.stageMaterialCapacityEnvelopeChangedCount).toBe(0)
+  expect(layout.stageMaterialCapacityEnvelopeLockStatus).toBe('locked')
+  expect(layout.stageMaterialCapacityEnvelopeMaterialMatchPercent).toBe(100)
+  expect(layout.stageMaterialCapacityEnvelopeMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.stageMaterialCapacityEnvelopeMaxDcr).toBe(layout.materialModelCapacityEnvelopeMaxDcr)
+  expect(layout.stageMaterialCapacityEnvelopeMinMarginPercent).toBe(layout.materialModelCapacityEnvelopeMinMarginPercent)
+  expect(layout.stageMaterialCapacityEnvelopeSvgCount).toBe(layout.stageMaterialCapacityEnvelopeCardCount)
+  expect(layout.stageMaterialCapacityEnvelopePointCount).toBeGreaterThanOrEqual(layout.stageMaterialCapacityEnvelopeCardCount * 2)
+  expect(layout.stageMaterialCapacityEnvelopeBarCount).toBe(layout.stageMaterialCapacityEnvelopeCardCount * 3)
+  expect(layout.stageMaterialCapacityEnvelopeVisible).toBe(true)
+  expect(layout.stageMaterialCapacityEnvelopeText).toContain('Capacity Envelope')
+  expect(layout.stageMaterialCapacityEnvelopeText).toContain('margin')
+  expect(layout.stageMaterialCapacityEnvelopeText).toContain('D/C')
+  expect(layout.stageMaterialCapacityEnvelopeWindowState?.schemaVersion).toBe('structure-viewer-stage-material-capacity-envelope.v1')
+  expect(layout.stageMaterialCapacityEnvelopeWindowState?.status).toBe('ready')
+  expect(layout.stageMaterialCapacityEnvelopeWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageMaterialCapacityEnvelopeWindowState?.rowCount).toBe(layout.stageMaterialCapacityEnvelopeCardCount)
+  expect(layout.stageMaterialCapacityEnvelopeWindowState?.sourceCapacityCount).toBe(layout.materialModelCapacityEnvelopeSourceCapacityCount)
+  expect(layout.stageMaterialCapacityEnvelopeWindowState?.estimatedCapacityCount).toBe(layout.materialModelCapacityEnvelopeEstimatedCapacityCount)
+  expect(layout.stageMaterialCapacityEnvelopeWindowState?.materialMatchPercent).toBe(100)
+  expect(layout.stageMaterialCapacityEnvelopeWindowState?.memberAssignmentMatchPercent).toBe(100)
+  expect((layout.stageMaterialCapacityEnvelopeWindowState?.projectedCount || 0) + (layout.stageMaterialCapacityEnvelopeWindowState?.edgePinnedCount || 0)).toBeGreaterThan(0)
+  expect(layout.stageMaterialCapacityEnvelopeOverflowCount).toBe(0)
   expect(layout.criticalTriage?.top || 9999).toBeLessThanOrEqual((layout.rightPanel?.bottom || 0) + 1)
   expect(layout.criticalTriageStatus).toBe('ready')
   expect(layout.criticalTriageSchema).toBe('structure-viewer-critical-triage.v1')
@@ -1191,6 +2575,21 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.stageDriftBandsText).toContain('Drift Bands')
   expect(layout.stageDriftBandsText).toContain('Limit')
   expect(layout.stageDriftBandsOverflowCount).toBe(0)
+  expect(layout.stageStoryForceFlowStatus).toBe('ready')
+  expect(layout.stageStoryForceFlowSchema).toBe('structure-viewer-stage-story-force-flow-bands.v1')
+  expect(layout.stageStoryForceFlowBandCount).toBeGreaterThanOrEqual(1)
+  expect(layout.stageStoryForceFlowRenderedBandCount).toBe(layout.stageStoryForceFlowBandCount)
+  expect(layout.stageStoryForceFlowProjectedCount).toBeGreaterThan(0)
+  expect(layout.stageStoryForceFlowSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.stageStoryForceFlowMaxDcr).toBeGreaterThan(0)
+  expect(layout.stageStoryForceFlowVisible).toBe(true)
+  expect(layout.stageStoryForceFlowBarCount).toBeGreaterThanOrEqual(layout.stageStoryForceFlowBandCount * 3)
+  expect(layout.stageStoryForceFlowWindowState?.schemaVersion).toBe('structure-viewer-stage-story-force-flow-bands.v1')
+  expect(layout.stageStoryForceFlowWindowState?.status).toBe('ready')
+  expect(layout.stageStoryForceFlowWindowState?.bandCount).toBe(layout.stageStoryForceFlowBandCount)
+  expect(layout.stageStoryForceFlowText).toContain('Story Forces')
+  expect(layout.stageStoryForceFlowText).toContain('D/C')
+  expect(layout.stageStoryForceFlowOverflowCount).toBe(0)
   expect(layout.stageCriticalHotspotsStatus).toBe('ready')
   expect(layout.stageCriticalHotspotsSchema).toBe('structure-viewer-stage-critical-hotspots.v1')
   expect(layout.stageCriticalHotspotCount).toBeGreaterThanOrEqual(3)
@@ -1268,6 +2667,232 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.drawingHandoffPreviewCallout).toBe(layout.drawingHandoffActiveCallout)
   expect(layout.drawingHandoffOpenSheetName).toBe(layout.drawingHandoffActiveSheet)
   expect(layout.drawingHandoffReceiptOverflowCount).toBe(0)
+  expect(layout.drawingMaterialParityStatus).toBe('ready')
+  expect(layout.drawingMaterialParitySchema).toBe('structure-viewer-drawing-material-parity-ledger.v1')
+  expect(layout.drawingMaterialParityMaterialMatchPercent).toBe(100)
+  expect(layout.drawingMaterialParityMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingMaterialParityMaterialMismatchCount).toBe(0)
+  expect(layout.drawingMaterialParityMemberMaterialMismatchCount).toBe(0)
+  expect(layout.drawingMaterialParitySectionAssignmentChangeCount).toBeGreaterThan(0)
+  expect(layout.drawingMaterialParitySheetCount).toBe(layout.drawingHandoffSheetCount)
+  expect(layout.drawingMaterialParityActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingMaterialParityLocked).toBe('true')
+  expect(layout.drawingMaterialParityRowCount).toBeGreaterThanOrEqual(4)
+  expect(layout.drawingMaterialParityText).toContain('Drawing Material Parity')
+  expect(layout.drawingMaterialParityText).toContain('section/drawing assignment only')
+  expect(layout.drawingMaterialParityWindowState?.schemaVersion).toBe('structure-viewer-drawing-material-parity-ledger.v1')
+  expect(layout.drawingMaterialParityWindowState?.status).toBe('ready')
+  expect(layout.drawingMaterialParityWindowState?.materialMismatchCount).toBe(0)
+  expect(layout.drawingMaterialParityWindowState?.memberMaterialMismatchCount).toBe(0)
+  expect(layout.drawingMaterialParityWindowState?.drawingOnlyOptimized).toBe(true)
+  expect(layout.drawingMaterialParityOverflowCount).toBe(0)
+  expect(layout.drawingSourceDetailStatus).toBe('ready')
+  expect(layout.drawingSourceDetailSchema).toBe('structure-viewer-drawing-source-detail-ledger.v1')
+  expect(layout.drawingSourceDetailActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingSourceDetailSheetCount).toBe(layout.drawingHandoffSheetCount)
+  expect(layout.drawingSourceDetailSourceLinkedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingSourceDetailSourceLinkedCount).toBeLessThanOrEqual(layout.drawingSourceDetailSheetCount)
+  expect(layout.drawingSourceDetailDetailCount).toBeGreaterThanOrEqual(5)
+  expect(layout.drawingSourceDetailRowCount).toBe(layout.drawingSourceDetailDetailCount)
+  expect(layout.drawingSourceDetailMaterialLocked).toBe('true')
+  expect(layout.drawingSourceDetailDrawingOnlyOptimized).toBe('true')
+  expect(layout.drawingSourceDetailSectionEditCount).toBeGreaterThan(0)
+  expect(layout.drawingSourceDetailMaterialMatchPercent).toBe(100)
+  expect(layout.drawingSourceDetailMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingSourceDetailText).toContain('Original Drawing Detail')
+  expect(layout.drawingSourceDetailText).toContain('section/drawing only')
+  expect(layout.drawingSourceDetailWindowState?.schemaVersion).toBe('structure-viewer-drawing-source-detail-ledger.v1')
+  expect(layout.drawingSourceDetailWindowState?.status).toBe('ready')
+  expect(layout.drawingSourceDetailWindowState?.activeSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingSourceDetailWindowState?.materialLocked).toBe(true)
+  expect(layout.drawingSourceDetailWindowState?.drawingOnlyOptimized).toBe(true)
+  expect(layout.drawingSourceDetailOverflowCount).toBe(0)
+  expect(layout.drawingSheetDetailStatus).toBe('ready')
+  expect(layout.drawingSheetDetailSchema).toBe('structure-viewer-drawing-sheet-detail-matrix.v1')
+  expect(layout.drawingSheetDetailActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingSheetDetailSheetCount).toBe(layout.drawingHandoffSheetCount)
+  expect(layout.drawingSheetDetailRowCount).toBe(layout.drawingHandoffSheetCount)
+  expect(layout.drawingSheetDetailActiveRowCount).toBe(1)
+  expect(layout.drawingSheetDetailSourceLinkedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingSheetDetailSourceLinkedRowCount).toBe(layout.drawingSheetDetailSourceLinkedCount)
+  expect(layout.drawingSheetDetailMaterialLocked).toBe('true')
+  expect(layout.drawingSheetDetailDrawingOnlyOptimized).toBe('true')
+  expect(layout.drawingSheetDetailSectionEditCount).toBeGreaterThan(0)
+  expect(layout.drawingSheetDetailMaterialMatchPercent).toBe(100)
+  expect(layout.drawingSheetDetailMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingSheetDetailMaxDcr).toBeGreaterThan(0)
+  expect(layout.drawingSheetDetailText).toContain('Drawing Sheet Details')
+  expect(layout.drawingSheetDetailText).toContain('source sheets')
+  expect(layout.drawingSheetDetailWindowState?.schemaVersion).toBe('structure-viewer-drawing-sheet-detail-matrix.v1')
+  expect(layout.drawingSheetDetailWindowState?.status).toBe('ready')
+  expect(layout.drawingSheetDetailWindowState?.activeSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingSheetDetailWindowState?.rows?.length).toBe(layout.drawingSheetDetailRowCount)
+  expect(layout.drawingSheetDetailOverflowCount).toBe(0)
+  expect(layout.drawingMaterialModelMatrixStatus).toBe('ready')
+  expect(layout.drawingMaterialModelMatrixSchema).toBe('structure-viewer-drawing-material-model-matrix.v1')
+  expect(layout.drawingMaterialModelMatrixActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingMaterialModelMatrixSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingMaterialModelMatrixRowCount).toBeGreaterThanOrEqual(6)
+  expect(layout.drawingMaterialModelMatrixRenderedRowCount).toBe(layout.drawingMaterialModelMatrixRowCount)
+  expect(layout.drawingMaterialModelMatrixMaterialCount).toBeGreaterThanOrEqual(layout.drawingMaterialModelMatrixRowCount)
+  expect(layout.drawingMaterialModelMatrixLockedCount).toBe(layout.drawingMaterialModelMatrixRowCount)
+  expect(layout.drawingMaterialModelMatrixChangedCount).toBe(0)
+  expect(layout.drawingMaterialModelMatrixForceBackedMaterialCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingMaterialModelMatrixForceBackedRowCount).toBe(layout.drawingMaterialModelMatrixForceBackedMaterialCount)
+  expect(layout.drawingMaterialModelMatrixMaterialMatchPercent).toBe(100)
+  expect(layout.drawingMaterialModelMatrixMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingMaterialModelMatrixText).toContain('Drawing Material Models')
+  expect(layout.drawingMaterialModelMatrixText).toContain('100% material lock target')
+  expect(layout.drawingMaterialModelMatrixWindowState?.schemaVersion).toBe('structure-viewer-drawing-material-model-matrix.v1')
+  expect(layout.drawingMaterialModelMatrixWindowState?.rowCount).toBe(layout.drawingMaterialModelMatrixRowCount)
+  expect(layout.drawingMaterialModelMatrixWindowState?.lockedCount).toBe(layout.drawingMaterialModelMatrixLockedCount)
+  expect(layout.drawingMaterialModelMatrixWindowState?.changedCount).toBe(0)
+  expect(layout.drawingMaterialModelMatrixWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingMaterialModelMatrixOverflowCount).toBe(0)
+  expect(layout.drawingMaterialConstitutiveRegisterStatus).toBe('ready')
+  expect(layout.drawingMaterialConstitutiveRegisterSchema).toBe('structure-viewer-drawing-material-constitutive-register.v1')
+  expect(layout.drawingMaterialConstitutiveRegisterActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingMaterialConstitutiveRegisterSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingMaterialConstitutiveRegisterRowCount).toBeGreaterThanOrEqual(6)
+  expect(layout.drawingMaterialConstitutiveRegisterRenderedRowCount).toBe(layout.drawingMaterialConstitutiveRegisterRowCount)
+  expect(layout.drawingMaterialConstitutiveRegisterMaterialCount).toBeGreaterThanOrEqual(layout.drawingMaterialConstitutiveRegisterRowCount)
+  expect(layout.drawingMaterialConstitutiveRegisterSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingMaterialConstitutiveRegisterCurveRowCount).toBe(layout.drawingMaterialConstitutiveRegisterCurveBackedRowCount)
+  expect(layout.drawingMaterialConstitutiveRegisterCapacityBackedMaterialCount).toBe(layout.drawingMaterialConstitutiveRegisterCapacityBackedRowCount)
+  expect(layout.drawingMaterialConstitutiveRegisterMaterialLocked).toBe('true')
+  expect(layout.drawingMaterialConstitutiveRegisterMaterialMatchPercent).toBe(100)
+  expect(layout.drawingMaterialConstitutiveRegisterMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingMaterialConstitutiveRegisterText).toContain('Drawing Material Constitutive Register')
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.schemaVersion).toBe('structure-viewer-drawing-material-constitutive-register.v1')
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.rowCount).toBe(layout.drawingMaterialConstitutiveRegisterRowCount)
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.materialLocked).toBe(true)
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.materialMatchPercent).toBe(100)
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.memberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.rows?.some((row: any) => row.model === 'Concrete damage-plasticity')).toBe(true)
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.rows?.some((row: any) => row.model === 'Steel bilinear')).toBe(true)
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.rows?.some((row: any) => row.model === 'Composite steel-concrete interaction')).toBe(true)
+  expect(layout.drawingMaterialConstitutiveRegisterWindowState?.rows?.some((row: any) => row.model === 'Rigid link constraint')).toBe(true)
+  expect(layout.drawingMaterialConstitutiveRegisterOverflowCount).toBe(0)
+  expect(layout.drawingMaterialCurveEvidenceStatus).toBe('ready')
+  expect(layout.drawingMaterialCurveEvidenceSchema).toBe('structure-viewer-drawing-material-curve-evidence.v1')
+  expect(layout.drawingMaterialCurveEvidenceActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingMaterialCurveEvidenceSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingMaterialCurveEvidenceCurveCount).toBe(layout.drawingMaterialConstitutiveRegisterCurveRowCount)
+  expect(layout.drawingMaterialCurveEvidenceRenderedRowCount).toBe(layout.drawingMaterialCurveEvidenceCurveCount)
+  expect(layout.drawingMaterialCurveEvidenceSvgCount).toBe(layout.drawingMaterialCurveEvidenceCurveCount)
+  expect(layout.drawingMaterialCurveEvidenceYieldMarkerCount).toBe(layout.drawingMaterialCurveEvidenceCurveCount)
+  expect(layout.drawingMaterialCurveEvidenceDemandMarkerCount).toBe(layout.drawingMaterialCurveEvidenceCurveCount)
+  expect(layout.drawingMaterialCurveEvidenceSourceBackedCount).toBe(layout.drawingMaterialCurveEvidenceSourceBackedRowCount)
+  expect(layout.drawingMaterialCurveEvidenceCapacityBackedCount).toBe(layout.drawingMaterialCurveEvidenceCapacityBackedRowCount)
+  expect(layout.drawingMaterialCurveEvidenceCurveCount).toBeGreaterThanOrEqual(4)
+  expect(layout.drawingMaterialCurveEvidenceMaterialLocked).toBe('true')
+  expect(layout.drawingMaterialCurveEvidenceMaterialMatchPercent).toBe(100)
+  expect(layout.drawingMaterialCurveEvidenceMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingMaterialCurveEvidenceText).toContain('Drawing Material Curve Evidence')
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.schemaVersion).toBe('structure-viewer-drawing-material-curve-evidence.v1')
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.curveCount).toBe(layout.drawingMaterialCurveEvidenceCurveCount)
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.materialLocked).toBe(true)
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.materialMatchPercent).toBe(100)
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.memberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.rows?.some((row: any) => row.model === 'Concrete damage-plasticity')).toBe(true)
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.rows?.some((row: any) => row.model === 'Steel bilinear')).toBe(true)
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.rows?.some((row: any) => row.model === 'Composite steel-concrete interaction')).toBe(true)
+  expect(layout.drawingMaterialCurveEvidenceWindowState?.rows?.some((row: any) => row.model === 'Rigid link constraint')).toBe(true)
+  expect(layout.drawingMaterialCurveEvidenceOverflowCount).toBe(0)
+  expect(layout.drawingForceHandoffStatus).toBe('ready')
+  expect(layout.drawingForceHandoffSchema).toBe('structure-viewer-drawing-force-handoff-ledger.v1')
+  expect(layout.drawingForceHandoffSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingForceHandoffSelectedMember).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.drawingForceHandoffActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingForceHandoffRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingForceHandoffForceRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingForceHandoffSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingForceHandoffMaxDcr).toBeGreaterThan(0)
+  expect(layout.drawingForceHandoffText).toContain('Drawing Force Handoff')
+  expect(layout.drawingForceHandoffText).toContain('D/C')
+  expect(layout.drawingForceHandoffWindowState?.schemaVersion).toBe('structure-viewer-drawing-force-handoff-ledger.v1')
+  expect(layout.drawingForceHandoffWindowState?.status).toBe('ready')
+  expect(layout.drawingForceHandoffWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingForceHandoffWindowState?.selectedMemberId).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.drawingForceHandoffOverflowCount).toBe(0)
+  expect(layout.drawingForceVectorEvidenceStatus).toBe('ready')
+  expect(layout.drawingForceVectorEvidenceSchema).toBe('structure-viewer-drawing-force-vector-evidence.v1')
+  expect(layout.drawingForceVectorEvidenceActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingForceVectorEvidenceSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingForceVectorEvidenceSelectedMember).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.drawingForceVectorEvidenceRowCount).toBeGreaterThanOrEqual(3)
+  expect(layout.drawingForceVectorEvidenceRenderedRowCount).toBe(layout.drawingForceVectorEvidenceRowCount)
+  expect(layout.drawingForceVectorEvidenceSvgCount).toBe(layout.drawingForceVectorEvidenceRowCount)
+  expect(layout.drawingForceVectorEvidenceForceRowCount).toBeGreaterThanOrEqual(layout.drawingForceVectorEvidenceRowCount)
+  expect(layout.drawingForceVectorEvidenceSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingForceVectorEvidenceSourceBackedRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingForceVectorEvidenceMaxDcr).toBeGreaterThan(0)
+  expect(layout.drawingForceVectorEvidenceMaterialLocked).toBe('true')
+  expect(layout.drawingForceVectorEvidenceText).toContain('Drawing Force Vector Evidence')
+  expect(layout.drawingForceVectorEvidenceKinds).toEqual(expect.arrayContaining(['axial', 'shear', 'moment']))
+  expect(layout.drawingForceVectorEvidenceWindowState?.schemaVersion).toBe('structure-viewer-drawing-force-vector-evidence.v1')
+  expect(layout.drawingForceVectorEvidenceWindowState?.status).toBe('ready')
+  expect(layout.drawingForceVectorEvidenceWindowState?.rowCount).toBe(layout.drawingForceVectorEvidenceRowCount)
+  expect(layout.drawingForceVectorEvidenceWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingForceVectorEvidenceWindowState?.selectedMemberId).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.drawingForceVectorEvidenceWindowState?.materialLocked).toBe(true)
+  expect(layout.drawingForceVectorEvidenceOverflowCount).toBe(0)
+  expect(layout.drawingCapacityHandoffStatus).toBe('ready')
+  expect(layout.drawingCapacityHandoffSchema).toBe('structure-viewer-drawing-capacity-handoff-ledger.v1')
+  expect(layout.drawingCapacityHandoffActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingCapacityHandoffSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingCapacityHandoffSelectedMember).not.toBe('')
+  expect(layout.drawingCapacityHandoffSelectedSection).not.toBe('')
+  expect(layout.drawingCapacityHandoffRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingCapacityHandoffRenderedRowCount).toBe(layout.drawingCapacityHandoffRowCount)
+  expect(layout.drawingCapacityHandoffSourceCapacityRowCount).toBe(layout.drawingCapacityHandoffRowCount)
+  expect(layout.drawingCapacityHandoffEstimatedCapacityRowCount).toBe(layout.drawingCapacityHandoffRowCount)
+  expect(layout.drawingCapacityHandoffMaterialCount).toBe(layout.materialModelCapacityEnvelopeMaterialCount)
+  expect(layout.drawingCapacityHandoffSourceCapacityCount).toBe(layout.materialModelCapacityEnvelopeSourceCapacityCount)
+  expect(layout.drawingCapacityHandoffEstimatedCapacityCount).toBe(layout.materialModelCapacityEnvelopeEstimatedCapacityCount)
+  expect(layout.drawingCapacityHandoffCapacityBackedMaterialCount).toBe(layout.materialModelCapacityEnvelopeCapacityBackedMaterialCount)
+  expect(layout.drawingCapacityHandoffForceRowCount).toBe(layout.materialModelCapacityEnvelopeForceRowCount)
+  expect(layout.drawingCapacityHandoffMappedForceRowCount).toBe(layout.materialModelCapacityEnvelopeMappedForceRowCount)
+  expect(layout.drawingCapacityHandoffSourceBackedCount).toBe(layout.materialModelCapacityEnvelopeSourceBackedCount)
+  expect(layout.drawingCapacityHandoffMaxDcr).toBe(layout.materialModelCapacityEnvelopeMaxDcr)
+  expect(layout.drawingCapacityHandoffMinMarginPercent).toBe(layout.materialModelCapacityEnvelopeMinMarginPercent)
+  expect(layout.drawingCapacityHandoffMaterialLocked).toBe('true')
+  expect(layout.drawingCapacityHandoffMaterialMatchPercent).toBe(100)
+  expect(layout.drawingCapacityHandoffMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingCapacityHandoffText).toContain('Drawing Capacity Handoff')
+  expect(layout.drawingCapacityHandoffText).toContain('capacity')
+  expect(layout.drawingCapacityHandoffText).toContain('margin')
+  expect(layout.drawingCapacityHandoffWindowState?.schemaVersion).toBe('structure-viewer-drawing-capacity-handoff-ledger.v1')
+  expect(layout.drawingCapacityHandoffWindowState?.status).toBe('ready')
+  expect(layout.drawingCapacityHandoffWindowState?.activeSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingCapacityHandoffWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingCapacityHandoffWindowState?.rowCount).toBe(layout.drawingCapacityHandoffRowCount)
+  expect(layout.drawingCapacityHandoffWindowState?.sourceCapacityCount).toBe(layout.materialModelCapacityEnvelopeSourceCapacityCount)
+  expect(layout.drawingCapacityHandoffWindowState?.estimatedCapacityCount).toBe(layout.materialModelCapacityEnvelopeEstimatedCapacityCount)
+  expect(layout.drawingCapacityHandoffWindowState?.materialMatchPercent).toBe(100)
+  expect(layout.drawingCapacityHandoffWindowState?.memberAssignmentMatchPercent).toBe(100)
+  expect(layout.drawingCapacityHandoffOverflowCount).toBe(0)
+  expect(layout.drawingSheetForceMatrixStatus).toBe('ready')
+  expect(layout.drawingSheetForceMatrixSchema).toBe('structure-viewer-drawing-sheet-force-matrix.v1')
+  expect(layout.drawingSheetForceMatrixActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingSheetForceMatrixSheetCount).toBe(layout.drawingHandoffSheetCount)
+  expect(layout.drawingSheetForceMatrixRowCount).toBe(layout.drawingHandoffSheetCount)
+  expect(layout.drawingSheetForceMatrixActiveRowCount).toBe(1)
+  expect(layout.drawingSheetForceMatrixSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingSheetForceMatrixSelectedMember).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.drawingSheetForceMatrixSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingSheetForceMatrixForceRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingSheetForceMatrixMaxDcr).toBeGreaterThan(0)
+  expect(layout.drawingSheetForceMatrixMaterialLocked).toBe('true')
+  expect(layout.drawingSheetForceMatrixText).toContain('Drawing Sheet Force Matrix')
+  expect(layout.drawingSheetForceMatrixText).toContain('material locked')
+  expect(layout.drawingSheetForceMatrixWindowState?.schemaVersion).toBe('structure-viewer-drawing-sheet-force-matrix.v1')
+  expect(layout.drawingSheetForceMatrixWindowState?.status).toBe('ready')
+  expect(layout.drawingSheetForceMatrixWindowState?.activeSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingSheetForceMatrixWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingSheetForceMatrixOverflowCount).toBe(0)
   expect(layout.materialCatalogStatus).toBe('ready')
   expect(['ready', 'needs_review']).toContain(layout.materialCoverageStatus)
   expect(layout.materialCoverageSchema).toBe('structure-viewer-material-coverage-readiness.v1')
@@ -1278,6 +2903,169 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.materialCoverageCheckCount).toBeGreaterThanOrEqual(6)
   expect(layout.materialCoveragePassCheckCount).toBeGreaterThanOrEqual(layout.materialCoverageCheckCount - 1)
   expect(layout.materialCoverageQueueEmptyCount).toBe(layout.materialCoverageReviewQueueCount === 0 ? 1 : 0)
+  expect(layout.materialModelParityStatus).toBe('ready')
+  expect(layout.materialModelParitySchema).toBe('structure-viewer-material-model-parity.v1')
+  expect(layout.materialModelParityMaterialCount).toBeGreaterThanOrEqual(6)
+  expect(layout.materialModelParityReferenceMaterialCount).toBeGreaterThanOrEqual(6)
+  expect(layout.materialModelParityMaterialMismatchCount).toBe(0)
+  expect(layout.materialModelParityMemberAssignmentCount).toBeGreaterThanOrEqual(12000)
+  expect(layout.materialModelParityMemberMaterialMismatchCount).toBe(0)
+  expect(layout.materialModelParitySectionAssignmentChangeCount).toBeGreaterThan(0)
+  expect(layout.materialModelParityMaterialMatchPercent).toBe(100)
+  expect(layout.materialModelParityMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.materialModelParityRowCount).toBeGreaterThanOrEqual(4)
+  expect(layout.materialModelParityText).toContain('Material Model Lock')
+  expect(layout.materialModelParityText).toContain('section/drawing edits')
+  expect(layout.materialModelParityWindowState?.schemaVersion).toBe('structure-viewer-material-model-parity.v1')
+  expect(layout.materialModelParityWindowState?.materialMismatchCount).toBe(0)
+  expect(layout.materialModelParityWindowState?.memberMaterialMismatchCount).toBe(0)
+  expect(layout.materialModelParityWindowState?.materialMatchPercent).toBe(100)
+  expect(layout.materialModelParityWindowState?.memberAssignmentMatchPercent).toBe(100)
+  expect(layout.materialModelParityOverflowCount).toBe(0)
+  expect(layout.materialModelSignatureStatus).toBe('ready')
+  expect(layout.materialModelSignatureSchema).toBe('structure-viewer-material-model-signature-ledger.v1')
+  expect(layout.materialModelSignatureMaterialCount).toBe(layout.materialModelParityMaterialCount)
+  expect(layout.materialModelSignatureRowCount).toBeGreaterThanOrEqual(6)
+  expect(layout.materialModelSignatureRenderedRowCount).toBe(layout.materialModelSignatureRowCount)
+  expect(layout.materialModelSignatureLockedCount).toBe(layout.materialModelSignatureRowCount)
+  expect(layout.materialModelSignatureChangedCount).toBe(0)
+  expect(layout.materialModelSignatureRawTokenCount).toBeGreaterThan(0)
+  expect(layout.materialModelSignatureText).toContain('All Material Models')
+  expect(layout.materialModelSignatureText).toContain('raw signature tokens')
+  expect(layout.materialModelSignatureWindowState?.schemaVersion).toBe('structure-viewer-material-model-signature-ledger.v1')
+  expect(layout.materialModelSignatureWindowState?.rowCount).toBe(layout.materialModelSignatureRowCount)
+  expect(layout.materialModelSignatureWindowState?.lockedCount).toBe(layout.materialModelSignatureLockedCount)
+  expect(layout.materialModelSignatureOverflowCount).toBe(0)
+  expect(layout.materialModelDemandAtlasStatus).toBe('ready')
+  expect(layout.materialModelDemandAtlasSchema).toBe('structure-viewer-material-model-demand-atlas.v1')
+  expect(layout.materialModelDemandAtlasRowCount).toBeGreaterThanOrEqual(6)
+  expect(layout.materialModelDemandAtlasRenderedRowCount).toBe(layout.materialModelDemandAtlasRowCount)
+  expect(layout.materialModelDemandAtlasMaterialCount).toBeGreaterThanOrEqual(layout.materialModelSignatureMaterialCount)
+  expect(layout.materialModelDemandAtlasLockedCount).toBe(layout.materialModelDemandAtlasRowCount)
+  expect(layout.materialModelDemandAtlasChangedCount).toBe(0)
+  expect(layout.materialModelDemandAtlasLockStatus).toBe('locked')
+  expect(layout.materialModelDemandAtlasForceBackedMaterialCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialModelDemandAtlasForceBackedRowCount).toBe(layout.materialModelDemandAtlasForceBackedMaterialCount)
+  expect(layout.materialModelDemandAtlasForceRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialModelDemandAtlasMappedForceRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialModelDemandAtlasSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialModelDemandAtlasSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.materialModelDemandAtlasMaxDcr).toBeGreaterThan(0)
+  expect(layout.materialModelDemandAtlasBarCount).toBeGreaterThanOrEqual(layout.materialModelDemandAtlasRowCount * 2)
+  expect(layout.materialModelDemandAtlasText).toContain('Material Model Demand Atlas')
+  expect(layout.materialModelDemandAtlasText).toContain('material models')
+  expect(layout.materialModelDemandAtlasWindowState?.schemaVersion).toBe('structure-viewer-material-model-demand-atlas.v1')
+  expect(layout.materialModelDemandAtlasWindowState?.rowCount).toBe(layout.materialModelDemandAtlasRowCount)
+  expect(layout.materialModelDemandAtlasWindowState?.lockedCount).toBe(layout.materialModelDemandAtlasLockedCount)
+  expect(layout.materialModelDemandAtlasWindowState?.changedCount).toBe(0)
+  expect(layout.materialModelDemandAtlasWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.materialModelDemandAtlasOverflowCount).toBe(0)
+  expect(layout.materialModelForceEnvelopeStatus).toBe('ready')
+  expect(layout.materialModelForceEnvelopeSchema).toBe('structure-viewer-material-model-force-envelope.v1')
+  expect(layout.materialModelForceEnvelopeRowCount).toBeGreaterThanOrEqual(layout.materialModelDemandAtlasRowCount)
+  expect(layout.materialModelForceEnvelopeRenderedRowCount).toBe(layout.materialModelForceEnvelopeRowCount)
+  expect(layout.materialModelForceEnvelopeMaterialCount).toBeGreaterThanOrEqual(layout.materialModelSignatureMaterialCount)
+  expect(layout.materialModelForceEnvelopeCombinationCount).toBeGreaterThanOrEqual(2)
+  expect(layout.materialModelForceEnvelopeForceRowCount).toBeGreaterThanOrEqual(layout.materialModelDemandAtlasForceRowCount)
+  expect(layout.materialModelForceEnvelopeMappedForceRowCount).toBeGreaterThanOrEqual(layout.materialModelDemandAtlasMappedForceRowCount)
+  expect(layout.materialModelForceEnvelopeSourceBackedCount).toBeGreaterThanOrEqual(layout.materialModelDemandAtlasSourceBackedCount)
+  expect(layout.materialModelForceEnvelopeForceBackedMaterialCount).toBeGreaterThanOrEqual(layout.materialModelDemandAtlasForceBackedMaterialCount)
+  expect(layout.materialModelForceEnvelopeForceBackedRowCount).toBe(layout.materialModelForceEnvelopeForceBackedMaterialCount)
+  expect(layout.materialModelForceEnvelopeSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.materialModelForceEnvelopeGoverningMaterial).not.toBe('')
+  expect(layout.materialModelForceEnvelopeLockedCount).toBe(layout.materialModelForceEnvelopeRowCount)
+  expect(layout.materialModelForceEnvelopeChangedCount).toBe(0)
+  expect(layout.materialModelForceEnvelopeLockStatus).toBe('locked')
+  expect(layout.materialModelForceEnvelopeMaterialMatchPercent).toBe(100)
+  expect(layout.materialModelForceEnvelopeMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.materialModelForceEnvelopeMaxDcr).toBeGreaterThan(0)
+  expect(layout.materialModelForceEnvelopeSvgCount).toBe(layout.materialModelForceEnvelopeRowCount)
+  expect(layout.materialModelForceEnvelopePointCount).toBeGreaterThanOrEqual(layout.materialModelForceEnvelopeRowCount * 2)
+  expect(layout.materialModelForceEnvelopeBarCount).toBeGreaterThanOrEqual(layout.materialModelForceEnvelopeRowCount * 3)
+  expect(layout.materialModelForceEnvelopeText).toContain('Material Model Force Envelope')
+  expect(layout.materialModelForceEnvelopeText).toContain('all combinations')
+  expect(layout.materialModelForceEnvelopeWindowState?.schemaVersion).toBe('structure-viewer-material-model-force-envelope.v1')
+  expect(layout.materialModelForceEnvelopeWindowState?.rowCount).toBe(layout.materialModelForceEnvelopeRowCount)
+  expect(layout.materialModelForceEnvelopeWindowState?.combinationCount).toBe(layout.materialModelForceEnvelopeCombinationCount)
+  expect(layout.materialModelForceEnvelopeWindowState?.mappedForceRowCount).toBe(layout.materialModelForceEnvelopeMappedForceRowCount)
+  expect(layout.materialModelForceEnvelopeWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.materialModelForceEnvelopeOverflowCount).toBe(0)
+  expect(layout.materialModelCapacityEnvelopeStatus).toBe('ready')
+  expect(layout.materialModelCapacityEnvelopeSchema).toBe('structure-viewer-material-model-capacity-envelope.v1')
+  expect(layout.materialModelCapacityEnvelopeRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialModelCapacityEnvelopeRenderedRowCount).toBe(layout.materialModelCapacityEnvelopeRowCount)
+  expect(layout.materialModelCapacityEnvelopeMaterialCount).toBeGreaterThanOrEqual(layout.materialModelCapacityEnvelopeRowCount)
+  expect(layout.materialModelCapacityEnvelopeCombinationCount).toBe(layout.materialModelForceEnvelopeCombinationCount)
+  expect(layout.materialModelCapacityEnvelopeForceRowCount).toBe(layout.materialModelForceEnvelopeForceRowCount)
+  expect(layout.materialModelCapacityEnvelopeMappedForceRowCount).toBe(layout.materialModelForceEnvelopeMappedForceRowCount)
+  expect(layout.materialModelCapacityEnvelopeSourceBackedCount).toBe(layout.materialModelForceEnvelopeSourceBackedCount)
+  expect(layout.materialModelCapacityEnvelopeSourceCapacityCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialModelCapacityEnvelopeEstimatedCapacityCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialModelCapacityEnvelopeCapacityBackedMaterialCount).toBe(layout.materialModelCapacityEnvelopeCapacityBackedRowCount)
+  expect(layout.materialModelCapacityEnvelopeCapacityBackedRowCount).toBe(layout.materialModelCapacityEnvelopeRowCount)
+  expect(layout.materialModelCapacityEnvelopeSourceCapacityRowCount).toBe(layout.materialModelCapacityEnvelopeRowCount)
+  expect(layout.materialModelCapacityEnvelopeEstimatedCapacityRowCount).toBe(layout.materialModelCapacityEnvelopeRowCount)
+  expect(layout.materialModelCapacityEnvelopeSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.materialModelCapacityEnvelopeGoverningMaterial).toBe(layout.materialModelForceEnvelopeGoverningMaterial)
+  expect(layout.materialModelCapacityEnvelopeLockedCount).toBe(layout.materialModelCapacityEnvelopeRowCount)
+  expect(layout.materialModelCapacityEnvelopeChangedCount).toBe(0)
+  expect(layout.materialModelCapacityEnvelopeLockStatus).toBe('locked')
+  expect(layout.materialModelCapacityEnvelopeMaterialMatchPercent).toBe(100)
+  expect(layout.materialModelCapacityEnvelopeMemberAssignmentMatchPercent).toBe(100)
+  expect(layout.materialModelCapacityEnvelopeMaxDcr).toBe(layout.materialModelForceEnvelopeMaxDcr)
+  expect(layout.materialModelCapacityEnvelopeSvgCount).toBe(layout.materialModelCapacityEnvelopeRowCount)
+  expect(layout.materialModelCapacityEnvelopePointCount).toBeGreaterThanOrEqual(layout.materialModelCapacityEnvelopeRowCount * 2)
+  expect(layout.materialModelCapacityEnvelopeBarCount).toBe(layout.materialModelCapacityEnvelopeRowCount * 3)
+  expect(layout.materialModelCapacityEnvelopeText).toContain('Material Model Capacity Envelope')
+  expect(layout.materialModelCapacityEnvelopeText).toContain('demand / capacity')
+  expect(layout.materialModelCapacityEnvelopeText).toContain('margin')
+  expect(layout.materialModelCapacityEnvelopeWindowState?.schemaVersion).toBe('structure-viewer-material-model-capacity-envelope.v1')
+  expect(layout.materialModelCapacityEnvelopeWindowState?.rowCount).toBe(layout.materialModelCapacityEnvelopeRowCount)
+  expect(layout.materialModelCapacityEnvelopeWindowState?.combinationCount).toBe(layout.materialModelCapacityEnvelopeCombinationCount)
+  expect(layout.materialModelCapacityEnvelopeWindowState?.mappedForceRowCount).toBe(layout.materialModelCapacityEnvelopeMappedForceRowCount)
+  expect(layout.materialModelCapacityEnvelopeWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.materialModelCapacityEnvelopeWindowState?.materialMatchPercent).toBe(100)
+  expect(layout.materialModelCapacityEnvelopeWindowState?.memberAssignmentMatchPercent).toBe(100)
+  expect(layout.materialModelCapacityEnvelopeOverflowCount).toBe(0)
+  expect(layout.materialForceInteractionStatus).toBe('ready')
+  expect(layout.materialForceInteractionSchema).toBe('structure-viewer-material-force-interaction.v1')
+  expect(layout.materialForceInteractionRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialForceInteractionRenderedRowCount).toBe(layout.materialForceInteractionRowCount)
+  expect(layout.materialForceInteractionForceRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialForceInteractionMappedForceRowCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialForceInteractionSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialForceInteractionSelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.materialForceInteractionGoverningMaterial).not.toBe('')
+  expect(layout.materialForceInteractionMaxDcr).toBeGreaterThan(0)
+  expect(layout.materialForceInteractionBarCount).toBeGreaterThanOrEqual(layout.materialForceInteractionRowCount * 3)
+  expect(layout.materialForceInteractionText).toContain('Material-Force Interaction')
+  expect(layout.materialForceInteractionText).toContain('mapped force rows')
+  expect(layout.materialForceInteractionWindowState?.schemaVersion).toBe('structure-viewer-material-force-interaction.v1')
+  expect(layout.materialForceInteractionWindowState?.rowCount).toBe(layout.materialForceInteractionRowCount)
+  expect(layout.materialForceInteractionWindowState?.mappedForceRowCount).toBe(layout.materialForceInteractionMappedForceRowCount)
+  expect(layout.materialForceInteractionWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.materialForceInteractionOverflowCount).toBe(0)
+  expect(layout.materialConstitutiveStatus).toBe('ready')
+  expect(layout.materialConstitutiveSchema).toBe('structure-viewer-material-constitutive-lens.v1')
+  expect(layout.materialConstitutiveRowCount).toBeGreaterThanOrEqual(4)
+  expect(layout.materialConstitutiveRenderedRowCount).toBe(layout.materialConstitutiveRowCount)
+  expect(layout.materialConstitutiveSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialConstitutiveHasSteelModel || layout.materialConstitutiveHasConcreteModel).toBe(true)
+  expect(layout.materialConstitutiveHasCompositeModel).toBe(true)
+  expect(layout.materialConstitutiveHasRigidModel).toBe(true)
+  expect(layout.materialStressStrainStatus).toBe('ready')
+  expect(layout.materialStressStrainSchema).toBe('structure-viewer-material-stress-strain-curves.v1')
+  expect(layout.materialStressStrainCurveCount).toBeGreaterThanOrEqual(4)
+  expect(layout.materialStressStrainRenderedCurveCount).toBe(layout.materialStressStrainCurveCount)
+  expect(layout.materialStressStrainSvgCount).toBe(layout.materialStressStrainCurveCount)
+  expect(layout.materialStressStrainDemandMarkerCount).toBe(layout.materialStressStrainCurveCount)
+  expect(layout.materialStressStrainYieldMarkerCount).toBe(layout.materialStressStrainCurveCount)
+  expect(layout.materialStressStrainSourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialStressStrainMaxDemandRatio).toBeGreaterThanOrEqual(0)
+  expect(layout.materialStressStrainText).toContain('Stress-Strain Curves')
+  expect(layout.materialStressStrainText).toContain('fy/fc')
+  expect(layout.materialStressStrainWindowState?.schemaVersion).toBe('structure-viewer-material-stress-strain-curves.v1')
+  expect(layout.materialStressStrainWindowState?.rowCount).toBe(layout.materialStressStrainCurveCount)
   expect(layout.materialCatalogMaterialCount).toBeGreaterThanOrEqual(6)
   expect(layout.materialCatalogUsedMaterialCount).toBeGreaterThanOrEqual(6)
   expect(layout.materialCatalogMissingMaterialCount).toBe(0)
@@ -1306,6 +3094,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.materialCatalogSectionScheduleOverflowCount).toBe(0)
   expect(layout.materialCatalogFamilyOverflowCount).toBe(0)
   expect(layout.materialCoverageOverflowCount).toBe(0)
+  expect(layout.materialStressStrainOverflowCount).toBe(0)
   expect(layout.optimizationCardCount).toBe(4)
   expect(layout.optimizationSourceCount).toBe(4)
   expect(layout.optimizationAfterBarCount).toBe(4)
@@ -1313,6 +3102,23 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.optimizationDetailsLinkCount).toBe(1)
   expect(layout.optimizationOverflowCount).toBe(0)
   expect(layout.chartCount).toBe(4)
+  expect(layout.lowerChartEvidenceSchemaCount).toBe(4)
+  expect(layout.lowerChartReadyCount).toBe(4)
+  expect(layout.lowerChartAxisReceiptCount).toBe(4)
+  expect(layout.lowerChartAxisReceiptSchemaCount).toBe(4)
+  expect(layout.lowerChartSharedScaleCount).toBeGreaterThanOrEqual(4)
+  expect(layout.lowerChartSvgSharedScaleCount).toBeGreaterThanOrEqual(4)
+  expect(layout.lowerChartKindText).toContain('story-drift')
+  expect(layout.lowerChartKindText).toContain('load-step-displacement')
+  expect(layout.lowerChartKindText).toContain('material-quantity')
+  expect(layout.lowerChartKindText).toContain('utilization-heatmap')
+  expect(layout.lowerChartAxisText).toContain('Drift (%)')
+  expect(layout.lowerChartAxisText).toContain('Height (m)')
+  expect(layout.lowerChartAxisText).toContain('Displacement (mm)')
+  expect(layout.lowerChartAxisText).toContain('D/C')
+  expect(layout.lowerChartPeakCount).toBeGreaterThanOrEqual(3)
+  expect(layout.lowerChartActiveCount).toBeGreaterThanOrEqual(3)
+  expect(layout.lowerChartReceiptOverflowCount).toBe(0)
   expect(layout.driftLineCount).toBeGreaterThanOrEqual(2)
   expect(layout.driftLimitCount).toBe(1)
   expect(layout.driftTickCount).toBeGreaterThanOrEqual(4)

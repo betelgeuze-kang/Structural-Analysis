@@ -12,7 +12,7 @@ export const MATERIAL_FAMILY_ONTOLOGY = [
   {
     family: 'rigid_link',
     label: 'Rigid link',
-    patterns: [/\brigid\b/i, /\bdummy\b/i, /\brlink\b/i, /\bmassless\b/i],
+    patterns: [/\brigid\b/i, /\brigid\s*bar\b/i, /rigidbar/i, /\bdummy\b/i, /\brlink\b/i, /\bmassless\b/i],
   },
   {
     family: 'prestressing',
@@ -832,24 +832,115 @@ export function buildRebarMaterialCodeSummary(rebarRows) {
     .slice(0, 8);
 }
 
+function buildSignatureText(row = {}, keys = []) {
+  const rawTokens = Array.isArray(row?.raw_tokens)
+    ? row.raw_tokens.map(value => normalizeSelectionValue(value)).filter(Boolean)
+    : [];
+  return [
+    ...keys.map(key => normalizeSelectionValue(row?.[key])),
+    ...rawTokens,
+  ].filter(Boolean).join('|');
+}
+
+export function buildMaterialModelSignature(modelPayload = {}) {
+  const materialRows = (Array.isArray(modelPayload?.materials) ? modelPayload.materials : [])
+    .map(row => {
+      const materialId = normalizeSelectionValue(row?.id ?? row?.material_id);
+      if (!materialId) return null;
+      return {
+        material_id: materialId,
+        material_name: normalizeSelectionValue(row?.name || row?.material_name) || `Material ${materialId}`,
+        signature: buildSignatureText(row, ['id', 'name', 'grade', 'material_name', 'material_grade']),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.material_id.localeCompare(b.material_id, undefined, { numeric: true }));
+  const sectionRows = (Array.isArray(modelPayload?.sections) ? modelPayload.sections : [])
+    .map(row => {
+      const sectionId = normalizeSelectionValue(row?.id ?? row?.section_id);
+      if (!sectionId) return null;
+      return {
+        section_id: sectionId,
+        section_name: normalizeSelectionValue(row?.name || row?.section_name) || `Section ${sectionId}`,
+        signature: buildSignatureText(row, ['id', 'name', 'section_name']),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.section_id.localeCompare(b.section_id, undefined, { numeric: true }));
+  return {
+    schema_version: 'structure-viewer-material-model-signature.v1',
+    material_count: materialRows.length,
+    section_count: sectionRows.length,
+    element_count: Array.isArray(modelPayload?.elements) ? modelPayload.elements.length : 0,
+    materials: materialRows,
+    sections: sectionRows,
+  };
+}
+
 export function buildReviewRowSummary(bridgeRows) {
   return (Array.isArray(bridgeRows) ? bridgeRows : [])
-    .map(row => ({
-      review_case_id: normalizeSelectionValue(row?.review_case_id) || '--',
-      member_id: normalizeSelectionValue(row?.baseline_focus_member_id || row?.review_member_id) || '',
-      target_element_id: normalizeSelectionValue(row?.full_crosswalk_target_element_id),
-      review_row_label: normalizeSelectionValue(row?.row_provenance_top_row_label) || '--',
-      review_summary_label: normalizeSelectionValue(row?.row_provenance_summary_label) || '--',
-      combination_names: Array.isArray(row?.full_crosswalk_load_combination_names) ? row.full_crosswalk_load_combination_names.slice(0, 6) : [],
-      group_names: Array.isArray(row?.full_crosswalk_member_groups) ? row.full_crosswalk_member_groups.slice(0, 6) : [],
-      isolation_token: buildReviewRowIsolationToken({
-        review_case_id: row?.review_case_id,
-        review_row_label: row?.row_provenance_top_row_label,
-        member_id: row?.baseline_focus_member_id || row?.review_member_id,
-        target_element_id: row?.full_crosswalk_target_element_id,
-      }),
-    }))
+    .map(row => {
+      const topRow = Array.isArray(row?.row_provenance_rows) ? row.row_provenance_rows[0] : {};
+      return {
+        review_case_id: normalizeSelectionValue(row?.review_case_id) || '--',
+        member_id: normalizeSelectionValue(row?.baseline_focus_member_id || row?.review_member_id) || '',
+        target_element_id: normalizeSelectionValue(row?.full_crosswalk_target_element_id),
+        review_row_label: normalizeSelectionValue(row?.row_provenance_top_row_label) || '--',
+        review_summary_label: normalizeSelectionValue(row?.row_provenance_summary_label) || '--',
+        row_count: safeNumber(row?.row_provenance_row_count, Array.isArray(row?.row_provenance_rows) ? row.row_provenance_rows.length : 0),
+        combination_count: safeNumber(row?.row_provenance_combination_count, 0),
+        clause_count: safeNumber(row?.row_provenance_clause_count, 0),
+        component_count: safeNumber(row?.row_provenance_component_count, 0),
+        top_combination: normalizeSelectionValue(topRow?.combination),
+        top_component: normalizeSelectionValue(topRow?.component),
+        top_clause: normalizeSelectionValue(topRow?.clause),
+        top_rule_family: normalizeSelectionValue(topRow?.rule_family),
+        top_hazard_type: normalizeSelectionValue(topRow?.hazard_type || row?.source_hazard_type),
+        top_topology_type: normalizeSelectionValue(topRow?.topology_type || row?.source_topology_type),
+        top_demand: safeNumber(topRow?.demand, 0),
+        top_capacity: safeNumber(topRow?.capacity, 0),
+        top_dcr: safeNumber(topRow?.dcr, 0),
+        combination_names: Array.isArray(row?.full_crosswalk_load_combination_names) ? row.full_crosswalk_load_combination_names.slice(0, 6) : [],
+        component_names: Array.isArray(row?.row_provenance_component_names) ? row.row_provenance_component_names.slice(0, 8) : [],
+        group_names: Array.isArray(row?.full_crosswalk_member_groups) ? row.full_crosswalk_member_groups.slice(0, 6) : [],
+        isolation_token: buildReviewRowIsolationToken({
+          review_case_id: row?.review_case_id,
+          review_row_label: row?.row_provenance_top_row_label,
+          member_id: row?.baseline_focus_member_id || row?.review_member_id,
+          target_element_id: row?.full_crosswalk_target_element_id,
+        }),
+      };
+    })
     .slice(0, 12);
+}
+
+export function buildLoadCombinationForceRows(bridgeRows) {
+  return (Array.isArray(bridgeRows) ? bridgeRows : [])
+    .flatMap(bridgeRow => {
+      const rows = Array.isArray(bridgeRow?.row_provenance_rows) ? bridgeRow.row_provenance_rows : [];
+      const focusMemberId = normalizeSelectionValue(bridgeRow?.baseline_focus_member_id || bridgeRow?.review_member_id);
+      const targetElementId = normalizeSelectionValue(bridgeRow?.full_crosswalk_target_element_id);
+      return rows.map(row => ({
+        review_case_id: normalizeSelectionValue(row?.case_id || bridgeRow?.review_case_id) || '--',
+        member_id: focusMemberId || normalizeSelectionValue(row?.member_id),
+        source_member_id: normalizeSelectionValue(row?.member_id),
+        target_element_id: targetElementId,
+        member_type: normalizeSelectionValue(row?.member_type || bridgeRow?.source_member_type),
+        combination: normalizeSelectionValue(row?.combination),
+        combination_scale: safeNumber(row?.combination_scale, 1),
+        component: normalizeSelectionValue(row?.component),
+        clause: normalizeSelectionValue(row?.clause),
+        rule_family: normalizeSelectionValue(row?.rule_family),
+        hazard_type: normalizeSelectionValue(row?.hazard_type || bridgeRow?.source_hazard_type),
+        topology_type: normalizeSelectionValue(row?.topology_type || bridgeRow?.source_topology_type),
+        demand: safeNumber(row?.demand, 0),
+        capacity: safeNumber(row?.capacity, 0),
+        dcr: safeNumber(row?.dcr, 0),
+      }));
+    })
+    .filter(row => row.combination && row.component && row.dcr > 0)
+    .sort((a, b) => b.dcr - a.dcr || b.demand - a.demand || a.combination.localeCompare(b.combination))
+    .slice(0, 2000);
 }
 
 export function extractLoadCaseInventory(modelPayload, metadata) {
@@ -1092,10 +1183,12 @@ export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {})
     modelPayload?.elements,
     { ...metadata, section_rows: modelPayload?.sections }
   );
+  const materialModelSignature = buildMaterialModelSignature(modelPayload);
   const materialFamilyCoverageSummary = buildMaterialFamilyCoverageSummary(materialCatalogSummary);
   const thicknessCatalogSummary = buildThicknessCatalogSummary(metadata.thickness);
   const rebarMaterialCodeSummary = buildRebarMaterialCodeSummary(metadata.rebar_material_codes);
   const bridgeRows = Array.isArray(axisBridge.bridge_rows) ? axisBridge.bridge_rows : [];
+  const loadCombinationForceRows = buildLoadCombinationForceRows(bridgeRows);
   const groupRows = Array.isArray(metadata.groups) ? metadata.groups : [];
   const realDrawingAssetRegistry = buildRealDrawingAssetRegistry(rootMeta);
   const realDrawingRegistrySummary = buildRealDrawingRegistrySummary(rootMeta, realDrawingAssetRegistry);
@@ -1139,6 +1232,7 @@ export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {})
     material_count: materialCount,
     used_material_count: usedMaterialCount,
     material_family_coverage_summary: materialFamilyCoverageSummary,
+    material_model_signature: materialModelSignature,
     material_family_ontology_count: materialFamilyCoverageSummary.ontology_family_count,
     material_family_count: materialFamilyCoverageSummary.family_count,
     known_material_family_count: materialFamilyCoverageSummary.known_family_count,
@@ -1173,6 +1267,8 @@ export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {})
     section_family_summary: buildSectionFamilySummary(sectionCatalogSummary),
     group_summary: buildGroupSummary(groupRows),
     review_row_summary: buildReviewRowSummary(bridgeRows),
+    load_combination_force_rows: loadCombinationForceRows,
+    load_combination_force_row_count: loadCombinationForceRows.length,
     real_drawing_asset_count: realDrawingRegistrySummary.asset_count,
     real_drawing_renderable_asset_count: realDrawingRegistrySummary.renderable_asset_count,
     real_drawing_solver_exact_asset_count: realDrawingRegistrySummary.solver_exact_asset_count,

@@ -1,0 +1,57 @@
+{
+  "input_hash": "bd376eaf7819ec28",
+  "input_refs": [
+    {
+      "available": true,
+      "label": "viewer_html",
+      "path": "implementation/phase1/release/visualization/structural_viewer_midas33_optimized_singlefile.html"
+    },
+    {
+      "available": true,
+      "label": "report_pdf",
+      "path": "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/optimized_drawing_expert_review.default.pdf"
+    },
+    {
+      "available": true,
+      "label": "drawings_dir",
+      "path": "implementation/phase1/output/structural_svg"
+    },
+    {
+      "available": true,
+      "label": "client_validation_report",
+      "path": "implementation/phase1/client_input_validation_report.json"
+    },
+    {
+      "available": true,
+      "label": "hardware_profile",
+      "path": "implementation/phase1/workstation_hardware_profile.json"
+    },
+    {
+      "available": true,
+      "label": "service_budget",
+      "path": "implementation/phase1/workstation_service_budget.json"
+    },
+    {
+      "available": true,
+      "label": "source_model",
+      "path": "implementation/phase1/open_data/midas/midas_model.json"
+    },
+    {
+      "available": true,
+      "label": "panel_zone_clash_artifact",
+      "path": "implementation/phase1/panel_zone_clash_artifact.json"
+    },
+    {
+      "available": true,
+      "label": "panel_zone_clash_report",
+      "path": "implementation/phase1/panel_zone_clash_report.json"
+    },
+    {
+      "available": true,
+      "label": "panel_zone_solver_handoff_report",
+      "path": "implementation/phase1/panel_zone_solver_verified_handoff_report.json"
+    }
+  ],
+  "job_id": "20260525T205533-bd376eaf7819ec28",
+  "schema_version": "workstation-job-input-manifest.v1"
+}

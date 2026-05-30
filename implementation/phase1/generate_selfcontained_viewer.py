@@ -642,6 +642,129 @@ def summarize_model_data(model_data: dict) -> tuple[int, int]:
     return len(payload.get("nodes", [])), len(payload.get("elements", []))
 
 
+def _signature_map(rows: list[dict], id_key: str = "id", name_key: str = "name") -> dict[str, str]:
+    result: dict[str, str] = {}
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, dict):
+            continue
+        row_id = str(row.get(id_key, row.get(id_key.replace("_id", ""), ""))).strip()
+        if not row_id:
+            continue
+        raw_tokens = row.get("raw_tokens") if isinstance(row.get("raw_tokens"), list) else []
+        signature = "|".join([row_id, str(row.get(name_key, row.get("name", ""))).strip(), *[str(token).strip() for token in raw_tokens]])
+        result[row_id] = signature
+    return result
+
+
+def _assignment_map(elements: list[dict]) -> dict[str, dict[str, str]]:
+    result: dict[str, dict[str, str]] = {}
+    for row in elements if isinstance(elements, list) else []:
+        if not isinstance(row, dict):
+            continue
+        element_id = str(row.get("id", "")).strip()
+        if not element_id:
+            continue
+        result[element_id] = {
+            "material_id": str(row.get("material_id", row.get("material", ""))).strip(),
+            "section_id": str(row.get("section_id", row.get("section", ""))).strip(),
+            "type": str(row.get("type", "")).strip(),
+        }
+    return result
+
+
+def _compare_signature_maps(reference: dict[str, str], current: dict[str, str]) -> dict[str, int | float]:
+    matched = changed = missing = added = 0
+    for key, reference_signature in reference.items():
+        current_signature = current.get(key)
+        if current_signature is None:
+            missing += 1
+        elif current_signature == reference_signature:
+            matched += 1
+        else:
+            changed += 1
+    for key in current:
+        if key not in reference:
+            added += 1
+    total = max(len(reference), 1)
+    return {
+        "reference_count": len(reference),
+        "current_count": len(current),
+        "matched": matched,
+        "mismatch_count": changed + missing + added,
+        "match_percent": (matched / total) * 100 if reference else (100.0 if current else 0.0),
+    }
+
+
+def _compare_assignments(reference: dict[str, dict[str, str]], current: dict[str, dict[str, str]]) -> dict[str, int | float]:
+    comparable = material_matched = material_changed = section_changed = type_changed = missing = added = 0
+    for key, reference_row in reference.items():
+        current_row = current.get(key)
+        if current_row is None:
+            missing += 1
+            continue
+        comparable += 1
+        if current_row.get("material_id") == reference_row.get("material_id"):
+            material_matched += 1
+        else:
+            material_changed += 1
+        if current_row.get("section_id") != reference_row.get("section_id"):
+            section_changed += 1
+        if current_row.get("type") != reference_row.get("type"):
+            type_changed += 1
+    for key in current:
+        if key not in reference:
+            added += 1
+    total = max(len(reference), 1)
+    return {
+        "reference_count": len(reference),
+        "current_count": len(current),
+        "comparable": comparable,
+        "missing": missing,
+        "added": added,
+        "material_matched": material_matched,
+        "material_changed": material_changed,
+        "section_changed": section_changed,
+        "type_changed": type_changed,
+        "material_match_percent": (material_matched / total) * 100 if reference else (100.0 if current else 0.0),
+        "section_assignment_change_percent": (section_changed / total) * 100 if reference else 0.0,
+    }
+
+
+def annotate_material_model_parity(payload: dict, preset: str | None) -> dict:
+    if preset not in {"midas33_optimized", "midas33_pr"} or not isinstance(payload, dict):
+        return payload
+    reference_path = ARTIFACT_PRESET_INPUTS.get("midas33")
+    if reference_path is None or not reference_path.exists():
+        return payload
+    reference_payload = json.loads(reference_path.read_text(encoding="utf-8"))
+    reference_model = extract_viewer_model_payload(reference_payload)
+    current_model = extract_viewer_model_payload(payload)
+    material_compare = _compare_signature_maps(_signature_map(reference_model.get("materials", [])), _signature_map(current_model.get("materials", [])))
+    section_compare = _compare_signature_maps(_signature_map(reference_model.get("sections", [])), _signature_map(current_model.get("sections", [])))
+    assignment_compare = _compare_assignments(_assignment_map(reference_model.get("elements", [])), _assignment_map(current_model.get("elements", [])))
+    result = {**payload}
+    result["meta"] = {**(payload.get("meta") or {})}
+    result["meta"]["material_model_parity_summary"] = {
+        "schema_version": "structure-viewer-material-model-parity.v1",
+        "reference_mode": "embedded original vs optimized MIDAS33 signatures",
+        "reference_material_count": material_compare["reference_count"],
+        "material_count": material_compare["current_count"],
+        "material_mismatch_count": material_compare["mismatch_count"],
+        "material_match_percent": min(float(material_compare["match_percent"]), float(assignment_compare["material_match_percent"])),
+        "reference_section_count": section_compare["reference_count"],
+        "section_count": section_compare["current_count"],
+        "section_mismatch_count": section_compare["mismatch_count"],
+        "member_assignment_count": assignment_compare["current_count"],
+        "comparable_member_count": assignment_compare["comparable"],
+        "member_material_mismatch_count": int(assignment_compare["material_changed"]) + int(assignment_compare["missing"]) + int(assignment_compare["added"]),
+        "member_assignment_match_percent": assignment_compare["material_match_percent"],
+        "section_assignment_change_count": assignment_compare["section_changed"],
+        "section_assignment_change_percent": assignment_compare["section_assignment_change_percent"],
+        "type_mismatch_count": assignment_compare["type_changed"],
+    }
+    return result
+
+
 def load_model_data(*, input_path: str | None, preset: str | None, demo: bool) -> tuple[dict, str]:
     """Load demo data, an explicit input JSON, or a checked-in artifact preset."""
 
@@ -656,7 +779,8 @@ def load_model_data(*, input_path: str | None, preset: str | None, demo: bool) -
         artifact_path = ARTIFACT_PRESET_INPUTS.get(normalized_preset)
         if artifact_path is None:
             raise ValueError(f"unknown preset: {normalized_preset}")
-        return json.loads(artifact_path.read_text(encoding="utf-8")), str(artifact_path.relative_to(REPO_ROOT))
+        payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        return annotate_material_model_parity(payload, normalized_preset), str(artifact_path.relative_to(REPO_ROOT))
 
     input_file = Path(str(input_path))
     return json.loads(input_file.read_text(encoding="utf-8")), str(input_file)

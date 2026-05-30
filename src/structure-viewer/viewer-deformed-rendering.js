@@ -54,11 +54,13 @@ export function createViewerDeformedRenderingToolkit(THREE, config = {}) {
     const points = nodeItems.map(node => nodeToDeformedViewerVector(T, node, factor));
     const curve = new T.LineCurve3(points[0], points[1]);
     const geometry = new T.TubeGeometry(curve, 1, safeNumber(radius, getDeformedLineRadius(type)), 6, false);
-    const material = new T.MeshPhongMaterial({
+    const material = new T.MeshStandardMaterial({
       color: deformedGhostColor,
       transparent: true,
       opacity: deformedGhostOpacity,
       wireframe: false,
+      roughness: 0.7,
+      metalness: 0.3,
     });
     const mesh = new T.Mesh(geometry, material);
     mesh.userData = { ...element, _deformed: true };
