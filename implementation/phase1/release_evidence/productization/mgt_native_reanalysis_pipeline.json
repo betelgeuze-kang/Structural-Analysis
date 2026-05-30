@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-native-reanalysis-pipeline.v1",
-  "generated_at": "2026-05-30T17:59:52.504609+00:00",
+  "generated_at": "2026-05-30T18:29:17.881448+00:00",
   "status": "story_proxy_pass",
   "claim": "MGT integrity + story-model proxy reanalysis; not native FEA certification.",
   "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
@@ -21,13 +21,13 @@
     "integrity_status": "verified"
   },
   "native_fea": {
-    "status": "readiness_pass",
-    "native_solve_status": "not_wired",
+    "status": "mesh_contract_pass",
+    "native_solve_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
     "readiness_for_global_fea_wiring": true,
-    "note": "MGT roundtrip/NPZ preflight ready; global FEA solver loop still not connected.",
+    "note": "MGT roundtrip/NPZ mesh contract ready; condensed solve not completed.",
     "mgt_refresh": {
       "schema_version": "sync-mgt-roundtrip-provenance.v1",
-      "generated_at": "2026-05-30T17:59:50.108364+00:00",
+      "generated_at": "2026-05-30T18:29:08.405540+00:00",
       "status": "ready",
       "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
       "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
@@ -72,7 +72,7 @@
     },
     "global_fea_readiness": {
       "schema_version": "mgt-global-fea-readiness-gate.v1",
-      "generated_at": "2026-05-30T17:59:52.498532+00:00",
+      "generated_at": "2026-05-30T18:29:10.761865+00:00",
       "status": "ready",
       "claim": "Roundtrip/NPZ/parse preflight only; does not run global FEA on full MGT mesh.",
       "native_solve_status": "not_wired",
@@ -90,7 +90,7 @@
       },
       "assembly_fingerprint": {
         "schema_version": "mgt-roundtrip-assembly-fingerprint.v1",
-        "generated_at": "2026-05-30T17:59:52.494013+00:00",
+        "generated_at": "2026-05-30T18:29:10.757130+00:00",
         "status": "ready",
         "fingerprint_sha256": "f6983a27d20156e4ddc3f29c5357cc4a286f79f0a96a491f6d26689a10418f51",
         "metrics": {
@@ -108,11 +108,608 @@
       },
       "blockers": [],
       "next_step": "Connect roundtrip NPZ assembly to licensed/global nonlinear solver export replay."
+    },
+    "global_fea_mesh_contract": {
+      "schema_version": "mgt-global-fea-mesh-contract-gate.v1",
+      "generated_at": "2026-05-30T18:29:10.862559+00:00",
+      "status": "ready",
+      "claim": "NPZ mesh contract check only; does not execute global nonlinear FEA.",
+      "native_solve_status": "not_wired",
+      "mesh_contract_ready": true,
+      "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+      "metrics": {
+        "expected_element_count": 12728,
+        "npz_element_count": 12728,
+        "expected_node_count": 11355,
+        "npz_node_count": 11355,
+        "npz_edge_pairs": 38238,
+        "npz_missing_arrays": [],
+        "node_count_basis": "parse_report",
+        "node_count_pre_coarsening": 13047
+      },
+      "blockers": [],
+      "next_step": "Map elem_id/section_id tensors into global solver assembly import."
+    },
+    "condensed_global_fea_solve": {
+      "schema_version": "mgt-global-fea-condensed-solve.v1",
+      "generated_at": "2026-05-30T18:29:11.207371+00:00",
+      "status": "ready",
+      "claim": "MGT NPZ mesh condensed to story-level nonlinear frame and solved in-repo; not a full 3D global FEA licensed-engine replay.",
+      "native_solve_status": "condensed_global_fea_wired",
+      "solve_mode": "mgt_npz_mesh_condensed_story",
+      "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+      "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "story_assembly": {
+        "story_count": 38,
+        "elevation_levels_m": [
+          -5.65,
+          -5.403947368421053,
+          -5.157894736842105,
+          -4.911842105263158,
+          -4.66578947368421,
+          -4.419736842105263,
+          -4.173684210526316,
+          -3.9276315789473686,
+          -3.681578947368421,
+          -3.4355263157894735,
+          -3.189473684210526,
+          -2.943421052631579,
+          -2.6973684210526314,
+          -2.451315789473684,
+          -2.205263157894737,
+          -1.9592105263157893,
+          -1.7131578947368418,
+          -1.4671052631578947,
+          -1.2210526315789467,
+          -0.9749999999999996,
+          -0.7289473684210517,
+          -0.4828947368421046,
+          -0.23684210526315752,
+          0.009210526315790446,
+          0.2552631578947375,
+          0.5013157894736846,
+          0.7473684210526326,
+          0.9934210526315796,
+          1.2394736842105267,
+          1.4855263157894747,
+          1.7315789473684218,
+          1.9776315789473697,
+          2.223684210526317,
+          2.469736842105265,
+          2.715789473684211,
+          2.961842105263159,
+          3.207894736842107,
+          3.453947368421053,
+          3.7
+        ],
+        "elem_per_story": [
+          742,
+          1,
+          1,
+          1,
+          1,
+          792,
+          1,
+          1,
+          1,
+          1,
+          1,
+          4206,
+          1,
+          714,
+          78,
+          668,
+          198,
+          872,
+          228,
+          1010,
+          172,
+          928,
+          8882,
+          1,
+          792,
+          1,
+          742,
+          1,
+          714,
+          78,
+          4132,
+          198,
+          872,
+          218,
+          1020,
+          172,
+          928,
+          8882
+        ]
+      },
+      "static_solve": {
+        "converged": true,
+        "iterations": 11,
+        "top_displacement_m": 33312.66186049739,
+        "backend": "rocm_torch_hip_mainloop"
+      },
+      "ndtha_solve": {
+        "converged_all_steps": true,
+        "max_drift_ratio_pct": 9.200000000000001,
+        "backend": "rocm_torch_hip_mainloop"
+      },
+      "blockers": []
+    },
+    "mesh_3d_global_fea_solve": {
+      "schema_version": "mgt-global-fea-3d-native-solve.v1",
+      "generated_at": "2026-05-30T18:29:17.877003+00:00",
+      "status": "blocked",
+      "claim": "Same MGT NPZ mesh fingerprint: 3D beam global Newton solve in-repo, cross-checked against commercial HF export reference medians (proxy for licensed solver metrics).",
+      "native_solve_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
+      "solve_mode": "mgt_npz_beam_mesh_3d_global_newton",
+      "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+      "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "mesh_3d_global_solve": {
+        "status": "warn",
+        "converged": false,
+        "solve_mode": "mgt_npz_beam_mesh_3d_global_newton",
+        "mesh_fingerprint": {
+          "beam_elements_solved": 80,
+          "nodes_in_submesh": 149,
+          "dof_count": 447,
+          "base_node_count": 22
+        },
+        "response_metrics": {
+          "max_drift_ratio_pct": 382.44737338376973,
+          "base_shear_kn": 0.0,
+          "top_displacement_m": 21.608276596182993,
+          "residual_inf": 81.28473779772499
+        },
+        "newton_iteration_log": [
+          {
+            "iteration": 0,
+            "load_step": 0.0,
+            "residual_inf": 0.0,
+            "solver_mode": "linear_seed"
+          },
+          {
+            "iteration": 1,
+            "load_step": 0.2,
+            "residual_inf": 106.44173124726098,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 2,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 3,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 4,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 5,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 6,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 7,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 8,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 9,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 10,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 11,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 12,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 13,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 14,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 15,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 16,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 17,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 18,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 19,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 20,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 21,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 22,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 23,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 24,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 25,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 26,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 27,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 28,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 29,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 30,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 31,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 32,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 33,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 34,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 35,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 36,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 37,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 38,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 39,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 40,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 41,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 42,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 43,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 44,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 45,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 46,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 47,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          },
+          {
+            "iteration": 48,
+            "load_step": 0.2,
+            "residual_inf": 81.28473779772499,
+            "solver_mode": "global_beam_newton"
+          }
+        ],
+        "blockers": [
+          "global_beam_newton_not_converged"
+        ]
+      },
+      "condensed_bridge_solve": {
+        "schema_version": "mgt-global-fea-condensed-solve.v1",
+        "generated_at": "2026-05-30T18:29:17.808774+00:00",
+        "status": "ready",
+        "claim": "MGT NPZ mesh condensed to story-level nonlinear frame and solved in-repo; not a full 3D global FEA licensed-engine replay.",
+        "native_solve_status": "condensed_global_fea_wired",
+        "solve_mode": "mgt_npz_mesh_condensed_story",
+        "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+        "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+        "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "story_assembly": {
+          "story_count": 38,
+          "elevation_levels_m": [
+            -5.65,
+            -5.403947368421053,
+            -5.157894736842105,
+            -4.911842105263158,
+            -4.66578947368421,
+            -4.419736842105263,
+            -4.173684210526316,
+            -3.9276315789473686,
+            -3.681578947368421,
+            -3.4355263157894735,
+            -3.189473684210526,
+            -2.943421052631579,
+            -2.6973684210526314,
+            -2.451315789473684,
+            -2.205263157894737,
+            -1.9592105263157893,
+            -1.7131578947368418,
+            -1.4671052631578947,
+            -1.2210526315789467,
+            -0.9749999999999996,
+            -0.7289473684210517,
+            -0.4828947368421046,
+            -0.23684210526315752,
+            0.009210526315790446,
+            0.2552631578947375,
+            0.5013157894736846,
+            0.7473684210526326,
+            0.9934210526315796,
+            1.2394736842105267,
+            1.4855263157894747,
+            1.7315789473684218,
+            1.9776315789473697,
+            2.223684210526317,
+            2.469736842105265,
+            2.715789473684211,
+            2.961842105263159,
+            3.207894736842107,
+            3.453947368421053,
+            3.7
+          ],
+          "elem_per_story": [
+            742,
+            1,
+            1,
+            1,
+            1,
+            792,
+            1,
+            1,
+            1,
+            1,
+            1,
+            4206,
+            1,
+            714,
+            78,
+            668,
+            198,
+            872,
+            228,
+            1010,
+            172,
+            928,
+            8882,
+            1,
+            792,
+            1,
+            742,
+            1,
+            714,
+            78,
+            4132,
+            198,
+            872,
+            218,
+            1020,
+            172,
+            928,
+            8882
+          ]
+        },
+        "static_solve": {
+          "converged": true,
+          "iterations": 11,
+          "top_displacement_m": 33312.66186049739,
+          "backend": "rocm_torch_hip_mainloop"
+        },
+        "ndtha_solve": {
+          "converged_all_steps": true,
+          "max_drift_ratio_pct": 9.200000000000001,
+          "backend": "rocm_torch_hip_mainloop"
+        },
+        "blockers": []
+      },
+      "condensed_licensed_crosscheck": {
+        "status": "pass",
+        "reference_family": "commercial_export_hf_proxy",
+        "note": "MGT mesh contract + condensed in-repo solve wired; commercial HF/LF export cross-validation passes on benchmark cases (licensed-solver proxy, not live MIDAS Gen replay on full mesh).",
+        "commercial_cross_validation_status": "pass_with_marginal_metrics"
+      },
+      "load_scale_applied": 0.1,
+      "licensed_solver_crosscheck": {
+        "status": "warn",
+        "reference_family": "commercial_export_hf_proxy",
+        "note": "Compares mesh-global native metrics to commercial HF export medians; not live MIDAS Gen API replay.",
+        "comparisons": [
+          {
+            "metric": "max_drift_ratio_pct",
+            "native": 382.44737338376973,
+            "reference_hf": 1.95,
+            "rel_error": 195.12685814552296,
+            "tolerance_ratio": 0.45,
+            "ok": false
+          },
+          {
+            "metric": "base_shear_kn",
+            "native": 0.0,
+            "reference_hf": 1657.5,
+            "rel_error": 1.0,
+            "tolerance_ratio": 0.45,
+            "ok": false
+          }
+        ]
+      },
+      "blockers": [
+        "mesh_3d_global_newton_not_converged",
+        "licensed_solver_proxy_crosscheck_warn"
+      ]
     }
   },
   "story_model_reanalysis": {
     "schema_version": "story-model-reanalysis-receipt.v1",
-    "generated_at": "2026-05-30T17:59:51.885810+00:00",
+    "generated_at": "2026-05-30T18:29:10.176442+00:00",
     "status": "pass",
     "claim": "Reduced story shear-building reanalysis on optimization terminal state; not licensed approval.",
     "state_npz_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/design_optimization/design_optimization_solver_loop_state.npz",
@@ -137,10 +734,12 @@
   },
   "gpu_solver_claim": {
     "schema_version": "gpu-solver-claim-receipt.v1",
-    "generated_at": "2026-05-30T17:59:52.300843+00:00",
+    "generated_at": "2026-05-30T18:29:10.592208+00:00",
     "claim_label": "gpu_assist_observed",
     "gpu_newton_terminal_proven": false,
-    "gpu_mainloop_residency_observed": true,
+    "gpu_mainloop_residency_observed": false,
+    "terminal_certification_status": null,
+    "terminal_certification_path": "",
     "gpu_assist_observed": true,
     "cpu_primary": false,
     "backends": {
@@ -151,7 +750,7 @@
       "static": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
         "runtime_backend": "rocm_torch_hip_mainloop",
-        "solver_path_kind": "production_hip_kernel",
+        "solver_path_kind": "production_hip_newton",
         "production_kernel_path": true,
         "force_jacobian_kernel_consistent": true,
         "surrogate_runtime_used": false,
@@ -160,10 +759,11 @@
         "cpu_backend": false,
         "cpu_required": false,
         "cpu_fallback_used": false,
-        "hip_kernel_invocation_count": 6,
+        "hip_kernel_invocation_count": 11,
         "host_copy_bytes": 0,
         "device_residency_ratio": 1.0,
-        "solver_array_bytes": 480
+        "solver_array_bytes": 640,
+        "static_solver_mode": "newton_gpu"
       },
       "ndtha": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -184,12 +784,13 @@
       }
     },
     "marketing_safe_wording": "GPU main-loop residency may be observed; nonlinear Newton terminal solve on GPU is not proven and must not be claimed without dedicated certification.",
-    "state_npz_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/design_optimization/design_optimization_solver_loop_state.npz"
+    "state_npz_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/design_optimization/design_optimization_solver_loop_state.npz",
+    "terminal_certification": null
   },
   "blockers": [],
   "mgt_refresh": {
     "schema_version": "sync-mgt-roundtrip-provenance.v1",
-    "generated_at": "2026-05-30T17:59:50.108364+00:00",
+    "generated_at": "2026-05-30T18:29:08.405540+00:00",
     "status": "ready",
     "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
     "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",

@@ -27,6 +27,8 @@ REQUIRED_FILES = (
     "residual_holdout_closure_updates.json",
     "mgt_roundtrip_assembly_fingerprint.json",
     "ml_multi_objective_status.json",
+    "mgt_global_fea_mesh_contract_gate.json",
+    "rh_engineer_review_packet_template.html",
 )
 
 
@@ -60,6 +62,9 @@ def validate_productization_delivery_evidence(
         path = productization_dir / name
         if not path.is_file():
             missing.append(name)
+            continue
+        if path.suffix.lower() == ".html":
+            checked[name] = "present"
             continue
         payload = _load(path)
         if not _has_schema_version(payload):

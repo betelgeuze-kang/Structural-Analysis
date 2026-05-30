@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-roundtrip-assembly-fingerprint.v1",
-  "generated_at": "2026-05-30T17:59:47.666134+00:00",
+  "generated_at": "2026-05-30T18:29:05.702056+00:00",
   "status": "ready",
   "fingerprint_sha256": "f6983a27d20156e4ddc3f29c5357cc4a286f79f0a96a491f6d26689a10418f51",
   "metrics": {

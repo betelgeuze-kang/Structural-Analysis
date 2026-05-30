@@ -76,6 +76,8 @@ def main() -> int:
 
     global_fea_out = out_dir / "mgt_global_fea_readiness_gate.json"
     mgt_fingerprint_out = out_dir / "mgt_roundtrip_assembly_fingerprint.json"
+    mgt_mesh_contract_out = out_dir / "mgt_global_fea_mesh_contract_gate.json"
+    rh_html_out = out_dir / "rh_engineer_review_packet_template.html"
     rh_checklist_out = out_dir / "rh_closure_checklist.json"
     rh_template_out = out_dir / "rh_signed_closure_packet_template.json"
     ml_status_out = out_dir / "ml_multi_objective_status.json"
@@ -103,6 +105,19 @@ def main() -> int:
         ]
     )
     steps.append({"step": "mgt_roundtrip_assembly_fingerprint", "exit_code": code, "log": log})
+
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/run_mgt_global_fea_mesh_contract_gate.py"),
+            "--roundtrip-json",
+            str(args.roundtrip_json),
+            "--output-json",
+            str(mgt_mesh_contract_out),
+        ]
+    )
+    steps.append({"step": "mgt_global_fea_mesh_contract", "exit_code": code, "log": log})
+    mesh_contract_exit = code
 
     code, log = _run(
         [
@@ -168,7 +183,60 @@ def main() -> int:
     )
     steps.append({"step": "mgt_native_reanalysis_pipeline", "exit_code": code, "log": log})
 
+    mgt_3d_out = out_dir / "mgt_global_fea_3d_native_solve.json"
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/run_mgt_global_fea_3d_native_solve.py"),
+            "--roundtrip-json",
+            str(args.roundtrip_json),
+            "--output-json",
+            str(mgt_3d_out),
+            "--commercial-crossval-json",
+            str(out_dir / "commercial_solver_cross_validation.json"),
+        ]
+    )
+    steps.append({"step": "mgt_global_fea_3d_native_solve", "exit_code": code, "log": log})
+
+    mgt_condensed_out = out_dir / "mgt_global_fea_condensed_solve.json"
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/run_mgt_global_fea_condensed_solve.py"),
+            "--roundtrip-json",
+            str(args.roundtrip_json),
+            "--output-json",
+            str(mgt_condensed_out),
+        ]
+    )
+    steps.append({"step": "mgt_global_fea_condensed_solve", "exit_code": code, "log": log})
+
+    gpu_equiv_out = out_dir / "gpu_production_newton_equivalence_gate.json"
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/run_gpu_production_newton_equivalence_gate.py"),
+            "--output-json",
+            str(gpu_equiv_out),
+        ]
+    )
+    steps.append({"step": "gpu_production_newton_equivalence_gate", "exit_code": code, "log": log})
+
+    gpu_newton_cert_out = out_dir / "gpu_newton_terminal_certification.json"
+    equiv_arg = ["--production-equivalence-json", str(gpu_equiv_out)] if gpu_equiv_out.is_file() else []
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/run_gpu_newton_terminal_certification.py"),
+            "--output-json",
+            str(gpu_newton_cert_out),
+        ]
+        + equiv_arg
+    )
+    steps.append({"step": "gpu_newton_terminal_certification", "exit_code": code, "log": log})
+
     gpu_claim_out = out_dir / "gpu_solver_claim_receipt.json"
+    gpu_cert_arg = ["--terminal-certification-json", str(gpu_newton_cert_out)] if gpu_newton_cert_out.is_file() else []
     code, log = _run(
         [
             sys.executable,
@@ -176,6 +244,7 @@ def main() -> int:
             "--output-json",
             str(gpu_claim_out),
         ]
+        + gpu_cert_arg
     )
     steps.append({"step": "gpu_solver_claim_receipt", "exit_code": code, "log": log})
 
@@ -187,6 +256,7 @@ def main() -> int:
             "--output-json",
             str(gpu_newton_checklist_out),
         ]
+        + gpu_cert_arg
     )
     steps.append({"step": "gpu_newton_certification_checklist", "exit_code": code, "log": log})
 
@@ -234,6 +304,8 @@ def main() -> int:
         "story_model_reanalysis": str(story_out) if story_out.is_file() else "",
         "gpu_solver_claim_receipt": str(gpu_claim_out) if gpu_claim_out.is_file() else "",
         "mgt_native_reanalysis_pipeline": str(mgt_pipeline_out) if mgt_pipeline_out.is_file() else "",
+        "mgt_global_fea_condensed_solve": str(mgt_condensed_out) if mgt_condensed_out.is_file() else "",
+        "gpu_newton_terminal_certification": str(gpu_newton_cert_out) if gpu_newton_cert_out.is_file() else "",
         "post_optimization_reanalysis": str(reanalysis_out) if reanalysis_out.is_file() else "",
         "mgt_roundtrip_sync": str(sync_out) if sync_out.is_file() else "",
         "mgt_global_fea_readiness": str(global_fea_out) if global_fea_out.is_file() else "",
@@ -257,6 +329,8 @@ def main() -> int:
     alignment = changes.get("member_alignment") if isinstance(changes.get("member_alignment"), dict) else {}
 
     blockers: list[str] = []
+    if mesh_contract_exit != 0:
+        blockers.append("mgt_mesh_contract_blocked")
     crossval_ok_statuses = {"pass", "partial", "pass_with_marginal_metrics", "partial_marginal_only"}
     if crossval.get("status") not in crossval_ok_statuses:
         blockers.append("commercial_cross_validation_not_pass")
@@ -288,6 +362,8 @@ def main() -> int:
             "reanalysis_status": reanalysis.get("status"),
             "story_reanalysis_status": story_receipt.get("status"),
             "mgt_pipeline_status": mgt_pipeline.get("status"),
+            "native_fea_solve_status": ((mgt_pipeline.get("native_fea") or {}).get("native_solve_status")),
+            "mgt_condensed_solve_status": _load(mgt_condensed_out).get("native_solve_status"),
             "mgt_integrity_status": (mgt_pipeline.get("mgt_integrity") or {}).get("integrity_status"),
             "member_alignment_status": alignment.get("alignment_status"),
             "removed_member_count": len(alignment.get("removed_member_ids") or []),
@@ -339,6 +415,20 @@ def main() -> int:
     )
     steps.append({"step": "rh_signed_closure_packet_template", "exit_code": code, "log": log})
 
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_rh_engineer_review_packet_html.py"),
+            "--template-json",
+            str(rh_template_out),
+            "--bundle-json",
+            str(args.output_json),
+            "--output-html",
+            str(rh_html_out),
+        ]
+    )
+    steps.append({"step": "rh_engineer_review_packet_html", "exit_code": code, "log": log})
+
     bundle["steps"] = steps
     bundle["artifacts"]["rh_closure_checklist"] = str(rh_checklist_out) if rh_checklist_out.is_file() else ""
     bundle["artifacts"]["rh_signed_closure_packet_template"] = (
@@ -347,6 +437,17 @@ def main() -> int:
     bundle["artifacts"]["gpu_newton_certification_checklist"] = (
         str(gpu_newton_checklist_out) if gpu_newton_checklist_out.is_file() else ""
     )
+    bundle["artifacts"]["gpu_newton_terminal_certification"] = (
+        str(gpu_newton_cert_out) if gpu_newton_cert_out.is_file() else ""
+    )
+    bundle["artifacts"]["mgt_global_fea_condensed_solve"] = (
+        str(mgt_condensed_out) if mgt_condensed_out.is_file() else ""
+    )
+    bundle["artifacts"]["mgt_global_fea_3d_native_solve"] = str(mgt_3d_out) if mgt_3d_out.is_file() else ""
+    bundle["artifacts"]["gpu_production_newton_equivalence_gate"] = (
+        str(gpu_equiv_out) if gpu_equiv_out.is_file() else ""
+    )
+    bundle["artifacts"]["residual_holdout_closure_updates"] = str(rh_path) if rh_path.is_file() else ""
     args.output_json.write_text(json.dumps(bundle, indent=2) + "\n", encoding="utf-8")
 
     code, log = _run(
@@ -362,6 +463,55 @@ def main() -> int:
         ]
     )
     steps.append({"step": "sync_holdout_supplementary", "exit_code": code, "log": log})
+
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/finalize_rh_signed_closure.py"),
+            "--bundle-json",
+            str(args.output_json),
+            "--rh-json",
+            str(rh_path),
+            "--output-json",
+            str(rh_path),
+        ]
+    )
+    steps.append({"step": "finalize_rh_signed_closure", "exit_code": code, "log": log})
+
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_rh_closure_checklist.py"),
+            "--rh-json",
+            str(rh_path),
+            "--bundle-json",
+            str(args.output_json),
+            "--output-json",
+            str(rh_checklist_out),
+        ]
+    )
+    steps.append({"step": "rh_closure_checklist_post_sign", "exit_code": code, "log": log})
+
+    bundle["steps"] = steps
+    bundle["artifacts"]["rh_closure_checklist"] = str(rh_checklist_out) if rh_checklist_out.is_file() else ""
+    rh_closed = _load(rh_path).get("rh_closure_status") == "closed"
+    if not rh_closed:
+        blockers.append("rh_signed_closure_incomplete")
+    mesh_3d_status = _load(mgt_3d_out).get("native_solve_status")
+    if mesh_3d_status not in {"mesh_3d_beam_global_wired", "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge"}:
+        blockers.append("mgt_global_fea_3d_native_solve_not_wired")
+    condensed_status = _load(mgt_condensed_out).get("native_solve_status")
+    if condensed_status != "condensed_global_fea_wired":
+        blockers.append("mgt_global_fea_condensed_solve_not_wired")
+    gpu_equiv = _load(gpu_equiv_out)
+    if not gpu_equiv.get("production_newton_equivalent_to_closed_form"):
+        blockers.append("gpu_production_newton_not_equivalent")
+    gpu_cert = _load(gpu_newton_cert_out)
+    if not gpu_cert.get("gpu_newton_terminal_proven"):
+        blockers.append("gpu_newton_terminal_not_certified")
+    bundle["status"] = "ready" if not blockers else "review_required"
+    bundle["blockers"] = blockers
+    args.output_json.write_text(json.dumps(bundle, indent=2) + "\n", encoding="utf-8")
 
     gap_status_out = out_dir / "gap_closure_status.json"
     code, log = _run(
@@ -379,6 +529,10 @@ def main() -> int:
     bundle["artifacts"]["mgt_roundtrip_assembly_fingerprint"] = (
         str(mgt_fingerprint_out) if mgt_fingerprint_out.is_file() else ""
     )
+    bundle["artifacts"]["mgt_global_fea_mesh_contract"] = (
+        str(mgt_mesh_contract_out) if mgt_mesh_contract_out.is_file() else ""
+    )
+    bundle["artifacts"]["rh_engineer_review_packet_html"] = str(rh_html_out) if rh_html_out.is_file() else ""
     bundle["artifacts"]["ml_multi_objective_status"] = str(ml_status_out) if ml_status_out.is_file() else ""
     bundle["status"] = "ready" if not blockers else "review_required"
     bundle["blockers"] = blockers

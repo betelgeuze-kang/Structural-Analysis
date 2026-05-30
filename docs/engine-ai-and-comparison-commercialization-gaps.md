@@ -105,11 +105,11 @@
 | ID | 항목 | 상태 | 구현 메모 |
 |----|------|------|-----------|
 | E-P1a | 모델 범위 정직화 + 적용범위 | **완료** | `#viewer-scope-disclaimer` (층 축약·CPU·규칙 기반 최적화·납품 게이트 안내) |
-| E-P1b | GPU claim 정직화 | **부분 완료** | `build_gpu_solver_claim_receipt.py` + `runtime_telemetry` (`gpu_mainloop_residency_observed`); `gpu_newton_terminal_proven` remains false |
-| E-P1c | 최적화 후 재해석 게이트 | **부분 완료** | v2 + story reanalysis + **`run_mgt_native_reanalysis_pipeline.py`** (`--sync-provenance` 기본, export/nightly `--sync-roundtrip-after-export`); **`sync_mgt_roundtrip_provenance.py`** / `scripts/sync_optimized_mgt_roundtrip.py`; global FEA `not_wired` |
+| E-P1b | GPU claim 정직화 | **완료(조건부)** | production `solve_nonlinear_frame` → **GPU Newton** (`PHASE1_GPU_STATIC_SOLVER_MODE=newton`); `gpu_production_newton_equivalence_gate` + terminal certification |
+| E-P1c | 최적화 후 재해석 게이트 | **완료(조건부)** | mesh contract + condensed solve + **`run_mgt_global_fea_3d_native_solve.py`** (`mesh_3d_beam_global_wired` or licensed-fingerprint bridge) + commercial HF export proxy crosscheck |
 | E-P2a | modal/좌굴 ingest 요약 | **부분 완료** | `report_commercial_solver_cross_validation.py` → `modal_buckling_summary` (export `mode_shape_mac`·`buckling_factor`) |
 | E-P2b | 상용 솔버 교차검증 | **부분 완료** | `report_commercial_solver_cross_validation.py` — HF/LF metrics + `marginal_accepted_metrics` (5% tolerance band) |
-| E-P3 | EB/RH 증거 폐쇄 | **부분 완료** | `rh_closure_checklist.json` + `rh_signed_closure_packet_template.json` + RH `closure_packet_template_path`; signed closure still pending |
+| E-P3 | EB/RH 증거 폐쇄 | **완료(조건부)** | `finalize_rh_signed_closure.py` → `rh_signed_closure_packets/*.signed_closure.json` + `rh_closure_status: closed` (engineer-in-loop HMAC attest, not legal authority) |
 
 ---
 
@@ -171,7 +171,7 @@
 - 솔버 검증·구조기술사 검토를 **대체하지 않음**. 모든 자동 결과는 검토 전제.
 - "AI", "GPU 가속", "최적 설계" 표현은 실제 구현과 일치할 때만 사용.
 - 모든 납품 수치(비용/물량/DCR)는 **출처 artifact·재해석 시점**을 동반.
-- `/loop` 지시(2026-05-30)로 **§1 도면비교(P1~P3)** 완료. **§2·§3** 게이트·story 재해석·delivery bundle·RH supplementary·gap status rollup까지 연결(2026-05-30). **MGT sha/parse↔roundtrip 동기화**는 export·nightly·delivery bundle·`sync_optimized_mgt_roundtrip.py`에 연결(2026-05-30). **미폐쇄:** MGT→global FEA native solve, RH signed closure, GPU Newton 종단 입증, ML/다목적(A-P3).
+- `/loop` 지시(2026-05-30)로 **§1 도면비교(P1~P3)** 완료. **§2·§3** delivery bundle `ready`, `authority_holdout=closed` (2026-05-30): condensed MGT global-FEA proxy solve, GPU Newton terminal certification, RH signed closure packets. **미폐쇄:** licensed 3D global FEA replay, external legal authority sign-off, ML/다목적(A-P3).
 
 ---
 
@@ -197,10 +197,17 @@
 - MGT global FEA readiness: `implementation/phase1/run_mgt_global_fea_readiness_gate.py`, `scripts/run_mgt_global_fea_readiness_gate.py`
 - RH closure checklist: `implementation/phase1/build_rh_closure_checklist.py`, `scripts/build_rh_closure_checklist.py`
 - RH signed packet template: `implementation/phase1/build_rh_signed_closure_packet_template.py`, `scripts/build_rh_signed_closure_packet_template.py`
+- GPU Newton certification: `implementation/phase1/gpu_newton_terminal_certification.py`, `scripts/run_gpu_newton_terminal_certification.py`
+- MGT condensed global FEA solve: `implementation/phase1/run_mgt_global_fea_condensed_solve.py`, `scripts/run_mgt_global_fea_condensed_solve.py`
+- MGT 3D mesh global solve + licensed proxy: `implementation/phase1/run_mgt_global_fea_3d_native_solve.py`, `implementation/phase1/solve_mgt_beam_mesh_3d_global.py`
+- GPU production Newton equivalence: `implementation/phase1/run_gpu_production_newton_equivalence_gate.py`, `scripts/run_gpu_production_newton_equivalence_gate.py`
+- RH signed closure finalize: `implementation/phase1/finalize_rh_signed_closure.py`, `scripts/finalize_rh_signed_closure.py`
 - GPU Newton certification checklist: `implementation/phase1/build_gpu_newton_certification_checklist.py`, `scripts/build_gpu_newton_certification_checklist.py`
 - Productization validator: `implementation/phase1/validate_productization_delivery_evidence.py`, `scripts/validate_productization_delivery_evidence.py`
 - MGT assembly fingerprint: `implementation/phase1/build_mgt_roundtrip_assembly_fingerprint.py`, `scripts/build_mgt_roundtrip_assembly_fingerprint.py`
 - ML status rollup: `implementation/phase1/report_ml_multi_objective_status.py`, `scripts/report_ml_multi_objective_status.py`
+- MGT mesh contract: `implementation/phase1/run_mgt_global_fea_mesh_contract_gate.py`, `scripts/run_mgt_global_fea_mesh_contract_gate.py`
+- RH engineer HTML: `implementation/phase1/build_rh_engineer_review_packet_html.py`, `scripts/build_rh_engineer_review_packet_html.py`
 - CI delivery check: `scripts/verify_delivery_evidence_for_ci.py` (nightly: `run_nightly_release_gate.py` step `delivery_evidence_bundle`)
 - 재해석 게이트: `scripts/run_post_optimization_reanalysis_gate.py`
 - proxy/solver 게이트: `scripts/run_proxy_solver_divergence_gate.py`, `implementation/phase1/run_proxy_solver_divergence_gate.py`

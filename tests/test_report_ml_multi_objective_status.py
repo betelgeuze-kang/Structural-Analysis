@@ -23,3 +23,4 @@ def test_ml_status_reports_not_started() -> None:
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["status"] == "not_started"
     assert payload["multi_objective_pareto_wired"] is False
+    assert payload["production_ml_wired"] is False

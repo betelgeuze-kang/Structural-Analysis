@@ -30,7 +30,16 @@ def test_mgt_pipeline_verifies_sha_and_runs_story_proxy() -> None:
     assert (payload.get("native_fea") or {}).get("status") in {
         "parse_linked",
         "readiness_pass",
+        "mesh_contract_pass",
+        "condensed_solve_wired",
+        "mesh_3d_global_wired",
         "not_wired",
+    }
+    assert (payload.get("native_fea") or {}).get("native_solve_status") in {
+        "not_wired",
+        "condensed_global_fea_wired",
+        "mesh_3d_beam_global_wired",
+        "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
     }
     assert payload["mgt_integrity"]["integrity_status"] in {
         "verified",

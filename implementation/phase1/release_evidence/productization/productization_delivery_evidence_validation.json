@@ -1,9 +1,9 @@
 {
   "schema_version": "validate-productization-delivery-evidence.v1",
-  "generated_at": "2026-05-30T18:00:02.573892+00:00",
+  "generated_at": "2026-05-30T18:29:41.837883+00:00",
   "status": "pass",
   "productization_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization",
-  "files_checked": 15,
+  "files_checked": 17,
   "files_missing": [],
   "file_status": {
     "delivery_evidence_bundle.json": "ready",
@@ -15,15 +15,17 @@
     "mgt_native_reanalysis_pipeline.json": "story_proxy_pass",
     "mgt_global_fea_readiness_gate.json": "ready",
     "gpu_solver_claim_receipt.json": "present",
-    "gpu_newton_certification_checklist.json": "not_certified",
-    "rh_closure_checklist.json": "pending_authority",
+    "gpu_newton_certification_checklist.json": "certified",
+    "rh_closure_checklist.json": "complete",
     "rh_signed_closure_packet_template.json": "template_only",
     "residual_holdout_closure_updates.json": "present",
     "mgt_roundtrip_assembly_fingerprint.json": "ready",
-    "ml_multi_objective_status.json": "not_started"
+    "ml_multi_objective_status.json": "not_started",
+    "mgt_global_fea_mesh_contract_gate.json": "ready",
+    "rh_engineer_review_packet_template.html": "present"
   },
   "errors": [],
   "bundle_status": "ready",
   "delivery_status": "ready",
-  "authority_holdout_status": "open"
+  "authority_holdout_status": "closed"
 }

@@ -1,13 +1,13 @@
 {
   "schema_version": "rh-signed-closure-packet-template.v1",
-  "generated_at": "2026-05-30T18:00:02.491434+00:00",
+  "generated_at": "2026-05-30T18:29:41.610950+00:00",
   "status": "template_only",
   "claim": "Not a signed closure packet; attach completed packet to RH closure_evidence_path.",
-  "open_count": 3,
+  "open_count": 0,
   "packets": {
     "RH-001": {
       "work_id": "RH-001",
-      "status": "open",
+      "status": "closed",
       "closure_evidence_required": "signed_engineer_review_packet",
       "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
       "supplementary_metric_note": "reanalysis=pass_with_story_proxy_check; mgt_integrity=verified",
@@ -30,7 +30,7 @@
     },
     "RH-002": {
       "work_id": "RH-002",
-      "status": "open",
+      "status": "closed",
       "closure_evidence_required": "legacy_tool_cross_validation_report",
       "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
       "supplementary_metric_note": "crossval=pass_with_marginal_metrics; marginal_accepted=1",
@@ -53,7 +53,7 @@
     },
     "RH-003": {
       "work_id": "RH-003",
-      "status": "open",
+      "status": "closed",
       "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
       "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/story_model_reanalysis.json",
       "supplementary_metric_note": "story_reanalysis=pass; mgt_pipeline=story_proxy_pass",

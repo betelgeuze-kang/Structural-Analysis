@@ -1,0 +1,22 @@
+{
+  "schema_version": "mgt-global-fea-mesh-contract-gate.v1",
+  "generated_at": "2026-05-30T18:29:05.868545+00:00",
+  "status": "ready",
+  "claim": "NPZ mesh contract check only; does not execute global nonlinear FEA.",
+  "native_solve_status": "not_wired",
+  "mesh_contract_ready": true,
+  "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "metrics": {
+    "expected_element_count": 12728,
+    "npz_element_count": 12728,
+    "expected_node_count": 11355,
+    "npz_node_count": 11355,
+    "npz_edge_pairs": 38238,
+    "npz_missing_arrays": [],
+    "node_count_basis": "parse_report",
+    "node_count_pre_coarsening": 13047
+  },
+  "blockers": [],
+  "next_step": "Map elem_id/section_id tensors into global solver assembly import."
+}

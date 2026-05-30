@@ -18,8 +18,18 @@ RUNNER_PATHS = (
     REPO_ROOT / "implementation/phase1/design_optimization_env.py",
 )
 
+ML_PRODUCTION_PATTERNS = (
+    r"\bfrom\s+implementation\.phase1\.train_",
+    r"\btrain_neural_operator_surrogate\b",
+    r"\bneural_operator_surrogate\b",
+    r"\bNSGA[\w]*\b",
+    r"\bpareto_front\b",
+    r"\bimport\s+sklearn\b",
+    r"\bimport\s+tensorflow\b",
+)
 
-def _grep_ml_imports(path: Path) -> list[str]:
+
+def _grep_ml_production_refs(path: Path) -> list[str]:
     if not path.is_file():
         return []
     text = path.read_text(encoding="utf-8", errors="ignore")
@@ -28,16 +38,14 @@ def _grep_ml_imports(path: Path) -> list[str]:
         stripped = line.strip()
         if stripped.startswith("#"):
             continue
-        if re.search(r"\b(import|from)\s+.*\b(torch|onnx|sklearn|tensorflow)\b", stripped, re.I):
-            hits.append(stripped[:160])
-        if re.search(r"\b(train_|surrogate|neural_operator|nsga)\b", stripped, re.I):
+        if any(re.search(pattern, stripped, re.I) for pattern in ML_PRODUCTION_PATTERNS):
             hits.append(stripped[:160])
     return hits[:8]
 
 
 def build_ml_multi_objective_status() -> dict[str, Any]:
-    runner_hits: dict[str, list[str]] = {str(path.name): _grep_ml_imports(path) for path in RUNNER_PATHS}
-    production_ml_wired = not any(runner_hits.values())
+    runner_hits: dict[str, list[str]] = {str(path.name): _grep_ml_production_refs(path) for path in RUNNER_PATHS}
+    production_ml_wired = any(runner_hits.values())
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),

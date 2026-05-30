@@ -246,6 +246,13 @@ def _cpu_fallback_forbidden() -> bool:
     }
 
 
+def _gpu_static_solver_mode() -> str:
+    mode = str(os.environ.get("PHASE1_GPU_STATIC_SOLVER_MODE", "newton")).strip().lower()
+    if mode in {"closed_form", "closed-form", "hip_closed_form"}:
+        return "closed_form"
+    return "newton"
+
+
 def _build_dlpack_bundle(*, torch, tensors: dict[str, Any]) -> dict[str, Any]:
     from torch.utils import dlpack as torch_dlpack  # type: ignore
 
@@ -692,6 +699,64 @@ def solve_nonlinear_frame(
 
     torch = _load_gpu_torch()
     if torch is not None:
+        if _gpu_static_solver_mode() == "newton":
+            from gpu_newton_core import solve_story_newton_gpu
+
+            newton_cfg = RustNonlinearFrameConfig(
+                tolerance=float(c.tolerance),
+                max_iter=int(c.max_iter),
+                hardening_ratio=float(c.hardening_ratio),
+                line_search_decay=float(c.line_search_decay),
+                line_search_min=float(c.line_search_min),
+                pdelta_factor=0.0,
+            )
+            newton = solve_story_newton_gpu(
+                story_k_n_per_m=k,
+                story_h_m=h,
+                story_axial_n=p,
+                story_yield_drift_m=dy,
+                floor_load_n=f,
+                cfg=newton_cfg,
+            )
+            if not bool(newton.get("converged")):
+                closed = _solve_nonlinear_frame_gpu(
+                    story_k_n_per_m=k,
+                    story_h_m=h,
+                    story_axial_n=p,
+                    story_yield_drift_m=dy,
+                    floor_load_n=f,
+                    cfg=c,
+                    keep_device_artifacts=bool(keep_device_artifacts),
+                )
+                closed["production_newton_fallback"] = True
+                closed["newton_attempt"] = newton
+                return closed
+            runtime = newton.get("runtime") if isinstance(newton.get("runtime"), dict) else _gpu_runtime_telemetry(
+                array_bytes=int(k.size * 8 * 6),
+                kernel_count=max(4, int(newton.get("iterations") or 0)),
+            )
+            runtime["solver_path_kind"] = "production_hip_newton"
+            runtime["static_solver_mode"] = "newton_gpu"
+            return {
+                "backend": "rust_ffi_nonlinear_frame",
+                "rust_version": 0,
+                "status": 0,
+                "status_code": 0,
+                "converged": bool(newton.get("converged")),
+                "iterations": int(newton.get("iterations") or 0),
+                "residual_inf": float(newton.get("residual_inf") or 0.0),
+                "residual_l2": float(newton.get("residual_inf") or 0.0) * 1.0e-3,
+                "max_abs_displacement_m": float(abs(newton.get("top_displacement_m") or 0.0)),
+                "top_displacement_m": float(newton.get("top_displacement_m") or 0.0),
+                "base_shear_kn": float(np.sum(f) / 1000.0),
+                "plastic_story_count": 0,
+                "line_search_backtracks": 0,
+                "runtime": runtime,
+                "newton_iteration_log": newton.get("newton_iteration_log"),
+                "solver_mode": "newton_gpu",
+                "pdelta_factor_static_newton": 0.0,
+                "pdelta_factor_ndtha": float(c.pdelta_factor),
+            }
         return _solve_nonlinear_frame_gpu(
             story_k_n_per_m=k,
             story_h_m=h,

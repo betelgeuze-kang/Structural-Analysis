@@ -68,10 +68,17 @@ def build_gap_closure_status() -> dict[str, Any]:
             "integrity": (_load(PRODUCTIZATION / "mgt_native_reanalysis_pipeline.json").get("mgt_integrity") or {}).get(
                 "integrity_status"
             ),
+            "native_solve_status": (
+                (_load(PRODUCTIZATION / "mgt_native_reanalysis_pipeline.json").get("native_fea") or {}).get(
+                    "native_solve_status"
+                )
+                or _load(PRODUCTIZATION / "mgt_global_fea_condensed_solve.json").get("native_solve_status")
+            ),
             "native_fea": (_load(PRODUCTIZATION / "mgt_native_reanalysis_pipeline.json").get("native_fea") or {}).get(
                 "status"
             ),
             "global_fea_readiness": _load(PRODUCTIZATION / "mgt_global_fea_readiness_gate.json").get("status"),
+            "mesh_contract": _load(PRODUCTIZATION / "mgt_global_fea_mesh_contract_gate.json").get("status"),
             "roundtrip_sync": bundle.get("summary", {}).get("mgt_roundtrip_sync_status"),
             "roundtrip_parsed": bool(bundle.get("summary", {}).get("mgt_roundtrip_parsed")),
         },
@@ -91,6 +98,12 @@ def build_gap_closure_status() -> dict[str, Any]:
         "rh_signed_closure_template": {
             "status": _load(PRODUCTIZATION / "rh_signed_closure_packet_template.json").get("status"),
             "open_count": _load(PRODUCTIZATION / "rh_signed_closure_packet_template.json").get("open_count"),
+        },
+        "rh_signed_closure": {
+            "status": _load(PRODUCTIZATION / "residual_holdout_closure_updates.json").get("rh_closure_status"),
+            "actual_closure_evidence_attached": _load(PRODUCTIZATION / "residual_holdout_closure_updates.json").get(
+                "actual_closure_evidence_attached"
+            ),
         },
         "ml_multi_objective_a_p3": {
             "status": (_load(PRODUCTIZATION / "ml_multi_objective_status.json").get("status") or "not_started"),

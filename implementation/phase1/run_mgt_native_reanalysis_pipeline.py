@@ -11,6 +11,9 @@ from typing import Any
 from design_optimization.io import load_json
 from build_gpu_solver_claim_receipt import build_gpu_solver_claim_receipt
 from run_story_model_reanalysis import build_mgt_reanalysis_provenance, run_story_model_reanalysis
+from run_mgt_global_fea_3d_native_solve import run_mgt_global_fea_3d_native_solve
+from run_mgt_global_fea_condensed_solve import run_mgt_global_fea_condensed_solve
+from run_mgt_global_fea_mesh_contract_gate import build_mgt_global_fea_mesh_contract_gate
 from run_mgt_global_fea_readiness_gate import build_mgt_global_fea_readiness_gate
 from sync_mgt_roundtrip_provenance import refresh_optimized_roundtrip_from_mgt
 
@@ -99,19 +102,38 @@ def run_mgt_native_reanalysis_pipeline(
         roundtrip_json=roundtrip_json,
         mgt_path=resolved_mgt,
     )
+    mesh_contract = build_mgt_global_fea_mesh_contract_gate(roundtrip_json=roundtrip_json)
+    condensed_solve: dict[str, Any] | None = None
+    mesh_3d_solve: dict[str, Any] | None = None
+    if mesh_contract.get("mesh_contract_ready"):
+        condensed_solve = run_mgt_global_fea_condensed_solve(roundtrip_json=roundtrip_json)
+        mesh_3d_solve = run_mgt_global_fea_3d_native_solve(roundtrip_json=roundtrip_json)
     parse_linked = bool(mgt_refresh and (mgt_refresh.get("parse") or {}).get("status") == "pass")
+    native_solve_status = str((mesh_3d_solve or {}).get("native_solve_status") or (condensed_solve or {}).get("native_solve_status") or "not_wired")
     fea_status = "not_wired"
-    if global_fea_readiness.get("readiness_for_global_fea_wiring"):
+    if native_solve_status == "mesh_3d_beam_global_wired":
+        fea_status = "mesh_3d_global_wired"
+    elif native_solve_status == "condensed_global_fea_wired":
+        fea_status = "condensed_solve_wired"
+    elif mesh_contract.get("mesh_contract_ready") and global_fea_readiness.get("readiness_for_global_fea_wiring"):
+        fea_status = "mesh_contract_pass"
+    elif global_fea_readiness.get("readiness_for_global_fea_wiring"):
         fea_status = "readiness_pass"
     elif parse_linked or (mgt_refresh and mgt_refresh.get("status") == "ready"):
         fea_status = "parse_linked"
 
     native_fea = {
         "status": fea_status,
-        "native_solve_status": "not_wired",
+        "native_solve_status": native_solve_status,
         "readiness_for_global_fea_wiring": global_fea_readiness.get("readiness_for_global_fea_wiring"),
         "note": (
-            "MGT roundtrip/NPZ preflight ready; global FEA solver loop still not connected."
+            "MGT NPZ same-mesh 3D beam global Newton wired; commercial HF export proxy crosscheck attached."
+            if native_solve_status == "mesh_3d_beam_global_wired"
+            else "MGT NPZ condensed to story model and solved in-repo (not full 3D licensed global FEA)."
+            if native_solve_status == "condensed_global_fea_wired"
+            else "MGT roundtrip/NPZ mesh contract ready; condensed solve not completed."
+            if fea_status == "mesh_contract_pass"
+            else "MGT roundtrip/NPZ preflight ready; global FEA solver loop still not connected."
             if fea_status == "readiness_pass"
             else "MGT re-parsed to roundtrip JSON; story-model proxy follows optimization state NPZ."
             if parse_linked
@@ -119,6 +141,9 @@ def run_mgt_native_reanalysis_pipeline(
         ),
         "mgt_refresh": mgt_refresh,
         "global_fea_readiness": global_fea_readiness,
+        "global_fea_mesh_contract": mesh_contract,
+        "condensed_global_fea_solve": condensed_solve,
+        "mesh_3d_global_fea_solve": mesh_3d_solve,
     }
 
     if "mgt_file_missing" in blockers:

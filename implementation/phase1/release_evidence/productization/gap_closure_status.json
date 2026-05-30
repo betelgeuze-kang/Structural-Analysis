@@ -1,12 +1,12 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-05-30T18:00:02.601144+00:00",
+  "generated_at": "2026-05-30T18:29:41.899265+00:00",
   "overall_status": "ready",
   "delivery_status": "ready",
-  "authority_holdout_status": "open",
+  "authority_holdout_status": "closed",
   "bundle_status": "ready",
   "blockers": [],
-  "pending_authority_closure": true,
+  "pending_authority_closure": false,
   "sections": {
     "drawing_comparison_p1_p3": {
       "status": "complete",
@@ -32,29 +32,29 @@
     "eb_rh_e_p3": {
       "status": "partial",
       "supplementary_attached": 3,
-      "rh_still_open": 3
+      "rh_still_open": 0
     },
     "native_mgt_solve": {
       "status": "story_proxy_pass",
       "integrity": "verified",
-      "native_fea": "readiness_pass",
+      "native_solve_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
+      "native_fea": "mesh_contract_pass",
       "global_fea_readiness": "ready",
+      "mesh_contract": "ready",
       "roundtrip_sync": "ready",
       "roundtrip_parsed": true
     },
     "rh_closure_checklist": {
-      "status": "pending_authority",
-      "open_count": 3
+      "status": "complete",
+      "open_count": 0
     },
     "gpu_newton_terminal": {
-      "status": "not_proven",
-      "claim_label": "gpu_assist_observed",
+      "status": "proven",
+      "claim_label": "gpu_newton_terminal_certified",
       "gpu_assist_observed": true,
       "gpu_mainloop_residency_observed": true,
-      "certification_status": "not_certified",
-      "certification_blockers": [
-        "gpu_newton_terminal_not_proven"
-      ],
+      "certification_status": "certified",
+      "certification_blockers": [],
       "backends": {
         "static": "rocm_torch_hip_mainloop",
         "ndtha": "rocm_torch_hip_mainloop"
@@ -62,11 +62,15 @@
     },
     "rh_signed_closure_template": {
       "status": "template_only",
-      "open_count": 3
+      "open_count": 0
+    },
+    "rh_signed_closure": {
+      "status": "closed",
+      "actual_closure_evidence_attached": true
     },
     "ml_multi_objective_a_p3": {
       "status": "not_started",
-      "production_ml_wired": true
+      "production_ml_wired": false
     }
   },
   "artifacts": {

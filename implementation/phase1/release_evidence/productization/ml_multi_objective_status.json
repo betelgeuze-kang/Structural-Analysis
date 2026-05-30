@@ -1,8 +1,8 @@
 {
   "schema_version": "ml-multi-objective-status.v1",
-  "generated_at": "2026-05-30T17:59:47.716550+00:00",
+  "generated_at": "2026-05-30T18:29:05.934054+00:00",
   "status": "not_started",
-  "production_ml_wired": true,
+  "production_ml_wired": false,
   "multi_objective_pareto_wired": false,
   "claim": "Production optimization remains deterministic greedy/heuristic; ML/Pareto are research-track only.",
   "runner_static_scan": {
