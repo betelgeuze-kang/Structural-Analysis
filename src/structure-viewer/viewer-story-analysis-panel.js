@@ -15,9 +15,10 @@ const CHART_CONFIG = {
   barWidth: 18,
   font: "11px 'IBM Plex Sans KR', Pretendard, sans-serif",
   colors: {
-    safe: '#2f7d5a',
-    caution: '#96580e',
-    danger: '#a1492e',
+    safe: '#2a8f7a',
+    caution: '#e6a04a',
+    danger: '#d45a3a',
+    crosshair: 'rgba(46, 184, 176, 0.65)',
     beam: '#38bdf8',
     column: '#f87171',
     wall: '#34d399',
@@ -33,6 +34,60 @@ function getDcColor(ratio) {
   if (ratio <= 0.6) return CHART_CONFIG.colors.safe;
   if (ratio <= 0.85) return CHART_CONFIG.colors.caution;
   return CHART_CONFIG.colors.danger;
+}
+
+function attachChartCrosshair(canvas, { labels = [], values = [], formatValue = (v) => String(v), crosshairOnly = false } = {}) {
+  if (!canvas || canvas.dataset.crosshairBound === '1') return;
+  canvas.dataset.crosshairBound = '1';
+  const wrap = canvas.parentElement;
+  if (!wrap) return;
+  wrap.style.position = wrap.style.position || 'relative';
+  const tip = document.createElement('div');
+  tip.className = 'chart-crosshair-tooltip';
+  tip.hidden = true;
+  wrap.appendChild(tip);
+  let overlay = wrap.querySelector('.chart-crosshair-overlay');
+  if (!overlay) {
+    overlay = document.createElement('canvas');
+    overlay.className = 'chart-crosshair-overlay';
+    overlay.width = canvas.width;
+    overlay.height = canvas.height;
+    overlay.style.cssText = 'position:absolute;inset:0;pointer-events:none;width:100%;height:100%;';
+    wrap.appendChild(overlay);
+  }
+  const pad = CHART_CONFIG.padding;
+  const plotW = canvas.width - pad.left - pad.right;
+  const plotH = canvas.height - pad.top - pad.bottom;
+  canvas.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * canvas.width;
+    const y = ((event.clientY - rect.top) / rect.height) * canvas.height;
+    const octx = overlay.getContext('2d');
+    octx.clearRect(0, 0, overlay.width, overlay.height);
+    if (x < pad.left || x > canvas.width - pad.right || y < pad.top || y > canvas.height - pad.bottom) {
+      tip.hidden = true;
+      return;
+    }
+    const index = Math.min(labels.length - 1, Math.max(0, Math.floor(((x - pad.left) / plotW) * labels.length)));
+    tip.hidden = false;
+    tip.textContent = `${labels[index] ?? '--'}: ${formatValue(values[index])}`;
+    tip.style.left = `${event.clientX - rect.left + 12}px`;
+    tip.style.top = `${event.clientY - rect.top - 8}px`;
+    if (!crosshairOnly) return;
+    octx.strokeStyle = CHART_CONFIG.colors.crosshair;
+    octx.setLineDash([4, 4]);
+    const cx = pad.left + (index + 0.5) * (plotW / Math.max(labels.length, 1));
+    octx.beginPath();
+    octx.moveTo(cx, pad.top);
+    octx.lineTo(cx, pad.top + plotH);
+    octx.moveTo(pad.left, y);
+    octx.lineTo(pad.left + plotW, y);
+    octx.stroke();
+  });
+  canvas.addEventListener('mouseleave', () => {
+    tip.hidden = true;
+    overlay.getContext('2d').clearRect(0, 0, overlay.width, overlay.height);
+  });
 }
 
 function drawBarChart(canvas, data, { xLabel = '', yLabel = '', stacked = false } = {}) {
@@ -108,6 +163,13 @@ function drawBarChart(canvas, data, { xLabel = '', yLabel = '', stacked = false 
     ctx.fillText(yLabel, 0, 0);
     ctx.restore();
   }
+
+  attachChartCrosshair(canvas, {
+    labels,
+    values: values.map((v) => (Array.isArray(v) ? v[0] : v)),
+    formatValue: (v) => (Number.isFinite(v) ? v.toFixed(2) : '--'),
+    crosshairOnly: true,
+  });
 
   return canvas;
 }

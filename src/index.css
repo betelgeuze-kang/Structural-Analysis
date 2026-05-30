@@ -1,7 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
 
 :root {
-  --color-primary: #0f6a73;
+  --color-primary: #1a8f8a;
+  --si-accent: #2eb8b0;
+  --si-viewport-bg: #060b12;
   --color-ink-dark: #08121d;
   --color-surface-dark: #111c29;
   --color-surface-dark-soft: #152435;
@@ -32,9 +34,9 @@
   color-scheme: dark;
   font-family: 'IBM Plex Sans KR', 'Pretendard', 'Noto Sans KR', sans-serif;
   background:
-    radial-gradient(circle at top left, rgba(244, 181, 107, 0.16), transparent 28%),
-    radial-gradient(circle at right 18%, rgba(79, 183, 173, 0.18), transparent 24%),
-    linear-gradient(180deg, var(--color-ink-dark) 0%, var(--color-surface-dark-strong) 38%, #12202d 100%);
+    radial-gradient(circle at top left, rgba(46, 184, 176, 0.12), transparent 28%),
+    radial-gradient(circle at right 18%, rgba(230, 169, 93, 0.10), transparent 24%),
+    linear-gradient(180deg, #050a10 0%, var(--color-surface-dark-strong) 38%, #111c29 100%);
   color: var(--color-text-dark);
 }
 
@@ -137,13 +139,13 @@ select {
 .hero__copy,
 .panel,
 .hero__status {
-  border: 1px solid rgba(43, 61, 80, 0.72);
+  border: 1px solid rgba(46, 184, 176, 0.2);
   background:
-    radial-gradient(circle at top right, rgba(79, 183, 173, 0.12), transparent 30%),
-    linear-gradient(180deg, rgba(18, 30, 44, 0.96), rgba(13, 24, 36, 0.94));
+    radial-gradient(circle at top right, rgba(46, 184, 176, 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(12, 22, 34, 0.97), rgba(8, 16, 26, 0.95));
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-dark);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(18px);
 }
 
 .hero__copy {
@@ -170,7 +172,7 @@ select {
   font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--color-accent-cool);
+  color: var(--si-accent, var(--color-accent-cool));
 }
 
 .hero__suite-pill {
@@ -276,7 +278,7 @@ select {
 .hero__overview-label,
 .hero__status-label {
   margin: 0;
-  color: var(--color-accent-cool);
+  color: var(--si-accent, var(--color-accent-cool));
   font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
   font-size: 0.72rem;
   letter-spacing: 0.12em;

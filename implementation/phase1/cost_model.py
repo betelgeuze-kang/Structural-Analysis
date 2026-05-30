@@ -204,6 +204,21 @@ def estimate_project_cost(members: list[MemberCostInput]) -> dict[str, float]:
     return _default_calibrator.estimate_project_cost(members)
 
 
+def build_price_provenance(table: RegionalPriceTable | None = None) -> dict[str, float | int | str]:
+    """Unit-price provenance for delivery reports (A-P2)."""
+    price = table or RegionalPriceTable()
+    return {
+        "schema_version": "cost-model-price-provenance.v1",
+        "region": price.region,
+        "price_year": price.year,
+        "concrete_per_m3": float(price.concrete_per_m3),
+        "steel_per_kg": float(price.steel_per_kg),
+        "rebar_per_kg": float(price.rebar_per_kg),
+        "labor_factor": float(price.labor_factor),
+        "calibration_note": "Default regional table; override with measured bid data via CostModelCalibrator.calibrate_from_actual_data.",
+    }
+
+
 __all__ = [
     "CostBreakdown",
     "MemberCostInput",
@@ -211,4 +226,5 @@ __all__ = [
     "CostModelCalibrator",
     "estimate_member_cost",
     "estimate_project_cost",
+    "build_price_provenance",
 ]

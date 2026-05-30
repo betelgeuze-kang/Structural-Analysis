@@ -1,0 +1,38 @@
+{
+  "story_model_reanalysis": {
+    "schema_version": "story-model-reanalysis-receipt.v1",
+    "generated_at": "2026-05-30T17:52:35.249894+00:00",
+    "status": "pass",
+    "claim": "Reduced story shear-building reanalysis on optimization terminal state; not licensed approval.",
+    "state_npz_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/design_optimization/design_optimization_solver_loop_state.npz",
+    "change_count": 20,
+    "metrics": {
+      "max_drift_ratio_pct": 1.9872000000000005,
+      "residual_drift_ratio_pct": 0.37399104000000016,
+      "governing_max_dcr": 0.9761,
+      "drift_limit_pct": 2.0,
+      "dcr_limit": 1.0,
+      "feasible": true,
+      "violation_score": 0.0
+    },
+    "solver": {
+      "backend_static": "rocm_torch_hip_mainloop",
+      "backend_ndtha": "rocm_torch_hip_mainloop",
+      "converged_all_steps": true,
+      "collapsed": false,
+      "static_converged": true
+    },
+    "blockers": []
+  },
+  "mgt_provenance": {
+    "schema_version": "mgt-reanalysis-provenance.v1",
+    "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_exists": true,
+    "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "element_count": 12728,
+    "node_count": 13047,
+    "native_solve_status": "not_wired",
+    "story_model_proxy_status": "wired_via_state_npz",
+    "note": "MGT native solver loop not connected; story-model check uses optimization state NPZ."
+  }
+}

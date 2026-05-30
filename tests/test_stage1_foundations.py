@@ -133,6 +133,15 @@ def test_kds_rc_rule_engine_supports_connection() -> None:
     assert all(r.clause.startswith("KDS-RC-CONN-") for r in results)
 
 
+def test_build_price_provenance_includes_region_and_year() -> None:
+    from implementation.phase1.cost_model import build_price_provenance
+
+    payload = build_price_provenance()
+    assert payload["schema_version"] == "cost-model-price-provenance.v1"
+    assert payload["price_year"] == 2026
+    assert float(payload["concrete_per_m3"]) > 0
+
+
 def test_cost_model_returns_positive_total() -> None:
     member = MemberCostInput(
         member_id="C1",

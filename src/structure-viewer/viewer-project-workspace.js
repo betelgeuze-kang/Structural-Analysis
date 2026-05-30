@@ -858,6 +858,12 @@ export function resolveWorkspaceStateFromSearch(search = '', {
     variant: variant?.variant || explicitVariant || 'optimized',
     filter: normalizeWorkspaceStatus(params.get('filter')) || normalizeToken(params.get('filter')) || 'all',
     comparisonFilter: normalizeToken(params.get('comparison_filter')) || 'changed',
+    optimizationTimelineStep: (() => {
+      const raw = params.get('optimization_timeline_step');
+      if (raw === null || raw === '') return -1;
+      const index = Number(raw);
+      return Number.isFinite(index) ? Math.round(index) : -1;
+    })(),
     taskStatus: normalizeToken(params.get('task')),
     overlay: normalizeToken(params.get('overlay')),
     receiptMemberId: normalizeText(params.get('receipt')),
@@ -899,6 +905,15 @@ export function buildWorkspaceUrl(href = '', state = {}, overrides = {}) {
   else url.searchParams.delete('overlay');
   if (receiptMemberId) url.searchParams.set('receipt', receiptMemberId);
   else url.searchParams.delete('receipt');
+  const timelineStepRaw = Object.prototype.hasOwnProperty.call(overrides, 'optimizationTimelineStep')
+    ? overrides.optimizationTimelineStep
+    : state.optimizationTimelineStep;
+  const timelineStep = Number(timelineStepRaw);
+  if (Number.isFinite(timelineStep) && timelineStep >= 0) {
+    url.searchParams.set('optimization_timeline_step', String(Math.round(timelineStep)));
+  } else {
+    url.searchParams.delete('optimization_timeline_step');
+  }
   if (Object.prototype.hasOwnProperty.call(overrides, 'memberId') || Object.prototype.hasOwnProperty.call(state, 'memberId')) {
     const memberId = normalizeText(overrides.memberId ?? state.memberId);
     if (memberId) url.searchParams.set('member', memberId);

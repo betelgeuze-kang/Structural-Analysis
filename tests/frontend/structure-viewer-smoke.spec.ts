@@ -521,6 +521,17 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      viewerWorkflow: document.body.getAttribute('data-viewer-workflow') || '',
+      drawingsTabHref: document.querySelector('[data-viewer-workflow-tab="drawings"]')?.getAttribute('href') || '',
+      layerToggleCount: document.querySelectorAll('[data-layer-toggle-row]').length,
+      layerGroupText: [...document.querySelectorAll('.layer-toggle-group')].map((node) => node.textContent?.trim() || '').join(' '),
+      materialFamilyLayerCount: document.querySelectorAll('[data-layer-toggle-group="Material families"]').length,
+      materialLawLayerCount: document.querySelectorAll('[data-layer-toggle-group="Material laws"]').length,
+      layerToggleText: document.querySelector('#layer-toggles')?.textContent || '',
+      layerToggleOverflowCount: [...document.querySelectorAll('[data-layer-toggle-row], [data-layer-toggle-row] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       viewport,
       footer,
       chartStrip,
@@ -1504,6 +1515,28 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
         if (!(node instanceof HTMLElement)) return false
         return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
       }).length,
+      drawingSheetForceOverlaySchema: document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-schema') || '',
+      drawingSheetForceOverlayStatus: document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-status') || '',
+      drawingSheetForceOverlayActiveSheet: document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-active-sheet') || '',
+      drawingSheetForceOverlaySelectedCombination: document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-selected-combination') || '',
+      drawingSheetForceOverlaySelectedMember: document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-selected-member') || '',
+      drawingSheetForceOverlayRowCount: Number(document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-row-count') || '0'),
+      drawingSheetForceOverlayVectorCount: Number(document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-vector-count') || '0'),
+      drawingSheetForceOverlayForceRowCount: Number(document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-force-row-count') || '0'),
+      drawingSheetForceOverlaySourceBackedCount: Number(document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-source-backed-count') || '0'),
+      drawingSheetForceOverlayMaxDcr: Number(document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-max-dcr') || '0'),
+      drawingSheetForceOverlayMaterialLocked: document.querySelector('[data-drawing-sheet-force-overlay]')?.getAttribute('data-drawing-sheet-force-overlay-material-locked') || '',
+      drawingSheetForceOverlayRenderedRowCount: document.querySelectorAll('[data-drawing-sheet-force-overlay] [data-drawing-sheet-force-overlay-row]').length,
+      drawingSheetForceOverlaySvgCount: document.querySelectorAll('[data-drawing-sheet-force-overlay] [data-drawing-sheet-force-overlay-svg]').length,
+      drawingSheetForceOverlayRenderedVectorCount: document.querySelectorAll('[data-drawing-sheet-force-overlay] [data-drawing-sheet-force-overlay-vector]').length,
+      drawingSheetForceOverlayMomentCount: document.querySelectorAll('[data-drawing-sheet-force-overlay] [data-drawing-sheet-force-overlay-moment]').length,
+      drawingSheetForceOverlayKinds: [...document.querySelectorAll('[data-drawing-sheet-force-overlay] [data-drawing-sheet-force-overlay-vector-kind]')].map((node) => node.getAttribute('data-drawing-sheet-force-overlay-vector-kind') || ''),
+      drawingSheetForceOverlayText: document.querySelector('[data-drawing-sheet-force-overlay]')?.textContent || '',
+      drawingSheetForceOverlayWindowState: window.__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__ || null,
+      drawingSheetForceOverlayOverflowCount: [...document.querySelectorAll('[data-drawing-sheet-force-overlay], [data-drawing-sheet-force-overlay] *')].filter((node) => {
+        if (!(node instanceof HTMLElement)) return false
+        return node.scrollWidth - node.clientWidth > 2 || node.scrollHeight - node.clientHeight > 2
+      }).length,
       drawingCapacityHandoffSchema: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-schema') || '',
       drawingCapacityHandoffStatus: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-status') || '',
       drawingCapacityHandoffActiveSheet: document.querySelector('[data-drawing-capacity-handoff-ledger]')?.getAttribute('data-drawing-capacity-handoff-active-sheet') || '',
@@ -1950,6 +1983,16 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.modelInfoHasUnits).toBe(true)
   expect(layout.modelInfoHasAnalysis).toBe(true)
   expect(layout.modelOverviewOverflowCount).toBe(0)
+  expect(layout.viewerWorkflow).toBe('model')
+  expect(layout.drawingsTabHref).toBe('#drawing-handoff-section')
+  expect(layout.layerToggleCount).toBeGreaterThan(2)
+  expect(layout.materialFamilyLayerCount).toBeGreaterThanOrEqual(1)
+  expect(layout.materialLawLayerCount).toBeGreaterThanOrEqual(1)
+  expect(layout.layerGroupText).toContain('Material families')
+  expect(layout.layerGroupText).toContain('Material laws')
+  expect(layout.layerToggleText).toContain('Concrete')
+  expect(layout.layerToggleText).toMatch(/Steel|Bilinear|damage-plasticity/)
+  expect(layout.layerToggleOverflowCount).toBe(0)
   expect(layout.viewport?.width || 0).toBeGreaterThanOrEqual(540)
   expect(layout.viewport?.height || 0).toBeGreaterThanOrEqual(398)
   expect(layout.stageOverlayOcclusionBudget).toBe('dense-model-protagonist')
@@ -2839,6 +2882,28 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.drawingForceVectorEvidenceWindowState?.selectedMemberId).toBe(layout.loadCombinationForceSelectedMember)
   expect(layout.drawingForceVectorEvidenceWindowState?.materialLocked).toBe(true)
   expect(layout.drawingForceVectorEvidenceOverflowCount).toBe(0)
+  expect(layout.drawingSheetForceOverlayStatus).toBe('ready')
+  expect(layout.drawingSheetForceOverlaySchema).toBe('structure-viewer-drawing-sheet-force-overlay.v1')
+  expect(layout.drawingSheetForceOverlayActiveSheet).toBe(layout.drawingHandoffActiveSheet)
+  expect(layout.drawingSheetForceOverlaySelectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
+  expect(layout.drawingSheetForceOverlaySelectedMember).toBe(layout.loadCombinationForceSelectedMember)
+  expect(layout.drawingSheetForceOverlayRowCount).toBe(layout.drawingForceVectorEvidenceRowCount)
+  expect(layout.drawingSheetForceOverlayRenderedRowCount).toBe(layout.drawingSheetForceOverlayRowCount)
+  expect(layout.drawingSheetForceOverlaySvgCount).toBe(1)
+  expect(layout.drawingSheetForceOverlayRenderedVectorCount).toBe(layout.drawingSheetForceOverlayVectorCount)
+  expect(layout.drawingSheetForceOverlayVectorCount).toBe(layout.drawingSheetForceOverlayRowCount)
+  expect(layout.drawingSheetForceOverlayForceRowCount).toBeGreaterThanOrEqual(layout.drawingSheetForceOverlayRowCount)
+  expect(layout.drawingSheetForceOverlaySourceBackedCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingSheetForceOverlayMaxDcr).toBeGreaterThan(0)
+  expect(layout.drawingSheetForceOverlayMaterialLocked).toBe('true')
+  expect(layout.drawingSheetForceOverlayText).toContain('Drawing Sheet Force Overlay')
+  expect(layout.drawingSheetForceOverlayKinds).toEqual(expect.arrayContaining(['axial', 'shear', 'moment']))
+  expect(layout.drawingSheetForceOverlayMomentCount).toBeGreaterThanOrEqual(1)
+  expect(layout.drawingSheetForceOverlayWindowState?.schemaVersion).toBe('structure-viewer-drawing-sheet-force-overlay.v1')
+  expect(layout.drawingSheetForceOverlayWindowState?.status).toBe('ready')
+  expect(layout.drawingSheetForceOverlayWindowState?.rowCount).toBe(layout.drawingSheetForceOverlayRowCount)
+  expect(layout.drawingSheetForceOverlayWindowState?.materialLocked).toBe(true)
+  expect(layout.drawingSheetForceOverlayOverflowCount).toBe(0)
   expect(layout.drawingCapacityHandoffStatus).toBe('ready')
   expect(layout.drawingCapacityHandoffSchema).toBe('structure-viewer-drawing-capacity-handoff-ledger.v1')
   expect(layout.drawingCapacityHandoffActiveSheet).toBe(layout.drawingHandoffActiveSheet)
@@ -3199,6 +3264,36 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.calloutCount).toBeGreaterThanOrEqual(4)
   expect(layout.chartFooterOverlap).toBe(0)
   expect(layout.calloutBadgeOverlap).toBe(0)
+  await page.locator('[data-viewer-workflow-tab="drawings"]').first().click()
+  const drawingWorkflow = await page.evaluate(() => {
+    const readDisplay = (selector: string) => {
+      const node = document.querySelector(selector)
+      return node instanceof HTMLElement ? window.getComputedStyle(node).display : ''
+    }
+    const drawingSection = document.querySelector('#drawing-handoff-section')
+    const drawingRect = drawingSection instanceof HTMLElement ? drawingSection.getBoundingClientRect() : null
+    return {
+      workflow: document.body.getAttribute('data-viewer-workflow') || '',
+      overlayDensity: document.body.getAttribute('data-stage-overlay-density') || '',
+      hash: window.location.hash,
+      activeDrawingsTabCount: document.querySelectorAll('[data-viewer-workflow-tab="drawings"].is-active').length,
+      stageResultDisplay: readDisplay('#stage-result-callouts'),
+      stageOverlayReceiptDisplay: readDisplay('#stage-overlay-receipt'),
+      loadGlyphDisplay: readDisplay('#stage-load-support-glyphs'),
+      contourSectionDisplay: readDisplay('#contour-section'),
+      drawingSectionTop: drawingRect?.top ?? 9999,
+      drawingSectionHeight: drawingRect?.height ?? 0,
+    }
+  })
+  expect(drawingWorkflow.workflow).toBe('drawings')
+  expect(drawingWorkflow.overlayDensity).toBe('drawing-clean')
+  expect(drawingWorkflow.hash).toBe('#drawing-handoff-section')
+  expect(drawingWorkflow.activeDrawingsTabCount).toBeGreaterThanOrEqual(1)
+  expect(drawingWorkflow.stageResultDisplay).toBe('none')
+  expect(drawingWorkflow.stageOverlayReceiptDisplay).toBe('none')
+  expect(drawingWorkflow.loadGlyphDisplay).toBe('none')
+  expect(drawingWorkflow.contourSectionDisplay).toBe('none')
+  expect(drawingWorkflow.drawingSectionHeight).toBeGreaterThan(0)
   await expectNoBrowserErrors(errors)
 })
 

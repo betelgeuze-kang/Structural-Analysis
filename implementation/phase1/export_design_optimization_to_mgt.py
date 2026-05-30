@@ -3084,6 +3084,20 @@ def main() -> int:
         default="",
     )
     p.add_argument("--output-mgt", default="implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt")
+    p.add_argument(
+        "--roundtrip-json-out",
+        default="implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    )
+    p.add_argument(
+        "--sync-roundtrip-after-export",
+        action="store_true",
+        help="Sync roundtrip JSON source.sha256 (and optional re-parse) after writing optimized MGT.",
+    )
+    p.add_argument(
+        "--refresh-roundtrip-parse-after-export",
+        action="store_true",
+        help="With --sync-roundtrip-after-export, re-parse MGT into roundtrip JSON (slow).",
+    )
     p.add_argument("--report-out", default="implementation/phase1/open_data/midas/midas_generator_33.optimized.export_report.json")
     p.add_argument("--patch-manifest-out", default="implementation/phase1/open_data/midas/midas_generator_33.optimized.patch_manifest.json")
     p.add_argument("--instruction-sidecar-out", default="implementation/phase1/open_data/midas/midas_generator_33.optimized.instruction_sidecar.json")
@@ -5290,6 +5304,21 @@ def main() -> int:
         },
     }
     _write_json(report_out_path, report)
+
+    if bool(args.sync_roundtrip_after_export):
+        from implementation.phase1.sync_mgt_roundtrip_provenance import refresh_optimized_roundtrip_from_mgt
+
+        refresh_payload = refresh_optimized_roundtrip_from_mgt(
+            mgt_path=output_mgt_path,
+            roundtrip_json=Path(args.roundtrip_json_out),
+            parse_refresh=bool(args.refresh_roundtrip_parse_after_export),
+            sync_provenance_only=not bool(args.refresh_roundtrip_parse_after_export),
+        )
+        report.setdefault("mgt_roundtrip_refresh", refresh_payload)
+        _write_json(report_out_path, report)
+        if refresh_payload.get("status") != "ready":
+            return 1
+
     return 0 if report["contract_pass"] else 1
 
 

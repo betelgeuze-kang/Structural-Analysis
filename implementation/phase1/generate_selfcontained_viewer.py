@@ -177,9 +177,11 @@ def generate_selfcontained_html(model_data: dict) -> str:
         embedded_json = json.dumps(model_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
         # Inline JSON is preferred by the viewer when opened over file://
+        # Use a global JS object instead of application/json to avoid HTML-parsing edge cases
+        # with large payloads (e.g., <!--, -->, </script> inside JSON strings).
         injection = f"""
-<script type="application/json" id="embedded-model-data">
-{embedded_json}
+<script>
+window.__STRUCTURE_VIEWER_PAYLOAD__ = {embedded_json};
 </script>
 """
         html_content = html_content.replace("</body>", f"{injection}\n</body>")

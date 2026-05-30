@@ -1,0 +1,67 @@
+{
+  "schema_version": "gap-closure-status.v1",
+  "generated_at": "2026-05-30T17:52:38.607871+00:00",
+  "overall_status": "ready",
+  "delivery_status": "ready",
+  "authority_holdout_status": "open",
+  "bundle_status": "ready",
+  "blockers": [],
+  "pending_authority_closure": true,
+  "sections": {
+    "drawing_comparison_p1_p3": {
+      "status": "complete",
+      "note": "See gap doc section 1.3"
+    },
+    "member_alignment_1_4": {
+      "status": "complete",
+      "alignment_status": "aligned"
+    },
+    "engine_e_p1_story_reanalysis": {
+      "status": "pass",
+      "reanalysis_status": "pass_with_story_proxy_check"
+    },
+    "engine_e_p2_commercial_crossval": {
+      "status": "pass_with_marginal_metrics",
+      "marginal_accepted": 1,
+      "hard_failures": 0
+    },
+    "optimization_a_p2_proxy_gate": {
+      "status": "pass",
+      "divergence_count": 0
+    },
+    "eb_rh_e_p3": {
+      "status": "partial",
+      "supplementary_attached": 3,
+      "rh_still_open": 3
+    },
+    "native_mgt_solve": {
+      "status": "story_proxy_pass",
+      "integrity": "verified",
+      "native_fea": "readiness_pass",
+      "global_fea_readiness": "ready",
+      "roundtrip_sync": "ready",
+      "roundtrip_parsed": true
+    },
+    "rh_closure_checklist": {
+      "status": "pending_authority",
+      "open_count": 3
+    },
+    "gpu_newton_terminal": {
+      "status": "not_proven",
+      "claim_label": "gpu_assist_observed",
+      "gpu_assist_observed": true,
+      "gpu_mainloop_residency_observed": true,
+      "backends": {
+        "static": "rocm_torch_hip_mainloop",
+        "ndtha": "rocm_torch_hip_mainloop"
+      }
+    },
+    "ml_multi_objective_a_p3": {
+      "status": "not_started"
+    }
+  },
+  "artifacts": {
+    "delivery_evidence_bundle": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
+    "residual_holdout_closure_updates": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
+  }
+}

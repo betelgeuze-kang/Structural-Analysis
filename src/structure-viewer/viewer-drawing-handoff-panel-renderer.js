@@ -37,20 +37,82 @@ function compactReceiptValue(value = '') {
 function compactDrawingMaterialFamily(value = '') {
   const text = normalizeText(value);
   const lower = text.toLowerCase();
+  // Match against the full 47-family ontology so every source material is readable in the drawing rail
   if (lower.includes('structural steel')) return 'Steel';
+  if (lower.includes('stainless steel')) return 'SS';
+  if (lower.includes('cold formed')) return 'CFS';
+  if (lower.includes('rail steel')) return 'Rail';
   if (lower.includes('concrete')) return 'Conc';
-  if (lower.includes('composite')) return 'Comp';
+  if (lower.includes('composite') || lower.includes('src') || lower.includes('cft') || lower.includes('comptr')) return 'Comp';
   if (lower.includes('rigid')) return 'Rigid';
+  if (lower.includes('rebar')) return 'Rebar';
+  if (lower.includes('prestress')) return 'PC';
+  if (lower.includes('cable')) return 'Cable';
+  if (lower.includes('bolt') || lower.includes('anchor')) return 'Bolt';
+  if (lower.includes('weld')) return 'Weld';
+  if (lower.includes('frp')) return 'FRP';
+  if (lower.includes('timber') || lower.includes('wood') || lower.includes('glulam')) return 'Timber';
+  if (lower.includes('masonry')) return 'Masonry';
+  if (lower.includes('aluminum') || lower.includes('alum')) return 'Alum';
+  if (lower.includes('metal deck')) return 'Deck';
+  if (lower.includes('facade') || lower.includes('cladding')) return 'Facade';
+  if (lower.includes('sleeve') || lower.includes('embed')) return 'Embed';
+  if (lower.includes('rail fastener')) return 'Fastener';
+  if (lower.includes('rail sleeper') || lower.includes('rail tie')) return 'Sleeper';
+  if (lower.includes('seismic isolator') || lower.includes('lead rubber')) return 'Isolator';
+  if (lower.includes('elastomer') || lower.includes('rubber bearing')) return 'Bearing';
+  if (lower.includes('pot bearing') || lower.includes('spherical bearing')) return 'PotBrg';
+  if (lower.includes('resilient pad')) return 'Pad';
+  if (lower.includes('expansion joint')) return 'ExpJnt';
+  if (lower.includes('damper')) return 'Damper';
+  if (lower.includes('spring') || lower.includes('nonlinear link')) return 'Spring';
+  if (lower.includes('mass') || lower.includes('inertia')) return 'Mass';
+  if (lower.includes('glass') || lower.includes('glazing')) return 'Glass';
+  if (lower.includes('ballast')) return 'Ballast';
+  if (lower.includes('soil') || lower.includes('clay') || lower.includes('sand') || lower.includes('gravel') || lower.includes('rock')) return 'Soil';
+  if (lower.includes('geosynthetic') || lower.includes('geomembrane') || lower.includes('geotextile')) return 'GeoSyn';
+  if (lower.includes('adhesive') || lower.includes('epoxy') || lower.includes('resin')) return 'Adhesive';
+  if (lower.includes('formwork') || lower.includes('shoring')) return 'Formwk';
+  if (lower.includes('screed') || lower.includes('topping')) return 'Screed';
+  if (lower.includes('ground improvement') || lower.includes('soil-cement') || lower.includes('jet grout')) return 'GrndImp';
+  if (lower.includes('grout') || lower.includes('backfill')) return 'Grout';
+  if (lower.includes('waterproof')) return 'Waterpf';
+  if (lower.includes('roof')) return 'Roof';
+  if (lower.includes('asphalt') || lower.includes('bitumen')) return 'Asphalt';
+  if (lower.includes('insulat')) return 'Insul';
+  if (lower.includes('fire proof') || lower.includes('fireproof') || lower.includes('intumescent')) return 'FirePrf';
+  if (lower.includes('coating') || lower.includes('paint') || lower.includes('primer') || lower.includes('galvan')) return 'Coating';
+  if (lower.includes('sealant') || lower.includes('caulk') || lower.includes('joint filler')) return 'Sealant';
+  if (lower.includes('gypsum') || lower.includes('drywall') || lower.includes('plaster board')) return 'Gypsum';
+  if (lower.includes('stone') || lower.includes('marble') || lower.includes('tile') || lower.includes('terrazzo')) return 'Stone';
   return text.length > 9 ? `${text.slice(0, 8)}...` : text;
 }
 
 function compactDrawingMaterialModel(value = '') {
   const text = normalizeText(value);
   const lower = text.toLowerCase();
+  // Constitutive / behaviour models
   if (lower.includes('concrete damage')) return 'CDP';
   if (lower.includes('steel bilinear')) return 'Bilinear';
   if (lower.includes('composite steel')) return 'SRC int.';
   if (lower.includes('rigid link')) return 'Rigid link';
+  if (lower.includes('elastic')) return 'Elastic';
+  if (lower.includes('plastic')) return 'Plastic';
+  if (lower.includes('hardening')) return lower.includes('kinematic') ? 'KineHard' : 'IsoHard';
+  if (lower.includes('damage')) return 'Damage';
+  if (lower.includes('drucker-prager')) return 'D-P';
+  if (lower.includes('mohr-coulomb')) return 'M-C';
+  if (lower.includes('von mises')) return 'vMises';
+  if (lower.includes('ramberg-osgood')) return 'R-O';
+  if (lower.includes('trilinear')) return 'Trilinear';
+  if (lower.includes('multilinear')) return 'Multilinear';
+  if (lower.includes('hyperelastic')) return 'HyperEl';
+  if (lower.includes('creep')) return 'Creep';
+  if (lower.includes('visco')) return 'Visco';
+  if (lower.includes('fracture')) return 'Fracture';
+  if (lower.includes('bond') || lower.includes('slip')) return 'BondSlip';
+  if (lower.includes('contact')) return 'Contact';
+  if (lower.includes('cohesive')) return 'Cohesive';
   return text.length > 10 ? `${text.slice(0, 9)}...` : text;
 }
 

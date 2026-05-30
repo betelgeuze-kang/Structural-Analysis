@@ -695,6 +695,13 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "STRUCTURE_VIEWER_DRAWING_FORCE_VECTOR_EVIDENCE_SCHEMA_VERSION" in drawing_handoff_renderer_text
     assert "buildDrawingForceVectorEvidenceModel" in text
     assert "__STRUCTURE_VIEWER_DRAWING_FORCE_VECTOR_EVIDENCE_STATE__" in text
+    assert "data-drawing-sheet-force-overlay" in drawing_handoff_renderer_text
+    assert "data-drawing-sheet-force-overlay-row" in drawing_handoff_renderer_text
+    assert "data-drawing-sheet-force-overlay-svg" in drawing_handoff_renderer_text
+    assert "structure-viewer-drawing-sheet-force-overlay.v1" in drawing_handoff_renderer_text
+    assert "STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_SCHEMA_VERSION" in drawing_handoff_renderer_text
+    assert "buildDrawingSheetForceOverlayModel" in text
+    assert "__STRUCTURE_VIEWER_DRAWING_SHEET_FORCE_OVERLAY_STATE__" in text
     assert "data-drawing-capacity-handoff-ledger" in drawing_handoff_renderer_text
     assert "data-drawing-capacity-handoff-row" in drawing_handoff_renderer_text
     assert "structure-viewer-drawing-capacity-handoff-ledger.v1" in drawing_handoff_renderer_text
@@ -939,6 +946,12 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "No assets match the active drawing quality filter." in tree_model_text
     assert "buildLoadCaseListModel" in text
     assert "buildLayerToggleItems" in text
+    assert "materialLayerMetaById" in text
+    assert "normalizeLayerVisibilityKey" in text
+    assert "data-layer-toggle-row" in text
+    assert 'data-viewer-workflow-tab="drawings"' in text
+    assert 'href="#drawing-handoff-section"' in text
+    assert "drawing-clean" in text
     assert "Artifact-driven view" in side_panel_model_text
     assert "buildViewerSearchResultsModel" in text
     assert "Search ready | members" in search_results_model_text

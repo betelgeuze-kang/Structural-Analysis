@@ -1,0 +1,68 @@
+{
+  "schema_version": "rh-closure-checklist.v1",
+  "generated_at": "2026-05-30T17:52:38.575397+00:00",
+  "status": "pending_authority",
+  "open_count": 3,
+  "delivery_bundle_status": "ready",
+  "delivery_summary": {
+    "cross_validation_status": "pass_with_marginal_metrics",
+    "cross_validation_marginal_accepted": 1,
+    "cross_validation_hard_failures": 0,
+    "mgt_roundtrip_sync_status": "ready",
+    "mgt_roundtrip_parsed": true,
+    "global_fea_readiness_status": "ready",
+    "global_fea_readiness_ready": true,
+    "proxy_divergence_count": 0,
+    "reanalysis_status": "pass_with_story_proxy_check",
+    "story_reanalysis_status": "pass",
+    "mgt_pipeline_status": "story_proxy_pass",
+    "mgt_integrity_status": "verified",
+    "member_alignment_status": "aligned",
+    "removed_member_count": 0
+  },
+  "rows": [
+    {
+      "work_id": "RH-001",
+      "status": "open",
+      "owner": "licensed_engineer",
+      "closure_evidence_required": "signed_engineer_review_packet",
+      "closure_evidence_status": "pending",
+      "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "supplementary_metric_note": "reanalysis=pass_with_story_proxy_check; mgt_integrity=verified",
+      "checklist": [
+        "Attach signed artifact: signed_engineer_review_packet",
+        "Verify supplementary JSON paths match delivery bundle artifacts",
+        "Do not mark RH closed until closure_evidence_path is populated"
+      ]
+    },
+    {
+      "work_id": "RH-002",
+      "status": "open",
+      "owner": "legacy_tool_owner",
+      "closure_evidence_required": "legacy_tool_cross_validation_report",
+      "closure_evidence_status": "pending",
+      "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+      "supplementary_metric_note": "crossval=pass_with_marginal_metrics; marginal_accepted=1",
+      "checklist": [
+        "Attach signed artifact: legacy_tool_cross_validation_report",
+        "Verify supplementary JSON paths match delivery bundle artifacts",
+        "Do not mark RH closed until closure_evidence_path is populated"
+      ]
+    },
+    {
+      "work_id": "RH-003",
+      "status": "open",
+      "owner": "authority_workflow_owner",
+      "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
+      "closure_evidence_status": "pending",
+      "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/story_model_reanalysis.json",
+      "supplementary_metric_note": "story_reanalysis=pass; mgt_pipeline=story_proxy_pass",
+      "checklist": [
+        "Attach signed artifact: authority_signoff_receipt_or_formal_hold",
+        "Verify supplementary JSON paths match delivery bundle artifacts",
+        "Do not mark RH closed until closure_evidence_path is populated"
+      ]
+    }
+  ],
+  "note": "Checklist supports engineer-in-loop closure; auto supplementary attach does not close RH items."
+}

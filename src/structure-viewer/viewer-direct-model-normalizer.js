@@ -1267,6 +1267,7 @@ export function buildDirectModelMeta(rootPayload, modelPayload, sourceMeta = {})
     section_family_summary: buildSectionFamilySummary(sectionCatalogSummary),
     group_summary: buildGroupSummary(groupRows),
     review_row_summary: buildReviewRowSummary(bridgeRows),
+    kds_geometry_bridge: axisBridge,
     load_combination_force_rows: loadCombinationForceRows,
     load_combination_force_row_count: loadCombinationForceRows.length,
     real_drawing_asset_count: realDrawingRegistrySummary.asset_count,
@@ -1387,7 +1388,7 @@ function sanitizeDirectElement(element, idx, context) {
   return {
     ...element,
     id: element?.id ?? idx,
-    type: normalizeElementType(element?.family || element?.type),
+    type: normalizeElementType(element?.type || element?.family),
     node_ids: Array.isArray(element?.node_ids) ? element.node_ids : [],
     member_id: memberId,
     material_id: materialId || normalizeSelectionValue(materialRow.material_id),
@@ -1432,6 +1433,8 @@ function buildSanitizedDirectModel(payload, sourceMeta, nodes, elements, normali
   return {
     nodes,
     elements,
+    materials: modelPayload.materials || [],
+    sections: modelPayload.sections || [],
     meta: {
       ...(rootPayload.meta && typeof rootPayload.meta === 'object' ? rootPayload.meta : {}),
       ...buildDirectModelMeta(rootPayload, modelPayload, sourceMeta),

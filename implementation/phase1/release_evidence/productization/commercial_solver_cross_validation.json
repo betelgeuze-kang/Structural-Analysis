@@ -1,0 +1,921 @@
+{
+  "schema_version": "commercial-solver-cross-validation.v1",
+  "generated_at": "2026-05-30T17:52:28.018634+00:00",
+  "status": "pass_with_marginal_metrics",
+  "claim": "Commercial HF/LF export agreement check; not independent solver certification.",
+  "source": {
+    "mode": "paired_csv",
+    "hf_csv": "implementation/phase1/commercial_hf_export_sample.csv",
+    "lf_csv": "implementation/phase1/commercial_lf_export_sample.csv",
+    "merged_csv": null,
+    "hf_prefix": null,
+    "lf_prefix": null,
+    "metric_source": "commercial_solver_export",
+    "source_family": "commercial_export",
+    "min_source_families": 1,
+    "require_shell_beam_mix": false,
+    "require_top_displacement": true,
+    "public_case_count": 4
+  },
+  "case_count": 12,
+  "cases_passed": 12,
+  "metric_comparisons": 84,
+  "metric_failures": 0,
+  "metric_failures_hard": 0,
+  "metric_failures_marginal": 0,
+  "metric_marginal_accepted": 1,
+  "hard_failure_cases": [],
+  "marginal_failure_cases": [],
+  "marginal_accepted_metrics": [
+    {
+      "case_id": "C-TST-003",
+      "metric": "buckling_factor",
+      "rel_error": 0.1238,
+      "tolerance": 0.12
+    }
+  ],
+  "marginal_tolerance_fraction": 0.05,
+  "modal_buckling_summary": {
+    "case_count": 12,
+    "mode_shape_mac_hf_min": 0.969,
+    "mode_shape_mac_hf_mean": 0.9777,
+    "buckling_factor_hf_min": 2.1,
+    "buckling_factor_hf_mean": 2.604,
+    "note": "Ingested from commercial exports; native eigen/buckling solver not run in-repo."
+  },
+  "cases": [
+    {
+      "case_id": "C-TRN-001",
+      "split": "train",
+      "topology_type": "rahmen",
+      "hazard_type": "wind",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 1.54,
+          "lf": 1.67,
+          "rel_error": 0.0778,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 1260.0,
+          "lf": 1195.0,
+          "rel_error": 0.0516,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.981,
+          "lf": 0.948,
+          "rel_error": 0.0336,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.86,
+          "lf": 2.62,
+          "rel_error": 0.0839,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.021,
+          "rel_error": 0.021,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 0.376493,
+          "lf": 0.408275,
+          "rel_error": 0.0778,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 928.0,
+          "lf": 958.0,
+          "rel_error": 0.0313,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-TRN-002",
+      "split": "train",
+      "topology_type": "truss",
+      "hazard_type": "wind",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 1.11,
+          "lf": 1.2,
+          "rel_error": 0.075,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 910.0,
+          "lf": 868.0,
+          "rel_error": 0.0462,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.988,
+          "lf": 0.96,
+          "rel_error": 0.0283,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 3.21,
+          "lf": 3.0,
+          "rel_error": 0.0654,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.017,
+          "rel_error": 0.017,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 0.358227,
+          "lf": 0.387272,
+          "rel_error": 0.075,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 742.0,
+          "lf": 760.0,
+          "rel_error": 0.0237,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-TRN-003",
+      "split": "train",
+      "topology_type": "rahmen",
+      "hazard_type": "seismic",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 2.08,
+          "lf": 2.31,
+          "rel_error": 0.0996,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 1735.0,
+          "lf": 1614.0,
+          "rel_error": 0.0697,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.976,
+          "lf": 0.938,
+          "rel_error": 0.0389,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.49,
+          "lf": 2.24,
+          "rel_error": 0.1004,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.03,
+          "rel_error": 0.03,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 0.50851,
+          "lf": 0.564739,
+          "rel_error": 0.0996,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 1184.0,
+          "lf": 1217.0,
+          "rel_error": 0.0271,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-TRN-004",
+      "split": "train",
+      "topology_type": "wall-frame",
+      "hazard_type": "wind",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 1.42,
+          "lf": 1.55,
+          "rel_error": 0.0839,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 1320.0,
+          "lf": 1248.0,
+          "rel_error": 0.0545,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.983,
+          "lf": 0.951,
+          "rel_error": 0.0326,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.94,
+          "lf": 2.72,
+          "rel_error": 0.0748,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.022,
+          "rel_error": 0.022,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 0.569393,
+          "lf": 0.621521,
+          "rel_error": 0.0839,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 1002.0,
+          "lf": 1036.0,
+          "rel_error": 0.0328,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-TRN-005",
+      "split": "train",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 2.44,
+          "lf": 2.75,
+          "rel_error": 0.1127,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 2140.0,
+          "lf": 1978.0,
+          "rel_error": 0.0757,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.971,
+          "lf": 0.928,
+          "rel_error": 0.0443,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.18,
+          "lf": 1.94,
+          "rel_error": 0.1101,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.035,
+          "rel_error": 0.035,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 1.169335,
+          "lf": 1.317898,
+          "rel_error": 0.1127,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 1561.0,
+          "lf": 1612.0,
+          "rel_error": 0.0316,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-TRN-006",
+      "split": "train",
+      "topology_type": "truss",
+      "hazard_type": "seismic",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 1.72,
+          "lf": 1.9,
+          "rel_error": 0.0947,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 1450.0,
+          "lf": 1352.0,
+          "rel_error": 0.0676,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.979,
+          "lf": 0.943,
+          "rel_error": 0.0368,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.73,
+          "lf": 2.49,
+          "rel_error": 0.0879,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.027,
+          "rel_error": 0.027,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 0.55509,
+          "lf": 0.613181,
+          "rel_error": 0.0947,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 1097.0,
+          "lf": 1128.0,
+          "rel_error": 0.0275,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-TRN-007",
+      "split": "train",
+      "topology_type": "wall-frame",
+      "hazard_type": "combined",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 2.16,
+          "lf": 2.41,
+          "rel_error": 0.1037,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 1895.0,
+          "lf": 1766.0,
+          "rel_error": 0.0681,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.974,
+          "lf": 0.933,
+          "rel_error": 0.0421,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.36,
+          "lf": 2.1,
+          "rel_error": 0.1102,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.032,
+          "rel_error": 0.032,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 0.866118,
+          "lf": 0.966363,
+          "rel_error": 0.1037,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 1335.0,
+          "lf": 1374.0,
+          "rel_error": 0.0284,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-TST-001",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "seismic",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 2.31,
+          "lf": 2.6,
+          "rel_error": 0.1115,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 2035.0,
+          "lf": 1878.0,
+          "rel_error": 0.0771,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.972,
+          "lf": 0.93,
+          "rel_error": 0.0432,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.24,
+          "lf": 1.99,
+          "rel_error": 0.1116,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.033,
+          "rel_error": 0.033,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 1.107035,
+          "lf": 1.246013,
+          "rel_error": 0.1115,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 1498.0,
+          "lf": 1548.0,
+          "rel_error": 0.0323,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-TST-002",
+      "split": "test",
+      "topology_type": "wall-frame",
+      "hazard_type": "seismic",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 1.88,
+          "lf": 2.09,
+          "rel_error": 0.1005,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 1610.0,
+          "lf": 1499.0,
+          "rel_error": 0.0689,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.978,
+          "lf": 0.941,
+          "rel_error": 0.0378,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.57,
+          "lf": 2.31,
+          "rel_error": 0.1012,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.028,
+          "rel_error": 0.028,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 0.753844,
+          "lf": 0.83805,
+          "rel_error": 0.1005,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 1216.0,
+          "lf": 1259.0,
+          "rel_error": 0.0342,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-TST-003",
+      "split": "test",
+      "topology_type": "outrigger",
+      "hazard_type": "combined",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 2.58,
+          "lf": 2.93,
+          "rel_error": 0.1195,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 2260.0,
+          "lf": 2082.0,
+          "rel_error": 0.0788,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.969,
+          "lf": 0.923,
+          "rel_error": 0.0475,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.1,
+          "lf": 1.84,
+          "rel_error": 0.1238,
+          "tolerance": 0.12,
+          "ok": false,
+          "marginal_only": true
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.037,
+          "rel_error": 0.037,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 1.236428,
+          "lf": 1.40416,
+          "rel_error": 0.1195,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 1638.0,
+          "lf": 1702.0,
+          "rel_error": 0.0376,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-VAL-001",
+      "split": "val",
+      "topology_type": "rahmen",
+      "hazard_type": "combined",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 2.02,
+          "lf": 2.25,
+          "rel_error": 0.1022,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 1705.0,
+          "lf": 1593.0,
+          "rel_error": 0.0657,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.975,
+          "lf": 0.937,
+          "rel_error": 0.039,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 2.45,
+          "lf": 2.21,
+          "rel_error": 0.098,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.029,
+          "rel_error": 0.029,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 0.493841,
+          "lf": 0.55007,
+          "rel_error": 0.1022,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 1249.0,
+          "lf": 1291.0,
+          "rel_error": 0.0325,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    },
+    {
+      "case_id": "C-VAL-002",
+      "split": "val",
+      "topology_type": "truss",
+      "hazard_type": "wind",
+      "metrics": [
+        {
+          "metric": "drift_ratio_pct",
+          "hf": 1.18,
+          "lf": 1.27,
+          "rel_error": 0.0709,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "base_shear_kN",
+          "hf": 980.0,
+          "lf": 939.0,
+          "rel_error": 0.0418,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "mode_shape_mac",
+          "hf": 0.987,
+          "lf": 0.958,
+          "rel_error": 0.0294,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "buckling_factor",
+          "hf": 3.12,
+          "lf": 2.92,
+          "rel_error": 0.0641,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "equilibrium_residual",
+          "hf": 0.0,
+          "lf": 0.018,
+          "rel_error": 0.018,
+          "tolerance": 0.05,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "top_displacement_m",
+          "hf": 0.380818,
+          "lf": 0.409863,
+          "rel_error": 0.0709,
+          "tolerance": 0.12,
+          "ok": true,
+          "marginal_only": false
+        },
+        {
+          "metric": "axial_force_kN",
+          "hf": 791.0,
+          "lf": 818.0,
+          "rel_error": 0.033,
+          "tolerance": 0.1,
+          "ok": true,
+          "marginal_only": false
+        }
+      ],
+      "ok": true
+    }
+  ],
+  "tolerances": {
+    "drift_ratio_pct": 0.12,
+    "base_shear_kN": 0.1,
+    "mode_shape_mac": 0.05,
+    "buckling_factor": 0.12,
+    "equilibrium_residual": 0.05,
+    "top_displacement_m": 0.12,
+    "axial_force_kN": 0.1
+  }
+}

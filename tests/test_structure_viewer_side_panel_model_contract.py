@@ -58,12 +58,26 @@ const layerItems = buildLayerToggleItems({
   beam: [{id: 'E1'}],
   wall: [{id: 'E2'}],
 });
+const enhancedLayerItems = buildLayerToggleItems({
+  beam: [{id: 'E1'}, {id: 'E2'}],
+  shell: [{id: 'E3'}],
+}, {
+  materialRows: [
+    {material_family: 'concrete', material_family_label: 'Concrete', usage_count: 12},
+    {material_family: 'steel', material_family_label: 'Structural steel', usage_count: 4},
+  ],
+  materialModelRows: [
+    {material_model: 'Concrete damage-plasticity', usage_count: 12},
+    {material_model: 'Steel bilinear', usage_count: 4},
+  ],
+});
 
 console.log(JSON.stringify({
   explicit,
   storyFallback,
   empty,
   layerItems,
+  enhancedLayerItems,
 }));
 """
     )
@@ -138,4 +152,54 @@ console.log(JSON.stringify({
     assert payload["layerItems"] == [
         {"type": "beam", "label": "beam", "checked": True},
         {"type": "wall", "label": "wall", "checked": True},
+    ]
+    assert payload["enhancedLayerItems"] == [
+        {
+            "type": "beam",
+            "key": "beam",
+            "label": "beam",
+            "group": "Structure",
+            "count": 2,
+            "checked": True,
+        },
+        {
+            "type": "shell",
+            "key": "shell",
+            "label": "shell",
+            "group": "Structure",
+            "count": 1,
+            "checked": True,
+        },
+        {
+            "type": "material_family:concrete",
+            "key": "material_family:concrete",
+            "label": "Concrete",
+            "group": "Material families",
+            "count": 12,
+            "checked": True,
+        },
+        {
+            "type": "material_family:steel",
+            "key": "material_family:steel",
+            "label": "Structural steel",
+            "group": "Material families",
+            "count": 4,
+            "checked": True,
+        },
+        {
+            "type": "material_model:Concrete damage-plasticity",
+            "key": "material_model:concrete_damage-plasticity",
+            "label": "Concrete damage-plasticity",
+            "group": "Material laws",
+            "count": 12,
+            "checked": True,
+        },
+        {
+            "type": "material_model:Steel bilinear",
+            "key": "material_model:steel_bilinear",
+            "label": "Steel bilinear",
+            "group": "Material laws",
+            "count": 4,
+            "checked": True,
+        },
     ]

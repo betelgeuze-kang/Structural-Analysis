@@ -1,0 +1,17 @@
+{
+  "schema_version": "proxy-solver-divergence-gate.v1",
+  "generated_at": "2026-05-30T17:52:28.053477+00:00",
+  "status": "pass",
+  "claim": "Heuristic proxy/solver consistency on optimization change rows; not structural approval.",
+  "change_count": 20,
+  "cost_proxy_moved_rows": 5,
+  "drift_moved_rows": 0,
+  "divergence_count": 0,
+  "thresholds": {
+    "min_cost_proxy_delta": 5.0,
+    "max_drift_delta_pct": 0.02,
+    "max_governing_dcr_after": 1.35,
+    "require_drift_stable_when_cost_moves": true
+  },
+  "divergences": []
+}

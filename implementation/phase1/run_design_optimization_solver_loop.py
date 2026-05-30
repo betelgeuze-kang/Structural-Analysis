@@ -296,6 +296,8 @@ def _solver_stage_state(
         "static_converged": bool(static.get("converged", False)),
         "backend_static": str(static_runtime.get("main_loop_backend", static.get("backend", ""))),
         "backend_ndtha": str(ndtha_runtime.get("main_loop_backend", ndtha.get("backend", ""))),
+        "runtime_static": dict(static_runtime),
+        "runtime_ndtha": dict(ndtha_runtime),
         "cost_proxy": float(np.sum(np.asarray(state["group_cost_proxy"], dtype=np.float64))),
     }
 

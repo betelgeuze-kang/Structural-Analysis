@@ -20,7 +20,12 @@
       "queue_status": "pending_review",
       "sla_hours": 72,
       "sla_label": "72h",
-      "status": "open"
+      "status": "open",
+      "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "supplementary_evidence_status": "attached_supplementary",
+      "supplementary_evidence_note": "Post-optimization reanalysis gate records story-proxy safety metrics.",
+      "supplementary_attached_at_utc": "2026-05-30T17:52:38.547995+00:00",
+      "supplementary_metric_note": "reanalysis=pass_with_story_proxy_check; mgt_integrity=verified"
     },
     "RH-002": {
       "closure_evidence_path": "",
@@ -33,7 +38,12 @@
       "queue_status": "pending_cross_validation",
       "sla_hours": 120,
       "sla_label": "120h",
-      "status": "open"
+      "status": "open",
+      "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+      "supplementary_evidence_status": "attached_supplementary",
+      "supplementary_evidence_note": "Commercial HF/LF cross-validation supports legacy-tool comparison workflow.",
+      "supplementary_attached_at_utc": "2026-05-30T17:52:38.548012+00:00",
+      "supplementary_metric_note": "crossval=pass_with_marginal_metrics; marginal_accepted=1"
     },
     "RH-003": {
       "closure_evidence_path": "",
@@ -46,7 +56,18 @@
       "queue_status": "pending_signoff",
       "sla_hours": 168,
       "sla_label": "168h",
-      "status": "open"
+      "status": "open",
+      "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/story_model_reanalysis.json",
+      "supplementary_evidence_status": "attached_supplementary",
+      "supplementary_evidence_note": "Story-model reanalysis receipt with MGT provenance for authority workflow review.",
+      "supplementary_attached_at_utc": "2026-05-30T17:52:38.548017+00:00",
+      "supplementary_metric_note": "story_reanalysis=pass; mgt_pipeline=story_proxy_pass"
     }
+  },
+  "supplementary_evidence_basis": {
+    "delivery_evidence_bundle": "2026-05-30T17:52:38.524191+00:00",
+    "bundle_status": "ready",
+    "bundle_schema": "delivery-evidence-bundle.v1",
+    "note": "Supplementary paths do not close RH work items; signed closure evidence still required."
   }
 }

@@ -1262,6 +1262,23 @@ def main() -> None:
     p.add_argument("--objective-profile", default="balanced_practice")
     p.add_argument("--budget-mode", default="high")
     p.add_argument("--batch-limit", type=int, default=None)
+    p.add_argument(
+        "--run-delivery-hooks",
+        action="store_true",
+        help="After writing changes, run member_alignment enrich + delivery evidence bundle.",
+    )
+    p.add_argument(
+        "--baseline-json-for-delivery",
+        default="implementation/phase1/open_data/midas/midas_generator_33.json",
+    )
+    p.add_argument(
+        "--optimized-roundtrip-json-for-delivery",
+        default="implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    )
+    p.add_argument(
+        "--delivery-bundle-out",
+        default="implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
+    )
     args = p.parse_args()
 
     loop_report = _load_json(Path(args.solver_loop_report))
@@ -1769,6 +1786,19 @@ def main() -> None:
     )
     out = Path(args.out)
     print(f"Wrote design optimization cost reduction report: {out}")
+
+    if args.run_delivery_hooks:
+        from run_post_cost_reduction_delivery_hooks import run_delivery_hooks
+
+        repo_root = Path(__file__).resolve().parents[2]
+        hook_result = run_delivery_hooks(
+            repo_root=repo_root,
+            changes_json=Path(args.changes_json_out),
+            baseline_json=Path(args.baseline_json_for_delivery),
+            optimized_roundtrip_json=Path(args.optimized_roundtrip_json_for_delivery),
+            bundle_output=Path(args.delivery_bundle_out),
+        )
+        print(f"Delivery hooks: {hook_result.get('status')} -> {hook_result.get('bundle_output')}")
 
 
 if __name__ == "__main__":

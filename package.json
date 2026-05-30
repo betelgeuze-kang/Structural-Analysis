@@ -21,7 +21,8 @@
     "export:viewer-report-pdf": "node ./scripts/export-structure-viewer-report-pdf.mjs",
     "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
     "verify:viewer-performance-probe": "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
-    "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
+    "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
+    "serve:viewer": "node ./scripts/serve-structure-viewer.mjs"
   },
   "dependencies": {
     "react": "18.2.0",

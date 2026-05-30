@@ -386,9 +386,12 @@
   body.structural-surface.command-center-shell .panel-toggle-row[data-layer-toggle-row] {
     display:grid;
     grid-template-columns:auto minmax(0,1fr) auto;
-    gap:8px;
+    gap:7px;
     min-height:30px;
+    width:100%;
+    min-width:0;
     padding:4px 0;
+    box-sizing:border-box;
   }
 
   body.structural-surface.command-center-shell .panel-toggle-row__label,
@@ -404,6 +407,10 @@
     color:var(--text);
     font-size:11px;
     font-weight:800;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    line-height:1.18;
   }
 
   body.structural-surface.command-center-shell .panel-toggle-row__count {
@@ -440,13 +447,60 @@
     pointer-events:none !important;
   }
 
-  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .stage-overlay-panel--left .stage-overlay-section:not(.stage-review-controls) {
-    display:none;
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .stage-overlay-panel--left .stage-overlay-section:not(.stage-review-controls),
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .stage-review-controls {
+    display:none !important;
   }
 
-  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .stage-subtitle::after {
-    content:" Drawing clean mode hides analysis callouts so sheets remain readable.";
-    color:var(--accent);
+  /* ── Drawing-first compact mode: maximize sheet visibility, minimize chrome ── */
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-panel {
+    gap: 5px;
+  }
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-header,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-callout,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-receipt__row,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-sheet {
+    padding: 5px 7px;
+    border-radius: 5px;
+  }
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-grid {
+    gap: 4px;
+  }
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-grid > div {
+    padding: 5px;
+  }
+  /* Enlarge preview so the drawing is the protagonist */
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-preview {
+    min-height: 152px;
+    padding: 6px;
+  }
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-preview__svg {
+    height: 118px;
+  }
+  /* Simplify preview decorations so the sheet reads as a drawing, not a wire puzzle */
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-preview__grid,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-preview__member {
+    opacity: 0.25;
+  }
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-handoff-preview__core {
+    opacity: 0.35;
+  }
+
+  /* Compact nested ledgers */
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-material-parity-ledger,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-force-handoff-ledger,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-material-model-matrix,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-sheet-force-matrix,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-source-detail-ledger,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-sheet-detail-matrix,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-capacity-handoff-ledger,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-material-constitutive-register,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-material-curve-evidence,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-force-vector-evidence,
+  body.structural-surface.command-center-shell[data-viewer-workflow="drawings"] .drawing-sheet-force-overlay {
+    gap: 4px;
+    padding: 6px;
+    border-radius: 5px;
   }
 
   body.structural-surface.command-center-shell #viewport {
@@ -3519,6 +3573,213 @@
   body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__tail,
   body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__node,
   body.structural-surface.command-center-shell .drawing-force-vector-row--danger .drawing-force-vector-row__meter i { fill:#ff8a80; background:#ff8a80; }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1px solid rgba(117,197,255,.26);
+    border-radius:7px;
+    background:
+      linear-gradient(135deg, rgba(9,27,42,.86), rgba(5,13,22,.78)),
+      rgba(5,12,22,.84);
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__head {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__head span,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__summary span,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row {
+    min-width:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__head b,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__head em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__head strong,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__summary b,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__summary em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row b,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row strong,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row em {
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__head b {
+    color:var(--text);
+    font-size:11px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__head em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__summary em,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row em {
+    color:var(--muted);
+    font-size:9px;
+    font-style:normal;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__head strong {
+    color:#75c5ff;
+    font-size:16px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__summary {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__summary span {
+    padding:5px 6px;
+    border:1px solid rgba(117,197,255,.16);
+    border-radius:6px;
+    background:rgba(5,12,22,.48);
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__summary b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__svg {
+    width:100%;
+    height:auto;
+    aspect-ratio:220/126;
+    overflow:visible;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__page {
+    fill:rgba(226,235,244,.055);
+    stroke:rgba(198,221,244,.34);
+    stroke-width:1;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__grid {
+    fill:none;
+    stroke:rgba(198,221,244,.16);
+    stroke-width:.75;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__member {
+    fill:none;
+    stroke:rgba(224,232,241,.54);
+    stroke-width:2.1;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__core {
+    fill:rgba(45,212,191,.1);
+    stroke:rgba(45,212,191,.48);
+    stroke-width:1.2;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__arrow,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__moment {
+    fill:none;
+    stroke:#75c5ff;
+    stroke-width:var(--drawing-sheet-force-overlay-stroke,3);
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__head,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__tail {
+    fill:#75c5ff;
+    stroke:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector text,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__sheet-label,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__rev-label {
+    fill:rgba(226,235,244,.88);
+    font-size:6.8px;
+    font-weight:800;
+    letter-spacing:0;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__rev-label {
+    text-anchor:end;
+    fill:rgba(169,185,203,.88);
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__rows {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row {
+    appearance:none;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:3px 6px;
+    align-items:center;
+    width:100%;
+    padding:6px 7px;
+    border:1px solid rgba(117,197,255,.18);
+    border-radius:6px;
+    background:rgba(5,12,22,.52);
+    color:inherit;
+    font:inherit;
+    text-align:left;
+    cursor:pointer;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row:hover,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row:focus-visible {
+    border-color:rgba(117,197,255,.48);
+    background:rgba(117,197,255,.1);
+    outline:none;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row b {
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row strong {
+    color:#75c5ff;
+    font-size:10px;
+    font-weight:900;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row em {
+    grid-column:1/-1;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    line-height:1.2;
+  }
+
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--success .drawing-sheet-force-overlay__arrow,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--success .drawing-sheet-force-overlay__moment { stroke:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--success .drawing-sheet-force-overlay__head,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--success .drawing-sheet-force-overlay__tail,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row--success strong { fill:#58d78d; color:#58d78d; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--warn .drawing-sheet-force-overlay__arrow,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--warn .drawing-sheet-force-overlay__moment { stroke:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--warn .drawing-sheet-force-overlay__head,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--warn .drawing-sheet-force-overlay__tail,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row--warn strong { fill:#ffc56f; color:#ffc56f; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--danger .drawing-sheet-force-overlay__arrow,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--danger .drawing-sheet-force-overlay__moment { stroke:#ff8a80; }
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--danger .drawing-sheet-force-overlay__head,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay__vector--danger .drawing-sheet-force-overlay__tail,
+  body.structural-surface.command-center-shell .drawing-sheet-force-overlay-row--danger strong { fill:#ff8a80; color:#ff8a80; }
 
   body.structural-surface.command-center-shell .drawing-capacity-handoff-ledger {
     display:flex;

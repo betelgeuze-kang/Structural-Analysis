@@ -1,0 +1,214 @@
+/* Structural Insight — standalone product shell (v2)
+   Viewport-first layout; workspace chrome available via data-si-shell="workspace". */
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] {
+  --product-topbar-height: 52px;
+  --product-rail-collapsed: 52px;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #app {
+  grid-template-columns: var(--product-rail-collapsed) minmax(0, 1fr) var(--product-rail-collapsed);
+  grid-template-rows: var(--product-topbar-height) minmax(0, 1fr) auto;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #app[data-left-rail-collapsed='false'] {
+  grid-template-columns: minmax(200px, 228px) minmax(0, 1fr) var(--product-rail-collapsed);
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #app[data-right-rail-collapsed='false'] {
+  grid-template-columns: var(--product-rail-collapsed) minmax(0, 1fr) minmax(360px, 420px);
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #app[data-left-rail-collapsed='false'][data-right-rail-collapsed='false'] {
+  grid-template-columns: minmax(200px, 228px) minmax(0, 1fr) minmax(360px, 420px);
+}
+
+/* Compact product top bar */
+body.structural-surface.viewer-product-shell[data-si-shell='product'] header.app-topbar {
+  min-height: var(--product-topbar-height);
+  padding: 0 14px;
+  border-bottom: 1px solid rgba(46, 184, 176, 0.2);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .app-topbar__primary {
+  grid-template-columns: auto minmax(240px, 1fr) minmax(220px, 280px) minmax(280px, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: var(--product-topbar-height);
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .app-topbar__secondary {
+  display: none;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .header-eyebrow {
+  color: var(--si-accent-300);
+  letter-spacing: 0.16em;
+  font-size: 10px;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] header h1 {
+  font-size: 17px;
+  line-height: 1.15;
+  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .top-run-control__receipt {
+  display: none;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .top-run-control__actions {
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .top-run-action--utility[data-top-run-action='light'],
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .top-run-action--utility[data-top-run-action='shortcuts'] {
+  display: none;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #toggle-workspace-chrome {
+  border-color: rgba(46, 184, 176, 0.35);
+  color: var(--si-accent-300);
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #toggle-workspace-chrome.is-active {
+  background: rgba(46, 184, 176, 0.14);
+  border-color: var(--si-accent-400);
+}
+
+/* Stage = viewport hero */
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #stage-panel {
+  min-height: 0;
+  padding: 8px 10px 6px;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .stage-shell__header {
+  display: none;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .stage-frame {
+  min-height: min(72vh, calc(100vh - var(--product-topbar-height) - 88px));
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .stage-overlay-panel--left {
+  display: none;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport {
+  min-height: 420px;
+  border-radius: var(--si-radius-lg);
+  border: 1px solid rgba(46, 184, 176, 0.12);
+}
+
+/* Hide 3D stage decoration clutter — HUD + tool rail carry review context */
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport .axis-helper,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-story-ruler,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-drift-bands,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-story-force-flow-bands,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-load-support-glyphs,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-load-combination-force-glyphs,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-force-demand-contour,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-material-model-demand-badges,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-material-force-ribbons,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-material-force-envelope,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-material-capacity-envelope,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-member-force-playback-trail,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-member-force-vector-field,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-member-material-state-badge,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-overlay-receipt,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-result-callouts,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-result-callout-anchors,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #stage-critical-hotspots,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #panel-zone-stage-badge,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport #info-overlay {
+  display: none !important;
+  pointer-events: none;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #viewport .viewport-hud__context {
+  display: block !important;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .viewport-tool-rail {
+  z-index: 16;
+}
+
+/* Charts strip — collapsed until workspace mode */
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .analysis-cockpit-strip {
+  display: none;
+  margin-top: 8px;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'][data-si-cockpit-charts='visible'] .analysis-cockpit-strip {
+  display: grid;
+}
+
+/* Instrument footer = product status strip */
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .instrument-footer {
+  min-height: 36px;
+  padding: 6px 14px;
+  border-top: 1px solid rgba(46, 184, 176, 0.14);
+  background: rgba(8, 18, 29, 0.92);
+  backdrop-filter: blur(12px);
+  font-size: 11px;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .instrument-footer .instrument-label {
+  color: var(--si-muted-300);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 9px;
+}
+
+/* Duplicate floating toolbar (legacy) hidden in product mode */
+body.structural-surface.viewer-product-shell[data-si-shell='product'] .viewport-toolbar {
+  display: none;
+}
+
+/* Collapsed rails: icon strip only */
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #left-panel.is-collapsed,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #right-panel.is-collapsed {
+  width: var(--product-rail-collapsed);
+  min-width: var(--product-rail-collapsed);
+  overflow: hidden;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #left-panel.is-collapsed .panel-rail-header__title,
+body.structural-surface.viewer-product-shell[data-si-shell='product'] #right-panel.is-collapsed .panel-rail-header__title {
+  display: none;
+}
+
+/* Workspace mode — restore cockpit density */
+body.structural-surface.viewer-product-shell[data-si-shell='workspace'] .app-topbar__secondary {
+  display: flex;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='workspace'] .stage-shell__header {
+  display: grid;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='workspace'] .stage-overlay-panel--left {
+  display: block;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='workspace'] .analysis-cockpit-strip {
+  display: grid;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='workspace'] .viewport-toolbar {
+  display: flex;
+}
+
+body.structural-surface.viewer-product-shell[data-si-shell='workspace'] #viewport .axis-helper {
+  display: block;
+}
+
+@media (max-width: 1100px) {
+  body.structural-surface.viewer-product-shell[data-si-shell='product'] .top-search-shell {
+    max-width: 42vw;
+  }
+}

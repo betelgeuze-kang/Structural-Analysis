@@ -55,7 +55,8 @@ console.log(JSON.stringify({
     assert payload["sidecar"] == "./index.real_drawing_private.data.js"
     assert payload["workspacePreset"] == "midas33_optimized"
     assert payload["candidates"][0] == "custom.json"
-    assert payload["candidates"][1].endswith("midas_generator_33.pr_recheck.json")
+    assert payload["candidates"][1] == "workspace-artifact.json"
+    assert any(candidate.endswith("midas_generator_33.pr_recheck.json") for candidate in payload["candidates"])
     assert payload["workspaceCandidates"][0] == "workspace-artifact.json"
     assert payload["inlineLabel"] == "window.__STRUCTURE_VIEWER_PAYLOAD__"
     assert payload["embedded"] == "fixture-report"

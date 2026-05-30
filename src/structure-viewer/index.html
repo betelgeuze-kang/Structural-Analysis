@@ -3,14 +3,19 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Structural Insight Viewer</title>
+<title>Structural Insight</title>
 <link rel="icon" href="data:,"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="./design-tokens.css"/>
 <link rel="stylesheet" href="./design-theme.css"/>
 <link rel="stylesheet" href="./viewer-visual-identity.css"/>
+<link rel="stylesheet" href="./viewer-product-shell.css"/>
+<link rel="stylesheet" href="./viewer-drawing-comparison.css"/>
 <link rel="stylesheet" href="./commercial-cockpit-polish.css"/>
 </head>
-<body class="structural-surface command-center-shell" data-si-identity="v2" data-viewer-workflow="model">
+<body class="structural-surface command-center-shell viewer-product-shell" data-si-identity="v2" data-si-shell="product" data-viewer-workflow="model">
 <div id="app">
 <header class="app-topbar">
   <div class="app-topbar__primary">
@@ -19,8 +24,8 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
       </button>
       <div class="app-brand-lockup">
-        <div class="header-eyebrow">Optimization Cockpit</div>
-        <h1>Structural Insight Viewer</h1>
+        <div class="header-eyebrow">Precision Engineering</div>
+        <h1>Structural Insight</h1>
       </div>
     </div>
     <section class="top-search-shell" id="search-section">
@@ -56,6 +61,7 @@
         <span><b>Runtime</b><em id="top-run-runtime">--</em></span>
       </div>
       <div class="top-run-control__actions">
+        <button id="toggle-workspace-chrome" type="button" class="top-run-action top-run-action--utility" data-top-run-action="workspace-chrome" onclick="toggleViewerShellMode()" aria-pressed="false" title="Show workspace panels and stage controls">Workspace</button>
         <button id="integrated-review-map-button" type="button" class="top-run-action top-run-action--utility" data-top-run-action="review-map" data-integrated-review-open onclick="openIntegratedReviewNavigator()" aria-haspopup="dialog">Map</button>
         <button id="top-run-compare-button" type="button" class="top-run-action" data-top-run-action="compare" onclick="toggleDeformed()" aria-pressed="false">Compare</button>
         <button id="export-png-button" class="top-run-action" data-top-run-action="export" onclick="exportViewportPng()">Export</button>
@@ -113,6 +119,13 @@
     </div>
   </div>
 </header>
+<p id="viewer-scope-disclaimer" role="note">
+  <strong>Engineer-in-loop:</strong>
+  Results use a reduced story shear-building solver on CPU (GPU kernels are auxiliary smoke tests only).
+  Optimization is physics- and rule-based search, not deployed ML.
+  Cost and savings figures require unit-price provenance and post-optimization reanalysis gate artifacts before delivery.
+  Compare mode overlays baseline geometry and section-id diffs; it does not replace licensed review or permit approval.
+</p>
 <div id="left-panel" class="ops-rail" data-panel-rail="left">
   <div class="panel-rail-header">
     <button type="button" class="panel-collapse-toggle" data-panel-collapse="left-panel" aria-expanded="true" aria-controls="left-panel" onclick="togglePanelRailCollapse('left-panel')" title="Collapse navigation">⟨</button>
@@ -337,6 +350,25 @@
               <span>Max <b id="legend-max">1</b></span>
             </div>
             <div id="legend-source-label" class="stage-contour-scale__source" data-contour-scale-source>Source values</div>
+            <div id="viewer-dual-contour-legend" class="viewer-dual-contour-legend" data-viewer-dual-contour-legend hidden>
+              <div class="viewer-dual-contour-legend__column" data-dual-contour-role="baseline">
+                <strong>Before (baseline)</strong>
+                <div class="viewer-dual-contour-legend__bar" data-dual-contour-bar="baseline" aria-hidden="true"></div>
+                <div class="viewer-dual-contour-legend__range">
+                  <span data-dual-contour-min="baseline">--</span>
+                  <span data-dual-contour-max="baseline">--</span>
+                </div>
+              </div>
+              <div class="viewer-dual-contour-legend__column" data-dual-contour-role="optimized">
+                <strong>After (optimized)</strong>
+                <div class="viewer-dual-contour-legend__bar" data-dual-contour-bar="optimized" aria-hidden="true"></div>
+                <div class="viewer-dual-contour-legend__range">
+                  <span data-dual-contour-min="optimized">--</span>
+                  <span data-dual-contour-max="optimized">--</span>
+                </div>
+              </div>
+              <div class="viewer-dual-contour-legend__linked" data-dual-contour-linked>Linked scale pending Compare variant.</div>
+            </div>
           </div>
           <div id="stage-result-receipt" class="stage-result-receipt" data-stage-result-receipt aria-live="polite">
             <div class="stage-result-receipt__title">
@@ -381,6 +413,34 @@
         </section>
       </aside>
       <div id="viewport" data-stage-overlay-occlusion-budget="dense-model-protagonist" data-stage-dominance-budget="dense-stage-primary">
+        <div id="viewer-dual-contour-viewport-legend" class="viewer-dual-contour-viewport-legend" data-viewer-dual-contour-viewport-legend aria-hidden="true">
+          <strong data-viewport-dual-contour-title>Contour compare</strong>
+          <span data-viewport-dual-contour-field>--</span>
+          <div class="viewer-dual-contour-viewport-legend__split">
+            <span><em>Before</em><i class="viewer-dual-contour-viewport-legend__swatch" data-viewport-dual-contour-swatch="baseline"></i></span>
+            <span><em>After</em><i class="viewer-dual-contour-viewport-legend__swatch" data-viewport-dual-contour-swatch="optimized"></i></span>
+          </div>
+          <span data-viewport-dual-contour-linked>Linked scale --</span>
+        </div>
+        <div id="viewer-drawing-compare-wipe" class="viewer-drawing-compare-wipe" data-viewer-drawing-compare-wipe aria-label="Baseline versus optimized wipe">
+          <div class="viewer-drawing-compare-wipe__head">
+            <span>Drawing compare</span>
+            <strong data-viewer-drawing-compare-status>inactive</strong>
+          </div>
+          <div class="viewer-drawing-compare-wipe__stats" data-viewer-drawing-compare-stats>Load Compare variant to enable baseline ghost and section diff.</div>
+          <button id="export-drawing-comparison-button" type="button" class="viewer-drawing-compare-wipe__export" onclick="exportDrawingComparisonSheet()">Compare Report</button>
+          <input id="viewer-drawing-compare-wipe-slider" type="range" min="0" max="100" value="50" aria-label="Baseline optimized wipe" oninput="setDrawingCompareWipePosition(this.value)"/>
+          <div class="viewer-drawing-compare-wipe__labels"><span>Baseline</span><span>Optimized</span></div>
+          <div id="viewer-optimization-timeline" class="viewer-optimization-timeline" data-viewer-optimization-timeline aria-label="Optimization change timeline">
+            <div class="viewer-optimization-timeline__head">
+              <span>Change timeline</span>
+              <strong data-optimization-timeline-step-label>Baseline</strong>
+            </div>
+            <input id="viewer-optimization-timeline-slider" type="range" min="-1" max="0" value="-1" aria-label="Optimization timeline step" oninput="setOptimizationTimelineStep(this.value)"/>
+            <div class="viewer-optimization-timeline__meta" data-optimization-timeline-meta>Cumulative cost delta --</div>
+            <div class="viewer-optimization-timeline__stages" data-optimization-timeline-stages></div>
+          </div>
+        </div>
         <div id="loading"><div class="spinner"></div><div id="loading-message">Loading model...</div></div>
         <div id="info-overlay"></div>
         <div id="stage-result-callout-anchors" class="stage-result-callout-anchors" data-stage-result-callout-anchors data-stage-result-callout-anchor-schema="structure-viewer-stage-result-callouts.v3" data-stage-result-callout-anchor-status="pending" data-stage-result-callout-anchor-count="0" aria-hidden="true"></div>
@@ -504,7 +564,7 @@
       <article class="kpi-card kpi-card--empty kpi-card--wide">
         <span class="kpi-card__label">Awaiting model</span>
         <strong class="kpi-card__value">--</strong>
-        <span class="kpi-card__meta">Load an artifact to populate the command-center summary.</span>
+        <span class="kpi-card__meta">Load an artifact to populate the live summary.</span>
       </article>
     </div>
     <div id="analysis-result-evidence-panel" class="analysis-result-evidence-panel" data-analysis-result-evidence data-result-evidence-status="pending">
@@ -928,6 +988,42 @@ import {
   buildMemberComparisonModel,
 } from './viewer-member-comparison-model.js';
 import {
+  buildDrawingComparisonDeliveryRows,
+  buildDrawingComparisonRemovedSummary,
+  buildDrawingComparisonState,
+  resolveBaselineArtifactPath,
+  resolveOptimizationChangesPath,
+} from './viewer-drawing-comparison-engine.js';
+import {
+  buildContourContextDescriptor,
+  hasUsableContourRange as hasUsableDrawingCompareContourRange,
+  isNodeContourField as isDrawingCompareNodeContourField,
+  mergeContourRanges,
+  summarizeContourContexts,
+} from './viewer-drawing-comparison-contour.js';
+import {
+  applyCodecheckHydrationToModelData,
+  buildElementDcrMapAllCombinations,
+  buildElementDcrMapFromModelMeta,
+  hydrateModelElementsWithCodecheckDcr,
+  mergeElementDcrMaps,
+  resolveCodecheckCompanionPaths,
+} from './viewer-codecheck-dcr-hydrator.js';
+import {
+  buildOptimizationTimelineDeliveryRows,
+  buildOptimizationTimelineModel,
+  buildTimelineStepHighlights,
+  resolveFirstTimelineStepIndexForStage,
+  resolveOptimizationTimelineStep,
+  resolveTimelineStepIndexForDeltaKey,
+  resolveTimelineStepIndexForMember,
+} from './viewer-optimization-timeline-model.js';
+import {
+  buildGroupMemberIndexModel,
+  buildTimelineHighlightsWithGroupIndex,
+  resolveGroupMemberIndexPath,
+} from './viewer-optimization-group-member-index.js';
+import {
   buildCommercialToolCrosswalkModel,
   buildCommercialToolCsvMapperModel,
 } from './viewer-commercial-tool-crosswalk-model.js';
@@ -1022,14 +1118,37 @@ window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__=resolveWorkspaceArtifact
   window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__=workspaceState.viewerPreset||'';
   window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_ARTIFACT__=resolveWorkspaceArtifactCandidatePath(workspaceState.artifactPath);
 })();
+(function syncWorkspaceVariantFromUrl(){
+  const urlVariant=normalizeSelectionValue(new URLSearchParams(window.location.search).get('variant')).toLowerCase();
+  if(urlVariant)workspaceState.variant=urlVariant;
+})();
 let memberComparisonFilter=normalizeSelectionValue(workspaceState.overlay||workspaceState.comparisonFilter)||'changed';
+function getWorkspaceVariantToken(){
+  const token=(value)=>normalizeSelectionValue(value).toLowerCase();
+  return token(workspaceState?.variant)
+    ||token(new URLSearchParams(window.location.search).get('variant'))
+    ||'optimized';
+}
+function isDrawingCompareWorkspaceActive(){
+  return getWorkspaceVariantToken()==='compare';
+}
 let commercialToolMapperProfile='auto';
 
 /* ── State ── */
 let scene,camera,orthographicCamera,renderer,controls,raycaster,mouse;
 let visualScene=null;
 let useOrthographicCamera=false;
-let modelGroup,deformedGroup,analysisOverlayGroup,selectionFocusOverlayGroup,originalPositions=new Map();
+let modelGroup,deformedGroup,analysisOverlayGroup,selectionFocusOverlayGroup,comparisonBaselineGroup,comparisonRemovedMarkersGroup,originalPositions=new Map();
+let drawingComparisonState=null,drawingComparisonChangesPayload=null,drawingCompareWipePosition=0.5;
+let drawingCompareClipPlanes={baseline:null,optimized:null};
+let drawingCompareBaselineData=null,drawingCompareBaselineContourContext=null,drawingCompareContourLinkedRange=null;
+let lastNormalizedRootPayload=null;
+let optimizationTimelineModel=null,optimizationTimelineStepIndex=-1,optimizationTimelineStoryClipActive=false;
+let optimizationGroupMemberIndex=null;
+const activeOptimizationMorphByElementId=new Map();
+const activeComparisonSectionVisualByElementId=new Map();
+const COMPARISON_BASELINE_GHOST_HEX=0x94a3b8;
+const COMPARISON_BASELINE_GHOST_MAX_ELEMENTS=12000;
 let elementMeshes=new Map(),selectedMesh=null;
 let instancedElementGroups=[],instancedElementRecordsByMemberId=new Map();
 let selectedElementData=null,selectedElementKey='',activeTypeHighlight='';
@@ -1161,6 +1280,16 @@ const COLORS={
 };
 const INSTANCED_LINE_ELEMENT_THRESHOLD=400;
 const INSTANCED_SURFACE_ELEMENT_THRESHOLD=120;
+const VIEWPORT_DRAW_DIRECT_WIREFRAMES=false;
+const DENSE_MODEL_OVERLAY_ELEMENT_THRESHOLD=4000;
+const STAGE_RESULT_CALLOUT_MAX_VISIBLE=4;
+const DENSE_MODEL_STATIC_RENDER_REFRESH_MS=33;
+let viewportDenseOverlayMode=false;
+let viewportRenderFrameCount=0;
+const VIEWER_SHELL_MODES=new Set(['product','workspace']);
+const _instancedVisualScratchColor=new THREE.Color();
+const _viewerRecenterScratch=new THREE.Vector3();
+let viewerModelRecenterOffset=new THREE.Vector3(0,0,0);
 const SURFACE_LOD_MEDIUM_ELEMENT_THRESHOLD=480;
 const SURFACE_LOD_COARSE_ELEMENT_THRESHOLD=1200;
 const SURFACE_LOD_MEDIUM_DIRECT_SUBDIVISIONS=12;
@@ -1194,6 +1323,9 @@ const COMPARISON_HIGHLIGHT_HEX={
   retained:0x475569,
   risk_up:0xdc2626,
   missing_evidence:0xd97706,
+  section_reduced:0x059669,
+  section_increased:0xdc2626,
+  section_removed:0x64748b,
   accent:0x2563eb,
   success:0x059669,
   warn:0xd97706,
@@ -1360,12 +1492,22 @@ function elementHasDetailedSection(el){
   const hasDims=/^(?:H|I|B|RC|SB|P|CHS|SHS|RHS|PIPE)?[\s]?\d+(?:\.\d+)?\s*[xX]\s*\d+(?:\.\d+)?/.test(sectionLabel);
   return hasDims;
 }
+function resolveTwoNodeLineEndpoints(nodeIds=[]){
+  if(!Array.isArray(nodeIds)||nodeIds.length<2)return null;
+  if(nodeIds.length===2)return nodeIds;
+  return [nodeIds[0],nodeIds[nodeIds.length-1]];
+}
+function shouldForceLineInstancingForElement(el,elementCount=0){
+  const type=normalizeElementType(el?.type);
+  if(type==='other'||type==='generic'||type==='unknown')return true;
+  return elementCount>=DENSE_MODEL_OVERLAY_ELEMENT_THRESHOLD;
+}
 
 function getElementGeometryKind(type){
   const normalized=normalizeElementType(type);
-  const lineTypes=new Set(['beam','column','brace','truss','cable','rebar','girder','purlin','joist','tie','strut','prestressing_tendon','anchor','bolt','weld','spring','link','rigid_link']);
+  const lineTypes=new Set(['beam','column','brace','truss','cable','rebar','girder','purlin','joist','tie','strut','prestressing_tendon','anchor','bolt','weld','spring','link','rigid_link','other','generic','unknown']);
   const surfaceTypes=new Set(['wall','slab','shell','roof','diaphragm','shear_wall','core_wall','retaining_wall','parapet','stairs','ramp','balcony','cold_formed_steel','masonry','frp_member','opening','void','opening_void']);
-  const solidTypes=new Set(['footing','pile','mat','panel_zone','joint','isolator','damper','friction_pendulum','lead_rubber_bearing','viscous_damper','bearing','pot_bearing','spherical_bearing','lumped_mass','expansion_joint','generic','other','unknown']);
+  const solidTypes=new Set(['footing','pile','mat','panel_zone','joint','isolator','damper','friction_pendulum','lead_rubber_bearing','viscous_damper','bearing','pot_bearing','spherical_bearing','lumped_mass','expansion_joint']);
   const terrainTypes=new Set(['soil','rock','terrain']);
   const compositeTypes=new Set(['comptr','composite_beam','src_column','cft_column']);
   if(lineTypes.has(normalized))return 'line';
@@ -1435,11 +1577,12 @@ function refreshViewportHudFromModel(){
   const meta=modelData?.meta||{};
   const caseLabel=normalizeSelectionValue(meta.name||meta.project_id||workspaceState.viewerPreset)||'Structural model';
   const modeLabel=renderMode==='contour'?'Contour results':renderMode==='wireframe'?'Wireframe':showDeformed?'Compare overlay':'Solid model';
+  const contourUnit=document.getElementById('legend-unit-label')?.textContent?.trim()||'D/C ratio';
   updateViewportHudContext({
     caseLabel,
     modeLabel,
     contourMode:renderMode==='contour',
-    contourUnit:'D/C ratio',
+    contourUnit,
   });
   if(controls?.target){
     updateViewportHudReadout({
@@ -1757,7 +1900,17 @@ function updateViewerQueryParams(selection){
     url.searchParams.delete('story_clip_pad');
   }
   applyRealDrawingBrowserQueryParams(url,{assetRef:resolveRealDrawingAssetRefForSelection(selection)});
+  if(optimizationTimelineStepIndex>=0){
+    url.searchParams.set('optimization_timeline_step',String(optimizationTimelineStepIndex));
+  }else{
+    url.searchParams.delete('optimization_timeline_step');
+  }
   window.history.replaceState({},'',url);
+}
+function buildCompareWorkspaceShareUrl(stepIndex=-1){
+  const overrides={variant:'compare',comparisonFilter:memberComparisonFilter||'changed'};
+  if(stepIndex>=0)overrides.optimizationTimelineStep=stepIndex;
+  return buildWorkspaceUrl(window.location.href,{...workspaceState,manifest:projectManifest},overrides);
 }
 function publishSharedSelection(selection){
   const next=buildSharedSelectionPayload(selection,{
@@ -2791,6 +2944,29 @@ function buildCurrentStructureViewerReportHtml(){
     filter:memberComparisonFilter,
   });
   const drawingSheetPackage=buildActiveDrawingSheetPackage(selectedElementData);
+  const contourLinked=drawingCompareContourLinkedRange;
+  const timelineModel=optimizationTimelineModel?.status==='ready'
+    ?optimizationTimelineModel
+    :buildOptimizationTimelineModel(drawingComparisonChangesPayload||{});
+  const timelineStep=resolveOptimizationTimelineStep(timelineModel,optimizationTimelineStepIndex);
+  const compareShareUrl=buildCompareWorkspaceShareUrl(optimizationTimelineStepIndex);
+  const drawingComparisonDelivery={
+    rows:[
+      ...buildDrawingComparisonDeliveryRows({
+        workspace:workspaceState,
+        sectionDiff:drawingComparisonState?.sectionDiff||{},
+        changesSummary:drawingComparisonState?.changesSummary||{},
+        comparison,
+        memberComparison,
+      }),
+      ...buildOptimizationTimelineDeliveryRows(timelineModel,timelineStep,compareShareUrl),
+      ...(contourLinked?[{
+        label:'Linked contour compare',
+        value:`${drawingCompareBaselineContourContext?.field||'dcr'} ${formatContourLegendValue(contourLinked.mn,drawingCompareBaselineContourContext?.field||'dcr')} – ${formatContourLegendValue(contourLinked.mx,drawingCompareBaselineContourContext?.field||'dcr')}`,
+        provenance:'compare variant + shared color scale',
+      }]:[]),
+    ],
+  };
   return buildStructureViewerReportExport({
     workspace:workspaceState,
     data:modelData||{},
@@ -2799,6 +2975,7 @@ function buildCurrentStructureViewerReportHtml(){
     comparison,
     drawingReview,
     memberComparison,
+    drawingComparisonDelivery,
     reviewTask,
     solverReceipt,
     commercialCrosswalk,
@@ -2812,6 +2989,90 @@ function buildCurrentStructureViewerReportHtml(){
       drawingId:workspaceState.drawingId,
       memberId:resolveSelectionMemberId(selectedElementData)||'',
     }),
+  });
+}
+function buildDrawingComparisonSheetExport(){
+  const timelineModel=optimizationTimelineModel?.status==='ready'
+    ?optimizationTimelineModel
+    :buildOptimizationTimelineModel(drawingComparisonChangesPayload||{});
+  const timelineStep=resolveOptimizationTimelineStep(timelineModel,optimizationTimelineStepIndex);
+  const removedSummary=buildDrawingComparisonRemovedSummary(
+    drawingComparisonState?.sectionDiff||{},
+    drawingComparisonChangesPayload,
+  );
+  const memberComparison=buildMemberComparisonModel({
+    data:modelData||{},
+    workspace:workspaceState,
+    filter:memberComparisonFilter,
+  });
+  const comparison=buildOptimizationComparisonModel({
+    data:modelData||{},
+    workspace:workspaceState,
+  });
+  const drawingComparisonDelivery={
+    rows:[
+      ...buildDrawingComparisonDeliveryRows({
+        workspace:workspaceState,
+        sectionDiff:drawingComparisonState?.sectionDiff||{},
+        changesSummary:drawingComparisonState?.changesSummary||{},
+        comparison,
+        memberComparison,
+      }),
+      {
+        label:'Removed members (baseline-only)',
+        value:String(removedSummary.removedCount),
+        provenance:'section-id diff baseline→optimized',
+      },
+      {
+        label:'Group member index',
+        value:optimizationGroupMemberIndex?.status==='ready'
+          ?`${optimizationGroupMemberIndex.groupCount} groups / ${optimizationGroupMemberIndex.memberCount} members`
+          :'--',
+        provenance:resolveGroupMemberIndexPath(workspaceState),
+      },
+      ...buildOptimizationTimelineDeliveryRows(timelineModel,timelineStep,buildCompareWorkspaceShareUrl(optimizationTimelineStepIndex)),
+    ],
+  };
+  return buildStructureViewerReportExport({
+    workspace:workspaceState,
+    data:modelData||{},
+    selectedElement:selectedElementData,
+    explainability:buildViewerExplainabilityModel({
+      data:modelData||{},
+      element:selectedElementData,
+      selection:getCurrentSelectionState(),
+      workspace:workspaceState,
+    }),
+    comparison,
+    drawingReview:buildDrawingReviewModel(workspaceState.drawing||{}),
+    memberComparison,
+    drawingComparisonDelivery,
+    screenshotDataUrl:captureViewerCanvasDataUrl(),
+    reviewNote:'Delivery comparison sheet (engineer review required).',
+  });
+}
+function exportDrawingComparisonSheet(){
+  const button=document.getElementById('export-drawing-comparison-button');
+  const restore=()=>{
+    if(button instanceof HTMLButtonElement)button.textContent='Compare Report';
+  };
+  if(button instanceof HTMLButtonElement)button.textContent='Exporting...';
+  void refreshDrawingComparisonPresentation().then(()=>{
+    try{
+      const report=buildDrawingComparisonSheetExport();
+      downloadBlob(new Blob([report.html],{type:'text/html;charset=utf-8'}),report.filename.replace('structure_viewer_report','drawing_comparison_sheet'));
+      auditWorkspaceEvent('drawing_comparison_sheet_exported',report.filename,resolveSelectionMemberId(selectedElementData));
+      if(button instanceof HTMLButtonElement){
+        button.textContent='Sheet saved';
+        window.setTimeout(restore,1200);
+      }
+    }catch(err){
+      console.warn('[Viewer] Drawing comparison sheet export failed:',err);
+      if(button instanceof HTMLButtonElement){
+        button.textContent='Export failed';
+        window.setTimeout(restore,1400);
+      }
+    }
   });
 }
 function exportWorkspaceHtmlReport(){
@@ -4031,7 +4292,13 @@ function quantizeLineElementVisualRadius(radius){
 }
 function getSectionAwareLineElementRadius(data,type,{quantized=false}={}){
   const radius=inferLineElementVisualRadius(data,type);
-  return quantized?quantizeLineElementVisualRadius(radius):radius;
+  const elementId=normalizeSelectionValue(data?.id||data?.member_id||data?.case_id);
+  const visual=elementId?activeComparisonSectionVisualByElementId.get(elementId):null;
+  const morph=elementId?activeOptimizationMorphByElementId.get(elementId):null;
+  let scaled=visual?.scale?radius*visual.scale:radius;
+  if(morph?.thicknessScale&&Number.isFinite(morph.thicknessScale))scaled*=Math.max(0.55,Math.min(1.45,morph.thicknessScale));
+  if(morph?.rebarScale&&Number.isFinite(morph.rebarScale))scaled*=Math.max(0.7,Math.min(1.2,0.85+morph.rebarScale*0.15));
+  return quantized?quantizeLineElementVisualRadius(scaled):scaled;
 }
 function isLayerVisible(type){
   const key=normalizeElementType(type);
@@ -4450,7 +4717,7 @@ async function buildInstancedLineElements(lineElements,nodeMap,{forceChunking=fa
       }
     });
     modelGroup.add(group.mesh);
-    modelGroup.add(group.wireframe);
+    if(VIEWPORT_DRAW_DIRECT_WIREFRAMES&&group.wireframe)modelGroup.add(group.wireframe);
     nextGroups.push(group);
   });
   return nextGroups;
@@ -4494,10 +4761,103 @@ async function buildInstancedSurfaceElements(surfaceElements,nodeMap,{forceChunk
       }
     });
     modelGroup.add(group.mesh);
-    modelGroup.add(group.wireframe);
+    if(VIEWPORT_DRAW_DIRECT_WIREFRAMES&&group.wireframe)modelGroup.add(group.wireframe);
     nextGroups.push(group);
   });
   return nextGroups;
+}
+function applyDenseViewportOverlayBudget(elementCount=0){
+  const dense=elementCount>=DENSE_MODEL_OVERLAY_ELEMENT_THRESHOLD;
+  viewportDenseOverlayMode=dense;
+  const viewport=document.getElementById('viewport');
+  const calloutPanel=document.getElementById('stage-result-callouts');
+  const calloutAnchors=document.getElementById('stage-result-callout-anchors');
+  const stageReceipt=document.getElementById('stage-overlay-receipt');
+  const leftStagePanel=document.querySelector('.stage-overlay-panel--left');
+  if(viewport){
+    viewport.setAttribute('data-stage-callouts-collapsed',dense?'true':'false');
+    viewport.setAttribute('data-stage-overlay-occlusion-budget',dense?'dense-model-protagonist':'standard');
+  }
+  if(calloutPanel instanceof HTMLElement){
+    calloutPanel.hidden=dense;
+    calloutPanel.setAttribute('data-stage-result-callouts-status',dense?'collapsed':'active');
+    calloutPanel.setAttribute('data-stage-result-callout-max',String(STAGE_RESULT_CALLOUT_MAX_VISIBLE));
+  }
+  if(calloutAnchors instanceof HTMLElement){
+    calloutAnchors.hidden=dense;
+    calloutAnchors.setAttribute('data-stage-result-callout-anchor-status',dense?'collapsed':'active');
+  }
+  if(stageReceipt instanceof HTMLElement)stageReceipt.hidden=dense;
+  if(leftStagePanel instanceof HTMLElement)leftStagePanel.hidden=dense;
+  const criticalHotspots=document.getElementById('stage-critical-hotspots');
+  if(criticalHotspots instanceof HTMLElement){
+    criticalHotspots.hidden=dense;
+    if(dense)criticalHotspots.innerHTML='';
+  }
+  const infoOverlay=document.getElementById('info-overlay');
+  if(infoOverlay instanceof HTMLElement)infoOverlay.hidden=dense;
+  if(dense)visualScene?.setQuality?.('low');
+  else if(document.body.dataset.siShell!=='product')visualScene?.setQuality?.('high');
+  applyProductShellPresentation();
+}
+function normalizeViewerShellMode(mode=''){
+  const normalized=normalizeSelectionValue(mode)||'product';
+  return VIEWER_SHELL_MODES.has(normalized)?normalized:'product';
+}
+function isProductShellMode(){
+  return normalizeViewerShellMode(document.body?.dataset?.siShell)==='product';
+}
+function applyProductShellPresentation(){
+  const shell=normalizeViewerShellMode(document.body?.dataset?.siShell);
+  document.body.dataset.siShell=shell;
+  const app=document.getElementById('app');
+  const viewport=document.getElementById('viewport');
+  const workspaceToggle=document.getElementById('toggle-workspace-chrome');
+  if(workspaceToggle instanceof HTMLElement){
+    const workspace=shell==='workspace';
+    workspaceToggle.classList.toggle('is-active',workspace);
+    workspaceToggle.setAttribute('aria-pressed',workspace?'true':'false');
+    workspaceToggle.title=workspace?'Return to viewport-focused product view':'Show workspace panels and stage controls';
+  }
+  if(app instanceof HTMLElement)app.dataset.siShell=shell;
+  if(viewport instanceof HTMLElement){
+    viewport.setAttribute('data-si-product-viewport',shell==='product'?'true':'false');
+    if(shell==='product'||viewportDenseOverlayMode){
+      viewport.setAttribute('data-stage-callouts-collapsed','true');
+    }
+  }
+  document.body.dataset.siCockpitCharts=shell==='workspace'?'visible':'hidden';
+  if(analysisOverlayGroup instanceof THREE.Group){
+    analysisOverlayGroup.visible=shell==='workspace';
+  }
+  refreshViewportHudFromModel();
+  requestViewerRender();
+}
+function toggleViewerShellMode(){
+  const next=document.body.dataset.siShell==='workspace'?'product':'workspace';
+  document.body.dataset.siShell=next;
+  safeSessionStorageSet('structure-viewer-si-shell',next);
+  if(next==='workspace'){
+    const left=document.getElementById('left-panel');
+    const right=document.getElementById('right-panel');
+    if(left?.classList.contains('is-collapsed'))togglePanelRailCollapse('left-panel');
+    if(right?.classList.contains('is-collapsed'))togglePanelRailCollapse('right-panel');
+  }
+  applyProductShellPresentation();
+  if(next==='workspace'&&typeof rebuildAnalysisStageOverlays==='function')rebuildAnalysisStageOverlays();
+  onResize();
+}
+function restoreViewerShellMode(){
+  const stored=normalizeViewerShellMode(safeSessionStorageGet('structure-viewer-si-shell')||'product');
+  document.body.dataset.siShell=stored;
+  applyProductShellPresentation();
+}
+function resolveInstancedRecordVisualColor(record){
+  if(renderMode==='contour'&&contourContext){
+    const value=resolveContourValue(record.data,contourContext.field,contourContext);
+    return resolveContourColor(value,contourContext);
+  }
+  return _instancedVisualScratchColor.setHex(resolveDisplayColorHex(record.data,record.baseColorHex));
 }
 function hasUsableContourRange(values){
   const finite=(Array.isArray(values)?values:[]).map(value=>safeNumber(value,NaN)).filter(Number.isFinite);
@@ -4592,6 +4952,9 @@ function formatContourSourceLabel(source){
   if(normalized==='direct')return'Source values';
   if(normalized==='derived_displacement_vector_or_height')return'Model estimate';
   if(normalized==='derived_height_plan_stress')return'Model estimate';
+  if(normalized==='derived_element_height')return'Model estimate (element)';
+  if(normalized==='codecheck_dcr')return'Code-check DCR (hydrated)';
+  if(normalized==='linked_before_after')return'Linked before/after scale';
   return normalized?normalized.replaceAll('_',' '):'Model evidence';
 }
 function renderContourScaleEvidence({mn=0,mx=1,field='dcr',source='direct',stops=[]}={}){
@@ -4700,42 +5063,304 @@ function renderStageResultReceipt(cockpitModel=lastAnalysisCockpitModel,context=
       <span class="stage-result-receipt__row"><b>Map</b><em>${escapeHtml(cmapLabel)} · ${escapeHtml(compareLabel)}</em></span>
     </div>`;
 }
-function computeContourContext(){
-  if(!modelData)return null;
-  const field=document.getElementById('scalar-select').value;
-  const cmapName=document.getElementById('cmap-select').value;
-  const cmapFn=COLORMAPS[cmapName]||COLORMAPS.jet;
+function buildDerivedElementContourValues(elements=[],nodes=[],field='dcr'){
+  const nodeMap=new Map();
+  (Array.isArray(nodes)?nodes:[]).forEach(node=>nodeMap.set(node.id,node));
+  const bounds=buildNodeContourBounds(nodes);
+  return(Array.isArray(elements)?elements:[]).map(element=>{
+    const endpointIds=resolveTwoNodeLineEndpoints(Array.isArray(element?.node_ids)?element.node_ids:[]);
+    const ns=endpointIds?endpointIds.map(id=>nodeMap.get(id)).filter(Boolean):[];
+    if(!ns.length)return 0;
+    const z=ns.reduce((sum,node)=>sum+safeNumber(node?.z,0),0)/ns.length;
+    const zNorm=Math.max(0,Math.min(1,(z-bounds.minZ)/Math.max(bounds.spanZ,1e-6)));
+    if(field==='dcr')return 0.32+zNorm*0.58;
+    if(field==='axial')return -200-zNorm*1800;
+    if(field==='moment')return 80+zNorm*420;
+    if(field==='shear')return 30+zNorm*170;
+    return zNorm;
+  });
+}
+function buildContourScalarBundleForModelData(data=null,field='dcr'){
+  if(!data)return{vals:[0,1],nodeScalarById:null,nodeScalarScale:1,nodeScalarSource:'direct'};
   let vals=[];
   let nodeScalarById=null;
   let nodeScalarScale=1;
   let nodeScalarSource='direct';
-  if(field==='disp_mag'||field==='stress_vm'){
-    const scalarContext=buildNodeContourScalarContext(modelData.nodes||[],field);
+  const hydration=data?.meta?.codecheck_dcr_hydration;
+  if(isDrawingCompareNodeContourField(field)){
+    const scalarContext=buildNodeContourScalarContext(data.nodes||[],field);
     vals=scalarContext.values;
     nodeScalarById=scalarContext.nodeScalarById;
     nodeScalarScale=scalarContext.nodeScalarScale;
     nodeScalarSource=scalarContext.nodeScalarSource;
   }else{
-    vals=(modelData.elements||[]).map(e=>safeNumber(e[field],0));
+    vals=(data.elements||[]).map(element=>safeNumber(element[field],0));
+    if(field==='dcr'&&hydration?.hydrated_count>0&&hasUsableDrawingCompareContourRange(vals)){
+      nodeScalarSource='codecheck_dcr';
+    }else if(!hasUsableDrawingCompareContourRange(vals)){
+      vals=buildDerivedElementContourValues(data.elements||[],data.nodes||[],field);
+      nodeScalarSource='derived_element_height';
+    }
   }
   if(!Array.isArray(vals)||!vals.length)vals=[0,1];
+  return{vals,nodeScalarById,nodeScalarScale,nodeScalarSource};
+}
+function buildContourContextForModelData(data,field,cmapFn,role=''){
+  const bundle=buildContourScalarBundleForModelData(data,field);
+  const mn=Math.min(...bundle.vals);
+  const mx=Math.max(...bundle.vals);
+  return buildContourContextDescriptor({
+    field,
+    mn,
+    mx,
+    cmapFn,
+    nodeScalarById:bundle.nodeScalarById,
+    nodeScalarScale:bundle.nodeScalarScale,
+    nodeScalarSource:bundle.nodeScalarSource,
+    role,
+    linked:false,
+  });
+}
+function buildContourColorStops(context,steps=10){
+  const cmapFn=context?.cmapFn||COLORMAPS.jet;
+  const stops=[];
+  for(let index=0;index<=steps;index+=1){
+    const tone=index/steps;
+    const color=cmapFn(tone);
+    stops.push(`rgb(${color.r*255|0},${color.g*255|0},${color.b*255|0})`);
+  }
+  return stops;
+}
+function applySharedRangeToContourContext(context,linkedRange){
+  if(!context||!linkedRange)return context;
+  return{
+    ...context,
+    mn:linkedRange.mn,
+    mx:linkedRange.mx,
+    linked:true,
+  };
+}
+function getActiveCodecheckCombinationName(){
+  return normalizeSelectionValue(
+    loadCombinationForceStepperState?.selectedCombination
+    ||window.__STRUCTURE_VIEWER_LOAD_COMBINATION_FORCE_MATRIX_STATE__?.selectedCombination
+    ||document.querySelector('[data-load-combination-force-matrix]')?.getAttribute('data-load-combination-force-selected-combination')
+    ||'KDS_ULS_1'
+  );
+}
+function formatCodecheckHydrationLabel(summary=null){
+  if(!summary||!summary.hydrated_count)return'';
+  return`code-check DCR on ${summary.hydrated_count}/${summary.element_count} members (${summary.coverage_pct}%)`;
+}
+async function hydrateModelDataFromCodecheckCompanion(modelData=null,companionPath='',combination=''){
+  if(!modelData||!normalizeSelectionValue(companionPath))return null;
+  const combo=normalizeSelectionValue(combination)||getActiveCodecheckCombinationName();
+  try{
+    const result=await tryFetchArtifact(companionPath);
+    const companionMap=buildElementDcrMapFromModelMeta({},result?.payload,{combination:combo});
+    const localMap=buildElementDcrMapFromModelMeta(modelData?.meta||{},lastNormalizedRootPayload,{combination:combo});
+    const merged=mergeElementDcrMaps(localMap,companionMap);
+    return hydrateModelElementsWithCodecheckDcr(modelData,merged,{combination:combo});
+  }catch(err){
+    console.warn('[Viewer] Code-check companion hydration failed:',companionPath,err);
+    return null;
+  }
+}
+async function applyFullCodecheckHydration(modelData=null,{
+  workspace=workspaceState,
+  rootPayload=lastNormalizedRootPayload,
+  companionRole='optimized',
+  allCombinations=false,
+}={}){
+  if(!modelData)return null;
+  const combo=getActiveCodecheckCombinationName();
+  const localMap=allCombinations
+    ?buildElementDcrMapAllCombinations(modelData?.meta||{},rootPayload)
+    :buildElementDcrMapFromModelMeta(modelData?.meta||{},rootPayload,{combination:combo});
+  const localSummary=hydrateModelElementsWithCodecheckDcr(modelData,localMap,{combination:combo});
+  const paths=resolveCodecheckCompanionPaths(workspace);
+  const companionPath=companionRole==='baseline'?paths.baseline:paths.optimized;
+  const companionSummary=await hydrateModelDataFromCodecheckCompanion(modelData,companionPath,combo);
+  const summary=companionSummary||localSummary;
+  window.__STRUCTURE_VIEWER_CODECHECK_DCR_HYDRATION__=summary;
+  return summary;
+}
+function buildContourCompareSafetyReceipt(changesPayload=null){
+  const changes=Array.isArray(changesPayload?.changes)?changesPayload.changes:[];
+  if(!changes.length)return'';
+  const dcrBefore=changes.reduce((max,row)=>Math.max(max,safeNumber(row.governing_member_governing_dcr_before,0)),0);
+  const dcrAfter=changes.reduce((max,row)=>Math.max(max,safeNumber(row.governing_member_governing_dcr_after,0)),0);
+  const driftBefore=safeNumber(changes[0]?.drift_before_pct,NaN);
+  const driftAfter=safeNumber(changes[0]?.drift_after_pct,NaN);
+  const driftLabel=Number.isFinite(driftBefore)&&Number.isFinite(driftAfter)
+    ?`drift ${driftBefore.toFixed(3)}% → ${driftAfter.toFixed(3)}%`
+    :'drift --';
+  return`Changes JSON governing DCR ${dcrBefore.toFixed(3)} → ${dcrAfter.toFixed(3)} · ${driftLabel}`;
+}
+function isDrawingCompareContourModeActive(){
+  return Boolean(
+    drawingComparisonState?.enabled
+    &&drawingCompareBaselineData
+    &&renderMode==='contour'
+  );
+}
+function renderDualContourLegend(baselineContext,optimizedContext,linkedRange){
+  const legendContainer=document.getElementById('legend-container');
+  const dualLegend=document.getElementById('viewer-dual-contour-legend');
+  const viewportLegend=document.getElementById('viewer-dual-contour-viewport-legend');
+  const active=isDrawingCompareContourModeActive()&&baselineContext&&optimizedContext&&linkedRange;
+  if(legendContainer instanceof HTMLElement){
+    legendContainer.dataset.dualContour=active?'active':'inactive';
+  }
+  document.body.dataset.siDrawingContourCompare=active?'active':'inactive';
+  if(!(dualLegend instanceof HTMLElement))return;
+  dualLegend.hidden=!active;
+  if(!active)return;
+  const field=baselineContext.field||optimizedContext.field||'dcr';
+  const stops=buildContourColorStops(baselineContext);
+  const gradient=`linear-gradient(to bottom,${[...stops].reverse().join(',')})`;
+  dualLegend.querySelectorAll('[data-dual-contour-bar]').forEach(node=>{
+    if(node instanceof HTMLElement)node.style.background=gradient;
+  });
+  const setRange=(role,context)=>{
+    const minNode=dualLegend.querySelector(`[data-dual-contour-min="${role}"]`);
+    const maxNode=dualLegend.querySelector(`[data-dual-contour-max="${role}"]`);
+    if(minNode)minNode.textContent=formatContourLegendValue(context.mn,field);
+    if(maxNode)maxNode.textContent=formatContourLegendValue(context.mx,field);
+  };
+  setRange('baseline',baselineContext);
+  setRange('optimized',optimizedContext);
+  const linkedNode=dualLegend.querySelector('[data-dual-contour-linked]');
+  if(linkedNode){
+    const safetyReceipt=buildContourCompareSafetyReceipt(drawingComparisonChangesPayload);
+    const baselineHydration=formatCodecheckHydrationLabel(drawingCompareBaselineData?.meta?.codecheck_dcr_hydration);
+    const optimizedHydration=formatCodecheckHydrationLabel(modelData?.meta?.codecheck_dcr_hydration);
+    const hydrationReceipt=[baselineHydration?`before: ${baselineHydration}`:'',optimizedHydration?`after: ${optimizedHydration}`:''].filter(Boolean).join(' · ');
+    linkedNode.textContent=`Linked ${getContourLegendUnitLabel(field)} scale ${formatContourLegendValue(linkedRange.mn,field)} – ${formatContourLegendValue(linkedRange.mx,field)}${safetyReceipt?` · ${safetyReceipt}`:''}${hydrationReceipt?` · ${hydrationReceipt}`:''}`;
+  }
+  if(viewportLegend instanceof HTMLElement){
+    viewportLegend.hidden=false;
+    viewportLegend.setAttribute('aria-hidden','false');
+    const title=viewportLegend.querySelector('[data-viewport-dual-contour-title]');
+    const fieldNode=viewportLegend.querySelector('[data-viewport-dual-contour-field]');
+    const linkedViewport=viewportLegend.querySelector('[data-viewport-dual-contour-linked]');
+    if(title)title.textContent='Before / After contour';
+    if(fieldNode)fieldNode.textContent=`${getSelectedOptionText('scalar-select',field)} · same load-step evidence`;
+    if(linkedViewport){
+      linkedViewport.textContent=`Linked ${formatContourLegendValue(linkedRange.mn,field)} – ${formatContourLegendValue(linkedRange.mx,field)}`;
+    }
+    viewportLegend.querySelectorAll('[data-viewport-dual-contour-swatch]').forEach(node=>{
+      if(node instanceof HTMLElement)node.style.background=gradient;
+    });
+  }
+  document.getElementById('legend-min').textContent=formatContourLegendValue(linkedRange.mn,field);
+  document.getElementById('legend-max').textContent=formatContourLegendValue(linkedRange.mx,field);
+  const legendBar=document.getElementById('legend-bar');
+  if(legendBar instanceof HTMLElement){
+    legendBar.style.background=gradient;
+    legendBar.dataset.scalarSource='linked_compare';
+  }
+  renderContourScaleEvidence({
+    mn:linkedRange.mn,
+    mx:linkedRange.mx,
+    field,
+    source:'linked_before_after',
+    stops,
+  });
+}
+function clearDualContourLegend(){
+  const legendContainer=document.getElementById('legend-container');
+  if(legendContainer instanceof HTMLElement)legendContainer.dataset.dualContour='inactive';
+  document.body.dataset.siDrawingContourCompare='inactive';
+  const dualLegend=document.getElementById('viewer-dual-contour-legend');
+  if(dualLegend instanceof HTMLElement)dualLegend.hidden=true;
+  const viewportLegend=document.getElementById('viewer-dual-contour-viewport-legend');
+  if(viewportLegend instanceof HTMLElement){
+    viewportLegend.hidden=true;
+    viewportLegend.setAttribute('aria-hidden','true');
+  }
+}
+function buildLinkedDrawingCompareContourContexts(baselineData,optimizedData){
+  const field=document.getElementById('scalar-select')?.value||'dcr';
+  const cmapName=document.getElementById('cmap-select')?.value||'jet';
+  const cmapFn=COLORMAPS[cmapName]||COLORMAPS.jet;
+  const baselineContext=buildContourContextForModelData(baselineData,field,cmapFn,'baseline');
+  const optimizedContext=buildContourContextForModelData(optimizedData||modelData,field,cmapFn,'optimized');
+  const linkedRange=mergeContourRanges(
+    {mn:baselineContext.mn,mx:baselineContext.mx},
+    {mn:optimizedContext.mn,mx:optimizedContext.mx},
+  );
+  return{
+    baseline:applySharedRangeToContourContext(baselineContext,linkedRange),
+    optimized:applySharedRangeToContourContext(optimizedContext,linkedRange),
+    linked:linkedRange,
+    summary:summarizeContourContexts(baselineContext,optimizedContext),
+  };
+}
+function applyBaselineGhostContourColors(){
+  if(!isDrawingCompareContourModeActive()||!drawingCompareBaselineContourContext||!comparisonBaselineGroup)return;
+  const context=drawingCompareBaselineContourContext;
+  comparisonBaselineGroup.traverse(object=>{
+    if(!object?.isMesh||!object.userData||object.userData._wireframe)return;
+    const value=resolveContourValue(object.userData,context.field,context);
+    const color=resolveContourColor(value,context);
+    if(object.material?.color){
+      object.material.color.copy(color);
+      object.material.transparent=true;
+      object.material.opacity=0.82;
+      object.material.depthWrite=false;
+      object.material.needsUpdate=true;
+    }
+  });
+}
+function refreshDrawingCompareContourPresentation(){
+  if(!isDrawingCompareContourModeActive()){
+    drawingCompareBaselineContourContext=null;
+    drawingCompareContourLinkedRange=null;
+    clearDualContourLegend();
+    return null;
+  }
+  const linked=buildLinkedDrawingCompareContourContexts(drawingCompareBaselineData,modelData);
+  drawingCompareBaselineContourContext=linked.baseline;
+  drawingCompareContourLinkedRange=linked.linked;
+  renderDualContourLegend(linked.baseline,linked.optimized,linked.linked);
+  applyBaselineGhostContourColors();
+  return linked.optimized;
+}
+function computeContourContext(){
+  if(!modelData)return null;
+  if(isDrawingCompareContourModeActive()){
+    const optimizedContext=refreshDrawingCompareContourPresentation();
+    if(optimizedContext){
+      renderStageResultReceipt(lastAnalysisCockpitModel,optimizedContext);
+      return optimizedContext;
+    }
+  }else{
+    drawingCompareBaselineContourContext=null;
+    drawingCompareContourLinkedRange=null;
+    clearDualContourLegend();
+  }
+  const field=document.getElementById('scalar-select').value;
+  const cmapName=document.getElementById('cmap-select').value;
+  const cmapFn=COLORMAPS[cmapName]||COLORMAPS.jet;
+  const bundle=buildContourScalarBundleForModelData(modelData,field);
+  const vals=bundle.vals;
   const mn=Math.min(...vals),mx=Math.max(...vals);
   document.getElementById('legend-min').textContent=formatContourLegendValue(mn,field);
   document.getElementById('legend-max').textContent=formatContourLegendValue(mx,field);
-  const stops=[];
-  for(let i=0;i<=10;i++){const t=i/10;const c=cmapFn(t);stops.push(`rgb(${c.r*255|0},${c.g*255|0},${c.b*255|0})`)}
+  const stops=buildContourColorStops({cmapFn});
   const legendBar=document.getElementById('legend-bar');
   legendBar.style.background=`linear-gradient(to bottom,${[...stops].reverse().join(',')})`;
-  legendBar.dataset.scalarSource=nodeScalarSource;
-  renderContourScaleEvidence({mn,mx,field,source:nodeScalarSource,stops});
-  const context={field,mn,mx,cmapFn,nodeScalarById,nodeScalarScale,nodeScalarSource};
+  legendBar.dataset.scalarSource=bundle.nodeScalarSource;
+  renderContourScaleEvidence({mn,mx,field,source:bundle.nodeScalarSource,stops});
+  const context={field,mn,mx,cmapFn,nodeScalarById:bundle.nodeScalarById,nodeScalarScale:bundle.nodeScalarScale,nodeScalarSource:bundle.nodeScalarSource};
   renderStageResultReceipt(lastAnalysisCockpitModel,context);
   return context;
 }
 function getSurfaceContourTint(mesh){
   const type=normalizeElementType(mesh.userData.type);
   if(isSelectedElement(mesh.userData))return{color:new THREE.Color(SELECTION_HIGHLIGHT_HEX),mix:.26};
-  const comparisonHex=resolveMemberComparisonHighlightHex(mesh.userData);
+  const comparisonHex=drawingCompareContourLinkedRange?0:resolveMemberComparisonHighlightHex(mesh.userData);
   if(comparisonHex)return{color:new THREE.Color(comparisonHex),mix:.22};
   if(Boolean(activeTypeHighlight)&&type===activeTypeHighlight)return{color:new THREE.Color(TYPE_HIGHLIGHT_HEX),mix:.16};
   return{color:new THREE.Color(1,1,1),mix:0};
@@ -4767,7 +5392,7 @@ function resolveDisplayColorHex(el,baseColorHex){
   if(activeTypeHighlight&&normalizeElementType(el.type)===activeTypeHighlight){
     colorHex=TYPE_HIGHLIGHT_HEX;
   }
-  const comparisonHex=resolveMemberComparisonHighlightHex(el);
+  const comparisonHex=drawingCompareContourLinkedRange?0:resolveMemberComparisonHighlightHex(el);
   if(comparisonHex){
     colorHex=comparisonHex;
   }
@@ -4777,6 +5402,11 @@ function resolveDisplayColorHex(el,baseColorHex){
   return colorHex;
 }
 function resolveMemberComparisonHighlightHex(el={}){
+  const elementId=normalizeSelectionValue(el?.id||el?.member_id||el?.case_id);
+  if(elementId&&activeComparisonSectionVisualByElementId.has(elementId)){
+    const sectionTone=activeComparisonSectionVisualByElementId.get(elementId)?.tone||'changed';
+    return COMPARISON_HIGHLIGHT_HEX[sectionTone]||COMPARISON_HIGHLIGHT_HEX.changed;
+  }
   const memberId=normalizeSelectionValue(resolveSelectionMemberId(el)||el.member_id||el.case_id||el.id);
   if(!memberId||!activeComparisonHighlightMemberIds.has(memberId))return 0;
   const tone=activeComparisonHighlightToneByMemberId.get(memberId)||activeComparisonHighlightFilter||'accent';
@@ -4807,10 +5437,8 @@ function refreshDirectMeshVisuals(){
   });
 }
 function refreshInstancedVisuals(){
+  const denseFastPath=viewportDenseOverlayMode;
   instancedElementGroups.forEach(group=>{
-    const positionAttr=group.wireframe?.geometry?.getAttribute?.('position');
-    const colorAttr=group.wireframe?.geometry?.getAttribute?.('color');
-    const basePositions=group.wireframe?.userData?.basePositions;
     let anyVisible=false;
     if(group.wireframe){
       group.wireframe.visible=false;
@@ -4824,6 +5452,35 @@ function refreshInstancedVisuals(){
     if(renderMode==='wireframe'||renderMode==='contour'){
       group.mesh.material.transparent=true;
     }
+    if(denseFastPath){
+      group.records.forEach(record=>{
+        const visible=isElementVisible(record.data);
+        anyVisible=anyVisible||visible;
+        if(visible){
+          group.mesh.setMatrixAt(record.instanceId,record.baseMatrix);
+          group.mesh.setColorAt(record.instanceId,resolveInstancedRecordVisualColor(record));
+        }else{
+          const hiddenMatrix=new THREE.Matrix4().compose(
+            record.points[0].clone(),
+            new THREE.Quaternion(),
+            new THREE.Vector3(1e-6,1e-6,1e-6)
+          );
+          group.mesh.setMatrixAt(record.instanceId,hiddenMatrix);
+        }
+      });
+      group.mesh.userData.hasVisibleInstances=anyVisible;
+      if(group.geometryKind==='surface'){
+        group.mesh.visible=anyVisible&&(renderMode==='solid'||renderMode==='contour');
+      }else{
+        group.mesh.visible=anyVisible&&renderMode!=='wireframe';
+      }
+      group.mesh.instanceMatrix.needsUpdate=true;
+      if(group.mesh.instanceColor)group.mesh.instanceColor.needsUpdate=true;
+      return;
+    }
+    const positionAttr=group.wireframe?.geometry?.getAttribute?.('position');
+    const colorAttr=group.wireframe?.geometry?.getAttribute?.('color');
+    const basePositions=group.wireframe?.userData?.basePositions;
     group.records.forEach(record=>{
       const visible=isElementVisible(record.data);
       anyVisible=anyVisible||visible;
@@ -5052,6 +5709,7 @@ async function processInChunks(rows,handler,{
   }
 }
 async function normalizeLoadedPayload(payload,sourceMeta={}){
+  if(payload&&typeof payload==='object')lastNormalizedRootPayload=payload;
   const directModel=extractModelPayload(payload);
   if(directModel){
     const nodeCount=Array.isArray(directModel.model?.nodes)?directModel.model.nodes.length:0;
@@ -5642,6 +6300,14 @@ function init(){
   }
 
   modelGroup=new THREE.Group();scene.add(modelGroup);
+  comparisonBaselineGroup=new THREE.Group();
+  comparisonBaselineGroup.name='comparison-baseline-ghost';
+  comparisonBaselineGroup.visible=false;
+  scene.add(comparisonBaselineGroup);
+  comparisonRemovedMarkersGroup=new THREE.Group();
+  comparisonRemovedMarkersGroup.name='comparison-removed-markers';
+  comparisonRemovedMarkersGroup.visible=false;
+  scene.add(comparisonRemovedMarkersGroup);
   deformedGroup=new THREE.Group();deformedGroup.visible=false;scene.add(deformedGroup);
   analysisOverlayGroup=new THREE.Group();
   analysisOverlayGroup.name='analysis-stage-overlays';
@@ -5649,7 +6315,9 @@ function init(){
   selectionFocusOverlayGroup=new THREE.Group();
   selectionFocusOverlayGroup.name='selected-member-focus-overlays';
   scene.add(selectionFocusOverlayGroup);
+  restoreViewerShellMode();
   restorePanelRailCollapseState();
+  applyProductShellPresentation();
 }
 
 /* ── Build Model ── */
@@ -5672,8 +6340,7 @@ function buildDirectElementMesh(el,ns,{useSurfaceInstancing=false,instancedSurfa
     if(!renderObjects)return;
     modelGroup.add(renderObjects.mesh);
     elementMeshes.set(el.id,renderObjects.mesh);
-    modelGroup.add(renderObjects.wireframe);
-    deformedGroup.add(renderObjects.deformedMesh);
+    if(VIEWPORT_DRAW_DIRECT_WIREFRAMES&&renderObjects.wireframe)modelGroup.add(renderObjects.wireframe);
     registerPickAnalyticRecord({
       data:renderObjects.meshData,
       points:renderObjects.pickPoints,
@@ -5695,7 +6362,7 @@ function buildDirectElementMesh(el,ns,{useSurfaceInstancing=false,instancedSurfa
     if(!renderObjects)return;
     modelGroup.add(renderObjects.mesh);
     elementMeshes.set(el.id,renderObjects.mesh);
-    modelGroup.add(renderObjects.wireframe);
+    if(VIEWPORT_DRAW_DIRECT_WIREFRAMES&&renderObjects.wireframe)modelGroup.add(renderObjects.wireframe);
     registerPickAnalyticRecord({
       data:renderObjects.meshData,
       points:renderObjects.pickPoints,
@@ -5717,7 +6384,6 @@ function buildDirectElementMesh(el,ns,{useSurfaceInstancing=false,instancedSurfa
     if(!renderObjects)return;
     modelGroup.add(renderObjects.mesh);
     elementMeshes.set(el.id,renderObjects.mesh);
-    deformedGroup.add(renderObjects.deformedMesh);
     registerPickAnalyticRecord({
       data:renderObjects.meshData,
       points:renderObjects.pickPoints,
@@ -5769,8 +6435,7 @@ function buildDirectElementMesh(el,ns,{useSurfaceInstancing=false,instancedSurfa
     if(!renderObjects)return;
     modelGroup.add(renderObjects.mesh);
     elementMeshes.set(el.id,renderObjects.mesh);
-    modelGroup.add(renderObjects.wireframe);
-    deformedGroup.add(renderObjects.deformedMesh);
+    if(VIEWPORT_DRAW_DIRECT_WIREFRAMES&&renderObjects.wireframe)modelGroup.add(renderObjects.wireframe);
     registerPickAnalyticRecord({
       data:renderObjects.meshData,
       points:renderObjects.pickPoints,
@@ -5823,6 +6488,59 @@ async function buildDirectRenderableElements(elements,nodeMap,{useSurfaceInstanc
     forceChunking
   });
 }
+function mapStructuralNodeToViewerPoint(node,target=_viewerRecenterScratch){
+  return target.set(
+    safeNumber(node?.x,0),
+    safeNumber(node?.z,0),
+    safeNumber(node?.y,0)
+  );
+}
+function computeViewerBoundsFromStructuralNodes(nodes=[]){
+  const box=new THREE.Box3();
+  let count=0;
+  (Array.isArray(nodes)?nodes:[]).forEach(node=>{
+    const x=safeNumber(node?.x,NaN);
+    const y=safeNumber(node?.y,NaN);
+    const z=safeNumber(node?.z,NaN);
+    if(!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(z))return;
+    box.expandByPoint(new THREE.Vector3(x,z,y));
+    count+=1;
+  });
+  if(!count||box.isEmpty())return null;
+  return{
+    box,
+    center:box.getCenter(new THREE.Vector3()),
+    size:box.getSize(new THREE.Vector3()),
+  };
+}
+function resetViewerModelRecenterTransforms(){
+  viewerModelRecenterOffset.set(0,0,0);
+  modelGroup?.position?.set?.(0,0,0);
+  deformedGroup?.position?.set?.(0,0,0);
+  analysisOverlayGroup?.position?.set?.(0,0,0);
+  selectionFocusOverlayGroup?.position?.set?.(0,0,0);
+  comparisonBaselineGroup?.position?.set?.(0,0,0);
+}
+function applyViewerModelRecenter(nodes=[]){
+  resetViewerModelRecenterTransforms();
+  const bounds=computeViewerBoundsFromStructuralNodes(nodes);
+  if(!bounds)return null;
+  const offset=bounds.center.clone().multiplyScalar(-1);
+  viewerModelRecenterOffset.copy(bounds.center);
+  modelGroup.position.copy(offset);
+  deformedGroup.position.copy(offset);
+  if(analysisOverlayGroup)analysisOverlayGroup.position.copy(offset);
+  if(selectionFocusOverlayGroup)selectionFocusOverlayGroup.position.copy(offset);
+  if(comparisonBaselineGroup)comparisonBaselineGroup.position.copy(offset);
+  const maxSpan=Math.max(bounds.size.x,bounds.size.y,bounds.size.z,1);
+  if(visualScene?.state?.infiniteGrid?.material?.uniforms?.uFadeDistance){
+    visualScene.state.infiniteGrid.material.uniforms.uFadeDistance.value=Math.max(120,Math.min(420,maxSpan*2.2));
+  }
+  return bounds;
+}
+function mapStructuralToViewerWorld(x,y,z,target=new THREE.Vector3()){
+  return target.set(safeNumber(x,0),safeNumber(z,0),safeNumber(y,0)).add(modelGroup.position);
+}
 async function buildModel(data,sourceMeta=null){
   modelData=data;
   modelSourceMeta=sourceMeta;
@@ -5830,6 +6548,7 @@ async function buildModel(data,sourceMeta=null){
   data.nodes.forEach(n=>nodeMap.set(n.id,n));
 
   // Clear
+  resetViewerModelRecenterTransforms();
   while(modelGroup.children.length)modelGroup.remove(modelGroup.children[0]);
   while(deformedGroup.children.length)deformedGroup.remove(deformedGroup.children[0]);
   while(analysisOverlayGroup?.children?.length)analysisOverlayGroup.remove(analysisOverlayGroup.children[0]);
@@ -5874,11 +6593,21 @@ async function buildModel(data,sourceMeta=null){
   const lineElements=[];
   const detailedLineElements=[];
   const surfaceElements=[];
+  const forceLineInstancing=shouldForceLineInstancingForElement({type:'other'},elementCount)||elementCount>=DENSE_MODEL_OVERLAY_ELEMENT_THRESHOLD;
   await processInChunks(data.elements,el=>{
     const ns=Array.isArray(el.node_ids)?el.node_ids:[];
-    if(ns.length===2){
-      if(elementHasDetailedSection(el))detailedLineElements.push(el);else lineElements.push(el);
-    }else surfaceElements.push(el);
+    const endpointIds=resolveTwoNodeLineEndpoints(ns);
+    if(endpointIds){
+      const lineEl=endpointIds===ns?el:{...el,node_ids:endpointIds};
+      if(forceLineInstancing||shouldForceLineInstancingForElement(lineEl,elementCount)||!elementHasDetailedSection(lineEl)){
+        lineElements.push(lineEl);
+        return;
+      }
+      if(elementHasDetailedSection(lineEl))detailedLineElements.push(lineEl);
+      else lineElements.push(lineEl);
+      return;
+    }
+    surfaceElements.push(el);
   },{
     chunkSize:LARGE_MODEL_BUILD_CHUNK_SIZE,
     progressLabel:'Preparing render batches',
@@ -5909,7 +6638,11 @@ async function buildModel(data,sourceMeta=null){
   const elementsToBuild=[];
   await processInChunks(data.elements,el=>{
     const ns=Array.isArray(el.node_ids)?el.node_ids:[];
-    if(useLineInstancing&&ns.length===2&&!elementHasDetailedSection(el))return;
+    const endpointIds=resolveTwoNodeLineEndpoints(ns);
+    if(endpointIds){
+      if(forceLineInstancing)return;
+      if(useLineInstancing&&!elementHasDetailedSection(el))return;
+    }
     elementsToBuild.push(el);
   },{
     chunkSize:LARGE_MODEL_BUILD_CHUNK_SIZE,
@@ -5925,6 +6658,7 @@ async function buildModel(data,sourceMeta=null){
       forceChunking:largeModelBuildProfile.enabled
     }
   );
+  applyDenseViewportOverlayBudget(elementCount);
   pickAnalyticSpatialIndex=await buildPickSpatialIndex(
     pickAnalyticRecords,
     {forceChunking:largeModelBuildProfile.enabled}
@@ -5949,7 +6683,18 @@ async function buildModel(data,sourceMeta=null){
   largeModelBuildProfile.surfacePickMode=shouldPreferInstancedSurfacePicking()?'instanced surfaces':'direct meshes';
   largeModelBuildProfile.pickRecordCount=pickAnalyticRecords.length;
 
+  applyViewerModelRecenter(data.nodes);
   rebuildAnalysisStageOverlays();
+  try{
+    await applyFullCodecheckHydration(data,{companionRole:'optimized'});
+  }catch(err){
+    console.warn('[Viewer] Code-check DCR hydration failed:',err);
+  }
+  try{
+    await refreshDrawingComparisonPresentation();
+  }catch(err){
+    console.warn('[Viewer] Drawing comparison presentation failed:',err);
+  }
   updateRenderMode();
   document.getElementById('loading').style.display='none';
   document.getElementById('element-count').textContent=`Elements: ${data.elements.length}`;
@@ -6545,6 +7290,72 @@ function buildOptimizationDeltaStripModel(cockpitModel=null){
     rows,
   };
 }
+function focusMemberOnOptimizationTimeline(memberId=''){
+  const normalized=normalizeSelectionValue(memberId);
+  if(!normalized||normalized==='manifest_member_delta')return -1;
+  const payload=drawingComparisonChangesPayload||{};
+  const bands=storyClipBands.length?storyClipBands:deriveStoryClipBands(modelData);
+  const stepIndex=resolveTimelineStepIndexForMember(normalized,{
+    changesPayload:payload,
+    elements:modelData?.elements||[],
+    nodes:modelData?.nodes||[],
+    storyBands:bands,
+    sectionChangedIds:drawingComparisonState?.sectionDiff?.changed||[],
+  });
+  safeSessionStorageSet('structure-viewer-optimization-timeline-step',String(stepIndex));
+  window.__STRUCTURE_VIEWER_MEMBER_TIMELINE_FOCUS__={
+    memberId:normalized,
+    timelineStepIndex:stepIndex,
+    at:new Date().toISOString(),
+  };
+  if(normalizeSelectionValue(workspaceState?.variant)!=='compare'){
+    navigateProjectWorkspace({
+      variant:'compare',
+      overlay:'changed',
+      comparisonFilter:'changed',
+      optimizationTimelineStep:stepIndex>=0?stepIndex:undefined,
+      memberId:normalized,
+    });
+    return stepIndex;
+  }
+  setMemberComparisonFilter('changed');
+  if(stepIndex>=0)setOptimizationTimelineStep(stepIndex);
+  selectMemberFromComparison(normalized);
+  document.getElementById('viewer-optimization-timeline')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+  return stepIndex;
+}
+function focusOptimizationDeltaOnTimeline(deltaKey=''){
+  const key=normalizeSelectionValue(deltaKey);
+  if(!key||key==='manifest_member_delta')return -1;
+  const payload=drawingComparisonChangesPayload||{};
+  const model=optimizationTimelineModel?.status==='ready'
+    ?optimizationTimelineModel
+    :buildOptimizationTimelineModel(payload);
+  const stepIndex=resolveTimelineStepIndexForDeltaKey(key,payload);
+  safeSessionStorageSet('structure-viewer-optimization-timeline-step',String(stepIndex));
+  window.__STRUCTURE_VIEWER_OPTIMIZATION_DELTA_FOCUS__={
+    key,
+    timelineStepIndex:stepIndex,
+    filter:'changed',
+    at:new Date().toISOString(),
+  };
+  if(normalizeSelectionValue(workspaceState?.variant)!=='compare'){
+    const navOverrides={variant:'compare',overlay:'changed',comparisonFilter:'changed'};
+    if(stepIndex>=0)navOverrides.optimizationTimelineStep=stepIndex;
+    navigateProjectWorkspace(navOverrides);
+    return stepIndex;
+  }
+  setMemberComparisonFilter('changed');
+  if(stepIndex>=0)setOptimizationTimelineStep(stepIndex);
+  const timelinePanel=document.getElementById('viewer-optimization-timeline');
+  if(timelinePanel instanceof HTMLElement){
+    timelinePanel.classList.add('is-delta-focused');
+    window.setTimeout(()=>timelinePanel.classList.remove('is-delta-focused'),2400);
+  }
+  timelinePanel?.scrollIntoView({behavior:'smooth',block:'nearest'});
+  document.getElementById('before-after-comparison-panel')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+  return stepIndex;
+}
 function renderOptimizationDeltaStrip(cockpitModel=null){
   const panel=document.getElementById('optimization-delta-strip');
   if(!(panel instanceof HTMLElement))return;
@@ -6591,6 +7402,19 @@ function renderOptimizationDeltaStrip(cockpitModel=null){
           </span>
         </article>`).join('')}
     </div>`;
+  panel.querySelectorAll('[data-optimization-delta-row]').forEach(tile=>{
+    if(!(tile instanceof HTMLElement))return;
+    tile.tabIndex=0;
+    tile.setAttribute('role','button');
+    tile.addEventListener('click',()=>{
+      focusOptimizationDeltaOnTimeline(tile.getAttribute('data-optimization-delta-key')||'');
+    });
+    tile.addEventListener('keydown',event=>{
+      if(event.key!=='Enter'&&event.key!==' ')return;
+      event.preventDefault();
+      tile.click();
+    });
+  });
 }
 function resolveDeliveryReceiptTone(pass, warn=false){
   if(!pass)return'danger';
@@ -10288,6 +11112,11 @@ function renderMaterialMemberCatalogPanel(data=modelData||{}){
 function renderStageResultCallouts(cockpitModel=null){
   const panel=document.getElementById('stage-result-callouts');
   if(!(panel instanceof HTMLElement))return;
+  if(viewportDenseOverlayMode){
+    panel.hidden=true;
+    panel.innerHTML='';
+    return;
+  }
   const model=cockpitModel||lastAnalysisCockpitModel;
   const timeline=getResolvedAnalysisTimeline(model)||{};
   panel.innerHTML=buildStageResultCalloutsHtml({
@@ -10800,6 +11629,11 @@ function buildStageCriticalHotspotRows(cockpitModel=null){
 function renderStageCriticalHotspots(cockpitModel=null){
   const panel=document.getElementById('stage-critical-hotspots');
   if(!(panel instanceof HTMLElement))return;
+  if(viewportDenseOverlayMode){
+    panel.hidden=true;
+    panel.innerHTML='';
+    return;
+  }
   const rows=buildStageCriticalHotspotRows(cockpitModel||lastAnalysisCockpitModel);
   panel.dataset.stageCriticalHotspotsSchema=STAGE_CRITICAL_HOTSPOTS_SCHEMA;
   panel.dataset.stageCriticalHotspotsStatus=rows.length?'ready':'pending';
@@ -14371,10 +15205,30 @@ function resolveLoadCombinationForceSelection(data={},candidateRows=null){
   const explicit=normalizeSelectionValue(loadCombinationForceStepperState?.selectedCombination);
   if(explicit)return explicit;
   const rows=Array.isArray(candidateRows)?candidateRows:buildLoadCombinationForceCandidateRows(data);
+  const preferred=rows.find(row=>normalizeSelectionValue(row?.combination)==='KDS_ULS_1');
+  if(preferred)return 'KDS_ULS_1';
   const governing=[...rows]
     .filter(row=>normalizeSelectionValue(row?.combination)&&safeNumber(row?.dcr,0)>0)
     .sort((a,b)=>safeNumber(b.dcr,0)-safeNumber(a.dcr,0)||normalizeSelectionValue(a.combination).localeCompare(normalizeSelectionValue(b.combination)))[0];
   return normalizeSelectionValue(governing?.combination);
+}
+async function refreshCodecheckContourAfterCombinationChange(){
+  if(!modelData)return;
+  try{
+    await applyFullCodecheckHydration(modelData,{companionRole:'optimized'});
+    if(drawingCompareBaselineData){
+      await applyFullCodecheckHydration(drawingCompareBaselineData,{workspace:workspaceState,rootPayload:null,companionRole:'baseline'});
+    }
+  }catch(err){
+    console.warn('[Viewer] Load-combination code-check hydration failed:',err);
+  }
+  if(renderMode==='contour')updateContour();
+  else if(isDrawingCompareContourModeActive()){
+    contourContext=refreshDrawingCompareContourPresentation()||contourContext;
+  }
+  refreshDirectMeshVisuals();
+  refreshInstancedVisuals();
+  requestRenderFrame();
 }
 function setLoadCombinationForceSelection(combination,{focus=false}={}){
   const selectedCombination=normalizeSelectionValue(combination);
@@ -14390,6 +15244,7 @@ function setLoadCombinationForceSelection(combination,{focus=false}={}){
   renderMaterialForceInteractionPanel(modelData||{},materialCatalog);
   const memberId=normalizeSelectionValue(window.__STRUCTURE_VIEWER_LOAD_COMBINATION_FORCE_MATRIX_STATE__?.selectedMemberId);
   if(focus&&memberId)focusMemberSearchResult(memberId);
+  void refreshCodecheckContourAfterCombinationChange();
 }
 function buildForceFlowRowsFromLoadCombinationEvidence(data={},options={}){
   const rows=buildLoadCombinationForceCandidateRows(data);
@@ -17280,6 +18135,384 @@ function updateMemberComparisonHighlights(model={}){
   refreshDirectMeshVisuals();
   refreshInstancedVisuals();
 }
+function clearComparisonBaselineGroup(){
+  if(!comparisonBaselineGroup)return;
+  while(comparisonBaselineGroup.children.length)comparisonBaselineGroup.remove(comparisonBaselineGroup.children[0]);
+  comparisonBaselineGroup.visible=false;
+}
+function applyClippingPlanesToObjectTree(root,planes=[]){
+  if(!root)return;
+  root.traverse(object=>{
+    if(!object?.material)return;
+    const materials=Array.isArray(object.material)?object.material:[object.material];
+    materials.forEach(material=>{
+      if(!material)return;
+      material.clippingPlanes=planes;
+      material.clipIntersection=false;
+      material.needsUpdate=true;
+    });
+  });
+}
+function applyDrawingCompareWipeClipping(position=0.5){
+  if(!drawingComparisonState?.enabled||!modelGroup||!comparisonBaselineGroup){
+    applyClippingPlanesToObjectTree(modelGroup,[]);
+    applyClippingPlanesToObjectTree(comparisonBaselineGroup,[]);
+    if(renderer)renderer.localClippingEnabled=false;
+    return;
+  }
+  const bounds=new THREE.Box3();
+  bounds.expandByObject(modelGroup);
+  if(bounds.isEmpty())return;
+  const size=bounds.getSize(new THREE.Vector3());
+  const center=bounds.getCenter(new THREE.Vector3());
+  const splitX=center.x-size.x*0.5+size.x*Math.max(0,Math.min(1,safeNumber(position,0.5)));
+  if(!drawingCompareClipPlanes.baseline){
+    drawingCompareClipPlanes.baseline=new THREE.Plane();
+    drawingCompareClipPlanes.optimized=new THREE.Plane();
+  }
+  drawingCompareClipPlanes.optimized.set(new THREE.Vector3(1,0,0),-splitX);
+  drawingCompareClipPlanes.baseline.set(new THREE.Vector3(-1,0,0),splitX);
+  applyClippingPlanesToObjectTree(modelGroup,[drawingCompareClipPlanes.optimized]);
+  applyClippingPlanesToObjectTree(comparisonBaselineGroup,[drawingCompareClipPlanes.baseline]);
+  if(renderer)renderer.localClippingEnabled=true;
+}
+function setDrawingCompareWipePosition(value='50'){
+  drawingCompareWipePosition=Math.max(0,Math.min(1,safeNumber(value,50)/100));
+  applyDrawingCompareWipeClipping(drawingCompareWipePosition);
+  requestRenderFrame();
+}
+function renderOptimizationTimelinePanel(model=null){
+  const slider=document.getElementById('viewer-optimization-timeline-slider');
+  const stagesHost=document.querySelector('[data-optimization-timeline-stages]');
+  const ready=Boolean(model?.status==='ready'&&model.changeCount>0);
+  if(slider instanceof HTMLInputElement){
+    slider.disabled=!ready;
+    slider.min='-1';
+    slider.max=ready?String(model.changeCount-1):'-1';
+    slider.value=String(optimizationTimelineStepIndex);
+  }
+  if(stagesHost instanceof HTMLElement){
+    stagesHost.innerHTML=(model?.stageSummary||[]).map(row=>`<button type="button" class="viewer-optimization-timeline__stage" data-timeline-stage="${escapeHtml(row.key)}" title="Jump to first ${escapeHtml(row.label)} change">${escapeHtml(row.label)} · ${escapeHtml(String(row.count))}</button>`).join('');
+    stagesHost.querySelectorAll('[data-timeline-stage]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const stageKey=button.getAttribute('data-timeline-stage')||'';
+        const stepIndex=resolveFirstTimelineStepIndexForStage(model,stageKey);
+        if(stepIndex>=0)setOptimizationTimelineStep(stepIndex);
+      });
+    });
+  }
+}
+function applyOptimizationTimelineStepHighlights(stepIndex=-1){
+  if(stepIndex<0){
+    activeOptimizationMorphByElementId.clear();
+    if(optimizationTimelineStoryClipActive){
+      optimizationTimelineStoryClipActive=false;
+      clearStoryClip();
+    }
+    const memberComparison=buildMemberComparisonModel({
+      data:modelData||{},
+      workspace:workspaceState,
+      filter:memberComparisonFilter,
+    });
+    updateMemberComparisonHighlights(memberComparison);
+    return;
+  }
+  const bands=storyClipBands.length?storyClipBands:deriveStoryClipBands(modelData);
+  const highlight=buildTimelineHighlightsWithGroupIndex({
+    stepIndex,
+    changesPayload:drawingComparisonChangesPayload||{},
+    groupMemberIndex:optimizationGroupMemberIndex,
+    elements:modelData?.elements||[],
+    nodes:modelData?.nodes||[],
+    storyBands:bands,
+    sectionChangedIds:drawingComparisonState?.sectionDiff?.changed||[],
+  });
+  activeOptimizationMorphByElementId.clear();
+  Object.entries(highlight.morphByElementId||{}).forEach(([memberId,morph])=>{
+    activeOptimizationMorphByElementId.set(normalizeSelectionValue(memberId),morph);
+  });
+  updateMemberComparisonHighlights({
+    filter:'changed',
+    highlightMemberIds:highlight.memberIds,
+    highlightToneByMemberId:highlight.toneByMemberId,
+  });
+  if(highlight.storyClipLabel){
+    optimizationTimelineStoryClipActive=true;
+    setStoryClipLabel(highlight.storyClipLabel);
+  }
+  window.__STRUCTURE_VIEWER_OPTIMIZATION_TIMELINE_HIGHLIGHT__={
+    matchCount:highlight.matchCount,
+    memberIds:highlight.memberIds,
+    storyClipLabel:highlight.storyClipLabel,
+  };
+}
+function setOptimizationTimelineStep(value='-1'){
+  const model=optimizationTimelineModel;
+  const maxIndex=model?.changeCount?model.changeCount-1:-1;
+  optimizationTimelineStepIndex=Math.max(-1,Math.min(maxIndex,Math.round(safeNumber(value,-1))));
+  const step=resolveOptimizationTimelineStep(model,optimizationTimelineStepIndex);
+  const labelNode=document.querySelector('[data-optimization-timeline-step-label]');
+  const metaNode=document.querySelector('[data-optimization-timeline-meta]');
+  const slider=document.getElementById('viewer-optimization-timeline-slider');
+  if(slider instanceof HTMLInputElement)slider.value=String(optimizationTimelineStepIndex);
+  if(labelNode)labelNode.textContent=step?.label||'Baseline';
+  if(metaNode){
+    const parts=[];
+    if(step){
+      if(step.index<0)parts.push('Before optimization changes');
+      else parts.push(`Applied ${step.changeCount}/${model?.changeCount||0} changes`);
+      parts.push(`cumulative Δcost ${safeNumber(step.cumulativeCostDelta,0).toFixed(1)}`);
+      if(safeNumber(step.maxGoverningDcrAfter,0)>0)parts.push(`governing DCR ${safeNumber(step.maxGoverningDcrAfter,0).toFixed(3)}`);
+      if(Number.isFinite(step.driftAfterPct))parts.push(`drift ${step.driftAfterPct.toFixed(3)}%`);
+      if(step.stage&&step.stage!=='baseline')parts.push(step.stage);
+    }
+    const highlightState=window.__STRUCTURE_VIEWER_OPTIMIZATION_TIMELINE_HIGHLIGHT__;
+    if(optimizationTimelineStepIndex>=0&&highlightState?.matchCount){
+      parts.push(`${highlightState.matchCount} members highlighted`);
+    }
+    metaNode.textContent=parts.join(' · ')||'Cumulative cost delta --';
+  }
+  applyOptimizationTimelineStepHighlights(optimizationTimelineStepIndex);
+  window.__STRUCTURE_VIEWER_OPTIMIZATION_TIMELINE__={
+    schemaVersion:model?.schemaVersion||'structure-viewer-optimization-timeline.v1',
+    status:model?.status||'missing',
+    stepIndex:optimizationTimelineStepIndex,
+    step,
+    changeCount:model?.changeCount||0,
+  };
+  requestRenderFrame();
+}
+function syncOptimizationTimelineFromChanges(changesPayload=null){
+  optimizationTimelineModel=buildOptimizationTimelineModel(changesPayload||{});
+  optimizationTimelineStepIndex=-1;
+  renderOptimizationTimelinePanel(optimizationTimelineModel);
+  const pendingStep=safeSessionStorageGet('structure-viewer-optimization-timeline-step');
+  const urlStep=safeNumber(workspaceState?.optimizationTimelineStep,-1);
+  const initialStep=pendingStep!==null?pendingStep:(urlStep>=0?String(urlStep):null);
+  if(initialStep!==null){
+    safeSessionStorageSet('structure-viewer-optimization-timeline-step',null);
+    setOptimizationTimelineStep(initialStep);
+    return;
+  }
+  setOptimizationTimelineStep(-1);
+}
+function updateDrawingComparisonHud(state={}){
+  const statusNode=document.querySelector('[data-viewer-drawing-compare-status]');
+  const statsNode=document.querySelector('[data-viewer-drawing-compare-stats]');
+  const slider=document.getElementById('viewer-drawing-compare-wipe-slider');
+  if(statusNode)statusNode.textContent=state.enabled?'active':'inactive';
+  if(statsNode){
+    statsNode.textContent=state.enabled
+      ?`${state.sectionDiff?.changed?.length||0} section changes | ${state.sectionDiff?.removed?.length||0} removed | baseline ghost ${state.baselineLoaded?'on':'off'}`
+      :'Load Compare variant to enable baseline ghost and section diff.';
+  }
+  if(slider instanceof HTMLInputElement){
+    slider.disabled=!state.enabled;
+    slider.value=String(Math.round(drawingCompareWipePosition*100));
+  }
+  document.body.dataset.siDrawingCompare=state.enabled?'active':'inactive';
+}
+async function fetchWorkspaceArtifactNormalized(artifactPath=''){
+  const candidate=normalizeSelectionValue(artifactPath);
+  if(!candidate)return null;
+  const result=await tryFetchArtifact(candidate);
+  return normalizeLoadedPayload(result.payload,{
+    mode:'artifact',
+    label:result.label,
+    resolvedPath:result.resolvedPath,
+    loadedAt:result.loadedAt,
+  });
+}
+async function fetchOptimizationChangesPayload(workspace={}){
+  const changesPath=resolveOptimizationChangesPath(workspace);
+  try{
+    const result=await tryFetchArtifact(changesPath);
+    return result?.payload&&typeof result.payload==='object'?result.payload:null;
+  }catch(err){
+    console.warn('[Viewer] Unable to load optimization changes payload:',err);
+    return null;
+  }
+}
+function applyDrawingComparisonSectionVisuals(sectionDiff={}){
+  activeComparisonSectionVisualByElementId.clear();
+  const visualMap=sectionDiff?.visualByElementId;
+  if(visualMap instanceof Map){
+    visualMap.forEach((visual,elementId)=>activeComparisonSectionVisualByElementId.set(normalizeSelectionValue(elementId),visual));
+  }
+  const toneEntries=sectionDiff?.toneByElementId instanceof Map?[...sectionDiff.toneByElementId.entries()]:[];
+  toneEntries.forEach(([elementId,tone])=>{
+    const normalized=normalizeSelectionValue(elementId);
+    if(!normalized)return;
+    activeComparisonHighlightMemberIds.add(normalized);
+    activeComparisonHighlightToneByMemberId.set(normalized,tone);
+  });
+}
+async function buildComparisonBaselineGhostOverlay(baselineData=null,sectionDiff={}){
+  clearComparisonBaselineGroup();
+  if(!comparisonBaselineGroup||!baselineData?.nodes?.length||!baselineData?.elements?.length)return;
+  const nodeMap=new Map();
+  baselineData.nodes.forEach(node=>nodeMap.set(node.id,node));
+  let built=0;
+  for(const element of baselineData.elements){
+    if(built>=COMPARISON_BASELINE_GHOST_MAX_ELEMENTS)break;
+    const endpointIds=resolveTwoNodeLineEndpoints(Array.isArray(element.node_ids)?element.node_ids:[]);
+    if(!endpointIds)continue;
+    const ns=endpointIds.map(id=>nodeMap.get(id)).filter(Boolean);
+    if(ns.length<2)continue;
+    const renderObjects=createLineElementRenderObjects({
+      element,
+      nodes:ns,
+      type:normalizeElementType(element.type),
+      baseColorHex:COMPARISON_BASELINE_GHOST_HEX,
+      radius:inferLineElementVisualRadius(element,normalizeElementType(element.type)),
+      deformScale:0,
+    });
+    if(!renderObjects?.mesh)continue;
+    renderObjects.mesh.userData._comparisonBaselineGhost=true;
+    if(renderObjects.mesh.material){
+      renderObjects.mesh.material.transparent=true;
+      renderObjects.mesh.material.opacity=0.28;
+      renderObjects.mesh.material.depthWrite=false;
+    }
+    comparisonBaselineGroup.add(renderObjects.mesh);
+    built+=1;
+  }
+  if(modelGroup&&comparisonBaselineGroup){
+    comparisonBaselineGroup.position.copy(modelGroup.position);
+  }
+  comparisonBaselineGroup.visible=built>0;
+}
+async function fetchOptimizationGroupMemberIndex(workspace={}){
+  const path=resolveGroupMemberIndexPath(workspace);
+  try{
+    const result=await tryFetchArtifact(path);
+    optimizationGroupMemberIndex=buildGroupMemberIndexModel(result?.payload||{});
+    return optimizationGroupMemberIndex;
+  }catch(err){
+    console.warn('[Viewer] Group member index load failed:',path,err);
+    optimizationGroupMemberIndex=buildGroupMemberIndexModel({});
+    return optimizationGroupMemberIndex;
+  }
+}
+function clearComparisonRemovedMarkers(){
+  if(!comparisonRemovedMarkersGroup)return;
+  while(comparisonRemovedMarkersGroup.children.length)comparisonRemovedMarkersGroup.remove(comparisonRemovedMarkersGroup.children[0]);
+  comparisonRemovedMarkersGroup.visible=false;
+}
+function buildComparisonRemovedMarkers(baselineData=null,sectionDiff={}){
+  clearComparisonRemovedMarkers();
+  if(!comparisonRemovedMarkersGroup||!baselineData?.elements?.length)return 0;
+  const removed=buildDrawingComparisonRemovedSummary(sectionDiff,drawingComparisonChangesPayload);
+  const nodeMap=new Map((baselineData.nodes||[]).map(node=>[String(node.id),node]));
+  let built=0;
+  for(const memberId of removed.removedMemberIds){
+    if(built>=800)break;
+    const element=baselineData.elements.find(row=>normalizeSelectionValue(row?.id||row?.member_id)===memberId);
+    if(!element)continue;
+    const endpointIds=resolveTwoNodeLineEndpoints(Array.isArray(element.node_ids)?element.node_ids:[]);
+    if(!endpointIds)continue;
+    const ns=endpointIds.map(id=>nodeMap.get(String(id))).filter(Boolean);
+    if(ns.length<2)continue;
+    const mid=new THREE.Vector3(
+      (safeNumber(ns[0].x,0)+safeNumber(ns[1].x,0))/2,
+      (safeNumber(ns[0].y,0)+safeNumber(ns[1].y,0))/2,
+      (safeNumber(ns[0].z,0)+safeNumber(ns[1].z,0))/2,
+    );
+    const marker=new THREE.Mesh(
+      new THREE.SphereGeometry(0.35,10,10),
+      new THREE.MeshBasicMaterial({color:0x64748b,transparent:true,opacity:0.85,depthTest:false}),
+    );
+    marker.position.copy(mid);
+    marker.userData._comparisonRemovedMarker=true;
+    comparisonRemovedMarkersGroup.add(marker);
+    built+=1;
+  }
+  comparisonRemovedMarkersGroup.visible=built>0;
+  if(modelGroup)comparisonRemovedMarkersGroup.position.copy(modelGroup.position);
+  return built;
+}
+async function refreshDrawingComparisonPresentation(){
+  const enabled=isDrawingCompareWorkspaceActive();
+  if(enabled&&getWorkspaceVariantToken()!=='compare')workspaceState.variant='compare';
+  let baselineData=null;
+  let changesPayload=drawingComparisonChangesPayload;
+  if(enabled){
+    if(!changesPayload)changesPayload=await fetchOptimizationChangesPayload(workspaceState);
+    if(!optimizationGroupMemberIndex||optimizationGroupMemberIndex.status!=='ready'){
+      await fetchOptimizationGroupMemberIndex(workspaceState);
+    }
+    drawingComparisonChangesPayload=changesPayload;
+    const baselinePath=resolveBaselineArtifactPath(workspaceState);
+    if(baselinePath)baselineData=await fetchWorkspaceArtifactNormalized(baselinePath);
+    drawingCompareBaselineData=baselineData;
+  }else{
+    drawingComparisonChangesPayload=null;
+    drawingCompareBaselineData=null;
+    drawingCompareBaselineContourContext=null;
+    drawingCompareContourLinkedRange=null;
+    clearDualContourLegend();
+  }
+  const comparisonCore=buildDrawingComparisonState({
+    workspace:workspaceState,
+    optimizedData:modelData||{},
+    baselineData,
+    changesPayload,
+  });
+  drawingComparisonState={
+    ...comparisonCore,
+    enabled,
+    variant:enabled?'compare':getWorkspaceVariantToken(),
+    baselineLoaded:Boolean(baselineData),
+  };
+  applyDrawingComparisonSectionVisuals(drawingComparisonState.sectionDiff||{});
+  if(enabled&&baselineData){
+    try{
+      await applyFullCodecheckHydration(baselineData,{workspace:workspaceState,rootPayload:null,companionRole:'baseline',allCombinations:true});
+    }catch(err){
+      console.warn('[Viewer] Baseline code-check hydration failed:',err);
+    }
+    await buildComparisonBaselineGhostOverlay(baselineData,drawingComparisonState.sectionDiff||{});
+    buildComparisonRemovedMarkers(baselineData,drawingComparisonState.sectionDiff||{});
+  }else{
+    clearComparisonBaselineGroup();
+    clearComparisonRemovedMarkers();
+    activeComparisonSectionVisualByElementId.clear();
+    activeOptimizationMorphByElementId.clear();
+  }
+  applyDrawingCompareWipeClipping(enabled?drawingCompareWipePosition:0.5);
+  updateDrawingComparisonHud(drawingComparisonState);
+  if(enabled&&changesPayload)syncOptimizationTimelineFromChanges(changesPayload);
+  else{
+    optimizationTimelineModel=null;
+    optimizationTimelineStepIndex=-1;
+    renderOptimizationTimelinePanel(null);
+    setOptimizationTimelineStep(-1);
+  }
+  if(enabled){
+    try{
+      await applyFullCodecheckHydration(modelData,{workspace:workspaceState,companionRole:'optimized',allCombinations:true});
+    }catch(err){
+      console.warn('[Viewer] Optimized code-check hydration failed:',err);
+    }
+  }
+  if(enabled&&baselineData&&renderMode==='contour'){
+    contourContext=refreshDrawingCompareContourPresentation()||contourContext;
+  }
+  window.__STRUCTURE_VIEWER_DRAWING_COMPARISON_STATE__={
+    ...drawingComparisonState,
+    wipe:drawingCompareWipePosition,
+    changesPath:resolveOptimizationChangesPath(workspaceState),
+    baselineArtifactPath:resolveBaselineArtifactPath(workspaceState),
+    contourCompare:isDrawingCompareContourModeActive(),
+    contourField:drawingCompareBaselineContourContext?.field||'',
+    contourLinkedRange:drawingCompareContourLinkedRange,
+  };
+  refreshDirectMeshVisuals();
+  refreshInstancedVisuals();
+  applyBaselineGhostContourColors();
+  renderProjectWorkspacePanel();
+  requestRenderFrame();
+}
 function setMemberComparisonFilter(filter='changed'){
   memberComparisonFilter=normalizeSelectionValue(filter)||'changed';
   const url=new URL(window.location.href);
@@ -17400,8 +18633,16 @@ function renderProjectWorkspacePanel(){
       });
     });
     comparisonPanel.querySelectorAll('[data-member-comparison-member]').forEach(button=>{
-      button.addEventListener('click',()=>selectMemberFromComparison(button.getAttribute('data-member-comparison-member')||''));
+      button.addEventListener('click',()=>{
+        const memberId=button.getAttribute('data-member-comparison-member')||'';
+        if(normalizeSelectionValue(workspaceState?.variant)==='compare'&&drawingComparisonChangesPayload){
+          focusMemberOnOptimizationTimeline(memberId);
+          return;
+        }
+        selectMemberFromComparison(memberId);
+      });
     });
+    if(optimizationTimelineStepIndex>=0)applyOptimizationTimelineStepHighlights(optimizationTimelineStepIndex);
   }
   const recent=document.getElementById('project-recent-list');
   if(recent instanceof HTMLElement){
@@ -18862,9 +20103,14 @@ function updateRenderMode(){
       }
     }
   });
-  refreshInstancedVisuals();
-  refreshDirectMeshVisuals();
-  if(renderMode==='contour')applyContour();
+  if(renderMode==='contour'){
+    applyContour();
+    applyBaselineGhostContourColors();
+    refreshDirectMeshVisuals();
+  }else{
+    refreshInstancedVisuals();
+    refreshDirectMeshVisuals();
+  }
   rebuildPickTargetMeshes();
   renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
   syncStageReviewControls();
@@ -18882,6 +20128,7 @@ function applyContour(){
   contourContext=computeContourContext();
   if(!contourContext)return;
 
+  if(!viewportDenseOverlayMode||VIEWPORT_DRAW_DIRECT_WIREFRAMES){
   modelGroup.children.forEach(child=>{
     if(child.userData?._wireframe){
       const linked=elementMeshes.get(child.userData.elemId);
@@ -18921,14 +20168,19 @@ function applyContour(){
     child.material.color.setHex(resolveDisplayColorHex(el,el.baseColor));
     child.material.opacity=.9;
   });
+  }
   refreshInstancedVisuals();
-  refreshDirectMeshVisuals();
-  renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
+  if(!viewportDenseOverlayMode)renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
   requestViewerRender();
 }
 function updateContour(){
-  if(renderMode==='contour')applyContour();
-  else renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
+  if(renderMode==='contour'){
+    contourContext=computeContourContext();
+    applyContour();
+    applyBaselineGhostContourColors();
+  }else{
+    renderStageResultReceipt(lastAnalysisCockpitModel,contourContext);
+  }
 }
 
 function setAnalysisStageOverlayState(state={}){
@@ -19189,13 +20441,12 @@ function rebuildAnalysisStageOverlays(){
     setAnalysisStageOverlayState({status:'pending',source:'Model extents'});
     return;
   }
-  const box=new THREE.Box3().setFromObject(modelGroup);
-  if(box.isEmpty()){
+  const bounds=computeViewerBoundsFromStructuralNodes(modelData.nodes||[]);
+  if(!bounds){
     setAnalysisStageOverlayState({status:'blocked',source:'Empty model bounds'});
     return;
   }
-  const center=box.getCenter(new THREE.Vector3());
-  const size=box.getSize(new THREE.Vector3());
+  const {box,center,size}=bounds;
   const maxSpan=Math.max(size.x,size.y,size.z,1);
   const arrowLength=Math.max(maxSpan*.16,3.6);
   const arrowStartX=box.max.x+maxSpan*.035;
@@ -19494,36 +20745,47 @@ function animate(){
   }
   const nowMs=performance.now();
   const refreshMs=isDrawingMode?5000:STATIC_RENDER_REFRESH_MS;
-  if(viewerNeedsRender||isAnimating||nowMs-lastRenderAt>=refreshMs){
-    if(!isDrawingMode){
+  const shouldRender=viewportDenseOverlayMode
+    ?(viewerNeedsRender||isAnimating)
+    :(viewerNeedsRender||isAnimating||nowMs-lastRenderAt>=refreshMs);
+  if(shouldRender){
+    if(!isDrawingMode&&(!viewportDenseOverlayMode||selectionFocusWorldPoint)){
       positionViewportSelectionFocusBadge();
-      positionStageStoryRuler();
-      positionStageDriftBands();
-      positionStageStoryForceFlowBands();
-      positionStageLoadSupportGlyphs();
-      positionStageLoadCombinationForceGlyphs();
-      positionStageForceDemandContour();
-      positionStageMaterialModelDemandBadges();
-      positionStageMaterialForceRibbons();
-      positionStageMaterialForceEnvelope();
-      positionStageMaterialCapacityEnvelope();
-      positionStageMemberForcePlaybackTrail();
-      positionStageMemberForceVectorField();
-      positionStageMemberMaterialStateBadge();
-      positionStageResultCalloutAnchors();
-      positionStageCriticalHotspots();
-      positionPanelZoneStageBadge();
+      if(!viewportDenseOverlayMode){
+        positionStageStoryRuler();
+        positionStageDriftBands();
+        positionStageStoryForceFlowBands();
+        positionStageLoadSupportGlyphs();
+        positionStageLoadCombinationForceGlyphs();
+        positionStageForceDemandContour();
+        positionStageMaterialModelDemandBadges();
+        positionStageMaterialForceRibbons();
+        positionStageMaterialForceEnvelope();
+        positionStageMaterialCapacityEnvelope();
+        positionStageMemberForcePlaybackTrail();
+        positionStageMemberForceVectorField();
+        positionStageMemberMaterialStateBadge();
+        positionStageResultCalloutAnchors();
+        positionStageCriticalHotspots();
+        positionPanelZoneStageBadge();
+      }
     }
     if(visualScene)visualScene.renderFrame();
     else renderer.render(scene,useOrthographicCamera?orthographicCamera:camera);
     viewerNeedsRender=false;
     lastRenderAt=nowMs;
+    viewportRenderFrameCount+=1;
   }
   frameCount++;
   const now=Date.now();
   if(now-lastFpsTime>=1000){
-    document.getElementById('fps-counter').textContent=`FPS: ${frameCount}`;
-    frameCount=0;lastFpsTime=now;
+    const fpsValue=viewportDenseOverlayMode
+      ?Math.max(viewportRenderFrameCount,frameCount)
+      :frameCount;
+    document.getElementById('fps-counter').textContent=`FPS: ${fpsValue}`;
+    frameCount=0;
+    viewportRenderFrameCount=0;
+    lastFpsTime=now;
   }
 }
 function onResize(){
@@ -19611,15 +20873,18 @@ function togglePanelRailCollapse(panelId=''){
   onResize();
 }
 function restorePanelRailCollapseState(){
+  const productDefault=isProductShellMode();
   ['left-panel','right-panel'].forEach(panelId=>{
-    const stored=safeSessionStorageGet(`structure-viewer-panel-${panelId}`);
+    let stored=safeSessionStorageGet(`structure-viewer-panel-${panelId}`);
+    if(stored===null&&productDefault)stored='collapsed';
     if(stored!=='collapsed')return;
     const panel=document.getElementById(panelId);
-    if(!(panel instanceof HTMLElement)||panel.classList.contains('is-collapsed'))return;
-    togglePanelRailCollapse(panelId);
+    if(!(panel instanceof HTMLElement))return;
+    if(!panel.classList.contains('is-collapsed'))togglePanelRailCollapse(panelId);
   });
 }
 window.togglePanelRailCollapse=togglePanelRailCollapse;
+window.toggleViewerShellMode=toggleViewerShellMode;
 window.buildModel=buildModel;
 window.generateDemoModel=generateDemoModel;
 window.setRenderMode=setRenderMode;
@@ -19685,6 +20950,7 @@ window.renderMemberSectionCapacityPanel=renderMemberSectionCapacityPanel;
 window.buildMemberSectionCapacityModel=buildMemberSectionCapacityModel;
 window.resetCamera=resetCamera;
 window.fitAll=fitAll;
+window.getViewerModelRecenterOffset=()=>({x:viewerModelRecenterOffset.x,y:viewerModelRecenterOffset.y,z:viewerModelRecenterOffset.z});
 window.getViewerModelBounds=getViewerModelBounds;
 window.setViewerCameraPose=setViewerCameraPose;
 window.setMidas33ViewPreset=setMidas33ViewPreset;
@@ -19708,6 +20974,9 @@ window.setProjectWorkspaceProject=setProjectWorkspaceProject;
 window.setProjectWorkspaceDrawing=setProjectWorkspaceDrawing;
 window.setTopbarWorkspaceSelection=setTopbarWorkspaceSelection;
 window.setProjectWorkspaceVariant=setProjectWorkspaceVariant;
+window.setDrawingCompareWipePosition=setDrawingCompareWipePosition;
+window.setOptimizationTimelineStep=setOptimizationTimelineStep;
+window.refreshDrawingComparisonPresentation=refreshDrawingComparisonPresentation;
 window.setProjectWorkspaceFilter=setProjectWorkspaceFilter;
 window.setProjectWorkspaceSearch=setProjectWorkspaceSearch;
 window.openIntegratedReviewNavigator=openIntegratedReviewNavigator;
@@ -19726,6 +20995,7 @@ window.updateStoryClipPadding=updateStoryClipPadding;
 window.clearStoryClip=clearStoryClip;
 window.exportViewportPng=exportViewportPng;
 window.exportWorkspaceHtmlReport=exportWorkspaceHtmlReport;
+window.exportDrawingComparisonSheet=exportDrawingComparisonSheet;
 window.exportWorkspaceAuditJsonl=exportWorkspaceAuditJsonl;
 window.exportProjectBundleJson=exportProjectBundleJson;
 window.previewProjectBundleImportFromInput=previewProjectBundleImportFromInput;
@@ -19811,6 +21081,9 @@ window.addEventListener('popstate',()=>{
   renderReportExportPanel();
   updateProvenanceBlock();
   renderSearchResults(modelData);
+  refreshDrawingComparisonPresentation().catch(err=>{
+    console.warn('[Viewer] Drawing comparison refresh after navigation failed:',err);
+  });
 });
 
 /* ── Main ── */

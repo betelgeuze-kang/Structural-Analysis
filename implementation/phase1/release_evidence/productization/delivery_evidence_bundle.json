@@ -1,0 +1,101 @@
+{
+  "schema_version": "delivery-evidence-bundle.v1",
+  "generated_at": "2026-05-30T17:52:38.524191+00:00",
+  "status": "ready",
+  "claim": "Engineer-in-loop delivery evidence bundle; not permit approval.",
+  "steps": [
+    {
+      "step": "mgt_roundtrip_sync",
+      "exit_code": 0,
+      "log": "sync-mgt: ready sha=1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4"
+    },
+    {
+      "step": "mgt_global_fea_readiness",
+      "exit_code": 0,
+      "log": "global-fea-readiness: ready -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_readiness_gate.json"
+    },
+    {
+      "step": "commercial_cross_validation",
+      "exit_code": 0,
+      "log": "crossval: pass_with_marginal_metrics (12/12 cases, 0 metric failures)"
+    },
+    {
+      "step": "proxy_solver_divergence",
+      "exit_code": 0,
+      "log": "proxy-gate: pass (0 divergences / 20 changes)"
+    },
+    {
+      "step": "mgt_native_reanalysis_pipeline",
+      "exit_code": 0,
+      "log": "mgt-pipeline: story_proxy_pass -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_native_reanalysis_pipeline.json"
+    },
+    {
+      "step": "gpu_solver_claim_receipt",
+      "exit_code": 0,
+      "log": "gpu-claim: gpu_assist_observed -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json"
+    },
+    {
+      "step": "story_model_reanalysis",
+      "exit_code": 0,
+      "log": "story-reanalysis: pass drift=1.987%"
+    },
+    {
+      "step": "post_optimization_reanalysis",
+      "exit_code": 0,
+      "log": "gate: pass_with_story_proxy_check -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json"
+    },
+    {
+      "step": "sync_holdout_supplementary",
+      "exit_code": 0,
+      "log": "sync-rh: attached supplementary evidence on 3 RH rows -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
+    },
+    {
+      "step": "rh_closure_checklist",
+      "exit_code": 0,
+      "log": "rh-checklist: pending_authority (3 open) -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_closure_checklist.json"
+    }
+  ],
+  "artifacts": {
+    "commercial_cross_validation": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+    "proxy_solver_divergence": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+    "story_model_reanalysis": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/story_model_reanalysis.json",
+    "gpu_solver_claim_receipt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json",
+    "mgt_native_reanalysis_pipeline": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_native_reanalysis_pipeline.json",
+    "post_optimization_reanalysis": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+    "mgt_roundtrip_sync": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_roundtrip_sync.json",
+    "mgt_global_fea_readiness": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_readiness_gate.json",
+    "rh_closure_checklist": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_closure_checklist.json",
+    "changes_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+  },
+  "summary": {
+    "cross_validation_status": "pass_with_marginal_metrics",
+    "cross_validation_marginal_accepted": 1,
+    "cross_validation_hard_failures": 0,
+    "mgt_roundtrip_sync_status": "ready",
+    "mgt_roundtrip_parsed": true,
+    "global_fea_readiness_status": "ready",
+    "global_fea_readiness_ready": true,
+    "proxy_divergence_count": 0,
+    "reanalysis_status": "pass_with_story_proxy_check",
+    "story_reanalysis_status": "pass",
+    "mgt_pipeline_status": "story_proxy_pass",
+    "mgt_integrity_status": "verified",
+    "member_alignment_status": "aligned",
+    "removed_member_count": 0
+  },
+  "blockers": [],
+  "holdout_evidence_hints": {
+    "RH-002": {
+      "supplementary_artifact": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+      "note": "Commercial HF/LF cross-validation supports legacy-tool comparison workflow."
+    },
+    "RH-001": {
+      "supplementary_artifact": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "note": "Post-optimization reanalysis gate records story-proxy safety metrics."
+    },
+    "RH-003": {
+      "supplementary_artifact": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/story_model_reanalysis.json",
+      "note": "Story-model reanalysis receipt with MGT provenance for authority workflow review."
+    }
+  }
+}

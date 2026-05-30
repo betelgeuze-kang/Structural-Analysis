@@ -40,6 +40,7 @@ export function buildStructureViewerReportHtml({
   importPreview = null,
   ingestPreview = null,
   drawingSheetPackage = null,
+  drawingComparisonDelivery = null,
   screenshotDataUrl = '',
   reviewNote = '',
   generatedAt = new Date().toISOString(),
@@ -59,6 +60,7 @@ export function buildStructureViewerReportHtml({
   const mapperRows = Array.isArray(commercialMapper?.rows) ? commercialMapper.rows : [];
   const sheetPackageRows = Array.isArray(drawingSheetPackage?.rows) ? drawingSheetPackage.rows : [];
   const sheetRows = Array.isArray(drawingSheetPackage?.sheets) ? drawingSheetPackage.sheets : [];
+  const deliveryRows = Array.isArray(drawingComparisonDelivery?.rows) ? drawingComparisonDelivery.rows : [];
   const ingestRenderableLabel = ingestPreview?.renderable_payload_available
     ? `${ingestPreview.renderable_payload_kind || 'renderable'} · nodes=${ingestPreview.renderable_node_count || 0} · elements=${ingestPreview.renderable_element_count || 0} · segments=${ingestPreview.renderable_segment_count || 0}`
     : '--';
@@ -140,6 +142,15 @@ ${reviewIssues.length ? reviewIssues.map((issue) => `<tr><td>${escapeHtml(issue.
 <div class="row muted">Count source</div><div class="row">${escapeHtml(verification.source || '--')}</div>
 <div class="row muted">Quality flags</div><div class="row">${qualityFlags.length ? qualityFlags.map((flag) => `<span class="badge">${escapeHtml(flag)}</span>`).join(' ') : '<span class="badge ready">none</span>'}</div>
 </div>
+
+<h2>Delivery Comparison Sheet</h2>
+<div class="muted">Engineer-in-loop review required. Numbers below are artifact-backed; they do not replace licensed structural approval.</div>
+<table>
+<thead><tr><th>Signal</th><th>Value</th><th>Provenance</th></tr></thead>
+<tbody>
+${deliveryRows.length ? deliveryRows.map((row) => `<tr><td>${escapeHtml(row.label)}</td><td>${escapeHtml(row.value)}</td><td>${escapeHtml(row.provenance)}</td></tr>`).join('') : '<tr><td colspan="3">Delivery comparison provenance pending (open Compare variant).</td></tr>'}
+</tbody>
+</table>
 
 <h2>Optimization Summary</h2>
 <table>
@@ -280,6 +291,7 @@ export function buildStructureViewerReportExport({
   importPreview = null,
   ingestPreview = null,
   drawingSheetPackage = null,
+  drawingComparisonDelivery = null,
   screenshotDataUrl = '',
   reviewNote = '',
   generatedAt = new Date().toISOString(),
@@ -299,6 +311,7 @@ export function buildStructureViewerReportExport({
     importPreview,
     ingestPreview,
     drawingSheetPackage,
+    drawingComparisonDelivery,
     screenshotDataUrl,
     reviewNote,
     generatedAt,

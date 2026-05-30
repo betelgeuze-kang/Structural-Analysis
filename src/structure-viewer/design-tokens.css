@@ -1,0 +1,109 @@
+/* Structural Insight — Precision Engineering visual identity (v2) */
+:root {
+  /* Neutrals */
+  --si-ink-950: #050a10;
+  --si-ink-900: #08121d;
+  --si-ink-850: #0c1826;
+  --si-ink-800: #111c29;
+  --si-ink-750: #152435;
+  --si-ink-700: #1a2d42;
+  --si-line-600: #2b3d50;
+  --si-line-500: #3d5268;
+  --si-muted-400: #7a8fa6;
+  --si-muted-300: #96a8bb;
+  --si-text-100: #ecf2f6;
+  --si-text-50: #f7fafc;
+
+  /* Signature accent (engineering teal) */
+  --si-accent-500: #1a8f8a;
+  --si-accent-400: #2eb8b0;
+  --si-accent-300: #4fd4cb;
+  --si-accent-glow: rgba(46, 184, 176, 0.35);
+
+  /* Secondary warm (review highlight) */
+  --si-warm-500: #c4782a;
+  --si-warm-400: #e6a95d;
+
+  /* Semantic */
+  --si-success-500: #2f9d6e;
+  --si-success-400: #63c7a1;
+  --si-warn-500: #b76a11;
+  --si-warn-400: #e6a95d;
+  --si-danger-500: #c24a3a;
+  --si-danger-400: #ef7d73;
+
+  /* Contour / D-C ramp (safe → exceed) */
+  --si-contour-0: #1e5f8f;
+  --si-contour-1: #2a8f7a;
+  --si-contour-2: #6bb86a;
+  --si-contour-3: #e6c84a;
+  --si-contour-4: #e6a04a;
+  --si-contour-5: #d45a3a;
+  --si-contour-6: #b82e2e;
+
+  /* Elevation */
+  --si-shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.18);
+  --si-shadow-md: 0 12px 32px rgba(0, 0, 0, 0.24);
+  --si-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.32);
+  --si-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  /* Glass */
+  --si-glass-bg: rgba(12, 22, 34, 0.72);
+  --si-glass-border: rgba(148, 168, 190, 0.22);
+  --si-glass-blur: 18px;
+
+  /* Motion */
+  --si-motion-fast: 120ms;
+  --si-motion-base: 200ms;
+  --si-motion-slow: 320ms;
+  --si-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --si-ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
+
+  /* Radius */
+  --si-radius-xs: 6px;
+  --si-radius-sm: 10px;
+  --si-radius-md: 14px;
+  --si-radius-lg: 20px;
+  --si-radius-xl: 26px;
+
+  /* Viewport */
+  --si-viewport-bg: #060b12;
+  --si-viewport-grid-major: rgba(46, 184, 176, 0.22);
+  --si-viewport-grid-minor: rgba(46, 184, 176, 0.08);
+}
+
+body.structural-surface {
+  --bg: var(--si-ink-900);
+  --bg-soft: var(--si-ink-850);
+  --panel: var(--si-glass-bg);
+  --panel-soft: rgba(17, 28, 41, 0.82);
+  --panel-strong: rgba(8, 16, 26, 0.94);
+  --panel-edge: var(--si-glass-border);
+  --panel-edge-strong: rgba(46, 184, 176, 0.28);
+  --text: var(--si-text-100);
+  --muted: var(--si-muted-300);
+  --accent: var(--si-accent-400);
+  --accent2: var(--si-warm-400);
+  --accent-ink: var(--si-ink-950);
+  --success: var(--si-success-400);
+  --warn: var(--si-warn-400);
+  --danger: var(--si-danger-400);
+  --shadow-elevated: var(--si-shadow-lg);
+  --shadow-soft: var(--si-shadow-md);
+}
+
+body.structural-surface.light-mode {
+  --bg: #f2ede4;
+  --bg-soft: #ebe4d8;
+  --panel: rgba(255, 252, 247, 0.94);
+  --panel-soft: rgba(255, 250, 242, 0.88);
+  --panel-strong: rgba(245, 236, 223, 0.96);
+  --panel-edge: rgba(100, 80, 60, 0.14);
+  --panel-edge-strong: rgba(26, 143, 138, 0.28);
+  --text: #1c2430;
+  --muted: #5c6678;
+  --accent: var(--si-accent-500);
+  --accent2: var(--si-warm-500);
+  --si-glass-bg: rgba(255, 252, 247, 0.88);
+  --si-viewport-bg: #f8f6f2;
+}

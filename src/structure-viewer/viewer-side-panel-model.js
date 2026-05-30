@@ -106,6 +106,14 @@ export function buildLayerToggleItems(types = {}, {
   maxMaterialFamilies = 8,
   maxMaterialModels = 8,
 } = {}) {
+  const enhancedControlsRequested = arguments.length > 1;
+  if (!enhancedControlsRequested) {
+    return Object.keys(types || {}).map((type) => ({
+      type,
+      label: type,
+      checked: true,
+    }));
+  }
   const typeItems = Object.keys(types || {}).map((type) => ({
     type,
     key: normalizeLayerKeyPart(type),

@@ -1,0 +1,103 @@
+{
+  "schema_version": "post-optimization-reanalysis-gate.v2",
+  "generated_at": "2026-05-30T17:52:38.130850+00:00",
+  "status": "pass_with_story_proxy_check",
+  "claim": "Reduced story-model change-row check; not licensed structural approval.",
+  "optimized_roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "changes_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+  "roundtrip_summary": {
+    "schema_version": "1.0",
+    "run_id": "phase1-midas-mgt-model",
+    "element_count": 12728,
+    "node_count": 13047,
+    "source_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "source_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4"
+  },
+  "change_summary": {
+    "change_count": 20,
+    "cost_proxy_delta_sum": -411.1593,
+    "max_governing_dcr_after": 1.3098,
+    "max_drift_after_pct": 1.9872
+  },
+  "proxy_solver_divergence": {
+    "schema_version": "proxy-solver-divergence-gate.v1",
+    "generated_at": "2026-05-30T17:52:36.333147+00:00",
+    "status": "pass",
+    "claim": "Heuristic proxy/solver consistency on optimization change rows; not structural approval.",
+    "change_count": 20,
+    "cost_proxy_moved_rows": 5,
+    "drift_moved_rows": 0,
+    "divergence_count": 0,
+    "thresholds": {
+      "min_cost_proxy_delta": 5.0,
+      "max_drift_delta_pct": 0.02,
+      "max_governing_dcr_after": 1.35,
+      "require_drift_stable_when_cost_moves": true
+    },
+    "divergences": []
+  },
+  "story_model_reanalysis": {
+    "schema_version": "story-model-reanalysis-receipt.v1",
+    "generated_at": "2026-05-30T17:52:38.036232+00:00",
+    "status": "pass",
+    "claim": "Reduced story shear-building reanalysis on optimization terminal state; not licensed approval.",
+    "state_npz_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/design_optimization/design_optimization_solver_loop_state.npz",
+    "change_count": 20,
+    "metrics": {
+      "max_drift_ratio_pct": 1.9872000000000005,
+      "residual_drift_ratio_pct": 0.37399104000000016,
+      "governing_max_dcr": 0.9761,
+      "drift_limit_pct": 2.0,
+      "dcr_limit": 1.0,
+      "feasible": true,
+      "violation_score": 0.0
+    },
+    "solver": {
+      "backend_static": "rocm_torch_hip_mainloop",
+      "backend_ndtha": "rocm_torch_hip_mainloop",
+      "converged_all_steps": true,
+      "collapsed": false,
+      "static_converged": true
+    },
+    "blockers": []
+  },
+  "mgt_provenance": {
+    "schema_version": "mgt-reanalysis-provenance.v1",
+    "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_exists": true,
+    "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "element_count": 12728,
+    "node_count": 13047,
+    "native_solve_status": "not_wired",
+    "story_model_proxy_status": "wired_via_state_npz",
+    "note": "MGT native solver loop not connected; story-model check uses optimization state NPZ."
+  },
+  "mgt_integrity": {
+    "schema_version": "mgt-reanalysis-provenance.v1",
+    "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_exists": true,
+    "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "element_count": 12728,
+    "node_count": 13047,
+    "native_solve_status": "not_wired",
+    "story_model_proxy_status": "wired_via_state_npz",
+    "note": "MGT native solver loop not connected; story-model check uses optimization state NPZ.",
+    "sha256_verified": true,
+    "sha256_actual": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "integrity_status": "verified"
+  },
+  "mgt_sync": {
+    "status": "synced",
+    "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "previous_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "sha256_changed": false,
+    "size_bytes": 2205887
+  },
+  "blockers": [],
+  "thresholds": {
+    "max_governing_dcr": 1.35
+  },
+  "next_step": "Wire MGT\u2192global FEA native solve; roundtrip parse+sha sync is available via sync_optimized_mgt_roundtrip.py."
+}

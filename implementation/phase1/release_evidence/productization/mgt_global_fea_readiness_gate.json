@@ -1,0 +1,21 @@
+{
+  "schema_version": "mgt-global-fea-readiness-gate.v1",
+  "generated_at": "2026-05-30T17:52:27.974089+00:00",
+  "status": "ready",
+  "claim": "Roundtrip/NPZ/parse preflight only; does not run global FEA on full MGT mesh.",
+  "native_solve_status": "not_wired",
+  "readiness_for_global_fea_wiring": true,
+  "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "parse_report_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
+  "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "metrics": {
+    "element_count": 12728,
+    "node_count": 13047,
+    "npz_bytes": 354229,
+    "parse_contract_pass": true,
+    "source_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4"
+  },
+  "blockers": [],
+  "next_step": "Connect roundtrip NPZ assembly to licensed/global nonlinear solver export replay."
+}

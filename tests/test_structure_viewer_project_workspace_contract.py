@@ -49,6 +49,13 @@ const standardState = resolveWorkspaceStateFromSearch('?project=midas33_release&
 const resumeState = resolveWorkspaceStateFromSearch('?project=midas33_release&drawing=midas33_optimized&variant=compare&comparison_filter=reduced&member=911', {
   manifest,
 });
+const timelineState = resolveWorkspaceStateFromSearch('?project=midas33_release&drawing=midas33_optimized&variant=compare&optimization_timeline_step=3', {
+  manifest,
+});
+const timelineUrl = buildWorkspaceUrl('http://127.0.0.1/src/structure-viewer/index.html', {
+  ...timelineState,
+  manifest,
+}, { variant: 'compare', optimizationTimelineStep: 5 });
 const browser = buildProjectBrowserModel(manifest, {...standardState, filter: 'all'});
 const midasDrawing = browser.drawings.find((drawing) => drawing.drawingId === 'midas33_optimized');
 const prRecheckDrawing = browser.drawings.find((drawing) => drawing.drawingId === 'midas33_pr_recheck');
@@ -191,6 +198,10 @@ console.log(JSON.stringify({
     variant: resumeState.variant,
     comparisonFilter: resumeState.comparisonFilter,
   },
+  timelineState: {
+    optimizationTimelineStep: timelineState.optimizationTimelineStep,
+  },
+  timelineUrlHasStep: timelineUrl.includes('optimization_timeline_step=5'),
   activeProject: browser.activeProject.project_id,
   drawingCount: browser.drawings.length,
   midasComparisonLabel: midasDrawing.comparisonLabel,
@@ -274,6 +285,8 @@ console.log(JSON.stringify({
         "variant": "compare",
         "comparisonFilter": "reduced",
     }
+    assert payload["timelineState"] == {"optimizationTimelineStep": 3}
+    assert payload["timelineUrlHasStep"] is True
     assert payload["activeProject"] == "midas33_release"
     assert payload["drawingCount"] >= 1
     assert payload["midasComparisonLabel"] == "members 11,334 -> 2,242 (-80.2%)"
