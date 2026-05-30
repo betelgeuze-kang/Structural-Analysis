@@ -1,6 +1,6 @@
 {
   "schema_version": "delivery-evidence-bundle.v1",
-  "generated_at": "2026-05-30T17:52:38.524191+00:00",
+  "generated_at": "2026-05-30T18:00:02.440383+00:00",
   "status": "ready",
   "claim": "Engineer-in-loop delivery evidence bundle; not permit approval.",
   "steps": [
@@ -13,6 +13,16 @@
       "step": "mgt_global_fea_readiness",
       "exit_code": 0,
       "log": "global-fea-readiness: ready -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_readiness_gate.json"
+    },
+    {
+      "step": "mgt_roundtrip_assembly_fingerprint",
+      "exit_code": 0,
+      "log": "mgt-fingerprint: ready sha=f6983a27d201"
+    },
+    {
+      "step": "ml_multi_objective_status",
+      "exit_code": 0,
+      "log": "ml-status: not_started production_ml_wired=True"
     },
     {
       "step": "commercial_cross_validation",
@@ -35,6 +45,11 @@
       "log": "gpu-claim: gpu_assist_observed -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json"
     },
     {
+      "step": "gpu_newton_certification_checklist",
+      "exit_code": 0,
+      "log": "gpu-newton-checklist: not_certified -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_newton_certification_checklist.json"
+    },
+    {
       "step": "story_model_reanalysis",
       "exit_code": 0,
       "log": "story-reanalysis: pass drift=1.987%"
@@ -45,14 +60,34 @@
       "log": "gate: pass_with_story_proxy_check -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json"
     },
     {
+      "step": "rh_closure_checklist",
+      "exit_code": 0,
+      "log": "rh-checklist: pending_authority (3 open) -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_closure_checklist.json"
+    },
+    {
+      "step": "rh_signed_closure_packet_template",
+      "exit_code": 0,
+      "log": "rh-template: template_only (3 open) -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json"
+    },
+    {
       "step": "sync_holdout_supplementary",
       "exit_code": 0,
       "log": "sync-rh: attached supplementary evidence on 3 RH rows -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
     },
     {
-      "step": "rh_closure_checklist",
+      "step": "gap_closure_status",
       "exit_code": 0,
-      "log": "rh-checklist: pending_authority (3 open) -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_closure_checklist.json"
+      "log": "gap-status: delivery=ready authority_holdout=open -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_closure_status.json"
+    },
+    {
+      "step": "productization_delivery_evidence_validation",
+      "exit_code": 0,
+      "log": "productization-validate: pass missing=0"
+    },
+    {
+      "step": "gap_closure_status_final",
+      "exit_code": 0,
+      "log": "gap-status: delivery=ready authority_holdout=open -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_closure_status.json"
     }
   ],
   "artifacts": {
@@ -65,7 +100,13 @@
     "mgt_roundtrip_sync": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_roundtrip_sync.json",
     "mgt_global_fea_readiness": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_readiness_gate.json",
     "rh_closure_checklist": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_closure_checklist.json",
-    "changes_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+    "changes_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+    "rh_signed_closure_packet_template": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
+    "gpu_newton_certification_checklist": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_newton_certification_checklist.json",
+    "gap_closure_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_closure_status.json",
+    "mgt_roundtrip_assembly_fingerprint": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_roundtrip_assembly_fingerprint.json",
+    "ml_multi_objective_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ml_multi_objective_status.json",
+    "productization_delivery_evidence_validation": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/productization_delivery_evidence_validation.json"
   },
   "summary": {
     "cross_validation_status": "pass_with_marginal_metrics",

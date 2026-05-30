@@ -4962,6 +4962,45 @@ def main() -> None:
             steps,
         ):
             reason_code = "ERR_DELIVERY_EVIDENCE_BUNDLE"
+        cmd_gap_closure_status = [
+            sys.executable,
+            "scripts/report_gap_closure_status.py",
+            "--output-json",
+            "implementation/phase1/release_evidence/productization/gap_closure_status.json",
+        ]
+        if reason_code == "PASS" and not _run_reusable(
+            "gap_closure_status",
+            cmd_gap_closure_status,
+            "implementation/phase1/release_evidence/productization/gap_closure_status.json",
+            steps,
+        ):
+            reason_code = "ERR_GAP_CLOSURE_STATUS"
+        cmd_verify_delivery_evidence = [
+            sys.executable,
+            "scripts/verify_delivery_evidence_for_ci.py",
+            "--bundle-json",
+            "implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
+        ]
+        if reason_code == "PASS" and not _run_reusable(
+            "verify_delivery_evidence",
+            cmd_verify_delivery_evidence,
+            "implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
+            steps,
+        ):
+            reason_code = "ERR_VERIFY_DELIVERY_EVIDENCE"
+        cmd_validate_productization = [
+            sys.executable,
+            "scripts/validate_productization_delivery_evidence.py",
+            "--output-json",
+            "implementation/phase1/release_evidence/productization/productization_delivery_evidence_validation.json",
+        ]
+        if reason_code == "PASS" and not _run_reusable(
+            "validate_productization_delivery_evidence",
+            cmd_validate_productization,
+            "implementation/phase1/release_evidence/productization/productization_delivery_evidence_validation.json",
+            steps,
+        ):
+            reason_code = "ERR_VALIDATE_PRODUCTIZATION_DELIVERY"
         if reason_code == "PASS" and need_autogen_pbd_hinge_refresh_source and not _run_reusable(
             "pbd_hinge_refresh_source",
             cmd_pbd_hinge_refresh_source,

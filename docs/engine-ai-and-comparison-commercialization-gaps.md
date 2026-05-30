@@ -109,7 +109,7 @@
 | E-P1c | 최적화 후 재해석 게이트 | **부분 완료** | v2 + story reanalysis + **`run_mgt_native_reanalysis_pipeline.py`** (`--sync-provenance` 기본, export/nightly `--sync-roundtrip-after-export`); **`sync_mgt_roundtrip_provenance.py`** / `scripts/sync_optimized_mgt_roundtrip.py`; global FEA `not_wired` |
 | E-P2a | modal/좌굴 ingest 요약 | **부분 완료** | `report_commercial_solver_cross_validation.py` → `modal_buckling_summary` (export `mode_shape_mac`·`buckling_factor`) |
 | E-P2b | 상용 솔버 교차검증 | **부분 완료** | `report_commercial_solver_cross_validation.py` — HF/LF metrics + `marginal_accepted_metrics` (5% tolerance band) |
-| E-P3 | EB/RH 증거 폐쇄 | **부분 완료** | delivery bundle + `rh_closure_checklist.json` + RH `supplementary_metric_note`; signed closure still pending |
+| E-P3 | EB/RH 증거 폐쇄 | **부분 완료** | `rh_closure_checklist.json` + `rh_signed_closure_packet_template.json` + RH `closure_packet_template_path`; signed closure still pending |
 
 ---
 
@@ -147,7 +147,7 @@
 | A-P1b | claim 정직화 | **완료** | scope disclaimer: 규칙 기반·ML 비배포·게이트 artifact 전제 |
 | A-P2a | 비용 단가 provenance | **부분 완료** | `cost_model.build_price_provenance()` (region/year/단가); 실측 캘리브레이션 API는 `CostModelCalibrator` |
 | A-P2b | proxy ↔ solver 일치도 | **부분 완료** | `run_proxy_solver_divergence_gate.py` — changes.json DCR/drift vs cost_proxy 휴리스틱 |
-| A-P3 | 다목적·ML 연결 | **미폐쇄** | Pareto·surrogate ROCm 연결은 연구 트랙 |
+| A-P3 | 다목적·ML 연결 | **미폐쇄** | `report_ml_multi_objective_status.py` → `ml_multi_objective_status.json` (production `not_started`) |
 
 ---
 
@@ -196,6 +196,11 @@
 - MGT roundtrip sync: `implementation/phase1/sync_mgt_roundtrip_provenance.py`, `scripts/sync_optimized_mgt_roundtrip.py`
 - MGT global FEA readiness: `implementation/phase1/run_mgt_global_fea_readiness_gate.py`, `scripts/run_mgt_global_fea_readiness_gate.py`
 - RH closure checklist: `implementation/phase1/build_rh_closure_checklist.py`, `scripts/build_rh_closure_checklist.py`
+- RH signed packet template: `implementation/phase1/build_rh_signed_closure_packet_template.py`, `scripts/build_rh_signed_closure_packet_template.py`
+- GPU Newton certification checklist: `implementation/phase1/build_gpu_newton_certification_checklist.py`, `scripts/build_gpu_newton_certification_checklist.py`
+- Productization validator: `implementation/phase1/validate_productization_delivery_evidence.py`, `scripts/validate_productization_delivery_evidence.py`
+- MGT assembly fingerprint: `implementation/phase1/build_mgt_roundtrip_assembly_fingerprint.py`, `scripts/build_mgt_roundtrip_assembly_fingerprint.py`
+- ML status rollup: `implementation/phase1/report_ml_multi_objective_status.py`, `scripts/report_ml_multi_objective_status.py`
 - CI delivery check: `scripts/verify_delivery_evidence_for_ci.py` (nightly: `run_nightly_release_gate.py` step `delivery_evidence_bundle`)
 - 재해석 게이트: `scripts/run_post_optimization_reanalysis_gate.py`
 - proxy/solver 게이트: `scripts/run_proxy_solver_divergence_gate.py`, `implementation/phase1/run_proxy_solver_divergence_gate.py`

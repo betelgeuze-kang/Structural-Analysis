@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from build_mgt_roundtrip_assembly_fingerprint import build_mgt_roundtrip_assembly_fingerprint
 from design_optimization.io import load_json
 
 
@@ -66,6 +67,12 @@ def build_mgt_global_fea_readiness_gate(
         blockers.append("mgt_file_missing")
 
     source = roundtrip.get("source") if isinstance(roundtrip.get("source"), dict) else {}
+    assembly_fingerprint = build_mgt_roundtrip_assembly_fingerprint(
+        roundtrip_json=roundtrip_json,
+        roundtrip_npz=roundtrip_npz,
+    )
+    if assembly_fingerprint.get("status") != "ready":
+        blockers.extend(f"assembly_{item}" for item in assembly_fingerprint.get("blockers") or [])
     readiness = not blockers
     return {
         "schema_version": SCHEMA_VERSION,
@@ -85,6 +92,7 @@ def build_mgt_global_fea_readiness_gate(
             "parse_contract_pass": parse_pass,
             "source_sha256": source.get("sha256"),
         },
+        "assembly_fingerprint": assembly_fingerprint,
         "blockers": blockers,
         "next_step": "Connect roundtrip NPZ assembly to licensed/global nonlinear solver export replay.",
     }

@@ -1,0 +1,18 @@
+{
+  "schema_version": "mgt-roundtrip-assembly-fingerprint.v1",
+  "generated_at": "2026-05-30T17:59:47.666134+00:00",
+  "status": "ready",
+  "fingerprint_sha256": "f6983a27d20156e4ddc3f29c5357cc4a286f79f0a96a491f6d26689a10418f51",
+  "metrics": {
+    "element_count": 12728,
+    "node_count": 13047,
+    "section_count": 183,
+    "source_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "npz_bytes": 354229
+  },
+  "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "solver_hook_status": "not_wired",
+  "blockers": [],
+  "note": "Fingerprint stabilizes MGT assembly identity for a future global FEA import path."
+}

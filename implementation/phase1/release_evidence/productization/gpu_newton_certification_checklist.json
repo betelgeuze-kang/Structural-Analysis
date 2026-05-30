@@ -1,0 +1,70 @@
+{
+  "schema_version": "gpu-newton-certification-checklist.v1",
+  "generated_at": "2026-05-30T17:59:56.949226+00:00",
+  "status": "not_certified",
+  "gpu_newton_terminal_proven": false,
+  "gpu_mainloop_residency_observed": true,
+  "claim_label": "gpu_assist_observed",
+  "marketing_safe_wording": "GPU main-loop residency may be observed; nonlinear Newton terminal solve on GPU is not proven and must not be claimed without dedicated certification.",
+  "required_evidence_before_terminal_claim": [
+    "Independent CPU reference solve on identical model fingerprint",
+    "Step-by-step Newton residual log with device attribution per iteration",
+    "Jacobian assembly path proven on GPU without CPU fallback",
+    "Published tolerance contract vs reference within agreed band",
+    "Third-party or licensed-engineer review receipt"
+  ],
+  "observed_receipt": {
+    "schema_version": "gpu-solver-claim-receipt.v1",
+    "generated_at": "2026-05-30T17:59:56.949140+00:00",
+    "claim_label": "gpu_assist_observed",
+    "gpu_newton_terminal_proven": false,
+    "gpu_mainloop_residency_observed": true,
+    "gpu_assist_observed": true,
+    "cpu_primary": false,
+    "backends": {
+      "static": "rocm_torch_hip_mainloop",
+      "ndtha": "rocm_torch_hip_mainloop"
+    },
+    "runtime_telemetry": {
+      "static": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "runtime_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "hip_kernel_invocation_count": 6,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "solver_array_bytes": 480
+      },
+      "ndtha": {
+        "main_loop_backend": "rocm_torch_hip_mainloop",
+        "runtime_backend": "rocm_torch_hip_mainloop",
+        "solver_path_kind": "production_hip_kernel",
+        "production_kernel_path": true,
+        "force_jacobian_kernel_consistent": true,
+        "surrogate_runtime_used": false,
+        "simplified_runtime_used": false,
+        "surrogate_runtime_markers": [],
+        "cpu_backend": false,
+        "cpu_required": false,
+        "cpu_fallback_used": false,
+        "hip_kernel_invocation_count": 288,
+        "host_copy_bytes": 0,
+        "device_residency_ratio": 1.0,
+        "solver_array_bytes": 14000
+      }
+    },
+    "marketing_safe_wording": "GPU main-loop residency may be observed; nonlinear Newton terminal solve on GPU is not proven and must not be claimed without dedicated certification.",
+    "state_npz_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/design_optimization/design_optimization_solver_loop_state.npz"
+  },
+  "certification_blockers": [
+    "gpu_newton_terminal_not_proven"
+  ]
+}

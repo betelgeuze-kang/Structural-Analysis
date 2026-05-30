@@ -53,6 +53,7 @@ def run_delivery_hooks(
         str(changes_json),
         "--roundtrip-json",
         str(optimized_roundtrip_json),
+        "--parse-roundtrip",
     ]
     proc = subprocess.run(bundle_cmd, cwd=repo_root, check=False, capture_output=True, text=True)
     steps.append(

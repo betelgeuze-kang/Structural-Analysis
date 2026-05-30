@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-solver-cross-validation.v1",
-  "generated_at": "2026-05-30T17:52:28.018634+00:00",
+  "generated_at": "2026-05-30T17:59:47.748907+00:00",
   "status": "pass_with_marginal_metrics",
   "claim": "Commercial HF/LF export agreement check; not independent solver certification.",
   "source": {

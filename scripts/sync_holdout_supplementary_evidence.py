@@ -64,12 +64,19 @@ def merge_supplementary_evidence(
 
     out = dict(rh_payload)
     out["updates"] = merged_updates
+    artifacts = bundle.get("artifacts") if isinstance(bundle.get("artifacts"), dict) else {}
+    template_path = str(artifacts.get("rh_signed_closure_packet_template") or "").strip()
     out["supplementary_evidence_basis"] = {
         "delivery_evidence_bundle": str(bundle.get("generated_at") or ""),
         "bundle_status": bundle.get("status"),
         "bundle_schema": bundle.get("schema_version"),
+        "rh_signed_closure_packet_template": template_path,
         "note": "Supplementary paths do not close RH work items; signed closure evidence still required.",
     }
+    if template_path:
+        for work_id, row in merged_updates.items():
+            if isinstance(row, dict):
+                row["closure_packet_template_path"] = template_path
     return out
 
 

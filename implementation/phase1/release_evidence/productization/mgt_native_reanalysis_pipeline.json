@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-native-reanalysis-pipeline.v1",
-  "generated_at": "2026-05-30T17:52:30.831793+00:00",
+  "generated_at": "2026-05-30T17:59:52.504609+00:00",
   "status": "story_proxy_pass",
   "claim": "MGT integrity + story-model proxy reanalysis; not native FEA certification.",
   "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
@@ -27,15 +27,37 @@
     "note": "MGT roundtrip/NPZ preflight ready; global FEA solver loop still not connected.",
     "mgt_refresh": {
       "schema_version": "sync-mgt-roundtrip-provenance.v1",
-      "generated_at": "2026-05-30T17:52:28.581809+00:00",
+      "generated_at": "2026-05-30T17:59:50.108364+00:00",
       "status": "ready",
       "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
       "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
       "npz_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
       "integrity_status": "verified",
       "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-      "parse": null,
+      "parse": {
+        "status": "pass",
+        "exit_code": 0,
+        "contract_pass": true,
+        "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+        "npz_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+        "report_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
+        "element_count": 12728,
+        "node_count": 11355,
+        "log_tail": "Wrote MIDAS MGT conversion report: /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json\n{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+      },
       "steps": [
+        {
+          "step": "parse_mgt",
+          "status": "pass",
+          "exit_code": 0,
+          "contract_pass": true,
+          "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+          "npz_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+          "report_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
+          "element_count": 12728,
+          "node_count": 11355,
+          "log_tail": "Wrote MIDAS MGT conversion report: /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json\n{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+        },
         {
           "step": "sync_provenance",
           "status": "synced",
@@ -50,7 +72,7 @@
     },
     "global_fea_readiness": {
       "schema_version": "mgt-global-fea-readiness-gate.v1",
-      "generated_at": "2026-05-30T17:52:30.826900+00:00",
+      "generated_at": "2026-05-30T17:59:52.498532+00:00",
       "status": "ready",
       "claim": "Roundtrip/NPZ/parse preflight only; does not run global FEA on full MGT mesh.",
       "native_solve_status": "not_wired",
@@ -66,13 +88,31 @@
         "parse_contract_pass": true,
         "source_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4"
       },
+      "assembly_fingerprint": {
+        "schema_version": "mgt-roundtrip-assembly-fingerprint.v1",
+        "generated_at": "2026-05-30T17:59:52.494013+00:00",
+        "status": "ready",
+        "fingerprint_sha256": "f6983a27d20156e4ddc3f29c5357cc4a286f79f0a96a491f6d26689a10418f51",
+        "metrics": {
+          "element_count": 12728,
+          "node_count": 13047,
+          "section_count": 183,
+          "source_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+          "npz_bytes": 354229
+        },
+        "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+        "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+        "solver_hook_status": "not_wired",
+        "blockers": [],
+        "note": "Fingerprint stabilizes MGT assembly identity for a future global FEA import path."
+      },
       "blockers": [],
       "next_step": "Connect roundtrip NPZ assembly to licensed/global nonlinear solver export replay."
     }
   },
   "story_model_reanalysis": {
     "schema_version": "story-model-reanalysis-receipt.v1",
-    "generated_at": "2026-05-30T17:52:30.333842+00:00",
+    "generated_at": "2026-05-30T17:59:51.885810+00:00",
     "status": "pass",
     "claim": "Reduced story shear-building reanalysis on optimization terminal state; not licensed approval.",
     "state_npz_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/design_optimization/design_optimization_solver_loop_state.npz",
@@ -97,7 +137,7 @@
   },
   "gpu_solver_claim": {
     "schema_version": "gpu-solver-claim-receipt.v1",
-    "generated_at": "2026-05-30T17:52:30.738002+00:00",
+    "generated_at": "2026-05-30T17:59:52.300843+00:00",
     "claim_label": "gpu_assist_observed",
     "gpu_newton_terminal_proven": false,
     "gpu_mainloop_residency_observed": true,
@@ -149,15 +189,37 @@
   "blockers": [],
   "mgt_refresh": {
     "schema_version": "sync-mgt-roundtrip-provenance.v1",
-    "generated_at": "2026-05-30T17:52:28.581809+00:00",
+    "generated_at": "2026-05-30T17:59:50.108364+00:00",
     "status": "ready",
     "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
     "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
     "npz_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
     "integrity_status": "verified",
     "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-    "parse": null,
+    "parse": {
+      "status": "pass",
+      "exit_code": 0,
+      "contract_pass": true,
+      "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "npz_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+      "report_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
+      "element_count": 12728,
+      "node_count": 11355,
+      "log_tail": "Wrote MIDAS MGT conversion report: /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json\n{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    },
     "steps": [
+      {
+        "step": "parse_mgt",
+        "status": "pass",
+        "exit_code": 0,
+        "contract_pass": true,
+        "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+        "npz_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+        "report_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json",
+        "element_count": 12728,
+        "node_count": 11355,
+        "log_tail": "Wrote MIDAS MGT conversion report: /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.parse_report.json\n{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+      },
       {
         "step": "sync_provenance",
         "status": "synced",

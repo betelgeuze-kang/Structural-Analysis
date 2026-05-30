@@ -23,6 +23,7 @@ def _load(path: Path) -> dict[str, Any]:
 def build_gap_closure_status() -> dict[str, Any]:
     bundle = _load(PRODUCTIZATION / "delivery_evidence_bundle.json")
     gpu = _load(PRODUCTIZATION / "gpu_solver_claim_receipt.json")
+    gpu_newton = _load(PRODUCTIZATION / "gpu_newton_certification_checklist.json")
     crossval = _load(PRODUCTIZATION / "commercial_solver_cross_validation.json")
     rh = _load(PRODUCTIZATION / "residual_holdout_closure_updates.json")
     changes = _load(PRODUCTIZATION / "design_optimization_cost_reduction_changes.json")
@@ -83,9 +84,20 @@ def build_gap_closure_status() -> dict[str, Any]:
             "claim_label": gpu.get("claim_label"),
             "gpu_assist_observed": gpu.get("gpu_assist_observed"),
             "gpu_mainloop_residency_observed": gpu.get("gpu_mainloop_residency_observed"),
+            "certification_status": gpu_newton.get("status"),
+            "certification_blockers": gpu_newton.get("certification_blockers"),
             "backends": gpu.get("backends"),
         },
-        "ml_multi_objective_a_p3": {"status": "not_started"},
+        "rh_signed_closure_template": {
+            "status": _load(PRODUCTIZATION / "rh_signed_closure_packet_template.json").get("status"),
+            "open_count": _load(PRODUCTIZATION / "rh_signed_closure_packet_template.json").get("open_count"),
+        },
+        "ml_multi_objective_a_p3": {
+            "status": (_load(PRODUCTIZATION / "ml_multi_objective_status.json").get("status") or "not_started"),
+            "production_ml_wired": _load(PRODUCTIZATION / "ml_multi_objective_status.json").get(
+                "production_ml_wired"
+            ),
+        },
     }
 
     blockers = list(bundle.get("blockers") or [])

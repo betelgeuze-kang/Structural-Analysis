@@ -1,6 +1,6 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-05-30T17:52:38.607871+00:00",
+  "generated_at": "2026-05-30T18:00:02.601144+00:00",
   "overall_status": "ready",
   "delivery_status": "ready",
   "authority_holdout_status": "open",
@@ -51,13 +51,22 @@
       "claim_label": "gpu_assist_observed",
       "gpu_assist_observed": true,
       "gpu_mainloop_residency_observed": true,
+      "certification_status": "not_certified",
+      "certification_blockers": [
+        "gpu_newton_terminal_not_proven"
+      ],
       "backends": {
         "static": "rocm_torch_hip_mainloop",
         "ndtha": "rocm_torch_hip_mainloop"
       }
     },
+    "rh_signed_closure_template": {
+      "status": "template_only",
+      "open_count": 3
+    },
     "ml_multi_objective_a_p3": {
-      "status": "not_started"
+      "status": "not_started",
+      "production_ml_wired": true
     }
   },
   "artifacts": {

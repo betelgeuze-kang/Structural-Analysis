@@ -1,0 +1,14 @@
+{
+  "schema_version": "ml-multi-objective-status.v1",
+  "generated_at": "2026-05-30T17:59:47.716550+00:00",
+  "status": "not_started",
+  "production_ml_wired": true,
+  "multi_objective_pareto_wired": false,
+  "claim": "Production optimization remains deterministic greedy/heuristic; ML/Pareto are research-track only.",
+  "runner_static_scan": {
+    "run_design_optimization_cost_reduction.py": [],
+    "run_design_optimization_solver_loop.py": [],
+    "design_optimization_env.py": []
+  },
+  "next_step": "Optional: wire validated surrogate behind explicit opt-in flag before any AI marketing claim."
+}

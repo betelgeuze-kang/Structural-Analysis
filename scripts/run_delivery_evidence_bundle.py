@@ -75,7 +75,11 @@ def main() -> int:
     steps.append({"step": "mgt_roundtrip_sync", "exit_code": code, "log": log})
 
     global_fea_out = out_dir / "mgt_global_fea_readiness_gate.json"
+    mgt_fingerprint_out = out_dir / "mgt_roundtrip_assembly_fingerprint.json"
     rh_checklist_out = out_dir / "rh_closure_checklist.json"
+    rh_template_out = out_dir / "rh_signed_closure_packet_template.json"
+    ml_status_out = out_dir / "ml_multi_objective_status.json"
+    productization_validate_out = out_dir / "productization_delivery_evidence_validation.json"
     code, log = _run(
         [
             sys.executable,
@@ -87,6 +91,28 @@ def main() -> int:
         ]
     )
     steps.append({"step": "mgt_global_fea_readiness", "exit_code": code, "log": log})
+
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_mgt_roundtrip_assembly_fingerprint.py"),
+            "--roundtrip-json",
+            str(args.roundtrip_json),
+            "--output-json",
+            str(mgt_fingerprint_out),
+        ]
+    )
+    steps.append({"step": "mgt_roundtrip_assembly_fingerprint", "exit_code": code, "log": log})
+
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/report_ml_multi_objective_status.py"),
+            "--output-json",
+            str(ml_status_out),
+        ]
+    )
+    steps.append({"step": "ml_multi_objective_status", "exit_code": code, "log": log})
 
     if args.enrich_changes:
         code, log = _run(
@@ -138,6 +164,7 @@ def main() -> int:
             str(mgt_pipeline_out),
             "--sync-provenance",
         ]
+        + (["--refresh-parse"] if args.parse_roundtrip else [])
     )
     steps.append({"step": "mgt_native_reanalysis_pipeline", "exit_code": code, "log": log})
 
@@ -151,6 +178,17 @@ def main() -> int:
         ]
     )
     steps.append({"step": "gpu_solver_claim_receipt", "exit_code": code, "log": log})
+
+    gpu_newton_checklist_out = out_dir / "gpu_newton_certification_checklist.json"
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_gpu_newton_certification_checklist.py"),
+            "--output-json",
+            str(gpu_newton_checklist_out),
+        ]
+    )
+    steps.append({"step": "gpu_newton_certification_checklist", "exit_code": code, "log": log})
 
     story_out = out_dir / "story_model_reanalysis.json"
     code, log = _run(
@@ -270,22 +308,8 @@ def main() -> int:
             },
         },
     }
-    args.output_json.write_text(json.dumps(bundle, indent=2) + "\n", encoding="utf-8")
-
     rh_path = REPO_ROOT / "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
-    code, log = _run(
-        [
-            sys.executable,
-            str(REPO_ROOT / "scripts/sync_holdout_supplementary_evidence.py"),
-            "--bundle-json",
-            str(args.output_json),
-            "--residual-holdout-json",
-            str(rh_path),
-            "--output-json",
-            str(rh_path),
-        ]
-    )
-    steps.append({"step": "sync_holdout_supplementary", "exit_code": code, "log": log})
+    args.output_json.write_text(json.dumps(bundle, indent=2) + "\n", encoding="utf-8")
 
     code, log = _run(
         [
@@ -300,8 +324,96 @@ def main() -> int:
         ]
     )
     steps.append({"step": "rh_closure_checklist", "exit_code": code, "log": log})
+
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_rh_signed_closure_packet_template.py"),
+            "--rh-json",
+            str(rh_path),
+            "--checklist-json",
+            str(rh_checklist_out),
+            "--output-json",
+            str(rh_template_out),
+        ]
+    )
+    steps.append({"step": "rh_signed_closure_packet_template", "exit_code": code, "log": log})
+
     bundle["steps"] = steps
     bundle["artifacts"]["rh_closure_checklist"] = str(rh_checklist_out) if rh_checklist_out.is_file() else ""
+    bundle["artifacts"]["rh_signed_closure_packet_template"] = (
+        str(rh_template_out) if rh_template_out.is_file() else ""
+    )
+    bundle["artifacts"]["gpu_newton_certification_checklist"] = (
+        str(gpu_newton_checklist_out) if gpu_newton_checklist_out.is_file() else ""
+    )
+    args.output_json.write_text(json.dumps(bundle, indent=2) + "\n", encoding="utf-8")
+
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/sync_holdout_supplementary_evidence.py"),
+            "--bundle-json",
+            str(args.output_json),
+            "--residual-holdout-json",
+            str(rh_path),
+            "--output-json",
+            str(rh_path),
+        ]
+    )
+    steps.append({"step": "sync_holdout_supplementary", "exit_code": code, "log": log})
+
+    gap_status_out = out_dir / "gap_closure_status.json"
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/report_gap_closure_status.py"),
+            "--output-json",
+            str(gap_status_out),
+        ]
+    )
+    steps.append({"step": "gap_closure_status", "exit_code": code, "log": log})
+
+    bundle["steps"] = steps
+    bundle["artifacts"]["gap_closure_status"] = str(gap_status_out) if gap_status_out.is_file() else ""
+    bundle["artifacts"]["mgt_roundtrip_assembly_fingerprint"] = (
+        str(mgt_fingerprint_out) if mgt_fingerprint_out.is_file() else ""
+    )
+    bundle["artifacts"]["ml_multi_objective_status"] = str(ml_status_out) if ml_status_out.is_file() else ""
+    bundle["status"] = "ready" if not blockers else "review_required"
+    bundle["blockers"] = blockers
+    args.output_json.write_text(json.dumps(bundle, indent=2) + "\n", encoding="utf-8")
+
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/validate_productization_delivery_evidence.py"),
+            "--productization-dir",
+            str(out_dir),
+            "--output-json",
+            str(productization_validate_out),
+        ]
+    )
+    steps.append({"step": "productization_delivery_evidence_validation", "exit_code": code, "log": log})
+    if code != 0 and "productization_validation_failed" not in blockers:
+        blockers.append("productization_validation_failed")
+        bundle["status"] = "review_required"
+        bundle["blockers"] = blockers
+        args.output_json.write_text(json.dumps(bundle, indent=2) + "\n", encoding="utf-8")
+    bundle["artifacts"]["productization_delivery_evidence_validation"] = (
+        str(productization_validate_out) if productization_validate_out.is_file() else ""
+    )
+
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/report_gap_closure_status.py"),
+            "--output-json",
+            str(gap_status_out),
+        ]
+    )
+    steps.append({"step": "gap_closure_status_final", "exit_code": code, "log": log})
+    bundle["steps"] = steps
     args.output_json.write_text(json.dumps(bundle, indent=2) + "\n", encoding="utf-8")
     print(f"bundle: {bundle['status']} -> {args.output_json}")
     if blockers:
