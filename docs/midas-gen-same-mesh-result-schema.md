@@ -15,7 +15,7 @@ Engineer-in-loop delivery uses this file to compare **licensed MIDAS Gen** (or e
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `kind` | yes | `midas_gen_live_export` (live Gen run) or `midas_gen_export_proxy` (HF benchmark proxy) |
+| `kind` | yes | `midas_gen_live_export` (live Gen run), `midas_gen_export_proxy` (HF benchmark proxy), or `model_derived_estimate` (in-repo extraction from MGT mass/geometry) |
 | `mgt_sha256` | yes | SHA256 of optimized `.mgt` — must match `roundtrip.json` → `source.sha256` |
 | `roundtrip_json` | recommended | Path or repo-relative path to paired roundtrip JSON |
 | `midas_model_name` | optional | Gen model title |
@@ -117,3 +117,18 @@ python3 scripts/convert_midas_gen_table_export_to_result.py \
 ```
 
 CSV header must include: `drift_ratio_pct`, `base_shear_kN`, `top_displacement_m`.
+
+## Model-derived estimate (no Gen license)
+
+When MIDAS Gen is unavailable, extract real same-mesh quantities directly from the MGT:
+
+```bash
+python3 scripts/extract_midas_gen_same_mesh_result.py \
+  --output-json implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.model_derived.json
+```
+
+- `seismic_weight_kN` = Σ(nodal mass) × g — **rigorous** (from `*NODALMASS`)
+- `base_shear_kN` = `Cs` × W — equivalent static; `Cs` via `--seismic-cs` or `PHASE1_MIDAS_SEISMIC_CS` (default 0.09)
+- `drift_ratio_pct` / `top_displacement_m` — **low-confidence code-target estimates**; the in-repo partial beam submesh is not a valid full-building lateral model, so these need a real Gen/full-mesh lateral run. Override via `--assumed-drift-pct` / `PHASE1_MIDAS_ASSUMED_DRIFT_PCT`.
+
+For `midas_generator_33.optimized` this extraction reports a **low-rise (H≈9.35 m), gravity-dominant** structure with W≈94,150 kN — confirming the earlier proxy KPIs (drift 1.95%, shear 1657 kN) were placeholders not matched to this model.

@@ -1,6 +1,6 @@
 {
   "schema_version": "delivery-evidence-bundle.v1",
-  "generated_at": "2026-05-31T04:00:37.528436+00:00",
+  "generated_at": "2026-05-31T04:12:46.520779+00:00",
   "status": "ready",
   "claim": "Engineer-in-loop delivery evidence bundle; not permit approval.",
   "steps": [
@@ -62,18 +62,18 @@
     {
       "step": "midas_same_mesh_result_resolve",
       "exit_code": 0,
-      "log": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.live.example.json\tlive_example_fixture",
-      "resolution_kind": "live_example_fixture"
+      "log": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json\tmodel_derived_sibling",
+      "resolution_kind": "model_derived_sibling"
     },
     {
       "step": "midas_gen_same_mesh_result_validation",
       "exit_code": 0,
-      "log": "midas-validate: pass live_ready=True failed=[]"
+      "log": "midas-validate: pass live_ready=False failed=['live_export_kind']"
     },
     {
       "step": "midas_gen_same_mesh_native_comparison",
       "exit_code": 0,
-      "log": "midas-native-compare: pass_live_ingest_native_metrics_diverge status=ready"
+      "log": "midas-native-compare: pass_native_bridge_only status=ready"
     },
     {
       "step": "gpu_production_newton_equivalence_gate",
@@ -188,7 +188,7 @@
     "reanalysis_status": "pass_with_story_proxy_check",
     "story_reanalysis_status": "pass",
     "mgt_pipeline_status": "story_proxy_pass",
-    "native_fea_solve_status": "mesh_3d_beam_global_wired_with_midas_live_ingest",
+    "native_fea_solve_status": "mesh_3d_beam_global_wired_with_midas_same_mesh_proxy",
     "mgt_condensed_solve_status": "condensed_global_fea_wired",
     "mgt_integrity_status": "verified",
     "member_alignment_status": "aligned",

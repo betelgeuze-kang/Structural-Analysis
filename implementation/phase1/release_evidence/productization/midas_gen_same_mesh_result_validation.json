@@ -1,29 +1,29 @@
 {
   "schema_version": "validate-midas-gen-same-mesh-result.v1",
-  "generated_at": "2026-05-31T04:00:23.837625+00:00",
+  "generated_at": "2026-05-31T04:12:33.370513+00:00",
   "status": "pass",
-  "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.live.example.json",
+  "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json",
   "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
   "ingest": {
     "schema_version": "midas-gen-same-mesh-result.v1",
-    "generated_at": "2026-05-31T04:00:23.831315+00:00",
+    "generated_at": "2026-05-31T04:12:33.365031+00:00",
     "status": "ready",
-    "claim": "Licensed-solver same-mesh metrics for delivery comparison.",
+    "claim": "In-repo model-derived same-mesh estimate (mass/weight rigorous; drift code-target). Not a licensed MIDAS Gen run.",
     "source": {
-      "kind": "midas_gen_live_export",
+      "kind": "model_derived_estimate",
       "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
       "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
       "midas_model_name": "midas_generator_33.optimized",
-      "load_case": "COMB1",
-      "run_id": "live-example-fixture-001",
-      "note": "ILLUSTRATIVE FIXTURE for schema/CI only \u2014 not an actual MIDAS Gen solver run. Replace metrics after real Gen export.",
-      "live_midas_gen_export": true,
-      "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.live.example.json"
+      "note": "Model-derived same-mesh estimate computed in-repo from MGT nodal mass/geometry. NOT a licensed MIDAS Gen solver run. base_shear is equivalent-static (Cs*W); drift/top_displacement are code-target estimates pending a full-mesh lateral solve.",
+      "live_midas_gen_export": false,
+      "model_derived_estimate": true,
+      "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json"
     },
     "metrics": {
-      "drift_ratio_pct": 1.92,
-      "base_shear_kN": 1640.0,
-      "top_displacement_m": 0.55
+      "drift_ratio_pct": 0.4,
+      "base_shear_kN": 8473.765534006505,
+      "top_displacement_m": 0.03740000000000001
     },
     "integrity": {
       "mgt_sha256_expected": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
@@ -51,29 +51,31 @@
     {
       "check": "kind_declared",
       "ok": true,
-      "detail": "midas_gen_live_export"
+      "detail": "model_derived_estimate"
     },
     {
       "check": "live_export_kind",
-      "ok": true,
+      "ok": false,
       "detail": "required for live MIDAS claim"
     },
     {
       "check": "metric_drift_ratio_pct_finite",
       "ok": true,
-      "detail": "1.92"
+      "detail": "0.4"
     },
     {
       "check": "metric_base_shear_kN_finite",
       "ok": true,
-      "detail": "1640.0"
+      "detail": "8473.765534006505"
     },
     {
       "check": "metric_top_displacement_m_finite",
       "ok": true,
-      "detail": "0.55"
+      "detail": "0.03740000000000001"
     }
   ],
-  "failed_checks": [],
-  "live_export_ready": true
+  "failed_checks": [
+    "live_export_kind"
+  ],
+  "live_export_ready": false
 }

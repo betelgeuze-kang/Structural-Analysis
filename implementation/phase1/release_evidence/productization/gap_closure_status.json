@@ -1,6 +1,6 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-05-31T04:00:37.838212+00:00",
+  "generated_at": "2026-05-31T04:12:46.844421+00:00",
   "overall_status": "ready",
   "delivery_status": "ready",
   "authority_holdout_status": "closed",
@@ -37,7 +37,7 @@
     "native_mgt_solve": {
       "status": "story_proxy_pass",
       "integrity": "verified",
-      "native_solve_status": "mesh_3d_beam_global_wired_with_midas_live_ingest",
+      "native_solve_status": "mesh_3d_beam_global_wired_with_midas_same_mesh_proxy",
       "native_fea": "mesh_contract_pass",
       "global_fea_readiness": "ready",
       "mesh_contract": "ready",

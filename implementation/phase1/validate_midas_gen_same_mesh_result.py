@@ -28,7 +28,11 @@ def validate_midas_gen_same_mesh_result(
     add("ingest_ready", ingest.get("status") == "ready", str(ingest.get("blockers") or []))
     add("mgt_sha256_match", bool((ingest.get("integrity") or {}).get("sha256_match")))
     kind = str(source.get("kind") or "")
-    add("kind_declared", kind in {"midas_gen_live_export", "midas_gen_export_proxy"}, kind)
+    add(
+        "kind_declared",
+        kind in {"midas_gen_live_export", "midas_gen_export_proxy", "model_derived_estimate"},
+        kind,
+    )
     add("live_export_kind", kind == "midas_gen_live_export", "required for live MIDAS claim")
     metrics = payload.get("metrics") if isinstance(payload.get("metrics"), dict) else {}
     for key in ("drift_ratio_pct", "base_shear_kN", "top_displacement_m"):
