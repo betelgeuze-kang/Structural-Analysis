@@ -1,6 +1,6 @@
 {
   "schema_version": "delivery-evidence-bundle.v1",
-  "generated_at": "2026-05-31T04:33:00.956512+00:00",
+  "generated_at": "2026-05-31T04:37:21.050664+00:00",
   "status": "ready",
   "claim": "Engineer-in-loop delivery evidence bundle; not permit approval.",
   "steps": [
@@ -62,7 +62,7 @@
     {
       "step": "midas_model_derived_extract",
       "exit_code": 0,
-      "log": "midas-extract: W=94153kN H=9.35m V=4237kN blockers=[]"
+      "log": "midas-extract: W=94153kN H=9.35m V=12083kN blockers=[]"
     },
     {
       "step": "midas_same_mesh_result_resolve",
@@ -78,7 +78,7 @@
     {
       "step": "midas_gen_same_mesh_native_comparison",
       "exit_code": 0,
-      "log": "midas-native-compare: pass_model_derived_condensed_drift_aligned status=ready"
+      "log": "midas-native-compare: pass_model_derived_condensed_aligned status=ready"
     },
     {
       "step": "gpu_production_newton_equivalence_gate",

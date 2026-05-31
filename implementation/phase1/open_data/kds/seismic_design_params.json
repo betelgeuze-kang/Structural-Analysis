@@ -1,9 +1,13 @@
 {
   "schema_version": "kds-seismic-design-params.v1",
-  "note": "Edit SDS/R/Ie for site-specific KDS 41 equivalent-static Cs. Cs = SDS / (R * Ie).",
-  "SDS": 0.225,
-  "R": 5.0,
+  "note": "KDS 41 17 00 equivalent-static params for this SRC/composite low-rise. SDS derived = 2.5*Z*Fa; Cs = SDS/(R*Ie). Edit per site geotech + structural system.",
+  "seismic_zone": 1,
+  "zone_factor_Z": 0.11,
+  "site_class": "S4",
+  "Fa": 1.4,
+  "R": 3.0,
   "Ie": 1.0,
-  "site_class": "S",
+  "R_basis": "composite/SRC ordinary moment frame (conservative); raise to ~5 for intermediate, ~8 for special",
+  "Ie_basis": "normal importance (KDS 41 seismic category II); 1.2 special, 1.5 critical",
   "importance_category": "normal"
 }

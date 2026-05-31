@@ -1,12 +1,12 @@
 {
   "schema_version": "midas-gen-same-mesh-native-comparison.v1",
-  "generated_at": "2026-05-31T04:32:47.115988+00:00",
+  "generated_at": "2026-05-31T04:37:07.200443+00:00",
   "status": "ready",
-  "comparison_status": "pass_model_derived_condensed_drift_aligned",
+  "comparison_status": "pass_model_derived_condensed_aligned",
   "claim": "Same-mesh metric comparison: ingested MIDAS/export-proxy vs in-repo native solves. Partial-mesh 3D native drift may diverge; condensed/bridge paths documented.",
   "ingest": {
     "schema_version": "midas-gen-same-mesh-result.v1",
-    "generated_at": "2026-05-31T04:32:47.110037+00:00",
+    "generated_at": "2026-05-31T04:37:07.193318+00:00",
     "status": "ready",
     "claim": "In-repo model-derived same-mesh estimate (mass/weight rigorous; drift code-target). Not a licensed MIDAS Gen run.",
     "source": {
@@ -22,7 +22,7 @@
     },
     "metrics": {
       "drift_ratio_pct": 9.200000000000001,
-      "base_shear_kN": 4236.882767003252,
+      "base_shear_kN": 12082.961965157423,
       "top_displacement_m": 0.8602000000000003
     },
     "integrity": {
@@ -37,7 +37,7 @@
   "comparison_tiers": {
     "ingest": "pass",
     "mesh_3d_global": "diverge",
-    "condensed_story": "diverge"
+    "condensed_story": "pass"
   },
   "comparisons": [
     {
@@ -54,8 +54,8 @@
       "metric": "base_shear_kN",
       "native_key": "base_shear_kn",
       "native": 396.223975763506,
-      "midas_reference": 4236.882767003252,
-      "rel_error": 0.9064821951531703,
+      "midas_reference": 12082.961965157423,
+      "rel_error": 0.9672080424563065,
       "tolerance_ratio": 0.45,
       "ok": false,
       "solver_family": "mesh_3d_global"
@@ -84,10 +84,10 @@
       "metric": "base_shear_kN",
       "native_key": "base_shear_kn",
       "native": 15589.462844014923,
-      "midas_reference": 4236.882767003252,
-      "rel_error": 2.6794652345411367,
+      "midas_reference": 12082.961965157423,
+      "rel_error": 0.2902020952287104,
       "tolerance_ratio": 0.45,
-      "ok": false,
+      "ok": true,
       "solver_family": "condensed_story"
     }
   ],

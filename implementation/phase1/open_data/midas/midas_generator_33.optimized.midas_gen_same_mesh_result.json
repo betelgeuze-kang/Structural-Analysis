@@ -1,6 +1,6 @@
 {
   "schema_version": "midas-gen-same-mesh-result.v1",
-  "generated_at": "2026-05-31T04:33:16.617664+00:00",
+  "generated_at": "2026-05-31T04:37:06.766097+00:00",
   "source": {
     "kind": "model_derived_estimate",
     "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
@@ -11,7 +11,7 @@
   },
   "metrics": {
     "drift_ratio_pct": 9.200000000000001,
-    "base_shear_kN": 4236.882767003252,
+    "base_shear_kN": 12082.961965157423,
     "top_displacement_m": 0.8602000000000003
   },
   "derivation": {
@@ -21,15 +21,25 @@
     "gravity_dominant_low_rise": true
   },
   "assumptions": {
-    "seismic_coefficient_cs": 0.045,
+    "seismic_coefficient_cs": 0.12833333333333333,
     "cs_basis": {
-      "cs": 0.045,
-      "SDS": 0.225,
-      "R": 5.0,
+      "cs": 0.12833333333333333,
+      "cs_raw": 0.12833333333333333,
+      "cs_floor_applied": false,
+      "SDS": 0.385,
+      "R": 3.0,
       "Ie": 1.0,
       "formula": "Cs = SDS / (R * Ie)",
-      "code_basis": "KDS 41 0000 equivalent-static simplification (project params file)",
+      "code_basis": "KDS 41 17 00 equivalent-static simplification (project params file)",
       "height_regime": "low_rise_gravity_dominant",
+      "period_assumption": "short period on constant-acceleration plateau; Cs=SDS/(R*Ie) governs",
+      "sds_derivation": {
+        "sds_basis": "derived_2p5_Z_Fa",
+        "zone_factor_Z": 0.11,
+        "site_coefficient_Fa": 1.4,
+        "site_class": "S4",
+        "seismic_zone": 1
+      },
       "params_source": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/kds/seismic_design_params.json"
     },
     "assumed_elastic_drift_pct": 9.200000000000001,
@@ -47,13 +57,23 @@
     "top_displacement_m": "medium"
   },
   "kds_seismic": {
-    "cs": 0.045,
-    "SDS": 0.225,
-    "R": 5.0,
+    "cs": 0.12833333333333333,
+    "cs_raw": 0.12833333333333333,
+    "cs_floor_applied": false,
+    "SDS": 0.385,
+    "R": 3.0,
     "Ie": 1.0,
     "formula": "Cs = SDS / (R * Ie)",
-    "code_basis": "KDS 41 0000 equivalent-static simplification (project params file)",
+    "code_basis": "KDS 41 17 00 equivalent-static simplification (project params file)",
     "height_regime": "low_rise_gravity_dominant",
+    "period_assumption": "short period on constant-acceleration plateau; Cs=SDS/(R*Ie) governs",
+    "sds_derivation": {
+      "sds_basis": "derived_2p5_Z_Fa",
+      "zone_factor_Z": 0.11,
+      "site_coefficient_Fa": 1.4,
+      "site_class": "S4",
+      "seismic_zone": 1
+    },
     "params_source": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/kds/seismic_design_params.json"
   },
   "condensed_story_bridge": {

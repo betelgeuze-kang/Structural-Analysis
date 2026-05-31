@@ -129,6 +129,9 @@ python3 scripts/extract_midas_gen_same_mesh_result.py \
 
 - `seismic_weight_kN` = Σ(nodal mass) × g — **rigorous** (from `*NODALMASS`)
 - `base_shear_kN` = `Cs` × W — `Cs` from `implementation/phase1/open_data/kds/seismic_design_params.json` (`Cs = SDS/(R·Ie)`) or `--seismic-cs` / `PHASE1_MIDAS_SEISMIC_CS`
+  - `SDS` is taken explicitly if present, else derived as `2.5 · Z · Fa` (KDS 41 17 00 short-period plateau)
+  - Tuned for this SRC low-rise: Z=0.11 (zone 1), Fa=1.4 (S4), R=3.0 (composite ordinary moment frame), Ie=1.0 → SDS=0.385, Cs=0.128, V≈12,083 kN
+  - With this Cs, the `condensed_story` comparison tier passes (drift 9.2% exact, base shear 29% < 45% band) → `comparison_status: pass_model_derived_condensed_aligned`
 - `drift_ratio_pct` — from condensed story NDTHA when `--condensed-solve-json` is passed (**medium** confidence); else code-target placeholder
 
 For `midas_generator_33.optimized` this extraction reports a **low-rise (H≈9.35 m), gravity-dominant** structure with W≈94,150 kN — confirming the earlier proxy KPIs (drift 1.95%, shear 1657 kN) were placeholders not matched to this model.

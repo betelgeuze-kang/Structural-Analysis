@@ -1,12 +1,12 @@
 {
   "schema_version": "validate-midas-gen-same-mesh-result.v1",
-  "generated_at": "2026-05-31T04:32:46.949245+00:00",
+  "generated_at": "2026-05-31T04:37:07.029233+00:00",
   "status": "pass",
   "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json",
   "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
   "ingest": {
     "schema_version": "midas-gen-same-mesh-result.v1",
-    "generated_at": "2026-05-31T04:32:46.943681+00:00",
+    "generated_at": "2026-05-31T04:37:07.021995+00:00",
     "status": "ready",
     "claim": "In-repo model-derived same-mesh estimate (mass/weight rigorous; drift code-target). Not a licensed MIDAS Gen run.",
     "source": {
@@ -22,7 +22,7 @@
     },
     "metrics": {
       "drift_ratio_pct": 9.200000000000001,
-      "base_shear_kN": 4236.882767003252,
+      "base_shear_kN": 12082.961965157423,
       "top_displacement_m": 0.8602000000000003
     },
     "integrity": {
@@ -66,7 +66,7 @@
     {
       "check": "metric_base_shear_kN_finite",
       "ok": true,
-      "detail": "4236.882767003252"
+      "detail": "12082.961965157423"
     },
     {
       "check": "metric_top_displacement_m_finite",
