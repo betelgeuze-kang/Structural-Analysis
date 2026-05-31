@@ -51,7 +51,7 @@ def resolve_midas_same_mesh_result_path(
             kind = str((payload.get("source") or {}).get("kind") or "")
             if kind == "midas_gen_live_export":
                 return sibling, "live_sibling"
-            if kind == "model_derived_estimate":
+            if kind in {"model_derived_estimate", "model_derived_wind_estimate"}:
                 return sibling, "model_derived_sibling"
             if not use_live:
                 return sibling, "proxy_sibling"

@@ -1,29 +1,32 @@
 {
   "schema_version": "midas-gen-same-mesh-native-comparison.v1",
-  "generated_at": "2026-05-31T04:37:07.200443+00:00",
+  "generated_at": "2026-05-31T08:44:42.841312+00:00",
   "status": "ready",
-  "comparison_status": "pass_model_derived_condensed_aligned",
+  "comparison_status": "pass_model_derived_wind_aligned",
+  "load_case_track": "wind",
   "claim": "Same-mesh metric comparison: ingested MIDAS/export-proxy vs in-repo native solves. Partial-mesh 3D native drift may diverge; condensed/bridge paths documented.",
   "ingest": {
     "schema_version": "midas-gen-same-mesh-result.v1",
-    "generated_at": "2026-05-31T04:37:07.193318+00:00",
+    "generated_at": "2026-05-31T08:44:42.834617+00:00",
     "status": "ready",
-    "claim": "In-repo model-derived same-mesh estimate (mass/weight rigorous; drift code-target). Not a licensed MIDAS Gen run.",
+    "claim": "In-repo model-derived WIND same-mesh estimate (base shear from wind workflow; drift low-confidence). Matches the model's WIND load cases; not a licensed MIDAS Gen run.",
     "source": {
-      "kind": "model_derived_estimate",
+      "kind": "model_derived_wind_estimate",
       "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
       "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
       "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
       "midas_model_name": "midas_generator_33.optimized",
-      "note": "Model-derived same-mesh estimate computed in-repo from MGT nodal mass/geometry. NOT a licensed MIDAS Gen solver run. base_shear is equivalent-static (Cs*W); drift/top_displacement are code-target estimates pending a full-mesh lateral solve.",
+      "load_case": "WIND (model-defined)",
+      "note": "Wind-load same-mesh estimate from in-repo wind workflow (KDS 41 12 00 site params). Matches the model's WIND load cases (this model has no seismic case). NOT a MIDAS Gen run.",
       "live_midas_gen_export": false,
       "model_derived_estimate": true,
+      "model_derived_wind_estimate": true,
       "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json"
     },
     "metrics": {
-      "drift_ratio_pct": 9.200000000000001,
-      "base_shear_kN": 12082.961965157423,
-      "top_displacement_m": 0.8602000000000003
+      "drift_ratio_pct": 0.002561374717150191,
+      "base_shear_kN": 644.4246941665405,
+      "top_displacement_m": 0.0002394885360535429
     },
     "integrity": {
       "mgt_sha256_expected": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
@@ -34,18 +37,42 @@
   },
   "native_3d_solve_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
   "native_3d_solve_mode": "mgt_npz_beam_mesh_3d_linear_tangent",
+  "lumped_drift_pct": 0.002561374717150191,
+  "native_fixed_guided_drift_pct": 0.0026942136095186578,
+  "native_cantilever_drift_pct": 0.0076386815452211465,
+  "wind_drift_bracket": {
+    "lumped_drift_pct": 0.002561374717150191,
+    "fixed_guided_drift_pct": 0.0026942136095186578,
+    "cantilever_drift_pct": 0.0076386815452211465,
+    "stiff_bound_drift_pct": 0.0026942136095186578,
+    "soft_bound_drift_pct": 0.0076386815452211465,
+    "ordering_ok": true,
+    "lumped_bracketed_between_bounds": false,
+    "aligned_with_fixed_guided": true,
+    "fixed_guided_vs_lumped_rel_error": 0.05186234231134457,
+    "drift_tol_ratio": 0.6
+  },
+  "wind_native_lateral_outcome": "aligned",
+  "native_wind_lateral": {
+    "base_shear_kn": 638.2738175560623,
+    "fixed_guided_drift_pct": 0.0026942136095186578,
+    "cantilever_drift_pct": 0.0076386815452211465,
+    "schema": "wind_native_lateral_dual.v1",
+    "boundary": "both"
+  },
   "comparison_tiers": {
     "ingest": "pass",
     "mesh_3d_global": "diverge",
-    "condensed_story": "pass"
+    "condensed_story": "diverge",
+    "wind_native_lateral": "pass"
   },
   "comparisons": [
     {
       "metric": "drift_ratio_pct",
       "native_key": "max_drift_ratio_pct",
       "native": 3739.6784546060694,
-      "midas_reference": 9.200000000000001,
-      "rel_error": 405.48678854413794,
+      "midas_reference": 0.002561374717150191,
+      "rel_error": 1460026.862993381,
       "tolerance_ratio": 0.45,
       "ok": false,
       "solver_family": "mesh_3d_global"
@@ -54,18 +81,18 @@
       "metric": "base_shear_kN",
       "native_key": "base_shear_kn",
       "native": 396.223975763506,
-      "midas_reference": 12082.961965157423,
-      "rel_error": 0.9672080424563065,
+      "midas_reference": 644.4246941665405,
+      "rel_error": 0.38515084950933187,
       "tolerance_ratio": 0.45,
-      "ok": false,
+      "ok": true,
       "solver_family": "mesh_3d_global"
     },
     {
       "metric": "top_displacement_m",
       "native_key": "top_displacement_m",
       "native": 211.29183268524292,
-      "midas_reference": 0.8602000000000003,
-      "rel_error": 244.6310540400405,
+      "midas_reference": 0.0002394885360535429,
+      "rel_error": 882261.826300813,
       "tolerance_ratio": 0.55,
       "ok": false,
       "solver_family": "mesh_3d_global"
@@ -74,21 +101,51 @@
       "metric": "drift_ratio_pct",
       "native_key": "max_story_drift_ratio_pct",
       "native": 9.200000000000001,
-      "midas_reference": 9.200000000000001,
-      "rel_error": 0.0,
+      "midas_reference": 0.002561374717150191,
+      "rel_error": 3590.821196016179,
       "tolerance_ratio": 0.45,
-      "ok": true,
+      "ok": false,
       "solver_family": "condensed_story"
     },
     {
       "metric": "base_shear_kN",
       "native_key": "base_shear_kn",
       "native": 15589.462844014923,
-      "midas_reference": 12082.961965157423,
-      "rel_error": 0.2902020952287104,
+      "midas_reference": 644.4246941665405,
+      "rel_error": 23.191287182402874,
       "tolerance_ratio": 0.45,
-      "ok": true,
+      "ok": false,
       "solver_family": "condensed_story"
+    },
+    {
+      "metric": "drift_ratio_pct",
+      "native_key": "fixed_guided_drift_pct",
+      "native": 0.0026942136095186578,
+      "midas_reference": 0.002561374717150191,
+      "rel_error": 0.05186234231134457,
+      "tolerance_ratio": 0.6,
+      "ok": true,
+      "solver_family": "wind_native_lateral_fixed_guided"
+    },
+    {
+      "metric": "drift_ratio_pct",
+      "native_key": "cantilever_drift_pct",
+      "native": 0.0076386815452211465,
+      "midas_reference": 0.002561374717150191,
+      "rel_error": 1.9822585091024922,
+      "tolerance_ratio": 0.6,
+      "ok": false,
+      "solver_family": "wind_native_lateral_cantilever"
+    },
+    {
+      "metric": "base_shear_kN",
+      "native_key": "base_shear_kn",
+      "native": 638.2738175560623,
+      "midas_reference": 644.4246941665405,
+      "rel_error": 0.009544756223895624,
+      "tolerance_ratio": 0.15,
+      "ok": true,
+      "solver_family": "wind_native_lateral"
     }
   ],
   "blockers": []

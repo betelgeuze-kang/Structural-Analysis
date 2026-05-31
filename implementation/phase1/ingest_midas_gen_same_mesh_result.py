@@ -53,9 +53,15 @@ def ingest_midas_gen_same_mesh_result(
 
     kind = str(source.get("kind") or "unknown")
     live_midas = kind == "midas_gen_live_export"
-    model_derived = kind == "model_derived_estimate"
+    model_derived_wind = kind == "model_derived_wind_estimate"
+    model_derived = kind in {"model_derived_estimate", "model_derived_wind_estimate"}
     if live_midas:
         claim = "Licensed-solver same-mesh metrics for delivery comparison."
+    elif model_derived_wind:
+        claim = (
+            "In-repo model-derived WIND same-mesh estimate (base shear from wind workflow; drift low-confidence). "
+            "Matches the model's WIND load cases; not a licensed MIDAS Gen run."
+        )
     elif model_derived:
         claim = (
             "In-repo model-derived same-mesh estimate (mass/weight rigorous; drift code-target). "
@@ -73,6 +79,7 @@ def ingest_midas_gen_same_mesh_result(
             "kind": kind,
             "live_midas_gen_export": live_midas,
             "model_derived_estimate": model_derived,
+            "model_derived_wind_estimate": model_derived_wind,
             "result_json": str(result_json),
             "roundtrip_json": str(roundtrip_json) if roundtrip_json else "",
         },

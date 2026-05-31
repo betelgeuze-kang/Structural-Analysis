@@ -1,87 +1,93 @@
 {
   "schema_version": "midas-gen-same-mesh-result.v1",
-  "generated_at": "2026-05-31T04:37:06.766097+00:00",
+  "generated_at": "2026-05-31T08:44:40.276920+00:00",
   "source": {
-    "kind": "model_derived_estimate",
+    "kind": "model_derived_wind_estimate",
     "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
     "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
     "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
     "midas_model_name": "midas_generator_33.optimized",
-    "note": "Model-derived same-mesh estimate computed in-repo from MGT nodal mass/geometry. NOT a licensed MIDAS Gen solver run. base_shear is equivalent-static (Cs*W); drift/top_displacement are code-target estimates pending a full-mesh lateral solve."
+    "load_case": "WIND (model-defined)",
+    "note": "Wind-load same-mesh estimate from in-repo wind workflow (KDS 41 12 00 site params). Matches the model's WIND load cases (this model has no seismic case). NOT a MIDAS Gen run."
   },
   "metrics": {
-    "drift_ratio_pct": 9.200000000000001,
-    "base_shear_kN": 12082.961965157423,
-    "top_displacement_m": 0.8602000000000003
+    "drift_ratio_pct": 0.002561374717150191,
+    "corner_drift_ratio_pct": 0.0027489241014763206,
+    "base_shear_kN": 644.4246941665405,
+    "top_displacement_m": 0.0002394885360535429
+  },
+  "wind_directional": {
+    "base_shear_x_kN": 644.4246941665405,
+    "base_shear_y_kN": 620.644932764959,
+    "governing_direction": "X",
+    "crosswind_bias_ratio": 0.9823612241287811,
+    "serviceability_status": "CHECK",
+    "occupant_comfort_class": "calm",
+    "top_peak_acceleration_mg": 3.325393612919767,
+    "top_rms_acceleration_mg": 1.1042080020923006,
+    "max_story_drift_ratio_service": 4.362500685817067,
+    "strength_governing_case_id": "W_STR_X_POS",
+    "strength_governing_story": 1,
+    "accidental_torsion": {
+      "ecc_fraction": 0.05,
+      "amp_x": 1.073222158035041,
+      "amp_y": 1.073222158035041,
+      "governing_amplification": 1.073222158035041,
+      "basis": "simplified rigid-diaphragm uniform-stiffness accidental torsion (ASCE-style \u00b15% eccentricity)"
+    }
   },
   "derivation": {
-    "seismic_mass_ton": 9600.929000000006,
-    "seismic_weight_kN": 94152.95037785005,
+    "plan_dim_x_m": 84.795,
+    "plan_dim_y_m": 68.055,
     "building_height_m": 9.350000000000001,
-    "gravity_dominant_low_rise": true
+    "total_nodal_mass_ton": 9600.929000000006,
+    "wind_story_count": 12,
+    "base_shear_x_kN": 644.4246941665405,
+    "base_shear_y_kN": 620.644932764959,
+    "fundamental_period_s": 0.4675000000000001
   },
   "assumptions": {
-    "seismic_coefficient_cs": 0.12833333333333333,
-    "cs_basis": {
-      "cs": 0.12833333333333333,
-      "cs_raw": 0.12833333333333333,
-      "cs_floor_applied": false,
-      "SDS": 0.385,
-      "R": 3.0,
-      "Ie": 1.0,
-      "formula": "Cs = SDS / (R * Ie)",
-      "code_basis": "KDS 41 17 00 equivalent-static simplification (project params file)",
-      "height_regime": "low_rise_gravity_dominant",
-      "period_assumption": "short period on constant-acceleration plateau; Cs=SDS/(R*Ie) governs",
-      "sds_derivation": {
-        "sds_basis": "derived_2p5_Z_Fa",
-        "zone_factor_Z": 0.11,
-        "site_coefficient_Fa": 1.4,
-        "site_class": "S4",
-        "seismic_zone": 1
-      },
-      "params_source": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/kds/seismic_design_params.json"
+    "wind_params": {
+      "schema_version": "kds-wind-design-params.v1",
+      "note": "KDS 41 12 00 wind params for model-derived same-mesh wind base shear/drift. Edit per site.",
+      "basic_wind_speed_mps": 30.0,
+      "exposure": "B",
+      "topographic_factor": 1.0,
+      "directionality_factor": 0.85,
+      "importance_factor": 1.0,
+      "gust_factor": 0.85,
+      "force_coefficient": 1.3,
+      "across_wind_factor": 1.2,
+      "damping_ratio": 0.02,
+      "basic_wind_speed_basis": "inland Korea ordinary site placeholder (KDS 41 12 00 basic wind speed map)",
+      "exposure_basis": "B = suburban/urban terrain"
     },
-    "assumed_elastic_drift_pct": 9.200000000000001,
-    "drift_basis": "From in-repo condensed story NDTHA (same MGT mesh fingerprint); not MIDAS Gen."
+    "wind_params_source": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/kds/wind_design_params.json",
+    "resolved_basic_wind_speed_mps": 30.0,
+    "resolved_exposure": "B",
+    "period_basis": "empirical 0.05*H low-rise rigid estimate",
+    "lateral_stiffness_kNpm": 2690837.3352053277,
+    "lateral_stiffness_basis": "mechanics_real_section",
+    "lateral_column_line_count": 681,
+    "lateral_full_height_column_count": 681,
+    "lateral_building_height_m": 9.350000000000001,
+    "lateral_min_height_fraction": 0.5,
+    "lateral_avg_column_height_m": 9.141923641703379,
+    "real_section_column_line_fraction": 0.9104258443465492,
+    "real_section_column_line_count": 620,
+    "drift_basis": "mechanics-based sway stiffness K=sum(12*E*I/H^3) over full-height column lines (H >= 0.5*building_height; MGT-parsed min(Iy,Iz) and material E)"
   },
   "metric_provenance": {
-    "base_shear_kN": "computed_cs_times_weight",
-    "seismic_weight_kN": "computed_from_model_nodal_mass",
-    "drift_ratio_pct": "condensed_story_ndtha",
-    "top_displacement_m": "condensed_story_ndtha"
+    "base_shear_kN": "in_repo_wind_workflow_strength",
+    "drift_ratio_pct": "lateral_stiffness_mechanics_real_section",
+    "corner_drift_ratio_pct": "translational_drift_x_accidental_torsion_amplification",
+    "top_displacement_m": "lateral_stiffness_mechanics_real_section"
   },
   "confidence": {
     "base_shear_kN": "medium",
-    "drift_ratio_pct": "medium",
-    "top_displacement_m": "medium"
-  },
-  "kds_seismic": {
-    "cs": 0.12833333333333333,
-    "cs_raw": 0.12833333333333333,
-    "cs_floor_applied": false,
-    "SDS": 0.385,
-    "R": 3.0,
-    "Ie": 1.0,
-    "formula": "Cs = SDS / (R * Ie)",
-    "code_basis": "KDS 41 17 00 equivalent-static simplification (project params file)",
-    "height_regime": "low_rise_gravity_dominant",
-    "period_assumption": "short period on constant-acceleration plateau; Cs=SDS/(R*Ie) governs",
-    "sds_derivation": {
-      "sds_basis": "derived_2p5_Z_Fa",
-      "zone_factor_Z": 0.11,
-      "site_coefficient_Fa": 1.4,
-      "site_class": "S4",
-      "seismic_zone": 1
-    },
-    "params_source": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/kds/seismic_design_params.json"
-  },
-  "condensed_story_bridge": {
-    "drift_ratio_pct": 9.200000000000001,
-    "base_shear_kn": 15589.462844014923,
-    "provenance": "condensed_story_ndtha",
-    "confidence": "medium",
-    "note": "From in-repo condensed story NDTHA (same MGT mesh fingerprint); not MIDAS Gen."
+    "drift_ratio_pct": "high",
+    "corner_drift_ratio_pct": "high",
+    "top_displacement_m": "high"
   },
   "blockers": []
 }

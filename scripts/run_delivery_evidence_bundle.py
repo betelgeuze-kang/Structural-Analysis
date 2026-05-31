@@ -234,13 +234,17 @@ def main() -> int:
         "true",
         "yes",
     }
+    # This model defines DEAD/LIVE/WIND load cases only (no seismic), so the wind track is the
+    # design-consistent default. Override with PHASE1_MIDAS_SAME_MESH_TRACK=seismic if desired.
+    track = str(os.environ.get("PHASE1_MIDAS_SAME_MESH_TRACK") or "wind").strip().lower()
+    mgt_path = args.roundtrip_json.with_suffix(".mgt").parent / "midas_generator_33.optimized.mgt"
     if not skip_model_derived:
-        code, log = _run(
-            [
+        if track == "seismic":
+            extract_cmd = [
                 sys.executable,
                 str(REPO_ROOT / "scripts/extract_midas_gen_same_mesh_result.py"),
                 "--mgt-path",
-                str(args.roundtrip_json.with_suffix(".mgt").parent / "midas_generator_33.optimized.mgt"),
+                str(mgt_path),
                 "--roundtrip-json",
                 str(args.roundtrip_json),
                 "--condensed-solve-json",
@@ -248,8 +252,21 @@ def main() -> int:
                 "--output-json",
                 str(midas_result_out),
             ]
-        )
-        steps.append({"step": "midas_model_derived_extract", "exit_code": code, "log": log})
+            extract_step = "midas_model_derived_extract_seismic"
+        else:
+            extract_cmd = [
+                sys.executable,
+                str(REPO_ROOT / "scripts/extract_midas_wind_same_mesh_result.py"),
+                "--mgt-path",
+                str(mgt_path),
+                "--roundtrip-json",
+                str(args.roundtrip_json),
+                "--output-json",
+                str(midas_result_out),
+            ]
+            extract_step = "midas_model_derived_extract_wind"
+        code, log = _run(extract_cmd)
+        steps.append({"step": extract_step, "exit_code": code, "log": log, "track": track})
 
     resolve_code, resolve_log = _run(
         [
@@ -309,23 +326,43 @@ def main() -> int:
     )
     steps.append({"step": "midas_gen_same_mesh_result_validation", "exit_code": code, "log": log})
 
+    native_wind_lateral_out = out_dir / "mgt_real_section_lateral_pushover.json"
+    wind_lateral_cmd = [
+        sys.executable,
+        str(REPO_ROOT / "scripts/solve_mgt_real_section_lateral_pushover.py"),
+        "--roundtrip-npz",
+        str(args.roundtrip_json.with_suffix(".npz")),
+        "--mgt-path",
+        str(mgt_path),
+        "--boundary",
+        "both",
+        "--output-json",
+        str(native_wind_lateral_out),
+    ]
+    if track == "wind":
+        code, log = _run(wind_lateral_cmd)
+        steps.append({"step": "mgt_real_section_lateral_pushover", "exit_code": code, "log": log})
+    else:
+        native_wind_lateral_out = None
+
     midas_compare_out = out_dir / "midas_gen_same_mesh_native_comparison.json"
-    code, log = _run(
-        [
-            sys.executable,
-            str(REPO_ROOT / "scripts/run_midas_gen_same_mesh_native_comparison.py"),
-            "--result-json",
-            str(midas_result_out),
-            "--roundtrip-json",
-            str(args.roundtrip_json),
-            "--native-3d-solve-json",
-            str(mgt_3d_out),
-            "--native-condensed-solve-json",
-            str(mgt_condensed_out),
-            "--output-json",
-            str(midas_compare_out),
-        ]
-    )
+    compare_cmd = [
+        sys.executable,
+        str(REPO_ROOT / "scripts/run_midas_gen_same_mesh_native_comparison.py"),
+        "--result-json",
+        str(midas_result_out),
+        "--roundtrip-json",
+        str(args.roundtrip_json),
+        "--native-3d-solve-json",
+        str(mgt_3d_out),
+        "--native-condensed-solve-json",
+        str(mgt_condensed_out),
+        "--output-json",
+        str(midas_compare_out),
+    ]
+    if track == "wind" and native_wind_lateral_out is not None:
+        compare_cmd.extend(["--native-wind-lateral-json", str(native_wind_lateral_out)])
+    code, log = _run(compare_cmd)
     steps.append({"step": "midas_gen_same_mesh_native_comparison", "exit_code": code, "log": log})
 
     gpu_equiv_out = out_dir / "gpu_production_newton_equivalence_gate.json"

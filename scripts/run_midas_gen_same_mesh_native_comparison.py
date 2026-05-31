@@ -30,6 +30,12 @@ def main() -> int:
         default=REPO_ROOT
         / "implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json",
     )
+    parser.add_argument(
+        "--native-wind-lateral-json",
+        type=Path,
+        default=None,
+        help="MDOF real-section lateral pushover JSON for wind-track cross-validation",
+    )
     parser.add_argument("--output-json", type=Path, required=True)
     args = parser.parse_args()
     payload = run_midas_gen_same_mesh_native_comparison(
@@ -37,6 +43,7 @@ def main() -> int:
         roundtrip_json=args.roundtrip_json,
         native_3d_solve_json=args.native_3d_solve_json,
         native_condensed_solve_json=args.native_condensed_solve_json,
+        native_wind_lateral_json=args.native_wind_lateral_json,
     )
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.output_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")

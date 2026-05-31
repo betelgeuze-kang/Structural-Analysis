@@ -1,0 +1,15 @@
+{
+  "schema_version": "kds-wind-design-params.v1",
+  "note": "KDS 41 12 00 wind params for model-derived same-mesh wind base shear/drift. Edit per site.",
+  "basic_wind_speed_mps": 30.0,
+  "exposure": "B",
+  "topographic_factor": 1.0,
+  "directionality_factor": 0.85,
+  "importance_factor": 1.0,
+  "gust_factor": 0.85,
+  "force_coefficient": 1.3,
+  "across_wind_factor": 1.2,
+  "damping_ratio": 0.02,
+  "basic_wind_speed_basis": "inland Korea ordinary site placeholder (KDS 41 12 00 basic wind speed map)",
+  "exposure_basis": "B = suburban/urban terrain"
+}

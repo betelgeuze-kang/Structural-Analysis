@@ -1,29 +1,31 @@
 {
   "schema_version": "validate-midas-gen-same-mesh-result.v1",
-  "generated_at": "2026-05-31T04:37:07.029233+00:00",
-  "status": "pass",
+  "generated_at": "2026-05-31T08:44:40.588051+00:00",
+  "status": "fail",
   "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json",
   "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
   "ingest": {
     "schema_version": "midas-gen-same-mesh-result.v1",
-    "generated_at": "2026-05-31T04:37:07.021995+00:00",
+    "generated_at": "2026-05-31T08:44:40.582301+00:00",
     "status": "ready",
-    "claim": "In-repo model-derived same-mesh estimate (mass/weight rigorous; drift code-target). Not a licensed MIDAS Gen run.",
+    "claim": "In-repo model-derived WIND same-mesh estimate (base shear from wind workflow; drift low-confidence). Matches the model's WIND load cases; not a licensed MIDAS Gen run.",
     "source": {
-      "kind": "model_derived_estimate",
+      "kind": "model_derived_wind_estimate",
       "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
       "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
       "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
       "midas_model_name": "midas_generator_33.optimized",
-      "note": "Model-derived same-mesh estimate computed in-repo from MGT nodal mass/geometry. NOT a licensed MIDAS Gen solver run. base_shear is equivalent-static (Cs*W); drift/top_displacement are code-target estimates pending a full-mesh lateral solve.",
+      "load_case": "WIND (model-defined)",
+      "note": "Wind-load same-mesh estimate from in-repo wind workflow (KDS 41 12 00 site params). Matches the model's WIND load cases (this model has no seismic case). NOT a MIDAS Gen run.",
       "live_midas_gen_export": false,
       "model_derived_estimate": true,
+      "model_derived_wind_estimate": true,
       "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json"
     },
     "metrics": {
-      "drift_ratio_pct": 9.200000000000001,
-      "base_shear_kN": 12082.961965157423,
-      "top_displacement_m": 0.8602000000000003
+      "drift_ratio_pct": 0.002561374717150191,
+      "base_shear_kN": 644.4246941665405,
+      "top_displacement_m": 0.0002394885360535429
     },
     "integrity": {
       "mgt_sha256_expected": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
@@ -50,8 +52,8 @@
     },
     {
       "check": "kind_declared",
-      "ok": true,
-      "detail": "model_derived_estimate"
+      "ok": false,
+      "detail": "model_derived_wind_estimate"
     },
     {
       "check": "live_export_kind",
@@ -61,20 +63,21 @@
     {
       "check": "metric_drift_ratio_pct_finite",
       "ok": true,
-      "detail": "9.200000000000001"
+      "detail": "0.002561374717150191"
     },
     {
       "check": "metric_base_shear_kN_finite",
       "ok": true,
-      "detail": "12082.961965157423"
+      "detail": "644.4246941665405"
     },
     {
       "check": "metric_top_displacement_m_finite",
       "ok": true,
-      "detail": "0.8602000000000003"
+      "detail": "0.0002394885360535429"
     }
   ],
   "failed_checks": [
+    "kind_declared",
     "live_export_kind"
   ],
   "live_export_ready": false

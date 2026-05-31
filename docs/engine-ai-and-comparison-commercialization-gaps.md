@@ -106,7 +106,7 @@
 |----|------|------|-----------|
 | E-P1a | 모델 범위 정직화 + 적용범위 | **완료** | `#viewer-scope-disclaimer` (층 축약·CPU·규칙 기반 최적화·납품 게이트 안내) |
 | E-P1b | GPU claim 정직화 | **완료(조건부)** | production `solve_nonlinear_frame` → **GPU Newton** (`PHASE1_GPU_STATIC_SOLVER_MODE=newton`); `gpu_production_newton_equivalence_gate` + terminal certification |
-| E-P1c | 최적화 후 재해석 게이트 | **완료(조건부)** | mesh contract + condensed + 3D native (`linear_tangent` fallback) + **`ingest_midas_gen_same_mesh_result.py`** / **`run_midas_gen_same_mesh_native_comparison.py`** (export-proxy or live MIDAS JSON) |
+| E-P1c | 최적화 후 재해석 게이트 | **완료(조건부)** | mesh contract + condensed + 3D native (`linear_tangent` fallback) + **`ingest_midas_gen_same_mesh_result.py`** / **`run_midas_gen_same_mesh_native_comparison.py`** (export-proxy / live MIDAS JSON / model-derived **wind** 기본 트랙) |
 | E-P2a | modal/좌굴 ingest 요약 | **부분 완료** | `report_commercial_solver_cross_validation.py` → `modal_buckling_summary` (export `mode_shape_mac`·`buckling_factor`) |
 | E-P2b | 상용 솔버 교차검증 | **부분 완료** | `report_commercial_solver_cross_validation.py` — HF/LF metrics + `marginal_accepted_metrics` (5% tolerance band) |
 | E-P3 | EB/RH 증거 폐쇄 | **완료(조건부)** | `finalize_rh_signed_closure.py` → `rh_signed_closure_packets/*.signed_closure.json` + `rh_closure_status: closed` (engineer-in-loop HMAC attest, not legal authority) |
@@ -211,8 +211,10 @@
 - MIDAS same-mesh ingest/compare: `implementation/phase1/ingest_midas_gen_same_mesh_result.py`, `run_midas_gen_same_mesh_native_comparison.py`, `scripts/build_midas_gen_same_mesh_result_proxy.py`
 - MIDAS Gen result schema (live): `docs/midas-gen-same-mesh-result-schema.md`, `validate_midas_gen_same_mesh_result.py`, `convert_midas_gen_table_export_to_result.py`
 - MIDAS model-derived extraction (no license): `implementation/phase1/extract_midas_gen_same_mesh_result.py`, `scripts/extract_midas_gen_same_mesh_result.py` (kind `model_derived_estimate`; W/H rigorous, drift code-target)
+- MIDAS model-derived **WIND** extraction (design-consistent default for this model — DEAD/LIVE/WIND only, no seismic): `implementation/phase1/extract_midas_wind_same_mesh_result.py`, `scripts/extract_midas_wind_same_mesh_result.py` (kind `model_derived_wind_estimate`; base shear from `wind_workflow.py` = medium conf; drift from mechanics sway stiffness `K=Σ12EI/H³` over actual column lines, consistent w/ in-repo 3D beam solver = medium conf, condensed-spring fallback = low conf). Site overrides via `--basic-wind-speed-mps`/`--exposure` or `open_data/kds/wind_design_params.json`. Bundle track selected by `PHASE1_MIDAS_SAME_MESH_TRACK` (`wind` default, `seismic` opt-in).
 - ML surrogate opt-in gate: `implementation/phase1/ml_surrogate_production_gate.py`
 - Optimization Pareto research archive: `implementation/phase1/build_optimization_pareto_research_archive.py`
+- 후속 개선 백로그(우선순위·수용기준): `docs/continued-improvement-backlog.md`
 - CI delivery check: `scripts/verify_delivery_evidence_for_ci.py` (nightly: `run_nightly_release_gate.py` step `delivery_evidence_bundle`)
 - 재해석 게이트: `scripts/run_post_optimization_reanalysis_gate.py`
 - proxy/solver 게이트: `scripts/run_proxy_solver_divergence_gate.py`, `implementation/phase1/run_proxy_solver_divergence_gate.py`
