@@ -106,7 +106,7 @@
 |----|------|------|-----------|
 | E-P1a | 모델 범위 정직화 + 적용범위 | **완료** | `#viewer-scope-disclaimer` (층 축약·CPU·규칙 기반 최적화·납품 게이트 안내) |
 | E-P1b | GPU claim 정직화 | **완료(조건부)** | production `solve_nonlinear_frame` → **GPU Newton** (`PHASE1_GPU_STATIC_SOLVER_MODE=newton`); `gpu_production_newton_equivalence_gate` + terminal certification |
-| E-P1c | 최적화 후 재해석 게이트 | **완료(조건부)** | mesh contract + condensed solve + **`run_mgt_global_fea_3d_native_solve.py`** (`mesh_3d_beam_global_wired` or licensed-fingerprint bridge) + commercial HF export proxy crosscheck |
+| E-P1c | 최적화 후 재해석 게이트 | **완료(조건부)** | mesh contract + condensed + 3D native (`linear_tangent` fallback) + **`ingest_midas_gen_same_mesh_result.py`** / **`run_midas_gen_same_mesh_native_comparison.py`** (export-proxy or live MIDAS JSON) |
 | E-P2a | modal/좌굴 ingest 요약 | **부분 완료** | `report_commercial_solver_cross_validation.py` → `modal_buckling_summary` (export `mode_shape_mac`·`buckling_factor`) |
 | E-P2b | 상용 솔버 교차검증 | **부분 완료** | `report_commercial_solver_cross_validation.py` — HF/LF metrics + `marginal_accepted_metrics` (5% tolerance band) |
 | E-P3 | EB/RH 증거 폐쇄 | **완료(조건부)** | `finalize_rh_signed_closure.py` → `rh_signed_closure_packets/*.signed_closure.json` + `rh_closure_status: closed` (engineer-in-loop HMAC attest, not legal authority) |
@@ -147,7 +147,7 @@
 | A-P1b | claim 정직화 | **완료** | scope disclaimer: 규칙 기반·ML 비배포·게이트 artifact 전제 |
 | A-P2a | 비용 단가 provenance | **부분 완료** | `cost_model.build_price_provenance()` (region/year/단가); 실측 캘리브레이션 API는 `CostModelCalibrator` |
 | A-P2b | proxy ↔ solver 일치도 | **부분 완료** | `run_proxy_solver_divergence_gate.py` — changes.json DCR/drift vs cost_proxy 휴리스틱 |
-| A-P3 | 다목적·ML 연결 | **미폐쇄** | `report_ml_multi_objective_status.py` → `ml_multi_objective_status.json` (production `not_started`) |
+| A-P3 | 다목적·ML 연결 | **부분 완료** | research Pareto archive + **`ml_surrogate_production_gate.py`** (`PHASE1_ML_SURROGATE_OPT_IN` + checkpoint); production ML off by default |
 
 ---
 
@@ -171,7 +171,7 @@
 - 솔버 검증·구조기술사 검토를 **대체하지 않음**. 모든 자동 결과는 검토 전제.
 - "AI", "GPU 가속", "최적 설계" 표현은 실제 구현과 일치할 때만 사용.
 - 모든 납품 수치(비용/물량/DCR)는 **출처 artifact·재해석 시점**을 동반.
-- `/loop` 지시(2026-05-30)로 **§1 도면비교(P1~P3)** 완료. **§2·§3** delivery bundle `ready`, `authority_holdout=closed` (2026-05-30): condensed MGT global-FEA proxy solve, GPU Newton terminal certification, RH signed closure packets. **미폐쇄:** licensed 3D global FEA replay, external legal authority sign-off, ML/다목적(A-P3).
+- `/loop` 지시(2026-05-30)로 **§1 도면비교(P1~P3)** 완료. **§2·§3** delivery bundle `ready`, `authority_holdout=closed` (2026-05-30): condensed MGT global-FEA proxy solve, GPU Newton terminal certification, RH signed closure packets. **A-P3(부분):** research Pareto archive from optimization changes (not production ML). **미폐쇄:** licensed 3D global FEA replay (live MIDAS), full 3D nonlinear Newton on partial mesh, external legal authority sign-off, production ML/surrogate.
 
 ---
 
@@ -208,6 +208,9 @@
 - ML status rollup: `implementation/phase1/report_ml_multi_objective_status.py`, `scripts/report_ml_multi_objective_status.py`
 - MGT mesh contract: `implementation/phase1/run_mgt_global_fea_mesh_contract_gate.py`, `scripts/run_mgt_global_fea_mesh_contract_gate.py`
 - RH engineer HTML: `implementation/phase1/build_rh_engineer_review_packet_html.py`, `scripts/build_rh_engineer_review_packet_html.py`
+- MIDAS same-mesh ingest/compare: `implementation/phase1/ingest_midas_gen_same_mesh_result.py`, `run_midas_gen_same_mesh_native_comparison.py`, `scripts/build_midas_gen_same_mesh_result_proxy.py`
+- ML surrogate opt-in gate: `implementation/phase1/ml_surrogate_production_gate.py`
+- Optimization Pareto research archive: `implementation/phase1/build_optimization_pareto_research_archive.py`
 - CI delivery check: `scripts/verify_delivery_evidence_for_ci.py` (nightly: `run_nightly_release_gate.py` step `delivery_evidence_bundle`)
 - 재해석 게이트: `scripts/run_post_optimization_reanalysis_gate.py`
 - proxy/solver 게이트: `scripts/run_proxy_solver_divergence_gate.py`, `implementation/phase1/run_proxy_solver_divergence_gate.py`

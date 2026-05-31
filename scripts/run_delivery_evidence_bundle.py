@@ -119,6 +119,19 @@ def main() -> int:
     steps.append({"step": "mgt_global_fea_mesh_contract", "exit_code": code, "log": log})
     mesh_contract_exit = code
 
+    pareto_archive_out = out_dir / "optimization_pareto_research_archive.json"
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_optimization_pareto_research_archive.py"),
+            "--changes-json",
+            str(args.changes_json),
+            "--output-json",
+            str(pareto_archive_out),
+        ]
+    )
+    steps.append({"step": "optimization_pareto_research_archive", "exit_code": code, "log": log})
+
     code, log = _run(
         [
             sys.executable,
@@ -210,6 +223,43 @@ def main() -> int:
         ]
     )
     steps.append({"step": "mgt_global_fea_condensed_solve", "exit_code": code, "log": log})
+
+    midas_result_out = (
+        REPO_ROOT
+        / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json"
+    )
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_midas_gen_same_mesh_result_proxy.py"),
+            "--roundtrip-json",
+            str(args.roundtrip_json),
+            "--commercial-crossval-json",
+            str(out_dir / "commercial_solver_cross_validation.json"),
+            "--output-json",
+            str(midas_result_out),
+        ]
+    )
+    steps.append({"step": "midas_gen_same_mesh_result_proxy", "exit_code": code, "log": log})
+
+    midas_compare_out = out_dir / "midas_gen_same_mesh_native_comparison.json"
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/run_midas_gen_same_mesh_native_comparison.py"),
+            "--result-json",
+            str(midas_result_out),
+            "--roundtrip-json",
+            str(args.roundtrip_json),
+            "--native-3d-solve-json",
+            str(mgt_3d_out),
+            "--native-condensed-solve-json",
+            str(mgt_condensed_out),
+            "--output-json",
+            str(midas_compare_out),
+        ]
+    )
+    steps.append({"step": "midas_gen_same_mesh_native_comparison", "exit_code": code, "log": log})
 
     gpu_equiv_out = out_dir / "gpu_production_newton_equivalence_gate.json"
     code, log = _run(

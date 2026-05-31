@@ -21,8 +21,14 @@ def main() -> int:
         type=Path,
         default=REPO_ROOT / "implementation/phase1/release_evidence/productization/ml_multi_objective_status.json",
     )
+    parser.add_argument(
+        "--pareto-archive-json",
+        type=Path,
+        default=None,
+        help="Optional Pareto research archive JSON (defaults to productization path).",
+    )
     args = parser.parse_args()
-    payload = build_ml_multi_objective_status()
+    payload = build_ml_multi_objective_status(pareto_archive_json=args.pareto_archive_json)
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.output_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(f"ml-status: {payload['status']} production_ml_wired={payload['production_ml_wired']}")

@@ -8,6 +8,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from ml_surrogate_production_gate import probe_ml_surrogate_production_gate
+
 
 SCHEMA_VERSION = "ml-multi-objective-status.v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -43,16 +45,42 @@ def _grep_ml_production_refs(path: Path) -> list[str]:
     return hits[:8]
 
 
-def build_ml_multi_objective_status() -> dict[str, Any]:
+def build_ml_multi_objective_status(
+    *,
+    pareto_archive_json: Path | None = None,
+) -> dict[str, Any]:
     runner_hits: dict[str, list[str]] = {str(path.name): _grep_ml_production_refs(path) for path in RUNNER_PATHS}
     production_ml_wired = any(runner_hits.values())
+    pareto_path = pareto_archive_json or (
+        REPO_ROOT
+        / "implementation/phase1/release_evidence/productization/optimization_pareto_research_archive.json"
+    )
+    pareto_payload: dict[str, Any] = {}
+    if pareto_path.is_file():
+        import json
+
+        pareto_payload = json.loads(pareto_path.read_text(encoding="utf-8"))
+    pareto_ready = str(pareto_payload.get("status") or "") == "research_archive_ready"
+    pareto_count = int(pareto_payload.get("pareto_front_count") or 0)
+    ml_gate = probe_ml_surrogate_production_gate()
+    production_ml_wired = production_ml_wired or bool(ml_gate.get("production_ml_wired"))
+    if production_ml_wired:
+        overall_status = "production_opt_in_ready"
+    elif pareto_ready:
+        overall_status = "research_archive_ready"
+    else:
+        overall_status = "not_started"
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "not_started",
+        "status": overall_status,
         "production_ml_wired": production_ml_wired,
         "multi_objective_pareto_wired": False,
-        "claim": "Production optimization remains deterministic greedy/heuristic; ML/Pareto are research-track only.",
+        "research_pareto_archive_ready": pareto_ready,
+        "research_pareto_front_count": pareto_count,
+        "ml_surrogate_production_gate": ml_gate,
+        "claim": "Production optimization remains deterministic greedy/heuristic unless ML opt-in + checkpoint are set.",
         "runner_static_scan": runner_hits,
-        "next_step": "Optional: wire validated surrogate behind explicit opt-in flag before any AI marketing claim.",
+        "pareto_archive_path": str(pareto_path) if pareto_path.is_file() else "",
+        "next_step": "Set PHASE1_ML_SURROGATE_OPT_IN=1 and ship validated checkpoint to enable surrogate hook.",
     }

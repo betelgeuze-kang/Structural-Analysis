@@ -12,6 +12,7 @@ from design_optimization.io import load_json
 from build_gpu_solver_claim_receipt import build_gpu_solver_claim_receipt
 from run_story_model_reanalysis import build_mgt_reanalysis_provenance, run_story_model_reanalysis
 from run_mgt_global_fea_3d_native_solve import run_mgt_global_fea_3d_native_solve
+from run_midas_gen_same_mesh_native_comparison import run_midas_gen_same_mesh_native_comparison
 from run_mgt_global_fea_condensed_solve import run_mgt_global_fea_condensed_solve
 from run_mgt_global_fea_mesh_contract_gate import build_mgt_global_fea_mesh_contract_gate
 from run_mgt_global_fea_readiness_gate import build_mgt_global_fea_readiness_gate
@@ -105,11 +106,24 @@ def run_mgt_native_reanalysis_pipeline(
     mesh_contract = build_mgt_global_fea_mesh_contract_gate(roundtrip_json=roundtrip_json)
     condensed_solve: dict[str, Any] | None = None
     mesh_3d_solve: dict[str, Any] | None = None
+    midas_same_mesh_comparison: dict[str, Any] | None = None
+    midas_result_json = roundtrip_json.parent / "midas_generator_33.optimized.midas_gen_same_mesh_result.json"
+    productization_dir = roundtrip_json.resolve().parents[2] / "release_evidence" / "productization"
     if mesh_contract.get("mesh_contract_ready"):
         condensed_solve = run_mgt_global_fea_condensed_solve(roundtrip_json=roundtrip_json)
         mesh_3d_solve = run_mgt_global_fea_3d_native_solve(roundtrip_json=roundtrip_json)
+        if midas_result_json.is_file():
+            midas_same_mesh_comparison = run_midas_gen_same_mesh_native_comparison(
+                result_json=midas_result_json,
+                roundtrip_json=roundtrip_json,
+                native_3d_solve_json=productization_dir / "mgt_global_fea_3d_native_solve.json",
+                native_condensed_solve_json=productization_dir / "mgt_global_fea_condensed_solve.json",
+            )
     parse_linked = bool(mgt_refresh and (mgt_refresh.get("parse") or {}).get("status") == "pass")
     native_solve_status = str((mesh_3d_solve or {}).get("native_solve_status") or (condensed_solve or {}).get("native_solve_status") or "not_wired")
+    if midas_same_mesh_comparison and str(midas_same_mesh_comparison.get("comparison_status") or "").startswith("pass"):
+        if native_solve_status.endswith("_bridge"):
+            native_solve_status = "mesh_3d_beam_global_wired_with_midas_same_mesh_proxy"
     fea_status = "not_wired"
     if native_solve_status == "mesh_3d_beam_global_wired":
         fea_status = "mesh_3d_global_wired"
@@ -144,6 +158,7 @@ def run_mgt_native_reanalysis_pipeline(
         "global_fea_mesh_contract": mesh_contract,
         "condensed_global_fea_solve": condensed_solve,
         "mesh_3d_global_fea_solve": mesh_3d_solve,
+        "midas_gen_same_mesh_comparison": midas_same_mesh_comparison,
     }
 
     if "mgt_file_missing" in blockers:

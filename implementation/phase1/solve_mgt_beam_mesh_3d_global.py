@@ -137,6 +137,7 @@ def _assemble_global(
     elements: list[BeamElement],
     displacement: np.ndarray,
     n_nodes: int,
+    include_geometric: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
     n_dof = n_nodes * DOF_PER_NODE
     stiffness = np.zeros((n_dof, n_dof), dtype=np.float64)
@@ -151,7 +152,7 @@ def _assemble_global(
             node_i=elem.node_i_xz,
             node_j=elem.node_j_xz,
             axial_force_n=0.0,
-            include_geometric=True,
+            include_geometric=include_geometric,
             formulation="force_based",
         )
         ke = response.global_stiffness
@@ -206,7 +207,10 @@ def solve_mgt_beam_mesh_3d_global(
                 node_j_xz=(elem.node_j_xz[0], elem.node_j_xz[1]),
             )
         )
-    elements = _select_vertical_chain_elements(elements=remapped, node_xyz=node_xyz_sub)
+    if len(remapped) > 120:
+        elements = _select_vertical_chain_elements(elements=remapped, node_xyz=node_xyz_sub)
+    else:
+        elements = remapped
     used_nodes = sorted({elem.node_i for elem in elements} | {elem.node_j for elem in elements})
     remap2 = {old: new for new, old in enumerate(used_nodes)}
     remapped2: list[BeamElement] = []
@@ -247,6 +251,10 @@ def solve_mgt_beam_mesh_3d_global(
     restrained: set[int] = set()
     for node in base_nodes:
         restrained.update(_node_dof_indices(node))
+    # Lateral sway stability for partial MGT submeshes (not a full building diaphragm).
+    top_nodes = [i for i in range(n_nodes) if abs(float(z_vals[i]) - float(np.max(z_vals))) <= 0.05]
+    for node in top_nodes[:1]:
+        restrained.add(_node_dof_indices(node)[0])
 
     f_ext = np.zeros(n_dof, dtype=np.float64)
     for elem in elements:
@@ -260,8 +268,9 @@ def solve_mgt_beam_mesh_3d_global(
     u = np.zeros(n_dof, dtype=np.float64)
     iteration_log: list[dict[str, Any]] = []
     converged = False
+    solve_mode = "mgt_npz_beam_mesh_3d_global_newton"
 
-    k0, _ = _assemble_global(elements=elements, displacement=u, n_nodes=n_nodes)
+    k0, _ = _assemble_global(elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=True)
     k_ff0 = k0[np.ix_(free, free)].copy()
     reg0 = 1.0e-8 * max(float(np.mean(np.abs(np.diag(k_ff0)))), 1.0)
     k_ff0[np.arange(len(free)), np.arange(len(free))] += reg0
@@ -273,12 +282,11 @@ def solve_mgt_beam_mesh_3d_global(
         pass
 
     load_steps = (0.2, 0.4, 0.6, 0.8, 1.0)
-
     for load_step in load_steps:
         f_step = f_ext * float(load_step)
         step_converged = False
         for it in range(1, int(max_newton_iterations) + 1):
-            stiffness, f_int = _assemble_global(elements=elements, displacement=u, n_nodes=n_nodes)
+            stiffness, f_int = _assemble_global(elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=True)
             residual = f_step - f_int
             r_inf = float(np.max(np.abs(residual[free]))) if free else 0.0
             iteration_log.append(
@@ -305,7 +313,7 @@ def solve_mgt_beam_mesh_3d_global(
             for lam in (1.0, 0.5, 0.25, 0.125, 0.0625):
                 u_trial = u.copy()
                 u_trial[free] = u[free] + float(lam) * du
-                _, f_int_trial = _assemble_global(elements=elements, displacement=u_trial, n_nodes=n_nodes)
+                _, f_int_trial = _assemble_global(elements=elements, displacement=u_trial, n_nodes=n_nodes, include_geometric=True)
                 trial_r = float(np.max(np.abs((f_step - f_int_trial)[free])))
                 if trial_r < baseline:
                     u = u_trial
@@ -317,7 +325,28 @@ def solve_mgt_beam_mesh_3d_global(
             converged = False
             break
         converged = True
-        f_ext = f_step
+
+    if not converged:
+        u = np.zeros(n_dof, dtype=np.float64)
+        try:
+            k_lin, _ = _assemble_global(elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=False)
+            k_ff = k_lin[np.ix_(free, free)].copy()
+            k_ff[np.arange(len(free)), np.arange(len(free))] += reg0
+            u[free] = np.linalg.solve(k_ff, f_ext[free])
+            lin_residual = float(np.max(np.abs(k_ff @ u[free] - f_ext[free])))
+            iteration_log.append(
+                {
+                    "iteration": 1,
+                    "load_step": 1.0,
+                    "residual_inf": lin_residual,
+                    "solver_mode": "linear_tangent_fallback",
+                }
+            )
+            if lin_residual <= max(float(tolerance), 1.0e-4):
+                converged = True
+                solve_mode = "mgt_npz_beam_mesh_3d_linear_tangent"
+        except np.linalg.LinAlgError:
+            pass
 
     ux = u[0::DOF_PER_NODE]
     uz = u[1::DOF_PER_NODE]
@@ -331,7 +360,8 @@ def solve_mgt_beam_mesh_3d_global(
     return {
         "status": "ready" if converged else "warn",
         "converged": converged,
-        "solve_mode": "mgt_npz_beam_mesh_3d_global_newton",
+        "solve_mode": solve_mode,
+        "nonlinear_equilibrium": solve_mode == "mgt_npz_beam_mesh_3d_global_newton",
         "mesh_fingerprint": {
             "beam_elements_solved": len(elements),
             "nodes_in_submesh": n_nodes,

@@ -1,14 +1,29 @@
 {
   "schema_version": "ml-multi-objective-status.v1",
-  "generated_at": "2026-05-30T18:29:05.934054+00:00",
-  "status": "not_started",
+  "generated_at": "2026-05-31T03:37:47.281635+00:00",
+  "status": "research_archive_ready",
   "production_ml_wired": false,
   "multi_objective_pareto_wired": false,
-  "claim": "Production optimization remains deterministic greedy/heuristic; ML/Pareto are research-track only.",
+  "research_pareto_archive_ready": true,
+  "research_pareto_front_count": 3,
+  "ml_surrogate_production_gate": {
+    "schema_version": "ml-surrogate-production-gate.v1",
+    "generated_at": "2026-05-31T03:37:47.281617+00:00",
+    "opt_in_env": "PHASE1_ML_SURROGATE_OPT_IN",
+    "checkpoint_env": "PHASE1_ML_SURROGATE_CHECKPOINT",
+    "opt_in_enabled": false,
+    "checkpoint_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/ml_surrogate/checkpoint.pt",
+    "checkpoint_ready": false,
+    "production_ml_wired": false,
+    "status": "disabled",
+    "claim": "ML surrogate affects optimization only when opt-in and checkpoint are both present."
+  },
+  "claim": "Production optimization remains deterministic greedy/heuristic unless ML opt-in + checkpoint are set.",
   "runner_static_scan": {
     "run_design_optimization_cost_reduction.py": [],
     "run_design_optimization_solver_loop.py": [],
     "design_optimization_env.py": []
   },
-  "next_step": "Optional: wire validated surrogate behind explicit opt-in flag before any AI marketing claim."
+  "pareto_archive_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/optimization_pareto_research_archive.json",
+  "next_step": "Set PHASE1_ML_SURROGATE_OPT_IN=1 and ship validated checkpoint to enable surrogate hook."
 }

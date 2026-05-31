@@ -1,0 +1,39 @@
+{
+  "schema_version": "optimization-pareto-research-archive.v1",
+  "generated_at": "2026-05-31T03:37:47.220724+00:00",
+  "status": "research_archive_ready",
+  "claim": "Pareto archive from applied optimization change rows (cost vs DCR vs drift). Research-track only; production search remains deterministic greedy.",
+  "source_changes_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+  "candidate_count": 20,
+  "pareto_front_count": 3,
+  "pareto_front": [
+    {
+      "group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "rebar_down",
+      "objectives": {
+        "cost_proxy_after": 458.22479999999996,
+        "governing_dcr_after": 1.1714694739239129,
+        "drift_after_pct": 1.9872000000000005
+      }
+    },
+    {
+      "group_id": "S04:perimeter:1:slab:default",
+      "action_name": "slab_thickness_down",
+      "objectives": {
+        "cost_proxy_after": 597.7293522340425,
+        "governing_dcr_after": 0.41903523089535444,
+        "drift_after_pct": 1.9872000000000005
+      }
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "action_name": "connection_detailing_down",
+      "objectives": {
+        "cost_proxy_after": 218.18861567999997,
+        "governing_dcr_after": 1.2905454545454547,
+        "drift_after_pct": 1.9872000000000005
+      }
+    }
+  ],
+  "production_pareto_wired": false
+}

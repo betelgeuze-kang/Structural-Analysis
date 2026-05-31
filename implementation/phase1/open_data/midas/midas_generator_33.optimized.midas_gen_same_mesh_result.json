@@ -1,0 +1,17 @@
+{
+  "schema_version": "midas-gen-same-mesh-result.v1",
+  "generated_at": "2026-05-31T03:38:00.963193+00:00",
+  "source": {
+    "kind": "midas_gen_export_proxy",
+    "note": "Proxy same-mesh metrics from commercial HF export medians aligned to optimized MGT SHA256. Replace with live MIDAS Gen result JSON when available.",
+    "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "commercial_crossval_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json"
+  },
+  "metrics": {
+    "drift_ratio_pct": 1.95,
+    "base_shear_kN": 1657.5,
+    "top_displacement_m": 0.5622415000000001
+  },
+  "blockers": []
+}

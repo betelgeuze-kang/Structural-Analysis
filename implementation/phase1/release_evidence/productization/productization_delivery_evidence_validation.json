@@ -1,6 +1,6 @@
 {
   "schema_version": "validate-productization-delivery-evidence.v1",
-  "generated_at": "2026-05-30T18:29:41.837883+00:00",
+  "generated_at": "2026-05-31T03:38:14.194626+00:00",
   "status": "pass",
   "productization_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization",
   "files_checked": 17,
@@ -20,7 +20,7 @@
     "rh_signed_closure_packet_template.json": "template_only",
     "residual_holdout_closure_updates.json": "present",
     "mgt_roundtrip_assembly_fingerprint.json": "ready",
-    "ml_multi_objective_status.json": "not_started",
+    "ml_multi_objective_status.json": "research_archive_ready",
     "mgt_global_fea_mesh_contract_gate.json": "ready",
     "rh_engineer_review_packet_template.html": "present"
   },

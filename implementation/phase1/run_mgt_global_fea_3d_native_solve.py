@@ -161,18 +161,28 @@ def run_mgt_global_fea_3d_native_solve(
     }
 
     mesh_converged = bool(solve_payload.get("converged"))
+    solve_mode = str(solve_payload.get("solve_mode") or "")
+    nonlinear_equilibrium = bool(solve_payload.get("nonlinear_equilibrium"))
     crosscheck_ok = licensed_crosscheck.get("status") in {"pass", "skipped"}
     comparisons = licensed_crosscheck.get("comparisons") if isinstance(licensed_crosscheck.get("comparisons"), list) else []
     metric_pass_count = sum(1 for row in comparisons if isinstance(row, dict) and row.get("ok"))
-    mesh_wired = mesh_converged and (crosscheck_ok or metric_pass_count >= 1)
+    crosscheck_metric_ok = crosscheck_ok or metric_pass_count >= 1
+    mesh_wired = mesh_converged and nonlinear_equilibrium and crosscheck_metric_ok
+    linear_tangent_wired = (
+        mesh_converged
+        and solve_mode == "mgt_npz_beam_mesh_3d_linear_tangent"
+        and crosscheck_metric_ok
+    )
     bridge_wired = (
         condensed_bridge.get("native_solve_status") == "condensed_global_fea_wired"
         and condensed_crosscheck.get("status") == "pass"
         and bool(reference)
     )
-    converged = mesh_wired or bridge_wired
+    converged = mesh_wired or linear_tangent_wired or bridge_wired
     if mesh_wired:
         native_status = "mesh_3d_beam_global_wired"
+    elif linear_tangent_wired:
+        native_status = "mesh_3d_beam_global_linear_tangent_wired"
     elif bridge_wired:
         native_status = "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge"
     else:

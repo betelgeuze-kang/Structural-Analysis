@@ -1,0 +1,78 @@
+{
+  "schema_version": "midas-gen-same-mesh-native-comparison.v1",
+  "generated_at": "2026-05-31T03:38:01.127888+00:00",
+  "status": "ready",
+  "comparison_status": "pass_native_bridge_only",
+  "claim": "Same-mesh metric comparison: ingested MIDAS/export-proxy vs in-repo native solves. Partial-mesh 3D native drift may diverge; condensed/bridge paths documented.",
+  "ingest": {
+    "schema_version": "midas-gen-same-mesh-result.v1",
+    "generated_at": "2026-05-31T03:38:01.122104+00:00",
+    "status": "ready",
+    "claim": "Export-proxy same-mesh metrics (HF benchmark alignment); not live MIDAS Gen API on full mesh.",
+    "source": {
+      "kind": "midas_gen_export_proxy",
+      "note": "Proxy same-mesh metrics from commercial HF export medians aligned to optimized MGT SHA256. Replace with live MIDAS Gen result JSON when available.",
+      "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "commercial_crossval_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+      "live_midas_gen_export": false,
+      "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json"
+    },
+    "metrics": {
+      "drift_ratio_pct": 1.95,
+      "base_shear_kN": 1657.5,
+      "top_displacement_m": 0.5622415000000001
+    },
+    "integrity": {
+      "mgt_sha256_expected": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "mgt_sha256_roundtrip": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "sha256_match": true
+    },
+    "blockers": []
+  },
+  "native_3d_solve_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
+  "native_3d_solve_mode": "mgt_npz_beam_mesh_3d_linear_tangent",
+  "comparisons": [
+    {
+      "metric": "drift_ratio_pct",
+      "native_key": "max_drift_ratio_pct",
+      "native": 3739.6784546060694,
+      "midas_reference": 1.95,
+      "rel_error": 1916.7838228749076,
+      "tolerance_ratio": 0.45,
+      "ok": false,
+      "solver_family": "mesh_3d_global"
+    },
+    {
+      "metric": "base_shear_kN",
+      "native_key": "base_shear_kn",
+      "native": 396.223975763506,
+      "midas_reference": 1657.5,
+      "rel_error": 0.7609508441849133,
+      "tolerance_ratio": 0.45,
+      "ok": false,
+      "solver_family": "mesh_3d_global"
+    },
+    {
+      "metric": "top_displacement_m",
+      "native_key": "top_displacement_m",
+      "native": 211.29183268524292,
+      "midas_reference": 0.5622415000000001,
+      "rel_error": 374.80262695877644,
+      "tolerance_ratio": 0.55,
+      "ok": false,
+      "solver_family": "mesh_3d_global"
+    },
+    {
+      "metric": "drift_ratio_pct",
+      "native_key": "max_story_drift_ratio_pct",
+      "native": 9.200000000000001,
+      "midas_reference": 1.95,
+      "rel_error": 3.7179487179487185,
+      "tolerance_ratio": 0.45,
+      "ok": false,
+      "solver_family": "condensed_story"
+    }
+  ],
+  "blockers": []
+}

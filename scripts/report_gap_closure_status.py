@@ -110,6 +110,12 @@ def build_gap_closure_status() -> dict[str, Any]:
             "production_ml_wired": _load(PRODUCTIZATION / "ml_multi_objective_status.json").get(
                 "production_ml_wired"
             ),
+            "research_pareto_archive_ready": _load(PRODUCTIZATION / "ml_multi_objective_status.json").get(
+                "research_pareto_archive_ready"
+            ),
+            "research_pareto_front_count": _load(PRODUCTIZATION / "ml_multi_objective_status.json").get(
+                "research_pareto_front_count"
+            ),
         },
     }
 

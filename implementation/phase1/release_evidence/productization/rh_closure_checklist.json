@@ -1,6 +1,6 @@
 {
   "schema_version": "rh-closure-checklist.v1",
-  "generated_at": "2026-05-30T18:29:41.779322+00:00",
+  "generated_at": "2026-05-31T03:38:14.135348+00:00",
   "status": "complete",
   "open_count": 0,
   "delivery_bundle_status": "ready",
@@ -16,7 +16,7 @@
     "reanalysis_status": "pass_with_story_proxy_check",
     "story_reanalysis_status": "pass",
     "mgt_pipeline_status": "story_proxy_pass",
-    "native_fea_solve_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
+    "native_fea_solve_status": "mesh_3d_beam_global_wired_with_midas_same_mesh_proxy",
     "mgt_condensed_solve_status": "condensed_global_fea_wired",
     "mgt_integrity_status": "verified",
     "member_alignment_status": "aligned",
