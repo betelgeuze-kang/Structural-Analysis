@@ -242,6 +242,21 @@ def main() -> int:
     )
     steps.append({"step": "midas_gen_same_mesh_result_proxy", "exit_code": code, "log": log})
 
+    midas_validate_out = out_dir / "midas_gen_same_mesh_result_validation.json"
+    code, log = _run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/validate_midas_gen_same_mesh_result.py"),
+            "--result-json",
+            str(midas_result_out),
+            "--roundtrip-json",
+            str(args.roundtrip_json),
+            "--output-json",
+            str(midas_validate_out),
+        ]
+    )
+    steps.append({"step": "midas_gen_same_mesh_result_validation", "exit_code": code, "log": log})
+
     midas_compare_out = out_dir / "midas_gen_same_mesh_native_comparison.json"
     code, log = _run(
         [

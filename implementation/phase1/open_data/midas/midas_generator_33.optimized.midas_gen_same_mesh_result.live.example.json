@@ -1,0 +1,19 @@
+{
+  "schema_version": "midas-gen-same-mesh-result.v1",
+  "generated_at": "2026-05-31T12:00:00+00:00",
+  "source": {
+    "kind": "midas_gen_live_export",
+    "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "roundtrip_json": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "midas_model_name": "midas_generator_33.optimized",
+    "load_case": "COMB1",
+    "run_id": "live-example-fixture-001",
+    "note": "ILLUSTRATIVE FIXTURE for schema/CI only — not an actual MIDAS Gen solver run. Replace metrics after real Gen export."
+  },
+  "metrics": {
+    "drift_ratio_pct": 1.92,
+    "base_shear_kN": 1640.0,
+    "top_displacement_m": 0.55
+  },
+  "blockers": []
+}

@@ -209,6 +209,7 @@
 - MGT mesh contract: `implementation/phase1/run_mgt_global_fea_mesh_contract_gate.py`, `scripts/run_mgt_global_fea_mesh_contract_gate.py`
 - RH engineer HTML: `implementation/phase1/build_rh_engineer_review_packet_html.py`, `scripts/build_rh_engineer_review_packet_html.py`
 - MIDAS same-mesh ingest/compare: `implementation/phase1/ingest_midas_gen_same_mesh_result.py`, `run_midas_gen_same_mesh_native_comparison.py`, `scripts/build_midas_gen_same_mesh_result_proxy.py`
+- MIDAS Gen result schema (live): `docs/midas-gen-same-mesh-result-schema.md`, `validate_midas_gen_same_mesh_result.py`, `convert_midas_gen_table_export_to_result.py`
 - ML surrogate opt-in gate: `implementation/phase1/ml_surrogate_production_gate.py`
 - Optimization Pareto research archive: `implementation/phase1/build_optimization_pareto_research_archive.py`
 - CI delivery check: `scripts/verify_delivery_evidence_for_ci.py` (nightly: `run_nightly_release_gate.py` step `delivery_evidence_bundle`)

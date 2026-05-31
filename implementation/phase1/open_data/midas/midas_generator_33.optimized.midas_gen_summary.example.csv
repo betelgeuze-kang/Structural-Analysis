@@ -1,0 +1,2 @@
+drift_ratio_pct,base_shear_kN,top_displacement_m,load_case,note
+1.92,1640.0,0.55,COMB1,example row for convert_midas_gen_table_export_to_result.py

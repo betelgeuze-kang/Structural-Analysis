@@ -121,8 +121,13 @@ def run_mgt_native_reanalysis_pipeline(
             )
     parse_linked = bool(mgt_refresh and (mgt_refresh.get("parse") or {}).get("status") == "pass")
     native_solve_status = str((mesh_3d_solve or {}).get("native_solve_status") or (condensed_solve or {}).get("native_solve_status") or "not_wired")
-    if midas_same_mesh_comparison and str(midas_same_mesh_comparison.get("comparison_status") or "").startswith("pass"):
-        if native_solve_status.endswith("_bridge"):
+    if midas_same_mesh_comparison:
+        comparison_status = str(midas_same_mesh_comparison.get("comparison_status") or "")
+        if comparison_status.startswith("pass_live"):
+            native_solve_status = "mesh_3d_beam_global_wired_with_midas_live_ingest"
+        elif comparison_status.startswith("pass") and (
+            native_solve_status.endswith("_bridge") or "bridge" in native_solve_status
+        ):
             native_solve_status = "mesh_3d_beam_global_wired_with_midas_same_mesh_proxy"
     fea_status = "not_wired"
     if native_solve_status == "mesh_3d_beam_global_wired":

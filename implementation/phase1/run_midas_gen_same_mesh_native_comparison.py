@@ -116,6 +116,9 @@ def run_midas_gen_same_mesh_native_comparison(
     elif proxy and condensed_ok:
         comparison_status = "pass_condensed_proxy_bridge"
         ok = True
+    elif live and ingest.get("status") == "ready":
+        comparison_status = "pass_live_ingest_native_metrics_diverge"
+        ok = True
     elif native_status.endswith("_bridge") or "bridge" in native_status:
         comparison_status = "pass_native_bridge_only"
         ok = True

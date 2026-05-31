@@ -54,3 +54,4 @@ def test_midas_same_mesh_proxy_and_comparison() -> None:
     assert proc.returncode == 0, proc.stderr
     payload = json.loads(compare_out.read_text(encoding="utf-8"))
     assert str(payload.get("comparison_status") or "").startswith("pass")
+    assert payload["ingest"]["source"]["kind"] == "midas_gen_export_proxy"
