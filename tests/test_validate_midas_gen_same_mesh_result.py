@@ -81,3 +81,4 @@ def test_live_example_comparison_status() -> None:
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["comparison_status"] == "pass_live_ingest_native_metrics_diverge"
     assert payload["ingest"]["source"]["live_midas_gen_export"] is True
+    assert payload["comparison_tiers"]["ingest"] == "pass"

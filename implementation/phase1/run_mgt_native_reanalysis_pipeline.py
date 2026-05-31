@@ -12,6 +12,7 @@ from design_optimization.io import load_json
 from build_gpu_solver_claim_receipt import build_gpu_solver_claim_receipt
 from run_story_model_reanalysis import build_mgt_reanalysis_provenance, run_story_model_reanalysis
 from run_mgt_global_fea_3d_native_solve import run_mgt_global_fea_3d_native_solve
+from resolve_midas_same_mesh_result_path import resolve_midas_same_mesh_result_path
 from run_midas_gen_same_mesh_native_comparison import run_midas_gen_same_mesh_native_comparison
 from run_mgt_global_fea_condensed_solve import run_mgt_global_fea_condensed_solve
 from run_mgt_global_fea_mesh_contract_gate import build_mgt_global_fea_mesh_contract_gate
@@ -107,7 +108,7 @@ def run_mgt_native_reanalysis_pipeline(
     condensed_solve: dict[str, Any] | None = None
     mesh_3d_solve: dict[str, Any] | None = None
     midas_same_mesh_comparison: dict[str, Any] | None = None
-    midas_result_json = roundtrip_json.parent / "midas_generator_33.optimized.midas_gen_same_mesh_result.json"
+    midas_result_json, _midas_resolution = resolve_midas_same_mesh_result_path(roundtrip_json=roundtrip_json)
     productization_dir = roundtrip_json.resolve().parents[2] / "release_evidence" / "productization"
     if mesh_contract.get("mesh_contract_ready"):
         condensed_solve = run_mgt_global_fea_condensed_solve(roundtrip_json=roundtrip_json)

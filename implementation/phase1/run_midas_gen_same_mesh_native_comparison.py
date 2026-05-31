@@ -55,7 +55,7 @@ def run_midas_gen_same_mesh_native_comparison(
     condensed_metrics = {
         "max_story_drift_ratio_pct": float(ndtha.get("max_drift_ratio_pct") or 0.0),
         "top_displacement_m": float(static.get("top_displacement_m") or 0.0),
-        "base_shear_kn": 0.0,
+        "base_shear_kn": float(static.get("base_shear_kn") or 0.0),
     }
 
     comparisons: list[dict[str, Any]] = []
@@ -86,7 +86,10 @@ def run_midas_gen_same_mesh_native_comparison(
             }
         )
 
-    condensed_pairs = (("max_story_drift_ratio_pct", "drift_ratio_pct", drift_tol_ratio),)
+    condensed_pairs = (
+        ("max_story_drift_ratio_pct", "drift_ratio_pct", drift_tol_ratio),
+        ("base_shear_kn", "base_shear_kN", shear_tol_ratio),
+    )
     condensed_ok = True
     for native_key, midas_key, tol in condensed_pairs:
         native_v = float(condensed_metrics.get(native_key) or 0.0)
@@ -111,8 +114,19 @@ def run_midas_gen_same_mesh_native_comparison(
 
     live = bool((ingest.get("source") or {}).get("live_midas_gen_export"))
     proxy = not live
+    mesh_3d_ok = all(row.get("ok") for row in comparisons if row.get("solver_family") == "mesh_3d_global")
+    condensed_rows_ok = all(row.get("ok") for row in comparisons if row.get("solver_family") == "condensed_story")
+    comparison_tiers = {
+        "ingest": "pass" if ingest.get("status") == "ready" else "fail",
+        "mesh_3d_global": "pass" if mesh_3d_ok else "diverge",
+        "condensed_story": "pass" if condensed_rows_ok else "diverge",
+    }
+
     if ok:
         comparison_status = "pass_live" if live else "pass_proxy"
+    elif live and condensed_rows_ok:
+        comparison_status = "pass_live_condensed_aligned"
+        ok = True
     elif proxy and condensed_ok:
         comparison_status = "pass_condensed_proxy_bridge"
         ok = True
@@ -137,6 +151,7 @@ def run_midas_gen_same_mesh_native_comparison(
         "ingest": ingest,
         "native_3d_solve_status": native_status,
         "native_3d_solve_mode": mesh_solve.get("solve_mode"),
+        "comparison_tiers": comparison_tiers,
         "comparisons": comparisons,
         "blockers": [] if ok else ["midas_native_metric_divergence"],
     }

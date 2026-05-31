@@ -87,6 +87,25 @@ python3 scripts/run_midas_gen_same_mesh_native_comparison.py \
 
 When ingest reports `live_midas_gen_export: true` and comparison `comparison_status` starts with `pass_live`, native pipeline status can upgrade from proxy-bridge to live-aligned receipt.
 
+## Install live result (canonical path)
+
+```bash
+python3 scripts/install_midas_live_same_mesh_result.py \
+  --live-result-json path/to/your_live_export.json
+```
+
+This validates `midas_gen_live_export` + SHA256 match, then copies to  
+`implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json`.
+
+CI/demo without a real Gen run:
+
+```bash
+export PHASE1_USE_MIDAS_LIVE_RESULT=1
+python3 scripts/run_delivery_evidence_bundle.py
+```
+
+Uses the illustrative live fixture (`*.live.example.json`) via resolver — not a substitute for real Gen metrics in production sign-off.
+
 ## CSV → JSON (one-row)
 
 ```bash

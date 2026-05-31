@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-global-fea-condensed-solve.v1",
-  "generated_at": "2026-05-31T03:38:00.431714+00:00",
+  "generated_at": "2026-05-31T04:00:23.091392+00:00",
   "status": "ready",
   "claim": "MGT NPZ mesh condensed to story-level nonlinear frame and solved in-repo; not a full 3D global FEA licensed-engine replay.",
   "native_solve_status": "condensed_global_fea_wired",
@@ -96,6 +96,7 @@
     "converged": true,
     "iterations": 11,
     "top_displacement_m": 33312.66186049739,
+    "base_shear_kn": 15589.462844014923,
     "backend": "rocm_torch_hip_mainloop"
   },
   "ndtha_solve": {

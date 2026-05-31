@@ -98,6 +98,7 @@ def run_mgt_global_fea_condensed_solve(
             "converged": static.get("converged"),
             "iterations": static.get("iterations"),
             "top_displacement_m": static.get("top_displacement_m"),
+            "base_shear_kn": float(static.get("base_shear_kn") or 0.0),
             "backend": static_runtime.get("main_loop_backend") or static.get("backend"),
         },
         "ndtha_solve": {

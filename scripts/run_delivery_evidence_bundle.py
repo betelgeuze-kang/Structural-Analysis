@@ -224,23 +224,48 @@ def main() -> int:
     )
     steps.append({"step": "mgt_global_fea_condensed_solve", "exit_code": code, "log": log})
 
-    midas_result_out = (
-        REPO_ROOT
-        / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json"
-    )
-    code, log = _run(
+    resolve_code, resolve_log = _run(
         [
             sys.executable,
-            str(REPO_ROOT / "scripts/build_midas_gen_same_mesh_result_proxy.py"),
+            str(REPO_ROOT / "scripts/resolve_midas_same_mesh_result_path.py"),
             "--roundtrip-json",
             str(args.roundtrip_json),
-            "--commercial-crossval-json",
-            str(out_dir / "commercial_solver_cross_validation.json"),
-            "--output-json",
-            str(midas_result_out),
         ]
     )
-    steps.append({"step": "midas_gen_same_mesh_result_proxy", "exit_code": code, "log": log})
+    midas_resolution_kind = "default_proxy"
+    if resolve_code == 0 and resolve_log:
+        first_line = resolve_log.splitlines()[0]
+        parts = first_line.split("\t", 1)
+        midas_result_out = Path(parts[0])
+        midas_resolution_kind = parts[1] if len(parts) > 1 else midas_resolution_kind
+    else:
+        midas_result_out = (
+            REPO_ROOT
+            / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json"
+        )
+    steps.append(
+        {
+            "step": "midas_same_mesh_result_resolve",
+            "exit_code": resolve_code,
+            "log": resolve_log,
+            "resolution_kind": midas_resolution_kind,
+        }
+    )
+
+    if midas_resolution_kind in {"missing", "default_proxy", "proxy_sibling"}:
+        code, log = _run(
+            [
+                sys.executable,
+                str(REPO_ROOT / "scripts/build_midas_gen_same_mesh_result_proxy.py"),
+                "--roundtrip-json",
+                str(args.roundtrip_json),
+                "--commercial-crossval-json",
+                str(out_dir / "commercial_solver_cross_validation.json"),
+                "--output-json",
+                str(midas_result_out),
+            ]
+        )
+        steps.append({"step": "midas_gen_same_mesh_result_proxy", "exit_code": code, "log": log})
 
     midas_validate_out = out_dir / "midas_gen_same_mesh_result_validation.json"
     code, log = _run(
