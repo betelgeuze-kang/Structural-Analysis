@@ -128,7 +128,7 @@ python3 scripts/extract_midas_gen_same_mesh_result.py \
 ```
 
 - `seismic_weight_kN` = Σ(nodal mass) × g — **rigorous** (from `*NODALMASS`)
-- `base_shear_kN` = `Cs` × W — equivalent static; `Cs` via `--seismic-cs` or `PHASE1_MIDAS_SEISMIC_CS` (default 0.09)
-- `drift_ratio_pct` / `top_displacement_m` — **low-confidence code-target estimates**; the in-repo partial beam submesh is not a valid full-building lateral model, so these need a real Gen/full-mesh lateral run. Override via `--assumed-drift-pct` / `PHASE1_MIDAS_ASSUMED_DRIFT_PCT`.
+- `base_shear_kN` = `Cs` × W — `Cs` from `implementation/phase1/open_data/kds/seismic_design_params.json` (`Cs = SDS/(R·Ie)`) or `--seismic-cs` / `PHASE1_MIDAS_SEISMIC_CS`
+- `drift_ratio_pct` — from condensed story NDTHA when `--condensed-solve-json` is passed (**medium** confidence); else code-target placeholder
 
 For `midas_generator_33.optimized` this extraction reports a **low-rise (H≈9.35 m), gravity-dominant** structure with W≈94,150 kN — confirming the earlier proxy KPIs (drift 1.95%, shear 1657 kN) were placeholders not matched to this model.

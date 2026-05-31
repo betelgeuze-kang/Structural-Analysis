@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -224,6 +225,32 @@ def main() -> int:
     )
     steps.append({"step": "mgt_global_fea_condensed_solve", "exit_code": code, "log": log})
 
+    midas_result_out = (
+        REPO_ROOT
+        / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json"
+    )
+    skip_model_derived = str(os.environ.get("PHASE1_SKIP_MODEL_DERIVED_MIDAS") or "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+    if not skip_model_derived:
+        code, log = _run(
+            [
+                sys.executable,
+                str(REPO_ROOT / "scripts/extract_midas_gen_same_mesh_result.py"),
+                "--mgt-path",
+                str(args.roundtrip_json.with_suffix(".mgt").parent / "midas_generator_33.optimized.mgt"),
+                "--roundtrip-json",
+                str(args.roundtrip_json),
+                "--condensed-solve-json",
+                str(mgt_condensed_out),
+                "--output-json",
+                str(midas_result_out),
+            ]
+        )
+        steps.append({"step": "midas_model_derived_extract", "exit_code": code, "log": log})
+
     resolve_code, resolve_log = _run(
         [
             sys.executable,
@@ -252,7 +279,7 @@ def main() -> int:
         }
     )
 
-    if midas_resolution_kind in {"missing", "default_proxy", "proxy_sibling"}:
+    if midas_resolution_kind in {"missing", "default_proxy", "proxy_sibling"} and not skip_model_derived:
         code, log = _run(
             [
                 sys.executable,

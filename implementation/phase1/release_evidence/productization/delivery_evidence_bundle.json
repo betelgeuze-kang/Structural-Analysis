@@ -1,6 +1,6 @@
 {
   "schema_version": "delivery-evidence-bundle.v1",
-  "generated_at": "2026-05-31T04:12:46.520779+00:00",
+  "generated_at": "2026-05-31T04:33:00.956512+00:00",
   "status": "ready",
   "claim": "Engineer-in-loop delivery evidence bundle; not permit approval.",
   "steps": [
@@ -60,6 +60,11 @@
       "log": "mgt-condensed-solve: condensed_global_fea_wired -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json"
     },
     {
+      "step": "midas_model_derived_extract",
+      "exit_code": 0,
+      "log": "midas-extract: W=94153kN H=9.35m V=4237kN blockers=[]"
+    },
+    {
       "step": "midas_same_mesh_result_resolve",
       "exit_code": 0,
       "log": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json\tmodel_derived_sibling",
@@ -73,7 +78,7 @@
     {
       "step": "midas_gen_same_mesh_native_comparison",
       "exit_code": 0,
-      "log": "midas-native-compare: pass_native_bridge_only status=ready"
+      "log": "midas-native-compare: pass_model_derived_condensed_drift_aligned status=ready"
     },
     {
       "step": "gpu_production_newton_equivalence_gate",
@@ -188,7 +193,7 @@
     "reanalysis_status": "pass_with_story_proxy_check",
     "story_reanalysis_status": "pass",
     "mgt_pipeline_status": "story_proxy_pass",
-    "native_fea_solve_status": "mesh_3d_beam_global_wired_with_midas_same_mesh_proxy",
+    "native_fea_solve_status": "mesh_3d_beam_global_wired_with_midas_model_derived",
     "mgt_condensed_solve_status": "condensed_global_fea_wired",
     "mgt_integrity_status": "verified",
     "member_alignment_status": "aligned",

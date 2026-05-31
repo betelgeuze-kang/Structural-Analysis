@@ -28,11 +28,18 @@ def main() -> int:
     )
     parser.add_argument("--seismic-cs", type=float, default=None)
     parser.add_argument("--assumed-drift-pct", type=float, default=None)
+    parser.add_argument(
+        "--condensed-solve-json",
+        type=Path,
+        default=None,
+        help="Optional condensed story solve JSON for NDTHA drift bridge.",
+    )
     parser.add_argument("--output-json", type=Path, required=True)
     args = parser.parse_args()
     payload = extract_midas_gen_same_mesh_result(
         mgt_path=args.mgt_path,
         roundtrip_json=args.roundtrip_json,
+        condensed_solve_json=args.condensed_solve_json,
         seismic_coefficient=args.seismic_cs,
         assumed_elastic_drift_pct=args.assumed_drift_pct,
     )

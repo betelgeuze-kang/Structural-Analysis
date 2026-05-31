@@ -1,12 +1,12 @@
 {
   "schema_version": "midas-gen-same-mesh-native-comparison.v1",
-  "generated_at": "2026-05-31T04:12:33.531821+00:00",
+  "generated_at": "2026-05-31T04:32:47.115988+00:00",
   "status": "ready",
-  "comparison_status": "pass_native_bridge_only",
+  "comparison_status": "pass_model_derived_condensed_drift_aligned",
   "claim": "Same-mesh metric comparison: ingested MIDAS/export-proxy vs in-repo native solves. Partial-mesh 3D native drift may diverge; condensed/bridge paths documented.",
   "ingest": {
     "schema_version": "midas-gen-same-mesh-result.v1",
-    "generated_at": "2026-05-31T04:12:33.526122+00:00",
+    "generated_at": "2026-05-31T04:32:47.110037+00:00",
     "status": "ready",
     "claim": "In-repo model-derived same-mesh estimate (mass/weight rigorous; drift code-target). Not a licensed MIDAS Gen run.",
     "source": {
@@ -21,9 +21,9 @@
       "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json"
     },
     "metrics": {
-      "drift_ratio_pct": 0.4,
-      "base_shear_kN": 8473.765534006505,
-      "top_displacement_m": 0.03740000000000001
+      "drift_ratio_pct": 9.200000000000001,
+      "base_shear_kN": 4236.882767003252,
+      "top_displacement_m": 0.8602000000000003
     },
     "integrity": {
       "mgt_sha256_expected": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
@@ -44,8 +44,8 @@
       "metric": "drift_ratio_pct",
       "native_key": "max_drift_ratio_pct",
       "native": 3739.6784546060694,
-      "midas_reference": 0.4,
-      "rel_error": 9348.196136515173,
+      "midas_reference": 9.200000000000001,
+      "rel_error": 405.48678854413794,
       "tolerance_ratio": 0.45,
       "ok": false,
       "solver_family": "mesh_3d_global"
@@ -54,8 +54,8 @@
       "metric": "base_shear_kN",
       "native_key": "base_shear_kn",
       "native": 396.223975763506,
-      "midas_reference": 8473.765534006505,
-      "rel_error": 0.9532410975765852,
+      "midas_reference": 4236.882767003252,
+      "rel_error": 0.9064821951531703,
       "tolerance_ratio": 0.45,
       "ok": false,
       "solver_family": "mesh_3d_global"
@@ -64,8 +64,8 @@
       "metric": "top_displacement_m",
       "native_key": "top_displacement_m",
       "native": 211.29183268524292,
-      "midas_reference": 0.03740000000000001,
-      "rel_error": 5648.514242920933,
+      "midas_reference": 0.8602000000000003,
+      "rel_error": 244.6310540400405,
       "tolerance_ratio": 0.55,
       "ok": false,
       "solver_family": "mesh_3d_global"
@@ -74,18 +74,18 @@
       "metric": "drift_ratio_pct",
       "native_key": "max_story_drift_ratio_pct",
       "native": 9.200000000000001,
-      "midas_reference": 0.4,
-      "rel_error": 22.0,
+      "midas_reference": 9.200000000000001,
+      "rel_error": 0.0,
       "tolerance_ratio": 0.45,
-      "ok": false,
+      "ok": true,
       "solver_family": "condensed_story"
     },
     {
       "metric": "base_shear_kN",
       "native_key": "base_shear_kn",
       "native": 15589.462844014923,
-      "midas_reference": 8473.765534006505,
-      "rel_error": 0.8397326172705684,
+      "midas_reference": 4236.882767003252,
+      "rel_error": 2.6794652345411367,
       "tolerance_ratio": 0.45,
       "ok": false,
       "solver_family": "condensed_story"

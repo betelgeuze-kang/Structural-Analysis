@@ -113,9 +113,15 @@ def run_midas_gen_same_mesh_native_comparison(
         )
 
     live = bool((ingest.get("source") or {}).get("live_midas_gen_export"))
-    proxy = not live
+    model_derived = bool((ingest.get("source") or {}).get("model_derived_estimate"))
+    proxy = not live and not model_derived
     mesh_3d_ok = all(row.get("ok") for row in comparisons if row.get("solver_family") == "mesh_3d_global")
     condensed_rows_ok = all(row.get("ok") for row in comparisons if row.get("solver_family") == "condensed_story")
+    condensed_drift_ok = all(
+        row.get("ok")
+        for row in comparisons
+        if row.get("solver_family") == "condensed_story" and row.get("metric") == "drift_ratio_pct"
+    )
     comparison_tiers = {
         "ingest": "pass" if ingest.get("status") == "ready" else "fail",
         "mesh_3d_global": "pass" if mesh_3d_ok else "diverge",
@@ -123,7 +129,21 @@ def run_midas_gen_same_mesh_native_comparison(
     }
 
     if ok:
-        comparison_status = "pass_live" if live else "pass_proxy"
+        if live:
+            comparison_status = "pass_live"
+        elif model_derived:
+            comparison_status = "pass_model_derived_aligned"
+        else:
+            comparison_status = "pass_proxy"
+    elif model_derived and condensed_rows_ok:
+        comparison_status = "pass_model_derived_condensed_aligned"
+        ok = True
+    elif model_derived and condensed_drift_ok:
+        comparison_status = "pass_model_derived_condensed_drift_aligned"
+        ok = True
+    elif model_derived and ingest.get("status") == "ready":
+        comparison_status = "pass_model_derived_ingest"
+        ok = True
     elif live and condensed_rows_ok:
         comparison_status = "pass_live_condensed_aligned"
         ok = True

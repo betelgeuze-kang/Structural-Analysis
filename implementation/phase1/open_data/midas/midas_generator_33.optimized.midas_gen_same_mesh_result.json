@@ -1,6 +1,6 @@
 {
   "schema_version": "midas-gen-same-mesh-result.v1",
-  "generated_at": "2026-05-31T04:10:28.640710+00:00",
+  "generated_at": "2026-05-31T04:33:16.617664+00:00",
   "source": {
     "kind": "model_derived_estimate",
     "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
@@ -10,9 +10,9 @@
     "note": "Model-derived same-mesh estimate computed in-repo from MGT nodal mass/geometry. NOT a licensed MIDAS Gen solver run. base_shear is equivalent-static (Cs*W); drift/top_displacement are code-target estimates pending a full-mesh lateral solve."
   },
   "metrics": {
-    "drift_ratio_pct": 0.4,
-    "base_shear_kN": 8473.765534006505,
-    "top_displacement_m": 0.03740000000000001
+    "drift_ratio_pct": 9.200000000000001,
+    "base_shear_kN": 4236.882767003252,
+    "top_displacement_m": 0.8602000000000003
   },
   "derivation": {
     "seismic_mass_ton": 9600.929000000006,
@@ -21,21 +21,47 @@
     "gravity_dominant_low_rise": true
   },
   "assumptions": {
-    "seismic_coefficient_cs": 0.09,
-    "cs_basis": "equivalent-static placeholder; override via PHASE1_MIDAS_SEISMIC_CS or site KDS 41 params",
-    "assumed_elastic_drift_pct": 0.4,
-    "drift_basis": "engineering placeholder pending full-mesh/Gen lateral run; override via PHASE1_MIDAS_ASSUMED_DRIFT_PCT"
+    "seismic_coefficient_cs": 0.045,
+    "cs_basis": {
+      "cs": 0.045,
+      "SDS": 0.225,
+      "R": 5.0,
+      "Ie": 1.0,
+      "formula": "Cs = SDS / (R * Ie)",
+      "code_basis": "KDS 41 0000 equivalent-static simplification (project params file)",
+      "height_regime": "low_rise_gravity_dominant",
+      "params_source": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/kds/seismic_design_params.json"
+    },
+    "assumed_elastic_drift_pct": 9.200000000000001,
+    "drift_basis": "From in-repo condensed story NDTHA (same MGT mesh fingerprint); not MIDAS Gen."
   },
   "metric_provenance": {
     "base_shear_kN": "computed_cs_times_weight",
     "seismic_weight_kN": "computed_from_model_nodal_mass",
-    "drift_ratio_pct": "code_target_estimate_low_confidence",
-    "top_displacement_m": "code_target_estimate_low_confidence"
+    "drift_ratio_pct": "condensed_story_ndtha",
+    "top_displacement_m": "condensed_story_ndtha"
   },
   "confidence": {
     "base_shear_kN": "medium",
-    "drift_ratio_pct": "low",
-    "top_displacement_m": "low"
+    "drift_ratio_pct": "medium",
+    "top_displacement_m": "medium"
+  },
+  "kds_seismic": {
+    "cs": 0.045,
+    "SDS": 0.225,
+    "R": 5.0,
+    "Ie": 1.0,
+    "formula": "Cs = SDS / (R * Ie)",
+    "code_basis": "KDS 41 0000 equivalent-static simplification (project params file)",
+    "height_regime": "low_rise_gravity_dominant",
+    "params_source": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/kds/seismic_design_params.json"
+  },
+  "condensed_story_bridge": {
+    "drift_ratio_pct": 9.200000000000001,
+    "base_shear_kn": 15589.462844014923,
+    "provenance": "condensed_story_ndtha",
+    "confidence": "medium",
+    "note": "From in-repo condensed story NDTHA (same MGT mesh fingerprint); not MIDAS Gen."
   },
   "blockers": []
 }

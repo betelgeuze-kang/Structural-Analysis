@@ -1,0 +1,9 @@
+{
+  "schema_version": "kds-seismic-design-params.v1",
+  "note": "Edit SDS/R/Ie for site-specific KDS 41 equivalent-static Cs. Cs = SDS / (R * Ie).",
+  "SDS": 0.225,
+  "R": 5.0,
+  "Ie": 1.0,
+  "site_class": "S",
+  "importance_category": "normal"
+}

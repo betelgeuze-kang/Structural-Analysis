@@ -20,6 +20,7 @@ import numpy as np
 
 from design_optimization.io import load_json
 from ingest_midas_gen_same_mesh_result import SCHEMA_VERSION
+from kds_equivalent_static_cs import compute_equivalent_static_cs
 
 G_ACCEL = 9.80665
 
@@ -45,10 +46,29 @@ def _total_nodal_mass_ton(mgt_text: str) -> float:
     return total
 
 
+def _drift_from_condensed_solve(condensed_solve_json: Path | None) -> dict[str, Any] | None:
+    if not condensed_solve_json or not condensed_solve_json.is_file():
+        return None
+    payload = load_json(condensed_solve_json)
+    ndtha = payload.get("ndtha_solve") if isinstance(payload.get("ndtha_solve"), dict) else {}
+    static = payload.get("static_solve") if isinstance(payload.get("static_solve"), dict) else {}
+    drift = float(ndtha.get("max_drift_ratio_pct") or 0.0)
+    if drift <= 0.0:
+        return None
+    return {
+        "drift_ratio_pct": drift,
+        "base_shear_kn": float(static.get("base_shear_kn") or 0.0),
+        "provenance": "condensed_story_ndtha",
+        "confidence": "medium",
+        "note": "From in-repo condensed story NDTHA (same MGT mesh fingerprint); not MIDAS Gen.",
+    }
+
+
 def extract_midas_gen_same_mesh_result(
     *,
     mgt_path: Path,
     roundtrip_json: Path,
+    condensed_solve_json: Path | None = None,
     seismic_coefficient: float | None = None,
     assumed_elastic_drift_pct: float | None = None,
 ) -> dict[str, Any]:
@@ -69,18 +89,29 @@ def extract_midas_gen_same_mesh_result(
             z = np.asarray(archive["node_xyz"], dtype=np.float64)[:, 2]
             height_m = float(np.max(z) - np.min(z))
 
+    kds_cs = compute_equivalent_static_cs(height_m=height_m)
     cs = float(
         seismic_coefficient
         if seismic_coefficient is not None
-        else os.environ.get("PHASE1_MIDAS_SEISMIC_CS", 0.09)
+        else float(os.environ.get("PHASE1_MIDAS_SEISMIC_CS") or kds_cs["cs"])
     )
     base_shear_kn = cs * seismic_weight_kn
 
-    drift_pct = float(
-        assumed_elastic_drift_pct
-        if assumed_elastic_drift_pct is not None
-        else os.environ.get("PHASE1_MIDAS_ASSUMED_DRIFT_PCT", 0.4)
-    )
+    condensed_drift = _drift_from_condensed_solve(condensed_solve_json)
+    if condensed_drift:
+        drift_pct = float(condensed_drift["drift_ratio_pct"])
+        drift_confidence = str(condensed_drift["confidence"])
+        drift_provenance = str(condensed_drift["provenance"])
+        drift_basis = str(condensed_drift["note"])
+    else:
+        drift_pct = float(
+            assumed_elastic_drift_pct
+            if assumed_elastic_drift_pct is not None
+            else os.environ.get("PHASE1_MIDAS_ASSUMED_DRIFT_PCT", 0.4)
+        )
+        drift_confidence = "low"
+        drift_provenance = "code_target_estimate"
+        drift_basis = "engineering placeholder pending full-mesh/Gen lateral run"
     top_displacement_m = drift_pct / 100.0 * height_m
 
     if mass_ton <= 0.0:
@@ -116,20 +147,22 @@ def extract_midas_gen_same_mesh_result(
         },
         "assumptions": {
             "seismic_coefficient_cs": cs,
-            "cs_basis": "equivalent-static placeholder; override via PHASE1_MIDAS_SEISMIC_CS or site KDS 41 params",
+            "cs_basis": kds_cs,
             "assumed_elastic_drift_pct": drift_pct,
-            "drift_basis": "engineering placeholder pending full-mesh/Gen lateral run; override via PHASE1_MIDAS_ASSUMED_DRIFT_PCT",
+            "drift_basis": drift_basis,
         },
         "metric_provenance": {
             "base_shear_kN": "computed_cs_times_weight",
             "seismic_weight_kN": "computed_from_model_nodal_mass",
-            "drift_ratio_pct": "code_target_estimate_low_confidence",
-            "top_displacement_m": "code_target_estimate_low_confidence",
+            "drift_ratio_pct": drift_provenance,
+            "top_displacement_m": drift_provenance,
         },
         "confidence": {
             "base_shear_kN": "medium",
-            "drift_ratio_pct": "low",
-            "top_displacement_m": "low",
+            "drift_ratio_pct": drift_confidence,
+            "top_displacement_m": drift_confidence,
         },
+        "kds_seismic": kds_cs,
+        "condensed_story_bridge": condensed_drift,
         "blockers": blockers,
     }

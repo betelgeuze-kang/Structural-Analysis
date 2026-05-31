@@ -11,10 +11,13 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def test_extract_model_derived_real_quantities() -> None:
     out = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.model_derived_test.json"
+    condensed = REPO_ROOT / "implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json"
     proc = subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts/extract_midas_gen_same_mesh_result.py"),
+            "--condensed-solve-json",
+            str(condensed),
             "--output-json",
             str(out),
         ],
@@ -28,7 +31,9 @@ def test_extract_model_derived_real_quantities() -> None:
     assert payload["derivation"]["seismic_weight_kN"] > 1000.0
     assert payload["derivation"]["building_height_m"] > 0.0
     assert payload["metrics"]["base_shear_kN"] > 0.0
-    assert payload["confidence"]["drift_ratio_pct"] == "low"
+    assert payload["confidence"]["drift_ratio_pct"] == "medium"
+    assert payload["metrics"]["drift_ratio_pct"] > 1.0
+    assert "kds_seismic" in payload
 
 
 def test_extract_validates_as_non_live() -> None:

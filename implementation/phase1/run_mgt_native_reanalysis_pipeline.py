@@ -126,6 +126,8 @@ def run_mgt_native_reanalysis_pipeline(
         comparison_status = str(midas_same_mesh_comparison.get("comparison_status") or "")
         if comparison_status.startswith("pass_live"):
             native_solve_status = "mesh_3d_beam_global_wired_with_midas_live_ingest"
+        elif comparison_status.startswith("pass_model_derived"):
+            native_solve_status = "mesh_3d_beam_global_wired_with_midas_model_derived"
         elif comparison_status.startswith("pass") and (
             native_solve_status.endswith("_bridge") or "bridge" in native_solve_status
         ):
