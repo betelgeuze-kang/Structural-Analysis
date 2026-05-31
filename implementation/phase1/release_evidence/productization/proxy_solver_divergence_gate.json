@@ -1,6 +1,6 @@
 {
   "schema_version": "proxy-solver-divergence-gate.v1",
-  "generated_at": "2026-05-31T03:37:47.352314+00:00",
+  "generated_at": "2026-05-31T09:13:04.539993+00:00",
   "status": "pass",
   "claim": "Heuristic proxy/solver consistency on optimization change rows; not structural approval.",
   "change_count": 20,

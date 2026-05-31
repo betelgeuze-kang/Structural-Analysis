@@ -1,6 +1,6 @@
 {
   "schema_version": "post-optimization-reanalysis-gate.v2",
-  "generated_at": "2026-05-31T03:38:13.507594+00:00",
+  "generated_at": "2026-05-31T09:13:48.178494+00:00",
   "status": "pass_with_story_proxy_check",
   "claim": "Reduced story-model change-row check; not licensed structural approval.",
   "optimized_roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
@@ -21,7 +21,7 @@
   },
   "proxy_solver_divergence": {
     "schema_version": "proxy-solver-divergence-gate.v1",
-    "generated_at": "2026-05-31T03:38:11.767936+00:00",
+    "generated_at": "2026-05-31T09:13:46.144325+00:00",
     "status": "pass",
     "claim": "Heuristic proxy/solver consistency on optimization change rows; not structural approval.",
     "change_count": 20,
@@ -38,7 +38,7 @@
   },
   "story_model_reanalysis": {
     "schema_version": "story-model-reanalysis-receipt.v1",
-    "generated_at": "2026-05-31T03:38:13.437389+00:00",
+    "generated_at": "2026-05-31T09:13:47.992793+00:00",
     "status": "pass",
     "claim": "Reduced story shear-building reanalysis on optimization terminal state; not licensed approval.",
     "state_npz_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/design_optimization/design_optimization_solver_loop_state.npz",

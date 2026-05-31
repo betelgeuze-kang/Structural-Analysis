@@ -1,6 +1,6 @@
 {
   "schema_version": "delivery-evidence-bundle.v1",
-  "generated_at": "2026-05-31T04:37:21.050664+00:00",
+  "generated_at": "2026-05-31T09:13:48.786488+00:00",
   "status": "ready",
   "claim": "Engineer-in-loop delivery evidence bundle; not permit approval.",
   "steps": [
@@ -60,9 +60,10 @@
       "log": "mgt-condensed-solve: condensed_global_fea_wired -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json"
     },
     {
-      "step": "midas_model_derived_extract",
+      "step": "midas_model_derived_extract_wind",
       "exit_code": 0,
-      "log": "midas-extract: W=94153kN H=9.35m V=12083kN blockers=[]"
+      "log": "midas-wind-extract: V=644kN drift=0.0026% (mechanics_real_section,conf=high) gov_dir=X torsion_amp=1.0732 Vw=30.0m/s exp=B plan=84.8x68.1m blockers=[]",
+      "track": "wind"
     },
     {
       "step": "midas_same_mesh_result_resolve",
@@ -72,13 +73,18 @@
     },
     {
       "step": "midas_gen_same_mesh_result_validation",
+      "exit_code": 1,
+      "log": "midas-validate: fail live_ready=False failed=['kind_declared', 'live_export_kind']"
+    },
+    {
+      "step": "mgt_real_section_lateral_pushover",
       "exit_code": 0,
-      "log": "midas-validate: pass live_ready=False failed=['live_export_kind']"
+      "log": "mgt-native-lateral: fixed_guided=0.002694% cantilever=0.007639% V=638kN n_stories=12 blockers=[]"
     },
     {
       "step": "midas_gen_same_mesh_native_comparison",
       "exit_code": 0,
-      "log": "midas-native-compare: pass_model_derived_condensed_aligned status=ready"
+      "log": "midas-native-compare: pass_model_derived_wind_aligned status=ready"
     },
     {
       "step": "gpu_production_newton_equivalence_gate",

@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-global-fea-condensed-solve.v1",
-  "generated_at": "2026-05-31T04:00:23.091392+00:00",
+  "generated_at": "2026-05-31T09:13:29.555299+00:00",
   "status": "ready",
   "claim": "MGT NPZ mesh condensed to story-level nonlinear frame and solved in-repo; not a full 3D global FEA licensed-engine replay.",
   "native_solve_status": "condensed_global_fea_wired",

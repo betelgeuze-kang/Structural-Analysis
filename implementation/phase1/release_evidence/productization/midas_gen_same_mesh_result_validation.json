@@ -1,12 +1,12 @@
 {
   "schema_version": "validate-midas-gen-same-mesh-result.v1",
-  "generated_at": "2026-05-31T08:44:40.588051+00:00",
+  "generated_at": "2026-05-31T09:13:31.489877+00:00",
   "status": "fail",
   "result_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.json",
   "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
   "ingest": {
     "schema_version": "midas-gen-same-mesh-result.v1",
-    "generated_at": "2026-05-31T08:44:40.582301+00:00",
+    "generated_at": "2026-05-31T09:13:31.483800+00:00",
     "status": "ready",
     "claim": "In-repo model-derived WIND same-mesh estimate (base shear from wind workflow; drift low-confidence). Matches the model's WIND load cases; not a licensed MIDAS Gen run.",
     "source": {

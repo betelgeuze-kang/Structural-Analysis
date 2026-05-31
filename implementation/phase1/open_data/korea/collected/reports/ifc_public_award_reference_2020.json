@@ -14,7 +14,7 @@
   "provenance_url": "https://event.buildingsmart.or.kr/Awards/2020",
   "reference_scheme": "local_path",
   "resolved_reference": "implementation/phase1/open_data/korea/curated/ifc_public_award_reference_2020.ifc",
-  "retrieved_at_utc": "2026-04-08T10:41:49.841878+00:00",
+  "retrieved_at_utc": "2026-05-31T09:21:51.018312+00:00",
   "schema_version": "1.0",
   "seed_basis": "official buildingSMART Korea awards seed with manually attached local curated IFC for exact-topology reconstruction",
   "seed_priority": "P1",

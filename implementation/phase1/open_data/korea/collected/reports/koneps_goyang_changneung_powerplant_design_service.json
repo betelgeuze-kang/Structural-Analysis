@@ -1,5 +1,5 @@
 {
-  "byte_count": 296,
+  "byte_count": 2205887,
   "collection_policy": "local_first_manual_attach",
   "content_kind": "native_text_model",
   "curated_local_ifc_reference": "",
@@ -14,10 +14,10 @@
   "provenance_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK01150037&bidPbancOrd=000&fileSeq=1&fileType=",
   "reference_scheme": "local_path",
   "resolved_reference": "implementation/phase1/open_data/korea/curated/koneps_goyang_changneung_powerplant_design_service.mgt",
-  "retrieved_at_utc": "2026-04-08T10:41:49.841878+00:00",
+  "retrieved_at_utc": "2026-05-31T09:21:51.018312+00:00",
   "schema_version": "1.0",
   "seed_basis": "official g2b attachment seed with a committed manual local MIDAS baseline for truthful native writeback validation",
   "seed_priority": "P0",
-  "sha256": "f6d48211c3223d8ce395afeaf54656c675c600fff28e9a538fa589a27537ece2",
+  "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
   "source_id": "koneps_goyang_changneung_powerplant_design_service"
 }

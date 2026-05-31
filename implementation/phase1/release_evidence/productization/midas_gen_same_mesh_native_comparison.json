@@ -1,13 +1,13 @@
 {
   "schema_version": "midas-gen-same-mesh-native-comparison.v1",
-  "generated_at": "2026-05-31T08:44:42.841312+00:00",
+  "generated_at": "2026-05-31T09:13:33.714502+00:00",
   "status": "ready",
   "comparison_status": "pass_model_derived_wind_aligned",
   "load_case_track": "wind",
   "claim": "Same-mesh metric comparison: ingested MIDAS/export-proxy vs in-repo native solves. Partial-mesh 3D native drift may diverge; condensed/bridge paths documented.",
   "ingest": {
     "schema_version": "midas-gen-same-mesh-result.v1",
-    "generated_at": "2026-05-31T08:44:42.834617+00:00",
+    "generated_at": "2026-05-31T09:13:33.708530+00:00",
     "status": "ready",
     "claim": "In-repo model-derived WIND same-mesh estimate (base shear from wind workflow; drift low-confidence). Matches the model's WIND load cases; not a licensed MIDAS Gen run.",
     "source": {
@@ -36,7 +36,7 @@
     "blockers": []
   },
   "native_3d_solve_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
-  "native_3d_solve_mode": "mgt_npz_beam_mesh_3d_linear_tangent",
+  "native_3d_solve_mode": "mgt_npz_beam_mesh_3d_real_section_linear_tangent",
   "lumped_drift_pct": 0.002561374717150191,
   "native_fixed_guided_drift_pct": 0.0026942136095186578,
   "native_cantilever_drift_pct": 0.0076386815452211465,
@@ -70,9 +70,9 @@
     {
       "metric": "drift_ratio_pct",
       "native_key": "max_drift_ratio_pct",
-      "native": 3739.6784546060694,
+      "native": 2051.8497242644057,
       "midas_reference": 0.002561374717150191,
-      "rel_error": 1460026.862993381,
+      "rel_error": 801072.6228970482,
       "tolerance_ratio": 0.45,
       "ok": false,
       "solver_family": "mesh_3d_global"
@@ -80,9 +80,9 @@
     {
       "metric": "base_shear_kN",
       "native_key": "base_shear_kn",
-      "native": 396.223975763506,
+      "native": 499.9368652268803,
       "midas_reference": 644.4246941665405,
-      "rel_error": 0.38515084950933187,
+      "rel_error": 0.2242121232280397,
       "tolerance_ratio": 0.45,
       "ok": true,
       "solver_family": "mesh_3d_global"
@@ -90,9 +90,9 @@
     {
       "metric": "top_displacement_m",
       "native_key": "top_displacement_m",
-      "native": 211.29183268524292,
+      "native": 115.92950942093893,
       "midas_reference": 0.0002394885360535429,
-      "rel_error": 882261.826300813,
+      "rel_error": 484070.22667040874,
       "tolerance_ratio": 0.55,
       "ok": false,
       "solver_family": "mesh_3d_global"

@@ -1,5 +1,5 @@
 {
-  "byte_count": 357,
+  "byte_count": 2205887,
   "collection_policy": "local_first_manual_attach",
   "content_kind": "native_text_model",
   "curated_local_ifc_reference": "",
@@ -14,10 +14,10 @@
   "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
   "reference_scheme": "local_path",
   "resolved_reference": "implementation/phase1/open_data/korea/curated/lh_bucheon_yeokgok_a1_housing_native_baseline.mgt",
-  "retrieved_at_utc": "2026-04-08T10:41:49.841878+00:00",
+  "retrieved_at_utc": "2026-05-31T09:21:51.018312+00:00",
   "schema_version": "1.0",
   "seed_basis": "official LH competition seed with a committed manual local MIDAS baseline for truthful native writeback validation",
   "seed_priority": "P0",
-  "sha256": "516a17bf021dc70d35a8d39a4147807468ff6a6fb2e8043ad5ca2b6fa33adf55",
+  "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
   "source_id": "lh_bucheon_yeokgok_a1_housing_native_baseline"
 }

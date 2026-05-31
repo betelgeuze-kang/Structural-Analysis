@@ -1,6 +1,6 @@
 {
   "schema_version": "ml-multi-objective-status.v1",
-  "generated_at": "2026-05-31T03:37:47.281635+00:00",
+  "generated_at": "2026-05-31T09:13:04.464548+00:00",
   "status": "research_archive_ready",
   "production_ml_wired": false,
   "multi_objective_pareto_wired": false,
@@ -8,7 +8,7 @@
   "research_pareto_front_count": 3,
   "ml_surrogate_production_gate": {
     "schema_version": "ml-surrogate-production-gate.v1",
-    "generated_at": "2026-05-31T03:37:47.281617+00:00",
+    "generated_at": "2026-05-31T09:13:04.464521+00:00",
     "opt_in_env": "PHASE1_ML_SURROGATE_OPT_IN",
     "checkpoint_env": "PHASE1_ML_SURROGATE_CHECKPOINT",
     "opt_in_enabled": false,

@@ -805,7 +805,7 @@
   "contract_version": "1.1",
   "member_alignment": {
     "schema_version": "design-optimization-member-alignment.v1",
-    "generated_at": "2026-05-30T17:59:29.514320+00:00",
+    "generated_at": "2026-05-30T18:28:06.968440+00:00",
     "baseline_artifact_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.json",
     "optimized_artifact_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
     "baseline_member_count": 12728,
