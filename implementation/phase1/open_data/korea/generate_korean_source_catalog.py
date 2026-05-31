@@ -24,6 +24,7 @@ from implementation.phase1.open_data.korea.korean_source_schema import (  # noqa
 KOREA_OPEN_DATA_DIR = REPO_ROOT / "implementation/phase1/open_data/korea"
 DEFAULT_OUT_PATH = KOREA_OPEN_DATA_DIR / "korean_source_catalog.json"
 DEFAULT_SEED_PATH = KOREA_OPEN_DATA_DIR / "korean_source_seed.json"
+MEDIUM_LARGE_SEED_PATH = KOREA_OPEN_DATA_DIR / "korean_medium_large_source_seed.json"
 
 def _default_source_rows_from_repo_seed() -> list[dict[str, Any]]:
     if not DEFAULT_SEED_PATH.exists():
@@ -51,6 +52,41 @@ def _load_seed_rows(seed_path: Path | None) -> list[dict[str, Any]]:
     if not isinstance(rows, list):
         raise ValueError("source_records must be a list")
     return [dict(row) for row in rows]
+
+
+def _merge_seed_rows(
+    base_rows: list[dict[str, Any]],
+    extension_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    seen = {str(row.get("source_id") or "").strip() for row in base_rows}
+    merged = list(base_rows)
+    for row in extension_rows:
+        source_id = str(row.get("source_id") or "").strip()
+        if not source_id or source_id in seen:
+            continue
+        seen.add(source_id)
+        merged.append(dict(row))
+    return merged
+
+
+def load_merged_korean_seed_rows(
+    *,
+    seed_path: Path | None = None,
+    medium_large_seed_path: Path | None = None,
+    include_medium_large: bool = True,
+) -> list[dict[str, Any]]:
+    primary = seed_path if seed_path is not None else DEFAULT_SEED_PATH
+    if primary == DEFAULT_SEED_PATH and not primary.exists():
+        base_rows = list(DEFAULT_SOURCE_ROWS)
+    else:
+        base_rows = _load_seed_rows(primary)
+    if not include_medium_large:
+        return base_rows
+    extension_path = medium_large_seed_path if medium_large_seed_path is not None else MEDIUM_LARGE_SEED_PATH
+    if not extension_path.exists():
+        return base_rows
+    extension_rows = _load_seed_rows(extension_path)
+    return _merge_seed_rows(base_rows, extension_rows)
 
 
 def build_korean_source_catalog(raw_records: list[dict[str, Any]], *, generated_at_utc: str | None = None) -> dict[str, Any]:
@@ -122,15 +158,30 @@ def build_korean_source_catalog(raw_records: list[dict[str, Any]], *, generated_
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed-json", default=str(DEFAULT_SEED_PATH))
+    parser.add_argument(
+        "--medium-large-seed-json",
+        default=str(MEDIUM_LARGE_SEED_PATH),
+        help="Optional extension seed merged after default seed (deduped by source_id).",
+    )
+    parser.add_argument(
+        "--no-medium-large-seed",
+        action="store_true",
+        help="Skip merging korean_medium_large_source_seed.json even when present.",
+    )
     parser.add_argument("--out", default=str(DEFAULT_OUT_PATH))
     args = parser.parse_args()
 
     seed_path = Path(args.seed_json)
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    catalog = build_korean_source_catalog(_load_seed_rows(seed_path))
+    rows = load_merged_korean_seed_rows(
+        seed_path=seed_path,
+        medium_large_seed_path=Path(args.medium_large_seed_json),
+        include_medium_large=not args.no_medium_large_seed,
+    )
+    catalog = build_korean_source_catalog(rows)
     out_path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"Wrote Korean source catalog: {out_path}")
+    print(f"Wrote Korean source catalog: {out_path} ({catalog['summary']['record_count']} records)")
 
 
 if __name__ == "__main__":

@@ -92,10 +92,12 @@
 - `comparison_status`: **`pass_model_derived_wind_aligned`** (`wind_native_lateral` tier **pass**). Bracket path `pass_model_derived_wind_bracketed` available when lumped lies strictly between the two native drifts.
 - CLI: `scripts/solve_mgt_real_section_lateral_pushover.py --boundary both`; bundle writes `mgt_real_section_lateral_pushover.json` with both modes.
 
-## I5 — 중·대형 건축물 도면 데이터
-- `open_data/korea/korean_source_catalog.json`에 중·대형 native MGT/IFC source 레코드 확장(고양창릉 복합발전소, 행복도시 5-1, BIM Awards 등).
-- 정책: g2b/공모 첨부는 **수동 다운로드 후 `collected/artifacts/<id>/`에 첨부** → `collect_korean_public_structures.py` 재실행으로 sha256/매니페스트 고정(자동 다운로드 금지).
-- 첨부 후 MGT는 roundtrip 파이프라인, IFC는 `ifc_structural_subset` 경로로 ingest.
+## I5 — 중·대형 건축물 도면 데이터 — **partial done**
+- **Done (scaffolding):** `korean_medium_large_source_seed.json` (+7 metadata/attach targets), `korean_building_scale.py`, catalog merge in `generate_korean_source_catalog.py`, `report_medium_large_korean_sources.py`, `run_korean_medium_large_ingest_pipeline.py`, `docs/korean-medium-large-drawing-data-guide.md`, `open_data/korea/README.md`.
+- **Still operator:** 실제 중·대형 native MGT/IFC 바이너리는 g2b/LH/buildingSMART에서 **수동 다운로드** 후 `collected/artifacts/<id>/`에 첨부 → `collect_korean_public_structures.py` / ingest pipeline 재실행. placeholder MGT는 `mgt_header_ok=false`로 보고됨.
+- 기존 시드(고양창릉, 행복도시 5-1, BIM Awards 등) + 확장 시드 병합 카탈로그: `python3 scripts/generate_korean_source_catalog.py`.
+- 정책: 자동 HTTP 다운로드 금지. 첨부 후 MGT는 roundtrip, IFC는 `ifc_structural_subset`.
+- 초고층 벤치마크는 별도 `open_data/megastructure/` (Canton Tower 등) — 운영 가이드 참조.
 
 ## I6/I8 — 외부 의존 (자체구현 불가)
 - I6 Live MIDAS Gen: 라이선스 환경에서 export → `scripts/install_midas_live_same_mesh_result.py`로 설치(골격 준비 완료).

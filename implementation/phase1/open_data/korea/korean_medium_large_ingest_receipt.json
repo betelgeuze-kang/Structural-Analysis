@@ -1,0 +1,221 @@
+{
+  "schema_version": "korean_medium_large_ingest_receipt.v1",
+  "generated_at_utc": "2026-05-31T09:19:35.487226+00:00",
+  "catalog_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_source_catalog.json",
+  "collection_report_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_public_structure_collection_report.json",
+  "summary": {
+    "medium_large_source_count": 19,
+    "attached_count": 9,
+    "metadata_only_count": 10,
+    "mgt_header_ok_count": 0
+  },
+  "per_source": [
+    {
+      "source_id": "koneps_goyang_changneung_powerplant_design_service",
+      "storey_band": "mid_rise",
+      "scale": "medium",
+      "format": "mgt",
+      "attached": true,
+      "metadata_only": false,
+      "mgt_header_ok": false,
+      "blockers": [
+        "mgt_file_too_small:296"
+      ],
+      "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_goyang_changneung_powerplant_design_service/koneps_goyang_changneung_powerplant_design_service.mgt"
+    },
+    {
+      "source_id": "lh_bucheon_yeokgok_a1_housing_competition",
+      "storey_band": "20_30",
+      "scale": "medium",
+      "format": "pdf",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "lh_happy_city_5_1_design_competition",
+      "storey_band": "mid_rise",
+      "scale": "medium",
+      "format": "pdf",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "lh_bucheon_yeokgok_a1_housing_native_baseline",
+      "storey_band": "20_30",
+      "scale": "medium",
+      "format": "mgt",
+      "attached": true,
+      "metadata_only": false,
+      "mgt_header_ok": false,
+      "blockers": [
+        "mgt_file_too_small:357"
+      ],
+      "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_native_baseline/lh_bucheon_yeokgok_a1_housing_native_baseline.mgt"
+    },
+    {
+      "source_id": "lh_happy_city_5_1_native_baseline",
+      "storey_band": "mid_rise",
+      "scale": "medium",
+      "format": "mgt",
+      "attached": true,
+      "metadata_only": false,
+      "mgt_header_ok": false,
+      "blockers": [
+        "mgt_file_too_small:321"
+      ],
+      "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_native_baseline/lh_happy_city_5_1_native_baseline.mgt"
+    },
+    {
+      "source_id": "kci_concrete_building_design_examples_2e",
+      "storey_band": "10_20",
+      "scale": "medium",
+      "format": "pdf",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "kci_concrete_building_design_examples_2e_native_baseline",
+      "storey_band": "10_20",
+      "scale": "medium",
+      "format": "mgt",
+      "attached": true,
+      "metadata_only": false,
+      "mgt_header_ok": false,
+      "blockers": [
+        "mgt_file_too_small:283"
+      ],
+      "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/kci_concrete_building_design_examples_2e_native_baseline/kci_concrete_building_design_examples_2e_native_baseline.mgt"
+    },
+    {
+      "source_id": "ifc_public_award_structure",
+      "storey_band": "mid_rise",
+      "scale": "medium",
+      "format": "ifc",
+      "attached": true,
+      "metadata_only": false,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "ifc_public_award_reference_2022",
+      "storey_band": "mid_rise",
+      "scale": "medium",
+      "format": "ifc",
+      "attached": true,
+      "metadata_only": false,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "ifc_public_award_reference_2021",
+      "storey_band": "mid_rise",
+      "scale": "medium",
+      "format": "ifc",
+      "attached": true,
+      "metadata_only": false,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "ifc_public_award_reference_2024",
+      "storey_band": "high_rise",
+      "scale": "large",
+      "format": "ifc",
+      "attached": true,
+      "metadata_only": false,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "ifc_public_award_reference_2020",
+      "storey_band": "mid_rise",
+      "scale": "medium",
+      "format": "ifc",
+      "attached": true,
+      "metadata_only": false,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "lh_yeongjong_international_city_block_competition",
+      "storey_band": "20_30",
+      "scale": "medium",
+      "format": "zip",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "lh_cheongna_international_city_tower_competition",
+      "storey_band": "high_rise",
+      "scale": "large",
+      "format": "pdf",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "lh_newtown_highrise_block_competition",
+      "storey_band": "10_20",
+      "scale": "medium",
+      "format": "mgt",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": [
+        "awaiting_manual_mgt_attach"
+      ]
+    },
+    {
+      "source_id": "koneps_public_highrise_design_service_g2b_portal",
+      "storey_band": "mid_rise",
+      "scale": "medium",
+      "format": "pdf",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "koneps_mixed_use_tower_design_attachment_lane",
+      "storey_band": "30_plus",
+      "scale": "large",
+      "format": "mgt",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": [
+        "awaiting_manual_mgt_attach"
+      ]
+    },
+    {
+      "source_id": "ifc_public_buildingsmart_korea_awards_hub",
+      "storey_band": "high_rise",
+      "scale": "large",
+      "format": "ifc",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": []
+    },
+    {
+      "source_id": "ifc_public_buildingsmart_2025_megaproject_lane",
+      "storey_band": "30_plus",
+      "scale": "large",
+      "format": "ifc",
+      "attached": false,
+      "metadata_only": true,
+      "mgt_header_ok": false,
+      "blockers": []
+    }
+  ],
+  "summary_line": "Korean medium/large ingest: sources=19 attached=9 metadata_only=10 mgt_header_ok=0"
+}

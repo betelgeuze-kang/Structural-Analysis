@@ -8,7 +8,9 @@ import sys
 
 from implementation.phase1.open_data.korea.generate_korean_source_catalog import (
     DEFAULT_SOURCE_ROWS,
+    MEDIUM_LARGE_SEED_PATH,
     build_korean_source_catalog,
+    load_merged_korean_seed_rows,
 )
 from implementation.phase1.open_data.korea.korean_source_schema import SCHEMA_VERSION
 import pytest
@@ -96,7 +98,7 @@ def test_generate_korean_source_catalog_cli_writes_output(tmp_path: Path) -> Non
     out_path = tmp_path / "korean_source_catalog.json"
 
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--out", str(out_path)],
+        [sys.executable, str(SCRIPT), "--out", str(out_path), "--no-medium-large-seed"],
         cwd=Path(__file__).resolve().parents[1],
         env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
         capture_output=True,
@@ -114,6 +116,32 @@ def test_generate_korean_source_catalog_cli_writes_output(tmp_path: Path) -> Non
     assert payload["summary"]["seed_metadata_complete_count"] == 15
     assert payload["summary"]["curated_local_ifc_required_count"] == 5
     assert payload["summary"]["curated_local_ifc_attached_count"] == 5
+
+
+def test_load_merged_korean_seed_rows_includes_medium_large_extension() -> None:
+    if not MEDIUM_LARGE_SEED_PATH.is_file():
+        return
+    merged = load_merged_korean_seed_rows()
+    assert len(merged) > len(DEFAULT_SOURCE_ROWS)
+    catalog = build_korean_source_catalog(merged, generated_at_utc="2026-05-31T00:00:00Z")
+    assert catalog["summary"]["record_count"] == len(merged)
+
+
+def test_generate_korean_source_catalog_cli_writes_merged_output(tmp_path: Path) -> None:
+    if not MEDIUM_LARGE_SEED_PATH.is_file():
+        return
+    out_path = tmp_path / "korean_source_catalog_merged.json"
+    proc = subprocess.run(
+        [sys.executable, str(SCRIPT), "--out", str(out_path)],
+        cwd=Path(__file__).resolve().parents[1],
+        env={key: value for key, value in os.environ.items() if key != "PYTHONPATH"},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(out_path.read_text(encoding="utf-8"))
+    assert payload["summary"]["record_count"] > 15
 
 
 def test_build_korean_source_catalog_rejects_inconsistent_promotion_hint_flags() -> None:
