@@ -1,7 +1,7 @@
 # 프론트엔드 시각화 개선 계획
 
-> 업데이트: 2026-05-20
-> 상태: **source viewer 제품 workflow/report package, static performance budget, local browser performance probe, 11-case render-mode/core/advanced workflow visual baseline은 올라왔고, 고객 하드웨어 성능/panel-zone fidelity 마감이 남아 있음**
+> 업데이트: 2026-05-30
+> 상태: **Structural Insight v2 product shell (viewport-first `data-si-shell="product"`, DESIGN.md tokens, HUD/ViewCube) 적용. source viewer workflow/report package, static performance budget, local browser performance probe, 11-case render-mode visual baseline 유지. 고객 하드웨어 성능/panel-zone fidelity 마감이 남아 있음**
 
 ## 현재 상태 요약
 
