@@ -21,9 +21,10 @@ class BeamElement:
     node_i: int
     node_j: int
     section_id: int
-    length_m: float
-    node_i_xz: tuple[float, float]
-    node_j_xz: tuple[float, float]
+    material_id: int = 0
+    length_m: float = 0.0
+    node_i_xz: tuple[float, float] = (0.0, 0.0)
+    node_j_xz: tuple[float, float] = (0.0, 0.0)
 
 
 def _beam_props(*, length_m: float, section_id: int) -> BeamColumnProperties:
@@ -36,6 +37,71 @@ def _beam_props(*, length_m: float, section_id: int) -> BeamColumnProperties:
         yield_moment_kNm=420.0 * scale,
         hardening_ratio=0.14,
     )
+
+
+def _real_beam_props(
+    *,
+    length_m: float,
+    section_id: int,
+    material_id: int,
+    section_props: dict[int, dict[str, Any]] | None,
+    material_props: dict[int, dict[str, Any]] | None,
+) -> tuple[BeamColumnProperties, bool]:
+    representative = _beam_props(length_m=length_m, section_id=section_id)
+    if not section_props or not material_props:
+        return representative, False
+    sec = section_props.get(int(section_id))
+    mat = material_props.get(int(material_id))
+    if sec is None or mat is None:
+        return representative, False
+    return (
+        BeamColumnProperties(
+            length_m=representative.length_m,
+            area_m2=float(sec["A_m2"]),
+            e_mpa=float(mat["E_kN_per_m2"]) / 1000.0,
+            iy_m4=float(min(sec["Iy_m4"], sec["Iz_m4"])),
+            yield_moment_kNm=representative.yield_moment_kNm,
+            hardening_ratio=representative.hardening_ratio,
+        ),
+        True,
+    )
+
+
+def _element_beam_props(
+    elem: BeamElement,
+    *,
+    section_props: dict[int, dict[str, Any]] | None,
+    material_props: dict[int, dict[str, Any]] | None,
+) -> tuple[BeamColumnProperties, bool]:
+    if section_props is not None and material_props is not None:
+        return _real_beam_props(
+            length_m=elem.length_m,
+            section_id=elem.section_id,
+            material_id=elem.material_id,
+            section_props=section_props,
+            material_props=material_props,
+        )
+    return _beam_props(length_m=elem.length_m, section_id=elem.section_id), False
+
+
+def _real_section_property_coverage_pct(
+    elements: list[BeamElement],
+    *,
+    section_props: dict[int, dict[str, Any]] | None,
+    material_props: dict[int, dict[str, Any]] | None,
+) -> float:
+    if not elements or section_props is None or material_props is None:
+        return 0.0
+    real_count = 0
+    for elem in elements:
+        _, used_real = _element_beam_props(
+            elem,
+            section_props=section_props,
+            material_props=material_props,
+        )
+        if used_real:
+            real_count += 1
+    return 100.0 * float(real_count) / float(len(elements))
 
 
 def _select_vertical_chain_elements(
@@ -88,6 +154,7 @@ def _select_beam_submesh(
     elem_id: np.ndarray,
     elem_type_code: np.ndarray,
     elem_section_id: np.ndarray,
+    elem_material_id: np.ndarray | None = None,
     max_elements: int,
 ) -> list[BeamElement]:
     beam_mask = np.asarray(elem_type_code, dtype=np.int32) == 1
@@ -107,12 +174,16 @@ def _select_beam_submesh(
         length_m = float(np.hypot(pj[0] - pi[0], pj[2] - pi[2]))
         if length_m < 0.25:
             continue
+        mat_id = 0
+        if elem_material_id is not None and idx < elem_material_id.shape[0]:
+            mat_id = int(elem_material_id[idx])
         elements.append(
             BeamElement(
                 elem_id=int(elem_id[idx]),
                 node_i=i,
                 node_j=j,
                 section_id=int(elem_section_id[idx]),
+                material_id=mat_id,
                 length_m=length_m,
                 node_i_xz=(float(pi[0]), float(pi[2])),
                 node_j_xz=(float(pj[0]), float(pj[2])),
@@ -138,12 +209,18 @@ def _assemble_global(
     displacement: np.ndarray,
     n_nodes: int,
     include_geometric: bool = True,
+    section_props: dict[int, dict[str, Any]] | None = None,
+    material_props: dict[int, dict[str, Any]] | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     n_dof = n_nodes * DOF_PER_NODE
     stiffness = np.zeros((n_dof, n_dof), dtype=np.float64)
     f_int = np.zeros(n_dof, dtype=np.float64)
     for elem in elements:
-        props = _beam_props(length_m=elem.length_m, section_id=elem.section_id)
+        props, _ = _element_beam_props(
+            elem,
+            section_props=section_props,
+            material_props=material_props,
+        )
         dof_map = _element_dof_map(elem)
         u_elem = displacement[list(dof_map)]
         response = solve_beam_column_global_response(
@@ -171,6 +248,9 @@ def solve_mgt_beam_mesh_3d_global(
     elem_id: np.ndarray,
     elem_type_code: np.ndarray,
     elem_section_id: np.ndarray,
+    elem_material_id: np.ndarray | None = None,
+    section_props: dict[int, dict[str, Any]] | None = None,
+    material_props: dict[int, dict[str, Any]] | None = None,
     max_elements: int = 420,
     max_newton_iterations: int = 48,
     tolerance: float = 1.0e-3,
@@ -182,6 +262,7 @@ def solve_mgt_beam_mesh_3d_global(
         elem_id=elem_id,
         elem_type_code=elem_type_code,
         elem_section_id=elem_section_id,
+        elem_material_id=elem_material_id,
         max_elements=max_elements,
     )
     if len(elements) < 8:
@@ -202,6 +283,7 @@ def solve_mgt_beam_mesh_3d_global(
                 node_i=remap[elem.node_i],
                 node_j=remap[elem.node_j],
                 section_id=elem.section_id,
+                material_id=elem.material_id,
                 length_m=elem.length_m,
                 node_i_xz=(elem.node_i_xz[0], elem.node_i_xz[1]),
                 node_j_xz=(elem.node_j_xz[0], elem.node_j_xz[1]),
@@ -221,6 +303,7 @@ def solve_mgt_beam_mesh_3d_global(
                 node_i=remap2[elem.node_i],
                 node_j=remap2[elem.node_j],
                 section_id=elem.section_id,
+                material_id=elem.material_id,
                 length_m=elem.length_m,
                 node_i_xz=elem.node_i_xz,
                 node_j_xz=elem.node_j_xz,
@@ -237,12 +320,19 @@ def solve_mgt_beam_mesh_3d_global(
                 node_i=elem.node_i,
                 node_j=elem.node_j,
                 section_id=elem.section_id,
+                material_id=elem.material_id,
                 length_m=elem.length_m,
                 node_i_xz=(float(pi[0]), float(pi[2])),
                 node_j_xz=(float(pj[0]), float(pj[2])),
             )
         )
     n_nodes = len(used_nodes)
+    real_coverage_pct = _real_section_property_coverage_pct(
+        elements,
+        section_props=section_props,
+        material_props=material_props,
+    )
+    used_real_section_properties = real_coverage_pct > 0.0
     n_dof = n_nodes * DOF_PER_NODE
 
     z_vals = node_xyz_sub[:, 2]
@@ -258,7 +348,11 @@ def solve_mgt_beam_mesh_3d_global(
 
     f_ext = np.zeros(n_dof, dtype=np.float64)
     for elem in elements:
-        props = _beam_props(length_m=elem.length_m, section_id=elem.section_id)
+        props, _ = _element_beam_props(
+            elem,
+            section_props=section_props,
+            material_props=material_props,
+        )
         weight_n = props.area_m2 * props.length_m * 7850.0 * 9.80665 * float(load_scale)
         for node, share in ((elem.node_i, 0.5), (elem.node_j, 0.5)):
             _, uz, _ = _node_dof_indices(node)
@@ -270,7 +364,13 @@ def solve_mgt_beam_mesh_3d_global(
     converged = False
     solve_mode = "mgt_npz_beam_mesh_3d_global_newton"
 
-    k0, _ = _assemble_global(elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=True)
+    asm_kw = {
+        "section_props": section_props,
+        "material_props": material_props,
+    }
+    k0, _ = _assemble_global(
+        elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=True, **asm_kw
+    )
     k_ff0 = k0[np.ix_(free, free)].copy()
     reg0 = 1.0e-8 * max(float(np.mean(np.abs(np.diag(k_ff0)))), 1.0)
     k_ff0[np.arange(len(free)), np.arange(len(free))] += reg0
@@ -286,7 +386,9 @@ def solve_mgt_beam_mesh_3d_global(
         f_step = f_ext * float(load_step)
         step_converged = False
         for it in range(1, int(max_newton_iterations) + 1):
-            stiffness, f_int = _assemble_global(elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=True)
+            stiffness, f_int = _assemble_global(
+                elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=True, **asm_kw
+            )
             residual = f_step - f_int
             r_inf = float(np.max(np.abs(residual[free]))) if free else 0.0
             iteration_log.append(
@@ -313,7 +415,9 @@ def solve_mgt_beam_mesh_3d_global(
             for lam in (1.0, 0.5, 0.25, 0.125, 0.0625):
                 u_trial = u.copy()
                 u_trial[free] = u[free] + float(lam) * du
-                _, f_int_trial = _assemble_global(elements=elements, displacement=u_trial, n_nodes=n_nodes, include_geometric=True)
+                _, f_int_trial = _assemble_global(
+                    elements=elements, displacement=u_trial, n_nodes=n_nodes, include_geometric=True, **asm_kw
+                )
                 trial_r = float(np.max(np.abs((f_step - f_int_trial)[free])))
                 if trial_r < baseline:
                     u = u_trial
@@ -329,7 +433,9 @@ def solve_mgt_beam_mesh_3d_global(
     if not converged:
         u = np.zeros(n_dof, dtype=np.float64)
         try:
-            k_lin, _ = _assemble_global(elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=False)
+            k_lin, _ = _assemble_global(
+                elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=False, **asm_kw
+            )
             k_ff = k_lin[np.ix_(free, free)].copy()
             k_ff[np.arange(len(free)), np.arange(len(free))] += reg0
             u[free] = np.linalg.solve(k_ff, f_ext[free])
@@ -344,9 +450,16 @@ def solve_mgt_beam_mesh_3d_global(
             )
             if lin_residual <= max(float(tolerance), 1.0e-4):
                 converged = True
-                solve_mode = "mgt_npz_beam_mesh_3d_linear_tangent"
+                solve_mode = (
+                    "mgt_npz_beam_mesh_3d_real_section_linear_tangent"
+                    if used_real_section_properties
+                    else "mgt_npz_beam_mesh_3d_linear_tangent"
+                )
         except np.linalg.LinAlgError:
             pass
+
+    if converged and used_real_section_properties and solve_mode == "mgt_npz_beam_mesh_3d_global_newton":
+        solve_mode = "mgt_npz_beam_mesh_3d_real_section"
 
     ux = u[0::DOF_PER_NODE]
     uz = u[1::DOF_PER_NODE]
@@ -361,7 +474,10 @@ def solve_mgt_beam_mesh_3d_global(
         "status": "ready" if converged else "warn",
         "converged": converged,
         "solve_mode": solve_mode,
-        "nonlinear_equilibrium": solve_mode == "mgt_npz_beam_mesh_3d_global_newton",
+        "nonlinear_equilibrium": solve_mode
+        in {"mgt_npz_beam_mesh_3d_global_newton", "mgt_npz_beam_mesh_3d_real_section"},
+        "used_real_section_properties": used_real_section_properties,
+        "real_section_property_coverage_pct": real_coverage_pct,
         "mesh_fingerprint": {
             "beam_elements_solved": len(elements),
             "nodes_in_submesh": n_nodes,

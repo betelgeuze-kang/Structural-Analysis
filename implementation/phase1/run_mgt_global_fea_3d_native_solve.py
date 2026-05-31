@@ -11,7 +11,9 @@ from typing import Any
 import numpy as np
 
 from design_optimization.io import load_json
+from parse_mgt_section_material_properties import load_mgt_section_material_properties
 from run_mgt_global_fea_condensed_solve import run_mgt_global_fea_condensed_solve
+from run_story_model_reanalysis import build_mgt_reanalysis_provenance
 from solve_mgt_beam_mesh_3d_global import solve_mgt_beam_mesh_3d_global
 
 
@@ -105,9 +107,24 @@ def run_mgt_global_fea_3d_native_solve(
             "blockers": ["roundtrip_npz_missing"],
         }
 
+    provenance = build_mgt_reanalysis_provenance(roundtrip_json=roundtrip_json)
+    mgt_path = Path(str(provenance.get("mgt_path") or ""))
+    property_bundle = (
+        load_mgt_section_material_properties(mgt_path)
+        if mgt_path.is_file()
+        else {"sections": {}, "materials": {}}
+    )
+    section_props = property_bundle.get("sections") if isinstance(property_bundle.get("sections"), dict) else {}
+    material_props = property_bundle.get("materials") if isinstance(property_bundle.get("materials"), dict) else {}
+
     solve_payload: dict[str, Any] | None = None
     applied_load_scale = 1.0
     with np.load(roundtrip_npz, allow_pickle=False) as archive:
+        elem_material_id = (
+            np.asarray(archive["elem_material_id"], dtype=np.int32)
+            if "elem_material_id" in archive
+            else None
+        )
         for scale in (1.0, 0.5, 0.25, 0.1):
             trial = solve_mgt_beam_mesh_3d_global(
                 node_xyz=np.asarray(archive["node_xyz"], dtype=np.float64),
@@ -115,6 +132,9 @@ def run_mgt_global_fea_3d_native_solve(
                 elem_id=np.asarray(archive["elem_id"], dtype=np.int64),
                 elem_type_code=np.asarray(archive["elem_type_code"], dtype=np.int32),
                 elem_section_id=np.asarray(archive["elem_section_id"], dtype=np.int32),
+                elem_material_id=elem_material_id,
+                section_props=section_props,
+                material_props=material_props,
                 max_elements=int(max_elements),
                 load_scale=float(scale),
             )
@@ -170,7 +190,11 @@ def run_mgt_global_fea_3d_native_solve(
     mesh_wired = mesh_converged and nonlinear_equilibrium and crosscheck_metric_ok
     linear_tangent_wired = (
         mesh_converged
-        and solve_mode == "mgt_npz_beam_mesh_3d_linear_tangent"
+        and solve_mode
+        in {
+            "mgt_npz_beam_mesh_3d_linear_tangent",
+            "mgt_npz_beam_mesh_3d_real_section_linear_tangent",
+        }
         and crosscheck_metric_ok
     )
     bridge_wired = (
@@ -202,6 +226,7 @@ def run_mgt_global_fea_3d_native_solve(
         "roundtrip_json": str(roundtrip_json),
         "roundtrip_npz": str(roundtrip_npz),
         "mgt_sha256": str((roundtrip.get("source") or {}).get("sha256") or ""),
+        "mgt_path": str(mgt_path),
         "mesh_3d_global_solve": solve_payload,
         "condensed_bridge_solve": condensed_bridge,
         "condensed_licensed_crosscheck": condensed_crosscheck,

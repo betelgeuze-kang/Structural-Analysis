@@ -46,6 +46,12 @@
 - `pytest tests/test_parse_mgt_section_material_properties.py tests/test_extract_midas_wind_same_mesh_result.py tests/test_solve_mgt_beam_mesh_3d_global.py` 통과.
 - delivery bundle `ready` 유지.
 
+### I1c — 3D beam mesh solver real section/material (2026-05-31)
+- `solve_mgt_beam_mesh_3d_global.py` now accepts `elem_material_id`, `section_props`, `material_props` from `load_mgt_section_material_properties(mgt_path)`; caller `run_mgt_global_fea_3d_native_solve.py` wires MGT path via `build_mgt_reanalysis_provenance`.
+- Real props override A, E, weak-axis I (`min(Iy,Iz)`); yield/hardening remain representative (`_beam_props` fallback for missing IDs).
+- Output adds `used_real_section_properties`, `real_section_property_coverage_pct`; solve modes `mgt_npz_beam_mesh_3d_real_section` / `…_real_section_linear_tangent` when tables are injected (Newton two-phase + `linear_tangent` fallback unchanged).
+- Benchmark (`max_elements=420`, generator-33 roundtrip): **~91.3%** real-section coverage on 80-element submesh; **Newton does not converge** at load scales 1.0–0.25; **`linear_tangent` fallback at load_scale=0.1** → `solve_mode=mgt_npz_beam_mesh_3d_real_section_linear_tangent`, `converged=true`. vs representative-only at same mesh cap: rep also used `linear_tangent` but at a higher load step — real run **base_shear ≈500 kN** (vs rep **≈396 kN**), **max_drift_ratio_pct ≈2052%** (vs rep **≈3740%**); both are partial-submesh proxies, not full-building drift. Delivery bundle **`ready`** maintained.
+
 ---
 
 ## I2 — 풍 다방향/비틀림/와류
