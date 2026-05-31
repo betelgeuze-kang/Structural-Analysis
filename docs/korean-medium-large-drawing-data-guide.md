@@ -23,6 +23,17 @@ implementation/phase1/open_data/korea/collected/artifacts/<source_id>/
 
 선택: `curated/` 에 기준 파일을 두고 `local_path`로 연결할 수 있습니다 (기존 native baseline 패턴).
 
+## 벤치마크 브리지 (개발·검증용, 공모 원본 아님)
+
+실제 공모 MGT를 아직 첨부하지 않았을 때, 저장소 벤치마크(`midas_generator_33.optimized.mgt`)로 파이프라인을 검증할 수 있습니다:
+
+```bash
+python3 scripts/install_korea_benchmark_mgt_bridge.py --also-curated
+python3 scripts/run_korean_medium_large_ingest_pipeline.py --run-roundtrip-parse
+```
+
+영수증의 `attach_provenance`가 `repo_benchmark_bridge`이면 벤치마크 복사본입니다. `operator_attached`이면 운영자가 넣은 실제 첨부 파일입니다.
+
 ## 명령 / Commands
 
 ```bash

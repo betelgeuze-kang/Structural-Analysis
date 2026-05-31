@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -27,6 +28,23 @@ DEFAULT_RECEIPT = KOREA_DIR / "korean_medium_large_ingest_receipt.json"
 ARTIFACT_ROOT = KOREA_DIR / "collected" / "artifacts"
 MGT_HEADER_MARKERS = ("*VERSION", "*UNIT")
 MIN_MGT_BYTES = 500
+BENCHMARK_MGT = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
+
+
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _attach_provenance(mgt_path: Path, benchmark_sha: str) -> str:
+    if not benchmark_sha or not mgt_path.is_file():
+        return "unknown"
+    if _sha256_file(mgt_path) == benchmark_sha:
+        return "repo_benchmark_bridge"
+    return "operator_attached"
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -97,7 +115,9 @@ def run_korean_medium_large_ingest_pipeline(
     receipt_path: Path = DEFAULT_RECEIPT,
     skip_regenerate: bool = False,
     skip_collect: bool = False,
+    run_roundtrip_parse: bool = False,
 ) -> dict[str, Any]:
+    benchmark_sha = _sha256_file(BENCHMARK_MGT) if BENCHMARK_MGT.is_file() else ""
     _regenerate_catalog(skip_regenerate=skip_regenerate)
     collection_report = _run_collector(catalog_path=catalog_path, skip_collect=skip_collect)
     catalog = _load_json(catalog_path)
@@ -152,6 +172,33 @@ def run_korean_medium_large_ingest_pipeline(
                 if ok:
                     mgt_header_ok_count += 1
                 entry["mgt_path"] = str(mgt_path)
+                entry["attach_provenance"] = _attach_provenance(mgt_path, benchmark_sha)
+                if run_roundtrip_parse and ok:
+                    out_dir = mgt_path.parent / "roundtrip"
+                    out_dir.mkdir(parents=True, exist_ok=True)
+                    json_out = out_dir / f"{source_id}.roundtrip.json"
+                    npz_out = out_dir / f"{source_id}.roundtrip.npz"
+                    parser_script = REPO_ROOT / "implementation/phase1/parse_midas_mgt_to_json_npz.py"
+                    proc = subprocess.run(
+                        [
+                            sys.executable,
+                            str(parser_script),
+                            "--mgt",
+                            str(mgt_path),
+                            "--json-out",
+                            str(json_out),
+                            "--npz-out",
+                            str(npz_out),
+                        ],
+                        cwd=REPO_ROOT / "implementation/phase1",
+                        capture_output=True,
+                        text=True,
+                    )
+                    entry["roundtrip_parse_exit_code"] = int(proc.returncode)
+                    entry["roundtrip_json"] = str(json_out) if json_out.is_file() else ""
+                    entry["roundtrip_npz"] = str(npz_out) if npz_out.is_file() else ""
+                    if proc.returncode != 0:
+                        entry["blockers"].append("roundtrip_parse_failed")
         elif source_format == "mgt" and not attached:
             entry["blockers"].append("awaiting_manual_mgt_attach")
 
@@ -186,6 +233,11 @@ def main() -> int:
     parser.add_argument("--receipt-out", type=Path, default=DEFAULT_RECEIPT)
     parser.add_argument("--skip-regenerate", action="store_true")
     parser.add_argument("--skip-collect", action="store_true")
+    parser.add_argument(
+        "--run-roundtrip-parse",
+        action="store_true",
+        help="Run parse_midas_mgt_to_json_npz for attached MGT with valid headers",
+    )
     args = parser.parse_args()
 
     receipt = run_korean_medium_large_ingest_pipeline(
@@ -194,6 +246,7 @@ def main() -> int:
         receipt_path=args.receipt_out,
         skip_regenerate=args.skip_regenerate,
         skip_collect=args.skip_collect,
+        run_roundtrip_parse=args.run_roundtrip_parse,
     )
     print(receipt["summary_line"])
     print(f"Wrote receipt: {args.receipt_out}")

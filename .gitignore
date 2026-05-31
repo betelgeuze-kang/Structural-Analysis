@@ -98,6 +98,9 @@ implementation/phase1/workspace/inputs/open_data/rwth_zenodo_14173245/Data_v1.0.
 implementation/phase1/open_data/irregular/collected/artifacts/setback_tower_proxy_local/DS3_TalTech_V4.ifc
 implementation/phase1/open_data/irregular/collected/artifacts/tpu_interference_highrise_local/tpu_hffb_interference_highrise_seed_01.csv
 implementation/phase1/open_data/irregular/collected/artifacts/twisted_tapered_tower_remote/DS3_TalTech_V4.ifc
+# Korean medium/large: local benchmark bridge copies (scripts/install_korea_benchmark_mgt_bridge.py)
+implementation/phase1/open_data/korea/collected/artifacts/*/*.mgt
+implementation/phase1/open_data/korea/collected/artifacts/*/roundtrip/
 implementation/phase1/open_data/irregular/harvested/torsionally_eccentric_core_tower/extracted/OpenSees_Model/Model2/layershell.tcl
 implementation/phase1/open_data/wind/tpu/case_917_materialized/tpu_hffb_interference_highrise_seed_01.csv
 implementation/phase1/open_data/wind/tpu/case_917_probe.csv

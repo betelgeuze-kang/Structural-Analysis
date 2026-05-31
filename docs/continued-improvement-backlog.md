@@ -9,7 +9,7 @@
 |----|------|------|------|----------|-----|
 | I1 | 실제 단면/재료 물성 파싱 | 대표값(`_beam_props`: E=210 GPa, 대표 I) | MGT `*SECTION`/`*MATERIAL`/`*THICKNESS`에서 실제 B·H·I·A·E 파싱 → 3D 솔버 + 풍 drift에 주입 | ✅ | ★★★ |
 | I2 | 풍 트랙 다방향/비틀림/와류 | **done** — `wind_directional` + corner drift | 다방향(45° 포함)·우발편심 비틀림·와류진동 across-wind | ✅ | ★★☆ |
-| I3 | 3D 비선형 Newton 부분메쉬 수렴 | `linear_tangent` fallback | full mesh geometric+material Newton 수렴 안정화 | ✅(난이도 高) | ★★☆ |
+| I3 | 3D 비선형 Newton 부분메쉬 수렴 | **partial** — improved Newton infra; 0% geometric on benchmark; fallback @ 0.1 | geometric+material Newton without fallback | ✅(난이도 高) | ★★☆ |
 | I4 | 풍↔native 직접 교차검증 | **done** — dual BC FE; lumped ≈ fixed-guided (**~5%** rel); cantilever ~3× softer | `pass_model_derived_wind_aligned` | ✅ | ★★☆ |
 | I5 | 중·대형 건축물 도면 데이터 다변화 | korea 카탈로그 15건(다수 metadata-only) | 중·대형 native MGT/IFC 수동첨부 → ingest/roundtrip/검증 골격 | ✅(데이터 첨부 필요) | ★★☆ |
 | I6 | Live MIDAS Gen 3D replay | export-proxy/model-derived | 라이선스 실행 JSON ingest | ❌(라이선스) | ★★★ |
@@ -67,8 +67,22 @@
 - 풍 same-mesh 결과에 `governing_direction`, `torsional_amplification`, `vortex_check` 필드 추가, 테스트. ✅ (`wind_directional`, `accidental_torsion.governing_amplification`, comfort/accel surfaced)
 
 ## I3 — 3D 비선형 Newton 부분메쉬 수렴
-- 현 `linear_tangent` fallback을 full mesh에서 geometric+material Newton로 수렴시키기.
-- arc-length/line-search, 강건한 BC, load stepping 정교화. `nonlinear_equilibrium=true` 비율 상승이 지표.
+
+**Status: partial (2026-05-31)** — `solve_mgt_beam_mesh_3d_global.py` gains `use_improved_newton=True` (default) with elastic incremental predictor per load step, 8-trial backtracking line search (best-trial + optional Armijo), Jacobi diagonal scaling on ill-conditioned tangents, optional `lateral_load_scale` (default 0) for top-story lateral shear exercising geometric stiffness, gravity-tributary axial forces when lateral load is active, finer load steps `(0.05…1.0)`, and reporting fields `newton_converged_at_load_step`, `newton_iterations_total`, `fell_back_to_linear_tangent`. `linear_tangent` fallback retained.
+
+**Benchmark (generator-33 roundtrip, real sections, max_elements=420):**
+
+| Solver | First Newton residual @ load_scale=0.1 | Geometric Newton converged | Final solve_mode |
+|--------|----------------------------------------|----------------------------|------------------|
+| Legacy (`use_improved_newton=False`) | ~4437 N | **0%** (stalls load_step 0.2) | `mgt_npz_beam_mesh_3d_real_section_linear_tangent` @ load_scale=0.1 |
+| Improved (default) | ~391 N (~11× lower) | **0%** (stalls load_step 0.05) | `mgt_npz_beam_mesh_3d_real_section_linear_tangent` @ load_scale=0.1 |
+
+- **`nonlinear_equilibrium=true` rate on benchmark: 0%** — force-based geometric tangent + partial vertical-chain submesh still does not drive free-DOF equilibrium residual below tolerance; Newton direction barely changes `f_int` on free DOFs (known model/BC limitation).
+- **`linear_tangent` fallback still required** at load_scale ≤ 0.1 for converged status; delivery native solve uses bridge path when only fallback converges.
+- CLI `scripts/run_mgt_global_fea_3d_native_solve.py`: `solve_mode=mgt_npz_beam_mesh_3d_real_section_linear_tangent`, `fell_back_to_linear_tangent=true`, `load_scale_applied=0.1`.
+- Tests: `pytest tests/test_solve_mgt_beam_mesh_3d_global.py` — 3 passed; new test asserts improved first-iteration residual < legacy or geometric convergence at load_step ≥ 0.5.
+
+**Still open:** deformed-state axial force iteration for P-Δ, full-mesh (non-chain) BC/diaphragm, consistent force-based internal force Jacobian — needed to raise geometric Newton convergence rate above 0%.
 
 ## I4 — 풍↔native 직접 교차검증
 

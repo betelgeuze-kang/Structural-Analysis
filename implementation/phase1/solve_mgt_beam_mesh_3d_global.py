@@ -203,6 +203,148 @@ def _element_dof_map(elem: BeamElement) -> tuple[int, ...]:
     return di + dj
 
 
+def _condition_number_threshold(diag: np.ndarray, *, ratio_limit: float = 1.0e8) -> bool:
+    d = np.abs(np.asarray(diag, dtype=np.float64))
+    d = d[d > EPS]
+    if d.size == 0:
+        return False
+    return float(np.max(d) / max(float(np.min(d)), EPS)) > float(ratio_limit)
+
+
+def _solve_newton_increment(
+    k_ff: np.ndarray,
+    residual_free: np.ndarray,
+    *,
+    use_jacobi_scaling: bool,
+) -> np.ndarray:
+    if not use_jacobi_scaling or not _condition_number_threshold(np.diag(k_ff)):
+        return np.linalg.solve(k_ff, residual_free)
+    d = np.sqrt(np.maximum(np.abs(np.diag(k_ff)), EPS))
+    k_scaled = (k_ff / d[:, None]) / d[None, :]
+    r_scaled = residual_free / d
+    du_scaled = np.linalg.solve(k_scaled, r_scaled)
+    return du_scaled / d
+
+
+def _elastic_predictor_displacement(
+    *,
+    elements: list[BeamElement],
+    n_nodes: int,
+    free: list[int],
+    f_step: np.ndarray,
+    u_prev: np.ndarray,
+    asm_kw: dict[str, Any],
+) -> np.ndarray:
+    u_pred = u_prev.copy()
+    k_prev, f_int_prev = _assemble_global(
+        elements=elements,
+        displacement=u_prev,
+        n_nodes=n_nodes,
+        include_geometric=False,
+        **asm_kw,
+    )
+    k_ff = k_prev[np.ix_(free, free)].copy()
+    reg = 1.0e-8 * max(float(np.mean(np.abs(np.diag(k_ff)))), 1.0)
+    k_ff[np.arange(len(free)), np.arange(len(free))] += reg
+    rhs = f_step[free] - f_int_prev[free]
+    try:
+        u_pred[free] = u_prev[free] + np.linalg.solve(k_ff, rhs)
+    except np.linalg.LinAlgError:
+        pass
+    return u_pred
+
+
+def _backtracking_line_search(
+    *,
+    u: np.ndarray,
+    free: list[int],
+    du: np.ndarray,
+    f_step: np.ndarray,
+    elements: list[BeamElement],
+    n_nodes: int,
+    baseline: float,
+    asm_kw: dict[str, Any],
+    max_trials: int = 8,
+    armijo_c: float = 1.0e-4,
+) -> tuple[np.ndarray, bool]:
+    lam = 1.0
+    best_u = u.copy()
+    best_r = baseline
+    accepted = False
+    for _ in range(int(max_trials)):
+        u_trial = u.copy()
+        u_trial[free] = u[free] + lam * du
+        _, f_int_trial = _assemble_global(
+            elements=elements,
+            displacement=u_trial,
+            n_nodes=n_nodes,
+            include_geometric=True,
+            **asm_kw,
+        )
+        trial_r = float(np.max(np.abs((f_step - f_int_trial)[free])))
+        if trial_r < best_r:
+            best_r = trial_r
+            best_u = u_trial
+        armijo_ok = trial_r <= baseline * (1.0 - armijo_c * lam)
+        if trial_r < baseline or armijo_ok:
+            return u_trial, True
+        lam *= 0.5
+    if best_r < baseline:
+        return best_u, True
+    u_fallback = u.copy()
+    u_fallback[free] = u[free] + 0.05 * du
+    _, f_int_fb = _assemble_global(
+        elements=elements,
+        displacement=u_fallback,
+        n_nodes=n_nodes,
+        include_geometric=True,
+        **asm_kw,
+    )
+    fb_r = float(np.max(np.abs((f_step - f_int_fb)[free])))
+    if fb_r < baseline:
+        return u_fallback, False
+    if best_r < fb_r:
+        return best_u, False
+    return u_fallback, False
+
+
+def _estimate_gravity_axial_forces(
+    elements: list[BeamElement],
+    *,
+    section_props: dict[int, dict[str, Any]] | None,
+    material_props: dict[int, dict[str, Any]] | None,
+    load_scale: float,
+) -> dict[int, float]:
+    """Estimate member compression from tributary self-weight (for P-Delta geometric stiffness)."""
+    if not elements:
+        return {}
+    node_z: dict[int, float] = {}
+    for elem in elements:
+        node_z[elem.node_i] = elem.node_i_xz[1]
+        node_z[elem.node_j] = elem.node_j_xz[1]
+    elem_weight: dict[int, float] = {}
+    for elem in elements:
+        props, _ = _element_beam_props(
+            elem,
+            section_props=section_props,
+            material_props=material_props,
+        )
+        elem_weight[elem.elem_id] = (
+            props.area_m2 * props.length_m * 7850.0 * 9.80665 * float(load_scale)
+        )
+    sorted_elems = sorted(
+        elements,
+        key=lambda e: 0.5 * (node_z.get(e.node_i, 0.0) + node_z.get(e.node_j, 0.0)),
+        reverse=True,
+    )
+    axial: dict[int, float] = {}
+    weight_above = 0.0
+    for elem in sorted_elems:
+        axial[elem.elem_id] = max(weight_above, 0.0)
+        weight_above += elem_weight.get(elem.elem_id, 0.0)
+    return axial
+
+
 def _assemble_global(
     *,
     elements: list[BeamElement],
@@ -211,6 +353,7 @@ def _assemble_global(
     include_geometric: bool = True,
     section_props: dict[int, dict[str, Any]] | None = None,
     material_props: dict[int, dict[str, Any]] | None = None,
+    element_axial_forces: dict[int, float] | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     n_dof = n_nodes * DOF_PER_NODE
     stiffness = np.zeros((n_dof, n_dof), dtype=np.float64)
@@ -223,12 +366,15 @@ def _assemble_global(
         )
         dof_map = _element_dof_map(elem)
         u_elem = displacement[list(dof_map)]
+        axial_n = 0.0
+        if include_geometric and element_axial_forces is not None:
+            axial_n = float(element_axial_forces.get(elem.elem_id, 0.0))
         response = solve_beam_column_global_response(
             props=props,
             deformation_global=u_elem,
             node_i=elem.node_i_xz,
             node_j=elem.node_j_xz,
-            axial_force_n=0.0,
+            axial_force_n=axial_n,
             include_geometric=include_geometric,
             formulation="force_based",
         )
@@ -255,6 +401,8 @@ def solve_mgt_beam_mesh_3d_global(
     max_newton_iterations: int = 48,
     tolerance: float = 1.0e-3,
     load_scale: float = 1.0,
+    lateral_load_scale: float = 0.0,
+    use_improved_newton: bool = True,
 ) -> dict[str, Any]:
     elements = _select_beam_submesh(
         node_xyz=node_xyz,
@@ -347,6 +495,7 @@ def solve_mgt_beam_mesh_3d_global(
         restrained.add(_node_dof_indices(node)[0])
 
     f_ext = np.zeros(n_dof, dtype=np.float64)
+    total_gravity_n = 0.0
     for elem in elements:
         props, _ = _element_beam_props(
             elem,
@@ -354,43 +503,93 @@ def solve_mgt_beam_mesh_3d_global(
             material_props=material_props,
         )
         weight_n = props.area_m2 * props.length_m * 7850.0 * 9.80665 * float(load_scale)
+        total_gravity_n += weight_n
         for node, share in ((elem.node_i, 0.5), (elem.node_j, 0.5)):
             _, uz, _ = _node_dof_indices(node)
             f_ext[uz] -= weight_n * share
+
+    lateral_scale = max(float(lateral_load_scale), 0.0)
+    if lateral_scale > 0.0 and top_nodes:
+        lateral_total_n = lateral_scale * total_gravity_n
+        share = lateral_total_n / float(len(top_nodes))
+        for node in top_nodes:
+            ux, _, _ = _node_dof_indices(node)
+            f_ext[ux] += share
 
     free = [i for i in range(n_dof) if i not in restrained]
     u = np.zeros(n_dof, dtype=np.float64)
     iteration_log: list[dict[str, Any]] = []
     converged = False
     solve_mode = "mgt_npz_beam_mesh_3d_global_newton"
+    newton_converged_at_load_step: float | None = None
+    newton_iterations_total = 0
+    fell_back_to_linear_tangent = False
 
-    asm_kw = {
+    asm_kw: dict[str, Any] = {
         "section_props": section_props,
         "material_props": material_props,
     }
-    k0, _ = _assemble_global(
-        elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=True, **asm_kw
+    if use_improved_newton and lateral_scale > 0.0:
+        asm_kw["element_axial_forces"] = _estimate_gravity_axial_forces(
+            elements,
+            section_props=section_props,
+            material_props=material_props,
+            load_scale=float(load_scale),
+        )
+    u_zero = np.zeros(n_dof, dtype=np.float64)
+    k_lin0, _ = _assemble_global(
+        elements=elements, displacement=u_zero, n_nodes=n_nodes, include_geometric=False, **asm_kw
     )
-    k_ff0 = k0[np.ix_(free, free)].copy()
-    reg0 = 1.0e-8 * max(float(np.mean(np.abs(np.diag(k_ff0)))), 1.0)
-    k_ff0[np.arange(len(free)), np.arange(len(free))] += reg0
-    try:
-        u_seed = np.linalg.solve(k_ff0, f_ext[free])
-        u[free] = 0.35 * u_seed
-        iteration_log.append({"iteration": 0, "load_step": 0.0, "residual_inf": 0.0, "solver_mode": "linear_seed"})
-    except np.linalg.LinAlgError:
-        pass
+    k_ff_lin0 = k_lin0[np.ix_(free, free)].copy()
+    reg0 = 1.0e-8 * max(float(np.mean(np.abs(np.diag(k_ff_lin0)))), 1.0)
 
-    load_steps = (0.2, 0.4, 0.6, 0.8, 1.0)
+    if not use_improved_newton:
+        k0, _ = _assemble_global(
+            elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=True, **asm_kw
+        )
+        k_ff0 = k0[np.ix_(free, free)].copy()
+        k_ff0[np.arange(len(free)), np.arange(len(free))] += reg0
+        try:
+            u_seed = np.linalg.solve(k_ff0, f_ext[free])
+            u[free] = 0.35 * u_seed
+            iteration_log.append({"iteration": 0, "load_step": 0.0, "residual_inf": 0.0, "solver_mode": "linear_seed"})
+        except np.linalg.LinAlgError:
+            pass
+
+    load_steps = (
+        (0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.65, 0.8, 1.0)
+        if use_improved_newton
+        else (0.2, 0.4, 0.6, 0.8, 1.0)
+    )
     for load_step in load_steps:
         f_step = f_ext * float(load_step)
+        if use_improved_newton:
+            u = _elastic_predictor_displacement(
+                elements=elements,
+                n_nodes=n_nodes,
+                free=free,
+                f_step=f_step,
+                u_prev=u,
+                asm_kw=asm_kw,
+            )
+            iteration_log.append(
+                {
+                    "iteration": 0,
+                    "load_step": float(load_step),
+                    "residual_inf": 0.0,
+                    "solver_mode": "elastic_predictor",
+                }
+            )
         step_converged = False
+        prev_r_inf: float | None = None
+        stall_count = 0
         for it in range(1, int(max_newton_iterations) + 1):
             stiffness, f_int = _assemble_global(
                 elements=elements, displacement=u, n_nodes=n_nodes, include_geometric=True, **asm_kw
             )
             residual = f_step - f_int
             r_inf = float(np.max(np.abs(residual[free]))) if free else 0.0
+            newton_iterations_total += 1
             iteration_log.append(
                 {
                     "iteration": it,
@@ -401,36 +600,73 @@ def solve_mgt_beam_mesh_3d_global(
             )
             if r_inf <= float(tolerance):
                 step_converged = True
+                newton_converged_at_load_step = float(load_step)
                 break
+            if (
+                prev_r_inf is not None
+                and abs(r_inf - prev_r_inf) <= max(1.0e-12, 1.0e-9 * max(prev_r_inf, 1.0))
+            ):
+                stall_count += 1
+            else:
+                stall_count = 0
+            prev_r_inf = r_inf
+            if use_improved_newton and stall_count >= 2:
+                stiffness, _ = _assemble_global(
+                    elements=elements,
+                    displacement=u,
+                    n_nodes=n_nodes,
+                    include_geometric=False,
+                    **asm_kw,
+                )
             k_ff = stiffness[np.ix_(free, free)].copy()
             reg = 1.0e-8 * max(float(np.mean(np.abs(np.diag(k_ff)))), 1.0)
             k_ff[np.arange(len(free)), np.arange(len(free))] += reg
             try:
-                du = np.linalg.solve(k_ff, residual[free])
+                du = _solve_newton_increment(
+                    k_ff,
+                    residual[free],
+                    use_jacobi_scaling=use_improved_newton,
+                )
             except np.linalg.LinAlgError:
                 step_converged = False
                 break
-            baseline = r_inf
-            accepted = False
-            for lam in (1.0, 0.5, 0.25, 0.125, 0.0625):
-                u_trial = u.copy()
-                u_trial[free] = u[free] + float(lam) * du
-                _, f_int_trial = _assemble_global(
-                    elements=elements, displacement=u_trial, n_nodes=n_nodes, include_geometric=True, **asm_kw
+            if use_improved_newton:
+                u, accepted = _backtracking_line_search(
+                    u=u,
+                    free=free,
+                    du=du,
+                    f_step=f_step,
+                    elements=elements,
+                    n_nodes=n_nodes,
+                    baseline=r_inf,
+                    asm_kw=asm_kw,
+                    max_trials=8,
                 )
-                trial_r = float(np.max(np.abs((f_step - f_int_trial)[free])))
-                if trial_r < baseline:
-                    u = u_trial
-                    accepted = True
-                    break
-            if not accepted:
-                u[free] = u[free] + 0.05 * du
+                if accepted:
+                    stall_count = 0
+            else:
+                baseline = r_inf
+                accepted = False
+                for lam in (1.0, 0.5, 0.25, 0.125, 0.0625):
+                    u_trial = u.copy()
+                    u_trial[free] = u[free] + float(lam) * du
+                    _, f_int_trial = _assemble_global(
+                        elements=elements, displacement=u_trial, n_nodes=n_nodes, include_geometric=True, **asm_kw
+                    )
+                    trial_r = float(np.max(np.abs((f_step - f_int_trial)[free])))
+                    if trial_r < baseline:
+                        u = u_trial
+                        accepted = True
+                        break
+                if not accepted:
+                    u[free] = u[free] + 0.05 * du
         if not step_converged:
             converged = False
             break
         converged = True
 
     if not converged:
+        fell_back_to_linear_tangent = True
         u = np.zeros(n_dof, dtype=np.float64)
         try:
             k_lin, _ = _assemble_global(
@@ -474,10 +710,17 @@ def solve_mgt_beam_mesh_3d_global(
         "status": "ready" if converged else "warn",
         "converged": converged,
         "solve_mode": solve_mode,
-        "nonlinear_equilibrium": solve_mode
-        in {"mgt_npz_beam_mesh_3d_global_newton", "mgt_npz_beam_mesh_3d_real_section"},
+        "nonlinear_equilibrium": bool(
+            converged
+            and solve_mode in {"mgt_npz_beam_mesh_3d_global_newton", "mgt_npz_beam_mesh_3d_real_section"}
+        ),
         "used_real_section_properties": used_real_section_properties,
         "real_section_property_coverage_pct": real_coverage_pct,
+        "use_improved_newton": bool(use_improved_newton),
+        "lateral_load_scale": lateral_scale,
+        "newton_converged_at_load_step": newton_converged_at_load_step,
+        "newton_iterations_total": int(newton_iterations_total),
+        "fell_back_to_linear_tangent": bool(fell_back_to_linear_tangent),
         "mesh_fingerprint": {
             "beam_elements_solved": len(elements),
             "nodes_in_submesh": n_nodes,
