@@ -1,0 +1,314 @@
+{
+  "schema_version": "mgt-frame-material-nonlinear-tangent.v1",
+  "generated_at": "2026-06-05T13:35:18.026071+00:00",
+  "status": "ready",
+  "frame_material_nonlinear_tangent_ready": true,
+  "service_load_material_state_ready": true,
+  "controlled_probe_material_state_ready": true,
+  "bounded_material_tangent_global_smoke_ready": true,
+  "global_smoke_solver_uses_per_element_material_tangent": true,
+  "full_material_nonlinear_newton_equilibrium": false,
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+  "claim_boundary": "MGT line/frame elements consume source material E/nu and material-name grade proxies for bounded nonlinear tangent states. Service load material states and a controlled yield/damage probe are assembled into a per-element tangent smoke solve. This is not full path-dependent material nonlinear Newton closure, fiber-section closure, or shell material closure.",
+  "strength_proxy_policy": {
+    "steel": "Q235-style material names infer fy in MPa",
+    "concrete": "C40-style material names infer fc in MPa",
+    "src": "Cxx+Qyyy names infer concrete fc and steel fy; tangent is bounded composite proxy",
+    "rigid_user": "RigidBar/USER rows remain elastic and are excluded from nonlinear damage claims"
+  },
+  "mesh_fingerprint": {
+    "raw_line_element_count": 5576,
+    "skipped_short_or_degenerate_count": 4,
+    "line_node_count": 2415,
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_angle_element_count": 5572,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "line_elements_solved": 5572,
+    "line_nodes_solved": 2415,
+    "component_count": 64,
+    "base_node_count": 779,
+    "dof_count": 14490,
+    "free_dof_count": 9816,
+    "restrained_dof_count": 4674,
+    "elastic_stiffness_nnz": 288648,
+    "material_tangent_stiffness_nnz": 288648
+  },
+  "material_strength_inventory": {
+    "1": {
+      "family": "CONC",
+      "name": "C40",
+      "source_E_mpa": 32500.0,
+      "solver_fallback_E_mpa": null,
+      "inferred_strength_mpa": 40.0,
+      "strength_source": "mgt_material_name_grade_proxy"
+    },
+    "27": {
+      "family": "UNKNOWN",
+      "name": "",
+      "source_E_mpa": 1e-09,
+      "solver_fallback_E_mpa": 210000.0,
+      "inferred_strength_mpa": null,
+      "strength_source": "not_inferred"
+    },
+    "31": {
+      "family": "UNKNOWN",
+      "name": "",
+      "source_E_mpa": 1e-09,
+      "solver_fallback_E_mpa": 210000.0,
+      "inferred_strength_mpa": null,
+      "strength_source": "not_inferred"
+    },
+    "29": {
+      "family": "UNKNOWN",
+      "name": "",
+      "source_E_mpa": 1e-09,
+      "solver_fallback_E_mpa": 210000.0,
+      "inferred_strength_mpa": null,
+      "strength_source": "not_inferred"
+    },
+    "30": {
+      "family": "UNKNOWN",
+      "name": "",
+      "source_E_mpa": 1e-09,
+      "solver_fallback_E_mpa": 210000.0,
+      "inferred_strength_mpa": null,
+      "strength_source": "not_inferred"
+    },
+    "28": {
+      "family": "UNKNOWN",
+      "name": "",
+      "source_E_mpa": 1e-09,
+      "solver_fallback_E_mpa": 210000.0,
+      "inferred_strength_mpa": null,
+      "strength_source": "not_inferred"
+    },
+    "5": {
+      "family": "USER",
+      "name": "RigidBar",
+      "source_E_mpa": 28000000000.0,
+      "solver_fallback_E_mpa": null,
+      "inferred_strength_mpa": null,
+      "strength_source": "not_inferred"
+    },
+    "2": {
+      "family": "STEEL",
+      "name": "Q235",
+      "source_E_mpa": 206000.0,
+      "solver_fallback_E_mpa": null,
+      "inferred_strength_mpa": 235.0,
+      "strength_source": "mgt_material_name_grade_proxy"
+    },
+    "26": {
+      "family": "UNKNOWN",
+      "name": "",
+      "source_E_mpa": 1e-09,
+      "solver_fallback_E_mpa": 210000.0,
+      "inferred_strength_mpa": null,
+      "strength_source": "not_inferred"
+    },
+    "3": {
+      "family": "SRC",
+      "name": "C40+Q235",
+      "source_E_mpa": 206000.0,
+      "solver_fallback_E_mpa": null,
+      "inferred_strength_mpa": 235.0,
+      "strength_source": "mgt_material_name_grade_proxy"
+    },
+    "16": {
+      "family": "UNKNOWN",
+      "name": "",
+      "source_E_mpa": 1e-09,
+      "solver_fallback_E_mpa": 210000.0,
+      "inferred_strength_mpa": null,
+      "strength_source": "not_inferred"
+    }
+  },
+  "service_material_state_summary": {
+    "element_count": 5572,
+    "material_family_counts": {
+      "CONC": 2110,
+      "UNKNOWN": 79,
+      "USER": 6,
+      "STEEL": 1690,
+      "SRC": 1687
+    },
+    "state_tag_counts": {
+      "concrete_compression_hardening": 1517,
+      "concrete_tension_elastic": 592,
+      "unknown_elastic_proxy": 79,
+      "rigid_user_elastic_proxy": 6,
+      "steel_elastic": 1688,
+      "steel_plastic_hardening": 2,
+      "concrete_compression_crushed": 1,
+      "src_steel_elastic+concrete_compression_hardening": 1327,
+      "src_steel_elastic+concrete_tension_elastic": 358,
+      "src_steel_elastic+concrete_tension_cracked": 2
+    },
+    "nonlinear_tangent_element_count": 1694,
+    "min_tangent_ratio": 0.015,
+    "mean_tangent_ratio": 0.9347322763290329,
+    "max_abs_strain": 0.05731207501083598
+  },
+  "controlled_probe_material_state_summary": {
+    "element_count": 5572,
+    "material_family_counts": {
+      "CONC": 2110,
+      "UNKNOWN": 79,
+      "USER": 6,
+      "STEEL": 1690,
+      "SRC": 1687
+    },
+    "state_tag_counts": {
+      "concrete_compression_softening": 2108,
+      "unknown_elastic_proxy": 79,
+      "concrete_compression_crushed": 2,
+      "rigid_user_elastic_proxy": 6,
+      "steel_plastic_hardening": 1688,
+      "steel_plastic_capped": 2,
+      "src_steel_plastic_hardening+concrete_compression_hardening": 1319,
+      "src_steel_plastic_hardening+concrete_tension_cracked": 360,
+      "src_steel_plastic_hardening+concrete_compression_crushed": 8
+    },
+    "nonlinear_tangent_element_count": 5487,
+    "min_tangent_ratio": 0.015,
+    "mean_tangent_ratio": 0.04215167086256856,
+    "max_abs_strain": 1.4328018752708995
+  },
+  "weakest_probe_elements": [
+    {
+      "elem_id": 24279,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": -6.773101684685261e-07,
+      "probe_strain": -0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    },
+    {
+      "elem_id": 24280,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": -6.773101684685261e-07,
+      "probe_strain": -0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    },
+    {
+      "elem_id": 24284,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": 1.567015278041151e-07,
+      "probe_strain": 0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    },
+    {
+      "elem_id": 24285,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": 1.567015278041151e-07,
+      "probe_strain": 0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    },
+    {
+      "elem_id": 24286,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": 6.831349057548923e-07,
+      "probe_strain": 0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    },
+    {
+      "elem_id": 24288,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": 6.831349057548923e-07,
+      "probe_strain": 0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    },
+    {
+      "elem_id": 24289,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": 5.965877301129339e-07,
+      "probe_strain": 0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    },
+    {
+      "elem_id": 24290,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": 5.965877301129339e-07,
+      "probe_strain": 0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    },
+    {
+      "elem_id": 24291,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": -2.94534304397691e-06,
+      "probe_strain": -0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    },
+    {
+      "elem_id": 24293,
+      "section_id": 1088,
+      "material_id": 2,
+      "material_family": "STEEL",
+      "service_strain": -2.94534304397691e-06,
+      "probe_strain": -0.0014259708737864077,
+      "probe_state_tag": "steel_plastic_hardening",
+      "probe_tangent_ratio": 0.015
+    }
+  ],
+  "elastic_reference_equilibrium": {
+    "residual_inf_n": 7.097434718161821e-06,
+    "regularization": 2047.0307500034644,
+    "real_section_material_coverage_pct": 98.58219669777459,
+    "total_gravity_kn": 192104.21926805886
+  },
+  "material_tangent_smoke_equilibrium": {
+    "residual_inf_n": 0.00010153651237487793,
+    "regularization": 1904.644801419571,
+    "real_section_material_coverage_pct": 98.58219669777459,
+    "min_solver_tangent_ratio": 0.015,
+    "tangent_reduction_element_count": 5487,
+    "total_gravity_kn": 192104.21926805886
+  },
+  "runtime_metrics": {
+    "backend": "scipy_sparse_spsolve_cpu_6dof_frame_material_tangent_smoke",
+    "elastic_assembly_seconds": 0.9119630870000037,
+    "elastic_solve_seconds": 0.15812985799948365,
+    "material_tangent_assembly_seconds": 0.9017116309996709,
+    "material_tangent_solve_seconds": 0.14570685400030925,
+    "total_seconds": 2.675468783000724
+  },
+  "limitations": [
+    "Controlled probe strain is not a production load combination.",
+    "Tangent is per-element axial material tangent mapped onto frame EA/EI/GJ stiffness, not a full fiber-section Jacobian.",
+    "No path-dependent internal-force history update or Newton residual iteration is promoted by this artifact.",
+    "Shell/plate material nonlinearity remains outside this frame receipt."
+  ],
+  "blockers": []
+}

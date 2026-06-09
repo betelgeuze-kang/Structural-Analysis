@@ -8,9 +8,16 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = REPO_ROOT / "implementation/phase1/release_evidence/productization"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from implementation.phase1.commercial_gap_ledger_status import (  # noqa: E402
+    build_commercial_gap_ledger_status,
+)
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -20,13 +27,34 @@ def _load(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
-def build_gap_closure_status() -> dict[str, Any]:
-    bundle = _load(PRODUCTIZATION / "delivery_evidence_bundle.json")
-    gpu = _load(PRODUCTIZATION / "gpu_solver_claim_receipt.json")
-    gpu_newton = _load(PRODUCTIZATION / "gpu_newton_certification_checklist.json")
-    crossval = _load(PRODUCTIZATION / "commercial_solver_cross_validation.json")
-    rh = _load(PRODUCTIZATION / "residual_holdout_closure_updates.json")
-    changes = _load(PRODUCTIZATION / "design_optimization_cost_reduction_changes.json")
+def _compact_ledger_requirements(rows: list[Any]) -> list[dict[str, Any]]:
+    compact: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        compact.append(
+            {
+                "id": row.get("id"),
+                "title": row.get("title"),
+                "ledger": row.get("ledger"),
+                "status": row.get("status"),
+                "closed": bool(row.get("closed")),
+                "locally_closable": bool(row.get("locally_closable")),
+                "blockers": list(row.get("blockers") or []),
+                "next_gate": row.get("next_gate"),
+            }
+        )
+    return compact
+
+
+def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str, Any]:
+    productization = Path(productization_dir or PRODUCTIZATION)
+    bundle = _load(productization / "delivery_evidence_bundle.json")
+    gpu = _load(productization / "gpu_solver_claim_receipt.json")
+    gpu_newton = _load(productization / "gpu_newton_certification_checklist.json")
+    crossval = _load(productization / "commercial_solver_cross_validation.json")
+    rh = _load(productization / "residual_holdout_closure_updates.json")
+    changes = _load(productization / "design_optimization_cost_reduction_changes.json")
     alignment = changes.get("member_alignment") if isinstance(changes.get("member_alignment"), dict) else {}
 
     rh_updates = rh.get("updates") if isinstance(rh.get("updates"), dict) else {}
@@ -64,27 +92,27 @@ def build_gap_closure_status() -> dict[str, Any]:
             "rh_still_open": rh_still_open,
         },
         "native_mgt_solve": {
-            "status": _load(PRODUCTIZATION / "mgt_native_reanalysis_pipeline.json").get("status", "missing"),
-            "integrity": (_load(PRODUCTIZATION / "mgt_native_reanalysis_pipeline.json").get("mgt_integrity") or {}).get(
+            "status": _load(productization / "mgt_native_reanalysis_pipeline.json").get("status", "missing"),
+            "integrity": (_load(productization / "mgt_native_reanalysis_pipeline.json").get("mgt_integrity") or {}).get(
                 "integrity_status"
             ),
             "native_solve_status": (
-                (_load(PRODUCTIZATION / "mgt_native_reanalysis_pipeline.json").get("native_fea") or {}).get(
+                (_load(productization / "mgt_native_reanalysis_pipeline.json").get("native_fea") or {}).get(
                     "native_solve_status"
                 )
-                or _load(PRODUCTIZATION / "mgt_global_fea_condensed_solve.json").get("native_solve_status")
+                or _load(productization / "mgt_global_fea_condensed_solve.json").get("native_solve_status")
             ),
-            "native_fea": (_load(PRODUCTIZATION / "mgt_native_reanalysis_pipeline.json").get("native_fea") or {}).get(
+            "native_fea": (_load(productization / "mgt_native_reanalysis_pipeline.json").get("native_fea") or {}).get(
                 "status"
             ),
-            "global_fea_readiness": _load(PRODUCTIZATION / "mgt_global_fea_readiness_gate.json").get("status"),
-            "mesh_contract": _load(PRODUCTIZATION / "mgt_global_fea_mesh_contract_gate.json").get("status"),
+            "global_fea_readiness": _load(productization / "mgt_global_fea_readiness_gate.json").get("status"),
+            "mesh_contract": _load(productization / "mgt_global_fea_mesh_contract_gate.json").get("status"),
             "roundtrip_sync": bundle.get("summary", {}).get("mgt_roundtrip_sync_status"),
             "roundtrip_parsed": bool(bundle.get("summary", {}).get("mgt_roundtrip_parsed")),
         },
         "rh_closure_checklist": {
-            "status": _load(PRODUCTIZATION / "rh_closure_checklist.json").get("status"),
-            "open_count": _load(PRODUCTIZATION / "rh_closure_checklist.json").get("open_count"),
+            "status": _load(productization / "rh_closure_checklist.json").get("status"),
+            "open_count": _load(productization / "rh_closure_checklist.json").get("open_count"),
         },
         "gpu_newton_terminal": {
             "status": "not_proven" if not gpu.get("gpu_newton_terminal_proven") else "proven",
@@ -96,34 +124,39 @@ def build_gap_closure_status() -> dict[str, Any]:
             "backends": gpu.get("backends"),
         },
         "rh_signed_closure_template": {
-            "status": _load(PRODUCTIZATION / "rh_signed_closure_packet_template.json").get("status"),
-            "open_count": _load(PRODUCTIZATION / "rh_signed_closure_packet_template.json").get("open_count"),
+            "status": _load(productization / "rh_signed_closure_packet_template.json").get("status"),
+            "open_count": _load(productization / "rh_signed_closure_packet_template.json").get("open_count"),
         },
         "rh_signed_closure": {
-            "status": _load(PRODUCTIZATION / "residual_holdout_closure_updates.json").get("rh_closure_status"),
-            "actual_closure_evidence_attached": _load(PRODUCTIZATION / "residual_holdout_closure_updates.json").get(
+            "status": _load(productization / "residual_holdout_closure_updates.json").get("rh_closure_status"),
+            "actual_closure_evidence_attached": _load(productization / "residual_holdout_closure_updates.json").get(
                 "actual_closure_evidence_attached"
             ),
         },
         "ml_multi_objective_a_p3": {
-            "status": (_load(PRODUCTIZATION / "ml_multi_objective_status.json").get("status") or "not_started"),
-            "production_ml_wired": _load(PRODUCTIZATION / "ml_multi_objective_status.json").get(
+            "status": (_load(productization / "ml_multi_objective_status.json").get("status") or "not_started"),
+            "production_ml_wired": _load(productization / "ml_multi_objective_status.json").get(
                 "production_ml_wired"
             ),
-            "research_pareto_archive_ready": _load(PRODUCTIZATION / "ml_multi_objective_status.json").get(
+            "research_pareto_archive_ready": _load(productization / "ml_multi_objective_status.json").get(
                 "research_pareto_archive_ready"
             ),
-            "research_pareto_front_count": _load(PRODUCTIZATION / "ml_multi_objective_status.json").get(
+            "research_pareto_front_count": _load(productization / "ml_multi_objective_status.json").get(
                 "research_pareto_front_count"
             ),
         },
     }
 
     blockers = list(bundle.get("blockers") or [])
+    ledger_status = build_commercial_gap_ledger_status(productization_dir=productization)
     delivery_status = str(bundle.get("status") or "missing")
     if blockers:
         delivery_status = "review_required"
     authority_holdout_status = "open" if rh_still_open else "closed"
+
+    ledger_rows = ledger_status.get("rows", [])
+    if not isinstance(ledger_rows, list):
+        ledger_rows = []
 
     return {
         "schema_version": "gap-closure-status.v1",
@@ -133,11 +166,18 @@ def build_gap_closure_status() -> dict[str, Any]:
         "authority_holdout_status": authority_holdout_status,
         "bundle_status": bundle.get("status"),
         "blockers": blockers,
+        "full_gap_ledger_status": ledger_status.get("status"),
+        "full_gap_ledger_ready": bool(ledger_status.get("full_gap_ledger_ready")),
+        "full_gap_ledger_summary": ledger_status.get("summary", {}),
+        "full_gap_ledger_blockers": ledger_status.get("blockers", []),
+        "next_locally_closable_gaps": ledger_status.get("next_locally_closable_gaps", []),
         "pending_authority_closure": rh_still_open > 0,
         "sections": sections,
+        "ledger_requirements": _compact_ledger_requirements(ledger_rows),
         "artifacts": {
-            "delivery_evidence_bundle": str(PRODUCTIZATION / "delivery_evidence_bundle.json"),
-            "residual_holdout_closure_updates": str(PRODUCTIZATION / "residual_holdout_closure_updates.json"),
+            "delivery_evidence_bundle": str(productization / "delivery_evidence_bundle.json"),
+            "residual_holdout_closure_updates": str(productization / "residual_holdout_closure_updates.json"),
+            "commercial_gap_ledger_status": str(productization / "commercial_gap_ledger_status.json"),
         },
     }
 
@@ -145,18 +185,33 @@ def build_gap_closure_status() -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--productization-dir",
+        type=Path,
+        default=PRODUCTIZATION,
+        help="Directory containing productization evidence JSON inputs.",
+    )
+    parser.add_argument(
         "--output-json",
         type=Path,
-        default=PRODUCTIZATION / "gap_closure_status.json",
+        default=None,
+    )
+    parser.add_argument(
+        "--fail-full-closure",
+        action="store_true",
+        help="Exit non-zero when the commercial solver/AI gap ledgers are not fully closed.",
     )
     args = parser.parse_args()
-    payload = build_gap_closure_status()
-    args.output_json.parent.mkdir(parents=True, exist_ok=True)
-    args.output_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    output_json = args.output_json or (args.productization_dir / "gap_closure_status.json")
+    payload = build_gap_closure_status(productization_dir=args.productization_dir)
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    output_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(
         f"gap-status: delivery={payload['delivery_status']} "
-        f"authority_holdout={payload['authority_holdout_status']} -> {args.output_json}"
+        f"authority_holdout={payload['authority_holdout_status']} "
+        f"full_gap_ledger={payload['full_gap_ledger_status']} -> {output_json}"
     )
+    if args.fail_full_closure and not payload.get("full_gap_ledger_ready"):
+        return 3
     return 0
 
 
