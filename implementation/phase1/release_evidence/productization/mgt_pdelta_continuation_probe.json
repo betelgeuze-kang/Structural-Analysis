@@ -1,0 +1,2127 @@
+{
+  "schema_version": "mgt-pdelta-continuation-probe.v1",
+  "generated_at": "2026-06-04T16:35:48.386408+00:00",
+  "status": "partial",
+  "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+  "solve_scope": "full_mgt_6dof_frame_deformed_state_pdelta_load_step_continuation_probe",
+  "full_load_pdelta_continuation_ready": false,
+  "full_load_nonlinear_newton_ready": false,
+  "material_newton_ready": false,
+  "pdelta_fixed_point_linear_solver_refinement": {
+    "enabled": true,
+    "max_iterations": 10,
+    "strategy": "best_residual_iterative_refinement",
+    "residual_metric": "regularized_free_dof_linear_subproblem_inf_norm",
+    "claim_boundary": "Refines the regularized free-DOF linear subproblem solve and keeps the lowest residual iterate. It is not a substitute for a consistent nonlinear Newton/Jacobian."
+  },
+  "line_search_linear_solver": {
+    "strategy": "single_direct_spsolve_on_regularized_residual_system",
+    "uses_frame_solver_iterative_refinement": false,
+    "claim_boundary": "The one-step line-search probe diagnoses the nonlinear residual/Jacobian gap. It deliberately does not hide that gap with the frame fixed-point refinement policy."
+  },
+  "frontier_residual_jacobian_requested_correction_passes": 4,
+  "max_converged_load_scale": 0.5076562499999999,
+  "direct_load_step_max_converged_load_scale": 0.5,
+  "first_failed_load_scale": 0.55,
+  "post_converged_micro_step_probe": {
+    "attempt_index": 1,
+    "seed_load_scale": 0.5,
+    "target_load_scale": 0.505,
+    "micro_increment": 0.0050000000000000044,
+    "ready": true,
+    "accepted_as_path_state": true,
+    "converged": true,
+    "iteration_count": 38,
+    "residual_inf_n": 0.0009174346923828125,
+    "relative_increment": 6.554357818980607e-05,
+    "max_increment_m": 4.554688824631725e-05,
+    "fixed_point_increment_m": 9.10937764926345e-05,
+    "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+    "max_translation_m": 1.5830763147516158,
+    "max_drift_ratio_pct": 15.788285874977937,
+    "residual_tolerance_n": 0.001,
+    "relative_increment_tolerance": 0.0001,
+    "near_displacement_fixed_point": true,
+    "residual_floor_above_tolerance": false,
+    "relaxation_factor": 0.5,
+    "linear_solver_refinement": {
+      "enabled": true,
+      "max_iterations": 10,
+      "strategy": "best_residual_iterative_refinement",
+      "residual_metric": "regularized_free_dof_linear_subproblem_inf_norm",
+      "claim_boundary": "Refines the regularized free-DOF linear subproblem solve and keeps the lowest residual iterate. It is not a substitute for a consistent nonlinear Newton/Jacobian."
+    },
+    "seconds": 47.85433898299743,
+    "blockers": []
+  },
+  "adaptive_micro_continuation_probe": {
+    "ready": false,
+    "target_load_scale": 0.55,
+    "seed_load_scale": 0.5,
+    "max_converged_load_scale": 0.505,
+    "first_failed_load_scale": 0.51,
+    "initial_increment": 0.005,
+    "min_increment": 0.0025,
+    "max_attempts": 3,
+    "attempt_count": 3,
+    "max_iterations_per_attempt": 40,
+    "relaxation_factor": 0.5,
+    "rows": [
+      {
+        "attempt_index": 1,
+        "seed_load_scale": 0.5,
+        "target_load_scale": 0.505,
+        "micro_increment": 0.0050000000000000044,
+        "ready": true,
+        "accepted_as_path_state": true,
+        "converged": true,
+        "iteration_count": 38,
+        "residual_inf_n": 0.0009174346923828125,
+        "relative_increment": 6.554357818980607e-05,
+        "max_increment_m": 4.554688824631725e-05,
+        "fixed_point_increment_m": 9.10937764926345e-05,
+        "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+        "max_translation_m": 1.5830763147516158,
+        "max_drift_ratio_pct": 15.788285874977937,
+        "residual_tolerance_n": 0.001,
+        "relative_increment_tolerance": 0.0001,
+        "near_displacement_fixed_point": true,
+        "residual_floor_above_tolerance": false,
+        "relaxation_factor": 0.5,
+        "linear_solver_refinement": {
+          "enabled": true,
+          "max_iterations": 10,
+          "strategy": "best_residual_iterative_refinement",
+          "residual_metric": "regularized_free_dof_linear_subproblem_inf_norm",
+          "claim_boundary": "Refines the regularized free-DOF linear subproblem solve and keeps the lowest residual iterate. It is not a substitute for a consistent nonlinear Newton/Jacobian."
+        },
+        "seconds": 47.85433898299743,
+        "blockers": []
+      },
+      {
+        "attempt_index": 2,
+        "seed_load_scale": 0.505,
+        "target_load_scale": 0.51,
+        "micro_increment": 0.0050000000000000044,
+        "ready": false,
+        "accepted_as_path_state": false,
+        "converged": false,
+        "iteration_count": 40,
+        "residual_inf_n": 0.0014414787292480469,
+        "relative_increment": 0.8888145659683275,
+        "max_increment_m": 0.615570442902161,
+        "fixed_point_increment_m": 1.231140885804322,
+        "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+        "max_translation_m": 1.5889691124033503,
+        "max_drift_ratio_pct": 15.725987106745679,
+        "residual_tolerance_n": 0.001,
+        "relative_increment_tolerance": 0.0001,
+        "near_displacement_fixed_point": false,
+        "residual_floor_above_tolerance": true,
+        "relaxation_factor": 0.5,
+        "linear_solver_refinement": {
+          "enabled": true,
+          "max_iterations": 10,
+          "strategy": "best_residual_iterative_refinement",
+          "residual_metric": "regularized_free_dof_linear_subproblem_inf_norm",
+          "claim_boundary": "Refines the regularized free-DOF linear subproblem solve and keeps the lowest residual iterate. It is not a substitute for a consistent nonlinear Newton/Jacobian."
+        },
+        "seconds": 49.415586784998595,
+        "blockers": [
+          "adaptive_micro_step_not_closed"
+        ]
+      },
+      {
+        "attempt_index": 3,
+        "seed_load_scale": 0.505,
+        "target_load_scale": 0.5075,
+        "micro_increment": 0.0024999999999999467,
+        "ready": false,
+        "accepted_as_path_state": false,
+        "converged": false,
+        "iteration_count": 40,
+        "residual_inf_n": 0.0012669563293457031,
+        "relative_increment": 0.4226069593695375,
+        "max_increment_m": 0.2888740146639611,
+        "fixed_point_increment_m": 0.5777480293279222,
+        "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+        "max_translation_m": 1.5703349480332078,
+        "max_drift_ratio_pct": 15.56887886714399,
+        "residual_tolerance_n": 0.001,
+        "relative_increment_tolerance": 0.0001,
+        "near_displacement_fixed_point": false,
+        "residual_floor_above_tolerance": true,
+        "relaxation_factor": 0.5,
+        "linear_solver_refinement": {
+          "enabled": true,
+          "max_iterations": 10,
+          "strategy": "best_residual_iterative_refinement",
+          "residual_metric": "regularized_free_dof_linear_subproblem_inf_norm",
+          "claim_boundary": "Refines the regularized free-DOF linear subproblem solve and keeps the lowest residual iterate. It is not a substitute for a consistent nonlinear Newton/Jacobian."
+        },
+        "seconds": 49.051735441000346,
+        "blockers": [
+          "adaptive_micro_step_not_closed"
+        ]
+      }
+    ],
+    "accepted_step_count": 1,
+    "seconds": 146.3216860700013,
+    "claim_boundary": "Bounded adaptive micro-step continuation above the last direct converged load. It can promote accepted micro-steps into the continuation path, but it is not full-load closure unless the target load is reached.",
+    "blockers": [
+      "adaptive_micro_continuation_not_full_load_closed"
+    ]
+  },
+  "post_failed_relaxation_sensitivity_probe": {
+    "ready": false,
+    "seed_load_scale": 0.505,
+    "target_load_scale": 0.5075,
+    "relaxation_factors": [
+      0.25
+    ],
+    "max_iterations": 40,
+    "row_count": 1,
+    "rows": [
+      {
+        "seed_load_scale": 0.505,
+        "target_load_scale": 0.5075,
+        "relaxation_factor": 0.25,
+        "ready": false,
+        "converged": false,
+        "iteration_count": 40,
+        "max_iterations": 40,
+        "residual_inf_n": 0.003032207489013672,
+        "relative_increment": 0.0001851585185116234,
+        "fixed_point_increment_m": 0.0002665822380691907,
+        "max_increment_m": 6.664555951729767e-05,
+        "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+        "max_translation_m": 1.6339475689433514,
+        "max_drift_ratio_pct": 16.318152177547947,
+        "residual_tolerance_n": 0.001,
+        "relative_increment_tolerance": 0.0001,
+        "near_displacement_fixed_point": false,
+        "residual_floor_above_tolerance": true,
+        "seconds": 48.94663387000037,
+        "blockers": [
+          "relaxation_sensitivity_not_closed"
+        ]
+      }
+    ],
+    "best_residual_inf_n": 0.003032207489013672,
+    "best_residual_relaxation_factor": 0.25,
+    "best_relative_increment": 0.0001851585185116234,
+    "best_increment_relaxation_factor": 0.25,
+    "seconds": 48.946641909999016,
+    "claim_boundary": "Relaxation sensitivity at the first failed post-accepted micro-step. This tests whether a more conservative fixed-point update can recover the path, but it is not closure unless both the residual and unrelaxed fixed-point increment meet tolerance.",
+    "blockers": [
+      "post_failed_relaxation_sensitivity_not_closed"
+    ]
+  },
+  "secant_predictor_probe": {
+    "ready": true,
+    "previous_load_scale": 0.5,
+    "seed_load_scale": 0.505,
+    "target_load_scale": 0.5075,
+    "extrapolation_factor": 0.4999999999999889,
+    "predictor_increment_m": 0.35574408133569224,
+    "relaxation_factors": [
+      0.5,
+      0.25
+    ],
+    "max_iterations": 50,
+    "row_count": 2,
+    "rows": [
+      {
+        "previous_load_scale": 0.5,
+        "seed_load_scale": 0.505,
+        "target_load_scale": 0.5075,
+        "extrapolation_factor": 0.4999999999999889,
+        "predictor_increment_m": 0.35574408133569224,
+        "relaxation_factor": 0.5,
+        "ready": false,
+        "converged": false,
+        "iteration_count": 50,
+        "max_iterations": 50,
+        "residual_inf_n": 7.414817810058594e-05,
+        "relative_increment": 1.3041292816992522,
+        "fixed_point_increment_m": 1.8392379319851027,
+        "max_increment_m": 0.9196189659925513,
+        "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+        "max_translation_m": 1.6230960168068178,
+        "max_drift_ratio_pct": 16.20060899500221,
+        "residual_tolerance_n": 0.001,
+        "relative_increment_tolerance": 0.0001,
+        "residual_gate_passed": true,
+        "relative_increment_gate_passed": false,
+        "accepted_as_path_state": false,
+        "seconds": 61.43929653300074,
+        "blockers": [
+          "secant_predictor_not_closed"
+        ]
+      },
+      {
+        "previous_load_scale": 0.5,
+        "seed_load_scale": 0.505,
+        "target_load_scale": 0.5075,
+        "extrapolation_factor": 0.4999999999999889,
+        "predictor_increment_m": 0.35574408133569224,
+        "relaxation_factor": 0.25,
+        "ready": true,
+        "converged": true,
+        "iteration_count": 39,
+        "max_iterations": 50,
+        "residual_inf_n": 0.0007381439208984375,
+        "relative_increment": 1.6640195382719183e-05,
+        "fixed_point_increment_m": 2.3957869051738356e-05,
+        "max_increment_m": 5.989467262934589e-06,
+        "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+        "max_translation_m": 1.6339580794379234,
+        "max_drift_ratio_pct": 16.318320446514196,
+        "residual_tolerance_n": 0.001,
+        "relative_increment_tolerance": 0.0001,
+        "residual_gate_passed": true,
+        "relative_increment_gate_passed": true,
+        "accepted_as_path_state": true,
+        "seconds": 47.77568405299826,
+        "blockers": []
+      }
+    ],
+    "best_residual_inf_n": 7.414817810058594e-05,
+    "best_residual_relaxation_factor": 0.5,
+    "best_relative_increment": 1.6640195382719183e-05,
+    "best_increment_relaxation_factor": 0.25,
+    "residual_gate_passed_by_any": true,
+    "relative_increment_gate_passed_by_any": true,
+    "accepted_as_path_state": true,
+    "accepted_load_scale": 0.5075,
+    "accepted_relaxation_factor": 0.25,
+    "seconds": 109.21503475899954,
+    "claim_boundary": "Secant displacement predictor from two accepted P-Delta states. It tests whether a path predictor can improve the failed next micro-step. It is not closure unless one row passes both residual and unrelaxed fixed-point increment gates.",
+    "blockers": []
+  },
+  "secant_micro_continuation_probe": {
+    "ready": false,
+    "target_load_scale": 0.55,
+    "initial_previous_load_scale": 0.505,
+    "initial_seed_load_scale": 0.5075,
+    "max_converged_load_scale": 0.5075,
+    "first_failed_load_scale": 0.5099999999999999,
+    "initial_increment": 0.0025,
+    "min_increment": 0.00125,
+    "max_attempts": 2,
+    "attempt_count": 2,
+    "accepted_step_count": 0,
+    "relaxation_factors": [
+      0.25
+    ],
+    "max_iterations_per_attempt": 50,
+    "rows": [
+      {
+        "attempt_index": 1,
+        "previous_load_scale": 0.505,
+        "seed_load_scale": 0.5075,
+        "target_load_scale": 0.5099999999999999,
+        "micro_increment": 0.0024999999999999467,
+        "ready": false,
+        "accepted_as_path_state": false,
+        "best_residual_inf_n": 0.0003294944763183594,
+        "best_relative_increment": 0.4344853325414667,
+        "best_residual_relaxation_factor": 0.25,
+        "best_increment_relaxation_factor": 0.25,
+        "residual_gate_passed_by_any": true,
+        "relative_increment_gate_passed_by_any": false,
+        "predictor": {
+          "ready": false,
+          "previous_load_scale": 0.505,
+          "seed_load_scale": 0.5075,
+          "target_load_scale": 0.5099999999999999,
+          "extrapolation_factor": 1.0,
+          "predictor_increment_m": 0.32685439229326296,
+          "relaxation_factors": [
+            0.25
+          ],
+          "max_iterations": 50,
+          "row_count": 1,
+          "rows": [
+            {
+              "previous_load_scale": 0.505,
+              "seed_load_scale": 0.5075,
+              "target_load_scale": 0.5099999999999999,
+              "extrapolation_factor": 1.0,
+              "predictor_increment_m": 0.32685439229326296,
+              "relaxation_factor": 0.25,
+              "ready": false,
+              "converged": false,
+              "iteration_count": 50,
+              "max_iterations": 50,
+              "residual_inf_n": 0.0003294944763183594,
+              "relative_increment": 0.4344853325414667,
+              "fixed_point_increment_m": 0.6031348034282789,
+              "max_increment_m": 0.1507837008570697,
+              "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+              "max_translation_m": 1.584691913518768,
+              "max_drift_ratio_pct": 15.659359806411901,
+              "residual_tolerance_n": 0.001,
+              "relative_increment_tolerance": 0.0001,
+              "residual_gate_passed": true,
+              "relative_increment_gate_passed": false,
+              "accepted_as_path_state": false,
+              "seconds": 61.51633444899926,
+              "blockers": [
+                "secant_predictor_not_closed"
+              ]
+            }
+          ],
+          "best_residual_inf_n": 0.0003294944763183594,
+          "best_residual_relaxation_factor": 0.25,
+          "best_relative_increment": 0.4344853325414667,
+          "best_increment_relaxation_factor": 0.25,
+          "residual_gate_passed_by_any": true,
+          "relative_increment_gate_passed_by_any": false,
+          "accepted_as_path_state": false,
+          "accepted_load_scale": null,
+          "accepted_relaxation_factor": null,
+          "seconds": 61.51638048099994,
+          "claim_boundary": "Secant displacement predictor from two accepted P-Delta states. It tests whether a path predictor can improve the failed next micro-step. It is not closure unless one row passes both residual and unrelaxed fixed-point increment gates.",
+          "blockers": [
+            "secant_predictor_not_closed"
+          ]
+        },
+        "blockers": [
+          "secant_micro_step_not_closed"
+        ]
+      },
+      {
+        "attempt_index": 2,
+        "previous_load_scale": 0.505,
+        "seed_load_scale": 0.5075,
+        "target_load_scale": 0.5087499999999999,
+        "micro_increment": 0.0012499999999999734,
+        "ready": false,
+        "accepted_as_path_state": false,
+        "best_residual_inf_n": 0.006094455718994141,
+        "best_relative_increment": 0.27469666874518217,
+        "best_residual_relaxation_factor": 0.25,
+        "best_increment_relaxation_factor": 0.25,
+        "residual_gate_passed_by_any": false,
+        "relative_increment_gate_passed_by_any": false,
+        "predictor": {
+          "ready": false,
+          "previous_load_scale": 0.505,
+          "seed_load_scale": 0.5075,
+          "target_load_scale": 0.5087499999999999,
+          "extrapolation_factor": 0.5,
+          "predictor_increment_m": 0.16342719614663137,
+          "relaxation_factors": [
+            0.25
+          ],
+          "max_iterations": 50,
+          "row_count": 1,
+          "rows": [
+            {
+              "previous_load_scale": 0.505,
+              "seed_load_scale": 0.5075,
+              "target_load_scale": 0.5087499999999999,
+              "extrapolation_factor": 0.5,
+              "predictor_increment_m": 0.16342719614663137,
+              "relaxation_factor": 0.25,
+              "ready": false,
+              "converged": false,
+              "iteration_count": 50,
+              "max_iterations": 50,
+              "residual_inf_n": 0.006094455718994141,
+              "relative_increment": 0.27469666874518217,
+              "fixed_point_increment_m": 0.4303730662582719,
+              "max_increment_m": 0.10759326656456802,
+              "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+              "max_translation_m": 1.6587356270461502,
+              "max_drift_ratio_pct": 16.574139447799354,
+              "residual_tolerance_n": 0.001,
+              "relative_increment_tolerance": 0.0001,
+              "residual_gate_passed": false,
+              "relative_increment_gate_passed": false,
+              "accepted_as_path_state": false,
+              "seconds": 61.413249850000284,
+              "blockers": [
+                "secant_predictor_not_closed"
+              ]
+            }
+          ],
+          "best_residual_inf_n": 0.006094455718994141,
+          "best_residual_relaxation_factor": 0.25,
+          "best_relative_increment": 0.27469666874518217,
+          "best_increment_relaxation_factor": 0.25,
+          "residual_gate_passed_by_any": false,
+          "relative_increment_gate_passed_by_any": false,
+          "accepted_as_path_state": false,
+          "accepted_load_scale": null,
+          "accepted_relaxation_factor": null,
+          "seconds": 61.41329595299976,
+          "claim_boundary": "Secant displacement predictor from two accepted P-Delta states. It tests whether a path predictor can improve the failed next micro-step. It is not closure unless one row passes both residual and unrelaxed fixed-point increment gates.",
+          "blockers": [
+            "secant_predictor_not_closed"
+          ]
+        },
+        "blockers": [
+          "secant_micro_step_not_closed"
+        ]
+      }
+    ],
+    "seconds": 122.9298550190033,
+    "claim_boundary": "Bounded secant-predictor micro-continuation after the first accepted secant step. It can advance the accepted P-Delta frontier, but it is not full-load closure unless the target load is reached and every accepted row passes both residual and unrelaxed fixed-point gates.",
+    "blockers": [
+      "secant_micro_continuation_not_full_load_closed"
+    ]
+  },
+  "fine_secant_micro_continuation_probe": {
+    "ready": false,
+    "target_load_scale": 0.55,
+    "initial_previous_load_scale": 0.505,
+    "initial_seed_load_scale": 0.5075,
+    "max_converged_load_scale": 0.5076562499999999,
+    "first_failed_load_scale": 0.5081249999999999,
+    "initial_increment": 0.000625,
+    "min_increment": 7.8125e-05,
+    "max_attempts": 4,
+    "attempt_count": 4,
+    "accepted_step_count": 1,
+    "relaxation_factors": [
+      0.25
+    ],
+    "max_iterations_per_attempt": 60,
+    "rows": [
+      {
+        "attempt_index": 1,
+        "previous_load_scale": 0.505,
+        "seed_load_scale": 0.5075,
+        "target_load_scale": 0.5081249999999999,
+        "micro_increment": 0.0006249999999999867,
+        "ready": false,
+        "accepted_as_path_state": false,
+        "best_residual_inf_n": 0.003537034574833342,
+        "best_relative_increment": 2.723370486273353e-05,
+        "best_residual_relaxation_factor": 0.25,
+        "best_increment_relaxation_factor": 0.25,
+        "residual_gate_passed_by_any": false,
+        "relative_increment_gate_passed_by_any": true,
+        "predictor": {
+          "ready": false,
+          "previous_load_scale": 0.505,
+          "seed_load_scale": 0.5075,
+          "target_load_scale": 0.5081249999999999,
+          "extrapolation_factor": 0.25,
+          "predictor_increment_m": 0.08171359807331569,
+          "relaxation_factors": [
+            0.25
+          ],
+          "max_iterations": 60,
+          "row_count": 1,
+          "rows": [
+            {
+              "previous_load_scale": 0.505,
+              "seed_load_scale": 0.5075,
+              "target_load_scale": 0.5081249999999999,
+              "extrapolation_factor": 0.25,
+              "predictor_increment_m": 0.08171359807331569,
+              "relaxation_factor": 0.25,
+              "ready": false,
+              "converged": false,
+              "iteration_count": 60,
+              "max_iterations": 60,
+              "residual_inf_n": 0.003537034574833342,
+              "relative_increment": 2.723370486273353e-05,
+              "fixed_point_increment_m": 3.949934309765979e-05,
+              "max_increment_m": 9.874835774414947e-06,
+              "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+              "max_translation_m": 1.6447947996976424,
+              "max_drift_ratio_pct": 16.428522642658645,
+              "residual_tolerance_n": 0.001,
+              "relative_increment_tolerance": 0.0001,
+              "residual_gate_passed": false,
+              "relative_increment_gate_passed": true,
+              "accepted_as_path_state": false,
+              "seconds": 73.87768879400028,
+              "blockers": [
+                "secant_predictor_not_closed"
+              ]
+            }
+          ],
+          "best_residual_inf_n": 0.003537034574833342,
+          "best_residual_relaxation_factor": 0.25,
+          "best_relative_increment": 2.723370486273353e-05,
+          "best_increment_relaxation_factor": 0.25,
+          "residual_gate_passed_by_any": false,
+          "relative_increment_gate_passed_by_any": true,
+          "accepted_as_path_state": false,
+          "accepted_load_scale": null,
+          "accepted_relaxation_factor": null,
+          "seconds": 73.87773439500234,
+          "claim_boundary": "Secant displacement predictor from two accepted P-Delta states. It tests whether a path predictor can improve the failed next micro-step. It is not closure unless one row passes both residual and unrelaxed fixed-point increment gates.",
+          "blockers": [
+            "secant_predictor_not_closed"
+          ]
+        },
+        "blockers": [
+          "secant_micro_step_not_closed"
+        ]
+      },
+      {
+        "attempt_index": 2,
+        "previous_load_scale": 0.505,
+        "seed_load_scale": 0.5075,
+        "target_load_scale": 0.5078125,
+        "micro_increment": 0.00031250000000004885,
+        "ready": false,
+        "accepted_as_path_state": false,
+        "best_residual_inf_n": 0.001994609832763672,
+        "best_relative_increment": 8.491343491599943e-08,
+        "best_residual_relaxation_factor": 0.25,
+        "best_increment_relaxation_factor": 0.25,
+        "residual_gate_passed_by_any": false,
+        "relative_increment_gate_passed_by_any": true,
+        "predictor": {
+          "ready": false,
+          "previous_load_scale": 0.505,
+          "seed_load_scale": 0.5075,
+          "target_load_scale": 0.5078125,
+          "extrapolation_factor": 0.1250000000000222,
+          "predictor_increment_m": 0.04085679903666506,
+          "relaxation_factors": [
+            0.25
+          ],
+          "max_iterations": 60,
+          "row_count": 1,
+          "rows": [
+            {
+              "previous_load_scale": 0.505,
+              "seed_load_scale": 0.5075,
+              "target_load_scale": 0.5078125,
+              "extrapolation_factor": 0.1250000000000222,
+              "predictor_increment_m": 0.04085679903666506,
+              "relaxation_factor": 0.25,
+              "ready": false,
+              "converged": false,
+              "iteration_count": 60,
+              "max_iterations": 60,
+              "residual_inf_n": 0.001994609832763672,
+              "relative_increment": 8.491343491599943e-08,
+              "fixed_point_increment_m": 1.227100273615278e-07,
+              "max_increment_m": 3.067750686813753e-08,
+              "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+              "max_translation_m": 1.6394237069369169,
+              "max_drift_ratio_pct": 16.373988640099544,
+              "residual_tolerance_n": 0.001,
+              "relative_increment_tolerance": 0.0001,
+              "residual_gate_passed": false,
+              "relative_increment_gate_passed": true,
+              "accepted_as_path_state": false,
+              "seconds": 76.59802115799903,
+              "blockers": [
+                "secant_predictor_not_closed"
+              ]
+            }
+          ],
+          "best_residual_inf_n": 0.001994609832763672,
+          "best_residual_relaxation_factor": 0.25,
+          "best_relative_increment": 8.491343491599943e-08,
+          "best_increment_relaxation_factor": 0.25,
+          "residual_gate_passed_by_any": false,
+          "relative_increment_gate_passed_by_any": true,
+          "accepted_as_path_state": false,
+          "accepted_load_scale": null,
+          "accepted_relaxation_factor": null,
+          "seconds": 76.59807948900198,
+          "claim_boundary": "Secant displacement predictor from two accepted P-Delta states. It tests whether a path predictor can improve the failed next micro-step. It is not closure unless one row passes both residual and unrelaxed fixed-point increment gates.",
+          "blockers": [
+            "secant_predictor_not_closed"
+          ]
+        },
+        "blockers": [
+          "secant_micro_step_not_closed"
+        ]
+      },
+      {
+        "attempt_index": 3,
+        "previous_load_scale": 0.505,
+        "seed_load_scale": 0.5075,
+        "target_load_scale": 0.5076562499999999,
+        "micro_increment": 0.00015624999999996891,
+        "ready": true,
+        "accepted_as_path_state": true,
+        "best_residual_inf_n": 0.0009484291076660156,
+        "best_relative_increment": 2.933389200703849e-06,
+        "best_residual_relaxation_factor": 0.25,
+        "best_increment_relaxation_factor": 0.25,
+        "residual_gate_passed_by_any": true,
+        "relative_increment_gate_passed_by_any": true,
+        "predictor": {
+          "ready": true,
+          "previous_load_scale": 0.505,
+          "seed_load_scale": 0.5075,
+          "target_load_scale": 0.5076562499999999,
+          "extrapolation_factor": 0.0624999999999889,
+          "predictor_increment_m": 0.020428399518325202,
+          "relaxation_factors": [
+            0.25
+          ],
+          "max_iterations": 60,
+          "row_count": 1,
+          "rows": [
+            {
+              "previous_load_scale": 0.505,
+              "seed_load_scale": 0.5075,
+              "target_load_scale": 0.5076562499999999,
+              "extrapolation_factor": 0.0624999999999889,
+              "predictor_increment_m": 0.020428399518325202,
+              "relaxation_factor": 0.25,
+              "ready": true,
+              "converged": true,
+              "iteration_count": 24,
+              "max_iterations": 60,
+              "residual_inf_n": 0.0009484291076660156,
+              "relative_increment": 2.933389200703849e-06,
+              "fixed_point_increment_m": 4.231274256416562e-06,
+              "max_increment_m": 1.0578185640763849e-06,
+              "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+              "max_translation_m": 1.636704148809781,
+              "max_drift_ratio_pct": 16.346315777445852,
+              "residual_tolerance_n": 0.001,
+              "relative_increment_tolerance": 0.0001,
+              "residual_gate_passed": true,
+              "relative_increment_gate_passed": true,
+              "accepted_as_path_state": true,
+              "seconds": 29.511577823999687,
+              "blockers": []
+            }
+          ],
+          "best_residual_inf_n": 0.0009484291076660156,
+          "best_residual_relaxation_factor": 0.25,
+          "best_relative_increment": 2.933389200703849e-06,
+          "best_increment_relaxation_factor": 0.25,
+          "residual_gate_passed_by_any": true,
+          "relative_increment_gate_passed_by_any": true,
+          "accepted_as_path_state": true,
+          "accepted_load_scale": 0.5076562499999999,
+          "accepted_relaxation_factor": 0.25,
+          "seconds": 29.511635056998784,
+          "claim_boundary": "Secant displacement predictor from two accepted P-Delta states. It tests whether a path predictor can improve the failed next micro-step. It is not closure unless one row passes both residual and unrelaxed fixed-point increment gates.",
+          "blockers": []
+        },
+        "blockers": []
+      },
+      {
+        "attempt_index": 4,
+        "previous_load_scale": 0.5075,
+        "seed_load_scale": 0.5076562499999999,
+        "target_load_scale": 0.5082812499999999,
+        "micro_increment": 0.0006249999999999867,
+        "ready": false,
+        "accepted_as_path_state": false,
+        "best_residual_inf_n": 0.002593994140625,
+        "best_relative_increment": 0.0003694832915692711,
+        "best_residual_relaxation_factor": 0.25,
+        "best_increment_relaxation_factor": 0.25,
+        "residual_gate_passed_by_any": false,
+        "relative_increment_gate_passed_by_any": false,
+        "predictor": {
+          "ready": false,
+          "previous_load_scale": 0.5075,
+          "seed_load_scale": 0.5076562499999999,
+          "target_load_scale": 0.5082812499999999,
+          "extrapolation_factor": 4.0000000000007105,
+          "predictor_increment_m": 0.054630539442993786,
+          "relaxation_factors": [
+            0.25
+          ],
+          "max_iterations": 60,
+          "row_count": 1,
+          "rows": [
+            {
+              "previous_load_scale": 0.5075,
+              "seed_load_scale": 0.5076562499999999,
+              "target_load_scale": 0.5082812499999999,
+              "extrapolation_factor": 4.0000000000007105,
+              "predictor_increment_m": 0.054630539442993786,
+              "relaxation_factor": 0.25,
+              "ready": false,
+              "converged": false,
+              "iteration_count": 60,
+              "max_iterations": 60,
+              "residual_inf_n": 0.002593994140625,
+              "relative_increment": 0.0003694832915692711,
+              "fixed_point_increment_m": 0.0005368584083407235,
+              "max_increment_m": 0.00013421460208506986,
+              "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+              "max_translation_m": 1.6474514598993764,
+              "max_drift_ratio_pct": 16.45544270760654,
+              "residual_tolerance_n": 0.001,
+              "relative_increment_tolerance": 0.0001,
+              "residual_gate_passed": false,
+              "relative_increment_gate_passed": false,
+              "accepted_as_path_state": false,
+              "seconds": 73.76830135000273,
+              "blockers": [
+                "secant_predictor_not_closed"
+              ]
+            }
+          ],
+          "best_residual_inf_n": 0.002593994140625,
+          "best_residual_relaxation_factor": 0.25,
+          "best_relative_increment": 0.0003694832915692711,
+          "best_increment_relaxation_factor": 0.25,
+          "residual_gate_passed_by_any": false,
+          "relative_increment_gate_passed_by_any": false,
+          "accepted_as_path_state": false,
+          "accepted_load_scale": null,
+          "accepted_relaxation_factor": null,
+          "seconds": 73.76834848100043,
+          "claim_boundary": "Secant displacement predictor from two accepted P-Delta states. It tests whether a path predictor can improve the failed next micro-step. It is not closure unless one row passes both residual and unrelaxed fixed-point increment gates.",
+          "blockers": [
+            "secant_predictor_not_closed"
+          ]
+        },
+        "blockers": [
+          "secant_micro_step_not_closed"
+        ]
+      }
+    ],
+    "seconds": 253.75601271900086,
+    "claim_boundary": "Bounded secant-predictor micro-continuation after the first accepted secant step. It can advance the accepted P-Delta frontier, but it is not full-load closure unless the target load is reached and every accepted row passes both residual and unrelaxed fixed-point gates.",
+    "blockers": [
+      "secant_micro_continuation_not_full_load_closed"
+    ]
+  },
+  "frontier_residual_jacobian_probe": {
+    "seed_load_scale": 0.5076562499999999,
+    "target_load_scale": 0.5078125,
+    "ready": false,
+    "converged": false,
+    "base_fixed_point_ready": false,
+    "base_fixed_point_iteration_count": 60,
+    "base_fixed_point_relaxation": 0.25,
+    "base_residual_inf_n": 10310.51651763916,
+    "base_fixed_point_map_residual_inf_n": 0.0018175238016251427,
+    "regularization": 2047.0118205817405,
+    "correction_pass_count": 4,
+    "requested_correction_passes": 4,
+    "accepted_correction_count": 4,
+    "direction_count": 3,
+    "direction_labels": [
+      "regularized_tangent_newton",
+      "fixed_point_delta",
+      "load_path_secant_delta"
+    ],
+    "jvp_rows": [
+      {
+        "label": "regularized_tangent_newton",
+        "direction_norm_inf_m": 1.5171440838361234e-06,
+        "trial_residual_inf_n": 10348.040744781494,
+        "jvp_norm_inf_n": 4396.056560516357
+      },
+      {
+        "label": "fixed_point_delta",
+        "direction_norm_inf_m": 1.5171250193901642e-06,
+        "trial_residual_inf_n": 26340.965635299683,
+        "jvp_norm_inf_n": 18453.220235824585
+      },
+      {
+        "label": "load_path_secant_delta",
+        "direction_norm_inf_m": 0.013276212752117322,
+        "trial_residual_inf_n": 99622036.25852966,
+        "jvp_norm_inf_n": 99629924.00392914
+      }
+    ],
+    "least_squares_backend": "numpy_lstsq_finite_difference_residual_jacobian",
+    "coefficient_values": [
+      5.161029376731084,
+      -2.8231094083201764,
+      -0.00031626759993841347
+    ],
+    "coefficient_l1": 7.984455052651199,
+    "combined_correction_norm_inf_m": 4.030070359172953e-06,
+    "candidate_count": 5,
+    "candidate_rows": [
+      {
+        "alpha": 1.0,
+        "residual_inf_n": 15730.635381698608,
+        "fixed_point_remap_residual_inf_n": 0.0017070770263671875,
+        "fixed_point_increment_m": 2.9920527675697528e-05,
+        "fixed_point_relative_increment": 2.0704530318507404e-05,
+        "max_translation_m": 1.639422854028896,
+        "max_drift_ratio_pct": 16.373979972735583,
+        "residual_gate_passed": false,
+        "relative_increment_gate_passed": true,
+        "ready": false
+      },
+      {
+        "alpha": 0.5,
+        "residual_inf_n": 5166.514132499695,
+        "fixed_point_remap_residual_inf_n": 0.00321197509765625,
+        "fixed_point_increment_m": 1.505093238995947e-05,
+        "fixed_point_relative_increment": 1.0415009001494265e-05,
+        "max_translation_m": 1.639423279930205,
+        "max_drift_ratio_pct": 16.373984299434966,
+        "residual_gate_passed": false,
+        "relative_increment_gate_passed": true,
+        "ready": false
+      },
+      {
+        "alpha": 0.25,
+        "residual_inf_n": 7738.5125913619995,
+        "fixed_point_remap_residual_inf_n": 0.0011678789537583611,
+        "fixed_point_increment_m": 7.543750595973009e-06,
+        "fixed_point_relative_increment": 5.220157692055325e-06,
+        "max_translation_m": 1.639423492880863,
+        "max_drift_ratio_pct": 16.3739864627847,
+        "residual_gate_passed": false,
+        "relative_increment_gate_passed": true,
+        "ready": false
+      },
+      {
+        "alpha": 0.125,
+        "residual_inf_n": 9024.514029502869,
+        "fixed_point_remap_residual_inf_n": 0.001621246337890625,
+        "fixed_point_increment_m": 3.797310412112509e-06,
+        "fixed_point_relative_increment": 2.6276797158532727e-06,
+        "max_translation_m": 1.6394235993561932,
+        "max_drift_ratio_pct": 16.373987544459574,
+        "residual_gate_passed": false,
+        "relative_increment_gate_passed": true,
+        "ready": false
+      },
+      {
+        "alpha": 0.0625,
+        "residual_inf_n": 9667.515173912048,
+        "fixed_point_remap_residual_inf_n": 0.0026268959045410156,
+        "fixed_point_increment_m": 1.9377177244983557e-06,
+        "fixed_point_relative_increment": 1.340870555941155e-06,
+        "max_translation_m": 1.639423652593858,
+        "max_drift_ratio_pct": 16.37398808529701,
+        "residual_gate_passed": false,
+        "relative_increment_gate_passed": true,
+        "ready": false
+      }
+    ],
+    "pass_rows": [
+      {
+        "pass": 1,
+        "residual_inf_n_before": 10310.51651763916,
+        "map_residual_inf_n_before": 0.0018175238016251427,
+        "regularization": 2047.0118205817405,
+        "direction_count": 3,
+        "direction_labels": [
+          "regularized_tangent_newton",
+          "fixed_point_delta",
+          "load_path_secant_delta"
+        ],
+        "jvp_rows": [
+          {
+            "label": "regularized_tangent_newton",
+            "direction_norm_inf_m": 1.5171440838361234e-06,
+            "trial_residual_inf_n": 10348.040744781494,
+            "jvp_norm_inf_n": 4396.056560516357
+          },
+          {
+            "label": "fixed_point_delta",
+            "direction_norm_inf_m": 1.5171250193901642e-06,
+            "trial_residual_inf_n": 26340.965635299683,
+            "jvp_norm_inf_n": 18453.220235824585
+          },
+          {
+            "label": "load_path_secant_delta",
+            "direction_norm_inf_m": 0.013276212752117322,
+            "trial_residual_inf_n": 99622036.25852966,
+            "jvp_norm_inf_n": 99629924.00392914
+          }
+        ],
+        "least_squares_backend": "numpy_lstsq_finite_difference_residual_jacobian",
+        "coefficient_values": [
+          5.161029376731084,
+          -2.8231094083201764,
+          -0.00031626759993841347
+        ],
+        "coefficient_l1": 7.984455052651199,
+        "combined_correction_norm_inf_m": 4.030070359172953e-06,
+        "candidate_count": 5,
+        "candidate_rows": [
+          {
+            "alpha": 1.0,
+            "residual_inf_n": 15730.635381698608,
+            "fixed_point_remap_residual_inf_n": 0.0017070770263671875,
+            "fixed_point_increment_m": 2.9920527675697528e-05,
+            "fixed_point_relative_increment": 2.0704530318507404e-05,
+            "max_translation_m": 1.639422854028896,
+            "max_drift_ratio_pct": 16.373979972735583,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.5,
+            "residual_inf_n": 5166.514132499695,
+            "fixed_point_remap_residual_inf_n": 0.00321197509765625,
+            "fixed_point_increment_m": 1.505093238995947e-05,
+            "fixed_point_relative_increment": 1.0415009001494265e-05,
+            "max_translation_m": 1.639423279930205,
+            "max_drift_ratio_pct": 16.373984299434966,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.25,
+            "residual_inf_n": 7738.5125913619995,
+            "fixed_point_remap_residual_inf_n": 0.0011678789537583611,
+            "fixed_point_increment_m": 7.543750595973009e-06,
+            "fixed_point_relative_increment": 5.220157692055325e-06,
+            "max_translation_m": 1.639423492880863,
+            "max_drift_ratio_pct": 16.3739864627847,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.125,
+            "residual_inf_n": 9024.514029502869,
+            "fixed_point_remap_residual_inf_n": 0.001621246337890625,
+            "fixed_point_increment_m": 3.797310412112509e-06,
+            "fixed_point_relative_increment": 2.6276797158532727e-06,
+            "max_translation_m": 1.6394235993561932,
+            "max_drift_ratio_pct": 16.373987544459574,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.0625,
+            "residual_inf_n": 9667.515173912048,
+            "fixed_point_remap_residual_inf_n": 0.0026268959045410156,
+            "fixed_point_increment_m": 1.9377177244983557e-06,
+            "fixed_point_relative_increment": 1.340870555941155e-06,
+            "max_translation_m": 1.639423652593858,
+            "max_drift_ratio_pct": 16.37398808529701,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          }
+        ],
+        "best_alpha": 0.5,
+        "best_residual_inf_n": 5166.514132499695,
+        "best_fixed_point_relative_increment": 1.0415009001494265e-05,
+        "accepted": true
+      },
+      {
+        "pass": 2,
+        "residual_inf_n_before": 5166.514132499695,
+        "map_residual_inf_n_before": 0.00321197509765625,
+        "regularization": 2047.011820581665,
+        "direction_count": 4,
+        "direction_labels": [
+          "regularized_tangent_newton",
+          "fixed_point_delta",
+          "load_path_secant_delta",
+          "previous_residual_jacobian_correction"
+        ],
+        "jvp_rows": [
+          {
+            "label": "regularized_tangent_newton",
+            "direction_norm_inf_m": 1.5009665459242066e-05,
+            "trial_residual_inf_n": 1929135.8377170563,
+            "jvp_norm_inf_n": 1925215.583431244
+          },
+          {
+            "label": "fixed_point_delta",
+            "direction_norm_inf_m": 1.505093238995947e-05,
+            "trial_residual_inf_n": 1979653.1616477966,
+            "jvp_norm_inf_n": 1975732.9073619843
+          },
+          {
+            "label": "load_path_secant_delta",
+            "direction_norm_inf_m": 0.013274197716937719,
+            "trial_residual_inf_n": 99614879.77758217,
+            "jvp_norm_inf_n": 99610959.52329636
+          },
+          {
+            "label": "previous_residual_jacobian_correction",
+            "direction_norm_inf_m": 2.0150351795864763e-06,
+            "trial_residual_inf_n": 15730.627597808838,
+            "jvp_norm_inf_n": 11810.37331199646
+          }
+        ],
+        "least_squares_backend": "numpy_lstsq_finite_difference_residual_jacobian",
+        "coefficient_values": [
+          0.16099768321524946,
+          -0.1740563590272331,
+          0.0001814007198554235,
+          1.011076119092371
+        ],
+        "coefficient_l1": 1.346311562054709,
+        "combined_correction_norm_inf_m": 1.845073694112748e-06,
+        "candidate_count": 5,
+        "candidate_rows": [
+          {
+            "alpha": 1.0,
+            "residual_inf_n": 9020.106508255005,
+            "fixed_point_remap_residual_inf_n": 0.002613067626953125,
+            "fixed_point_increment_m": 1.3701223122497552e-05,
+            "fixed_point_relative_increment": 9.481031596941963e-06,
+            "max_translation_m": 1.6394233289967273,
+            "max_drift_ratio_pct": 16.373984793172696,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.5,
+            "residual_inf_n": 2578.825674533844,
+            "fixed_point_remap_residual_inf_n": 0.0021071434020996094,
+            "fixed_point_increment_m": 1.4334056535947326e-05,
+            "fixed_point_relative_increment": 9.918942292121234e-06,
+            "max_translation_m": 1.6394233044634663,
+            "max_drift_ratio_pct": 16.37398454630383,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.25,
+            "residual_inf_n": 3872.6686182022095,
+            "fixed_point_remap_residual_inf_n": 0.0016236305236816406,
+            "fixed_point_increment_m": 1.4659114878190493e-05,
+            "fixed_point_relative_increment": 1.0143877506971133e-05,
+            "max_translation_m": 1.6394232921968355,
+            "max_drift_ratio_pct": 16.3739844228694,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.125,
+            "residual_inf_n": 4519.591122627258,
+            "fixed_point_remap_residual_inf_n": 0.0039806365966796875,
+            "fixed_point_increment_m": 1.4863951650179175e-05,
+            "fixed_point_relative_increment": 1.0285621300865243e-05,
+            "max_translation_m": 1.6394232860635205,
+            "max_drift_ratio_pct": 16.373984361152182,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.0625,
+            "residual_inf_n": 4843.052547454834,
+            "fixed_point_remap_residual_inf_n": 0.001220703125,
+            "fixed_point_increment_m": 1.4952692369174514e-05,
+            "fixed_point_relative_increment": 1.0347028467901464e-05,
+            "max_translation_m": 1.639423282996863,
+            "max_drift_ratio_pct": 16.373984330293574,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          }
+        ],
+        "best_alpha": 0.5,
+        "best_residual_inf_n": 2578.825674533844,
+        "best_fixed_point_relative_increment": 9.918942292121234e-06,
+        "accepted": true
+      },
+      {
+        "pass": 3,
+        "residual_inf_n_before": 2578.825674533844,
+        "map_residual_inf_n_before": 0.0021071434020996094,
+        "regularization": 2047.011820581669,
+        "direction_count": 4,
+        "direction_labels": [
+          "regularized_tangent_newton",
+          "fixed_point_delta",
+          "load_path_secant_delta",
+          "previous_residual_jacobian_correction"
+        ],
+        "jvp_rows": [
+          {
+            "label": "regularized_tangent_newton",
+            "direction_norm_inf_m": 1.4341776253558818e-05,
+            "trial_residual_inf_n": 1806293.5356826782,
+            "jvp_norm_inf_n": 1808843.410938263
+          },
+          {
+            "label": "fixed_point_delta",
+            "direction_norm_inf_m": 1.4334056535947326e-05,
+            "trial_residual_inf_n": 1807209.4720478058,
+            "jvp_norm_inf_n": 1809759.3473033905
+          },
+          {
+            "label": "load_path_secant_delta",
+            "direction_norm_inf_m": 0.013274281419910272,
+            "trial_residual_inf_n": 99603189.28145218,
+            "jvp_norm_inf_n": 99605739.15670776
+          },
+          {
+            "label": "previous_residual_jacobian_correction",
+            "direction_norm_inf_m": 9.22536847056374e-07,
+            "trial_residual_inf_n": 9020.106573104858,
+            "jvp_norm_inf_n": 6470.231317520142
+          }
+        ],
+        "least_squares_backend": "numpy_lstsq_finite_difference_residual_jacobian",
+        "coefficient_values": [
+          -1.6209054754811187,
+          1.6223977266698009,
+          4.8346271592558665e-05,
+          0.9972597115049546
+        ],
+        "coefficient_l1": 4.2406112599274675,
+        "combined_correction_norm_inf_m": 1.0649386812922683e-06,
+        "candidate_count": 5,
+        "candidate_rows": [
+          {
+            "alpha": 1.0,
+            "residual_inf_n": 2404.6470470428467,
+            "fixed_point_remap_residual_inf_n": 0.0014383395974721935,
+            "fixed_point_increment_m": 8.925541578053142e-06,
+            "fixed_point_relative_increment": 6.176335340597776e-06,
+            "max_translation_m": 1.6394234605885412,
+            "max_drift_ratio_pct": 16.37398613277703,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.5,
+            "residual_inf_n": 2477.2772102355957,
+            "fixed_point_remap_residual_inf_n": 0.0031299591064453125,
+            "fixed_point_increment_m": 1.1630844871213242e-05,
+            "fixed_point_relative_increment": 8.048362587103439e-06,
+            "max_translation_m": 1.6394233825260034,
+            "max_drift_ratio_pct": 16.37398533954043,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.25,
+            "residual_inf_n": 2513.6939907073975,
+            "fixed_point_remap_residual_inf_n": 0.0034389495849609375,
+            "fixed_point_increment_m": 1.2975727032848994e-05,
+            "fixed_point_relative_increment": 8.97899978605573e-06,
+            "max_translation_m": 1.6394233434947347,
+            "max_drift_ratio_pct": 16.373984942922128,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.125,
+            "residual_inf_n": 2531.8702507019043,
+            "fixed_point_remap_residual_inf_n": 0.003764629364013672,
+            "fixed_point_increment_m": 1.3689887162771086e-05,
+            "fixed_point_relative_increment": 9.47318728949666e-06,
+            "max_translation_m": 1.6394233239791005,
+            "max_drift_ratio_pct": 16.37398474461298,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.0625,
+            "residual_inf_n": 2540.873077392578,
+            "fixed_point_remap_residual_inf_n": 0.0036471433611513504,
+            "fixed_point_increment_m": 1.4003208829382885e-05,
+            "fixed_point_relative_increment": 9.690000923871113e-06,
+            "max_translation_m": 1.6394233142212835,
+            "max_drift_ratio_pct": 16.373984645458407,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          }
+        ],
+        "best_alpha": 1.0,
+        "best_residual_inf_n": 2404.6470470428467,
+        "best_fixed_point_relative_increment": 6.176335340597776e-06,
+        "accepted": true
+      },
+      {
+        "pass": 4,
+        "residual_inf_n_before": 2404.6470470428467,
+        "map_residual_inf_n_before": 0.0014383395974721935,
+        "regularization": 2047.011820581697,
+        "direction_count": 4,
+        "direction_labels": [
+          "regularized_tangent_newton",
+          "fixed_point_delta",
+          "load_path_secant_delta",
+          "previous_residual_jacobian_correction"
+        ],
+        "jvp_rows": [
+          {
+            "label": "regularized_tangent_newton",
+            "direction_norm_inf_m": 8.900186364860026e-06,
+            "trial_residual_inf_n": 1099536.2379703522,
+            "jvp_norm_inf_n": 1101940.885017395
+          },
+          {
+            "label": "fixed_point_delta",
+            "direction_norm_inf_m": 8.925541578053142e-06,
+            "trial_residual_inf_n": 1139083.0059604645,
+            "jvp_norm_inf_n": 1141487.6530075073
+          },
+          {
+            "label": "load_path_secant_delta",
+            "direction_norm_inf_m": 0.01327501553260757,
+            "trial_residual_inf_n": 99614655.47519302,
+            "jvp_norm_inf_n": 99617060.12224007
+          },
+          {
+            "label": "previous_residual_jacobian_correction",
+            "direction_norm_inf_m": 1.0649386812922683e-06,
+            "trial_residual_inf_n": 2582.6265535354614,
+            "jvp_norm_inf_n": 2580.7193269729614
+          }
+        ],
+        "least_squares_backend": "numpy_lstsq_finite_difference_residual_jacobian",
+        "coefficient_values": [
+          0.03780655494835079,
+          -0.03806151531971828,
+          4.205214587667955e-05,
+          0.0003149702820595115
+        ],
+        "coefficient_l1": 0.07622509269600528,
+        "combined_correction_norm_inf_m": 5.552398607195446e-07,
+        "candidate_count": 5,
+        "candidate_rows": [
+          {
+            "alpha": 1.0,
+            "residual_inf_n": 2092.1725463867188,
+            "fixed_point_remap_residual_inf_n": 0.0014262199401855469,
+            "fixed_point_increment_m": 4.819335874595154e-06,
+            "fixed_point_relative_increment": 3.3349053725600184e-06,
+            "max_translation_m": 1.6394235747907082,
+            "max_drift_ratio_pct": 16.373987294641854,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.5,
+            "residual_inf_n": 2248.4628314971924,
+            "fixed_point_remap_residual_inf_n": 0.002834320068359375,
+            "fixed_point_increment_m": 6.9306444288042e-06,
+            "fixed_point_relative_increment": 4.795897835991511e-06,
+            "max_translation_m": 1.6394235176896248,
+            "max_drift_ratio_pct": 16.373986713709442,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.25,
+            "residual_inf_n": 2326.6432037353516,
+            "fixed_point_remap_residual_inf_n": 0.003021240234375,
+            "fixed_point_increment_m": 7.871238949519466e-06,
+            "fixed_point_relative_increment": 5.4467744900414475e-06,
+            "max_translation_m": 1.639423489139083,
+            "max_drift_ratio_pct": 16.373986423243238,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.125,
+            "residual_inf_n": 2365.583692550659,
+            "fixed_point_remap_residual_inf_n": 0.00139617919921875,
+            "fixed_point_increment_m": 8.416413630030206e-06,
+            "fixed_point_relative_increment": 5.82402680313488e-06,
+            "max_translation_m": 1.6394234748638121,
+            "max_drift_ratio_pct": 16.373986278010133,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          },
+          {
+            "alpha": 0.0625,
+            "residual_inf_n": 2385.170036315918,
+            "fixed_point_remap_residual_inf_n": 0.00263214111328125,
+            "fixed_point_increment_m": 8.630907259554732e-06,
+            "fixed_point_relative_increment": 5.972453027248619e-06,
+            "max_translation_m": 1.6394234677261765,
+            "max_drift_ratio_pct": 16.37398620539358,
+            "residual_gate_passed": false,
+            "relative_increment_gate_passed": true,
+            "ready": false
+          }
+        ],
+        "best_alpha": 1.0,
+        "best_residual_inf_n": 2092.1725463867188,
+        "best_fixed_point_relative_increment": 3.3349053725600184e-06,
+        "accepted": true
+      }
+    ],
+    "best_alpha": 1.0,
+    "best_residual_inf_n": 2092.1725463867188,
+    "best_fixed_point_relative_increment": 3.3349053725600184e-06,
+    "final_residual_inf_n": 2092.1725463867188,
+    "best_residual_reduction_factor": 0.20291636629527188,
+    "residual_tolerance_n": 0.001,
+    "relative_increment_tolerance": 0.0001,
+    "breakdown": "",
+    "seconds": 143.88308302000223,
+    "claim_boundary": "Finite-difference residual-Jacobian probe at the nearest failed P-Delta frontier bracket. It builds a small Newton-Krylov correction from tangent, fixed-point, and load-path directions and accepts only after both direct residual and remapped fixed-point increment gates pass. It is a local frontier closure only, not full-load material/shell Newton closure.",
+    "blockers": [
+      "frontier_residual_jacobian_not_closed"
+    ]
+  },
+  "first_failed_one_step_line_search_probe": {
+    "target_load_scale": 0.55,
+    "seed_residual_inf_n": 412327.0493295045,
+    "correction_norm_inf_m": 1.1403785230167263,
+    "regularization": 2047.0102455881934,
+    "candidate_count": 4,
+    "candidates": [
+      {
+        "alpha": 1.0,
+        "residual_inf_n": 9044295688.93304,
+        "residual_reduction_factor": 21934.761989639534,
+        "max_translation_m": 2.0196344463192344,
+        "max_drift_ratio_pct": 20.02984461277579
+      },
+      {
+        "alpha": 0.5,
+        "residual_inf_n": 37186049181.742615,
+        "residual_reduction_factor": 90185.810613715,
+        "max_translation_m": 1.827769672389822,
+        "max_drift_ratio_pct": 18.18415910442553
+      },
+      {
+        "alpha": 0.25,
+        "residual_inf_n": 26739636125.4028,
+        "residual_reduction_factor": 64850.550476581164,
+        "max_translation_m": 1.7321204478644894,
+        "max_drift_ratio_pct": 17.26410038666348
+      },
+      {
+        "alpha": 0.125,
+        "residual_inf_n": 15403952814.52221,
+        "residual_reduction_factor": 37358.57940819301,
+        "max_translation_m": 1.6843807063854035,
+        "max_drift_ratio_pct": 16.804900509663945
+      }
+    ],
+    "best_alpha": 1.0,
+    "best_residual_inf_n": 9044295688.93304,
+    "best_residual_reduction_factor": 21934.761989639534,
+    "best_max_translation_m": 2.0196344463192344,
+    "ready": false,
+    "threshold_n": 0.001,
+    "linear_solver": {
+      "strategy": "single_direct_spsolve_on_regularized_residual_system",
+      "uses_frame_solver_iterative_refinement": false
+    },
+    "seconds": 4.841122207999433,
+    "claim_boundary": "One-step approximate Newton correction with residual-based alpha scan at the first failed continuation load. This is diagnostic evidence for the consistent Newton/Jacobian gap, not a full nonlinear path closure.",
+    "blockers": [
+      "one_step_line_search_newton_not_closed"
+    ]
+  },
+  "first_failed_anderson_acceleration_probe": {
+    "target_load_scale": 0.55,
+    "ready": false,
+    "converged": false,
+    "label": "constrained_anderson",
+    "iteration_count": 48,
+    "max_iterations": 48,
+    "history_depth": 8,
+    "coefficient_l1_limit": null,
+    "coefficient_bounded_count": 0,
+    "best_map_residual_inf_n": 7.97957181930542e-06,
+    "best_relative_increment": 0.0020817748150549105,
+    "final_map_residual_inf_n": 1.1756357707781717e-05,
+    "final_relative_increment": 0.0076832960803650185,
+    "relative_increment_tolerance": 0.0001,
+    "residual_tolerance_n": 0.001,
+    "max_coefficient_l1": 138.25569426287393,
+    "max_unbounded_coefficient_l1": 138.25569426287393,
+    "history_tail": [
+      {
+        "iteration": 43,
+        "map_residual_inf_n": 1.7914921045303345e-05,
+        "regularization": 2047.0102353266657,
+        "max_increment_m": 0.21140770465485126,
+        "relative_increment": 0.12033546280933147,
+        "max_translation_m": 1.954729803920218,
+        "max_drift_ratio_pct": 18.26198676998281,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 7.929200387176577,
+        "anderson_unbounded_coefficient_l1": 7.929200387176577,
+        "coefficient_l1_was_bounded": false
+      },
+      {
+        "iteration": 44,
+        "map_residual_inf_n": 1.5504655721088056e-05,
+        "regularization": 2047.0102352896247,
+        "max_increment_m": 0.12816596349021103,
+        "relative_increment": 0.0786944242388993,
+        "max_translation_m": 1.9547326889202414,
+        "max_drift_ratio_pct": 18.26197048869533,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 6.606227598908656,
+        "anderson_unbounded_coefficient_l1": 6.606227598908656,
+        "coefficient_l1_was_bounded": false
+      },
+      {
+        "iteration": 45,
+        "map_residual_inf_n": 1.1059775715693831e-05,
+        "regularization": 2047.0102352927706,
+        "max_increment_m": 0.06562973822440443,
+        "relative_increment": 0.04097772103194394,
+        "max_translation_m": 1.9547338731556503,
+        "max_drift_ratio_pct": 18.26204235772377,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 2.078799731651651,
+        "anderson_unbounded_coefficient_l1": 2.078799731651651,
+        "coefficient_l1_was_bounded": false
+      },
+      {
+        "iteration": 46,
+        "map_residual_inf_n": 1.160171814262867e-05,
+        "regularization": 2047.0102353058076,
+        "max_increment_m": 0.013590780109397294,
+        "relative_increment": 0.008485772445394767,
+        "max_translation_m": 1.9547344826777935,
+        "max_drift_ratio_pct": 18.262036576705768,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 1.9126252342933239,
+        "anderson_unbounded_coefficient_l1": 1.9126252342933239,
+        "coefficient_l1_was_bounded": false
+      },
+      {
+        "iteration": 47,
+        "map_residual_inf_n": 2.1849293261766434e-05,
+        "regularization": 2047.0102353082902,
+        "max_increment_m": 0.0033341624258016456,
+        "relative_increment": 0.0020817748150549105,
+        "max_translation_m": 1.9547344130420576,
+        "max_drift_ratio_pct": 18.2620395405888,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 1.9649687531666478,
+        "anderson_unbounded_coefficient_l1": 1.9649687531666478,
+        "coefficient_l1_was_bounded": false
+      },
+      {
+        "iteration": 48,
+        "map_residual_inf_n": 1.1756357707781717e-05,
+        "regularization": 2047.0102353076054,
+        "max_increment_m": 0.0123055421768683,
+        "relative_increment": 0.0076832960803650185,
+        "max_translation_m": 1.954735102457157,
+        "max_drift_ratio_pct": 18.262039957773148,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 5.013464181805744,
+        "anderson_unbounded_coefficient_l1": 5.013464181805744,
+        "coefficient_l1_was_bounded": false
+      }
+    ],
+    "seconds": 60.21150505600235,
+    "breakdown": "",
+    "claim_boundary": "Constrained Anderson acceleration on the existing deformed-state P-Delta fixed-point map. Optional coefficient L1 limiting blends unstable extrapolation back toward the latest mapped state. This is a path-following diagnostic only; it does not provide a consistent Newton/Jacobian or material Newton closure.",
+    "blockers": [
+      "anderson_acceleration_pdelta_not_closed"
+    ]
+  },
+  "first_failed_coefficient_bounded_anderson_probe": {
+    "target_load_scale": 0.55,
+    "ready": false,
+    "converged": false,
+    "label": "coefficient_bounded_anderson_l1_8",
+    "iteration_count": 48,
+    "max_iterations": 48,
+    "history_depth": 8,
+    "coefficient_l1_limit": 8.0,
+    "coefficient_bounded_count": 20,
+    "best_map_residual_inf_n": 7.62939453125e-06,
+    "best_relative_increment": 0.002074286864856289,
+    "final_map_residual_inf_n": 1.0178151569562033e-05,
+    "final_relative_increment": 0.05423981577997646,
+    "relative_increment_tolerance": 0.0001,
+    "residual_tolerance_n": 0.001,
+    "max_coefficient_l1": 8.000000000000002,
+    "max_unbounded_coefficient_l1": 82.63927903613076,
+    "history_tail": [
+      {
+        "iteration": 43,
+        "map_residual_inf_n": 2.288399264216423e-05,
+        "regularization": 2047.010235305114,
+        "max_increment_m": 0.3985851266029452,
+        "relative_increment": 0.24886713868573077,
+        "max_translation_m": 1.9547365021344185,
+        "max_drift_ratio_pct": 18.262033509997046,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 8.0,
+        "anderson_unbounded_coefficient_l1": 12.759427648126339,
+        "coefficient_l1_was_bounded": true
+      },
+      {
+        "iteration": 44,
+        "map_residual_inf_n": 1.4258548617362976e-05,
+        "regularization": 2047.010235307387,
+        "max_increment_m": 0.19630102117472392,
+        "relative_increment": 0.12256574325439015,
+        "max_translation_m": 1.9547363047706743,
+        "max_drift_ratio_pct": 18.76812235811593,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 2.640999001665447,
+        "anderson_unbounded_coefficient_l1": 2.640999001665447,
+        "coefficient_l1_was_bounded": false
+      },
+      {
+        "iteration": 45,
+        "map_residual_inf_n": 1.4621764421463013e-05,
+        "regularization": 2047.0102352995852,
+        "max_increment_m": 0.014287973170916679,
+        "relative_increment": 0.008921074349129709,
+        "max_translation_m": 1.9547363417242392,
+        "max_drift_ratio_pct": 18.80945262892917,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 1.7836921325023678,
+        "anderson_unbounded_coefficient_l1": 1.7836921325023678,
+        "coefficient_l1_was_bounded": false
+      },
+      {
+        "iteration": 46,
+        "map_residual_inf_n": 1.3716516377826338e-05,
+        "regularization": 2047.010235300296,
+        "max_increment_m": 0.003322173298179798,
+        "relative_increment": 0.002074286864856289,
+        "max_translation_m": 1.9547363362115662,
+        "max_drift_ratio_pct": 18.815721730168743,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 1.9216217215240228,
+        "anderson_unbounded_coefficient_l1": 1.9216217215240228,
+        "coefficient_l1_was_bounded": false
+      },
+      {
+        "iteration": 47,
+        "map_residual_inf_n": 1.2662261724472046e-05,
+        "regularization": 2047.0102353000505,
+        "max_increment_m": 0.03085439372653026,
+        "relative_increment": 0.019264756675984002,
+        "max_translation_m": 1.95473642240877,
+        "max_drift_ratio_pct": 18.868056181011184,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 4.010985800121405,
+        "anderson_unbounded_coefficient_l1": 4.010985800121405,
+        "coefficient_l1_was_bounded": false
+      },
+      {
+        "iteration": 48,
+        "map_residual_inf_n": 1.0178151569562033e-05,
+        "regularization": 2047.0102353015304,
+        "max_increment_m": 0.0868703762768448,
+        "relative_increment": 0.05423981577997646,
+        "max_translation_m": 1.9547364538767615,
+        "max_drift_ratio_pct": 19.29806519822256,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 7.999999999999998,
+        "anderson_unbounded_coefficient_l1": 20.889839799498542,
+        "coefficient_l1_was_bounded": true
+      }
+    ],
+    "seconds": 62.07937611399757,
+    "breakdown": "",
+    "claim_boundary": "Constrained Anderson acceleration on the existing deformed-state P-Delta fixed-point map. Optional coefficient L1 limiting blends unstable extrapolation back toward the latest mapped state. This is a path-following diagnostic only; it does not provide a consistent Newton/Jacobian or material Newton closure.",
+    "blockers": [
+      "anderson_acceleration_pdelta_not_closed"
+    ]
+  },
+  "first_failed_residual_trust_region_anderson_probe": {
+    "target_load_scale": 0.55,
+    "ready": false,
+    "converged": false,
+    "label": "residual_trust_region_anderson",
+    "iteration_count": 8,
+    "max_iterations": 8,
+    "history_depth": 8,
+    "blend_factors": [
+      1.0,
+      0.5,
+      0.25
+    ],
+    "best_fixed_point_relative_increment": 0.13732693656452394,
+    "best_residual_inf_n": 7.97957181930542e-06,
+    "best_candidate_label": "anderson_blend_1",
+    "relative_increment_tolerance": 0.0001,
+    "residual_tolerance_n": 0.001,
+    "max_coefficient_l1": 3.091899536352164,
+    "history_tail": [
+      {
+        "iteration": 3,
+        "input_map_residual_inf_n": 1.1809167745013838e-05,
+        "input_regularization": 2047.010234943158,
+        "anderson_history_count": 3,
+        "anderson_coefficient_l1": 1.0,
+        "candidate_count": 4,
+        "selected_label": "anderson_blend_1",
+        "selected_fixed_point_relative_increment": 0.21776174622980699,
+        "selected_residual_inf_n": 1.1556083336472511e-05,
+        "candidate_rows": [
+          {
+            "label": "fixed_point_map",
+            "blend_factor": 1.0,
+            "residual_inf_n": 1.7028884030878544e-05,
+            "regularization": 2047.0102352172003,
+            "fixed_point_increment_m": 0.49081925772607676,
+            "fixed_point_relative_increment": 0.30645641568157594,
+            "max_translation_m": 1.9597199815448259,
+            "max_drift_ratio_pct": 20.512647409356713,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_1",
+            "blend_factor": 1.0,
+            "residual_inf_n": 1.1556083336472511e-05,
+            "regularization": 2047.010235055826,
+            "fixed_point_increment_m": 0.34916511233907815,
+            "fixed_point_relative_increment": 0.21776174622980699,
+            "max_translation_m": 1.9609632885743575,
+            "max_drift_ratio_pct": 20.05767888247179,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.5",
+            "blend_factor": 0.5,
+            "residual_inf_n": 1.3252268176581176e-05,
+            "regularization": 2047.0102351365078,
+            "fixed_point_increment_m": 0.40190922472927326,
+            "fixed_point_relative_increment": 0.2507971987699692,
+            "max_translation_m": 1.9603228636056647,
+            "max_drift_ratio_pct": 20.209691402772002,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.25",
+            "blend_factor": 0.25,
+            "residual_inf_n": 1.8761220417218283e-05,
+            "regularization": 2047.010235176853,
+            "fixed_point_increment_m": 0.44085891292522644,
+            "fixed_point_relative_increment": 0.27518165506398273,
+            "max_translation_m": 1.960016727495982,
+            "max_drift_ratio_pct": 20.342644213084338,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          }
+        ]
+      },
+      {
+        "iteration": 4,
+        "input_map_residual_inf_n": 1.1556083336472511e-05,
+        "input_regularization": 2047.010235055826,
+        "anderson_history_count": 4,
+        "anderson_coefficient_l1": 2.995603158878197,
+        "candidate_count": 4,
+        "selected_label": "fixed_point_map",
+        "selected_fixed_point_relative_increment": 0.4465192338159331,
+        "selected_residual_inf_n": 2.1622243366437033e-05,
+        "candidate_rows": [
+          {
+            "label": "fixed_point_map",
+            "blend_factor": 1.0,
+            "residual_inf_n": 2.1622243366437033e-05,
+            "regularization": 2047.0102352667184,
+            "fixed_point_increment_m": 1.246872718635618,
+            "fixed_point_relative_increment": 0.4465192338159331,
+            "max_translation_m": 1.9563788383161347,
+            "max_drift_ratio_pct": 19.22649766992054,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_1",
+            "blend_factor": 1.0,
+            "residual_inf_n": 2.288818359375e-05,
+            "regularization": 2047.0102352523013,
+            "fixed_point_increment_m": 3.6227157057665904,
+            "fixed_point_relative_increment": 0.7045984791222407,
+            "max_translation_m": 1.9529764752553396,
+            "max_drift_ratio_pct": 18.2181336862899,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.5",
+            "blend_factor": 0.5,
+            "residual_inf_n": 1.0114797078131232e-05,
+            "regularization": 2047.0102352595077,
+            "fixed_point_increment_m": 2.4706294451429356,
+            "fixed_point_relative_increment": 0.6172229620855452,
+            "max_translation_m": 1.9546774362253638,
+            "max_drift_ratio_pct": 18.550514162931663,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.25",
+            "blend_factor": 0.25,
+            "residual_inf_n": 1.30713349335565e-05,
+            "regularization": 2047.010235263113,
+            "fixed_point_increment_m": 1.8119125613125477,
+            "fixed_point_relative_increment": 0.5407430377874022,
+            "max_translation_m": 1.9555280822026107,
+            "max_drift_ratio_pct": 18.888050948278885,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          }
+        ]
+      },
+      {
+        "iteration": 5,
+        "input_map_residual_inf_n": 2.1622243366437033e-05,
+        "input_regularization": 2047.0102352667184,
+        "anderson_history_count": 5,
+        "anderson_coefficient_l1": 3.091899536352164,
+        "candidate_count": 4,
+        "selected_label": "anderson_blend_1",
+        "selected_fixed_point_relative_increment": 0.26758824179588964,
+        "selected_residual_inf_n": 1.6542726293150193e-05,
+        "candidate_rows": [
+          {
+            "label": "fixed_point_map",
+            "blend_factor": 1.0,
+            "residual_inf_n": 1.4338642358779907e-05,
+            "regularization": 2047.0102353948905,
+            "fixed_point_increment_m": 2.9085973094509856,
+            "fixed_point_relative_increment": 1.815830534472054,
+            "max_translation_m": 1.955505404287922,
+            "max_drift_ratio_pct": 27.210381738277395,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_1",
+            "blend_factor": 1.0,
+            "residual_inf_n": 1.6542726293150193e-05,
+            "regularization": 2047.0102352038525,
+            "fixed_point_increment_m": 0.5143422131043136,
+            "fixed_point_relative_increment": 0.26758824179588964,
+            "max_translation_m": 1.952909370517178,
+            "max_drift_ratio_pct": 18.21760167607482,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.5",
+            "blend_factor": 0.5,
+            "residual_inf_n": 1.7037615180015564e-05,
+            "regularization": 2047.0102352786769,
+            "fixed_point_increment_m": 2.2482916593112687,
+            "fixed_point_relative_increment": 1.4020438345823707,
+            "max_translation_m": 1.9542024177358883,
+            "max_drift_ratio_pct": 21.676972850092046,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.25",
+            "blend_factor": 0.25,
+            "residual_inf_n": 1.7609447240829468e-05,
+            "regularization": 2047.0102353316736,
+            "fixed_point_increment_m": 2.5905729866272855,
+            "fixed_point_relative_increment": 1.6163884994753708,
+            "max_translation_m": 1.9548526698338662,
+            "max_drift_ratio_pct": 24.344956882601345,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          }
+        ]
+      },
+      {
+        "iteration": 6,
+        "input_map_residual_inf_n": 1.6542726293150193e-05,
+        "input_regularization": 2047.0102352038525,
+        "anderson_history_count": 6,
+        "anderson_coefficient_l1": 1.9203025019515216,
+        "candidate_count": 4,
+        "selected_label": "anderson_blend_1",
+        "selected_fixed_point_relative_increment": 0.15462765228005282,
+        "selected_residual_inf_n": 1.582317054271698e-05,
+        "candidate_rows": [
+          {
+            "label": "fixed_point_map",
+            "blend_factor": 1.0,
+            "residual_inf_n": 1.6524729289812967e-05,
+            "regularization": 2047.0102352853232,
+            "fixed_point_increment_m": 0.9344599149139922,
+            "fixed_point_relative_increment": 0.5835532470184601,
+            "max_translation_m": 1.9572051956760692,
+            "max_drift_ratio_pct": 23.748118644779144,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_1",
+            "blend_factor": 1.0,
+            "residual_inf_n": 1.582317054271698e-05,
+            "regularization": 2047.010235274588,
+            "fixed_point_increment_m": 0.24911106950194217,
+            "fixed_point_relative_increment": 0.15462765228005282,
+            "max_translation_m": 1.9562759805622856,
+            "max_drift_ratio_pct": 19.498967106142967,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.5",
+            "blend_factor": 0.5,
+            "residual_inf_n": 1.649860200814146e-05,
+            "regularization": 2047.0102352779675,
+            "fixed_point_increment_m": 0.6512492334792677,
+            "fixed_point_relative_increment": 0.40659107105965286,
+            "max_translation_m": 1.9567401306331182,
+            "max_drift_ratio_pct": 21.55758902235929,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.25",
+            "blend_factor": 0.25,
+            "residual_inf_n": 1.5683992387494072e-05,
+            "regularization": 2047.0102352811502,
+            "fixed_point_increment_m": 0.8031473756781413,
+            "fixed_point_relative_increment": 0.5014878941343772,
+            "max_translation_m": 1.9569725488238185,
+            "max_drift_ratio_pct": 22.638704595323993,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          }
+        ]
+      },
+      {
+        "iteration": 7,
+        "input_map_residual_inf_n": 1.582317054271698e-05,
+        "input_regularization": 2047.010235274588,
+        "anderson_history_count": 7,
+        "anderson_coefficient_l1": 1.5730171777120334,
+        "candidate_count": 4,
+        "selected_label": "anderson_blend_1",
+        "selected_fixed_point_relative_increment": 0.1500802678409297,
+        "selected_residual_inf_n": 2.1074898540973663e-05,
+        "candidate_rows": [
+          {
+            "label": "fixed_point_map",
+            "blend_factor": 1.0,
+            "residual_inf_n": 1.6008125385269523e-05,
+            "regularization": 2047.0102353189716,
+            "fixed_point_increment_m": 7.59630958227161,
+            "fixed_point_relative_increment": 0.8250268896527259,
+            "max_translation_m": 1.9552741274262637,
+            "max_drift_ratio_pct": 19.22736064231612,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_1",
+            "blend_factor": 1.0,
+            "residual_inf_n": 2.1074898540973663e-05,
+            "regularization": 2047.010235293592,
+            "fixed_point_increment_m": 0.24415001826260052,
+            "fixed_point_relative_increment": 0.1500802678409297,
+            "max_translation_m": 1.9563334786841604,
+            "max_drift_ratio_pct": 19.50154042869236,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.5",
+            "blend_factor": 0.5,
+            "residual_inf_n": 1.8846243619918823e-05,
+            "regularization": 2047.0102353060893,
+            "fixed_point_increment_m": 0.31935753958311763,
+            "fixed_point_relative_increment": 0.1713091310529546,
+            "max_translation_m": 1.9558036203991418,
+            "max_drift_ratio_pct": 19.224589453225267,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.25",
+            "blend_factor": 0.25,
+            "residual_inf_n": 1.3272860087454319e-05,
+            "regularization": 2047.0102353124823,
+            "fixed_point_increment_m": 0.8284331170989965,
+            "fixed_point_relative_increment": 0.3442649474326047,
+            "max_translation_m": 1.955538828230134,
+            "max_drift_ratio_pct": 19.190730674558417,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          }
+        ]
+      },
+      {
+        "iteration": 8,
+        "input_map_residual_inf_n": 2.1074898540973663e-05,
+        "input_regularization": 2047.010235293592,
+        "anderson_history_count": 8,
+        "anderson_coefficient_l1": 3.025173680642887,
+        "candidate_count": 4,
+        "selected_label": "anderson_blend_1",
+        "selected_fixed_point_relative_increment": 0.13732693656452394,
+        "selected_residual_inf_n": 1.1869295121869072e-05,
+        "candidate_rows": [
+          {
+            "label": "fixed_point_map",
+            "blend_factor": 1.0,
+            "residual_inf_n": 1.638522371649742e-05,
+            "regularization": 2047.0102353229638,
+            "fixed_point_increment_m": 1.6254935380267082,
+            "fixed_point_relative_increment": 0.499799722505827,
+            "max_translation_m": 1.9549301745274033,
+            "max_drift_ratio_pct": 19.523015370475775,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_1",
+            "blend_factor": 1.0,
+            "residual_inf_n": 1.1869295121869072e-05,
+            "regularization": 2047.0102353126592,
+            "fixed_point_increment_m": 0.23337465534049984,
+            "fixed_point_relative_increment": 0.13732693656452394,
+            "max_translation_m": 1.9552427450349439,
+            "max_drift_ratio_pct": 19.338909337322217,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.5",
+            "blend_factor": 0.5,
+            "residual_inf_n": 2.185138873755932e-05,
+            "regularization": 2047.0102353175282,
+            "fixed_point_increment_m": 0.3475309716789021,
+            "fixed_point_relative_increment": 0.18349567826332389,
+            "max_translation_m": 1.9550864415220774,
+            "max_drift_ratio_pct": 19.344509171240144,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          },
+          {
+            "label": "anderson_blend_0.25",
+            "blend_factor": 0.25,
+            "residual_inf_n": 1.3194356852217273e-05,
+            "regularization": 2047.0102353201746,
+            "fixed_point_increment_m": 0.6169047681895847,
+            "fixed_point_relative_increment": 0.2799645123863484,
+            "max_translation_m": 1.9550083034594188,
+            "max_drift_ratio_pct": 19.41233880669553,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": false,
+            "ready": false
+          }
+        ]
+      }
+    ],
+    "seconds": 46.096224539000104,
+    "breakdown": "",
+    "claim_boundary": "Residual-trust-region Anderson probe. Unlike damped update diagnostics, every candidate is remapped through the P-Delta fixed-point operator and closure requires the remapped true fixed-point relative increment, residual, and displacement gates to pass.",
+    "blockers": [
+      "residual_trust_region_anderson_not_closed"
+    ]
+  },
+  "load_steps_requested": [
+    0.5,
+    0.55,
+    1.0
+  ],
+  "step_results": [
+    {
+      "load_step": 0.5,
+      "seconds": 21.537551012999756,
+      "ready": true,
+      "converged": true,
+      "iteration_count": 18,
+      "residual_inf_n": 7.533282041549683e-05,
+      "relative_increment": 7.783444566027228e-05,
+      "max_translation_m": 1.5069725797059113,
+      "max_drift_ratio_pct": 15.030721084395157,
+      "fixed_point_increment_m": 0.00010343924212108391,
+      "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+      "relaxation_factor": 1.0,
+      "initial_displacement_was_seeded": false,
+      "linear_solver_refinement_enabled": true,
+      "linear_solver_refinement_strategy": "best_residual_iterative_refinement",
+      "blockers": []
+    },
+    {
+      "load_step": 0.55,
+      "seconds": 33.850884527000744,
+      "ready": false,
+      "converged": false,
+      "iteration_count": 28,
+      "residual_inf_n": 1.4604069292545319e-05,
+      "relative_increment": 0.2982647008302138,
+      "max_translation_m": 1.9547364831406133,
+      "max_drift_ratio_pct": 19.38438175328362,
+      "fixed_point_increment_m": 0.4777001337956438,
+      "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+      "relaxation_factor": 0.7,
+      "initial_displacement_was_seeded": true,
+      "linear_solver_refinement_enabled": true,
+      "linear_solver_refinement_strategy": "best_residual_iterative_refinement",
+      "blockers": [
+        "deformed_state_pdelta_path_not_converged"
+      ]
+    }
+  ],
+  "mesh_fingerprint": {
+    "raw_line_element_count": 5576,
+    "skipped_short_or_degenerate_count": 4,
+    "line_node_count": 2415,
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_angle_element_count": 5572,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "line_elements_solved": 5572,
+    "line_nodes_solved": 2415,
+    "component_count": 64,
+    "base_node_count": 779,
+    "dof_count": 14490
+  },
+  "runtime_metrics": {
+    "backend": "scipy_sparse_spsolve_cpu_6dof_frame_pdelta_continuation_probe",
+    "total_seconds": 1053.6693722269993
+  },
+  "claim_boundary": "This is a deterministic continuation probe for the existing deformed-state P-Delta fixed-point path. A failed step is evidence that full-load closure needs a consistent Newton/Jacobian or stronger path-following method; it is not itself a full-load nonlinear closure.",
+  "blockers": [
+    "full_load_pdelta_continuation_not_converged",
+    "consistent_newton_jacobian_required",
+    "anderson_acceleration_pdelta_not_closed"
+  ]
+}

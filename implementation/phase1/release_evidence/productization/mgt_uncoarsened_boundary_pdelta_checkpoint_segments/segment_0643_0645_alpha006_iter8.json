@@ -1,0 +1,542 @@
+{
+  "schema_version": "mgt-uncoarsened-boundary-pdelta-probe.v1",
+  "generated_at": "2026-06-03T10:01:28.302090+00:00",
+  "status": "partial",
+  "uncoarsened_boundary_pdelta_ready": false,
+  "full_load_nonlinear_newton_ready": false,
+  "roundtrip_policy": {
+    "resolve_rigid_links": false,
+    "drop_unreferenced_nodes": false,
+    "parser_report_contract_pass": true,
+    "parser_coarsening": {
+      "applied": false,
+      "elastic_link_count": 1692,
+      "rigid_like_link_count": 0,
+      "merge_pair_count": 0,
+      "merged_node_count": 0,
+      "dummy_node_removed_count": 0,
+      "dropped_degenerate_elements": 0,
+      "support_node_count": 2133,
+      "support_node_count_mapped": 2133,
+      "node_count_pre": 13047,
+      "node_count_post": 13047,
+      "element_count_pre": 12728,
+      "element_count_post": 12728
+    },
+    "parser_run": {
+      "command": [
+        "/usr/bin/python3",
+        "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/parse_midas_mgt_to_json_npz.py",
+        "--mgt",
+        "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+        "--json-out",
+        "/tmp/mgt-uncoarsened-boundary-pdelta-903vuaex/mgt_uncoarsened.roundtrip.json",
+        "--npz-out",
+        "/tmp/mgt-uncoarsened-boundary-pdelta-903vuaex/mgt_uncoarsened.roundtrip.npz",
+        "--report-out",
+        "/tmp/mgt-uncoarsened-boundary-pdelta-903vuaex/mgt_uncoarsened.report.json",
+        "--no-resolve-rigid-links",
+        "--no-drop-unreferenced-nodes",
+        "--no-strict-unknown-sections",
+        "--max-element-skip-ratio",
+        "0.20",
+        "--max-element-skip-count",
+        "10000"
+      ],
+      "return_code": 0,
+      "stdout_excerpt": "Wrote MIDAS MGT conversion report: /tmp/mgt-uncoarsened-boundary-pdelta-903vuaex/mgt_uncoarsened.report.json\n",
+      "stderr_excerpt": "{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    }
+  },
+  "source": {
+    "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "source_family": "midas_mgt",
+    "provenance": "repo_benchmark_bridge",
+    "blocks": [
+      "*CONSTRAINT",
+      "*ELASTICLINK",
+      "*ELEMENT",
+      "*THICKNESS"
+    ]
+  },
+  "solve_scope": "uncoarsened_frame_shell_boundary_tangent_deformed_state_pdelta_probe",
+  "unit_policy": {
+    "mgt_force_unit": "kN",
+    "mgt_length_unit": "m",
+    "elastic_link_stiffness_scale_to_si": 1000.0,
+    "base_frame_gravity_load_scale": 0.01,
+    "load_scale_multiplies_frame_gravity_and_shell_surface_probe_load": true
+  },
+  "load_steps_requested": [
+    0.6425,
+    0.643,
+    0.6435,
+    0.644,
+    0.6445,
+    0.645
+  ],
+  "max_converged_load_scale": 0.645,
+  "first_failed_load_scale": null,
+  "step_results": [
+    {
+      "load_scale": 0.643,
+      "ready": true,
+      "converged": true,
+      "iteration_count": 0,
+      "max_iterations": 8,
+      "relaxation_factor": 0.5,
+      "residual_tolerance_n": 0.0005,
+      "relative_increment_tolerance": 0.0001,
+      "best_residual_inf_n": 7.429751155285658e-05,
+      "best_relative_residual_inf": null,
+      "best_fixed_point_relative_increment": 5.8811131332956585e-05,
+      "final_residual_inf_n": 7.429751155285658e-05,
+      "final_fixed_point_relative_increment": 5.8811131332956585e-05,
+      "final_max_translation_m": 0.8894277498894513,
+      "rows": [],
+      "seed_alpha_scan": {
+        "enabled": true,
+        "load_scale": 0.643,
+        "requested_alpha_values": [
+          0.06
+        ],
+        "evaluation_count": 2,
+        "base_fixed_point_relative_increment": 8.170953685272807e-05,
+        "base_residual_inf_n": 7.657186734988386e-05,
+        "direction_inf_m": 7.266544945927489e-05,
+        "best_alpha": 0.06,
+        "best_residual_inf_n": 7.429751155285658e-05,
+        "best_fixed_point_relative_increment": 5.8811131332956585e-05,
+        "best_max_translation_m": 0.8894277498894513,
+        "best_ready": true,
+        "candidate_rows": [
+          {
+            "alpha": 0.06,
+            "residual_inf_n": 7.429751155285658e-05,
+            "fixed_point_increment_m": 5.2303754288329785e-05,
+            "fixed_point_relative_increment": 5.8811131332956585e-05,
+            "max_translation_m": 0.8894277498894513,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": true,
+            "ready": true
+          }
+        ],
+        "seconds": 22.12698847799038,
+        "claim_boundary": "Seed alpha scan is a one-step globalization diagnostic. It builds candidates along the first fixed-point correction direction and remaps each candidate through the same P-Delta operator. It is closure only if the remapped residual and unrelaxed fixed-point gates pass."
+      },
+      "initial_seed_strategy": "seed_alpha_scan_best_candidate",
+      "seconds": 22.127983173006214,
+      "blockers": [],
+      "secant_seed": {
+        "enabled": true,
+        "previous_load_scale": 0.64225,
+        "current_load_scale": 0.6425,
+        "target_load_scale": 0.643,
+        "extrapolation_factor": 2.000000000000444,
+        "seed_delta_inf_m": 0.000766703394955659,
+        "checkpoint_delta_inf_m": 0.00038335169747771847,
+        "claim_boundary": "Secant prediction only changes the initial displacement seed for the next load step. The step is promoted only if the existing residual and unrelaxed fixed-point increment gates pass after remapping through the P-Delta operator."
+      }
+    },
+    {
+      "load_scale": 0.6435,
+      "ready": true,
+      "converged": true,
+      "iteration_count": 0,
+      "max_iterations": 8,
+      "relaxation_factor": 0.5,
+      "residual_tolerance_n": 0.0005,
+      "relative_increment_tolerance": 0.0001,
+      "best_residual_inf_n": 0.0001074751392557971,
+      "best_relative_residual_inf": null,
+      "best_fixed_point_relative_increment": 4.7993345128705555e-05,
+      "final_residual_inf_n": 0.0001074751392557971,
+      "final_fixed_point_relative_increment": 4.7993345128705555e-05,
+      "final_max_translation_m": 0.8898545205677787,
+      "rows": [],
+      "seed_alpha_scan": {
+        "enabled": true,
+        "load_scale": 0.6435,
+        "requested_alpha_values": [
+          0.06
+        ],
+        "evaluation_count": 2,
+        "base_fixed_point_relative_increment": 8.367064249808722e-05,
+        "base_residual_inf_n": 2.5012857747697126e-05,
+        "direction_inf_m": 7.44505727142662e-05,
+        "best_alpha": 0.06,
+        "best_residual_inf_n": 0.0001074751392557971,
+        "best_fixed_point_relative_increment": 4.7993345128705555e-05,
+        "best_max_translation_m": 0.8898545205677787,
+        "best_ready": true,
+        "candidate_rows": [
+          {
+            "alpha": 0.06,
+            "residual_inf_n": 0.0001074751392557971,
+            "fixed_point_increment_m": 4.2702884141765374e-05,
+            "fixed_point_relative_increment": 4.7993345128705555e-05,
+            "max_translation_m": 0.8898545205677787,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": true,
+            "ready": true
+          }
+        ],
+        "seconds": 22.283701402993756,
+        "claim_boundary": "Seed alpha scan is a one-step globalization diagnostic. It builds candidates along the first fixed-point correction direction and remaps each candidate through the same P-Delta operator. It is closure only if the remapped residual and unrelaxed fixed-point gates pass."
+      },
+      "initial_seed_strategy": "seed_alpha_scan_best_candidate",
+      "seconds": 22.28373906399065,
+      "blockers": [],
+      "secant_seed": {
+        "enabled": true,
+        "previous_load_scale": 0.6425,
+        "current_load_scale": 0.643,
+        "target_load_scale": 0.6435,
+        "extrapolation_factor": 0.999999999999778,
+        "seed_delta_inf_m": 0.0007695323921994568,
+        "checkpoint_delta_inf_m": 0.0007695323921996788,
+        "claim_boundary": "Secant prediction only changes the initial displacement seed for the next load step. The step is promoted only if the existing residual and unrelaxed fixed-point increment gates pass after remapping through the P-Delta operator."
+      }
+    },
+    {
+      "load_scale": 0.644,
+      "ready": true,
+      "converged": true,
+      "iteration_count": 0,
+      "max_iterations": 8,
+      "relaxation_factor": 0.5,
+      "residual_tolerance_n": 0.0005,
+      "relative_increment_tolerance": 0.0001,
+      "best_residual_inf_n": 6.0742268619407014e-05,
+      "best_relative_residual_inf": null,
+      "best_fixed_point_relative_increment": 3.951612218473026e-05,
+      "final_residual_inf_n": 6.0742268619407014e-05,
+      "final_fixed_point_relative_increment": 3.951612218473026e-05,
+      "final_max_translation_m": 0.8902776902607257,
+      "rows": [],
+      "seed_alpha_scan": {
+        "enabled": true,
+        "load_scale": 0.644,
+        "requested_alpha_values": [
+          0.06
+        ],
+        "evaluation_count": 2,
+        "base_fixed_point_relative_increment": 0.00011260712809193622,
+        "base_residual_inf_n": 5.9049111762021766e-05,
+        "direction_inf_m": 0.00010024022671903366,
+        "best_alpha": 0.06,
+        "best_residual_inf_n": 6.0742268619407014e-05,
+        "best_fixed_point_relative_increment": 3.951612218473026e-05,
+        "best_max_translation_m": 0.8902776902607257,
+        "best_ready": true,
+        "candidate_rows": [
+          {
+            "alpha": 0.06,
+            "residual_inf_n": 6.0742268619407014e-05,
+            "fixed_point_increment_m": 3.5178194920446396e-05,
+            "fixed_point_relative_increment": 3.951612218473026e-05,
+            "max_translation_m": 0.8902776902607257,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": true,
+            "ready": true
+          }
+        ],
+        "seconds": 22.364821631999803,
+        "claim_boundary": "Seed alpha scan is a one-step globalization diagnostic. It builds candidates along the first fixed-point correction direction and remaps each candidate through the same P-Delta operator. It is closure only if the remapped residual and unrelaxed fixed-point gates pass."
+      },
+      "initial_seed_strategy": "seed_alpha_scan_best_candidate",
+      "seconds": 22.370066390009015,
+      "blockers": [],
+      "secant_seed": {
+        "enabled": true,
+        "previous_load_scale": 0.643,
+        "current_load_scale": 0.6435,
+        "target_load_scale": 0.644,
+        "extrapolation_factor": 1.000000000000222,
+        "seed_delta_inf_m": 0.0007725989972954261,
+        "checkpoint_delta_inf_m": 0.0007725989972952041,
+        "claim_boundary": "Secant prediction only changes the initial displacement seed for the next load step. The step is promoted only if the existing residual and unrelaxed fixed-point increment gates pass after remapping through the P-Delta operator."
+      }
+    },
+    {
+      "load_scale": 0.6445,
+      "ready": true,
+      "converged": true,
+      "iteration_count": 0,
+      "max_iterations": 8,
+      "relaxation_factor": 0.5,
+      "residual_tolerance_n": 0.0005,
+      "relative_increment_tolerance": 0.0001,
+      "best_residual_inf_n": 4.3108300779692854e-05,
+      "best_relative_residual_inf": null,
+      "best_fixed_point_relative_increment": 6.791519995032258e-05,
+      "final_residual_inf_n": 4.3108300779692854e-05,
+      "final_fixed_point_relative_increment": 6.791519995032258e-05,
+      "final_max_translation_m": 0.8907020614195689,
+      "rows": [],
+      "seed_alpha_scan": {
+        "enabled": true,
+        "load_scale": 0.6445,
+        "requested_alpha_values": [
+          0.06
+        ],
+        "evaluation_count": 2,
+        "base_fixed_point_relative_increment": 0.00011546529231231795,
+        "base_residual_inf_n": 0.0001375715750704387,
+        "direction_inf_m": 0.00010284220907566966,
+        "best_alpha": 0.06,
+        "best_residual_inf_n": 4.3108300779692854e-05,
+        "best_fixed_point_relative_increment": 6.791519995032258e-05,
+        "best_max_translation_m": 0.8907020614195689,
+        "best_ready": true,
+        "candidate_rows": [
+          {
+            "alpha": 0.06,
+            "residual_inf_n": 4.3108300779692854e-05,
+            "fixed_point_increment_m": 6.0486524876519855e-05,
+            "fixed_point_relative_increment": 6.791519995032258e-05,
+            "max_translation_m": 0.8907020614195689,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": true,
+            "ready": true
+          }
+        ],
+        "seconds": 22.279723451996688,
+        "claim_boundary": "Seed alpha scan is a one-step globalization diagnostic. It builds candidates along the first fixed-point correction direction and remaps each candidate through the same P-Delta operator. It is closure only if the remapped residual and unrelaxed fixed-point gates pass."
+      },
+      "initial_seed_strategy": "seed_alpha_scan_best_candidate",
+      "seconds": 22.283297650006716,
+      "blockers": [],
+      "secant_seed": {
+        "enabled": true,
+        "previous_load_scale": 0.6435,
+        "current_load_scale": 0.644,
+        "target_load_scale": 0.6445,
+        "extrapolation_factor": 0.999999999999778,
+        "seed_delta_inf_m": 0.0007740428861137127,
+        "checkpoint_delta_inf_m": 0.0007740428861139348,
+        "claim_boundary": "Secant prediction only changes the initial displacement seed for the next load step. The step is promoted only if the existing residual and unrelaxed fixed-point increment gates pass after remapping through the P-Delta operator."
+      }
+    },
+    {
+      "load_scale": 0.645,
+      "ready": true,
+      "converged": true,
+      "iteration_count": 0,
+      "max_iterations": 8,
+      "relaxation_factor": 0.5,
+      "residual_tolerance_n": 0.0005,
+      "relative_increment_tolerance": 0.0001,
+      "best_residual_inf_n": 6.225842898643918e-05,
+      "best_relative_residual_inf": null,
+      "best_fixed_point_relative_increment": 6.212354418559191e-05,
+      "final_residual_inf_n": 6.225842898643918e-05,
+      "final_fixed_point_relative_increment": 6.212354418559191e-05,
+      "final_max_translation_m": 0.8911218668979436,
+      "rows": [],
+      "seed_alpha_scan": {
+        "enabled": true,
+        "load_scale": 0.645,
+        "requested_alpha_values": [
+          0.06
+        ],
+        "evaluation_count": 2,
+        "base_fixed_point_relative_increment": 0.00018134964437752397,
+        "base_residual_inf_n": 6.986537908915125e-05,
+        "direction_inf_m": 0.0001615836606523864,
+        "best_alpha": 0.06,
+        "best_residual_inf_n": 6.225842898643918e-05,
+        "best_fixed_point_relative_increment": 6.212354418559191e-05,
+        "best_max_translation_m": 0.8911218668979436,
+        "best_ready": true,
+        "candidate_rows": [
+          {
+            "alpha": 0.06,
+            "residual_inf_n": 6.225842898643918e-05,
+            "fixed_point_increment_m": 5.535728615733786e-05,
+            "fixed_point_relative_increment": 6.212354418559191e-05,
+            "max_translation_m": 0.8911218668979436,
+            "residual_gate_passed": true,
+            "relative_increment_gate_passed": true,
+            "ready": true
+          }
+        ],
+        "seconds": 22.236026799000683,
+        "claim_boundary": "Seed alpha scan is a one-step globalization diagnostic. It builds candidates along the first fixed-point correction direction and remaps each candidate through the same P-Delta operator. It is closure only if the remapped residual and unrelaxed fixed-point gates pass."
+      },
+      "initial_seed_strategy": "seed_alpha_scan_best_candidate",
+      "seconds": 22.23613663300057,
+      "blockers": [],
+      "secant_seed": {
+        "enabled": true,
+        "previous_load_scale": 0.644,
+        "current_load_scale": 0.6445,
+        "target_load_scale": 0.645,
+        "extrapolation_factor": 1.000000000000222,
+        "seed_delta_inf_m": 0.0007762299904738867,
+        "checkpoint_delta_inf_m": 0.0007762299904736647,
+        "claim_boundary": "Secant prediction only changes the initial displacement seed for the next load step. The step is promoted only if the existing residual and unrelaxed fixed-point increment gates pass after remapping through the P-Delta operator."
+      }
+    }
+  ],
+  "checkpoint_resume": {
+    "supported": true,
+    "checkpoint_schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+    "checkpoint_dir": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_0643_0645_alpha006_iter8",
+    "resume_checkpoint_npz": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_064225_06425_alpha006_iter8/accepted_load_0p6425.npz",
+    "secant_seed_checkpoint_npz": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_064225_06425_alpha006_iter8/accepted_load_0p64225.npz",
+    "resume_from_load_scale": 0.6425,
+    "resume_checkpoint": {
+      "path": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_064225_06425_alpha006_iter8/accepted_load_0p6425.npz",
+      "schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+      "load_scale": 0.6425,
+      "dof_count": 78282,
+      "node_count": 13047,
+      "residual_inf_n": 3.534030599539051e-05,
+      "fixed_point_relative_increment": 7.003479247746874e-05,
+      "max_translation_m": 0.8890007063379279
+    },
+    "secant_seed_checkpoint": {
+      "path": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_064225_06425_alpha006_iter8/accepted_load_0p64225.npz",
+      "schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+      "load_scale": 0.64225,
+      "dof_count": 78282,
+      "node_count": 13047,
+      "residual_inf_n": 0.00010250204615047664,
+      "fixed_point_relative_increment": 7.410142743698811e-05,
+      "max_translation_m": 0.8887850041460515
+    },
+    "secant_seed_used_count": 5,
+    "seed_alpha_scan_values": [
+      0.06
+    ],
+    "skipped_load_steps_before_resume": [
+      0.6425
+    ],
+    "attempted_load_steps_after_resume": [
+      0.643,
+      0.6435,
+      0.644,
+      0.6445,
+      0.645
+    ],
+    "saved_checkpoint_count": 5,
+    "saved_checkpoints": [
+      {
+        "path": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_0643_0645_alpha006_iter8/accepted_load_0p643.npz",
+        "schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+        "load_scale": 0.643,
+        "dof_count": 78282,
+        "node_count": 13047,
+        "residual_inf_n": 7.429751155285658e-05,
+        "fixed_point_relative_increment": 5.8811131332956585e-05,
+        "max_translation_m": 0.8894277498894513
+      },
+      {
+        "path": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_0643_0645_alpha006_iter8/accepted_load_0p6435.npz",
+        "schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+        "load_scale": 0.6435,
+        "dof_count": 78282,
+        "node_count": 13047,
+        "residual_inf_n": 0.0001074751392557971,
+        "fixed_point_relative_increment": 4.7993345128705555e-05,
+        "max_translation_m": 0.8898545205677787
+      },
+      {
+        "path": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_0643_0645_alpha006_iter8/accepted_load_0p644.npz",
+        "schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+        "load_scale": 0.644,
+        "dof_count": 78282,
+        "node_count": 13047,
+        "residual_inf_n": 6.0742268619407014e-05,
+        "fixed_point_relative_increment": 3.951612218473026e-05,
+        "max_translation_m": 0.8902776902607257
+      },
+      {
+        "path": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_0643_0645_alpha006_iter8/accepted_load_0p6445.npz",
+        "schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+        "load_scale": 0.6445,
+        "dof_count": 78282,
+        "node_count": 13047,
+        "residual_inf_n": 4.3108300779692854e-05,
+        "fixed_point_relative_increment": 6.791519995032258e-05,
+        "max_translation_m": 0.8907020614195689
+      },
+      {
+        "path": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_0643_0645_alpha006_iter8/accepted_load_0p645.npz",
+        "schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+        "load_scale": 0.645,
+        "dof_count": 78282,
+        "node_count": 13047,
+        "residual_inf_n": 6.225842898643918e-05,
+        "fixed_point_relative_increment": 6.212354418559191e-05,
+        "max_translation_m": 0.8911218668979436
+      }
+    ],
+    "claim_boundary": "Accepted displacement states can be written and replayed as exact seeds for later frontier probes. This reduces rerun cost for bracket search, but it does not change the nonlinear convergence gate or promote a failed residual/increment state."
+  },
+  "mesh_fingerprint": {
+    "raw_line_element_count": 5576,
+    "line_elements_solved": 5564,
+    "skipped_short_or_degenerate_line_count": 12,
+    "line_node_count": 2491,
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "node_count": 13047,
+    "dof_count": 78282,
+    "element_count": 12728,
+    "elastic_link_spring_stiffness_nnz": 40608
+  },
+  "boundary_summary": {
+    "support_constraint_row_count": 8,
+    "authored_support_node_count": 2133,
+    "mapped_support_node_count": 2133,
+    "missing_support_node_count": 0,
+    "authored_support_restrained_dof_count": 7707,
+    "restraint_code_counts": {
+      "111000": 1,
+      "111111": 7
+    },
+    "restrained_dof_counts": {
+      "Dx": 2133,
+      "Dy": 2133,
+      "Dz": 2133,
+      "Rx": 436,
+      "Ry": 436,
+      "Rz": 436
+    },
+    "missing_support_node_ids_head": [],
+    "elastic_link_row_count": 1692,
+    "elastic_link_rows_skipped": 0,
+    "distinct_elastic_link_node_count": 3384,
+    "mapped_elastic_link_node_count": 3384,
+    "missing_elastic_link_node_count": 0,
+    "finite_spring_component_count": 10152,
+    "finite_spring_dof_counts": {
+      "SDx": 1692,
+      "SDy": 1692,
+      "SDz": 1692,
+      "SRx": 1692,
+      "SRy": 1692,
+      "SRz": 1692
+    },
+    "elastic_link_type_counts": {
+      "GEN": 1692
+    },
+    "stiffness_abs_min_nonzero_n_per_m_or_nm_per_rad": 1.0,
+    "stiffness_abs_max_n_per_m_or_nm_per_rad": 1000000000.0
+  },
+  "runtime_metrics": {
+    "backend": "scipy_sparse_spsolve_cpu_uncoarsened_boundary_pdelta_probe",
+    "total_seconds": 113.63550785199914
+  },
+  "claim_boundary": "This probe wires the uncoarsened authored support masks and finite elastic-link spring tangent into a deformed-coordinate frame-shell P-Delta fixed-point loop. The frame tangent uses geometric stiffness from frame gravity axial forces and the shell tangent is rebuilt on the deformed nodal coordinates. It is a nonlinear path diagnostic only; it is not a consistent Newton/Jacobian, material nonlinear, or full-load closure.",
+  "blockers": [
+    "uncoarsened_boundary_pdelta_not_full_load_closed",
+    "consistent_newton_jacobian_required",
+    "material_nonlinear_newton_required"
+  ]
+}

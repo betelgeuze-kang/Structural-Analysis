@@ -1,0 +1,228 @@
+{
+  "schema_version": "mgt-full-frame-6dof-sparse-equilibrium.v1",
+  "generated_at": "2026-06-05T13:34:41.862691+00:00",
+  "status": "ready",
+  "full_frame_6dof_sparse_elastic_equilibrium_ready": true,
+  "full_frame_6dof_linearized_geometric_equilibrium_ready": true,
+  "full_frame_6dof_deformed_state_pdelta_equilibrium_ready": true,
+  "full_frame_6dof_nonlinear_equilibrium": false,
+  "frame_local_axis_support": {
+    "elem_angle_array_present": true,
+    "elem_angle_source": "roundtrip_npz",
+    "elem_angle_nonzero_count": 150,
+    "elem_angle_max_abs_deg": 270.0,
+    "elem_lcaxis_array_present": true,
+    "elem_lcaxis_nonzero_count": 0,
+    "frame_angle_rows_consumed": true,
+    "frame_angle_element_count": 5572,
+    "frame_nonzero_angle_element_count": 150,
+    "frame_max_abs_angle_deg": 270.0,
+    "solver_local_axis_roll_transform_ready": true,
+    "elastic_assembly_roll_transform_applied_count": 150,
+    "geometric_assembly_roll_transform_applied_count": 150,
+    "source_surface_lcaxis_nonzero_count": 0
+  },
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+  "solve_scope": "full_line_element_mesh_sparse_6dof_frame_elastic_linearized_geometric_and_deformed_state_pdelta",
+  "linear_solver_refinement": {
+    "enabled": true,
+    "max_iterations": 10,
+    "strategy": "best_residual_iterative_refinement",
+    "residual_metric": "regularized_free_dof_linear_subproblem_inf_norm",
+    "claim_boundary": "Refines the regularized free-DOF linear subproblem solve and keeps the lowest residual iterate. It is not a substitute for a consistent nonlinear Newton/Jacobian."
+  },
+  "claim_boundary": "Solves the full line/beam element graph with 6 DOF per node and 3D frame stiffness under gravity loads, including linearized geometric and scaled deformed-state P-Delta passes. MGT GLOBAL beam end offsets are applied through a rigid-end transformation when present. MGT frame ANGLE rows are consumed as local y/z roll transforms when present. This removes the prior collapsed-horizontal-DOF line solve limitation, but does not close full material nonlinear Newton, shell/plate, diaphragm, or design-code claims.",
+  "mesh_fingerprint": {
+    "raw_line_element_count": 5576,
+    "skipped_short_or_degenerate_count": 4,
+    "line_node_count": 2415,
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_angle_element_count": 5572,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "line_elements_solved": 5572,
+    "line_nodes_solved": 2415,
+    "component_count": 64,
+    "base_node_count": 779,
+    "dof_count": 14490,
+    "free_dof_count": 9816,
+    "restrained_dof_count": 4674,
+    "stiffness_nnz": 288648,
+    "geometric_stiffness_nnz": 288648
+  },
+  "section_material_coverage": {
+    "real_section_material_element_count": 5493,
+    "real_section_material_coverage_pct": 98.58219669777459,
+    "total_gravity_n": 192104219.26805887,
+    "unique_section_count": 182,
+    "unique_material_count": 11,
+    "local_axis_roll_transform_applied_count": 150,
+    "local_axis_max_abs_angle_deg": 270.0,
+    "section_usage_head": {
+      "1088": 3382,
+      "4": 448,
+      "6": 200,
+      "29": 138,
+      "1053": 84,
+      "44": 76,
+      "248": 58,
+      "93": 56,
+      "256": 38,
+      "48": 34
+    },
+    "material_usage_head": {
+      "1": 2110,
+      "2": 1690,
+      "3": 1687,
+      "29": 17,
+      "30": 15,
+      "28": 14,
+      "31": 10,
+      "27": 9,
+      "26": 9,
+      "5": 6
+    }
+  },
+  "linearized_geometric_tangent": {
+    "positive_axial_element_count": 2711,
+    "max_axial_force_n": 93544811.78539698,
+    "mean_positive_axial_force_n": 5671654.243387877,
+    "real_section_material_coverage_pct": 98.58219669777459
+  },
+  "beam_end_offset_support": {
+    "typed_mgt_offset_parser_ready": true,
+    "global_beam_end_offset_elements_available": 708,
+    "rigid_end_offset_transform_applied": true,
+    "rigid_end_offset_tangent_ready": true,
+    "applied_element_count": 708,
+    "max_abs_offset_m": 0.523,
+    "load_eccentricity_moments_applied": true,
+    "geometric_tangent_uses_offset_length": true,
+    "not_closed": [
+      "ELEMENT local-yz offset rows are still unsupported in this solver path",
+      "roundtrip export and non-frame shell/surface eccentricity semantics have not consumed beam offsets yet"
+    ]
+  },
+  "equilibrium_metrics": {
+    "residual_inf_n": 7.097434718161821e-06,
+    "max_abs_displacement_m": 2.3516102925250157,
+    "max_translation_m": 2.7460034415751293,
+    "max_drift_ratio_pct": 26.227307842172532,
+    "total_gravity_kn": 192104.21926805886,
+    "regularization": 2047.0307500034644,
+    "linear_solver_refinement_enabled": true,
+    "linear_solver_refinement_strategy": "best_residual_iterative_refinement"
+  },
+  "geometric_equilibrium_metrics": {
+    "residual_inf_n": 0.00037202611565589905,
+    "max_abs_displacement_m": 4.685374484889083,
+    "max_translation_m": 4.685374895270057,
+    "max_drift_ratio_pct": 50.516168288108155,
+    "regularization": 2046.9934281493256,
+    "linear_solver_refinement_enabled": true,
+    "linear_solver_refinement_strategy": "best_residual_iterative_refinement"
+  },
+  "deformed_state_pdelta_path": {
+    "ready": true,
+    "converged": true,
+    "target_load_scale": 0.5,
+    "load_scale_reached": 0.5,
+    "initial_displacement_was_seeded": false,
+    "relaxation_factor": 1.0,
+    "iteration_count": 18,
+    "residual_inf_n": 7.533282041549683e-05,
+    "max_increment_m": 0.00010343924212108391,
+    "fixed_point_increment_m": 0.00010343924212108391,
+    "relative_increment": 7.783444566027228e-05,
+    "convergence_increment_metric": "unrelaxed_fixed_point_relative_increment",
+    "regularization": 2047.0121002862843,
+    "linear_solver_refinement": {
+      "enabled": true,
+      "max_iterations": 10,
+      "strategy": "best_residual_iterative_refinement",
+      "residual_metric": "regularized_free_dof_linear_subproblem_inf_norm",
+      "claim_boundary": "Refines the regularized free-DOF linear subproblem solve and keeps the lowest residual iterate. It is not a substitute for a consistent nonlinear Newton/Jacobian."
+    },
+    "max_abs_displacement_m": 1.3289648463942316,
+    "max_translation_m": 1.5069725797059113,
+    "max_drift_ratio_pct": 15.030721084395157,
+    "history_tail": [
+      {
+        "iteration": 14.0,
+        "residual_inf_n": 5.319714546203613e-05,
+        "max_increment_m": 0.0007193653247454246,
+        "relative_increment": 0.0005412974653158873,
+        "fixed_point_increment_m": 0.0007193653247454246,
+        "fixed_point_relative_increment": 0.0005412974653158873,
+        "max_translation_m": 1.5069725999248196,
+        "relaxation_factor": 1.0
+      },
+      {
+        "iteration": 15.0,
+        "residual_inf_n": 7.972866296768188e-05,
+        "max_increment_m": 0.00044334293871145514,
+        "relative_increment": 0.0003336001969623219,
+        "fixed_point_increment_m": 0.00044334293871145514,
+        "fixed_point_relative_increment": 0.0003336001969623219,
+        "max_translation_m": 1.5069725857930991,
+        "relaxation_factor": 1.0
+      },
+      {
+        "iteration": 16.0,
+        "residual_inf_n": 5.1647424697875977e-05,
+        "max_increment_m": 0.0002730368503152114,
+        "relative_increment": 0.00020545076885229938,
+        "fixed_point_increment_m": 0.0002730368503152114,
+        "fixed_point_relative_increment": 0.00020545076885229938,
+        "max_translation_m": 1.5069725818588497,
+        "relaxation_factor": 1.0
+      },
+      {
+        "iteration": 17.0,
+        "residual_inf_n": 0.00011211633682250977,
+        "max_increment_m": 0.0001680785295092857,
+        "relative_increment": 0.00012647326967745817,
+        "fixed_point_increment_m": 0.0001680785295092857,
+        "fixed_point_relative_increment": 0.00012647326967745817,
+        "max_translation_m": 1.5069725800612679,
+        "relaxation_factor": 1.0
+      },
+      {
+        "iteration": 18.0,
+        "residual_inf_n": 7.533282041549683e-05,
+        "max_increment_m": 0.00010343924212108391,
+        "relative_increment": 7.783444566027228e-05,
+        "fixed_point_increment_m": 0.00010343924212108391,
+        "fixed_point_relative_increment": 7.783444566027228e-05,
+        "max_translation_m": 1.5069725797059113,
+        "relaxation_factor": 1.0
+      }
+    ],
+    "claim_boundary": "Deformed-coordinate 6-DOF frame P-Delta fixed-point path under scaled gravity. It is geometric nonlinear frame evidence, not full material nonlinear or shell/plate closure.",
+    "blockers": []
+  },
+  "runtime_metrics": {
+    "backend": "scipy_sparse_spsolve_cpu_6dof_frame",
+    "linear_solver_refinement_enabled": true,
+    "linear_solver_refinement_max_iterations": 10,
+    "selection_seconds": 0.08984787600002164,
+    "assembly_seconds": 0.9249400469998363,
+    "solve_seconds": 0.15794385000026523,
+    "geometric_assembly_seconds": 0.9400722179998411,
+    "geometric_solve_seconds": 0.17523565900046378,
+    "deformed_state_pdelta_seconds": 22.31808443400041,
+    "total_seconds": 24.60612408400084
+  },
+  "limitations": [
+    "Scaled deformed-state P-Delta path is fixed-point geometric nonlinear evidence, not full Newton/material closure.",
+    "Frame line elements only; shell/plate/solid surfaces remain unsupported by this artifact.",
+    "Component base-node auto-restraints are an evidence harness boundary condition, not a full user-authored support model.",
+    "Only MGT GLOBAL beam end offsets are applied; local ELEMENT offset rows remain queued."
+  ],
+  "blockers": []
+}

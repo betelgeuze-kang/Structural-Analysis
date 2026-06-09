@@ -1,0 +1,95 @@
+{
+  "schema_version": "mgt-full-line-mesh-sparse-equilibrium.v1",
+  "generated_at": "2026-06-05T13:34:40.478217+00:00",
+  "status": "ready",
+  "full_line_mesh_sparse_elastic_equilibrium_ready": true,
+  "full_line_mesh_linearized_geometric_equilibrium_ready": true,
+  "full_line_mesh_nonlinear_equilibrium": false,
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+  "solve_scope": "full_line_element_mesh_sparse_elastic_and_linearized_geometric_equilibrium",
+  "claim_boundary": "Solves the full line/beam element graph with sparse elastic and linearized geometric global tangents under gravity loads. Horizontal X/Y members are projected into a collapsed horizontal DOF; shell/plate and deformed-state nonlinear full-building equilibrium remain separate gaps.",
+  "mesh_fingerprint": {
+    "raw_line_element_count": 5576,
+    "skipped_short_or_degenerate_count": 4,
+    "line_node_count": 2415,
+    "line_elements_solved": 5572,
+    "line_nodes_solved": 2415,
+    "component_count": 64,
+    "base_node_count": 779,
+    "dof_count": 7245,
+    "free_dof_count": 4908,
+    "restrained_dof_count": 2337,
+    "stiffness_nnz": 72162,
+    "geometric_stiffness_nnz": 72162
+  },
+  "section_material_coverage": {
+    "real_section_material_element_count": 5493,
+    "real_section_material_coverage_pct": 98.58219669777459,
+    "total_gravity_n": 192040946.81018752,
+    "unique_section_count": 182,
+    "unique_material_count": 11,
+    "section_usage_head": {
+      "1088": 3382,
+      "4": 448,
+      "6": 200,
+      "29": 138,
+      "1053": 84,
+      "44": 76,
+      "248": 58,
+      "93": 56,
+      "256": 38,
+      "48": 34
+    },
+    "material_usage_head": {
+      "1": 2110,
+      "2": 1690,
+      "3": 1687,
+      "29": 17,
+      "30": 15,
+      "28": 14,
+      "31": 10,
+      "27": 9,
+      "26": 9,
+      "5": 6
+    }
+  },
+  "linearized_geometric_tangent": {
+    "positive_axial_element_count": 2711,
+    "max_axial_force_n": 93522660.34404293,
+    "mean_positive_axial_force_n": 5677047.509708903,
+    "real_section_material_coverage_pct": 98.58219669777459
+  },
+  "equilibrium_metrics": {
+    "residual_inf_n": 3.8929283618927e-06,
+    "max_abs_displacement_m": 0.5638936857856294,
+    "top_displacement_m": 0.5645077074377657,
+    "max_drift_ratio_pct": 0.7315116967041939,
+    "total_gravity_kn": 192040.9468101875,
+    "regularization": 3910.899753819274
+  },
+  "geometric_equilibrium_metrics": {
+    "residual_inf_n": 1.6093254089355469e-06,
+    "max_abs_displacement_m": 0.5639317152057444,
+    "top_displacement_m": 0.5639317152089401,
+    "max_drift_ratio_pct": 0.31146314356561317,
+    "regularization": 3910.8624094013685
+  },
+  "runtime_metrics": {
+    "backend": "scipy_sparse_spsolve_cpu",
+    "selection_seconds": 0.0373063449997062,
+    "assembly_seconds": 0.40767139599938673,
+    "solve_seconds": 0.006808766999711224,
+    "geometric_assembly_seconds": 0.418321625000317,
+    "geometric_solve_seconds": 0.006060722000256646,
+    "total_seconds": 0.8761688549993778
+  },
+  "limitations": [
+    "Sparse line mesh covers elastic and linearized geometric tangents, not full deformed-state nonlinear Newton closure.",
+    "Collapsed horizontal DOF is a line-element productionization step, not a complete 6-DOF frame/shell model.",
+    "Plate/shell surface elements remain unsupported by the current global tangent."
+  ],
+  "blockers": []
+}

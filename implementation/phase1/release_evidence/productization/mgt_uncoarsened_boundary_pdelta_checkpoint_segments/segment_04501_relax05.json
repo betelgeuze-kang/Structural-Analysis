@@ -1,0 +1,286 @@
+{
+  "schema_version": "mgt-uncoarsened-boundary-pdelta-probe.v1",
+  "generated_at": "2026-06-03T04:20:42.246034+00:00",
+  "status": "partial",
+  "uncoarsened_boundary_pdelta_ready": false,
+  "full_load_nonlinear_newton_ready": false,
+  "roundtrip_policy": {
+    "resolve_rigid_links": false,
+    "drop_unreferenced_nodes": false,
+    "parser_report_contract_pass": true,
+    "parser_coarsening": {
+      "applied": false,
+      "elastic_link_count": 1692,
+      "rigid_like_link_count": 0,
+      "merge_pair_count": 0,
+      "merged_node_count": 0,
+      "dummy_node_removed_count": 0,
+      "dropped_degenerate_elements": 0,
+      "support_node_count": 2133,
+      "support_node_count_mapped": 2133,
+      "node_count_pre": 13047,
+      "node_count_post": 13047,
+      "element_count_pre": 12728,
+      "element_count_post": 12728
+    },
+    "parser_run": {
+      "command": [
+        "/usr/bin/python3",
+        "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/parse_midas_mgt_to_json_npz.py",
+        "--mgt",
+        "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+        "--json-out",
+        "/tmp/mgt-uncoarsened-boundary-pdelta-8ks8f0mm/mgt_uncoarsened.roundtrip.json",
+        "--npz-out",
+        "/tmp/mgt-uncoarsened-boundary-pdelta-8ks8f0mm/mgt_uncoarsened.roundtrip.npz",
+        "--report-out",
+        "/tmp/mgt-uncoarsened-boundary-pdelta-8ks8f0mm/mgt_uncoarsened.report.json",
+        "--no-resolve-rigid-links",
+        "--no-drop-unreferenced-nodes",
+        "--no-strict-unknown-sections",
+        "--max-element-skip-ratio",
+        "0.20",
+        "--max-element-skip-count",
+        "10000"
+      ],
+      "return_code": 0,
+      "stdout_excerpt": "Wrote MIDAS MGT conversion report: /tmp/mgt-uncoarsened-boundary-pdelta-8ks8f0mm/mgt_uncoarsened.report.json\n",
+      "stderr_excerpt": "{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+    }
+  },
+  "source": {
+    "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "source_family": "midas_mgt",
+    "provenance": "repo_benchmark_bridge",
+    "blocks": [
+      "*CONSTRAINT",
+      "*ELASTICLINK",
+      "*ELEMENT",
+      "*THICKNESS"
+    ]
+  },
+  "solve_scope": "uncoarsened_frame_shell_boundary_tangent_deformed_state_pdelta_probe",
+  "unit_policy": {
+    "mgt_force_unit": "kN",
+    "mgt_length_unit": "m",
+    "elastic_link_stiffness_scale_to_si": 1000.0,
+    "base_frame_gravity_load_scale": 0.01,
+    "load_scale_multiplies_frame_gravity_and_shell_surface_probe_load": true
+  },
+  "load_steps_requested": [
+    0.45,
+    0.4501
+  ],
+  "max_converged_load_scale": 0.4501,
+  "first_failed_load_scale": null,
+  "step_results": [
+    {
+      "load_scale": 0.4501,
+      "ready": true,
+      "converged": true,
+      "iteration_count": 3,
+      "max_iterations": 8,
+      "relaxation_factor": 0.5,
+      "residual_tolerance_n": 0.0005,
+      "relative_increment_tolerance": 0.0001,
+      "best_residual_inf_n": 1.9947369594319753e-05,
+      "best_relative_residual_inf": 3.3508420330235488e-09,
+      "best_fixed_point_relative_increment": 5.017052016937219e-05,
+      "final_residual_inf_n": 5.10193747604859e-05,
+      "final_fixed_point_relative_increment": 5.017052016937219e-05,
+      "final_max_translation_m": 0.6420707623977254,
+      "rows": [
+        {
+          "iteration": 1,
+          "load_scale": 0.4501,
+          "residual_inf_n": 1.9947369594319753e-05,
+          "relative_residual_inf": 3.3508420330235488e-09,
+          "rhs_inf_n": 5952.942394100489,
+          "regularization": 382.23149368427954,
+          "active_dof_count": 61446,
+          "free_dof_count": 58998,
+          "fixed_point_increment_m": 0.0001151013146371005,
+          "fixed_point_relative_increment": 0.00017927435597202642,
+          "relaxed_increment_m": 5.755065731860576e-05,
+          "relaxed_relative_increment": 8.964521353006045e-05,
+          "max_abs_displacement_m": 0.641982489107547,
+          "max_translation_m": 0.6420168816593905,
+          "max_drift_ratio_pct": 0.13059773638479866,
+          "displacement_cap_m": 5.0,
+          "displacement_cap_exceeded": false,
+          "frame_stiffness_nnz": 291132,
+          "shell_stiffness_nnz": 1901664,
+          "spring_stiffness_nnz": 40608,
+          "coupled_stiffness_nnz": 2000548,
+          "frame_total_gravity_n": 129592198.79379755,
+          "surface_total_area_m2": 11403.976897273618,
+          "seconds": 11.109711154000252,
+          "residual_gate_passed": true,
+          "relative_increment_gate_passed": false,
+          "ready": false
+        },
+        {
+          "iteration": 2,
+          "load_scale": 0.4501,
+          "residual_inf_n": 4.329061549590563e-05,
+          "relative_residual_inf": 7.2721374792426574e-09,
+          "rhs_inf_n": 5952.942394099794,
+          "regularization": 382.23149440945804,
+          "active_dof_count": 61446,
+          "free_dof_count": 58998,
+          "fixed_point_increment_m": 7.551477570355569e-05,
+          "fixed_point_relative_increment": 0.00011761363497819898,
+          "relaxed_increment_m": 3.775738785183336e-05,
+          "relaxed_relative_increment": 5.88102759343493e-05,
+          "max_abs_displacement_m": 0.6420202464953988,
+          "max_translation_m": 0.642054658360303,
+          "max_drift_ratio_pct": 0.1306114825973663,
+          "displacement_cap_m": 5.0,
+          "displacement_cap_exceeded": false,
+          "frame_stiffness_nnz": 291132,
+          "shell_stiffness_nnz": 1901664,
+          "spring_stiffness_nnz": 40608,
+          "coupled_stiffness_nnz": 2000589,
+          "frame_total_gravity_n": 129592198.79379755,
+          "surface_total_area_m2": 11403.976870788743,
+          "seconds": 11.024220611994679,
+          "residual_gate_passed": true,
+          "relative_increment_gate_passed": false,
+          "ready": false
+        },
+        {
+          "iteration": 3,
+          "load_scale": 0.4501,
+          "residual_inf_n": 5.10193747604859e-05,
+          "relative_residual_inf": 8.570446576311562e-09,
+          "rhs_inf_n": 5952.94239409902,
+          "regularization": 382.23149477319816,
+          "active_dof_count": 61446,
+          "free_dof_count": 58998,
+          "fixed_point_increment_m": 3.2212105824047654e-05,
+          "fixed_point_relative_increment": 5.017052016937219e-05,
+          "relaxed_increment_m": 1.6106052912023827e-05,
+          "relaxed_relative_increment": 2.5085889370745416e-05,
+          "max_abs_displacement_m": 0.6420363525483108,
+          "max_translation_m": 0.6420707623977254,
+          "max_drift_ratio_pct": 0.13062191283864752,
+          "displacement_cap_m": 5.0,
+          "displacement_cap_exceeded": false,
+          "frame_stiffness_nnz": 291132,
+          "shell_stiffness_nnz": 1901664,
+          "spring_stiffness_nnz": 40608,
+          "coupled_stiffness_nnz": 2000607,
+          "frame_total_gravity_n": 129592198.79379755,
+          "surface_total_area_m2": 11403.976858273281,
+          "seconds": 11.109601873999054,
+          "residual_gate_passed": true,
+          "relative_increment_gate_passed": true,
+          "ready": true
+        }
+      ],
+      "seconds": 33.2807735039969,
+      "blockers": []
+    }
+  ],
+  "checkpoint_resume": {
+    "supported": true,
+    "checkpoint_schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+    "checkpoint_dir": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_04501_relax05",
+    "resume_checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoints/accepted_load_0p45.npz",
+    "resume_from_load_scale": 0.45,
+    "resume_checkpoint": {
+      "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoints/accepted_load_0p45.npz",
+      "schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+      "load_scale": 0.45,
+      "dof_count": 78282,
+      "node_count": 13047,
+      "residual_inf_n": 3.0751983066679145e-05,
+      "fixed_point_relative_increment": 6.20320605920438e-05,
+      "max_translation_m": 0.6419594011810663
+    },
+    "skipped_load_steps_before_resume": [
+      0.45
+    ],
+    "attempted_load_steps_after_resume": [
+      0.4501
+    ],
+    "saved_checkpoint_count": 1,
+    "saved_checkpoints": [
+      {
+        "path": "/tmp/mgt_uncoarsened_boundary_pdelta_frontier_checkpoints_04501_relax05/accepted_load_0p4501.npz",
+        "schema_version": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+        "load_scale": 0.4501,
+        "dof_count": 78282,
+        "node_count": 13047,
+        "residual_inf_n": 1.9947369594319753e-05,
+        "fixed_point_relative_increment": 5.017052016937219e-05,
+        "max_translation_m": 0.6420707623977254
+      }
+    ],
+    "claim_boundary": "Accepted displacement states can be written and replayed as exact seeds for later frontier probes. This reduces rerun cost for bracket search, but it does not change the nonlinear convergence gate or promote a failed residual/increment state."
+  },
+  "mesh_fingerprint": {
+    "raw_line_element_count": 5576,
+    "line_elements_solved": 5564,
+    "skipped_short_or_degenerate_line_count": 12,
+    "line_node_count": 2491,
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "node_count": 13047,
+    "dof_count": 78282,
+    "element_count": 12728,
+    "elastic_link_spring_stiffness_nnz": 40608
+  },
+  "boundary_summary": {
+    "support_constraint_row_count": 8,
+    "authored_support_node_count": 2133,
+    "mapped_support_node_count": 2133,
+    "missing_support_node_count": 0,
+    "authored_support_restrained_dof_count": 7707,
+    "restraint_code_counts": {
+      "111000": 1,
+      "111111": 7
+    },
+    "restrained_dof_counts": {
+      "Dx": 2133,
+      "Dy": 2133,
+      "Dz": 2133,
+      "Rx": 436,
+      "Ry": 436,
+      "Rz": 436
+    },
+    "missing_support_node_ids_head": [],
+    "elastic_link_row_count": 1692,
+    "elastic_link_rows_skipped": 0,
+    "distinct_elastic_link_node_count": 3384,
+    "mapped_elastic_link_node_count": 3384,
+    "missing_elastic_link_node_count": 0,
+    "finite_spring_component_count": 10152,
+    "finite_spring_dof_counts": {
+      "SDx": 1692,
+      "SDy": 1692,
+      "SDz": 1692,
+      "SRx": 1692,
+      "SRy": 1692,
+      "SRz": 1692
+    },
+    "elastic_link_type_counts": {
+      "GEN": 1692
+    },
+    "stiffness_abs_min_nonzero_n_per_m_or_nm_per_rad": 1.0,
+    "stiffness_abs_max_n_per_m_or_nm_per_rad": 1000000000.0
+  },
+  "runtime_metrics": {
+    "backend": "scipy_sparse_spsolve_cpu_uncoarsened_boundary_pdelta_probe",
+    "total_seconds": 35.40717294099886
+  },
+  "claim_boundary": "This probe wires the uncoarsened authored support masks and finite elastic-link spring tangent into a deformed-coordinate frame-shell P-Delta fixed-point loop. The frame tangent uses geometric stiffness from frame gravity axial forces and the shell tangent is rebuilt on the deformed nodal coordinates. It is a nonlinear path diagnostic only; it is not a consistent Newton/Jacobian, material nonlinear, or full-load closure.",
+  "blockers": [
+    "uncoarsened_boundary_pdelta_not_full_load_closed",
+    "consistent_newton_jacobian_required",
+    "material_nonlinear_newton_required"
+  ]
+}

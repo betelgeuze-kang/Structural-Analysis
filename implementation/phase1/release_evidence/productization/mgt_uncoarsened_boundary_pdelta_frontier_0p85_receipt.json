@@ -1,0 +1,51 @@
+{
+  "schema_version": "mgt-uncoarsened-boundary-pdelta-frontier-0p85-receipt.v1",
+  "generated_at": "2026-06-09T16:09:17.696016+00:00",
+  "status": "partial",
+  "frontier_0p85_reached": false,
+  "target_load_scale": 0.85,
+  "frontier_load_scale": 0.656,
+  "source": {
+    "segment_dir": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoint_segments",
+    "segment_count": 76,
+    "source_aggregate_json": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoint_continuation.json",
+    "source_aggregate_frontier": 0.656,
+    "source_checkpoint_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoints/accepted_load_0p45.npz",
+    "source_checkpoint_exists": true,
+    "source_seed_load_scale": 0.45
+  },
+  "frontier_diagnostic": {
+    "current_frontier_load_scale": 0.656,
+    "previous_source_aggregate_frontier": 0.656,
+    "frontier_increment_vs_source_aggregate": 0.0,
+    "first_failed_load_scale": 0.540601,
+    "first_failed_load_scale_source_aggregate": null,
+    "target_load_scale": 0.85,
+    "frontier_to_target_gap": 0.19399999999999995,
+    "target_reached": false,
+    "residual_tolerance_n": 0.0005,
+    "relative_increment_tolerance": 0.0001,
+    "nearest_failed_bracket": 0.540601,
+    "next_action": "consistent Newton/Jacobian, material tangent, arc-length/trust-region, or stronger globalization on the next bracket"
+  },
+  "summary": {
+    "segment_count": 76,
+    "accepted_step_count": 108,
+    "failed_step_count": 4,
+    "saved_checkpoint_count": 0,
+    "max_converged_load_scale": 0.656,
+    "first_failed_load_scale": 0.540601,
+    "rule_family_breakdown": {
+      "strength": {
+        "count": 112,
+        "max_dcr": 0.0,
+        "max_increment": 0.0005049576423878143,
+        "max_residual_n": 0.00012945257387997344
+      }
+    }
+  },
+  "claim_boundary": "Frontier 0.85 receipt is an honest read-only aggregate of the existing mgt-uncoarsened-boundary-pdelta-probe.v1 segment JSONs. It does NOT re-run the probe or claim any new segment load steps. Frontier extension toward 0.85 still requires a new probe run with stronger globalization or a consistent Newton/Jacobian. Until the aggregate's first_failed_load_scale is None AND max_converged_load_scale >= 0.85, this receipt's status remains partial.",
+  "blockers": [
+    "frontier_below_target:0.656000_of_0.85"
+  ]
+}
