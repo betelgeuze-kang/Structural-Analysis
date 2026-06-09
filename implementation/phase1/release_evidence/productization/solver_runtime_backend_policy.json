@@ -1,0 +1,47 @@
+{
+  "schema_version": "solver-runtime-backend-policy.v1",
+  "generated_at": "2026-06-07T15:06:44.385840+00:00",
+  "status": "ready",
+  "official_solver_compute_backend": "amd_rocm_hip",
+  "official_solver_backend": "amd_rocm_hip",
+  "official_solver_backend_family": "rocm_hip",
+  "official_gpu_device_label_policy": "PyTorch ROCm exposes HIP devices through the torch.cuda API; a device label such as cuda:0 can still be AMD ROCm/HIP when torch.version.hip is populated and rocm-smi/rocminfo detect AMD GPU.",
+  "gpu_required_for_commercial_solver_closure": true,
+  "nvidia_smi_required": false,
+  "nvidia_smi_detected": false,
+  "rocm_smi_detected": true,
+  "rocminfo_detected": true,
+  "hipcc_detected": true,
+  "torch_version": "2.6.0+rocm6.1",
+  "torch_version_hip": "6.1.40091-a8dbc0c19",
+  "torch_device_label": "cuda:0",
+  "torch_device_label_is_pytorch_rocm_compat_alias": true,
+  "device_names": [
+    "AMD Radeon RX 6900 XT"
+  ],
+  "gfx_targets": [
+    "gfx1030"
+  ],
+  "rocm_hardware_ready": true,
+  "torch_rocm_runtime_ready": true,
+  "target_hardware_match": true,
+  "rocm_sparse_probe_present": true,
+  "rocm_sparse_solver_probe_ready": true,
+  "line_frame_rocm_sparse_solver_ready": true,
+  "shell_coupled_rocm_sparse_solver_ready": true,
+  "cpu_diagnostic_artifacts": [
+    {
+      "artifact": "mgt_direct_residual_newton_probe.json",
+      "present": true,
+      "status": "partial",
+      "purpose": "physical_residual_diagnostic_only",
+      "promotes_solver_closure": false
+    }
+  ],
+  "cpu_diagnostic_promotes_solver_closure": false,
+  "cpu_solver_fallback_detected": false,
+  "cpu_fallback_allowed_for_official_solver_closure": false,
+  "cpu_reference_allowed_for_validation_replay": true,
+  "claim_boundary": "Commercial solver closure on this workstation is an AMD ROCm/HIP lane. CPU direct-residual receipts may diagnose physics gaps but cannot promote G1/G9 solver closure. CPU reference solutions inside ROCm receipts are validation replay references only, not accepted fallback solver backends.",
+  "blockers": []
+}

@@ -1,11 +1,43 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-05-31T09:13:49.114968+00:00",
+  "generated_at": "2026-06-09T15:41:15.692611+00:00",
   "overall_status": "ready",
   "delivery_status": "ready",
   "authority_holdout_status": "closed",
   "bundle_status": "ready",
   "blockers": [],
+  "full_gap_ledger_status": "open",
+  "full_gap_ledger_ready": false,
+  "full_gap_ledger_summary": {
+    "total_count": 20,
+    "closed_count": 17,
+    "partial_count": 2,
+    "open_count": 0,
+    "external_blocked_count": 1,
+    "locally_closable_open_count": 1,
+    "missing_doc_id_count": 0,
+    "missing_status_id_count": 0
+  },
+  "full_gap_ledger_blockers": [
+    "G1:full_mesh_nonlinear_equilibrium_not_closed",
+    "G1:direct_residual_newton_not_closed",
+    "G1:equilibrium_newton_not_closed",
+    "G6:external_receipt_or_closure_pending:hardest_external_10case",
+    "G6:external_receipt_or_closure_pending:korean_public_structures",
+    "G6:external_receipt_or_closure_pending:peer_spd_hinge",
+    "G6:external_receipt_or_closure_pending:tpu_hffb",
+    "G6:external_submission_receipts_pending",
+    "G6:residual_closure_pending:RH-001",
+    "G6:residual_closure_pending:RH-002",
+    "G6:residual_closure_pending:RH-003",
+    "G6:residual_holdout_closure_pending",
+    "G7:repo_benchmark_bridge_mgt_present",
+    "G7:metadata_only_sources_present",
+    "G7:operator_attached_real_mgt_header_ok_below_target"
+  ],
+  "next_locally_closable_gaps": [
+    "G1"
+  ],
   "pending_authority_closure": false,
   "sections": {
     "drawing_comparison_p1_p3": {
@@ -38,11 +70,11 @@
       "status": "story_proxy_pass",
       "integrity": "verified",
       "native_solve_status": "mesh_3d_beam_global_wired_with_midas_model_derived",
-      "native_fea": "mesh_contract_pass",
+      "native_fea": "mesh_3d_global_wired",
       "global_fea_readiness": "ready",
       "mesh_contract": "ready",
-      "roundtrip_sync": "ready",
-      "roundtrip_parsed": true
+      "roundtrip_sync": "synced",
+      "roundtrip_parsed": false
     },
     "rh_closure_checklist": {
       "status": "complete",
@@ -69,14 +101,235 @@
       "actual_closure_evidence_attached": true
     },
     "ml_multi_objective_a_p3": {
-      "status": "research_archive_ready",
-      "production_ml_wired": false,
+      "status": "production_shadow_solver_gated_ready",
+      "production_ml_wired": true,
       "research_pareto_archive_ready": true,
       "research_pareto_front_count": 3
     }
   },
+  "ledger_requirements": [
+    {
+      "id": "G1",
+      "title": "Full 3D Global FEA Core",
+      "ledger": "commercial_solver",
+      "status": "partial",
+      "closed": false,
+      "locally_closable": true,
+      "blockers": [
+        "full_mesh_nonlinear_equilibrium_not_closed",
+        "direct_residual_newton_not_closed",
+        "equilibrium_newton_not_closed"
+      ],
+      "next_gate": "consistent full-load Newton/Jacobian plus material Newton closure"
+    },
+    {
+      "id": "G2",
+      "title": "Modal, Buckling, Stability",
+      "ledger": "commercial_solver",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "full-building native modal/buckling solve after G1 expands beyond representative component"
+    },
+    {
+      "id": "G3",
+      "title": "Loads, Combinations, Staged Construction Semantics",
+      "ledger": "commercial_solver",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "attach source rows for currently unsupported hazard families before making those hazard-specific solver claims"
+    },
+    {
+      "id": "G4",
+      "title": "Material, Section, Element Breadth",
+      "ledger": "commercial_solver",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "promote full shell/plate/contact and path-dependent material Newton families only after tangent benchmarks"
+    },
+    {
+      "id": "G5",
+      "title": "Design Code And Detailing Automation",
+      "ledger": "commercial_solver",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "promote unsupported steel/composite/seismic/project-specific detailing only after clause/source/review evidence"
+    },
+    {
+      "id": "G6",
+      "title": "V&V, External Benchmarks, Residual Holdouts",
+      "ledger": "commercial_solver",
+      "status": "external_blocked",
+      "closed": false,
+      "locally_closable": false,
+      "blockers": [
+        "external_receipt_or_closure_pending:hardest_external_10case",
+        "external_receipt_or_closure_pending:korean_public_structures",
+        "external_receipt_or_closure_pending:peer_spd_hinge",
+        "external_receipt_or_closure_pending:tpu_hffb",
+        "external_submission_receipts_pending",
+        "residual_closure_pending:RH-001",
+        "residual_closure_pending:RH-002",
+        "residual_closure_pending:RH-003",
+        "residual_holdout_closure_pending"
+      ],
+      "next_gate": "attach EB receipts 4/4 and strict RH closures 3/3"
+    },
+    {
+      "id": "G7",
+      "title": "Korean Medium/Large Real-Project Corpus",
+      "ledger": "commercial_solver",
+      "status": "partial",
+      "closed": false,
+      "locally_closable": false,
+      "blockers": [
+        "repo_benchmark_bridge_mgt_present",
+        "metadata_only_sources_present",
+        "operator_attached_real_mgt_header_ok_below_target"
+      ],
+      "next_gate": "replace bridge lanes with permitted real operator-attached MGT/IFC/PDF-derived artifacts"
+    },
+    {
+      "id": "G8",
+      "title": "Optimization And AI Productization",
+      "ledger": "commercial_solver",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "production optimization proposals replay through solver/code/cost gates with governed ML/Pareto promotion"
+    },
+    {
+      "id": "G9",
+      "title": "Runtime, GPU, Performance, And Scale",
+      "ledger": "commercial_solver",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "promote nonlinear/full-load GPU paths, pure-device preconditioners, and scale evidence beyond shell/coupled smoke probes"
+    },
+    {
+      "id": "G10",
+      "title": "Product UX, Reports, Governance, Support",
+      "ledger": "commercial_solver",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "customer report separates solver/proxy/unsupported states and signed engineer review workflow"
+    },
+    {
+      "id": "AI-G1",
+      "title": "Input Model Understanding And Semantic Normalization",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "AI-generated typed structure entities include source provenance, confidence, repair diff, and unsupported queue"
+    },
+    {
+      "id": "AI-G2",
+      "title": "Structural Response Surrogate And Residual Learning",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "validated checkpoint plus dataset/model card, OOD gate, uncertainty, and solver fallback"
+    },
+    {
+      "id": "AI-G3",
+      "title": "Optimization Policy And Design Action Space",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "action/state/reward/constraint vector with hard action mask and solver/code replay evidence"
+    },
+    {
+      "id": "AI-G4",
+      "title": "Physics-Informed Hybrid AI",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "equilibrium, energy monotonicity, BC violation, and OOD unsupported gates for AI corrections"
+    },
+    {
+      "id": "AI-G5",
+      "title": "Design Code And Regulation Reasoning AI",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "clause citation, edition, governing-combo trace, unsupported queue, and engineer review workflow"
+    },
+    {
+      "id": "AI-G6",
+      "title": "Explainability, Audit, Reproducibility",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "AI suggestion traces include alternatives, sensitivity, solver/code replay, and human decision log"
+    },
+    {
+      "id": "AI-G7",
+      "title": "Dataset, ModelOps, ReleaseOps",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "checkpoint registry with candidate/shadow/production states, dataset/model cards, drift monitoring"
+    },
+    {
+      "id": "AI-G8",
+      "title": "Safety, Responsibility, Product Governance",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "AI result state contract distinguishes auto_applied, suggested_only, blocked, review_required, unsupported"
+    },
+    {
+      "id": "AI-G9",
+      "title": "Deployment Performance And Runtime",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "AI inference receipt records backend, checkpoint hash, latency, memory, OOD/confidence, and fallback reason when fallback is required"
+    },
+    {
+      "id": "AI-G10",
+      "title": "User Workflow And AI Interface",
+      "ledger": "ai_engine",
+      "status": "closed",
+      "closed": true,
+      "locally_closable": true,
+      "blockers": [],
+      "next_gate": "review queue and grounded assistant answers link to evidence, confidence, caveat, and next review action"
+    }
+  ],
   "artifacts": {
     "delivery_evidence_bundle": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
-    "residual_holdout_closure_updates": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
+    "residual_holdout_closure_updates": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
+    "commercial_gap_ledger_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
   }
 }
