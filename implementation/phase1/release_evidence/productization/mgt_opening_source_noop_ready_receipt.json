@@ -1,0 +1,70 @@
+{
+  "schema_version": "mgt-opening-source-noop-ready-receipt.v1",
+  "generated_at": "2026-06-09T16:09:34.460591+00:00",
+  "status": "ready",
+  "current_source_opening_noop_ready": true,
+  "current_source_opening_marker_count": 0,
+  "generic_opening_cutout_ready": false,
+  "source": {
+    "local_axis_opening_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_element_local_axis_opening_semantics_receipt.json",
+    "local_axis_opening_receipt_exists": true,
+    "shell_bending_tangent_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_surface_shell_bending_tangent.json",
+    "shell_bending_tangent_receipt_exists": true,
+    "local_axis_summary": {
+      "local_axis_row_count": 12728,
+      "line_local_axis_row_count": 5576,
+      "line_nonzero_angle_row_count": 150,
+      "line_max_abs_angle_deg": 270.0,
+      "surface_lcaxis_row_count": 7152,
+      "surface_nonzero_lcaxis_row_count": 0,
+      "line_type_counts": {
+        "BEAM": 2192,
+        "COMPTR": 3384
+      },
+      "surface_type_counts": {
+        "PLATE": 7152
+      },
+      "surface_lcaxis_source_counts": {
+        "default_lcaxis_token_omitted": 7152
+      },
+      "opening_marker_block_count": 0,
+      "opening_marker_row_count": 0,
+      "generic_opening_cutout_source_row_count": 0
+    },
+    "shell_anisotropy": {
+      "mode": "isotropic",
+      "orthotropic_ratio_d22_over_d11": 1.0,
+      "d11_baseline_unit": "E * t^3 / (12 * (1 - nu^2))",
+      "d22_scaled": false,
+      "poisson_coupling_d12_d21_scaled": false,
+      "shear_block_d66_unscaled": true
+    },
+    "opening_source_scan": {
+      "opening_marker_block_names": [],
+      "opening_marker_block_count": 0,
+      "opening_marker_row_count": 0,
+      "opening_marker_rows_head": []
+    }
+  },
+  "checks": {
+    "local_axis_opening_noop_runtime_ready": true,
+    "shell_bending_opening_inventory_present": true,
+    "opening_marker_count_zero": true,
+    "opening_rows_absent_in_local_axis": true
+  },
+  "claim_boundary": {
+    "closed": [
+      "MGT *ELEMENT frame ANGLE rows are parsed and exported into roundtrip NPZ",
+      "6-DOF frame elastic and geometric tangent assembly consumes nonzero frame ANGLE as local y/z roll",
+      "PLATE compact local-axis option tokens are inventoried; current source rows are all default zero",
+      "benchmark bridge MGT contains no opening/hole/void source rows, so current-source opening semantics is a checked no-op (parser + provenance ready, no runtime cutout)",
+      "shell-bending tangent has a deterministic no-op opening_source_inventory field reporting current_source_opening_marker_count=0"
+    ],
+    "not_closed": [
+      "generic opening/cutout runtime meshing is not claimed because no opening/hole/void source rows are present in the benchmark bridge MGT",
+      "surface shell local-axis LCAXIS has only default-zero source coverage in this MGT",
+      "diaphragm/member release and full-load nonlinear frame-shell semantics remain outside this receipt"
+    ]
+  },
+  "blockers": []
+}

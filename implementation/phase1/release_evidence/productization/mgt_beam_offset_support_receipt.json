@@ -1,0 +1,159 @@
+{
+  "schema_version": "mgt-beam-offset-support-receipt.v1",
+  "generated_at": "2026-06-05T13:35:21.209833+00:00",
+  "status": "partial",
+  "source": {
+    "path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "size_bytes": 2205887,
+    "source_family": "midas_mgt",
+    "block": "*OFFSET",
+    "provenance": "repo_benchmark_bridge"
+  },
+  "summary": {
+    "offset_row_count": 708,
+    "offset_element_ref_count": 708,
+    "distinct_offset_element_count": 708,
+    "mgt_element_count": 12728,
+    "unmatched_offset_element_count": 0,
+    "duplicate_offset_assignment_count": 0,
+    "coordinate_system_counts": {
+      "GLOBAL": 708
+    },
+    "max_abs_offset_m": 0.523,
+    "nonzero_component_counts": {
+      "global_i_x": 470,
+      "global_i_y": 482,
+      "global_j_x": 558,
+      "global_j_y": 570
+    },
+    "component_abs_max_m": {
+      "global_i_x": 0.45,
+      "global_i_y": 0.4,
+      "global_i_z": 0.0,
+      "global_j_x": 0.45,
+      "global_j_y": 0.523,
+      "global_j_z": 0.0
+    }
+  },
+  "support": {
+    "typed_mgt_offset_parser_ready": true,
+    "offset_element_refs_match_mgt_elements": true,
+    "canonical_runtime_entity_ready": true,
+    "global_xyz_offsets_supported": true,
+    "element_local_yz_offsets_supported": false,
+    "solver_rigid_end_offset_tangent_ready": true,
+    "solver_geometric_stiffness_offset_ready": true,
+    "frame_offset_applied_element_count": 708,
+    "load_eccentricity_moments_applied": true,
+    "roundtrip_preserves_offset_metadata": false
+  },
+  "consuming_artifacts": {
+    "frame_solve_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json",
+    "frame_solve_status": "ready"
+  },
+  "claim_boundary": {
+    "closed": [
+      "real MGT *OFFSET rows are parsed into typed element end-offset entities",
+      "receipt records source SHA256 and verifies offset element references against *ELEMENT ids",
+      "6-DOF frame elastic and geometric tangent assembly consumes GLOBAL offsets through rigid-end transformation"
+    ],
+    "not_closed": [
+      "ELEMENT local-yz offset rows are still queued for solver support",
+      "roundtrip export and non-frame shell/surface eccentricity semantics have not consumed offsets yet"
+    ]
+  },
+  "unmatched_offset_element_ids_head": [],
+  "example_rows": [
+    {
+      "row_index": 35,
+      "element_ids": [
+        1252
+      ],
+      "coordinate_system": "GLOBAL",
+      "i_offset_m": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "j_offset_m": {
+        "x": -0.046,
+        "y": -0.523,
+        "z": 0.0
+      },
+      "max_abs_offset_m": 0.523
+    },
+    {
+      "row_index": 389,
+      "element_ids": [
+        26832
+      ],
+      "coordinate_system": "GLOBAL",
+      "i_offset_m": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "j_offset_m": {
+        "x": -0.046,
+        "y": -0.523,
+        "z": 0.0
+      },
+      "max_abs_offset_m": 0.523
+    },
+    {
+      "row_index": 188,
+      "element_ids": [
+        6115
+      ],
+      "coordinate_system": "GLOBAL",
+      "i_offset_m": {
+        "x": 0.45,
+        "y": -0.039,
+        "z": 0.0
+      },
+      "j_offset_m": {
+        "x": 0.45,
+        "y": -0.039,
+        "z": 0.0
+      },
+      "max_abs_offset_m": 0.45
+    },
+    {
+      "row_index": 189,
+      "element_ids": [
+        6116
+      ],
+      "coordinate_system": "GLOBAL",
+      "i_offset_m": {
+        "x": 0.45,
+        "y": -0.039,
+        "z": 0.0
+      },
+      "j_offset_m": {
+        "x": 0.45,
+        "y": -0.039,
+        "z": 0.0
+      },
+      "max_abs_offset_m": 0.45
+    },
+    {
+      "row_index": 190,
+      "element_ids": [
+        6117
+      ],
+      "coordinate_system": "GLOBAL",
+      "i_offset_m": {
+        "x": 0.45,
+        "y": -0.039,
+        "z": 0.0
+      },
+      "j_offset_m": {
+        "x": 0.45,
+        "y": -0.039,
+        "z": 0.0
+      },
+      "max_abs_offset_m": 0.45
+    }
+  ]
+}

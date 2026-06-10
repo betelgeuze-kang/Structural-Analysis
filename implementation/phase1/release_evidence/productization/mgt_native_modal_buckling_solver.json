@@ -1,0 +1,153 @@
+{
+  "schema_version": "mgt-native-modal-buckling-solver.v1",
+  "generated_at": "2026-06-05T13:34:31.038934+00:00",
+  "status": "ready",
+  "native_solver_ready": true,
+  "benchmark_contract_pass": true,
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "solve_scope": "representative_native_beam_component",
+  "claim_boundary": "Native in-repo K/M/Kg eigen solve for modal/buckling readiness; full-building nonlinear closure remains G1.",
+  "mesh_fingerprint": {
+    "raw_beam_elements_available": 358,
+    "beam_elements_solved": 4,
+    "nodes_in_component": 5,
+    "dof_count": 15,
+    "free_dof_count": 12,
+    "base_node_count": 1,
+    "z_span_m": 5.65,
+    "real_section_property_coverage_pct": 100.0
+  },
+  "matrices": {
+    "stiffness_matrix_ready": true,
+    "mass_matrix_ready": true,
+    "geometric_stiffness_ready": true,
+    "restrained_dof_count": 3
+  },
+  "modal_solve": {
+    "status": "ready",
+    "mode_count": 4,
+    "modes": [
+      {
+        "mode_id": 1,
+        "omega_rad_s": 8.030639961761642,
+        "frequency_hz": 1.2781160461056746,
+        "period_s": 0.7824015691274092,
+        "free_dof_shape_head": [
+          1.0,
+          -0.6153985483420655,
+          -0.27926694089332027,
+          0.9999939956946192,
+          -0.3701934766172665,
+          -0.27922457870622935,
+          0.9999793827075869,
+          -0.23063938000058928,
+          -0.27896390941551696,
+          0.999953629177325,
+          -0.00011856508741473688,
+          -0.2783252916500291
+        ],
+        "modal_mass_normalized": true
+      },
+      {
+        "mode_id": 2,
+        "omega_rad_s": 39.88540684813355,
+        "frequency_hz": 6.347959657111788,
+        "period_s": 0.1575309318293593,
+        "free_dof_shape_head": [
+          -0.2806705463726791,
+          -1.0,
+          -0.4618049984166244,
+          -0.2806289702553172,
+          -0.5950131143017773,
+          -0.46010466368433434,
+          -0.2805277940863229,
+          -0.367293042708067,
+          -0.4496625235494542,
+          -0.2803495043555634,
+          -0.004753153400642724,
+          -0.4241521360066275
+        ],
+        "modal_mass_normalized": true
+      },
+      {
+        "mode_id": 3,
+        "omega_rad_s": 230.87456303259594,
+        "frequency_hz": 36.744827940819015,
+        "period_s": 0.027214714452074552,
+        "free_dof_shape_head": [
+          -0.007300278406829738,
+          1.0,
+          0.7144756569572375,
+          -0.007264044684518386,
+          0.3907049144587261,
+          0.6555301405663552,
+          -0.0071761085470631696,
+          0.14019542315154165,
+          0.314772207211936,
+          -0.007021784240306793,
+          0.1640632357434538,
+          -0.4434705577135462
+        ],
+        "modal_mass_normalized": true
+      },
+      {
+        "mode_id": 4,
+        "omega_rad_s": 416.1673664198535,
+        "frequency_hz": 66.23509351925574,
+        "period_s": 0.015097736665975747,
+        "free_dof_shape_head": [
+          -0.00013872170427988502,
+          0.5114991491570297,
+          1.0,
+          -0.00013648451945225625,
+          -0.32947685274822053,
+          0.885930670041058,
+          -0.00013108929991174654,
+          -0.6511670660605916,
+          0.39489255769887166,
+          -0.00012171125748211943,
+          -0.7722711422587164,
+          -0.026054517913158815
+        ],
+        "modal_mass_normalized": true
+      }
+    ],
+    "blockers": []
+  },
+  "buckling_solve": {
+    "status": "ready",
+    "critical_load_factor": 7053.141480946014,
+    "buckling_factor_head": [
+      7053.141480946014,
+      66287.15497073073,
+      163501.79039347955,
+      443349.2477388147,
+      1050321.595362575
+    ],
+    "geometric_stiffness_positive_rank": 6,
+    "euler_member_factor_min": 241.56518577501603,
+    "blockers": []
+  },
+  "benchmark_contract": {
+    "status": "pass",
+    "contract_pass": true,
+    "source": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+    "cross_validation_status": "pass_with_marginal_metrics",
+    "modal_buckling_summary": {
+      "case_count": 12,
+      "mode_shape_mac_hf_min": 0.969,
+      "mode_shape_mac_hf_mean": 0.9777,
+      "buckling_factor_hf_min": 2.1,
+      "buckling_factor_hf_mean": 2.604,
+      "note": "Ingested from commercial exports; this artifact records benchmark tolerances, while native eigen/buckling solve evidence is emitted separately."
+    },
+    "note": "Benchmark tolerance comes from paired commercial HF/LF exports; native K/M/Kg solve is reported separately."
+  },
+  "limitations": [
+    "Representative component eigen solve; not a full 3D all-member modal model.",
+    "Benchmark tolerance is paired commercial export evidence, not live licensed solver execution."
+  ],
+  "blockers": []
+}

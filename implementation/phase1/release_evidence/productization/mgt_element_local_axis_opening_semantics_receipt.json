@@ -1,0 +1,254 @@
+{
+  "schema_version": "mgt-element-local-axis-opening-semantics-receipt.v1",
+  "generated_at": "2026-06-09T16:09:28.877793+00:00",
+  "status": "ready",
+  "source": {
+    "path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "size_bytes": 2205887,
+    "source_family": "midas_mgt",
+    "block": "*ELEMENT",
+    "provenance": "repo_benchmark_bridge"
+  },
+  "summary": {
+    "local_axis_row_count": 12728,
+    "line_local_axis_row_count": 5576,
+    "line_nonzero_angle_row_count": 150,
+    "line_max_abs_angle_deg": 270.0,
+    "surface_lcaxis_row_count": 7152,
+    "surface_nonzero_lcaxis_row_count": 0,
+    "line_type_counts": {
+      "BEAM": 2192,
+      "COMPTR": 3384
+    },
+    "surface_type_counts": {
+      "PLATE": 7152
+    },
+    "surface_lcaxis_source_counts": {
+      "default_lcaxis_token_omitted": 7152
+    },
+    "opening_marker_block_count": 0,
+    "opening_marker_row_count": 0,
+    "generic_opening_cutout_source_row_count": 0
+  },
+  "support": {
+    "frame_angle_parser_ready": true,
+    "frame_angle_source_has_nonzero_rows": true,
+    "frame_angle_roundtrip_npz_ready": true,
+    "frame_angle_solver_consumption_ready": true,
+    "surface_lcaxis_parser_ready": true,
+    "surface_lcaxis_source_all_default": true,
+    "opening_source_inventory_ready": true,
+    "opening_source_rows_present": false,
+    "current_source_opening_absence_policy_ready": true,
+    "current_source_opening_noop_runtime_ready": true,
+    "opening_runtime_semantics_ready": true,
+    "generic_opening_cutout_runtime_semantics_ready": false
+  },
+  "solver_consumption": {
+    "frame_solve_json": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json",
+    "frame_solve_status": "ready",
+    "frame_local_axis_support": {
+      "elem_angle_array_present": true,
+      "elem_angle_source": "roundtrip_npz",
+      "elem_angle_nonzero_count": 150,
+      "elem_angle_max_abs_deg": 270.0,
+      "elem_lcaxis_array_present": true,
+      "elem_lcaxis_nonzero_count": 0,
+      "frame_angle_rows_consumed": true,
+      "frame_angle_element_count": 5572,
+      "frame_nonzero_angle_element_count": 150,
+      "frame_max_abs_angle_deg": 270.0,
+      "solver_local_axis_roll_transform_ready": true,
+      "elastic_assembly_roll_transform_applied_count": 150,
+      "geometric_assembly_roll_transform_applied_count": 150,
+      "source_surface_lcaxis_nonzero_count": 0
+    }
+  },
+  "opening_source_scan": {
+    "opening_marker_block_names": [],
+    "opening_marker_block_count": 0,
+    "opening_marker_row_count": 0,
+    "opening_marker_rows_head": []
+  },
+  "example_rows": {
+    "nonzero_frame_angle_rows_head": [
+      {
+        "row_index": 678,
+        "element_id": 5485,
+        "type": "BEAM",
+        "family": "line",
+        "angle_deg": 90.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "",
+        "raw": "5485, BEAM  ,    1,  1053,  2325,     1,    90,     0"
+      },
+      {
+        "row_index": 679,
+        "element_id": 5486,
+        "type": "BEAM",
+        "family": "line",
+        "angle_deg": 90.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "",
+        "raw": "5486, BEAM  ,    1,  1053,  2327,     2,    90,     0"
+      },
+      {
+        "row_index": 680,
+        "element_id": 5490,
+        "type": "BEAM",
+        "family": "line",
+        "angle_deg": 77.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "",
+        "raw": "5490, BEAM  ,    1,  1056,  2348,    10,    77,     0"
+      },
+      {
+        "row_index": 681,
+        "element_id": 5491,
+        "type": "BEAM",
+        "family": "line",
+        "angle_deg": 90.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "",
+        "raw": "5491, BEAM  ,    1,  1053,  2349,    11,    90,     0"
+      },
+      {
+        "row_index": 682,
+        "element_id": 5492,
+        "type": "BEAM",
+        "family": "line",
+        "angle_deg": 90.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "",
+        "raw": "5492, BEAM  ,    1,  1053,  2317,    12,    90,     0"
+      },
+      {
+        "row_index": 683,
+        "element_id": 5503,
+        "type": "BEAM",
+        "family": "line",
+        "angle_deg": 90.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "",
+        "raw": "5503, BEAM  ,    1,  1053,  2429,    26,    90,     0"
+      },
+      {
+        "row_index": 684,
+        "element_id": 5505,
+        "type": "BEAM",
+        "family": "line",
+        "angle_deg": 77.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "",
+        "raw": "5505, BEAM  ,    1,  1053,  2408,    28,    77,     0"
+      },
+      {
+        "row_index": 685,
+        "element_id": 5506,
+        "type": "BEAM",
+        "family": "line",
+        "angle_deg": -85.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "",
+        "raw": "5506, BEAM  ,    1,  1053,  2372,    29,   -85,     0"
+      }
+    ],
+    "surface_lcaxis_rows_head": [
+      {
+        "row_index": 34,
+        "element_id": 1062,
+        "type": "PLATE",
+        "family": "surface",
+        "angle_deg": 0.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "default_lcaxis_token_omitted",
+        "raw": "1062, PLATE ,    4,     5,  2207,  3611,  3612,  2520,     4,     0"
+      },
+      {
+        "row_index": 35,
+        "element_id": 1063,
+        "type": "PLATE",
+        "family": "surface",
+        "angle_deg": 0.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "default_lcaxis_token_omitted",
+        "raw": "1063, PLATE ,    4,     5,  3612,  3613,  2521,  2520,     4,     0"
+      },
+      {
+        "row_index": 36,
+        "element_id": 1064,
+        "type": "PLATE",
+        "family": "surface",
+        "angle_deg": 0.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "default_lcaxis_token_omitted",
+        "raw": "1064, PLATE ,    4,     5,  3613,  3614,  2522,  2521,     4,     0"
+      },
+      {
+        "row_index": 37,
+        "element_id": 1065,
+        "type": "PLATE",
+        "family": "surface",
+        "angle_deg": 0.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "default_lcaxis_token_omitted",
+        "raw": "1065, PLATE ,    4,     5,  3614,  3615,  2206,  2522,     4,     0"
+      },
+      {
+        "row_index": 38,
+        "element_id": 1066,
+        "type": "PLATE",
+        "family": "surface",
+        "angle_deg": 0.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "default_lcaxis_token_omitted",
+        "raw": "1066, PLATE ,    4,     5,  3140,  3616,  3617,  2459,     4,     0"
+      },
+      {
+        "row_index": 39,
+        "element_id": 1067,
+        "type": "PLATE",
+        "family": "surface",
+        "angle_deg": 0.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "default_lcaxis_token_omitted",
+        "raw": "1067, PLATE ,    4,     5,  3141,  3618,  3616,  3140,     4,     0"
+      },
+      {
+        "row_index": 40,
+        "element_id": 1068,
+        "type": "PLATE",
+        "family": "surface",
+        "angle_deg": 0.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "default_lcaxis_token_omitted",
+        "raw": "1068, PLATE ,    4,     5,  3142,  3619,  3618,  3141,     4,     0"
+      },
+      {
+        "row_index": 41,
+        "element_id": 1069,
+        "type": "PLATE",
+        "family": "surface",
+        "angle_deg": 0.0,
+        "lcaxis_code": 0,
+        "lcaxis_source": "default_lcaxis_token_omitted",
+        "raw": "1069, PLATE ,    4,     5,  2460,  3620,  3619,  3142,     4,     0"
+      }
+    ]
+  },
+  "claim_boundary": {
+    "closed": [
+      "MGT *ELEMENT frame ANGLE rows are parsed and exported into roundtrip NPZ",
+      "6-DOF frame elastic and geometric tangent assembly consumes nonzero frame ANGLE as local y/z roll",
+      "PLATE compact local-axis option tokens are inventoried; current source rows are all default zero",
+      "benchmark bridge MGT contains no opening/hole/void rows, so current-source opening semantics are a checked no-op instead of an uninspected solver omission"
+    ],
+    "not_closed": [
+      "generic opening/cutout runtime meshing is not claimed because no opening/hole/void source rows are present in the benchmark bridge MGT",
+      "surface shell local-axis LCAXIS has only default-zero source coverage in this MGT",
+      "diaphragm/member release and full-load nonlinear frame-shell semantics remain outside this receipt"
+    ]
+  },
+  "blockers": []
+}

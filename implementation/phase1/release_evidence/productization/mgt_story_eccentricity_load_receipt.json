@@ -1,0 +1,734 @@
+{
+  "schema_version": "mgt-story-eccentricity-load-receipt.v1",
+  "generated_at": "2026-06-05T13:35:31.562244+00:00",
+  "status": "ready",
+  "source": {
+    "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+    "roundtrip_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "block": "*STORY-ECCEN",
+    "provenance": "repo_benchmark_bridge"
+  },
+  "story_eccentricity": {
+    "row_index": 1,
+    "include_seismic_eccentricity": true,
+    "include_wind_eccentricity": false,
+    "seismic_eccentricity_percent": 5.0,
+    "wind_eccentricity_percent": 15.0,
+    "raw": "YES, NO, 5, 15"
+  },
+  "generation_policy": {
+    "mode": "notional_accidental_torsion_equivalent_nodal_loads",
+    "notional_lateral_coefficient": 0.01,
+    "lateral_force_basis": "story gravity proxy from MGT line/surface elements",
+    "seismic_enabled_by_source": true,
+    "wind_enabled_by_source": false
+  },
+  "summary": {
+    "story_count": 31,
+    "generated_case_count": 4,
+    "generated_seismic_case_count": 4,
+    "generated_wind_case_count": 0,
+    "max_abs_torsional_moment_nm": 3439041.688220291,
+    "total_story_weight_n": 88437218.97472548,
+    "line_weight_n": 48603369.17874777,
+    "surface_weight_n": 39833849.79598372,
+    "max_story_node_count": 2316,
+    "max_story_x_span_m": 84.795,
+    "max_story_y_span_m": 68.055,
+    "nodal_equivalent_entry_count": 90840
+  },
+  "support": {
+    "typed_mgt_story_eccentricity_parser_ready": true,
+    "story_eccentricity_load_generation_ready": true,
+    "seismic_story_eccentricity_load_generation_ready": true,
+    "wind_story_eccentricity_disabled_by_source": true,
+    "global_solver_consumes_story_eccentricity_loads": false,
+    "design_code_response_spectrum_ready": false
+  },
+  "story_rows_head": [
+    {
+      "story_index": 1,
+      "z_m": -5.65,
+      "node_count": 2133,
+      "x_span_m": 84.795,
+      "y_span_m": 68.055,
+      "gravity_weight_n": 6967559.185112063
+    },
+    {
+      "story_index": 2,
+      "z_m": -2.75,
+      "node_count": 301,
+      "x_span_m": 74.991,
+      "y_span_m": 68.055,
+      "gravity_weight_n": 9829187.391341858
+    },
+    {
+      "story_index": 3,
+      "z_m": -2.7,
+      "node_count": 95,
+      "x_span_m": 57.81100000000001,
+      "y_span_m": 18.069999999999993,
+      "gravity_weight_n": 2198279.471288528
+    },
+    {
+      "story_index": 4,
+      "z_m": -1.85,
+      "node_count": 280,
+      "x_span_m": 74.95899999999999,
+      "y_span_m": 68.055,
+      "gravity_weight_n": 612116.4875547945
+    },
+    {
+      "story_index": 5,
+      "z_m": -1.8,
+      "node_count": 13,
+      "x_span_m": 50.39499999999998,
+      "y_span_m": 12.263000000000005,
+      "gravity_weight_n": 0.0
+    },
+    {
+      "story_index": 6,
+      "z_m": -1.75,
+      "node_count": 64,
+      "x_span_m": 57.68900000000001,
+      "y_span_m": 18.069999999999993,
+      "gravity_weight_n": 0.0
+    },
+    {
+      "story_index": 7,
+      "z_m": -1.5,
+      "node_count": 85,
+      "x_span_m": 57.89699999999999,
+      "y_span_m": 17.346000000000004,
+      "gravity_weight_n": 2153459.981032985
+    },
+    {
+      "story_index": 8,
+      "z_m": -1.1500000000000001,
+      "node_count": 8,
+      "x_span_m": 19.067000000000007,
+      "y_span_m": 7.881,
+      "gravity_weight_n": 631931.4851688202
+    },
+    {
+      "story_index": 9,
+      "z_m": -1.1,
+      "node_count": 71,
+      "x_span_m": 57.89699999999999,
+      "y_span_m": 17.346000000000004,
+      "gravity_weight_n": 57912.77719920066
+    },
+    {
+      "story_index": 10,
+      "z_m": -0.9,
+      "node_count": 272,
+      "x_span_m": 74.95899999999999,
+      "y_span_m": 68.055,
+      "gravity_weight_n": 69796.87595338287
+    },
+    {
+      "story_index": 11,
+      "z_m": -0.8500000000000001,
+      "node_count": 22,
+      "x_span_m": 57.78,
+      "y_span_m": 13.432999999999993,
+      "gravity_weight_n": 0.0
+    },
+    {
+      "story_index": 12,
+      "z_m": -0.8,
+      "node_count": 7,
+      "x_span_m": 2.3419999999999987,
+      "y_span_m": 0.05000000000001137,
+      "gravity_weight_n": 0.0
+    }
+  ],
+  "generated_load_cases": [
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "eccentricity_sign": -1.0,
+      "eccentricity_percent": 5.0,
+      "story_count": 31,
+      "total_lateral_force_n": 884372.1897472548,
+      "total_abs_torsional_moment_nm": 2721782.0704398314,
+      "max_eccentricity_m": 3.40275,
+      "nodal_equivalent_entry_count": 22710,
+      "story_rows_head": [
+        {
+          "story_index": 1,
+          "z_m": -5.65,
+          "node_count": 2133,
+          "story_weight_n": 6967559.185112063,
+          "lateral_force_n": 69675.59185112063,
+          "eccentricity_m": 3.40275,
+          "torsional_moment_nm": -237088.62017140072,
+          "nodal_lateral_force_n": 32.6655376704738,
+          "nodal_torsion_moment_nm": -111.15265830820475
+        },
+        {
+          "story_index": 2,
+          "z_m": -2.75,
+          "node_count": 301,
+          "story_weight_n": 9829187.391341858,
+          "lateral_force_n": 98291.87391341857,
+          "eccentricity_m": 3.40275,
+          "torsional_moment_nm": -334462.6739588851,
+          "nodal_lateral_force_n": 326.5510761243142,
+          "nodal_torsion_moment_nm": -1111.1716742820101
+        },
+        {
+          "story_index": 3,
+          "z_m": -2.7,
+          "node_count": 95,
+          "story_weight_n": 2198279.471288528,
+          "lateral_force_n": 21982.79471288528,
+          "eccentricity_m": 0.9034999999999996,
+          "torsional_moment_nm": -19861.455023091843,
+          "nodal_lateral_force_n": 231.39783908300294,
+          "nodal_torsion_moment_nm": -209.06794761149308
+        },
+        {
+          "story_index": 4,
+          "z_m": -1.85,
+          "node_count": 280,
+          "story_weight_n": 612116.4875547945,
+          "lateral_force_n": 6121.1648755479455,
+          "eccentricity_m": 3.40275,
+          "torsional_moment_nm": -20828.79378027077,
+          "nodal_lateral_force_n": 21.861303126956948,
+          "nodal_torsion_moment_nm": -74.38854921525275
+        },
+        {
+          "story_index": 5,
+          "z_m": -1.8,
+          "node_count": 13,
+          "story_weight_n": 0.0,
+          "lateral_force_n": 0.0,
+          "eccentricity_m": 0.6131500000000003,
+          "torsional_moment_nm": -0.0,
+          "nodal_lateral_force_n": 0.0,
+          "nodal_torsion_moment_nm": -0.0
+        },
+        {
+          "story_index": 6,
+          "z_m": -1.75,
+          "node_count": 64,
+          "story_weight_n": 0.0,
+          "lateral_force_n": 0.0,
+          "eccentricity_m": 0.9034999999999996,
+          "torsional_moment_nm": -0.0,
+          "nodal_lateral_force_n": 0.0,
+          "nodal_torsion_moment_nm": -0.0
+        },
+        {
+          "story_index": 7,
+          "z_m": -1.5,
+          "node_count": 85,
+          "story_weight_n": 2153459.981032985,
+          "lateral_force_n": 21534.599810329848,
+          "eccentricity_m": 0.8673000000000002,
+          "torsional_moment_nm": -18676.95841549908,
+          "nodal_lateral_force_n": 253.34823306270408,
+          "nodal_torsion_moment_nm": -219.7289225352833
+        },
+        {
+          "story_index": 8,
+          "z_m": -1.1500000000000001,
+          "node_count": 8,
+          "story_weight_n": 631931.4851688202,
+          "lateral_force_n": 6319.314851688203,
+          "eccentricity_m": 0.39405,
+          "torsional_moment_nm": -2490.126017307736,
+          "nodal_lateral_force_n": 789.9143564610254,
+          "nodal_torsion_moment_nm": -311.265752163467
+        }
+      ]
+    },
+    {
+      "case_index": 2,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "eccentricity_sign": 1.0,
+      "eccentricity_percent": 5.0,
+      "story_count": 31,
+      "total_lateral_force_n": 884372.1897472548,
+      "total_abs_torsional_moment_nm": 2721782.0704398314,
+      "max_eccentricity_m": 3.40275,
+      "nodal_equivalent_entry_count": 22710,
+      "story_rows_head": [
+        {
+          "story_index": 1,
+          "z_m": -5.65,
+          "node_count": 2133,
+          "story_weight_n": 6967559.185112063,
+          "lateral_force_n": 69675.59185112063,
+          "eccentricity_m": 3.40275,
+          "torsional_moment_nm": 237088.62017140072,
+          "nodal_lateral_force_n": 32.6655376704738,
+          "nodal_torsion_moment_nm": 111.15265830820475
+        },
+        {
+          "story_index": 2,
+          "z_m": -2.75,
+          "node_count": 301,
+          "story_weight_n": 9829187.391341858,
+          "lateral_force_n": 98291.87391341857,
+          "eccentricity_m": 3.40275,
+          "torsional_moment_nm": 334462.6739588851,
+          "nodal_lateral_force_n": 326.5510761243142,
+          "nodal_torsion_moment_nm": 1111.1716742820101
+        },
+        {
+          "story_index": 3,
+          "z_m": -2.7,
+          "node_count": 95,
+          "story_weight_n": 2198279.471288528,
+          "lateral_force_n": 21982.79471288528,
+          "eccentricity_m": 0.9034999999999996,
+          "torsional_moment_nm": 19861.455023091843,
+          "nodal_lateral_force_n": 231.39783908300294,
+          "nodal_torsion_moment_nm": 209.06794761149308
+        },
+        {
+          "story_index": 4,
+          "z_m": -1.85,
+          "node_count": 280,
+          "story_weight_n": 612116.4875547945,
+          "lateral_force_n": 6121.1648755479455,
+          "eccentricity_m": 3.40275,
+          "torsional_moment_nm": 20828.79378027077,
+          "nodal_lateral_force_n": 21.861303126956948,
+          "nodal_torsion_moment_nm": 74.38854921525275
+        },
+        {
+          "story_index": 5,
+          "z_m": -1.8,
+          "node_count": 13,
+          "story_weight_n": 0.0,
+          "lateral_force_n": 0.0,
+          "eccentricity_m": 0.6131500000000003,
+          "torsional_moment_nm": 0.0,
+          "nodal_lateral_force_n": 0.0,
+          "nodal_torsion_moment_nm": 0.0
+        },
+        {
+          "story_index": 6,
+          "z_m": -1.75,
+          "node_count": 64,
+          "story_weight_n": 0.0,
+          "lateral_force_n": 0.0,
+          "eccentricity_m": 0.9034999999999996,
+          "torsional_moment_nm": 0.0,
+          "nodal_lateral_force_n": 0.0,
+          "nodal_torsion_moment_nm": 0.0
+        },
+        {
+          "story_index": 7,
+          "z_m": -1.5,
+          "node_count": 85,
+          "story_weight_n": 2153459.981032985,
+          "lateral_force_n": 21534.599810329848,
+          "eccentricity_m": 0.8673000000000002,
+          "torsional_moment_nm": 18676.95841549908,
+          "nodal_lateral_force_n": 253.34823306270408,
+          "nodal_torsion_moment_nm": 219.7289225352833
+        },
+        {
+          "story_index": 8,
+          "z_m": -1.1500000000000001,
+          "node_count": 8,
+          "story_weight_n": 631931.4851688202,
+          "lateral_force_n": 6319.314851688203,
+          "eccentricity_m": 0.39405,
+          "torsional_moment_nm": 2490.126017307736,
+          "nodal_lateral_force_n": 789.9143564610254,
+          "nodal_torsion_moment_nm": 311.265752163467
+        }
+      ]
+    },
+    {
+      "case_index": 3,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "Y",
+      "eccentricity_sign": -1.0,
+      "eccentricity_percent": 5.0,
+      "story_count": 31,
+      "total_lateral_force_n": 884372.1897472548,
+      "total_abs_torsional_moment_nm": 3439041.688220291,
+      "max_eccentricity_m": 4.23975,
+      "nodal_equivalent_entry_count": 22710,
+      "story_rows_head": [
+        {
+          "story_index": 1,
+          "z_m": -5.65,
+          "node_count": 2133,
+          "story_weight_n": 6967559.185112063,
+          "lateral_force_n": 69675.59185112063,
+          "eccentricity_m": 4.23975,
+          "torsional_moment_nm": -295407.0905507887,
+          "nodal_lateral_force_n": 32.6655376704738,
+          "nodal_torsion_moment_nm": -138.49371333839133
+        },
+        {
+          "story_index": 2,
+          "z_m": -2.75,
+          "node_count": 301,
+          "story_weight_n": 9829187.391341858,
+          "lateral_force_n": 98291.87391341857,
+          "eccentricity_m": 3.7495499999999997,
+          "torsional_moment_nm": -368550.2958320586,
+          "nodal_lateral_force_n": 326.5510761243142,
+          "nodal_torsion_moment_nm": -1224.4195874819222
+        },
+        {
+          "story_index": 3,
+          "z_m": -2.7,
+          "node_count": 95,
+          "story_weight_n": 2198279.471288528,
+          "lateral_force_n": 21982.79471288528,
+          "eccentricity_m": 2.8905500000000006,
+          "torsional_moment_nm": -63542.36725733056,
+          "nodal_lateral_force_n": 231.39783908300294,
+          "nodal_torsion_moment_nm": -668.8670237613743
+        },
+        {
+          "story_index": 4,
+          "z_m": -1.85,
+          "node_count": 280,
+          "story_weight_n": 612116.4875547945,
+          "lateral_force_n": 6121.1648755479455,
+          "eccentricity_m": 3.7479499999999994,
+          "torsional_moment_nm": -22941.81989530992,
+          "nodal_lateral_force_n": 21.861303126956948,
+          "nodal_torsion_moment_nm": -81.93507105467829
+        },
+        {
+          "story_index": 5,
+          "z_m": -1.8,
+          "node_count": 13,
+          "story_weight_n": 0.0,
+          "lateral_force_n": 0.0,
+          "eccentricity_m": 2.5197499999999993,
+          "torsional_moment_nm": -0.0,
+          "nodal_lateral_force_n": 0.0,
+          "nodal_torsion_moment_nm": -0.0
+        },
+        {
+          "story_index": 6,
+          "z_m": -1.75,
+          "node_count": 64,
+          "story_weight_n": 0.0,
+          "lateral_force_n": 0.0,
+          "eccentricity_m": 2.8844500000000006,
+          "torsional_moment_nm": -0.0,
+          "nodal_lateral_force_n": 0.0,
+          "nodal_torsion_moment_nm": -0.0
+        },
+        {
+          "story_index": 7,
+          "z_m": -1.5,
+          "node_count": 85,
+          "story_weight_n": 2153459.981032985,
+          "lateral_force_n": 21534.599810329848,
+          "eccentricity_m": 2.8948499999999995,
+          "torsional_moment_nm": -62339.43626093335,
+          "nodal_lateral_force_n": 253.34823306270408,
+          "nodal_torsion_moment_nm": -733.4051324815688
+        },
+        {
+          "story_index": 8,
+          "z_m": -1.1500000000000001,
+          "node_count": 8,
+          "story_weight_n": 631931.4851688202,
+          "lateral_force_n": 6319.314851688203,
+          "eccentricity_m": 0.9533500000000004,
+          "torsional_moment_nm": -6024.51881385695,
+          "nodal_lateral_force_n": 789.9143564610254,
+          "nodal_torsion_moment_nm": -753.0648517321188
+        }
+      ]
+    },
+    {
+      "case_index": 4,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "Y",
+      "eccentricity_sign": 1.0,
+      "eccentricity_percent": 5.0,
+      "story_count": 31,
+      "total_lateral_force_n": 884372.1897472548,
+      "total_abs_torsional_moment_nm": 3439041.688220291,
+      "max_eccentricity_m": 4.23975,
+      "nodal_equivalent_entry_count": 22710,
+      "story_rows_head": [
+        {
+          "story_index": 1,
+          "z_m": -5.65,
+          "node_count": 2133,
+          "story_weight_n": 6967559.185112063,
+          "lateral_force_n": 69675.59185112063,
+          "eccentricity_m": 4.23975,
+          "torsional_moment_nm": 295407.0905507887,
+          "nodal_lateral_force_n": 32.6655376704738,
+          "nodal_torsion_moment_nm": 138.49371333839133
+        },
+        {
+          "story_index": 2,
+          "z_m": -2.75,
+          "node_count": 301,
+          "story_weight_n": 9829187.391341858,
+          "lateral_force_n": 98291.87391341857,
+          "eccentricity_m": 3.7495499999999997,
+          "torsional_moment_nm": 368550.2958320586,
+          "nodal_lateral_force_n": 326.5510761243142,
+          "nodal_torsion_moment_nm": 1224.4195874819222
+        },
+        {
+          "story_index": 3,
+          "z_m": -2.7,
+          "node_count": 95,
+          "story_weight_n": 2198279.471288528,
+          "lateral_force_n": 21982.79471288528,
+          "eccentricity_m": 2.8905500000000006,
+          "torsional_moment_nm": 63542.36725733056,
+          "nodal_lateral_force_n": 231.39783908300294,
+          "nodal_torsion_moment_nm": 668.8670237613743
+        },
+        {
+          "story_index": 4,
+          "z_m": -1.85,
+          "node_count": 280,
+          "story_weight_n": 612116.4875547945,
+          "lateral_force_n": 6121.1648755479455,
+          "eccentricity_m": 3.7479499999999994,
+          "torsional_moment_nm": 22941.81989530992,
+          "nodal_lateral_force_n": 21.861303126956948,
+          "nodal_torsion_moment_nm": 81.93507105467829
+        },
+        {
+          "story_index": 5,
+          "z_m": -1.8,
+          "node_count": 13,
+          "story_weight_n": 0.0,
+          "lateral_force_n": 0.0,
+          "eccentricity_m": 2.5197499999999993,
+          "torsional_moment_nm": 0.0,
+          "nodal_lateral_force_n": 0.0,
+          "nodal_torsion_moment_nm": 0.0
+        },
+        {
+          "story_index": 6,
+          "z_m": -1.75,
+          "node_count": 64,
+          "story_weight_n": 0.0,
+          "lateral_force_n": 0.0,
+          "eccentricity_m": 2.8844500000000006,
+          "torsional_moment_nm": 0.0,
+          "nodal_lateral_force_n": 0.0,
+          "nodal_torsion_moment_nm": 0.0
+        },
+        {
+          "story_index": 7,
+          "z_m": -1.5,
+          "node_count": 85,
+          "story_weight_n": 2153459.981032985,
+          "lateral_force_n": 21534.599810329848,
+          "eccentricity_m": 2.8948499999999995,
+          "torsional_moment_nm": 62339.43626093335,
+          "nodal_lateral_force_n": 253.34823306270408,
+          "nodal_torsion_moment_nm": 733.4051324815688
+        },
+        {
+          "story_index": 8,
+          "z_m": -1.1500000000000001,
+          "node_count": 8,
+          "story_weight_n": 631931.4851688202,
+          "lateral_force_n": 6319.314851688203,
+          "eccentricity_m": 0.9533500000000004,
+          "torsional_moment_nm": 6024.51881385695,
+          "nodal_lateral_force_n": 789.9143564610254,
+          "nodal_torsion_moment_nm": 753.0648517321188
+        }
+      ]
+    }
+  ],
+  "nodal_equivalent_entries_head": [
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 0,
+      "force_dof": "Fx",
+      "force_value_n": 32.6655376704738,
+      "moment_dof": "Mz",
+      "moment_value_nm": -111.15265830820475
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 1,
+      "force_dof": "Fx",
+      "force_value_n": 32.6655376704738,
+      "moment_dof": "Mz",
+      "moment_value_nm": -111.15265830820475
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2764,
+      "force_dof": "Fx",
+      "force_value_n": 326.5510761243142,
+      "moment_dof": "Mz",
+      "moment_value_nm": -1111.1716742820101
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2767,
+      "force_dof": "Fx",
+      "force_value_n": 326.5510761243142,
+      "moment_dof": "Mz",
+      "moment_value_nm": -1111.1716742820101
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2800,
+      "force_dof": "Fx",
+      "force_value_n": 231.39783908300294,
+      "moment_dof": "Mz",
+      "moment_value_nm": -209.06794761149308
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2803,
+      "force_dof": "Fx",
+      "force_value_n": 231.39783908300294,
+      "moment_dof": "Mz",
+      "moment_value_nm": -209.06794761149308
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2763,
+      "force_dof": "Fx",
+      "force_value_n": 21.861303126956948,
+      "moment_dof": "Mz",
+      "moment_value_nm": -74.38854921525275
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2766,
+      "force_dof": "Fx",
+      "force_value_n": 21.861303126956948,
+      "moment_dof": "Mz",
+      "moment_value_nm": -74.38854921525275
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2835,
+      "force_dof": "Fx",
+      "force_value_n": 0.0,
+      "moment_dof": "Mz",
+      "moment_value_nm": -0.0
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2868,
+      "force_dof": "Fx",
+      "force_value_n": 0.0,
+      "moment_dof": "Mz",
+      "moment_value_nm": -0.0
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2799,
+      "force_dof": "Fx",
+      "force_value_n": 0.0,
+      "moment_dof": "Mz",
+      "moment_value_nm": -0.0
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2802,
+      "force_dof": "Fx",
+      "force_value_n": 0.0,
+      "moment_dof": "Mz",
+      "moment_value_nm": -0.0
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2458,
+      "force_dof": "Fx",
+      "force_value_n": 253.34823306270408,
+      "moment_dof": "Mz",
+      "moment_value_nm": -219.7289225352833
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 2459,
+      "force_dof": "Fx",
+      "force_value_n": 253.34823306270408,
+      "moment_dof": "Mz",
+      "moment_value_nm": -219.7289225352833
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 3615,
+      "force_dof": "Fx",
+      "force_value_n": 789.9143564610254,
+      "moment_dof": "Mz",
+      "moment_value_nm": -311.265752163467
+    },
+    {
+      "case_index": 1,
+      "family": "seismic_accidental_eccentricity",
+      "axis": "X",
+      "node_index": 3616,
+      "force_dof": "Fx",
+      "force_value_n": 789.9143564610254,
+      "moment_dof": "Mz",
+      "moment_value_nm": -311.265752163467
+    }
+  ],
+  "claim_boundary": {
+    "closed": [
+      "real MGT *STORY-ECCEN is consumed into equivalent accidental torsion load cases",
+      "story plan spans and gravity proxy are computed from the roundtrip model",
+      "equivalent nodal lateral force and Mz torsion entries are generated for enabled source families"
+    ],
+    "not_closed": [
+      "generated story eccentricity loads are not yet injected into the full global frame-shell solve",
+      "this is not a KDS/IBC response spectrum or wind-code implementation",
+      "wind eccentricity is parsed but disabled because the source row sets bIncludeEccWind=NO"
+    ]
+  },
+  "blockers": []
+}
