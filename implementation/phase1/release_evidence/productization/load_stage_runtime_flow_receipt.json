@@ -1,0 +1,135 @@
+{
+  "schema_version": "load-stage-runtime-flow-receipt.v1",
+  "generated_at": "2026-06-05T13:35:32.646529+00:00",
+  "status": "ready",
+  "typed_load_stage_flow_ready": true,
+  "solve_flow_ready": true,
+  "viewer_flow_ready": true,
+  "export_flow_ready": true,
+  "audit_flow_ready": true,
+  "unsupported_hazard_queue_ready": true,
+  "claim_boundary": "Current lane proves typed D/L/W case inventory, D/L load-combination graph, staged-analysis semantics, viewer/export/audit propagation, and explicit unsupported queue for absent hazards; it is not a claim that every hazard family has source rows in the current MGT.",
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "summary": {
+    "case_entity_count": 6,
+    "combination_entity_count": 8,
+    "construction_stage_count": 24,
+    "runtime_combo_count_total": 8,
+    "runtime_max_nested_depth": 2,
+    "loadcomb_exact_roundtrip_pass": true,
+    "roundtrip_exact_entry_row_coverage_min": 1.0,
+    "native_3d_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
+    "condensed_status": "condensed_global_fea_wired",
+    "solve_flow_basis": "legacy_native_and_condensed"
+  },
+  "load_family_inventory": {
+    "case_types": [
+      "D",
+      "L",
+      "W"
+    ],
+    "case_names": [
+      "DEAD",
+      "LIVE",
+      "WIND+X",
+      "WIND-X",
+      "WIND+Y",
+      "WIND-Y"
+    ],
+    "has_dead": true,
+    "has_live": true,
+    "has_wind": true,
+    "has_seismic": false,
+    "nodal_load_row_count": 12,
+    "pressure_load_row_count": 7278,
+    "selfweight_row_count": 1,
+    "unbound_load_row_count": 0,
+    "body_load_pending_case_count": 1,
+    "surface_load_pending_case_count": 2
+  },
+  "unsupported_hazard_queue": [
+    {
+      "hazard_family": "seismic_response_spectrum",
+      "status": "unsupported_or_no_source_rows",
+      "reason": "No typed source rows are present in the current MGT lane; solver claim must stay blocked or engineer-reviewed.",
+      "required_action_before_claim": "attach source rows, normalize typed entity, replay solve/export/audit evidence"
+    },
+    {
+      "hazard_family": "temperature_load",
+      "status": "unsupported_or_no_source_rows",
+      "reason": "No typed source rows are present in the current MGT lane; solver claim must stay blocked or engineer-reviewed.",
+      "required_action_before_claim": "attach source rows, normalize typed entity, replay solve/export/audit evidence"
+    },
+    {
+      "hazard_family": "settlement_load",
+      "status": "unsupported_or_no_source_rows",
+      "reason": "No typed source rows are present in the current MGT lane; solver claim must stay blocked or engineer-reviewed.",
+      "required_action_before_claim": "attach source rows, normalize typed entity, replay solve/export/audit evidence"
+    },
+    {
+      "hazard_family": "prestress_load",
+      "status": "unsupported_or_no_source_rows",
+      "reason": "No typed source rows are present in the current MGT lane; solver claim must stay blocked or engineer-reviewed.",
+      "required_action_before_claim": "attach source rows, normalize typed entity, replay solve/export/audit evidence"
+    }
+  ],
+  "flow_contract": {
+    "solve": {
+      "status": "ready",
+      "mgt_roundtrip_sync_status": "synced",
+      "mgt_global_fea_3d_native_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
+      "mgt_global_fea_condensed_status": "condensed_global_fea_wired",
+      "load_combination_contract_pass": true,
+      "solver_evidence": {
+        "status": "ready",
+        "ready": true,
+        "basis": "legacy_native_and_condensed",
+        "native_3d_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
+        "condensed_status": "condensed_global_fea_wired",
+        "full_line_sparse_ready": true,
+        "full_frame_6dof_sparse_ready": true,
+        "full_frame_6dof_pdelta_path_ready": true,
+        "coupled_frame_shell_sparse_ready": true,
+        "pdelta_continuation_status": "partial",
+        "pdelta_max_converged_load_scale": 0.5076562499999999,
+        "claim_boundary": "Solve-flow readiness means typed load/load-combination/stage entities are wired to the current solver evidence lane with full sparse line, 6-DOF frame, and coupled frame-shell receipts. It does not claim full-load nonlinear convergence or hazard families with no source rows."
+      }
+    },
+    "viewer": {
+      "status": "ready",
+      "checks": {
+        "shared_selection_load_case": true,
+        "stage_load_case_chip": true,
+        "load_case_list": true,
+        "audit_jsonl": true,
+        "export_history": true,
+        "report_load_combo": true
+      },
+      "source_files": [
+        "/home/betelgeuze/건축구조분석/src/structure-viewer/index.html",
+        "/home/betelgeuze/건축구조분석/src/structure-viewer/viewer-provenance-model.js",
+        "/home/betelgeuze/건축구조분석/src/structure-viewer/viewer-local-ops-state.js",
+        "/home/betelgeuze/건축구조분석/src/structure-viewer/viewer-report-export.js"
+      ]
+    },
+    "export": {
+      "status": "ready",
+      "midas_interoperability_gate": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/midas/midas_interoperability_gate_report.json",
+      "export_report": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.export_report.json",
+      "summary_line": "MIDAS interoperability/export readiness: PASS | seeds=3/3 | patterns=3/3 | preview=3/3 | roundtrip=3/3 exact_entry_row_min=1.00 | bounded_subset=full_exact_roundtrip | limits=none | exact_closure=closed"
+    },
+    "audit": {
+      "status": "ready",
+      "load_stage_audit_contract": {
+        "raw_load_case_row_count": 0,
+        "raw_load_combination_row_count": 16,
+        "pattern_library_present": true,
+        "editor_seed_present": true,
+        "roundtrip_exact_ready": true
+      },
+      "export_audit_review_queue_item_count": 2,
+      "export_audit_review_resolution_closed_packet_count": 2
+    }
+  },
+  "blockers": []
+}

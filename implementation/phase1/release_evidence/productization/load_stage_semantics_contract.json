@@ -1,0 +1,228 @@
+{
+  "schema_version": "load-stage-semantics-contract.v1",
+  "generated_at": "2026-06-09T15:42:17.513760+00:00",
+  "status": "ready",
+  "typed_runtime_entities_ready": true,
+  "stage_semantics_ready": true,
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "load_combination_engine_gate": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_combination_engine_gate.json",
+  "construction_sequence_gate": "/home/betelgeuze/건축구조분석/implementation/phase1/construction_sequence_gate_report.json",
+  "summary": {
+    "case_entity_count": 6,
+    "combination_entity_count": 8,
+    "graph_node_count": 10,
+    "graph_edge_count": 15,
+    "runtime_max_nested_depth": 2,
+    "unresolved_reference_count": 0,
+    "required_load_pattern_coverage_ratio": 1.0,
+    "construction_stage_count": 24,
+    "construction_case_count": 4
+  },
+  "case_entities": [
+    {
+      "id": "CASE:DEAD",
+      "name": "DEAD",
+      "type": "D",
+      "source": "model.loads.static_load_cases",
+      "active": true
+    },
+    {
+      "id": "CASE:LIVE",
+      "name": "LIVE",
+      "type": "L",
+      "source": "model.loads.static_load_cases",
+      "active": true
+    },
+    {
+      "id": "CASE:WIND+X",
+      "name": "WIND+X",
+      "type": "W",
+      "source": "model.loads.static_load_cases",
+      "active": false
+    },
+    {
+      "id": "CASE:WIND-X",
+      "name": "WIND-X",
+      "type": "W",
+      "source": "model.loads.static_load_cases",
+      "active": false
+    },
+    {
+      "id": "CASE:WIND+Y",
+      "name": "WIND+Y",
+      "type": "W",
+      "source": "model.loads.static_load_cases",
+      "active": false
+    },
+    {
+      "id": "CASE:WIND-Y",
+      "name": "WIND-Y",
+      "type": "W",
+      "source": "model.loads.static_load_cases",
+      "active": false
+    }
+  ],
+  "combination_entities": [
+    {
+      "id": "COMBO:gLCB1",
+      "name": "gLCB1",
+      "limit_state": "ACTIVE",
+      "combination_type": "GEN",
+      "referenced_cases": [
+        "DEAD",
+        "LIVE"
+      ],
+      "referenced_combinations": [],
+      "expansion_depth": 1,
+      "factor_map": {
+        "DEAD": 1.3,
+        "LIVE": 1.5
+      },
+      "raw_row_count": 2
+    },
+    {
+      "id": "COMBO:gLCB2",
+      "name": "gLCB2",
+      "limit_state": "ACTIVE",
+      "combination_type": "GEN",
+      "referenced_cases": [
+        "DEAD",
+        "LIVE"
+      ],
+      "referenced_combinations": [],
+      "expansion_depth": 1,
+      "factor_map": {
+        "DEAD": 1.0,
+        "LIVE": 1.5
+      },
+      "raw_row_count": 2
+    },
+    {
+      "id": "COMBO:gLCB3",
+      "name": "gLCB3",
+      "limit_state": "ACTIVE",
+      "combination_type": "GEN",
+      "referenced_cases": [
+        "DEAD",
+        "LIVE"
+      ],
+      "referenced_combinations": [],
+      "expansion_depth": 1,
+      "factor_map": {
+        "DEAD": 1.0,
+        "LIVE": 1.0
+      },
+      "raw_row_count": 2
+    },
+    {
+      "id": "COMBO:STL ENV_STR",
+      "name": "STL ENV_STR",
+      "limit_state": "ACTIVE",
+      "combination_type": "GEN",
+      "referenced_cases": [
+        "DEAD",
+        "LIVE"
+      ],
+      "referenced_combinations": [
+        "gLCB1",
+        "gLCB2"
+      ],
+      "expansion_depth": 2,
+      "factor_map": {
+        "DEAD": 1.3,
+        "LIVE": 1.5
+      },
+      "raw_row_count": 2
+    },
+    {
+      "id": "COMBO:STL ENV_SER",
+      "name": "STL ENV_SER",
+      "limit_state": "ACTIVE",
+      "combination_type": "GEN",
+      "referenced_cases": [
+        "DEAD",
+        "LIVE"
+      ],
+      "referenced_combinations": [
+        "gLCB3"
+      ],
+      "expansion_depth": 2,
+      "factor_map": {
+        "DEAD": 1.0,
+        "LIVE": 1.0
+      },
+      "raw_row_count": 2
+    },
+    {
+      "id": "COMBO:sLCB1",
+      "name": "sLCB1",
+      "limit_state": "ACTIVE",
+      "combination_type": "STEEL",
+      "referenced_cases": [
+        "DEAD",
+        "LIVE"
+      ],
+      "referenced_combinations": [],
+      "expansion_depth": 1,
+      "factor_map": {
+        "DEAD": 1.3,
+        "LIVE": 1.5
+      },
+      "raw_row_count": 2
+    },
+    {
+      "id": "COMBO:sLCB2",
+      "name": "sLCB2",
+      "limit_state": "ACTIVE",
+      "combination_type": "STEEL",
+      "referenced_cases": [
+        "DEAD",
+        "LIVE"
+      ],
+      "referenced_combinations": [],
+      "expansion_depth": 1,
+      "factor_map": {
+        "DEAD": 1.0,
+        "LIVE": 1.5
+      },
+      "raw_row_count": 2
+    },
+    {
+      "id": "COMBO:sLCB3",
+      "name": "sLCB3",
+      "limit_state": "SERVICE",
+      "combination_type": "STEEL",
+      "referenced_cases": [
+        "DEAD",
+        "LIVE"
+      ],
+      "referenced_combinations": [],
+      "expansion_depth": 1,
+      "factor_map": {
+        "DEAD": 1.0,
+        "LIVE": 1.0
+      },
+      "raw_row_count": 2
+    }
+  ],
+  "stage_semantics": {
+    "contract_pass": true,
+    "stage_count": 24,
+    "construction_years": 4.0,
+    "all_stages_converged": true,
+    "stagewise_monotonic_load_pass": true,
+    "creep_shrinkage_applied": true
+  },
+  "audit_contract": {
+    "raw_load_case_row_count": 0,
+    "raw_load_combination_row_count": 16,
+    "pattern_library_present": true,
+    "editor_seed_present": true,
+    "roundtrip_exact_ready": true
+  },
+  "limitations": [
+    "Current MIDAS33 optimized lane has gravity/nested combinations; wind/seismic combination breadth is tracked by separate benchmark gates.",
+    "Construction sequence evidence is a staged analysis gate, not a full arbitrary MGT construction-stage editor."
+  ],
+  "blockers": []
+}

@@ -1,0 +1,79 @@
+{
+  "schema_version": "mgt-shell-calibration-benchmarks.v1",
+  "generated_at": "2026-06-05T13:35:15.316232+00:00",
+  "status": "ready",
+  "shell_calibration_benchmarks_ready": true,
+  "membrane_patch_benchmark_ready": true,
+  "shell_patch_benchmark_ready": true,
+  "plate_deflection_benchmark_ready": true,
+  "case_count": 5,
+  "ready_case_count": 5,
+  "cases": [
+    {
+      "case_id": "membrane_constant_strain_patch",
+      "ready": true,
+      "formulation": "constant_strain_triangle_membrane",
+      "reference": "closed_form_plane_stress_constant_strain_energy",
+      "energy_j": 36.125,
+      "expected_energy_j": 36.125,
+      "relative_error": 0.0,
+      "threshold": 1e-10,
+      "area_m2": 1.0
+    },
+    {
+      "case_id": "membrane_rigid_body_modes",
+      "ready": true,
+      "formulation": "constant_strain_triangle_membrane",
+      "reference": "zero_internal_force_for_translation_and_in_plane_rotation",
+      "mode_count": 4,
+      "max_residual": 0.0,
+      "max_normalized_residual": 0.0,
+      "threshold": 1e-12
+    },
+    {
+      "case_id": "shell_transverse_shear_patch",
+      "ready": true,
+      "formulation": "mindlin_cst_transverse_shear",
+      "reference": "closed_form_constant_transverse_shear_energy",
+      "energy_j": 10.41666666666667,
+      "expected_energy_j": 10.41666666666667,
+      "relative_error": 0.0,
+      "threshold": 1e-10,
+      "area_m2": 1.0
+    },
+    {
+      "case_id": "shell_zero_shear_rigid_slope",
+      "ready": true,
+      "formulation": "mindlin_cst_bending_shear",
+      "reference": "zero_energy_for_linear_w_with_matching_rotation",
+      "energy_j_abs": 1.8189894035458566e-16,
+      "normalized_energy": 1.746229827404022e-18,
+      "threshold": 1e-12
+    },
+    {
+      "case_id": "clamped_square_plate_uniform_pressure",
+      "ready": true,
+      "formulation": "assembled_mindlin_cst_shell_plate",
+      "reference": "classical_clamped_square_plate_center_deflection_alpha_0p00126",
+      "mesh_divisions": 24,
+      "node_count": 625,
+      "triangle_count": 1152,
+      "free_dof_count": 2116,
+      "center_deflection_m": 0.00014301986443244395,
+      "expected_center_deflection_m": 0.00015482879999999995,
+      "relative_error": 0.07627092354623946,
+      "threshold": 0.15,
+      "residual_inf_n": 3.492914402158931e-09,
+      "relative_residual_inf": 1.257449184777214e-11,
+      "regularization": 21.221457691100824,
+      "assembly_plus_solve_seconds": 0.2957935639997231,
+      "solve_seconds": 0.006705593000333465
+    }
+  ],
+  "claim_boundary": "Calibrates the current CST membrane plus Mindlin-type shell bending/shear implementation against constant-strain, rigid-mode, transverse-shear, and clamped square plate analytical benchmarks. This is a shell formulation calibration receipt, not opening/local-axis handling, higher-order shell breadth, material nonlinear shell behavior, or full-load nonlinear closure.",
+  "runtime_metrics": {
+    "backend": "scipy_sparse_spsolve_cpu_shell_calibration",
+    "total_seconds": 0.29945626100015943
+  },
+  "blockers": []
+}
