@@ -1,0 +1,102 @@
+{
+  "schema_version": "mgt-direct-residual-adaptive-preconditioned-global-newton.v1",
+  "generated_at": "2026-06-06T10:39:13.183370+00:00",
+  "status": "partial",
+  "adaptive_preconditioned_global_newton_ready": false,
+  "controller": {
+    "enabled": true,
+    "attempted": true,
+    "promotion_count": 0,
+    "max_controller_steps": 1,
+    "stop_reason": "no_regularization_factor_promoted",
+    "tangent_regularization_factors": [
+      1e-06,
+      3e-06
+    ],
+    "matrix_free_global_krylov_max_iterations": 3,
+    "matrix_free_global_krylov_alpha_values": [
+      8.0,
+      4.0,
+      2.0,
+      1.0,
+      0.5,
+      0.25
+    ],
+    "matrix_free_global_krylov_max_alpha": 8.0,
+    "minimum_relative_improvement": 1e-06
+  },
+  "initial_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e6_followup_3_smoke_final_checkpoint.npz",
+  "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_final_checkpoint.npz",
+  "final_direct_residual_inf_n": 6931.422474165393,
+  "rows": [
+    {
+      "step_index": 1,
+      "tangent_regularization_factor": 1e-06,
+      "child_receipt_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_step1_reg1em06.json",
+      "child_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_step1_reg1em06_final_checkpoint.npz",
+      "status": "partial",
+      "accepted": false,
+      "stop_reason": "no_residual_descent",
+      "base_direct_residual_inf_n": 6931.422474165393,
+      "final_direct_residual_inf_n": 6931.422474165393,
+      "best_candidate_direct_residual_inf_n": 6931.433329472165,
+      "best_candidate_relative_improvement": -1.566100870586168e-06,
+      "best_candidate_alpha": -0.25,
+      "best_candidate_alpha_source": "matrix_free_global_krylov_negative",
+      "relative_increment_gate_passed": true,
+      "residual_gate_passed": false,
+      "matvec_count": 4,
+      "preconditioner_solve_count": 5,
+      "preconditioner_regularization": 38211.6495491554
+    },
+    {
+      "step_index": 1,
+      "tangent_regularization_factor": 3e-06,
+      "child_receipt_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_step1_reg3em06.json",
+      "child_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_step1_reg3em06_final_checkpoint.npz",
+      "status": "partial",
+      "accepted": false,
+      "stop_reason": "no_residual_descent",
+      "base_direct_residual_inf_n": 6931.422474165393,
+      "final_direct_residual_inf_n": 6931.422474165393,
+      "best_candidate_direct_residual_inf_n": 6931.477813298451,
+      "best_candidate_relative_improvement": -7.983806103865793e-06,
+      "best_candidate_alpha": -0.25,
+      "best_candidate_alpha_source": "matrix_free_global_krylov_negative",
+      "relative_increment_gate_passed": true,
+      "residual_gate_passed": false,
+      "matvec_count": 4,
+      "preconditioner_solve_count": 5,
+      "preconditioner_regularization": 114634.94864746621
+    }
+  ],
+  "promoted_rows": [],
+  "best_candidate_row": {
+    "step_index": 1,
+    "tangent_regularization_factor": 1e-06,
+    "child_receipt_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_step1_reg1em06.json",
+    "child_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_step1_reg1em06_final_checkpoint.npz",
+    "status": "partial",
+    "accepted": false,
+    "stop_reason": "no_residual_descent",
+    "base_direct_residual_inf_n": 6931.422474165393,
+    "final_direct_residual_inf_n": 6931.422474165393,
+    "best_candidate_direct_residual_inf_n": 6931.433329472165,
+    "best_candidate_relative_improvement": -1.566100870586168e-06,
+    "best_candidate_alpha": -0.25,
+    "best_candidate_alpha_source": "matrix_free_global_krylov_negative",
+    "relative_increment_gate_passed": true,
+    "residual_gate_passed": false,
+    "matvec_count": 4,
+    "preconditioner_solve_count": 5,
+    "preconditioner_regularization": 38211.6495491554
+  },
+  "runtime_seconds": 288.0575689989928,
+  "claim_boundary": {
+    "cpu_diagnostic_only": true,
+    "official_rocm_hip_closure_required": true,
+    "residual_replay_is_regularization_free": true,
+    "regularization_used_only_for_preconditioner_direction": true,
+    "ai_residual_correction_is_candidate_generation_only": true
+  }
+}

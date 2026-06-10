@@ -1,0 +1,144 @@
+{
+  "schema_version": "mgt-direct-residual-adaptive-preconditioned-global-newton.v1",
+  "generated_at": "2026-06-06T10:49:54.053492+00:00",
+  "status": "partial",
+  "adaptive_preconditioned_global_newton_ready": false,
+  "controller": {
+    "enabled": true,
+    "attempted": true,
+    "promotion_count": 1,
+    "max_controller_steps": 1,
+    "stop_reason": "max_controller_steps_reached",
+    "tangent_regularization_factors": [
+      1e-06,
+      3e-06
+    ],
+    "matrix_free_global_krylov_max_iterations": 3,
+    "matrix_free_global_krylov_alpha_values": [
+      8.0,
+      4.0,
+      2.0,
+      1.0,
+      0.5,
+      0.25
+    ],
+    "matrix_free_global_krylov_max_alpha": 8.0,
+    "minimum_relative_improvement": 1e-06,
+    "secant_family_seed_enabled": true,
+    "max_secant_family_promotions": 1,
+    "secant_family_window_sizes": [
+      4,
+      8,
+      16,
+      32
+    ],
+    "secant_family_ridge_factors": [
+      0.0,
+      1e-08
+    ],
+    "secant_family_alpha_values": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625
+    ],
+    "secant_family_minimum_relative_improvement": 1e-06
+  },
+  "initial_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e6_followup_3_smoke_final_checkpoint.npz",
+  "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_smoke_final_checkpoint.npz",
+  "final_direct_residual_inf_n": 6931.387293436975,
+  "rows": [
+    {
+      "step_index": 1,
+      "tangent_regularization_factor": 1e-06,
+      "child_receipt_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_smoke_step1_reg1em06.json",
+      "child_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_smoke_step1_reg1em06_final_checkpoint.npz",
+      "status": "partial",
+      "accepted": true,
+      "stop_reason": "accepted",
+      "base_direct_residual_inf_n": 6931.422474165393,
+      "final_direct_residual_inf_n": 6931.387293436975,
+      "final_relative_improvement": 5.075542365197553e-06,
+      "component_acceptance": {
+        "secant_family": true,
+        "matrix_free_global_krylov": true,
+        "matrix_free_jacobian_subspace": false,
+        "current_tangent_residual_row": false
+      },
+      "best_candidate_direct_residual_inf_n": 6931.387293436975,
+      "best_candidate_relative_improvement": 2.762983482342204e-06,
+      "best_candidate_alpha": 0.5,
+      "best_candidate_alpha_source": "matrix_free_global_krylov",
+      "relative_increment_gate_passed": true,
+      "residual_gate_passed": false,
+      "matvec_count": 4,
+      "preconditioner_solve_count": 5,
+      "preconditioner_regularization": 38211.64953658629
+    }
+  ],
+  "promoted_rows": [
+    {
+      "step_index": 1,
+      "tangent_regularization_factor": 1e-06,
+      "child_receipt_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_smoke_step1_reg1em06.json",
+      "child_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_smoke_step1_reg1em06_final_checkpoint.npz",
+      "status": "partial",
+      "accepted": true,
+      "stop_reason": "accepted",
+      "base_direct_residual_inf_n": 6931.422474165393,
+      "final_direct_residual_inf_n": 6931.387293436975,
+      "final_relative_improvement": 5.075542365197553e-06,
+      "component_acceptance": {
+        "secant_family": true,
+        "matrix_free_global_krylov": true,
+        "matrix_free_jacobian_subspace": false,
+        "current_tangent_residual_row": false
+      },
+      "best_candidate_direct_residual_inf_n": 6931.387293436975,
+      "best_candidate_relative_improvement": 2.762983482342204e-06,
+      "best_candidate_alpha": 0.5,
+      "best_candidate_alpha_source": "matrix_free_global_krylov",
+      "relative_increment_gate_passed": true,
+      "residual_gate_passed": false,
+      "matvec_count": 4,
+      "preconditioner_solve_count": 5,
+      "preconditioner_regularization": 38211.64953658629
+    }
+  ],
+  "best_candidate_row": {
+    "step_index": 1,
+    "tangent_regularization_factor": 1e-06,
+    "child_receipt_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_smoke_step1_reg1em06.json",
+    "child_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_smoke_step1_reg1em06_final_checkpoint.npz",
+    "status": "partial",
+    "accepted": true,
+    "stop_reason": "accepted",
+    "base_direct_residual_inf_n": 6931.422474165393,
+    "final_direct_residual_inf_n": 6931.387293436975,
+    "final_relative_improvement": 5.075542365197553e-06,
+    "component_acceptance": {
+      "secant_family": true,
+      "matrix_free_global_krylov": true,
+      "matrix_free_jacobian_subspace": false,
+      "current_tangent_residual_row": false
+    },
+    "best_candidate_direct_residual_inf_n": 6931.387293436975,
+    "best_candidate_relative_improvement": 2.762983482342204e-06,
+    "best_candidate_alpha": 0.5,
+    "best_candidate_alpha_source": "matrix_free_global_krylov",
+    "relative_increment_gate_passed": true,
+    "residual_gate_passed": false,
+    "matvec_count": 4,
+    "preconditioner_solve_count": 5,
+    "preconditioner_regularization": 38211.64953658629
+  },
+  "runtime_seconds": 606.0912372820021,
+  "claim_boundary": {
+    "cpu_diagnostic_only": true,
+    "official_rocm_hip_closure_required": true,
+    "residual_replay_is_regularization_free": true,
+    "regularization_used_only_for_preconditioner_direction": true,
+    "ai_residual_correction_is_candidate_generation_only": true
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "schema_version": "mgt-direct-residual-adaptive-preconditioned-global-newton.v1",
+  "generated_at": "2026-06-06T11:21:01.617403+00:00",
+  "status": "partial",
+  "adaptive_preconditioned_global_newton_ready": false,
+  "controller": {
+    "enabled": true,
+    "attempted": true,
+    "promotion_count": 0,
+    "max_controller_steps": 1,
+    "stop_reason": "runtime_budget_exceeded",
+    "tangent_regularization_factors": [
+      1e-06,
+      3e-06
+    ],
+    "matrix_free_global_krylov_max_iterations": 3,
+    "matrix_free_global_krylov_alpha_values": [
+      8.0,
+      4.0,
+      2.0,
+      1.0,
+      0.5,
+      0.25
+    ],
+    "matrix_free_global_krylov_max_alpha": 8.0,
+    "minimum_relative_improvement": 1e-06,
+    "secant_family_seed_enabled": true,
+    "max_secant_family_promotions": 1,
+    "secant_family_window_sizes": [
+      4,
+      8,
+      16,
+      32
+    ],
+    "secant_family_ridge_factors": [
+      0.0,
+      1e-08
+    ],
+    "secant_family_alpha_values": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625
+    ],
+    "secant_family_minimum_relative_improvement": 1e-06,
+    "runtime_budget_seconds": 0.0,
+    "runtime_budget_exceeded": true
+  },
+  "initial_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_followup_smoke_final_checkpoint.npz",
+  "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_runtime_budget_smoke_final_checkpoint.npz",
+  "final_direct_residual_inf_n": null,
+  "rows": [],
+  "promoted_rows": [],
+  "best_candidate_row": {},
+  "runtime_seconds": 0.06026252900483087,
+  "claim_boundary": {
+    "cpu_diagnostic_only": true,
+    "official_rocm_hip_closure_required": true,
+    "residual_replay_is_regularization_free": true,
+    "regularization_used_only_for_preconditioner_direction": true,
+    "ai_residual_correction_is_candidate_generation_only": true
+  }
+}
