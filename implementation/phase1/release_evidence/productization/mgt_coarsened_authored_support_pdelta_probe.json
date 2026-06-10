@@ -1,0 +1,159 @@
+{
+  "schema_version": "mgt-coarsened-authored-support-pdelta-probe.v1",
+  "generated_at": "2026-06-05T13:22:31.236609+00:00",
+  "status": "partial",
+  "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+  "solve_scope": "coarsened_line_mesh_pdelta_with_authored_support_masks_probe",
+  "boundary_condition_policy": {
+    "primary_restraints": "authored_mgt_support_masks_mapped_to_coarsened_line_nodes",
+    "component_base_restraints_used": false,
+    "component_base_restraints_recorded_for_comparison": true,
+    "finite_elastic_links_assembled": false,
+    "finite_elastic_link_reason": "not_assembled_in_this_coarsened_line_probe_no_link_has_both_endpoints_mapped"
+  },
+  "coarsened_authored_support_pdelta_ready": false,
+  "max_converged_load_scale": 0.0,
+  "first_failed_load_scale": 0.5,
+  "load_steps_requested": [
+    0.5,
+    0.55
+  ],
+  "step_results": [
+    {
+      "load_step": 0.5,
+      "seconds": 33.68319550099977,
+      "ready": false,
+      "converged": false,
+      "iteration_count": 28,
+      "residual_inf_n": 0.005545312500089494,
+      "relative_increment": 0.7518448626009988,
+      "fixed_point_increment_m": 19.387709654232914,
+      "max_translation_m": 25.791201766739533,
+      "max_drift_ratio_pct": 64.93558550432067,
+      "linear_solver_refinement": {
+        "enabled": true,
+        "max_iterations": 10,
+        "strategy": "best_residual_iterative_refinement",
+        "residual_metric": "regularized_free_dof_linear_subproblem_inf_norm",
+        "claim_boundary": "Refines the regularized free-DOF linear subproblem solve and keeps the lowest residual iterate. It is not a substitute for a consistent nonlinear Newton/Jacobian."
+      },
+      "blockers": [
+        "deformed_state_pdelta_path_not_converged"
+      ]
+    }
+  ],
+  "mesh_fingerprint": {
+    "raw_line_element_count": 5576,
+    "skipped_short_or_degenerate_count": 4,
+    "line_node_count": 2415,
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_angle_element_count": 5572,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "coarsened_line_node_count": 2415,
+    "line_node_id_head": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "line_elements_solved": 5572,
+    "line_nodes_solved": 2415,
+    "component_count": 64,
+    "component_base_node_count": 779,
+    "component_base_restrained_dof_count": 4674,
+    "dof_count": 14490
+  },
+  "support_mapping": {
+    "support_constraint_row_count": 8,
+    "authored_support_node_count": 2133,
+    "mapped_support_node_count": 756,
+    "missing_support_node_count": 1377,
+    "authored_support_restrained_dof_count": 2544,
+    "restraint_code_counts": {
+      "111000": 1,
+      "111111": 7
+    },
+    "mapped_restraint_code_counts": {
+      "111000": 1,
+      "111111": 7
+    },
+    "restrained_dof_counts": {
+      "Dx": 756,
+      "Dy": 756,
+      "Dz": 756,
+      "Rx": 92,
+      "Ry": 92,
+      "Rz": 92
+    },
+    "missing_support_node_ids_head": [
+      10,
+      11,
+      12,
+      26,
+      27,
+      193,
+      221,
+      223,
+      224,
+      231,
+      310,
+      313,
+      314,
+      351,
+      352,
+      355,
+      356,
+      357,
+      358,
+      377,
+      378,
+      419,
+      420,
+      421,
+      422,
+      423,
+      424,
+      425,
+      702,
+      704,
+      705,
+      706
+    ]
+  },
+  "elastic_link_mapping": {
+    "elastic_link_row_count": 1692,
+    "elastic_link_distinct_node_count": 3384,
+    "elastic_link_mapped_node_count": 887,
+    "elastic_link_rows_both_endpoints_mapped_to_line_mesh": 0,
+    "elastic_link_rows_one_endpoint_mapped_to_line_mesh": 887,
+    "finite_elastic_link_policy": "not_assembled_in_this_coarsened_line_probe_no_link_has_both_endpoints_mapped"
+  },
+  "runtime_metrics": {
+    "backend": "scipy_sparse_spsolve_cpu_coarsened_line_pdelta_authored_support_probe",
+    "total_seconds": 34.06622931999982
+  },
+  "claim_boundary": "This diagnostic replaces the coarsened line-only component-base restraints with authored MIDAS support masks that still map to the coarsened line mesh. It deliberately does not assemble finite elastic links because no elastic-link row has both endpoints in this coarsened line mesh. The result is boundary-condition migration evidence, not full-load nonlinear Newton closure.",
+  "blockers": [
+    "coarsened_line_authored_support_pdelta_not_converged",
+    "uncoarsened_boundary_nonlinear_continuation_required",
+    "consistent_newton_jacobian_required"
+  ]
+}

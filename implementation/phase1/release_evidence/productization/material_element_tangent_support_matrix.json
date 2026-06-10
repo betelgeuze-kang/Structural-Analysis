@@ -1,0 +1,279 @@
+{
+  "schema_version": "material-element-tangent-support-matrix.v1",
+  "generated_at": "2026-06-05T13:35:20.815037+00:00",
+  "status": "ready",
+  "line_beam_tangent_ready": true,
+  "unsupported_queue_ready": true,
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "claim_boundary": "MGT solver lane; surface membrane, bending/drilling, and same-node frame-shell smoke solves are attached with source plate thickness coverage, while calibrated full shell benchmarks, local axes/openings, full-load coupled solves are queued and bounded frame material tangent smoke is attached; full path-dependent material Newton remains queued.",
+  "element_inventory": {
+    "model_element_type_counts": {
+      "BEAM": 2192,
+      "PLATE": 7152,
+      "COMPTR": 3384
+    },
+    "npz_element_type_code_counts": {
+      "1": 5576,
+      "2": 7152
+    }
+  },
+  "section_material_inventory": {
+    "parsed_section_count": 183,
+    "parsed_material_count": 6,
+    "supported_section_shapes": [
+      "P",
+      "SB"
+    ],
+    "supported_material_types": [
+      "CONC",
+      "SRC",
+      "STEEL",
+      "USER"
+    ]
+  },
+  "support_matrix": [
+    {
+      "family": "line_beam_column_code1",
+      "status": "tangent_coupled",
+      "formulation": "2D beam-column global tangent embedded in 3D MGT component selection",
+      "material_law": "elastic_isotropic_mgt_E_nu",
+      "section_law": "parsed_SB_and_pipe_real_section_properties",
+      "geometric_nonlinearity": "P-delta axial geometric stiffness available for representative component",
+      "frame_local_axis_roll_transform_ready": true,
+      "frame_local_axis_nonzero_angle_count": 150,
+      "frame_local_axis_max_abs_angle_deg": 270.0,
+      "element_count": 5576,
+      "section_material_coverage_count": 5497,
+      "section_material_coverage_pct": 98.5832137733142,
+      "missing_section_id_count": 0,
+      "missing_material_id_count": 7,
+      "missing_section_id_head": [],
+      "missing_material_id_head": [
+        16,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    {
+      "family": "plate_shell_surface_code2",
+      "status": "membrane_bending_drilling_calibrated_benchmark_ready_opening_local_axis_unsupported",
+      "formulation": "constant_strain_membrane_plus_mindlin_cst_bending_drilling_smoke",
+      "material_law": "elastic_isotropic_mgt_E_nu",
+      "section_law": "source_mgt_thickness_rows_by_plate_section_id",
+      "source_plate_thickness_coverage_pct": 100.0,
+      "source_plate_thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+      "surface_membrane_tangent_ready": true,
+      "surface_shell_bending_drilling_smoke_ready": true,
+      "surface_shell_transverse_pressure_smoke_ready": true,
+      "surface_shell_coupled_sparse_equilibrium_ready": true,
+      "surface_shell_calibration_benchmarks_ready": true,
+      "surface_lcaxis_parser_ready": true,
+      "surface_lcaxis_source_all_default": true,
+      "opening_runtime_semantics_ready": true,
+      "current_source_opening_noop_runtime_ready": true,
+      "generic_opening_cutout_runtime_semantics_ready": false,
+      "shell_calibration_case_count": 5,
+      "shell_calibration_ready_case_count": 5,
+      "shell_calibration_cases": [
+        {
+          "case_id": "membrane_constant_strain_patch",
+          "ready": true,
+          "formulation": "constant_strain_triangle_membrane",
+          "reference": "closed_form_plane_stress_constant_strain_energy",
+          "energy_j": 36.125,
+          "expected_energy_j": 36.125,
+          "relative_error": 0.0,
+          "threshold": 1e-10,
+          "area_m2": 1.0
+        },
+        {
+          "case_id": "membrane_rigid_body_modes",
+          "ready": true,
+          "formulation": "constant_strain_triangle_membrane",
+          "reference": "zero_internal_force_for_translation_and_in_plane_rotation",
+          "mode_count": 4,
+          "max_residual": 0.0,
+          "max_normalized_residual": 0.0,
+          "threshold": 1e-12
+        },
+        {
+          "case_id": "shell_transverse_shear_patch",
+          "ready": true,
+          "formulation": "mindlin_cst_transverse_shear",
+          "reference": "closed_form_constant_transverse_shear_energy",
+          "energy_j": 10.41666666666667,
+          "expected_energy_j": 10.41666666666667,
+          "relative_error": 0.0,
+          "threshold": 1e-10,
+          "area_m2": 1.0
+        },
+        {
+          "case_id": "shell_zero_shear_rigid_slope",
+          "ready": true,
+          "formulation": "mindlin_cst_bending_shear",
+          "reference": "zero_energy_for_linear_w_with_matching_rotation",
+          "energy_j_abs": 1.8189894035458566e-16,
+          "normalized_energy": 1.746229827404022e-18,
+          "threshold": 1e-12
+        },
+        {
+          "case_id": "clamped_square_plate_uniform_pressure",
+          "ready": true,
+          "formulation": "assembled_mindlin_cst_shell_plate",
+          "reference": "classical_clamped_square_plate_center_deflection_alpha_0p00126",
+          "mesh_divisions": 24,
+          "node_count": 625,
+          "triangle_count": 1152,
+          "free_dof_count": 2116,
+          "center_deflection_m": 0.00014301986443244395,
+          "expected_center_deflection_m": 0.00015482879999999995,
+          "relative_error": 0.07627092354623946,
+          "threshold": 0.15,
+          "residual_inf_n": 3.492914402158931e-09,
+          "relative_residual_inf": 1.257449184777214e-11,
+          "regularization": 21.221457691100824,
+          "assembly_plus_solve_seconds": 0.2957935639997231,
+          "solve_seconds": 0.006705593000333465
+        }
+      ],
+      "surface_shell_full_bending_tangent_ready": false,
+      "element_count": 7152,
+      "section_material_coverage_count": 553,
+      "section_material_coverage_pct": 7.732102908277405,
+      "missing_section_id_count": 11,
+      "missing_material_id_count": 17,
+      "missing_section_id_head": [
+        1,
+        2,
+        3,
+        5,
+        8,
+        18,
+        20,
+        21,
+        22,
+        23
+      ],
+      "missing_material_id_head": [
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        17,
+        18
+      ]
+    },
+    {
+      "family": "nonlinear_rc_steel_composite_material_laws",
+      "status": "bounded_frame_material_nonlinear_tangent_smoke_ready_full_newton_unsupported",
+      "formulation": "source_material_name_grade_proxy_frame_tangent_smoke",
+      "material_law": "steel_bilinear_concrete_damage_src_bounded_composite_proxy",
+      "frame_material_nonlinear_tangent_ready": true,
+      "service_load_material_state_ready": true,
+      "controlled_probe_material_state_ready": true,
+      "bounded_material_tangent_global_smoke_ready": true,
+      "full_material_nonlinear_newton_equilibrium": false,
+      "service_material_state_summary": {
+        "element_count": 5572,
+        "material_family_counts": {
+          "CONC": 2110,
+          "UNKNOWN": 79,
+          "USER": 6,
+          "STEEL": 1690,
+          "SRC": 1687
+        },
+        "state_tag_counts": {
+          "concrete_compression_hardening": 1517,
+          "concrete_tension_elastic": 592,
+          "unknown_elastic_proxy": 79,
+          "rigid_user_elastic_proxy": 6,
+          "steel_elastic": 1688,
+          "steel_plastic_hardening": 2,
+          "concrete_compression_crushed": 1,
+          "src_steel_elastic+concrete_compression_hardening": 1327,
+          "src_steel_elastic+concrete_tension_elastic": 358,
+          "src_steel_elastic+concrete_tension_cracked": 2
+        },
+        "nonlinear_tangent_element_count": 1694,
+        "min_tangent_ratio": 0.015,
+        "mean_tangent_ratio": 0.9347322763290329,
+        "max_abs_strain": 0.05731207501083598
+      },
+      "controlled_probe_material_state_summary": {
+        "element_count": 5572,
+        "material_family_counts": {
+          "CONC": 2110,
+          "UNKNOWN": 79,
+          "USER": 6,
+          "STEEL": 1690,
+          "SRC": 1687
+        },
+        "state_tag_counts": {
+          "concrete_compression_softening": 2108,
+          "unknown_elastic_proxy": 79,
+          "concrete_compression_crushed": 2,
+          "rigid_user_elastic_proxy": 6,
+          "steel_plastic_hardening": 1688,
+          "steel_plastic_capped": 2,
+          "src_steel_plastic_hardening+concrete_compression_hardening": 1319,
+          "src_steel_plastic_hardening+concrete_tension_cracked": 360,
+          "src_steel_plastic_hardening+concrete_compression_crushed": 8
+        },
+        "nonlinear_tangent_element_count": 5487,
+        "min_tangent_ratio": 0.015,
+        "mean_tangent_ratio": 0.04215167086256856,
+        "max_abs_strain": 1.4328018752708995
+      },
+      "material_tangent_smoke_equilibrium": {
+        "residual_inf_n": 0.00010153651237487793,
+        "regularization": 1904.644801419571,
+        "real_section_material_coverage_pct": 98.58219669777459,
+        "min_solver_tangent_ratio": 0.015,
+        "tangent_reduction_element_count": 5487,
+        "total_gravity_kn": 192104.21926805886
+      }
+    }
+  ],
+  "native_3d_evidence": {
+    "native_solve_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
+    "solve_mode": "mgt_npz_beam_mesh_3d_real_section_connected_component",
+    "used_real_section_properties": true,
+    "real_section_property_coverage_pct": 100.0,
+    "fell_back_to_linear_tangent": false,
+    "partial_connected_component_mesh": true
+  },
+  "unsupported_element_material_queue": [
+    {
+      "family": "plate_shell_surface_code2",
+      "element_count": 7152,
+      "status": "membrane_bending_drilling_calibrated_benchmark_ready_opening_local_axis_unsupported",
+      "reason": "Surface membrane plus bending/drilling smoke solves are attached with source MGT plate thickness coverage and shell calibration benchmarks. Opening/local-axis handling, higher-order shell breadth, full-load frame-shell nonlinear coupling, and material nonlinear shell behavior are not promoted.",
+      "required_action_before_claim": "promote parsed local axes/openings, higher-order shell breadth, and coupled full-load frame-shell Newton"
+    },
+    {
+      "family": "nonlinear_rc_steel_composite_material_laws",
+      "element_count": 12728,
+      "status": "bounded_frame_material_nonlinear_tangent_smoke_ready_full_newton_unsupported",
+      "reason": "Frame elements now have a bounded material tangent receipt using MGT E/nu and material-name grade proxies with service/probe states and a global tangent smoke solve. Full path-dependent internal-force history, fiber sections, shell material nonlinearity, and Newton consistent Jacobian benchmarks are not promoted.",
+      "required_action_before_claim": "promote path-dependent constitutive update, internal-force history variables, fiber-section/shell material tangents, consistent Newton Jacobian, and regression benchmarks"
+    },
+    {
+      "family": "contact_interface_foundation",
+      "element_count": 0,
+      "status": "unsupported_or_no_source_rows",
+      "reason": "No source rows are normalized into a contact/interface/foundation tangent in this MGT lane.",
+      "required_action_before_claim": "normalize source entities and attach contact/interface tangent benchmarks"
+    }
+  ],
+  "blockers": []
+}

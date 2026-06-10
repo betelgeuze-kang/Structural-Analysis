@@ -1,0 +1,91 @@
+{
+  "schema_version": "rocm-workstation-gpu-receipt.v1",
+  "generated_at": "2026-06-05T13:35:46.363325+00:00",
+  "status": "ready",
+  "rocm_hardware_ready": true,
+  "torch_rocm_runtime_ready": true,
+  "target_hardware_match": true,
+  "device_names": [
+    "AMD Radeon RX 6900 XT"
+  ],
+  "gfx_targets": [
+    "gfx1030"
+  ],
+  "tool_paths": {
+    "rocm_smi": "/usr/local/bin/rocm-smi",
+    "rocminfo": "/usr/bin/rocminfo",
+    "hipcc": "/opt/rocm/bin/hipcc",
+    "hipconfig": "/opt/rocm/bin/hipconfig",
+    "amd_smi": "",
+    "nvidia_smi": ""
+  },
+  "device_nodes": {
+    "dev_kfd_present": true,
+    "render_nodes": [
+      "/dev/dri/renderD128"
+    ]
+  },
+  "rocm_smi": {
+    "return_code": 0,
+    "cards": [
+      {
+        "card_id": "card0",
+        "card_series": "Navi 21 [Radeon RX 6800/6800 XT / 6900 XT]",
+        "card_model": "0x2408",
+        "card_vendor": "Advanced Micro Devices, Inc. [AMD/ATI]",
+        "card_sku": "D41201",
+        "gpu_use_pct": "4",
+        "vram_total_bytes": "17163091968",
+        "vram_used_bytes": "944820224",
+        "temperature_edge_c": "50.0",
+        "temperature_junction_c": "55.0",
+        "temperature_memory_c": "54.0"
+      }
+    ],
+    "system": {
+      "Driver version": "6.5.0-26-generic"
+    },
+    "parse_error": "",
+    "stderr_excerpt": ""
+  },
+  "rocminfo": {
+    "return_code": 0,
+    "gpu_agent_count": 1,
+    "gpu_agents": [
+      {
+        "agent": "Agent 2",
+        "names": [
+          "gfx1030",
+          "amdgcn-amd-amdhsa--gfx1030"
+        ],
+        "name": "gfx1030",
+        "uuid": "GPU-XX",
+        "marketing_name": "AMD Radeon RX 6900 XT",
+        "vendor_name": "AMD",
+        "device_type": "GPU"
+      }
+    ],
+    "gfx_targets": [
+      "gfx1030"
+    ],
+    "stderr_excerpt": ""
+  },
+  "torch_rocm_probe": {
+    "torch_import_ok": true,
+    "torch_rocm_runtime_ready": true,
+    "torch_device_tensor_test_passed": true,
+    "torch_version": "2.6.0+rocm6.1",
+    "torch_version_hip": "6.1.40091-a8dbc0c19",
+    "torch_cuda_api_available": true,
+    "torch_cuda_device_count": 1,
+    "device_names": [
+      "AMD Radeon RX 6900 XT"
+    ],
+    "torch_device_tensor_sum": 2048.0,
+    "torch_device_tensor_device": "cuda:0"
+  },
+  "pytorch_device_label_policy": "PyTorch ROCm exposes HIP devices through the torch.cuda API; a device label such as cuda:0 can still be AMD ROCm/HIP when torch.version.hip is populated and rocm-smi/rocminfo detect AMD GPU.",
+  "nvidia_smi_not_required_for_amd_rocm": true,
+  "claim_boundary": "This receipt proves local AMD ROCm/PyTorch-HIP workstation availability. It does not prove that every MGT full sparse frame/shell solver artifact is GPU accelerated unless that artifact records a ROCm/HIP backend.",
+  "blockers": []
+}

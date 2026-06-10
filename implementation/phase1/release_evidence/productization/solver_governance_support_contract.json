@@ -1,0 +1,121 @@
+{
+  "schema_version": "solver-governance-support-contract.v1",
+  "generated_at": "2026-06-05T13:36:10.201383+00:00",
+  "status": "ready",
+  "governance_support_ready": true,
+  "bundle_status": "ready",
+  "validation_status": "pass",
+  "workstation_delivery_status": "ready",
+  "full_gap_ledger_ready": false,
+  "full_gap_ledger_status": "open",
+  "unsupported_state_first_report_policy": true,
+  "report_state_separation": {
+    "solver_derived": [
+      "mgt_global_fea_3d_native_solve.json",
+      "mgt_global_fea_condensed_solve.json",
+      "story_model_reanalysis.json"
+    ],
+    "proxy_derived": [
+      "proxy_solver_divergence_gate.json",
+      "post_optimization_reanalysis_gate.json"
+    ],
+    "ai_assisted": [
+      "ai_decision_trace_ledger.json",
+      "ai_review_queue.json",
+      "ai_inference_runtime_receipt.json"
+    ],
+    "unsupported_or_external": [
+      "G1",
+      "G6",
+      "G7",
+      "G9"
+    ]
+  },
+  "headline_trace_contract": {
+    "required_chain": [
+      "customer_report_metric",
+      "viewer_surface_or_delivery_index_link",
+      "evidence_json_path",
+      "solver_or_proxy_run_id",
+      "input_model_hash",
+      "claim_boundary_label"
+    ],
+    "artifact_examples": {
+      "delivery_bundle": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
+      "gap_ledger": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+      "ai_review_queue": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json",
+      "load_stage_semantics": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json"
+    }
+  },
+  "engineer_review_workflow": {
+    "states": [
+      "pending_review",
+      "accepted",
+      "rejected",
+      "waived",
+      "blocked",
+      "unsupported"
+    ],
+    "required_before_final_report_promotion": [
+      "solver_or_proxy_state_visible",
+      "unsupported_state_visible",
+      "engineer_review_decision",
+      "evidence_links_resolve"
+    ],
+    "ai_queue_item_count": 20,
+    "ai_trace_proposal_count": 20
+  },
+  "support_policy": {
+    "release_note_policy_required": true,
+    "numerical_change_policy_required": true,
+    "audit_export_required": true,
+    "retention_delete_policy_required": true,
+    "external_state_confirmation_required": true
+  },
+  "unsupported_rows": [
+    {
+      "id": "G1",
+      "title": "Full 3D Global FEA Core",
+      "status": "partial",
+      "blockers": [
+        "full_mesh_nonlinear_equilibrium_not_closed",
+        "direct_residual_newton_not_closed"
+      ]
+    },
+    {
+      "id": "G6",
+      "title": "V&V, External Benchmarks, Residual Holdouts",
+      "status": "external_blocked",
+      "blockers": [
+        "external_receipt_or_closure_pending:hardest_external_10case",
+        "external_receipt_or_closure_pending:korean_public_structures",
+        "external_receipt_or_closure_pending:peer_spd_hinge",
+        "external_receipt_or_closure_pending:tpu_hffb",
+        "external_submission_receipts_pending",
+        "residual_closure_pending:RH-001",
+        "residual_closure_pending:RH-002",
+        "residual_closure_pending:RH-003",
+        "residual_holdout_closure_pending"
+      ]
+    },
+    {
+      "id": "G7",
+      "title": "Korean Medium/Large Real-Project Corpus",
+      "status": "partial",
+      "blockers": [
+        "repo_benchmark_bridge_mgt_present",
+        "metadata_only_sources_present",
+        "operator_attached_real_mgt_header_ok_below_target"
+      ]
+    },
+    {
+      "id": "G9",
+      "title": "Runtime, GPU, Performance, And Scale",
+      "status": "partial",
+      "blockers": [
+        "full_solver_gpu_evidence_not_closed"
+      ]
+    }
+  ],
+  "blockers": []
+}

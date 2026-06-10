@@ -1,0 +1,104 @@
+{
+  "schema_version": "mgt-boundary-spring-tangent-receipt.v1",
+  "generated_at": "2026-06-05T13:35:21.708863+00:00",
+  "status": "ready",
+  "source": {
+    "path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "size_bytes": 2205887,
+    "source_family": "midas_mgt",
+    "blocks": [
+      "*CONSTRAINT",
+      "*ELASTICLINK"
+    ],
+    "provenance": "repo_benchmark_bridge"
+  },
+  "unit_policy": {
+    "mgt_force_unit": "kN",
+    "mgt_length_unit": "m",
+    "stiffness_scale_to_si": 1000.0,
+    "probe_load_n_or_nm": 1.0
+  },
+  "summary": {
+    "mgt_node_count": 13047,
+    "active_boundary_node_count": 5517,
+    "support_node_count": 2133,
+    "elastic_link_node_count": 3384,
+    "direct_support_link_node_intersection_count": 0,
+    "dof_count": 33102,
+    "tangent_nnz": 40608,
+    "authored_support_constraint_row_count": 8,
+    "authored_support_node_count": 2133,
+    "authored_support_node_count_in_boundary_subsystem": 2133,
+    "authored_support_node_count_missing_from_boundary_subsystem": 0,
+    "authored_support_restrained_dof_count": 7707,
+    "authored_support_restraint_code_counts": {
+      "111000": 1,
+      "111111": 7
+    },
+    "authored_support_applied_restraint_code_counts": {
+      "111000": 1,
+      "111111": 7
+    },
+    "authored_support_restrained_dof_counts": {
+      "Dx": 2133,
+      "Dy": 2133,
+      "Dz": 2133,
+      "Rx": 436,
+      "Ry": 436,
+      "Rz": 436
+    },
+    "authored_support_missing_node_ids_head": [],
+    "elastic_link_row_count": 1692,
+    "elastic_link_rows_skipped": 0,
+    "finite_spring_component_count": 10152,
+    "finite_spring_dof_counts": {
+      "SDx": 1692,
+      "SDy": 1692,
+      "SDz": 1692,
+      "SRx": 1692,
+      "SRy": 1692,
+      "SRz": 1692
+    },
+    "elastic_link_type_counts": {
+      "GEN": 1692
+    },
+    "stiffness_abs_min_nonzero_n_per_m_or_nm_per_rad": 1.0,
+    "stiffness_abs_max_n_per_m_or_nm_per_rad": 1000000000.0,
+    "link_length_min_m": 0.075,
+    "link_length_max_m": 0.075,
+    "link_length_mean_m": 0.07499999999999998
+  },
+  "support": {
+    "authored_support_mask_application_ready": true,
+    "finite_elastic_link_spring_tangent_ready": true,
+    "boundary_subsystem_probe_solve_ready": true,
+    "solver_uses_authored_support_restraint_masks": true,
+    "solver_assembles_finite_elastic_link_springs": true,
+    "support_and_link_nodes_directly_overlap": false,
+    "global_frame_shell_tangent_integration_ready": false,
+    "story_eccentricity_load_generation_ready": false
+  },
+  "probe_solve": {
+    "free_dof_count": 25395,
+    "restrained_dof_count": 7707,
+    "regularization": 0.13328122898806852,
+    "residual_inf": 0.0,
+    "relative_residual_inf": 0.0,
+    "max_abs_probe_displacement_or_rotation": 0.4687614489883056,
+    "load_inf": 1.0
+  },
+  "claim_boundary": {
+    "closed": [
+      "real MGT *CONSTRAINT masks are applied as restrained DOFs in a sparse boundary subsystem",
+      "real MGT *ELASTICLINK GEN stiffness rows are assembled as finite two-node 6-DOF spring tangent components",
+      "a self-equilibrating probe load is solved against the assembled sparse boundary tangent"
+    ],
+    "not_closed": [
+      "this is a boundary subsystem tangent receipt, not the full frame/shell global tangent",
+      "support nodes and elastic-link nodes do not directly overlap in this MGT, so full structural connectivity must come from the global element graph",
+      "story eccentricity settings are not consumed by this spring tangent receipt"
+    ]
+  },
+  "direct_support_link_node_ids_head": []
+}
