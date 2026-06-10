@@ -1,0 +1,360 @@
+{
+  "schema_version": "mgt-direct-residual-newton-probe.v1",
+  "generated_at": "2026-06-05T17:37:45.355366+00:00",
+  "status": "partial",
+  "direct_residual_newton_ready": false,
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_expanded_support_continuation_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 23,
+    "accepted_residual_history_count": 23,
+    "residual_inf_n": 7511.203920880909,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 0.8996613710816006
+  },
+  "source": {
+    "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "provenance": "repo_benchmark_bridge"
+  },
+  "residual_contract": {
+    "definition": "R(u, lambda) = F_int(u) - lambda * F_ext",
+    "direct_residual_uses_solver_regularization": false,
+    "regularization_used_only_for_linear_correction_direction": true,
+    "external_load_vector_configuration": "reference",
+    "external_load_vector_reassembled_with_displacement": false,
+    "frame_geometric_tangent_included": true,
+    "authored_support_restraints_included": true,
+    "finite_elastic_link_springs_included": true,
+    "shell_surface_tangent_included": true,
+    "service_material_tangent_included": true,
+    "directional_residual_jacobian_globalization_included": true,
+    "matrix_free_consistent_jacobian_subspace_included": true,
+    "current_tangent_residual_row_correction_included": false
+  },
+  "mesh_fingerprint": {
+    "raw_line_element_count": 5576,
+    "line_elements_solved": 5564,
+    "skipped_short_or_degenerate_line_count": 12,
+    "line_node_count": 2491,
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "node_count": 13047,
+    "reference_external_load_meta": {
+      "active_dof_count": 54377,
+      "free_dof_count": 51993,
+      "frame_material_stiffness_nnz": 291132,
+      "frame_geometric_delta_stiffness_nnz": 44913,
+      "shell_stiffness_nnz": 1901664,
+      "spring_stiffness_nnz": 40608,
+      "coupled_stiffness_nnz": 1141195,
+      "frame_material_meta": {
+        "real_section_material_element_count": 5485,
+        "real_section_material_coverage_pct": 98.58015815959742,
+        "total_gravity_n": 129592198.79379755,
+        "min_solver_tangent_ratio": 4.7619047619047615e-06,
+        "tangent_reduction_element_count": 1762
+      },
+      "frame_geometric_meta": {
+        "real_section_material_element_count": 5485,
+        "real_section_material_coverage_pct": 98.58015815959742,
+        "total_gravity_n": 129592198.79379755,
+        "unique_section_count": 182,
+        "unique_material_count": 11,
+        "local_axis_roll_transform_applied_count": 150,
+        "local_axis_max_abs_angle_deg": 270.0,
+        "section_usage_head": {
+          "1088": 3374,
+          "4": 446,
+          "6": 200,
+          "29": 138,
+          "1053": 84,
+          "44": 76,
+          "248": 58,
+          "93": 56,
+          "256": 38,
+          "48": 34
+        },
+        "material_usage_head": {
+          "1": 2110,
+          "2": 1686,
+          "3": 1683,
+          "29": 17,
+          "30": 15,
+          "28": 14,
+          "31": 10,
+          "27": 9,
+          "26": 9,
+          "5": 6
+        }
+      },
+      "service_material_meta": {
+        "service_material_tangent_element_count": 5564,
+        "service_material_family_counts": {
+          "CONC": 2110,
+          "UNKNOWN": 79,
+          "USER": 6,
+          "STEEL": 1686,
+          "SRC": 1683
+        },
+        "service_min_tangent_ratio": 0.7894417475728155,
+        "service_mean_tangent_ratio": 0.9363102913668312
+      },
+      "shell_meta": {
+        "surface_element_count": 7152,
+        "surface_quad_count": 6968,
+        "surface_tri_count": 184,
+        "assembled_triangle_count": 14120,
+        "skipped_degenerate_triangle_count": 0,
+        "surface_node_count": 7894,
+        "surface_material_coverage_pct": 96.33668903803132,
+        "unique_surface_material_count": 20,
+        "unique_surface_section_count": 15,
+        "surface_total_area_m2": 11404.192103423085,
+        "surface_stiffness_nnz": 1901664,
+        "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+        "source_plate_thickness_coverage_count": 7152,
+        "source_plate_thickness_coverage_pct": 100.0,
+        "source_thickness_table_count": 25,
+        "thickness_min_m": 0.140625,
+        "thickness_max_m": 0.85
+      },
+      "external_load_source": "assembled_configuration",
+      "assembled_external_load_inf_n": 8676.13911480824,
+      "used_external_load_inf_n": 8676.13911480824
+    },
+    "active_dof_count": 61446,
+    "free_dof_count": 58998,
+    "frame_material_stiffness_nnz": 291132,
+    "frame_geometric_delta_stiffness_nnz": 134118,
+    "shell_stiffness_nnz": 1901664,
+    "spring_stiffness_nnz": 40608,
+    "coupled_stiffness_nnz": 2000607,
+    "frame_material_meta": {
+      "real_section_material_element_count": 5485,
+      "real_section_material_coverage_pct": 98.58015815959742,
+      "total_gravity_n": 129592198.79379755,
+      "min_solver_tangent_ratio": 4.7619047619047615e-06,
+      "tangent_reduction_element_count": 1762
+    },
+    "frame_geometric_meta": {
+      "real_section_material_element_count": 5485,
+      "real_section_material_coverage_pct": 98.58015815959742,
+      "total_gravity_n": 129592198.79379755,
+      "unique_section_count": 182,
+      "unique_material_count": 11,
+      "local_axis_roll_transform_applied_count": 150,
+      "local_axis_max_abs_angle_deg": 270.0,
+      "section_usage_head": {
+        "1088": 3374,
+        "4": 446,
+        "6": 200,
+        "29": 138,
+        "1053": 84,
+        "44": 76,
+        "248": 58,
+        "93": 56,
+        "256": 38,
+        "48": 34
+      },
+      "material_usage_head": {
+        "1": 2110,
+        "2": 1686,
+        "3": 1683,
+        "29": 17,
+        "30": 15,
+        "28": 14,
+        "31": 10,
+        "27": 9,
+        "26": 9,
+        "5": 6
+      }
+    },
+    "service_material_meta": {
+      "service_material_tangent_element_count": 5564,
+      "service_material_family_counts": {
+        "CONC": 2110,
+        "UNKNOWN": 79,
+        "USER": 6,
+        "STEEL": 1686,
+        "SRC": 1683
+      },
+      "service_min_tangent_ratio": 0.7892508801722118,
+      "service_mean_tangent_ratio": 0.9362928696611795
+    },
+    "shell_meta": {
+      "surface_element_count": 7152,
+      "surface_quad_count": 6968,
+      "surface_tri_count": 184,
+      "assembled_triangle_count": 14120,
+      "skipped_degenerate_triangle_count": 0,
+      "surface_node_count": 7894,
+      "surface_material_coverage_pct": 96.33668903803132,
+      "unique_surface_material_count": 20,
+      "unique_surface_section_count": 15,
+      "surface_total_area_m2": 11403.86699192744,
+      "surface_stiffness_nnz": 1901664,
+      "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+      "source_plate_thickness_coverage_count": 7152,
+      "source_plate_thickness_coverage_pct": 100.0,
+      "source_thickness_table_count": 25,
+      "thickness_min_m": 0.140625,
+      "thickness_max_m": 0.85
+    },
+    "external_load_source": "reference_configuration",
+    "assembled_external_load_inf_n": 8676.139091070776,
+    "used_external_load_inf_n": 8676.13911480824
+  },
+  "boundary_summary": {
+    "support_constraint_row_count": 8,
+    "authored_support_node_count": 2133,
+    "mapped_support_node_count": 2133,
+    "missing_support_node_count": 0,
+    "authored_support_restrained_dof_count": 7707,
+    "restraint_code_counts": {
+      "111000": 1,
+      "111111": 7
+    },
+    "restrained_dof_counts": {
+      "Dx": 2133,
+      "Dy": 2133,
+      "Dz": 2133,
+      "Rx": 436,
+      "Ry": 436,
+      "Rz": 436
+    },
+    "missing_support_node_ids_head": [],
+    "elastic_link_row_count": 1692,
+    "elastic_link_rows_skipped": 0,
+    "distinct_elastic_link_node_count": 3384,
+    "mapped_elastic_link_node_count": 3384,
+    "missing_elastic_link_node_count": 0,
+    "finite_spring_component_count": 10152,
+    "finite_spring_dof_counts": {
+      "SDx": 1692,
+      "SDy": 1692,
+      "SDz": 1692,
+      "SRx": 1692,
+      "SRy": 1692,
+      "SRz": 1692
+    },
+    "elastic_link_type_counts": {
+      "GEN": 1692
+    },
+    "stiffness_abs_min_nonzero_n_per_m_or_nm_per_rad": 1.0,
+    "stiffness_abs_max_n_per_m_or_nm_per_rad": 1000000000.0
+  },
+  "base_direct_residual": {
+    "load_scale": 0.656,
+    "direct_residual_inf_n": 7511.203920880909,
+    "direct_residual_l2_n": 31021.91896572156,
+    "direct_relative_residual_inf": 0.8657311531647706,
+    "rhs_inf_n": 8676.13911480824,
+    "linear_correction_regularization": 382.1165024737579,
+    "regularized_residual_inf_n": 7511.098627402325,
+    "fixed_point_receipt_residual_inf_n": 7511.203920880909,
+    "fixed_point_receipt_relative_increment": null
+  },
+  "final_direct_residual": {
+    "direct_residual_inf_n": 7511.203920880909,
+    "direct_relative_residual_inf": 0.8657311531647706,
+    "accepted_trust_region_iteration_count": 0,
+    "secant_subspace_globalization_accepted": false,
+    "current_tangent_residual_row_correction_accepted": false,
+    "improvement_factor": 1.0
+  },
+  "newton_direction": {
+    "linearized_tangent": "current service-material frame tangent plus frame geometric delta plus shell tangent plus finite springs",
+    "regularization": 0.0,
+    "correction_inf_m": 0.0,
+    "linear_solve_seconds": 0.0
+  },
+  "trust_region_line_search": {
+    "alpha_values": [
+      0.001,
+      0.0005,
+      0.00025,
+      0.000125,
+      6.25e-05,
+      3.125e-05,
+      1.5625e-05,
+      7.8125e-06
+    ],
+    "directional_jacobian_probe_alpha": 7.8125e-06,
+    "max_trust_iterations": 0,
+    "accepted_iteration_count": 0,
+    "iterations": [],
+    "candidate_rows": [],
+    "best_candidate": {},
+    "accepted": false
+  },
+  "secant_subspace_globalization": {
+    "enabled": false,
+    "attempted": false,
+    "accepted": false,
+    "promotion_count": 0,
+    "passes": []
+  },
+  "matrix_free_consistent_jacobian_subspace": {
+    "enabled": true,
+    "attempted": false,
+    "accepted": false,
+    "promoted_to_final_state": false,
+    "basis_size": 0,
+    "promotion_count": 0,
+    "max_promotions": 0,
+    "probe_scale": 0.25,
+    "probe_scales": [
+      0.25
+    ],
+    "minimum_relative_improvement": 1e-05,
+    "stop_reason": "max_promotions_zero",
+    "passes": [],
+    "trial_rows": [],
+    "jvp_rows": [],
+    "best_candidate": null,
+    "best_gate_eligible_candidate": null,
+    "residual_descent": false
+  },
+  "current_tangent_residual_row_correction": {
+    "enabled": false,
+    "attempted": false,
+    "accepted": false,
+    "promoted_to_final_state": false,
+    "promotion_count": 0,
+    "max_promotions": 0,
+    "minimum_relative_improvement": 1e-05,
+    "target_row_counts": [
+      1,
+      2
+    ],
+    "support_column_counts": [
+      4,
+      8
+    ],
+    "support_expansion_depth": 0,
+    "directional_probe_alpha": 0.0,
+    "configured_alpha_values": [
+      0.03125,
+      0.015625
+    ],
+    "stop_reason": "not_attempted",
+    "passes": [],
+    "trial_rows": []
+  },
+  "runtime_metrics": {
+    "initial_assembly_seconds": 15.463200870999572,
+    "total_seconds": 17.866450224999426
+  },
+  "output_final_checkpoint": null,
+  "claim_boundary": "This is the direct residual/Jacobian bridge required before G1 closure. It evaluates the physical residual without solver regularization and iterates regularized Newton correction directions with trust-region line-search plus a directional finite-difference residual-Jacobian alpha probe, accepted-history secant subspace, and matrix-free finite-difference consistent-Jacobian subspace plus a current-tangent residual-row least-squares correction. It is not full closure unless both direct residual and increment gates pass.",
+  "blockers": [
+    "direct_residual_gate_not_closed",
+    "consistent_jacobian_or_globalization_required",
+    "regularized_fixed_point_residual_must_not_be_used_as_physical_residual"
+  ]
+}
