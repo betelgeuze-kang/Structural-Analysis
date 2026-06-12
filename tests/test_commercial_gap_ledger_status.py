@@ -4966,6 +4966,95 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert post_block_translation_followup50_component_breakdown[
         "top_row_dominant_component_counts"
     ] == {"shell_membrane": 1, "frame": 20, "shell_bending_drilling": 3}
+    g1_frame_hotspot_block_translation_rows21_support32_followup51 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup51"
+    ]
+    assert (
+        g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_translation_rows21_support32_followup50[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "final_direct_residual_inf_n"
+        ]
+        == 5622.863556797554
+    )
+    assert (
+        g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "final_direct_residual_inf_n"
+        ]
+        < g1_frame_hotspot_block_translation_rows21_support32_followup50[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "promotion_count"
+        ]
+        == 1
+    )
+    assert (
+        g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "promotion_pass_actual_direct_residual_inf_n"
+        ]
+        == [5622.863556797554]
+    )
+    assert (
+        g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "translation"
+    )
+    assert (
+        g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "frame_hotspot_block_lstsq_selected_component_counts"
+        ]
+        == {"shell_membrane": 1, "frame": 17, "shell_bending_drilling": 3}
+    )
+    assert (
+        g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 312
+    )
+    assert (
+        g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "output_final_checkpoint_path"
+        ]
+        == "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup51_probe_final_checkpoint.npz"
+    )
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_post_block_rows21_support32_translation_followup51_component_status"
+    ] == "partial"
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_post_block_rows21_support32_translation_followup51_component_only"
+    ] is True
+    assert (
+        rows["G1"]["evidence"][
+            "residual_jacobian_post_block_rows21_support32_translation_followup51_base_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    post_block_translation_followup51_component_breakdown = rows["G1"]["evidence"][
+        "residual_jacobian_post_block_rows21_support32_translation_followup51_component_breakdown"
+    ]
+    assert post_block_translation_followup51_component_breakdown["component_inf_n"][
+        "frame"
+    ] == 3486.881350177466
+    assert post_block_translation_followup51_component_breakdown["component_inf_n"][
+        "shell_membrane"
+    ] == 2355.386588796982
+    assert post_block_translation_followup51_component_breakdown[
+        "top_row_dominant_component_counts"
+    ] == {"shell_membrane": 1, "frame": 21, "shell_bending_drilling": 2}
     assert rows["G1"]["evidence"][
         "residual_jacobian_current_frontier_component_status"
     ] == "partial"
