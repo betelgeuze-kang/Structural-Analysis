@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-06-12T23:31:53.737301+00:00",
+  "generated_at": "2026-06-12T23:38:27.824003+00:00",
   "status": "open",
   "commercial_solver_gap_ready": false,
   "ai_engine_gap_ready": true,
@@ -35094,16 +35094,16 @@
         },
         "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup_series": {
           "series_schema": "mgt-translation-frontier-followup-series.v1",
-          "count": 9,
+          "count": 10,
           "strictly_decreasing_final_residual": true,
-          "latest_followup_index": 52,
-          "latest_final_direct_residual_inf_n": 5608.9029283559275,
+          "latest_followup_index": 53,
+          "latest_final_direct_residual_inf_n": 5594.942299914306,
           "latest_component_inf_n": {
-            "frame": 3528.414739726482,
+            "frame": 3517.4797739856767,
             "spring": 0.8387057679917196,
             "material_stress_correction": 0.0,
-            "shell_bending_drilling": 2174.8783544631237,
-            "shell_membrane": 2341.6622353890675
+            "shell_bending_drilling": 2173.352230364505,
+            "shell_membrane": 2327.9378819811577
           },
           "rows": [
             {
@@ -35414,6 +35414,41 @@
                 "material_stress_correction": 0.0,
                 "shell_bending_drilling": 2174.8783544631237,
                 "shell_membrane": 2341.6622353890675
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 53,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup53_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup53_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5608.9029283559275,
+              "final_direct_residual_inf_n": 5594.942299914306,
+              "promotion_count": 1,
+              "promotion_candidate_alpha": 0.002489012311310589,
+              "promotion_candidate_relative_increment": 9.999999999990003e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 332,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 18,
+                "shell_bending_drilling": 2
+              },
+              "output_final_checkpoint_path": "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup53_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5594.942299914306,
+              "component_inf_n": {
+                "frame": 3517.4797739856767,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2173.352230364505,
+                "shell_membrane": 2327.9378819811577
               },
               "top_row_dominant_component_counts": {
                 "shell_membrane": 1,
