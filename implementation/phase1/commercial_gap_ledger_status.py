@@ -180,6 +180,12 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "frame_hotspot_block_lstsq_selected_count": hotspot_block.get(
             "selected_hotspot_row_count"
         ),
+        "frame_hotspot_block_lstsq_component_filter": hotspot_block.get(
+            "component_filter"
+        ),
+        "frame_hotspot_block_lstsq_selected_component_counts": hotspot_block.get(
+            "selected_hotspot_dominant_component_counts"
+        ),
         "frame_hotspot_block_lstsq_support_size": hotspot_block.get("support_size"),
         "frame_hotspot_block_lstsq_correction_inf_m": _float_or_none(
             hotspot_block.get("correction_inf_m")
@@ -1791,6 +1797,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_residual_jacobian_post_block_rows21_support16_followup31_component_probe.json"
     )
+    direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support16_followup34 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support16_followup34_probe.json"
+    )
+    residual_jacobian_post_block_rows21_support16_translation_followup34_component = _load(
+        productization
+        / "mgt_residual_jacobian_post_block_rows21_support16_translation_followup34_component_probe.json"
+    )
     direct_residual_current_frontier_frame_block_current_tangent_narrow = _load(
         productization
         / "mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_probe.json"
@@ -2660,6 +2674,23 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "residual_jacobian_post_block_rows21_support16_followup31_component_breakdown": (
                     residual_jacobian_post_block_rows21_support16_followup31_component.get(
+                        "residual_component_breakdown"
+                    )
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support16_followup34": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support16_followup34
+                ),
+                "residual_jacobian_post_block_rows21_support16_translation_followup34_component_status": (
+                    residual_jacobian_post_block_rows21_support16_translation_followup34_component.get("status")
+                ),
+                "residual_jacobian_post_block_rows21_support16_translation_followup34_component_only": (
+                    residual_jacobian_post_block_rows21_support16_translation_followup34_component.get("component_only")
+                ),
+                "residual_jacobian_post_block_rows21_support16_translation_followup34_base_residual_inf_n": (
+                    residual_jacobian_post_block_rows21_support16_translation_followup34_component.get("base_residual_inf_n")
+                ),
+                "residual_jacobian_post_block_rows21_support16_translation_followup34_component_breakdown": (
+                    residual_jacobian_post_block_rows21_support16_translation_followup34_component.get(
                         "residual_component_breakdown"
                     )
                 ),

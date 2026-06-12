@@ -206,6 +206,18 @@ def _block_lstsq_hotspot_correction_vector(
     return correction
 
 
+def _block_lstsq_row_matches_filter(row: dict[str, Any], *, component_filter: str) -> bool:
+    dof = str(row.get("dof") or "")
+    if dof not in {"ux", "uy", "uz"}:
+        return False
+    dominant = str(row.get("dominant_component") or "")
+    if component_filter == "frame":
+        return dominant == "frame"
+    if component_filter == "translation":
+        return True
+    raise ValueError(f"unsupported block_lstsq_component_filter: {component_filter}")
+
+
 def _truncated_svd_coefficients(
     matrix: np.ndarray,
     rhs: np.ndarray,
@@ -262,6 +274,7 @@ def _hotspot_block_lstsq_sweep(
     support_columns_per_row: int = 8,
     svd_max_condition: float = 1.0e8,
     include_gate_limited_alpha: bool = False,
+    component_filter: str = "frame",
 ) -> dict[str, Any]:
     base_u = np.asarray(u, dtype=np.float64)
     free_idx = np.asarray(free, dtype=np.int64)
@@ -287,11 +300,10 @@ def _hotspot_block_lstsq_sweep(
     }
     selected_rows: list[dict[str, Any]] = []
     selected_local_rows: list[int] = []
+    selected_component_counts: dict[str, int] = {}
     seen: set[int] = set()
     for row in top_rows:
-        if str(row.get("dominant_component") or "") != "frame":
-            continue
-        if str(row.get("dof") or "") not in {"ux", "uy", "uz"}:
+        if not _block_lstsq_row_matches_filter(row, component_filter=component_filter):
             continue
         global_dof = int(row.get("global_dof", -1))
         if global_dof < 0 or global_dof in seen or global_dof not in local_row_by_global:
@@ -299,13 +311,20 @@ def _hotspot_block_lstsq_sweep(
         selected_rows.append(row)
         selected_local_rows.append(int(local_row_by_global[global_dof]))
         seen.add(global_dof)
+        dominant = str(row.get("dominant_component") or "none")
+        selected_component_counts[dominant] = selected_component_counts.get(dominant, 0) + 1
         if len(selected_rows) >= max(int(max_rows), 0):
             break
     if not selected_local_rows:
         return {
             "enabled": True,
             "evaluated": False,
-            "reason": "no_frame_translation_hotspot_rows",
+            "reason": (
+                "no_frame_translation_hotspot_rows"
+                if component_filter == "frame"
+                else "no_translation_hotspot_rows"
+            ),
+            "component_filter": component_filter,
             "candidate_rows": [],
             "best_candidate": {},
             "best_gate_eligible_candidate": {},
@@ -441,8 +460,14 @@ def _hotspot_block_lstsq_sweep(
     return {
         "enabled": True,
         "evaluated": True,
-        "direction": "block_lstsq_on_frame_translation_hotspots",
+        "direction": (
+            "block_lstsq_on_frame_translation_hotspots"
+            if component_filter == "frame"
+            else "block_lstsq_on_translation_hotspots"
+        ),
+        "component_filter": component_filter,
         "selected_hotspot_row_count": int(len(selected_rows)),
+        "selected_hotspot_dominant_component_counts": selected_component_counts,
         "target_rows": [int(row) for row in target_rows.tolist()],
         "target_global_dofs": [int(free_idx[int(row)]) for row in target_rows.tolist()],
         "support_size": int(support_cols.size),
@@ -477,6 +502,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     block_lstsq_support_columns_per_row: int = 8,
     block_lstsq_svd_max_condition: float = 1.0e8,
     block_lstsq_include_gate_limited_alpha: bool = False,
+    block_lstsq_component_filter: str = "frame",
     write_progress_artifacts: bool = False,
 ) -> dict[str, Any]:
     started = time.perf_counter()
@@ -571,13 +597,17 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
                 support_columns_per_row=block_lstsq_support_columns_per_row,
                 svd_max_condition=block_lstsq_svd_max_condition,
                 include_gate_limited_alpha=block_lstsq_include_gate_limited_alpha,
+                component_filter=block_lstsq_component_filter,
             )
         last_sweep = sweep
         base_residual_inf = _max_abs(residual)
         promotion_candidate = sweep.get("best_gate_eligible_candidate")
         promotion_candidate = promotion_candidate if isinstance(promotion_candidate, dict) else {}
-        candidate_residual_inf = float(
-            promotion_candidate.get("direct_residual_inf_n") or float("inf")
+        candidate_residual_raw = promotion_candidate.get("direct_residual_inf_n")
+        candidate_residual_inf = (
+            float(candidate_residual_raw)
+            if candidate_residual_raw is not None
+            else float("inf")
         )
         if not promotion_candidate or candidate_residual_inf >= base_residual_inf:
             stop_reason = "no_gate_eligible_descent"
@@ -889,6 +919,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--block-lstsq-support-columns-per-row", type=int, default=8)
     parser.add_argument("--block-lstsq-svd-max-condition", type=float, default=1.0e8)
     parser.add_argument("--block-lstsq-include-gate-limited-alpha", action="store_true")
+    parser.add_argument(
+        "--block-lstsq-component-filter",
+        choices=("frame", "translation"),
+        default="frame",
+    )
     parser.add_argument("--write-progress-artifacts", action="store_true")
     parser.add_argument(
         "--promotion-mode",
@@ -921,6 +956,7 @@ def main(argv: list[str] | None = None) -> int:
         block_lstsq_include_gate_limited_alpha=bool(
             args.block_lstsq_include_gate_limited_alpha
         ),
+        block_lstsq_component_filter=str(args.block_lstsq_component_filter),
         write_progress_artifacts=bool(args.write_progress_artifacts),
     )
     print(
