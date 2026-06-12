@@ -528,6 +528,27 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         rows["G1"]["evidence"]["direct_residual_final"]["direct_residual_inf_n"]
         == matrix_free_gate["direct_residual_inf_n"]
     )
+    direct_followup48_replay = rows["G1"]["evidence"][
+        "direct_residual_newton_followup48_replay"
+    ]
+    assert direct_followup48_replay["status"] == "partial"
+    assert direct_followup48_replay["ready"] is False
+    assert (
+        direct_followup48_replay["base_direct_residual_inf_n"]
+        == 5662.74655057728
+    )
+    assert (
+        direct_followup48_replay["final_direct_residual_inf_n"]
+        == direct_followup48_replay["base_direct_residual_inf_n"]
+    )
+    assert direct_followup48_replay["matrix_free_global_krylov_enabled"] is False
+    assert direct_followup48_replay["matrix_free_global_krylov_attempted"] is False
+    assert direct_followup48_replay["promotion_count"] is None
+    assert (
+        direct_followup48_replay["promotion_candidate_residual_gate_passed"]
+        is None
+    )
+    assert "direct_residual_gate_not_closed" in direct_followup48_replay["blockers"]
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
     ]

@@ -1253,6 +1253,9 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     boundary_spring_tangent = _load(productization / "mgt_boundary_spring_tangent_receipt.json")
     boundary_global = _load(productization / "mgt_uncoarsened_boundary_global_equilibrium.json")
     direct_residual_newton = _load(productization / "mgt_direct_residual_newton_probe.json")
+    direct_residual_newton_followup48_replay = _load(
+        productization / "mgt_direct_residual_newton_followup48_replay_probe.json"
+    )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
     )
@@ -2153,6 +2156,9 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "direct_residual_current_tangent_residual_row_correction": direct_residual_newton.get(
                     "current_tangent_residual_row_correction"
+                ),
+                "direct_residual_newton_followup48_replay": _direct_residual_probe_summary(
+                    direct_residual_newton_followup48_replay
                 ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
                     "status"
