@@ -1869,6 +1869,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_residual_jacobian_post_block_rows21_support32_translation_followup49_component_probe.json"
     )
+    direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup50 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup50_probe.json"
+    )
+    residual_jacobian_post_block_rows21_support32_translation_followup50_component = _load(
+        productization
+        / "mgt_residual_jacobian_post_block_rows21_support32_translation_followup50_component_probe.json"
+    )
     direct_residual_current_frontier_frame_block_current_tangent_narrow = _load(
         productization
         / "mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_probe.json"
@@ -2880,6 +2888,23 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "residual_jacobian_post_block_rows21_support32_translation_followup49_component_breakdown": (
                     residual_jacobian_post_block_rows21_support32_translation_followup49_component.get(
+                        "residual_component_breakdown"
+                    )
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup50": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup50
+                ),
+                "residual_jacobian_post_block_rows21_support32_translation_followup50_component_status": (
+                    residual_jacobian_post_block_rows21_support32_translation_followup50_component.get("status")
+                ),
+                "residual_jacobian_post_block_rows21_support32_translation_followup50_component_only": (
+                    residual_jacobian_post_block_rows21_support32_translation_followup50_component.get("component_only")
+                ),
+                "residual_jacobian_post_block_rows21_support32_translation_followup50_base_residual_inf_n": (
+                    residual_jacobian_post_block_rows21_support32_translation_followup50_component.get("base_residual_inf_n")
+                ),
+                "residual_jacobian_post_block_rows21_support32_translation_followup50_component_breakdown": (
+                    residual_jacobian_post_block_rows21_support32_translation_followup50_component.get(
                         "residual_component_breakdown"
                     )
                 ),
